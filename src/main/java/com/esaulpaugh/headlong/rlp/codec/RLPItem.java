@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.rlp.codec;
 
 import com.esaulpaugh.headlong.rlp.codec.decoding.ObjectNotation;
+import com.esaulpaugh.headlong.rlp.codec.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.codec.util.Integers;
 import com.esaulpaugh.headlong.rlp.codec.util.Strings;
 
@@ -20,7 +21,7 @@ public abstract class RLPItem {
     public final transient int dataIndex;
     public final transient int dataLength;
 
-    RLPItem(byte[] buffer, int index, int containerLimit) {
+    RLPItem(byte[] buffer, int index, int containerLimit) throws DecodeException {
         containerLimit = Math.min(buffer.length, containerLimit);
 
         final int _dataIndex;
@@ -107,11 +108,11 @@ public abstract class RLPItem {
         return Strings.encodeToString(buffer, dataIndex, dataLength, encoding);
     }
 
-    public int asInt() {
+    public int asInt() throws DecodeException {
         return Integers.getInt(buffer, dataIndex, dataLength);
     }
 
-    public long asLong() {
+    public long asLong() throws DecodeException {
         return Integers.get(buffer, dataIndex, dataLength);
     }
 
@@ -131,7 +132,12 @@ public abstract class RLPItem {
 
     @Override
     public String toString() {
-        return ObjectNotation.fromEncoding(buffer, index, endIndex()).toString();
+        try {
+            return ObjectNotation.fromEncoding(buffer, index, endIndex()).toString();
+        } catch (DecodeException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -173,7 +179,7 @@ public abstract class RLPItem {
         return result;
     }
 
-    static RLPItem fromEncoding(byte[] buffer, int index, int containerLimit) {
+    static RLPItem fromEncoding(byte[] buffer, int index, int containerLimit) throws DecodeException {
         DataType type = DataType.type(buffer[index]);
         switch (type) {
         case SINGLE_BYTE:

@@ -4,6 +4,7 @@ import com.esaulpaugh.headlong.rlp.codec.RLPAdapter;
 import com.esaulpaugh.headlong.rlp.codec.RLPCodec;
 import com.esaulpaugh.headlong.rlp.codec.RLPItem;
 import com.esaulpaugh.headlong.rlp.codec.RLPList;
+import com.esaulpaugh.headlong.rlp.codec.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.codec.util.Integers;
 
 import java.util.List;
@@ -17,7 +18,7 @@ import static com.esaulpaugh.headlong.rlp.codec.util.Strings.fromUtf8;
 public class StudentRLPAdapter implements RLPAdapter<Student> {
 
     @Override
-    public Student fromRLP(byte[] rlp) {
+    public Student fromRLP(byte[] rlp) throws DecodeException {
         RLPList rlpList = (RLPList) RLPCodec.wrap(rlp);
 //        System.out.println(rlpList.toString());
         List<RLPItem> fields = rlpList.elements();

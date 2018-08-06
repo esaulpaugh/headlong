@@ -4,7 +4,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongycastle.util.encoders.Hex;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,38 +22,20 @@ public class Parser {
     private static final int STRING_PREFIX_LEN = STRING_PREFIX.length();
     private static final int STRING_SUFFIX_LEN = STRING_SUFFIX.length();
 
-//    enum ObjectType {
-//        OBJECT_ARRAY( OBJECT_ARRAY_PREFIX, OBJECT_ARRAY_SUFFIX ),
-//        STRING( STRING_PREFIX, STRING_SUFFIX );
-////        CHARACTER("\'", "\'");
-//
-//        private final String prefix;
-//        private final int prefixLen;
-//
-//        private String suffix;
-//        private int suffixLen;
-//
-//        ObjectType(String prefix, String suffix) {
-//            this.prefix = prefix;
-//            this.prefixLen = prefix.length();
-//            this.suffix = suffix;
-//            this.suffixLen = suffix.length();
-//        }
-//    }
-
-    public static List<Object> parse(String stringRep) throws ParseException {
+    public static List<Object> parse(String stringRep) {
         List<Object> top = new ArrayList<>();
         parse(stringRep, 0, stringRep.length(), top);
         return top;
     }
 
-    private static int parse(String stringRep, int i, final int end, List<Object> parent) throws ParseException {
+    private static int parse(String stringRep, int i, final int end, List<Object> parent) {
 
         while (i < end) {
 
             int endArray = stringRep.indexOf(OBJECT_ARRAY_SUFFIX, i);
             if(endArray == -1) {
-                throw new ParseException("no array end found", i);
+                endArray = Integer.MAX_VALUE;
+//                throw new DecodeException("no array end found: " + i);
             }
             Pair<Integer, Integer> nextPrefix = nextPrefix(stringRep, i);
             if(nextPrefix == null) {
@@ -72,19 +53,9 @@ public class Parser {
             case STRING:
                 objectStart = nextPrefix.getRight() + STRING_PREFIX_LEN;
                 objectEnd = stringRep.indexOf(STRING_SUFFIX, objectStart);
-//                String escaped = stringRep.substring(objectStart, objectEnd);
-//                String unescaped = StringEscapeUtils.unescapeJava(escaped);
                 parent.add(Hex.decode(stringRep.substring(objectStart, objectEnd)));
                 i = objectEnd + STRING_SUFFIX_LEN;
                 break;
-//            case CHARACTER:
-//                objectStart = i;
-//                objectEnd = stringRep.indexOf(ObjectType.CHARACTER.suffix, objectStart);
-//                escaped = stringRep.substring(objectStart, objectEnd);
-//                unescaped = StringEscapeUtils.unescapeJava(escaped);
-//                parent.add(unescaped.charAt(0));
-//                i = objectEnd + ObjectType.CHARACTER.suffixLen;
-//                break;
             case OBJECT_ARRAY:
                 objectStart = nextPrefix.getRight() + OBJECT_ARRAY_PREFIX_LEN;
                 List<Object> childList = new ArrayList<>();
@@ -96,21 +67,6 @@ public class Parser {
 
         return end + OBJECT_ARRAY_SUFFIX_LEN;
     }
-
-//    private static final Comparator<ImmutablePair<ObjectType, Integer>> COMPARE_BY_INT = Comparator.comparingInt(p -> p.right);
-//
-//    private static Pair<ObjectType, Integer> nextPrefix(String stringRep, int i) {
-//
-//        ArrayList<ImmutablePair<ObjectType, Integer>> indices = new ArrayList<>();
-//        for (ObjectType type : ObjectType.values()) {
-//            indices.add(new ImmutablePair<>(type, stringRep.indexOf(type.prefix, i)));
-//        }
-//
-//        return indices.stream()
-//                .filter(p -> p.right != -1)
-//                .min(COMPARE_BY_INT)
-//                .orElse(null);
-//    }
 
     private static Pair<Integer, Integer> nextPrefix(String rlpon, int i) {
         int o = rlpon.indexOf(OBJECT_ARRAY_PREFIX, i);

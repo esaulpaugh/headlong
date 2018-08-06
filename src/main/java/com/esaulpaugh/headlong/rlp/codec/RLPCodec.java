@@ -1,9 +1,8 @@
 package com.esaulpaugh.headlong.rlp.codec;
 
-import com.esaulpaugh.headlong.rlp.codec.decoding.Decoder;
 import com.esaulpaugh.headlong.rlp.codec.decoding.ObjectNotation;
+import com.esaulpaugh.headlong.rlp.codec.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.codec.util.Integers;
-import org.spongycastle.util.encoders.EncoderException;
 import org.spongycastle.util.encoders.Hex;
 
 import java.util.Arrays;
@@ -63,7 +62,7 @@ public class RLPCodec {
 
     private static int encodeObject(Object o, byte[] dest, int destIndex) {
         if (o instanceof byte[]) {
-            final byte[] bytes = (byte[]) o; // Strings.decodeString(STRING_ENCODING, (String) o);
+            final byte[] bytes = (byte[]) o;
             final int dataLen = bytes.length;
             if (isLong(dataLen)) { // long string
                 int n = Integers.put(dataLen, dest, destIndex + 1);
@@ -123,15 +122,15 @@ public class RLPCodec {
      * @param lengthOneRLP
      * @return
      */
-    public static RLPItem wrap(byte lengthOneRLP) {
+    public static RLPItem wrap(byte lengthOneRLP) throws DecodeException {
         return RLPItem.fromEncoding(new byte[] { lengthOneRLP }, 0, 1);
     }
 
-    public static RLPItem wrap(byte[] encoding) {
+    public static RLPItem wrap(byte[] encoding) throws DecodeException {
         return RLPItem.fromEncoding(encoding, 0, encoding.length);
     }
 
-    public static RLPItem wrap(byte[] encoding, int index, int len) {
+    public static RLPItem wrap(byte[] encoding, int index, int len) throws DecodeException {
         return RLPItem.fromEncoding(encoding, index, len);
     }
 
@@ -147,7 +146,7 @@ public class RLPCodec {
         encodeList(objects, dataLen, isLong(dataLen), dest, destIndex);
     }
 
-    public static RLPList toList(Iterable<RLPItem> elements) {
+    public static RLPList toList(Iterable<RLPItem> elements) throws DecodeException {
         return RLPList.withElements(elements);
     }
 
@@ -172,49 +171,32 @@ public class RLPCodec {
         }
     }
 
-    public static void main(String[] args0) {
+    public static void main(String[] args0) throws DecodeException {
 
-//        byte[] data0 = new byte[] {
-//                (byte) 0xf8, (byte) 148, // TODO test multiple length bytes
-//                (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, 0x00, (byte) 0x81, '\0', (byte) 0x81, '\u001B', (byte) '\u230A',
-//                (byte) 0xb8, 56, 0x09,(byte)0x80,-1,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, -3, -2, 0, 0,
-//                (byte) 0xf8, 0x38, 0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 36, 74, 0, 0,
-//                (byte) 0x84, 'c', 'a', 't', 's',
-//                (byte) 0x84, 'd', 'o', 'g', 's',
-//                (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's', // TODO TEST ALL 256 BYTE VALUES IN ALL ELEMENT TYPES
-//        };
+        byte[] data0 = new byte[] {
+                (byte) 0xf8, (byte) 148, // TODO test multiple length bytes
+                (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0x80, (byte) 0x81, (byte) 0x81, (byte) 0x81, (byte) '\u0093', (byte) '\u230A',
+                (byte) 0xb8, 56, 0x09,(byte)0x80,-1,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, -3, -2, 0, 0,
+                (byte) 0xf8, 0x38, 0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 36, 74, 0, 0,
+                (byte) 0x84, 'c', 'a', 't', 's',
+                (byte) 0x84, 'd', 'o', 'g', 's',
+                (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's', // TODO TEST ALL 256 BYTE VALUES IN ALL ELEMENT TYPES
+        };
 
         final byte[] invalidAf = new byte[] { (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, 0x00, (byte) 0x81, '\0', (byte) 0x81, '\u001B', (byte) '\u230A' };
 
 //        final byte[] data0 = new byte[] { (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0x80, (byte) 0x81, (byte) 0x81, (byte) 0x81, (byte) '\u0080', (byte) '\u230A' };
 
 //        final byte[] data0 = new byte[] { (byte) 0x83, 'c', 'a', 't' };
-        final byte[] data0 = new byte[] { (byte) 0x82, 'h', 'i', (byte) 0x84, 'L', 'O', 'O', 'K', '@', (byte) 0x82, 'm', 'e'};
+//        final byte[] data0 = new byte[] { (byte) 0x82, 'h', 'i', (byte) 0x84, 'L', 'O', 'O', 'K', '@', (byte) 0x82, 'm', 'e'};
 
-        System.out.println(ObjectNotation.fromEncoding(data0).toString());
+        ObjectNotation objectNotation = ObjectNotation.fromEncoding(data0);
 
-
+        System.out.println(objectNotation.toString());
         System.out.println(Hex.toHexString(data0));
-
-        StringBuilder sb__ = new StringBuilder();
-
         System.out.println("data0.length = " + data0.length);
 
-        List<Object> objects = null;
-        try {
-            objects = Decoder.decodeRLP(data0);
-            sb__.append("\n");
-//            decodeLongList(sb__, data1);
-        } catch (EncoderException ee) {
-//            if(!ONLINE) {
-//                throw new Exception(ee);
-//            }
-            System.err.println("end of input reached: " + ee.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("\n" + sb__.toString());
+        List<Object> objects = objectNotation.parse();
 
         final byte[] rlp = encodeAll(objects);
 

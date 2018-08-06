@@ -1,8 +1,10 @@
 package com.esaulpaugh.headlong.rlp.codec.util;
 
+import com.esaulpaugh.headlong.rlp.codec.exception.DecodeException;
+
 public class Integers {
 
-    public static int getInt(byte[] buffer, int i, int numBytes) {
+    public static int getInt(byte[] buffer, int i, int numBytes) throws DecodeException {
         int shiftAmount = 0;
         int val = 0;
         switch (numBytes) { /* cases fall through */
@@ -14,13 +16,14 @@ public class Integers {
             val |= (lead & 0xFF) << shiftAmount;
             // validate
             if(lead == 0 && val > 0) {
-                throw new NumberFormatException("Deserialised positive integers with leading zeroes are invalid.");
+                throw new DecodeException("Deserialised positive integers with leading zeroes are invalid.");
             }
-        default: return val;
+            return val;
+        default: throw new DecodeException(new IllegalArgumentException("numBytes out of range: " + numBytes));
         }
     }
 
-    public static long get(final byte[] buffer, final int i, final int numBytes) {
+    public static long get(final byte[] buffer, final int i, final int numBytes) throws DecodeException {
 
         int shiftAmount = 0;
 
@@ -38,7 +41,7 @@ public class Integers {
             val |= (lead & 0xFFL) << shiftAmount;
             // validate
             if(lead == 0 && val > 0) {
-                throw new NumberFormatException("Deserialised positive integers with leading zeroes are invalid.");
+                throw new DecodeException("Deserialised positive integers with leading zeroes are invalid.");
             }
         default: return val;
         }
@@ -184,18 +187,5 @@ public class Integers {
         case 2: b[i++] = y;
         case 1: b[i] = z;
         }
-    }
-
-    private static final double BASE_64_RATIO = 4.0 / 3.0;
-    private static int encodedLen(int len) {
-        return (int) Math.ceil(len * BASE_64_RATIO);
-    }
-
-    private static boolean isEscaped(String s, int i) {
-        int n = 0;
-        while (--i >= 0 && s.charAt(i) == '\\') {
-            n++;
-        }
-        return n % 2 == 1;
     }
 }

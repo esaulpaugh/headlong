@@ -1,9 +1,9 @@
 package com.esaulpaugh.headlong.rlp.codec;
 
-import com.esaulpaugh.headlong.rlp.codec.decoding.Decoder;
 import com.esaulpaugh.headlong.rlp.codec.decoding.ObjectNotation;
 import com.esaulpaugh.headlong.rlp.codec.example.Student;
 import com.esaulpaugh.headlong.rlp.codec.example.StudentRLPAdapter;
+import com.esaulpaugh.headlong.rlp.codec.exception.DecodeException;
 import org.spongycastle.util.encoders.Hex;
 
 import java.util.Arrays;
@@ -11,13 +11,13 @@ import java.util.List;
 
 public class Main {
 
-    private static void test() {
+    private static void test() throws DecodeException {
         StudentRLPAdapter adapter = new StudentRLPAdapter();
         Student s = new Student("Plato", 9000.01f);
         byte[] rlp = adapter.toRLP(s);
-
-
         Student plato = null;
+
+        System.out.println(Arrays.toString(rlp));
 
         System.out.println("Doing 50_000_000 decode-encodes of:\n" + ObjectNotation.fromEncoding(rlp));
 
@@ -35,17 +35,17 @@ public class Main {
         }
         end = System.nanoTime();
 
-//        1657.567238 millis
+        System.out.println(((end - start) / 1000000.0) + " millis");
 
-        System.out.println(((end - start) / 1000000.0) + " millis, " + plato);
+        System.out.println(plato);
 
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws DecodeException {
 
         test();
 
-        if(true) return;
+//        if(true) return;
 
         final byte[] invalidAf = new byte[] { (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, 0x00, (byte) 0x81, '\0', (byte) 0x81, '\u001B', (byte) '\u230A' };
 
@@ -66,11 +66,10 @@ public class Main {
 //        byte[] rlp = new byte[] { (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, 0x00, (byte) 0x81, '\0', (byte) 0x81, '\u001B', (byte) '\u230A' };
 
         RLPList rlpList = (RLPList) RLPCodec.wrap(rlpEncoded);
-        List<Object> recursive = rlpList.elementsRecursive();
+//        List<Object> recursive = rlpList.elementsRecursive();
 
         List<RLPItem> elements = rlpList.elements();
 
-        List<Object> decoded = Decoder.decodeRLP(rlpEncoded);
         ObjectNotation woo = ObjectNotation.fromEncoding(rlpEncoded);
         System.out.println(woo.toString());
         List<Object> parsed = woo.parse();

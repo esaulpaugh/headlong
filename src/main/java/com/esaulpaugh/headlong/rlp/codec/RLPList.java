@@ -1,16 +1,19 @@
 package com.esaulpaugh.headlong.rlp.codec;
 
+import com.esaulpaugh.headlong.rlp.codec.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.codec.util.Integers;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.esaulpaugh.headlong.rlp.codec.DataType.LIST_LONG;
 
 /**
  * Created by Evo on 1/19/2017.
  */
 public class RLPList extends RLPItem {
 
-    RLPList(byte[] buffer, int index, int containerLimit) { // , ArrayList<RLPItem> elements
+    RLPList(byte[] buffer, int index, int containerLimit) throws DecodeException {
         super(buffer, index, containerLimit);
     }
 
@@ -19,7 +22,7 @@ public class RLPList extends RLPItem {
      * @param srcElements pre-encoded top-level elements of the list
      * @return
      */
-    static RLPList withElements(Iterable<RLPItem> srcElements) {
+    static RLPList withElements(Iterable<RLPItem> srcElements) throws DecodeException {
 
         byte[] dest;
 
@@ -44,33 +47,7 @@ public class RLPList extends RLPItem {
         return true;
     }
 
-    /**
-     * @see RLPList#elements() instead
-     * @return
-     */
-    public List<Object> elementsRecursive() {
-        ArrayList<Object> result = new ArrayList<>();
-
-        final int end = dataIndex + dataLength;
-        int i = dataIndex;
-        while (i < end) {
-            RLPItem newElement = RLPItem.fromEncoding(buffer, i, endIndex());
-
-            if(newElement.isList()) {
-                result.add(((RLPList) newElement).elementsRecursive());
-            } else {
-                result.add(newElement);
-            }
-
-            i += newElement.encodingLength();
-        }
-
-        return result;
-
-//        return Collections.unmodifiableList(arrayList);
-    }
-
-    public List<RLPItem> elements() {
+    public List<RLPItem> elements() throws DecodeException {
 
         ArrayList<RLPItem> arrayList = new ArrayList<>();
 
@@ -84,8 +61,6 @@ public class RLPList extends RLPItem {
         }
 
         return arrayList;
-
-//        return Collections.unmodifiableList(arrayList);
     }
 
     private static void copyElements(Iterable<RLPItem> srcElements, byte[] dest, int destIndex) {
@@ -122,7 +97,7 @@ public class RLPList extends RLPItem {
 
         int destDataIndex = 1 + n;
         byte[] dest = new byte[destDataIndex + srcDataLen];
-        dest[0] = (byte) (DataType.LIST_LONG.offset + n);
+        dest[0] = (byte) (LIST_LONG.offset + n);
         Integers.insertBytes(n, dest, 1, a, b, c, d);
 
         copyElements(srcElements, dest, destDataIndex);
