@@ -1,6 +1,6 @@
-package com.esaulpaugh.headlong.rlp.codec.util;
+package com.esaulpaugh.headlong.rlp.util;
 
-import com.esaulpaugh.headlong.rlp.codec.exception.DecodeException;
+import com.esaulpaugh.headlong.rlp.DecodeException;
 
 import java.math.BigDecimal;
 

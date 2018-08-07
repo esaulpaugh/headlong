@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.rlp.codec.exception;
+package com.esaulpaugh.headlong.rlp;
 
 public class DecodeException extends Exception {
 

@@ -1,15 +1,13 @@
-package com.esaulpaugh.headlong.rlp.codec.decoding;
+package com.esaulpaugh.headlong.rlp.util;
 
-import com.esaulpaugh.headlong.rlp.codec.DataType;
-import com.esaulpaugh.headlong.rlp.codec.exception.DecodeException;
-import com.esaulpaugh.headlong.rlp.codec.util.Integers;
-import com.esaulpaugh.headlong.rlp.codec.util.Strings;
+import com.esaulpaugh.headlong.rlp.DataType;
+import com.esaulpaugh.headlong.rlp.DecodeException;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static com.esaulpaugh.headlong.rlp.codec.DataType.MIN_LONG_DATA_LEN;
-import static com.esaulpaugh.headlong.rlp.codec.util.Strings.HEX;
+import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
+import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
 
 public class ObjectNotation {
 
@@ -48,19 +46,19 @@ public class ObjectNotation {
         }
     }
 
-    private static int getShortElementEnd(int elementDataIndex, final int elementDataLen, final int containerLimit) throws DecodeException {
+    private static int getShortElementEnd(int elementDataIndex, final int elementDataLen, final int containerEnd) throws DecodeException {
         final int end = elementDataIndex + elementDataLen;
-        if (end > containerLimit) {
-            throw new DecodeException("element @ index " + (elementDataIndex - 1) + " exceeds its container: " + end + " > " + containerLimit);
+        if (end > containerEnd) {
+            throw new DecodeException("element @ index " + (elementDataIndex - 1) + " exceeds its container: " + end + " > " + containerEnd);
         }
 
         return end;
     }
 
-    private static int getLongElementEnd(byte[] data, final int leadByteIndex, final int lengthLen, final int containerLimit) throws DecodeException {
+    private static int getLongElementEnd(byte[] data, final int leadByteIndex, final int lengthLen, final int containerEnd) throws DecodeException {
         int lengthIndex = leadByteIndex + 1;
-        if (lengthIndex + lengthLen > containerLimit) {
-            throw new DecodeException("end of input reached; element @ " + leadByteIndex + " cannot be decoded: " + (lengthIndex + lengthLen) + " > " + containerLimit);
+        if (lengthIndex + lengthLen > containerEnd) {
+            throw new DecodeException("end of input reached; element @ " + leadByteIndex + " cannot be decoded: " + (lengthIndex + lengthLen) + " > " + containerEnd);
         }
         final long dataLenLong = Integers.getLong(data, leadByteIndex + 1, lengthLen);
         if (dataLenLong > Integer.MAX_VALUE) {
@@ -74,8 +72,8 @@ public class ObjectNotation {
         if (end < 0) {
             throw new DecodeException("overflow");
         }
-        if (end > containerLimit) {
-            throw new DecodeException("element @ index " + leadByteIndex + " exceeds its container; indices: " + end + " > " + containerLimit);
+        if (end > containerEnd) {
+            throw new DecodeException("element @ index " + leadByteIndex + " exceeds its container; indices: " + end + " > " + containerEnd);
         }
 
         return end;

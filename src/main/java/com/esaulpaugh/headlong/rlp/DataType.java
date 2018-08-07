@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.rlp.codec;
+package com.esaulpaugh.headlong.rlp;
 
 public enum DataType {
 

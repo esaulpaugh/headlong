@@ -1,18 +1,14 @@
-package com.esaulpaugh.headlong.rlp.codec.example;
+package com.esaulpaugh.headlong.rlp.example;
 
-import com.esaulpaugh.headlong.rlp.codec.RLPAdapter;
-import com.esaulpaugh.headlong.rlp.codec.RLPCodec;
-import com.esaulpaugh.headlong.rlp.codec.RLPItem;
-import com.esaulpaugh.headlong.rlp.codec.RLPList;
-import com.esaulpaugh.headlong.rlp.codec.exception.DecodeException;
-import com.esaulpaugh.headlong.rlp.codec.util.FloatingPoint;
-import com.esaulpaugh.headlong.rlp.codec.util.Integers;
-import com.esaulpaugh.headlong.rlp.codec.util.Strings;
+import com.esaulpaugh.headlong.rlp.*;
+import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
+import com.esaulpaugh.headlong.rlp.util.Integers;
+import com.esaulpaugh.headlong.rlp.util.Strings;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import static com.esaulpaugh.headlong.rlp.codec.util.Strings.UTF_8;
+import static com.esaulpaugh.headlong.rlp.util.Strings.UTF_8;
 
 public class StudentRLPAdapter implements RLPAdapter<Student> {
 

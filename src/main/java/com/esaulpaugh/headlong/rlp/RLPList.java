@@ -1,20 +1,19 @@
-package com.esaulpaugh.headlong.rlp.codec;
+package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.codec.exception.DecodeException;
-import com.esaulpaugh.headlong.rlp.codec.util.Integers;
+import com.esaulpaugh.headlong.rlp.util.Integers;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.esaulpaugh.headlong.rlp.codec.DataType.LIST_LONG;
+import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG;
 
 /**
  * Created by Evo on 1/19/2017.
  */
 public class RLPList extends RLPItem {
 
-    RLPList(byte[] buffer, int index, int containerLimit) throws DecodeException {
-        super(buffer, index, containerLimit);
+    RLPList(byte[] buffer, int index, int containerEnd) throws DecodeException {
+        super(buffer, index, containerEnd);
     }
 
     /**
@@ -54,7 +53,7 @@ public class RLPList extends RLPItem {
         final int end = dataIndex + dataLength;
         int i = dataIndex;
         while (i < end) {
-            RLPItem newElement = RLPItem.fromEncoding(buffer, i, endIndex());
+            RLPItem newElement = RLPCodec.wrap(buffer, i, endIndex());
 
             arrayList.add(newElement);
             i += newElement.encodingLength();

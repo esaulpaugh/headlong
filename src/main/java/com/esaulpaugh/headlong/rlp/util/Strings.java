@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.rlp.codec.util;
+package com.esaulpaugh.headlong.rlp.util;
 
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;

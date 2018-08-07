@@ -1,9 +1,10 @@
-package com.esaulpaugh.headlong.rlp.codec;
+package com.esaulpaugh.headlong.rlp.example;
 
-import com.esaulpaugh.headlong.rlp.codec.decoding.ObjectNotation;
-import com.esaulpaugh.headlong.rlp.codec.example.Student;
-import com.esaulpaugh.headlong.rlp.codec.example.StudentRLPAdapter;
-import com.esaulpaugh.headlong.rlp.codec.exception.DecodeException;
+import com.esaulpaugh.headlong.rlp.DecodeException;
+import com.esaulpaugh.headlong.rlp.RLPCodec;
+import com.esaulpaugh.headlong.rlp.RLPItem;
+import com.esaulpaugh.headlong.rlp.RLPList;
+import com.esaulpaugh.headlong.rlp.util.ObjectNotation;
 import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigDecimal;
@@ -113,7 +114,7 @@ public class Main {
         ObjectNotation on = ObjectNotation.fromEncoding(rlpEncoded);
 
 //        String parsed =
-        byte[] rlpEncoded2 = RLPCodec.encodeAll(on.parse());
+        byte[] rlpEncoded2 = RLPCodec.encodeSequentially(on.parse());
 
         ObjectNotation on2 = ObjectNotation.fromEncoding(rlpEncoded2);
 
@@ -131,9 +132,9 @@ public class Main {
 
 //        objects2.set(0, null); // TODO TEST
 
-        byte[] rlpEncoded3 = RLPCodec.encodeAll(on2.parse());
+        byte[] rlpEncoded3 = RLPCodec.encodeSequentially(on2.parse());
 
-        byte[] encoded = RLPCodec.encodeAll(objects2);
+        byte[] encoded = RLPCodec.encodeSequentially(objects2);
 
         System.out.println(Arrays.equals(encoded, rlpEncoded));
 

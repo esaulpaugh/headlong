@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.rlp.codec.example;
+package com.esaulpaugh.headlong.rlp.example;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

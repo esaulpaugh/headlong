@@ -1,15 +1,15 @@
-package com.esaulpaugh.headlong.rlp.codec;
+package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.codec.decoding.ObjectNotation;
-import com.esaulpaugh.headlong.rlp.codec.exception.DecodeException;
-import com.esaulpaugh.headlong.rlp.codec.util.FloatingPoint;
-import com.esaulpaugh.headlong.rlp.codec.util.Integers;
-import com.esaulpaugh.headlong.rlp.codec.util.Strings;
+import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
+import com.esaulpaugh.headlong.rlp.util.Integers;
+import com.esaulpaugh.headlong.rlp.util.ObjectNotation;
+import com.esaulpaugh.headlong.rlp.util.Strings;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import static com.esaulpaugh.headlong.rlp.codec.DataType.MIN_LONG_DATA_LEN;
+import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
+import static com.esaulpaugh.headlong.rlp.RLPCodec.wrap;
 
 /**
  * Created by Evo on 1/19/2017.
@@ -23,8 +23,8 @@ public abstract class RLPItem {
     public final transient int dataIndex;
     public final transient int dataLength;
 
-    RLPItem(byte[] buffer, int index, int containerLimit) throws DecodeException {
-        containerLimit = Math.min(buffer.length, containerLimit);
+    RLPItem(byte[] buffer, int index, int containerEnd) throws DecodeException {
+        containerEnd = Math.min(buffer.length, containerEnd);
 
         final int _dataIndex;
         final long _dataLength;
@@ -50,8 +50,8 @@ public abstract class RLPItem {
         }
 
         final long end = _dataIndex + _dataLength;
-        if(end > containerLimit) {
-            throw new IllegalStateException("element @ index " + index + " exceeds its container: " + end + " > " + containerLimit);
+        if(end > containerEnd) {
+            throw new IllegalStateException("element @ index " + index + " exceeds its container: " + end + " > " + containerEnd);
         }
         if(end < 0) {
             throw new IllegalStateException("end of element @ " + index + " is out of range: " + end);
@@ -150,7 +150,7 @@ public abstract class RLPItem {
      */
     public RLPItem duplicate() {
         try {
-            return fromEncoding(encoding(), 0, Integer.MAX_VALUE);
+            return wrap(encoding(), 0, Integer.MAX_VALUE);
         } catch (DecodeException e) {
             throw new RuntimeException(e);
         }
@@ -203,20 +203,5 @@ public abstract class RLPItem {
             result = 31 * result + buffer[i];
         }
         return result;
-    }
-
-    static RLPItem fromEncoding(byte[] buffer, int index, int containerLimit) throws DecodeException {
-        DataType type = DataType.type(buffer[index]);
-        switch (type) {
-        case SINGLE_BYTE:
-        case STRING_SHORT:
-        case STRING_LONG:
-            return new RLPString(buffer, index, containerLimit);
-        case LIST_SHORT:
-        case LIST_LONG:
-            return new RLPList(buffer, index, containerLimit);
-        default:
-            throw new RuntimeException("???");
-        }
     }
 }
