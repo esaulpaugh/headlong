@@ -2,9 +2,11 @@ package com.esaulpaugh.headlong.rlp.codec;
 
 import com.esaulpaugh.headlong.rlp.codec.decoding.ObjectNotation;
 import com.esaulpaugh.headlong.rlp.codec.exception.DecodeException;
+import com.esaulpaugh.headlong.rlp.codec.util.FloatingPoint;
 import com.esaulpaugh.headlong.rlp.codec.util.Integers;
 import com.esaulpaugh.headlong.rlp.codec.util.Strings;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.rlp.codec.DataType.MIN_LONG_DATA_LEN;
@@ -39,7 +41,7 @@ public abstract class RLPItem {
             int lengthIndex = index + 1;
             int lengthOfLength = leadByte - type.offset; // DataType dictates that lengthOfLength guaranteed to be in [1,8]
             _dataIndex = lengthIndex + lengthOfLength;
-            _dataLength = Integers.get(buffer, lengthIndex, lengthOfLength);
+            _dataLength = Integers.getLong(buffer, lengthIndex, lengthOfLength);
             if(_dataLength < MIN_LONG_DATA_LEN) {
                 throw new IllegalStateException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
             }
@@ -104,8 +106,8 @@ public abstract class RLPItem {
         return endIndex();
     }
 
-    public String data(int encoding) {
-        return Strings.encodeToString(buffer, dataIndex, dataLength, encoding);
+    public String asString(int encoding) {
+        return Strings.encode(buffer, dataIndex, dataLength, encoding);
     }
 
     public int asInt() throws DecodeException {
@@ -113,12 +115,24 @@ public abstract class RLPItem {
     }
 
     public long asLong() throws DecodeException {
-        return Integers.get(buffer, dataIndex, dataLength);
+        return Integers.getLong(buffer, dataIndex, dataLength);
+    }
+
+    public BigInteger asBigInt() {
+        return new BigInteger(data());
+    }
+
+    public float asFloat() throws DecodeException {
+        return FloatingPoint.getFloat(data(), 0, dataLength);
+    }
+
+    public double asDouble() throws DecodeException {
+        return FloatingPoint.getDouble(data(), 0, dataLength);
     }
 
     public String encodeRange(int from, int to, int encoding) {
         checkRangeBounds(from, to);
-        return Strings.encodeToString(buffer, from, to - from, encoding);
+        return Strings.encode(buffer, from, to - from, encoding);
     }
 
     private void checkRangeBounds(int from, int to) {
@@ -127,6 +141,18 @@ public abstract class RLPItem {
         }
         if(to > endIndex()) {
             throw new IndexOutOfBoundsException(to + " > " + endIndex());
+        }
+    }
+
+    /**
+     * Clones this object.
+     * @return
+     */
+    public RLPItem duplicate() {
+        try {
+            return fromEncoding(encoding(), 0, Integer.MAX_VALUE);
+        } catch (DecodeException e) {
+            throw new RuntimeException(e);
         }
     }
 

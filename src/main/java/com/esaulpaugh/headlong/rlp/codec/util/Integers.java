@@ -2,6 +2,9 @@ package com.esaulpaugh.headlong.rlp.codec.util;
 
 import com.esaulpaugh.headlong.rlp.codec.exception.DecodeException;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+
 public class Integers {
 
     public static int getInt(byte[] buffer, int i, int numBytes) throws DecodeException {
@@ -23,7 +26,7 @@ public class Integers {
         }
     }
 
-    public static long get(final byte[] buffer, final int i, final int numBytes) throws DecodeException {
+    public static long getLong(final byte[] buffer, final int i, final int numBytes) throws DecodeException {
 
         int shiftAmount = 0;
 
@@ -187,5 +190,16 @@ public class Integers {
         case 2: b[i++] = y;
         case 1: b[i] = z;
         }
+    }
+
+    public static BigInteger getBigInteger(byte[] bytes, int i, int numBytes) {
+        return new BigInteger(Arrays.copyOfRange(bytes, i, i + numBytes));
+    }
+
+    public static int put(BigInteger val, byte[] o, int i) {
+        byte[] bytes = val.toByteArray();
+        final int len = bytes.length;
+        System.arraycopy(bytes, 0, o, i, len);
+        return len;
     }
 }

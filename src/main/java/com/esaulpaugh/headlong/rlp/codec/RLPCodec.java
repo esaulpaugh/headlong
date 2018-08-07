@@ -62,36 +62,39 @@ public class RLPCodec {
 
     private static int encodeObject(Object o, byte[] dest, int destIndex) {
         if (o instanceof byte[]) {
-            final byte[] bytes = (byte[]) o;
-            final int dataLen = bytes.length;
-            if (isLong(dataLen)) { // long string
-                int n = Integers.put(dataLen, dest, destIndex + 1);
-                dest[destIndex] = (byte) (STRING_LONG.offset + (byte) n);
-                destIndex += 1 + n;
-                System.arraycopy(bytes, 0, dest, destIndex, dataLen);
-                destIndex += dataLen;
-            } else { // short strings
-                if(dataLen == 1) {
-                    byte first = bytes[0];
-                    if(first >= 0x00) { // same as (first & 0xFF) < 0x80
-                        dest[destIndex++] = first;
-                    } else {
-                        dest[destIndex++] = (byte) (STRING_SHORT.offset + (byte) dataLen);
-                        dest[destIndex++] = first;
-                    }
-                } else {
-                    dest[destIndex++] = (byte) (STRING_SHORT.offset + (byte) dataLen);
-                    for (int i = 0; i < dataLen; i++) {
-                        dest[destIndex++] = bytes[i];
-                    }
-                }
-            }
+            return encodeString((byte[]) o, dest, destIndex);
         } else if (o instanceof Iterable) {
             Iterable<Object> list = (Iterable<Object>) o;
             long listLen = totalDataLen(list);
-            destIndex = encodeList(list, listLen, isLong(listLen), dest, destIndex);
+            return encodeList(list, listLen, isLong(listLen), dest, destIndex);
         }
+        return destIndex;
+    }
 
+    private static int encodeString(byte[] bytes, byte[] dest, int destIndex) {
+        final int dataLen = bytes.length;
+        if (isLong(dataLen)) { // long string
+            int n = Integers.put(dataLen, dest, destIndex + 1);
+            dest[destIndex] = (byte) (STRING_LONG.offset + (byte) n);
+            destIndex += 1 + n;
+            System.arraycopy(bytes, 0, dest, destIndex, dataLen);
+            destIndex += dataLen;
+        } else { // short strings
+            if(dataLen == 1) {
+                byte first = bytes[0];
+                if(first >= 0x00) { // same as (first & 0xFF) < 0x80
+                    dest[destIndex++] = first;
+                } else {
+                    dest[destIndex++] = (byte) (STRING_SHORT.offset + (byte) dataLen);
+                    dest[destIndex++] = first;
+                }
+            } else {
+                dest[destIndex++] = (byte) (STRING_SHORT.offset + (byte) dataLen);
+                for (int i = 0; i < dataLen; i++) {
+                    dest[destIndex++] = bytes[i];
+                }
+            }
+        }
         return destIndex;
     }
 

@@ -18,54 +18,54 @@ public class Strings {
     public static final boolean WITH_PADDING = true;
     public static final boolean NO_PADDING = false;
 
-    public static String encodeToString(byte[] bytes, int from, int len, int encoding) {
+    public static String encode(byte[] bytes, int from, int len, int encoding) {
         switch (encoding) {
-        case UTF_8: return utf8(bytes, from, len);
-        case BASE64: return base64(bytes, from, len, NO_PADDING);
+        case UTF_8: return toUtf8(bytes, from, len);
+        case BASE64: return toBase64(bytes, from, len, NO_PADDING);
         case HEX:
-        default: return hex(bytes, from, len);
+        default: return toHex(bytes, from, len);
         }
     }
 
-    public static byte[] decodeString(String string, int encoding) {
+    public static byte[] decode(String string, int encoding) {
         if(string.isEmpty())
             return EMPTY_BYTE_ARRAY;
         switch (encoding) {
         case UTF_8: return fromUtf8(string);
         case BASE64: return fromBase64(string, NO_PADDING);
         case HEX:
-        default: return Hex.decode(string);
+        default: return fromHex(string);
         }
     }
 
-    public static String hex(byte[] bytes, int from, int len) {
+    private static String toUtf8(byte[] bytes, int from, int len) {
+        return new String(bytes, from, len, CHARSET_UTF_8);
+    }
+
+    private static byte[] fromUtf8(String utf8) {
+        return utf8.getBytes(CHARSET_UTF_8);
+    }
+
+    private static String toHex(byte[] bytes, int from, int len) {
         return Hex.toHexString(bytes, from, len);
     }
 
-    public static byte[] fromHex(String hex) {
+    private static byte[] fromHex(String hex) {
         return Hex.decode(hex);
     }
 
-    public static String base64(byte[] bytes, int from, int len, boolean withPadding) {
+    private static String toBase64(byte[] bytes, int from, int len, boolean withPadding) {
         if(withPadding) {
             return Base64.toBase64String(bytes, from, len);
         }
         return unpad(Base64.encode(bytes, from, len));
     }
 
-    public static byte[] fromBase64(String base64, boolean hasPadding) {
+    private static byte[] fromBase64(String base64, boolean hasPadding) {
         if(hasPadding) {
             return Base64.decode(base64);
         }
         return Base64.decode(pad(base64));
-    }
-
-    public static String utf8(byte[] bytes, int from, int len) {
-        return new String(bytes, from, len, CHARSET_UTF_8);
-    }
-
-    public static byte[] fromUtf8(String utf8) {
-        return utf8.getBytes(CHARSET_UTF_8);
     }
 
     public static int calcHexDecodedLen(int encodedLen) {

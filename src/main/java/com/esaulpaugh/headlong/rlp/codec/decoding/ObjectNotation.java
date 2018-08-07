@@ -62,7 +62,7 @@ public class ObjectNotation {
         if (lengthIndex + lengthLen > containerLimit) {
             throw new DecodeException("end of input reached; element @ " + leadByteIndex + " cannot be decoded: " + (lengthIndex + lengthLen) + " > " + containerLimit);
         }
-        final long dataLenLong = Integers.get(data, leadByteIndex + 1, lengthLen);
+        final long dataLenLong = Integers.getLong(data, leadByteIndex + 1, lengthLen);
         if (dataLenLong > Integer.MAX_VALUE) {
             throw new DecodeException("too much data: " + dataLenLong + " > " + Integer.MAX_VALUE);
         }
@@ -239,7 +239,7 @@ public class ObjectNotation {
     }
 
     private static int buildByte(StringBuilder sb, byte[] data, int i) {
-        String string = Strings.encodeToString(data, i, 1, HEX);
+        String string = Strings.encode(data, i, 1, HEX);
 
         sb.append('\"').append(string).append("\", ");
 
@@ -253,7 +253,7 @@ public class ObjectNotation {
             throw new IllegalStateException("invalid rlp for single byte @ " + (from - 1));
         }
 
-        String string = Strings.encodeToString(data, from, len, HEX);
+        String string = Strings.encode(data, from, len, HEX);
 
         sb.append('\"').append(string).append("\", ");
 

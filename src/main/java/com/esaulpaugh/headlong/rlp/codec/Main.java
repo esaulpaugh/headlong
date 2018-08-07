@@ -6,39 +6,70 @@ import com.esaulpaugh.headlong.rlp.codec.example.StudentRLPAdapter;
 import com.esaulpaugh.headlong.rlp.codec.exception.DecodeException;
 import org.spongycastle.util.encoders.Hex;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 
 public class Main {
 
+    private static BigInteger newDummyECPubKey() {
+        byte[] dummyECPubKey = new byte[65];
+        SecureRandom sr = new SecureRandom();
+        sr.nextBytes(dummyECPubKey);
+        return new BigInteger(dummyECPubKey);
+    }
+
     private static void test() throws DecodeException {
         StudentRLPAdapter adapter = new StudentRLPAdapter();
-        Student s = new Student("Plato", 9000.01f);
-        byte[] rlp = adapter.toRLP(s);
-        Student plato = null;
+
+        Student plato = new Student(
+                "Plato",
+                9000.01f,
+                newDummyECPubKey(),
+                new BigDecimal("2552.7185792349726775956284153005464480874316939890710382513661202185792349726775956284153005464480874316939890710382513661202")
+        );
+        byte[] rlp = adapter.toRLP(plato);
+
+        System.out.println("RLP len = " + rlp.length);
 
         System.out.println(Arrays.toString(rlp));
 
-        System.out.println("Doing 50_000_000 decode-encodes of:\n" + ObjectNotation.fromEncoding(rlp));
-
-        long start, end;
-
-        for (int i = 0; i < 100_000; i++) {
-            rlp = adapter.toRLP(s);
-            plato = adapter.fromRLP(rlp);
-        }
-        start = System.nanoTime();
-        for (int i = 0; i < 50_000_000; i++) {
-            rlp = adapter.toRLP(s);
-            plato = adapter.fromRLP(rlp);
-//            if(i % 100000 == 0) System.out.println(i + " " + plato + " " + System.nanoTime());
-        }
-        end = System.nanoTime();
-
-        System.out.println(((end - start) / 1000000.0) + " millis");
+        Student decoded = adapter.fromRLP(rlp);
 
         System.out.println(plato);
+        System.out.println(decoded);
 
+        boolean equal = decoded.equals(plato);
+
+        System.out.println("equal = " + equal);
+
+        if(equal) {
+
+            final int n = 1_000_000;
+
+            System.out.println("Doing " + new DecimalFormat("#,###").format(n) + " encode-decodes of:\n" + ObjectNotation.fromEncoding(rlp));
+
+            long start, end;
+
+            for (int i = 0; i < 500_000; i++) {
+                rlp = adapter.toRLP(plato);
+                plato = adapter.fromRLP(rlp);
+            }
+            start = System.nanoTime();
+            for (int i = 0; i < n; i++) {
+                rlp = adapter.toRLP(plato);
+                plato = adapter.fromRLP(rlp);
+//            if(i % 100000 == 0) System.out.println(i + " " + plato + " " + System.nanoTime());
+            }
+            end = System.nanoTime();
+
+            System.out.println(((end - start) / 1000000.0) + " millis");
+        }
+
+        System.out.println(plato);
     }
 
     public static void main(String[] args) throws DecodeException {
@@ -62,6 +93,11 @@ public class Main {
                 (byte) 0x84, 'd', 'o', 'g', 's',
                 (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
         };
+
+        RLPItem it = RLPCodec.wrap(rlpEncoded);
+
+        RLPItem dup = it.duplicate();
+        System.out.println((it != dup) + ", " + (it.getClass() == dup.getClass()) + " " + it.equals(dup));
 
 //        byte[] rlp = new byte[] { (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, 0x00, (byte) 0x81, '\0', (byte) 0x81, '\u001B', (byte) '\u230A' };
 
