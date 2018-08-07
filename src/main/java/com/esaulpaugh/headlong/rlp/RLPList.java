@@ -47,18 +47,13 @@ public class RLPList extends RLPItem {
     }
 
     public List<RLPItem> elements() throws DecodeException {
-
         ArrayList<RLPItem> arrayList = new ArrayList<>();
-
-        final int end = dataIndex + dataLength;
         int i = dataIndex;
-        while (i < end) {
-            RLPItem newElement = RLPCodec.wrap(buffer, i, endIndex());
-
-            arrayList.add(newElement);
-            i += newElement.encodingLength();
+        while (i < this.endIndex) {
+            RLPItem item = RLPCodec.wrap(buffer, i);
+            arrayList.add(item);
+            i = item.endIndex;
         }
-
         return arrayList;
     }
 

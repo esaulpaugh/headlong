@@ -4,8 +4,11 @@ import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.rlp.util.ObjectNotation;
 import org.spongycastle.util.encoders.Hex;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.BiPredicate;
 
 import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG;
 import static com.esaulpaugh.headlong.rlp.DataType.LIST_SHORT;
@@ -13,6 +16,9 @@ import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_LONG;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT;
 
+/**
+ * Stateless, though not designed to be thread-safe.
+ */
 public class RLPCodec {
 
     /* ***************************************************************/
@@ -31,14 +37,14 @@ public class RLPCodec {
         }
     }
 
-    public static long totalEncodedLen(Object[] items) {
-        long total = 0;
-        final int len = items.length;
-        for (int i = 0; i < len; i++) {
-            total += itemEncodedLen(items[i]);
-        }
-        return total;
-    }
+//    public static long totalEncodedLen(Object[] items) {
+//        long total = 0;
+//        final int len = items.length;
+//        for (int i = 0; i < len; i++) {
+//            total += itemEncodedLen(items[i]);
+//        }
+//        return total;
+//    }
 
     private static long totalEncodedLen(Iterable<Object> items) {
         long total = 0;
@@ -51,11 +57,17 @@ public class RLPCodec {
     private static long itemEncodedLen(Object item) {
         if (item instanceof byte[]) {
             return stringEncodedLen((byte[]) item);
-        } else if (item instanceof Iterable) {
-            return listEncodedLen((Iterable<Object>) item);
-        } else {
-            throw new IllegalArgumentException("only byte[] and Iterable allowed");
         }
+        if (item instanceof Iterable) {
+            return listEncodedLen((Iterable<Object>) item);
+        }
+        if(item instanceof Object[]) {
+            return listEncodedLen(Arrays.asList((Object[]) item));
+        }
+        if(item == null) {
+            throw new NullPointerException();
+        }
+        throw new IllegalArgumentException("unsupported object type: " + item.getClass().getName());
     }
 
     private static int stringEncodedLen(byte[] byteString) {
@@ -80,12 +92,19 @@ public class RLPCodec {
     private static int encodeItem(Object item, byte[] dest, int destIndex) {
         if (item instanceof byte[]) {
             return encodeString((byte[]) item, dest, destIndex);
-        } else if (item instanceof Iterable) {
+        }
+        if (item instanceof Iterable) {
             Iterable<Object> elements = (Iterable<Object>) item;
             return encodeList(totalEncodedLen(elements), elements, dest, destIndex);
-        } else {
-            throw new IllegalArgumentException("only byte[] and Iterable allowed");
         }
+        if(item instanceof Object[]) {
+            Iterable<Object> elements = Arrays.asList((Object[]) item);
+            return encodeList(totalEncodedLen(elements), elements, dest, destIndex);
+        }
+        if(item == null) {
+            throw new NullPointerException();
+        }
+        throw new IllegalArgumentException("unsupported object type: " + item.getClass().getName());
     }
 
     private static int encodeString(byte[] bytes, byte[] dest, int destIndex) {
@@ -115,10 +134,10 @@ public class RLPCodec {
         return destIndex;
     }
 
-    private static int encodeList(long dataLen, Object[] elements, byte[] dest, int destIndex) {
-        destIndex = encodeListPrefix(dataLen, dest, destIndex);
-        return encodeSequentially(elements, dest, destIndex);
-    }
+//    private static int encodeList(long dataLen, Object[] elements, byte[] dest, int destIndex) {
+//        destIndex = encodeListPrefix(dataLen, dest, destIndex);
+//        return encodeSequentially(elements, dest, destIndex);
+//    }
 
     private static int encodeList(long dataLen, Iterable<Object> elements, byte[] dest, int destIndex) {
         destIndex = encodeListPrefix(dataLen, dest, destIndex);
@@ -174,30 +193,6 @@ public class RLPCodec {
         }
     }
 
-    public static byte[] encodeAsList(Object... elements) {
-        long listDataLen = totalEncodedLen(elements);
-        byte[] dest = new byte[prefixLength(listDataLen) + (int) listDataLen];
-        encodeList(listDataLen, elements, dest, 0);
-        return dest;
-    }
-
-    public static void encodeAsList(Object[] elements, byte[] dest, int destIndex) {
-        long listDataLen = totalEncodedLen(elements);
-        encodeList(listDataLen, elements, dest, destIndex);
-    }
-
-    public static byte[] encodeAsList(Iterable<Object> elements) {
-        long listDataLen = totalEncodedLen(elements);
-        byte[] dest = new byte[prefixLength(listDataLen) + (int) listDataLen];
-        encodeList(listDataLen, elements, dest, 0);
-        return dest;
-    }
-
-    public static void encodeAsList(Iterable<Object> elements, byte[] dest, int destIndex) {
-        long listDataLen = totalEncodedLen(elements);
-        encodeList(listDataLen, elements, dest, destIndex);
-    }
-
     public static byte[] encode(byte b) {
         return encode(new byte[] { b });
     }
@@ -209,6 +204,13 @@ public class RLPCodec {
     }
 
     public static byte[] encodeSequentially(Object... items) {
+        Iterable<Object> iterable = Arrays.asList(items);
+        byte[] dest = new byte[(int) totalEncodedLen(iterable)];
+        encodeSequentially(iterable, dest, 0);
+        return dest;
+    }
+
+    public static byte[] encodeSequentially(Iterable<Object> items) {
         byte[] dest = new byte[(int) totalEncodedLen(items)];
         encodeSequentially(items, dest, 0);
         return dest;
@@ -221,12 +223,6 @@ public class RLPCodec {
         return destIndex;
     }
 
-    public static byte[] encodeSequentially(Iterable<Object> items) {
-        byte[] dest = new byte[(int) totalEncodedLen(items)];
-        encodeSequentially(items, dest, 0);
-        return dest;
-    }
-
     public static int encodeSequentially(Iterable<Object> items, byte[] dest, int destIndex) {
         for (Object item : items) {
             destIndex = encodeItem(item, dest, destIndex);
@@ -234,8 +230,55 @@ public class RLPCodec {
         return destIndex;
     }
 
+    public static byte[] encodeAsList(Object... elements) {
+        return encodeAsList(Arrays.asList(elements));
+    }
+
+    public static byte[] encodeAsList(Iterable<Object> elements) {
+        long listDataLen = totalEncodedLen(elements);
+        byte[] dest = new byte[prefixLength(listDataLen) + (int) listDataLen];
+        encodeList(listDataLen, elements, dest, 0);
+        return dest;
+    }
+
+    public static void encodeAsList(Object[] elements, byte[] dest, int destIndex) {
+        encodeAsList(Arrays.asList(elements), dest, destIndex);
+    }
+
+    public static void encodeAsList(Iterable<Object> elements, byte[] dest, int destIndex) {
+        long listDataLen = totalEncodedLen(elements);
+        encodeList(listDataLen, elements, dest, destIndex);
+    }
+
     public static RLPList toList(Iterable<RLPItem> encodings) throws DecodeException {
         return RLPList.withElements(encodings);
+    }
+
+    public static List<RLPItem> collect(final int n, byte[] encodings) throws DecodeException {
+        ArrayList<RLPItem> arrayList = new ArrayList<>();
+        collect((count, i) -> count < n, encodings, 0, arrayList);
+        return arrayList;
+    }
+
+    public static void collect(int n, byte[] encodings, int index, RLPItem[] dest) throws DecodeException {
+        int count = 0;
+        while (count < n) {
+            RLPItem item = RLPCodec.wrap(encodings, index);
+            dest[count] = item;
+            count++;
+            index = item.endIndex;
+        }
+    }
+
+    public static int collect(BiPredicate<Integer, Integer> predicate, byte[] encodings, int index, Collection<RLPItem> collection) throws DecodeException {
+        int count = 0;
+        while (predicate.test(count, index)) {
+            RLPItem item = RLPCodec.wrap(encodings, index);
+            collection.add(item);
+            count++;
+            index = item.endIndex;
+        }
+        return count;
     }
 
     public static void main(String[] args0) throws DecodeException {

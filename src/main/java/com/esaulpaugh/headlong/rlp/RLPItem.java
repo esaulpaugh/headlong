@@ -19,9 +19,10 @@ public abstract class RLPItem {
     final byte[] buffer;
     public final int index;
 
-    public final transient DataType type;
+//    public final transient DataType type;
     public final transient int dataIndex;
     public final transient int dataLength;
+    public final transient int endIndex;
 
     RLPItem(byte[] buffer, int index, int containerEnd) throws DecodeException {
         containerEnd = Math.min(buffer.length, containerEnd);
@@ -59,19 +60,16 @@ public abstract class RLPItem {
 
         this.buffer = buffer;
         this.index = index;
-        this.type = type;
+//        this.type = type;
         this.dataIndex = _dataIndex;
         this.dataLength = (int) _dataLength;
+        this.endIndex = dataIndex + dataLength;
     }
 
     public abstract boolean isList();
 
     public int encodingLength() {
-        return endIndex() - index;
-    }
-
-    public int endIndex() {
-        return dataIndex + dataLength;
+        return endIndex - index;
     }
 
     public byte[] encoding() {
@@ -103,7 +101,7 @@ public abstract class RLPItem {
 
     public int exportData(byte[] dest, int destIndex) {
         System.arraycopy(buffer, dataIndex, dest, destIndex, dataLength);
-        return endIndex();
+        return endIndex;
     }
 
     public String asString(int encoding) {
@@ -139,8 +137,8 @@ public abstract class RLPItem {
         if(from < dataIndex) {
             throw new IndexOutOfBoundsException(from + " < " + dataIndex);
         }
-        if(to > endIndex()) {
-            throw new IndexOutOfBoundsException(to + " > " + endIndex());
+        if(to > endIndex) {
+            throw new IndexOutOfBoundsException(to + " > " + endIndex);
         }
     }
 
@@ -159,7 +157,7 @@ public abstract class RLPItem {
     @Override
     public String toString() {
         try {
-            return ObjectNotation.fromEncoding(buffer, index, endIndex()).toString();
+            return ObjectNotation.fromEncoding(buffer, index, endIndex).toString();
         } catch (DecodeException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -198,8 +196,7 @@ public abstract class RLPItem {
     public int hashCode() {
 
         int result = 1;
-        final int end = endIndex();
-        for (int i = index; i < end; i++) {
+        for (int i = index; i < endIndex; i++) {
             result = 31 * result + buffer[i];
         }
         return result;

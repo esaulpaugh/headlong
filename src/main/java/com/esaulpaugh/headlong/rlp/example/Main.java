@@ -17,7 +17,7 @@ import java.util.List;
 public class Main {
 
     private static BigInteger newDummyECPubKey() {
-        byte[] dummyECPubKey = new byte[65];
+        byte[] dummyECPubKey = new byte[138]; // 65
         SecureRandom sr = new SecureRandom();
         sr.nextBytes(dummyECPubKey);
         return new BigInteger(dummyECPubKey);
@@ -32,20 +32,24 @@ public class Main {
                 newDummyECPubKey(),
                 new BigDecimal("2552.7185792349726775956284153005464480874316939890710382513661202185792349726775956284153005464480874316939890710382513661202")
         );
-        byte[] rlp = adapter.toRLP(plato);
+        byte[] rlp = plato.toRLP();
+//        byte[] rlp = adapter.encode(plato);
 
         System.out.println("RLP len = " + rlp.length);
 
         System.out.println(Arrays.toString(rlp));
 
-        Student decoded = adapter.fromRLP(rlp);
+        Student decoded = new Student(rlp);
+//        Student decoded = adapter.decode(rlp);
 
         System.out.println(plato);
         System.out.println(decoded);
 
-        boolean equal = decoded.equals(plato);
+        boolean equal = plato.equals(decoded);
 
         System.out.println("equal = " + equal);
+
+        byte[] temp = new byte[205];
 
         if(equal) {
 
@@ -55,14 +59,18 @@ public class Main {
 
             long start, end;
 
-            for (int i = 0; i < 500_000; i++) {
-                rlp = adapter.toRLP(plato);
-                plato = adapter.fromRLP(rlp);
+            for (int i = 0; i < 2_000_000; i++) {
+                plato.toRLP(temp, 0);
+                plato = new Student(rlp);
+//                rlp = adapter.encode(plato);
+//                plato = adapter.decode(rlp);
             }
             start = System.nanoTime();
             for (int i = 0; i < n; i++) {
-                rlp = adapter.toRLP(plato);
-                plato = adapter.fromRLP(rlp);
+                plato.toRLP(temp, 0);
+                plato = new Student(rlp);
+//                rlp = adapter.encode(plato);
+//                plato = adapter.decode(rlp);
 //            if(i % 100000 == 0) System.out.println(i + " " + plato + " " + System.nanoTime());
             }
             end = System.nanoTime();
@@ -77,7 +85,7 @@ public class Main {
 
         test();
 
-//        if(true) return;
+        if(true) return;
 
         final byte[] invalidAf = new byte[] { (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, 0x00, (byte) 0x81, '\0', (byte) 0x81, '\u001B', (byte) '\u230A' };
 

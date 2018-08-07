@@ -1,9 +1,18 @@
 package com.esaulpaugh.headlong.rlp.example;
 
+import com.esaulpaugh.headlong.rlp.DecodeException;
+import com.esaulpaugh.headlong.rlp.RLPCodec;
+import com.esaulpaugh.headlong.rlp.RLPItem;
+import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
+import com.esaulpaugh.headlong.rlp.util.Integers;
+import com.esaulpaugh.headlong.rlp.util.Strings;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public class Student {
+import static com.esaulpaugh.headlong.rlp.util.Strings.UTF_8;
+
+public class Student implements RLPEncodeable {
 
     private String name;
     private float gpa;
@@ -15,6 +24,20 @@ public class Student {
         this.gpa = gpa;
         this.publicKey = publicKey;
         this.balance = balance;
+    }
+
+    // 2051 ms
+    public Student(byte[] rlp) throws DecodeException {
+        RLPItem item = RLPCodec.wrap(rlp);
+        this.name = item.asString(UTF_8);
+        item = RLPCodec.wrap(rlp, item.endIndex);
+        this.gpa = item.asFloat();
+        item = RLPCodec.wrap(rlp, item.endIndex);
+        this.publicKey = item.asBigInt();
+        item = RLPCodec.wrap(rlp, item.endIndex);
+        BigInteger intVal = item.asBigInt();
+        item = RLPCodec.wrap(rlp, item.endIndex);
+        this.balance = new BigDecimal(intVal, item.asInt());
     }
 
     public String getName() {
@@ -84,5 +107,26 @@ public class Student {
         }
 
         return true;
+    }
+
+    @Override
+    public Object[] toObjectArray() {
+        return new Object[] {
+                Strings.decode(name, UTF_8),
+                FloatingPoint.toBytes(gpa),
+                publicKey.toByteArray(),
+                balance.unscaledValue().toByteArray(),
+                Integers.toBytes(balance.scale())
+        };
+    }
+
+    @Override
+    public byte[] toRLP() {
+        return RLPCodec.encodeSequentially(toObjectArray());
+    }
+
+    @Override
+    public void toRLP(byte[] dest, int destIndex) {
+        RLPCodec.encodeSequentially(toObjectArray(), dest, destIndex);
     }
 }

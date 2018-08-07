@@ -2,8 +2,12 @@ package com.esaulpaugh.headlong.rlp;
 
 public interface RLPAdapter<T> {
 
-    T fromRLP(byte[] rlp) throws DecodeException;
+    default T decode(byte[] rlp) throws DecodeException {
+        return decode(rlp, 0);
+    }
 
-    byte[] toRLP(T t);
+    T decode(byte[] rlp, int index) throws DecodeException;
+
+    byte[] encode(T t);
 
 }
