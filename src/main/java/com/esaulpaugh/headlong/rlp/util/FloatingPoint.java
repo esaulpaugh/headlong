@@ -13,7 +13,7 @@ public class FloatingPoint {
     }
 
     public static int putFloat(float val, byte[] bytes, int i) {
-        return Integers.put(Float.floatToIntBits(val), bytes, i);
+        return Integers.putLong(Float.floatToIntBits(val), bytes, i);
     }
 
     public static byte[] toBytes(float val) {
@@ -31,12 +31,12 @@ public class FloatingPoint {
     }
 
     public static int putDouble(double val, byte[] bytes, int i) {
-        return Integers.put(Double.doubleToLongBits(val), bytes, i);
+        return Integers.putLong(Double.doubleToLongBits(val), bytes, i);
     }
 
     /* BigDecimal */
 
     public BigDecimal getBigDecimal(byte[] bytes, int i, int unscaledNumBytes, int scale) {
-        return new BigDecimal(Integers.getBigInteger(bytes, i, unscaledNumBytes), scale);
+        return new BigDecimal(Integers.getBigInt(bytes, i, unscaledNumBytes), scale);
     }
 }

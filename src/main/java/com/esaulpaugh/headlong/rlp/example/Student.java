@@ -1,7 +1,7 @@
 package com.esaulpaugh.headlong.rlp.example;
 
 import com.esaulpaugh.headlong.rlp.DecodeException;
-import com.esaulpaugh.headlong.rlp.RLPCodec;
+import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.rlp.util.Integers;
@@ -10,6 +10,7 @@ import com.esaulpaugh.headlong.rlp.util.Strings;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.rlp.util.Strings.UTF_8;
 
 public class Student implements RLPEncodeable {
@@ -26,17 +27,16 @@ public class Student implements RLPEncodeable {
         this.balance = balance;
     }
 
-    // 2051 ms
     public Student(byte[] rlp) throws DecodeException {
-        RLPItem item = RLPCodec.wrap(rlp);
+        RLPItem item = RLP_STRICT.wrap(rlp);
         this.name = item.asString(UTF_8);
-        item = RLPCodec.wrap(rlp, item.endIndex);
+        item = RLP_STRICT.wrap(rlp, item.endIndex);
         this.gpa = item.asFloat();
-        item = RLPCodec.wrap(rlp, item.endIndex);
+        item = RLP_STRICT.wrap(rlp, item.endIndex);
         this.publicKey = item.asBigInt();
-        item = RLPCodec.wrap(rlp, item.endIndex);
+        item = RLP_STRICT.wrap(rlp, item.endIndex);
         BigInteger intVal = item.asBigInt();
-        item = RLPCodec.wrap(rlp, item.endIndex);
+        item = RLP_STRICT.wrap(rlp, item.endIndex);
         this.balance = new BigDecimal(intVal, item.asInt());
     }
 
@@ -122,11 +122,11 @@ public class Student implements RLPEncodeable {
 
     @Override
     public byte[] toRLP() {
-        return RLPCodec.encodeSequentially(toObjectArray());
+        return RLPEncoder.encodeSequentially(toObjectArray());
     }
 
     @Override
     public void toRLP(byte[] dest, int destIndex) {
-        RLPCodec.encodeSequentially(toObjectArray(), dest, destIndex);
+        RLPEncoder.encodeSequentially(toObjectArray(), dest, destIndex);
     }
 }

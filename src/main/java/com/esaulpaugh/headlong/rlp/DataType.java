@@ -8,7 +8,14 @@ public enum DataType {
     LIST_SHORT(0xc0),
     LIST_LONG(0xf7);
 
-//    public static final int MAX_SHORT_DATA_LEN = 55;
+    static final byte SINGLE_BYTE_OFFSET = 0;
+    static final byte STRING_SHORT_OFFSET = (byte) 0x80;
+    static final byte STRING_LONG_OFFSET = (byte) 0xb7;
+    static final byte LIST_SHORT_OFFSET = (byte) 0xc0;
+    static final byte LIST_LONG_OFFSET = (byte) 0xf7;
+
+
+    //    public static final int MAX_SHORT_DATA_LEN = 55;
     public static final int MIN_LONG_DATA_LEN = 56;
 
     public final byte offset;

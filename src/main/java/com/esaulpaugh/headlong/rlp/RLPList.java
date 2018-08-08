@@ -6,14 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG;
+import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
 
 /**
  * Created by Evo on 1/19/2017.
  */
 public class RLPList extends RLPItem {
 
-    RLPList(byte[] buffer, int index, int containerEnd) throws DecodeException {
-        super(buffer, index, containerEnd);
+    RLPList(byte[] buffer, int index, int containerEnd, boolean lenient) throws DecodeException {
+        super(buffer, index, containerEnd, lenient);
     }
 
     /**
@@ -32,13 +33,13 @@ public class RLPList extends RLPItem {
 
         if (dataLen < DataType.MIN_LONG_DATA_LEN) {
             dest = new byte[1 + dataLen];
-            dest[0] = (byte) (DataType.LIST_SHORT.offset + dataLen);
+            dest[0] = (byte) (DataType.LIST_SHORT_OFFSET + dataLen);
             copyElements(srcElements, dest, 1);
         } else {
             dest = encodeListLong(dataLen, srcElements);
         }
 
-        return new RLPList(dest, 0, dest.length);
+        return new RLPList(dest, 0, dest.length, false);
     }
 
     @Override
@@ -46,11 +47,11 @@ public class RLPList extends RLPItem {
         return true;
     }
 
-    public List<RLPItem> elements() throws DecodeException {
+    public List<RLPItem> elements(RLPDecoder decoder) throws DecodeException {
         ArrayList<RLPItem> arrayList = new ArrayList<>();
         int i = dataIndex;
         while (i < this.endIndex) {
-            RLPItem item = RLPCodec.wrap(buffer, i);
+            RLPItem item = decoder.wrap(buffer, i);
             arrayList.add(item);
             i = item.endIndex;
         }
@@ -91,7 +92,7 @@ public class RLPList extends RLPItem {
 
         int destDataIndex = 1 + n;
         byte[] dest = new byte[destDataIndex + srcDataLen];
-        dest[0] = (byte) (LIST_LONG.offset + n);
+        dest[0] = (byte) (LIST_LONG_OFFSET + n);
         Integers.insertBytes(n, dest, 1, a, b, c, d);
 
         copyElements(srcElements, dest, destDataIndex);

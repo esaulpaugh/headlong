@@ -5,36 +5,64 @@ import com.esaulpaugh.headlong.rlp.DecodeException;
 import java.math.BigInteger;
 import java.util.Arrays;
 
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
+
 public class Integers {
+
+    public static byte getByte(byte[] buffer, int i, int numBytes) throws DecodeException {
+        switch (numBytes) {
+        case 1:
+            byte lead = buffer[i];
+            if(lead == 0) {
+                throw new DecodeException("Deserialised integers with leading zeroes are invalid: " + i + ", " + numBytes);
+            }
+            return lead;
+        case 0: return 0;
+        default: throw new DecodeException(new IllegalArgumentException("numBytes out of range: " + numBytes));
+        }
+    }
+
+    public static short getShort(byte[] buffer, int i, int numBytes) throws DecodeException {
+        int shiftAmount = 0;
+        int val = 0;
+        switch (numBytes) { /* cases 2 through 1 fall through */
+        case 2: val = buffer[i+1] & 0xFF; shiftAmount = Byte.SIZE; // & 0xFF to promote to int before left shift
+        case 1:
+            byte lead = buffer[i];
+            val |= (lead & 0xFF) << shiftAmount;
+            if(lead == 0) {
+                throw new DecodeException("Deserialised integers with leading zeroes are invalid: " + i + ", " + numBytes);
+            }
+        case 0: return (short) val;
+        default: throw new DecodeException(new IllegalArgumentException("numBytes out of range: " + numBytes));
+        }
+    }
 
     public static int getInt(byte[] buffer, int i, int numBytes) throws DecodeException {
         int shiftAmount = 0;
         int val = 0;
-        switch (numBytes) { /* cases fall through */
-        case 4: val |= (buffer[i+3] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
+        switch (numBytes) { /* cases 4 through 1 fall through */
+        case 4: val = buffer[i+3] & 0xFF; shiftAmount = Byte.SIZE;
         case 3: val |= (buffer[i+2] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 2: val |= (buffer[i+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1:
             byte lead = buffer[i];
             val |= (lead & 0xFF) << shiftAmount;
-            // validate
-            if(lead == 0 && val > 0) {
-                throw new DecodeException("Deserialised positive integers with leading zeroes are invalid.");
+            if(lead == 0) {
+                throw new DecodeException("Deserialised integers with leading zeroes are invalid: " + i + ", " + numBytes);
             }
-            return val;
+        case 0: return val;
         default: throw new DecodeException(new IllegalArgumentException("numBytes out of range: " + numBytes));
         }
     }
 
     public static long getLong(final byte[] buffer, final int i, final int numBytes) throws DecodeException {
-
         int shiftAmount = 0;
-
-        long val = 0;
-        switch (numBytes) { /* cases fall through */
-        case 8: val |= (buffer[i+7] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 7: val |= (buffer[i+6] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 6: val |= (buffer[i+5] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        long val = 0L;
+        switch (numBytes) { /* cases 8 through 1 fall through */
+        case 8: val = buffer[i+7] & 0xFF; shiftAmount = Byte.SIZE;
+        case 7: val |= (buffer[i+6] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 6: val |= (buffer[i+5] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 5: val |= (buffer[i+4] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 4: val |= (buffer[i+3] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 3: val |= (buffer[i+2] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
@@ -42,30 +70,50 @@ public class Integers {
         case 1:
             byte lead = buffer[i];
             val |= (lead & 0xFFL) << shiftAmount;
-            // validate
-            if(lead == 0 && val > 0) {
-                throw new DecodeException("Deserialised positive integers with leading zeroes are invalid.");
+            if(lead == 0) {
+                throw new DecodeException("Deserialised integers with leading zeroes are invalid: " + i + ", " + numBytes);
             }
-        default: return val;
+        case 0: return val;
+        default: throw new DecodeException(new IllegalArgumentException("numBytes out of range: " + numBytes));
         }
     }
 
-//    public static byte[] intToBytes(int val) {
-//        return longToBytes(val);
-//    }
-//
-//    public static int putInt(int val, byte[] o, int i) {
-//        return putLong(val, o, i);
-//    }
+    public static byte[] toBytes(byte val) {
+        if(val == 0) {
+            return EMPTY_BYTE_ARRAY;
+        }
+        return new byte[] { val };
+    }
 
-    public static byte[] toBytes(long val) {
+    public static byte[] toBytes(short val) {
+        if(val == 0) {
+            return EMPTY_BYTE_ARRAY;
+        }
         int n = numBytes(val);
         byte[] bytes = new byte[n];
-        put(val, bytes, 0);
+        putShort(val, bytes, 0);
         return bytes;
     }
 
+    public static byte[] toBytes(int val) {
+        if(val == 0) {
+            return EMPTY_BYTE_ARRAY;
+        }
+        int n = numBytes(val);
+        byte[] bytes = new byte[n];
+        putInt(val, bytes, 0);
+        return bytes;
+    }
 
+    public static byte[] toBytes(long val) {
+        if(val == 0) {
+            return EMPTY_BYTE_ARRAY;
+        }
+        int n = numBytes(val);
+        byte[] bytes = new byte[n];
+        putLong(val, bytes, 0);
+        return bytes;
+    }
 
     /**
      *
@@ -74,40 +122,119 @@ public class Integers {
      * @param i
      * @return  the number of bytes inserted
      */
-    public static int put(long val, byte[] o, int i) {
-
-        byte a = 0, b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h;
-
-        int n = 1;
-        h = (byte) (val & 0xFF);
-        val = val >>> Byte.SIZE;
+    public static int putByte(byte val, byte[] o, int i) {
         if(val != 0) {
-            n = 2;
-            g = (byte) (val & 0xFF);
+            o[i] = val;
+            return 1;
+        }
+        return 0;
+    }
+
+    /**
+     *
+     * @param val
+     * @param o
+     * @param i
+     * @return  the number of bytes inserted
+     */
+    public static int putShort(short val, byte[] o, int i) {
+        byte b = 0;
+        int n = 0;
+        if(val != 0) {
+            n = 1;
+            b = (byte) val;
+//            val = (short) (val >>> Byte.SIZE); // ICAST_QUESTIONABLE_UNSIGNED_RIGHT_SHIFT
+            val = (short) (val >> Byte.SIZE); // high bytes chopped off either way, see above
+            if (val != 0) {
+                n = 2;
+            }
+        }
+        switch (n) {
+        case 0: return 0;
+        case 1: o[i]=b; return 1;
+        default: o[i]=(byte)val; o[i+1]=b; return 2;
+        }
+    }
+
+    /**
+     *
+     * @param val
+     * @param o
+     * @param i
+     * @return  the number of bytes inserted
+     */
+    public static int putInt(int val, byte[] o, int i) {
+        byte b = 0, c = 0, d = 0;
+        int n = 0;
+        if(val != 0) {
+            n = 1;
+            d = (byte) val;
             val = val >>> Byte.SIZE;
-            if(val != 0) {
-                n = 3;
-                f = (byte) (val & 0xFF);
+            if (val != 0) {
+                n = 2;
+                c = (byte) val;
                 val = val >>> Byte.SIZE;
-                if(val != 0) {
-                    n = 4;
-                    e = (byte) (val & 0xFF);
+                if (val != 0) {
+                    n = 3;
+                    b = (byte) val;
                     val = val >>> Byte.SIZE;
-                    if(val != 0) {
-                        n = 5;
-                        d = (byte) (val & 0xFF);
+                    if (val != 0) {
+                        n = 4;
+                    }
+                }
+            }
+        }
+        switch (n) {
+        case 0: return 0;
+        case 1: o[i]=d; return 1;
+        case 2: o[i]=c; o[i+1]=d; return 2;
+        case 3: o[i]=b; o[i+1]=c; o[i+2]=d; return 3;
+        default:
+        o[i]=(byte)val; o[i+1]=b; o[i+2]=c; o[i+3]=d; return 4;
+        }
+    }
+
+    /**
+     *
+     * @param val
+     * @param o
+     * @param i
+     * @return  the number of bytes inserted
+     */
+    public static int putLong(long val, byte[] o, int i) {
+        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0;
+        int n = 0;
+        if(val != 0) {
+            n = 1;
+            h = (byte) val;
+            val = val >>> Byte.SIZE;
+            if (val != 0) {
+                n = 2;
+                g = (byte) val;
+                val = val >>> Byte.SIZE;
+                if (val != 0) {
+                    n = 3;
+                    f = (byte) val;
+                    val = val >>> Byte.SIZE;
+                    if (val != 0) {
+                        n = 4;
+                        e = (byte) val;
                         val = val >>> Byte.SIZE;
-                        if(val != 0) {
-                            n = 6;
-                            c = (byte) (val & 0xFF);
+                        if (val != 0) {
+                            n = 5;
+                            d = (byte) val;
                             val = val >>> Byte.SIZE;
-                            if(val != 0) {
-                                n = 7;
-                                b = (byte) (val & 0xFF);
+                            if (val != 0) {
+                                n = 6;
+                                c = (byte) val;
                                 val = val >>> Byte.SIZE;
-                                if(val != 0) {
-                                    n = 8;
-                                    a = (byte) (val & 0xFF);
+                                if (val != 0) {
+                                    n = 7;
+                                    b = (byte) val;
+                                    val = val >>> Byte.SIZE;
+                                    if (val != 0) {
+                                        n = 8;
+                                    }
                                 }
                             }
                         }
@@ -115,8 +242,8 @@ public class Integers {
                 }
             }
         }
-
         switch (n) {
+        case 0: return 0;
         case 1: o[i]=h; return 1;
         case 2: o[i]=g; o[i+1]=h; return 2;
         case 3: o[i]=f; o[i+1]=g; o[i+2]=h; return 3;
@@ -124,33 +251,70 @@ public class Integers {
         case 5: o[i]=d; o[i+1]=e; o[i+2]=f; o[i+3]=g; o[i+4]=h; return 5;
         case 6: o[i]=c; o[i+1]=d; o[i+2]=e; o[i+3]=f; o[i+4]=g; o[i+5]=h; return 6;
         case 7: o[i]=b; o[i+1]=c; o[i+2]=d; o[i+3]=e; o[i+4]=f; o[i+5]=g; o[i+6]=h; return 7;
-        default:o[i]=a; o[i+1]=b; o[i+2]=c; o[i+3]=d; o[i+4]=e; o[i+5]=f; o[i+6]=g; o[i+7]=h; return 8;
+        default:
+        o[i]=(byte)val; o[i+1]=b; o[i+2]=c; o[i+3]=d; o[i+4]=e; o[i+5]=f; o[i+6]=g; o[i+7]=h; return 8;
         }
     }
 
-    public static int numBytes(long val) {
-        int n = 1;
-        val = val >>> Byte.SIZE;
+    public static int numBytes(short val) {
+        int n = 0;
         if(val != 0) {
-            n = 2;
+            n = 1;
+//            val = (short) (val >>> Byte.SIZE); // ICAST_QUESTIONABLE_UNSIGNED_RIGHT_SHIFT
+            val = (short) (val >> Byte.SIZE); // high bytes chopped off either way, see above
+            if (val != 0) {
+                return 2;
+            }
+        }
+        return n;
+    }
+
+    public static int numBytes(int val) {
+        int n = 0;
+        if(val != 0) {
+            n = 1;
             val = val >>> Byte.SIZE;
-            if(val != 0) {
-                n = 3;
+            if (val != 0) {
+                n = 2;
                 val = val >>> Byte.SIZE;
-                if(val != 0) {
-                    n = 4;
+                if (val != 0) {
+                    n = 3;
                     val = val >>> Byte.SIZE;
-                    if(val != 0) {
-                        n = 5;
+                    if (val != 0) {
+                        return 4;
+                    }
+                }
+            }
+        }
+        return n;
+    }
+
+    public static int numBytes(long val) {
+        int n = 0;
+        if(val != 0) {
+            n = 1;
+            val = val >>> Byte.SIZE;
+            if (val != 0) {
+                n = 2;
+                val = val >>> Byte.SIZE;
+                if (val != 0) {
+                    n = 3;
+                    val = val >>> Byte.SIZE;
+                    if (val != 0) {
+                        n = 4;
                         val = val >>> Byte.SIZE;
-                        if(val != 0) {
-                            n = 6;
+                        if (val != 0) {
+                            n = 5;
                             val = val >>> Byte.SIZE;
-                            if(val != 0) {
-                                n = 7;
+                            if (val != 0) {
+                                n = 6;
                                 val = val >>> Byte.SIZE;
-                                if(val != 0) {
-                                    n = 8;
+                                if (val != 0) {
+                                    n = 7;
+                                    val = val >>> Byte.SIZE;
+                                    if (val != 0) {
+                                        return 8;
+                                    }
                                 }
                             }
                         }
@@ -192,11 +356,11 @@ public class Integers {
         }
     }
 
-    public static BigInteger getBigInteger(byte[] bytes, int i, int numBytes) {
+    public static BigInteger getBigInt(byte[] bytes, int i, int numBytes) {
         return new BigInteger(Arrays.copyOfRange(bytes, i, i + numBytes));
     }
 
-    public static int put(BigInteger val, byte[] o, int i) {
+    public static int putBigInt(BigInteger val, byte[] o, int i) {
         byte[] bytes = val.toByteArray();
         final int len = bytes.length;
         System.arraycopy(bytes, 0, o, i, len);

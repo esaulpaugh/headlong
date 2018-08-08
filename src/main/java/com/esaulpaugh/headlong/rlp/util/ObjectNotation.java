@@ -11,6 +11,8 @@ import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
 
 public class ObjectNotation {
 
+    private static final boolean LENIENT = true; // keep lenient so RLPItem.toString() doesn't throw, and to help with debugging
+
     static final String OBJECT_ARRAY_PREFIX = "{";
     static final String OBJECT_ARRAY_SUFFIX = "}";
     static final String STRING_PREFIX = "\"";
@@ -55,39 +57,44 @@ public class ObjectNotation {
         return end;
     }
 
-    private static int getLongElementEnd(byte[] data, final int leadByteIndex, final int lengthLen, final int containerEnd) throws DecodeException {
+    private static int getLongElementEnd(byte[] data, final int leadByteIndex, final int dataIndex, final int containerEnd) throws DecodeException {
         int lengthIndex = leadByteIndex + 1;
-        if (lengthIndex + lengthLen > containerEnd) {
-            throw new DecodeException("end of input reached; element @ " + leadByteIndex + " cannot be decoded: " + (lengthIndex + lengthLen) + " > " + containerEnd);
+        if (dataIndex > containerEnd) {
+            throw new DecodeException("element @ index " + leadByteIndex + " exceeds its container; indices: " + dataIndex + " > " + containerEnd);
         }
+        final int lengthLen = dataIndex - lengthIndex;
         final long dataLenLong = Integers.getLong(data, leadByteIndex + 1, lengthLen);
-        if (dataLenLong > Integer.MAX_VALUE) {
-            throw new DecodeException("too much data: " + dataLenLong + " > " + Integer.MAX_VALUE);
+//        if (dataLenLong > MAX_ARRAY_LENGTH) {
+//            throw new DecodeException("too much data: " + dataLenLong + " > " + MAX_ARRAY_LENGTH);
+//        }
+        final long end = lengthIndex + lengthLen + dataLenLong;
+        if (end > containerEnd) {
+            throw new DecodeException("element @ index " + leadByteIndex + " exceeds its container; indices: " + end + " > " + containerEnd);
         }
         final int dataLen = (int) dataLenLong;
         if (dataLen < MIN_LONG_DATA_LEN) {
             throw new DecodeException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + dataLen + " for element @ " + leadByteIndex);
         }
-        final int end = lengthIndex + lengthLen + dataLen;
-        if (end < 0) {
-            throw new DecodeException("overflow");
-        }
-        if (end > containerEnd) {
-            throw new DecodeException("element @ index " + leadByteIndex + " exceeds its container; indices: " + end + " > " + containerEnd);
-        }
 
-        return end;
+        return (int) end;
     }
 
-    public static ObjectNotation fromEncoding(byte[] encoding) throws DecodeException {
-        return fromEncoding(encoding, 0, encoding.length);
+    public static ObjectNotation forEncoding(byte[] encoding) throws DecodeException {
+        return forEncoding(encoding, 0, encoding.length);
     }
 
-    public static ObjectNotation fromEncoding(byte[] encoding, int index, int end) throws DecodeException {
+    public static ObjectNotation forEncoding(byte[] buffer, int index, int end) throws DecodeException {
+        byte first = buffer[index]; // test for ArrayIndexOutOfBoundsException
+
+        end = Math.min(buffer.length, end);
+        if(index > end) {
+            throw new DecodeException("index > end: " + index + " > " + end);
+        }
+
         StringBuilder sb = new StringBuilder("(");
         buildLongList(
                 sb,
-                encoding,
+                buffer,
                 index,
                 end,
                 0
@@ -128,10 +135,10 @@ public class ObjectNotation {
             case LIST_LONG:
                 lengthLen = current - type.offset;
                 elementDataIndex = i + 1 + lengthLen;
-                elementEnd = getLongElementEnd(data, i, lengthLen, end);
+                elementEnd = getLongElementEnd(data, i, elementDataIndex, end);
                 break;
             default:
-                throw new RuntimeException();
+                throw new AssertionError();
             }
             hasELement = true;
             switch (type) {
@@ -191,9 +198,9 @@ public class ObjectNotation {
                 break;
             case STRING_LONG:
             case LIST_LONG:
-                throw new IllegalStateException("surely, it cannot possibly fit. index: " + i);
+                throw new DecodeException("surely, it cannot possibly fit. index: " + i);
             default:
-                throw new RuntimeException();
+                throw new AssertionError();
             }
             hasElement = true;
             switch (type) {
@@ -244,11 +251,11 @@ public class ObjectNotation {
         return i + 1;
     }
 
-    private static int buildString(StringBuilder sb, byte[] data, int from, int to) {
+    private static int buildString(StringBuilder sb, byte[] data, int from, int to) throws DecodeException {
 
         final int len = to - from;
-        if(len == 1 && data[from] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
-            throw new IllegalStateException("invalid rlp for single byte @ " + (from - 1));
+        if(!LENIENT && len == 1 && data[from] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
+            throw new DecodeException("invalid rlp for single byte @ " + (from - 1));
         }
 
         String string = Strings.encode(data, from, len, HEX);

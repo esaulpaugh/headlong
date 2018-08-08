@@ -18,6 +18,10 @@ public class Strings {
     public static final boolean WITH_PADDING = true;
     public static final boolean NO_PADDING = false;
 
+    public static String encode(byte[] bytes, int encoding) {
+        return encode(bytes, 0, bytes.length, encoding);
+    }
+
     public static String encode(byte[] bytes, int from, int len, int encoding) {
         switch (encoding) {
         case UTF_8: return toUtf8(bytes, from, len);
@@ -135,6 +139,6 @@ public class Strings {
             return bytes;
         }
         }
-        throw new RuntimeException("illegal state: " + remainder + " " + unpaddedLen);
+        throw new IllegalArgumentException("illegal input length: " + unpaddedLen);
     }
 }

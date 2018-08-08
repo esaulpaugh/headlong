@@ -5,8 +5,8 @@ package com.esaulpaugh.headlong.rlp;
  */
 public class RLPString extends RLPItem {
 
-    RLPString(byte[] buffer, int index, int containerEnd) throws DecodeException {
-        super(buffer, index, containerEnd);
+    RLPString(byte[] buffer, int index, int containerEnd, boolean lenient) throws DecodeException {
+        super(buffer, index, containerEnd, lenient);
     }
 
     @Override

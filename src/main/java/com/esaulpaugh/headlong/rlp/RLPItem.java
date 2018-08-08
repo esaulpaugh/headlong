@@ -9,7 +9,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
-import static com.esaulpaugh.headlong.rlp.RLPCodec.wrap;
+import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT;
 
 /**
  * Created by Evo on 1/19/2017.
@@ -19,12 +19,11 @@ public abstract class RLPItem {
     final byte[] buffer;
     public final int index;
 
-//    public final transient DataType type;
     public final transient int dataIndex;
     public final transient int dataLength;
     public final transient int endIndex;
 
-    RLPItem(byte[] buffer, int index, int containerEnd) throws DecodeException {
+    RLPItem(final byte[] buffer, final int index, int containerEnd, final boolean lenient) throws DecodeException {
         containerEnd = Math.min(buffer.length, containerEnd);
 
         final int _dataIndex;
@@ -32,38 +31,42 @@ public abstract class RLPItem {
 
         final byte leadByte = buffer[index];
         final DataType type = DataType.type(leadByte);
+        final int diff = leadByte - type.offset;
         switch (type) {
         case SINGLE_BYTE: _dataIndex = index; _dataLength = 1; break;
         case STRING_SHORT:
-        case LIST_SHORT: _dataIndex = index + 1; _dataLength = leadByte - type.offset;
+        case LIST_SHORT:
+            _dataIndex = index + 1; _dataLength = diff;
             break;
         case STRING_LONG:
         case LIST_LONG:
             int lengthIndex = index + 1;
-            int lengthOfLength = leadByte - type.offset; // DataType dictates that lengthOfLength guaranteed to be in [1,8]
-            _dataIndex = lengthIndex + lengthOfLength;
-            _dataLength = Integers.getLong(buffer, lengthIndex, lengthOfLength);
+            _dataIndex = lengthIndex + diff; // DataType dictates that lengthOfLength guaranteed to be in [1,8]
+            if (_dataIndex > containerEnd) {
+                throw new DecodeException("element @ index " + index + " exceeds its container; indices: " + _dataIndex + " > " + containerEnd);
+            }
+            _dataLength = Integers.getLong(buffer, lengthIndex, diff);
             if(_dataLength < MIN_LONG_DATA_LEN) {
-                throw new IllegalStateException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
+                throw new DecodeException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
             }
             break;
-        default: throw new RuntimeException();
+        default: throw new AssertionError();
         }
 
-        final long end = _dataIndex + _dataLength;
-        if(end > containerEnd) {
-            throw new IllegalStateException("element @ index " + index + " exceeds its container: " + end + " > " + containerEnd);
+        final long _endIndex = _dataIndex + _dataLength;
+
+        if(_endIndex > containerEnd) {
+            throw new DecodeException("element @ index " + index + " exceeds its container: " + _endIndex + " > " + containerEnd);
         }
-        if(end < 0) {
-            throw new IllegalStateException("end of element @ " + index + " is out of range: " + end);
+        if(!lenient && _dataLength == 1 && type == STRING_SHORT && buffer[_dataIndex] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
+            throw new DecodeException("invalid rlp for single byte @ " + index);
         }
 
         this.buffer = buffer;
         this.index = index;
-//        this.type = type;
         this.dataIndex = _dataIndex;
         this.dataLength = (int) _dataLength;
-        this.endIndex = dataIndex + dataLength;
+        this.endIndex = (int) _endIndex;
     }
 
     public abstract boolean isList();
@@ -104,8 +107,30 @@ public abstract class RLPItem {
         return endIndex;
     }
 
+    public boolean asBoolean() throws DecodeException {
+        if(dataLength == 1) {
+            return buffer[dataIndex] != 0;
+        }
+        throw new DecodeException("not decodeable as boolean; length: " + dataLength);
+    }
+
+    public char asChar() throws DecodeException {
+        if(dataLength == 1) {
+            return (char) buffer[dataIndex];
+        }
+        throw new DecodeException("not decodeable as char; length: " + dataLength);
+    }
+
     public String asString(int encoding) {
         return Strings.encode(buffer, dataIndex, dataLength, encoding);
+    }
+
+    public byte asByte() throws DecodeException {
+        return Integers.getByte(buffer, dataIndex, dataLength);
+    }
+
+    public short asShort() throws DecodeException {
+        return Integers.getShort(buffer, dataIndex, dataLength);
     }
 
     public int asInt() throws DecodeException {
@@ -146,21 +171,16 @@ public abstract class RLPItem {
      * Clones this object.
      * @return
      */
-    public RLPItem duplicate() {
-        try {
-            return wrap(encoding(), 0, Integer.MAX_VALUE);
-        } catch (DecodeException e) {
-            throw new RuntimeException(e);
-        }
+    public RLPItem duplicate(RLPDecoder decoder) throws DecodeException {
+        return decoder.wrap(encoding(), 0, Integer.MAX_VALUE);
     }
 
     @Override
     public String toString() {
         try {
-            return ObjectNotation.fromEncoding(buffer, index, endIndex).toString();
+            return ObjectNotation.forEncoding(buffer, index, endIndex).toString();
         } catch (DecodeException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            throw new AssertionError(e);
         }
     }
 
