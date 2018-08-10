@@ -57,6 +57,7 @@ public class Parser {
                 i = parse(stringRep, objectStart, end, childList);
                 parent.add(childList);
                 break;
+            default: /* do nothing */
             }
         }
 

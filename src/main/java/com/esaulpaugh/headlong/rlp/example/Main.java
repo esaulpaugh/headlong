@@ -6,6 +6,8 @@ import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
 import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.rlp.util.ObjectNotation;
+import com.esaulpaugh.headlong.rlp.util.Strings;
+import org.junit.Assert;
 import org.spongycastle.util.encoders.Hex;
 
 import java.lang.management.ManagementFactory;
@@ -16,9 +18,11 @@ import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
+import static com.esaulpaugh.headlong.rlp.util.Strings.BASE64;
 import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
 
 public class Main {
@@ -144,12 +148,16 @@ public class Main {
 
     public static void main(String[] args) throws DecodeException {
 
+        byte[] o = new byte[2];
+        int n = Integers.putShort((short) -400, o, 0);
+        System.out.println(Hex.toHexString(o));
+
         System.out.println(Runtime.getRuntime().maxMemory());
 
         MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
         System.out.println(memoryBean.getHeapMemoryUsage().getMax());
 
-        test();
+//        test();
 
         if(true) return;
 

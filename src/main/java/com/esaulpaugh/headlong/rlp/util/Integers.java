@@ -10,10 +10,14 @@ import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
 public class Integers {
 
     /**
+     * Inserts an integer up to one byte in length, without leading zeroes (the integer zero will not be inserted).
+     * Big-endian two's complement format.
      *
-     * @param val
-     * @param o
-     * @param i
+     * @see #toBytes(byte)
+     * @see #getByte(byte[], int, int)
+     * @param val   the integer to be inserted
+     * @param o the output array
+     * @param i the index into the output
      * @return  the number of bytes inserted
      */
     public static int putByte(byte val, byte[] o, int i) {
@@ -25,10 +29,14 @@ public class Integers {
     }
 
     /**
+     * Inserts an integer up to two bytes in length, without leading zeroes (the integer zero will not be inserted).
+     * Big-endian two's complement format.
      *
-     * @param val
-     * @param o
-     * @param i
+     * @see #toBytes(short)
+     * @see #getShort(byte[], int, int)
+     * @param val   the integer to be inserted
+     * @param o the output array
+     * @param i the index into the output
      * @return  the number of bytes inserted
      */
     public static int putShort(short val, byte[] o, int i) {
@@ -51,10 +59,14 @@ public class Integers {
     }
 
     /**
+     * Inserts an integer up to four bytes in length, without leading zeroes (the integer zero will not be inserted).
+     * Big-endian two's complement format.
      *
-     * @param val
-     * @param o
-     * @param i
+     * @see #toBytes(int)
+     * @see #getInt(byte[], int, int)
+     * @param val   the integer to be inserted
+     * @param o the output array
+     * @param i the index into the output
      * @return  the number of bytes inserted
      */
     public static int putInt(int val, byte[] o, int i) {
@@ -89,10 +101,14 @@ public class Integers {
     }
 
     /**
+     * Inserts an integer up to eight bytes in length, without leading zeroes (the integer zero will not be inserted).
+     * Big-endian two's complement format.
      *
-     * @param val
-     * @param o
-     * @param i
+     * @see #toBytes(long)
+     * @see #getLong(byte[], int, int)
+     * @param val   the integer to be inserted
+     * @param o the output array
+     * @param i the index into the output
      * @return  the number of bytes inserted
      */
     public static int putLong(long val, byte[] o, int i) {
@@ -150,6 +166,18 @@ public class Integers {
         }
     }
 
+    /**
+     * Retrieves an integer up to one byte in length. No leading zeroes allowed. The integer zero always has zero length.
+     * Big-endian two's complement format.
+     *
+     * @see #toBytes(byte)
+     * @see #putByte(byte, byte[], int)
+     * @param buffer    the array containing the integer
+     * @param i the array index locating the integer
+     * @param numBytes  the length in bytes of the integer's representation
+     * @return  the integer
+     * @throws DecodeException  if the integer's representation is found to have leading zeroes
+     */
     public static byte getByte(byte[] buffer, int i, int numBytes) throws DecodeException {
         switch (numBytes) {
         case 1:
@@ -163,6 +191,18 @@ public class Integers {
         }
     }
 
+    /**
+     * Retrieves an integer up to two bytes in length. No leading zeroes allowed. The integer zero always has zero length.
+     * Big-endian two's complement format.
+     *
+     * @see #toBytes(short)
+     * @see #putShort(short, byte[], int)
+     * @param buffer    the array containing the integer's representation
+     * @param i the array index locating the integer
+     * @param numBytes  the length in bytes of the integer's representation, without leading zeroes
+     * @return  the integer
+     * @throws DecodeException  if the integer's representation is found to have leading zeroes
+     */
     public static short getShort(byte[] buffer, int i, int numBytes) throws DecodeException {
         int shiftAmount = 0;
         int val = 0;
@@ -179,6 +219,18 @@ public class Integers {
         }
     }
 
+    /**
+     * Retrieves an integer up to two bytes in length. No leading zeroes allowed. The integer zero always has zero length.
+     * Big-endian two's complement format.
+     *
+     * @see #toBytes(int)
+     * @see #putInt(int, byte[], int)
+     * @param buffer    the array containing the integer's representation
+     * @param i the array index locating the integer
+     * @param numBytes  the length in bytes of the integer's representation, without leading zeroes
+     * @return  the integer
+     * @throws DecodeException  if the integer's representation is found to have leading zeroes
+     */
     public static int getInt(byte[] buffer, int i, int numBytes) throws DecodeException {
         int shiftAmount = 0;
         int val = 0;
@@ -197,6 +249,18 @@ public class Integers {
         }
     }
 
+    /**
+     * Retrieves an integer up to two bytes in length. No leading zeroes allowed. The integer zero always has zero length.
+     * Big-endian two's complement format.
+     *
+     * @see #toBytes(long)
+     * @see #putLong(long, byte[], int)
+     * @param buffer    the array containing the integer's representation
+     * @param i the array index locating the integer
+     * @param numBytes  the length in bytes of the integer's representation, without leading zeroes
+     * @return  the integer
+     * @throws DecodeException  if the integer's representation is found to have leading zeroes
+     */
     public static long getLong(final byte[] buffer, final int i, final int numBytes) throws DecodeException {
         int shiftAmount = 0;
         long val = 0L;
@@ -359,6 +423,8 @@ public class Integers {
         case 3: b[i++] = x;
         case 2: b[i++] = y;
         case 1: b[i] = z;
+        case 0: return;
+        default: throw new IllegalArgumentException("n is out of range: " + n);
         }
     }
 

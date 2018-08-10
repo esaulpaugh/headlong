@@ -2,6 +2,7 @@ package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.rlp.DecodeException;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -33,6 +34,9 @@ public class IntegersTest {
         }
     }
 
+    /* ignored because it takes 16 seconds on laptop */
+    // TODO multithread?
+    @Ignore
     @Test
     public void putGetInt() throws DecodeException {
         byte[] four = new byte[4];
@@ -48,7 +52,7 @@ public class IntegersTest {
     public void putGetLong() throws DecodeException {
         Random rand = new Random(new SecureRandom().nextLong());
         byte[] eight = new byte[8];
-        final long lim = Long.MAX_VALUE - (long) Math.pow(2.0, 31);
+        final long lim = Long.MAX_VALUE - (long) Math.pow(2.0, 24);
         for (long i = Long.MAX_VALUE; i >= lim; i--) {
             long lo = rand.nextLong();
             int n = Integers.putLong(lo, eight, 0);
@@ -106,7 +110,7 @@ public class IntegersTest {
     public void numBytesLong() {
         Random rand = new Random(new SecureRandom().nextLong());
 
-        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+        for (int i = 0; i < Short.MAX_VALUE; i++) {
             long lo = rand.nextLong();
             int numBytes = Integers.numBytes(lo);
             Assert.assertEquals(

@@ -84,7 +84,9 @@ public class ObjectNotation {
     }
 
     public static ObjectNotation forEncoding(byte[] buffer, int index, int end) throws DecodeException {
-        byte first = buffer[index]; // test for ArrayIndexOutOfBoundsException
+        if(index < 0 || index >= buffer.length) {
+            throw new ArrayIndexOutOfBoundsException(index);
+        }
 
         end = Math.min(buffer.length, end);
         if(index > end) {

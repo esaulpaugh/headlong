@@ -62,14 +62,14 @@ public class Strings {
         if(withPadding) {
             return Base64.toBase64String(bytes, from, len);
         }
-        return unpad(Base64.encode(bytes, from, len));
+        return unpadBase64(Base64.encode(bytes, from, len));
     }
 
     private static byte[] fromBase64(String base64, boolean hasPadding) {
         if(hasPadding) {
             return Base64.decode(base64);
         }
-        return Base64.decode(pad(base64));
+        return Base64.decode(padBase64(base64));
     }
 
     public static int calcHexDecodedLen(int encodedLen) {
@@ -99,7 +99,7 @@ public class Strings {
                 : len - 1;
     }
 
-    private static String unpad(byte[] padded) {
+    private static String unpadBase64(byte[] padded) {
         final int len = padded.length;
         if(len < 4) {
             return "";
@@ -117,7 +117,7 @@ public class Strings {
         return String.valueOf(chars);
     }
 
-    private static byte[] pad(String unpadded) {
+    private static byte[] padBase64(String unpadded) {
         final int unpaddedLen = unpadded.length();
         final int remainder = unpadded.length() % 4;
         switch (remainder) {
