@@ -8,6 +8,8 @@ import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.rlp.util.ObjectNotation;
 import org.spongycastle.util.encoders.Hex;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -88,10 +90,11 @@ public class Main {
 
             final int n = 1_000_000;
 
-            System.out.println("Doing " + new DecimalFormat("#,###").format(n) + " decodes of:\n" + ObjectNotation.forEncoding(rlp));
+            System.out.println("Doing " + new DecimalFormat("#,###").format(n) + " decodes of Student object:\n" + ObjectNotation.forEncoding(rlp));
 
             long start, end;
 
+            // warmup
             for (int i = 0; i < 2_000_000; i++) {
 //                plato.toRLP(temp, 0);
                 plato = new Student(rlp);
@@ -141,11 +144,16 @@ public class Main {
 
     public static void main(String[] args) throws DecodeException {
 
+        System.out.println(Runtime.getRuntime().maxMemory());
+
+        MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+        System.out.println(memoryBean.getHeapMemoryUsage().getMax());
+
         test();
 
-//        if(true) return;
+        if(true) return;
 
-        final byte[] invalidAf = new byte[] { (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, 0x00, (byte) 0x81, '\0', (byte) 0x81, '\u001B', (byte) '\u230A' };
+        final byte[] invalidAf = new byte[] { (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, 0x00, (byte) 0x81, (byte) 0x81, (byte) '\u0080', '\u007f', (byte) '\u230A' };
 
         final byte[] valid = new byte[] { (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0x80, (byte) 0x81, (byte) 0x81, (byte) 0x81, (byte) '\u0080', (byte) '\u230A' };
 

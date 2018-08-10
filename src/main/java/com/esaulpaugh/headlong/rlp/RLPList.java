@@ -3,9 +3,9 @@ package com.esaulpaugh.headlong.rlp;
 import com.esaulpaugh.headlong.rlp.util.Integers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG;
 import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
 
 /**
@@ -48,21 +48,25 @@ public class RLPList extends RLPItem {
     }
 
     public List<RLPItem> elements(RLPDecoder decoder) throws DecodeException {
-        ArrayList<RLPItem> arrayList = new ArrayList<>();
+        ArrayList<RLPItem> arrayList = new ArrayList<>(Math.max(10, dataLength / 100));
+        elements(decoder, arrayList);
+        return arrayList;
+    }
+
+    public void elements(RLPDecoder decoder, Collection<RLPItem> collection) throws DecodeException {
         int i = dataIndex;
         while (i < this.endIndex) {
             RLPItem item = decoder.wrap(buffer, i);
-            arrayList.add(item);
+            collection.add(item);
             i = item.endIndex;
         }
-        return arrayList;
     }
 
     private static void copyElements(Iterable<RLPItem> srcElements, byte[] dest, int destIndex) {
         for (final RLPItem element : srcElements) {
             final int elementLen = element.encodingLength();
             System.arraycopy(element.buffer, element.index, dest, destIndex, elementLen);
-            destIndex += elementLen;
+            destIndex = element.endIndex;
         }
     }
 

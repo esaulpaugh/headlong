@@ -5,6 +5,8 @@ When decoding, the source array is retained throughout and is shared by all item
 
 When encoding, long items' length bytes are inserted without the use of an intermediate byte array.
 
+Decode tested with data up to 2,147,483,634 bytes in length (list of 2,147,483,634 single-byte items). See RLPDecoderTest.java for more.
+
 Performance tests run end-to-end: each decode instantiates a new model object and populates all its fields with data from the RLP-encoding, while each encode serializes all the fields of a model object and RLP-encodes them together.
 
     Doing 1,000,000 decodes of:

@@ -9,6 +9,147 @@ import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
 
 public class Integers {
 
+    /**
+     *
+     * @param val
+     * @param o
+     * @param i
+     * @return  the number of bytes inserted
+     */
+    public static int putByte(byte val, byte[] o, int i) {
+        if(val != 0) {
+            o[i] = val;
+            return 1;
+        }
+        return 0;
+    }
+
+    /**
+     *
+     * @param val
+     * @param o
+     * @param i
+     * @return  the number of bytes inserted
+     */
+    public static int putShort(short val, byte[] o, int i) {
+        byte b = 0;
+        int n = 0;
+        if(val != 0) {
+            n = 1;
+            b = (byte) val;
+//            val = (short) (val >>> Byte.SIZE); // ICAST_QUESTIONABLE_UNSIGNED_RIGHT_SHIFT
+            val = (short) (val >> Byte.SIZE); // high bytes chopped off either way, see above
+            if (val != 0) {
+                n = 2;
+            }
+        }
+        switch (n) {
+        case 0: return 0;
+        case 1: o[i]=b; return 1;
+        default: o[i]=(byte)val; o[i+1]=b; return 2;
+        }
+    }
+
+    /**
+     *
+     * @param val
+     * @param o
+     * @param i
+     * @return  the number of bytes inserted
+     */
+    public static int putInt(int val, byte[] o, int i) {
+        byte b = 0, c = 0, d = 0;
+        int n = 0;
+        if(val != 0) {
+            n = 1;
+            d = (byte) val;
+            val = val >>> Byte.SIZE;
+            if (val != 0) {
+                n = 2;
+                c = (byte) val;
+                val = val >>> Byte.SIZE;
+                if (val != 0) {
+                    n = 3;
+                    b = (byte) val;
+                    val = val >>> Byte.SIZE;
+                    if (val != 0) {
+                        n = 4;
+                    }
+                }
+            }
+        }
+        switch (n) {
+        case 0: return 0;
+        case 1: o[i]=d; return 1;
+        case 2: o[i]=c; o[i+1]=d; return 2;
+        case 3: o[i]=b; o[i+1]=c; o[i+2]=d; return 3;
+        default:
+            o[i]=(byte)val; o[i+1]=b; o[i+2]=c; o[i+3]=d; return 4;
+        }
+    }
+
+    /**
+     *
+     * @param val
+     * @param o
+     * @param i
+     * @return  the number of bytes inserted
+     */
+    public static int putLong(long val, byte[] o, int i) {
+        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0;
+        int n = 0;
+        if(val != 0) {
+            n = 1;
+            h = (byte) val;
+            val = val >>> Byte.SIZE;
+            if (val != 0) {
+                n = 2;
+                g = (byte) val;
+                val = val >>> Byte.SIZE;
+                if (val != 0) {
+                    n = 3;
+                    f = (byte) val;
+                    val = val >>> Byte.SIZE;
+                    if (val != 0) {
+                        n = 4;
+                        e = (byte) val;
+                        val = val >>> Byte.SIZE;
+                        if (val != 0) {
+                            n = 5;
+                            d = (byte) val;
+                            val = val >>> Byte.SIZE;
+                            if (val != 0) {
+                                n = 6;
+                                c = (byte) val;
+                                val = val >>> Byte.SIZE;
+                                if (val != 0) {
+                                    n = 7;
+                                    b = (byte) val;
+                                    val = val >>> Byte.SIZE;
+                                    if (val != 0) {
+                                        n = 8;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        switch (n) {
+        case 0: return 0;
+        case 1: o[i]=h; return 1;
+        case 2: o[i]=g; o[i+1]=h; return 2;
+        case 3: o[i]=f; o[i+1]=g; o[i+2]=h; return 3;
+        case 4: o[i]=e; o[i+1]=f; o[i+2]=g; o[i+3]=h; return 4;
+        case 5: o[i]=d; o[i+1]=e; o[i+2]=f; o[i+3]=g; o[i+4]=h; return 5;
+        case 6: o[i]=c; o[i+1]=d; o[i+2]=e; o[i+3]=f; o[i+4]=g; o[i+5]=h; return 6;
+        case 7: o[i]=b; o[i+1]=c; o[i+2]=d; o[i+3]=e; o[i+4]=f; o[i+5]=g; o[i+6]=h; return 7;
+        default:
+        o[i]=(byte)val; o[i+1]=b; o[i+2]=c; o[i+3]=d; o[i+4]=e; o[i+5]=f; o[i+6]=g; o[i+7]=h; return 8;
+        }
+    }
+
     public static byte getByte(byte[] buffer, int i, int numBytes) throws DecodeException {
         switch (numBytes) {
         case 1:
@@ -115,145 +256,10 @@ public class Integers {
         return bytes;
     }
 
-    /**
-     *
-     * @param val
-     * @param o
-     * @param i
-     * @return  the number of bytes inserted
-     */
-    public static int putByte(byte val, byte[] o, int i) {
-        if(val != 0) {
-            o[i] = val;
-            return 1;
-        }
-        return 0;
-    }
-
-    /**
-     *
-     * @param val
-     * @param o
-     * @param i
-     * @return  the number of bytes inserted
-     */
-    public static int putShort(short val, byte[] o, int i) {
-        byte b = 0;
-        int n = 0;
-        if(val != 0) {
-            n = 1;
-            b = (byte) val;
-//            val = (short) (val >>> Byte.SIZE); // ICAST_QUESTIONABLE_UNSIGNED_RIGHT_SHIFT
-            val = (short) (val >> Byte.SIZE); // high bytes chopped off either way, see above
-            if (val != 0) {
-                n = 2;
-            }
-        }
-        switch (n) {
-        case 0: return 0;
-        case 1: o[i]=b; return 1;
-        default: o[i]=(byte)val; o[i+1]=b; return 2;
-        }
-    }
-
-    /**
-     *
-     * @param val
-     * @param o
-     * @param i
-     * @return  the number of bytes inserted
-     */
-    public static int putInt(int val, byte[] o, int i) {
-        byte b = 0, c = 0, d = 0;
-        int n = 0;
-        if(val != 0) {
-            n = 1;
-            d = (byte) val;
-            val = val >>> Byte.SIZE;
-            if (val != 0) {
-                n = 2;
-                c = (byte) val;
-                val = val >>> Byte.SIZE;
-                if (val != 0) {
-                    n = 3;
-                    b = (byte) val;
-                    val = val >>> Byte.SIZE;
-                    if (val != 0) {
-                        n = 4;
-                    }
-                }
-            }
-        }
-        switch (n) {
-        case 0: return 0;
-        case 1: o[i]=d; return 1;
-        case 2: o[i]=c; o[i+1]=d; return 2;
-        case 3: o[i]=b; o[i+1]=c; o[i+2]=d; return 3;
-        default:
-        o[i]=(byte)val; o[i+1]=b; o[i+2]=c; o[i+3]=d; return 4;
-        }
-    }
-
-    /**
-     *
-     * @param val
-     * @param o
-     * @param i
-     * @return  the number of bytes inserted
-     */
-    public static int putLong(long val, byte[] o, int i) {
-        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0;
-        int n = 0;
-        if(val != 0) {
-            n = 1;
-            h = (byte) val;
-            val = val >>> Byte.SIZE;
-            if (val != 0) {
-                n = 2;
-                g = (byte) val;
-                val = val >>> Byte.SIZE;
-                if (val != 0) {
-                    n = 3;
-                    f = (byte) val;
-                    val = val >>> Byte.SIZE;
-                    if (val != 0) {
-                        n = 4;
-                        e = (byte) val;
-                        val = val >>> Byte.SIZE;
-                        if (val != 0) {
-                            n = 5;
-                            d = (byte) val;
-                            val = val >>> Byte.SIZE;
-                            if (val != 0) {
-                                n = 6;
-                                c = (byte) val;
-                                val = val >>> Byte.SIZE;
-                                if (val != 0) {
-                                    n = 7;
-                                    b = (byte) val;
-                                    val = val >>> Byte.SIZE;
-                                    if (val != 0) {
-                                        n = 8;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        switch (n) {
-        case 0: return 0;
-        case 1: o[i]=h; return 1;
-        case 2: o[i]=g; o[i+1]=h; return 2;
-        case 3: o[i]=f; o[i+1]=g; o[i+2]=h; return 3;
-        case 4: o[i]=e; o[i+1]=f; o[i+2]=g; o[i+3]=h; return 4;
-        case 5: o[i]=d; o[i+1]=e; o[i+2]=f; o[i+3]=g; o[i+4]=h; return 5;
-        case 6: o[i]=c; o[i+1]=d; o[i+2]=e; o[i+3]=f; o[i+4]=g; o[i+5]=h; return 6;
-        case 7: o[i]=b; o[i+1]=c; o[i+2]=d; o[i+3]=e; o[i+4]=f; o[i+5]=g; o[i+6]=h; return 7;
-        default:
-        o[i]=(byte)val; o[i+1]=b; o[i+2]=c; o[i+3]=d; o[i+4]=e; o[i+5]=f; o[i+6]=g; o[i+7]=h; return 8;
-        }
+    public static int numBytes(byte val) {
+        if(val == 0)
+            return 0;
+        return 1;
     }
 
     public static int numBytes(short val) {
