@@ -12,6 +12,10 @@ import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT;
 
 /**
+ * An immutable view of a portion of a byte array containing RLP-encoded data, starting at {@code index} (inclusive) and
+ * ending at {@code endIndex} (exclusive), representing a single item (either a string or list). Useful when decoding or
+ * otherwise manipulating RLP items.
+ *
  * Created by Evo on 1/19/2017.
  */
 public abstract class RLPItem {
@@ -67,6 +71,10 @@ public abstract class RLPItem {
         this.dataIndex = _dataIndex;
         this.dataLength = (int) _dataLength;
         this.endIndex = (int) _endIndex;
+    }
+
+    public DataType type() {
+        return DataType.type(buffer[index]);
     }
 
     public abstract boolean isList();

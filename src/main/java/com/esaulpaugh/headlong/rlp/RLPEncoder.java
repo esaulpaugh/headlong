@@ -7,11 +7,16 @@ import com.esaulpaugh.headlong.rlp.util.Parser;
 import com.esaulpaugh.headlong.rlp.util.Strings;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static com.esaulpaugh.headlong.rlp.DataType.*;
+import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
+import static com.esaulpaugh.headlong.rlp.DataType.LIST_SHORT_OFFSET;
+import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
+import static com.esaulpaugh.headlong.rlp.DataType.STRING_LONG_OFFSET;
+import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
 import static com.esaulpaugh.headlong.rlp.util.Strings.UTF_8;
@@ -30,8 +35,7 @@ public class RLPEncoder {
         }
     }
 
-    // TODO ForkJoin divide-and-conquer?
-    private static long totalEncodedLen(Iterable<Object> items) {
+    static long totalEncodedLen(Iterable<Object> items) {
         long total = 0;
         for (Object item : items) {
             total += itemEncodedLen(item);
@@ -218,9 +222,9 @@ public class RLPEncoder {
 
     public static void main(String[] args0) throws DecodeException {
 
-        byte[] bytes0 = new byte[0];
-        Arrays.fill(bytes0, (byte) 0xFF);
-        byte[] dest = new byte[56];
+//        byte[] bytes0 = new byte[0];
+//        Arrays.fill(bytes0, (byte) 0xFF);
+//        byte[] dest = new byte[56];
 
         int di;
         int destIndex;
@@ -230,7 +234,9 @@ public class RLPEncoder {
         // ac 2.82
 
 
-        long start, end;
+//        long start, end;
+
+
         // switch 318 w/ 3, 100_000_000
         // arraycopy 602 w/ 3, 100_000_000
         // for 545 w/ 3, 100_000_000
