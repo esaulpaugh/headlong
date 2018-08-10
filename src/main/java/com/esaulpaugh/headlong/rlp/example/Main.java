@@ -43,24 +43,25 @@ public class Main {
 //        System.out.println(Hex.toHexString(two));
 //        long s = Integers.getInt(two, 0, nnn);
 //        System.out.println(s);
-//
-//        RLPItem empty = RLP_LENIENT.wrap(new byte[] { (byte) 0x81, (byte) 0x00 }, 0); //  (byte) 0x81, (byte) 0x00
-////        System.out.println(empty.asBoolean());
-////        System.out.println(empty.asChar());
-//        System.out.println(empty.asString(HEX));
+
+        byte[] burma17 = new byte[] { (byte) 0xc4, (byte) 0x82, (byte) 0x10, (byte) 0x10, (byte) 0xc0 };
+        RLPItem empty = RLP_LENIENT.wrap( burma17, 1);
+        System.out.println(empty.asBoolean());
+        System.out.println(empty.asChar());
+        System.out.println(empty.asString(HEX));
 //        System.out.println(empty.asByte());
-//        System.out.println(empty.asShort());
-//        System.out.println(empty.asInt());
-//        System.out.println(empty.asLong());
-//        System.out.println(ObjectNotation.forEncoding(new byte[] { 0x00, 0x00 }, 0, 0).toString());
-//
-//        try {
-//            empty.duplicate(RLP_STRICT);
-//        } catch (DecodeException de) {
-//            System.out.println(de.toString());
-//        }
+        System.out.println(empty.asShort());
+        System.out.println(empty.asInt());
+        System.out.println(empty.asLong());
+        System.out.println(ObjectNotation.forEncoding(burma17).toString());
+
+        try {
+            empty.duplicate(RLP_STRICT);
+        } catch (DecodeException de) {
+            System.out.println(de.toString());
+        }
 //        ((RLPList) empty).elements(RLP_LENIENT);
-//
+
 //        if(true) return;
 
         StudentRLPAdapter adapter = new StudentRLPAdapter();
@@ -157,9 +158,9 @@ public class Main {
         MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
         System.out.println(memoryBean.getHeapMemoryUsage().getMax());
 
-//        test();
+        test();
 
-        if(true) return;
+//        if(true) return;
 
         final byte[] invalidAf = new byte[] { (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, 0x00, (byte) 0x81, (byte) 0x81, (byte) '\u0080', '\u007f', (byte) '\u230A' };
 

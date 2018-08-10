@@ -128,14 +128,14 @@ public class Strings {
             byte[] bytes = new byte[paddedLen];
             bytes[paddedLen - 2] = '=';
             bytes[paddedLen - 1] = '=';
-            unpadded.getBytes(0, unpaddedLen, bytes, 0);
+            unpadded.getBytes(0, unpaddedLen, bytes, 0); // there is no replacement for this method
             return bytes;
         }
         case 3: {
             final int paddedLen = unpaddedLen + 1;
             byte[] bytes = new byte[paddedLen];
             bytes[paddedLen - 1] = '=';
-            unpadded.getBytes(0, unpaddedLen, bytes, 0);
+            unpadded.getBytes(0, unpaddedLen, bytes, 0); // there is no replacement for this method
             return bytes;
         }
         }

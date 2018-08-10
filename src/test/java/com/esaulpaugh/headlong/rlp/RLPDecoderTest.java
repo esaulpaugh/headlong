@@ -83,6 +83,7 @@ public class RLPDecoderTest {
         }
     }
 
+    @Ignore // memory hog, run by itself
     @Test
     public void hugeListsHighMem() throws DecodeException {
 
@@ -183,5 +184,25 @@ public class RLPDecoderTest {
         throw new Exception("not yet implemented");
     }
 
+    @Test
+    public void booleans() throws DecodeException {
+        byte[] burma17 = new byte[] { (byte) 0xc5, (byte) 0x82, (byte) 0x10, (byte) 0x10, (byte) 0xc0 };
 
+        RLPItem nonEmpty = RLP_LENIENT.wrap( burma17, 1);
+        Assert.assertTrue(nonEmpty.asBoolean());
+
+        RLPItem empty = RLP_LENIENT.wrap( burma17, 4);
+        Assert.assertFalse(empty.asBoolean());
+    }
+
+    @Test
+    public void chars() throws DecodeException {
+        byte[] burma17 = new byte[] { (byte) 0xc5, (byte) 0x82, (byte) 0x10, (byte) 0x10, (byte) 0xc0 };
+
+        RLPItem nonEmpty = RLP_LENIENT.wrap( burma17, 1);
+        Assert.assertEquals(Character.valueOf('\u1010'), Character.valueOf(nonEmpty.asChar())); // တ
+
+        RLPItem empty = RLP_LENIENT.wrap( burma17, 4);
+        Assert.assertEquals(Character.valueOf('\0'), Character.valueOf(empty.asChar()));
+    }
 }

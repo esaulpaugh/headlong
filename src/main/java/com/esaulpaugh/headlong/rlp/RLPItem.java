@@ -115,18 +115,23 @@ public abstract class RLPItem {
         return endIndex;
     }
 
-    public boolean asBoolean() throws DecodeException {
-        if(dataLength == 1) {
-            return buffer[dataIndex] != 0;
-        }
-        throw new DecodeException("not decodeable as boolean; length: " + dataLength);
+    /**
+     * Wise man says only empty items are false.
+     *
+     * @see Integers#putByte(byte, byte[], int)
+     * @return
+     */
+    public boolean asBoolean() {
+        return dataLength != 0;
     }
 
+    /**
+     * @see String#charAt(int)
+     * @return
+     * @throws DecodeException
+     */
     public char asChar() throws DecodeException {
-        if(dataLength == 1) {
-            return (char) buffer[dataIndex];
-        }
-        throw new DecodeException("not decodeable as char; length: " + dataLength);
+        return (char) asShort();
     }
 
     public String asString(int encoding) {
