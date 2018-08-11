@@ -22,7 +22,7 @@ public class RLPList extends RLPItem {
      * @param srcElements pre-encoded top-level elements of the list
      * @return
      */
-    static RLPList withElements(Iterable<RLPItem> srcElements) throws DecodeException {
+    static RLPList withElements(Iterable<RLPItem> srcElements) {
 
         byte[] dest;
 
@@ -39,7 +39,11 @@ public class RLPList extends RLPItem {
             dest = encodeListLong(dataLen, srcElements);
         }
 
-        return new RLPList(dest, 0, dest.length, false);
+        try {
+            return new RLPList(dest, 0, dest.length, false);
+        } catch (DecodeException de) {
+            throw new AssertionError(de);
+        }
     }
 
     @Override
@@ -66,7 +70,7 @@ public class RLPList extends RLPItem {
         for (final RLPItem element : srcElements) {
             final int elementLen = element.encodingLength();
             System.arraycopy(element.buffer, element.index, dest, destIndex, elementLen);
-            destIndex = element.endIndex;
+            destIndex += elementLen;
         }
     }
 
