@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.function.BiPredicate;
 
 /**
- * Stateless, though not designed to be thread-safe.
+ * Decodes RLP-formatted data.
  */
 public class RLPDecoder {
 
@@ -18,10 +18,6 @@ public class RLPDecoder {
     private RLPDecoder(boolean lenient) {
         this.lenient = lenient;
     }
-
-    /* ***************************************************************/
-    // Todo: streaming
-    /* ***************************************************************/
 
     /**
      * e.g. 0xC0

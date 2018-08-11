@@ -7,6 +7,9 @@ import java.nio.charset.Charset;
 
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
 
+/**
+ * Utility for encoding and decoding hexadecimal, base64, and utf-8 {@code Strings}.
+ */
 public class Strings {
 
     private static final Charset CHARSET_UTF_8 = Charset.forName("UTF-8");

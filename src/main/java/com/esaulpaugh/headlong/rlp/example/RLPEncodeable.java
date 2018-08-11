@@ -1,6 +1,6 @@
 package com.esaulpaugh.headlong.rlp.example;
 
-public interface RLPEncodeable<T> {
+public interface RLPEncodeable {
 
     Object[] toObjectArray();
 

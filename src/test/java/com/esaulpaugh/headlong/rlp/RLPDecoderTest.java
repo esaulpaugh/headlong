@@ -181,6 +181,7 @@ public class RLPDecoderTest {
     @Ignore
     @Test
     public void exceedsContainer() throws Exception {
+        // TODO
         throw new Exception("not yet implemented");
     }
 
@@ -200,7 +201,7 @@ public class RLPDecoderTest {
         byte[] burma17 = new byte[] { (byte) 0xc5, (byte) 0x82, (byte) 0x10, (byte) 0x10, (byte) 0xc0 };
 
         RLPItem nonEmpty = RLP_LENIENT.wrap( burma17, 1);
-        Assert.assertEquals(Character.valueOf('\u1010'), Character.valueOf(nonEmpty.asChar())); // တ
+        Assert.assertEquals(Character.valueOf('\u1010'), Character.valueOf(nonEmpty.asChar()));
 
         RLPItem empty = RLP_LENIENT.wrap( burma17, 4);
         Assert.assertEquals(Character.valueOf('\0'), Character.valueOf(empty.asChar()));

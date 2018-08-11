@@ -1,25 +1,18 @@
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.rlp.util.Integers;
-import com.esaulpaugh.headlong.rlp.util.ObjectNotation;
-import com.esaulpaugh.headlong.rlp.util.Parser;
-import com.esaulpaugh.headlong.rlp.util.Strings;
 
-import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
 
 import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
 import static com.esaulpaugh.headlong.rlp.DataType.LIST_SHORT_OFFSET;
 import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_LONG_OFFSET;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
-import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
-import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
-import static com.esaulpaugh.headlong.rlp.util.Strings.UTF_8;
 
+/**
+ * Encodes data to RLP format.
+ */
 public class RLPEncoder {
 
     private static boolean isLong(long dataLen) {
@@ -248,138 +241,5 @@ public class RLPEncoder {
      */
     public static RLPList toList(Iterable<RLPItem> encodings) {
         return RLPList.withElements(encodings);
-    }
-
-    private static byte[][] TESTS = new byte[100_000][];
-
-    static {
-        Random r = new Random();
-        r.setSeed(new SecureRandom().nextLong());
-        for (int i = 0; i < TESTS.length; i++) {
-            TESTS[i] = new byte[r.nextInt(56)];
-            r.nextBytes(TESTS[i]);
-        }
-    }
-
-    public static void main(String[] args0) throws DecodeException {
-
-//        byte[] bytes0 = new byte[0];
-//        Arrays.fill(bytes0, (byte) 0xFF);
-//        byte[] dest = new byte[56];
-
-        int di;
-        int destIndex;
-
-        // sw 5.69
-        // for 9.107
-        // ac 2.82
-
-
-//        long start, end;
-
-
-        // switch 318 w/ 3, 100_000_000
-        // arraycopy 602 w/ 3, 100_000_000
-        // for 545 w/ 3, 100_000_000
-
-        // switch 3300 w/ 55
-        // arraycopy 973 w/ 55
-        // for 4487 w/ 55
-
-        // switch:
-        // for: 195 w/ 1, 1399 w/ 27, 2408 w/ 55
-        // arraycopy: 513 w/ 1, 819 w/ 27, 980 w/ 55
-
-//        destIndex = 1;
-//        for (int j = 0; j < dataLen; j++) {
-//            dest[destIndex++] = b[j];
-//        }
-//        System.arraycopy(b, 0, dest, 1, dataLen);
-//        System.out.println(Arrays.toString(dest));
-//        if(true) return;
-
-//        for (int i = 0; i < TESTS.length; i++) {
-//            byte[] bytes = TESTS[i];
-//            di = 1;
-//            final int len = bytes.length;
-//            System.arraycopy(bytes, 0, dest, di, len); // 876
-//        }
-//        start = System.nanoTime();
-//        for (int i = 0; i < TESTS.length; i++) {
-//            byte[] bytes = TESTS[i];
-//            di = 1;
-//            final int len = bytes.length;
-////            copyShortString2(bytes, dest, 1);
-////            copyShortString(b, dest, 1);
-////            for (int j = 0; j < len; j++) { // 1400 w/ 27
-////                dest[di++] = bytes[j];
-////            }
-//            System.arraycopy(bytes, 0, dest, di, len);
-//        }
-//        end = System.nanoTime();
-//
-//        System.out.println((end - start) / 1_000_000.0);
-
-
-//        byte[] data0 = new byte[] {
-//                (byte) 0xf8, (byte) 148, // TODO test multiple length bytes
-//                (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0x80, (byte) 0x81, (byte) 0x81, (byte) 0x81, (byte) '\u0093', (byte) '\u230A',
-//                (byte) 0xb8, 56, 0x09,(byte)0x80,-1,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, -3, -2, 0, 0,
-//                (byte) 0xf8, 0x38, 0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 36, 74, 0, 0,
-//                (byte) 0x84, 'c', 'a', 't', 's',
-//                (byte) 0x84, 'd', 'o', 'g', 's',
-//                (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's', // TODO TEST ALL 256 BYTE VALUES IN ALL ELEMENT TYPES
-//        };
-//
-//        final byte[] invalidAf = new byte[] { (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, 0x00, (byte) 0x81, '\0', (byte) 0x81, '\u001B', (byte) '\u230A' };
-
-//        final byte[] data0 = new byte[] { (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0x80, (byte) 0x81, (byte) 0x81, (byte) 0x81, (byte) '\u0080', (byte) '\u230A' };
-
-//        final byte[] data0 = new byte[] { (byte) 0x82, 'h', 'i', (byte) 0x84, 'L', 'O', 'O', 'K', '@', (byte) 0x82, 'm', 'e'};
-
-        // decode
-        final byte[] rlp0 = new byte[] { (byte) 0xc0, (byte) 0x83, 'c', 'a', 't', 0x09, 0x09 };
-        RLPItem item0 = RLP_STRICT.wrap(rlp0, 1); // wrap item at index 1
-        String cat = item0.asString(UTF_8); // "cat"
-        RLPItem item1 = RLP_STRICT.wrap(rlp0, item0.endIndex);
-        String hex = item1.asString(HEX); // "09"
-
-        // encode a list item with n elements
-        byte[] rlp1 = RLPEncoder.encodeAsList(new byte[0], FloatingPoint.toBytes(0.5f), new Object[] {} );
-        System.out.println(Strings.encode(rlp1, HEX)); // "c780843f000000c0"
-
-        // concatenate n encodings
-        byte[] rlp2 = RLPEncoder.encodeSequentially(Strings.decode(cat, UTF_8), Integers.toBytes(32L), new Object[] { new Object[] {}, new byte[] { '\t' } }, FloatingPoint.toBytes(0.0));
-        System.out.println(Strings.encode(rlp2, HEX)); // "8363617420c2c00980"
-
-        // Object notation and parser for debugging
-        String notation = ObjectNotation.forEncoding(rlp2).toString();
-        System.out.println(notation);
-    /*
-        (
-          "636174",
-          "20",
-          { {  }, "09" },
-          ""
-        )
-    */
-        List<Object> rlp2Objects = Parser.parse(notation);
-        byte[] rlp3 = RLPEncoder.encodeSequentially(rlp2Objects);
-        System.out.println(Strings.encode(rlp3, HEX)); // "8363617420c2c00900"
-
-
-//        ObjectNotation objectNotation = ObjectNotation.fromEncoding(data0);
-//
-//        System.out.println(objectNotation.toString());
-//        System.out.println(Hex.toHexString(data0));
-//        System.out.println("data0.length = " + data0.length);
-//
-//        List<Object> objects = objectNotation.parse();
-//
-//        final byte[] rlp = encodeSequentially(objects);
-//
-//        System.out.println("BEFORE:" + Hex.toHexString(data0));
-//        System.out.println("AFTER: " + Hex.toHexString(rlp));
-//        System.out.println(Arrays.equals(data0, rlp) ? "SUCCESS" : "FAIL");
     }
 }

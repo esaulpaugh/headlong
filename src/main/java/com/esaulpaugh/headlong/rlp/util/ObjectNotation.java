@@ -9,6 +9,9 @@ import java.util.List;
 import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
 import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
 
+/**
+ * An object notation for RLP, not unlike JSON. Call {@link #parse()} to parse the notation into the original list of objects.
+ */
 public class ObjectNotation {
 
     private static final boolean LENIENT = true; // keep lenient so RLPItem.toString() doesn't throw, and to help with debugging

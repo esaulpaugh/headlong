@@ -14,8 +14,6 @@ public enum DataType {
     static final byte LIST_SHORT_OFFSET = (byte) 0xc0;
     static final byte LIST_LONG_OFFSET = (byte) 0xf7;
 
-
-    //    public static final int MAX_SHORT_DATA_LEN = 55;
     public static final int MIN_LONG_DATA_LEN = 56;
 
     public final byte offset;
