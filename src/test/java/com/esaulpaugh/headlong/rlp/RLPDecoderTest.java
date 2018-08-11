@@ -178,11 +178,68 @@ public class RLPDecoderTest {
         }
     }
 
-    @Ignore
+    private interface CustomRunnable {
+        void run() throws Throwable;
+    }
+
     @Test
-    public void exceedsContainer() throws Exception {
-        // TODO
-        throw new Exception("not yet implemented");
+    public void exceedsContainerShort() throws Throwable {
+
+        final Class<? extends Throwable> clazz = DecodeException.class;
+
+        byte[] a0 = new byte[] { (byte) 0x81 };
+        byte[] a1 = new byte[] { (byte) 0xc1 };
+
+        assertThrown(clazz, "@ index 0", () -> RLP_LENIENT.wrap(a0, 0));
+        assertThrown(clazz, "@ index 0", () -> RLP_LENIENT.wrap(a1, 0));
+
+        byte[] b0 = new byte[] { (byte) 0xc1, (byte) 0x81 };
+        byte[] b1 = new byte[] { (byte) 0xc1, (byte) 0xc1 };
+
+        assertThrown(clazz, "@ index 1", () -> ((RLPList) RLP_LENIENT.wrap(b0, 0)).elements(RLP_STRICT));
+        assertThrown(clazz, "@ index 1", () -> ((RLPList) RLP_LENIENT.wrap(b1, 0)).elements(RLP_STRICT));
+
+        byte[] c0 = new byte[] { (byte) 0xc1, (byte) 0x81, (byte) 0x00 };
+        byte[] c1 = new byte[] { (byte) 0xc1, (byte) 0xc1, (byte) 0x00 };
+
+        assertThrown(clazz, "@ index 1", () -> ((RLPList) RLP_LENIENT.wrap(c0, 0)).elements(RLP_STRICT));
+        assertThrown(clazz, "@ index 1", () -> ((RLPList) RLP_LENIENT.wrap(c1, 0)).elements(RLP_STRICT));
+    }
+
+    @Test
+    public void exceedsContainerLong() throws Throwable {
+
+        final Class<? extends Throwable> clazz = DecodeException.class;
+
+        byte[] a0 = new byte[57]; a0[0] = (byte) 0xb8; a0[1] = 56;
+        byte[] a1 = new byte[57]; a1[0] = (byte) 0xf8; a1[1] = 56;
+
+        assertThrown(clazz, "@ index 0", () -> RLP_LENIENT.wrap(a0, 0));
+        assertThrown(clazz, "@ index 0", () -> RLP_LENIENT.wrap(a1, 0));
+
+        byte[] b0 = new byte[58]; b0[0] = (byte) 0xf8; b0[1] = 56; b0[57] = (byte) 0x81;
+        byte[] b1 = new byte[58]; b1[0] = (byte) 0xf8; b1[1] = 56; b1[56] = (byte) 0xc2;
+
+        assertThrown(clazz, "@ index 57", () -> ((RLPList) RLP_LENIENT.wrap(b0, 0)).elements(RLP_STRICT));
+        assertThrown(clazz, "@ index 56", () -> ((RLPList) RLP_LENIENT.wrap(b1, 0)).elements(RLP_STRICT));
+
+        byte[] c0 = new byte[59]; c0[0] = (byte) 0xf8; c0[1] = 56; c0[57] = (byte) 0x81;
+        byte[] c1 = new byte[59]; c1[0] = (byte) 0xf8; c1[1] = 56; c1[56] = (byte) 0xc2;
+
+        assertThrown(clazz, "@ index 57", () -> ((RLPList) RLP_LENIENT.wrap(c0, 0)).elements(RLP_STRICT));
+        assertThrown(clazz, "@ index 56", () -> ((RLPList) RLP_LENIENT.wrap(c1, 0)).elements(RLP_STRICT));
+    }
+
+    private static void assertThrown(Class<? extends Throwable> clazz, String substr, CustomRunnable r) throws Throwable {
+        try {
+            r.run();
+        } catch (Throwable t) {
+            if(clazz.isAssignableFrom(t.getClass()) && t.getMessage().contains(substr)) {
+                return;
+            }
+            throw t;
+        }
+        throw new AssertionError("no " + clazz.getName() + " thrown");
     }
 
     @Test

@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Random;
 
 import static com.esaulpaugh.headlong.rlp.util.Strings.BASE64;
@@ -19,7 +18,7 @@ public class StringsTest {
             r.nextBytes(x);
             String s = Strings.encode(x, BASE64);
             byte[] y = Strings.decode(s, BASE64);
-            Assert.assertTrue(Arrays.equals(x, y));
+            Assert.assertArrayEquals(x, y);
         }
     }
 }

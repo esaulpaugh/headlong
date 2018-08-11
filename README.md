@@ -60,7 +60,7 @@ Decode tested with data up to 2,147,483,634 bytes in length (list of 2,147,483,6
 
 Object notation and parser for debugging:
 
-    byte[] rlp2 = ...
+    byte[] rlp2 = Hex.decode("8363617420c2c00900");
     String notation = ObjectNotation.forEncoding(rlp2).toString();
     System.out.println(notation);
     /*

@@ -60,7 +60,7 @@ public class RLPList extends RLPItem {
     public void elements(RLPDecoder decoder, Collection<RLPItem> collection) throws DecodeException {
         int i = dataIndex;
         while (i < this.endIndex) {
-            RLPItem item = decoder.wrap(buffer, i);
+            RLPItem item = decoder.wrap(buffer, i, this.endIndex);
             collection.add(item);
             i = item.endIndex;
         }

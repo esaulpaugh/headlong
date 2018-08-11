@@ -144,47 +144,47 @@ public class IntegersTest {
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(0, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
-        Assert.assertTrue(Arrays.equals(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, ten));
+        Assert.assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(1, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
-        Assert.assertTrue(Arrays.equals(new byte[] { 0, d, 0, 0, 0, 0, 0, 0, 0, 0 }, ten));
+        Assert.assertArrayEquals(new byte[] { 0, d, 0, 0, 0, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(2, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
-        Assert.assertTrue(Arrays.equals(new byte[] { 0, c, d, 0, 0, 0, 0, 0, 0, 0 }, ten));
+        Assert.assertArrayEquals(new byte[] { 0, c, d, 0, 0, 0, 0, 0, 0, 0 }, ten);
         Arrays.fill(ten, (byte) 0);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(3, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
-        Assert.assertTrue(Arrays.equals(new byte[] { 0, b, c, d, 0, 0, 0, 0, 0, 0 }, ten));
+        Assert.assertArrayEquals(new byte[] { 0, b, c, d, 0, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(4, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
-        Assert.assertTrue(Arrays.equals(new byte[] { 0, a, b, c, d, 0, 0, 0, 0, 0 }, ten));
+        Assert.assertArrayEquals(new byte[] { 0, a, b, c, d, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(5, ten, 1, (byte) 0, (byte) 0, (byte) 0, a, b, c, d, e);
-        Assert.assertTrue(Arrays.equals(new byte[] { 0, a, b, c, d, e, 0, 0, 0, 0 }, ten));
+        Assert.assertArrayEquals(new byte[] { 0, a, b, c, d, e, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(6, ten, 1, (byte) 0, (byte) 0, a, b, c, d, e, f);
-        Assert.assertTrue(Arrays.equals(new byte[] { 0, a, b, c, d, e, f, 0, 0, 0 }, ten));
+        Assert.assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(7, ten, 1, (byte) 0, a, b, c, d, e, f, g);
-        Assert.assertTrue(Arrays.equals(new byte[] { 0, a, b, c, d, e, f, g, 0, 0 }, ten));
+        Assert.assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, g, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(8, ten, 1, a, b, c, d, e, f, g, h);
-        Assert.assertTrue(Arrays.equals(new byte[] { 0, a, b, c, d, e, f, g, h, 0 }, ten));
+        Assert.assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, g, h, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         byte[] src = new byte[4];
         Random rand = new Random(new SecureRandom().nextLong());
         rand.nextBytes(src);
         Integers.insertBytes(3, ten, ten.length - 3, (byte) 0, src[1], src[2], src[3]);
-        Assert.assertTrue(Arrays.equals(new byte[] { 0, 0, 0, 0, 0, 0, 0, src[1], src[2], src[3] }, ten));
+        Assert.assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, src[1], src[2], src[3] }, ten);
     }
 
     @Test

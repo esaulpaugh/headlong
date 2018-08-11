@@ -5,8 +5,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 
-import java.util.Arrays;
-
 public class StudentTest {
 
     private static final byte[] STUDENT_RLP_SEQUENTIAL = Hex.decode("85506c61746f84460ca00ab88a3232b0883839e5de6a8bf0555b6304b703041e82fe7568aa8b6837aa62740a83fe5aaa8736a1c2a27080f77142702cdf4a81ca2744bda44397bbd58c63f35c0eb6796bf485d750a0b9bfa4a2f3be5b9030a7f2b13d6a4d468e22b32fe92506b11af5517d425bc68f26f2525a61f1a954c50933874c7d97b1cd8ff65d55f651cb7c455876278787ac3a40b4269da3281d03da142f61ba27534caabf68f4cf30bcd23399b8cdf6fddc601f76012819f4572f901661ec6a5122f901661ec6a51279");
@@ -21,7 +19,7 @@ public class StudentTest {
         Assert.assertEquals(STUDENT_TO_STRING, plato.toString());
 
         byte[] rlp = plato.toRLP();
-        Assert.assertTrue(Arrays.equals(STUDENT_RLP_SEQUENTIAL, rlp));
+        Assert.assertArrayEquals(STUDENT_RLP_SEQUENTIAL, rlp);
 
 
     }
@@ -38,7 +36,7 @@ public class StudentTest {
         byte[] rlp = adapter.encode(plato);
 //        System.out.println(Hex.toHexString(rlp));
 
-        Assert.assertTrue(Arrays.equals(STUDENT_RLP_LIST, rlp));
+        Assert.assertArrayEquals(STUDENT_RLP_LIST, rlp);
     }
 
 }
