@@ -1,6 +1,6 @@
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.util.Integers;
+import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,6 +49,20 @@ public class RLPList extends RLPItem {
     @Override
     public boolean isList() {
         return true;
+    }
+
+    @Deprecated
+    public void elementsRecursive(Collection<Object> results, RLPDecoder decoder) throws DecodeException {
+        List<RLPItem> actualList = elements(decoder);
+        for (RLPItem element : actualList) {
+            if(element.isList()) {
+                List<Object> subList = new ArrayList<>();
+                ((RLPList) element).elementsRecursive(subList, decoder);
+                results.add(subList);
+            } else {
+                results.add(element);
+            }
+        }
     }
 
     public List<RLPItem> elements(RLPDecoder decoder) throws DecodeException {
@@ -101,7 +115,7 @@ public class RLPList extends RLPItem {
         int destDataIndex = 1 + n;
         byte[] dest = new byte[destDataIndex + srcDataLen];
         dest[0] = (byte) (LIST_LONG_OFFSET + n);
-        Integers.insertBytes(n, dest, 1, a, b, c, d);
+        RLPIntegers.insertBytes(n, dest, 1, a, b, c, d);
 
         copyElements(srcElements, dest, destDataIndex);
 

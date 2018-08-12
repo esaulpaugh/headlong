@@ -1,9 +1,19 @@
 package com.esaulpaugh.headlong.rlp.example;
 
 import com.esaulpaugh.headlong.rlp.DecodeException;
+import com.esaulpaugh.headlong.rlp.RLPDecoder;
+import com.esaulpaugh.headlong.rlp.RLPItem;
+import com.esaulpaugh.headlong.rlp.RLPList;
+import com.esaulpaugh.headlong.rlp.util.ObjectNotation;
 import org.junit.Assert;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
 
 public class StudentTest {
 
@@ -38,5 +48,90 @@ public class StudentTest {
 
         Assert.assertArrayEquals(STUDENT_RLP_LIST, rlp);
     }
+
+    @Test
+    public void miniDecodeBenchmark() throws DecodeException {
+        Student plato;
+        StudentRLPAdapter adapter = new StudentRLPAdapter();
+        byte[] rlp = STUDENT_RLP_SEQUENTIAL;
+        byte[] temp = new byte[rlp.length];
+
+        final int n = 10_000_000;
+
+        System.out.println("Doing " + new DecimalFormat("#,###").format(n) + " decodes of Student object:\n" + ObjectNotation.forEncoding(rlp));
+
+        long start, end;
+
+        // warmup
+        for (int i = 0; i < 5_500_000; i++) {
+            plato = new Student(rlp);
+//            plato.toRLP(temp, 0);
+//            rlp = adapter.encode(plato);
+//            plato = adapter.decode(rlp);
+        }
+        start = System.nanoTime();
+        for (int i = 0; i < n; i++) {
+            plato = new Student(rlp);
+//            plato.toRLP(temp, 0);
+//            rlp = adapter.encode(plato);
+//            plato = adapter.decode(rlp);
+        }
+        end = System.nanoTime();
+
+//        Assert.assertArrayEquals(STUDENT_RLP_SEQUENTIAL, temp);
+
+        System.out.println(((end - start) / 1000000.0) + " millis");
+
+    }
+
+    @Test
+    public void miniBenchmark() throws DecodeException {
+        byte[] rlp = Hex.decode("f8cbf8c7a00000000000000000000000000000000000000000000000000000000000000000a01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347940000000000000000000000000000000000000000a02f4399b08efe68945c1cf90ffe85bbe3ce978959da753f9e649f034015b8817da00000000000000000000000000000000000000000000000000000000000000000834000008080830f4240808080a004994f67dc55b09e814ab7ffc8df3686b4afb2bb53e60eae97ef043fe03fb829c0c0");
+
+        final int n = 10_000_000;
+
+        RLPList rlpList;
+
+        System.out.println("Doing " + new DecimalFormat("#,###").format(n) + " decodes of Student object:\n" + ObjectNotation.forEncoding(rlp));
+
+        long start, end;
+
+        List<Object> results0 = new ArrayList<>();
+        rlpList = (RLPList) RLP_LENIENT.wrap(rlp);
+        rlpList.elementsRecursive(results0, RLP_LENIENT);
+
+//        List<Object> results0 = new ArrayList<>();
+//        rlpList = (RLPList) RLP_LENIENT.wrap(rlp);
+//        collectAll(results0, rlpList);
+
+        // warmup
+        for (int i = 0; i < 5_500_000; i++) {
+            List<Object> results = new ArrayList<>();
+            rlpList = (RLPList) RLP_LENIENT.wrap(rlp);
+            rlpList.elementsRecursive(results, RLP_LENIENT);
+        }
+        start = System.nanoTime();
+        for (int i = 0; i < n; i++) {
+            List<Object> results = new ArrayList<>();
+            rlpList = (RLPList) RLP_LENIENT.wrap(rlp);
+            rlpList.elementsRecursive(results, RLP_LENIENT);
+        }
+        end = System.nanoTime();
+
+        System.out.println(((end - start) / 1000000.0) + " millis");
+    }
+
+//    private void collectAll(List<Object> results, RLPList rlpList) throws DecodeException {
+//        List<RLPItem> actualList = rlpList.elements(RLP_LENIENT);
+//        for (RLPItem element : actualList) {
+//            if(element.isList()) {
+//                List<Object> subList = new ArrayList<>();
+//                collectAll(subList, (RLPList) element);
+//                results.add(subList);
+//            } else {
+//                results.add(element);
+//            }
+//        }
+//    }
 
 }

@@ -66,7 +66,7 @@ public class ObjectNotation {
             throw new DecodeException("element @ index " + leadByteIndex + " exceeds its container; indices: " + dataIndex + " > " + containerEnd);
         }
         final int lengthLen = dataIndex - lengthIndex;
-        final long dataLenLong = Integers.getLong(data, leadByteIndex + 1, lengthLen);
+        final long dataLenLong = RLPIntegers.getLong(data, leadByteIndex + 1, lengthLen);
 //        if (dataLenLong > MAX_ARRAY_LENGTH) {
 //            throw new DecodeException("too much data: " + dataLenLong + " > " + MAX_ARRAY_LENGTH);
 //        }

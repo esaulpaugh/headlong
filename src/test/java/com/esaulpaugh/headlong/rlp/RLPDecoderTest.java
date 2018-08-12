@@ -1,6 +1,6 @@
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.util.Integers;
+import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -57,6 +57,7 @@ public class RLPDecoderTest {
         Assert.assertEquals(10, actualList.get(0).dataLength);
     }
 
+    @Ignore // run this by itself
     @Test
     public void hugeStrings() throws DecodeException {
         int lol;
@@ -72,10 +73,10 @@ public class RLPDecoderTest {
                 (long) (Integer.MAX_VALUE * 0.921) // lower this if you can't increase heap
         };
         for (long dataLen : dataLengths) {
-            lol = Integers.numBytes(dataLen);
+            lol = RLPIntegers.len(dataLen);
             buffer = new byte[1 + lol + (int) dataLen];
             buffer[0] = (byte) (0xb7 + lol);
-            Integers.putLong(dataLen, buffer, 1);
+            RLPIntegers.putLong(dataLen, buffer, 1);
             huge = (RLPString) RLP_STRICT.wrap(buffer);
             data = huge.asString(UTF_8);
             System.out.println(dataLen);
@@ -111,17 +112,17 @@ public class RLPDecoderTest {
 
         for (long dataLen : dataLengths) {
             System.out.println("dataLen = " + dataLen);
-            lol = Integers.numBytes(dataLen);
+            lol = RLPIntegers.len(dataLen);
             System.out.println("length of length = " + lol);
             buffer = new byte[1 + lol + (int) dataLen];
             buffer[0] = (byte) (0xf7 + lol);
-            Integers.putLong(dataLen, buffer, 1);
+            RLPIntegers.putLong(dataLen, buffer, 1);
             i = 1 + lol;
             int size = 0;
             final int lim = buffer.length - elementEncodedLen;
             while(i < lim) {
                 buffer[i] = elementLeadByte;
-//                Integers.putLong(elementDataLen, buffer, i + 1);
+//                RLPIntegers.putLong(elementDataLen, buffer, i + 1);
                 size++;
                 i += elementEncodedLen;
             }
@@ -150,17 +151,14 @@ public class RLPDecoderTest {
                 Integer.MAX_VALUE - 13
         };
 
-        final byte elementLeadByte = 0x09;
-        final int elementEncodedLen = 1;
-
         for (long dataLen : dataLengths) {
             System.out.println("dataLen = " + dataLen);
-            lol = Integers.numBytes(dataLen);
+            lol = RLPIntegers.len(dataLen);
             System.out.println("length of length = " + lol);
             buffer = new byte[1 + lol + (int) dataLen];
             Arrays.fill(buffer, (byte) 0x09);
             buffer[0] = (byte) (0xf7 + lol);
-            Integers.putLong(dataLen, buffer, 1);
+            RLPIntegers.putLong(dataLen, buffer, 1);
             i = 1 + lol;
             final int size = buffer.length - i;
 
@@ -176,10 +174,6 @@ public class RLPDecoderTest {
             System.out.println("size = " + size + ", count = " + count + "\n");
             Assert.assertEquals(size, count);
         }
-    }
-
-    private interface CustomRunnable {
-        void run() throws Throwable;
     }
 
     @Test
@@ -230,18 +224,6 @@ public class RLPDecoderTest {
         assertThrown(clazz, "@ index 56", () -> ((RLPList) RLP_LENIENT.wrap(c1, 0)).elements(RLP_STRICT));
     }
 
-    private static void assertThrown(Class<? extends Throwable> clazz, String substr, CustomRunnable r) throws Throwable {
-        try {
-            r.run();
-        } catch (Throwable t) {
-            if(clazz.isAssignableFrom(t.getClass()) && t.getMessage().contains(substr)) {
-                return;
-            }
-            throw t;
-        }
-        throw new AssertionError("no " + clazz.getName() + " thrown");
-    }
-
     @Test
     public void booleans() throws DecodeException {
         byte[] burma17 = new byte[] { (byte) 0xc5, (byte) 0x82, (byte) 0x10, (byte) 0x10, (byte) 0xc0 };
@@ -262,5 +244,36 @@ public class RLPDecoderTest {
 
         RLPItem empty = RLP_LENIENT.wrap( burma17, 4);
         Assert.assertEquals(Character.valueOf('\0'), Character.valueOf(empty.asChar()));
+    }
+
+    @Test
+    public void negativeDataLen() throws Throwable {
+        byte[] alpha = new byte[] {
+                (byte) 0xbf,
+                (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF };
+
+        assertThrown(DecodeException.class, "found: -1", () -> RLP_LENIENT.wrap(alpha) );
+
+        byte[] beta = new byte[] {
+                (byte) 0xbf,
+                (byte) 0x80, 0, 0, 0, 0, 0, 0, 0 };
+
+        assertThrown(DecodeException.class, "found: -9223372036854775808", () -> RLP_LENIENT.wrap(beta) );
+    }
+
+    private interface CustomRunnable {
+        void run() throws Throwable;
+    }
+
+    private static void assertThrown(Class<? extends Throwable> clazz, String substr, CustomRunnable r) throws Throwable {
+        try {
+            r.run();
+        } catch (Throwable t) {
+            if(clazz.isAssignableFrom(t.getClass()) && t.getMessage().contains(substr)) {
+                return;
+            }
+            throw t;
+        }
+        throw new AssertionError("no " + clazz.getName() + " thrown");
     }
 }

@@ -4,7 +4,7 @@ import com.esaulpaugh.headlong.rlp.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
-import com.esaulpaugh.headlong.rlp.util.Integers;
+import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
 import com.esaulpaugh.headlong.rlp.util.Strings;
 
 import java.math.BigDecimal;
@@ -116,7 +116,7 @@ public class Student implements RLPEncodeable {
                 FloatingPoint.toBytes(gpa),
                 publicKey.toByteArray(),
                 balance.unscaledValue().toByteArray(),
-                Integers.toBytes(balance.scale())
+                RLPIntegers.toBytes(balance.scale())
         };
     }
 

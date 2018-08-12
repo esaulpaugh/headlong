@@ -7,11 +7,68 @@ import java.util.Arrays;
 
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
 
-public class Integers {
+public class RLPIntegers {
 
     /**
-     * Inserts an integer up to one byte in length, without leading zeroes (the integer zero will not be inserted).
-     * Big-endian two's complement format.
+     * Returns an integer's minimal big-endian two's complement representation. The int
+     * @param val   the integer
+     * @return  the minimal representation
+     */
+    public static byte[] toBytes(byte val) {
+        if(val == 0) {
+            return EMPTY_BYTE_ARRAY;
+        }
+        return new byte[] { val };
+    }
+
+    /**
+     * Returns an integer's minimal big-endian two's complement representation. The int
+     * @param val   the integer
+     * @return  the minimal representation
+     */
+    public static byte[] toBytes(short val) {
+        if(val == 0) {
+            return EMPTY_BYTE_ARRAY;
+        }
+        int n = len(val);
+        byte[] bytes = new byte[n];
+        putShort(val, bytes, 0);
+        return bytes;
+    }
+
+    /**
+     * Returns an integer's minimal big-endian two's complement representation. The int
+     * @param val   the integer
+     * @return  the minimal representation
+     */
+    public static byte[] toBytes(int val) {
+        if(val == 0) {
+            return EMPTY_BYTE_ARRAY;
+        }
+        int n = len(val);
+        byte[] bytes = new byte[n];
+        putInt(val, bytes, 0);
+        return bytes;
+    }
+
+    /**
+     * Returns an integer's minimal big-endian two's complement representation. The int
+     * @param val   the integer
+     * @return  the minimal representation
+     */
+    public static byte[] toBytes(long val) {
+        if(val == 0) {
+            return EMPTY_BYTE_ARRAY;
+        }
+        int n = len(val);
+        byte[] bytes = new byte[n];
+        putLong(val, bytes, 0);
+        return bytes;
+    }
+
+    /**
+     * Inserts into a byte array an integer's minimal (without leading zeroes), big-endian two's complement representation,
+     * up to one byte in length. The integer zero always has length zero.
      *
      * @see #toBytes(byte)
      * @see #getByte(byte[], int, int)
@@ -29,8 +86,8 @@ public class Integers {
     }
 
     /**
-     * Inserts an integer up to two bytes in length, without leading zeroes (the integer zero will not be inserted).
-     * Big-endian two's complement format.
+     * Inserts into a byte array an integer's minimal (without leading zeroes), big-endian two's complement representation,
+     * up to two bytes in length. The integer zero always has length zero.
      *
      * @see #toBytes(short)
      * @see #getShort(byte[], int, int)
@@ -59,8 +116,8 @@ public class Integers {
     }
 
     /**
-     * Inserts an integer up to four bytes in length, without leading zeroes (the integer zero will not be inserted).
-     * Big-endian two's complement format.
+     * Inserts into a byte array an integer's minimal (without leading zeroes), big-endian two's complement representation,
+     * up to four bytes in length. The integer zero always has length zero.
      *
      * @see #toBytes(int)
      * @see #getInt(byte[], int, int)
@@ -96,13 +153,13 @@ public class Integers {
         case 2: o[i]=c; o[i+1]=d; return 2;
         case 3: o[i]=b; o[i+1]=c; o[i+2]=d; return 3;
         default:
-            o[i]=(byte)val; o[i+1]=b; o[i+2]=c; o[i+3]=d; return 4;
+        o[i]=(byte)val; o[i+1]=b; o[i+2]=c; o[i+3]=d; return 4;
         }
     }
 
     /**
-     * Inserts an integer up to eight bytes in length, without leading zeroes (the integer zero will not be inserted).
-     * Big-endian two's complement format.
+     * Inserts into a byte array an integer's minimal (without leading zeroes), big-endian two's complement representation,
+     * up to eight bytes in length. The integer zero always has length zero.
      *
      * @see #toBytes(long)
      * @see #getLong(byte[], int, int)
@@ -174,20 +231,20 @@ public class Integers {
      * @see #putByte(byte, byte[], int)
      * @param buffer    the array containing the integer
      * @param i the array index locating the integer
-     * @param numBytes  the length in bytes of the integer's representation
+     * @param len  the length in bytes of the integer's representation
      * @return  the integer
      * @throws DecodeException  if the integer's representation is found to have leading zeroes
      */
-    public static byte getByte(byte[] buffer, int i, int numBytes) throws DecodeException {
-        switch (numBytes) {
+    public static byte getByte(byte[] buffer, int i, int len) throws DecodeException {
+        switch (len) {
         case 1:
             byte lead = buffer[i];
             if(lead == 0) {
-                throw new DecodeException("Deserialised integers with leading zeroes are invalid: " + i + ", " + numBytes);
+                throw new DecodeException("deserialised integers with leading zeroes are invalid; index: " + i + ", len: " + len);
             }
             return lead;
         case 0: return 0;
-        default: throw new DecodeException(new IllegalArgumentException("numBytes out of range: " + numBytes));
+        default: throw new DecodeException(new IllegalArgumentException("len is out of range: " + len));
         }
     }
 
@@ -199,23 +256,23 @@ public class Integers {
      * @see #putShort(short, byte[], int)
      * @param buffer    the array containing the integer's representation
      * @param i the array index locating the integer
-     * @param numBytes  the length in bytes of the integer's representation, without leading zeroes
+     * @param len  the length in bytes of the integer's representation, without leading zeroes
      * @return  the integer
      * @throws DecodeException  if the integer's representation is found to have leading zeroes
      */
-    public static short getShort(byte[] buffer, int i, int numBytes) throws DecodeException {
+    public static short getShort(byte[] buffer, int i, int len) throws DecodeException {
         int shiftAmount = 0;
         int val = 0;
-        switch (numBytes) { /* cases 2 through 1 fall through */
+        switch (len) { /* cases 2 through 1 fall through */
         case 2: val = buffer[i+1] & 0xFF; shiftAmount = Byte.SIZE; // & 0xFF to promote to int before left shift
         case 1:
             byte lead = buffer[i];
             val |= (lead & 0xFF) << shiftAmount;
             if(lead == 0) {
-                throw new DecodeException("Deserialised integers with leading zeroes are invalid: " + i + ", " + numBytes);
+                throw new DecodeException("deserialised integers with leading zeroes are invalid; index: " + i + ", len: " + len);
             }
         case 0: return (short) val;
-        default: throw new DecodeException(new IllegalArgumentException("numBytes out of range: " + numBytes));
+        default: throw new DecodeException(new IllegalArgumentException("len is out of range: " + len));
         }
     }
 
@@ -227,14 +284,14 @@ public class Integers {
      * @see #putInt(int, byte[], int)
      * @param buffer    the array containing the integer's representation
      * @param i the array index locating the integer
-     * @param numBytes  the length in bytes of the integer's representation, without leading zeroes
+     * @param len  the length in bytes of the integer's representation, without leading zeroes
      * @return  the integer
      * @throws DecodeException  if the integer's representation is found to have leading zeroes
      */
-    public static int getInt(byte[] buffer, int i, int numBytes) throws DecodeException {
+    public static int getInt(byte[] buffer, int i, int len) throws DecodeException {
         int shiftAmount = 0;
         int val = 0;
-        switch (numBytes) { /* cases 4 through 1 fall through */
+        switch (len) { /* cases 4 through 1 fall through */
         case 4: val = buffer[i+3] & 0xFF; shiftAmount = Byte.SIZE;
         case 3: val |= (buffer[i+2] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 2: val |= (buffer[i+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
@@ -242,10 +299,10 @@ public class Integers {
             byte lead = buffer[i];
             val |= (lead & 0xFF) << shiftAmount;
             if(lead == 0) {
-                throw new DecodeException("Deserialised integers with leading zeroes are invalid: " + i + ", " + numBytes);
+                throw new DecodeException("deserialised integers with leading zeroes are invalid; index: " + i + ", len: " + len);
             }
         case 0: return val;
-        default: throw new DecodeException(new IllegalArgumentException("numBytes out of range: " + numBytes));
+        default: throw new DecodeException(new IllegalArgumentException("len is out of range: " + len));
         }
     }
 
@@ -257,14 +314,14 @@ public class Integers {
      * @see #putLong(long, byte[], int)
      * @param buffer    the array containing the integer's representation
      * @param i the array index locating the integer
-     * @param numBytes  the length in bytes of the integer's representation, without leading zeroes
+     * @param len  the length in bytes of the integer's representation, without leading zeroes
      * @return  the integer
      * @throws DecodeException  if the integer's representation is found to have leading zeroes
      */
-    public static long getLong(final byte[] buffer, final int i, final int numBytes) throws DecodeException {
+    public static long getLong(final byte[] buffer, final int i, final int len) throws DecodeException {
         int shiftAmount = 0;
         long val = 0L;
-        switch (numBytes) { /* cases 8 through 1 fall through */
+        switch (len) { /* cases 8 through 1 fall through */
         case 8: val = buffer[i+7] & 0xFF; shiftAmount = Byte.SIZE;
         case 7: val |= (buffer[i+6] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 6: val |= (buffer[i+5] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
@@ -276,57 +333,46 @@ public class Integers {
             byte lead = buffer[i];
             val |= (lead & 0xFFL) << shiftAmount;
             if(lead == 0) {
-                throw new DecodeException("Deserialised integers with leading zeroes are invalid: " + i + ", " + numBytes);
+                throw new DecodeException("deserialised integers with leading zeroes are invalid; index: " + i + ", len: " + len);
             }
         case 0: return val;
-        default: throw new DecodeException(new IllegalArgumentException("numBytes out of range: " + numBytes));
+        default: throw new DecodeException(new IllegalArgumentException("len is out of range: " + len));
         }
     }
 
-    public static byte[] toBytes(byte val) {
-        if(val == 0) {
-            return EMPTY_BYTE_ARRAY;
-        }
-        return new byte[] { val };
-    }
+//    public static int len(byte val) {
+//        return len(val & 0xFFL);
+//    }
+//
+//    public static int len(short val) {
+//        return len(val & 0xFFFFL);
+//    }
+//
+//    public static int len(int val) {
+//        return len(val & 0xFFFFFFFFL);
+//    }
 
-    public static byte[] toBytes(short val) {
-        if(val == 0) {
-            return EMPTY_BYTE_ARRAY;
-        }
-        int n = numBytes(val);
-        byte[] bytes = new byte[n];
-        putShort(val, bytes, 0);
-        return bytes;
-    }
-
-    public static byte[] toBytes(int val) {
-        if(val == 0) {
-            return EMPTY_BYTE_ARRAY;
-        }
-        int n = numBytes(val);
-        byte[] bytes = new byte[n];
-        putInt(val, bytes, 0);
-        return bytes;
-    }
-
-    public static byte[] toBytes(long val) {
-        if(val == 0) {
-            return EMPTY_BYTE_ARRAY;
-        }
-        int n = numBytes(val);
-        byte[] bytes = new byte[n];
-        putLong(val, bytes, 0);
-        return bytes;
-    }
-
-    public static int numBytes(byte val) {
+    /**
+     * Returns the byte length of an integer's minimal (without leading zeroes) two's complement representation. The
+     * integer zero always has zero length.
+     *
+     * @param val   the integer
+     * @return  the byte length
+     */
+    public static int len(byte val) {
         if(val == 0)
             return 0;
         return 1;
     }
 
-    public static int numBytes(short val) {
+    /**
+     * Returns the byte length of an integer's minimal (without leading zeroes) two's complement representation. The
+     * integer zero always has zero length.
+     *
+     * @param val   the integer
+     * @return  the byte length
+     */
+    public static int len(short val) {
         int n = 0;
         if(val != 0) {
             n = 1;
@@ -339,7 +385,14 @@ public class Integers {
         return n;
     }
 
-    public static int numBytes(int val) {
+    /**
+     * Returns the byte length of an integer's minimal (without leading zeroes) two's complement representation. The
+     * integer zero always has zero length.
+     *
+     * @param val   the integer
+     * @return  the byte length
+     */
+    public static int len(int val) {
         int n = 0;
         if(val != 0) {
             n = 1;
@@ -359,7 +412,14 @@ public class Integers {
         return n;
     }
 
-    public static int numBytes(long val) {
+    /**
+     * Returns the byte length of an integer's minimal (without leading zeroes) two's complement representation. The
+     * integer zero always has zero length.
+     *
+     * @param val   the integer
+     * @return  the byte length
+     */
+    public static int len(long val) {
         int n = 0;
         if(val != 0) {
             n = 1;
@@ -428,8 +488,8 @@ public class Integers {
         }
     }
 
-    public static BigInteger getBigInt(byte[] bytes, int i, int numBytes) {
-        return new BigInteger(Arrays.copyOfRange(bytes, i, i + numBytes));
+    public static BigInteger getBigInt(byte[] bytes, int i, int len) {
+        return new BigInteger(Arrays.copyOfRange(bytes, i, i + len));
     }
 
     public static int putBigInt(BigInteger val, byte[] o, int i) {
