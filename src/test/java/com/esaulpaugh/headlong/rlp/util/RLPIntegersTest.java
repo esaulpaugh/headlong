@@ -27,7 +27,7 @@ public class RLPIntegersTest {
     @Test
     public void putGetShort_fast() throws DecodeException {
         byte[] two = new byte[2];
-        for (int j = 0; j < 50_000; j++) {
+        for (int j = 0; j < 10_000; j++) {
             for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
                 short s = (short) i;
                 int n = RLPIntegers.putShort(s, two, 0);
@@ -64,7 +64,7 @@ public class RLPIntegersTest {
     @Test
     public void putGetShort_slow() throws DecodeException {
         byte[] two = new byte[2];
-        for (int j = 0; j < 50_000; j++) {
+        for (int j = 0; j < 10_000; j++) {
             for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
                 short s = (short) i;
                 int n = RLPIntegers.putLong(0xFFFFL & s, two, 0);
@@ -78,7 +78,7 @@ public class RLPIntegersTest {
     // TODO forkjoin
 //    @Ignore
     @Test
-    public void putGetInt() throws DecodeException {
+    public void putGetInt_slow() throws DecodeException {
         byte[] four = new byte[4];
         for (long lo = Integer.MIN_VALUE; lo <= Integer.MAX_VALUE; lo++) {
             int i = (int) lo;

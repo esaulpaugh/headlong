@@ -82,8 +82,7 @@ public class BizarroIntegers {
         switch (n) {
         case 0: return 0;
         case 1: o[i]=b; return 1;
-        default:
-        o[i]=(byte)val; o[i+1]=b; return 2;
+        default: o[i]=(byte)val; o[i+1]=b; return 2;
         }
     }
 
@@ -222,7 +221,7 @@ public class BizarroIntegers {
         }
     }
 
-    public static byte getMinimalNegativeByte(byte[] buffer, int index, int len) throws DecodeException {
+    public static byte getByte(byte[] buffer, int index, int len) throws DecodeException {
         switch (len) {
         case 0: return (byte) 0xFF;
         case 1: return _getByte(buffer, index, len);
@@ -230,21 +229,21 @@ public class BizarroIntegers {
         }
     }
 
-    public static short getMinimalNegativeShort(byte[] buffer, int index, int len) throws DecodeException {
+    public static short getShort(byte[] buffer, int index, int len) throws DecodeException {
         // do sign extension for len < 2
         switch (len) {
         case 0: return (short) 0xFFFF;
-        case 1: return (short) (0xFF00 | _getByte(buffer, index, len));
+        case 1: return (short) (0xFF00 | _getByte(buffer, index, len)); // only negative integers will have len == 1; e.g. -256 = (short) (0xFF00 | 0x00000000)
         case 2: return _getShort(buffer, index, len);
         default: throw new IllegalArgumentException("len is out of range: " + len);
         }
     }
 
-    public static int getMinimalNegativeInt(byte[] buffer, int index, int len) throws DecodeException {
+    public static int getInt(byte[] buffer, int index, int len) throws DecodeException {
         // do sign extension for len < 4
         switch (len) {
         case 0: return 0xFFFFFFFF;
-        case 1: return 0xFFFFFF00 | _getByte(buffer, index, len);
+        case 1: return 0xFFFFFF00 | _getByte(buffer, index, len); // only negative integers will have len == 1; e.g. -256 = 0xFFFFFF00 | 0x00000000
         case 2: return 0xFFFF0000 | _getShort(buffer, index, len);
         case 3: return 0xFF000000 | _getInt(buffer, index, len);
         case 4: return _getInt(buffer, index, len);
@@ -260,11 +259,11 @@ public class BizarroIntegers {
      * @return
      * @throws DecodeException
      */
-    public static long getMinimalNegativeLong(final byte[] buffer, final int index, final int len) throws DecodeException {
+    public static long getLong(final byte[] buffer, final int index, final int len) throws DecodeException {
         // do sign extension for len < 8
         switch (len) {
         case 0: return 0xFFFFFFFF_FFFFFFFFL;
-        case 1: return 0xFFFFFFFF_FFFFFF00L | _getByte(buffer, index, len);
+        case 1: return 0xFFFFFFFF_FFFFFF00L | _getByte(buffer, index, len); // only negative integers will have len == 1; e.g. -256 = 0xFFFFFFFF_FFFFFF00L | 0x00000000
         case 2: return 0xFFFFFFFF_FFFF0000L | _getShort(buffer, index, len);
         case 3: return 0xFFFFFFFF_FF000000L | _getInt(buffer, index, len);
         case 4: return 0xFFFFFFFF_00000000L | _getInt(buffer, index, len);
@@ -356,7 +355,7 @@ public class BizarroIntegers {
         for (long i = start; i < end; i++) {
             int n = putLong(i, dest, 1);
             if(n != len(i)) throw new Exception("len doesn't match");
-            long result = getMinimalNegativeLong(dest, 1, n);
+            long result = getLong(dest, 1, n);
             if(i != result) {
                 System.out.println(Hex.toHexString(RLPIntegers.toBytes(i)) + " vs \n" + Hex.toHexString(RLPIntegers.toBytes(result)));
                 throw new Exception(i + " != " + result);
@@ -411,6 +410,19 @@ public class BizarroIntegers {
 
     public static void main(String[] args0) throws Exception {
 
+        System.out.println((short) (byte) -2);
+
+//        for(int i = 0; i < 256; i++) {
+//            byte b = (byte) i;
+//            System.out.println(b);
+//            System.out.println(0xFFL & b);
+//        }
+
+        if(true) return;
+
+        System.out.println(getShort(toBytes((short) 16), 0, 2));
+        System.out.println(getShort(toBytes((short) -16), 0, 1));
+
         System.out.println(Hex.toHexString(toBytes(-16L)));
         System.out.println(Hex.toHexString(toBytes(-2L)));
         System.out.println(Hex.toHexString(toBytes(0L)));
@@ -424,28 +436,28 @@ public class BizarroIntegers {
             Arrays.fill(x, (byte) 0);
             int n = putLong(i, x, 0);
             System.out.print(n + " " + Hex.toHexString(x) + " ");
-            long lo = getMinimalNegativeLong(x, 0, n);
+            long lo = getLong(x, 0, n);
             System.out.println(lo);
         }
 
         for (byte i = -3; i < 3; i++) {
             byte[] z = toBytes(i);
-            System.out.println(i + " " + Hex.toHexString(z) + " " + getMinimalNegativeByte(z, 0, z.length));
+            System.out.println(i + " " + Hex.toHexString(z) + " " + getByte(z, 0, z.length));
         }
 
         for (short i = -3; i < 3; i++) {
             byte[] z = toBytes(i);
-            System.out.println(i + " " + Hex.toHexString(z) + " " + getMinimalNegativeShort(z, 0, z.length));
+            System.out.println(i + " " + Hex.toHexString(z) + " " + getShort(z, 0, z.length));
         }
 
         for (int i = -3; i < 3; i++) {
             byte[] z = toBytes(i);
-            System.out.println(i + " " + Hex.toHexString(z) + " " + getMinimalNegativeInt(z, 0, z.length));
+            System.out.println(i + " " + Hex.toHexString(z) + " " + getInt(z, 0, z.length));
         }
 
         for (long i = -3; i < 3; i++) {
             byte[] z = toBytes(i);
-            System.out.println(i + " " + Hex.toHexString(z) + " " + getMinimalNegativeLong(z, 0, z.length));
+            System.out.println(i + " " + Hex.toHexString(z) + " " + getLong(z, 0, z.length));
         }
 
         long veryStart = 0xFFFF_FFF0_0000_0000L;
@@ -453,23 +465,32 @@ public class BizarroIntegers {
 
         System.out.println(veryEnd - veryStart);
 
+        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Short.MAX_VALUE)));
+        System.out.println(Hex.toHexString(RLPIntegers.toBytes((short) Byte.MAX_VALUE)));
+        System.out.println(Hex.toHexString(RLPIntegers.toBytes((short) Byte.MIN_VALUE)));
+        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Short.MIN_VALUE)));
 
-        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Long.MAX_VALUE)));
-        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Integer.MAX_VALUE)));
-        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Short.MAX_VALUE)));
-        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Byte.MAX_VALUE)));
-        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Byte.MIN_VALUE)));
-        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Short.MIN_VALUE)));
-        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Integer.MIN_VALUE)));
-        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Long.MIN_VALUE)));
+        System.out.println(Hex.toHexString(toBytes(Short.MAX_VALUE)));
+        System.out.println(Hex.toHexString(toBytes((short) Byte.MAX_VALUE)));
+        System.out.println(Hex.toHexString(toBytes((short) Byte.MIN_VALUE)));
+        System.out.println(Hex.toHexString(toBytes(Short.MIN_VALUE)));
 
-        System.out.println(Hex.toHexString(toBytes(Long.MAX_VALUE)));
-        System.out.println(Hex.toHexString(toBytes((long) Integer.MAX_VALUE)));
-        System.out.println(Hex.toHexString(toBytes((long) Short.MAX_VALUE)));
-        System.out.println(Hex.toHexString(toBytes((long) Byte.MAX_VALUE)));
-        System.out.println(Hex.toHexString(toBytes((long) Byte.MIN_VALUE)));
-        System.out.println(Hex.toHexString(toBytes((long) Short.MIN_VALUE)));
-        System.out.println(Hex.toHexString(toBytes((long) Integer.MIN_VALUE)));
-        System.out.println(Hex.toHexString(toBytes(Long.MIN_VALUE)));
+//        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Long.MAX_VALUE)));
+//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Integer.MAX_VALUE)));
+//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Short.MAX_VALUE)));
+//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Byte.MAX_VALUE)));
+//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Byte.MIN_VALUE)));
+//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Short.MIN_VALUE)));
+//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Integer.MIN_VALUE)));
+//        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Long.MIN_VALUE)));
+//
+//        System.out.println(Hex.toHexString(toBytes(Long.MAX_VALUE)));
+//        System.out.println(Hex.toHexString(toBytes((long) Integer.MAX_VALUE)));
+//        System.out.println(Hex.toHexString(toBytes((long) Short.MAX_VALUE)));
+//        System.out.println(Hex.toHexString(toBytes((long) Byte.MAX_VALUE)));
+//        System.out.println(Hex.toHexString(toBytes((long) Byte.MIN_VALUE)));
+//        System.out.println(Hex.toHexString(toBytes((long) Short.MIN_VALUE)));
+//        System.out.println(Hex.toHexString(toBytes((long) Integer.MIN_VALUE)));
+//        System.out.println(Hex.toHexString(toBytes(Long.MIN_VALUE)));
     }
 }
