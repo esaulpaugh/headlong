@@ -55,6 +55,8 @@ Alternative style:
             return RLPEncoder.encodeAsList(student.toObjectArray());
         }
     }
+    
+Features support for integers (including negative), floating point numbers, chars, and booleans, as well as Strings, byte arrays, Object arrays, and Iterable<Object>.
 
 Decode tested with data up to 2,147,483,634 bytes in length (list of 2,147,483,634 single-byte items). See RLPDecoderTest.java for more.
 

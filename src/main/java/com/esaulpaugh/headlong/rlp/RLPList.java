@@ -51,6 +51,12 @@ public class RLPList extends RLPItem {
         return true;
     }
 
+    /**
+     * Use {@link #elements(RLPDecoder)} or {@link #elements(RLPDecoder, Collection)}
+     * @param results
+     * @param decoder
+     * @throws DecodeException
+     */
     @Deprecated
     public void elementsRecursive(Collection<Object> results, RLPDecoder decoder) throws DecodeException {
         List<RLPItem> actualList = elements(decoder);
@@ -66,7 +72,7 @@ public class RLPList extends RLPItem {
     }
 
     public List<RLPItem> elements(RLPDecoder decoder) throws DecodeException {
-        ArrayList<RLPItem> arrayList = new ArrayList<>(Math.max(10, dataLength / 100));
+        ArrayList<RLPItem> arrayList = new ArrayList<>();
         elements(decoder, arrayList);
         return arrayList;
     }

@@ -11,10 +11,11 @@ import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
  * Negative integers are stored in a minimal big-endian two's complement representation. Non-negative integers are stored
  * full-length.
  *
+ *-256L = 0x00
  * -16L = 0xf0
- *  -2L = 0xfe
+ *  -1L = 0x
  *   0L = 0x0000000000000000
- *   2L = 0x0000000000000002
+ *   1L = 0x0000000000000001
  *  16L = 0x0000000000000010
  *
  *  Negative one is represented by the empty byte array. Numbers are sign-extended on decode.
@@ -410,7 +411,7 @@ public class BizarroIntegers {
 
     public static void main(String[] args0) throws Exception {
 
-        System.out.println((short) (byte) -2);
+//        System.out.println((short) (byte) -2);
 
 //        for(int i = 0; i < 256; i++) {
 //            byte b = (byte) i;
@@ -418,16 +419,17 @@ public class BizarroIntegers {
 //            System.out.println(0xFFL & b);
 //        }
 
-        if(true) return;
+//        if(true) return;
 
-        System.out.println(getShort(toBytes((short) 16), 0, 2));
-        System.out.println(getShort(toBytes((short) -16), 0, 1));
+//        System.out.println(getShort(toBytes((short) 16), 0, 2));
+//        System.out.println(getShort(toBytes((short) -16), 0, 1));
 
-        System.out.println(Hex.toHexString(toBytes(-16L)));
-        System.out.println(Hex.toHexString(toBytes(-2L)));
-        System.out.println(Hex.toHexString(toBytes(0L)));
-        System.out.println(Hex.toHexString(toBytes(2L)));
-        System.out.println(Hex.toHexString(toBytes(16L)));
+        System.out.println("0x" + Hex.toHexString(toBytes(-256L)));
+        System.out.println("0x" + Hex.toHexString(toBytes(-16L)));
+        System.out.println("0x" + Hex.toHexString(toBytes(-1L)));
+        System.out.println("0x" + Hex.toHexString(toBytes(0L)));
+        System.out.println("0x" + Hex.toHexString(toBytes(1L)));
+        System.out.println("0x" + Hex.toHexString(toBytes(16L)));
 
         testNegativeLongs(Long.MIN_VALUE / 256 + 10_000_000, Long.MIN_VALUE / 256 + 100_000_000);
 
