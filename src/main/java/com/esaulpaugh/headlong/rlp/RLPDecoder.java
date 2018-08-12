@@ -21,8 +21,8 @@ public class RLPDecoder {
 
     /**
      * e.g. 0xC0
-     * @param lengthOneRLP
-     * @return
+     * @param lengthOneRLP  a one-byte RLP encoding
+     * @return  the item
      */
     public RLPItem wrap(byte lengthOneRLP) throws DecodeException {
         return wrap(new byte[] { lengthOneRLP }, 0);

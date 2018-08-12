@@ -61,14 +61,14 @@ public class Strings {
         return Hex.decode(hex);
     }
 
-    private static String toBase64(byte[] bytes, int from, int len, boolean withPadding) {
+    public static String toBase64(byte[] bytes, int from, int len, boolean withPadding) {
         if(withPadding) {
             return Base64.toBase64String(bytes, from, len);
         }
         return unpadBase64(Base64.encode(bytes, from, len));
     }
 
-    private static byte[] fromBase64(String base64, boolean hasPadding) {
+    public static byte[] fromBase64(String base64, boolean hasPadding) {
         if(hasPadding) {
             return Base64.decode(base64);
         }

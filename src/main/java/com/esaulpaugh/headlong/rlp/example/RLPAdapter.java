@@ -1,4 +1,6 @@
-package com.esaulpaugh.headlong.rlp;
+package com.esaulpaugh.headlong.rlp.example;
+
+import com.esaulpaugh.headlong.rlp.DecodeException;
 
 public interface RLPAdapter<T> {
 
