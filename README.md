@@ -5,8 +5,8 @@ When decoding, the source array is retained throughout and is shared by all item
 
 Example usage:
 
-    public Student(byte[] rlp) throws DecodeException {
-        RLPItem item = RLP_STRICT.wrap(rlp);
+    public Student(byte[] rlp, int index) throws DecodeException {
+        RLPItem item = RLP_STRICT.wrap(rlp, index);
         this.name = item.asString(UTF_8);
         item = RLP_STRICT.wrap(rlp, item.endIndex);
         this.gpa = item.asFloat();

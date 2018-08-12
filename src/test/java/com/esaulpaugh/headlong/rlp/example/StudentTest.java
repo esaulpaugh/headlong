@@ -1,8 +1,6 @@
 package com.esaulpaugh.headlong.rlp.example;
 
 import com.esaulpaugh.headlong.rlp.DecodeException;
-import com.esaulpaugh.headlong.rlp.RLPDecoder;
-import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
 import com.esaulpaugh.headlong.rlp.util.ObjectNotation;
 import org.junit.Assert;
@@ -25,7 +23,7 @@ public class StudentTest {
 
     @Test
     public void decodeEncode() throws DecodeException {
-        Student plato = new Student(STUDENT_RLP_SEQUENTIAL);
+        Student plato = new Student(STUDENT_RLP_SEQUENTIAL, 0);
         Assert.assertEquals(STUDENT_TO_STRING, plato.toString());
 
         byte[] rlp = plato.toRLP();
@@ -64,14 +62,14 @@ public class StudentTest {
 
         // warmup
         for (int i = 0; i < 5_500_000; i++) {
-            plato = new Student(rlp);
+            plato = new Student(rlp, 0);
 //            plato.toRLP(temp, 0);
 //            rlp = adapter.encode(plato);
 //            plato = adapter.decode(rlp);
         }
         start = System.nanoTime();
         for (int i = 0; i < n; i++) {
-            plato = new Student(rlp);
+            plato = new Student(rlp, 0);
 //            plato.toRLP(temp, 0);
 //            rlp = adapter.encode(plato);
 //            plato = adapter.decode(rlp);
@@ -98,7 +96,8 @@ public class StudentTest {
 
         List<Object> results0 = new ArrayList<>();
         rlpList = (RLPList) RLP_LENIENT.wrap(rlp);
-        rlpList.elementsRecursive(results0, RLP_LENIENT);
+        rlpList.elements(RLP_LENIENT);
+//        rlpList.elementsRecursive(results0, RLP_LENIENT);
 
 //        List<Object> results0 = new ArrayList<>();
 //        rlpList = (RLPList) RLP_LENIENT.wrap(rlp);
@@ -106,15 +105,17 @@ public class StudentTest {
 
         // warmup
         for (int i = 0; i < 5_500_000; i++) {
-            List<Object> results = new ArrayList<>();
+//            List<Object> results = new ArrayList<>();
             rlpList = (RLPList) RLP_LENIENT.wrap(rlp);
-            rlpList.elementsRecursive(results, RLP_LENIENT);
+            rlpList.elements(RLP_LENIENT);
+//            rlpList.elementsRecursive(results, RLP_LENIENT);
         }
         start = System.nanoTime();
         for (int i = 0; i < n; i++) {
-            List<Object> results = new ArrayList<>();
+//            List<Object> results = new ArrayList<>();
             rlpList = (RLPList) RLP_LENIENT.wrap(rlp);
-            rlpList.elementsRecursive(results, RLP_LENIENT);
+            rlpList.elements(RLP_LENIENT);
+//            rlpList.elementsRecursive(results, RLP_LENIENT);
         }
         end = System.nanoTime();
 
