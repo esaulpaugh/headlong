@@ -1,5 +1,5 @@
 # headlong
-An ultra-fast Recursive Length Prefix library in Java for use on the Ethereum network (see https://github.com/ethereum/wiki/wiki/RLP). Highly optimized to avoid unnecessary loops, branches, and array copies. Where possible, a switch statement is used in lieu of a series of ifs (DataType.java). Loops of a known finite length are unrolled. Some loops are replaced with switch statements whose cases fall through (Integers.java).
+An ultra-fast Recursive Length Prefix library in Java for use on the Ethereum network (see https://github.com/ethereum/wiki/wiki/RLP). Highly optimized to avoid unnecessary loops, branches, and array copies. Where possible, a switch statement is used in lieu of a series of ifs (DataType.java). Loops of a known finite length are unrolled. Some loops are replaced with switch statements whose cases fall through (RLPIntegers.java).
 
 When decoding, the source array is retained throughout and is shared by all items. The first time an item's data (payload) bytes are read is when the caller specifically demands that item's data.
 
