@@ -496,8 +496,10 @@ public class RLPIntegers {
         }
     }
 
-    public static BigInteger getBigInt(byte[] bytes, int i, int len) {
-        return new BigInteger(Arrays.copyOfRange(bytes, i, i + len));
+    public static BigInteger getBigInt(byte[] bytes, int i, final int len) {
+        byte[] dest = new byte[len];
+        System.arraycopy(bytes, i, dest, 0, len);
+        return new BigInteger(dest);
     }
 
     public static int putBigInt(BigInteger val, byte[] o, int i) {

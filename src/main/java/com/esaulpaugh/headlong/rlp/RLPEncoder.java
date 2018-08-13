@@ -85,7 +85,7 @@ public class RLPEncoder {
             return encodeList(totalEncodedLen(elements), elements, dest, destIndex);
         }
         if(item == null) {
-            throw new NullPointerException();
+            throw new NullPointerException(); // TODO correct behavior?
         }
         throw new IllegalArgumentException("unsupported object type: " + item.getClass().getName());
     }
