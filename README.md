@@ -76,3 +76,5 @@ Object notation and parser for debugging:
     List<Object> rlp2Objects = Parser.parse(notation);
     byte[] rlp3 = RLPEncoder.encodeSequentially(rlp2Objects);
     System.out.println(Strings.encode(rlp3, HEX)); // "8363617420c2c00900"
+    
+Licensed under Apache License, Version 2.0 https://www.apache.org/licenses/LICENSE-2.0.txt
