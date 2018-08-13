@@ -35,6 +35,7 @@ public class RLPEncoder {
         return total;
     }
 
+    @SuppressWarnings("unchecked")
     private static long itemEncodedLen(Object obj) {
         if (obj instanceof byte[]) {
             return stringEncodedLen((byte[]) obj);
@@ -70,6 +71,7 @@ public class RLPEncoder {
         return 1 + listDataLen;
     }
 
+    @SuppressWarnings("unchecked")
     private static int encodeItem(Object item, byte[] dest, int destIndex) {
         if (item instanceof byte[]) {
             return encodeString((byte[]) item, dest, destIndex);
@@ -237,7 +239,6 @@ public class RLPEncoder {
      *
      * @param encodings
      * @return
-     * @throws DecodeException
      */
     public static RLPList toList(Iterable<RLPItem> encodings) {
         return RLPList.withElements(encodings);

@@ -10,7 +10,9 @@ import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
 public class RLPIntegers {
 
     /**
-     * Returns an integer's minimal big-endian two's complement representation. The int
+     * Returns an integer's minimal big-endian two's complement representation. The integer zero is represented by the
+     * empty byte array.
+     *
      * @param val   the integer
      * @return  the minimal representation
      */
@@ -22,7 +24,9 @@ public class RLPIntegers {
     }
 
     /**
-     * Returns an integer's minimal big-endian two's complement representation. The int
+     * Returns an integer's minimal big-endian two's complement representation. The integer zero is represented by the
+     * empty byte array.
+     *
      * @param val   the integer
      * @return  the minimal representation
      */
@@ -37,7 +41,9 @@ public class RLPIntegers {
     }
 
     /**
-     * Returns an integer's minimal big-endian two's complement representation. The int
+     * Returns an integer's minimal big-endian two's complement representation. The integer zero is represented by the
+     * empty byte array.
+     *
      * @param val   the integer
      * @return  the minimal representation
      */
@@ -52,7 +58,9 @@ public class RLPIntegers {
     }
 
     /**
-     * Returns an integer's minimal big-endian two's complement representation. The int
+     * Returns an integer's minimal big-endian two's complement representation. The integer zero is represented by the
+     * empty byte array.
+     *
      * @param val   the integer
      * @return  the minimal representation
      */
@@ -132,15 +140,15 @@ public class RLPIntegers {
         if(val != 0) {
             n = 1;
             d = (byte) val;
-            val = val >>> Byte.SIZE;
+            val >>>= Byte.SIZE;
             if (val != 0) {
                 n = 2;
                 c = (byte) val;
-                val = val >>> Byte.SIZE;
+                val >>>= Byte.SIZE;
                 if (val != 0) {
                     n = 3;
                     b = (byte) val;
-                    val = val >>> Byte.SIZE;
+                    val >>>= Byte.SIZE;
                     if (val != 0) {
                         n = 4;
                     }
@@ -174,31 +182,31 @@ public class RLPIntegers {
         if(val != 0) {
             n = 1;
             h = (byte) val;
-            val = val >>> Byte.SIZE;
+            val >>>= Byte.SIZE;
             if (val != 0) {
                 n = 2;
                 g = (byte) val;
-                val = val >>> Byte.SIZE;
+                val >>>= Byte.SIZE;
                 if (val != 0) {
                     n = 3;
                     f = (byte) val;
-                    val = val >>> Byte.SIZE;
+                    val >>>= Byte.SIZE;
                     if (val != 0) {
                         n = 4;
                         e = (byte) val;
-                        val = val >>> Byte.SIZE;
+                        val >>>= Byte.SIZE;
                         if (val != 0) {
                             n = 5;
                             d = (byte) val;
-                            val = val >>> Byte.SIZE;
+                            val >>>= Byte.SIZE;
                             if (val != 0) {
                                 n = 6;
                                 c = (byte) val;
-                                val = val >>> Byte.SIZE;
+                                val >>>= Byte.SIZE;
                                 if (val != 0) {
                                     n = 7;
                                     b = (byte) val;
-                                    val = val >>> Byte.SIZE;
+                                    val >>>= Byte.SIZE;
                                     if (val != 0) {
                                         n = 8;
                                     }
@@ -277,7 +285,7 @@ public class RLPIntegers {
     }
 
     /**
-     * Retrieves an integer up to two bytes in length. No leading zeroes allowed. The integer zero always has zero length.
+     * Retrieves an integer up to four bytes in length. No leading zeroes allowed. The integer zero always has zero length.
      * Big-endian two's complement format.
      *
      * @see #toBytes(int)
@@ -307,7 +315,7 @@ public class RLPIntegers {
     }
 
     /**
-     * Retrieves an integer up to two bytes in length. No leading zeroes allowed. The integer zero always has zero length.
+     * Retrieves an integer up to eight bytes in length. No leading zeroes allowed. The integer zero always has zero length.
      * Big-endian two's complement format.
      *
      * @see #toBytes(long)
@@ -396,13 +404,13 @@ public class RLPIntegers {
         int n = 0;
         if(val != 0) {
             n = 1;
-            val = val >>> Byte.SIZE;
+            val >>>= Byte.SIZE;
             if (val != 0) {
                 n = 2;
-                val = val >>> Byte.SIZE;
+                val >>>= Byte.SIZE;
                 if (val != 0) {
                     n = 3;
-                    val = val >>> Byte.SIZE;
+                    val >>>= Byte.SIZE;
                     if (val != 0) {
                         return 4;
                     }
@@ -423,25 +431,25 @@ public class RLPIntegers {
         int n = 0;
         if(val != 0) {
             n = 1;
-            val = val >>> Byte.SIZE;
+            val >>>= Byte.SIZE;
             if (val != 0) {
                 n = 2;
-                val = val >>> Byte.SIZE;
+                val >>>= Byte.SIZE;
                 if (val != 0) {
                     n = 3;
-                    val = val >>> Byte.SIZE;
+                    val >>>= Byte.SIZE;
                     if (val != 0) {
                         n = 4;
-                        val = val >>> Byte.SIZE;
+                        val >>>= Byte.SIZE;
                         if (val != 0) {
                             n = 5;
-                            val = val >>> Byte.SIZE;
+                            val >>>= Byte.SIZE;
                             if (val != 0) {
                                 n = 6;
-                                val = val >>> Byte.SIZE;
+                                val >>>= Byte.SIZE;
                                 if (val != 0) {
                                     n = 7;
-                                    val = val >>> Byte.SIZE;
+                                    val >>>= Byte.SIZE;
                                     if (val != 0) {
                                         return 8;
                                     }

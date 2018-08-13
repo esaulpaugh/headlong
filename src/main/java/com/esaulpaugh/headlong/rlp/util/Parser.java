@@ -17,22 +17,22 @@ public class Parser {
     private static final int STRING_PREFIX_LEN = ObjectNotation.STRING_PREFIX.length();
     private static final int STRING_SUFFIX_LEN = ObjectNotation.STRING_SUFFIX.length();
 
-    public static List<Object> parse(String stringRep) {
+    public static List<Object> parse(String notation) {
         List<Object> top = new ArrayList<>();
-        parse(stringRep, 0, stringRep.length(), top);
+        parse(notation, 0, notation.length(), top);
         return top;
     }
 
-    private static int parse(String stringRep, int i, final int end, List<Object> parent) {
+    private static int parse(String notation, int i, final int end, List<Object> parent) {
 
         while (i < end) {
 
-            int endArray = stringRep.indexOf(ObjectNotation.OBJECT_ARRAY_SUFFIX, i);
+            int endArray = notation.indexOf(ObjectNotation.OBJECT_ARRAY_SUFFIX, i);
             if(endArray == -1) {
                 endArray = Integer.MAX_VALUE;
 //                throw new DecodeException("no array end found: " + i);
             }
-            Pair<Integer, Integer> nextPrefix = nextPrefix(stringRep, i);
+            Pair<Integer, Integer> nextPrefix = nextPrefix(notation, i);
             if(nextPrefix == null) {
                 return Integer.MAX_VALUE;
             }
@@ -47,14 +47,14 @@ public class Parser {
             switch (objectType) {
             case STRING:
                 objectStart = nextPrefix.getRight() + STRING_PREFIX_LEN;
-                objectEnd = stringRep.indexOf(ObjectNotation.STRING_SUFFIX, objectStart);
-                parent.add(Hex.decode(stringRep.substring(objectStart, objectEnd)));
+                objectEnd = notation.indexOf(ObjectNotation.STRING_SUFFIX, objectStart);
+                parent.add(Hex.decode(notation.substring(objectStart, objectEnd)));
                 i = objectEnd + STRING_SUFFIX_LEN;
                 break;
             case OBJECT_ARRAY:
                 objectStart = nextPrefix.getRight() + OBJECT_ARRAY_PREFIX_LEN;
                 List<Object> childList = new ArrayList<>();
-                i = parse(stringRep, objectStart, end, childList);
+                i = parse(notation, objectStart, end, childList);
                 parent.add(childList);
                 break;
             default: /* do nothing */
