@@ -28,7 +28,7 @@ public class Benchmark {
         long start, end;
 
         // warmup
-        for (int i = 0; i < 2_00_000; i++) {
+        for (int i = 0; i < 2_000_000; i++) {
             plato = new Student(rlp, 0);
 //            plato.toRLP(temp, 0);
 //            rlp = adapter.encode(plato);

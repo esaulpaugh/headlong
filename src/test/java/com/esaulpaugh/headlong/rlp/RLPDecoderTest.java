@@ -9,7 +9,10 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.BiPredicate;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
@@ -244,6 +247,32 @@ public class RLPDecoderTest {
 
         RLPItem empty = RLP_LENIENT.wrap( burma17, 4);
         Assert.assertEquals(Character.valueOf('\0'), Character.valueOf(empty.asChar()));
+    }
+
+    private static final BiPredicate<Integer, Integer> UNTIL_COUNT_FIVE = (count, index) -> count < 5;
+    private static final BiPredicate<Integer, Integer> UNTIL_INDEX_SEVEN = (count, index) -> index < 7;
+
+    @Test
+    public void collectBiPredicate() throws DecodeException {
+        byte[] rlp = new byte[9];
+        for (int i = 0; i < rlp.length; i++) {
+            rlp[i] = (byte) i;
+        }
+        Set<RLPItem> hashSet = new HashSet<>();
+        int n = RLP_STRICT.collect(UNTIL_COUNT_FIVE, rlp, 0, hashSet);
+        Assert.assertEquals(5, n);
+        Assert.assertEquals(5, hashSet.size());
+        for (int i = 0; i < 5; i++) {
+            Assert.assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
+        }
+
+        hashSet = new HashSet<>();
+        n = RLP_STRICT.collect(UNTIL_INDEX_SEVEN, rlp, 0, hashSet);
+        Assert.assertEquals(7, n);
+        Assert.assertEquals(7, hashSet.size());
+        for (int i = 0; i < 7; i++) {
+            Assert.assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
+        }
     }
 
     @Test

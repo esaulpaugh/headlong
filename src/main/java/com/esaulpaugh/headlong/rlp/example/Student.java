@@ -9,6 +9,7 @@ import com.esaulpaugh.headlong.rlp.util.Strings;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.rlp.util.Strings.UTF_8;
@@ -79,6 +80,8 @@ public class Student implements RLPEncodeable {
 
     @Override
     public int hashCode() {
+//        return Arrays.deepHashCode(new Object[]{ name, gpa, publicKey, balance });
+
         return name == null ? 31 : name.hashCode()
                 * Float.hashCode(gpa)
                 * (publicKey == null ? 31 : publicKey.hashCode())

@@ -205,19 +205,21 @@ public abstract class RLPItem {
 
         RLPItem other = (RLPItem) obj;
 
-        final int encLen = this.encodingLength();
+//        // Java 9+ vectorizedMismatch
+//        return Arrays.equals(
+//                this.buffer, this.index, this.endIndex,
+//                other.buffer, other.index, other.endIndex
+//        );
 
-        if(encLen != other.encodingLength()) {
+        final int length = this.endIndex - this.index;
+        if(length != other.endIndex - other.index) {
             return false;
         }
 
-        final int end = this.index + encLen;
-        for (int i = this.index, j = other.index; i < end; i++, j++) {
-            if(this.buffer[i] != other.buffer[j]) {
+        for (int i = 0; i < length; i++) {
+            if (this.buffer[this.index + i] != other.buffer[other.index + i])
                 return false;
-            }
         }
-
         return true;
     }
 

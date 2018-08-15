@@ -3,7 +3,7 @@ package com.esaulpaugh.headlong.rlp.util;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
 
@@ -12,11 +12,11 @@ import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
  */
 public class Strings {
 
-    private static final Charset CHARSET_UTF_8 = Charset.forName("UTF-8");
+//    private static final Charset CHARSET_UTF_8 = Charset.forName("UTF-8");
 
-    public static final int HEX = 16;
-    public static final int BASE64 = 64;
-    public static final int UTF_8 = 256;
+    public static final int UTF_8 = 0; // 256
+    public static final int BASE64 = 1; // 64
+    public static final int HEX = 2; // 16
 
     public static final boolean WITH_PADDING = true;
     public static final boolean NO_PADDING = false;
@@ -28,37 +28,27 @@ public class Strings {
     public static String encode(byte[] bytes, int from, int len, int encoding) {
         switch (encoding) {
         case UTF_8: return toUtf8(bytes, from, len);
-        case BASE64: return toBase64(bytes, from, len, NO_PADDING);
+        case BASE64: return toBase64(bytes, from, len, WITH_PADDING);
         case HEX:
         default: return toHex(bytes, from, len);
         }
     }
 
     public static byte[] decode(String string, int encoding) {
-        if(string.isEmpty())
-            return EMPTY_BYTE_ARRAY;
         switch (encoding) {
         case UTF_8: return fromUtf8(string);
-        case BASE64: return fromBase64(string, NO_PADDING);
+        case BASE64: return fromBase64(string, WITH_PADDING);
         case HEX:
         default: return fromHex(string);
         }
     }
 
     private static String toUtf8(byte[] bytes, int from, int len) {
-        return new String(bytes, from, len, CHARSET_UTF_8);
-    }
-
-    private static byte[] fromUtf8(String utf8) {
-        return utf8.getBytes(CHARSET_UTF_8);
+        return new String(bytes, from, len, StandardCharsets.UTF_8);
     }
 
     private static String toHex(byte[] bytes, int from, int len) {
         return Hex.toHexString(bytes, from, len);
-    }
-
-    private static byte[] fromHex(String hex) {
-        return Hex.decode(hex);
     }
 
     public static String toBase64(byte[] bytes, int from, int len, boolean withPadding) {
@@ -68,7 +58,24 @@ public class Strings {
         return unpadBase64(Base64.encode(bytes, from, len));
     }
 
+    private static byte[] fromUtf8(String utf8) {
+        if(utf8.isEmpty()) {
+            return EMPTY_BYTE_ARRAY;
+        }
+        return utf8.getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static byte[] fromHex(String hex) {
+        if(hex.isEmpty()) {
+            return EMPTY_BYTE_ARRAY;
+        }
+        return Hex.decode(hex);
+    }
+
     public static byte[] fromBase64(String base64, boolean hasPadding) {
+        if(base64.isEmpty()) {
+            return EMPTY_BYTE_ARRAY;
+        }
         if(hasPadding) {
             return Base64.decode(base64);
         }
@@ -102,29 +109,26 @@ public class Strings {
                 : len - 1;
     }
 
-    private static String unpadBase64(byte[] padded) {
+    private static String unpadBase64(byte[] padded) { // ascii bytes
         final int len = padded.length;
         if(len < 4) {
             return "";
         }
-        int minus1 = len - 1;
-        if(padded[minus1] != '=') {
-            return org.spongycastle.util.Strings.fromByteArray(padded);
+        int last = len - 1;
+        if(padded[last] != '=') {
+            return new String(padded);
         }
-        int minus2 = len - 2;
-        final int newLen = padded[minus2] == '=' ? minus2 : minus1;
-        char[] chars = new char[newLen];
-        for (int i = 0; i < newLen; i++) {
-            chars[i] = (char) (padded[i] & 0xFF);
-        }
-        return String.valueOf(chars);
+        int secondToLast = len - 2;
+        final int newLen = padded[secondToLast] == '=' ? secondToLast : last;
+
+        return new String(padded, 0, newLen);
     }
 
     private static byte[] padBase64(String unpadded) {
         final int unpaddedLen = unpadded.length();
         final int remainder = unpadded.length() % 4;
         switch (remainder) {
-        case 0: return unpadded.getBytes(CHARSET_UTF_8);
+        case 0: return unpadded.getBytes(); // CHARSET_UTF_8
         case 1: break;
         case 2: {
             final int paddedLen = unpaddedLen + 2;
