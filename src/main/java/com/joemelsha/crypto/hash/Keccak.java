@@ -318,13 +318,12 @@ public class Keccak extends MessageDigest {
     }
 
     private static void keccak(long[] a) {
-        int c, i;
         long x, a_10_;
         long x0, x1, x2, x3, x4;
         long t0, t1, t2, t3, t4;
         long c0, c1, c2, c3, c4;
 
-        i = 0;
+        int i = 0;
         do {
             // theta (precalculation part)
             c0 = a[0] ^ a[5 + 0] ^ a[10 + 0] ^ a[15 + 0] ^ a[20 + 0];
@@ -372,17 +371,40 @@ public class Keccak extends MessageDigest {
             a[10] = a_10_;
 
             // chi
-            c = 0;
-            do {
-                x0 = a[c]; x1 = a[c + 1]; x2 = a[c + 2]; x3 = a[c + 3]; x4 = a[c + 4];
-                a[c] = x0 ^ ((~x1) & x2);
-                a[c + 1] = x1 ^ ((~x2) & x3);
-                a[c + 2] = x2 ^ ((~x3) & x4);
-                a[c + 3] = x3 ^ ((~x4) & x0);
-                a[c + 4] = x4 ^ ((~x0) & x1);
+            x0 = a[0]; x1 = a[1]; x2 = a[2]; x3 = a[3]; x4 = a[4];
+            a[0] = x0 ^ ((~x1) & x2);
+            a[1] = x1 ^ ((~x2) & x3);
+            a[2] = x2 ^ ((~x3) & x4);
+            a[3] = x3 ^ ((~x4) & x0);
+            a[4] = x4 ^ ((~x0) & x1);
 
-                c += 5;
-            } while (c < 25);
+            x0 = a[5]; x1 = a[6]; x2 = a[7]; x3 = a[8]; x4 = a[9];
+            a[5] = x0 ^ ((~x1) & x2);
+            a[6] = x1 ^ ((~x2) & x3);
+            a[7] = x2 ^ ((~x3) & x4);
+            a[8] = x3 ^ ((~x4) & x0);
+            a[9] = x4 ^ ((~x0) & x1);
+
+            x0 = a[10]; x1 = a[11]; x2 = a[12]; x3 = a[13]; x4 = a[14];
+            a[10] = x0 ^ ((~x1) & x2);
+            a[11] = x1 ^ ((~x2) & x3);
+            a[12] = x2 ^ ((~x3) & x4);
+            a[13] = x3 ^ ((~x4) & x0);
+            a[14] = x4 ^ ((~x0) & x1);
+
+            x0 = a[15]; x1 = a[16]; x2 = a[17]; x3 = a[18]; x4 = a[19];
+            a[15] = x0 ^ ((~x1) & x2);
+            a[16] = x1 ^ ((~x2) & x3);
+            a[17] = x2 ^ ((~x3) & x4);
+            a[18] = x3 ^ ((~x4) & x0);
+            a[19] = x4 ^ ((~x0) & x1);
+
+            x0 = a[20]; x1 = a[21]; x2 = a[22]; x3 = a[23]; x4 = a[24];
+            a[20] = x0 ^ ((~x1) & x2);
+            a[21] = x1 ^ ((~x2) & x3);
+            a[22] = x2 ^ ((~x3) & x4);
+            a[23] = x3 ^ ((~x4) & x0);
+            a[24] = x4 ^ ((~x0) & x1);
 
             // iota
             switch (i) {
