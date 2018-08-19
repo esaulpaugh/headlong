@@ -1,5 +1,8 @@
 package com.joemelsha.crypto.hash;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.MessageDigest;
@@ -205,6 +208,18 @@ public class Keccak extends MessageDigest {
         }
     }
 
+    public void digest(ByteBuffer out, int len) {
+        final int prevLim = out.limit();
+        out.limit(out.position() + len);
+        digest(out);
+        out.limit(prevLim);
+    }
+
+    public void digest(ByteBuffer out) {
+        this.out = out;
+        engineDigest();
+    }
+
     @Override
     protected int engineDigest(byte[] buf, int offset, int len) {
         out = ByteBuffer.wrap(buf, offset, len);
@@ -274,7 +289,8 @@ public class Keccak extends MessageDigest {
     }
 
     protected void pad() {
-        updateBits(0x1L, 1);
+//        updateBits(0x6L, 3); // SHA-3 padding (little-endian): 011 = 0x6
+        updateBits(0x1L, 1); // Keccak padding: 1
         if (rateBits >= rateSizeBits) {
             keccak(state);
         }

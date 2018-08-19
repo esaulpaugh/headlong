@@ -27,6 +27,12 @@ public class Benchmark {
         Student plato;
 //        StudentRLPAdapter adapter = new StudentRLPAdapter();
 
+        byte[] empty = "test".getBytes();
+        MessageDigest k_ = new Keccak(256);
+        k_.update(empty, 0, empty.length);
+        byte[] out = k_.digest();
+        System.out.println(Hex.toHexString(out));
+
         Random r = new Random(new SecureRandom().nextLong());
 
         for (int i = 20000; i >= 0; i--) {
@@ -44,8 +50,6 @@ public class Benchmark {
             final int random = r.nextInt(input.length + 1);
             k0.update(input, 0, random);
             k0.update(input, random, input.length - random);
-//            k0.update(Arrays.copyOfRange(input, 0, random));
-//            k0.update(Arrays.copyOfRange(input, random, input.length));
             output = k0.digest();
             current = Hex.toHexString(output);
 //            System.out.println(current);
