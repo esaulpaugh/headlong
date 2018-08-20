@@ -8,12 +8,11 @@ import sun.nio.cs.US_ASCII;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
-
-//import java.lang.reflect.Type;
 
 // TODO encode and decode
 // TODO optimize -- maybe write all zeroes first then fill in params
@@ -30,9 +29,12 @@ public class GypsyRoad {
 
     private static final Charset ASCII = US_ASCII.INSTANCE;
 
-    public static List<Type> parseFunctionSignature(String signature) {
+    public static List<Type> parseFunctionSignature(String signature) throws ParseException {
         ArrayList<Type> types = new ArrayList<>();
         final int endParams = signature.lastIndexOf(')');
+        if(endParams < 0) {
+            throw new ParseException("non-terminating function signature: " + signature, signature.length());
+        }
         int paramStart = signature.indexOf('(') + 1;
         int paramEnd;
         while(paramStart < endParams) {
@@ -61,6 +63,9 @@ public class GypsyRoad {
 
     public static void encodeParams(ByteBuffer outBuffer, Object[] values, List<Type> types) {
         for (int i = 0; i < values.length; i++) {
+
+            types.get(i).encode(values[i], outBuffer);
+
 //            Object value = values[i];
 //            if(value instanceof Object[]) {
 //                Object[] arr = (Object[]) value;
@@ -68,12 +73,12 @@ public class GypsyRoad {
 //                    types.get(i).encode(values[i], outBuffer);
 //                }
 //            } else {
-                types.get(i).encode(values[i], outBuffer);
+
 //            }
         }
     }
 
-    public static ByteBuffer encodeFunctionCall(String signature, Object... params) {
+    public static ByteBuffer encodeFunctionCall(String signature, Object... params) throws ParseException {
         List<Type> types = parseFunctionSignature(signature);
 
         if(params.length != types.size()) {
@@ -94,13 +99,13 @@ public class GypsyRoad {
 //                } else {
 //                paramsByteLen += t.byteLen;
             } else {
-                paramsByteLen += t.calcDynamicByteLen(params[i]);
-//                throw new UnsupportedOperationException("dynamic types not yet supported");
+//                paramsByteLen += t.calcDynamicByteLen(params[i]);
+                throw new UnsupportedOperationException("dynamic types not yet supported");
             }
 
         }
 
-
+        System.out.println("allocating " + (4 + paramsByteLen));
         ByteBuffer outBuffer = ByteBuffer.wrap(new byte[4 + paramsByteLen]);
         Keccak keccak = new Keccak(256);
         keccak.update(signature.getBytes(ASCII));
@@ -111,7 +116,7 @@ public class GypsyRoad {
         return outBuffer;
     }
 
-    public static void main(String[] args0) throws ClassNotFoundException {
+    public static void main(String[] args0) throws ClassNotFoundException, ParseException {
 
 //        Class.forName(int.class.getName());
 //        Class.forName(float.class.getName());
@@ -148,64 +153,78 @@ public class GypsyRoad {
         // TODO CALC DYNAMIC LENGTH
         // TODO TEST SIGNED/UNSIGNED
         // TODO TUPLES, FIXEDMxN
-//        ByteBuffer abi0 = encodeFunctionCall("yee(bytes[],bytes,bytes7,string,uint8[],uint16,uint24[][1],uint24[2][],uint32,uint64,int128,int[1][2][3])",
+//        ByteBuffer abi0 = encodeFunctionCall("yee(bytes[],bytes,bytes7,string,uint8[],uint16,uint24[][1],uint24[2][],uint32,uint64,int128,int256[1][2][3])",
 //                new byte[][] { new byte[9] },
 //                new byte[7],
 //                new byte[7],
 //                "",
 //                new byte[2],
 //                (short) 0,
-//                new int[][] { new int[1], new int[1], new int[1] },
-//                new int[][] { new int[9], new int[7] },
+//                new int[][] { new int[1] },
+//                new int[][] { new int[2], new int[2] },
 //                0,
 //                0L,
 //                BigInteger.TEN,
 //                new BigInteger[][][] {
 //                        new BigInteger[][] {
-//                                new BigInteger[] { BigInteger.ONE, BigInteger.ONE, BigInteger.ONE },
-//                                new BigInteger[] { BigInteger.ONE, BigInteger.ONE, BigInteger.ONE }
+//                                new BigInteger[] { BigInteger.ONE },
+//                                new BigInteger[] { BigInteger.ONE }
+//                        },
+//                        new BigInteger[][] {
+//                                new BigInteger[] { BigInteger.ONE },
+//                                new BigInteger[] { BigInteger.ONE }
+//                        },
+//                        new BigInteger[][] {
+//                                new BigInteger[] { BigInteger.ONE },
+//                                new BigInteger[] { BigInteger.ONE }
 //                        }
 //                }
 //                );
 
-//        ByteBuffer abi1 = encodeFunctionCall("yeehaw(int8[1],int16[2],int24[3],int32[4],int40[5],int64[6])",
-//                (byte) 1,
-//                (short) 2,
-//                3,
-//                4,
-//                5L,
-//                6L
+//        ByteBuffer abi1 = encodeFunctionCall("yeehaw(bool[1],int24[3],int56[2],bool,int8,int16,int24,int32,int56,int64)",
+//                new boolean[] { true },
+//                new int[] { 1, -10, Integer.MAX_VALUE / 128 },
+//                new long[] { Integer.MAX_VALUE, Long.MAX_VALUE >>> 7 },
+//                true,
+//                (byte) 4,
+//                (short) 5,
+//                Integer.MAX_VALUE >>> 7,
+//                Integer.MAX_VALUE,
+//                (long) Integer.MAX_VALUE << 7,
+//                Long.MAX_VALUE
 //        );
+//        System.out.println(Hex.toHexString(abi1.array()));
+
 //        for (int i = 30; i >= -456; i--) {
 //            BizarroIntegers.bitLen(i);
 //        }
 //
-        ByteBuffer abi2 = encodeFunctionCall("yeehaw(int8,int8,int16,int16,int24,int24,int32,int32,int40,int40,int64,int64)",
-                (byte) -1,
-                (byte) 0,
-                (short) -1,
-                (short) 0,
-                -1,
-                0,
-//                -(Short.MAX_VALUE * 2 + 2 * 256) - 16711170,
-//                -((Short.MAX_VALUE * 2 + 2) * 256),
-//                -4,
-//                -16711169,
-//                Integer.MIN_VALUE,
-                //                -(int) (Math.pow(2, 24)),
-//                16777216,
-                -1,
-                0,
-                -1L,
-                0L,
-                -1L,
-                0L
-        );
-
-        ByteBuffer abi3 = encodeFunctionCall("yeehaw(bytes1,bytes2[3])", // ,bytes2[]
-                new byte[] { 127 },
-                new byte[][] { new byte[] { 9, 8 }, new byte[] { 7, 6 }, new byte[] { 5, 4 } }
-        );
+//        ByteBuffer abi2 = encodeFunctionCall("yeehaw(int8,int8,int16,int16,int24,int24,int32,int32,int40,int40,int64,int64)",
+//                (byte) -1,
+//                (byte) 0,
+//                (short) -1,
+//                (short) 0,
+//                -1,
+//                0,
+////                -(Short.MAX_VALUE * 2 + 2 * 256) - 16711170,
+////                -((Short.MAX_VALUE * 2 + 2) * 256),
+////                -4,
+////                -16711169,
+////                Integer.MIN_VALUE,
+//                //                -(int) (Math.pow(2, 24)),
+////                16777216,
+//                -1,
+//                0,
+//                -1L,
+//                0L,
+//                -1L,
+//                0L
+//        );
+//
+//        ByteBuffer abi3 = encodeFunctionCall("yeehaw(bytes1,bytes2[3])", // ,bytes2[]
+//                new byte[] { 127 },
+//                new byte[][] { new byte[] { 9, 8 }, new byte[] { 7, 6 }, new byte[] { 5, 4 } }
+//        );
 
 //        ByteBuffer abi3 = encodeFunctionCall("yeehaw(bytes,string,bytes[],bytes1[])",
 //                new byte[0],
@@ -213,8 +232,31 @@ public class GypsyRoad {
 //                new byte[0][],
 //                new byte[][] {  }
 //        );
+//        System.out.println(Hex.toHexString(abi3.array()));
+
+        ByteBuffer abi = encodeFunctionCall("yeehaw(int8[3][5][2])",
+                (Object) new byte[][][] {
+                        new byte[][] { new byte[] { (byte) 0xAA, (byte) 0xAA, (byte) 0xAA }, new byte[3], new byte[3], new byte[3], new byte[3] },
+                        new byte[][] { new byte[3], new byte[3], new byte[3], new byte[3], new byte[] { (byte) 0xFF, (byte) 0xFF, (byte) 0xFF } }
+                }
+                );
+
+        ByteBuffer abi2 = encodeFunctionCall("yeehaw(int16[3][5][2])",
+                (Object) new short[][][] {
+                        new short[][] { new short[3], new short[3], new short[3], new short[3], new short[3] },
+                        new short[][] { new short[3], new short[3], new short[3], new short[3], new short[] { -1, -2, -3 } }
+                }
+        );
+
+        ByteBuffer abi3 = encodeFunctionCall("yeehaw(bytes2[5][2])",
+                (Object) new byte[][][] {
+                        new byte[][] { new byte[2], new byte[2], new byte[2], new byte[2], new byte[2] },
+                        new byte[][] { new byte[2], new byte[2], new byte[2], new byte[2], new byte[] { -9, -8 } }
+                }
+        );
 
         System.out.println(Hex.toHexString(abi3.array()));
+
 
         if(true) return;
 

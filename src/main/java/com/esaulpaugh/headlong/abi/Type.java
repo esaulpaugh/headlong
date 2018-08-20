@@ -8,6 +8,7 @@ import org.junit.Assert;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Stack;
 
@@ -43,7 +44,7 @@ public class Type {
 
     private final String typeString;
 
-    private transient final  Stack<Integer> fixedArrayLengthStack = new Stack<>(); // TODO parse typeString from left to right?
+    private transient final  Stack<Integer> fixedLengthStack = new Stack<>(); // TODO parse typeString from left to right?
     private transient final String className;
 
     transient final Integer baseTypeByteLen;
@@ -57,28 +58,45 @@ public class Type {
         this.typeString = typeString;
         String javaBaseType = buildJavaClassName(typeString.length() - 1);
         StringBuilder classNameBuilder = new StringBuilder();
-        final int depth = fixedArrayLengthStack.size() - 1;
+        int depth = fixedLengthStack.size() - 1;
         for (int i = 0; i < depth; i++) {
             classNameBuilder.append('[');
         }
         this.className = classNameBuilder.append(javaBaseType).toString();
 
-        // fixedArrayLengthStack.empty()
-        if (!fixedArrayLengthStack.contains(null)) { // static
-            this.baseTypeByteLen = fixedArrayLengthStack.get(fixedArrayLengthStack.size() - 1);
-            int product = baseTypeByteLen + (32 - (baseTypeByteLen % 32)); // round up to next 32
-//            final int lim = fixedArrayLengthStack.size() - 1;
-            for (int i = 0; i < depth; i++) {
-                product *= fixedArrayLengthStack.get(i);
+        // fixedLengthStack.empty()
+        if (!fixedLengthStack.contains(null)) { // static
+            this.baseTypeByteLen = fixedLengthStack.get(fixedLengthStack.size() - 1);
+
+            int rounded = roundUp(baseTypeByteLen);
+
+//            int product;
+//            int mod = baseTypeByteLen % 32;
+//            if(mod != 0) {
+//                product = baseTypeByteLen + (32 - mod); // round up to next 32
+//            } else {
+//                product = baseTypeByteLen;
+//            }
+
+            if(baseTypeByteLen == 1 && !typeString.startsWith("bytes1")) { // typeString.startsWith("int8") || typeString.startsWith("uint8")
+                depth--;
+            }
+
+            int product = rounded;
+            StringBuilder sb = new StringBuilder("(" + baseTypeByteLen + " --> " + product + ")");
+            for (int i = depth - 1; i >= 0; i--) {
+                product *= fixedLengthStack.get(i);
+                sb.append(" * ").append(fixedLengthStack.get(i));
             }
             this.byteLen = product;
-            System.out.println(toString() + " : static len = " + byteLen + " (base len " + baseTypeByteLen + ")");
+            System.out.println(toString() + " : static len: " + sb.toString() + " = " + byteLen);
         } else {
             switch (javaBaseType) {
             case "B":
+            case "[B":
             case "java.lang.String":
-                this.baseTypeByteLen = 8; break;
-                default: this.baseTypeByteLen = null;
+                this.baseTypeByteLen = 1; break;
+            default: this.baseTypeByteLen = null;
             }
             this.byteLen = null;
         }
@@ -126,31 +144,31 @@ public class Type {
 //                classNameBuilder.append('[');
 //            }
 
-            fixedArrayLengthStack.push(fixedLength);
+            fixedLengthStack.push(fixedLength);
 
             return buildJavaClassName(arrayOpenIndex - 1); // , true
         } else {
             this.abiBaseType = typeString.substring(0, i + 1);
-            return type(abiBaseType, !fixedArrayLengthStack.isEmpty());
+            return type(abiBaseType, !fixedLengthStack.isEmpty());
 //            classNameBuilder.append();
 //            fixedLength = null;
         }
 //        if(arrayType) {
-//            fixedArrayLengthStack.add(fixedLength);
+//            fixedLengthStack.add(fixedLength);
 //        }
-//        fixedArrayLengthStack.add(fixedLength);
+//        fixedLengthStack.add(fixedLength);
     }
 
     private String type(String abiBaseType, boolean element) {
         switch (abiBaseType) {
-        case "uint8": fixedArrayLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_BYTE : CLASS_NAME_BYTE;
-        case "uint16": fixedArrayLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_SHORT : CLASS_NAME_SHORT;
+        case "uint8": fixedLengthStack.push(1); return element ? CLASS_NAME_ELEMENT_BYTE : CLASS_NAME_BYTE;
+        case "uint16": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_SHORT : CLASS_NAME_SHORT;
         case "uint24":
-        case "uint32": fixedArrayLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_INT : CLASS_NAME_INT;
+        case "uint32": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_INT : CLASS_NAME_INT;
         case "uint40":
         case "uint48":
         case "uint56":
-        case "uint64": fixedArrayLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_LONG : CLASS_NAME_LONG;
+        case "uint64": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_LONG : CLASS_NAME_LONG;
         case "uint72":
         case "uint80":
         case "uint88":
@@ -174,15 +192,15 @@ public class Type {
         case "uint232":
         case "uint240":
         case "uint248":
-        case "uint256": fixedArrayLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_BIG_INTEGER : CLASS_NAME_BIG_INTEGER;
-        case "int8": fixedArrayLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_BYTE : CLASS_NAME_BYTE; // signed // TODO
-        case "int16": fixedArrayLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_SHORT : CLASS_NAME_SHORT;
+        case "uint256": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_BIG_INTEGER : CLASS_NAME_BIG_INTEGER;
+        case "int8": fixedLengthStack.push(1); return element ? CLASS_NAME_ELEMENT_BYTE : CLASS_NAME_BYTE; // signed // TODO
+        case "int16": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_SHORT : CLASS_NAME_SHORT;
         case "int24":
-        case "int32": fixedArrayLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_INT : CLASS_NAME_INT;
+        case "int32": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_INT : CLASS_NAME_INT;
         case "int40":
         case "int48":
         case "int56":
-        case "int64": fixedArrayLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_LONG : CLASS_NAME_LONG;
+        case "int64": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_LONG : CLASS_NAME_LONG;
         case "int72":
         case "int80":
         case "int88":
@@ -207,51 +225,53 @@ public class Type {
         case "int240":
         case "int248":
         case "int256":
-        case "address": fixedArrayLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_BIG_INTEGER : CLASS_NAME_BIG_INTEGER;
+        case "address": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_BIG_INTEGER : CLASS_NAME_BIG_INTEGER;
 //        case "uint":
 //        case "int": return element ? CLASS_NAME_ELEMENT_BIG_INTEGER : CLASS_NAME_BIG_INTEGER;
-        case "bool": fixedArrayLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_BOOLEAN : CLASS_NAME_BOOLEAN;
+        case "bool": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_BOOLEAN : CLASS_NAME_BOOLEAN;
 //        case "ufixed":
 //        case "fixed": return element ? CLASS_NAME_ELEMENT_BIG_DECIMAL : CLASS_NAME_BIG_DECIMAL;
-        case "bytes1": fixedArrayLengthStack.push(1); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes2": fixedArrayLengthStack.push(2); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes3": fixedArrayLengthStack.push(3); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes4": fixedArrayLengthStack.push(4); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes5": fixedArrayLengthStack.push(5); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes6": fixedArrayLengthStack.push(6); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes7": fixedArrayLengthStack.push(7); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes8": fixedArrayLengthStack.push(8); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes9": fixedArrayLengthStack.push(9); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes10": fixedArrayLengthStack.push(10); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes11": fixedArrayLengthStack.push(11); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes12": fixedArrayLengthStack.push(12); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes13": fixedArrayLengthStack.push(13); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes14": fixedArrayLengthStack.push(14); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes15": fixedArrayLengthStack.push(15); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes16": fixedArrayLengthStack.push(16); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes17": fixedArrayLengthStack.push(17); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes18": fixedArrayLengthStack.push(18); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes19": fixedArrayLengthStack.push(19); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes20": fixedArrayLengthStack.push(20); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes21": fixedArrayLengthStack.push(21); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes22": fixedArrayLengthStack.push(22); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes23": fixedArrayLengthStack.push(23); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes1": fixedLengthStack.push(1); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes2": fixedLengthStack.push(2); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes3": fixedLengthStack.push(3); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes4": fixedLengthStack.push(4); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes5": fixedLengthStack.push(5); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes6": fixedLengthStack.push(6); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes7": fixedLengthStack.push(7); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes8": fixedLengthStack.push(8); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes9": fixedLengthStack.push(9); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes10": fixedLengthStack.push(10); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes11": fixedLengthStack.push(11); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes12": fixedLengthStack.push(12); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes13": fixedLengthStack.push(13); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes14": fixedLengthStack.push(14); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes15": fixedLengthStack.push(15); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes16": fixedLengthStack.push(16); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes17": fixedLengthStack.push(17); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes18": fixedLengthStack.push(18); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes19": fixedLengthStack.push(19); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes20": fixedLengthStack.push(20); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes21": fixedLengthStack.push(21); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes22": fixedLengthStack.push(22); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes23": fixedLengthStack.push(23); return CLASS_NAME_ARRAY_BYTE;
         case "function":
-        case "bytes24": fixedArrayLengthStack.push(24); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes25": fixedArrayLengthStack.push(25); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes26": fixedArrayLengthStack.push(26); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes27": fixedArrayLengthStack.push(27); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes28": fixedArrayLengthStack.push(28); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes29": fixedArrayLengthStack.push(29); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes30": fixedArrayLengthStack.push(30); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes31": fixedArrayLengthStack.push(31); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes32": fixedArrayLengthStack.push(32); return CLASS_NAME_ARRAY_BYTE; // CLASS_NAME_ARRAY_BYTE; // CLASS_NAME_ELEMENT_ARRAY_BYTE;
+        case "bytes24": fixedLengthStack.push(24); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes25": fixedLengthStack.push(25); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes26": fixedLengthStack.push(26); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes27": fixedLengthStack.push(27); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes28": fixedLengthStack.push(28); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes29": fixedLengthStack.push(29); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes30": fixedLengthStack.push(30); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes31": fixedLengthStack.push(31); return CLASS_NAME_ARRAY_BYTE;
+        case "bytes32": fixedLengthStack.push(32); return CLASS_NAME_ARRAY_BYTE; // CLASS_NAME_ARRAY_BYTE; // CLASS_NAME_ELEMENT_ARRAY_BYTE;
         case "bytes": /* dynamic*/
-            fixedArrayLengthStack.push(null);
+            fixedLengthStack.push(null);
             return CLASS_NAME_ARRAY_BYTE;
         case "string": /* dynamic*/
-            fixedArrayLengthStack.push(null);
+            fixedLengthStack.push(null);
             return element ? CLASS_NAME_ELEMENT_STRING : CLASS_NAME_STRING;
+        case "int": throw new IllegalArgumentException("int not supported. use int256");
+        case "uint": throw new IllegalArgumentException("uint not supported. use uint256");
         default: {
             throw new IllegalArgumentException("abi base type " + abiBaseType + " not yet supported");
             // ufixed<M>x<N>
@@ -283,133 +303,352 @@ public class Type {
             }
         }
         System.out.print("class valid, ");
-        final Integer fixedArrayLength;
-        if(param instanceof Number) {
-            Number numberParam = (Number) param;
-            final int bitLen;
-            if(param instanceof BigInteger) {
-                BigInteger bigIntParam = (BigInteger) param;
-                bitLen = bigIntParam.bitLength();
-            } else {
-//                bigIntParam = BigInteger.valueOf(numberParam.longValue());
-                final long longVal = numberParam.longValue();
-                bitLen = longVal >= 0 ? RLPIntegers.bitLen(longVal) : BizarroIntegers.bitLen(longVal);
-                if(longVal > 0) {
-                    Assert.assertEquals(Long.toBinaryString(longVal).length(), bitLen);
-                } else if(longVal == 0) {
-                    Assert.assertEquals(0, bitLen);
-                } else if(longVal == -1) {
-                    Assert.assertEquals(0, bitLen);
-                } else { // < -1
-                    String bin = Long.toBinaryString(longVal);
-                    String minBin = bin.substring(bin.indexOf('0'));
-                    Assert.assertEquals(bitLen, minBin.length());
-                }
-                Assert.assertEquals(BigInteger.valueOf(longVal).bitLength(), bitLen);
-            }
 
-            if(bitLen > baseTypeBitLimit) {
-                throw new IllegalArgumentException("exceeds bit limit: " + bitLen + " > " + baseTypeBitLimit);
-            }
-
-//            bigIntParam.bitLength()
-//            if (bigIntParam.compareTo(baseArithmeticLimit) >= 0) {
-//                throw new IllegalArgumentException("exceeds arithmetic limit: " + bigIntParam + " > " + baseArithmeticLimit);
+        if(param.getClass().isArray()) {
+            if (param instanceof Object[]) {
+                validateObjectArray((Object[]) param, expectedClassName, expectedLengthIndex);
+//            } else {
+//                validateArray(param, expectedLengthIndex);
 //            }
-            return;
-        }
-        if(param instanceof byte[]) {
-            fixedArrayLength = fixedArrayLengthStack.get(expectedLengthIndex);
-            if(fixedArrayLength != null) {
-                checkLength(((byte[]) param).length, fixedArrayLength);
+            } else if (param instanceof byte[]) {
+                validateByteArray((byte[]) param, expectedLengthIndex);
+            } else if (param instanceof int[]) {
+                validateIntArray((int[]) param, expectedLengthIndex);
+            } else if (param instanceof long[]) {
+                validateLongArray((long[]) param, expectedLengthIndex);
+            } else if (param instanceof short[]) {
+                validateShortArray((short[]) param, expectedLengthIndex);
+            } else if (param instanceof boolean[]) {
+                validateBooleanArray((boolean[]) param, expectedLengthIndex);
             }
-            return;
+        } else if(param instanceof Number) {
+            validateNumber((Number) param);
+//            Number numberParam = (Number) param;
+//            final int bitLen;
+//            if(param instanceof BigInteger) {
+//                BigInteger bigIntParam = (BigInteger) param;
+//                bitLen = bigIntParam.bitLength();
+//            } else {
+////                bigIntParam = BigInteger.valueOf(numberParam.longValue());
+//                final long longVal = numberParam.longValue();
+//                bitLen = longVal >= 0 ? RLPIntegers.bitLen(longVal) : BizarroIntegers.bitLen(longVal);
+//                if(longVal > 0) {
+//                    Assert.assertEquals(Long.toBinaryString(longVal).length(), bitLen);
+//                } else if(longVal == 0) {
+//                    Assert.assertEquals(0, bitLen);
+//                } else if(longVal == -1) {
+//                    Assert.assertEquals(0, bitLen);
+//                } else { // < -1
+//                    String bin = Long.toBinaryString(longVal);
+//                    String minBin = bin.substring(bin.indexOf('0'));
+//                    Assert.assertEquals(bitLen, minBin.length());
+//                }
+//                Assert.assertEquals(BigInteger.valueOf(longVal).bitLength(), bitLen);
+//            }
+//
+//            if(bitLen > baseTypeBitLimit) {
+//                throw new IllegalArgumentException("exceeds bit limit: " + bitLen + " > " + baseTypeBitLimit);
+//            }
+//            System.out.println("length valid, ");
+//
+////            bigIntParam.bitLength()
+////            if (bigIntParam.compareTo(baseArithmeticLimit) >= 0) {
+////                throw new IllegalArgumentException("exceeds arithmetic limit: " + bigIntParam + " > " + baseArithmeticLimit);
+////            }
+//            return;
         }
-        if(param instanceof short[]) {
-            fixedArrayLength = fixedArrayLengthStack.get(expectedLengthIndex);
-            if(fixedArrayLength != null) {
-                checkLength(((short[]) param).length, fixedArrayLength);
-            }
-            return;
-        }
-        if(param instanceof int[]) {
-            fixedArrayLength = fixedArrayLengthStack.get(expectedLengthIndex);
-            if(fixedArrayLength != null) {
-                checkLength(((int[]) param).length, fixedArrayLength);
-            }
-            return;
-        }
-        if(param instanceof long[]) {
-            fixedArrayLength = fixedArrayLengthStack.get(expectedLengthIndex);
-            if(fixedArrayLength != null) {
-                checkLength(((long[]) param).length, fixedArrayLength);
-            }
-            return;
-        }
-        if(param instanceof Object[]) {
-            fixedArrayLength = fixedArrayLengthStack.get(expectedLengthIndex);
-            Object[] objectArray = (Object[]) param;
-            final int len = objectArray.length;
-            if(fixedArrayLength != null) {
-                checkLength(len, fixedArrayLength);
-            }
-            final int nextExpectedLengthIndex = expectedLengthIndex + 1;
-            int i = 0;
-            try {
-                for ( ; i < len; i++) {
-                    String nextExpectedClassName;
-                    if(expectedClassName.charAt(1) == 'L') {
-                        nextExpectedClassName = expectedClassName.substring(2, expectedClassName.length() - 1);
-                    } else {
-                        nextExpectedClassName = expectedClassName.substring(1);
-                    }
-                    validate(objectArray[i], nextExpectedClassName, nextExpectedLengthIndex);
+
+
+//            Object[] objectArray = (Object[]) param;
+//            final int len = objectArray.length;
+//            checkLength(len, fixedLengthStack.get(expectedLengthIndex));
+//            int i = 0;
+//            try {
+//                for ( ; i < len; i++) {
+//                    String nextExpectedClassName;
+//                    if(expectedClassName.charAt(1) == 'L') {
+//                        nextExpectedClassName = expectedClassName.substring(2, expectedClassName.length() - 1);
+//                    } else {
+//                        nextExpectedClassName = expectedClassName.substring(1);
+//                    }
+//                    validate(objectArray[i], nextExpectedClassName, expectedLengthIndex + 1);
+//                }
+//            } catch (IllegalArgumentException | NullPointerException re) {
+//                throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
+//            }
+    }
+
+    private void validateObjectArray(Object[] arr, String expectedClassName, int expectedLengthIndex) {
+        final int len = arr.length;
+        checkLength(len, fixedLengthStack.get(expectedLengthIndex));
+        int i = 0;
+        try {
+            for ( ; i < len; i++) {
+                String nextExpectedClassName;
+                if(expectedClassName.charAt(1) == 'L') {
+                    nextExpectedClassName = expectedClassName.substring(2, expectedClassName.length() - 1);
+                } else {
+                    nextExpectedClassName = expectedClassName.substring(1);
                 }
-            } catch (IllegalArgumentException | NullPointerException e) {
-                throw new IllegalArgumentException("index " + i + ": " + e.getMessage(), e);
+                validate(arr[i], nextExpectedClassName, expectedLengthIndex + 1);
             }
+        } catch (IllegalArgumentException | NullPointerException re) {
+            throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
         }
     }
 
-    private static void checkLength(int actual, int expected) {
-        if(actual != expected) {
+    private void validateBooleanArray(boolean[] arr, int expectedLengthIndex) {
+        final int len = arr.length;
+        checkLength(len, fixedLengthStack.get(expectedLengthIndex));
+        final int nextExpectedLengthIndex = expectedLengthIndex + 1;
+        int i = 0;
+        try {
+            for ( ; i < len; i++) {
+                validate(arr[i], CLASS_NAME_BOOLEAN, nextExpectedLengthIndex);
+            }
+        } catch (IllegalArgumentException | NullPointerException re) {
+            throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
+        }
+    }
+
+    private void validateByteArray(byte[] arr, int expectedLengthIndex) {
+        final int len = arr.length;
+        checkLength(len, fixedLengthStack.get(expectedLengthIndex));
+//        int i = 0;
+//        try {
+//            for ( ; i < len; i++) {
+//                validate(arr[i], CLASS_NAME_ELEMENT_BYTE, expectedLengthIndex + 1);
+//            }
+//        } catch (IllegalArgumentException | NullPointerException re) {
+//            throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
+//        }
+    }
+
+    private void validateShortArray(short[] arr, int expectedLengthIndex) {
+        final int len = arr.length;
+        checkLength(len, fixedLengthStack.get(expectedLengthIndex));
+        int i = 0;
+        try {
+            for ( ; i < len; i++) {
+                validate(arr[i], CLASS_NAME_SHORT, expectedLengthIndex + 1);
+            }
+        } catch (IllegalArgumentException | NullPointerException re) {
+            throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
+        }
+    }
+
+    private void validateIntArray(int[] arr, int expectedLengthIndex) {
+        final int len = arr.length;
+        checkLength(len, fixedLengthStack.get(expectedLengthIndex));
+        int i = 0;
+        try {
+            for ( ; i < len; i++) {
+                validate(arr[i], CLASS_NAME_INT, expectedLengthIndex + 1);
+            }
+        } catch (IllegalArgumentException | NullPointerException re) {
+            throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
+        }
+    }
+
+    private void validateLongArray(long[] arr, int expectedLengthIndex) {
+        final int len = arr.length;
+        checkLength(len, fixedLengthStack.get(expectedLengthIndex));
+        int i = 0;
+        try {
+            for ( ; i < len; i++) {
+                validate(arr[i], CLASS_NAME_LONG, expectedLengthIndex + 1);
+            }
+        } catch (IllegalArgumentException | NullPointerException re) {
+            throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
+        }
+    }
+
+    private static void checkLength(int actual, Integer expected) {
+        if(expected != null && actual != expected) {
             throw new IllegalArgumentException("array length mismatch: " + actual + " != " + expected);
         }
-        System.out.println("length valid ");
+        System.out.println("length valid;");
+    }
+
+    private void validateNumber(Number number) {
+        final int bitLen;
+        if(!(number instanceof BigInteger)) {
+            final long longVal = number.longValue();
+            bitLen = longVal >= 0 ? RLPIntegers.bitLen(longVal) : BizarroIntegers.bitLen(longVal);
+
+            if(longVal > 0) {
+                Assert.assertEquals(Long.toBinaryString(longVal).length(), bitLen);
+            } else if(longVal == 0) {
+                Assert.assertEquals(0, bitLen);
+            } else if(longVal == -1) {
+                Assert.assertEquals(0, bitLen);
+            } else { // < -1
+                String bin = Long.toBinaryString(longVal);
+                String minBin = bin.substring(bin.indexOf('0'));
+                Assert.assertEquals(bitLen, minBin.length());
+            }
+            Assert.assertEquals(BigInteger.valueOf(longVal).bitLength(), bitLen);
+        } else {
+            BigInteger bigIntParam = (BigInteger) number;
+            bitLen = bigIntParam.bitLength();
+        }
+
+        if(bitLen > baseTypeBitLimit) {
+            throw new IllegalArgumentException("exceeds bit limit: " + bitLen + " > " + baseTypeBitLimit);
+        }
+        System.out.println("length valid;");
     }
 
     public void encode(Object value, ByteBuffer dest) {
-        if (value instanceof Number) {
-            Encoder.insertInt(((Number) value).longValue(), dest);
-        } else if (value instanceof byte[]) {
-            Encoder.insertBytes((byte[]) value, dest);
-        } else if (value instanceof int[]) {
-
-        } else if (value instanceof Object[]) {
-            Object[] arr = (Object[]) value;
-            for (int j = 0; j < arr.length; j++) {
-                encode(arr[j], dest);
+        if(value instanceof String) {
+            Encoder.insertBytes(((String) value).getBytes(StandardCharsets.UTF_8), dest);
+        } else if(value.getClass().isArray()) {
+            if (value instanceof Object[]) {
+                Object[] arr = (Object[]) value;
+                for (Object obj : arr) {
+                    encode(obj, dest);
+                }
+            } else if (value instanceof byte[]) {
+                System.out.println("byte[] " + dest.position());
+                Encoder.insertBytes((byte[]) value, dest);
+            } else if (value instanceof int[]) {
+                Encoder.insertInts((int[]) value, dest);
+            } else if (value instanceof long[]) {
+                Encoder.insertLongs((long[]) value, dest);
+            } else if (value instanceof short[]) {
+                Encoder.insertShorts((short[]) value, dest);
+            } else if(value instanceof boolean[]) {
+                Encoder.insertBooleans((boolean[]) value, dest);
             }
+        } else if (value instanceof Number) {
+            Encoder.insertInt(((Number) value).longValue(), dest);
+        } else if(value instanceof Boolean) {
+            Encoder.insertBool((boolean) value, dest);
         }
     }
 
     public int calcDynamicByteLen(Object param) {
-//        int len =
-        for (Integer e : fixedArrayLengthStack) {
-//            product *= e;
-        }
 
-        return 0;
+        Stack<Integer> dynamicLengthStack = new Stack<>();
+        buildLengthStack(param, dynamicLengthStack);
+
+        int product = baseTypeByteLen;
+        final int lim = fixedLengthStack.size();
+        for (int i = 0; i < lim; i++) {
+            int len;
+            Integer fixedLen = fixedLengthStack.get(i);
+            if(fixedLen != null) {
+                len = fixedLen;
+            } else {
+                len = dynamicLengthStack.get(i);
+            }
+            product *= len;
+        }
+        return product;
+    }
+
+    private void buildLengthStack(Object value, Stack<Integer> dynamicLengthStack) {
+        if(value instanceof String) {
+            dynamicLengthStack.push(roundUp(((String) value).length()));
+        } else if(value.getClass().isArray()) {
+            if (value instanceof Object[]) {
+                Object[] arr = (Object[]) value;
+                for (Object obj : arr) {
+                    buildLengthStack(obj, dynamicLengthStack);
+                }
+            } else if (value instanceof byte[]) {
+                dynamicLengthStack.push(roundUp(((byte[]) value).length));
+            } else if (value instanceof int[]) {
+                dynamicLengthStack.push(((int[]) value).length << 5); // mul 32
+            } else if (value instanceof long[]) {
+                dynamicLengthStack.push(((long[]) value).length << 5);
+            } else if (value instanceof short[]) {
+                dynamicLengthStack.push(((short[]) value).length << 5);
+            } else if(value instanceof boolean[]) {
+                dynamicLengthStack.push(((boolean[]) value).length << 5);
+            }
+        } else if (value instanceof Number) {
+            dynamicLengthStack.push(32);
+        } else if(value instanceof Boolean) {
+            dynamicLengthStack.push(32);
+        }
+    }
+
+    private static int roundUp(int len) {
+        int mod = len % 32;
+        return mod == 0 ? len : len + (32 -mod);
+//        return newLen == 0 ? 32 : newLen;
     }
 
     @Override
     public String toString() {
-        return typeString + ", " + className + ", " + Arrays.toString(fixedArrayLengthStack.toArray());
+        return typeString + ", " + className + ", " + Arrays.toString(fixedLengthStack.toArray());
+    }
+
+    private void validateArray(Object arr, int expectedLengthIndex) {
+        Object[] elements;
+        String newClassName;
+        final int len;
+        if(arr instanceof byte[]) {
+            byte[] casted = (byte[]) arr;
+            len = casted.length;
+            elements = new Object[len];
+            for (int i = 0; i < len; i++) {
+                elements[i] = casted[i];
+            }
+            newClassName = CLASS_NAME_BYTE;
+        } else if(arr instanceof short[]) {
+            short[] casted = (short[]) arr;
+            len = casted.length;
+            elements = new Object[len];
+            for (int i = 0; i < len; i++) {
+                elements[i] = casted[i];
+            }
+            newClassName = CLASS_NAME_SHORT;
+        } else if(arr instanceof int[]) {
+            int[] casted = (int[]) arr;
+            len = casted.length;
+            elements = new Object[len];
+            for (int i = 0; i < len; i++) {
+                elements[i] = casted[i];
+            }
+            newClassName = CLASS_NAME_INT;
+        } else if(arr instanceof long[]) {
+            long[] casted = (long[]) arr;
+            len = casted.length;
+            elements = new Object[len];
+            for (int i = 0; i < len; i++) {
+                elements[i] = casted[i];
+            }
+            newClassName = CLASS_NAME_LONG;
+        } else if(arr instanceof boolean[]) {
+            boolean[] casted = (boolean[]) arr;
+            len = casted.length;
+            elements = new Object[len];
+            for (int i = 0; i < len; i++) {
+                elements[i] = casted[i];
+            }
+            newClassName = CLASS_NAME_BOOLEAN;
+        } else {
+            throw new RuntimeException(new ClassNotFoundException(arr.getClass().getName()));
+        }
+        Integer fixedArrayLength = fixedLengthStack.get(expectedLengthIndex);
+        if(fixedArrayLength != null) {
+            checkLength(len, fixedArrayLength);
+        }
+        int i = 0;
+        try {
+            for ( ; i < len; i++) {
+                validate(elements[i], newClassName, expectedLengthIndex + 1);
+            }
+        } catch (IllegalArgumentException | NullPointerException re) {
+            throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
+        }
     }
 }
 
 
-//if(!fixedArrayLengthStack.contains(null)) { // static
+//if(!fixedLengthStack.contains(null)) { // static
 ////            switch (javaBaseType) {
 ////            case "B":
 ////            case "S":
@@ -421,21 +660,21 @@ public class Type {
 ////            case "java.lang.Integer":
 ////            case "java.lang.Long":
 ////            case "java.math.BigInteger": this.baseTypeByteLen = 32; break;
-////            case "[B": this.baseTypeByteLen = fixedArrayLengthStack.get(fixedArrayLengthStack.size() - 1); break;
+////            case "[B": this.baseTypeByteLen = fixedLengthStack.get(fixedLengthStack.size() - 1); break;
 ////            default: this.baseTypeByteLen = null;
 ////            }
 //
 //// int roundedUp = t.byteLen + (32 - (t.byteLen % 32));
-//        this.baseTypeByteLen = fixedArrayLengthStack.get(fixedArrayLengthStack.size() - 1);
+//        this.baseTypeByteLen = fixedLengthStack.get(fixedLengthStack.size() - 1);
 //
 //        if (baseTypeByteLen != null) {
-//        if (fixedArrayLengthStack.empty()) {
+//        if (fixedLengthStack.empty()) {
 //        this.byteLen = baseTypeByteLen;
 //        } else {
 //        int product = baseTypeByteLen;
-//final int size = fixedArrayLengthStack.size();
+//final int size = fixedLengthStack.size();
 //        for (int i = 1; i < size; i++) {
-//        product *= fixedArrayLengthStack.get(i);
+//        product *= fixedLengthStack.get(i);
 //        }
 //        this.byteLen = product;
 //        }
