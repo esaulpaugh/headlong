@@ -12,6 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Stack;
 
+import static com.esaulpaugh.headlong.abi.util.ClassNames.toFriendly;
+
 public class Type {
 
     private static final String CLASS_NAME_BOOLEAN = Boolean.class.getName();
@@ -53,6 +55,8 @@ public class Type {
     transient String abiBaseType;
 //    transient final BigInteger baseArithmeticLimit; // signed vs unsigned
     transient final Integer baseTypeBitLimit;
+
+    transient Integer scaleN;
 
     Type(String typeString) {
         this.typeString = typeString;
@@ -105,11 +109,11 @@ public class Type {
             System.out.println(typeString + ", " + abiBaseType + ", " + javaBaseType + ", " + className + " : dynamic len");
         }
 
-        int x = abiBaseType.lastIndexOf("int");
-        if(x != -1) {
-            if(x < abiBaseType.length() - 3) {
+        int t;
+        if((t = abiBaseType.lastIndexOf("int")) != -1) {
+            if(t < abiBaseType.length() - 3) {
 //                this.baseArithmeticLimit = BigInteger.valueOf(2).pow(y);
-                this.baseTypeBitLimit = Integer.parseInt(abiBaseType.substring(x + 3));
+                this.baseTypeBitLimit = Integer.parseInt(abiBaseType.substring(t + 3));
             } else { // endsWith("int")
 //                this.baseArithmeticLimit = UINT_256_ARITHMETIC_LIMIT;
                 this.baseTypeBitLimit = 256;
@@ -117,7 +121,15 @@ public class Type {
         } else if(abiBaseType.equals("address")) {
 //            this.baseArithmeticLimit = ADDRESS_ARITHMETIC_LIMIT;
             this.baseTypeBitLimit = 160;
+        } else if((t = abiBaseType.indexOf("fixed")) >= 0) {
+            int x = abiBaseType.lastIndexOf('x');
+            Integer m = Integer.parseInt(abiBaseType.substring(t + 5, x));
+            Integer n = Integer.parseInt(abiBaseType.substring(x + 1));
+            System.out.println(m + "x" + n);
+            this.baseTypeBitLimit = m;
+            this.scaleN = n;
         } else {
+            this.abiBaseType = null;
 //            this.baseArithmeticLimit = null;
             this.baseTypeBitLimit = null;
         }
@@ -270,9 +282,15 @@ public class Type {
         case "string": /* dynamic*/
             fixedLengthStack.push(null);
             return element ? CLASS_NAME_ELEMENT_STRING : CLASS_NAME_STRING;
+        case "fixed": throw new IllegalArgumentException("fixed not supported. use fixed128x18");
+        case "ufixed": throw new IllegalArgumentException("ufixed not supported. use ufixed128x18");
         case "int": throw new IllegalArgumentException("int not supported. use int256");
         case "uint": throw new IllegalArgumentException("uint not supported. use uint256");
         default: {
+            if(abiBaseType.contains("fixed")) {
+                fixedLengthStack.push(32);
+                return CLASS_NAME_BIG_DECIMAL;
+            }
             throw new IllegalArgumentException("abi base type " + abiBaseType + " not yet supported");
             // ufixed<M>x<N>
             // fixed<M>x<N>
@@ -299,7 +317,11 @@ public class Type {
                 isAssignable = false;
             }
             if(!isAssignable) {
-                throw new IllegalArgumentException("class mismatch: " + param.getClass().getName() + " not assignable to " + expectedClassName + " (" + typeString + ")");
+                throw new IllegalArgumentException("class mismatch: "
+                        + param.getClass().getName()
+                        + " not assignable to "
+                        + expectedClassName
+                        + " (" + toFriendly(param.getClass().getName()) + " not instanceof " + toFriendly(expectedClassName) + "/" + typeString + ")");
             }
         }
         System.out.print("class valid, ");
@@ -472,7 +494,13 @@ public class Type {
 
     private void validateNumber(Number number) {
         final int bitLen;
-        if(!(number instanceof BigInteger)) {
+        if(number instanceof BigInteger) {
+            BigInteger bigIntParam = (BigInteger) number;
+            bitLen = bigIntParam.bitLength();
+        } else if(number instanceof BigDecimal) {
+            BigDecimal bigIntParam = (BigDecimal) number;
+            bitLen = bigIntParam.unscaledValue().bitLength();
+        } else {
             final long longVal = number.longValue();
             bitLen = longVal >= 0 ? RLPIntegers.bitLen(longVal) : BizarroIntegers.bitLen(longVal);
 
@@ -488,9 +516,6 @@ public class Type {
                 Assert.assertEquals(bitLen, minBin.length());
             }
             Assert.assertEquals(BigInteger.valueOf(longVal).bitLength(), bitLen);
-        } else {
-            BigInteger bigIntParam = (BigInteger) number;
-            bitLen = bigIntParam.bitLength();
         }
 
         if(bitLen > baseTypeBitLimit) {
@@ -521,7 +546,13 @@ public class Type {
                 Encoder.insertBooleans((boolean[]) value, dest);
             }
         } else if (value instanceof Number) {
-            Encoder.insertInt(((Number) value).longValue(), dest);
+            if(value instanceof BigInteger) {
+                Encoder.insertInt(((BigInteger) value), dest);
+            } else if(value instanceof BigDecimal) {
+                Encoder.insertInt(((BigDecimal) value).unscaledValue(), dest);
+            } else {
+                Encoder.insertInt(((Number) value).longValue(), dest);
+            }
         } else if(value instanceof Boolean) {
             Encoder.insertBool((boolean) value, dest);
         }
@@ -533,6 +564,7 @@ public class Type {
         buildLengthStack(param, dynamicLengthStack);
 
         int product = baseTypeByteLen;
+        System.out.print(product);
         final int lim = fixedLengthStack.size();
         for (int i = 0; i < lim; i++) {
             int len;
@@ -542,8 +574,10 @@ public class Type {
             } else {
                 len = dynamicLengthStack.get(i);
             }
+            System.out.print(" * " + len);
             product *= len;
         }
+        System.out.println();
         return product;
     }
 

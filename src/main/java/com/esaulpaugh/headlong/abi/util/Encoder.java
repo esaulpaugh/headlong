@@ -1,5 +1,6 @@
 package com.esaulpaugh.headlong.abi.util;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 public class Encoder {
@@ -55,6 +56,15 @@ public class Encoder {
         dest.putLong(val);
 //        putLongBigEndian(val, dest, pos + NUM_PADDING_BYTES);
 //        return pos + INT_PARAM_LENGTH_BYTES;
+    }
+
+    public static void insertInt(BigInteger bigGuy, ByteBuffer dest) {
+        byte[] arr = bigGuy.toByteArray();
+        final int lim = 32 - arr.length;
+        for (int i = 0; i < lim; i++) {
+            dest.put((byte) 0);
+        }
+        dest.put(arr);
     }
 
 }

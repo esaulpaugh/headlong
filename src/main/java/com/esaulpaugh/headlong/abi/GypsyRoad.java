@@ -6,6 +6,8 @@ import com.joemelsha.crypto.hash.Keccak;
 import org.spongycastle.util.encoders.Hex;
 import sun.nio.cs.US_ASCII;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
@@ -106,7 +108,7 @@ public class GypsyRoad {
         }
 
         System.out.println("allocating " + (4 + paramsByteLen));
-        ByteBuffer outBuffer = ByteBuffer.wrap(new byte[4 + paramsByteLen]);
+        ByteBuffer outBuffer = ByteBuffer.wrap(new byte[4 + paramsByteLen]); // ByteOrder.BIG_ENDIAN by default
         Keccak keccak = new Keccak(256);
         keccak.update(signature.getBytes(ASCII));
         keccak.digest(outBuffer, 4);
@@ -234,28 +236,58 @@ public class GypsyRoad {
 //        );
 //        System.out.println(Hex.toHexString(abi3.array()));
 
-        ByteBuffer abi = encodeFunctionCall("yeehaw(int8[3][5][2])",
-                (Object) new byte[][][] {
-                        new byte[][] { new byte[] { (byte) 0xAA, (byte) 0xAA, (byte) 0xAA }, new byte[3], new byte[3], new byte[3], new byte[3] },
-                        new byte[][] { new byte[3], new byte[3], new byte[3], new byte[3], new byte[] { (byte) 0xFF, (byte) 0xFF, (byte) 0xFF } }
-                }
-                );
+//        ByteBuffer abi = encodeFunctionCall("yeehaw(int8[3][5][2])",
+//                (Object) new byte[][][] {
+//                        new byte[][] { new byte[] { (byte) 0xAA, (byte) 0xAA, (byte) 0xAA }, new byte[3], new byte[3], new byte[3], new byte[3] },
+//                        new byte[][] { new byte[3], new byte[3], new byte[3], new byte[3], new byte[] { (byte) 0xFF, (byte) 0xFF, (byte) 0xFF } }
+//                }
+//                );
+//
+//        ByteBuffer abi2 = encodeFunctionCall("yeehaw(int16[3][5][2])",
+//                (Object) new short[][][] {
+//                        new short[][] { new short[3], new short[3], new short[3], new short[3], new short[3] },
+//                        new short[][] { new short[3], new short[3], new short[3], new short[3], new short[] { -1, -2, -3 } }
+//                }
+//        );
+//
+//        ByteBuffer abi3 = encodeFunctionCall("yeehaw(bytes2[5][2])",
+//                (Object) new byte[][][] {
+//                        new byte[][] { new byte[2], new byte[2], new byte[2], new byte[2], new byte[2] },
+//                        new byte[][] { new byte[2], new byte[2], new byte[2], new byte[2], new byte[] { -9, -8 } }
+//                }
+//        );
 
-        ByteBuffer abi2 = encodeFunctionCall("yeehaw(int16[3][5][2])",
-                (Object) new short[][][] {
-                        new short[][] { new short[3], new short[3], new short[3], new short[3], new short[3] },
-                        new short[][] { new short[3], new short[3], new short[3], new short[3], new short[] { -1, -2, -3 } }
-                }
+//        ByteBuffer abi4 = encodeFunctionCall("yeehaw(fixed16x2,ufixed16x2,int16,uint16,int40,uint40,int256,uint256)",
+//                BigDecimal.valueOf(250.54),
+//                BigDecimal.valueOf(250.54),
+//                (short) 25_054,
+//                (short) 25_054,
+//                25_054L,
+//                25_054L,
+//                BigInteger.valueOf(25_054),
+//                BigInteger.valueOf(25_054)
+//        );
+
+//        ByteBuffer abi5 = encodeFunctionCall("yeehaw(string)",
+//                "ahoy123_ahoy123_ahoy123_ahoy123_!" // 4321yoe_4321yoe_4321yoe_4321yoe_
+//        );
+
+//        ByteBuffer abi6 = encodeFunctionCall("yeehaw(bytes[2])",
+//                (Object) new byte[][] { new byte[32], new byte[32] }
+//        );
+
+        ByteBuffer abi7 = encodeFunctionCall("test(bytes,string,int8,int16,int24,int40,int200,bytes[0])",
+                new byte[0],
+                "",
+                (byte) 0,
+                (short) 'o',
+                0,
+                0L,
+                BigInteger.ZERO,
+                new byte[][][] {  }
         );
 
-        ByteBuffer abi3 = encodeFunctionCall("yeehaw(bytes2[5][2])",
-                (Object) new byte[][][] {
-                        new byte[][] { new byte[2], new byte[2], new byte[2], new byte[2], new byte[2] },
-                        new byte[][] { new byte[2], new byte[2], new byte[2], new byte[2], new byte[] { -9, -8 } }
-                }
-        );
-
-        System.out.println(Hex.toHexString(abi3.array()));
+        System.out.println(Hex.toHexString(abi7.array()));
 
 
         if(true) return;
