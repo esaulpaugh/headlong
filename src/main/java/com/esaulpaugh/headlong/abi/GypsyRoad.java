@@ -6,6 +6,7 @@ import com.joemelsha.crypto.hash.Keccak;
 import org.spongycastle.util.encoders.Hex;
 import sun.nio.cs.US_ASCII;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
@@ -21,73 +22,13 @@ import static org.apache.commons.lang3.StringEscapeUtils.escapeJava;
 // TODO optimize -- maybe write all zeroes first then fill in params
 public class GypsyRoad {
 
-    private static final int _24 = 24;
-    private static final int _32 = 32;
-
-//    private static final Type TYPE_FLOAT = float.class;
-//    private static final Type TYPE_INT_ARRAY = int[].class;
-//    private static final Type TYPE_BYTE_ARRAY = byte[].class;
-//
-    private static final byte[] PADDING_192_BITS = new byte[_24];
-
     private static final Charset ASCII = US_ASCII.INSTANCE;
 
-//    private static final Pattern PRINTABLE = Pattern.compile("[\\p{Print}].*");
-//    private static final Pattern NON_PRINTABLE = Pattern.compile("[^\\p{Print}].*");
-//
-//    private static final Pattern CTRL = Pattern.compile("[\\p{Cntrl}].*");
-//    private static final Pattern NON_CTRL = Pattern.compile("[^\\p{Cntrl}].*");
-
     private static final String REGEX_NON_ASCII_CHAR = "[^\\p{ASCII}]{1,}";
-    private static final Pattern NON_ASCII_CHAR = Pattern.compile(REGEX_NON_ASCII_CHAR);
     private static final Pattern HAS_NON_ASCII_CHARS = Pattern.compile(REGEX_NON_ASCII_CHAR);
 
-
     private static final String REGEX_NON_TYPE_CHAR = "[^a-z0-9\\[\\](),]{1,}";
-    private static final Pattern NON_TYPE_CHAR = Pattern.compile(REGEX_NON_TYPE_CHAR);
     private static final Pattern HAS_NON_TYPE_CHARS = Pattern.compile(REGEX_NON_TYPE_CHAR);
-
-//    public static void parseFunctionSignature(String signature, List<Type> types, StringBuilder canonicalSig) {
-//
-//        System.out.println("signature: " + signature);
-//
-//        String[] tokens = signature.trim().split(REGEX_NON_TYPE); // "[^\\p{Print}]|\\s|\\(|\\)|," // \p{Cntrl} \p{Print}  \p{C}\p{Z} \u001C|\u001D|\u001E|\u001F \u001C|\u001D|\u001E|\u001F
-//
-//        for (String s : tokens) {
-//            System.out.println(StringEscapeUtils.escapeJava(s));
-//        }
-//
-////        String[] tokens = signature.trim().split("(?!\\p{Print})|\\s|,|\\(|\\)|"); // \p{Cntrl} \p{Print}  \p{C}\p{Z} \u001C|\u001D|\u001E|\u001F \u001C|\u001D|\u001E|\u001F
-//
-//        canonicalSig.append(tokens[0]).append('('); // tokens[1].equals("(")
-//
-////        int i = tokens.length - 1;
-////        String token;
-////        do {
-////            token = tokens[i--];
-////        } while (!token.equals(")") && i >= 2);
-//
-//        final int firstTypeIndex = 2;
-//        final int lastTypeIndex = tokens.length - 2; // ignore trailing ")"
-//        for (int i = firstTypeIndex; i <= lastTypeIndex; i++) {
-//            String typeString = tokens[i];
-//            if(!typeString.isEmpty()) {
-//                if (typeString.endsWith("int")) { // canonicalize
-//                    typeString = typeString + "256";
-//                }
-//                canonicalSig.append(typeString).append(",");
-//                types.add(new Type(typeString));
-//            }
-//        }
-//        if(lastTypeIndex > firstTypeIndex) {
-//            final int builderLen = canonicalSig.length();
-//            canonicalSig.replace(builderLen - 1, builderLen, ")");
-//        } else {
-//            canonicalSig.append(')');
-//        }
-//
-//        System.out.println("canonical: " + canonicalSig.toString());
-//    }
 
     private static String escapeChar(char c) {
         String hex = Integer.toHexString((int) c);
@@ -121,94 +62,58 @@ public class GypsyRoad {
         }
     }
 
-//    private static void checkStartAndEndIndices(String signature, int startParams, int endParams) throws ParseException {
-//        if(startParams < 0) {
-//            throw new ParseException("params start not found", 0);
-//        }
-//        if(endParams != signature.length() - 1) {
-//            throw new ParseException("illegal signature termination: " + StringEscapeUtils.escapeJava(signature.substring(Math.max(0, endParams))), endParams + 1);
-//        }
-//    }
-
     public static void parseFunctionSignature(final String signature, final List<Type> types, final StringBuilder canonicalSig) throws ParseException {
         System.out.println("signature: " + escapeJava(signature));
 
         final int startParams = signature.indexOf('(');
-//        final int endParams = signature.lastIndexOf(')');
-
-//        final int endParams = signature.length() - 1;
-
-//        checkStartAndEndIndices(signature, startParams, endParams);
 
         if(startParams < 0) {
             throw new ParseException("params start not found", 0);
         }
 
         checkNameChars(signature, startParams);
-//        checkParamsChars(signature, startParams, end - 1); // endParams
-
-//        Matcher illegalChars = HAS_NON_TYPE_CHARS.matcher(signature);
 
         int argStart = startParams + 1;
-        int argEnd = -1; // Integer.MIN_VALUE; // = Integer.MIN_VALUE; // do not default to -1
+        int argEnd = argStart; // this inital value important for empty params case
         int prevNonCanonicalIndex = 0;
 
+        final int sigEnd = signature.length();
 
-        final int sigEnd = signature.length(); //  - 1;
-
-//        int nextEnd;
-
-//        final int allParamsEnd = signature.lastIndexOf(')');
-        while(argStart < sigEnd) { // argStart < endParams
-            if(signature.charAt(argStart) == '(') {
-                try {
-                    argEnd = parseTuple(signature, argStart/*, endParams*/);
-                } catch (ParseException pe) {
-                    throw new ParseException(pe.getMessage() + " @ " + types.size(), pe.getErrorOffset()); //  + " (param " + types.size() + ")"
+        LOOP:
+        while(argStart < sigEnd) {
+            char c = signature.charAt(argStart);
+            switch (c) {
+            case ')':
+                if(types.size() > 0) {
+                    argEnd = argStart - 1;
                 }
-//                if(signature.indexOf(')', argEnd) == -1) {
-//                    argEnd = -1;
-//                    break;
-//                }
+//                argEnd = types.size() == 0 ? argStart : argStart - 1;
+                break LOOP;
+            case ',':
+                if(signature.charAt(argStart - 1) == ')') {
+//                    argEnd = argStart - 1;
+                    break LOOP;
+                }
+                throw new ParseException("empty parameter @ " + types.size(), argStart);
+//                break LOOP;
+            case '(': { // tuple
+                try {
+                    String typeString = parseTuple(signature, argStart);
+                    types.add(new Type(typeString));
+                    argEnd = argStart + typeString.length();
+                } catch (ParseException pe) {
+                    throw new ParseException(pe.getMessage() + " @ " + types.size(), pe.getErrorOffset());
+                }
                 if(argEnd == sigEnd || signature.charAt(argEnd) != ',') {
-                    break;
+                    break LOOP;
                 }
                 argStart = argEnd + 1;
-            } else {
-//                System.out.println(signature.charAt(argStart));
-//                int nextEnd = nextParamTerminator(signature, argStart);
-                argEnd = nextParamTerminator(signature, argStart);
-
+            }
+            default: { // non-tuple
+                argEnd = nextParamTerminator(signature, argStart + 1);
                 if(argEnd == -1) {
-//                    argEnd = -1;
-                    break;
+                    break LOOP;
                 }
-                if(argEnd == argStart) {
-
-                    if(types.size() == 0 && signature.charAt(argStart) == ')') {
-//                        argEnd = argStart;
-                        break;
-                    }
-
-//                    if(signature.charAt(argStart) == ',') {
-                        throw new ParseException("empty parameter @ " + types.size(), argStart); // prevNonCanonicalIndex = paramEnd + 1;
-//                    }
-
-                }
-
-//                argEnd = nextEnd;
-
-//                argEnd = signature.indexOf(',', argStart);
-//                if(argEnd == -1) {
-//                    argEnd = signature.indexOf(')', argStart);
-//                    if(argEnd == -1) {
-//                        break;
-////                        throw new ParseException("non-terminating signature", signature.length());
-//                    }
-//                }
-//                if(argEnd == argStart) {
-//                    throw new ParseException("empty parameter @ " + types.size(), argStart); // prevNonCanonicalIndex = paramEnd + 1;
-//                }
                 checkParamChars(signature, argStart, argEnd);
                 String typeString = signature.substring(argStart, argEnd);
                 if (typeString.endsWith("int")) { // canonicalize
@@ -219,25 +124,22 @@ public class GypsyRoad {
                 types.add(new Type(typeString));
                 argStart = argEnd + 1;
             }
-//            System.out.println("argEnd = " + argEnd);
+            }
+//            if(signature.charAt(argStart) == ')' || signature.charAt()) { //
+//                break LOOP;
+//            }
+//            if(signature.charAt(argStart) == '(') {
+//
+//            } else {
+//
+//            }
         }
 
-//        System.out.println("final argEnd = " + argEnd + ", final argStart = " + argStart);
-
-        int terminator = signature.indexOf(')', argEnd); // lastIndexOf(')');
-        // argEnd == -1 ||
-        if(terminator == -1) {
+        int terminator = signature.indexOf(')', argEnd);
+        if(argEnd == -1 || terminator == -1) {
             throw new ParseException("non-terminating signature", sigEnd);
         }
 
-//        if(argEnd == Integer.MIN_VALUE) {
-//            argEnd = argStart;
-//        }
-
-//        if() {
-//            throw new ParseException("non-terminating signature", signature.length());
-//        }
-//
         if(argEnd != terminator || terminator != sigEnd - 1) {
             throw new ParseException(
                     "illegal signature termination: " + escapeJava(signature.substring(Math.max(0, argEnd))),
@@ -245,21 +147,12 @@ public class GypsyRoad {
             );
         }
 
-//        if(paramEnd == endParams - 1) {
-//            throw new ParseException("empty parameter @ " + types.size(), paramEnd - 1);
-//        }
-
-//        final int endParams = end - 1;
-//        if(signature.charAt(endParams) != ')') {
-//            throw new ParseException("illegal signature termination: " + StringEscapeUtils.escapeJava(signature.substring(Math.max(0, endParams))), endParams + 1);
-//        }
-
         canonicalSig.append(signature, prevNonCanonicalIndex, sigEnd);
 
         System.out.println("canonical: " + canonicalSig.toString());
     }
 
-    private static int nextParamTerminator(String signature, int i) {
+    static int nextParamTerminator(String signature, int i) {
         int comma = signature.indexOf(',', i);
         int close = signature.indexOf(')', i);
         if(comma == -1) {
@@ -271,7 +164,7 @@ public class GypsyRoad {
         return Math.min(comma, close);
     }
 
-    private static int parseTuple(String signature, int tupleStart/*, int endParams*/) throws ParseException {
+    private static String parseTuple(String signature, int tupleStart) throws ParseException {
         int idx = tupleStart;
         int tupleDepth = 0;
         int openTuple, closeTuple;
@@ -279,7 +172,7 @@ public class GypsyRoad {
             openTuple = signature.indexOf('(', idx);
             closeTuple = signature.indexOf(')', idx);
 
-            if(closeTuple < 0) { //  || closeTuple >= endParams
+            if(closeTuple < 0) {
                 throw new ParseException("non-terminating tuple", tupleStart);
             }
 
@@ -296,7 +189,9 @@ public class GypsyRoad {
         String tuple = signature.substring(tupleStart, idx);
         System.out.println("tuple: " + tuple); // uncanonicalized
 
-        return idx;
+        return tuple;
+
+//        return idx;
     }
 
     public static void validateParams(Object[] values, List<Type> types) {
@@ -306,7 +201,6 @@ public class GypsyRoad {
             for ( ; i < size; i++) {
                 types.get(i).validate(values[i]);
             }
-            // encode
         } catch (IllegalArgumentException | NullPointerException e) {
             throw new IllegalArgumentException("invalid param @ " + i + ": " + e.getMessage(), e);
         }
@@ -314,24 +208,9 @@ public class GypsyRoad {
 
     public static void encodeParams(ByteBuffer outBuffer, Object[] values, List<Type> types) {
         for (int i = 0; i < values.length; i++) {
-
             types.get(i).encode(values[i], outBuffer);
-
-//            Object value = values[i];
-//            if(value instanceof Object[]) {
-//                Object[] arr = (Object[]) value;
-//                for (int j = 0; j < arr.length; j++) {
-//                    types.get(i).encode(values[i], outBuffer);
-//                }
-//            } else {
-
-//            }
         }
     }
-
-//    private static String canonicalize() {
-//
-//    }
 
     public static ByteBuffer encodeFunctionCall(String signature, Object... params) throws ParseException {
 
@@ -351,20 +230,12 @@ public class GypsyRoad {
         for (int i = 0; i < size; i++) {
             Type t = types.get(i);
             if(t.byteLen != null) {
-//                if(t.byteLen != 32) {
-//                int roundedUp = t.byteLen + (32 - (t.byteLen % 32));
-//                System.out.println(roundedUp);
-                    paramsByteLen += t.byteLen;
-//                } else {
-//                paramsByteLen += t.byteLen;
+                paramsByteLen += t.byteLen;
             } else {
 //                paramsByteLen += t.calcDynamicByteLen(params[i]);
-
                 paramsByteLen = 1000;
-
 //                throw new UnsupportedOperationException("dynamic types not yet supported");
             }
-
         }
 
         System.out.println("allocating " + (4 + paramsByteLen));
@@ -602,36 +473,36 @@ public class GypsyRoad {
 
         ByteBuffer abi = null;
 
-        try {
-            abi = encodeFunctionCall("");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = encodeFunctionCall("a");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = encodeFunctionCall(")");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = encodeFunctionCall("a(");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = encodeFunctionCall("a(int");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = encodeFunctionCall("a(,int");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
+//        try {
+//            abi = encodeFunctionCall("");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = encodeFunctionCall("a");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = encodeFunctionCall(")");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = encodeFunctionCall("a(");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = encodeFunctionCall("a(int");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = encodeFunctionCall("a(,int");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
         try {
             abi = encodeFunctionCall("a(,int)");
         } catch (Throwable t) {
@@ -653,7 +524,7 @@ public class GypsyRoad {
             System.out.println("\t\t" + t.getMessage());
         }
         try {
-            abi = encodeFunctionCall("a(())");
+            abi = encodeFunctionCall("a(())", (Object) "");
         } catch (Throwable t) {
             System.out.println("\t\t" + t.getMessage());
         }
@@ -668,6 +539,11 @@ public class GypsyRoad {
             System.out.println("\t\t" + t.getMessage());
         }
         try {
+            abi = encodeFunctionCall("a((");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+        try {
             abi = encodeFunctionCall("a(()");
         } catch (Throwable t) {
             System.out.println("\t\t" + t.getMessage());
@@ -677,20 +553,25 @@ public class GypsyRoad {
         } catch (Throwable t) {
             System.out.println("\t\t" + t.getMessage());
         }
+//        try {
+            BigDecimal a = BigDecimal.valueOf(96, 0);
+            BigDecimal b = BigDecimal.valueOf((byte)96.0);
+            BigDecimal c_ = BigDecimal.valueOf((short) 96.0);
+            BigDecimal d = BigDecimal.valueOf((int) 96.0);
+            BigDecimal e = BigDecimal.valueOf(96);
+            System.out.println(e.scale());
 
-//        abi = encodeFunctionCall("a((()))");
+//            System.out.println("bitlen " + a.unscaledValue().bitLength());
+
+        abi = encodeFunctionCall("a(fixed16x0,fixed16x1,fixed16x2,fixed16x3,fixed16x4)", a, b, c_, d, e);
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
 
         System.out.println(Hex.toHexString(abi.array()));
 
 
         if(true) return;
-
-//        Type t = new Type("uint[][12][]");
-//        System.out.println(t);
-
-//        if(true) return;
-
-//        System.out.println(int[][].class);
 
         Class c0 = int[].class;
         System.out.println(c0.getName());
@@ -739,54 +620,5 @@ public class GypsyRoad {
         Encoder.insertInts(new int[] { 1, 2, 3 }, outBuffer);
 
         System.out.println(Strings.encode(outBuffer.array(), HEX));
-
     }
-
-//    private static void insertBytesArray(byte[][] src, ByteBuffer dest) {
-//        for(byte[] e : src) {
-//            insertBytes(e, dest);
-//        }
-//    }
-//
-//    private static void insertBytes(byte[] src,/* int offset, int len,*/ ByteBuffer dest) {
-//        dest.put(src);
-//        final int n = _32 - src.length;
-//        for (int i = 0; i < n; i++) {
-//            dest.put((byte) 0);
-//        }
-//    }
-//
-//    private static void insertBool(boolean bool, ByteBuffer dest) {
-//        insertInt(bool ? 1L : 0L, dest);
-//    }
-//
-//    public static void insertInts(int[] ints, ByteBuffer dest) {
-//        for (int e : ints) {
-//            insertInt(e, dest);
-//        }
-//    }
-//
-//    private static void insertInt(long val, ByteBuffer dest) {
-////        final int pos = dest.position();
-//        dest.put(PADDING_192_BITS);
-//        dest.putLong(val);
-////        putLongBigEndian(val, dest, pos + NUM_PADDING_BYTES);
-////        return pos + INT_PARAM_LENGTH_BYTES;
-//    }
-//
-//    public static void putLongBigEndian(long val, ByteBuffer dest) {
-//
-//    }
-//
-//    public static void putLongBigEndian(long val, byte[] o, int i) {
-//        o[i] = (byte) (val >>> 56);
-//        o[i+1] = (byte) (val >>> 48);
-//        o[i+2] = (byte) (val >>> 40);
-//        o[i+3] = (byte) (val >>> 32);
-//        o[i+4] = (byte) (val >>> 24);
-//        o[i+5] = (byte) (val >>> 16);
-//        o[i+6] = (byte) (val >>> 8);
-//        o[i+7] = (byte) val;
-//    }
-
 }

@@ -123,9 +123,9 @@ public class Type {
 //            this.baseArithmeticLimit = ADDRESS_ARITHMETIC_LIMIT;
             this.baseTypeBitLimit = 160;
         } else if((t = abiBaseType.indexOf("fixed")) >= 0) {
-            int x = abiBaseType.lastIndexOf('x');
+            int x = abiBaseType.indexOf('x', t + 5);
             Integer m = Integer.parseInt(abiBaseType.substring(t + 5, x));
-            Integer n = Integer.parseInt(abiBaseType.substring(x + 1));
+            Integer n = Integer.parseInt(abiBaseType.substring(x + 1)); // error due to tuple not parsed
             System.out.println(m + "x" + n);
             this.baseTypeBitLimit = m;
             this.scaleN = n;
@@ -172,6 +172,12 @@ public class Type {
     }
 
     private String type(String abiBaseType, boolean element) {
+
+        if(abiBaseType.charAt(0) == '(') {
+            fixedLengthStack.push(32);
+            return "TUPLE";
+        }
+
         switch (abiBaseType) {
         case "uint8": fixedLengthStack.push(1); return element ? CLASS_NAME_ELEMENT_BYTE : CLASS_NAME_BYTE;
         case "uint16": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_SHORT : CLASS_NAME_SHORT;
@@ -499,6 +505,9 @@ public class Type {
             bitLen = bigIntParam.bitLength();
         } else if(number instanceof BigDecimal) {
             BigDecimal bigIntParam = (BigDecimal) number;
+            if(bigIntParam.scale() != 0) {
+                throw new IllegalArgumentException("scale must be 0");
+            }
             bitLen = bigIntParam.unscaledValue().bitLength();
         } else {
             final long longVal = number.longValue();
