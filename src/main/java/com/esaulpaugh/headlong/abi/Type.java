@@ -295,7 +295,8 @@ public class Type {
         default: {
             if(abiBaseType.contains("fixed")) {
                 fixedLengthStack.push(32);
-                return CLASS_NAME_BIG_DECIMAL;
+                return element ? CLASS_NAME_ELEMENT_BIG_DECIMAL : CLASS_NAME_BIG_DECIMAL;
+//                return CLASS_NAME_BIG_DECIMAL;
             }
             throw new IllegalArgumentException("unrecognized type: " + abiBaseType + " (" + Hex.toHexString(abiBaseType.getBytes()) + ")");
             // ufixed<M>x<N>

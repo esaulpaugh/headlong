@@ -7,6 +7,7 @@ import org.spongycastle.util.encoders.Hex;
 import sun.nio.cs.US_ASCII;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
@@ -55,14 +56,59 @@ public class GypsyRoad {
         }
     }
 
-    private static void checkParamChars(String signature, int argStart, int argEnd) throws ParseException {
-        Matcher illegalChars = HAS_NON_TYPE_CHARS.matcher(signature).region(argStart, argEnd);
+    private static void checkParamChars(Matcher matcher, String signature, int argStart, int argEnd) throws ParseException {
+        Matcher illegalChars = matcher.region(argStart, argEnd);
         if (illegalChars.find()) {
             throwIllegalCharException(true, signature, illegalChars.start());
         }
     }
 
-    public static void parseFunctionSignature(final String signature, final List<Type> types, final StringBuilder canonicalSig) throws ParseException {
+    private static String canonicalize(String signature, String typeString, int argStart, final int argEnd /* StringBuilder canonicalSig, int prevNonCanonicalIndex */) {
+        int splitIndex;
+        String piece;
+
+        if (typeString.endsWith("int")) {
+            splitIndex = argEnd;
+            piece = "256";
+//            canonicalSig.append(signature, prevNonCanonicalIndex, argEnd).append("256");
+        } else if(typeString.endsWith("fixed")) {
+            splitIndex = argEnd;
+            piece = "128x18";
+//            canonicalSig.append(signature, prevNonCanonicalIndex, argEnd).append("128x18");
+        } else if(typeString.contains("int[")) {
+            splitIndex = signature.indexOf("int", argStart) + 3;
+            piece = "256";
+//            String a = signature.substring(argStart, idx);
+//            String b = signature.substring(idx, argEnd);
+//            canonicalSig.append(signature, prevNonCanonicalIndex, idx).append("256").append(signature, idx, argEnd);
+        } else if(typeString.contains("fixed[")) {
+            splitIndex = signature.indexOf("fixed", argStart) + 5;
+            piece = "128x18";
+//            String a = signature.substring(argStart, idx);
+//            String b = signature.substring(idx, argEnd);
+//            canonicalSig.append(signature, prevNonCanonicalIndex, idx).append("128x18").append(signature, idx, argEnd);
+        } else {
+            return null;
+//            splitIndex = argEnd;
+//            piece = "";
+        }
+
+        return new StringBuilder().append(signature, argStart, splitIndex).append(piece).append(signature, splitIndex, argEnd).toString();
+
+//        return argEnd;
+    }
+
+    /**
+     * Parses an Ethereum ABI-compatible function signature, outputting its canonical form and its parameters'
+     * {@code Types}.
+     *
+     * @param signature     the signature
+     * @param canonicalOut  the destination for the canonical form of the signature
+     * @param types         the destination for the function parameters' {@code Type}s.
+     * @return              true if the output signature differs from the input signature due to canonicalization
+     * @throws ParseException if the input is malformed
+     */
+    public static boolean parseFunctionSignature(final String signature, final StringBuilder canonicalOut, final List<Type> types) throws ParseException {
         System.out.println("signature: " + escapeJava(signature));
 
         final int startParams = signature.indexOf('(');
@@ -74,8 +120,10 @@ public class GypsyRoad {
         checkNameChars(signature, startParams);
 
         int argStart = startParams + 1;
-        int argEnd = argStart; // this inital value important for empty params case
+        int argEnd = argStart; // this inital value is important for empty params case
         int prevNonCanonicalIndex = 0;
+
+        final Matcher illegalTypeCharMatcher = HAS_NON_TYPE_CHARS.matcher(signature);
 
         final int sigEnd = signature.length();
 
@@ -87,18 +135,15 @@ public class GypsyRoad {
                 if(types.size() > 0) {
                     argEnd = argStart - 1;
                 }
-//                argEnd = types.size() == 0 ? argStart : argStart - 1;
                 break LOOP;
             case ',':
                 if(signature.charAt(argStart - 1) == ')') {
-//                    argEnd = argStart - 1;
                     break LOOP;
                 }
                 throw new ParseException("empty parameter @ " + types.size(), argStart);
-//                break LOOP;
             case '(': { // tuple
                 try {
-                    String typeString = parseTuple(signature, argStart);
+                    String typeString = parseTuple(illegalTypeCharMatcher, signature, argStart);
                     types.add(new Type(typeString));
                     argEnd = argStart + typeString.length();
                 } catch (ParseException pe) {
@@ -114,25 +159,18 @@ public class GypsyRoad {
                 if(argEnd == -1) {
                     break LOOP;
                 }
-                checkParamChars(signature, argStart, argEnd);
+                checkParamChars(illegalTypeCharMatcher, signature, argStart, argEnd);
                 String typeString = signature.substring(argStart, argEnd);
-                if (typeString.endsWith("int")) { // canonicalize
-                    typeString = typeString + "256";
-                    canonicalSig.append(signature, prevNonCanonicalIndex, argEnd).append("256");
+                String canonicalized = canonicalize(signature, typeString, argStart, argEnd);
+                if(canonicalized != null) {
+                    typeString = canonicalized;
+                    canonicalOut.append(signature, prevNonCanonicalIndex, argStart).append(typeString);
                     prevNonCanonicalIndex = argEnd;
                 }
                 types.add(new Type(typeString));
                 argStart = argEnd + 1;
             }
             }
-//            if(signature.charAt(argStart) == ')' || signature.charAt()) { //
-//                break LOOP;
-//            }
-//            if(signature.charAt(argStart) == '(') {
-//
-//            } else {
-//
-//            }
         }
 
         int terminator = signature.indexOf(')', argEnd);
@@ -147,9 +185,16 @@ public class GypsyRoad {
             );
         }
 
-        canonicalSig.append(signature, prevNonCanonicalIndex, sigEnd);
+//        System.out.println("prevNonCanonicalIndex = " + prevNonCanonicalIndex);
+//        if(prevNonCanonicalIndex == 0) {
+//            System.out.println("signature already canonical");
+//        }
 
-        System.out.println("canonical: " + canonicalSig.toString());
+        canonicalOut.append(signature, prevNonCanonicalIndex, sigEnd);
+
+        System.out.println("canonical: " + canonicalOut.toString());
+
+        return prevNonCanonicalIndex != 0;
     }
 
     static int nextParamTerminator(String signature, int i) {
@@ -164,7 +209,7 @@ public class GypsyRoad {
         return Math.min(comma, close);
     }
 
-    private static String parseTuple(String signature, int tupleStart) throws ParseException {
+    private static String parseTuple(Matcher matcher, String signature, int tupleStart) throws ParseException {
         int idx = tupleStart;
         int tupleDepth = 0;
         int openTuple, closeTuple;
@@ -185,7 +230,7 @@ public class GypsyRoad {
             }
         } while(tupleDepth > 0);
 
-        checkParamChars(signature, tupleStart, idx);
+        checkParamChars(matcher, signature, tupleStart, idx);
         String tuple = signature.substring(tupleStart, idx);
         System.out.println("tuple: " + tuple); // uncanonicalized
 
@@ -216,8 +261,10 @@ public class GypsyRoad {
 
         StringBuilder canonicalSigBuilder = new StringBuilder();
         List<Type> types = new ArrayList<>();
-        parseFunctionSignature(signature, types, canonicalSigBuilder);
+        boolean wasChanged = parseFunctionSignature(signature, canonicalSigBuilder, types);
         signature = canonicalSigBuilder.toString();
+
+        System.out.println("wasChanged = " + wasChanged);
 
         if(params.length != types.size()) {
             throw new IllegalArgumentException("params.length <> types.size(): " + params.length + " != " + types.size());
@@ -503,67 +550,103 @@ public class GypsyRoad {
 //        } catch (Throwable t) {
 //            System.out.println("\t\t" + t.getMessage());
 //        }
-        try {
-            abi = encodeFunctionCall("a(,int)");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = encodeFunctionCall("a(int,)");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = encodeFunctionCall("a()%");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = encodeFunctionCall("a()");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = encodeFunctionCall("a(())", (Object) "");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = encodeFunctionCall("a(()))");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = encodeFunctionCall("a(()]int)");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = encodeFunctionCall("a((");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = encodeFunctionCall("a(()");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = encodeFunctionCall("a((),");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
 //        try {
-            BigDecimal a = BigDecimal.valueOf(96, 0);
-            BigDecimal b = BigDecimal.valueOf((byte)96.0);
-            BigDecimal c_ = BigDecimal.valueOf((short) 96.0);
-            BigDecimal d = BigDecimal.valueOf((int) 96.0);
-            BigDecimal e = BigDecimal.valueOf(96);
-            System.out.println(e.scale());
+//            abi = encodeFunctionCall("a(,int)");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = encodeFunctionCall("a(int,)");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = encodeFunctionCall("a()%");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = encodeFunctionCall("a()");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = encodeFunctionCall("a(())", (Object) "");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = encodeFunctionCall("a(()))");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = encodeFunctionCall("a(()]int)");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = encodeFunctionCall("a((");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = encodeFunctionCall("a(()");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = encodeFunctionCall("a((),");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+////        try {
+//            BigDecimal a = BigDecimal.valueOf(96, 0);
+//            BigDecimal b = BigDecimal.valueOf((byte)96.0);
+//            BigDecimal c_ = BigDecimal.valueOf((short) 96.0);
+//            BigDecimal d = BigDecimal.valueOf((int) 96.0);
+//            BigDecimal e = BigDecimal.valueOf(96);
+//            System.out.println(e.scale());
+//
+////            System.out.println("bitlen " + a.unscaledValue().bitLength());
+//
+//        abi = encodeFunctionCall("a(fixed16x0,fixed16x1,fixed16x2,fixed16x3,fixed16x4)", a, b, c_, d, e);
+////        } catch (Throwable t) {
+////            System.out.println("\t\t" + t.getMessage());
+////        }
 
-//            System.out.println("bitlen " + a.unscaledValue().bitLength());
+        abi = encodeFunctionCall("()");
 
-        abi = encodeFunctionCall("a(fixed16x0,fixed16x1,fixed16x2,fixed16x3,fixed16x4)", a, b, c_, d, e);
+        Object[] params = new Object[] {
+                BigInteger.ONE, new BigInteger[][] {  }, BigInteger.ONE, new BigInteger[][] {  },
+                BigDecimal.valueOf(1L, 0), new BigDecimal[][] {  }, BigDecimal.valueOf(1L, 0), new BigDecimal[][] {  },
+        };
+
+        try {
+            abi = encodeFunctionCall("yabba_(int,int[99][0],uint,uint[99][0],fixed,fixed[99][0],ufixed,ufixed[99][0])",
+                    params
+            );
+        } catch (Throwable t) { System.out.println("\t\t" + t.getMessage());
+        }
+
+        System.out.println(Hex.toHexString(abi.array()));
+
+        abi = encodeFunctionCall("yabba_(int256,int256[2][0],uint256,uint256[2][0],fixed128x18,fixed128x18[2][0],ufixed128x18,ufixed128x18[2][0])",
+                params
+        );
+
+        System.out.println(Hex.toHexString(abi.array()));
+
+//        abi = encodeFunctionCall("yabba_(int[1])",
+//                (Object) new BigInteger[] { BigInteger.ZERO }
+//        );
+//        abi = encodeFunctionCall("yabba_(int[1])",
+//                (Object) new BigInteger[] { BigInteger.ZERO }
+//        );
+
+
+//        try {
+            abi = encodeFunctionCall("dabba_(ufixed[1])", (Object) new BigDecimal[] { BigDecimal.TEN });
 //        } catch (Throwable t) {
 //            System.out.println("\t\t" + t.getMessage());
 //        }
