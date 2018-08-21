@@ -6,15 +6,16 @@ import com.joemelsha.crypto.hash.Keccak;
 import org.spongycastle.util.encoders.Hex;
 import sun.nio.cs.US_ASCII;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
+import static org.apache.commons.lang3.StringEscapeUtils.escapeJava;
 
 // TODO encode and decode
 // TODO optimize -- maybe write all zeroes first then fill in params
@@ -31,23 +32,271 @@ public class GypsyRoad {
 
     private static final Charset ASCII = US_ASCII.INSTANCE;
 
-    public static List<Type> parseFunctionSignature(String signature) throws ParseException {
-        ArrayList<Type> types = new ArrayList<>();
-        final int endParams = signature.lastIndexOf(')');
-        if(endParams < 0) {
-            throw new ParseException("non-terminating function signature: " + signature, signature.length());
+//    private static final Pattern PRINTABLE = Pattern.compile("[\\p{Print}].*");
+//    private static final Pattern NON_PRINTABLE = Pattern.compile("[^\\p{Print}].*");
+//
+//    private static final Pattern CTRL = Pattern.compile("[\\p{Cntrl}].*");
+//    private static final Pattern NON_CTRL = Pattern.compile("[^\\p{Cntrl}].*");
+
+    private static final String REGEX_NON_ASCII_CHAR = "[^\\p{ASCII}]{1,}";
+    private static final Pattern NON_ASCII_CHAR = Pattern.compile(REGEX_NON_ASCII_CHAR);
+    private static final Pattern HAS_NON_ASCII_CHARS = Pattern.compile(REGEX_NON_ASCII_CHAR);
+
+
+    private static final String REGEX_NON_TYPE_CHAR = "[^a-z0-9\\[\\](),]{1,}";
+    private static final Pattern NON_TYPE_CHAR = Pattern.compile(REGEX_NON_TYPE_CHAR);
+    private static final Pattern HAS_NON_TYPE_CHARS = Pattern.compile(REGEX_NON_TYPE_CHAR);
+
+//    public static void parseFunctionSignature(String signature, List<Type> types, StringBuilder canonicalSig) {
+//
+//        System.out.println("signature: " + signature);
+//
+//        String[] tokens = signature.trim().split(REGEX_NON_TYPE); // "[^\\p{Print}]|\\s|\\(|\\)|," // \p{Cntrl} \p{Print}  \p{C}\p{Z} \u001C|\u001D|\u001E|\u001F \u001C|\u001D|\u001E|\u001F
+//
+//        for (String s : tokens) {
+//            System.out.println(StringEscapeUtils.escapeJava(s));
+//        }
+//
+////        String[] tokens = signature.trim().split("(?!\\p{Print})|\\s|,|\\(|\\)|"); // \p{Cntrl} \p{Print}  \p{C}\p{Z} \u001C|\u001D|\u001E|\u001F \u001C|\u001D|\u001E|\u001F
+//
+//        canonicalSig.append(tokens[0]).append('('); // tokens[1].equals("(")
+//
+////        int i = tokens.length - 1;
+////        String token;
+////        do {
+////            token = tokens[i--];
+////        } while (!token.equals(")") && i >= 2);
+//
+//        final int firstTypeIndex = 2;
+//        final int lastTypeIndex = tokens.length - 2; // ignore trailing ")"
+//        for (int i = firstTypeIndex; i <= lastTypeIndex; i++) {
+//            String typeString = tokens[i];
+//            if(!typeString.isEmpty()) {
+//                if (typeString.endsWith("int")) { // canonicalize
+//                    typeString = typeString + "256";
+//                }
+//                canonicalSig.append(typeString).append(",");
+//                types.add(new Type(typeString));
+//            }
+//        }
+//        if(lastTypeIndex > firstTypeIndex) {
+//            final int builderLen = canonicalSig.length();
+//            canonicalSig.replace(builderLen - 1, builderLen, ")");
+//        } else {
+//            canonicalSig.append(')');
+//        }
+//
+//        System.out.println("canonical: " + canonicalSig.toString());
+//    }
+
+    private static String escapeChar(char c) {
+        String hex = Integer.toHexString((int) c);
+        switch (hex.length()) {
+        case 1: return "\\u000" + hex;
+        case 2: return "\\u00" + hex;
+        case 3: return "\\u0" + hex;
+        case 4: return "\\u" + hex;
+        default: return "\\u0000";
         }
-        int paramStart = signature.indexOf('(') + 1;
-        int paramEnd;
-        while(paramStart < endParams) {
-            paramEnd = signature.indexOf(',', paramStart);
-            if(paramEnd == -1) {
-                paramEnd = endParams;
+    }
+
+    private static void throwIllegalCharException(boolean forNonTypeChar, String signature, int start) throws ParseException {
+        char c = signature.charAt(start);
+        throw new ParseException(
+                "non-" + (forNonTypeChar ? "type" : "ascii") + " character at index " + start
+                        + ": \'" + c + "\', " + escapeChar(c), start);
+    }
+
+    private static void checkNameChars(String signature, int startParams) throws ParseException {
+        Matcher illegalChars = HAS_NON_ASCII_CHARS.matcher(signature).region(0, startParams);
+        if(illegalChars.find()) {
+            throwIllegalCharException(false, signature, illegalChars.start());
+        }
+    }
+
+    private static void checkParamChars(String signature, int argStart, int argEnd) throws ParseException {
+        Matcher illegalChars = HAS_NON_TYPE_CHARS.matcher(signature).region(argStart, argEnd);
+        if (illegalChars.find()) {
+            throwIllegalCharException(true, signature, illegalChars.start());
+        }
+    }
+
+//    private static void checkStartAndEndIndices(String signature, int startParams, int endParams) throws ParseException {
+//        if(startParams < 0) {
+//            throw new ParseException("params start not found", 0);
+//        }
+//        if(endParams != signature.length() - 1) {
+//            throw new ParseException("illegal signature termination: " + StringEscapeUtils.escapeJava(signature.substring(Math.max(0, endParams))), endParams + 1);
+//        }
+//    }
+
+    public static void parseFunctionSignature(final String signature, final List<Type> types, final StringBuilder canonicalSig) throws ParseException {
+        System.out.println("signature: " + escapeJava(signature));
+
+        final int startParams = signature.indexOf('(');
+//        final int endParams = signature.lastIndexOf(')');
+
+//        final int endParams = signature.length() - 1;
+
+//        checkStartAndEndIndices(signature, startParams, endParams);
+
+        if(startParams < 0) {
+            throw new ParseException("params start not found", 0);
+        }
+
+        checkNameChars(signature, startParams);
+//        checkParamsChars(signature, startParams, end - 1); // endParams
+
+//        Matcher illegalChars = HAS_NON_TYPE_CHARS.matcher(signature);
+
+        int argStart = startParams + 1;
+        int argEnd = -1; // Integer.MIN_VALUE; // = Integer.MIN_VALUE; // do not default to -1
+        int prevNonCanonicalIndex = 0;
+
+
+        final int sigEnd = signature.length(); //  - 1;
+
+//        int nextEnd;
+
+//        final int allParamsEnd = signature.lastIndexOf(')');
+        while(argStart < sigEnd) { // argStart < endParams
+            if(signature.charAt(argStart) == '(') {
+                try {
+                    argEnd = parseTuple(signature, argStart/*, endParams*/);
+                } catch (ParseException pe) {
+                    throw new ParseException(pe.getMessage() + " @ " + types.size(), pe.getErrorOffset()); //  + " (param " + types.size() + ")"
+                }
+//                if(signature.indexOf(')', argEnd) == -1) {
+//                    argEnd = -1;
+//                    break;
+//                }
+                if(argEnd == sigEnd || signature.charAt(argEnd) != ',') {
+                    break;
+                }
+                argStart = argEnd + 1;
+            } else {
+//                System.out.println(signature.charAt(argStart));
+//                int nextEnd = nextParamTerminator(signature, argStart);
+                argEnd = nextParamTerminator(signature, argStart);
+
+                if(argEnd == -1) {
+//                    argEnd = -1;
+                    break;
+                }
+                if(argEnd == argStart) {
+
+                    if(types.size() == 0 && signature.charAt(argStart) == ')') {
+//                        argEnd = argStart;
+                        break;
+                    }
+
+//                    if(signature.charAt(argStart) == ',') {
+                        throw new ParseException("empty parameter @ " + types.size(), argStart); // prevNonCanonicalIndex = paramEnd + 1;
+//                    }
+
+                }
+
+//                argEnd = nextEnd;
+
+//                argEnd = signature.indexOf(',', argStart);
+//                if(argEnd == -1) {
+//                    argEnd = signature.indexOf(')', argStart);
+//                    if(argEnd == -1) {
+//                        break;
+////                        throw new ParseException("non-terminating signature", signature.length());
+//                    }
+//                }
+//                if(argEnd == argStart) {
+//                    throw new ParseException("empty parameter @ " + types.size(), argStart); // prevNonCanonicalIndex = paramEnd + 1;
+//                }
+                checkParamChars(signature, argStart, argEnd);
+                String typeString = signature.substring(argStart, argEnd);
+                if (typeString.endsWith("int")) { // canonicalize
+                    typeString = typeString + "256";
+                    canonicalSig.append(signature, prevNonCanonicalIndex, argEnd).append("256");
+                    prevNonCanonicalIndex = argEnd;
+                }
+                types.add(new Type(typeString));
+                argStart = argEnd + 1;
             }
-            types.add(new Type(signature.substring(paramStart, paramEnd)));
-            paramStart = paramEnd + 1;
+//            System.out.println("argEnd = " + argEnd);
         }
-        return types;
+
+//        System.out.println("final argEnd = " + argEnd + ", final argStart = " + argStart);
+
+        int terminator = signature.indexOf(')', argEnd); // lastIndexOf(')');
+        // argEnd == -1 ||
+        if(terminator == -1) {
+            throw new ParseException("non-terminating signature", sigEnd);
+        }
+
+//        if(argEnd == Integer.MIN_VALUE) {
+//            argEnd = argStart;
+//        }
+
+//        if() {
+//            throw new ParseException("non-terminating signature", signature.length());
+//        }
+//
+        if(argEnd != terminator || terminator != sigEnd - 1) {
+            throw new ParseException(
+                    "illegal signature termination: " + escapeJava(signature.substring(Math.max(0, argEnd))),
+                    argEnd
+            );
+        }
+
+//        if(paramEnd == endParams - 1) {
+//            throw new ParseException("empty parameter @ " + types.size(), paramEnd - 1);
+//        }
+
+//        final int endParams = end - 1;
+//        if(signature.charAt(endParams) != ')') {
+//            throw new ParseException("illegal signature termination: " + StringEscapeUtils.escapeJava(signature.substring(Math.max(0, endParams))), endParams + 1);
+//        }
+
+        canonicalSig.append(signature, prevNonCanonicalIndex, sigEnd);
+
+        System.out.println("canonical: " + canonicalSig.toString());
+    }
+
+    private static int nextParamTerminator(String signature, int i) {
+        int comma = signature.indexOf(',', i);
+        int close = signature.indexOf(')', i);
+        if(comma == -1) {
+            return close;
+        }
+        if(close == -1) {
+            return comma;
+        }
+        return Math.min(comma, close);
+    }
+
+    private static int parseTuple(String signature, int tupleStart/*, int endParams*/) throws ParseException {
+        int idx = tupleStart;
+        int tupleDepth = 0;
+        int openTuple, closeTuple;
+        do {
+            openTuple = signature.indexOf('(', idx);
+            closeTuple = signature.indexOf(')', idx);
+
+            if(closeTuple < 0) { //  || closeTuple >= endParams
+                throw new ParseException("non-terminating tuple", tupleStart);
+            }
+
+            if(openTuple == -1 || closeTuple < openTuple) {
+                tupleDepth--;
+                idx = closeTuple + 1;
+            } else {
+                tupleDepth++;
+                idx = openTuple + 1;
+            }
+        } while(tupleDepth > 0);
+
+        checkParamChars(signature, tupleStart, idx);
+        String tuple = signature.substring(tupleStart, idx);
+        System.out.println("tuple: " + tuple); // uncanonicalized
+
+        return idx;
     }
 
     public static void validateParams(Object[] values, List<Type> types) {
@@ -59,7 +308,7 @@ public class GypsyRoad {
             }
             // encode
         } catch (IllegalArgumentException | NullPointerException e) {
-            throw new IllegalArgumentException("invalid param @ index " + i + ": " + e.getMessage(), e);
+            throw new IllegalArgumentException("invalid param @ " + i + ": " + e.getMessage(), e);
         }
     }
 
@@ -80,8 +329,16 @@ public class GypsyRoad {
         }
     }
 
+//    private static String canonicalize() {
+//
+//    }
+
     public static ByteBuffer encodeFunctionCall(String signature, Object... params) throws ParseException {
-        List<Type> types = parseFunctionSignature(signature);
+
+        StringBuilder canonicalSigBuilder = new StringBuilder();
+        List<Type> types = new ArrayList<>();
+        parseFunctionSignature(signature, types, canonicalSigBuilder);
+        signature = canonicalSigBuilder.toString();
 
         if(params.length != types.size()) {
             throw new IllegalArgumentException("params.length <> types.size(): " + params.length + " != " + types.size());
@@ -102,7 +359,10 @@ public class GypsyRoad {
 //                paramsByteLen += t.byteLen;
             } else {
 //                paramsByteLen += t.calcDynamicByteLen(params[i]);
-                throw new UnsupportedOperationException("dynamic types not yet supported");
+
+                paramsByteLen = 1000;
+
+//                throw new UnsupportedOperationException("dynamic types not yet supported");
             }
 
         }
@@ -119,6 +379,30 @@ public class GypsyRoad {
     }
 
     public static void main(String[] args0) throws ClassNotFoundException, ParseException {
+
+        //        int countP = 0, countC = 0, countN = 0;
+//        int j = Short.MIN_VALUE;
+//        for ( ; j <= Short.MAX_VALUE; j++) {
+//            String s = new String(new char[] { (char) j });
+//            boolean p = PRINTABLE.matcher(s).matches();
+//            boolean c = CTRL.matcher(s).matches();
+//            boolean np = NON_PRINTABLE.matcher(s).matches();
+//            boolean nc = NON_CTRL.matcher(s).matches();
+////            System.out.println("printable:" + p);
+////            if(p != nc || np != c) {
+////                countN++;
+////                System.out.println(i + ": " + Hex.toHexString(new byte[] { (byte) ((char) j) }) + ", printable:" + p + " != " + nc + " || " + np + " != " + c + " == " + (char) j);
+////            }
+//            if(p) {
+//                countP++;
+//            }
+//            if(c) {
+//                countC++;
+//            }
+//            countN++;
+//        }
+//
+//        System.out.println("countP: " + countP + ", countC = " + countC + ", countN = " + countN + ", " + j);
 
 //        Class.forName(int.class.getName());
 //        Class.forName(float.class.getName());
@@ -223,19 +507,20 @@ public class GypsyRoad {
 //                0L
 //        );
 //
-//        ByteBuffer abi3 = encodeFunctionCall("yeehaw(bytes1,bytes2[3])", // ,bytes2[]
+
+//        ByteBuffer abi00 = encodeFunctionCall("yeehaw(bytes1,bytes2[3])", // ,bytes2[]
 //                new byte[] { 127 },
 //                new byte[][] { new byte[] { 9, 8 }, new byte[] { 7, 6 }, new byte[] { 5, 4 } }
 //        );
-
-//        ByteBuffer abi3 = encodeFunctionCall("yeehaw(bytes,string,bytes[],bytes1[])",
+//
+//        ByteBuffer abi0 = encodeFunctionCall("yeehaw(bytes,string,bytes[],bytes1[])",
 //                new byte[0],
 //                "",
 //                new byte[0][],
 //                new byte[][] {  }
 //        );
-//        System.out.println(Hex.toHexString(abi3.array()));
-
+////        System.out.println(Hex.toHexString(abi3.array()));
+//
 //        ByteBuffer abi = encodeFunctionCall("yeehaw(int8[3][5][2])",
 //                (Object) new byte[][][] {
 //                        new byte[][] { new byte[] { (byte) 0xAA, (byte) 0xAA, (byte) 0xAA }, new byte[3], new byte[3], new byte[3], new byte[3] },
@@ -256,7 +541,7 @@ public class GypsyRoad {
 //                        new byte[][] { new byte[2], new byte[2], new byte[2], new byte[2], new byte[] { -9, -8 } }
 //                }
 //        );
-
+//
 //        ByteBuffer abi4 = encodeFunctionCall("yeehaw(fixed16x2,ufixed16x2,int16,uint16,int40,uint40,int256,uint256)",
 //                BigDecimal.valueOf(250.54),
 //                BigDecimal.valueOf(250.54),
@@ -267,27 +552,135 @@ public class GypsyRoad {
 //                BigInteger.valueOf(25_054),
 //                BigInteger.valueOf(25_054)
 //        );
-
+//
 //        ByteBuffer abi5 = encodeFunctionCall("yeehaw(string)",
 //                "ahoy123_ahoy123_ahoy123_ahoy123_!" // 4321yoe_4321yoe_4321yoe_4321yoe_
 //        );
-
+//
 //        ByteBuffer abi6 = encodeFunctionCall("yeehaw(bytes[2])",
 //                (Object) new byte[][] { new byte[32], new byte[32] }
 //        );
+//
+//        ByteBuffer abi7 = encodeFunctionCall("test(bytes,string,int8,int16,int24,int40,int200,bytes[0])",
+//                new byte[0],
+//                "",
+//                (byte) 0,
+//                (short) 'o',
+//                0,
+//                0L,
+//                BigInteger.ZERO,
+//                new byte[][] {  }
+//        );
 
-        ByteBuffer abi7 = encodeFunctionCall("test(bytes,string,int8,int16,int24,int40,int200,bytes[0])",
-                new byte[0],
-                "",
-                (byte) 0,
-                (short) 'o',
-                0,
-                0L,
-                BigInteger.ZERO,
-                new byte[][][] {  }
-        );
+//        ByteBuffer abi_ = encodeFunctionCall("()");
+//
+//        ByteBuffer abi__ = encodeFunctionCall("____(int)", BigInteger.TEN);
+//
+//        ByteBuffer abi___ = encodeFunctionCall(")()");
+//
+//
+//        ByteBuffer abi65 = encodeFunctionCall(" -----_;\u007F-a ;(int)", BigInteger.TEN);
+//
+//        ByteBuffer abi8 = encodeFunctionCall(" noncanon(int)",
+////                        '\u0009' +
+////                        '\r' +
+////                        '\u000B' +
+////                        '\u000C' +
+////                        '\n' +
+////                        '\u001C' +
+////                        '\u001D' +
+////                        '\u001E' +
+////                        '\u001F' +
+////                        " \t ,\f,",
+//                BigInteger.ZERO
+////                BigInteger.ZERO,
+////                BigInteger.ZERO,
+////                BigInteger.ONE,
+////                BigInteger.ONE,
+////                BigInteger.ONE
+//        );
 
-        System.out.println(Hex.toHexString(abi7.array()));
+        ByteBuffer abi = null;
+
+        try {
+            abi = encodeFunctionCall("");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+        try {
+            abi = encodeFunctionCall("a");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+        try {
+            abi = encodeFunctionCall(")");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+        try {
+            abi = encodeFunctionCall("a(");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+        try {
+            abi = encodeFunctionCall("a(int");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+        try {
+            abi = encodeFunctionCall("a(,int");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+        try {
+            abi = encodeFunctionCall("a(,int)");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+        try {
+            abi = encodeFunctionCall("a(int,)");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+        try {
+            abi = encodeFunctionCall("a()%");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+        try {
+            abi = encodeFunctionCall("a()");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+        try {
+            abi = encodeFunctionCall("a(())");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+        try {
+            abi = encodeFunctionCall("a(()))");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+        try {
+            abi = encodeFunctionCall("a(()]int)");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+        try {
+            abi = encodeFunctionCall("a(()");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+        try {
+            abi = encodeFunctionCall("a((),");
+        } catch (Throwable t) {
+            System.out.println("\t\t" + t.getMessage());
+        }
+
+//        abi = encodeFunctionCall("a((()))");
+
+        System.out.println(Hex.toHexString(abi.array()));
 
 
         if(true) return;

@@ -4,6 +4,7 @@ import com.esaulpaugh.headlong.abi.util.Encoder;
 import com.esaulpaugh.headlong.rlp.util.BizarroIntegers;
 import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
 import org.junit.Assert;
+import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -133,7 +134,6 @@ public class Type {
 //            this.baseArithmeticLimit = null;
             this.baseTypeBitLimit = null;
         }
-
     }
 
     // uint[][3][]
@@ -291,7 +291,7 @@ public class Type {
                 fixedLengthStack.push(32);
                 return CLASS_NAME_BIG_DECIMAL;
             }
-            throw new IllegalArgumentException("abi base type " + abiBaseType + " not yet supported");
+            throw new IllegalArgumentException("unrecognized type: " + abiBaseType + " (" + Hex.toHexString(abiBaseType.getBytes()) + ")");
             // ufixed<M>x<N>
             // fixed<M>x<N>
 //            BigDecimal
