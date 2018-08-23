@@ -1,5 +1,7 @@
 package com.esaulpaugh.headlong.abi.util;
 
+import com.esaulpaugh.headlong.abi.Tuple;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
@@ -65,6 +67,10 @@ public class Encoder {
             dest.put((byte) 0);
         }
         dest.put(arr);
+    }
+
+    public static void insertTuple(Tuple tuple) {
+        throw new Error("not yet implemented");
     }
 
 }
