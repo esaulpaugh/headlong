@@ -246,10 +246,41 @@ public class Example {
 //            System.out.println("\t\t" + t.getMessage());
 //        }
 
-        abi = ABI.encodeFunctionCall("(bool,bool,bool[])",
-                true,
-                true,
-                new boolean[] { true, false, true }
+//        abi = ABI.encodeFunctionCall("(bool,bool,bool[])",
+//                true,
+//                true,
+//                new boolean[] { true, false, true }
+//        );
+//        abi = ABI.encodeFunctionCall("(uint200,uint200[],uint208,uint208[],uint216,uint216[],uint224,uint224[],uint232,uint232[],uint240,uint240[],uint248,uint248[],uint256,uint256[])",
+//                BigInteger.valueOf(5L),
+//                new BigInteger[] { new BigInteger("172345678901234567890123456789012345678901234567890123456789") },
+//                BigInteger.valueOf(5L),
+//                new BigInteger[] { new BigInteger("172345678901234567890123456789012345678901234567890123456789000") },
+//                BigInteger.valueOf(5L),
+//                new BigInteger[] { BigInteger.valueOf(65L) },
+//                BigInteger.valueOf(5L),
+//                new BigInteger[] { BigInteger.valueOf(65L) },
+//                BigInteger.valueOf(5L),
+//                new BigInteger[] { BigInteger.valueOf(65L) },
+//                BigInteger.valueOf(5L),
+//                new BigInteger[] { BigInteger.valueOf(65L) },
+//                BigInteger.valueOf(5L),
+//                new BigInteger[] { BigInteger.valueOf(65L) },
+//                BigInteger.valueOf(5L),
+//                new BigInteger[] { new BigInteger("172345678901234567890123456789012345678901234567890123456789000000000000000000") }
+//        );
+        byte[] function = new byte[24];
+        function[0] = 126;
+        function[23] = 127;
+        byte[] bytes32 = new byte[32];
+        bytes32[0] = 126;
+        bytes32[31] = 127;
+
+        // TODO ENCODE ARRAY LENGTH FOR DYNAMICS
+        abi = ABI.encodeFunctionCall("(function,bytes32,bytes[])",
+                function,
+                bytes32,
+                new byte[][] { new byte[] { 5, 6, 7 } }
         );
 
         System.out.println(Hex.toHexString(abi.array()));

@@ -52,7 +52,9 @@ public class ArrayType extends Type {
             System.out.println(canonicalAbiType + " : static len: " + sb.toString() + " = " + byteLen);
         }
 
-        if(abiBaseType.equals("string")) {
+        if(abiBaseType.equals("string")
+                || abiBaseType.equals("function")
+                || (abiBaseType.startsWith("bytes"))) { //  && abiBaseType.length() > "bytes".length()
             abiBaseType = "uint8";
         }
 
@@ -61,7 +63,7 @@ public class ArrayType extends Type {
 
     @Override
     protected void validate(final Object param, final String expectedClassName, final int expectedLengthIndex) {
-//        validateArray((Object[]) param, expectedClassName, expectedLengthIndex);
+        super.validate(param, expectedClassName, expectedLengthIndex);
 
         if(param.getClass().isArray()) {
             if(param instanceof Object[]) {
@@ -80,7 +82,7 @@ public class ArrayType extends Type {
         } else if(param instanceof String) {
             validateByteArray(((String) param).getBytes(UTF_8.INSTANCE), expectedLengthIndex);
         } else if(param instanceof Number) {
-            NumberType.validateNumber(param, ((NumberType) baseType).bitLimit);
+            NumberType._validateNumber(param, ((NumberType) baseType).bitLimit);
         } else if(param instanceof Boolean) {
             super.validate(param, CLASS_NAME_BOOLEAN, expectedLengthIndex);
         } else {
@@ -173,7 +175,7 @@ public class ArrayType extends Type {
             return;
         }
         if(actual != expected) {
-            throw new IllegalArgumentException("array length mismatch: " + actual + " != " + expected);
+            throw new IllegalArgumentException("array length mismatch: actual != expected: " + actual + " != " + expected);
         }
         System.out.println("fixed length valid;");
     }

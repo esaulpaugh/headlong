@@ -1,10 +1,8 @@
 package com.esaulpaugh.headlong.abi;
 
-import java.util.Stack;
-
 class TupleType extends Type {
 
-    private final Type[] types;
+    final Type[] types;
 
     private TupleType(boolean dynamic, Type... types) {
         super(typeStringForTypes(types), Tuple.class.getName(), dynamic);
@@ -41,9 +39,9 @@ class TupleType extends Type {
         return sb.append(")").toString();
     }
 
-    Type[] getTypes() {
-        return types;
-    }
+//    Type[] getTypes() {
+//        return types;
+//    }
 
 //    @Override
 //    public int calcDynamicByteLen(Object param) {
@@ -116,7 +114,7 @@ class TupleType extends Type {
 
         Tuple tuple = (Tuple) param;
 
-        Type[] types = getTypes();
+        Type[] types = this.types;
         final int typesLen = types.length;
         if(typesLen != tuple.elements.length) {
             throw new IllegalArgumentException("tuple length mismatch: expected: " + typesLen + ", actual: " + tuple.elements.length);

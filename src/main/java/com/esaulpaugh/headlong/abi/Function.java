@@ -17,7 +17,7 @@ public class Function {
 
     transient final byte[] selector = new byte[FUNCTION_ID_LEN];
 
-    transient final Type[] types;
+    transient final TupleType paramTypes;
 
     boolean requiredCanonicalization;
 
@@ -35,11 +35,11 @@ public class Function {
             throw new RuntimeException(de);
         }
 
-        this.types = types.toArray(EMPTY_TYPE_ARRAY);
+        this.paramTypes = TupleType.create(types.toArray(EMPTY_TYPE_ARRAY));
     }
 
     public ByteBuffer encodeCall(Object... params) {
-        return ABI.encodeFunctionCall(this, params);
+        return Encoder.encodeFunctionCall(this, params);
     }
 
     public String getCanonicalSignature() {
@@ -52,10 +52,11 @@ public class Function {
         return out;
     }
 
-    public Type[] getTypes() {
-        Type[] out = new Type[types.length];
-        System.arraycopy(types, 0, out, 0, out.length);
-        return out;
+    public TupleType getParamTypes() {
+        return paramTypes;
+//        Type[] out = new Type[types.length];
+//        System.arraycopy(types, 0, out, 0, out.length);
+//        return out;
     }
 
     public boolean requiredCanonicalization() {

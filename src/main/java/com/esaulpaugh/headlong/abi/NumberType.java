@@ -59,10 +59,10 @@ public class NumberType extends Type {
     @Override
     protected void validate(final Object param, final String expectedClassName, final int expectedLengthIndex) {
         super.validate(param, expectedClassName, expectedLengthIndex);
-        validateNumber(param, bitLimit);
+        _validateNumber(param, bitLimit);
     }
 
-    protected static void validateNumber(final Object param, final int bitLimit) {
+    protected static void _validateNumber(final Object param, final int bitLimit) {
         Number number = (Number) param;
         final int bitLen;
         if(number instanceof BigInteger) {

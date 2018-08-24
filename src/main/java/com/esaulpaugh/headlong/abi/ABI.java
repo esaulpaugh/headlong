@@ -8,9 +8,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -263,137 +260,28 @@ public class ABI {
 ////        return idx;
 //    }
 
-    public static void checkTypes(Type[] types, Object[] values) {
-        final int n = types.length;
+    public static void checkTypes(Type[] paramTypes, Object[] arguments) {
+        final int n = paramTypes.length;
         int i = 0;
         try {
             for ( ; i < n; i++) {
-                types[i].validate(values[i]);
+                paramTypes[i].validate(arguments[i]);
             }
         } catch (IllegalArgumentException | NullPointerException e) {
             throw new IllegalArgumentException("invalid param @ " + i + ": " + e.getMessage(), e);
         }
     }
 
-    public static void encodeParamHeads(ByteBuffer outBuffer, List<Type> types, List<Object> values, int[] headLengths) {
-//        final int size = types.size();
-//        for (int i = 0; i < size; i++) {
-//            types[i].encodeHeads(values[i], outBuffer);
-//        }
-
-        int sum = 0;
-        for (int i : headLengths) {
-            sum += i;
-        }
-
-        int i = 0;
-        Iterator<Type> ti;
-        Iterator<Object> vi;
-        for(ti = types.iterator(), vi = values.iterator(); ti.hasNext(); ) {
-            Type type = ti.next();
-//            sum -= headLengths[i++];
-            type.encodeHead(vi.next(), outBuffer, sum, type.dynamic);
-            if(!type.dynamic) {
-                ti.remove();
-                vi.remove();
-            }
-        }
+    public static ByteBuffer encodeFunctionCall(String signature, Object... arguments) throws ParseException {
+        return Encoder.encodeFunctionCall(new Function(signature), arguments);
     }
 
-    public static void encodeParamTails(ByteBuffer outBuffer, List<Type> types, List<Object> values) {
-//        final int size = types.size();
-//        for (int i = 0; i < size; i++) {
-//            types[i].encodeHeads(values[i], outBuffer);
-//        }
-        Iterator<Type> ti;
-        Iterator<Object> vi;
-        for(ti = types.iterator(), vi = values.iterator(); ti.hasNext(); ) {
-            Type type = ti.next();
-            type.encodeTail(vi.next(), outBuffer);
-            if(!type.dynamic) {
-                ti.remove();
-                vi.remove();
-            }
-        }
-    }
-
-    public static ByteBuffer encodeFunctionCall(String signature, Object... params) throws ParseException {
-        return encodeFunctionCall(new Function(signature), params);
-    }
-
-    public static ByteBuffer encodeFunctionCall(Function function, Object... params) {
-
-//        StringBuilder canonicalSigBuilder = new StringBuilder();
-//        List<Type> types = new ArrayList<>();
-//        boolean wasChanged = parseFunctionSignature(signature, canonicalSigBuilder, types);
-//        signature = canonicalSigBuilder.toString();
-
-//        Function f = new Function(signature);
-
-        System.out.println("requiredCanonicalization = " + function.requiredCanonicalization);
-
-        final Type[] types = function.types;
-        final int expectedNumParams = types.length;
-
-        if(params.length != expectedNumParams) {
-            throw new IllegalArgumentException("params.length <> types.size(): " + params.length + " != " + types.length);
-        }
-
-        checkTypes(types, params);
-
-        // head(X(i)) = enc(len(head(X(1)) ... head(X(k)) tail(X(1)) ... tail(X(i-1)) ))
-
-        int[] headLengths = new int[types.length];
-        int dynamicHeadsByteLen = 0;
-//        boolean dynamic = false;
-        int paramsByteLen = 0;
-        for (int i = 0; i < expectedNumParams; i++) {
-            Type t = types[i];
-//            dynamic |= t.dynamic;
-
-            int byteLen = t.getDataByteLen(params[i]);
-            System.out.println(params[i] + " --> " + byteLen);
-            paramsByteLen += byteLen;
-
-            if(t.dynamic) {
-                headLengths[i] = 32;
-                dynamicHeadsByteLen += 32;
-                System.out.println(params[i] + " dynamic head " + 32);
-            } else {
-                headLengths[i] = byteLen;
-            }
-
-//            Integer byteLen = t.getHeadLen(params[i]);
-//            if(byteLen != null) {
-//                paramsByteLen += byteLen;
-//            } else {
-////                paramsByteLen = 1000;
-////                throw new UnsupportedOperationException("dynamic types not yet supported");
-//            }
-        }
-
-        System.out.println("**************** " + dynamicHeadsByteLen);
-
-        System.out.println("**************** " + paramsByteLen);
-
-        final int allocation = FUNCTION_ID_LEN + dynamicHeadsByteLen + paramsByteLen;
-
-        System.out.println("allocating " + allocation);
-        ByteBuffer outBuffer = ByteBuffer.wrap(new byte[allocation]); // ByteOrder.BIG_ENDIAN by default
-//        Keccak keccak = new Keccak(256);
-//        keccak.update(signature.getBytes(ASCII));
-//        keccak.digest(outBuffer, 4);
-
-        outBuffer.put(function.selector);
-
-        List<Type> typeList = new LinkedList<>(Arrays.asList(types));
-        List<Object> paramList = new LinkedList<>(Arrays.asList(params));
-
-        // TODO ENCODE HEADS
-        encodeParamHeads(outBuffer, typeList, paramList, headLengths);
-        // TODO THEN TAILS
-        encodeParamTails(outBuffer, typeList, paramList);
-
-        return outBuffer;
-    }
+//    public static ByteBuffer encodeFunctionCall(Function function, Object... arguments) {
+////        StringBuilder canonicalSigBuilder = new StringBuilder();
+////        List<Type> types = new ArrayList<>();
+////        boolean wasChanged = parseFunctionSignature(signature, canonicalSigBuilder, types);
+////        signature = canonicalSigBuilder.toString();
+//
+////        Function f = new Function(signature);
+//    }
 }

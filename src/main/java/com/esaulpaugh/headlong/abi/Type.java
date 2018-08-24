@@ -1,13 +1,11 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Encoder;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.util.Stack;
 
 import static com.esaulpaugh.headlong.abi.util.ClassNames.toFriendly;
@@ -361,79 +359,6 @@ abstract class Type {
 //        }
 //        System.out.println("length valid;");
 //    }
-
-    public void encodeHead(Object value, ByteBuffer dest, int tailOffset, boolean dynamic) {
-        if(value instanceof String) { // dynamic
-            dest.position(dest.position() + 32); // leave empty for now
-//            Encoder.insertBytes(((String) value).getBytes(StandardCharsets.UTF_8), dest);
-        } else if(value.getClass().isArray()) {
-            if (value instanceof Object[]) {
-                Object[] arr = (Object[]) value;
-                for (Object obj : arr) {
-                    encodeHead(obj, dest, tailOffset, dynamic);
-                }
-            } else if (value instanceof byte[]) {
-//                System.out.println("byte[] " + dest.position());
-                Encoder.insertBytes((byte[]) value, dest);
-            } else if (value instanceof int[]) {
-                Encoder.insertInts((int[]) value, dest);
-            } else if (value instanceof long[]) {
-                Encoder.insertLongs((long[]) value, dest);
-            } else if (value instanceof short[]) {
-                Encoder.insertShorts((short[]) value, dest);
-            } else if(value instanceof boolean[]) {
-                Encoder.insertBooleansHead((boolean[]) value, dest, tailOffset, dynamic);
-            }
-        } else if (value instanceof Number) {
-            if(value instanceof BigInteger) {
-                Encoder.insertInt(((BigInteger) value), dest);
-            } else if(value instanceof BigDecimal) {
-                Encoder.insertInt(((BigDecimal) value).unscaledValue(), dest);
-            } else {
-                Encoder.insertInt(((Number) value).longValue(), dest);
-            }
-        } else if(value instanceof Boolean) {
-            Encoder.insertBool((boolean) value, dest);
-        } else if(value instanceof Tuple) {
-            Encoder.insertTupleHead((Tuple) value, dest);
-        }
-    }
-
-    public void encodeTail(Object value, ByteBuffer dest) {
-        if(value instanceof String) { // dynamic
-            dest.position(dest.position() + 32); // leave empty for now
-//            Encoder.insertBytes(((String) value).getBytes(StandardCharsets.UTF_8), dest);
-        } else if(value.getClass().isArray()) {
-            if (value instanceof Object[]) {
-                Object[] arr = (Object[]) value;
-                for (Object obj : arr) {
-                    encodeTail(obj, dest);
-                }
-            } else if (value instanceof byte[]) {
-                Encoder.insertBytes((byte[]) value, dest);
-            } else if (value instanceof int[]) {
-                Encoder.insertInts((int[]) value, dest);
-            } else if (value instanceof long[]) {
-                Encoder.insertLongs((long[]) value, dest);
-            } else if (value instanceof short[]) {
-                Encoder.insertShorts((short[]) value, dest);
-            } else if(value instanceof boolean[]) {
-                Encoder.insertBooleansTail((boolean[]) value, dest);
-            }
-//        } else if (value instanceof Number) {
-//            if(value instanceof BigInteger) {
-//                Encoder.insertInt(((BigInteger) value), dest);
-//            } else if(value instanceof BigDecimal) {
-//                Encoder.insertInt(((BigDecimal) value).unscaledValue(), dest);
-//            } else {
-//                Encoder.insertInt(((Number) value).longValue(), dest);
-//            }
-//        } else if(value instanceof Boolean) {
-//            Encoder.insertBool((boolean) value, dest);
-        } else if(value instanceof Tuple) {
-            Encoder.insertTupleTail((Tuple) value, dest);
-        }
-    }
 
 //    public abstract int calcDynamicByteLen(Object param);
 
