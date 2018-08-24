@@ -4,28 +4,25 @@ class TupleType extends Type {
 
     private final Type[] types;
 
-    public TupleType(Type... types) {
-        super(typeStringForTypes(types));
+    private TupleType(boolean dynamic, Type... types) {
+        super(typeStringForTypes(types), Tuple.class.getName(), dynamic);
         this.types = types;
     }
 
-    protected TupleType(String typeString, Type... types) {
-        super(typeString);
-        this.types = types;
+    static TupleType create(Type... types) {
+
+        boolean dynamic = false;
+        for (Type t : types) {
+            dynamic |= t.dynamic;
+        }
+
+        return new TupleType(dynamic, types);
     }
 
-//    private Tuple(String signature, int start) {
-//
+//    static TupleType forTypeString(String typeString) {
+////        ABI.parseTuple();
+//        return null;
 //    }
-
-    private TupleType(String typeString) {
-        super(typeString);
-        this.types = null;
-    }
-
-    static TupleType forTypeString(String typeString) {
-        return new TupleType(typeString);
-    }
 
     protected static String typeStringForTypes(Type... types) {
         StringBuilder sb = new StringBuilder("(");
@@ -40,10 +37,6 @@ class TupleType extends Type {
         }
 
         return sb.append(")").toString();
-
-//        return len == 0
-//                ? sb.toString()
-//                : sb.replace(strLen - 1, strLen, "").toString();
     }
 
     Type[] getTypes() {
@@ -52,10 +45,6 @@ class TupleType extends Type {
 
     @Override
     public int calcDynamicByteLen(Object param) {
-
-        // TODO conform with spec
-
-//        final Tuple tuple = (Tuple) param;
         final Object[] elements = ((Tuple) param).elements;
         int byteLen = 0;
         final int len = this.types.length;
@@ -65,36 +54,25 @@ class TupleType extends Type {
         return byteLen;
     }
 
-//    private static String parseTuple(Matcher matcher, String signature, int tupleStart) throws ParseException {
-//        int idx = tupleStart;
-//        int tupleDepth = 0;
-//        int openTuple, closeTuple;
-//        do {
-//            openTuple = signature.indexOf('(', idx);
-//            closeTuple = signature.indexOf(')', idx);
-//
-//            if(closeTuple < 0) {
-//                throw new ParseException("non-terminating tuple", tupleStart);
-//            }
-//
-//            while(idx < closeTuple) {
-//
-//            }
-//
-//            if(openTuple == -1 || closeTuple < openTuple) {
-//                tupleDepth--;
-//                idx = closeTuple + 1;
-//            } else {
-//                tupleDepth++;
-//                idx = openTuple + 1;
-//            }
-//        } while(tupleDepth > 0);
-//
-////        checkParamChars(matcher, signature, tupleStart, idx);
-//        String tuple = signature.substring(tupleStart, idx);
-//        System.out.println("tuple: " + tuple); // uncanonicalized
-//
-//        return tuple;
-//    }
+    @Override
+    public Integer getByteLen() {
+        return null;
+    }
 
+    @Override
+    protected void validate(final Object param, final String expectedClassName, final int expectedLengthIndex) {
+        super.validate(param, expectedClassName, expectedLengthIndex);
+
+        Tuple tuple = (Tuple) param;
+
+        Type[] types = getTypes();
+        final int typesLen = types.length;
+        if(typesLen != tuple.elements.length) {
+            throw new IllegalArgumentException("tuple length mismatch: expected: " + typesLen + ", actual: " + tuple.elements.length);
+        }
+        System.out.println("length valid;");
+        for (int i = 0; i < typesLen; i++) {
+            validate(tuple.elements[i], types[i].javaClassName, 0);
+        }
+    }
 }

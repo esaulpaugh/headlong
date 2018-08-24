@@ -69,7 +69,7 @@ public class Encoder {
         dest.put(arr);
     }
 
-    public static void insertTuple(Tuple tuple) {
+    public static void insertTupleHead(Tuple tuple) {
         throw new Error("not yet implemented");
     }
 

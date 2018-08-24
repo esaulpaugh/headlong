@@ -15,7 +15,7 @@ public class Function {
 
     private final String canonicalSignature;
 
-    transient final byte[] id = new byte[FUNCTION_ID_LEN];
+    transient final byte[] selector = new byte[FUNCTION_ID_LEN];
 
     transient final Type[] types;
 
@@ -30,7 +30,7 @@ public class Function {
         try {
             Keccak keccak256 = new Keccak(256);
             keccak256.update(this.canonicalSignature.getBytes(US_ASCII.INSTANCE));
-            keccak256.digest(id, 0, id.length);
+            keccak256.digest(selector, 0, selector.length);
         } catch (DigestException de) {
             throw new RuntimeException(de);
         }
@@ -46,9 +46,9 @@ public class Function {
         return canonicalSignature;
     }
 
-    public byte[] getId() {
-        byte[] out = new byte[id.length];
-        System.arraycopy(id, 0, out, 0, out.length);
+    public byte[] getSelector() {
+        byte[] out = new byte[selector.length];
+        System.arraycopy(selector, 0, out, 0, out.length);
         return out;
     }
 

@@ -179,7 +179,7 @@ public class ABI {
                     ArrayList<Type> innerTupleTypes = new ArrayList<>();
                     Pair<Integer, Integer> results = parseTuple(signature, argStart, canonicalOut, innerTupleTypes, illegalTypeCharMatcher);
 
-                    tupleTypes.add(new TupleType(innerTupleTypes.toArray(Function.EMPTY_TYPE_ARRAY)));
+                    tupleTypes.add(TupleType.create(innerTupleTypes.toArray(Function.EMPTY_TYPE_ARRAY)));
 
                     argEnd = results.getLeft() + 1;
                     prevNonCanonicalIndex = results.getRight();
@@ -210,7 +210,7 @@ public class ABI {
                     canonicalOut.append(signature, prevNonCanonicalIndex, argStart).append(typeString);
                     prevNonCanonicalIndex = argEnd;
                 }
-                tupleTypes.add(new Type(typeString));
+                tupleTypes.add(Type.create(typeString));
                 argStart = argEnd + 1;
             }
             }
@@ -273,9 +273,9 @@ public class ABI {
         }
     }
 
-    public static void encodeParams(ByteBuffer outBuffer, Object[] values, Type[] types) {
+    public static void encodeParamHeads(ByteBuffer outBuffer, Type[] types, Object[] values) {
         for (int i = 0; i < values.length; i++) {
-            types[i].encode(values[i], outBuffer);
+            types[i].encodeHeads(values[i], outBuffer);
         }
     }
 
@@ -324,8 +324,12 @@ public class ABI {
 //        keccak.update(signature.getBytes(ASCII));
 //        keccak.digest(outBuffer, 4);
 
-        outBuffer.put(function.id);
-        encodeParams(outBuffer, params, types);
+        outBuffer.put(function.selector);
+
+        // TODO ENCODE HEADS -- linked list iterator removal of static types?
+        encodeParamHeads(outBuffer, types, params);
+        // TODO THEN TAILS
+
 
         return outBuffer;
     }

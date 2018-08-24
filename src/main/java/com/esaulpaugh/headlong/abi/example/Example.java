@@ -235,14 +235,18 @@ public class Example {
 
         ByteBuffer abi;
 
-        abi = ABI.encodeFunctionCall("(())", new Tuple());
-        abi = ABI.encodeFunctionCall("((),())", new Tuple(), new Tuple());
-        abi = ABI.encodeFunctionCall("((int))", new Tuple(BigInteger.TEN) );
-        abi = ABI.encodeFunctionCall("((int),(uint))", new Tuple(BigInteger.TEN), new Tuple(BigInteger.TEN));
+        try {
+            abi = ABI.encodeFunctionCall("(())", new Tuple());
+            abi = ABI.encodeFunctionCall("((),())", new Tuple(), new Tuple());
+            abi = ABI.encodeFunctionCall("((int))", new Tuple(BigInteger.TEN));
+            abi = ABI.encodeFunctionCall("((int),(uint))", new Tuple(BigInteger.TEN), new Tuple(BigInteger.TEN));
+            System.out.println(Hex.toHexString(abi.array()));
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
 
-        System.out.println(Hex.toHexString(abi.array()));
 
-        if(true) return;
+//        if(true) return;
 
         try {
             abi = ABI.encodeFunctionCall("");
