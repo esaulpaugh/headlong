@@ -1,6 +1,5 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.joemelsha.crypto.hash.Keccak;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import sun.nio.cs.US_ASCII;
@@ -9,6 +8,9 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -273,9 +275,45 @@ public class ABI {
         }
     }
 
-    public static void encodeParamHeads(ByteBuffer outBuffer, Type[] types, Object[] values) {
-        for (int i = 0; i < values.length; i++) {
-            types[i].encodeHeads(values[i], outBuffer);
+    public static void encodeParamHeads(ByteBuffer outBuffer, List<Type> types, List<Object> values, int[] headLengths) {
+//        final int size = types.size();
+//        for (int i = 0; i < size; i++) {
+//            types[i].encodeHeads(values[i], outBuffer);
+//        }
+
+        int sum = 0;
+        for (int i : headLengths) {
+            sum += i;
+        }
+
+        int i = 0;
+        Iterator<Type> ti;
+        Iterator<Object> vi;
+        for(ti = types.iterator(), vi = values.iterator(); ti.hasNext(); ) {
+            Type type = ti.next();
+//            sum -= headLengths[i++];
+            type.encodeHead(vi.next(), outBuffer, sum, type.dynamic);
+            if(!type.dynamic) {
+                ti.remove();
+                vi.remove();
+            }
+        }
+    }
+
+    public static void encodeParamTails(ByteBuffer outBuffer, List<Type> types, List<Object> values) {
+//        final int size = types.size();
+//        for (int i = 0; i < size; i++) {
+//            types[i].encodeHeads(values[i], outBuffer);
+//        }
+        Iterator<Type> ti;
+        Iterator<Object> vi;
+        for(ti = types.iterator(), vi = values.iterator(); ti.hasNext(); ) {
+            Type type = ti.next();
+            type.encodeTail(vi.next(), outBuffer);
+            if(!type.dynamic) {
+                ti.remove();
+                vi.remove();
+            }
         }
     }
 
@@ -303,33 +341,58 @@ public class ABI {
 
         checkTypes(types, params);
 
+        // head(X(i)) = enc(len(head(X(1)) ... head(X(k)) tail(X(1)) ... tail(X(i-1)) ))
+
+        int[] headLengths = new int[types.length];
+        int dynamicHeadsByteLen = 0;
+//        boolean dynamic = false;
         int paramsByteLen = 0;
         for (int i = 0; i < expectedNumParams; i++) {
             Type t = types[i];
-            Integer byteLen = t.getByteLen();
-            if(byteLen != null) {
-                paramsByteLen += byteLen;
+//            dynamic |= t.dynamic;
+
+            int byteLen = t.getDataByteLen(params[i]);
+            System.out.println(params[i] + " --> " + byteLen);
+            paramsByteLen += byteLen;
+
+            if(t.dynamic) {
+                headLengths[i] = 32;
+                dynamicHeadsByteLen += 32;
+                System.out.println(params[i] + " dynamic head " + 32);
             } else {
-                paramsByteLen += t.calcDynamicByteLen(params[i]);
-//                paramsByteLen = 1000;
-//                throw new UnsupportedOperationException("dynamic types not yet supported");
+                headLengths[i] = byteLen;
             }
+
+//            Integer byteLen = t.getHeadLen(params[i]);
+//            if(byteLen != null) {
+//                paramsByteLen += byteLen;
+//            } else {
+////                paramsByteLen = 1000;
+////                throw new UnsupportedOperationException("dynamic types not yet supported");
+//            }
         }
+
+        System.out.println("**************** " + dynamicHeadsByteLen);
 
         System.out.println("**************** " + paramsByteLen);
 
-        System.out.println("allocating " + (FUNCTION_ID_LEN + paramsByteLen));
-        ByteBuffer outBuffer = ByteBuffer.wrap(new byte[FUNCTION_ID_LEN + paramsByteLen]); // ByteOrder.BIG_ENDIAN by default
+        final int allocation = FUNCTION_ID_LEN + dynamicHeadsByteLen + paramsByteLen;
+
+        System.out.println("allocating " + allocation);
+        ByteBuffer outBuffer = ByteBuffer.wrap(new byte[allocation]); // ByteOrder.BIG_ENDIAN by default
 //        Keccak keccak = new Keccak(256);
 //        keccak.update(signature.getBytes(ASCII));
 //        keccak.digest(outBuffer, 4);
 
         outBuffer.put(function.selector);
 
-        // TODO ENCODE HEADS -- linked list iterator removal of static types?
-        encodeParamHeads(outBuffer, types, params);
-        // TODO THEN TAILS
+        List<Type> typeList = new LinkedList<>(Arrays.asList(types));
+        List<Object> paramList = new LinkedList<>(Arrays.asList(params));
 
+        // TODO ENCODE HEADS
+        encodeParamHeads(outBuffer, typeList, paramList, headLengths);
+        // TODO THEN TAILS
+        encodeParamTails(outBuffer, typeList, paramList);
 
         return outBuffer;
     }

@@ -9,8 +9,8 @@ import java.math.BigInteger;
 
 public class NumberType extends Type {
 
-    private transient final Integer bitLimit;
-    private transient final Integer scale;
+    protected transient final Integer bitLimit;
+    protected transient final Integer scale;
 
     protected NumberType(String canonicalAbiType, String javaClassName, int bitLimit, int scale) {
         super(canonicalAbiType, javaClassName, false);
@@ -38,6 +38,8 @@ public class NumberType extends Type {
             System.out.println(m + "x" + n);
             bitLimit = m;
             scale = n;
+//        } else if(canonicalAbiType.equals("bool")) {
+//            return new NumberType(canonicalAbiType, javaClassName, 1, 0);
         } else {
             throw new AssertionError("unknown case");
         }
@@ -45,13 +47,22 @@ public class NumberType extends Type {
     }
 
     @Override
-    public Integer getByteLen() {
+    public Integer getDataByteLen(Object param) {
         return 32;
+    }
+
+    @Override
+    public Integer getNumElements(Object param) {
+        return null;
     }
 
     @Override
     protected void validate(final Object param, final String expectedClassName, final int expectedLengthIndex) {
         super.validate(param, expectedClassName, expectedLengthIndex);
+        validateNumber(param, bitLimit);
+    }
+
+    protected static void validateNumber(final Object param, final int bitLimit) {
         Number number = (Number) param;
         final int bitLen;
         if(number instanceof BigInteger) {
@@ -87,9 +98,9 @@ public class NumberType extends Type {
         System.out.println("length valid;");
     }
 
-    @Override
-    public int calcDynamicByteLen(Object param) {
-        return 0;
-    }
+//    @Override
+//    public int calcDynamicByteLen(Object param) {
+//        return 0;
+//    }
 
 }

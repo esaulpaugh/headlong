@@ -19,7 +19,15 @@ public class Encoder {
         insertInt(bool ? 1L : 0L, dest);
     }
 
-    public static void insertBooleans(boolean[] bools, ByteBuffer dest) {
+    public static void insertBooleansHead(boolean[] bools, ByteBuffer dest, int tailOffset, boolean dynamic) {
+        if(dynamic) {
+            insertInt(tailOffset, dest);
+        } else {
+            insertBooleansTail(bools, dest);
+        }
+    }
+
+    public static void insertBooleansTail(boolean[] bools, ByteBuffer dest) {
         for (boolean e : bools) {
             insertBool(e, dest);
         }
@@ -69,8 +77,13 @@ public class Encoder {
         dest.put(arr);
     }
 
-    public static void insertTupleHead(Tuple tuple) {
-        throw new Error("not yet implemented");
+    public static void insertTupleHead(Tuple tuple, ByteBuffer dest) {
+        Encoder.insertInt(0L, dest);
+//        throw new Error("not yet implemented");
+    }
+
+    public static void insertTupleTail(Tuple tuple, ByteBuffer dest) {
+        // TODO
     }
 
 }

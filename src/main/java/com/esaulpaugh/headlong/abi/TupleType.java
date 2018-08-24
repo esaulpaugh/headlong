@@ -1,5 +1,7 @@
 package com.esaulpaugh.headlong.abi;
 
+import java.util.Stack;
+
 class TupleType extends Type {
 
     private final Type[] types;
@@ -43,21 +45,70 @@ class TupleType extends Type {
         return types;
     }
 
-    @Override
-    public int calcDynamicByteLen(Object param) {
-        final Object[] elements = ((Tuple) param).elements;
-        int byteLen = 0;
-        final int len = this.types.length;
-        for (int i = 0; i < len; i++) {
-            byteLen += this.types[i].calcDynamicByteLen(elements[i]);
-        }
-        return byteLen;
-    }
+//    @Override
+//    public int calcDynamicByteLen(Object param) {
+//        final Object[] elements = ((Tuple) param).elements;
+//        int byteLen = 0;
+//        final int len = this.types.length;
+//        for (int i = 0; i < len; i++) {
+//            byteLen += this.types[i].calcDynamicByteLen(elements[i]);
+//        }
+//        return byteLen;
+//    }
 
     @Override
-    public Integer getByteLen() {
-        return null;
+    public Integer getDataByteLen(Object value) {
+
+        Tuple tuple = (Tuple) value;
+        final Type[] types = this.types;
+        final Object[] elements = tuple.elements;
+
+        int dataByteLen = 0;
+
+        final int len = types.length;
+        for (int i = 0; i < len; i++) {
+            dataByteLen += types[i].getDataByteLen(elements[i]);
+        }
+
+        return dataByteLen;
     }
+
+//    @Override
+//    public Integer getDataByteLen(Object value) {
+//        Stack<Integer> dynamicByteLenStack = new Stack<>();
+//        ArrayType.buildByteLenStack(((Tuple) value).elements, dynamicByteLenStack);
+//        int tupleDepth = dynamicByteLenStack.size() - 1;
+//        if(baseTypeByteLen == 1 && !canonicalAbiType.startsWith("bytes1")) { // typeString.startsWith("int8") || typeString.startsWith("uint8")
+//            tupleDepth--;
+//        }
+//        int n = 1;
+//        for (int i = tupleDepth - 1; i >= 0; i--) {
+//            int len;
+//            Integer fixedLen = fixedLengthStack.get(i);
+//            if(fixedLen != null) {
+//                len = fixedLen;
+//            } else {
+//                len = dynamicByteLenStack.get(i);
+//            }
+//            n *= len;
+//        }
+//        return roundUp(n);
+//    }
+
+    @Override
+    public Integer getNumElements(Object value) {
+        return ((Tuple) value).elements.length;
+    }
+
+//    protected Integer getDataLen(Object param) {
+//        final Object[] elements = ((Tuple) param).elements;
+//        int byteLen = 0;
+//        final int len = this.types.length;
+//        for (int i = 0; i < len; i++) {
+//            byteLen += this.types[i].getHeadLen(elements[i]);
+//        }
+//        return byteLen;
+//    }
 
     @Override
     protected void validate(final Object param, final String expectedClassName, final int expectedLengthIndex) {

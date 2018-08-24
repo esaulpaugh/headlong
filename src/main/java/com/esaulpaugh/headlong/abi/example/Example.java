@@ -235,15 +235,32 @@ public class Example {
 
         ByteBuffer abi;
 
-        try {
-            abi = ABI.encodeFunctionCall("(())", new Tuple());
-            abi = ABI.encodeFunctionCall("((),())", new Tuple(), new Tuple());
-            abi = ABI.encodeFunctionCall("((int))", new Tuple(BigInteger.TEN));
-            abi = ABI.encodeFunctionCall("((int),(uint))", new Tuple(BigInteger.TEN), new Tuple(BigInteger.TEN));
-            System.out.println(Hex.toHexString(abi.array()));
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
+//        try {
+//            abi = ABI.encodeFunctionCall("(())", new Tuple());
+//            abi = ABI.encodeFunctionCall("((),())", new Tuple(), new Tuple());
+//            abi = ABI.encodeFunctionCall("((int))", new Tuple(BigInteger.TEN));
+//            abi = ABI.encodeFunctionCall("((int),(uint))", new Tuple(BigInteger.TEN), new Tuple(BigInteger.TEN));
+//            System.out.println(Hex.toHexString(abi.array()));
+//        } catch (Throwable t) {
+////            t.printStackTrace();
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+
+        abi = ABI.encodeFunctionCall("(bool,bool,bool[])",
+                true,
+                true,
+                new boolean[] { true, false, true }
+        );
+
+        System.out.println(Hex.toHexString(abi.array()));
+
+        if(true) return;
+
+        abi = ABI.encodeFunctionCall("(string,string,string[])",
+                "",
+                "y",
+                new String[0]
+        );
 
 
 //        if(true) return;
