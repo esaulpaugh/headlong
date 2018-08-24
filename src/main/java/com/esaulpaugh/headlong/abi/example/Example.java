@@ -3,6 +3,7 @@ package com.esaulpaugh.headlong.abi.example;
 import com.esaulpaugh.headlong.abi.ABI;
 import com.esaulpaugh.headlong.abi.Tuple;
 import org.spongycastle.util.encoders.Hex;
+import sun.nio.cs.UTF_8;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -276,11 +277,10 @@ public class Example {
         bytes32[0] = 126;
         bytes32[31] = 127;
 
-        // TODO ENCODE ARRAY LENGTH FOR DYNAMICS
-        abi = ABI.encodeFunctionCall("(function,bytes32,bytes[])",
-                function,
-                bytes32,
-                new byte[][] { new byte[] { 5, 6, 7 } }
+        abi = ABI.encodeFunctionCall("sam(bytes,bool,uint256[])",
+                "dave".getBytes(UTF_8.INSTANCE),
+                true,
+                new BigInteger[]{ BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3) }
         );
 
         System.out.println(Hex.toHexString(abi.array()));

@@ -15,29 +15,30 @@ public class Encoder {
     private static final byte[] PADDING_192_BITS = new byte[24];
 
     private static int getLengthInfo(Type[] types, Object[] arguments, int[] headLengths) {
-        int dynamicHeadsByteLen = 0;
+        int dynamicOverheadBytes = 0;
         int paramsByteLen = 0;
         final int n = headLengths.length;
         for (int i = 0; i < n; i++) {
             Type t = types[i];
             int byteLen = t.getDataByteLen(arguments[i]);
-            System.out.println(arguments[i] + " --> " + byteLen);
+            System.out.print(arguments[i] + " --> " + byteLen + ", ");
             paramsByteLen += byteLen;
 
             if(t.dynamic) {
                 headLengths[i] = 32;
-                dynamicHeadsByteLen += 32;
-                System.out.println(arguments[i] + " dynamic head " + 32);
+                dynamicOverheadBytes += 32 + 32; // 32
+                System.out.println(arguments[i] + " dynamic len: " + 32 + " + " + 32 + " + " + byteLen + " = " + (64 + byteLen));
             } else {
                 headLengths[i] = byteLen;
+                System.out.println(arguments[i] + " static len: " + byteLen);
             }
         }
 
-        System.out.println("**************** " + dynamicHeadsByteLen);
+        System.out.println("**************** " + dynamicOverheadBytes);
 
         System.out.println("**************** " + paramsByteLen);
 
-        return dynamicHeadsByteLen + paramsByteLen;
+        return dynamicOverheadBytes + paramsByteLen;
     }
 
     public static ByteBuffer encodeFunctionCall(Function function, Object[] arguments) {
@@ -98,13 +99,16 @@ public class Encoder {
             sum += i;
         }
 
+        int mark;
 //        int i = 0;
         Iterator<Type> ti;
         Iterator<Object> vi;
         for(ti = types.iterator(), vi = values.iterator(); ti.hasNext(); ) {
             Type type = ti.next();
 //            sum -= headLengths[i++];
+            mark = outBuffer.position();
             encodeHead(type, vi.next(), outBuffer, sum, type.dynamic);
+            sum += outBuffer.position() - mark;
             if(!type.dynamic) {
                 ti.remove();
                 vi.remove();
@@ -136,7 +140,11 @@ public class Encoder {
 //            insertBytes(((String) value).getBytes(StandardCharsets.UTF_8), dest);
         } else if(value.getClass().isArray()) {
             if (value instanceof Object[]) {
-                insertObjectsHead(paramType, (Object[]) value, dest, tailOffset, dynamic);
+                if(value instanceof BigInteger[]) {
+                    insertBigIntsHead((BigInteger[]) value, dest, tailOffset, dynamic);
+                } else {
+                    insertObjectsHead(paramType, (Object[]) value, dest, tailOffset, dynamic);
+                }
             } else if (value instanceof byte[]) {
 //                System.out.println("byte[] " + dest.position());
                 insertBytesHead((byte[]) value, dest, tailOffset, dynamic);
@@ -170,8 +178,12 @@ public class Encoder {
 //            insertBytes(((String) value).getBytes(StandardCharsets.UTF_8), dest);
         } else if(value.getClass().isArray()) {
             if (value instanceof Object[]) {
-                for (Object object : (Object[]) value) {
-                    encodeTail(paramType, object, dest);
+                if(value instanceof BigInteger[]) {
+                    insertBigInts((BigInteger[]) value, dest);
+                } else {
+                    for (Object object : (Object[]) value) {
+                        encodeTail(paramType, object, dest);
+                    }
                 }
             } else if (value instanceof byte[]) {
                 insertBytes((byte[]) value, dest);
@@ -273,39 +285,45 @@ public class Encoder {
     // -------------------------------------------------------------------------------------------------
 
     public static void insertBooleans(boolean[] bools, ByteBuffer dest) {
+        insertInt(bools.length, dest);
         for (boolean e : bools) {
             insertBool(e, dest);
         }
     }
 
-    public static void insertBytes(byte[] src, ByteBuffer dest) {
-        dest.put(src);
+    public static void insertBytes(byte[] bytes, ByteBuffer dest) {
+        insertInt(bytes.length, dest);
+        dest.put(bytes);
         // pad todo
-        final int n = Integer.SIZE - src.length;
+        final int n = Integer.SIZE - bytes.length;
         for (int i = 0; i < n; i++) {
             dest.put((byte) 0);
         }
     }
 
     public static void insertShorts(short[] shorts, ByteBuffer dest) {
+        insertInt(shorts.length, dest);
         for (short e : shorts) {
             insertInt(e, dest);
         }
     }
 
     public static void insertInts(int[] ints, ByteBuffer dest) {
+        insertInt(ints.length, dest);
         for (int e : ints) {
             insertInt(e, dest);
         }
     }
 
     public static void insertLongs(long[] ints, ByteBuffer dest) {
+        insertInt(ints.length, dest);
         for (long e : ints) {
             insertInt(e, dest);
         }
     }
 
     public static void insertBigInts(BigInteger[] bigInts, ByteBuffer dest) {
+        insertInt(bigInts.length, dest);
         for (BigInteger e : bigInts) {
             insertInt(e, dest);
         }

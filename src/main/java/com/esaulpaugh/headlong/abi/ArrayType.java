@@ -260,7 +260,7 @@ public class ArrayType extends Type {
             dynamicLengthStack.push(roundUp(((String) value).length()));
         } else if(value.getClass().isArray()) {
             if (value instanceof Object[]) {
-                dynamicLengthStack.push(roundUp(((Object[]) value).length));
+                dynamicLengthStack.push(roundUp(((Object[]) value).length << 5)); // mul 32
                 Object[] arr = (Object[]) value;
                 for (Object obj : arr) {
                     buildByteLenStack(obj, dynamicLengthStack);
@@ -270,11 +270,11 @@ public class ArrayType extends Type {
             } else if (value instanceof int[]) {
                 dynamicLengthStack.push(((int[]) value).length << 5); // mul 32
             } else if (value instanceof long[]) {
-                dynamicLengthStack.push(((long[]) value).length << 5);
+                dynamicLengthStack.push(((long[]) value).length << 5); // mul 32
             } else if (value instanceof short[]) {
-                dynamicLengthStack.push(((short[]) value).length << 5);
+                dynamicLengthStack.push(((short[]) value).length << 5); // mul 32
             } else if(value instanceof boolean[]) {
-                dynamicLengthStack.push(((boolean[]) value).length << 5);
+                dynamicLengthStack.push(((boolean[]) value).length << 5); // mul 32
             }
         } else if (value instanceof Number) {
             dynamicLengthStack.push(32);
