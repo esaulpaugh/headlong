@@ -68,7 +68,37 @@ class TupleType extends Type {
             dataByteLen += types[i].getDataByteLen(elements[i]);
         }
 
-        return dataByteLen;
+        return dynamic ?
+                32 + dataByteLen
+                : dataByteLen;
+    }
+
+    static int getLengthInfo(Type[] types, Object[] arguments, int[] headLengths) {
+//        int dynamicOverheadBytes = 0;
+        int paramsByteLen = 0;
+        final int n = headLengths.length;
+        for (int i = 0; i < n; i++) {
+            Type t = types[i];
+            int byteLen = t.getDataByteLen(arguments[i]);
+            System.out.print(arguments[i] + " --> " + byteLen + ", ");
+            paramsByteLen += byteLen;
+
+            if(t.dynamic) {
+                headLengths[i] = 32;
+//                dynamicOverheadBytes += 32 + 32; // 32
+                System.out.println("dynamic");
+            } else {
+                headLengths[i] = byteLen;
+                System.out.println("static");
+            }
+        }
+
+//        System.out.println("**************** " + dynamicOverheadBytes);
+
+        System.out.println("**************** " + paramsByteLen);
+
+        // dynamicOverheadBytes +
+        return paramsByteLen;
     }
 
 //    @Override
@@ -112,16 +142,31 @@ class TupleType extends Type {
     protected void validate(final Object param, final String expectedClassName, final int expectedLengthIndex) {
         super.validate(param, expectedClassName, expectedLengthIndex);
 
-        Tuple tuple = (Tuple) param;
+        final Tuple tuple = (Tuple) param;
+        final Object[] elements = tuple.elements;
 
-        Type[] types = this.types;
-        final int typesLen = types.length;
-        if(typesLen != tuple.elements.length) {
-            throw new IllegalArgumentException("tuple length mismatch: expected: " + typesLen + ", actual: " + tuple.elements.length);
+        final int expected = this.types.length;
+        final int actual = elements.length;
+        if(expected != actual) {
+            throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + actual + " != " + expected);
         }
         System.out.println("length valid;");
-        for (int i = 0; i < typesLen; i++) {
-            validate(tuple.elements[i], types[i].javaClassName, 0);
+
+        checkTypes(this.types, elements);
+//        for (int i = 0; i < expected; i++) {
+//            validate(elements[i], types[i].javaClassName, 0);
+//        }
+    }
+
+    public static void checkTypes(Type[] paramTypes, Object[] arguments) {
+        final int n = paramTypes.length;
+        int i = 0;
+        try {
+            for ( ; i < n; i++) {
+                paramTypes[i].validate(arguments[i]);
+            }
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new IllegalArgumentException("invalid param @ " + i + ": " + e.getMessage(), e);
         }
     }
 }

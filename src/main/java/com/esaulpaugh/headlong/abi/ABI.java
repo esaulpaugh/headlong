@@ -260,18 +260,6 @@ public class ABI {
 ////        return idx;
 //    }
 
-    public static void checkTypes(Type[] paramTypes, Object[] arguments) {
-        final int n = paramTypes.length;
-        int i = 0;
-        try {
-            for ( ; i < n; i++) {
-                paramTypes[i].validate(arguments[i]);
-            }
-        } catch (IllegalArgumentException | NullPointerException e) {
-            throw new IllegalArgumentException("invalid param @ " + i + ": " + e.getMessage(), e);
-        }
-    }
-
     public static ByteBuffer encodeFunctionCall(String signature, Object... arguments) throws ParseException {
         return Encoder.encodeFunctionCall(new Function(signature), arguments);
     }

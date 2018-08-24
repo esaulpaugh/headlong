@@ -270,6 +270,13 @@ public class Example {
 //                BigInteger.valueOf(5L),
 //                new BigInteger[] { new BigInteger("172345678901234567890123456789012345678901234567890123456789000000000000000000") }
 //        );
+
+        ByteBuffer abi_ = ABI.encodeFunctionCall("funct((string))", new Tuple("hello_THERE YOYOYOYOYOYO"));
+
+        System.out.println(Hex.toHexString(abi_.array()));
+
+//        if(true) return;
+
         byte[] function = new byte[24];
         function[0] = 126;
         function[23] = 127;
@@ -285,7 +292,7 @@ public class Example {
 
         System.out.println(Hex.toHexString(abi.array()));
 
-        if(true) return;
+//        if(true) return;
 
         abi = ABI.encodeFunctionCall("(string,string,string[])",
                 "",
@@ -293,6 +300,7 @@ public class Example {
                 new String[0]
         );
 
+        System.out.println(Hex.toHexString(abi.array()));
 
 //        if(true) return;
 

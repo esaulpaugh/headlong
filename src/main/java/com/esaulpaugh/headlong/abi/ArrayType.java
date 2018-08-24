@@ -197,7 +197,9 @@ public class ArrayType extends Type {
             n *= len;
         }
 
-        return roundUp(n);
+        return dynamic
+                ? 32 + 32 + roundUp(n)
+                : roundUp(n);
     }
 
     @Override
@@ -257,6 +259,8 @@ public class ArrayType extends Type {
 
     static void buildByteLenStack(Object value, Stack<Integer> dynamicLengthStack) {
         if(value instanceof String) {
+            int len = ((String) value).length();
+            System.out.println("len = " + len);
             dynamicLengthStack.push(roundUp(((String) value).length()));
         } else if(value.getClass().isArray()) {
             if (value instanceof Object[]) {
