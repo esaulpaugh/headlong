@@ -2,8 +2,6 @@ package com.esaulpaugh.headlong.abi;
 
 class TupleType extends Type {
 
-    public static final Type[] EMPTY_TYPE_ARRAY = new Type[0];
-
     private final Type[] types;
 
     public TupleType(Type... types) {

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.esaulpaugh.headlong.abi.TupleType.EMPTY_TYPE_ARRAY;
+import static com.esaulpaugh.headlong.abi.Function.FUNCTION_ID_LEN;
 import static org.apache.commons.lang3.StringEscapeUtils.escapeJava;
 
 // TODO encode and decode
@@ -39,21 +39,21 @@ public class ABI {
         }
     }
 
-    private static IllegalCharacterException newIllegalCharacterException(boolean forNonTypeChar, String signature, int start) {
+    private static ParseException newIllegalCharacterException(boolean forNonTypeChar, String signature, int start) {
         char c = signature.charAt(start);
-        return new IllegalCharacterException(
+        return new ParseException(
                 "non-" + (forNonTypeChar ? "type" : "ascii") + " character at index " + start
                         + ": \'" + c + "\', " + escapeChar(c), start);
     }
 
-    private static void checkNameChars(String signature, int startParams) throws IllegalCharacterException {
+    private static void checkNameChars(String signature, int startParams) throws ParseException {
         Matcher illegalChars = HAS_NON_ASCII_CHARS.matcher(signature).region(0, startParams);
         if(illegalChars.find()) {
             throw newIllegalCharacterException(false, signature, illegalChars.start());
         }
     }
 
-    private static void checkParamChars(Matcher matcher, String signature, int argStart, int argEnd) throws IllegalCharacterException {
+    private static void checkParamChars(Matcher matcher, String signature, int argStart, int argEnd) throws ParseException {
         Matcher illegalChars = matcher.region(argStart, argEnd);
         if (illegalChars.find()) {
             throw newIllegalCharacterException(true, signature, illegalChars.start());
@@ -116,95 +116,35 @@ public class ABI {
 
         checkNameChars(signature, startParams);
 
-//        int argStart = startParams + 1;
-//        int argEnd = argStart; // this inital value is important for empty params case
-//        int prevNonCanonicalIndex = 0;
-
         final Matcher illegalTypeCharMatcher = HAS_NON_TYPE_CHARS.matcher(signature);
 
         Pair<Integer, Integer> results;
         try {
             results = parseTuple(signature, startParams, canonicalOut, types, illegalTypeCharMatcher);
         } catch (NonTerminationException nte) {
-            throw new NonTerminationException("non-terminating signature", nte.getErrorOffset());
+            throw (ParseException) new ParseException("non-terminating signature", nte.getErrorOffset()).initCause(nte);
+        } catch (EmptyParameterException epe) {
+            throw (ParseException) new ParseException(epe.getMessage(), epe.getErrorOffset()).initCause(epe);
         }
 
         final int argEnd = results.getLeft();
-        final int prevNonCanonicalIndex = results.getRight();
         final int sigEnd = signature.length();
 
         int terminator = signature.indexOf(')', argEnd);
         if (terminator == -1) {
             throw new ParseException("non-terminating signature", sigEnd);
         }
-
         if (argEnd != terminator || terminator != sigEnd - 1) {
-            throw new ParseException(
-                    "illegal signature termination: " + escapeJava(signature.substring(Math.max(0, argEnd))),
-                    argEnd
-            );
+            throw new ParseException("illegal signature termination: " + signature.substring(Math.max(0, argEnd)), argEnd);
         }
 
-//        System.out.println("prevNonCanonicalIndex = " + prevNonCanonicalIndex);
-//        if(prevNonCanonicalIndex == 0) {
-//            System.out.println("signature already canonical");
-//        }
+        final int prevNonCanonicalIndex = results.getRight();
 
         canonicalOut.append(signature, prevNonCanonicalIndex, sigEnd);
 
         System.out.println("canonical: " + canonicalOut.toString());
 
         return prevNonCanonicalIndex != 0;
-
-
-
-
-//
-//        LOOP:
-//        while(argStart < sigEnd) {
-//            char c = signature.charAt(argStart);
-//            switch (c) {
-//            case ')':
-//                if(types.size() > 0) {
-//                    argEnd = argStart - 1;
-//                }
-//                break LOOP;
-//            case ',':
-//                if(signature.charAt(argStart - 1) == ')') {
-//                    break LOOP;
-//                }
-//                throw new ParseException("empty parameter @ " + types.size(), argStart);
-//            case '(': { // tuple
-//                try {
-//                    String typeString = parseTuple(illegalTypeCharMatcher, signature, argStart);
-//                    types.add(new Type(typeString));
-//                    argEnd = argStart + typeString.length();
-//                } catch (ParseException pe) {
-//                    throw new ParseException(pe.getMessage() + " @ " + types.size(), pe.getErrorOffset());
-//                }
-//                if(argEnd == sigEnd || signature.charAt(argEnd) != ',') {
-//                    break LOOP;
-//                }
-//                argStart = argEnd + 1;
-//            }
-//            default: { // non-tuple
-//                argEnd = nextParamTerminator(signature, argStart + 1);
-//                if(argEnd == -1) {
-//                    break LOOP;
-//                }
-//                checkParamChars(illegalTypeCharMatcher, signature, argStart, argEnd);
-//                String typeString = signature.substring(argStart, argEnd);
-//                String canonicalized = canonicalize(signature, typeString, argStart, argEnd);
-//                if(canonicalized != null) {
-//                    typeString = canonicalized;
-//                    canonicalOut.append(signature, prevNonCanonicalIndex, argStart).append(typeString);
-//                    prevNonCanonicalIndex = argEnd;
-//                }
-//                types.add(new Type(typeString));
-//                argStart = argEnd + 1;
-//            }
-//            }
-//        }
     }
 
     private static Pair<Integer, Integer> parseTuple(final String signature,
@@ -212,7 +152,7 @@ public class ABI {
                                                      final StringBuilder canonicalOut,
                                                      final List<Type> tupleTypes,
                                                      final Matcher illegalTypeCharMatcher)
-            throws EmptyParameterException, NonTerminationException, IllegalCharacterException {
+            throws ParseException {
 
         int argStart = startParams + 1;
         int argEnd = argStart; // this inital value is important for empty params case
@@ -234,12 +174,12 @@ public class ABI {
                     break LOOP;
                 }
                 throw new EmptyParameterException("empty parameter @ " + tupleTypes.size(), argStart);
-            case '(': { // tuple
+            case '(': { // tuple element
                 try {
                     ArrayList<Type> innerTupleTypes = new ArrayList<>();
                     Pair<Integer, Integer> results = parseTuple(signature, argStart, canonicalOut, innerTupleTypes, illegalTypeCharMatcher);
 
-                    tupleTypes.add(new TupleType(innerTupleTypes.toArray(EMPTY_TYPE_ARRAY)));
+                    tupleTypes.add(new TupleType(innerTupleTypes.toArray(Function.EMPTY_TYPE_ARRAY)));
 
                     argEnd = results.getLeft() + 1;
                     prevNonCanonicalIndex = results.getRight();
@@ -248,7 +188,7 @@ public class ABI {
 //                    argEnd = argStart + typeString.length();
 
                 } catch (EmptyParameterException epe) {
-                    throw new EmptyParameterException(epe.getMessage() + " @ " + tupleTypes.size(), epe.getErrorOffset());
+                    throw (EmptyParameterException) new EmptyParameterException(epe.getMessage() + " @ " + tupleTypes.size(), epe.getErrorOffset()).initCause(epe);
                 }
                 if (argEnd >= sigEnd || signature.charAt(argEnd) != ',') {
                     break LOOP;
@@ -256,10 +196,10 @@ public class ABI {
                 argStart = argEnd + 1;
                 break;
             }
-            default: { // non-tuple
+            default: { // non-tuple element
                 argEnd = nextParamTerminator(signature, argStart + 1);
                 if (argEnd == -1) {
-                    throw new NonTerminationException(null, startParams); // "non-terminating tuple"
+                    throw new NonTerminationException("non-terminating tuple", startParams);
 //                    break LOOP;
                 }
                 checkParamChars(illegalTypeCharMatcher, signature, argStart, argEnd);
@@ -321,45 +261,54 @@ public class ABI {
 ////        return idx;
 //    }
 
-    public static void checkTypes(List<Type> types, Object[] values) {
-        final int size = types.size();
+    public static void checkTypes(Type[] types, Object[] values) {
+        final int n = types.length;
         int i = 0;
         try {
-            for ( ; i < size; i++) {
-                types.get(i).validate(values[i]);
+            for ( ; i < n; i++) {
+                types[i].validate(values[i]);
             }
         } catch (IllegalArgumentException | NullPointerException e) {
             throw new IllegalArgumentException("invalid param @ " + i + ": " + e.getMessage(), e);
         }
     }
 
-    public static void encodeParams(ByteBuffer outBuffer, Object[] values, List<Type> types) {
+    public static void encodeParams(ByteBuffer outBuffer, Object[] values, Type[] types) {
         for (int i = 0; i < values.length; i++) {
-            types.get(i).encode(values[i], outBuffer);
+            types[i].encode(values[i], outBuffer);
         }
     }
 
     public static ByteBuffer encodeFunctionCall(String signature, Object... params) throws ParseException {
+        return encodeFunctionCall(new Function(signature), params);
+    }
 
-        StringBuilder canonicalSigBuilder = new StringBuilder();
-        List<Type> types = new ArrayList<>();
-        boolean wasChanged = parseFunctionSignature(signature, canonicalSigBuilder, types);
-        signature = canonicalSigBuilder.toString();
+    public static ByteBuffer encodeFunctionCall(Function function, Object... params) {
 
-        System.out.println("wasChanged = " + wasChanged);
+//        StringBuilder canonicalSigBuilder = new StringBuilder();
+//        List<Type> types = new ArrayList<>();
+//        boolean wasChanged = parseFunctionSignature(signature, canonicalSigBuilder, types);
+//        signature = canonicalSigBuilder.toString();
 
-        if(params.length != types.size()) {
-            throw new IllegalArgumentException("params.length <> types.size(): " + params.length + " != " + types.size());
+//        Function f = new Function(signature);
+
+        System.out.println("requiredCanonicalization = " + function.requiredCanonicalization);
+
+        final Type[] types = function.types;
+        final int expectedNumParams = types.length;
+
+        if(params.length != expectedNumParams) {
+            throw new IllegalArgumentException("params.length <> types.size(): " + params.length + " != " + types.length);
         }
 
         checkTypes(types, params);
 
         int paramsByteLen = 0;
-        final int size = types.size();
-        for (int i = 0; i < size; i++) {
-            Type t = types.get(i);
-            if(t.byteLen != null) {
-                paramsByteLen += t.byteLen;
+        for (int i = 0; i < expectedNumParams; i++) {
+            Type t = types[i];
+            Integer byteLen = t.getByteLen();
+            if(byteLen != null) {
+                paramsByteLen += byteLen;
             } else {
                 paramsByteLen += t.calcDynamicByteLen(params[i]);
 //                paramsByteLen = 1000;
@@ -369,12 +318,13 @@ public class ABI {
 
         System.out.println("**************** " + paramsByteLen);
 
-        System.out.println("allocating " + (4 + paramsByteLen));
-        ByteBuffer outBuffer = ByteBuffer.wrap(new byte[4 + paramsByteLen]); // ByteOrder.BIG_ENDIAN by default
-        Keccak keccak = new Keccak(256);
-        keccak.update(signature.getBytes(ASCII));
-        keccak.digest(outBuffer, 4);
+        System.out.println("allocating " + (FUNCTION_ID_LEN + paramsByteLen));
+        ByteBuffer outBuffer = ByteBuffer.wrap(new byte[FUNCTION_ID_LEN + paramsByteLen]); // ByteOrder.BIG_ENDIAN by default
+//        Keccak keccak = new Keccak(256);
+//        keccak.update(signature.getBytes(ASCII));
+//        keccak.digest(outBuffer, 4);
 
+        outBuffer.put(function.id);
         encodeParams(outBuffer, params, types);
 
         return outBuffer;

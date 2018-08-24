@@ -2,7 +2,7 @@ package com.esaulpaugh.headlong.abi;
 
 import java.text.ParseException;
 
-public class EmptyParameterException extends ParseException {
+class EmptyParameterException extends ParseException {
 
     /**
      * Constructs a ParseException with the specified detail message and

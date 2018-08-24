@@ -4,7 +4,6 @@ import com.esaulpaugh.headlong.abi.ABI;
 import com.esaulpaugh.headlong.abi.Tuple;
 import org.spongycastle.util.encoders.Hex;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -12,7 +11,7 @@ import java.text.ParseException;
 
 public class Example {
 
-    public static void main(String[] args0) throws ClassNotFoundException, ParseException, IOException {
+    public static void main(String[] args0) throws ParseException {
 
         //        int countP = 0, countC = 0, countN = 0;
 //        int j = Short.MIN_VALUE;
