@@ -1,10 +1,9 @@
 package com.esaulpaugh.headlong.abi;
 
-import sun.nio.cs.UTF_8;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -134,7 +133,7 @@ public class Encoder {
                 insertBooleansHead((boolean[]) value, dest, tailOffset, dynamic);
             }
         } else if(value instanceof Tuple) {
-            insertTupleHead((TupleType) paramType, (Tuple) value, dest, tailOffset, dynamic);
+            insertTupleHead(paramType, (Tuple) value, dest, tailOffset, dynamic);
         } else if (value instanceof Number) {
             if(value instanceof BigInteger) {
                 insertInt(((BigInteger) value), dest);
@@ -151,7 +150,7 @@ public class Encoder {
     public static void encodeTail(Type paramType, Object value, ByteBuffer dest) {
         if(value instanceof String) { // dynamic
 //            dest.position(dest.position() + 32); // leave empty for now
-            insertBytes(((String) value).getBytes(UTF_8.INSTANCE), dest);
+            insertBytes(((String) value).getBytes(StandardCharsets.UTF_8), dest);
 //            insertBytes(((String) value).getBytes(StandardCharsets.UTF_8), dest);
         } else if(value.getClass().isArray()) {
             if (value instanceof Object[]) {
@@ -184,9 +183,16 @@ public class Encoder {
 //        } else if(value instanceof Boolean) {
 //            insertBool((boolean) value, dest);
         } else if(value instanceof Tuple) {
-            TupleType tupleType = (TupleType) paramType;
-            int[] headLengths = new int[tupleType.types.length];
-            int encodingByteLen = TupleType.getLengthInfo(tupleType.types, ((Tuple) value).elements, headLengths);
+            TupleType tupleType;
+            try {
+                tupleType = (TupleType) paramType;
+            } catch (ClassCastException cce) {
+                throw new RuntimeException(cce);
+            }
+            Tuple tuple = (Tuple) value;
+//            int[] headLengths = new int[tupleType.types.length];
+//            int encodingByteLen = TupleType.getLengthInfo(tupleType.types, tuple.elements, headLengths);
+            int[] headLengths = TupleType.getHeadLengths(tupleType.types, tuple.elements);
             encodeTuple(tupleType, ((Tuple) value).elements, headLengths, dest);
 //            insertTuple((Tuple) value, dest);
         }
@@ -247,12 +253,19 @@ public class Encoder {
         }
     }
 
-    public static void insertTupleHead(TupleType paramTypes, Tuple tuple, ByteBuffer dest, int tailOffset, boolean dynamic) {
+    public static void insertTupleHead(Type tupleType, Tuple tuple, ByteBuffer dest, int tailOffset, boolean dynamic) {
+        TupleType paramTypes;
+        try {
+            paramTypes = (TupleType) tupleType;
+        } catch (ClassCastException cce) {
+            throw new RuntimeException(cce);
+        }
         if(dynamic) {
             insertInt(tailOffset, dest);
         } else {
-            int[] headLengths = new int[paramTypes.types.length];
-            int encodingByteLen = TupleType.getLengthInfo(paramTypes.types, tuple.elements, headLengths);
+//            int[] headLengths = new int[paramTypes.types.length];
+//            int encodingByteLen = TupleType.getLengthInfo(paramTypes.types, tuple.elements, headLengths);
+            int[] headLengths = TupleType.getHeadLengths(paramTypes.types, tuple.elements);
             encodeTuple(paramTypes, tuple.elements, headLengths, dest);
 //            insertTuple(paramType, tuple, dest);
         }

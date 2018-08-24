@@ -152,16 +152,13 @@ public class ObjectNotation {
                 i = buildByte(sb, data, i);
                 break;
             case STRING_SHORT:
+            case STRING_LONG:
                 sb.append(ELEMENT_INDENTATION);
                 i = buildString(sb, data, elementDataIndex, elementEnd);
                 break;
             case LIST_SHORT:
                 sb.append(ELEMENT_INDENTATION);
                 i = buildShortList(sb, data, elementDataIndex, elementEnd);
-                break;
-            case STRING_LONG:
-                sb.append(ELEMENT_INDENTATION);
-                i = buildString(sb, data, elementDataIndex, elementEnd);
                 break;
             case LIST_LONG:
                 sb.append(ELEMENT_INDENTATION);

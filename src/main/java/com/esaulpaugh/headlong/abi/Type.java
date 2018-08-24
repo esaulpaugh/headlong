@@ -9,6 +9,7 @@ import java.math.BigInteger;
 import java.util.Stack;
 
 import static com.esaulpaugh.headlong.abi.util.ClassNames.toFriendly;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 abstract class Type {
 
@@ -69,7 +70,7 @@ abstract class Type {
         for (int i = 0; i < depth; i++) {
             classNameBuilder.append('[');
         }
-        String javaClassName = classNameBuilder.append(baseTypeNames.getRight()).toString();
+        String javaClassName = classNameBuilder.append(javaBaseType).toString();
 
         if(canonicalAbiType.startsWith("(")) {
 //            return new TupleType(javaClassName, ABI.parseTuple());
@@ -101,7 +102,7 @@ abstract class Type {
 //        }
 
 
-        return ArrayType.create(canonicalAbiType, abiBaseType, javaClassName, javaBaseType, fixedLengthStack, depth);
+        return ArrayType.create(canonicalAbiType, abiBaseType, javaClassName, fixedLengthStack, depth);
     }
 
     public static int roundUp(int len) {
@@ -132,7 +133,7 @@ abstract class Type {
             String abiBaseType = canonicalAbiType.substring(0, i + 1);
             String javaBaseType = getJavaBaseTypeName(abiBaseType, !fixedLengthStack.isEmpty(), fixedLengthStack);
             if(javaBaseType == null) {
-                throw new IllegalArgumentException("unrecognized type: " + abiBaseType + " (" + Hex.toHexString(abiBaseType.getBytes()) + ")");
+                throw new IllegalArgumentException("unrecognized type: " + abiBaseType + " (" + Hex.toHexString(abiBaseType.getBytes(UTF_8)) + ")");
             }
             return new ImmutablePair<>(abiBaseType, javaBaseType);
         }

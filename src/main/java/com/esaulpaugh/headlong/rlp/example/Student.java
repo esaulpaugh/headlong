@@ -99,7 +99,7 @@ public class Student implements RLPEncodeable {
         if (name == null ? other.name != null : !name.equals(other.name)) {
             return false;
         }
-        if (gpa != other.gpa) {
+        if (Math.abs(gpa - other.gpa) > 0.00005) {
             return false;
         }
         if (publicKey == null ? other.publicKey != null : !publicKey.equals(other.publicKey)) {

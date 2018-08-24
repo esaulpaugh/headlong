@@ -10,18 +10,18 @@ import java.math.BigInteger;
 public class NumberType extends Type {
 
     protected transient final Integer bitLimit;
-    protected transient final Integer scale;
+//    protected transient final Integer scale;
 
-    protected NumberType(String canonicalAbiType, String javaClassName, int bitLimit, int scale) {
+    protected NumberType(String canonicalAbiType, String javaClassName, int bitLimit) {
         super(canonicalAbiType, javaClassName, false);
 
         this.bitLimit = bitLimit;
-        this.scale = scale;
+//        this.scale = scale;
     }
 
     static NumberType create(final String canonicalAbiType, final String javaClassName) {
         int bitLimit;
-        int scale = 0;
+//        int scale = 0;
         int idx;
         if ((idx = canonicalAbiType.lastIndexOf("int")) != -1) {
             if(idx == canonicalAbiType.length() - "int".length()) { // endswith
@@ -34,16 +34,16 @@ public class NumberType extends Type {
         } else if ((idx = canonicalAbiType.indexOf("fixed")) >= 0) {
             int x = canonicalAbiType.indexOf('x', idx + "fixed".length());
             Integer m = Integer.parseInt(canonicalAbiType.substring(idx + "fixed".length(), x));
-            Integer n = Integer.parseInt(canonicalAbiType.substring(x + "x".length())); // error due to tuple not parsed
+            int n = Integer.parseInt(canonicalAbiType.substring(x + "x".length())); // error due to tuple not parsed
             System.out.println(m + "x" + n);
             bitLimit = m;
-            scale = n;
+//            scale = n;
 //        } else if(canonicalAbiType.equals("bool")) {
 //            return new NumberType(canonicalAbiType, javaClassName, 1, 0);
         } else {
             throw new AssertionError("unknown case");
         }
-        return new NumberType(canonicalAbiType, javaClassName, bitLimit, scale);
+        return new NumberType(canonicalAbiType, javaClassName, bitLimit); // , scale
     }
 
     @Override

@@ -1,14 +1,17 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.joemelsha.crypto.hash.Keccak;
-import sun.nio.cs.US_ASCII;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
 import java.text.ParseException;
 import java.util.ArrayList;
 
 public class Function {
+
+    private static final Charset ASCII = StandardCharsets.US_ASCII;
 
     public static final Type[] EMPTY_TYPE_ARRAY = new Type[0];
     public static final int FUNCTION_ID_LEN = 4;
@@ -29,7 +32,7 @@ public class Function {
 
         try {
             Keccak keccak256 = new Keccak(256);
-            keccak256.update(this.canonicalSignature.getBytes(US_ASCII.INSTANCE));
+            keccak256.update(this.canonicalSignature.getBytes(ASCII));
             keccak256.digest(selector, 0, selector.length);
         } catch (DigestException de) {
             throw new RuntimeException(de);

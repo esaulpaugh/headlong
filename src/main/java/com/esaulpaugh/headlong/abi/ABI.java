@@ -2,24 +2,23 @@ package com.esaulpaugh.headlong.abi;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import sun.nio.cs.US_ASCII;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.esaulpaugh.headlong.abi.Function.FUNCTION_ID_LEN;
 import static org.apache.commons.lang3.StringEscapeUtils.escapeJava;
 
 // TODO encode and decode
 // TODO optimize -- maybe write all zeroes first then fill in params
 public class ABI {
 
-    private static final Charset ASCII = US_ASCII.INSTANCE;
+    private static final Charset ASCII = StandardCharsets.US_ASCII;
 
     private static final String REGEX_NON_ASCII_CHAR = "[^\\p{ASCII}]{1,}";
     private static final Pattern HAS_NON_ASCII_CHARS = Pattern.compile(REGEX_NON_ASCII_CHAR);

@@ -52,7 +52,7 @@ public class Keccak extends MessageDigest {
         int rateSizeBits = rateSizeBitsFor(digestSizeBits);
         if (rateSizeBits + digestSizeBits * 2 != MAX_STATE_SIZE)
             throw new IllegalArgumentException("Invalid rateSizeBits + digestSizeBits * 2: " + rateSizeBits + " + " + digestSizeBits + " * 2 != " + MAX_STATE_SIZE);
-        if (rateSizeBits <= 0 || (rateSizeBits & 0x3f) > 0)
+        if (rateSizeBits <= 0 || (rateSizeBits & 0x3f) != 0)
             throw new IllegalArgumentException("Invalid rateSizeBits: " + rateSizeBits);
 
         this.digestSizeBits = digestSizeBits;
@@ -125,7 +125,7 @@ public class Keccak extends MessageDigest {
         }
 
         int rateBits = this.rateBits;
-        if ((rateBits & 0b111) > 0) {
+        if ((rateBits & 0b111) != 0) {
             throw new IllegalStateException("Cannot update while in bit mode");
         }
 

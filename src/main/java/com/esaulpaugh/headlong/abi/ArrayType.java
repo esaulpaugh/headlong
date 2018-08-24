@@ -1,38 +1,36 @@
 package com.esaulpaugh.headlong.abi;
 
-import sun.nio.cs.UTF_8;
-
+import java.nio.charset.StandardCharsets;
 import java.util.Stack;
 
 public class ArrayType extends Type {
 
-    protected transient final Type baseType;
-    protected transient final Stack<Integer> fixedLengthStack;
-    protected transient final int arrayDepth;
-    protected transient final Integer baseTypeByteLen;
+    private transient final Type baseType;
+    private transient final Stack<Integer> fixedLengthStack;
+    private transient final int arrayDepth;
 
-    protected ArrayType(String canonicalAbiType, String abiBaseType, String javaClassName, Stack<Integer> fixedLengthStack, int arrayDepth, Integer baseTypeByteLen, boolean dynamic) {
+    protected ArrayType(String canonicalAbiType, String abiBaseType, String javaClassName, Stack<Integer> fixedLengthStack, int arrayDepth, boolean dynamic) {
         super(canonicalAbiType, javaClassName, dynamic);
         this.baseType = Type.create(abiBaseType);
         this.fixedLengthStack = fixedLengthStack;
         this.arrayDepth = arrayDepth;
-        this.baseTypeByteLen = baseTypeByteLen;
+//        Integer baseTypeByteLen1 = baseTypeByteLen;
     }
 
-    static ArrayType create(String canonicalAbiType, String abiBaseType, String javaClassName, String javaBaseType, Stack<Integer> fixedLengthStack, int depth) {
+    static ArrayType create(String canonicalAbiType, String abiBaseType, String javaClassName, Stack<Integer> fixedLengthStack, int depth) {
         Integer baseTypeByteLen;
-        Integer byteLen;
+        int byteLen;
 
         boolean dynamic = fixedLengthStack.contains(null);
         if(dynamic) {
-            switch (javaBaseType) {
-            case "B":
-            case "[B":
-            case "java.lang.String":
-                baseTypeByteLen = 1; break;
-            default: baseTypeByteLen = null;
-            }
-            byteLen = null;
+//            switch (javaBaseType) {
+//            case "B":
+//            case "[B":
+//            case "java.lang.String":
+//                baseTypeByteLen = 1; break;
+//            default: baseTypeByteLen = null;
+//            }
+//            byteLen = null;
         } else { // static
             baseTypeByteLen = fixedLengthStack.get(fixedLengthStack.size() - 1); // e.g. uint8[2] --> 1, uint16[2] --> 32?
 
@@ -58,7 +56,7 @@ public class ArrayType extends Type {
             abiBaseType = "uint8";
         }
 
-        return new ArrayType(canonicalAbiType, abiBaseType, javaClassName, fixedLengthStack, depth, baseTypeByteLen, dynamic);
+        return new ArrayType(canonicalAbiType, abiBaseType, javaClassName, fixedLengthStack, depth, dynamic);
     }
 
     @Override
@@ -80,7 +78,7 @@ public class ArrayType extends Type {
                 validateBooleanArray((boolean[]) param, expectedLengthIndex);
             }
         } else if(param instanceof String) {
-            validateByteArray(((String) param).getBytes(UTF_8.INSTANCE), expectedLengthIndex);
+            validateByteArray(((String) param).getBytes(StandardCharsets.UTF_8), expectedLengthIndex);
         } else if(param instanceof Number) {
             NumberType._validateNumber(param, ((NumberType) baseType).bitLimit);
         } else if(param instanceof Boolean) {

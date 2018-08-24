@@ -21,11 +21,9 @@ public class ClassNames {
             final int dot = base.lastIndexOf('.');
             if(dot != -1) {
                 if (base.charAt(0) == 'L') {
-                    sb.append(base.substring(dot + 1, base.length() - 1));
+                    sb.append(base, dot + 1, base.length() - 1);
                 } else {
                     sb.append(base.substring(dot + 1));
-//                System.err.println("???");
-//                return className;
                 }
             }
         }

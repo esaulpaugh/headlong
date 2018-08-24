@@ -101,6 +101,19 @@ class TupleType extends Type {
         return paramsByteLen;
     }
 
+    static int[] getHeadLengths(Type[] types, Object[] arguments) {
+        final int len = types.length;
+        int[] headLengths = new int[len];
+        Type type;
+        for (int i = 0; i < len; i++) {
+            type = types[i];
+            headLengths[i] = type.dynamic
+                    ? 32
+                    : type.getDataByteLen(arguments[i]);
+        }
+        return headLengths;
+    }
+
 //    @Override
 //    public Integer getDataByteLen(Object value) {
 //        Stack<Integer> dynamicByteLenStack = new Stack<>();
