@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 import static org.apache.commons.lang3.StringEscapeUtils.escapeJava;
 
 // TODO encode and decode
-// TODO optimize -- maybe write all zeroes first then fill in params
+// TODO optimize -- maybe write all zeroes first then fill in args
 public class ABI {
 
     private static final Charset ASCII = StandardCharsets.US_ASCII;
@@ -58,39 +58,25 @@ public class ABI {
         }
     }
 
-    private static String canonicalize(String signature, String typeString, int argStart, final int argEnd /* StringBuilder canonicalSig, int prevNonCanonicalIndex */) {
-        int splitIndex;
-        String piece;
-
+    private static String canonicalize(String signature, String typeString, int argStart, final int argEnd) {
+        final int splitIndex;
+        final String piece;
         if (typeString.endsWith("int")) {
             splitIndex = argEnd;
             piece = "256";
-//            canonicalSig.append(signature, prevNonCanonicalIndex, argEnd).append("256");
         } else if(typeString.endsWith("fixed")) {
             splitIndex = argEnd;
             piece = "128x18";
-//            canonicalSig.append(signature, prevNonCanonicalIndex, argEnd).append("128x18");
         } else if(typeString.contains("int[")) {
-            splitIndex = signature.indexOf("int", argStart) + 3;
+            splitIndex = signature.indexOf("int", argStart) + "int".length();
             piece = "256";
-//            String a = signature.substring(argStart, idx);
-//            String b = signature.substring(idx, argEnd);
-//            canonicalSig.append(signature, prevNonCanonicalIndex, idx).append("256").append(signature, idx, argEnd);
         } else if(typeString.contains("fixed[")) {
-            splitIndex = signature.indexOf("fixed", argStart) + 5;
+            splitIndex = signature.indexOf("fixed", argStart) + "fixed".length();
             piece = "128x18";
-//            String a = signature.substring(argStart, idx);
-//            String b = signature.substring(idx, argEnd);
-//            canonicalSig.append(signature, prevNonCanonicalIndex, idx).append("128x18").append(signature, idx, argEnd);
         } else {
             return null;
-//            splitIndex = argEnd;
-//            piece = "";
         }
-
         return new StringBuilder().append(signature, argStart, splitIndex).append(piece).append(signature, splitIndex, argEnd).toString();
-
-//        return argEnd;
     }
 
     /**
@@ -149,9 +135,7 @@ public class ABI {
                                                      final int startParams,
                                                      final StringBuilder canonicalOut,
                                                      final List<Type> tupleTypes,
-                                                     final Matcher illegalTypeCharMatcher)
-            throws ParseException {
-
+                                                     final Matcher illegalTypeCharMatcher) throws ParseException {
         int argStart = startParams + 1;
         int argEnd = argStart; // this inital value is important for empty params case
         int prevNonCanonicalIndex = 0;
@@ -182,9 +166,6 @@ public class ABI {
                     argEnd = results.getLeft() + 1;
                     prevNonCanonicalIndex = results.getRight();
 
-//                    String typeString = parseTuple(illegalTypeCharMatcher, signature, argStart);
-//                    argEnd = argStart + typeString.length();
-
                 } catch (EmptyParameterException epe) {
                     throw (EmptyParameterException) new EmptyParameterException(epe.getMessage() + " @ " + tupleTypes.size(), epe.getErrorOffset()).initCause(epe);
                 }
@@ -198,7 +179,6 @@ public class ABI {
                 argEnd = nextParamTerminator(signature, argStart + 1);
                 if (argEnd == -1) {
                     throw new NonTerminationException("non-terminating tuple", startParams);
-//                    break LOOP;
                 }
                 checkParamChars(illegalTypeCharMatcher, signature, argStart, argEnd);
                 String typeString = signature.substring(argStart, argEnd);
@@ -229,46 +209,7 @@ public class ABI {
         return Math.min(comma, close);
     }
 
-//    private static String parseTuple(Matcher matcher, String signature, int tupleStart) throws ParseException {
-//        int idx = tupleStart;
-//        int tupleDepth = 0;
-//        int openTuple, closeTuple;
-//        do {
-//            openTuple = signature.indexOf('(', idx);
-//            closeTuple = signature.indexOf(')', idx);
-//
-//            if(closeTuple < 0) {
-//                throw new ParseException("non-terminating tuple", tupleStart);
-//            }
-//
-//            if(openTuple == -1 || closeTuple < openTuple) {
-//                tupleDepth--;
-//                idx = closeTuple + 1;
-//            } else {
-//                tupleDepth++;
-//                idx = openTuple + 1;
-//            }
-//        } while(tupleDepth > 0);
-//
-//        checkParamChars(matcher, signature, tupleStart, idx);
-//        String tuple = signature.substring(tupleStart, idx);
-//        System.out.println("tuple: " + tuple); // uncanonicalized
-//
-//        return tuple;
-//
-////        return idx;
-//    }
-
     public static ByteBuffer encodeFunctionCall(String signature, Object... arguments) throws ParseException {
         return Encoder.encodeFunctionCall(new Function(signature), arguments);
     }
-
-//    public static ByteBuffer encodeFunctionCall(Function function, Object... arguments) {
-////        StringBuilder canonicalSigBuilder = new StringBuilder();
-////        List<Type> types = new ArrayList<>();
-////        boolean wasChanged = parseFunctionSignature(signature, canonicalSigBuilder, types);
-////        signature = canonicalSigBuilder.toString();
-//
-////        Function f = new Function(signature);
-//    }
 }

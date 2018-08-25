@@ -35,5 +35,4 @@ public class ClassNames {
 
         return sb.toString();
     }
-
 }

@@ -129,14 +129,14 @@ public class Example {
         abi = ABI.encodeFunctionCall("()");
         System.out.println(Hex.toHexString(abi.array()));
 
-        Object[] params_ = new Object[] {
+        Object[] args = new Object[] {
                 BigInteger.ONE, new BigInteger[][] {  }, BigInteger.ONE, new BigInteger[][] {  },
                 BigDecimal.valueOf(1L, 0), new BigDecimal[][] {  }, BigDecimal.valueOf(1L, 0), new BigDecimal[][] {  },
         };
         try {
             abi = ABI.encodeFunctionCall(
                     "yabba_(int,int[99][0],uint,uint[99][0],fixed,fixed[99][0],ufixed,ufixed[99][0])",
-                    params_
+                    args
             );
         } catch (Throwable t) { System.out.println("\t\t" + t.getMessage());
         }
@@ -144,7 +144,7 @@ public class Example {
 
         abi = ABI.encodeFunctionCall(
                 "yabba_(int256,int256[2][0],uint256,uint256[2][0],fixed128x18,fixed128x18[2][0],ufixed128x18,ufixed128x18[2][0])",
-                params_
+                args
         );
         System.out.println(Hex.toHexString(abi.array()));
 

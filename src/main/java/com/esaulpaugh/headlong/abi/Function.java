@@ -41,8 +41,8 @@ public class Function {
         this.paramTypes = TupleType.create(types.toArray(EMPTY_TYPE_ARRAY));
     }
 
-    public ByteBuffer encodeCall(Object... params) {
-        return Encoder.encodeFunctionCall(this, params);
+    public ByteBuffer encodeCall(Object... args) {
+        return Encoder.encodeFunctionCall(this, args);
     }
 
     public String getCanonicalSignature() {

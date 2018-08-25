@@ -33,32 +33,23 @@ abstract class Type {
     protected static final String CLASS_NAME_ELEMENT_BIG_DECIMAL = BigDecimal[].class.getName().replaceFirst("\\[", "");
     protected static final String CLASS_NAME_ELEMENT_STRING = String[].class.getName().replaceFirst("\\[", "");
 
-//    protected static final String CLASS_NAME_ARRAY_BOOLEAN = boolean[].class.getName();
     protected static final String CLASS_NAME_ARRAY_BYTE = byte[].class.getName();
 
-    protected static final String CLASS_NAME_ELEMENT_ARRAY_BYTE = byte[][].class.getName().replaceFirst("\\[", "");
-
-//    protected static final BigInteger ADDRESS_ARITHMETIC_LIMIT = BigInteger.valueOf(2).pow(160);
-//    protected static final BigInteger UINT_256_ARITHMETIC_LIMIT = BigInteger.valueOf(2).pow(256);
-
     private final String canonicalAbiType;
-
-//    protected transient final Stack<Integer> fixedLengthStack = new Stack<>();
-
-    protected final String javaClassName;
-
+    private final String javaClassName;
     protected final boolean dynamic;
-
-//    private transient final Integer byteLen;
 
     protected Type(String canonicalAbiType, String javaClassName, boolean dynamic) {
         this.canonicalAbiType = canonicalAbiType;
         this.javaClassName = javaClassName;
-//        this.byteLen = byteLen;
         this.dynamic = dynamic;
     }
 
     protected static Type create(String canonicalAbiType) {
+
+        if(canonicalAbiType.startsWith("(")) {
+            throw new IllegalArgumentException("the way is shut -- can't create tuple type this way");
+        }
 
         final Stack<Integer> fixedLengthStack = new Stack<>();
         Pair<String, String> baseTypeNames = buildBaseTypeNames(canonicalAbiType, canonicalAbiType.length() - 1, fixedLengthStack);
@@ -72,11 +63,6 @@ abstract class Type {
         }
         String javaClassName = classNameBuilder.append(javaBaseType).toString();
 
-        if(canonicalAbiType.startsWith("(")) {
-//            return new TupleType(javaClassName, ABI.parseTuple());
-            throw new IllegalArgumentException("can't create tuple type this way");
-        }
-
         try {
             if (canonicalAbiType.equals(abiBaseType) && Number.class.isAssignableFrom(Class.forName(javaClassName))) {
                 return NumberType.create(canonicalAbiType, javaClassName);
@@ -89,19 +75,6 @@ abstract class Type {
             return BooleanType.create(canonicalAbiType, javaClassName);
         }
 
-
-
-
-
-//        if(byteLen == null) {
-//            System.out.println(canonicalAbiType + ", " + abiBaseType + ", " + javaBaseType + ", " + javaClassName + " : dynamic len");
-//        }
-
-//        if(abiBaseType.startsWith("(")) {
-//            return new TupleType();
-//        }
-
-
         return ArrayType.create(canonicalAbiType, abiBaseType, javaClassName, fixedLengthStack, depth);
     }
 
@@ -111,9 +84,7 @@ abstract class Type {
 //        return newLen == 0 ? 32 : newLen;
     }
 
-    public abstract Integer getDataByteLen(Object param);
-
-    public abstract Integer getNumElements(Object param);
+    public abstract Integer getDataByteLen(Object value);
 
     private static Pair<String, String> buildBaseTypeNames(String canonicalAbiType, final int i, Stack<Integer> fixedLengthStack) {
         Integer fixedLength;
@@ -266,166 +237,32 @@ abstract class Type {
         }
     }
 
-    public void validate(Object param) {
-        validate(param, javaClassName, 0);
+    public void validate(Object value) {
+        validate(value, javaClassName, 0);
     }
 
-    protected void validate(final Object param, final String expectedClassName, final int expectedLengthIndex) {
-//        if(param == null) {
-//            throw new NullPointerException("object is null");
-//        }
-        if(!javaClassName.equals(param.getClass().getName())) {
+    protected void validate(final Object value, final String expectedClassName, final int expectedLengthIndex) {
+        // will throw NPE if argument null
+        if(!javaClassName.equals(value.getClass().getName())) {
             boolean isAssignable;
             try {
-                isAssignable = Class.forName(expectedClassName).isAssignableFrom(param.getClass());
+                isAssignable = Class.forName(expectedClassName).isAssignableFrom(value.getClass());
             } catch (ClassNotFoundException cnfe) {
                 isAssignable = false;
             }
             if(!isAssignable) {
                 throw new IllegalArgumentException("class mismatch: "
-                        + param.getClass().getName()
+                        + value.getClass().getName()
                         + " not assignable to "
                         + expectedClassName
-                        + " (" + toFriendly(param.getClass().getName()) + " not instanceof " + toFriendly(expectedClassName) + "/" + canonicalAbiType + ")");
+                        + " (" + toFriendly(value.getClass().getName()) + " not instanceof " + toFriendly(expectedClassName) + "/" + canonicalAbiType + ")");
             }
         }
         System.out.print("class valid, ");
-
-//        if(param.getClass().isArray()) {
-//            if(param instanceof Object[]) {
-//                validateArray((Object[]) param, expectedClassName, expectedLengthIndex);
-//            } else if (param instanceof byte[]) {
-//                validateByteArray((byte[]) param, expectedLengthIndex);
-//            } else if (param instanceof int[]) {
-//                validateIntArray((int[]) param, expectedLengthIndex);
-//            } else if (param instanceof long[]) {
-//                validateLongArray((long[]) param, expectedLengthIndex);
-//            } else if (param instanceof short[]) {
-//                validateShortArray((short[]) param, expectedLengthIndex);
-//            } else if (param instanceof boolean[]) {
-//                validateBooleanArray((boolean[]) param, expectedLengthIndex);
-//            }
-//        } else if(param instanceof Number) {
-//            NumberType.validateNumber((Number) param);
-//        } else if (param instanceof Tuple) {
-//            validateTuple((Tuple) param);
-//        } else {
-//            throw new IllegalArgumentException("unrecognized type: " + param.getClass().getName());
-//        }
     }
-
-//    private void validateTuple(Tuple tuple) {
-//        Type[] types = ((TupleType) this).getTypes();
-//        final int typesLen = types.length;
-//        if(typesLen != tuple.elements.length) {
-//            throw new IllegalArgumentException("tuple length mismatch: expected: " + typesLen + ", actual: " + tuple.elements.length);
-//        }
-//        System.out.println("length valid;");
-//        for (int i = 0; i < typesLen; i++) {
-//            validate(tuple.elements[i], types[i].javaClassName, 0);
-//        }
-//    }
-
-//    private void validateNumber(Number number) {
-//        final int bitLen;
-//        if(number instanceof BigInteger) {
-//            BigInteger bigIntParam = (BigInteger) number;
-//            bitLen = bigIntParam.bitLength();
-//        } else if(number instanceof BigDecimal) {
-//            BigDecimal bigIntParam = (BigDecimal) number;
-//            if(bigIntParam.scale() != 0) {
-//                throw new IllegalArgumentException("scale must be 0");
-//            }
-//            bitLen = bigIntParam.unscaledValue().bitLength();
-//        } else {
-//            final long longVal = number.longValue();
-//            bitLen = longVal >= 0 ? RLPIntegers.bitLen(longVal) : BizarroIntegers.bitLen(longVal);
-//
-//            if(longVal > 0) {
-//                Assert.assertEquals(Long.toBinaryString(longVal).length(), bitLen);
-//            } else if(longVal == 0) {
-//                Assert.assertEquals(0, bitLen);
-//            } else if(longVal == -1) {
-//                Assert.assertEquals(0, bitLen);
-//            } else { // < -1
-//                String bin = Long.toBinaryString(longVal);
-//                String minBin = bin.substring(bin.indexOf('0'));
-//                Assert.assertEquals(bitLen, minBin.length());
-//            }
-//            Assert.assertEquals(BigInteger.valueOf(longVal).bitLength(), bitLen);
-//        }
-//
-//        if(bitLen > baseTypeBitLimit) {
-//            throw new IllegalArgumentException("exceeds bit limit: " + bitLen + " > " + baseTypeBitLimit);
-//        }
-//        System.out.println("length valid;");
-//    }
-
-//    public abstract int calcDynamicByteLen(Object param);
 
     @Override
     public String toString() {
         return canonicalAbiType;
     }
-
-//    private void validateArray(Object arr, int expectedLengthIndex) {
-//        Object[] elements;
-//        String newClassName;
-//        final int len;
-//        if(arr instanceof byte[]) {
-//            byte[] casted = (byte[]) arr;
-//            len = casted.length;
-//            elements = new Object[len];
-//            for (int i = 0; i < len; i++) {
-//                elements[i] = casted[i];
-//            }
-//            newClassName = CLASS_NAME_BYTE;
-//        } else if(arr instanceof short[]) {
-//            short[] casted = (short[]) arr;
-//            len = casted.length;
-//            elements = new Object[len];
-//            for (int i = 0; i < len; i++) {
-//                elements[i] = casted[i];
-//            }
-//            newClassName = CLASS_NAME_SHORT;
-//        } else if(arr instanceof int[]) {
-//            int[] casted = (int[]) arr;
-//            len = casted.length;
-//            elements = new Object[len];
-//            for (int i = 0; i < len; i++) {
-//                elements[i] = casted[i];
-//            }
-//            newClassName = CLASS_NAME_INT;
-//        } else if(arr instanceof long[]) {
-//            long[] casted = (long[]) arr;
-//            len = casted.length;
-//            elements = new Object[len];
-//            for (int i = 0; i < len; i++) {
-//                elements[i] = casted[i];
-//            }
-//            newClassName = CLASS_NAME_LONG;
-//        } else if(arr instanceof boolean[]) {
-//            boolean[] casted = (boolean[]) arr;
-//            len = casted.length;
-//            elements = new Object[len];
-//            for (int i = 0; i < len; i++) {
-//                elements[i] = casted[i];
-//            }
-//            newClassName = CLASS_NAME_BOOLEAN;
-//        } else {
-//            throw new RuntimeException(new ClassNotFoundException(arr.getClass().getName()));
-//        }
-//        Integer fixedArrayLength = fixedLengthStack.get(expectedLengthIndex);
-//        if(fixedArrayLength != null) {
-//            checkLength(len, fixedArrayLength);
-//        }
-//        int i = 0;
-//        try {
-//            for ( ; i < len; i++) {
-//                validate(elements[i], newClassName, expectedLengthIndex + 1);
-//            }
-//        } catch (IllegalArgumentException | NullPointerException re) {
-//            throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
-//        }
-//    }
 }

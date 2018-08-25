@@ -19,16 +19,11 @@ class TupleType extends Type {
         return new TupleType(dynamic, types);
     }
 
-//    static TupleType forTypeString(String typeString) {
-////        ABI.parseTuple();
-//        return null;
-//    }
-
-    protected static String typeStringForTypes(Type... types) {
+    private static String typeStringForTypes(Type... types) {
         StringBuilder sb = new StringBuilder("(");
         final int len = types.length;
-        for (int i = 0; i < len; i++) {
-            sb.append(types[i]).append(",");
+        for (Type type : types) {
+            sb.append(type).append(",");
         }
         final int strLen = sb.length();
 
@@ -38,21 +33,6 @@ class TupleType extends Type {
 
         return sb.append(")").toString();
     }
-
-//    Type[] getTypes() {
-//        return types;
-//    }
-
-//    @Override
-//    public int calcDynamicByteLen(Object param) {
-//        final Object[] elements = ((Tuple) param).elements;
-//        int byteLen = 0;
-//        final int len = this.types.length;
-//        for (int i = 0; i < len; i++) {
-//            byteLen += this.types[i].calcDynamicByteLen(elements[i]);
-//        }
-//        return byteLen;
-//    }
 
     @Override
     public Integer getDataByteLen(Object value) {
@@ -74,18 +54,16 @@ class TupleType extends Type {
     }
 
     static int getLengthInfo(Type[] types, Object[] arguments, int[] headLengths) {
-//        int dynamicOverheadBytes = 0;
-        int paramsByteLen = 0;
+        int argsByteLen = 0;
         final int n = headLengths.length;
         for (int i = 0; i < n; i++) {
             Type t = types[i];
             int byteLen = t.getDataByteLen(arguments[i]);
             System.out.print(arguments[i] + " --> " + byteLen + ", ");
-            paramsByteLen += byteLen;
+            argsByteLen += byteLen;
 
             if(t.dynamic) {
                 headLengths[i] = 32;
-//                dynamicOverheadBytes += 32 + 32; // 32
                 System.out.println("dynamic");
             } else {
                 headLengths[i] = byteLen;
@@ -93,15 +71,12 @@ class TupleType extends Type {
             }
         }
 
-//        System.out.println("**************** " + dynamicOverheadBytes);
+        System.out.println("**************** " + argsByteLen);
 
-        System.out.println("**************** " + paramsByteLen);
-
-        // dynamicOverheadBytes +
-        return paramsByteLen;
+        return argsByteLen;
     }
 
-    static int[] getHeadLengths(Type[] types, Object[] arguments) {
+    static int[] getHeadLengths(Type[] types, Object[] values) {
         final int len = types.length;
         int[] headLengths = new int[len];
         Type type;
@@ -109,53 +84,16 @@ class TupleType extends Type {
             type = types[i];
             headLengths[i] = type.dynamic
                     ? 32
-                    : type.getDataByteLen(arguments[i]);
+                    : type.getDataByteLen(values[i]);
         }
         return headLengths;
     }
 
-//    @Override
-//    public Integer getDataByteLen(Object value) {
-//        Stack<Integer> dynamicByteLenStack = new Stack<>();
-//        ArrayType.buildByteLenStack(((Tuple) value).elements, dynamicByteLenStack);
-//        int tupleDepth = dynamicByteLenStack.size() - 1;
-//        if(baseTypeByteLen == 1 && !canonicalAbiType.startsWith("bytes1")) { // typeString.startsWith("int8") || typeString.startsWith("uint8")
-//            tupleDepth--;
-//        }
-//        int n = 1;
-//        for (int i = tupleDepth - 1; i >= 0; i--) {
-//            int len;
-//            Integer fixedLen = fixedLengthStack.get(i);
-//            if(fixedLen != null) {
-//                len = fixedLen;
-//            } else {
-//                len = dynamicByteLenStack.get(i);
-//            }
-//            n *= len;
-//        }
-//        return roundUp(n);
-//    }
-
     @Override
-    public Integer getNumElements(Object value) {
-        return ((Tuple) value).elements.length;
-    }
+    protected void validate(final Object value, final String expectedClassName, final int expectedLengthIndex) {
+        super.validate(value, expectedClassName, expectedLengthIndex);
 
-//    protected Integer getDataLen(Object param) {
-//        final Object[] elements = ((Tuple) param).elements;
-//        int byteLen = 0;
-//        final int len = this.types.length;
-//        for (int i = 0; i < len; i++) {
-//            byteLen += this.types[i].getHeadLen(elements[i]);
-//        }
-//        return byteLen;
-//    }
-
-    @Override
-    protected void validate(final Object param, final String expectedClassName, final int expectedLengthIndex) {
-        super.validate(param, expectedClassName, expectedLengthIndex);
-
-        final Tuple tuple = (Tuple) param;
+        final Tuple tuple = (Tuple) value;
         final Object[] elements = tuple.elements;
 
         final int expected = this.types.length;
@@ -166,20 +104,17 @@ class TupleType extends Type {
         System.out.println("length valid;");
 
         checkTypes(this.types, elements);
-//        for (int i = 0; i < expected; i++) {
-//            validate(elements[i], types[i].javaClassName, 0);
-//        }
     }
 
-    public static void checkTypes(Type[] paramTypes, Object[] arguments) {
+    public static void checkTypes(Type[] paramTypes, Object[] values) {
         final int n = paramTypes.length;
         int i = 0;
         try {
             for ( ; i < n; i++) {
-                paramTypes[i].validate(arguments[i]);
+                paramTypes[i].validate(values[i]);
             }
         } catch (IllegalArgumentException | NullPointerException e) {
-            throw new IllegalArgumentException("invalid param @ " + i + ": " + e.getMessage(), e);
+            throw new IllegalArgumentException("invalid arg @ " + i + ": " + e.getMessage(), e);
         }
     }
 }

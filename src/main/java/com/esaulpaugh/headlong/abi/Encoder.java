@@ -29,8 +29,6 @@ public class Encoder {
 
         TupleType.checkTypes(types, arguments);
 
-        // head(X(i)) = enc(len(head(X(1)) ... head(X(k)) tail(X(1)) ... tail(X(i-1)) ))
-
         int[] headLengths = new int[types.length];
         int encodingByteLen = TupleType.getLengthInfo(types, arguments, headLengths);
 
@@ -38,35 +36,22 @@ public class Encoder {
 
         System.out.println("allocating " + allocation);
         ByteBuffer outBuffer = ByteBuffer.wrap(new byte[allocation]); // ByteOrder.BIG_ENDIAN by default
-//        Keccak keccak = new Keccak(256);
-//        keccak.update(signature.getBytes(ASCII));
-//        keccak.digest(outBuffer, 4);
-
         outBuffer.put(function.selector);
 
-//        List<Type> typeList = new LinkedList<>(Arrays.asList(types));
-//        List<Object> paramList = new LinkedList<>(Arrays.asList(values));
-
         Encoder.encodeTuple(paramTypes, arguments, headLengths, outBuffer);
-
-//        encodeParamTails(outBuffer, typeList, paramList);
 
         return outBuffer;
     }
 
-    public static void encodeTuple(TupleType paramTypes, Object[] values, int[] headLengths, ByteBuffer outBuffer) {
-        List<Type> typeList = new LinkedList<>(Arrays.asList(paramTypes.types));
+    private static void encodeTuple(TupleType tupleType, Object[] values, int[] headLengths, ByteBuffer outBuffer) {
+        List<Type> typeList = new LinkedList<>(Arrays.asList(tupleType.types));
         List<Object> valuesList = new LinkedList<>(Arrays.asList(values));
 
-        encodeParamHeads(typeList, valuesList, headLengths, outBuffer);
-        encodeParamTails(typeList, valuesList, outBuffer);
+        encodeHeadsForTuple(typeList, valuesList, headLengths, outBuffer);
+        encodeTailsForTuple(typeList, valuesList, outBuffer);
     }
 
-    public static void encodeParamHeads(List<Type> types, List<Object> values, int[] headLengths, ByteBuffer outBuffer) {
-//        final int size = types.size();
-//        for (int i = 0; i < size; i++) {
-//            types[i].encodeHeads(values[i], outBuffer);
-//        }
+    private static void encodeHeadsForTuple(List<Type> types, List<Object> values, int[] headLengths, ByteBuffer outBuffer) {
 
         int sum = 0;
         for (int i : headLengths) {
@@ -74,12 +59,10 @@ public class Encoder {
         }
 
         int mark;
-//        int i = 0;
         Iterator<Type> ti;
         Iterator<Object> vi;
         for(ti = types.iterator(), vi = values.iterator(); ti.hasNext(); ) {
             Type type = ti.next();
-//            sum -= headLengths[i++];
             mark = outBuffer.position();
             encodeHead(type, vi.next(), outBuffer, sum, type.dynamic);
             sum += outBuffer.position() - mark;
@@ -90,29 +73,19 @@ public class Encoder {
         }
     }
 
-    public static void encodeParamTails(List<Type> types, List<Object> values, ByteBuffer outBuffer) {
-//        final int size = types.size();
-//        for (int i = 0; i < size; i++) {
-//            types[i].encodeHeads(values[i], outBuffer);
-//        }
+    private static void encodeTailsForTuple(List<Type> types, List<Object> values, ByteBuffer outBuffer) {
         Iterator<Type> ti;
         Iterator<Object> vi;
         for(ti = types.iterator(), vi = values.iterator(); ti.hasNext(); ) {
             Type type = ti.next();
             encodeTail(type, vi.next(), outBuffer);
-//            if(!type.dynamic) {
-//                ti.remove();
-//                vi.remove();
-//            }
         }
     }
 
     // TODO switch(typeInt) for performance?
-    public static void encodeHead(Type paramType, Object value, ByteBuffer dest, int tailOffset, boolean dynamic) {
+    private static void encodeHead(Type paramType, Object value, ByteBuffer dest, int tailOffset, boolean dynamic) {
         if(value instanceof String) { // dynamic
-//            dest.position(dest.position() + 32); // leave empty for now
             insertStringHead(dest, tailOffset);
-//            insertBytes(((String) value).getBytes(StandardCharsets.UTF_8), dest);
         } else if(value.getClass().isArray()) {
             if (value instanceof Object[]) {
                 if(value instanceof BigInteger[]) {
@@ -121,7 +94,6 @@ public class Encoder {
                     insertObjectsHead(paramType, (Object[]) value, dest, tailOffset, dynamic);
                 }
             } else if (value instanceof byte[]) {
-//                System.out.println("byte[] " + dest.position());
                 insertBytesHead((byte[]) value, dest, tailOffset, dynamic);
             } else if (value instanceof int[]) {
                 insertIntsHead((int[]) value, dest, tailOffset, dynamic);
@@ -147,11 +119,16 @@ public class Encoder {
         }
     }
 
-    public static void encodeTail(Type paramType, Object value, ByteBuffer dest) {
+    /**
+     * Only for dynamic types -- no Booleans, no Numbers
+     *
+     * @param paramType
+     * @param value
+     * @param dest
+     */
+    private static void encodeTail(Type paramType, Object value, ByteBuffer dest) {
         if(value instanceof String) { // dynamic
-//            dest.position(dest.position() + 32); // leave empty for now
             insertBytes(((String) value).getBytes(StandardCharsets.UTF_8), dest);
-//            insertBytes(((String) value).getBytes(StandardCharsets.UTF_8), dest);
         } else if(value.getClass().isArray()) {
             if (value instanceof Object[]) {
                 if(value instanceof BigInteger[]) {
@@ -172,16 +149,6 @@ public class Encoder {
             } else if(value instanceof boolean[]) {
                 insertBooleans((boolean[]) value, dest);
             }
-//        } else if (value instanceof Number) {
-//            if(value instanceof BigInteger) {
-//                insertInt(((BigInteger) value), dest);
-//            } else if(value instanceof BigDecimal) {
-//                insertInt(((BigDecimal) value).unscaledValue(), dest);
-//            } else {
-//                insertInt(((Number) value).longValue(), dest);
-//            }
-//        } else if(value instanceof Boolean) {
-//            insertBool((boolean) value, dest);
         } else if(value instanceof Tuple) {
             TupleType tupleType;
             try {
@@ -190,22 +157,18 @@ public class Encoder {
                 throw new RuntimeException(cce);
             }
             Tuple tuple = (Tuple) value;
-//            int[] headLengths = new int[tupleType.types.length];
-//            int encodingByteLen = TupleType.getLengthInfo(tupleType.types, tuple.elements, headLengths);
             int[] headLengths = TupleType.getHeadLengths(tupleType.types, tuple.elements);
             encodeTuple(tupleType, ((Tuple) value).elements, headLengths, dest);
-//            insertTuple((Tuple) value, dest);
         }
     }
 
     // ----------------------------------------------
 
-    public static void insertStringHead(ByteBuffer dest, int tailOffset) {
+    private static void insertStringHead(ByteBuffer dest, int tailOffset) {
         insertInt(tailOffset, dest);
-//        insertBytesHead(string.getBytes(UTF_8.INSTANCE), dest, tailOffset, true);
     }
 
-    public static void insertBytesHead(byte[] bytes, ByteBuffer dest, int tailOffset, boolean dynamic) {
+    private static void insertBytesHead(byte[] bytes, ByteBuffer dest, int tailOffset, boolean dynamic) {
         if(dynamic) {
             insertInt(tailOffset, dest);
         } else {
@@ -213,7 +176,7 @@ public class Encoder {
         }
     }
 
-    public static void insertBooleansHead(boolean[] bools, ByteBuffer dest, int tailOffset, boolean dynamic) {
+    private static void insertBooleansHead(boolean[] bools, ByteBuffer dest, int tailOffset, boolean dynamic) {
         if(dynamic) {
             insertInt(tailOffset, dest);
         } else {
@@ -221,7 +184,7 @@ public class Encoder {
         }
     }
 
-    public static void insertShortsHead(short[] shorts, ByteBuffer dest, int tailOffset, boolean dynamic) {
+    private static void insertShortsHead(short[] shorts, ByteBuffer dest, int tailOffset, boolean dynamic) {
         if(dynamic) {
             insertInt(tailOffset, dest);
         } else {
@@ -229,7 +192,7 @@ public class Encoder {
         }
     }
 
-    public static void insertIntsHead(int[] ints, ByteBuffer dest, int tailOffset, boolean dynamic) {
+    private static void insertIntsHead(int[] ints, ByteBuffer dest, int tailOffset, boolean dynamic) {
         if(dynamic) {
             insertInt(tailOffset, dest);
         } else {
@@ -237,7 +200,7 @@ public class Encoder {
         }
     }
 
-    public static void insertLongsHead(long[] ints, ByteBuffer dest, int tailOffset, boolean dynamic) {
+    private static void insertLongsHead(long[] ints, ByteBuffer dest, int tailOffset, boolean dynamic) {
         if(dynamic) {
             insertInt(tailOffset, dest);
         } else {
@@ -245,7 +208,7 @@ public class Encoder {
         }
     }
 
-    public static void insertBigIntsHead(BigInteger[] ints, ByteBuffer dest, int tailOffset, boolean dynamic) {
+    private static void insertBigIntsHead(BigInteger[] ints, ByteBuffer dest, int tailOffset, boolean dynamic) {
         if(dynamic) {
             insertInt(tailOffset, dest);
         } else {
@@ -253,7 +216,7 @@ public class Encoder {
         }
     }
 
-    public static void insertTupleHead(Type tupleType, Tuple tuple, ByteBuffer dest, int tailOffset, boolean dynamic) {
+    private static void insertTupleHead(Type tupleType, Tuple tuple, ByteBuffer dest, int tailOffset, boolean dynamic) {
         TupleType paramTypes;
         try {
             paramTypes = (TupleType) tupleType;
@@ -263,15 +226,12 @@ public class Encoder {
         if(dynamic) {
             insertInt(tailOffset, dest);
         } else {
-//            int[] headLengths = new int[paramTypes.types.length];
-//            int encodingByteLen = TupleType.getLengthInfo(paramTypes.types, tuple.elements, headLengths);
             int[] headLengths = TupleType.getHeadLengths(paramTypes.types, tuple.elements);
             encodeTuple(paramTypes, tuple.elements, headLengths, dest);
-//            insertTuple(paramType, tuple, dest);
         }
     }
 
-    public static void insertObjectsHead(Type paramType, Object[] objects, ByteBuffer dest, int tailOffset, boolean dynamic) {
+    private static void insertObjectsHead(Type paramType, Object[] objects, ByteBuffer dest, int tailOffset, boolean dynamic) {
         if(dynamic) {
             insertInt(tailOffset, dest);
         } else {
@@ -281,77 +241,58 @@ public class Encoder {
 
     // -------------------------------------------------------------------------------------------------
 
-    public static void insertBooleans(boolean[] bools, ByteBuffer dest) {
+    private static void insertBooleans(boolean[] bools, ByteBuffer dest) {
         insertInt(bools.length, dest);
         for (boolean e : bools) {
             insertBool(e, dest);
         }
     }
 
-    public static void insertBytes(byte[] bytes, ByteBuffer dest) {
+    private static void insertBytes(byte[] bytes, ByteBuffer dest) {
         insertInt(bytes.length, dest);
         dest.put(bytes);
-        // pad todo
         final int n = Integer.SIZE - bytes.length;
         for (int i = 0; i < n; i++) {
             dest.put((byte) 0);
         }
     }
 
-    public static void insertShorts(short[] shorts, ByteBuffer dest) {
+    private static void insertShorts(short[] shorts, ByteBuffer dest) {
         insertInt(shorts.length, dest);
         for (short e : shorts) {
             insertInt(e, dest);
         }
     }
 
-    public static void insertInts(int[] ints, ByteBuffer dest) {
+    private static void insertInts(int[] ints, ByteBuffer dest) {
         insertInt(ints.length, dest);
         for (int e : ints) {
             insertInt(e, dest);
         }
     }
 
-    public static void insertLongs(long[] ints, ByteBuffer dest) {
+    private static void insertLongs(long[] ints, ByteBuffer dest) {
         insertInt(ints.length, dest);
         for (long e : ints) {
             insertInt(e, dest);
         }
     }
 
-    public static void insertBigInts(BigInteger[] bigInts, ByteBuffer dest) {
+    private static void insertBigInts(BigInteger[] bigInts, ByteBuffer dest) {
         insertInt(bigInts.length, dest);
         for (BigInteger e : bigInts) {
             insertInt(e, dest);
         }
     }
 
-//    public static void insertTuple(Tuple tuple, ByteBuffer dest) {
-//        insertObjects(tuple.elements, dest);
-//    }
-
-//    public static void insertObjects(Object[] objects, ByteBuffer dest) {
-//        for (Object obj) {
-//            encodeTail();
-//        }
-////        if(objects instanceof BigInteger[]) {
-////            insertBigInts((BigInteger[]) objects, dest);
-////        } else {
-////            throw new Error(objects.getClass().getName());
-////        }
-//    }
-
     // --------------------------
 
-    public static void insertInt(long val, ByteBuffer dest) {
-//        final int pos = dest.position();
+    private static void insertInt(long val, ByteBuffer dest) {
         dest.put(PADDING_192_BITS);
         dest.putLong(val);
-//        putLongBigEndian(val, dest, pos + NUM_PADDING_BYTES);
-//        return pos + INT_PARAM_LENGTH_BYTES;
     }
 
-    public static void insertInt(BigInteger bigGuy, ByteBuffer dest) {
+    private static void insertInt(BigInteger bigGuy, ByteBuffer dest) {
         byte[] arr = bigGuy.toByteArray();
         final int lim = 32 - arr.length;
         for (int i = 0; i < lim; i++) {
@@ -360,11 +301,7 @@ public class Encoder {
         dest.put(arr);
     }
 
-    public static void insertBool(boolean bool, ByteBuffer dest) {
+    private static void insertBool(boolean bool, ByteBuffer dest) {
         insertInt(bool ? 1L : 0L, dest);
     }
-
-//    public static void insertObject() {
-//
-//    }
 }

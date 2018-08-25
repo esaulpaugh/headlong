@@ -3,18 +3,17 @@ package com.esaulpaugh.headlong.abi;
 import java.nio.charset.StandardCharsets;
 import java.util.Stack;
 
-public class ArrayType extends Type {
+class ArrayType extends Type {
 
     private transient final Type baseType;
     private transient final Stack<Integer> fixedLengthStack;
     private transient final int arrayDepth;
 
-    protected ArrayType(String canonicalAbiType, String abiBaseType, String javaClassName, Stack<Integer> fixedLengthStack, int arrayDepth, boolean dynamic) {
+    private ArrayType(String canonicalAbiType, String abiBaseType, String javaClassName, Stack<Integer> fixedLengthStack, int arrayDepth, boolean dynamic) {
         super(canonicalAbiType, javaClassName, dynamic);
         this.baseType = Type.create(abiBaseType);
         this.fixedLengthStack = fixedLengthStack;
         this.arrayDepth = arrayDepth;
-//        Integer baseTypeByteLen1 = baseTypeByteLen;
     }
 
     static ArrayType create(String canonicalAbiType, String abiBaseType, String javaClassName, Stack<Integer> fixedLengthStack, int depth) {
@@ -22,21 +21,12 @@ public class ArrayType extends Type {
         int byteLen;
 
         boolean dynamic = fixedLengthStack.contains(null);
-        if(dynamic) {
-//            switch (javaBaseType) {
-//            case "B":
-//            case "[B":
-//            case "java.lang.String":
-//                baseTypeByteLen = 1; break;
-//            default: baseTypeByteLen = null;
-//            }
-//            byteLen = null;
-        } else { // static
+        if(!dynamic) {
             baseTypeByteLen = fixedLengthStack.get(fixedLengthStack.size() - 1); // e.g. uint8[2] --> 1, uint16[2] --> 32?
 
             int rounded = roundUp(baseTypeByteLen);
 
-            if(baseTypeByteLen == 1 && !canonicalAbiType.startsWith("bytes1")) { // typeString.startsWith("int8") || typeString.startsWith("uint8")
+            if(baseTypeByteLen == 1 && !canonicalAbiType.equals("bytes1")) { // int8, uint8
                 depth--;
             }
 
@@ -52,7 +42,7 @@ public class ArrayType extends Type {
 
         if(abiBaseType.equals("string")
                 || abiBaseType.equals("function")
-                || (abiBaseType.startsWith("bytes"))) { //  && abiBaseType.length() > "bytes".length()
+                || (abiBaseType.startsWith("bytes"))) {
             abiBaseType = "uint8";
         }
 
@@ -60,31 +50,31 @@ public class ArrayType extends Type {
     }
 
     @Override
-    protected void validate(final Object param, final String expectedClassName, final int expectedLengthIndex) {
-        super.validate(param, expectedClassName, expectedLengthIndex);
+    protected void validate(final Object value, final String expectedClassName, final int expectedLengthIndex) {
+        super.validate(value, expectedClassName, expectedLengthIndex);
 
-        if(param.getClass().isArray()) {
-            if(param instanceof Object[]) {
-                validateArray((Object[]) param, expectedClassName, expectedLengthIndex);
-            } else if (param instanceof byte[]) {
-                validateByteArray((byte[]) param, expectedLengthIndex);
-            } else if (param instanceof int[]) {
-                validateIntArray((int[]) param, expectedLengthIndex);
-            } else if (param instanceof long[]) {
-                validateLongArray((long[]) param, expectedLengthIndex);
-            } else if (param instanceof short[]) {
-                validateShortArray((short[]) param, expectedLengthIndex);
-            } else if (param instanceof boolean[]) {
-                validateBooleanArray((boolean[]) param, expectedLengthIndex);
+        if(value.getClass().isArray()) {
+            if(value instanceof Object[]) {
+                validateArray((Object[]) value, expectedClassName, expectedLengthIndex);
+            } else if (value instanceof byte[]) {
+                validateByteArray((byte[]) value, expectedLengthIndex);
+            } else if (value instanceof int[]) {
+                validateIntArray((int[]) value, expectedLengthIndex);
+            } else if (value instanceof long[]) {
+                validateLongArray((long[]) value, expectedLengthIndex);
+            } else if (value instanceof short[]) {
+                validateShortArray((short[]) value, expectedLengthIndex);
+            } else if (value instanceof boolean[]) {
+                validateBooleanArray((boolean[]) value, expectedLengthIndex);
             }
-        } else if(param instanceof String) {
-            validateByteArray(((String) param).getBytes(StandardCharsets.UTF_8), expectedLengthIndex);
-        } else if(param instanceof Number) {
-            NumberType._validateNumber(param, ((NumberType) baseType).bitLimit);
-        } else if(param instanceof Boolean) {
-            super.validate(param, CLASS_NAME_BOOLEAN, expectedLengthIndex);
+        } else if(value instanceof String) {
+            validateByteArray(((String) value).getBytes(StandardCharsets.UTF_8), expectedLengthIndex);
+        } else if(value instanceof Number) {
+            NumberType._validateNumber(value, ((NumberType) baseType).bitLimit);
+        } else if(value instanceof Boolean) {
+            super.validate(value, CLASS_NAME_BOOLEAN, expectedLengthIndex);
         } else {
-            throw new IllegalArgumentException("unrecognized type: " + param.getClass().getName());
+            throw new IllegalArgumentException("unrecognized type: " + value.getClass().getName());
         }
     }
 
@@ -179,9 +169,9 @@ public class ArrayType extends Type {
     }
 
     @Override
-    public Integer getDataByteLen(Object param) {
+    public Integer getDataByteLen(Object value) {
         Stack<Integer> dynamicByteLenStack = new Stack<>();
-        buildByteLenStack(param, dynamicByteLenStack);
+        buildByteLenStack(value, dynamicByteLenStack);
 
         int n = 1;
         for (int i = arrayDepth - 1; i >= 0; i--) {
@@ -200,59 +190,36 @@ public class ArrayType extends Type {
                 : roundUp(n);
     }
 
-    @Override
-    public Integer getNumElements(Object value) {
-        return _getNumElements(value);
-    }
-
-    protected static int _getNumElements(Object value) {
-        if (value instanceof String) {
-            return ((String) value).length();
-        }
-        if (value instanceof Number[]) {
-            return ((Number[]) value).length;
-        }
-        if (value instanceof byte[]) {
-            return ((byte[]) value).length;
-        }
-        if (value instanceof int[]) {
-            return ((int[]) value).length;
-        }
-        if (value instanceof long[]) {
-            return ((long[]) value).length;
-        }
-        if (value instanceof short[]) {
-            return ((short[]) value).length;
-        }
-        if (value instanceof boolean[]) {
-            return ((boolean[]) value).length;
-        }
-        if (value instanceof Tuple[]) {
-            return ((Tuple[]) value).length;
-        }
-        if (value instanceof Object[]) {
-            return ((Object[]) value).length;
-        }
-        // shouldn't happen if type checks/validation already occurred
-        throw new IllegalArgumentException("unknown type: " + value.getClass().getName());
-    }
-
-//    @Override
-//    public int calcDynamicByteLen(Object param) {
-//
-//    }
-//                int numElements = 0;
-//                Object[] arr = (Object[]) value;
-//                for (Object obj : arr) {
-//                    numElements += calcNumElements(obj);
-//                }
-//                return numElements;
+//    protected static int _getNumElements(Object value) {
+//        if (value instanceof String) {
+//            return ((String) value).length();
 //        }
-//         if(value instanceof Tuple) {
-//            return calcNumElements(((Tuple) value).elements);
-////            throw new AssertionError("override expected");
-////            dynamicLengthStack.push(((Tuple) value).byteLen);
+//        if (value instanceof Number[]) {
+//            return ((Number[]) value).length;
 //        }
+//        if (value instanceof byte[]) {
+//            return ((byte[]) value).length;
+//        }
+//        if (value instanceof int[]) {
+//            return ((int[]) value).length;
+//        }
+//        if (value instanceof long[]) {
+//            return ((long[]) value).length;
+//        }
+//        if (value instanceof short[]) {
+//            return ((short[]) value).length;
+//        }
+//        if (value instanceof boolean[]) {
+//            return ((boolean[]) value).length;
+//        }
+//        if (value instanceof Tuple[]) {
+//            return ((Tuple[]) value).length;
+//        }
+//        if (value instanceof Object[]) {
+//            return ((Object[]) value).length;
+//        }
+//        // shouldn't happen if type checks/validation already occurred
+//        throw new IllegalArgumentException("unknown type: " + value.getClass().getName());
 //    }
 
     static void buildByteLenStack(Object value, Stack<Integer> dynamicLengthStack) {
@@ -284,140 +251,9 @@ public class ArrayType extends Type {
             dynamicLengthStack.push(32);
         } else if(value instanceof Tuple) {
             buildByteLenStack(((Tuple) value).elements, dynamicLengthStack);
-//            throw new AssertionError("override expected");
-//            dynamicLengthStack.push(((Tuple) value).byteLen);
         } else {
             // shouldn't happen if type checks/validation already occurred
             throw new IllegalArgumentException("unknown type: " + value.getClass().getName());
         }
     }
-
-//    protected static int getBaseBitLen(String abiBaseType) {
-//        private static String getJavaBaseTypeName(String abiBaseType) {
-//
-//            int
-//            if(abiBaseType.startsWith("int")) {
-//                return Integer.parseInt(abiBaseType.substring(abiBaseType.lastIndexOf("int") + "int".length()));
-//            }
-//        }
-//
-//            switch (abiBaseType) {
-//            case "uint8": return
-//            case "uint16": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_SHORT : CLASS_NAME_SHORT;
-//            case "uint24":
-//            case "uint32": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_INT : CLASS_NAME_INT;
-//            case "uint40":
-//            case "uint48":
-//            case "uint56":
-//            case "uint64": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_LONG : CLASS_NAME_LONG;
-//            case "uint72":
-//            case "uint80":
-//            case "uint88":
-//            case "uint96":
-//            case "uint104":
-//            case "uint112":
-//            case "uint120":
-//            case "uint128":
-//            case "uint136":
-//            case "uint144":
-//            case "uint152":
-//            case "uint160":
-//            case "uint168":
-//            case "uint176":
-//            case "uint184":
-//            case "uint192":
-//            case "uint200":
-//            case "uint208":
-//            case "uint216":
-//            case "uint224":
-//            case "uint232":
-//            case "uint240":
-//            case "uint248":
-//            case "uint256": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_BIG_INTEGER : CLASS_NAME_BIG_INTEGER;
-//            case "int8": fixedLengthStack.push(1); return element ? CLASS_NAME_ELEMENT_BYTE : CLASS_NAME_BYTE; // signed // TODO
-//            case "int16": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_SHORT : CLASS_NAME_SHORT;
-//            case "int24":
-//            case "int32": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_INT : CLASS_NAME_INT;
-//            case "int40":
-//            case "int48":
-//            case "int56":
-//            case "int64": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_LONG : CLASS_NAME_LONG;
-//            case "int72":
-//            case "int80":
-//            case "int88":
-//            case "int96":
-//            case "int104":
-//            case "int112":
-//            case "int120":
-//            case "int128":
-//            case "int136":
-//            case "int144":
-//            case "int152":
-//            case "int160":
-//            case "int168":
-//            case "int176":
-//            case "int184":
-//            case "int192":
-//            case "int200":
-//            case "int208":
-//            case "int216":
-//            case "int224":
-//            case "int232":
-//            case "int240":
-//            case "int248":
-//            case "int256":
-//            case "address": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_BIG_INTEGER : CLASS_NAME_BIG_INTEGER;
-//            case "bytes1": fixedLengthStack.push(1); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes2": fixedLengthStack.push(2); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes3": fixedLengthStack.push(3); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes4": fixedLengthStack.push(4); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes5": fixedLengthStack.push(5); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes6": fixedLengthStack.push(6); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes7": fixedLengthStack.push(7); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes8": fixedLengthStack.push(8); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes9": fixedLengthStack.push(9); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes10": fixedLengthStack.push(10); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes11": fixedLengthStack.push(11); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes12": fixedLengthStack.push(12); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes13": fixedLengthStack.push(13); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes14": fixedLengthStack.push(14); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes15": fixedLengthStack.push(15); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes16": fixedLengthStack.push(16); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes17": fixedLengthStack.push(17); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes18": fixedLengthStack.push(18); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes19": fixedLengthStack.push(19); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes20": fixedLengthStack.push(20); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes21": fixedLengthStack.push(21); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes22": fixedLengthStack.push(22); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes23": fixedLengthStack.push(23); return CLASS_NAME_ARRAY_BYTE;
-//            case "function":
-//            case "bytes24": fixedLengthStack.push(24); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes25": fixedLengthStack.push(25); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes26": fixedLengthStack.push(26); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes27": fixedLengthStack.push(27); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes28": fixedLengthStack.push(28); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes29": fixedLengthStack.push(29); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes30": fixedLengthStack.push(30); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes31": fixedLengthStack.push(31); return CLASS_NAME_ARRAY_BYTE;
-//            case "bytes32": fixedLengthStack.push(32); return CLASS_NAME_ARRAY_BYTE; // CLASS_NAME_ARRAY_BYTE; // CLASS_NAME_ELEMENT_ARRAY_BYTE;
-//            case "bool": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_BOOLEAN : CLASS_NAME_BOOLEAN;
-//            case "bytes": /* dynamic*/
-//                fixedLengthStack.push(null);
-//                return CLASS_NAME_ARRAY_BYTE;
-//            case "string": /* dynamic*/
-//                fixedLengthStack.push(null);
-//                return element ? CLASS_NAME_ELEMENT_STRING : CLASS_NAME_STRING;
-//            case "fixed": throw new IllegalArgumentException("fixed not supported. use fixed128x18");
-//            case "ufixed": throw new IllegalArgumentException("ufixed not supported. use ufixed128x18");
-//            case "int": throw new IllegalArgumentException("int not supported. use int256");
-//            case "uint": throw new IllegalArgumentException("uint not supported. use uint256");
-//            default: {
-//                if(abiBaseType.contains("fixed")) {
-//                    fixedLengthStack.push(32);
-//                    return element ? CLASS_NAME_ELEMENT_BIG_DECIMAL : CLASS_NAME_BIG_DECIMAL;
-//                }
-//                return null;
-//            }
-//            }
-//    }
 }
