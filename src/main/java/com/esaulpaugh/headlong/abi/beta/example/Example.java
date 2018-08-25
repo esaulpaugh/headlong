@@ -1,12 +1,13 @@
-package com.esaulpaugh.headlong.abi.example;
+package com.esaulpaugh.headlong.abi.beta.example;
 
-import com.esaulpaugh.headlong.abi.Function;
+import com.esaulpaugh.headlong.abi.beta.Function;
 import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.Arrays;
 
 public class Example {
 
@@ -14,19 +15,33 @@ public class Example {
 
     public static void main(String[] args0) throws ParseException {
 
-        Function sam = new Function("sam(bytes,bool,uint[])");
-
+        Function sam = new Function("sam(bytes,bool,uint256[][])"); // bool[4],bool[],uint[]
         ByteBuffer abi = sam.encodeCall(
                 dave,
                 true,
-                new BigInteger[] {
-                        BigInteger.valueOf(1),
-                        BigInteger.valueOf(2),
-                        BigInteger.valueOf(3)
+                new BigInteger[][] {
+                        new BigInteger[] {},
+                        new BigInteger[] {
+                                BigInteger.ONE,
+                                BigInteger.valueOf(2L),
+                                BigInteger.valueOf(3L)
+                        }
                 }
+
         );
 
-        System.out.println(Hex.toHexString(abi.array()));
+        byte[] abiBytes = abi.array();
+
+        System.out.println(Hex.toHexString(Arrays.copyOfRange(abiBytes, 0, 4)));
+
+        final int end = abiBytes.length;
+        int i = 4;
+        while(i < end) {
+            System.out.println(Hex.toHexString(Arrays.copyOfRange(abiBytes, i, i + 32)));
+            i += 32;
+        }
+
+        System.out.println("\n" + Hex.toHexString(abi.array()));
 
 
 //        ByteBuffer abi;

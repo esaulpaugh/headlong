@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.abi;
+package com.esaulpaugh.headlong.abi.beta;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.esaulpaugh.headlong.abi.Function.FUNCTION_ID_LEN;
+import static com.esaulpaugh.headlong.abi.beta.Function.FUNCTION_ID_LEN;
 
 public class Encoder {
 
@@ -128,26 +128,26 @@ public class Encoder {
      */
     private static void encodeTail(Type paramType, Object value, ByteBuffer dest) {
         if(value instanceof String) { // dynamic
-            insertBytes(((String) value).getBytes(StandardCharsets.UTF_8), dest);
+            insertBytesDynamic(((String) value).getBytes(StandardCharsets.UTF_8), dest);
         } else if(value.getClass().isArray()) {
             if (value instanceof Object[]) {
                 if(value instanceof BigInteger[]) {
-                    insertBigInts((BigInteger[]) value, dest);
+                    insertBigIntsDynamic((BigInteger[]) value, dest);
                 } else {
                     for (Object object : (Object[]) value) {
                         encodeTail(paramType, object, dest);
                     }
                 }
             } else if (value instanceof byte[]) {
-                insertBytes((byte[]) value, dest);
+                insertBytesDynamic((byte[]) value, dest);
             } else if (value instanceof int[]) {
-                insertInts((int[]) value, dest);
+                insertIntsDynamic((int[]) value, dest);
             } else if (value instanceof long[]) {
-                insertLongs((long[]) value, dest);
+                insertLongsDynamic((long[]) value, dest);
             } else if (value instanceof short[]) {
-                insertShorts((short[]) value, dest);
+                insertShortsDynamic((short[]) value, dest);
             } else if(value instanceof boolean[]) {
-                insertBooleans((boolean[]) value, dest);
+                insertBooleansDynamic((boolean[]) value, dest);
             }
         } else if(value instanceof Tuple) {
             TupleType tupleType;
@@ -168,19 +168,19 @@ public class Encoder {
         insertInt(tailOffset, dest);
     }
 
-    private static void insertBytesHead(byte[] bytes, ByteBuffer dest, int tailOffset, boolean dynamic) {
-        if(dynamic) {
-            insertInt(tailOffset, dest);
-        } else {
-            insertBytes(bytes, dest);
-        }
-    }
-
     private static void insertBooleansHead(boolean[] bools, ByteBuffer dest, int tailOffset, boolean dynamic) {
         if(dynamic) {
             insertInt(tailOffset, dest);
         } else {
-            insertBooleans(bools, dest);
+            insertBooleansStatic(bools, dest);
+        }
+    }
+
+    private static void insertBytesHead(byte[] bytes, ByteBuffer dest, int tailOffset, boolean dynamic) {
+        if(dynamic) {
+            insertInt(tailOffset, dest);
+        } else {
+            insertBytesStatic(bytes, dest);
         }
     }
 
@@ -188,7 +188,7 @@ public class Encoder {
         if(dynamic) {
             insertInt(tailOffset, dest);
         } else {
-            insertShorts(shorts, dest);
+            insertShortsStatic(shorts, dest);
         }
     }
 
@@ -196,7 +196,7 @@ public class Encoder {
         if(dynamic) {
             insertInt(tailOffset, dest);
         } else {
-            insertInts(ints, dest);
+            insertIntsStatic(ints, dest);
         }
     }
 
@@ -204,7 +204,7 @@ public class Encoder {
         if(dynamic) {
             insertInt(tailOffset, dest);
         } else {
-            insertLongs(ints, dest);
+            insertLongsStatic(ints, dest);
         }
     }
 
@@ -212,7 +212,7 @@ public class Encoder {
         if(dynamic) {
             insertInt(tailOffset, dest);
         } else {
-            insertBigInts(ints, dest);
+            insertBigIntsStatic(ints, dest);
         }
     }
 
@@ -241,45 +241,74 @@ public class Encoder {
 
     // -------------------------------------------------------------------------------------------------
 
-    private static void insertBooleans(boolean[] bools, ByteBuffer dest) {
+    private static void insertBooleansDynamic(boolean[] bools, ByteBuffer dest) {
         insertInt(bools.length, dest);
-        for (boolean e : bools) {
-            insertBool(e, dest);
-        }
+        insertBooleansStatic(bools, dest);
     }
 
-    private static void insertBytes(byte[] bytes, ByteBuffer dest) {
+    private static void insertBytesDynamic(byte[] bytes, ByteBuffer dest) {
         insertInt(bytes.length, dest);
-        dest.put(bytes);
-        final int n = Integer.SIZE - bytes.length;
+        insertBytesStatic(bytes, dest);
+    }
+
+    private static void insertShortsDynamic(short[] shorts, ByteBuffer dest) {
+        insertInt(shorts.length, dest);
+        insertShortsStatic(shorts, dest);
+    }
+
+    private static void insertIntsDynamic(int[] ints, ByteBuffer dest) {
+        insertInt(ints.length, dest);
+        insertIntsStatic(ints, dest);
+    }
+
+    private static void insertLongsDynamic(long[] longs, ByteBuffer dest) {
+        insertInt(longs.length, dest);
+        insertLongsStatic(longs, dest);
+    }
+
+    private static void insertBigIntsDynamic(BigInteger[] bigInts, ByteBuffer dest) {
+        insertInt(bigInts.length, dest);
+        insertBigIntsStatic(bigInts, dest);
+    }
+
+    private static void insertBooleansStatic(boolean[] bools, ByteBuffer dest) {
+        for (boolean e : bools) {
+            dest.put(e ? (byte) 1 : (byte) 0);
+//            insertBool(e, dest);
+        }
+        final int n = 32 - bools.length;
         for (int i = 0; i < n; i++) {
             dest.put((byte) 0);
         }
     }
 
-    private static void insertShorts(short[] shorts, ByteBuffer dest) {
-        insertInt(shorts.length, dest);
+    private static void insertBytesStatic(byte[] bytes, ByteBuffer dest) {
+        dest.put(bytes);
+        final int n = 32 - bytes.length;
+        for (int i = 0; i < n; i++) {
+            dest.put((byte) 0);
+        }
+    }
+
+    private static void insertShortsStatic(short[] shorts, ByteBuffer dest) {
         for (short e : shorts) {
             insertInt(e, dest);
         }
     }
 
-    private static void insertInts(int[] ints, ByteBuffer dest) {
-        insertInt(ints.length, dest);
+    private static void insertIntsStatic(int[] ints, ByteBuffer dest) {
         for (int e : ints) {
             insertInt(e, dest);
         }
     }
 
-    private static void insertLongs(long[] ints, ByteBuffer dest) {
-        insertInt(ints.length, dest);
+    private static void insertLongsStatic(long[] ints, ByteBuffer dest) {
         for (long e : ints) {
             insertInt(e, dest);
         }
     }
 
-    private static void insertBigInts(BigInteger[] bigInts, ByteBuffer dest) {
-        insertInt(bigInts.length, dest);
+    private static void insertBigIntsStatic(BigInteger[] bigInts, ByteBuffer dest) {
         for (BigInteger e : bigInts) {
             insertInt(e, dest);
         }

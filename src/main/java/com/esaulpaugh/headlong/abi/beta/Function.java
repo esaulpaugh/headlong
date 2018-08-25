@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.abi;
+package com.esaulpaugh.headlong.abi.beta;
 
 import com.joemelsha.crypto.hash.Keccak;
 import org.bouncycastle.util.encoders.Hex;

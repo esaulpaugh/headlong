@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.abi;
+package com.esaulpaugh.headlong.abi.beta;
 
 class BooleanType extends Type {
 

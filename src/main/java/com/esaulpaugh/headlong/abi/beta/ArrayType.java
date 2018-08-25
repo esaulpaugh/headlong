@@ -1,5 +1,6 @@
-package com.esaulpaugh.headlong.abi;
+package com.esaulpaugh.headlong.abi.beta;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Stack;
 
@@ -24,13 +25,13 @@ class ArrayType extends Type {
         if(!dynamic) {
             baseTypeByteLen = fixedLengthStack.get(fixedLengthStack.size() - 1); // e.g. uint8[2] --> 1, uint16[2] --> 32?
 
-            int rounded = roundUp(baseTypeByteLen);
-
-            if(baseTypeByteLen == 1 && !canonicalAbiType.equals("bytes1")) { // int8, uint8
+            if(baseTypeByteLen == 1
+                    && !canonicalAbiType.equals("bytes1")
+                    && !canonicalAbiType.equals("bool")) { // int8, uint8
                 depth--;
             }
 
-            int product = rounded;
+            int product = roundUp(baseTypeByteLen);
             StringBuilder sb = new StringBuilder("(" + baseTypeByteLen + " --> " + product + ")");
             for (int i = depth - 1; i >= 0; i--) {
                 product *= fixedLengthStack.get(i);
@@ -40,13 +41,21 @@ class ArrayType extends Type {
             System.out.println(canonicalAbiType + " : static len: " + sb.toString() + " = " + byteLen);
         }
 
-        if(abiBaseType.equals("string")
+        if(abiBaseType.equals("bool")) {
+            canonicalAbiType = canonicalAbiType.replace("bool", "uint8");
+            abiBaseType = "uint8";
+        } else if (abiBaseType.equals("string")
                 || abiBaseType.equals("function")
-                || (abiBaseType.startsWith("bytes"))) {
+                || abiBaseType.startsWith("bytes")) {
             abiBaseType = "uint8";
         }
 
         return new ArrayType(canonicalAbiType, abiBaseType, javaClassName, fixedLengthStack, depth, dynamic);
+    }
+
+    private static int roundUp(int len) {
+        int mod = len % 32;
+        return mod == 0 ? len : len + (32 - mod);
     }
 
     @Override
@@ -54,7 +63,7 @@ class ArrayType extends Type {
         super.validate(value, expectedClassName, expectedLengthIndex);
 
         if(value.getClass().isArray()) {
-            if(value instanceof Object[]) {
+            if(value instanceof Object[]) { // includes BigInteger[]
                 validateArray((Object[]) value, expectedClassName, expectedLengthIndex);
             } else if (value instanceof byte[]) {
                 validateByteArray((byte[]) value, expectedLengthIndex);
@@ -174,7 +183,7 @@ class ArrayType extends Type {
         buildByteLenStack(value, dynamicByteLenStack);
 
         int n = 1;
-        for (int i = arrayDepth - 1; i >= 0; i--) {
+        for (int i = arrayDepth; i >= 0; i--) { // arrayDepth - 1
             int len;
             Integer fixedLen = fixedLengthStack.get(i);
             if(fixedLen != null) {
@@ -222,17 +231,21 @@ class ArrayType extends Type {
 //        throw new IllegalArgumentException("unknown type: " + value.getClass().getName());
 //    }
 
-    static void buildByteLenStack(Object value, Stack<Integer> dynamicLengthStack) {
+    private static void buildByteLenStack(Object value, Stack<Integer> dynamicLengthStack) {
         if(value instanceof String) {
             int len = ((String) value).length();
             System.out.println("len = " + len);
             dynamicLengthStack.push(roundUp(((String) value).length()));
         } else if(value.getClass().isArray()) {
             if (value instanceof Object[]) {
-                dynamicLengthStack.push(roundUp(((Object[]) value).length << 5)); // mul 32
-                Object[] arr = (Object[]) value;
-                for (Object obj : arr) {
-                    buildByteLenStack(obj, dynamicLengthStack);
+                if(value instanceof BigInteger[]) {
+                    dynamicLengthStack.push(((Object[]) value).length);
+                } else {
+                    Object[] arr = (Object[]) value;
+                    dynamicLengthStack.push(arr.length);
+                    for (Object obj : arr) {
+                        buildByteLenStack(obj, dynamicLengthStack);
+                    }
                 }
             } else if (value instanceof byte[]) {
                 dynamicLengthStack.push(roundUp(((byte[]) value).length));
@@ -243,7 +256,7 @@ class ArrayType extends Type {
             } else if (value instanceof short[]) {
                 dynamicLengthStack.push(((short[]) value).length << 5); // mul 32
             } else if(value instanceof boolean[]) {
-                dynamicLengthStack.push(((boolean[]) value).length << 5); // mul 32
+                dynamicLengthStack.push(((boolean[]) value).length);
             }
         } else if (value instanceof Number) {
             dynamicLengthStack.push(32);

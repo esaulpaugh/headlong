@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.abi.util;
+package com.esaulpaugh.headlong.abi.beta.util;
 
 public class ClassNames {
 

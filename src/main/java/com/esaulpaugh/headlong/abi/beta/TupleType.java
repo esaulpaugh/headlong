@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.abi;
+package com.esaulpaugh.headlong.abi.beta;
 
 class TupleType extends Type {
 
@@ -11,12 +11,15 @@ class TupleType extends Type {
 
     static TupleType create(Type... types) {
 
-        boolean dynamic = false;
+//        boolean dynamic = false;
         for (Type t : types) {
-            dynamic |= t.dynamic;
+            if(t.dynamic) {
+                return new TupleType(true, types);
+            }
+//            dynamic |= t.dynamic;
         }
 
-        return new TupleType(dynamic, types);
+        return new TupleType(false, types);
     }
 
     private static String typeStringForTypes(Type... types) {

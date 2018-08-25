@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.abi;
+package com.esaulpaugh.headlong.abi.beta;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Stack;
 
-import static com.esaulpaugh.headlong.abi.util.ClassNames.toFriendly;
+import static com.esaulpaugh.headlong.abi.beta.util.ClassNames.toFriendly;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 abstract class Type {
@@ -78,12 +78,6 @@ abstract class Type {
         return ArrayType.create(canonicalAbiType, abiBaseType, javaClassName, fixedLengthStack, depth);
     }
 
-    public static int roundUp(int len) {
-        int mod = len % 32;
-        return mod == 0 ? len : len + (32 -mod);
-//        return newLen == 0 ? 32 : newLen;
-    }
-
     public abstract Integer getDataByteLen(Object value);
 
     private static Pair<String, String> buildBaseTypeNames(String canonicalAbiType, final int i, Stack<Integer> fixedLengthStack) {
@@ -117,7 +111,10 @@ abstract class Type {
             return Tuple.class.getName();
         }
 
+        // ~5,220 possible base types (mostly (u)fixedMxN)
+        // compiles to a lookupswitch, plus a tableswitch
         switch (abiBaseType) {
+        case "bool": fixedLengthStack.push(1); return element ? CLASS_NAME_ELEMENT_BOOLEAN : CLASS_NAME_BOOLEAN;
         case "uint8": fixedLengthStack.push(1); return element ? CLASS_NAME_ELEMENT_BYTE : CLASS_NAME_BYTE;
         case "uint16": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_SHORT : CLASS_NAME_SHORT;
         case "uint24":
@@ -215,8 +212,7 @@ abstract class Type {
         case "bytes29": fixedLengthStack.push(29); return CLASS_NAME_ARRAY_BYTE;
         case "bytes30": fixedLengthStack.push(30); return CLASS_NAME_ARRAY_BYTE;
         case "bytes31": fixedLengthStack.push(31); return CLASS_NAME_ARRAY_BYTE;
-        case "bytes32": fixedLengthStack.push(32); return CLASS_NAME_ARRAY_BYTE; // CLASS_NAME_ARRAY_BYTE; // CLASS_NAME_ELEMENT_ARRAY_BYTE;
-        case "bool": fixedLengthStack.push(32); return element ? CLASS_NAME_ELEMENT_BOOLEAN : CLASS_NAME_BOOLEAN;
+        case "bytes32": fixedLengthStack.push(32); return CLASS_NAME_ARRAY_BYTE;
         case "bytes": /* dynamic*/
             fixedLengthStack.push(null);
             return CLASS_NAME_ARRAY_BYTE;
