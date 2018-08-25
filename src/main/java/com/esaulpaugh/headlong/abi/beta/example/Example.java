@@ -15,19 +15,34 @@ public class Example {
 
     public static void main(String[] args0) throws ParseException {
 
-        Function sam = new Function("sam(bytes,bool,uint256[][])"); // bool[4],bool[],uint[]
-        ByteBuffer abi = sam.encodeCall(
-                dave,
-                true,
-                new BigInteger[][] {
-                        new BigInteger[] {},
-                        new BigInteger[] {
+//        Function sam = new Function("sam(bytes,bool,uint256[][])"); // bool[4],bool[],uint[]
+//        ByteBuffer abi = sam.encodeCall(
+//                dave,
+//                true,
+//                new BigInteger[][] {
+//                        new BigInteger[] {},
+//                        new BigInteger[] {
+//                                BigInteger.ONE,
+//                                BigInteger.valueOf(2L),
+//                                BigInteger.valueOf(3L)
+//                        }
+//                }
+//
+//        );
+
+        Function g = new Function("g(uint[][],string[])");
+        System.out.println(g.getSelectorHex());
+        ByteBuffer abi = g.encodeCall(
+                new BigInteger[][]{
+                        new BigInteger[]{
                                 BigInteger.ONE,
                                 BigInteger.valueOf(2L),
+                        },
+                        new BigInteger[]{
                                 BigInteger.valueOf(3L)
                         }
-                }
-
+                },
+                new String[] { "one", "two", "three" }
         );
 
         byte[] abiBytes = abi.array();
