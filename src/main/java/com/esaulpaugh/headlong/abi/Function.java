@@ -9,7 +9,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * Represents a function in an Ethereum contract. Can encode function calls matching the function's signature.
+ */
 public class Function {
 
     private static final Charset ASCII = StandardCharsets.US_ASCII;
@@ -24,9 +28,9 @@ public class Function {
 
     public Function(String signature) throws ParseException {
         StringBuilder canonicalSignature = new StringBuilder();
-        ArrayList<Type> types = new ArrayList<>();
-        this.requiredCanonicalization = ABI.parseFunctionSignature(signature, canonicalSignature, types);
+        List<Type> types = SignatureParser.parseFunctionSignature(signature, canonicalSignature);
         this.canonicalSignature = canonicalSignature.toString();
+        this.requiredCanonicalization = !signature.equals(this.canonicalSignature);
 
         try {
             Keccak keccak256 = new Keccak(256);
@@ -59,5 +63,9 @@ public class Function {
 
     public String getSelectorHex() {
         return Hex.toHexString(selector);
+    }
+
+    public static ByteBuffer encodeFunctionCall(String signature, Object... arguments) throws ParseException {
+        return Encoder.encodeFunctionCall(new Function(signature), arguments);
     }
 }

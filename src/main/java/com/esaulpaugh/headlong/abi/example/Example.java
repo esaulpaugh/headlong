@@ -1,11 +1,8 @@
 package com.esaulpaugh.headlong.abi.example;
 
-import com.esaulpaugh.headlong.abi.ABI;
 import com.esaulpaugh.headlong.abi.Function;
-import com.esaulpaugh.headlong.abi.Tuple;
 import org.spongycastle.util.encoders.Hex;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
