@@ -462,6 +462,10 @@ public class RLPIntegers {
         return n;
     }
 
+    public static int bitLen(long val) {
+        return Long.SIZE - Long.numberOfLeadingZeros(val);
+    }
+
     public static void insertBytes(int n, byte[] b, int i, byte w, byte x, byte y, byte z) {
         insertBytes(n, b, i, (byte) 0, (byte) 0, (byte) 0, (byte) 0, w, x, y, z);
     }

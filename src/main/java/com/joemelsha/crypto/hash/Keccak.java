@@ -1,5 +1,8 @@
 package com.joemelsha.crypto.hash;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.MessageDigest;
@@ -49,7 +52,7 @@ public class Keccak extends MessageDigest {
         int rateSizeBits = rateSizeBitsFor(digestSizeBits);
         if (rateSizeBits + digestSizeBits * 2 != MAX_STATE_SIZE)
             throw new IllegalArgumentException("Invalid rateSizeBits + digestSizeBits * 2: " + rateSizeBits + " + " + digestSizeBits + " * 2 != " + MAX_STATE_SIZE);
-        if (rateSizeBits <= 0 || (rateSizeBits & 0x3f) > 0)
+        if (rateSizeBits <= 0 || (rateSizeBits & 0x3f) != 0)
             throw new IllegalArgumentException("Invalid rateSizeBits: " + rateSizeBits);
 
         this.digestSizeBits = digestSizeBits;
@@ -122,7 +125,7 @@ public class Keccak extends MessageDigest {
         }
 
         int rateBits = this.rateBits;
-        if ((rateBits & 0b111) > 0) {
+        if ((rateBits & 0b111) != 0) {
             throw new IllegalStateException("Cannot update while in bit mode");
         }
 
@@ -205,6 +208,18 @@ public class Keccak extends MessageDigest {
         }
     }
 
+    public void digest(ByteBuffer out, int len) {
+        final int prevLim = out.limit();
+        out.limit(out.position() + len);
+        digest(out);
+        out.limit(prevLim);
+    }
+
+    public void digest(ByteBuffer out) {
+        this.out = out;
+        engineDigest();
+    }
+
     @Override
     protected int engineDigest(byte[] buf, int offset, int len) {
         out = ByteBuffer.wrap(buf, offset, len);
@@ -274,7 +289,8 @@ public class Keccak extends MessageDigest {
     }
 
     protected void pad() {
-        updateBits(0x1L, 1);
+//        updateBits(0x6L, 3); // SHA-3 padding (little-endian): 011 = 0x6
+        updateBits(0x1L, 1); // Keccak padding: 1
         if (rateBits >= rateSizeBits) {
             keccak(state);
         }

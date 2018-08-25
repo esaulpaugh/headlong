@@ -3,6 +3,7 @@ package com.esaulpaugh.headlong.rlp.util;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
@@ -12,7 +13,7 @@ import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
  */
 public class Strings {
 
-//    private static final Charset CHARSET_UTF_8 = Charset.forName("UTF-8");
+    private static final Charset CHARSET_UTF_8 = Charset.forName("UTF-8");
 
     public static final int UTF_8 = 0; // 256
     public static final int BASE64 = 1; // 64
@@ -116,19 +117,19 @@ public class Strings {
         }
         int last = len - 1;
         if(padded[last] != '=') {
-            return new String(padded);
+            return new String(padded, CHARSET_UTF_8);
         }
         int secondToLast = len - 2;
         final int newLen = padded[secondToLast] == '=' ? secondToLast : last;
 
-        return new String(padded, 0, newLen);
+        return new String(padded, 0, newLen, CHARSET_UTF_8);
     }
 
     private static byte[] padBase64(String unpadded) {
         final int unpaddedLen = unpadded.length();
         final int remainder = unpadded.length() % 4;
         switch (remainder) {
-        case 0: return unpadded.getBytes(); // CHARSET_UTF_8
+        case 0: return unpadded.getBytes(CHARSET_UTF_8);
         case 1: break;
         case 2: {
             final int paddedLen = unpaddedLen + 2;
