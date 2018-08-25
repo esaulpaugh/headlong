@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.abi.example;
 
 import com.esaulpaugh.headlong.abi.ABI;
+import com.esaulpaugh.headlong.abi.Function;
 import com.esaulpaugh.headlong.abi.Tuple;
 import org.spongycastle.util.encoders.Hex;
 
@@ -12,144 +13,159 @@ import java.text.ParseException;
 
 public class Example {
 
+    private static final byte[] dave = "dave".getBytes(StandardCharsets.UTF_8);
+
     public static void main(String[] args0) throws ParseException {
 
-        ByteBuffer abi;
+        Function sam = new Function("sam(bytes,bool,uint[])");
 
-        abi = ABI.encodeFunctionCall("funct((string))", new Tuple("hello_THERE YOYOYOYOYOYO"));
-        System.out.println(Hex.toHexString(abi.array()));
-
-//        byte[] function = new byte[24];
-//        function[0] = 126;
-//        function[23] = 127;
-//        byte[] bytes32 = new byte[32];
-//        bytes32[0] = 126;
-//        bytes32[31] = 127;
-
-        abi = ABI.encodeFunctionCall("sam(bytes,bool,uint256[])",
-                "dave".getBytes(StandardCharsets.UTF_8),
+        ByteBuffer abi = sam.encodeCall(
+                dave,
                 true,
-                new BigInteger[]{ BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3) }
+                new BigInteger[] {
+                        BigInteger.valueOf(1),
+                        BigInteger.valueOf(2),
+                        BigInteger.valueOf(3)
+                }
         );
+
         System.out.println(Hex.toHexString(abi.array()));
 
-        abi = ABI.encodeFunctionCall("(string,string,string[])",
-                "",
-                "y",
-                new String[0]
-        );
-        System.out.println(Hex.toHexString(abi.array()));
 
-        try {
-            abi = ABI.encodeFunctionCall("");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = ABI.encodeFunctionCall("a");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = ABI.encodeFunctionCall(")");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = ABI.encodeFunctionCall("a(");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = ABI.encodeFunctionCall("a(int");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = ABI.encodeFunctionCall("a(,int");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = ABI.encodeFunctionCall("a(int,)");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = ABI.encodeFunctionCall("a()%");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = ABI.encodeFunctionCall("a()");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = ABI.encodeFunctionCall("a(())", new Tuple());
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = ABI.encodeFunctionCall("a(()))", Tuple.EMPTY);
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = ABI.encodeFunctionCall("a(()]int)", Tuple.EMPTY, BigInteger.ZERO);
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = ABI.encodeFunctionCall("a((");
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = ABI.encodeFunctionCall("a(()", Tuple.EMPTY);
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        try {
-            abi = ABI.encodeFunctionCall("a((),", Tuple.EMPTY);
-        } catch (Throwable t) {
-            System.out.println("\t\t" + t.getMessage());
-        }
-        System.out.println(Hex.toHexString(abi.array()));
-
-        BigDecimal a = BigDecimal.valueOf(96, 0);
-        BigDecimal b = BigDecimal.valueOf((byte) 96.0);
-        BigDecimal c_ = BigDecimal.valueOf((short) 96.0);
-        BigDecimal d = BigDecimal.valueOf((int) 96.0);
-        BigDecimal e = BigDecimal.valueOf(96);
-//            System.out.println(e.scale());
-        abi = ABI.encodeFunctionCall("a(fixed16x0,fixed16x1,fixed16x2,fixed16x3,fixed16x4)", a, b, c_, d, e);
-        System.out.println(Hex.toHexString(abi.array()));
-
-        abi = ABI.encodeFunctionCall("()");
-        System.out.println(Hex.toHexString(abi.array()));
-
-        Object[] args = new Object[] {
-                BigInteger.ONE, new BigInteger[][] {  }, BigInteger.ONE, new BigInteger[][] {  },
-                BigDecimal.valueOf(1L, 0), new BigDecimal[][] {  }, BigDecimal.valueOf(1L, 0), new BigDecimal[][] {  },
-        };
-        try {
-            abi = ABI.encodeFunctionCall(
-                    "yabba_(int,int[99][0],uint,uint[99][0],fixed,fixed[99][0],ufixed,ufixed[99][0])",
-                    args
-            );
-        } catch (Throwable t) { System.out.println("\t\t" + t.getMessage());
-        }
-        System.out.println(Hex.toHexString(abi.array()));
-
-        abi = ABI.encodeFunctionCall(
-                "yabba_(int256,int256[2][0],uint256,uint256[2][0],fixed128x18,fixed128x18[2][0],ufixed128x18,ufixed128x18[2][0])",
-                args
-        );
-        System.out.println(Hex.toHexString(abi.array()));
-
-        abi = ABI.encodeFunctionCall("dabba_(ufixed[1])", (Object) new BigDecimal[] { BigDecimal.TEN });
-        System.out.println(Hex.toHexString(abi.array()));
+//        ByteBuffer abi;
+//        abi = ABI.encodeFunctionCall("funct((string))", new Tuple("hello_THERE YOYOYOYOYOYO"));
+//        System.out.println(Hex.toHexString(abi.array()));
+//
+////        byte[] function = new byte[24];
+////        function[0] = 126;
+////        function[23] = 127;
+////        byte[] bytes32 = new byte[32];
+////        bytes32[0] = 126;
+////        bytes32[31] = 127;
+//
+//        abi = ABI.encodeFunctionCall("sam(bytes,bool,uint256[])",
+//                "dave".getBytes(StandardCharsets.UTF_8),
+//                true,
+//                new BigInteger[]{ BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3) }
+//        );
+//        System.out.println(Hex.toHexString(abi.array()));
+//
+//        abi = ABI.encodeFunctionCall("(string,string,string[])",
+//                "",
+//                "y",
+//                new String[0]
+//        );
+//        System.out.println(Hex.toHexString(abi.array()));
+//
+//        try {
+//            abi = ABI.encodeFunctionCall("");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = ABI.encodeFunctionCall("a");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = ABI.encodeFunctionCall(")");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = ABI.encodeFunctionCall("a(");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = ABI.encodeFunctionCall("a(int");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = ABI.encodeFunctionCall("a(,int");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = ABI.encodeFunctionCall("a(int,)");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = ABI.encodeFunctionCall("a()%");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = ABI.encodeFunctionCall("a()");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = ABI.encodeFunctionCall("a(())", new Tuple());
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = ABI.encodeFunctionCall("a(()))", Tuple.EMPTY);
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = ABI.encodeFunctionCall("a(()]int)", Tuple.EMPTY, BigInteger.ZERO);
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = ABI.encodeFunctionCall("a((");
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = ABI.encodeFunctionCall("a(()", Tuple.EMPTY);
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        try {
+//            abi = ABI.encodeFunctionCall("a((),", Tuple.EMPTY);
+//        } catch (Throwable t) {
+//            System.out.println("\t\t" + t.getMessage());
+//        }
+//        System.out.println(Hex.toHexString(abi.array()));
+//
+//        BigDecimal a = BigDecimal.valueOf(96, 0);
+//        BigDecimal b = BigDecimal.valueOf((byte) 96.0);
+//        BigDecimal c_ = BigDecimal.valueOf((short) 96.0);
+//        BigDecimal d = BigDecimal.valueOf((int) 96.0);
+//        BigDecimal e = BigDecimal.valueOf(96);
+////            System.out.println(e.scale());
+//        abi = ABI.encodeFunctionCall("a(fixed16x0,fixed16x1,fixed16x2,fixed16x3,fixed16x4)", a, b, c_, d, e);
+//        System.out.println(Hex.toHexString(abi.array()));
+//
+//        abi = ABI.encodeFunctionCall("()");
+//        System.out.println(Hex.toHexString(abi.array()));
+//
+//        Object[] args = new Object[] {
+//                BigInteger.ONE, new BigInteger[][] {  }, BigInteger.ONE, new BigInteger[][] {  },
+//                BigDecimal.valueOf(1L, 0), new BigDecimal[][] {  }, BigDecimal.valueOf(1L, 0), new BigDecimal[][] {  },
+//        };
+//        try {
+//            abi = ABI.encodeFunctionCall(
+//                    "yabba_(int,int[99][0],uint,uint[99][0],fixed,fixed[99][0],ufixed,ufixed[99][0])",
+//                    args
+//            );
+//        } catch (Throwable t) { System.out.println("\t\t" + t.getMessage());
+//        }
+//        System.out.println(Hex.toHexString(abi.array()));
+//
+//        abi = ABI.encodeFunctionCall(
+//                "yabba_(int256,int256[2][0],uint256,uint256[2][0],fixed128x18,fixed128x18[2][0],ufixed128x18,ufixed128x18[2][0])",
+//                args
+//        );
+//        System.out.println(Hex.toHexString(abi.array()));
+//
+//        abi = ABI.encodeFunctionCall("dabba_(ufixed[1])", (Object) new BigDecimal[] { BigDecimal.TEN });
+//        System.out.println(Hex.toHexString(abi.array()));
     }
-
 }

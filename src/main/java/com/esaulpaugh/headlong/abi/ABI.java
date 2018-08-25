@@ -4,8 +4,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +15,6 @@ import static org.apache.commons.lang3.StringEscapeUtils.escapeJava;
 // TODO encode and decode
 // TODO optimize -- maybe write all zeroes first then fill in args
 public class ABI {
-
-    private static final Charset ASCII = StandardCharsets.US_ASCII;
 
     private static final String REGEX_NON_ASCII_CHAR = "[^\\p{ASCII}]{1,}";
     private static final Pattern HAS_NON_ASCII_CHARS = Pattern.compile(REGEX_NON_ASCII_CHAR);

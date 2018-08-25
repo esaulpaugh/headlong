@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.joemelsha.crypto.hash.Keccak;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -17,14 +18,11 @@ public class Function {
     public static final int FUNCTION_ID_LEN = 4;
 
     private final String canonicalSignature;
-
+    private boolean requiredCanonicalization;
     transient final byte[] selector = new byte[FUNCTION_ID_LEN];
-
     transient final TupleType paramTypes;
 
-    boolean requiredCanonicalization;
-
-    Function(String signature) throws ParseException {
+    public Function(String signature) throws ParseException {
         StringBuilder canonicalSignature = new StringBuilder();
         ArrayList<Type> types = new ArrayList<>();
         this.requiredCanonicalization = ABI.parseFunctionSignature(signature, canonicalSignature, types);
@@ -49,20 +47,17 @@ public class Function {
         return canonicalSignature;
     }
 
+    public boolean requiredCanonicalization() {
+        return requiredCanonicalization;
+    }
+
     public byte[] getSelector() {
         byte[] out = new byte[selector.length];
         System.arraycopy(selector, 0, out, 0, out.length);
         return out;
     }
 
-    public TupleType getParamTypes() {
-        return paramTypes;
-//        Type[] out = new Type[types.length];
-//        System.arraycopy(types, 0, out, 0, out.length);
-//        return out;
-    }
-
-    public boolean requiredCanonicalization() {
-        return requiredCanonicalization;
+    public String getSelectorHex() {
+        return Hex.toHexString(selector);
     }
 }

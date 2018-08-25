@@ -17,7 +17,7 @@ public class Encoder {
 
     public static ByteBuffer encodeFunctionCall(Function function, Object[] arguments) {
 
-        System.out.println("requiredCanonicalization = " + function.requiredCanonicalization);
+        System.out.println("requiredCanonicalization = " + function.requiredCanonicalization());
 
         final TupleType paramTypes = function.paramTypes;
         final Type[] types = paramTypes.types;
