@@ -1,8 +1,6 @@
 package com.esaulpaugh.headlong.abi.beta;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.spongycastle.util.encoders.Hex;
+import com.esaulpaugh.headlong.abi.beta.util.Pair;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -54,8 +52,8 @@ abstract class Type {
         final Stack<Integer> fixedLengthStack = new Stack<>();
         Pair<String, String> baseTypeNames = buildBaseTypeNames(canonicalAbiType, canonicalAbiType.length() - 1, fixedLengthStack);
 
-        String abiBaseType = baseTypeNames.getLeft();
-        String javaBaseType = baseTypeNames.getRight();
+        String abiBaseType = baseTypeNames.first;
+        String javaBaseType = baseTypeNames.second;
         StringBuilder classNameBuilder = new StringBuilder();
         int depth = fixedLengthStack.size() - 1;
         for (int i = 0; i < depth; i++) {
@@ -98,9 +96,9 @@ abstract class Type {
             String abiBaseType = canonicalAbiType.substring(0, i + 1);
             String javaBaseType = getJavaBaseTypeName(abiBaseType, !fixedLengthStack.isEmpty(), fixedLengthStack);
             if(javaBaseType == null) {
-                throw new IllegalArgumentException("unrecognized type: " + abiBaseType + " (" + Hex.toHexString(abiBaseType.getBytes(UTF_8)) + ")");
+                throw new IllegalArgumentException("unrecognized type: " + abiBaseType + " (" + String.format("%040x", new BigInteger(abiBaseType.getBytes(UTF_8))) + ")");
             }
-            return new ImmutablePair<>(abiBaseType, javaBaseType);
+            return new Pair<>(abiBaseType, javaBaseType);
         }
     }
 

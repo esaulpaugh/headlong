@@ -1,8 +1,8 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import com.joemelsha.crypto.hash.Keccak;
-import org.bouncycastle.util.encoders.Hex;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -61,7 +61,7 @@ public class Function {
     }
 
     public String getSelectorHex() {
-        return Hex.toHexString(selector);
+        return String.format("%040x", new BigInteger(selector));
     }
 
     public static ByteBuffer encodeFunctionCall(String signature, Object... arguments) throws ParseException {

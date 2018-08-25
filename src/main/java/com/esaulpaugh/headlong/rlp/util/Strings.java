@@ -6,7 +6,7 @@ import org.spongycastle.util.encoders.Hex;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
+import static com.esaulpaugh.headlong.rlp.util.RLPIntegers.EMPTY_BYTE_ARRAY;
 
 /**
  * Utility for encoding and decoding hexadecimal, base64, and utf-8 {@code String}s.

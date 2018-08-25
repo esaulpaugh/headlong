@@ -1,15 +1,12 @@
 package com.esaulpaugh.headlong.abi.beta;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import com.esaulpaugh.headlong.abi.beta.util.Pair;
 
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static org.apache.commons.lang3.StringEscapeUtils.escapeJava;
 
 class SignatureParser {
 
@@ -20,7 +17,7 @@ class SignatureParser {
     private static final Pattern HAS_NON_TYPE_CHARS = Pattern.compile(REGEX_NON_TYPE_CHAR);
 
     static List<Type> parseFunctionSignature(final String signature, final StringBuilder canonicalOut) throws ParseException {
-        System.out.println("signature: " + escapeJava(signature));
+//        System.out.println("signature: " + escapeJava(signature));
 
 //        if(canonicalOut.length() > 0) {
 //            throw new IllegalArgumentException("canonicalOut must be empty");
@@ -50,7 +47,7 @@ class SignatureParser {
             throw (ParseException) new ParseException(epe.getMessage(), epe.getErrorOffset()).initCause(epe);
         }
 
-        final int argEnd = results.getLeft();
+        final int argEnd = results.first;
         final int sigEnd = signature.length();
 
         int terminator = signature.indexOf(')', argEnd);
@@ -61,7 +58,7 @@ class SignatureParser {
             throw new ParseException("illegal signature termination: " + signature.substring(Math.max(0, argEnd)), argEnd);
         }
 
-        final int prevNonCanonicalIndex = results.getRight();
+        final int prevNonCanonicalIndex = results.second;
 
         canonicalOut.append(signature, prevNonCanonicalIndex, sigEnd);
 
@@ -104,8 +101,8 @@ class SignatureParser {
 
                     tupleTypes.add(TupleType.create(innerTupleTypes.toArray(Function.EMPTY_TYPE_ARRAY)));
 
-                    argEnd = results.getLeft() + 1;
-                    prevNonCanonicalIndex = results.getRight();
+                    argEnd = results.first + 1;
+                    prevNonCanonicalIndex = results.second;
 
                 } catch (EmptyParameterException epe) {
                     throw (EmptyParameterException) new EmptyParameterException(epe.getMessage() + " @ " + tupleTypes.size(), epe.getErrorOffset()).initCause(epe);
@@ -135,7 +132,7 @@ class SignatureParser {
             }
         }
 
-        return new ImmutablePair<>(argEnd, prevNonCanonicalIndex);
+        return new Pair<>(argEnd, prevNonCanonicalIndex);
     }
 
     private static int nextParamTerminator(String signature, int i) {

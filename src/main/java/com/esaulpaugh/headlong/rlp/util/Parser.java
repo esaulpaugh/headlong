@@ -1,7 +1,6 @@
 package com.esaulpaugh.headlong.rlp.util;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import com.esaulpaugh.headlong.abi.beta.util.Pair;
 import org.spongycastle.util.encoders.Hex;
 
 import java.util.ArrayList;
@@ -30,29 +29,31 @@ public class Parser {
             int endArray = notation.indexOf(ObjectNotation.OBJECT_ARRAY_SUFFIX, i);
             if(endArray == -1) {
                 endArray = Integer.MAX_VALUE;
-//                throw new DecodeException("no array end found: " + i);
             }
-            Pair<Integer, Integer> nextPrefix = nextPrefix(notation, i);
-            if(nextPrefix == null) {
+            Pair<Integer, Integer> nextObjectInfo = nextObject(notation, i);
+            if(nextObjectInfo == null) {
                 return Integer.MAX_VALUE;
             }
-            if(endArray < nextPrefix.getRight()) {
+
+            final Integer nextObjectndex = nextObjectInfo.second;
+
+            if(endArray < nextObjectndex) {
                 return endArray + OBJECT_ARRAY_SUFFIX_LEN;
             }
 
-            int objectType = nextPrefix.getLeft();
+            final int nextObjectType = nextObjectInfo.first;
 
             int objectStart;
             int objectEnd;
-            switch (objectType) {
+            switch (nextObjectType) {
             case STRING:
-                objectStart = nextPrefix.getRight() + STRING_PREFIX_LEN;
+                objectStart = nextObjectndex + STRING_PREFIX_LEN;
                 objectEnd = notation.indexOf(ObjectNotation.STRING_SUFFIX, objectStart);
                 parent.add(Hex.decode(notation.substring(objectStart, objectEnd)));
                 i = objectEnd + STRING_SUFFIX_LEN;
                 break;
             case OBJECT_ARRAY:
-                objectStart = nextPrefix.getRight() + OBJECT_ARRAY_PREFIX_LEN;
+                objectStart = nextObjectndex + OBJECT_ARRAY_PREFIX_LEN;
                 List<Object> childList = new ArrayList<>();
                 i = parse(notation, objectStart, end, childList);
                 parent.add(childList);
@@ -64,7 +65,7 @@ public class Parser {
         return end + OBJECT_ARRAY_SUFFIX_LEN;
     }
 
-    private static Pair<Integer, Integer> nextPrefix(String rlpon, int i) {
+    private static Pair<Integer, Integer> nextObject(String rlpon, int i) {
         int o = rlpon.indexOf(ObjectNotation.OBJECT_ARRAY_PREFIX, i);
         int s = rlpon.indexOf(ObjectNotation.STRING_PREFIX, i);
 
@@ -72,14 +73,14 @@ public class Parser {
             if(o == -1) {
                 return null;
             }
-            return new ImmutablePair<>(OBJECT_ARRAY, o);
+            return new Pair<>(OBJECT_ARRAY, o);
         }
         if(o == -1) {
-            return new ImmutablePair<>(STRING, s);
+            return new Pair<>(STRING, s);
         }
 
         return o < s
-                ? new ImmutablePair<>(OBJECT_ARRAY, o)
-                : new ImmutablePair<>(STRING, s);
+                ? new Pair<>(OBJECT_ARRAY, o)
+                : new Pair<>(STRING, s);
     }
 }

@@ -1,11 +1,8 @@
 package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.rlp.DecodeException;
-import org.spongycastle.util.encoders.Hex;
 
-import java.util.Arrays;
-
-import static org.apache.commons.lang3.ArrayUtils.EMPTY_BYTE_ARRAY;
+import static com.esaulpaugh.headlong.rlp.util.RLPIntegers.EMPTY_BYTE_ARRAY;
 
 /**
  * Negative integers are stored in a minimal big-endian two's complement representation. Non-negative integers are stored
@@ -397,148 +394,148 @@ public class BizarroIntegers {
         return bitLen;
     }
 
-    private static void testNegativeLongs(long start, long end) throws Exception {
-        byte[] dest = new byte[10];
-        for (long i = start; i < end; i++) {
-            int n = putLong(i, dest, 1);
-            if(n != len(i)) throw new Exception("len doesn't match");
-            long result = getLong(dest, 1, n);
-            if(i != result) {
-                System.out.println(Hex.toHexString(RLPIntegers.toBytes(i)) + " vs \n" + Hex.toHexString(RLPIntegers.toBytes(result)));
-                throw new Exception(i + " != " + result);
-            }
-        }
-    }
-
-    private static class CustomThread extends Thread {
-
-        private long start, end;
-
-        public CustomThread(long start, long end) {
-            System.out.println(Hex.toHexString(RLPIntegers.toBytes(start)) + " --> " + Hex.toHexString(RLPIntegers.toBytes(end)));
-            this.start = start;
-            this.end = end;
-        }
-
-        @Override
-        public void run() {
-            try {
-                testNegativeLongs(start, end);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private static void testMultithreaded(long veryStart, long finalEnd) throws Exception {
-
-        long len = finalEnd - veryStart;
-        long subLen = len / 8;
-
-        Thread[] threads = new Thread[7];
-
-        long nextStart = veryStart;
-        for (int i = 0; i < 7; i++) {
-            long end = nextStart + subLen;
-            Thread t = new CustomThread(nextStart, end);
-            t.start();
-            threads[i] = t;
-
-            nextStart = end;
-        }
-
-        System.out.println(Hex.toHexString(RLPIntegers.toBytes(nextStart)) + " --> " + Hex.toHexString(RLPIntegers.toBytes(finalEnd)));
-        testNegativeLongs(nextStart, finalEnd);
-
-        for (Thread t : threads) {
-            t.join();
-        }
-    }
-
-    public static void main(String[] args0) throws Exception {
-
-//        System.out.println((short) (byte) -2);
-
-//        for(int i = 0; i < 256; i++) {
-//            byte b = (byte) i;
-//            System.out.println(b);
-//            System.out.println(0xFFL & b);
+//    private static void testNegativeLongs(long start, long end) throws Exception {
+//        byte[] dest = new byte[10];
+//        for (long i = start; i < end; i++) {
+//            int n = putLong(i, dest, 1);
+//            if(n != len(i)) throw new Exception("len doesn't match");
+//            long result = getLong(dest, 1, n);
+//            if(i != result) {
+//                System.out.println(Hex.toHexString(RLPIntegers.toBytes(i)) + " vs \n" + Hex.toHexString(RLPIntegers.toBytes(result)));
+//                throw new Exception(i + " != " + result);
+//            }
 //        }
-
-//        if(true) return;
-
-//        System.out.println(getShort(toBytes((short) 16), 0, 2));
-//        System.out.println(getShort(toBytes((short) -16), 0, 1));
-
-        System.out.println("0x" + Hex.toHexString(toBytes(-256L)));
-        System.out.println("0x" + Hex.toHexString(toBytes(-16L)));
-        System.out.println("0x" + Hex.toHexString(toBytes(-1L)));
-        System.out.println("0x" + Hex.toHexString(toBytes(0L)));
-        System.out.println("0x" + Hex.toHexString(toBytes(1L)));
-        System.out.println("0x" + Hex.toHexString(toBytes(16L)));
-
-        testNegativeLongs(Long.MIN_VALUE / 256 + 10_000_000, Long.MIN_VALUE / 256 + 100_000_000);
-
-        byte[] x = new byte[8];
-        for (int i = 0; i < 20; i++) {
-            Arrays.fill(x, (byte) 0);
-            int n = putLong(i, x, 0);
-            System.out.print(n + " " + Hex.toHexString(x) + " ");
-            long lo = getLong(x, 0, n);
-            System.out.println(lo);
-        }
-
-        for (byte i = -3; i < 3; i++) {
-            byte[] z = toBytes(i);
-            System.out.println(i + " " + Hex.toHexString(z) + " " + getByte(z, 0, z.length));
-        }
-
-        for (short i = -3; i < 3; i++) {
-            byte[] z = toBytes(i);
-            System.out.println(i + " " + Hex.toHexString(z) + " " + getShort(z, 0, z.length));
-        }
-
-        for (int i = -3; i < 3; i++) {
-            byte[] z = toBytes(i);
-            System.out.println(i + " " + Hex.toHexString(z) + " " + getInt(z, 0, z.length));
-        }
-
-        for (long i = -3; i < 3; i++) {
-            byte[] z = toBytes(i);
-            System.out.println(i + " " + Hex.toHexString(z) + " " + getLong(z, 0, z.length));
-        }
-
-        long veryStart = 0xFFFF_FFF0_0000_0000L;
-        long veryEnd = 0xFFFF_FFFF_F000_0000L;
-
-        System.out.println(veryEnd - veryStart);
-
-        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Short.MAX_VALUE)));
-        System.out.println(Hex.toHexString(RLPIntegers.toBytes((short) Byte.MAX_VALUE)));
-        System.out.println(Hex.toHexString(RLPIntegers.toBytes((short) Byte.MIN_VALUE)));
-        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Short.MIN_VALUE)));
-
-        System.out.println(Hex.toHexString(toBytes(Short.MAX_VALUE)));
-        System.out.println(Hex.toHexString(toBytes((short) Byte.MAX_VALUE)));
-        System.out.println(Hex.toHexString(toBytes((short) Byte.MIN_VALUE)));
-        System.out.println(Hex.toHexString(toBytes(Short.MIN_VALUE)));
-
-//        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Long.MAX_VALUE)));
-//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Integer.MAX_VALUE)));
-//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Short.MAX_VALUE)));
-//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Byte.MAX_VALUE)));
-//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Byte.MIN_VALUE)));
-//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Short.MIN_VALUE)));
-//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Integer.MIN_VALUE)));
-//        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Long.MIN_VALUE)));
+//    }
 //
-//        System.out.println(Hex.toHexString(toBytes(Long.MAX_VALUE)));
-//        System.out.println(Hex.toHexString(toBytes((long) Integer.MAX_VALUE)));
-//        System.out.println(Hex.toHexString(toBytes((long) Short.MAX_VALUE)));
-//        System.out.println(Hex.toHexString(toBytes((long) Byte.MAX_VALUE)));
-//        System.out.println(Hex.toHexString(toBytes((long) Byte.MIN_VALUE)));
-//        System.out.println(Hex.toHexString(toBytes((long) Short.MIN_VALUE)));
-//        System.out.println(Hex.toHexString(toBytes((long) Integer.MIN_VALUE)));
-//        System.out.println(Hex.toHexString(toBytes(Long.MIN_VALUE)));
-    }
+//    private static class CustomThread extends Thread {
+//
+//        private long start, end;
+//
+//        public CustomThread(long start, long end) {
+//            System.out.println(Hex.toHexString(RLPIntegers.toBytes(start)) + " --> " + Hex.toHexString(RLPIntegers.toBytes(end)));
+//            this.start = start;
+//            this.end = end;
+//        }
+//
+//        @Override
+//        public void run() {
+//            try {
+//                testNegativeLongs(start, end);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
+//
+//    private static void testMultithreaded(long veryStart, long finalEnd) throws Exception {
+//
+//        long len = finalEnd - veryStart;
+//        long subLen = len / 8;
+//
+//        Thread[] threads = new Thread[7];
+//
+//        long nextStart = veryStart;
+//        for (int i = 0; i < 7; i++) {
+//            long end = nextStart + subLen;
+//            Thread t = new CustomThread(nextStart, end);
+//            t.start();
+//            threads[i] = t;
+//
+//            nextStart = end;
+//        }
+//
+//        System.out.println(Hex.toHexString(RLPIntegers.toBytes(nextStart)) + " --> " + Hex.toHexString(RLPIntegers.toBytes(finalEnd)));
+//        testNegativeLongs(nextStart, finalEnd);
+//
+//        for (Thread t : threads) {
+//            t.join();
+//        }
+//    }
+//
+//    public static void main(String[] args0) throws Exception {
+//
+////        System.out.println((short) (byte) -2);
+//
+////        for(int i = 0; i < 256; i++) {
+////            byte b = (byte) i;
+////            System.out.println(b);
+////            System.out.println(0xFFL & b);
+////        }
+//
+////        if(true) return;
+//
+////        System.out.println(getShort(toBytes((short) 16), 0, 2));
+////        System.out.println(getShort(toBytes((short) -16), 0, 1));
+//
+//        System.out.println("0x" + Hex.toHexString(toBytes(-256L)));
+//        System.out.println("0x" + Hex.toHexString(toBytes(-16L)));
+//        System.out.println("0x" + Hex.toHexString(toBytes(-1L)));
+//        System.out.println("0x" + Hex.toHexString(toBytes(0L)));
+//        System.out.println("0x" + Hex.toHexString(toBytes(1L)));
+//        System.out.println("0x" + Hex.toHexString(toBytes(16L)));
+//
+//        testNegativeLongs(Long.MIN_VALUE / 256 + 10_000_000, Long.MIN_VALUE / 256 + 100_000_000);
+//
+//        byte[] x = new byte[8];
+//        for (int i = 0; i < 20; i++) {
+//            Arrays.fill(x, (byte) 0);
+//            int n = putLong(i, x, 0);
+//            System.out.print(n + " " + Hex.toHexString(x) + " ");
+//            long lo = getLong(x, 0, n);
+//            System.out.println(lo);
+//        }
+//
+//        for (byte i = -3; i < 3; i++) {
+//            byte[] z = toBytes(i);
+//            System.out.println(i + " " + Hex.toHexString(z) + " " + getByte(z, 0, z.length));
+//        }
+//
+//        for (short i = -3; i < 3; i++) {
+//            byte[] z = toBytes(i);
+//            System.out.println(i + " " + Hex.toHexString(z) + " " + getShort(z, 0, z.length));
+//        }
+//
+//        for (int i = -3; i < 3; i++) {
+//            byte[] z = toBytes(i);
+//            System.out.println(i + " " + Hex.toHexString(z) + " " + getInt(z, 0, z.length));
+//        }
+//
+//        for (long i = -3; i < 3; i++) {
+//            byte[] z = toBytes(i);
+//            System.out.println(i + " " + Hex.toHexString(z) + " " + getLong(z, 0, z.length));
+//        }
+//
+//        long veryStart = 0xFFFF_FFF0_0000_0000L;
+//        long veryEnd = 0xFFFF_FFFF_F000_0000L;
+//
+//        System.out.println(veryEnd - veryStart);
+//
+//        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Short.MAX_VALUE)));
+//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((short) Byte.MAX_VALUE)));
+//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((short) Byte.MIN_VALUE)));
+//        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Short.MIN_VALUE)));
+//
+//        System.out.println(Hex.toHexString(toBytes(Short.MAX_VALUE)));
+//        System.out.println(Hex.toHexString(toBytes((short) Byte.MAX_VALUE)));
+//        System.out.println(Hex.toHexString(toBytes((short) Byte.MIN_VALUE)));
+//        System.out.println(Hex.toHexString(toBytes(Short.MIN_VALUE)));
+//
+////        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Long.MAX_VALUE)));
+////        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Integer.MAX_VALUE)));
+////        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Short.MAX_VALUE)));
+////        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Byte.MAX_VALUE)));
+////        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Byte.MIN_VALUE)));
+////        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Short.MIN_VALUE)));
+////        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Integer.MIN_VALUE)));
+////        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Long.MIN_VALUE)));
+////
+////        System.out.println(Hex.toHexString(toBytes(Long.MAX_VALUE)));
+////        System.out.println(Hex.toHexString(toBytes((long) Integer.MAX_VALUE)));
+////        System.out.println(Hex.toHexString(toBytes((long) Short.MAX_VALUE)));
+////        System.out.println(Hex.toHexString(toBytes((long) Byte.MAX_VALUE)));
+////        System.out.println(Hex.toHexString(toBytes((long) Byte.MIN_VALUE)));
+////        System.out.println(Hex.toHexString(toBytes((long) Short.MIN_VALUE)));
+////        System.out.println(Hex.toHexString(toBytes((long) Integer.MIN_VALUE)));
+////        System.out.println(Hex.toHexString(toBytes(Long.MIN_VALUE)));
+//    }
 }
