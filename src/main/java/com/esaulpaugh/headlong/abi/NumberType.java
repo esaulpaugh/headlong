@@ -2,7 +2,6 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.rlp.util.BizarroIntegers;
 import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
-import org.junit.Assert;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -69,18 +68,18 @@ class NumberType extends Type {
             final long longVal = number.longValue();
             bitLen = longVal >= 0 ? RLPIntegers.bitLen(longVal) : BizarroIntegers.bitLen(longVal);
 
-            if(longVal > 0) {
-                Assert.assertEquals(Long.toBinaryString(longVal).length(), bitLen);
-            } else if(longVal == 0) {
-                Assert.assertEquals(0, bitLen);
-            } else if(longVal == -1) {
-                Assert.assertEquals(0, bitLen);
-            } else { // < -1
-                String bin = Long.toBinaryString(longVal);
-                String minBin = bin.substring(bin.indexOf('0'));
-                Assert.assertEquals(bitLen, minBin.length());
-            }
-            Assert.assertEquals(BigInteger.valueOf(longVal).bitLength(), bitLen);
+//            if(longVal > 0) {
+//                Assert.assertEquals(Long.toBinaryString(longVal).length(), bitLen);
+//            } else if(longVal == 0) {
+//                Assert.assertEquals(0, bitLen);
+//            } else if(longVal == -1) {
+//                Assert.assertEquals(0, bitLen);
+//            } else { // < -1
+//                String bin = Long.toBinaryString(longVal);
+//                String minBin = bin.substring(bin.indexOf('0'));
+//                Assert.assertEquals(bitLen, minBin.length());
+//            }
+//            Assert.assertEquals(BigInteger.valueOf(longVal).bitLength(), bitLen);
         }
 
         if(bitLen > bitLimit) {

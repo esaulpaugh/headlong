@@ -1,7 +1,6 @@
 package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.rlp.DecodeException;
-import org.junit.Assert;
 import org.spongycastle.util.encoders.Hex;
 
 import java.util.Arrays;
@@ -391,7 +390,7 @@ public class BizarroIntegers {
 
         int bitLen =  ((byteLen - 1) << 3) + 32 - Integer.numberOfLeadingZeros(xor & 0xFF);
 
-        Assert.assertEquals(minBin.length(), bitLen);
+//        Assert.assertEquals(minBin.length(), bitLen);
 
 //        int bitLen = ((byteLen - 1) << 3) + Integer.numberOfLeadingZeros(x);
         System.out.println("return " + bitLen);
