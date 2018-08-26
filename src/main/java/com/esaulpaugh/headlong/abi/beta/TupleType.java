@@ -51,12 +51,14 @@ class TupleType extends Type {
             dataByteLen += types[i].getDataByteLen(elements[i]);
         }
 
-        return dynamic ?
-                32 + dataByteLen
-                : dataByteLen;
+        return dataByteLen; // dynamic tuples don't have extra prefix
+
+//        return dynamic ?
+//                32 + dataByteLen
+//                : dataByteLen;
     }
 
-    static int getLengthInfo(Type[] types, Object[] arguments, int[] headLengths) {
+    static void getLengthInfo(Type[] types, Object[] arguments, int[] headLengths) {
         int argsByteLen = 0;
         final int n = headLengths.length;
         for (int i = 0; i < n; i++) {
@@ -76,7 +78,7 @@ class TupleType extends Type {
 
         System.out.println("**************** " + argsByteLen);
 
-        return argsByteLen;
+//        return argsByteLen;
     }
 
     static int[] getHeadLengths(Type[] types, Object[] values) {

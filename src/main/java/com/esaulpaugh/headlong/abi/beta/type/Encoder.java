@@ -1,12 +1,10 @@
-package com.esaulpaugh.headlong.abi.beta;
+package com.esaulpaugh.headlong.abi.beta.type;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import static com.esaulpaugh.headlong.abi.beta.Function.FUNCTION_ID_LEN;
@@ -19,9 +17,9 @@ public class Encoder {
 
         System.out.println("requiredCanonicalization = " + function.requiredCanonicalization());
 
-        final TupleType tupleType = function.paramTypes;
-        final Tuple tuple = new Tuple(arguments);
-        final Type[] types = tupleType.types;
+        final Tuple tupleType = function.paramTypes;
+        final com.esaulpaugh.headlong.abi.beta.Tuple tuple = new com.esaulpaugh.headlong.abi.beta.Tuple(arguments);
+        final StackableType[] types = tupleType.memberTypes;
         final int expectedNumParams = types.length;
 
         if(arguments.length != expectedNumParams) {
@@ -33,9 +31,9 @@ public class Encoder {
         tupleType.validate(tuple);
 
         int[] headLengths = new int[types.length];
-        TupleType.getLengthInfo(types, arguments, headLengths);
-
-        int encodingByteLen = tupleType.getDataByteLen(tuple);
+        getLengthInfo(types, arguments, headLengths);
+//
+        int encodingByteLen = tupleType.byteLength(arguments); //.getDataByteLen(tuple);
 
 //        encodingByteLen += 64; // TODO REMOVE
 
@@ -50,7 +48,7 @@ public class Encoder {
         return outBuffer;
     }
 
-    private static void encodeTuple(TupleType tupleType, Object[] values, int[] headLengths, ByteBuffer outBuffer) {
+    private static void encodeTuple(Tuple tupleType, Object[] values, int[] headLengths, ByteBuffer outBuffer) {
 
         int sum = 0;
         for (int i : headLengths) {
@@ -58,10 +56,10 @@ public class Encoder {
         }
 
         int mark;
-        Type[] types = tupleType.types;
+        StackableType[] types = tupleType.memberTypes;
         final int len = values.length;
         for(int i = 0; i < len; i++) {
-            Type type = types[i];
+            StackableType type = types[i];
             Object val = values[i];
             mark = outBuffer.position();
             if(type.dynamic) {
@@ -80,7 +78,7 @@ public class Encoder {
 //        encodeTailsForTuple(typeList, valuesList, outBuffer);
     }
 
-    private static void encodeHeadsForTuple(List<Type> types, List<Object> values, int[] headLengths, ByteBuffer outBuffer) {
+    private static void encodeHeadsForTuple(List<StackableType> types, List<Object> values, int[] headLengths, ByteBuffer outBuffer) {
 
         int sum = 0;
         for (int i : headLengths) {
@@ -88,10 +86,10 @@ public class Encoder {
         }
 
         int mark;
-        Iterator<Type> ti;
+        Iterator<StackableType> ti;
         Iterator<Object> vi;
         for(ti = types.iterator(), vi = values.iterator(); ti.hasNext(); ) {
-            Type type = ti.next();
+            StackableType type = ti.next();
             mark = outBuffer.position();
             encodeHead(type, vi.next(), outBuffer, sum, type.dynamic);
             sum += outBuffer.position() - mark;
@@ -102,17 +100,17 @@ public class Encoder {
         }
     }
 
-    private static void encodeTailsForTuple(List<Type> types, List<Object> values, ByteBuffer outBuffer) {
-        Iterator<Type> ti;
+    private static void encodeTailsForTuple(List<StackableType> types, List<Object> values, ByteBuffer outBuffer) {
+        Iterator<StackableType> ti;
         Iterator<Object> vi;
         for(ti = types.iterator(), vi = values.iterator(); ti.hasNext(); ) {
-            Type type = ti.next();
+            StackableType type = ti.next();
             encodeTail(type, vi.next(), outBuffer);
         }
     }
 
     // TODO switch(typeInt) for performance?
-    private static void encodeHead(Type paramType, Object value, ByteBuffer dest, int tailOffset, boolean dynamic) {
+    private static void encodeHead(StackableType paramType, Object value, ByteBuffer dest, int tailOffset, boolean dynamic) {
         if(value instanceof String) { // dynamic
             insertStringHead(dest, tailOffset);
         } else if(value.getClass().isArray()) {
@@ -133,8 +131,8 @@ public class Encoder {
             } else if(value instanceof boolean[]) {
                 insertBooleansHead((boolean[]) value, dest, tailOffset, dynamic);
             }
-        } else if(value instanceof Tuple) {
-            insertTupleHead(paramType, (Tuple) value, dest, tailOffset, dynamic);
+        } else if(value instanceof com.esaulpaugh.headlong.abi.beta.Tuple) {
+            insertTupleHead(paramType, (com.esaulpaugh.headlong.abi.beta.Tuple) value, dest, tailOffset, dynamic);
         } else if (value instanceof Number) {
             if(value instanceof BigInteger) {
                 insertInt(((BigInteger) value), dest);
@@ -155,7 +153,7 @@ public class Encoder {
      * @param value
      * @param dest
      */
-    private static void encodeTail(Type paramType, Object value, ByteBuffer dest) {
+    private static void encodeTail(StackableType paramType, Object value, ByteBuffer dest) {
         if(value instanceof String) { // dynamic
             insertBytesDynamic(((String) value).getBytes(StandardCharsets.UTF_8), dest);
         } else if(value.getClass().isArray()) {
@@ -178,16 +176,17 @@ public class Encoder {
             } else if(value instanceof boolean[]) {
                 insertBooleansDynamic((boolean[]) value, dest);
             }
-        } else if(value instanceof Tuple) {
-            TupleType tupleType;
+        } else if(value instanceof com.esaulpaugh.headlong.abi.beta.Tuple) {
+            Tuple tupleType;
             try {
-                tupleType = (TupleType) paramType;
+                tupleType = (Tuple) paramType;
             } catch (ClassCastException cce) {
                 throw new RuntimeException(cce);
             }
-            Tuple tuple = (Tuple) value;
-            int[] headLengths = TupleType.getHeadLengths(tupleType.types, tuple.elements);
-            encodeTuple(tupleType, ((Tuple) value).elements, headLengths, dest);
+//            throw new Error();
+            com.esaulpaugh.headlong.abi.beta.Tuple tuple = (com.esaulpaugh.headlong.abi.beta.Tuple) value;
+            int[] headLengths = getHeadLengths(tupleType.memberTypes, tuple.elements);
+            encodeTuple(tupleType, tuple.elements, headLengths, dest);
         }
     }
 
@@ -244,23 +243,60 @@ public class Encoder {
             insertBigIntsStatic(ints, dest);
         }
     }
+// ----- TODO
+    static void getLengthInfo(StackableType[] types, Object[] arguments, int[] headLengths) {
+        int argsByteLen = 0;
+        final int n = headLengths.length;
+        for (int i = 0; i < n; i++) {
+            StackableType t = types[i];
+            int byteLen = t.byteLength(arguments[i]); // .getDataByteLen(arguments[i]);
+            System.out.print(arguments[i] + " --> " + byteLen + ", ");
+            argsByteLen += byteLen;
 
-    private static void insertTupleHead(Type tupleType, Tuple tuple, ByteBuffer dest, int tailOffset, boolean dynamic) {
-        TupleType paramTypes;
+            if(t.dynamic) {
+                headLengths[i] = 32;
+                System.out.println("dynamic");
+            } else {
+                headLengths[i] = byteLen;
+                System.out.println("static");
+            }
+        }
+
+        System.out.println("**************** " + argsByteLen);
+
+//        return argsByteLen;
+    }
+
+    static int[] getHeadLengths(StackableType[] types, Object[] values) {
+        final int len = types.length;
+        int[] headLengths = new int[len];
+        StackableType type;
+        for (int i = 0; i < len; i++) {
+            type = types[i];
+            headLengths[i] = type.dynamic
+                    ? 32
+                    : type.byteLength(values[i]);// getDataByteLen(values[i]);
+        }
+        return headLengths;
+    }
+
+    private static void insertTupleHead(StackableType tupleType, com.esaulpaugh.headlong.abi.beta.Tuple tuple, ByteBuffer dest, int tailOffset, boolean dynamic) {
+        Tuple paramTypes;
         try {
-            paramTypes = (TupleType) tupleType;
+            paramTypes = (Tuple) tupleType;
         } catch (ClassCastException cce) {
             throw new RuntimeException(cce);
         }
         if(dynamic) {
             insertInt(tailOffset, dest);
         } else {
-            int[] headLengths = TupleType.getHeadLengths(paramTypes.types, tuple.elements);
+//            throw new Error();
+            int[] headLengths = getHeadLengths(paramTypes.memberTypes, tuple.elements);
             encodeTuple(paramTypes, tuple.elements, headLengths, dest);
         }
     }
 
-    private static void insertArrayHead(Type paramType, Object[] objects, ByteBuffer dest, int tailOffset, boolean dynamic) {
+    private static void insertArrayHead(StackableType paramType, Object[] objects, ByteBuffer dest, int tailOffset, boolean dynamic) {
 //        for(Object obj : objects) {
 //            encodeHead();
 //        }

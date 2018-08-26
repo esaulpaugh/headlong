@@ -5,6 +5,7 @@ import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -30,32 +31,34 @@ public class Example {
 //
 //        );
 
+        Function test = new Function("(bytes[9)");
+
         Function g = new Function("g(uint[][],string[])");
         System.out.println(g.getSelectorHex());
         ByteBuffer abi = g.encodeCall(
-                new BigInteger[][]{
-                        new BigInteger[]{
+                new BigInteger[][] {
+                        new BigInteger[] {
                                 BigInteger.ONE,
                                 BigInteger.valueOf(2L),
                         },
-                        new BigInteger[]{
+                        new BigInteger[] {
                                 BigInteger.valueOf(3L)
                         }
                 },
-                new String[] { "one", "two", "three" }
+                new String[] { "one", "two", "three" } //
+//                }
+//                (Object) "abcd".getBytes(Charset.forName("UTF-8"))
+//                (Object) new int[0]
         );
 
         byte[] abiBytes = abi.array();
-
         System.out.println(Hex.toHexString(Arrays.copyOfRange(abiBytes, 0, 4)));
-
         final int end = abiBytes.length;
         int i = 4;
         while(i < end) {
-            System.out.println(Hex.toHexString(Arrays.copyOfRange(abiBytes, i, i + 32)));
+            System.out.println( (i / 32) + "\t" + Hex.toHexString(Arrays.copyOfRange(abiBytes, i, i + 32)));
             i += 32;
         }
-
         System.out.println("\n" + Hex.toHexString(abi.array()));
 
 
