@@ -122,7 +122,10 @@ public class GoodEncoder {
                     if(dynamic) {
                         insertOffset(offset, paramType, elements, dest);
                     } else {
-                        encodeTail(paramType, value, dest);
+                        StackableType elementType = ((Array) paramType).elementType;
+                        for(Object e : elements) {
+                            encodeHead(elementType, e, dest, offset);
+                        }
                     }
 //                    int[] headLengths = getHeadLengths(((Array) paramType).elementType, elements);
 //                    insertArrayOffsets(paramType, elements, dest, tailOffsets[0]); // , dynamic
@@ -197,6 +200,9 @@ public class GoodEncoder {
      * @param dest
      */
     private static void encodeTail(StackableType paramType, Object value, ByteBuffer dest) {
+        if(!paramType.dynamic) {
+            throw new AssertionError("statics not expected");
+        }
         if(value instanceof String) { // dynamic
             insertBytesDynamic(((String) value).getBytes(StandardCharsets.UTF_8), dest);
         } else if(value.getClass().isArray()) {

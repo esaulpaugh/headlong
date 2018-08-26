@@ -23,8 +23,8 @@ public class Test {
         Object[] args00 = new Object[] {
                 new byte[][] { "abc".getBytes(Charset.forName("UTF-8")), "def".getBytes(Charset.forName("UTF-8")) }
         };
-//        buffer = f00.encodeCall(args00);
-//        printABI(buffer.array());
+        buffer = f00.encodeCall(args00);
+        printABI(buffer.array());
 
 
         Function f0 = new Function("f(uint,uint32[],bytes10,bytes)");
