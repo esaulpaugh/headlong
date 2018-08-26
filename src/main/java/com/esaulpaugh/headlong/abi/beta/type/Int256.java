@@ -8,7 +8,7 @@ import java.math.BigInteger;
 
 class Int256 extends StackableType {
 
-    private final int bitLength;
+    protected final int bitLength;
 
     Int256(String canonicalAbiType, String className, int bitLength) {
         super(canonicalAbiType, className, 32);
@@ -28,7 +28,21 @@ class Int256 extends StackableType {
     @Override
     protected void validate(final Object value) {
         super.validate(value);
-        _validateNumber(value, bitLength);
+//        if(value instanceof Boolean) {
+//            if(bitLength != 1) {
+//                throw new IllegalArgumentException("bitLength 1, expected Boolean. found " + value.getClass().getName());
+//            }
+//            return;
+//        }
+//        if(bitLength == 1) {
+//            if(!(value instanceof Boolean)) {
+//                throw new IllegalArgumentException("bitLength 1, expected Boolean. found " + value.getClass().getName());
+//            }
+//            return;
+//        }
+        if(bitLength != 1) {
+            _validateNumber(value, bitLength);
+        }
     }
 
     private static void _validateNumber(final Object value, final int bitLimit) {

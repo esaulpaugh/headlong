@@ -54,7 +54,7 @@ public class Function {
     }
 
     public ByteBuffer encodeCall(Object... args) {
-        return Encoder.encodeFunctionCall(this, args);
+        return GoodEncoder.encodeFunctionCall(this, args);
     }
 
     public String getCanonicalSignature() {
@@ -76,6 +76,6 @@ public class Function {
     }
 
     public static ByteBuffer encodeFunctionCall(String signature, Object... arguments) throws ParseException {
-        return Encoder.encodeFunctionCall(new Function(signature), arguments);
+        return GoodEncoder.encodeFunctionCall(new Function(signature), arguments);
     }
 }

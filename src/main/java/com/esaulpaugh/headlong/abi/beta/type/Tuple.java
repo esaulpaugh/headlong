@@ -37,7 +37,9 @@ class Tuple extends StackableType {
         for (int i = 0; i < memberTypes.length; i++) {
             len += memberTypes[i].byteLength(elements[i]);
         }
-        return len;
+
+        return len; // tuple has no dynamic head
+//        return dynamic ? 64 + len : len;
     }
 
     @Override

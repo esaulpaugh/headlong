@@ -1,5 +1,7 @@
 package com.esaulpaugh.headlong.abi.beta.type;
 
+import com.esaulpaugh.headlong.abi.beta.util.Pair;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Stack;
@@ -68,7 +70,7 @@ abstract class StackableType {
             throw new IllegalArgumentException("can't create tuple this way");
         } else if ("bool".equals(abi)) {
             className = isElement ? CLASS_NAME_ELEMENT_BOOLEAN : CLASS_NAME_BOOLEAN;
-            typeStack.push(new Byte(abi, className));
+            typeStack.push(Byte.booleanType(abi, className)); // new Byte(abi, className));
         } else if ("address".equals(abi)) {
             className = isElement ? CLASS_NAME_ELEMENT_BIG_INTEGER : CLASS_NAME_BIG_INTEGER;
             typeStack.push(new StaticArray(abi, className, BYTE_PRIMITIVE, 20));
@@ -77,24 +79,17 @@ abstract class StackableType {
                 throw new IllegalArgumentException("non-canonical: " + abi);
             }
             int bits = Integer.parseUnsignedInt(abi.substring("uint".length()), 10);
-            className = classNameForInt(bits, isElement);
-            StackableType integer;
-            if(bits == 8) {
-                integer = BYTE_PRIMITIVE;
-            } else if(className.equals(CLASS_NAME_ELEMENT_BIG_INTEGER)) {
-                integer = new Int256(abi, CLASS_NAME_BIG_INTEGER, bits);
-            } else {
-                integer = new Int256(abi, className, bits);
-            }
-            typeStack.push(integer);
+            Pair<String, Int256> pair = makeInt(abi, bits, isElement);
+            className = pair.first;
+            typeStack.push(pair.second);
         } else if (abi.startsWith("int")) {
             if (abi.length() == "int".length()) {
                 throw new IllegalArgumentException("non-canonical: " + abi);
             }
             int bits = Integer.parseUnsignedInt(abi.substring("int".length()), 10);
-            className = classNameForInt(bits, isElement);
-//            Int256 int256 = new Int256(abi, className, bits); // .className;
-            typeStack.push(bits == 8 ? BYTE_PRIMITIVE : new Int256(abi, CLASS_NAME_BIG_INTEGER, bits));
+            Pair<String, Int256> pair = makeInt(abi, bits, isElement);
+            className = pair.first;
+            typeStack.push(pair.second);
         } else if (abi.startsWith("ufixed")) {
             if (abi.length() == "ufixed".length()) {
                 throw new IllegalArgumentException("non-canonical: " + abi);
@@ -130,23 +125,27 @@ abstract class StackableType {
         return className;
     }
 
-    private static String classNameForInt(int bits, boolean isElement) {
+    private static Pair<String, Int256> makeInt(String abi, int bits, boolean isElement) {
+        String className;
+        Int256 integer;
         if (bits > 64) {
-//            Int256 i = new Int256(null, className, bits).className;
-//            typeStack.push(bits == 8 ? BYTE_PRIMITIVE : new Int256(abi, className, bits));
+             className = isElement ? CLASS_NAME_ELEMENT_BIG_INTEGER : CLASS_NAME_BIG_INTEGER;
+             integer = new Int256(abi, CLASS_NAME_BIG_INTEGER, bits);
+        } else if (bits > 32) {
+             className = isElement ? CLASS_NAME_ELEMENT_LONG : CLASS_NAME_LONG;
+             integer = new Int256(abi, CLASS_NAME_LONG, bits);
+        } else if (bits > 16) {
+             className = isElement ? CLASS_NAME_ELEMENT_INT : CLASS_NAME_INT;
+             integer = new Int256(abi, CLASS_NAME_INT, bits);
+        } else if (bits > 8) {
+             className = isElement ? CLASS_NAME_ELEMENT_SHORT : CLASS_NAME_SHORT;
+             integer = new Int256(abi, CLASS_NAME_SHORT, bits);
+        } else {
+             className = isElement ? CLASS_NAME_ELEMENT_BYTE : CLASS_NAME_BYTE;
+             integer = new Int256(abi, CLASS_NAME_BYTE, bits);
+        }
+        return new Pair<>(className, integer);
 
-            return isElement ? CLASS_NAME_ELEMENT_BIG_INTEGER : CLASS_NAME_BIG_INTEGER;
-        }
-        if (bits > 32) {
-            return isElement ? CLASS_NAME_ELEMENT_LONG : CLASS_NAME_LONG;
-        }
-        if (bits > 16) {
-            return isElement ? CLASS_NAME_ELEMENT_INT : CLASS_NAME_INT;
-        }
-        if (bits > 8) {
-            return isElement ? CLASS_NAME_ELEMENT_SHORT : CLASS_NAME_SHORT;
-        }
-        return isElement ? CLASS_NAME_ELEMENT_BYTE : CLASS_NAME_BYTE;
     }
 
     protected void validate(Object value) {

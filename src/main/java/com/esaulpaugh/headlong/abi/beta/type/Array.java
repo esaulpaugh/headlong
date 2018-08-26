@@ -133,6 +133,48 @@ abstract class Array extends StackableType {
 
     // -----------------------------------------------------------------------------------------------------------------
 
+    protected int _overhead(Object value) { // , boolean dynamic
+        if(value.getClass().isArray()) {
+            if (value instanceof byte[]) { // always needs dynamic head?
+                return dynamic ? 64 : 0;
+            }
+            if (value instanceof int[]) {
+                return dynamic ? 64 : 0;
+            }
+            if (value instanceof long[]) {
+                return dynamic ? 64 : 0;
+            }
+            if (value instanceof short[]) {
+                return dynamic ? 64 : 0;
+            }
+            if (value instanceof boolean[]) {
+                return dynamic ? 64 : 0;
+            }
+            if (value instanceof Number[]) {
+                return dynamic ? 64 : 0;
+            }
+        }
+        if (value instanceof String) { // always needs dynamic head
+            return 64;
+        }
+        if (value instanceof Number) {
+            return 0;
+        }
+        if (value instanceof Tuple) {
+            throw new RuntimeException("arrays of tuples not yet supported"); // TODO **************************************
+        }
+        if (value instanceof Object[]) {
+//            int len = 0;
+//            for (Object element : (Object[]) value) {
+//                len += this.elementType.byteLength(element);
+//            }
+            return dynamic ? 64 : 0;
+//            throw new AssertionError("Object array not expected here");
+        }
+        // shouldn't happen if type checks/validation already occurred
+        throw new IllegalArgumentException("unknown type: " + value.getClass().getName());
+    }
+
     protected int getDataLen(Object value) { // , boolean dynamic
         if(value.getClass().isArray()) {
             if (value instanceof byte[]) { // always needs dynamic head?
@@ -144,16 +186,20 @@ abstract class Array extends StackableType {
                 return dynamic ? 64 + staticLen : staticLen;
             }
             if (value instanceof long[]) {
-                return ((long[]) value).length << 5; // mul 32
+                int staticLen = ((long[]) value).length << 5; // mul 32
+                return dynamic ? 64 + staticLen : staticLen;
             }
             if (value instanceof short[]) {
-                return ((short[]) value).length << 5; // mul 32
+                int staticLen = ((short[]) value).length << 5; // mul 32
+                return dynamic ? 64 + staticLen : staticLen;
             }
             if (value instanceof boolean[]) {
-                return ((boolean[]) value).length << 5; // mul 32
+                int staticLen = ((boolean[]) value).length << 5; // mul 32
+                return dynamic ? 64 + staticLen : staticLen;
             }
             if (value instanceof Number[]) {
-                return ((Number[]) value).length << 5; // mul 32
+                int staticLen = ((Number[]) value).length << 5; // mul 32
+                return dynamic ? 64 + staticLen : staticLen;
             }
         }
         if (value instanceof String) { // always needs dynamic head
