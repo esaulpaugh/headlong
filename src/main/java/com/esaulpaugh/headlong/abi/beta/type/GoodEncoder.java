@@ -119,7 +119,11 @@ public class GoodEncoder {
                     insertBigIntsHead(paramType, (BigInteger[]) value, dest, offset, dynamic);
                 } else {
                     Object[] elements = (Object[]) value;
-                    insertOffset(offset, paramType, elements, dest);
+                    if(dynamic) {
+                        insertOffset(offset, paramType, elements, dest);
+                    } else {
+                        encodeTail(paramType, value, dest);
+                    }
 //                    int[] headLengths = getHeadLengths(((Array) paramType).elementType, elements);
 //                    insertArrayOffsets(paramType, elements, dest, tailOffsets[0]); // , dynamic
                 }
@@ -150,13 +154,14 @@ public class GoodEncoder {
     }
 
     private static void insertLength(int length, ByteBuffer dest) {
-        insertInt(0x3333333333000000L + length, dest);
+        System.out.println("insertLength(" + length + ")");
+        insertInt(length, dest); // 0x3333333333000000L +
     }
 
     private static void insertOffset(final int[] offset, StackableType paramType, Object object, ByteBuffer dest) {
         if(paramType.dynamic) {
             System.out.println("\noffset[0] is " + offset[0]);
-            insertInt(0xFFFFFFFFFF000000L + offset[0], dest);
+            insertInt(offset[0], dest); // 0xFFFFFFFFFF000000L +
 //            offset[0] = offset[0] - 32 + paramType.byteLength(object);
 //            offset[0] = paramType.overhead(object);
 //            System.out.println("overhead " + offset[0]);
@@ -201,7 +206,7 @@ public class GoodEncoder {
                 } else {
                     Object[] objects = (Object[]) value;
                     insertLength(objects.length, dest);
-                    int[] offset = new int[] { 0 };
+                    int[] offset = new int[] { objects.length << 5 }; // mul 32 (0x20)
                     for(Object object : objects) {
                         insertOffset(offset, paramType, object, dest);
                     }
