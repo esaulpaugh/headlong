@@ -84,6 +84,9 @@ class SignatureParser {
         while (argStart < sigEnd) {
             char c = signature.charAt(argStart);
             switch (c) {
+            case '[':
+                break LOOP;
+//                Tuple.create(null, tupleTypes.get(tupleTypes.size() - 1));
             case ')':
                 if (tupleTypes.size() > 0) {
                     argEnd = argStart - 1;
@@ -99,12 +102,34 @@ class SignatureParser {
                     ArrayList<StackableType> innerTupleTypes = new ArrayList<>();
                     Pair<Integer, Integer> results = parseTuple(signature, argStart, canonicalOut, innerTupleTypes, illegalTypeCharMatcher);
 
-                    argEnd = results.first + 1;
+                    // TODO test DynamicArray (e.g. [4] w/ dynamic element) enforces specified len
+//                    new DynamicArray(canonicalAbiType, className, typeStack.peek());
+//                    new StaticArray(canonicalAbiType, className, typeStack.peek(), length);
+
 
                     // TODO NON-CANONICAL, DON'T SUBSTRING
                     // signature.substring(argEnd, argEnd)
                     StackableType[] members = innerTupleTypes.toArray(StackableType.EMPTY_TYPE_ARRAY);
-                    tupleTypes.add(Tuple.create(null, members));
+
+                    Tuple tuple = Tuple.create(null, members);
+                    StackableType typleArray = null;
+
+                    int k = results.first + 1;
+                    int nextTerminator = -1;
+                    if(k < sigEnd && signature.charAt(k) == '[') {
+                        nextTerminator = nextParamTerminator(signature, k);
+                        if(nextTerminator > k) {
+                            typleArray = Typing.createForTuple(signature.substring(argStart, nextTerminator), tuple);
+                        }
+                    }
+
+                    if(typleArray != null) {
+                        tupleTypes.add(typleArray);
+                        argEnd = nextTerminator;
+                    } else {
+                        tupleTypes.add(tuple);
+                        argEnd = results.first + 1;
+                    }
 
                     prevNonCanonicalIndex = results.second;
 

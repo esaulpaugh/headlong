@@ -215,36 +215,38 @@ public class GoodEncoder {
      * @param dest
      */
     private static void encodeTail(StackableType paramType, Object value, ByteBuffer dest) {
-        if(!paramType.dynamic) {
-            throw new AssertionError("statics not expected");
-        }
+//        if(!paramType.dynamic) {
+//            throw new AssertionError("statics not expected");
+//        }
+        final boolean dynamic = paramType.dynamic;
         if(value instanceof String) { // dynamic
-            insertBytesDynamic(((String) value).getBytes(StandardCharsets.UTF_8), dest);
+            insertBytesTail(((String) value).getBytes(StandardCharsets.UTF_8), dest, dynamic);
         } else if(value.getClass().isArray()) {
             if (value instanceof Object[]) {
                 if(value instanceof BigInteger[]) {
-                    insertBigIntsDynamic((BigInteger[]) value, dest);
+                    insertBigIntsTail((BigInteger[]) value, dest, dynamic);
                 } else {
                     Object[] objects = (Object[]) value;
                     insertLength(objects.length, dest);
                     int[] offset = new int[] { objects.length << 5 }; // mul 32 (0x20)
-                    for(Object object : objects) {
-                        insertOffset(offset, paramType, object, dest);
+                    for(Object element : objects) {
+                        insertOffset(offset, paramType, element, dest);
                     }
-                    for (Object object : objects) {
-                        encodeTail(paramType, object, dest);
+                    Array arrayType = (Array) paramType;
+                    for (Object element : objects) {
+                        encodeTail(arrayType.elementType, element, dest);
                     }
                 }
             } else if (value instanceof byte[]) {
-                insertBytesDynamic((byte[]) value, dest);
+                insertBytesTail((byte[]) value, dest, dynamic);
             } else if (value instanceof int[]) {
-                insertIntsDynamic((int[]) value, dest);
+                insertIntsTail((int[]) value, dest, dynamic);
             } else if (value instanceof long[]) {
-                insertLongsDynamic((long[]) value, dest);
+                insertLongsTail((long[]) value, dest, dynamic);
             } else if (value instanceof short[]) {
-                insertShortsDynamic((short[]) value, dest);
+                insertShortsTail((short[]) value, dest, dynamic);
             } else if(value instanceof boolean[]) {
-                insertBooleansDynamic((boolean[]) value, dest);
+                insertBooleansTail((boolean[]) value, dest, dynamic);
             }
         } else if(value instanceof com.esaulpaugh.headlong.abi.beta.util.Tuple) {
             Tuple tupleType;
@@ -360,33 +362,33 @@ public class GoodEncoder {
     }
     // -------------------------------------------------------------------------------------------------
 
-    private static void insertBooleansDynamic(boolean[] bools, ByteBuffer dest) {
-        insertLength(bools.length, dest);
+    private static void insertBooleansTail(boolean[] bools, ByteBuffer dest, boolean dynamic) {
+        if(dynamic) insertLength(bools.length, dest);
         insertBooleansStatic(bools, dest);
     }
 
-    private static void insertBytesDynamic(byte[] bytes, ByteBuffer dest) {
-        insertLength(bytes.length, dest);
+    private static void insertBytesTail(byte[] bytes, ByteBuffer dest, boolean dynamic) {
+        if(dynamic) insertLength(bytes.length, dest);
         insertBytesStatic(bytes, dest);
     }
 
-    private static void insertShortsDynamic(short[] shorts, ByteBuffer dest) {
-        insertLength(shorts.length, dest);
+    private static void insertShortsTail(short[] shorts, ByteBuffer dest, boolean dynamic) {
+        if(dynamic) insertLength(shorts.length, dest);
         insertShortsStatic(shorts, dest);
     }
 
-    private static void insertIntsDynamic(int[] ints, ByteBuffer dest) {
-        insertLength(ints.length, dest);
+    private static void insertIntsTail(int[] ints, ByteBuffer dest, boolean dynamic) {
+        if(dynamic) insertLength(ints.length, dest);
         insertIntsStatic(ints, dest);
     }
 
-    private static void insertLongsDynamic(long[] longs, ByteBuffer dest) {
-        insertLength(longs.length, dest);
+    private static void insertLongsTail(long[] longs, ByteBuffer dest, boolean dynamic) {
+        if(dynamic) insertLength(longs.length, dest);
         insertLongsStatic(longs, dest);
     }
 
-    private static void insertBigIntsDynamic(BigInteger[] bigInts, ByteBuffer dest) {
-        insertLength(bigInts.length, dest);
+    private static void insertBigIntsTail(BigInteger[] bigInts, ByteBuffer dest, boolean dynamic) {
+        if(dynamic) insertLength(bigInts.length, dest);
         insertBigIntsStatic(bigInts, dest);
     }
 

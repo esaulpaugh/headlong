@@ -60,7 +60,7 @@ class Tuple extends StackableType {
         checkTypes(this.memberTypes, elements);
     }
 
-    public static void checkTypes(StackableType[] paramTypes, Object[] values) {
+    private static void checkTypes(StackableType[] paramTypes, Object[] values) {
         final int n = paramTypes.length;
         int i = 0;
         try {

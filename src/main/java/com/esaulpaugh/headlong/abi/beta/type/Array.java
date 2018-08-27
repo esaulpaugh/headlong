@@ -104,7 +104,7 @@ abstract class Array extends StackableType {
 
     private void checkLength(int actual) {
         int expected = this.length;
-        if(expected == -1) {
+        if(expected < 0) { // == -1
             System.out.println("dynamic length");
             return;
         }
@@ -184,6 +184,10 @@ abstract class Array extends StackableType {
                 int staticLen = ((Number[]) value).length << 5; // mul 32
                 return dynamic ? 64 + staticLen : staticLen;
             }
+//            if(value instanceof com.esaulpaugh.headlong.abi.beta.util.Tuple[]) {
+//                throw new Error();
+////                return elementType.byteLength(value);
+//            }
         }
         if (value instanceof String) { // always needs dynamic head
             return 64 + roundUp(((String) value).length());
@@ -191,8 +195,8 @@ abstract class Array extends StackableType {
         if (value instanceof Number) {
             return 32;
         }
-        if (value instanceof Tuple) {
-            throw new RuntimeException("arrays of tuples not yet supported"); // TODO **************************************
+        if (value instanceof com.esaulpaugh.headlong.abi.beta.util.Tuple) {
+            return elementType.byteLength(value);
         }
         if (value instanceof Object[]) {
             int len = 0;

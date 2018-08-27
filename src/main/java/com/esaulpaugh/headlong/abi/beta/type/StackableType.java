@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.abi.beta.type;
 
 import com.esaulpaugh.headlong.abi.beta.util.Pair;
+import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -24,6 +25,7 @@ abstract class StackableType {
     protected static final String CLASS_NAME_BIG_INTEGER = BigInteger.class.getName();
     protected static final String CLASS_NAME_BIG_DECIMAL = BigDecimal.class.getName();
     protected static final String CLASS_NAME_STRING = String.class.getName();
+    protected static final String CLASS_NAME_TUPLE = Tuple.class.getName();
 
     protected static final String CLASS_NAME_ELEMENT_BOOLEAN = boolean[].class.getName().replaceFirst("\\[", "");
     protected static final String CLASS_NAME_ELEMENT_BYTE = byte[].class.getName().replaceFirst("\\[", "");
@@ -34,6 +36,8 @@ abstract class StackableType {
     protected static final String CLASS_NAME_ELEMENT_BIG_INTEGER = BigInteger[].class.getName().replaceFirst("\\[", "");
     protected static final String CLASS_NAME_ELEMENT_BIG_DECIMAL = BigDecimal[].class.getName().replaceFirst("\\[", "");
     protected static final String CLASS_NAME_ELEMENT_STRING = String[].class.getName().replaceFirst("\\[", "");
+    protected static final String CLASS_NAME_ELEMENT_TUPLE = Tuple[].class.getName().replaceFirst("\\[", "");
+
 
     protected static final String CLASS_NAME_ARRAY_BYTE = byte[].class.getName();
 
@@ -54,7 +58,11 @@ abstract class StackableType {
 
     abstract int byteLength(Object value);
 
-    static String getJavaBaseTypeName(final String abi, boolean isElement, Stack<StackableType> typeStack) {
+    static String getJavaBaseTypeName(final String abi, boolean isElement, Stack<StackableType> typeStack, StackableType baseTuple) {
+
+        if(abi.isEmpty()) {
+            return null;
+        }
 
 //        int bits = Integer.parseUnsignedInt(abiBaseType, "uint".length(), abiBaseType.length(), 10); // Java 9
 
@@ -64,8 +72,12 @@ abstract class StackableType {
 
         // ~5,220 possible base types (mostly (u)fixedMxN)
         if (abi.charAt(0) == '(') {
+
+            typeStack.push(baseTuple);
+            return isElement ? CLASS_NAME_ELEMENT_TUPLE : CLASS_NAME_TUPLE;
+
 //            SignatureParser.parseTuple()
-            throw new IllegalArgumentException("can't create tuple this way");
+//            throw new IllegalArgumentException("can't create tuple this way");
         } else if ("bool".equals(abi)) {
             className = isElement ? CLASS_NAME_ELEMENT_BOOLEAN : CLASS_NAME_BOOLEAN;
             typeStack.push(Byte.booleanType(abi, className)); // new Byte(abi, className));
@@ -111,11 +123,11 @@ abstract class StackableType {
                 int bytes = Integer.parseUnsignedInt(abi.substring("bytes".length()), 10);
                 typeStack.push(new StaticArray(abi, className, BYTE_PRIMITIVE, bytes));
             } else {
-                typeStack.push(new DynamicArray(abi, className, BYTE_PRIMITIVE));
+                typeStack.push(new DynamicArray(abi, className, BYTE_PRIMITIVE, -1));
             }
         } else if ("string".equals(abi)) {
             className = isElement ? CLASS_NAME_ELEMENT_STRING : CLASS_NAME_STRING;
-            typeStack.push(new DynamicArray(abi, CLASS_NAME_STRING, BYTE_PRIMITIVE));
+            typeStack.push(new DynamicArray(abi, CLASS_NAME_STRING, BYTE_PRIMITIVE, -1));
         } else {
             throw new IllegalArgumentException("unrecognized type: " + abi);
         }

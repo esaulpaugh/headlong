@@ -19,10 +19,15 @@ public class Test {
 
         ByteBuffer buffer;
 
+//        com.esaulpaugh.headlong.abi.beta.type.Tuple.create("(())").validate(new Tuple());
 
-        Function f00 = new Function("bar((uint8)[])"); // bytes3[2]
+//        if(true)return;
+
+        Function f00 = new Function("bar(((()[]))[])"); // bytes3[2]
+//        Function f00 = new Function("bar(((uint8[]))[][][])"); // bytes3[2]
         Object[] args00 = new Object[] {
-                new Tuple[1] // new byte[4]
+                new Tuple[] { new Tuple(new Tuple((Object) new Tuple[0])) }
+//                new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple(new Tuple( (Object) new byte[] { 7 } )) } } } // new byte[4]
 //                new byte[][] { "abc".getBytes(Charset.forName("UTF-8")), "def".getBytes(Charset.forName("UTF-8")) }
         };
         buffer = f00.encodeCall(args00);
