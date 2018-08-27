@@ -117,7 +117,7 @@ abstract class StackableType {
             className = isElement ? CLASS_NAME_ELEMENT_STRING : CLASS_NAME_STRING;
             typeStack.push(new DynamicArray(abi, CLASS_NAME_STRING, BYTE_PRIMITIVE));
         } else {
-            throw new IllegalArgumentException("?");
+            throw new IllegalArgumentException("unrecognized type: " + abi);
         }
 
         return className;

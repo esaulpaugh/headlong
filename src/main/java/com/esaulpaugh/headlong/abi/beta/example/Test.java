@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.abi.beta.example;
 
 import com.esaulpaugh.headlong.abi.beta.type.Function;
+import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
@@ -19,9 +20,10 @@ public class Test {
         ByteBuffer buffer;
 
 
-        Function f00 = new Function("bar(bytes3[2])");
+        Function f00 = new Function("bar((uint8)[])"); // bytes3[2]
         Object[] args00 = new Object[] {
-                new byte[][] { "abc".getBytes(Charset.forName("UTF-8")), "def".getBytes(Charset.forName("UTF-8")) }
+                new Tuple[1] // new byte[4]
+//                new byte[][] { "abc".getBytes(Charset.forName("UTF-8")), "def".getBytes(Charset.forName("UTF-8")) }
         };
         buffer = f00.encodeCall(args00);
         printABI(buffer.array());
@@ -90,7 +92,7 @@ public class Test {
     private static void printABI(byte[] abi) {
         System.out.println(Hex.toHexString(Arrays.copyOfRange(abi, 0, SELECTOR_LEN)));
         final int end = abi.length;
-        int i = 4;
+        int i = SELECTOR_LEN;
         while(i < end) {
             System.out.println( (i / 32) + "\t" + Hex.toHexString(Arrays.copyOfRange(abi, i, i + 32)));
             i += 32;

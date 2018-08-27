@@ -34,7 +34,9 @@ public class GoodEncoder {
 
         int sum = getHeadLengthSum(types, arguments);
 
-        int encodingByteLen = tupleType.byteLength(arguments);
+        int encodingByteLen = tupleType.byteLength(tuple);
+
+        encodingByteLen -= 32; // top level dynamic tuple needs no offset?
 
         System.out.println(tupleType.dynamic + " " + encodingByteLen);
 
@@ -50,6 +52,8 @@ public class GoodEncoder {
     }
 
     private static void insertTuple(Tuple tupleType, com.esaulpaugh.headlong.abi.beta.util.Tuple tuple, int offset, ByteBuffer outBuffer) {
+        System.out.println("insertTuple(" + tupleType + ")");
+
         Object[] values = tuple.elements;
         List<StackableType> typeList = new LinkedList<>(Arrays.asList(tupleType.memberTypes));
         List<Object> valuesList = new LinkedList<>(Arrays.asList(values));
@@ -137,8 +141,8 @@ public class GoodEncoder {
             }
         } else if(value instanceof com.esaulpaugh.headlong.abi.beta.util.Tuple) {
 //            throw new Error(); // TODO TEST
-            insertTuple((Tuple) paramType, (com.esaulpaugh.headlong.abi.beta.util.Tuple) value, offset[0], dest);
-//            insertTupleHead(paramType, (com.esaulpaugh.headlong.abi.beta.util.Tuple) value, dest, offset[0], dynamic);
+//            insertTuple((Tuple) paramType, (com.esaulpaugh.headlong.abi.beta.util.Tuple) value, offset[0], dest);
+            insertTupleHead(paramType, (com.esaulpaugh.headlong.abi.beta.util.Tuple) value, dest, offset[0], dynamic);
         } else if (value instanceof Number) {
             if(value instanceof BigInteger) {
                 insertInt(((BigInteger) value), dest);
@@ -149,6 +153,21 @@ public class GoodEncoder {
             }
         } else if(value instanceof Boolean) {
             insertBool((boolean) value, dest);
+        }
+    }
+
+    private static void insertTupleHead(StackableType tupleType, com.esaulpaugh.headlong.abi.beta.util.Tuple tuple, ByteBuffer dest, int tailOffset, boolean dynamic) {
+        Tuple paramTypes;
+        try {
+            paramTypes = (Tuple) tupleType;
+        } catch (ClassCastException cce) {
+            throw new RuntimeException(cce);
+        }
+        if(dynamic) {
+            insertInt(tailOffset, dest);
+        } else {
+            int headLengths = getHeadLengthSum(paramTypes.memberTypes, tuple.elements);
+            insertTuple(paramTypes, tuple, headLengths, dest);
         }
     }
 

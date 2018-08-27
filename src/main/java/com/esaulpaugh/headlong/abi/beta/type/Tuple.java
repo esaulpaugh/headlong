@@ -27,19 +27,20 @@ class Tuple extends StackableType {
 
     @Override
     int byteLength(Object value) {
-        Object[] elements = (Object[]) value;
+        com.esaulpaugh.headlong.abi.beta.util.Tuple tuple = (com.esaulpaugh.headlong.abi.beta.util.Tuple) value;
 
-        if(elements.length != memberTypes.length) {
+        if(tuple.elements.length != memberTypes.length) {
             throw new IllegalArgumentException("tuple length mismatch");
         }
 
         int len = 0;
         for (int i = 0; i < memberTypes.length; i++) {
-            len += memberTypes[i].byteLength(elements[i]);
+            len += memberTypes[i].byteLength(tuple.elements[i]);
         }
 
-        return len; // tuple has no dynamic head
-//        return dynamic ? 64 + len : len;
+//        return len; // tuple has no dynamic head
+        return len + 32;
+//        return dynamic ? (memberTypes.length << 5) + len : len;
     }
 
     @Override
