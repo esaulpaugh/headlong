@@ -20,11 +20,6 @@ class Byte extends Int256 {
     }
 
     @Override
-    public String toString() {
-        return getClass().getSimpleName();
-    }
-
-    @Override
     int byteLength(Object value) {
         return roundUp(1);
     }

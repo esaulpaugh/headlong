@@ -1,6 +1,5 @@
 package com.esaulpaugh.headlong.abi.beta.type;
 
-import com.esaulpaugh.headlong.abi.beta.*;
 import com.esaulpaugh.headlong.abi.beta.util.Pair;
 
 import java.text.ParseException;

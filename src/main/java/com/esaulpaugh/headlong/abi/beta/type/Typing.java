@@ -7,98 +7,20 @@ import java.util.Stack;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-// TODO make package-private
-public abstract class Typing {
+abstract class Typing {
 
-
-
-
-
-//    protected enum EncodingBaseType {
-//        UINT8("uint8"),
-//        UINT256("uint256"),
-//        STATIC_ARRAY("[0]"),
-//        DYNAMIC_ARRAY("uint256"),
-//        TUPLE("()");
-//
-//        final String abiBaseType;
-//
-//        EncodingBaseType(String abiBaseType) {
-//            this.abiBaseType = abiBaseType;
-//        }
-//    }
-
-//    protected static final String CLASS_NAME_BOOLEAN = Boolean.class.getName();
-//    protected static final String CLASS_NAME_BYTE = Byte.class.getName();
-//    protected static final String CLASS_NAME_SHORT = Short.class.getName();
-//    protected static final String CLASS_NAME_INT = Integer.class.getName();
-//    protected static final String CLASS_NAME_LONG = Long.class.getName();
-//
-//    protected static final String CLASS_NAME_BIG_INTEGER = BigInteger.class.getName();
-//    protected static final String CLASS_NAME_BIG_DECIMAL = BigDecimal.class.getName();
-//    protected static final String CLASS_NAME_STRING = String.class.getName();
-//
-//    protected static final String CLASS_NAME_ELEMENT_BOOLEAN = boolean[].class.getName().replaceFirst("\\[", "");
-//    protected static final String CLASS_NAME_ELEMENT_BYTE = byte[].class.getName().replaceFirst("\\[", "");
-//    protected static final String CLASS_NAME_ELEMENT_SHORT = short[].class.getName().replaceFirst("\\[", "");
-//    protected static final String CLASS_NAME_ELEMENT_INT = int[].class.getName().replaceFirst("\\[", "");
-//    protected static final String CLASS_NAME_ELEMENT_LONG = long[].class.getName().replaceFirst("\\[", "");
-//
-//    protected static final String CLASS_NAME_ELEMENT_BIG_INTEGER = BigInteger[].class.getName().replaceFirst("\\[", "");
-//    protected static final String CLASS_NAME_ELEMENT_BIG_DECIMAL = BigDecimal[].class.getName().replaceFirst("\\[", "");
-//    protected static final String CLASS_NAME_ELEMENT_STRING = String[].class.getName().replaceFirst("\\[", "");
-//
-//    protected static final String CLASS_NAME_ARRAY_BYTE = byte[].class.getName();
-
-//    private final String canonicalAbiType;
-//    private final String javaClassName;
-//    protected final boolean dynamic;
-
-//    protected final String className;
-//    protected final boolean dynamic;
-//
-//    private final String canonicalAbiType;
-//
-//    public Typing(String canonicalAbiType, String className, boolean dynamic) {
-//        this.canonicalAbiType = canonicalAbiType;
-//        this.className = className;
-//        this.dynamic = dynamic;
-//    }
-
-    // TODO make package-private/protected
-    public static StackableType create(String canonicalAbiType) {
+    static StackableType create(String canonicalAbiType) {
         Stack<StackableType> typeStack = new Stack<>();
         Pair<String, String> results = buildTypeStack(canonicalAbiType, typeStack);
 
         String abiBaseType = results.first;
         String javaBaseType = results.second;
 
-//        StringBuilder classNameBuilder = new StringBuilder();
-//        int depth = typeStack.size() - 1;
-//        for (int i = 0; i < depth; i++) {
-//            classNameBuilder.append('[');
-//        }
         String className = buildClassName(typeStack, javaBaseType);
 
-//        final int size = typeStack.size();
-        int i = 0;
-        for(StackableType stackable : typeStack) {
-            System.out.println(i++ + " " + stackable);
-        }
-
-//        final StackableType type = typeStack.peek();
-//        final StackableType elementType = typeStack.get(typeStack.size() - 2);
-
-
+//        int i = 0;
 //        for(StackableType stackable : typeStack) {
-//            if(stackable instanceof DynamicArray) {
-//                return new DynamicArray(canonicalAbiType, typeStack.peek(), className);
-//            }
-//        }
-//
-//        if(canonicalAbiType.charAt(canonicalAbiType.length() - 1) == ']') {
-//            final StackableType elementType = typeStack.peek(); // ??
-//            return new StaticArray(canonicalAbiType, elementType, className, elementType.length);
+//            System.out.println(i++ + " " + stackable);
 //        }
 
         return typeStack.peek();

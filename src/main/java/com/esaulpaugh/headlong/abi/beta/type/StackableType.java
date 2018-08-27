@@ -9,6 +9,8 @@ import java.util.Stack;
 import static com.esaulpaugh.headlong.abi.beta.type.Byte.BYTE_PRIMITIVE;
 import static com.esaulpaugh.headlong.abi.beta.util.ClassNames.toFriendly;
 
+// TODO support model classes à la Student.java
+// TODO support vyper e.g. "decimal"
 abstract class StackableType {
 
     public static final StackableType[] EMPTY_TYPE_ARRAY = new StackableType[0];
@@ -37,20 +39,16 @@ abstract class StackableType {
 
     protected final String canonicalAbiType;
     protected final String className;
-    protected final int length;
 
     protected final boolean dynamic;
 
-//    protected transient int tailOffset; // TODO
-
-    protected StackableType(String canonicalAbiType, String className, int length) {
-        this(canonicalAbiType, className, length, false);
+    protected StackableType(String canonicalAbiType, String className) {
+        this(canonicalAbiType, className, false);
     }
 
-    protected StackableType(String canonicalAbiType, String className, int length, boolean dynamic) {
+    protected StackableType(String canonicalAbiType, String className, boolean dynamic) {
         this.canonicalAbiType = canonicalAbiType;
         this.className = className;
-        this.length = length;
         this.dynamic = dynamic;
     }
 

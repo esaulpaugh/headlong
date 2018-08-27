@@ -5,7 +5,7 @@ class Tuple extends StackableType {
     protected final StackableType[] memberTypes;
 
     Tuple(String canonicalAbiType, boolean dynamic, StackableType... memberTypes) {
-        super(canonicalAbiType, com.esaulpaugh.headlong.abi.beta.Tuple.class.getName(), memberTypes.length, dynamic); // Tuple.class.getName()
+        super(canonicalAbiType, com.esaulpaugh.headlong.abi.beta.util.Tuple.class.getName(), dynamic); // Tuple.class.getName()
         this.memberTypes = memberTypes;
     }
 
@@ -22,7 +22,7 @@ class Tuple extends StackableType {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + ": " + length;
+        return getClass().getSimpleName() + " " + memberTypes.length;
     }
 
     @Override
@@ -46,7 +46,7 @@ class Tuple extends StackableType {
     protected void validate(final Object value) {
         super.validate(value);
 
-        final com.esaulpaugh.headlong.abi.beta.Tuple tuple = (com.esaulpaugh.headlong.abi.beta.Tuple) value;
+        final com.esaulpaugh.headlong.abi.beta.util.Tuple tuple = (com.esaulpaugh.headlong.abi.beta.util.Tuple) value;
         final Object[] elements = tuple.elements;
 
         final int expected = this.memberTypes.length;

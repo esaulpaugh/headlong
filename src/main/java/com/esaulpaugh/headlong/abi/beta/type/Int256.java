@@ -11,7 +11,7 @@ class Int256 extends StackableType {
     protected final int bitLength;
 
     Int256(String canonicalAbiType, String className, int bitLength) {
-        super(canonicalAbiType, className, 32);
+        super(canonicalAbiType, className);
         this.bitLength = bitLength;
     }
 

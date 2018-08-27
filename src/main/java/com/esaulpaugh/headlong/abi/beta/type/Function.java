@@ -45,7 +45,7 @@ public class Function {
 
     public Throwable error(Object... args) {
         try {
-            paramTypes.validate(new com.esaulpaugh.headlong.abi.beta.Tuple(args));
+            paramTypes.validate(new com.esaulpaugh.headlong.abi.beta.util.Tuple(args));
             return null;
         } catch (Throwable t) {
 //            System.err.println(t.getMessage());

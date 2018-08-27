@@ -5,17 +5,21 @@ import java.nio.charset.StandardCharsets;
 abstract class Array extends StackableType {
 
     protected final StackableType elementType;
-
-//    protected Stack<StackableType> typeStack;
+    protected final int length;
 
     protected Array(String canonicalAbiType, String className, StackableType elementType, int length) {
         this(canonicalAbiType, className, elementType, length, false);
     }
 
     protected Array(String canonicalAbiType, String className, StackableType elementType, int length, boolean dynamic) { // , Stack<StackableType> typeStack
-        super(canonicalAbiType, className, length, dynamic); // dynamic
+        super(canonicalAbiType, className, dynamic);
         this.elementType = elementType;
-//        this.typeStack = typeStack;
+        this.length = length;
+    }
+
+    @Override
+    int byteLength(Object value) {
+        return getDataLen(value);
     }
 
     @Override
@@ -23,23 +27,9 @@ abstract class Array extends StackableType {
         return getClass().getSimpleName() + ": " + elementType + ", " + length;
     }
 
-//    @Override
-//    public void validate(Object value) {
-//        validate(typeStack.size() - 1, value); // , className
-//    }
-
-//    @Override
-//    protected void validate(final Object value) { // final StackableType type,
-//        super.validate(value);
-//        validate(typeStack.size() - 1, value);
-//    }
-
     @Override
     protected void validate(final Object value) { // , final String expectedClassName // int stackIndex
         super.validate(value);
-//        StackableType.validate(typeStack.get(stackIndex), value); // .className
-
-         // typeStack.get(stackIndex - 1);
 
         if(value.getClass().isArray()) {
 //            StackableType elementType = ((Array) this.typeStack.peek()).elementType;
@@ -92,14 +82,7 @@ abstract class Array extends StackableType {
         int i = 0;
         try {
             for ( ; i < len; i++) {
-
                 elementType.validate(arr[i]);
-
-//                Type.Int256.validate();
-
-
-//                StackableType.validate(arr[i]);
-//                validate(arr[i], CLASS_NAME_INT, expectedLengthIndex + 1);
             }
         } catch (IllegalArgumentException | NullPointerException re) {
             throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
@@ -112,7 +95,7 @@ abstract class Array extends StackableType {
         int i = 0;
         try {
             for ( ; i < len; i++) {
-                elementType.validate(arr[i]); // , CLASS_NAME_LONG, .canonicalAbiType
+                elementType.validate(arr[i]);
             }
         } catch (IllegalArgumentException | NullPointerException re) {
             throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
@@ -175,7 +158,7 @@ abstract class Array extends StackableType {
         throw new IllegalArgumentException("unknown type: " + value.getClass().getName());
     }
 
-    protected int getDataLen(Object value) { // , boolean dynamic
+    protected int getDataLen(Object value) {
         if(value.getClass().isArray()) {
             if (value instanceof byte[]) { // always needs dynamic head?
                 int staticLen = roundUp(((byte[]) value).length);
