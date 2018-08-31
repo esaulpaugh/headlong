@@ -2,6 +2,8 @@ package com.esaulpaugh.headlong.abi.beta.type;
 
 import java.nio.charset.StandardCharsets;
 
+import static com.esaulpaugh.headlong.abi.beta.type.DynamicArray.DYNAMIC_LENGTH;
+
 abstract class Array extends StackableType {
 
     protected final StackableType elementType;
@@ -14,6 +16,9 @@ abstract class Array extends StackableType {
     protected Array(String canonicalAbiType, String className, StackableType elementType, int length, boolean dynamic) {
         super(canonicalAbiType, className, dynamic);
         this.elementType = elementType;
+        if(length < DYNAMIC_LENGTH) {
+            throw new NegativeArraySizeException();
+        }
         this.length = length;
     }
 
@@ -104,7 +109,7 @@ abstract class Array extends StackableType {
 
     private void checkLength(int actual) {
         int expected = this.length;
-        if(expected < 0) { // == -1
+        if(expected == DYNAMIC_LENGTH) { // -1
             System.out.println("dynamic length");
             return;
         }

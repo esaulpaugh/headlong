@@ -5,9 +5,12 @@ import com.esaulpaugh.headlong.abi.beta.util.Pair;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.EmptyStackException;
+import java.util.Queue;
 
 import static com.esaulpaugh.headlong.abi.beta.type.Byte.BYTE_PRIMITIVE;
+import static com.esaulpaugh.headlong.abi.beta.type.DynamicArray.DYNAMIC_LENGTH;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 abstract class Typing {
@@ -36,106 +39,69 @@ abstract class Typing {
 
     private static final String CLASS_NAME_ARRAY_BYTE = byte[].class.getName();
 
-    // basically an unsynchronized Stack
-    private static class TypeStack extends ArrayDeque<StackableType> {
-
-        @Override
-        public StackableType peek() {
-            StackableType e = peekFirst();
-            if(e == null) {
-                throw new EmptyStackException();
-            }
-            return e;
-        }
-
-    }
-
     static StackableType createForTuple(String canonicalAbiType, Tuple baseTuple) {
-
-        TypeStack typeStack = new TypeStack();
-        Pair<String, String> results = buildTypeStack(canonicalAbiType, typeStack, baseTuple);
-
-        return typeStack.peek();
-
-//        StackableType type = create(abi);
-//        return type;
-//        if(elementType.dynamic) {
-//            return new DynamicArray(null, null, elementType);
-//        }
-//        return new StaticArray(null, null, elementType, len);
+        if(baseTuple == null) {
+            throw new NullPointerException();
+        }
+        return create(canonicalAbiType, baseTuple);
     }
 
     static StackableType create(String canonicalAbiType) {
-        TypeStack typeStack = new TypeStack();
-        Pair<String, String> results = buildTypeStack(canonicalAbiType, typeStack, null);
+        return create(canonicalAbiType, null);
+    }
 
-        String abiBaseType = results.first;
-        String javaBaseType = results.second;
-
-        String className = buildClassName(typeStack, javaBaseType);
-
-//        int i = 0;
-//        for(StackableType stackable : typeStack) {
-//            System.out.println(i++ + " " + stackable);
-//        }
-
+    private static StackableType create(String canonicalAbiType, Tuple baseTuple) {
+        Deque<StackableType> typeStack = new ArrayDeque<>();
+        buildTypeStack(canonicalAbiType, canonicalAbiType.length() - 1, typeStack, new StringBuilder(), baseTuple);
         return typeStack.peek();
     }
 
-    private static String buildClassName(ArrayDeque<StackableType> typeStack, String javaBaseType) {
-        StringBuilder classNameBuilder = new StringBuilder();
-        final int depth = typeStack.size() - 1;
-        for (int i = 0; i < depth; i++) {
-            classNameBuilder.append('[');
-        }
-        return classNameBuilder.append(javaBaseType).toString();
-    }
-
-    private static Pair<String, String> buildTypeStack(String canonicalAbiType, TypeStack typeStack, StackableType baseTuple) {
-        StringBuilder brackets = new StringBuilder();
-        return buildTypeStack(canonicalAbiType, canonicalAbiType.length() - 1, typeStack, brackets, baseTuple);
-    }
-
-    @SuppressWarnings("null")
-    private static Pair<String, String> buildTypeStack(String canonicalAbiType, final int i, TypeStack typeStack, StringBuilder brackets, StackableType baseTuple) {
-
-//        if(i < 0) {
-//            return null;
+//    private static String buildClassName(ArrayDeque<StackableType> typeStack, String javaBaseType) {
+//        StringBuilder classNameBuilder = new StringBuilder();
+//        final int depth = typeStack.size() - 1;
+//        for (int i = 0; i < depth; i++) {
+//            classNameBuilder.append('[');
 //        }
+//        return classNameBuilder.append(javaBaseType).toString();
+//    }
 
-        if(canonicalAbiType.charAt(i) == ']') {
+    private static String buildTypeStack(final String canonicalAbiType,
+                                         final int index,
+                                         final Deque<StackableType> typeStack,
+                                         final StringBuilder brackets,
+                                         final StackableType baseTuple) {
 
-            final int arrayOpenIndex = canonicalAbiType.lastIndexOf('[', i - 1);
+        if(canonicalAbiType.charAt(index) == ']') {
 
-            Pair<String, String> results = buildTypeStack(canonicalAbiType, arrayOpenIndex - 1, typeStack, brackets, baseTuple);
+            final int fromIndex = index - 1;
+            final int arrayOpenIndex = canonicalAbiType.lastIndexOf('[', fromIndex);
 
-//            if(typeStack.empty()) {
-//
-//            }
+            final String javaBaseType = buildTypeStack(canonicalAbiType, arrayOpenIndex - 1, typeStack, brackets, baseTuple);
 
             brackets.append('[');
-            final String className = brackets.toString() + results.second;
+            final String className = brackets.toString() + javaBaseType; // results.second;
 
-            if(arrayOpenIndex == i - 1) { // []
-                typeStack.push(new DynamicArray(canonicalAbiType, className, typeStack.peek(), -1));
+            if(arrayOpenIndex == fromIndex) { // []
+                typeStack.push(new DynamicArray(canonicalAbiType, className, typeStack.peek(), DYNAMIC_LENGTH));
             } else { // [...]
-                int length = Integer.parseUnsignedInt(canonicalAbiType.substring(arrayOpenIndex + 1, i));
-                StackableType top = typeStack.peek();
-//                int length = top instanceof Array ? ((Array) top).length : -1;
-                if(typeStack.peek().dynamic) {
-                    // TODO DynamicArray (e.g. [4] w/ dynamic element) can't enforce specified (top-level) len without length param?
+                final int length = Integer.parseUnsignedInt(canonicalAbiType.substring(arrayOpenIndex + 1, index));
+                final StackableType top = typeStack.peek();
+                if(top == null) { // should never happen
+                    throw new EmptyStackException();
+                }
+                if(top.dynamic) {
                     typeStack.push(new DynamicArray(canonicalAbiType, className, top, length));
                 } else {
-                    typeStack.push(new StaticArray(canonicalAbiType, className, typeStack.peek(), length));
+                    typeStack.push(new StaticArray(canonicalAbiType, className, top, length));
                 }
             }
 
-            return results;
+            return javaBaseType;
         } else {
-            String abiBaseType = canonicalAbiType.substring(0, i + 1);
+            final String abiBaseType = canonicalAbiType.substring(0, index + 1);
             String javaBaseType;
             try {
-                boolean isElement = i != canonicalAbiType.length() - 1;
+                boolean isElement = index != canonicalAbiType.length() - 1;
                 javaBaseType = getJavaBaseTypeName(abiBaseType, isElement, typeStack, baseTuple);
             } catch (NumberFormatException nfe) {
                 javaBaseType = null;
@@ -143,11 +109,12 @@ abstract class Typing {
             if(javaBaseType == null) {
                 throw new IllegalArgumentException("unrecognized type: " + abiBaseType + " (" + String.format("%040x", new BigInteger(abiBaseType.getBytes(UTF_8))) + ")");
             }
-            return new Pair<>(abiBaseType, javaBaseType);
+            return javaBaseType;
+//            return new Pair<>(abiBaseType, javaBaseType);
         }
     }
 
-    private static String getJavaBaseTypeName(final String abi, boolean isElement, TypeStack typeStack, StackableType baseTuple) {
+    private static String getJavaBaseTypeName(final String abi, boolean isElement, Deque<StackableType> typeStack, StackableType baseTuple) {
 
         if(abi.isEmpty()) {
             return null;
@@ -155,18 +122,15 @@ abstract class Typing {
 
 //        int bits = Integer.parseUnsignedInt(abiBaseType, "uint".length(), abiBaseType.length(), 10); // Java 9
 
-//        String bracketsString = brackets.toString();
-
         final String className;
 
         // ~5,220 possible base types (mostly (u)fixedMxN)
         if (abi.charAt(0) == '(') {
-
+//            if(baseTuple == null) {
+//                throw new NullPointerException("baseTuple is null");
+//            }
             typeStack.push(baseTuple);
             return isElement ? CLASS_NAME_ELEMENT_TUPLE : CLASS_NAME_TUPLE;
-
-//            SignatureParser.parseTuple()
-//            throw new IllegalArgumentException("can't create tuple this way");
         } else if ("bool".equals(abi)) {
             className = isElement ? CLASS_NAME_ELEMENT_BOOLEAN : CLASS_NAME_BOOLEAN;
             typeStack.push(Byte.booleanType(abi, className)); // new Byte(abi, className));
@@ -212,11 +176,11 @@ abstract class Typing {
                 int bytes = Integer.parseUnsignedInt(abi.substring("bytes".length()), 10);
                 typeStack.push(new StaticArray(abi, className, BYTE_PRIMITIVE, bytes));
             } else {
-                typeStack.push(new DynamicArray(abi, className, BYTE_PRIMITIVE, -1));
+                typeStack.push(new DynamicArray(abi, className, BYTE_PRIMITIVE, DYNAMIC_LENGTH));
             }
         } else if ("string".equals(abi)) {
             className = isElement ? CLASS_NAME_ELEMENT_STRING : CLASS_NAME_STRING;
-            typeStack.push(new DynamicArray(abi, CLASS_NAME_STRING, BYTE_PRIMITIVE, -1));
+            typeStack.push(new DynamicArray(abi, CLASS_NAME_STRING, BYTE_PRIMITIVE, DYNAMIC_LENGTH));
         } else {
             throw new IllegalArgumentException("unrecognized type: " + abi);
         }
