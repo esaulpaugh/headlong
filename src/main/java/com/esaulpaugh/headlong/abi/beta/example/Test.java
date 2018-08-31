@@ -23,7 +23,7 @@ public class Test {
 
 //        if(true)return;
 
-        Function f00 = new Function("bar(((()[]))[])"); // bytes3[2]
+        Function f00 = new Function("bar(((()[]))[1])"); // bytes3[2]
 //        Function f00 = new Function("bar(((uint8[]))[][][])"); // bytes3[2]
         Object[] args00 = new Object[] {
                 new Tuple[] { new Tuple(new Tuple((Object) new Tuple[0])) }

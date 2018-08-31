@@ -4,7 +4,7 @@ import static com.esaulpaugh.headlong.abi.beta.type.Array.roundUp;
 
 class Byte extends Int256 {
 
-    protected static final StackableType BYTE_OBJECT = new Byte("uint8", StackableType.CLASS_NAME_BYTE);
+    protected static final StackableType BYTE_OBJECT = new Byte("uint8", Typing.CLASS_NAME_BYTE);
     protected static final StackableType BYTE_PRIMITIVE = new Byte("uint8", "B");
 
     Byte(String canonicalAbiType, String className) {

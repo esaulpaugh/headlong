@@ -11,7 +11,7 @@ abstract class Array extends StackableType {
         this(canonicalAbiType, className, elementType, length, false);
     }
 
-    protected Array(String canonicalAbiType, String className, StackableType elementType, int length, boolean dynamic) { // , Stack<StackableType> typeStack
+    protected Array(String canonicalAbiType, String className, StackableType elementType, int length, boolean dynamic) {
         super(canonicalAbiType, className, dynamic);
         this.elementType = elementType;
         this.length = length;
@@ -24,7 +24,7 @@ abstract class Array extends StackableType {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + ": " + elementType + ", " + length;
+        return getClass().getSimpleName() + "<" + elementType + ">(" + length + ")";
     }
 
     @Override

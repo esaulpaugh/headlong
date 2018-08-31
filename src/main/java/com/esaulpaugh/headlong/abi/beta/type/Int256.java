@@ -22,7 +22,7 @@ class Int256 extends StackableType {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + ": " + bitLength;
+        return getClass().getSimpleName() + "(" + bitLength + ")";
     }
 
     @Override
