@@ -1,7 +1,8 @@
 package com.esaulpaugh.headlong.abi.beta.type;
 
-import java.util.Arrays;
-
+/**
+ *
+ */
 class Tuple extends StackableType {
 
     protected final StackableType[] memberTypes;
@@ -24,14 +25,15 @@ class Tuple extends StackableType {
 
     @Override
     public String toString() {
+        if(memberTypes.length == 0) {
+            return "()";
+        }
         StringBuilder sb = new StringBuilder("(");
         for (StackableType memberType : memberTypes) {
             sb.append(memberType).append(',');
         }
-        return getClass().getSimpleName() +
-                (sb.length() == "(".length()
-                        ? "()"
-                        : sb.replace(sb.length() - 1, sb.length(), "").append(')').toString());
+        sb.replace(sb.length() - 1, sb.length(), "").append(')');
+        return getClass().getSimpleName() + sb.toString();
     }
 
     @Override
@@ -47,9 +49,7 @@ class Tuple extends StackableType {
             len += memberTypes[i].byteLength(tuple.elements[i]);
         }
 
-//        return len; // tuple has no dynamic head
-        return len + 32;
-//        return dynamic ? (memberTypes.length << 5) + len : len;
+        return len; // + 32;
     }
 
     @Override

@@ -36,7 +36,7 @@ public class GoodEncoder {
 
         int encodingByteLen = tupleType.byteLength(tuple);
 
-        encodingByteLen -= 32; // top level dynamic tuple needs no offset?
+//        encodingByteLen -= 32; // top level dynamic tuple needs no offset?
 
         System.out.println(tupleType.dynamic + " " + encodingByteLen);
 

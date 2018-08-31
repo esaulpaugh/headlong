@@ -16,9 +16,6 @@ abstract class Array extends StackableType {
     protected Array(String canonicalAbiType, String className, StackableType elementType, int length, boolean dynamic) {
         super(canonicalAbiType, className, dynamic);
         this.elementType = elementType;
-        if(length < DYNAMIC_LENGTH) {
-            throw new NegativeArraySizeException();
-        }
         this.length = length;
     }
 
@@ -219,5 +216,4 @@ abstract class Array extends StackableType {
         int mod = len % 32;
         return mod == 0 ? len : len + (32 - mod);
     }
-
 }

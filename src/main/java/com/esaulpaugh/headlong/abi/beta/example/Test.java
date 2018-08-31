@@ -15,63 +15,56 @@ import static com.esaulpaugh.headlong.abi.beta.type.Function.SELECTOR_LEN;
 
 public class Test {
 
-    public static void main(String[] args0) throws ParseException {
+    public static void main(String[] args_) throws ParseException {
 
         ByteBuffer buffer;
 
-//        com.esaulpaugh.headlong.abi.beta.type.Tuple.create("(())").validate(new Tuple());
-
-//        if(true)return;
-
-        Function f00 = new Function("bar(((()[]))[1])"); // bytes3[2]
-//        Function f00 = new Function("bar(((uint8[]))[][][])"); // bytes3[2]
+        Function f00 = new Function("(())");
         Object[] args00 = new Object[] {
-                new Tuple[] { new Tuple(new Tuple((Object) new Tuple[0])) }
-//                new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple(new Tuple( (Object) new byte[] { 7 } )) } } } // new byte[4]
-//                new byte[][] { "abc".getBytes(Charset.forName("UTF-8")), "def".getBytes(Charset.forName("UTF-8")) }
+                new Tuple()
+//                new Tuple[] { new Tuple(new Tuple((Object) new Tuple[0])) }
         };
         buffer = f00.encodeCall(args00);
         printABI(buffer.array());
 
+//        if(true)return;
 
-        Function f0 = new Function("f(uint,uint32[],bytes10,bytes)");
+        Function f0 = new Function("((int8,()))"); // bar(((((uint8))[1]))) // bar(((()[]))[1])
+        Object[] args0 = new Object[] {
+//                (byte) 5
+                new Tuple((byte) 5, new Tuple())
+//                new Tuple(new Tuple((byte) 5))
+//                new Tuple( (byte) 5, new Tuple() )
+//                new Tuple(new Tuple((byte) 5))
+//                new Tuple( new Tuple( (Object) new Tuple[] { new Tuple(new Tuple((Object) (byte) 1 )) } ) )
+//                new Tuple[] { new Tuple(new Tuple((Object) new Tuple[0])) }
+        };
+        buffer = f0.encodeCall(args0);
+        printABI(buffer.array());
 
-        Object[] args0_ = new Object[] {
+        if(true)return;
+
+        Function f1 = new Function("f(uint,uint32[],bytes10,bytes)");
+        Object[] args1 = new Object[] {
                 BigInteger.valueOf(0x123),
                 new int[] { 0x456, 0x789 },
                 "1234567890".getBytes(Charset.forName("UTF-8")),
                 "Hello, world!".getBytes(Charset.forName("UTF-8"))
         };
-        buffer = f0.encodeCall(args0_);
+        buffer = f1.encodeCall(args1);
         printABI(buffer.array());
 
-
-//if(true) return;
-
-
-
-
-
-
-//        Typing.create("bytes11[9]").validate(new byte[9][11]);
-//        System.out.println();
-//        Typing.create("bytes[9]");
-//        System.out.println();
-//        Typing.create("()");
-
-
-        Function f = new Function("sam(bytes,bool,uint256[])"); // uint8[1][]
-//        Object[] args = new Object[] { new byte[] { 3, 7 } }; // new byte[][] { new byte[1] }
-        Object[] args = new Object[] {
+        Function f2 = new Function("sam(bytes,bool,uint256[])"); // uint8[1][]
+        Object[] args2 = new Object[] {
                 "dave".getBytes(StandardCharsets.UTF_8),
                 true,
                 new BigInteger[] { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3) }
         };
-        Throwable t = f.error(args);
+        Throwable t = f2.error(args2);
         if(t != null) {
             System.err.println(t.getMessage());
         }
-        buffer = f.encodeCall(args);
+        buffer = f2.encodeCall(args2);
         printABI(buffer.array());
 
         Function g = new Function("g(uint[][],string[])");
@@ -104,5 +97,4 @@ public class Test {
         }
         System.out.println("\n" + Hex.toHexString(abi));
     }
-
 }
