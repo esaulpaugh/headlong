@@ -311,27 +311,27 @@ abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> 
         if(value.getClass().isArray()) {
             if (value instanceof byte[]) { // always needs dynamic head?
                 int staticLen = roundUp(((byte[]) value).length);
-                return dynamic ? 32 + staticLen : staticLen;
+                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
             }
             if (value instanceof int[]) {
                 int staticLen = ((int[]) value).length << 5; // mul 32
-                return dynamic ? 32 + staticLen : staticLen;
+                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
             }
             if (value instanceof long[]) {
                 int staticLen = ((long[]) value).length << 5; // mul 32
-                return dynamic ? 32 + staticLen : staticLen;
+                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
             }
             if (value instanceof short[]) {
                 int staticLen = ((short[]) value).length << 5; // mul 32
-                return dynamic ? 32 + staticLen : staticLen;
+                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
             }
             if (value instanceof boolean[]) {
                 int staticLen = ((boolean[]) value).length << 5; // mul 32
-                return dynamic ? 32 + staticLen : staticLen;
+                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
             }
             if (value instanceof Number[]) {
                 int staticLen = ((Number[]) value).length << 5; // mul 32
-                return dynamic ? 32 + staticLen : staticLen;
+                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
             }
 //            if(value instanceof com.esaulpaugh.headlong.abi.beta.util.Tuple[]) {
 //                throw new Error();
@@ -339,23 +339,23 @@ abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> 
 //            }
         }
         if (value instanceof String) { // always needs dynamic head
-            return 32 + roundUp(((String) value).length());
+            return ARRAY_LENGTH_BYTE_LEN + roundUp(((String) value).length());
         }
         if (value instanceof Number) {
-            return 32;
+            return ARRAY_LENGTH_BYTE_LEN;
         }
         if (value instanceof com.esaulpaugh.headlong.abi.beta.util.Tuple) {
-            return dynamic ? 32 + elementType.byteLength(value) : elementType.byteLength(value); // TODO
+            return dynamic ? ARRAY_LENGTH_BYTE_LEN + elementType.byteLength(value) : elementType.byteLength(value); // TODO
         }
         if (value instanceof Object[]) {
             int len = 0;
             for (Object element : (Object[]) value) {
                 len += this.elementType.byteLength(element);
                 if(this.elementType.dynamic) {
-                    len += 32;
+                    len += ARRAY_LENGTH_BYTE_LEN;
                 }
             }
-            return dynamic ? 32 + len : len;
+            return dynamic ? ARRAY_LENGTH_BYTE_LEN + len : len;
 //            throw new AssertionError("Object array not expected here");
         }
         // shouldn't happen if type checks/validation already occurred
@@ -364,7 +364,7 @@ abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> 
 
     // TODO move?
     static int roundUp(int len) {
-        int mod = len % 32;
-        return mod == 0 ? len : len + (32 - mod);
+        int mod = len % AbstractInt256Type.INT_LENGTH_BYTES;
+        return mod == 0 ? len : len + (AbstractInt256Type.INT_LENGTH_BYTES - mod);
     }
 }

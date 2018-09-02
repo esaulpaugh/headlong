@@ -14,7 +14,7 @@ import java.util.List;
 import static com.esaulpaugh.headlong.abi.beta.StackableType.EMPTY_TYPE_ARRAY;
 
 /**
- * Represents a function in an Ethereum contract. Can encode function calls matching the function's signature.
+ * Represents a function in an Ethereum contract. Can encode and decode function calls matching this function's signature.
  */
 public class Function {
 

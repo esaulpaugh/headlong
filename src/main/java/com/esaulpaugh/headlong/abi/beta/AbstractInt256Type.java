@@ -12,7 +12,7 @@ abstract class AbstractInt256Type<V> extends StackableType<V> { // instance of V
 
     private final int bitLength;
 
-    private final boolean signed;
+    protected final boolean signed;
 
     AbstractInt256Type(String canonicalAbiType, String className, int bitLength, boolean signed) {
         super(canonicalAbiType, className);
