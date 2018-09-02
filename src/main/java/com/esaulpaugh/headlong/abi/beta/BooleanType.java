@@ -9,7 +9,7 @@ class BooleanType extends AbstractInt256Type<Boolean> {
     static final String CLASS_NAME_ELEMENT = boolean[].class.getName().replaceFirst("\\[", "");
 
     BooleanType(String canonicalAbiType, String className) {
-        super(canonicalAbiType, className, 1);
+        super(canonicalAbiType, className, 1, false);
     }
 
     @Override

@@ -12,11 +12,14 @@ class ByteType extends AbstractInt256Type<Byte> {
 
     private static final int MAX_BIT_LEN = 8;
 
-    static final ByteType BYTE_OBJECT = new ByteType("uint8", CLASS_NAME);
-    static final ByteType BYTE_PRIMITIVE = new ByteType("uint8", "B");
+    static final ByteType SIGNED_BYTE_OBJECT = new ByteType("int8", CLASS_NAME, true);
+    static final ByteType SIGNED_BYTE_PRIMITIVE = new ByteType("int8", "B", true);
 
-    ByteType(String canonicalAbiType, String className) {
-        super(canonicalAbiType, className, MAX_BIT_LEN);
+    static final ByteType UNSIGNED_BYTE_OBJECT = new ByteType("uint8", CLASS_NAME, false);
+    static final ByteType UNSIGNED_BYTE_PRIMITIVE = new ByteType("uint8", "B", false);
+
+    ByteType(String canonicalAbiType, String className, boolean signed) {
+        super(canonicalAbiType, className, MAX_BIT_LEN, signed);
     }
 
     @Override

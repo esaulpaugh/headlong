@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import com.esaulpaugh.headlong.abi.beta.util.Pair;
+import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -14,7 +15,7 @@ import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
 abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> {
 
     private static final int ARRAY_LENGTH_BYTE_LEN = IntType.MAX_BIT_LEN;
-    private static final IntType ARRAY_LENGTH_TYPE = new IntType("uint32", IntType.CLASS_NAME, ARRAY_LENGTH_BYTE_LEN);
+    private static final IntType ARRAY_LENGTH_TYPE = new IntType("uint32", IntType.CLASS_NAME, ARRAY_LENGTH_BYTE_LEN, false);
 
     final T elementType;
     private final int length;
@@ -90,7 +91,9 @@ abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> 
                 long[] longs = new long[arrayLen];
                 for(int i = 0; i < arrayLen; i++) {
                     bb.get(thirtyTwo);
-                    longs[i] = new BigInteger(thirtyTwo).longValueExact(); // validates that value is in long range
+                    long longVal = new BigInteger(thirtyTwo).longValueExact();
+                    ((LongType) elementType).validateLongBitLen(longVal);
+                    longs[i] = longVal;
                 }
                 return new Pair<>(longs, bb.position());
             } else if(elementType instanceof BigIntegerType) {
@@ -99,7 +102,7 @@ abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> 
                 for(int i = 0; i < arrayLen; i++) {
                     bb.get(thirtyTwo);
                     BigInteger temp = new BigInteger(thirtyTwo);
-                    et.validateBitLen(temp.bitLength()); // validate that value is in range
+                    et.validateBigIntBitLen(temp);
                     bigInts[i] = temp;
                 }
                 return new Pair<>(bigInts, bb.position());
@@ -109,15 +112,23 @@ abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> 
                 for(int i = 0; i < arrayLen; i++) {
                     bb.get(thirtyTwo);
                     BigInteger temp = new BigInteger(thirtyTwo);
-                    et.validateBitLen(temp.bitLength()); // validate that value is in range
+                    et.validateBigIntBitLen(temp);
                     bigInts[i] = new BigDecimal(temp, et.scale);
                 }
                 return new Pair<>(bigInts, bb.position());
             }
-            throw new Error();
+        } else if(elementType instanceof TupleType) {
+            TupleType tt = (TupleType) elementType;
+            Tuple[] tuples = new Tuple[arrayLen];
+            for(int i = 0; i < arrayLen; i++) {
+                tuples[i] = tt.decode(buffer, idx);
+                idx = tt.tag;
+            }
+            return new Pair<>(tuples, idx);
         } else {
             return decodeObjectArray(arrayLen, buffer, idx);
         }
+        throw new Error();
     }
 
     private Pair<Object, Integer> decodeObjectArray(int arrayLen, byte[] buffer, final int index) {

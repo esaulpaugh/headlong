@@ -349,50 +349,64 @@ public class BizarroIntegers {
     }
 
     public static int bitLen(long val) {
-//        System.out.println(val + " " + Hex.toHexString(toBytes(val)));
-//        byte[] bytes = toBytes(val);
-//        byte b0 = bytes[0];
-//        System.out.print(Hex.toHexString(toBytes(val)) + " ");
-
-        String minBin;
-        if(val >= 0) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < 64; i++) {
-                sb.append('-');
-            }
-            minBin = sb.toString();
-        } else if(val == -1) {
-            minBin = "";
-        } else {
-            String bin = Long.toBinaryString(val);
-            minBin = bin.substring(bin.indexOf('0')); // z < 0 ? 0 : z
-        }
-
-        System.out.print(minBin + " ");
-
-        final int byteLen = len(val);
-        if(val == -1) {
-            System.out.println("$return " + byteLen);
-            return 0;
-        }
-        byte b = (byte) (val >> ((byteLen - 1) << 3));
-        byte b2 = toBytes(val)[0];
-        if(b != b2) throw new RuntimeException(b + " != " + b2 + " " + (val >> (byteLen - 1)) + ", " + val + " " + byteLen + " ");
-//        System.out.println(Hex.toHexString(new byte[] { b }));
-        int xor = b ^ 0xFF;
-//        System.out.println("b" + Integer.toBinaryString(b) + " x" + Integer.toBinaryString(xor));
-//        System.out.println("b& " + Integer.toBinaryString(b & 0xFF) + " x&" + Integer.toBinaryString(xor & 0xFF));
-//        int x = b < 0 ? (b ^ 0xFF) & 0xFF : b & 0xFF;
-//        System.out.println(xor + " (" + Integer.numberOfLeadingZeros(xor) + "), " + (byte) xor + " (" + (Integer.numberOfLeadingZeros((byte) xor) - 24));
-
-        int bitLen =  ((byteLen - 1) << 3) + 32 - Integer.numberOfLeadingZeros(xor & 0xFF);
-
-//        Assert.assertEquals(minBin.length(), bitLen);
-
-//        int bitLen = ((byteLen - 1) << 3) + Integer.numberOfLeadingZeros(x);
-        System.out.println("return " + bitLen);
-        return bitLen;
+//        if(val >= -1) {
+//            if(val == -1) {
+//                return 0;
+//            }
+//            return 64;
+//        }
+//        final int byteLen = len(val);
+//        final int x = (byteLen - 1) << 3; // number of complete bytes times 8
+//        final long r = val >> x; // remaining 1 to 8 bits
+//        return x + (64 - Long.numberOfLeadingZeros(~r)); // flip zeroes and ones
+        return 64 - Long.numberOfLeadingZeros(~val);
     }
+
+//    public static int bitLen(long val) {
+////        System.out.println(val + " " + Hex.toHexString(toBytes(val)));
+////        byte[] bytes = toBytes(val);
+////        byte b0 = bytes[0];
+////        System.out.print(Hex.toHexString(toBytes(val)) + " ");
+//
+//        String minBin;
+//        if(val >= 0) {
+//            StringBuilder sb = new StringBuilder();
+//            for (int i = 0; i < 64; i++) {
+//                sb.append('-');
+//            }
+//            minBin = sb.toString();
+//        } else if(val == -1) {
+//            minBin = "";
+//        } else {
+//            String bin = Long.toBinaryString(val);
+//            minBin = bin.substring(bin.indexOf('0')); // z < 0 ? 0 : z
+//        }
+//
+//        System.out.print(minBin + " ");
+//
+//        final int byteLen = len(val);
+//        if(val == -1) {
+//            System.out.println("$return " + byteLen);
+//            return 0;
+//        }
+//        byte b = (byte) (val >> ((byteLen - 1) << 3));
+//        byte b2 = toBytes(val)[0];
+//        if(b != b2) throw new RuntimeException(b + " != " + b2 + " " + (val >> (byteLen - 1)) + ", " + val + " " + byteLen + " ");
+////        System.out.println(Hex.toHexString(new byte[] { b }));
+//        int xor = b ^ 0xFF;
+////        System.out.println("b" + Integer.toBinaryString(b) + " x" + Integer.toBinaryString(xor));
+////        System.out.println("b& " + Integer.toBinaryString(b & 0xFF) + " x&" + Integer.toBinaryString(xor & 0xFF));
+////        int x = b < 0 ? (b ^ 0xFF) & 0xFF : b & 0xFF;
+////        System.out.println(xor + " (" + Integer.numberOfLeadingZeros(xor) + "), " + (byte) xor + " (" + (Integer.numberOfLeadingZeros((byte) xor) - 24));
+//
+//        int bitLen =  ((byteLen - 1) << 3) + 32 - Integer.numberOfLeadingZeros(xor & 0xFF);
+//
+////        Assert.assertEquals(minBin.length(), bitLen);
+//
+////        int bitLen = ((byteLen - 1) << 3) + Integer.numberOfLeadingZeros(x);
+//        System.out.println("return " + bitLen);
+//        return bitLen;
+//    }
 
 //    private static void testNegativeLongs(long start, long end) throws Exception {
 //        byte[] dest = new byte[10];

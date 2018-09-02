@@ -8,13 +8,13 @@ import com.esaulpaugh.headlong.abi.beta.util.Tuple;
  */
 class TupleType extends StackableType<Tuple> {
 
-    final StackableType[] memberTypes;
+    final StackableType[] elementTypes;
 
-    private transient int tag = -1; // to hold tuple end index temporarily
+    transient int tag = -1; // to hold tuple end index temporarily
 
-    TupleType(String canonicalAbiType, boolean dynamic, StackableType... memberTypes) {
+    TupleType(String canonicalAbiType, boolean dynamic, StackableType... elementTypes) {
         super(canonicalAbiType, com.esaulpaugh.headlong.abi.beta.util.Tuple.class.getName(), dynamic); // Tuple.class.getName()
-        this.memberTypes = memberTypes;
+        this.elementTypes = elementTypes;
     }
 
     static TupleType create(String canonicalAbiType, StackableType... members) {
@@ -30,11 +30,11 @@ class TupleType extends StackableType<Tuple> {
 
     @Override
     public String toString() {
-        if(memberTypes.length == 0) {
+        if(elementTypes.length == 0) {
             return "()";
         }
         StringBuilder sb = new StringBuilder("(");
-        for (StackableType memberType : memberTypes) {
+        for (StackableType memberType : elementTypes) {
             sb.append(memberType).append(',');
         }
         sb.replace(sb.length() - 1, sb.length(), "").append(')');
@@ -45,13 +45,13 @@ class TupleType extends StackableType<Tuple> {
     int byteLength(Object value) {
         com.esaulpaugh.headlong.abi.beta.util.Tuple tuple = (com.esaulpaugh.headlong.abi.beta.util.Tuple) value;
 
-        if(tuple.elements.length != memberTypes.length) {
+        if(tuple.elements.length != elementTypes.length) {
             throw new IllegalArgumentException("tuple length mismatch");
         }
 
         int len = 0;
-        for (int i = 0; i < memberTypes.length; i++) {
-            StackableType type = memberTypes[i];
+        for (int i = 0; i < elementTypes.length; i++) {
+            StackableType type = elementTypes[i];
             len += type.byteLength(tuple.elements[i]);
             if(type.dynamic) {
                 len += 32; // for offset
@@ -65,14 +65,14 @@ class TupleType extends StackableType<Tuple> {
     @SuppressWarnings("unchecked")
     Tuple decode(byte[] buffer, final int index) {
 
-        final int tupleLen = memberTypes.length;
+        final int tupleLen = elementTypes.length;
         Object[] members = new Object[tupleLen];
 
         int[] offsets = new int[tupleLen];
 
         int idx = index;
         for (int i = 0; i < tupleLen; i++) {
-            StackableType type = memberTypes[i];
+            StackableType type = elementTypes[i];
             if (type.dynamic) {
                 offsets[i] = IntType.OFFSET_TYPE.decode(buffer, idx);
                 System.out.println("offset " + offsets[i] + " @ " + idx);
@@ -97,7 +97,7 @@ class TupleType extends StackableType<Tuple> {
             for (int i = 0; i < tupleLen; i++) {
                 idx = index + offsets[i];
                 if (idx > index) {
-                    StackableType type = memberTypes[i];
+                    StackableType type = elementTypes[i];
                     if (type instanceof ArrayType) {
                         Pair<Object, Integer> results = ((ArrayType) type).decodeArray(buffer, idx);
                         members[i] = results.first;
@@ -121,14 +121,14 @@ class TupleType extends StackableType<Tuple> {
         final com.esaulpaugh.headlong.abi.beta.util.Tuple tuple = (com.esaulpaugh.headlong.abi.beta.util.Tuple) value;
         final Object[] elements = tuple.elements;
 
-        final int expected = this.memberTypes.length;
+        final int expected = this.elementTypes.length;
         final int actual = elements.length;
         if(expected != actual) {
             throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + actual + " != " + expected);
         }
         System.out.println("tuple length valid;");
 
-        checkTypes(this.memberTypes, elements);
+        checkTypes(this.elementTypes, elements);
     }
 
     private static void checkTypes(StackableType[] paramTypes, Object[] values) {

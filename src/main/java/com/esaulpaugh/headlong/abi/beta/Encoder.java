@@ -15,35 +15,34 @@ import static com.esaulpaugh.headlong.abi.beta.Function.SELECTOR_LEN;
 
 class Encoder {
 
-    private static final byte[] BOOLEAN_FALSE;
-    private static final byte[] BOOLEAN_TRUE;
+    private static final byte[] BOOLEAN_FALSE = new byte[AbstractInt256Type.INT_LENGTH_BYTES];
+    private static final byte[] BOOLEAN_TRUE = new byte[AbstractInt256Type.INT_LENGTH_BYTES];
+
+    private static final byte[] NON_NEGATIVE_INT_PADDING = new byte[24];
+    private static final byte[] NEGATIVE_INT_PADDING = new byte[24];
 
     static {
-        BOOLEAN_FALSE = new byte[AbstractInt256Type.INT_LENGTH_BYTES];
-        BOOLEAN_TRUE = new byte[AbstractInt256Type.INT_LENGTH_BYTES];
-        BOOLEAN_TRUE[BOOLEAN_TRUE.length - 1] = 1;
+        BOOLEAN_TRUE[BOOLEAN_TRUE.length-1] = 1;
+        Arrays.fill(NEGATIVE_INT_PADDING, (byte) 0xFF);
     }
 
-    private static final byte[] PADDING_192_BITS = new byte[24];
-
-    static ByteBuffer encodeFunctionCall(Function function, Object[] arguments) {
+    static ByteBuffer encodeFunctionCall(Function function, Tuple argsTuple) {
 
         System.out.println("requiredCanonicalization = " + function.requiredCanonicalization());
 
         final TupleType tupleType = function.paramTypes;
-        final Tuple tuple = new Tuple(arguments);
-        final StackableType[] types = tupleType.memberTypes;
+        final StackableType[] types = tupleType.elementTypes;
         final int expectedNumParams = types.length;
 
-        if(arguments.length != expectedNumParams) {
-            throw new IllegalArgumentException("arguments.length <> types.size(): " + arguments.length + " != " + types.length);
+        if(argsTuple.elements.length != expectedNumParams) {
+            throw new IllegalArgumentException("arguments.length <> types.size(): " + argsTuple.elements.length + " != " + types.length);
         }
 
-        tupleType.validate(tuple);
+        tupleType.validate(argsTuple);
 
-        int sum = getHeadLengthSum(types, arguments);
+        int sum = getHeadLengthSum(tupleType, argsTuple);
 
-        int encodingByteLen = tupleType.byteLength(tuple);
+        int encodingByteLen = tupleType.byteLength(argsTuple);
 
         System.out.println(tupleType.dynamic + " " + encodingByteLen);
 
@@ -53,7 +52,7 @@ class Encoder {
         ByteBuffer outBuffer = ByteBuffer.wrap(new byte[allocation]); // ByteOrder.BIG_ENDIAN by default
         outBuffer.put(function.selector);
 
-        insertTuple(tupleType, tuple, sum, outBuffer);
+        insertTuple(tupleType, argsTuple, sum, outBuffer);
 
         return outBuffer;
     }
@@ -62,7 +61,7 @@ class Encoder {
         System.out.println("insertTuple(" + tupleType + ")");
 
         Object[] values = tuple.elements;
-        List<StackableType> typeList = new LinkedList<>(Arrays.asList(tupleType.memberTypes));
+        List<StackableType> typeList = new LinkedList<>(Arrays.asList(tupleType.elementTypes));
         List<Object> valuesList = new LinkedList<>(Arrays.asList(values));
 //        int[] offset = new int[] { tupleType.overhead(tuple) };
 
@@ -177,7 +176,7 @@ class Encoder {
             insertOffset(offset, tupleType, tuple, dest);
 //            insertInt(tailOffset, dest);
         } else {
-            int headLengths = getHeadLengthSum(tupleType.memberTypes, tuple.elements);
+            int headLengths = getHeadLengthSum(tupleType, tuple);
             insertTuple(tupleType, tuple, headLengths, dest);
         }
     }
@@ -277,7 +276,7 @@ class Encoder {
 //            throw new Error();
             // TODO TEST ***********************************************************************
             Tuple tuple = (Tuple) value;
-            int sum = getHeadLengthSum(tupleType.memberTypes, tuple.elements);
+            int sum = getHeadLengthSum(tupleType, tuple);
             insertTuple(tupleType, tuple, sum, dest);
         } else {
             throw new Error("unexpected type: " + paramType);
@@ -354,11 +353,13 @@ class Encoder {
 
     // ========================================
 
-    private static int getHeadLengthSum(StackableType[] types, Object[] arguments) {
+    private static int getHeadLengthSum(TupleType tupleType, Tuple tuple) {
+        StackableType[] elementTypes = tupleType.elementTypes;
+        Object[] elements = tuple.elements;
         int headLengths = 0;
-        final int n = types.length;
+        final int n = elementTypes.length;
         for (int i = 0; i < n; i++) {
-            StackableType t = types[i];
+            StackableType t = elementTypes[i];
 //            int byteLen = t.byteLength(arguments[i]);
 //            System.out.print(arguments[i] + " --> " + byteLen + ", ");
 
@@ -366,7 +367,7 @@ class Encoder {
                 headLengths += 32;
                 System.out.println("dynamic");
             } else {
-                headLengths += t.byteLength(arguments[i]);
+                headLengths += t.byteLength(elements[i]);
                 System.out.println("static");
             }
         }
@@ -430,12 +431,7 @@ class Encoder {
     private static void insertBooleansStatic(boolean[] bools, ByteBuffer dest) {
         for (boolean e : bools) {
             dest.put(e ? BOOLEAN_TRUE : BOOLEAN_FALSE);
-//            insertBool(e, dest);
         }
-//        final int n = 32 - bools.length;
-//        for (int i = 0; i < n; i++) {
-//            dest.put((byte) 0);
-//        }
     }
 
     private static void insertBytesStatic(byte[] bytes, ByteBuffer dest) {
@@ -478,10 +474,8 @@ class Encoder {
         }
     }
 
-    // --------------------------
-
     private static void insertInt(long val, ByteBuffer dest) {
-        dest.put(PADDING_192_BITS);
+        dest.put(val < 0 ? NEGATIVE_INT_PADDING : NON_NEGATIVE_INT_PADDING);
         dest.putLong(val);
     }
 

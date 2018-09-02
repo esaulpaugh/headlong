@@ -55,7 +55,11 @@ public class Function {
     }
 
     public ByteBuffer encodeCall(Object... args) {
-        return Encoder.encodeFunctionCall(this, args);
+        return Function.encodeCall(this, new Tuple(args));
+    }
+
+    public ByteBuffer encodeCall(Tuple argsTuple) {
+        return Function.encodeCall(this, argsTuple);
     }
 
     public Tuple decodeCall(byte[] abi) {
@@ -80,7 +84,15 @@ public class Function {
         return String.format("%040x", new BigInteger(selector));
     }
 
-    public static ByteBuffer encodeFunctionCall(String signature, Object... arguments) throws ParseException {
-        return Encoder.encodeFunctionCall(new Function(signature), arguments);
+    public static ByteBuffer encodeCall(String signature, Object... args) throws ParseException {
+        return Function.encodeCall(new Function(signature), new Tuple(args));
+    }
+
+    public static ByteBuffer encodeCall(Function function, Object... args) {
+        return Function.encodeCall(function, new Tuple(args));
+    }
+
+    public static ByteBuffer encodeCall(Function function, Tuple argsTuple) {
+        return Encoder.encodeFunctionCall(function, argsTuple);
     }
 }

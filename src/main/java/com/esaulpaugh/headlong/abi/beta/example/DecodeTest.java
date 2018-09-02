@@ -5,6 +5,7 @@ import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.Arrays;
 
@@ -12,8 +13,37 @@ public class DecodeTest {
 
     public static void main(String[] args0) throws ParseException {
 
+        Function f0 = new Function("(ufixed,fixed)"); // ,uint24,int24
+        final BigDecimal abba = new BigDecimal(BigInteger.valueOf(2).pow(128), 18);
+        final BigDecimal dabba = new BigDecimal(BigInteger.valueOf(2).pow(127), 18);
+        final BigDecimal upow = abba.subtract(BigDecimal.valueOf(1));
+        final BigDecimal pow = dabba.subtract(BigDecimal.valueOf(1));
+
+        System.out.println(abba);
+        System.out.println(dabba);
+        System.out.println(upow);
+        System.out.println(pow);
+        Object[] args = new Object[] { upow, pow };
+        ByteBuffer bb = f0.encodeCall(args); // , pow, upow
+        Tuple t = f0.decodeCall(bb.array());
+        System.out.println(Arrays.deepEquals(t.elements, args));
+
+//        for (int i = 0; i < 63; i++) {
+//            long x = Long.MIN_VALUE / (1L << i);
+//            int bitLen = BizarroIntegers.bitLen(x);
+//            System.out.println(x + " --> " + bitLen + " " + Arrays.toString(BizarroIntegers.toBytes(x)) + " " + Long.toBinaryString(x));
+//            if(bitLen != 63 - i) {
+//                throw new Error();
+//            }
+//        }
+//        System.out.println();
+//        for (int i = -17; i < 22; i++) {
+//            System.out.println(i + " --> " + BizarroIntegers.bitLen(i) + " " + Integer.toBinaryString(i));
+//        }
+//        if(true)return;
+
         // (uint8),uint8,(int24,bytes),
-        Function f = new Function("(((string[][3][])),string[][][],(fixed),fixed)"); // ,(string),string
+        Function f = new Function("((uint8),(int16)[2][1][],(int24)[],(int32)[],uint40,(int48)[],(uint))"); // ,(string),string
 //        Function f = new Function("(string[2][3][])");
 
 //        BigInteger five = BigInteger.valueOf(5);
@@ -56,9 +86,19 @@ public class DecodeTest {
 
         // new Tuple(new Tuple("five"))
         Object[] argsIn = new Object[] {
-                new Tuple(new Tuple((Object) triple)),
-                triple,
-                new Tuple(new BigDecimal(BigInteger.ONE, 18)), new BigDecimal(BigInteger.ONE, 18)
+                // ((uint8)(int8)[],(int8)[],(int8)[],uint8,(int8)[],(uint8))
+                new Tuple((byte) 7),
+                new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple((short) 9), new Tuple((short) -11) } } },
+                new Tuple[] { new Tuple(13), new Tuple(-15) },
+                new Tuple[] { new Tuple(17), new Tuple(-19) },
+                17L,
+                new Tuple[] { new Tuple((long) 0x7e), new Tuple((long) -0x7e) },
+                new Tuple(BigInteger.TEN)
+
+//                new Tuple[] { new Tuple((byte) 7) }
+//                new Tuple(new Tuple((Object) triple)),
+//                triple,
+//                new Tuple(new BigDecimal(BigInteger.ONE, 18)), new BigDecimal(BigInteger.ONE, 18)
         }; // , new Tuple(""), ""
 
         byte[] abi = f.encodeCall(argsIn).array();

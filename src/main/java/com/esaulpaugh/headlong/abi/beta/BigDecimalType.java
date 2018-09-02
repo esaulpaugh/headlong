@@ -11,8 +11,8 @@ class BigDecimalType extends AbstractInt256Type<BigDecimal> {
 
     final int scale;
 
-    BigDecimalType(String canonicalAbiType, String className, int bitLength, int scale) {
-        super(canonicalAbiType, className, bitLength);
+    BigDecimalType(String canonicalAbiType, String className, int bitLength, int scale, boolean signed) {
+        super(canonicalAbiType, className, bitLength, signed);
         this.scale = scale;
     }
 
@@ -20,7 +20,7 @@ class BigDecimalType extends AbstractInt256Type<BigDecimal> {
     BigDecimal decode(byte[] buffer, int index) {
         BigInteger bi = new BigInteger(Arrays.copyOfRange(buffer, index, index + INT_LENGTH_BYTES));
         BigDecimal dec = new BigDecimal(bi, scale);
-        validateBitLen(bi.bitLength());
+        validateBigIntBitLen(bi);
         return dec;
     }
 
@@ -28,7 +28,7 @@ class BigDecimalType extends AbstractInt256Type<BigDecimal> {
     void validate(Object object) {
         super.validate(object);
         BigDecimal dec = (BigDecimal) object;
-        validateBitLen(dec.unscaledValue().bitLength());
+        validateBigIntBitLen(dec.unscaledValue());
         if(dec.scale() != scale) {
             throw new IllegalArgumentException("big decimal scale mismatch: actual != expected: " + dec.scale() + " != " + scale);
         }

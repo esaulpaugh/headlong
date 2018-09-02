@@ -7,8 +7,8 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.EmptyStackException;
 
+import static com.esaulpaugh.headlong.abi.beta.ByteType.UNSIGNED_BYTE_PRIMITIVE;
 import static com.esaulpaugh.headlong.abi.beta.DynamicArrayType.DYNAMIC_LENGTH;
-import static com.esaulpaugh.headlong.abi.beta.ByteType.BYTE_PRIMITIVE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 abstract class Typing {
@@ -109,33 +109,24 @@ abstract class Typing {
             typeStack.push(new BooleanType(abi, className)); // com.esaulpaugh.headlong.abi.beta.ByteType.booleanType(abi, className)); // new ByteType(abi, className));
         } else if ("address".equals(abi)) { // same as uint160
             className = isElement ? BigIntegerType.CLASS_NAME_ELEMENT : BigIntegerType.CLASS_NAME;
-            typeStack.push(new BigIntegerType("uint160", BigIntegerType.CLASS_NAME, 160));
+            typeStack.push(new BigIntegerType("uint160", BigIntegerType.CLASS_NAME, 160, false));
 //            typeStack.push(new StaticArrayType(abi, className, BYTE_PRIMITIVE, 20));
-        } else if (abi.startsWith("uint")) {
-            if (abi.length() == "uint".length()) {
-                throw new IllegalArgumentException("non-canonical: " + abi);
-            }
-            int bits = Integer.parseUnsignedInt(abi.substring("uint".length()), 10);
-            Pair<String, AbstractInt256Type> pair = AbstractInt256Type.makeInt(abi, bits, isElement);
-            className = pair.first;
-            typeStack.push(pair.second);
         } else if (abi.startsWith("int")) {
             if (abi.length() == "int".length()) {
                 throw new IllegalArgumentException("non-canonical: " + abi);
             }
             int bits = Integer.parseUnsignedInt(abi.substring("int".length()), 10);
-            Pair<String, AbstractInt256Type> pair = AbstractInt256Type.makeInt(abi, bits, isElement);
+            Pair<String, AbstractInt256Type> pair = AbstractInt256Type.makeInt(abi, bits, isElement, true);
             className = pair.first;
             typeStack.push(pair.second);
-        } else if (abi.startsWith("ufixed")) {
-            if (abi.length() == "ufixed".length()) {
+        } else if (abi.startsWith("uint")) {
+            if (abi.length() == "uint".length()) {
                 throw new IllegalArgumentException("non-canonical: " + abi);
             }
-            final int indexOfX = abi.indexOf('x', "ufixed".length());
-            int bits = Integer.parseUnsignedInt(abi.substring("ufixed".length(), indexOfX), 10);
-            int scale = Integer.parseUnsignedInt(abi.substring(indexOfX + 1), 10);
-            className = isElement ? BigDecimalType.CLASS_NAME_ELEMENT : BigDecimalType.CLASS_NAME;
-            typeStack.push(new BigDecimalType(abi, BigDecimalType.CLASS_NAME, bits, scale));
+            int bits = Integer.parseUnsignedInt(abi.substring("uint".length()), 10);
+            Pair<String, AbstractInt256Type> pair = AbstractInt256Type.makeInt(abi, bits, isElement, false);
+            className = pair.first;
+            typeStack.push(pair.second);
         } else if (abi.startsWith("fixed")) {
             if (abi.length() == "fixed".length()) {
                 throw new IllegalArgumentException("non-canonical: " + abi);
@@ -144,21 +135,30 @@ abstract class Typing {
             int bits = Integer.parseUnsignedInt(abi.substring("fixed".length(), indexOfX), 10);
             int scale = Integer.parseUnsignedInt(abi.substring(indexOfX + 1), 10);
             className = isElement ? BigDecimalType.CLASS_NAME_ELEMENT : BigDecimalType.CLASS_NAME;
-            typeStack.push(new BigDecimalType(abi, BigDecimalType.CLASS_NAME, bits, scale));
+            typeStack.push(new BigDecimalType(abi, BigDecimalType.CLASS_NAME, bits, scale, true));
+        } else if (abi.startsWith("ufixed")) {
+            if (abi.length() == "ufixed".length()) {
+                throw new IllegalArgumentException("non-canonical: " + abi);
+            }
+            final int indexOfX = abi.indexOf('x', "ufixed".length());
+            int bits = Integer.parseUnsignedInt(abi.substring("ufixed".length(), indexOfX), 10);
+            int scale = Integer.parseUnsignedInt(abi.substring(indexOfX + 1), 10);
+            className = isElement ? BigDecimalType.CLASS_NAME_ELEMENT : BigDecimalType.CLASS_NAME;
+            typeStack.push(new BigDecimalType(abi, BigDecimalType.CLASS_NAME, bits, scale, false));
         } else if ("function".equals(abi)) {
             className = CLASS_NAME_ARRAY_BYTE;
-            typeStack.push(new StaticArrayType<ByteType, Byte>(abi, className, BYTE_PRIMITIVE, 24));
+            typeStack.push(new StaticArrayType<ByteType, Byte>(abi, className, UNSIGNED_BYTE_PRIMITIVE, 24));
         } else if (abi.startsWith("bytes")) {
             className = CLASS_NAME_ARRAY_BYTE;
             if (abi.length() > "bytes".length()) {
                 int bytes = Integer.parseUnsignedInt(abi.substring("bytes".length()), 10);
-                typeStack.push(new StaticArrayType<ByteType, Byte>(abi, className, BYTE_PRIMITIVE, bytes));
+                typeStack.push(new StaticArrayType<ByteType, Byte>(abi, className, UNSIGNED_BYTE_PRIMITIVE, bytes));
             } else {
-                typeStack.push(new DynamicArrayType<ByteType, Byte>(abi, className, BYTE_PRIMITIVE, DYNAMIC_LENGTH));
+                typeStack.push(new DynamicArrayType<ByteType, Byte>(abi, className, UNSIGNED_BYTE_PRIMITIVE, DYNAMIC_LENGTH));
             }
         } else if ("string".equals(abi)) {
             className = isElement ? CLASS_NAME_ELEMENT_STRING : CLASS_NAME_STRING;
-            typeStack.push(new DynamicArrayType<ByteType, Byte>(abi, CLASS_NAME_STRING, BYTE_PRIMITIVE, DYNAMIC_LENGTH));
+            typeStack.push(new DynamicArrayType<ByteType, Byte>(abi, CLASS_NAME_STRING, UNSIGNED_BYTE_PRIMITIVE, DYNAMIC_LENGTH));
         } else {
             throw new IllegalArgumentException("unrecognized type: " + abi);
         }

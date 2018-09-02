@@ -10,8 +10,8 @@ class ShortType extends AbstractInt256Type<Short> {
 
     private static final int SHORT_LENGTH_BITS = 16;
 
-    ShortType(String canonicalAbiType, String className) {
-        super(canonicalAbiType, className, SHORT_LENGTH_BITS);
+    ShortType(String canonicalAbiType, String className, boolean signed) {
+        super(canonicalAbiType, className, SHORT_LENGTH_BITS, signed);
     }
 
     @Override
