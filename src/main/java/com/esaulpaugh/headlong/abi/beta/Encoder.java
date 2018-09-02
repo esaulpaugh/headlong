@@ -1,9 +1,5 @@
 package com.esaulpaugh.headlong.abi.beta;
 
-import com.esaulpaugh.headlong.abi.beta.type.TupleType;
-import com.esaulpaugh.headlong.abi.beta.type.array.ArrayType;
-import com.esaulpaugh.headlong.abi.beta.type.StackableType;
-import com.esaulpaugh.headlong.abi.beta.type.integer.AbstractInt256Type;
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
 import java.math.BigDecimal;
@@ -17,7 +13,7 @@ import java.util.List;
 
 import static com.esaulpaugh.headlong.abi.beta.Function.SELECTOR_LEN;
 
-public class GoodEncoder {
+class Encoder {
 
     private static final byte[] BOOLEAN_FALSE;
     private static final byte[] BOOLEAN_TRUE;
@@ -30,7 +26,7 @@ public class GoodEncoder {
 
     private static final byte[] PADDING_192_BITS = new byte[24];
 
-    public static ByteBuffer encodeFunctionCall(Function function, Object[] arguments) {
+    static ByteBuffer encodeFunctionCall(Function function, Object[] arguments) {
 
         System.out.println("requiredCanonicalization = " + function.requiredCanonicalization());
 
@@ -43,15 +39,11 @@ public class GoodEncoder {
             throw new IllegalArgumentException("arguments.length <> types.size(): " + arguments.length + " != " + types.length);
         }
 
-//        TupleType.checkTypes(types, arguments);
-
         tupleType.validate(tuple);
 
         int sum = getHeadLengthSum(types, arguments);
 
         int encodingByteLen = tupleType.byteLength(tuple);
-
-//        encodingByteLen -= 32; // top level dynamic tuple needs no offset?
 
         System.out.println(tupleType.dynamic + " " + encodingByteLen);
 

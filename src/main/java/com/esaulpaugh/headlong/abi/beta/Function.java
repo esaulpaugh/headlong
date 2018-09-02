@@ -1,7 +1,5 @@
 package com.esaulpaugh.headlong.abi.beta;
 
-import com.esaulpaugh.headlong.abi.beta.type.StackableType;
-import com.esaulpaugh.headlong.abi.beta.type.TupleType;
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 import com.joemelsha.crypto.hash.Keccak;
 
@@ -13,7 +11,7 @@ import java.security.DigestException;
 import java.text.ParseException;
 import java.util.List;
 
-import static com.esaulpaugh.headlong.abi.beta.type.StackableType.EMPTY_TYPE_ARRAY;
+import static com.esaulpaugh.headlong.abi.beta.StackableType.EMPTY_TYPE_ARRAY;
 
 /**
  * Represents a function in an Ethereum contract. Can encode function calls matching the function's signature.
@@ -57,7 +55,7 @@ public class Function {
     }
 
     public ByteBuffer encodeCall(Object... args) {
-        return GoodEncoder.encodeFunctionCall(this, args);
+        return Encoder.encodeFunctionCall(this, args);
     }
 
     public Tuple decodeCall(byte[] abi) {
@@ -83,6 +81,6 @@ public class Function {
     }
 
     public static ByteBuffer encodeFunctionCall(String signature, Object... arguments) throws ParseException {
-        return GoodEncoder.encodeFunctionCall(new Function(signature), arguments);
+        return Encoder.encodeFunctionCall(new Function(signature), arguments);
     }
 }

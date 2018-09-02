@@ -1,17 +1,14 @@
-package com.esaulpaugh.headlong.abi.beta.type;
+package com.esaulpaugh.headlong.abi.beta;
 
-import com.esaulpaugh.headlong.abi.beta.type.array.ArrayType;
-import com.esaulpaugh.headlong.abi.beta.type.integer.AbstractInt256Type;
-import com.esaulpaugh.headlong.abi.beta.type.integer.IntType;
 import com.esaulpaugh.headlong.abi.beta.util.Pair;
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
 /**
  *
  */
-public class TupleType extends StackableType<Tuple> {
+class TupleType extends StackableType<Tuple> {
 
-    public final StackableType[] memberTypes;
+    final StackableType[] memberTypes;
 
     private transient int tag = -1; // to hold tuple end index temporarily
 
@@ -20,7 +17,7 @@ public class TupleType extends StackableType<Tuple> {
         this.memberTypes = memberTypes;
     }
 
-    public static TupleType create(String canonicalAbiType, StackableType... members) {
+    static TupleType create(String canonicalAbiType, StackableType... members) {
 
         for (StackableType type : members) {
             if(type.dynamic) {
@@ -45,7 +42,7 @@ public class TupleType extends StackableType<Tuple> {
     }
 
     @Override
-    public int byteLength(Object value) {
+    int byteLength(Object value) {
         com.esaulpaugh.headlong.abi.beta.util.Tuple tuple = (com.esaulpaugh.headlong.abi.beta.util.Tuple) value;
 
         if(tuple.elements.length != memberTypes.length) {
@@ -66,7 +63,7 @@ public class TupleType extends StackableType<Tuple> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Tuple decode(byte[] buffer, final int index) {
+    Tuple decode(byte[] buffer, final int index) {
 
         final int tupleLen = memberTypes.length;
         Object[] members = new Object[tupleLen];
@@ -118,7 +115,7 @@ public class TupleType extends StackableType<Tuple> {
     }
 
     @Override
-    public void validate(final Object value) {
+    void validate(final Object value) {
         super.validate(value);
 
         final com.esaulpaugh.headlong.abi.beta.util.Tuple tuple = (com.esaulpaugh.headlong.abi.beta.util.Tuple) value;

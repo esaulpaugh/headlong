@@ -24,6 +24,6 @@ public class Tuple {
     @Override
     public boolean equals(Object object) {
         return object instanceof Tuple
-                && Arrays.deepEquals(elements, ((Tuple) object).elements);
+                && Arrays.deepEquals(this.elements, ((Tuple) object).elements);
     }
 }

@@ -1,7 +1,5 @@
 package com.esaulpaugh.headlong.abi.beta;
 
-import com.esaulpaugh.headlong.abi.beta.type.StackableType;
-import com.esaulpaugh.headlong.abi.beta.type.TupleType;
 import com.esaulpaugh.headlong.abi.beta.util.Pair;
 
 import java.text.ParseException;
@@ -19,14 +17,6 @@ class SignatureParser {
     private static final Pattern HAS_NON_TYPE_CHARS = Pattern.compile(REGEX_NON_TYPE_CHAR);
 
     static List<StackableType> parseFunctionSignature(final String signature, final StringBuilder canonicalOut) throws ParseException {
-//        System.out.println("signature: " + escapeJava(signature));
-
-//        if(canonicalOut.length() > 0) {
-//            throw new IllegalArgumentException("canonicalOut must be empty");
-//        }
-//        if(!typesOut.isEmpty()) {
-//            throw new IllegalArgumentException("typesOut must be empty");
-//        }
 
         List<StackableType> typesOut = new ArrayList<>();
 

@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.spongycastle.crypto.Digest;
 import org.spongycastle.crypto.digests.KeccakDigest;
 import org.spongycastle.jcajce.provider.digest.Keccak.DigestKeccak;
-import org.spongycastle.util.encoders.Hex;;
+import org.spongycastle.util.encoders.Hex;
 
 import java.nio.charset.Charset;
 import java.security.DigestException;

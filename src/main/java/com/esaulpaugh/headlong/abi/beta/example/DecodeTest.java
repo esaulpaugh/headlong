@@ -3,6 +3,8 @@ package com.esaulpaugh.headlong.abi.beta.example;
 import com.esaulpaugh.headlong.abi.beta.Function;
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.Arrays;
 
@@ -11,7 +13,7 @@ public class DecodeTest {
     public static void main(String[] args0) throws ParseException {
 
         // (uint8),uint8,(int24,bytes),
-        Function f = new Function("((string),string)"); // ,(string),string
+        Function f = new Function("(((string[][3][])),string[][][],(fixed),fixed)"); // ,(string),string
 //        Function f = new Function("(string[2][3][])");
 
 //        BigInteger five = BigInteger.valueOf(5);
@@ -53,7 +55,11 @@ public class DecodeTest {
         // new Tuple((byte) 6), (byte) 99, new Tuple(1001, new byte[0]),
 
         // new Tuple(new Tuple("five"))
-        Object[] argsIn = new Object[] { new Tuple(""), "" }; // , new Tuple(""), ""
+        Object[] argsIn = new Object[] {
+                new Tuple(new Tuple((Object) triple)),
+                triple,
+                new Tuple(new BigDecimal(BigInteger.ONE, 18)), new BigDecimal(BigInteger.ONE, 18)
+        }; // , new Tuple(""), ""
 
         byte[] abi = f.encodeCall(argsIn).array();
 

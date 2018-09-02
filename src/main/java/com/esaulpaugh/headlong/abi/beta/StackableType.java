@@ -1,17 +1,17 @@
-package com.esaulpaugh.headlong.abi.beta.type;
+package com.esaulpaugh.headlong.abi.beta;
 
 import static com.esaulpaugh.headlong.abi.beta.util.ClassNames.toFriendly;
 
 // TODO support model classes à la Student.java
 // TODO support vyper e.g. "decimal"
-public abstract class StackableType<T> {
+abstract class StackableType<T> {
 
-    public static final StackableType[] EMPTY_TYPE_ARRAY = new StackableType[0];
+    static final StackableType[] EMPTY_TYPE_ARRAY = new StackableType[0];
 
     protected final String canonicalAbiType;
     protected final String className;
 
-    public final boolean dynamic;
+    final boolean dynamic;
 
     protected StackableType(String canonicalAbiType, String className) {
         this(canonicalAbiType, className, false);
@@ -23,11 +23,11 @@ public abstract class StackableType<T> {
         this.dynamic = dynamic;
     }
 
-    public abstract int byteLength(Object value);
+    abstract int byteLength(Object value);
 
-    public abstract T decode(byte[] buffer, int index);
+    abstract T decode(byte[] buffer, int index);
 
-    public void validate(Object value) {
+    void validate(Object value) {
         validate(this, value);
     }
 

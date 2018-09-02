@@ -1,7 +1,5 @@
-package com.esaulpaugh.headlong.abi.beta.type.array;
+package com.esaulpaugh.headlong.abi.beta;
 
-import com.esaulpaugh.headlong.abi.beta.type.StackableType;
-import com.esaulpaugh.headlong.abi.beta.type.integer.*;
 import com.esaulpaugh.headlong.abi.beta.util.Pair;
 
 import java.lang.reflect.Array;
@@ -10,22 +8,22 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import static com.esaulpaugh.headlong.abi.beta.type.array.DynamicArrayType.DYNAMIC_LENGTH;
+import static com.esaulpaugh.headlong.abi.beta.DynamicArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
 
-public abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> {
+abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> {
 
-    public static final int ARRAY_LENGTH_BYTE_LEN = IntType.MAX_BIT_LEN;
-    protected static final IntType ARRAY_LENGTH_TYPE = new IntType("uint32", IntType.CLASS_NAME, ARRAY_LENGTH_BYTE_LEN);
+    private static final int ARRAY_LENGTH_BYTE_LEN = IntType.MAX_BIT_LEN;
+    private static final IntType ARRAY_LENGTH_TYPE = new IntType("uint32", IntType.CLASS_NAME, ARRAY_LENGTH_BYTE_LEN);
 
-    public final T elementType;
-    protected final int length;
+    final T elementType;
+    private final int length;
 
-    protected ArrayType(String canonicalAbiType, String className, T elementType, int length) {
+    ArrayType(String canonicalAbiType, String className, T elementType, int length) {
         this(canonicalAbiType, className, elementType, length, false);
     }
 
-    protected ArrayType(String canonicalAbiType, String className, T elementType, int length, boolean dynamic) {
+    ArrayType(String canonicalAbiType, String className, T elementType, int length, boolean dynamic) {
         super(canonicalAbiType, className, dynamic);
         this.elementType = elementType;
         this.length = length;
@@ -40,18 +38,16 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
     }
 
     @Override
-    public int byteLength(Object value) {
+    int byteLength(Object value) {
         return getDataLen(value);
     }
 
     @Override
-//    @SuppressWarnings("unchecked")
-    public E[] decode(byte[] buffer, int index) {
+    E[] decode(byte[] buffer, int index) {
         throw new UnsupportedOperationException("use decodeArray");
-//        return (E[]) decodeArray(buffer, index).first;
     }
 
-    public Pair<Object, Integer> decodeArray(final byte[] buffer, final int index) {
+    Pair<Object, Integer> decodeArray(final byte[] buffer, final int index) {
         final int arrayLen;
         int idx;
         if(dynamic) {
@@ -124,7 +120,6 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Pair<Object, Integer> decodeObjectArray(int arrayLen, byte[] buffer, final int index) {
 
         final ArrayType elementArrayType = (ArrayType) elementType;
@@ -165,25 +160,15 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
         return idx;
     }
 
-    @SuppressWarnings("unchecked")
     private void decodeTails(final byte[] buffer, final int index, final int[] offsets, final Object[] dest) {
         final ArrayType et = (ArrayType) elementType;
         final int len = offsets.length;
-//        if(dest instanceof String[]) {
-//            for (int i = 0; i < len; i++) {
-//                int offset = offsets[i];
-//                if(offset > 0) {
-//                    dest[i] = new String((byte[]) et.decodeArray(buffer, index + offset).first, CHARSET_UTF_8);
-//                }
-//            }
-//        } else {
-            for (int i = 0; i < len; i++) {
-                int offset = offsets[i];
-                if (offset > 0) {
-                    dest[i] = et.decodeArray(buffer, index + offset).first;
-                }
+        for (int i = 0; i < len; i++) {
+            int offset = offsets[i];
+            if (offset > 0) {
+                dest[i] = et.decodeArray(buffer, index + offset).first;
             }
-//        }
+        }
     }
 
     private static Pair<Object, Integer> decodeBooleanArray(int arrayLen, ByteBuffer bb, byte[] temp32) {
@@ -209,17 +194,13 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
         return new Pair<>(booleans, bb.position());
     }
 
-//            final int shortOffset = AbstractInt256Type.INT_LENGTH_BYTES - Short.BYTES;
-//                out[i] = bb.getShort(idx + shortOffset);
-//                idx += AbstractInt256Type.INT_LENGTH_BYTES;
-
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<" + elementType + ">(" + length + ")";
     }
 
     @Override
-    public void validate(final Object value) { // , final String expectedClassName // int stackIndex
+    void validate(final Object value) { // , final String expectedClassName // int stackIndex
         super.validate(value);
 
         if(value.getClass().isArray()) {
@@ -300,7 +281,7 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
         }
     }
 
-    protected void checkLength(int actual) {
+    void checkLength(int actual) {
         int expected = this.length;
         if(expected == DYNAMIC_LENGTH) { // -1
             System.out.println("dynamic length");
@@ -314,50 +295,8 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
 
     // -----------------------------------------------------------------------------------------------------------------
 
-//    protected int _overhead(Object value) { // , boolean dynamic
-//        if(value.getClass().isArray()) {
-//            if (value instanceof byte[]) { // always needs dynamic head?
-//                return dynamic ? 64 : 0;
-//            }
-//            if (value instanceof int[]) {
-//                return dynamic ? 64 : 0;
-//            }
-//            if (value instanceof long[]) {
-//                return dynamic ? 64 : 0;
-//            }
-//            if (value instanceof short[]) {
-//                return dynamic ? 64 : 0;
-//            }
-//            if (value instanceof boolean[]) {
-//                return dynamic ? 64 : 0;
-//            }
-//            if (value instanceof Number[]) {
-//                return dynamic ? 64 : 0;
-//            }
-//        }
-//        if (value instanceof String) { // always needs dynamic head
-//            return 64;
-//        }
-//        if (value instanceof Number) {
-//            return 0;
-//        }
-//        if (value instanceof Tuple) {
-//            throw new RuntimeException("arrays of tuples not yet supported"); // TODO **************************************
-//        }
-//        if (value instanceof Object[]) {
-////            int len = 0;
-////            for (Object element : (Object[]) value) {
-////                len += this.elementType.byteLength(element);
-////            }
-//            return dynamic ? 64 : 0;
-////            throw new AssertionError("Object array not expected here");
-//        }
-//        // shouldn't happen if type checks/validation already occurred
-//        throw new IllegalArgumentException("unknown type: " + value.getClass().getName());
-//    }
-
     // dynamics get +32 for the array length
-    protected int getDataLen(Object value) {
+    int getDataLen(Object value) {
         if(value.getClass().isArray()) {
             if (value instanceof byte[]) { // always needs dynamic head?
                 int staticLen = roundUp(((byte[]) value).length);
@@ -413,7 +352,7 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
     }
 
     // TODO move?
-    public static int roundUp(int len) {
+    static int roundUp(int len) {
         int mod = len % 32;
         return mod == 0 ? len : len + (32 - mod);
     }
