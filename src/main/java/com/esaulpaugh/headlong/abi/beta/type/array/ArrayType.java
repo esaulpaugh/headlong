@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import static com.esaulpaugh.headlong.abi.beta.type.array.DynamicArrayType.DYNAMIC_LENGTH;
+import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
 
 public abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> {
 
@@ -124,41 +125,61 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
 
         final ArrayType elementArrayType = (ArrayType) elementType;
 
-        Object[] objects; // = new Object[0]; // new Object[arrayLen];
+        Object[] dest;
         try {
-            objects = (Object[]) Array.newInstance(Class.forName(elementArrayType.className), arrayLen);  // .getDeclaredConstructor(int.class).newInstance(arrayLen);
+            dest = (Object[]) Array.newInstance(Class.forName(elementArrayType.className), arrayLen);
         } catch (ClassNotFoundException e) {
             throw new Error(e);
         }
         int[] offsets = new int[arrayLen];
 
+        int idx = decodeHeads(buffer, index, offsets, dest);
+
+        if (dynamic) {
+            decodeTails(buffer, index, offsets, dest);
+        }
+
+        return new Pair<>(dest, idx);
+    }
+
+    @SuppressWarnings("unchecked")
+    private int decodeHeads(final byte[] buffer, final int index, final int[] offsets, final Object[] dest) {
+        final ArrayType elementArrayType = (ArrayType) elementType;
         int idx = index;
-        for (int i = 0; i < arrayLen; i++) {
+        final int len = offsets.length;
+        for (int i = 0; i < len; i++) {
             if (elementArrayType.dynamic) {
-                // TODO offset 5 @ 196, points to 73, increment to 228
-                offsets[i] = IntType.OFFSET_TYPE.decode(buffer, idx); // TODO offset 2 @ 228, points to 166, increment to 260
+                offsets[i] = IntType.OFFSET_TYPE.decode(buffer, idx);
                 System.out.println("offset " + offsets[i] + " @ " + idx + ", points to " + (index + offsets[i]) + ", increment to " + (idx + AbstractInt256Type.INT_LENGTH_BYTES));
                 idx += AbstractInt256Type.INT_LENGTH_BYTES;
             } else {
                 Pair<Object, Integer> results = elementArrayType.decodeArray(buffer, idx);
-                objects[i] = results.first;
+                dest[i] = results.first;
                 idx = results.second;
             }
-//            idx += AbstractInt256Type.INT_LENGTH_BYTES;
         }
+        return idx;
+    }
 
-        if (dynamic) {
-            for (int i = 0; i < arrayLen; i++) {
+    @SuppressWarnings("unchecked")
+    private void decodeTails(final byte[] buffer, final int index, final int[] offsets, final Object[] dest) {
+        final ArrayType et = (ArrayType) elementType;
+        final int len = offsets.length;
+        if(dest instanceof String[]) {
+            for (int i = 0; i < len; i++) {
                 int offset = offsets[i];
                 if(offset > 0) {
-                   idx = index + offset;
-                    Pair<Object, Integer> results = elementArrayType.decodeArray(buffer, idx);
-                    objects[i] = results.first;
+                    dest[i] = new String((byte[]) et.decodeArray(buffer, index + offset).first, CHARSET_UTF_8);
+                }
+            }
+        } else {
+            for (int i = 0; i < len; i++) {
+                int offset = offsets[i];
+                if (offset > 0) {
+                    dest[i] = et.decodeArray(buffer, index + offset).first;
                 }
             }
         }
-
-        return new Pair<>(objects, idx);
     }
 
     private static Pair<Object, Integer> decodeBooleanArray(int arrayLen, ByteBuffer bb, byte[] temp32) {

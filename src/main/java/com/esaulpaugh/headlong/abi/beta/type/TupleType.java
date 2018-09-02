@@ -78,9 +78,9 @@ public class TupleType extends StackableType<Object[]> {
                     members[i] = results.first;
                     idx = results.second;
                 } else if (type instanceof TupleType) {
-                    members[i] = decode(buffer, idx); // TODO update idx *********************
+                    members[i] = type.decode(buffer, idx); // TODO update idx *********************
                 } else {
-                    members[i] = decode(buffer, idx);
+                    members[i] = type.decode(buffer, idx);
                     idx += AbstractInt256Type.INT_LENGTH_BYTES;
                 }
             }

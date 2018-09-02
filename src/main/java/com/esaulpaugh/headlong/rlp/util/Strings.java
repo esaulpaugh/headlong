@@ -13,7 +13,7 @@ import static com.esaulpaugh.headlong.rlp.util.RLPIntegers.EMPTY_BYTE_ARRAY;
  */
 public class Strings {
 
-    private static final Charset CHARSET_UTF_8 = Charset.forName("UTF-8");
+    public static final Charset CHARSET_UTF_8 = Charset.forName("UTF-8");
 
     public static final int UTF_8 = 0; // 256
     public static final int BASE64 = 1; // 64
