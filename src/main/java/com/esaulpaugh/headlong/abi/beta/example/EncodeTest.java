@@ -1,6 +1,6 @@
 package com.esaulpaugh.headlong.abi.beta.example;
 
-import com.esaulpaugh.headlong.abi.beta.type.Function;
+import com.esaulpaugh.headlong.abi.beta.Function;
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 import org.spongycastle.util.encoders.Hex;
 
@@ -11,9 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Arrays;
 
-import static com.esaulpaugh.headlong.abi.beta.type.Function.SELECTOR_LEN;
+import static com.esaulpaugh.headlong.abi.beta.Function.SELECTOR_LEN;
 
-public class Test {
+public class EncodeTest {
 
     public static void main(String[] args_) throws ParseException {
 
@@ -42,7 +42,7 @@ public class Test {
         buffer = f0.encodeCall(args0);
         printABI(buffer.array());
 
-        if(true)return;
+//        if(true)return;
 
         Function f1 = new Function("f(uint,uint32[],bytes10,bytes)");
         Object[] args1 = new Object[] {
@@ -87,7 +87,7 @@ public class Test {
         System.out.println("\n" + Hex.toHexString(buffer.array()));
     }
 
-    private static void printABI(byte[] abi) {
+    static void printABI(byte[] abi) {
         System.out.println(Hex.toHexString(Arrays.copyOfRange(abi, 0, SELECTOR_LEN)));
         final int end = abi.length;
         int i = SELECTOR_LEN;

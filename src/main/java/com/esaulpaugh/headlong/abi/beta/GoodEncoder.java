@@ -1,4 +1,8 @@
-package com.esaulpaugh.headlong.abi.beta.type;
+package com.esaulpaugh.headlong.abi.beta;
+
+import com.esaulpaugh.headlong.abi.beta.type.TupleType;
+import com.esaulpaugh.headlong.abi.beta.type.array.ArrayType;
+import com.esaulpaugh.headlong.abi.beta.type.StackableType;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -9,7 +13,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.esaulpaugh.headlong.abi.beta.type.Function.SELECTOR_LEN;
+import static com.esaulpaugh.headlong.abi.beta.Function.SELECTOR_LEN;
+import static com.esaulpaugh.headlong.abi.beta.type.integer.BooleanType.BOOLEAN_FALSE;
+import static com.esaulpaugh.headlong.abi.beta.type.integer.BooleanType.BOOLEAN_TRUE;
 
 public class GoodEncoder {
 
@@ -19,7 +25,7 @@ public class GoodEncoder {
 
         System.out.println("requiredCanonicalization = " + function.requiredCanonicalization());
 
-        final Tuple tupleType = function.paramTypes;
+        final TupleType tupleType = function.paramTypes;
         final com.esaulpaugh.headlong.abi.beta.util.Tuple tuple = new com.esaulpaugh.headlong.abi.beta.util.Tuple(arguments);
         final StackableType[] types = tupleType.memberTypes;
         final int expectedNumParams = types.length;
@@ -51,7 +57,7 @@ public class GoodEncoder {
         return outBuffer;
     }
 
-    private static void insertTuple(Tuple tupleType, com.esaulpaugh.headlong.abi.beta.util.Tuple tuple, int offset, ByteBuffer outBuffer) {
+    private static void insertTuple(TupleType tupleType, com.esaulpaugh.headlong.abi.beta.util.Tuple tuple, int offset, ByteBuffer outBuffer) {
         System.out.println("insertTuple(" + tupleType + ")");
 
         Object[] values = tuple.elements;
@@ -120,12 +126,12 @@ public class GoodEncoder {
                     if(dynamic) {
                         insertOffset(offset, paramType, elements, dest);
                     } else {
-                        StackableType elementType = ((Array) paramType).elementType;
+                        StackableType elementType = ((ArrayType) paramType).elementType;
                         for(Object e : elements) {
                             encodeHead(elementType, e, dest, offset);
                         }
                     }
-//                    int[] headLengths = getHeadLengths(((Array) paramType).elementType, elements);
+//                    int[] headLengths = getHeadLengths(((ArrayType) paramType).elementType, elements);
 //                    insertArrayOffsets(paramType, elements, dest, tailOffsets[0]); // , dynamic
                 }
             } else if (value instanceof byte[]) {
@@ -157,9 +163,9 @@ public class GoodEncoder {
     }
 
     private static void insertTupleHead(StackableType tupleType, com.esaulpaugh.headlong.abi.beta.util.Tuple tuple, ByteBuffer dest, int tailOffset, boolean dynamic) {
-        Tuple paramTypes;
+        TupleType paramTypes;
         try {
-            paramTypes = (Tuple) tupleType;
+            paramTypes = (TupleType) tupleType;
         } catch (ClassCastException cce) {
             throw new RuntimeException(cce);
         }
@@ -232,7 +238,7 @@ public class GoodEncoder {
                     for(Object element : objects) {
                         insertOffset(offset, paramType, element, dest);
                     }
-                    Array arrayType = (Array) paramType;
+                    ArrayType arrayType = (ArrayType) paramType;
                     for (Object element : objects) {
                         encodeTail(arrayType.elementType, element, dest);
                     }
@@ -249,9 +255,9 @@ public class GoodEncoder {
                 insertBooleansTail((boolean[]) value, dest, dynamic);
             }
         } else if(value instanceof com.esaulpaugh.headlong.abi.beta.util.Tuple) {
-            Tuple tupleType;
+            TupleType tupleType;
             try {
-                tupleType = (Tuple) paramType;
+                tupleType = (TupleType) paramType;
             } catch (ClassCastException cce) {
                 throw new RuntimeException(cce);
             }
@@ -394,20 +400,22 @@ public class GoodEncoder {
 
     private static void insertBooleansStatic(boolean[] bools, ByteBuffer dest) {
         for (boolean e : bools) {
-            dest.put(e ? (byte) 1 : (byte) 0);
+            dest.put(e ? BOOLEAN_TRUE : BOOLEAN_FALSE);
 //            insertBool(e, dest);
         }
-        final int n = 32 - bools.length;
-        for (int i = 0; i < n; i++) {
-            dest.put((byte) 0);
-        }
+//        final int n = 32 - bools.length;
+//        for (int i = 0; i < n; i++) {
+//            dest.put((byte) 0);
+//        }
     }
 
     private static void insertBytesStatic(byte[] bytes, ByteBuffer dest) {
-        dest.put(bytes);
-        final int n = 32 - bytes.length;
-        for (int i = 0; i < n; i++) {
-            dest.put((byte) 0);
+        if(bytes.length > 0) { // don't pad empty array to 32 bytes
+            dest.put(bytes);
+            final int n = 32 - bytes.length;
+            for (int i = 0; i < n; i++) {
+                dest.put((byte) 0);
+            }
         }
     }
 

@@ -1,58 +1,65 @@
-package com.esaulpaugh.headlong.abi.beta.type;
+package com.esaulpaugh.headlong.abi.beta;
 
+import com.esaulpaugh.headlong.abi.beta.type.StackableType;
+import com.esaulpaugh.headlong.abi.beta.type.TupleType;
+import com.esaulpaugh.headlong.abi.beta.type.array.DynamicArrayType;
+import com.esaulpaugh.headlong.abi.beta.type.array.StaticArrayType;
+import com.esaulpaugh.headlong.abi.beta.type.integer.AbstractInt256Type;
+import com.esaulpaugh.headlong.abi.beta.type.integer.BigDecimalType;
+import com.esaulpaugh.headlong.abi.beta.type.integer.BigIntegerType;
+import com.esaulpaugh.headlong.abi.beta.type.integer.BooleanType;
+import com.esaulpaugh.headlong.abi.beta.type.integer.ByteType;
 import com.esaulpaugh.headlong.abi.beta.util.Pair;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.EmptyStackException;
-import java.util.Queue;
 
-import static com.esaulpaugh.headlong.abi.beta.type.Byte.BYTE_PRIMITIVE;
-import static com.esaulpaugh.headlong.abi.beta.type.DynamicArray.DYNAMIC_LENGTH;
+import static com.esaulpaugh.headlong.abi.beta.type.array.DynamicArrayType.DYNAMIC_LENGTH;
+import static com.esaulpaugh.headlong.abi.beta.type.integer.ByteType.BYTE_PRIMITIVE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 abstract class Typing {
 
-    private static final String CLASS_NAME_BOOLEAN = Boolean.class.getName();
-    static final String CLASS_NAME_BYTE = java.lang.Byte.class.getName();
-    private static final String CLASS_NAME_SHORT = Short.class.getName();
-    private static final String CLASS_NAME_INT = Integer.class.getName();
-    private static final String CLASS_NAME_LONG = Long.class.getName();
+//    private static final String CLASS_NAME_BOOLEAN = Boolean.class.getName();
+//    static final String CLASS_NAME_BYTE = java.lang.ByteType.class.getName();
+//    private static final String CLASS_NAME_SHORT = Short.class.getName();
+//    private static final String CLASS_NAME_INT = Integer.class.getName();
+//    private static final String CLASS_NAME_LONG = Long.class.getName();
 
-    private static final String CLASS_NAME_BIG_INTEGER = BigInteger.class.getName();
-    private static final String CLASS_NAME_BIG_DECIMAL = BigDecimal.class.getName();
+//    private static final String CLASS_NAME_BIG_INTEGER = BigInteger.class.getName();
+//    private static final String CLASS_NAME_BIG_DECIMAL = BigDecimal.class.getName();
     private static final String CLASS_NAME_STRING = String.class.getName();
     private static final String CLASS_NAME_TUPLE = com.esaulpaugh.headlong.abi.beta.util.Tuple.class.getName();
 
-    private static final String CLASS_NAME_ELEMENT_BOOLEAN = boolean[].class.getName().replaceFirst("\\[", "");
-    private static final String CLASS_NAME_ELEMENT_BYTE = byte[].class.getName().replaceFirst("\\[", "");
-    private static final String CLASS_NAME_ELEMENT_SHORT = short[].class.getName().replaceFirst("\\[", "");
-    private static final String CLASS_NAME_ELEMENT_INT = int[].class.getName().replaceFirst("\\[", "");
-    private static final String CLASS_NAME_ELEMENT_LONG = long[].class.getName().replaceFirst("\\[", "");
+//    private static final String CLASS_NAME_ELEMENT_BOOLEAN = boolean[].class.getName().replaceFirst("\\[", "");
+//    private static final String CLASS_NAME_ELEMENT_BYTE = byte[].class.getName().replaceFirst("\\[", "");
+//    private static final String CLASS_NAME_ELEMENT_SHORT = short[].class.getName().replaceFirst("\\[", "");
+//    private static final String CLASS_NAME_ELEMENT_INT = int[].class.getName().replaceFirst("\\[", "");
+//    private static final String CLASS_NAME_ELEMENT_LONG = long[].class.getName().replaceFirst("\\[", "");
 
-    private static final String CLASS_NAME_ELEMENT_BIG_INTEGER = BigInteger[].class.getName().replaceFirst("\\[", "");
-    private static final String CLASS_NAME_ELEMENT_BIG_DECIMAL = BigDecimal[].class.getName().replaceFirst("\\[", "");
+//    private static final String CLASS_NAME_ELEMENT_BIG_INTEGER = BigInteger[].class.getName().replaceFirst("\\[", "");
+//    private static final String CLASS_NAME_ELEMENT_BIG_DECIMAL = BigDecimal[].class.getName().replaceFirst("\\[", "");
     private static final String CLASS_NAME_ELEMENT_STRING = String[].class.getName().replaceFirst("\\[", "");
     private static final String CLASS_NAME_ELEMENT_TUPLE = com.esaulpaugh.headlong.abi.beta.util.Tuple[].class.getName().replaceFirst("\\[", "");
 
     private static final String CLASS_NAME_ARRAY_BYTE = byte[].class.getName();
 
-    static StackableType createForTuple(String canonicalAbiType, Tuple baseTuple) {
-        if(baseTuple == null) {
+    static StackableType createForTuple(String canonicalAbiType, TupleType baseTupleType) {
+        if(baseTupleType == null) {
             throw new NullPointerException();
         }
-        return create(canonicalAbiType, baseTuple);
+        return create(canonicalAbiType, baseTupleType);
     }
 
     static StackableType create(String canonicalAbiType) {
         return create(canonicalAbiType, null);
     }
 
-    private static StackableType create(String canonicalAbiType, Tuple baseTuple) {
+    private static StackableType create(String canonicalAbiType, TupleType baseTupleType) {
         Deque<StackableType> typeStack = new ArrayDeque<>();
-        buildTypeStack(canonicalAbiType, canonicalAbiType.length() - 1, typeStack, new StringBuilder(), baseTuple);
+        buildTypeStack(canonicalAbiType, canonicalAbiType.length() - 1, typeStack, new StringBuilder(), baseTupleType);
         return typeStack.peek();
     }
 
@@ -82,7 +89,7 @@ abstract class Typing {
             final String className = brackets.toString() + javaBaseType; // results.second;
 
             if(arrayOpenIndex == fromIndex) { // []
-                typeStack.push(new DynamicArray(canonicalAbiType, className, typeStack.peek(), DYNAMIC_LENGTH));
+                typeStack.push(new DynamicArrayType(canonicalAbiType, className, typeStack.peek(), DYNAMIC_LENGTH));
             } else { // [...]
                 final int length = Integer.parseUnsignedInt(canonicalAbiType.substring(arrayOpenIndex + 1, index));
                 final StackableType top = typeStack.peek();
@@ -90,9 +97,9 @@ abstract class Typing {
                     throw new EmptyStackException();
                 }
                 if(top.dynamic) {
-                    typeStack.push(new DynamicArray(canonicalAbiType, className, top, length));
+                    typeStack.push(new DynamicArrayType(canonicalAbiType, className, top, length));
                 } else {
-                    typeStack.push(new StaticArray(canonicalAbiType, className, top, length));
+                    typeStack.push(new StaticArrayType(canonicalAbiType, className, top, length));
                 }
             }
 
@@ -132,17 +139,18 @@ abstract class Typing {
             typeStack.push(baseTuple);
             return isElement ? CLASS_NAME_ELEMENT_TUPLE : CLASS_NAME_TUPLE;
         } else if ("bool".equals(abi)) {
-            className = isElement ? CLASS_NAME_ELEMENT_BOOLEAN : CLASS_NAME_BOOLEAN;
-            typeStack.push(Byte.booleanType(abi, className)); // new Byte(abi, className));
-        } else if ("address".equals(abi)) {
-            className = isElement ? CLASS_NAME_ELEMENT_BIG_INTEGER : CLASS_NAME_BIG_INTEGER;
-            typeStack.push(new StaticArray(abi, className, BYTE_PRIMITIVE, 20));
+            className = isElement ? BooleanType.CLASS_NAME_ELEMENT : BooleanType.CLASS_NAME;
+            typeStack.push(new BooleanType(abi, className)); // com.esaulpaugh.headlong.abi.beta.type.integer.ByteType.booleanType(abi, className)); // new ByteType(abi, className));
+        } else if ("address".equals(abi)) { // same as uint160
+            className = isElement ? BigIntegerType.CLASS_NAME_ELEMENT : BigIntegerType.CLASS_NAME;
+            typeStack.push(new BigIntegerType("uint160", BigIntegerType.CLASS_NAME, 160));
+//            typeStack.push(new StaticArrayType(abi, className, BYTE_PRIMITIVE, 20));
         } else if (abi.startsWith("uint")) {
             if (abi.length() == "uint".length()) {
                 throw new IllegalArgumentException("non-canonical: " + abi);
             }
             int bits = Integer.parseUnsignedInt(abi.substring("uint".length()), 10);
-            Pair<String, Int256> pair = makeInt(abi, bits, isElement);
+            Pair<String, AbstractInt256Type> pair = AbstractInt256Type.makeInt(abi, bits, isElement);
             className = pair.first;
             typeStack.push(pair.second);
         } else if (abi.startsWith("int")) {
@@ -150,64 +158,45 @@ abstract class Typing {
                 throw new IllegalArgumentException("non-canonical: " + abi);
             }
             int bits = Integer.parseUnsignedInt(abi.substring("int".length()), 10);
-            Pair<String, Int256> pair = makeInt(abi, bits, isElement);
+            Pair<String, AbstractInt256Type> pair = AbstractInt256Type.makeInt(abi, bits, isElement);
             className = pair.first;
             typeStack.push(pair.second);
         } else if (abi.startsWith("ufixed")) {
             if (abi.length() == "ufixed".length()) {
                 throw new IllegalArgumentException("non-canonical: " + abi);
             }
-            int bits = Integer.parseUnsignedInt(abi.substring("ufixed".length(), abi.indexOf('x', "ufixed".length())), 10);
-            className = isElement ? CLASS_NAME_ELEMENT_BIG_DECIMAL : CLASS_NAME_BIG_DECIMAL;
-            typeStack.push(new Int256(abi, className, bits));
+            final int indexOfX = abi.indexOf('x', "ufixed".length());
+            int bits = Integer.parseUnsignedInt(abi.substring("ufixed".length(), indexOfX), 10);
+            int scale = Integer.parseUnsignedInt(abi.substring(indexOfX + 1), 10);
+            className = isElement ? BigDecimalType.CLASS_NAME_ELEMENT : BigDecimalType.CLASS_NAME;
+            typeStack.push(new BigDecimalType(abi, BigDecimalType.CLASS_NAME, bits, scale));
         } else if (abi.startsWith("fixed")) {
             if (abi.length() == "fixed".length()) {
                 throw new IllegalArgumentException("non-canonical: " + abi);
             }
-            int bits = Integer.parseUnsignedInt(abi.substring("fixed".length(), abi.indexOf('x', "fixed".length())), 10);
-            className = isElement ? CLASS_NAME_ELEMENT_BIG_DECIMAL : CLASS_NAME_BIG_DECIMAL;
-            typeStack.push(new Int256(abi, className, bits));
+            final int indexOfX = abi.indexOf('x', "fixed".length());
+            int bits = Integer.parseUnsignedInt(abi.substring("fixed".length(), indexOfX), 10);
+            int scale = Integer.parseUnsignedInt(abi.substring(indexOfX + 1), 10);
+            className = isElement ? BigDecimalType.CLASS_NAME_ELEMENT : BigDecimalType.CLASS_NAME;
+            typeStack.push(new BigDecimalType(abi, BigDecimalType.CLASS_NAME, bits, scale));
         } else if ("function".equals(abi)) {
             className = CLASS_NAME_ARRAY_BYTE;
-            typeStack.push(new StaticArray(abi, className, BYTE_PRIMITIVE, 24));
+            typeStack.push(new StaticArrayType<ByteType, Byte>(abi, className, BYTE_PRIMITIVE, 24));
         } else if (abi.startsWith("bytes")) {
             className = CLASS_NAME_ARRAY_BYTE;
             if (abi.length() > "bytes".length()) {
                 int bytes = Integer.parseUnsignedInt(abi.substring("bytes".length()), 10);
-                typeStack.push(new StaticArray(abi, className, BYTE_PRIMITIVE, bytes));
+                typeStack.push(new StaticArrayType<ByteType, Byte>(abi, className, BYTE_PRIMITIVE, bytes));
             } else {
-                typeStack.push(new DynamicArray(abi, className, BYTE_PRIMITIVE, DYNAMIC_LENGTH));
+                typeStack.push(new DynamicArrayType<ByteType, Byte>(abi, className, BYTE_PRIMITIVE, DYNAMIC_LENGTH));
             }
         } else if ("string".equals(abi)) {
             className = isElement ? CLASS_NAME_ELEMENT_STRING : CLASS_NAME_STRING;
-            typeStack.push(new DynamicArray(abi, CLASS_NAME_STRING, BYTE_PRIMITIVE, DYNAMIC_LENGTH));
+            typeStack.push(new DynamicArrayType<ByteType, Byte>(abi, CLASS_NAME_STRING, BYTE_PRIMITIVE, DYNAMIC_LENGTH));
         } else {
             throw new IllegalArgumentException("unrecognized type: " + abi);
         }
 
         return className;
-    }
-
-    private static Pair<String, Int256> makeInt(String abi, int bits, boolean isElement) {
-        String className;
-        Int256 integer;
-        if (bits > 64) {
-            className = isElement ? CLASS_NAME_ELEMENT_BIG_INTEGER : CLASS_NAME_BIG_INTEGER;
-            integer = new Int256(abi, CLASS_NAME_BIG_INTEGER, bits);
-        } else if (bits > 32) {
-            className = isElement ? CLASS_NAME_ELEMENT_LONG : CLASS_NAME_LONG;
-            integer = new Int256(abi, CLASS_NAME_LONG, bits);
-        } else if (bits > 16) {
-            className = isElement ? CLASS_NAME_ELEMENT_INT : CLASS_NAME_INT;
-            integer = new Int256(abi, CLASS_NAME_INT, bits);
-        } else if (bits > 8) {
-            className = isElement ? CLASS_NAME_ELEMENT_SHORT : CLASS_NAME_SHORT;
-            integer = new Int256(abi, CLASS_NAME_SHORT, bits);
-        } else {
-            className = isElement ? CLASS_NAME_ELEMENT_BYTE : CLASS_NAME_BYTE;
-            integer = new Int256(abi, CLASS_NAME_BYTE, bits);
-        }
-        return new Pair<>(className, integer);
-
     }
 }

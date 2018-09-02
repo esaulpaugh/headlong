@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.abi.beta.type;
+package com.esaulpaugh.headlong.abi.beta;
 
 import java.text.ParseException;
 

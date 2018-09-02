@@ -1,5 +1,7 @@
-package com.esaulpaugh.headlong.abi.beta.type;
+package com.esaulpaugh.headlong.abi.beta;
 
+import com.esaulpaugh.headlong.abi.beta.type.StackableType;
+import com.esaulpaugh.headlong.abi.beta.type.TupleType;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.math.BigInteger;
@@ -24,7 +26,7 @@ public class Function {
     private final String canonicalSignature;
     private boolean requiredCanonicalization;
     transient final byte[] selector = new byte[SELECTOR_LEN];
-    transient final Tuple paramTypes;
+    transient final TupleType paramTypes;
 
     public Function(String signature) throws ParseException {
         StringBuilder canonicalSignature = new StringBuilder();
@@ -40,7 +42,7 @@ public class Function {
             throw new RuntimeException(de);
         }
 
-        this.paramTypes = Tuple.create(canonicalSignature.substring(canonicalSignature.indexOf("(")), types.toArray(EMPTY_TYPE_ARRAY));
+        this.paramTypes = TupleType.create(canonicalSignature.substring(canonicalSignature.indexOf("(")), types.toArray(EMPTY_TYPE_ARRAY));
     }
 
     public Throwable error(Object... args) {
@@ -55,6 +57,10 @@ public class Function {
 
     public ByteBuffer encodeCall(Object... args) {
         return GoodEncoder.encodeFunctionCall(this, args);
+    }
+
+    public Object[] decodeCall(byte[] abi) {
+        return paramTypes.decode(abi, SELECTOR_LEN);
     }
 
     public String getCanonicalSignature() {

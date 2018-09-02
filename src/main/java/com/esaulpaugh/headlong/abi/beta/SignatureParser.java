@@ -1,5 +1,7 @@
-package com.esaulpaugh.headlong.abi.beta.type;
+package com.esaulpaugh.headlong.abi.beta;
 
+import com.esaulpaugh.headlong.abi.beta.type.StackableType;
+import com.esaulpaugh.headlong.abi.beta.type.TupleType;
 import com.esaulpaugh.headlong.abi.beta.util.Pair;
 
 import java.text.ParseException;
@@ -102,16 +104,16 @@ class SignatureParser {
                     ArrayList<StackableType> innerTupleTypes = new ArrayList<>();
                     Pair<Integer, Integer> results = parseTuple(signature, argStart, canonicalOut, innerTupleTypes, illegalTypeCharMatcher);
 
-                    // TODO test DynamicArray (e.g. [4] w/ dynamic element) enforces specified len
-//                    new DynamicArray(canonicalAbiType, className, typeStack.peek());
-//                    new StaticArray(canonicalAbiType, className, typeStack.peek(), length);
+                    // TODO test DynamicArrayType (e.g. [4] w/ dynamic element) enforces specified len
+//                    new DynamicArrayType(canonicalAbiType, className, typeStack.peek());
+//                    new StaticArrayType(canonicalAbiType, className, typeStack.peek(), length);
 
 
                     // TODO NON-CANONICAL, DON'T SUBSTRING
                     // signature.substring(argEnd, argEnd)
                     StackableType[] members = innerTupleTypes.toArray(StackableType.EMPTY_TYPE_ARRAY);
 
-                    Tuple tuple = Tuple.create(null, members);
+                    TupleType tupleType = TupleType.create(null, members);
                     StackableType typleArray = null;
 
                     int k = results.first + 1;
@@ -119,7 +121,7 @@ class SignatureParser {
                     if(k < sigEnd && signature.charAt(k) == '[') {
                         nextTerminator = nextParamTerminator(signature, k);
                         if(nextTerminator > k) {
-                            typleArray = Typing.createForTuple(signature.substring(argStart, nextTerminator), tuple);
+                            typleArray = Typing.createForTuple(signature.substring(argStart, nextTerminator), tupleType);
                         }
                     }
 
@@ -127,7 +129,7 @@ class SignatureParser {
                         tupleTypes.add(typleArray);
                         argEnd = nextTerminator;
                     } else {
-                        tupleTypes.add(tuple);
+                        tupleTypes.add(tupleType);
                         argEnd = results.first + 1;
                     }
 

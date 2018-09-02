@@ -1,14 +1,16 @@
-package com.esaulpaugh.headlong.abi.beta.type;
+package com.esaulpaugh.headlong.abi.beta.type.array;
+
+import com.esaulpaugh.headlong.abi.beta.type.StackableType;
 
 /**
  * Represents any array with a variable byte-length, whether because the array length is not fixed or it contains at
  * least one variable-length (dynamic) element.
  */
-class DynamicArray extends Array {
+public class DynamicArrayType<T extends StackableType, E> extends ArrayType<T, E> {
 
-    static final int DYNAMIC_LENGTH = -1;
+    public static final int DYNAMIC_LENGTH = -1;
 
-    protected DynamicArray(String canonicalAbiType, String className, StackableType elementType, int length) {
+    public DynamicArrayType(String canonicalAbiType, String className, T elementType, int length) {
         super(canonicalAbiType, className, elementType, length, true);
         if(length < DYNAMIC_LENGTH) {
             throw new IllegalArgumentException("length must be non-negative or " + DYNAMIC_LENGTH + ". found: " + length);
