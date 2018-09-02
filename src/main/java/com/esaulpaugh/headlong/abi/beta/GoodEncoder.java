@@ -4,6 +4,7 @@ import com.esaulpaugh.headlong.abi.beta.type.TupleType;
 import com.esaulpaugh.headlong.abi.beta.type.array.ArrayType;
 import com.esaulpaugh.headlong.abi.beta.type.StackableType;
 import com.esaulpaugh.headlong.abi.beta.type.integer.AbstractInt256Type;
+import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -34,7 +35,7 @@ public class GoodEncoder {
         System.out.println("requiredCanonicalization = " + function.requiredCanonicalization());
 
         final TupleType tupleType = function.paramTypes;
-        final com.esaulpaugh.headlong.abi.beta.util.Tuple tuple = new com.esaulpaugh.headlong.abi.beta.util.Tuple(arguments);
+        final Tuple tuple = new Tuple(arguments);
         final StackableType[] types = tupleType.memberTypes;
         final int expectedNumParams = types.length;
 
@@ -65,7 +66,7 @@ public class GoodEncoder {
         return outBuffer;
     }
 
-    private static void insertTuple(TupleType tupleType, com.esaulpaugh.headlong.abi.beta.util.Tuple tuple, int offset, ByteBuffer outBuffer) {
+    private static void insertTuple(TupleType tupleType, Tuple tuple, int offset, ByteBuffer outBuffer) {
         System.out.println("insertTuple(" + tupleType + ")");
 
         Object[] values = tuple.elements;
@@ -122,15 +123,15 @@ public class GoodEncoder {
     }
 
     private static void encodeHead(StackableType paramType, Object value, ByteBuffer dest, int[] offset) { // , boolean dynamic
-        boolean dynamic = paramType.dynamic;
+//        boolean dynamic = paramType.dynamic;
         if(value instanceof String) { // dynamic
-            insertStringHead(dest, offset[0]);
+            insertStringHead(paramType, (String) value, dest, offset);
         } else if(value.getClass().isArray()) {
             if (value instanceof Object[]) {
                 if(value instanceof BigInteger[]) {
-                    insertBigIntsHead(paramType, (BigInteger[]) value, dest, offset, dynamic);
+                    insertBigIntsHead(paramType, (BigInteger[]) value, dest, offset);
                 } else if(value instanceof BigDecimal[]) {
-                    insertBigDecimalsHead(paramType, (BigDecimal[]) value, dest, offset, dynamic);
+                    insertBigDecimalsHead(paramType, (BigDecimal[]) value, dest, offset);
                 } else {
                     Object[] elements = (Object[]) value;
 //                    ArrayType arrayType = (ArrayType) paramType;
@@ -143,23 +144,23 @@ public class GoodEncoder {
                         }
                     }
 //                    int[] headLengths = getHeadLengths(((ArrayType) paramType).elementType, elements);
-//                    insertArrayOffsets(paramType, elements, dest, tailOffsets[0]); // , dynamic
+//                    insertArrayOffsets(paramType, elements, dest, tailOffsets[0]); //
                 }
             } else if (value instanceof byte[]) {
-                insertBytesHead(paramType, (byte[]) value, dest, offset, dynamic);
+                insertBytesHead(paramType, (byte[]) value, dest, offset);
             } else if (value instanceof int[]) {
-                insertIntsHead(paramType, (int[]) value, dest, offset, dynamic);
+                insertIntsHead(paramType, (int[]) value, dest, offset);
             } else if (value instanceof long[]) {
-                insertLongsHead(paramType, (long[]) value, dest, offset, dynamic);
+                insertLongsHead(paramType, (long[]) value, dest, offset);
             } else if (value instanceof short[]) {
-                insertShortsHead(paramType, (short[]) value, dest, offset, dynamic);
+                insertShortsHead(paramType, (short[]) value, dest, offset);
             } else if(value instanceof boolean[]) {
-                insertBooleansHead(paramType, (boolean[]) value, dest, offset, dynamic);
+                insertBooleansHead(paramType, (boolean[]) value, dest, offset);
             }
-        } else if(value instanceof com.esaulpaugh.headlong.abi.beta.util.Tuple) {
+        } else if(value instanceof Tuple) {
 //            throw new Error(); // TODO TEST
-//            insertTuple((Tuple) paramType, (com.esaulpaugh.headlong.abi.beta.util.Tuple) value, offset[0], dest);
-            insertTupleHead(paramType, (com.esaulpaugh.headlong.abi.beta.util.Tuple) value, dest, offset[0], dynamic);
+//            insertTuple((Tuple) paramType, (Tuple) value, offset[0], dest);
+            insertTupleHead(paramType, (Tuple) value, dest, offset);
         } else if (value instanceof Number) {
             if(value instanceof BigInteger) {
                 insertInt(((BigInteger) value), dest);
@@ -173,18 +174,19 @@ public class GoodEncoder {
         }
     }
 
-    private static void insertTupleHead(StackableType tupleType, com.esaulpaugh.headlong.abi.beta.util.Tuple tuple, ByteBuffer dest, int tailOffset, boolean dynamic) {
-        TupleType paramTypes;
+    private static void insertTupleHead(StackableType t, Tuple tuple, ByteBuffer dest, int[] offset) {
+        TupleType tupleType;
         try {
-            paramTypes = (TupleType) tupleType;
+            tupleType = (TupleType) t;
         } catch (ClassCastException cce) {
             throw new RuntimeException(cce);
         }
-        if(dynamic) {
-            insertInt(tailOffset, dest);
+        if(tupleType.dynamic) {
+            insertOffset(offset, tupleType, tuple, dest);
+//            insertInt(tailOffset, dest);
         } else {
-            int headLengths = getHeadLengthSum(paramTypes.memberTypes, tuple.elements);
-            insertTuple(paramTypes, tuple, headLengths, dest);
+            int headLengths = getHeadLengthSum(tupleType.memberTypes, tuple.elements);
+            insertTuple(tupleType, tuple, headLengths, dest);
         }
     }
 
@@ -203,7 +205,7 @@ public class GoodEncoder {
 
 
             System.out.println("offset[0] = " + offset[0] + " + " + paramType.byteLength(object) + " - " + 32);
-            offset[0] += paramType.byteLength(object) - 32;
+            offset[0] += paramType.byteLength(object); //  - 32
             System.out.println("aka " + offset[0] + ", " + (offset[0] >>> 5));
 //        }
 //        else {
@@ -273,7 +275,7 @@ public class GoodEncoder {
             } else {
                 throw new Error("unexpected array type: " + paramType);
             }
-        } else if(value instanceof com.esaulpaugh.headlong.abi.beta.util.Tuple) {
+        } else if(value instanceof Tuple) {
             TupleType tupleType;
             try {
                 tupleType = (TupleType) paramType;
@@ -282,7 +284,7 @@ public class GoodEncoder {
             }
 //            throw new Error();
             // TODO TEST ***********************************************************************
-            com.esaulpaugh.headlong.abi.beta.util.Tuple tuple = (com.esaulpaugh.headlong.abi.beta.util.Tuple) value;
+            Tuple tuple = (Tuple) value;
             int sum = getHeadLengthSum(tupleType.memberTypes, tuple.elements);
             insertTuple(tupleType, tuple, sum, dest);
         } else {
@@ -292,12 +294,13 @@ public class GoodEncoder {
 
     // ----------------------------------------------
 
-    private static void insertStringHead(ByteBuffer dest, int tailOffset) {
-        insertInt(tailOffset, dest);
+    private static void insertStringHead(StackableType paramType, String string, ByteBuffer dest, int[] offset) {
+        // strings always dynamic
+        insertOffset(offset, paramType, string, dest);
     }
 
-    private static void insertBooleansHead(StackableType paramType, boolean[] bools, ByteBuffer dest, int[] offset, boolean dynamic) {
-        if(dynamic) {
+    private static void insertBooleansHead(StackableType paramType, boolean[] bools, ByteBuffer dest, int[] offset) {
+        if(paramType.dynamic) {
             insertOffset(offset, paramType, bools, dest);
 //            insertInt(tailOffset, dest);
         } else {
@@ -305,8 +308,8 @@ public class GoodEncoder {
         }
     }
 
-    private static void insertBytesHead(StackableType paramType, byte[] bytes, ByteBuffer dest, int[] offset, boolean dynamic) {
-        if(dynamic) {
+    private static void insertBytesHead(StackableType paramType, byte[] bytes, ByteBuffer dest, int[] offset) {
+        if(paramType.dynamic) {
             insertOffset(offset, paramType, bytes, dest);
 //            insertInt(tailOffset, dest);
         } else {
@@ -314,8 +317,8 @@ public class GoodEncoder {
         }
     }
 
-    private static void insertShortsHead(StackableType paramType, short[] shorts, ByteBuffer dest, int[] offset, boolean dynamic) {
-        if(dynamic) {
+    private static void insertShortsHead(StackableType paramType, short[] shorts, ByteBuffer dest, int[] offset) {
+        if(paramType.dynamic) {
             insertOffset(offset, paramType, shorts, dest);
 //            insertInt(tailOffset, dest);
         } else {
@@ -323,8 +326,8 @@ public class GoodEncoder {
         }
     }
 
-    private static void insertIntsHead(StackableType paramType, int[] ints, ByteBuffer dest, int[] offset, boolean dynamic) {
-        if(dynamic) {
+    private static void insertIntsHead(StackableType paramType, int[] ints, ByteBuffer dest, int[] offset) {
+        if(paramType.dynamic) {
             insertOffset(offset, paramType, ints, dest);
 //            insertInt(tailOffset, dest);
         } else {
@@ -332,8 +335,8 @@ public class GoodEncoder {
         }
     }
 
-    private static void insertLongsHead(StackableType paramType, long[] longs, ByteBuffer dest, int[] offset, boolean dynamic) {
-        if(dynamic) {
+    private static void insertLongsHead(StackableType paramType, long[] longs, ByteBuffer dest, int[] offset) {
+        if(paramType.dynamic) {
             insertOffset(offset, paramType, longs, dest);
 //            insertInt(tailOffset, dest);
         } else {
@@ -341,16 +344,16 @@ public class GoodEncoder {
         }
     }
 
-    private static void insertBigIntsHead(StackableType paramType, BigInteger[] bigInts, ByteBuffer dest, int[] offset, boolean dynamic) {
-        if(dynamic) {
+    private static void insertBigIntsHead(StackableType paramType, BigInteger[] bigInts, ByteBuffer dest, int[] offset) {
+        if(paramType.dynamic) {
             insertOffset(offset, paramType, bigInts, dest);
         } else {
             insertBigIntsStatic(bigInts, dest);
         }
     }
 
-    private static void insertBigDecimalsHead(StackableType paramType, BigDecimal[] bigDecs, ByteBuffer dest, int[] offset, boolean dynamic) {
-        if(dynamic) {
+    private static void insertBigDecimalsHead(StackableType paramType, BigDecimal[] bigDecs, ByteBuffer dest, int[] offset) {
+        if(paramType.dynamic) {
             insertOffset(offset, paramType, bigDecs, dest);
         } else {
             insertBigDecimalsStatic(bigDecs, dest);
@@ -364,14 +367,14 @@ public class GoodEncoder {
         final int n = types.length;
         for (int i = 0; i < n; i++) {
             StackableType t = types[i];
-            int byteLen = t.byteLength(arguments[i]);
-            System.out.print(arguments[i] + " --> " + byteLen + ", ");
+//            int byteLen = t.byteLength(arguments[i]);
+//            System.out.print(arguments[i] + " --> " + byteLen + ", ");
 
             if(t.dynamic) {
                 headLengths += 32;
                 System.out.println("dynamic");
             } else {
-                headLengths += byteLen;
+                headLengths += t.byteLength(arguments[i]);
                 System.out.println("static");
             }
         }

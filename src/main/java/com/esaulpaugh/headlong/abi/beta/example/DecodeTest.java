@@ -10,7 +10,8 @@ public class DecodeTest {
 
     public static void main(String[] args0) throws ParseException {
 
-        Function f = new Function("((uint8),uint8,(int24,bytes),(string))");
+        // (uint8),uint8,(int24,bytes),
+        Function f = new Function("((string),string)"); // ,(string),string
 //        Function f = new Function("(string[2][3][])");
 
 //        BigInteger five = BigInteger.valueOf(5);
@@ -49,8 +50,10 @@ public class DecodeTest {
 //        BigInteger[][] two = new BigInteger[][] { a, b, c }; // a, b, c
 //        BigInteger[][][] triple = new BigInteger[][][] { one, two }; // one, two
 
-        // "", /*, */ }; // (uint8),uint8,(int24,bytes),
-        Object[] argsIn = new Object[] { new Tuple((byte) 6), (byte) 99, new Tuple(1001, new byte[0]), new Tuple("") }; // 1001, new byte[0]
+        // new Tuple((byte) 6), (byte) 99, new Tuple(1001, new byte[0]),
+
+        // new Tuple(new Tuple("five"))
+        Object[] argsIn = new Object[] { new Tuple(""), "" }; // , new Tuple(""), ""
 
         byte[] abi = f.encodeCall(argsIn).array();
 

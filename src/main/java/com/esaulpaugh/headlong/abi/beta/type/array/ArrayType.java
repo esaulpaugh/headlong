@@ -68,9 +68,9 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
             byte[] out = new byte[arrayLen];
             System.arraycopy(buffer, idx, out, 0, arrayLen);
             if(String.class.getName().equals(className)) {
-                return new Pair<>(new String(out, CHARSET_UTF_8), idx + arrayLen);
+                return new Pair<>(new String(out, CHARSET_UTF_8), roundUp(idx + arrayLen));
             }
-            return new Pair<>(out, idx + arrayLen);
+            return new Pair<>(out, roundUp(idx + arrayLen));
         } else if(elementType instanceof AbstractInt256Type) {
             ByteBuffer bb = ByteBuffer.wrap(buffer, idx, arrayLen << 5); // mul 32
             final byte[] thirtyTwo = new byte[AbstractInt256Type.INT_LENGTH_BYTES];
@@ -356,31 +356,32 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
 //        throw new IllegalArgumentException("unknown type: " + value.getClass().getName());
 //    }
 
+    // dynamics get +32 for the array length
     protected int getDataLen(Object value) {
         if(value.getClass().isArray()) {
             if (value instanceof byte[]) { // always needs dynamic head?
                 int staticLen = roundUp(((byte[]) value).length);
-                return dynamic ? 64 + staticLen : staticLen;
+                return dynamic ? 32 + staticLen : staticLen;
             }
             if (value instanceof int[]) {
                 int staticLen = ((int[]) value).length << 5; // mul 32
-                return dynamic ? 64 + staticLen : staticLen;
+                return dynamic ? 32 + staticLen : staticLen;
             }
             if (value instanceof long[]) {
                 int staticLen = ((long[]) value).length << 5; // mul 32
-                return dynamic ? 64 + staticLen : staticLen;
+                return dynamic ? 32 + staticLen : staticLen;
             }
             if (value instanceof short[]) {
                 int staticLen = ((short[]) value).length << 5; // mul 32
-                return dynamic ? 64 + staticLen : staticLen;
+                return dynamic ? 32 + staticLen : staticLen;
             }
             if (value instanceof boolean[]) {
                 int staticLen = ((boolean[]) value).length << 5; // mul 32
-                return dynamic ? 64 + staticLen : staticLen;
+                return dynamic ? 32 + staticLen : staticLen;
             }
             if (value instanceof Number[]) {
                 int staticLen = ((Number[]) value).length << 5; // mul 32
-                return dynamic ? 64 + staticLen : staticLen;
+                return dynamic ? 32 + staticLen : staticLen;
             }
 //            if(value instanceof com.esaulpaugh.headlong.abi.beta.util.Tuple[]) {
 //                throw new Error();
@@ -388,20 +389,23 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
 //            }
         }
         if (value instanceof String) { // always needs dynamic head
-            return 64 + roundUp(((String) value).length());
+            return 32 + roundUp(((String) value).length());
         }
         if (value instanceof Number) {
             return 32;
         }
         if (value instanceof com.esaulpaugh.headlong.abi.beta.util.Tuple) {
-            return elementType.byteLength(value);
+            return dynamic ? 32 + elementType.byteLength(value) : elementType.byteLength(value); // TODO
         }
         if (value instanceof Object[]) {
             int len = 0;
             for (Object element : (Object[]) value) {
                 len += this.elementType.byteLength(element);
+                if(this.elementType.dynamic) {
+                    len += 32;
+                }
             }
-            return dynamic ? 64 + len : len;
+            return dynamic ? 32 + len : len;
 //            throw new AssertionError("Object array not expected here");
         }
         // shouldn't happen if type checks/validation already occurred

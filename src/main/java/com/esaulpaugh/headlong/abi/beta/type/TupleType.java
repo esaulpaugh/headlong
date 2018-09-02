@@ -54,10 +54,14 @@ public class TupleType extends StackableType<Tuple> {
 
         int len = 0;
         for (int i = 0; i < memberTypes.length; i++) {
-            len += memberTypes[i].byteLength(tuple.elements[i]);
+            StackableType type = memberTypes[i];
+            len += type.byteLength(tuple.elements[i]);
+            if(type.dynamic) {
+                len += 32; // for offset
+            }
         }
 
-        return len; // + 32;
+        return len;
     }
 
     @Override
@@ -74,6 +78,7 @@ public class TupleType extends StackableType<Tuple> {
             StackableType type = memberTypes[i];
             if (type.dynamic) {
                 offsets[i] = IntType.OFFSET_TYPE.decode(buffer, idx);
+                System.out.println("offset " + offsets[i] + " @ " + idx);
                 idx += AbstractInt256Type.INT_LENGTH_BYTES;
             } else {
                 if (type instanceof ArrayType) {
