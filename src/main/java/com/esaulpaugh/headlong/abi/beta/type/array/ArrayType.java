@@ -125,7 +125,7 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
         final ArrayType elementArrayType = (ArrayType) elementType;
 
         Object[] objects; // = new Object[0]; // new Object[arrayLen];
-        try { // TODO disallow boolean[][] etc and force Object[] { boolean[] } ?
+        try {
             objects = (Object[]) Array.newInstance(Class.forName(elementArrayType.className), arrayLen);  // .getDeclaredConstructor(int.class).newInstance(arrayLen);
         } catch (ClassNotFoundException e) {
             throw new Error(e);
@@ -135,6 +135,7 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
         int idx = index;
         for (int i = 0; i < arrayLen; i++) {
             if (elementArrayType.dynamic) {
+                // TODO offset 5 @ 196, points to 73, increment to 228
                 offsets[i] = IntType.OFFSET_TYPE.decode(buffer, idx); // TODO offset 2 @ 228, points to 166, increment to 260
                 System.out.println("offset " + offsets[i] + " @ " + idx + ", points to " + (index + offsets[i]) + ", increment to " + (idx + AbstractInt256Type.INT_LENGTH_BYTES));
                 idx += AbstractInt256Type.INT_LENGTH_BYTES;
@@ -143,7 +144,7 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
                 objects[i] = results.first;
                 idx = results.second;
             }
-            idx += AbstractInt256Type.INT_LENGTH_BYTES;
+//            idx += AbstractInt256Type.INT_LENGTH_BYTES;
         }
 
         if (dynamic) {
@@ -283,7 +284,7 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
         if(actual != expected) {
             throw new IllegalArgumentException("array length mismatch: actual != expected: " + actual + " != " + expected);
         }
-        System.out.println("fixed length valid;");
+        System.out.println("array length valid;");
     }
 
     // -----------------------------------------------------------------------------------------------------------------

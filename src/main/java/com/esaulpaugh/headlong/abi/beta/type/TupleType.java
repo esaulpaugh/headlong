@@ -122,7 +122,7 @@ public class TupleType extends StackableType<Object[]> {
         if(expected != actual) {
             throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + actual + " != " + expected);
         }
-        System.out.println("length valid;");
+        System.out.println("tuple length valid;");
 
         checkTypes(this.memberTypes, elements);
     }

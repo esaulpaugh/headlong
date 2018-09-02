@@ -3,6 +3,7 @@ package com.esaulpaugh.headlong.abi.beta;
 import com.esaulpaugh.headlong.abi.beta.type.TupleType;
 import com.esaulpaugh.headlong.abi.beta.type.array.ArrayType;
 import com.esaulpaugh.headlong.abi.beta.type.StackableType;
+import com.esaulpaugh.headlong.abi.beta.type.integer.AbstractInt256Type;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -14,10 +15,17 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static com.esaulpaugh.headlong.abi.beta.Function.SELECTOR_LEN;
-import static com.esaulpaugh.headlong.abi.beta.type.integer.BooleanType.BOOLEAN_FALSE;
-import static com.esaulpaugh.headlong.abi.beta.type.integer.BooleanType.BOOLEAN_TRUE;
 
 public class GoodEncoder {
+
+    private static final byte[] BOOLEAN_FALSE;
+    private static final byte[] BOOLEAN_TRUE;
+
+    static {
+        BOOLEAN_FALSE = new byte[AbstractInt256Type.INT_LENGTH_BYTES];
+        BOOLEAN_TRUE = new byte[AbstractInt256Type.INT_LENGTH_BYTES];
+        BOOLEAN_TRUE[BOOLEAN_TRUE.length - 1] = 1;
+    }
 
     private static final byte[] PADDING_192_BITS = new byte[24];
 
@@ -121,6 +129,8 @@ public class GoodEncoder {
             if (value instanceof Object[]) {
                 if(value instanceof BigInteger[]) {
                     insertBigIntsHead(paramType, (BigInteger[]) value, dest, offset, dynamic);
+                } else if(value instanceof BigDecimal[]) {
+                    insertBigDecimalsHead(paramType, (BigDecimal[]) value, dest, offset, dynamic);
                 } else {
                     Object[] elements = (Object[]) value;
                     if(dynamic) {
@@ -231,6 +241,8 @@ public class GoodEncoder {
             if (value instanceof Object[]) {
                 if(value instanceof BigInteger[]) {
                     insertBigIntsTail((BigInteger[]) value, dest, dynamic);
+                } else if(value instanceof BigDecimal[]) {
+                    insertBigDecimalsTail((BigDecimal[]) value, dest, dynamic);
                 } else {
                     Object[] objects = (Object[]) value;
                     insertLength(objects.length, dest);
@@ -253,6 +265,8 @@ public class GoodEncoder {
                 insertShortsTail((short[]) value, dest, dynamic);
             } else if(value instanceof boolean[]) {
                 insertBooleansTail((boolean[]) value, dest, dynamic);
+            } else {
+                throw new Error("unexpected array type: " + paramType);
             }
         } else if(value instanceof com.esaulpaugh.headlong.abi.beta.util.Tuple) {
             TupleType tupleType;
@@ -266,6 +280,8 @@ public class GoodEncoder {
             com.esaulpaugh.headlong.abi.beta.util.Tuple tuple = (com.esaulpaugh.headlong.abi.beta.util.Tuple) value;
             int sum = getHeadLengthSum(tupleType.memberTypes, tuple.elements);
             insertTuple(tupleType, tuple, sum, dest);
+        } else {
+            throw new Error("unexpected type: " + paramType);
         }
     }
 
@@ -320,11 +336,19 @@ public class GoodEncoder {
         }
     }
 
-    private static void insertBigIntsHead(StackableType paramType, BigInteger[] ints, ByteBuffer dest, int[] offset, boolean dynamic) {
+    private static void insertBigIntsHead(StackableType paramType, BigInteger[] bigInts, ByteBuffer dest, int[] offset, boolean dynamic) {
         if(dynamic) {
-            insertOffset(offset, paramType, ints, dest);
+            insertOffset(offset, paramType, bigInts, dest);
         } else {
-            insertBigIntsStatic(ints, dest);
+            insertBigIntsStatic(bigInts, dest);
+        }
+    }
+
+    private static void insertBigDecimalsHead(StackableType paramType, BigDecimal[] bigDecs, ByteBuffer dest, int[] offset, boolean dynamic) {
+        if(dynamic) {
+            insertOffset(offset, paramType, bigDecs, dest);
+        } else {
+            insertBigDecimalsStatic(bigDecs, dest);
         }
     }
 
@@ -352,20 +376,20 @@ public class GoodEncoder {
         return headLengths;
     }
 
-    static void dataLengths(StackableType[] types, Object[] arguments, int[] dataLengths) {
-//        int argsByteLen = 0;
-        final int n = dataLengths.length;
-        for (int i = 0; i < n; i++) {
-            StackableType t = types[i];
-            int byteLen = t.byteLength(arguments[i]); // .getDataByteLen(arguments[i]);
-            System.out.print(arguments[i] + " data--> " + byteLen + ", ");
-//            argsByteLen += byteLen;
-
-            dataLengths[i] = types[i].byteLength(arguments[i]);
-        }
-
-//        System.out.println("**************** " + argsByteLen);
-    }
+//    static void dataLengths(StackableType[] types, Object[] arguments, int[] dataLengths) {
+////        int argsByteLen = 0;
+//        final int n = dataLengths.length;
+//        for (int i = 0; i < n; i++) {
+//            StackableType t = types[i];
+//            int byteLen = t.byteLength(arguments[i]); // .getDataByteLen(arguments[i]);
+//            System.out.print(arguments[i] + " data--> " + byteLen + ", ");
+////            argsByteLen += byteLen;
+//
+//            dataLengths[i] = types[i].byteLength(arguments[i]);
+//        }
+//
+////        System.out.println("**************** " + argsByteLen);
+//    }
     // -------------------------------------------------------------------------------------------------
 
     private static void insertBooleansTail(boolean[] bools, ByteBuffer dest, boolean dynamic) {
@@ -396,6 +420,11 @@ public class GoodEncoder {
     private static void insertBigIntsTail(BigInteger[] bigInts, ByteBuffer dest, boolean dynamic) {
         if(dynamic) insertLength(bigInts.length, dest);
         insertBigIntsStatic(bigInts, dest);
+    }
+
+    private static void insertBigDecimalsTail(BigDecimal[] bigDecs, ByteBuffer dest, boolean dynamic) {
+        if(dynamic) insertLength(bigDecs.length, dest);
+        insertBigDecimalsStatic(bigDecs, dest);
     }
 
     private static void insertBooleansStatic(boolean[] bools, ByteBuffer dest) {
@@ -440,6 +469,12 @@ public class GoodEncoder {
     private static void insertBigIntsStatic(BigInteger[] bigInts, ByteBuffer dest) {
         for (BigInteger e : bigInts) {
             insertInt(e, dest);
+        }
+    }
+
+    private static void insertBigDecimalsStatic(BigDecimal[] bigDecs, ByteBuffer dest) {
+        for (BigDecimal e : bigDecs) {
+            insertInt(e.unscaledValue(), dest);
         }
     }
 

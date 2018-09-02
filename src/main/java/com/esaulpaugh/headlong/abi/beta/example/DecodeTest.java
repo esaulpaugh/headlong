@@ -1,7 +1,6 @@
 package com.esaulpaugh.headlong.abi.beta.example;
 
 import com.esaulpaugh.headlong.abi.beta.Function;
-import com.esaulpaugh.headlong.abi.beta.type.integer.BigIntegerType;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -12,16 +11,19 @@ public class DecodeTest {
 
     public static void main(String[] args0) throws ParseException {
 
-        Function f = new Function("(ufixed[][][])");
+        Function f = new Function("(ufixed[2][][2])");
 
-        BigDecimal[] a = new BigDecimal[] { new BigDecimal(BigInteger.ONE, 18), new BigDecimal(BigInteger.ONE, 18) };
-        BigDecimal[] b = new BigDecimal[] { new BigDecimal(BigInteger.ONE, 18), new BigDecimal(BigInteger.ONE, 18) };
+        BigInteger five = BigInteger.valueOf(5);
+        BigInteger seven = BigInteger.valueOf(8);
+        BigDecimal[] a = new BigDecimal[] { new BigDecimal(five, 18), new BigDecimal(five, 18) };
+        BigDecimal[] b = new BigDecimal[] { new BigDecimal(seven, 18), new BigDecimal(seven, 18) };
         BigDecimal[] c = new BigDecimal[] {
-                new BigDecimal(BigInteger.ONE, 18), new BigDecimal(BigInteger.ONE, 18), new BigDecimal(BigInteger.ONE, 18), new BigDecimal(BigInteger.ONE, 18)
+                new BigDecimal(five, 18), new BigDecimal(seven, 18)
         };
-        BigDecimal[][] one = new BigDecimal[][] { a, b };
+        BigDecimal[][] one = new BigDecimal[][] { a, b, a };
         BigDecimal[][] two = new BigDecimal[][] { a, b, c };
-        Object[] argsIn = new Object[] { new BigDecimal[][][] { one, two } }; // new int[][][] { new int[][] { new int[] { 1, 3, 5 } } } // new short[] { (short) 6, (short) 7 } // new byte[] { 1, 2, 3 }
+        BigDecimal[][][] triple = new BigDecimal[][][] { one, two };
+        Object[] argsIn = new Object[] { triple }; // new int[][][] { new int[][] { new int[] { 1, 3, 5 } } } // new short[] { (short) 6, (short) 7 } // new byte[] { 1, 2, 3 }
 
         byte[] abi = f.encodeCall(argsIn).array();
 

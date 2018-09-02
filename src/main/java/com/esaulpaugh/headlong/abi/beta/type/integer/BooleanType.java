@@ -8,15 +8,6 @@ public class BooleanType extends AbstractInt256Type<Boolean> {
     public static final String CLASS_NAME = Boolean.class.getName();
     public static final String CLASS_NAME_ELEMENT = boolean[].class.getName().replaceFirst("\\[", "");
 
-    public static final byte[] BOOLEAN_FALSE;
-    public static final byte[] BOOLEAN_TRUE;
-
-    static {
-        BOOLEAN_FALSE = new byte[AbstractInt256Type.INT_LENGTH_BYTES];
-        BOOLEAN_TRUE = new byte[AbstractInt256Type.INT_LENGTH_BYTES];
-        BOOLEAN_TRUE[BOOLEAN_TRUE.length - 1] = 1;
-    }
-
     public BooleanType(String canonicalAbiType, String className) {
         super(canonicalAbiType, className, 1);
     }

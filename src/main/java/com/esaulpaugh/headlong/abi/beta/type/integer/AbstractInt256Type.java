@@ -72,7 +72,7 @@ public abstract class AbstractInt256Type<V> extends StackableType<V> { // instan
         if(bitLen > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + bitLen + " > " + bitLength);
         }
-        System.out.println("length valid;");
+//        System.out.println("bit len valid;");
     }
 
     public static Pair<String, AbstractInt256Type> makeInt(String abi, int bits, boolean isElement) {
