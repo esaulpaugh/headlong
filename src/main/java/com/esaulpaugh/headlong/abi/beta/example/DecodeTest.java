@@ -11,18 +11,16 @@ public class DecodeTest {
 
     public static void main(String[] args0) throws ParseException {
 
-        Function f = new Function("(ufixed[2][][2])");
+        Function f = new Function("(ufixed[2][3][])");
 
         BigInteger five = BigInteger.valueOf(5);
-        BigInteger seven = BigInteger.valueOf(8);
-        BigDecimal[] a = new BigDecimal[] { new BigDecimal(five, 18), new BigDecimal(five, 18) };
-        BigDecimal[] b = new BigDecimal[] { new BigDecimal(seven, 18), new BigDecimal(seven, 18) };
-        BigDecimal[] c = new BigDecimal[] {
-                new BigDecimal(five, 18), new BigDecimal(seven, 18)
-        };
-        BigDecimal[][] one = new BigDecimal[][] { a, b, a };
-        BigDecimal[][] two = new BigDecimal[][] { a, b, c };
-        BigDecimal[][][] triple = new BigDecimal[][][] { one, two };
+        BigInteger seven = BigInteger.valueOf(7);
+        BigDecimal[] a = new BigDecimal[] { new BigDecimal(five, 18), new BigDecimal(five, 18) }; //
+        BigDecimal[] b = new BigDecimal[] { new BigDecimal(seven, 18), new BigDecimal(seven, 18) }; //
+        BigDecimal[] c = new BigDecimal[] { new BigDecimal(seven, 18), new BigDecimal(seven, 18) }; //
+        BigDecimal[][] one = new BigDecimal[][] { a, b, a }; // a, b, a
+        BigDecimal[][] two = new BigDecimal[][] { a, b, c }; // a, b, c
+        BigDecimal[][][] triple = new BigDecimal[][][] { one, two }; // one, two
         Object[] argsIn = new Object[] { triple }; // new int[][][] { new int[][] { new int[] { 1, 3, 5 } } } // new short[] { (short) 6, (short) 7 } // new byte[] { 1, 2, 3 }
 
         byte[] abi = f.encodeCall(argsIn).array();

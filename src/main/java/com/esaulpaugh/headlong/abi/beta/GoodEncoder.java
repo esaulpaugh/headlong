@@ -133,10 +133,11 @@ public class GoodEncoder {
                     insertBigDecimalsHead(paramType, (BigDecimal[]) value, dest, offset, dynamic);
                 } else {
                     Object[] elements = (Object[]) value;
-                    if(dynamic) {
-                        insertOffset(offset, paramType, elements, dest);
+//                    ArrayType arrayType = (ArrayType) paramType;
+                    final StackableType elementType = ((ArrayType) paramType).elementType;
+                    if(paramType.dynamic) {
+                        insertOffset(offset, paramType, value, dest);
                     } else {
-                        StackableType elementType = ((ArrayType) paramType).elementType;
                         for(Object e : elements) {
                             encodeHead(elementType, e, dest, offset);
                         }
@@ -193,7 +194,7 @@ public class GoodEncoder {
     }
 
     private static void insertOffset(final int[] offset, StackableType paramType, Object object, ByteBuffer dest) {
-        if(paramType.dynamic) {
+//        if(paramType.dynamic) {
             System.out.println("\noffset[0] is " + offset[0]);
             insertInt(offset[0], dest); // 0xFFFFFFFFFF000000L +
 //            offset[0] = offset[0] - 32 + paramType.byteLength(object);
@@ -204,7 +205,7 @@ public class GoodEncoder {
             System.out.println("offset[0] = " + offset[0] + " + " + paramType.byteLength(object) + " - " + 32);
             offset[0] += paramType.byteLength(object) - 32;
             System.out.println("aka " + offset[0] + ", " + (offset[0] >>> 5));
-        }
+//        }
 //        else {
 ////            insertArrayStatic(bools, dest);
 //            for (Object object : objects) {
@@ -245,14 +246,18 @@ public class GoodEncoder {
                     insertBigDecimalsTail((BigDecimal[]) value, dest, dynamic);
                 } else {
                     Object[] objects = (Object[]) value;
-                    insertLength(objects.length, dest);
                     int[] offset = new int[] { objects.length << 5 }; // mul 32 (0x20)
-                    for(Object element : objects) {
-                        insertOffset(offset, paramType, element, dest);
+                    final StackableType elementType = ((ArrayType) paramType).elementType;
+                    if(dynamic) {
+                        insertLength(objects.length, dest);
                     }
-                    ArrayType arrayType = (ArrayType) paramType;
+                    if(elementType.dynamic) {
+                        for (Object element : objects) {
+                            insertOffset(offset, elementType, element, dest);
+                        }
+                    }
                     for (Object element : objects) {
-                        encodeTail(arrayType.elementType, element, dest);
+                        encodeTail(elementType, element, dest);
                     }
                 }
             } else if (value instanceof byte[]) {
