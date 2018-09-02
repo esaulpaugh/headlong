@@ -2,6 +2,7 @@ package com.esaulpaugh.headlong.abi.beta;
 
 import com.esaulpaugh.headlong.abi.beta.type.StackableType;
 import com.esaulpaugh.headlong.abi.beta.type.TupleType;
+import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.math.BigInteger;
@@ -59,7 +60,7 @@ public class Function {
         return GoodEncoder.encodeFunctionCall(this, args);
     }
 
-    public Object[] decodeCall(byte[] abi) {
+    public Tuple decodeCall(byte[] abi) {
         return paramTypes.decode(abi, SELECTOR_LEN);
     }
 

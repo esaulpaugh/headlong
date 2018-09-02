@@ -63,9 +63,13 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
             arrayLen = length;
             idx = index;
         }
+
         if(elementType instanceof ByteType) {
             byte[] out = new byte[arrayLen];
             System.arraycopy(buffer, idx, out, 0, arrayLen);
+            if(String.class.getName().equals(className)) {
+                return new Pair<>(new String(out, CHARSET_UTF_8), idx + arrayLen);
+            }
             return new Pair<>(out, idx + arrayLen);
         } else if(elementType instanceof AbstractInt256Type) {
             ByteBuffer bb = ByteBuffer.wrap(buffer, idx, arrayLen << 5); // mul 32
@@ -165,21 +169,21 @@ public abstract class ArrayType<T extends StackableType, E> extends StackableTyp
     private void decodeTails(final byte[] buffer, final int index, final int[] offsets, final Object[] dest) {
         final ArrayType et = (ArrayType) elementType;
         final int len = offsets.length;
-        if(dest instanceof String[]) {
-            for (int i = 0; i < len; i++) {
-                int offset = offsets[i];
-                if(offset > 0) {
-                    dest[i] = new String((byte[]) et.decodeArray(buffer, index + offset).first, CHARSET_UTF_8);
-                }
-            }
-        } else {
+//        if(dest instanceof String[]) {
+//            for (int i = 0; i < len; i++) {
+//                int offset = offsets[i];
+//                if(offset > 0) {
+//                    dest[i] = new String((byte[]) et.decodeArray(buffer, index + offset).first, CHARSET_UTF_8);
+//                }
+//            }
+//        } else {
             for (int i = 0; i < len; i++) {
                 int offset = offsets[i];
                 if (offset > 0) {
                     dest[i] = et.decodeArray(buffer, index + offset).first;
                 }
             }
-        }
+//        }
     }
 
     private static Pair<Object, Integer> decodeBooleanArray(int arrayLen, ByteBuffer bb, byte[] temp32) {

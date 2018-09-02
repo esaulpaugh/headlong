@@ -4,13 +4,16 @@ import com.esaulpaugh.headlong.abi.beta.type.array.ArrayType;
 import com.esaulpaugh.headlong.abi.beta.type.integer.AbstractInt256Type;
 import com.esaulpaugh.headlong.abi.beta.type.integer.IntType;
 import com.esaulpaugh.headlong.abi.beta.util.Pair;
+import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
 /**
  *
  */
-public class TupleType extends StackableType<Object[]> {
+public class TupleType extends StackableType<Tuple> {
 
     public final StackableType[] memberTypes;
+
+    private transient int tag = -1; // to hold tuple end index temporarily
 
     TupleType(String canonicalAbiType, boolean dynamic, StackableType... memberTypes) {
         super(canonicalAbiType, com.esaulpaugh.headlong.abi.beta.util.Tuple.class.getName(), dynamic); // Tuple.class.getName()
@@ -59,7 +62,7 @@ public class TupleType extends StackableType<Object[]> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Object[] decode(byte[] buffer, final int index) {
+    public Tuple decode(byte[] buffer, final int index) {
 
         final int tupleLen = memberTypes.length;
         Object[] members = new Object[tupleLen];
@@ -78,7 +81,9 @@ public class TupleType extends StackableType<Object[]> {
                     members[i] = results.first;
                     idx = results.second;
                 } else if (type instanceof TupleType) {
-                    members[i] = type.decode(buffer, idx); // TODO update idx *********************
+                    TupleType tt = (TupleType) type;
+                    members[i] = tt.decode(buffer, idx);
+                    idx = tt.tag;
                 } else {
                     members[i] = type.decode(buffer, idx);
                     idx += AbstractInt256Type.INT_LENGTH_BYTES;
@@ -102,12 +107,9 @@ public class TupleType extends StackableType<Object[]> {
             }
         }
 
-//        for(int i = 0; i < len; i++) {
-//            // TODO dynamic offsets
-//            StackableType type = memberTypes[i];
-//            System.out.println(i + (type.dynamic ? " dynamic" : " static"));
-//        }
-        return members;
+        this.tag = idx;
+
+        return new Tuple(members);
     }
 
     @Override
