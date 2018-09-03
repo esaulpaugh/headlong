@@ -249,14 +249,6 @@ public class BizarroIntegers {
         }
     }
 
-    /**
-     * Returns a negative long value.
-     * @param buffer
-     * @param index
-     * @param len
-     * @return
-     * @throws DecodeException
-     */
     public static long getLong(final byte[] buffer, final int index, final int len) throws DecodeException {
         // do sign extension for len < 8
         switch (len) {

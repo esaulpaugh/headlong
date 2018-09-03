@@ -6,15 +6,15 @@ import org.spongycastle.util.encoders.Hex;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Parser {
+public class NotationParser {
 
     private static final int OBJECT_ARRAY = 0;
     private static final int STRING = 1;
 
-    private static final int OBJECT_ARRAY_PREFIX_LEN = ObjectNotation.OBJECT_ARRAY_PREFIX.length();
-    private static final int OBJECT_ARRAY_SUFFIX_LEN = ObjectNotation.OBJECT_ARRAY_SUFFIX.length();
-    private static final int STRING_PREFIX_LEN = ObjectNotation.STRING_PREFIX.length();
-    private static final int STRING_SUFFIX_LEN = ObjectNotation.STRING_SUFFIX.length();
+    private static final int OBJECT_ARRAY_PREFIX_LEN = Notation.OBJECT_ARRAY_PREFIX.length();
+    private static final int OBJECT_ARRAY_SUFFIX_LEN = Notation.OBJECT_ARRAY_SUFFIX.length();
+    private static final int STRING_PREFIX_LEN = Notation.STRING_PREFIX.length();
+    private static final int STRING_SUFFIX_LEN = Notation.STRING_SUFFIX.length();
 
     public static List<Object> parse(String notation) {
         List<Object> top = new ArrayList<>();
@@ -26,7 +26,7 @@ public class Parser {
 
         while (i < end) {
 
-            int endArray = notation.indexOf(ObjectNotation.OBJECT_ARRAY_SUFFIX, i);
+            int endArray = notation.indexOf(Notation.OBJECT_ARRAY_SUFFIX, i);
             if(endArray == -1) {
                 endArray = Integer.MAX_VALUE;
             }
@@ -48,7 +48,7 @@ public class Parser {
             switch (nextObjectType) {
             case STRING:
                 objectStart = nextObjectndex + STRING_PREFIX_LEN;
-                objectEnd = notation.indexOf(ObjectNotation.STRING_SUFFIX, objectStart);
+                objectEnd = notation.indexOf(Notation.STRING_SUFFIX, objectStart);
                 parent.add(Hex.decode(notation.substring(objectStart, objectEnd)));
                 i = objectEnd + STRING_SUFFIX_LEN;
                 break;
@@ -66,8 +66,8 @@ public class Parser {
     }
 
     private static Pair<Integer, Integer> nextObject(String rlpon, int i) {
-        int o = rlpon.indexOf(ObjectNotation.OBJECT_ARRAY_PREFIX, i);
-        int s = rlpon.indexOf(ObjectNotation.STRING_PREFIX, i);
+        int o = rlpon.indexOf(Notation.OBJECT_ARRAY_PREFIX, i);
+        int s = rlpon.indexOf(Notation.STRING_PREFIX, i);
 
         if(s == -1) {
             if(o == -1) {

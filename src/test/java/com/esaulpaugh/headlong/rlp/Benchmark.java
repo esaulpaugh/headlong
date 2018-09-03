@@ -1,7 +1,7 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.rlp.example.Student;
-import com.esaulpaugh.headlong.rlp.util.ObjectNotation;
+import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.joemelsha.crypto.hash.Keccak;
 import org.junit.Assert;
 import org.junit.Test;
@@ -115,7 +115,7 @@ public class Benchmark {
 
         final int n = 1_000_000;
 
-        System.out.println("Doing " + new DecimalFormat("#,###").format(n) + " decodes of Student object:\n" + ObjectNotation.forEncoding(rlp));
+        System.out.println("Doing " + new DecimalFormat("#,###").format(n) + " decodes of Student object:\n" + Notation.forEncoding(rlp));
 
         long start, end;
 

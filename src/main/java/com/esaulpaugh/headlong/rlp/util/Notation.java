@@ -12,7 +12,7 @@ import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
 /**
  * An object notation for RLP, not unlike JSON. Call {@link #parse()} to parse the notation into the original list of objects.
  */
-public class ObjectNotation {
+public class Notation {
 
     private static final boolean LENIENT = true; // keep lenient so RLPItem.toString() doesn't throw, and to help with debugging
 
@@ -28,14 +28,14 @@ public class ObjectNotation {
 
     private final String value;
 
-    ObjectNotation(String value) {
+    Notation(String value) {
         if(value == null)
             throw new IllegalArgumentException("value cannot be null");
         this.value = value;
     }
 
     public List<Object> parse() {
-        return Parser.parse(value);
+        return NotationParser.parse(value);
     }
 
     private static final String[] INDENTATIONS;
@@ -82,11 +82,11 @@ public class ObjectNotation {
         return (int) end;
     }
 
-    public static ObjectNotation forEncoding(byte[] encoding) throws DecodeException {
+    public static Notation forEncoding(byte[] encoding) throws DecodeException {
         return forEncoding(encoding, 0, encoding.length);
     }
 
-    public static ObjectNotation forEncoding(byte[] buffer, int index, int end) throws DecodeException {
+    public static Notation forEncoding(byte[] buffer, int index, int end) throws DecodeException {
         if(index < 0 || index >= buffer.length) {
             throw new ArrayIndexOutOfBoundsException(index);
         }
@@ -104,7 +104,7 @@ public class ObjectNotation {
                 end,
                 0
         );
-        return new ObjectNotation(sb.append("\n)").toString());
+        return new Notation(sb.append("\n)").toString());
     }
 
     private static int buildLongList(final StringBuilder sb, final byte[] data, final int dataIndex, int end, final int depth) throws DecodeException {
@@ -269,11 +269,11 @@ public class ObjectNotation {
 
     @Override
     public boolean equals(Object other) {
-        if(!(other instanceof ObjectNotation)) {
+        if(!(other instanceof Notation)) {
             return false;
         }
 
-        return value.equals(((ObjectNotation) other).value);
+        return value.equals(((Notation) other).value);
     }
 
     @Override

@@ -10,7 +10,7 @@ import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
 
-public class ObjectNotationTest {
+public class NotationTest {
 
     private static final String NOTATION = "(\n" +
             "  \"636174\", \n" +
@@ -22,7 +22,7 @@ public class ObjectNotationTest {
     @Test
     public void parse() throws DecodeException {
         byte[] rlp2 = Hex.decode("8363617420c2c00900");
-        String notation = ObjectNotation.forEncoding(rlp2).toString();
+        String notation = Notation.forEncoding(rlp2).toString();
         System.out.println(notation);
 
     /*
@@ -36,7 +36,7 @@ public class ObjectNotationTest {
 
         Assert.assertEquals(NOTATION, notation);
 
-        List<Object> rlp2Objects = Parser.parse(notation);
+        List<Object> rlp2Objects = NotationParser.parse(notation);
         byte[] rlp3 = RLPEncoder.encodeSequentially(rlp2Objects);
         System.out.println(Strings.encode(rlp3, HEX)); // "8363617420c2c00900"
 

@@ -31,9 +31,9 @@ abstract class StackableType<T> {
         validate(this, value);
     }
 
-    private static void validate(final StackableType type, final Object value) { //  { // , final String expectedClassName
+    private static void validate(final StackableType type, final Object value) {
 
-        String expectedClassName = type.className; // TODO
+        final String expectedClassName = type.className;
 
         // will throw NPE if argument null
         if(!expectedClassName.equals(value.getClass().getName())) {

@@ -45,13 +45,16 @@ public class Function {
     }
 
     public Throwable error(Object... args) {
+        return error(new Tuple(args));
+    }
+
+    public Throwable error(Tuple args) {
         try {
-            paramTypes.validate(new com.esaulpaugh.headlong.abi.beta.util.Tuple(args));
-            return null;
+            paramTypes.validate(args);
         } catch (Throwable t) {
-//            System.err.println(t.getMessage());
             return t;
         }
+        return null;
     }
 
     public ByteBuffer encodeCall(Object... args) {

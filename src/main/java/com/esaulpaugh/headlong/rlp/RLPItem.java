@@ -2,7 +2,7 @@ package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
-import com.esaulpaugh.headlong.rlp.util.ObjectNotation;
+import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.rlp.util.Strings;
 
 import java.math.BigInteger;
@@ -191,7 +191,7 @@ public abstract class RLPItem {
     @Override
     public String toString() {
         try {
-            return ObjectNotation.forEncoding(buffer, index, endIndex).toString();
+            return Notation.forEncoding(buffer, index, endIndex).toString();
         } catch (DecodeException e) {
             throw new AssertionError(e);
         }
