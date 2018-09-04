@@ -14,7 +14,8 @@ public class DecodeTest {
 
     public static void main(String[] args0) throws ParseException {
 
-        String signature = "large(decimal[][])"; // (bytes1[3][2])[1]
+        // "large(bytes32[][])"
+        String signature = "large(bytes32)"; // (bytes1[3][2])[1]
 
         Function f0 = new Function(signature);
 //        final BigDecimal abba = new BigDecimal(BigInteger.valueOf(2).pow(128), 18);
@@ -23,7 +24,11 @@ public class DecodeTest {
 //        final BigDecimal pow = dabba.subtract(BigDecimal.valueOf(1));
 
         Object[] args = new Object[] {
-                new BigDecimal[][] { new BigDecimal[] { BigDecimal.valueOf(1.0000000001) }, new BigDecimal[] { BigDecimal.valueOf(2.0000000005) },  }
+
+                "01234567890123456789012345678901".getBytes()
+//                new byte[][][] { new byte[][] { "01234567890123456789012345678901".getBytes() } }
+
+//                new BigDecimal[][] { new BigDecimal[] { BigDecimal.valueOf(1.0000000001) }, new BigDecimal[] { BigDecimal.valueOf(2.0000000005) },  }
 //                new Tuple( new Tuple(new Tuple(new byte[][] { new byte[1] }, (byte) 9), Tuple.singleton("_".getBytes()), Tuple.singleton("yaaaaaaaaaaaaa".getBytes()) ), Tuple.singleton(new byte[45]) ),
 //                new Tuple( new Tuple(new Tuple(" ".getBytes(), "_".getBytes()), Tuple.singleton("_".getBytes()), Tuple.singleton("yaaaaaaaaaaaaa".getBytes()) ), Tuple.singleton(new byte[45]) ),
 //                new Tuple( new Tuple("_a".getBytes(), "yaaaaaaaaaaaaa".getBytes() ), Tuple.singleton(new byte[45]) )

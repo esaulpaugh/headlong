@@ -2,16 +2,17 @@ package com.esaulpaugh.headlong.abi.beta;
 
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import static com.esaulpaugh.headlong.abi.beta.Function.SELECTOR_LEN;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 class Encoder {
 
@@ -34,22 +35,19 @@ class Encoder {
 
         final TupleType tupleType = function.paramTypes;
         final StackableType[] types = tupleType.elementTypes;
-        final int expectedNumParams = types.length;
 
-        if(argsTuple.elements.length != expectedNumParams) {
-            throw new IllegalArgumentException("arguments.length <> types.size(): " + argsTuple.elements.length + " != " + types.length);
+        if(argsTuple.elements.length != types.length) {
+            throw new IllegalArgumentException("argsTuple.elements.length <> types.length: " + argsTuple.elements.length + " != " + types.length);
         }
 
         tupleType.validate(argsTuple);
 
         int encodingByteLen = tupleType.byteLength(argsTuple);
-
         final int allocation = SELECTOR_LEN + encodingByteLen;
-
         System.out.println("allocating " + allocation);
         ByteBuffer outBuffer = ByteBuffer.wrap(new byte[allocation]); // ByteOrder.BIG_ENDIAN by default
-        outBuffer.put(function.selector);
 
+        outBuffer.put(function.selector);
         insertTuple(tupleType, argsTuple, outBuffer);
 
         return outBuffer;
@@ -87,7 +85,7 @@ class Encoder {
 
     private static void encodeHead(StackableType paramType, Object value, ByteBuffer dest, int[] offset) {
         if(value instanceof String) {
-            insertStringHead(paramType, (String) value, dest, offset);
+            insertOffset(offset, paramType, value, dest); // strings always dynamic
         } else if(value.getClass().isArray()) {
             if(paramType.dynamic) {
                 insertOffset(offset, paramType, value, dest);
@@ -148,9 +146,11 @@ class Encoder {
      */
     private static void encodeTail(StackableType type, Object value, ByteBuffer dest) {
         if(value instanceof String) {
-            insertBytesTail(((String) value).getBytes(StandardCharsets.UTF_8), dest, true);
+            byte[] bytes = ((String) value).getBytes(UTF_8);
+            insertLength(bytes.length, dest);
+            insertBytes(bytes, dest);
         } else if(value.getClass().isArray()) {
-            encodeArrayDynamic((ArrayType) type, value, dest);
+            encodeArrayTail((ArrayType) type, value, dest);
         } else if(value instanceof Tuple) {
             insertTuple((TupleType) type, (Tuple) value, dest);
         } else {
@@ -159,11 +159,6 @@ class Encoder {
     }
 
     // ----------------------------------------------
-
-    private static void insertStringHead(StackableType paramType, String string, ByteBuffer dest, int[] offset) {
-        // strings always dynamic
-        insertOffset(offset, paramType, string, dest);
-    }
 
     private static void encodeArrayStatic(ArrayType arrayType, Object value, ByteBuffer dest) {
         if (value instanceof Object[]) {
@@ -192,18 +187,18 @@ class Encoder {
         }
     }
 
-    private static void encodeArrayDynamic(ArrayType arrayType, Object value, ByteBuffer dest) {
+    private static void encodeArrayTail(ArrayType arrayType, Object value, ByteBuffer dest) {
+        if(arrayType.dynamic) {
+            insertLength(Array.getLength(value), dest);
+        }
         if (value instanceof Object[]) {
             if(value instanceof BigInteger[]) {
-                insertBigIntegersTail((BigInteger[]) value, dest, arrayType.dynamic);
+                insertBigIntegers((BigInteger[]) value, dest);
             } else if(value instanceof BigDecimal[]) {
-                insertBigDecimalsTail((BigDecimal[]) value, dest, arrayType.dynamic);
+                insertBigDecimals((BigDecimal[]) value, dest);
             } else {
                 Object[] objects = (Object[]) value;
                 final StackableType elementType = arrayType.elementType;
-                if(arrayType.dynamic) { // if parent is dynamic
-                    insertLength(objects.length, dest);
-                }
                 if(elementType.dynamic) { // if elements are dynamic
                     final int[] offset = new int[] { objects.length << 5 }; // mul 32 (0x20)
                     for (Object element : objects) {
@@ -215,15 +210,15 @@ class Encoder {
                 }
             }
         } else if (value instanceof byte[]) {
-            insertBytesTail((byte[]) value, dest, arrayType.dynamic);
+            insertBytes((byte[]) value, dest);
         } else if (value instanceof int[]) {
-            insertIntsTail((int[]) value, dest, arrayType.dynamic);
+            insertInts((int[]) value, dest);
         } else if (value instanceof long[]) {
-            insertLongsTail((long[]) value, dest, arrayType.dynamic);
+            insertLongs((long[]) value, dest);
         } else if (value instanceof short[]) {
-            insertShortsTail((short[]) value, dest, arrayType.dynamic);
+            insertShorts((short[]) value, dest);
         } else if(value instanceof boolean[]) {
-            insertBooleansTail((boolean[]) value, dest, arrayType.dynamic);
+            insertBooleans((boolean[]) value, dest);
         } else {
             throw new Error("unexpected array type: " + value.getClass().getName());
         }
@@ -250,55 +245,24 @@ class Encoder {
 
     // -------------------------------------------------------------------------------------------------
 
-    private static void insertBooleansTail(boolean[] bools, ByteBuffer dest, boolean dynamic) {
-        if(dynamic) insertLength(bools.length, dest);
-        insertBooleans(bools, dest);
-    }
-
-    private static void insertBytesTail(byte[] bytes, ByteBuffer dest, boolean dynamic) {
-        if(dynamic) insertLength(bytes.length, dest);
-        insertBytes(bytes, dest);
-    }
-
-    private static void insertShortsTail(short[] shorts, ByteBuffer dest, boolean dynamic) {
-        if(dynamic) insertLength(shorts.length, dest);
-        insertShorts(shorts, dest);
-    }
-
-    private static void insertIntsTail(int[] ints, ByteBuffer dest, boolean dynamic) {
-        if(dynamic) insertLength(ints.length, dest);
-        insertInts(ints, dest);
-    }
-
-    private static void insertLongsTail(long[] longs, ByteBuffer dest, boolean dynamic) {
-        if(dynamic) insertLength(longs.length, dest);
-        insertLongs(longs, dest);
-    }
-
-    private static void insertBigIntegersTail(BigInteger[] bigInts, ByteBuffer dest, boolean dynamic) {
-        if(dynamic) insertLength(bigInts.length, dest);
-        insertBigIntegers(bigInts, dest);
-    }
-
-    private static void insertBigDecimalsTail(BigDecimal[] bigDecs, ByteBuffer dest, boolean dynamic) {
-        if(dynamic) insertLength(bigDecs.length, dest);
-        insertBigDecimals(bigDecs, dest);
-    }
-
     private static void insertBooleans(boolean[] bools, ByteBuffer dest) {
         for (boolean e : bools) {
             dest.put(e ? BOOLEAN_TRUE : BOOLEAN_FALSE);
         }
     }
 
+    private static int paddingLength(int len) {
+        int mod = len & 31;
+        return mod == 0
+                ? 0
+                : 32 - mod;
+    }
+
     private static void insertBytes(byte[] bytes, ByteBuffer dest) {
-        final int len = bytes.length;
-        if(len > 0) { // don't pad empty array to 32 bytes
-            dest.put(bytes);
-            final int remainder = 32 - (len & 31); // 32 - (len % 32)
-            for (int i = 0; i < remainder; i++) {
-                dest.put(ZERO_BYTE);
-            }
+        dest.put(bytes);
+        final int paddingLength = paddingLength(bytes.length);
+        for (int i = 0; i < paddingLength; i++) {
+            dest.put(ZERO_BYTE);
         }
     }
 
@@ -349,6 +313,7 @@ class Encoder {
     }
 
     private static void insertBool(boolean bool, ByteBuffer dest) {
-        insertInt(bool ? 1L : 0L, dest);
+        dest.put(bool ? BOOLEAN_TRUE : BOOLEAN_FALSE);
+//        insertInt(bool ? 1L : 0L, dest);
     }
 }

@@ -21,7 +21,7 @@ public class BaseTypeInfo {
         o = putInts(o, map, false);
         o = putInts(o, map, true);
 
-        for (int i = 1; i < 32; i++) {
+        for (int i = 1; i <= 32; i++) {
             String canonical = "bytes" + i;
             map.put(canonical, new BaseTypeInfo(o++, canonical, byte[].class, i, ByteType.UNSIGNED_BYTE_OBJECT));
         }
