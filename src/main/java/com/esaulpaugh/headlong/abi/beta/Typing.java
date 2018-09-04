@@ -183,6 +183,7 @@ abstract class Typing {
             case "bool": type = new BooleanType(); break;
             case "bytes":
             case "string": type = new ArrayType<ByteType, byte[]>(canonicalType, info.className, info.arrayClassNameStub, (ByteType) info.elementType, DYNAMIC_LENGTH, true); break;
+            case "decimal": type = new BigDecimalType(canonicalType, info.bitLength, info.scale, true); break;
             default: type = null;
             }
         } else {

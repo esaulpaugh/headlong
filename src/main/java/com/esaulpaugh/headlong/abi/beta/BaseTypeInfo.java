@@ -35,7 +35,7 @@ public class BaseTypeInfo {
         map.put("address", new BaseTypeInfo(o++, "address", null, "uint160", BigInteger.class, null, 160, 0, false, -1, null));
         map.put("bytes", new BaseTypeInfo(o++, "bytes", byte[].class, -1, ByteType.UNSIGNED_BYTE_OBJECT));
         map.put("string", new BaseTypeInfo(o++, "string", String.class, -1, ByteType.UNSIGNED_BYTE_OBJECT));
-        map.put("decimal", new BaseTypeInfo(o++, "decimal", null, "fixed256x10", BigDecimal.class, null, -1, 0, true, -1, null));
+        map.put("decimal", new BaseTypeInfo(o++, "decimal", null, "fixed256x10", BigDecimal.class, null, 256, 10, true, -1, null));
 
         System.out.println("o = " + o);
 

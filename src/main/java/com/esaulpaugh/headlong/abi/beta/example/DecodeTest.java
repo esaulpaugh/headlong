@@ -3,6 +3,7 @@ package com.esaulpaugh.headlong.abi.beta.example;
 import com.esaulpaugh.headlong.abi.beta.Function;
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
@@ -13,7 +14,7 @@ public class DecodeTest {
 
     public static void main(String[] args0) throws ParseException {
 
-        String signature = "large(uint8[][])"; // (bytes1[3][2])[1]
+        String signature = "large(decimal[][])"; // (bytes1[3][2])[1]
 
         Function f0 = new Function(signature);
 //        final BigDecimal abba = new BigDecimal(BigInteger.valueOf(2).pow(128), 18);
@@ -22,7 +23,7 @@ public class DecodeTest {
 //        final BigDecimal pow = dabba.subtract(BigDecimal.valueOf(1));
 
         Object[] args = new Object[] {
-                new byte[][] {  }
+                new BigDecimal[][] { new BigDecimal[] { BigDecimal.valueOf(1.0000000001) }, new BigDecimal[] { BigDecimal.valueOf(2.0000000005) },  }
 //                new Tuple( new Tuple(new Tuple(new byte[][] { new byte[1] }, (byte) 9), Tuple.singleton("_".getBytes()), Tuple.singleton("yaaaaaaaaaaaaa".getBytes()) ), Tuple.singleton(new byte[45]) ),
 //                new Tuple( new Tuple(new Tuple(" ".getBytes(), "_".getBytes()), Tuple.singleton("_".getBytes()), Tuple.singleton("yaaaaaaaaaaaaa".getBytes()) ), Tuple.singleton(new byte[45]) ),
 //                new Tuple( new Tuple("_a".getBytes(), "yaaaaaaaaaaaaa".getBytes() ), Tuple.singleton(new byte[45]) )
