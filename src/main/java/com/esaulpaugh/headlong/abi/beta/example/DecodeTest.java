@@ -13,7 +13,7 @@ public class DecodeTest {
 
     public static void main(String[] args0) throws ParseException {
 
-        String signature = "large((int24[][]))";
+        String signature = "large(uint8[][])"; // (bytes1[3][2])[1]
 
         Function f0 = new Function(signature);
 //        final BigDecimal abba = new BigDecimal(BigInteger.valueOf(2).pow(128), 18);
@@ -22,18 +22,26 @@ public class DecodeTest {
 //        final BigDecimal pow = dabba.subtract(BigDecimal.valueOf(1));
 
         Object[] args = new Object[] {
-
-                Tuple.singleton(new int[][] {
-                        new int[] { 3, 5, 9 },
-
-                        new int[] { 1, 3, 5 }
-                }
-                )
+                new byte[][] {  }
+//                new Tuple( new Tuple(new Tuple(new byte[][] { new byte[1] }, (byte) 9), Tuple.singleton("_".getBytes()), Tuple.singleton("yaaaaaaaaaaaaa".getBytes()) ), Tuple.singleton(new byte[45]) ),
+//                new Tuple( new Tuple(new Tuple(" ".getBytes(), "_".getBytes()), Tuple.singleton("_".getBytes()), Tuple.singleton("yaaaaaaaaaaaaa".getBytes()) ), Tuple.singleton(new byte[45]) ),
+//                new Tuple( new Tuple("_a".getBytes(), "yaaaaaaaaaaaaa".getBytes() ), Tuple.singleton(new byte[45]) )
+//                new Tuple[] {
+//                        Tuple.singleton(
+//                                new byte[][][] {
+//                                        new byte[][] { "_".getBytes(), "y".getBytes(), "y".getBytes() },
+//                                        new byte[][] { "a".getBytes(), "B".getBytes(), "z".getBytes() },
+//
+////                                new int[] { 3, 5, 9 },
+////                                new int[] { 1, 3, 5 }
+//                                }
+//                        )
+//                }
 
         };
         ByteBuffer bb = f0.encodeCall(args); // , pow, upow
         Tuple t = f0.decodeCall(bb.array());
-        System.out.println(Arrays.deepEquals(t.elements, args));
+        System.out.println("========= " + Arrays.deepEquals(t.elements, args));
 
 //        if(true)return;
 

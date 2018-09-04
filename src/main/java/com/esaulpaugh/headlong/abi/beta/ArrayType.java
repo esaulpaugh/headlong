@@ -104,7 +104,7 @@ abstract class ArrayType<T extends StackableType, A> extends DynamicType<A> {
     @SuppressWarnings("unchecked")
     A decodeDynamic(final byte[] buffer, final int index, final int[] returnIndex) {
         final int arrayLen;
-        int idx;
+        final int idx;
         if(dynamic) {
             arrayLen = ARRAY_LENGTH_TYPE.decodeStatic(buffer, index);
             System.out.println("arrayLen " + arrayLen + " @ " + index);
@@ -118,7 +118,7 @@ abstract class ArrayType<T extends StackableType, A> extends DynamicType<A> {
         if(elementType instanceof ByteType) {
             byte[] out = new byte[arrayLen];
             System.arraycopy(buffer, idx, out, 0, arrayLen);
-            returnIndex[0] = roundUp(idx + arrayLen);
+            returnIndex[0] = idx + roundUp(arrayLen);
             if(STRING_CLASS_NAME.equals(className)) {
                 return (A) new String(out, CHARSET_UTF_8);
             }
@@ -185,9 +185,9 @@ abstract class ArrayType<T extends StackableType, A> extends DynamicType<A> {
         } else if(elementType instanceof TupleType) {
             final TupleType tt = (TupleType) elementType;
             Tuple[] tuples = new Tuple[arrayLen];
+            returnIndex[0] = idx;
             for(int i = 0; i < arrayLen; i++) {
-                tuples[i] = tt.decodeDynamic(buffer, idx, returnIndex);
-                idx = returnIndex[0];
+                tuples[i] = tt.decodeDynamic(buffer, returnIndex[0], returnIndex);
             }
             return (A) tuples;
         } else {
@@ -203,45 +203,43 @@ abstract class ArrayType<T extends StackableType, A> extends DynamicType<A> {
         try {
             dest = (Object[]) Array.newInstance(Class.forName(elementArrayType.className), arrayLen);
         } catch (ClassNotFoundException e) {
-            throw new Error(e);
+            throw new RuntimeException(e);
         }
+
         int[] offsets = new int[arrayLen];
 
-        int idx = decodeHeads(buffer, index, offsets, dest, returnIndex);
+        decodeArrayHeads(elementArrayType, buffer, index, offsets, dest, returnIndex);
 
-        if (dynamic) {
-            decodeTails(buffer, index, offsets, dest, returnIndex);
+        if(dynamic) {
+            decodeArrayTails(elementArrayType, buffer, index, offsets, dest, returnIndex);
         }
-
-        returnIndex[0] = idx;
         return dest;
     }
 
-    @SuppressWarnings("unchecked")
-    private int decodeHeads(final byte[] buffer, final int index, final int[] offsets, final Object[] dest, int[] returnIndex) {
-        final ArrayType elementArrayType = (ArrayType) elementType;
+    private static void decodeArrayHeads(ArrayType elementArrayType, final byte[] buffer, final int index, final int[] offsets, final Object[] dest, int[] returnIndex) {
         int idx = index;
         final int len = offsets.length;
-        for (int i = 0; i < len; i++) {
-            if (elementArrayType.dynamic) {
+        if(elementArrayType.dynamic) {
+            for (int i = 0; i < len; i++) {
                 offsets[i] = Encoder.OFFSET_TYPE.decodeStatic(buffer, idx);
                 System.out.println("offset " + offsets[i] + " @ " + idx + ", points to " + (index + offsets[i]) + ", increment to " + (idx + AbstractInt256Type.INT_LENGTH_BYTES));
                 idx += AbstractInt256Type.INT_LENGTH_BYTES;
-            } else {
-                dest[i] = elementArrayType.decodeDynamic(buffer, idx, returnIndex);
-                idx = returnIndex[0];
+            }
+            returnIndex[0] = idx;
+        } else {
+            returnIndex[0] = idx;
+            for (int i = 0; i < len; i++) {
+                dest[i] = elementArrayType.decodeDynamic(buffer, returnIndex[0], returnIndex);
             }
         }
-        return idx;
     }
 
-    private void decodeTails(final byte[] buffer, final int index, final int[] offsets, final Object[] dest, int[] returnIndex) {
-        final ArrayType et = (ArrayType) elementType;
+    private void decodeArrayTails(ArrayType elementArrayType, final byte[] buffer, final int index, final int[] offsets, final Object[] dest, int[] returnIndex) {
         final int len = offsets.length;
         for (int i = 0; i < len; i++) {
             int offset = offsets[i];
             if (offset > 0) {
-                dest[i] = et.decodeDynamic(buffer, index + offset, returnIndex);
+                dest[i] = elementArrayType.decodeDynamic(buffer, index + offset, returnIndex);
             }
         }
     }

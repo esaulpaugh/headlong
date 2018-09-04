@@ -106,21 +106,17 @@ class TupleType extends DynamicType<Tuple> {
             }
         }
 
-        if(dynamic) {
-            for (int i = 0; i < tupleLen; i++) {
-                idx = index + offsets[i];
-                if (idx > index) {
-                    StackableType type = elementTypes[i];
-                    if (type instanceof DynamicType) {
-                        members[i] = ((DynamicType) type).decodeDynamic(buffer, idx, returnIndex);
-                    } else {
-                        members[i] = ((StaticType) type).decodeStatic(buffer, idx);
-                    }
-                }
-            }
+        if(!dynamic) {
+            returnIndex[0] = idx;
+            return new Tuple(members);
         }
 
-        returnIndex[0] = idx;
+        for (int i = 0; i < tupleLen; i++) {
+            idx = index + offsets[i];
+            if (idx > index) {
+                members[i] = ((DynamicType) elementTypes[i]).decodeDynamic(buffer, idx, returnIndex);
+            }
+        }
         return new Tuple(members);
     }
 
