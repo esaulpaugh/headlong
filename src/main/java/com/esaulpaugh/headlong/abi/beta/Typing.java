@@ -3,9 +3,8 @@ package com.esaulpaugh.headlong.abi.beta;
 import java.math.BigInteger;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.EmptyStackException;
 
-import static com.esaulpaugh.headlong.abi.beta.DynamicArrayType.DYNAMIC_LENGTH;
+import static com.esaulpaugh.headlong.abi.beta.ArrayType.DYNAMIC_LENGTH;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 abstract class Typing {
@@ -40,23 +39,19 @@ abstract class Typing {
 
             final String baseClassName = buildTypeStack(canonicalType, arrayOpenIndex - 1, typeStack, brackets, baseTuple);
 
+            final int arrayLength;
+            if(arrayOpenIndex == fromIndex) { // i.e. []
+                arrayLength = DYNAMIC_LENGTH;
+            } else {
+                arrayLength = Integer.parseUnsignedInt(canonicalType.substring(arrayOpenIndex + 1, index));
+            }
+
             brackets.append('[');
             final String className = brackets.toString() + baseClassName;
 
-            if(arrayOpenIndex == fromIndex) { // i.e. []
-                typeStack.push(new DynamicArrayType<StackableType, Object>(canonicalType, className, null, typeStack.peek(), DYNAMIC_LENGTH));
-            } else { // e.g. [10]
-                final int length = Integer.parseUnsignedInt(canonicalType.substring(arrayOpenIndex + 1, index));
-                final StackableType top = typeStack.peek();
-                if(top == null) { // should never happen
-                    throw new EmptyStackException();
-                }
-                if(top.dynamic) {
-                    typeStack.push(new DynamicArrayType<StackableType, Object>(canonicalType, className, null, top, length));
-                } else {
-                    typeStack.push(new StaticArrayType<StackableType, Object>(canonicalType, className, null, top, length));
-                }
-            }
+            final StackableType top = typeStack.peek();
+            final boolean dynamic = arrayLength == DYNAMIC_LENGTH || top.dynamic;
+            typeStack.push(new ArrayType<StackableType, Object>(canonicalType, className, null, top, arrayLength, dynamic));
 
             return baseClassName;
         } else {
@@ -184,10 +179,10 @@ abstract class Typing {
             case "bytes29":
             case "bytes30":
             case "bytes31":
-            case "bytes32": type = new StaticArrayType<ByteType, byte[]>(canonicalType, info.className, info.arrayClassNameStub, (ByteType) info.elementType, info.arrayLength); break;
+            case "bytes32": type = new ArrayType<ByteType, byte[]>(canonicalType, info.className, info.arrayClassNameStub, (ByteType) info.elementType, info.arrayLength, false); break;
             case "bool": type = new BooleanType(); break;
             case "bytes":
-            case "string": type = new DynamicArrayType<ByteType, byte[]>(canonicalType, info.className, info.arrayClassNameStub, (ByteType) info.elementType, DYNAMIC_LENGTH); break;
+            case "string": type = new ArrayType<ByteType, byte[]>(canonicalType, info.className, info.arrayClassNameStub, (ByteType) info.elementType, DYNAMIC_LENGTH, true); break;
             default: type = null;
             }
         } else {

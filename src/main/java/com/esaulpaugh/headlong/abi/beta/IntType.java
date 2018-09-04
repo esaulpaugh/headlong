@@ -25,7 +25,7 @@ class IntType extends AbstractInt256Type<Integer> {
     }
 
     @Override
-    Integer decodeStatic(byte[] buffer, int index) {
+    Integer decode(byte[] buffer, int index) {
         BigInteger bi = new BigInteger(Arrays.copyOfRange(buffer, index, index + INT_LENGTH_BYTES));
         long longVal = bi.longValueExact();
         validateLongBitLen(longVal);

@@ -6,8 +6,8 @@ import java.util.Arrays;
 
 class BigDecimalType extends AbstractInt256Type<BigDecimal> {
 
-    static final String CLASS_NAME = BigDecimal.class.getName();
-    static final String ARRAY_CLASS_NAME_STUB = BigDecimal[].class.getName().replaceFirst("\\[", "");
+    private static final String CLASS_NAME = BigDecimal.class.getName();
+    private static final String ARRAY_CLASS_NAME_STUB = BigDecimal[].class.getName().replaceFirst("\\[", "");
 
     final int scale;
 
@@ -27,7 +27,7 @@ class BigDecimalType extends AbstractInt256Type<BigDecimal> {
     }
 
     @Override
-    BigDecimal decodeStatic(byte[] buffer, int index) {
+    BigDecimal decode(byte[] buffer, int index) {
         BigInteger bi = new BigInteger(Arrays.copyOfRange(buffer, index, index + INT_LENGTH_BYTES));
         BigDecimal dec = new BigDecimal(bi, scale);
         validateBigIntBitLen(bi);

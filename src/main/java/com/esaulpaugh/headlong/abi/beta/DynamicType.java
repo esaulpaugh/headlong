@@ -8,8 +8,8 @@ abstract class DynamicType<V> extends StackableType<V> {
 
     @Override
     V decode(byte[] buffer, int index) {
-        return decodeDynamic(buffer, index, new int[1]);
-//        throw new UnsupportedOperationException("use decodeDynamic");
+//        return decodeDynamic(buffer, index, new int[1]);
+        throw new UnsupportedOperationException("use decodeDynamic");
     }
 
     abstract V decodeDynamic(byte[] buffer, int index, int[] returnIndex);

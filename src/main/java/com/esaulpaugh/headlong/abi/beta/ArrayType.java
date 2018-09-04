@@ -8,15 +8,16 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import static com.esaulpaugh.headlong.abi.beta.DynamicArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
 
-abstract class ArrayType<T extends StackableType, A> extends DynamicType<A> {
+class ArrayType<T extends StackableType, A> extends DynamicType<A> {
 
     private static final String STRING_CLASS_NAME = String.class.getName();
 
     private static final int ARRAY_LENGTH_BYTE_LEN = IntType.MAX_BIT_LEN;
     private static final IntType ARRAY_LENGTH_TYPE = new IntType("uint32", ARRAY_LENGTH_BYTE_LEN, false);
+
+    static final int DYNAMIC_LENGTH = -1;
 
     final T elementType;
     private final int length;
@@ -29,13 +30,10 @@ abstract class ArrayType<T extends StackableType, A> extends DynamicType<A> {
         this.arrayClassNameStub = arrayClassNameStub;
         this.elementType = elementType;
         this.length = length;
-//        try {
-//            if(!(Class.forName(className).isArray() || STRING_CLASS_NAME.equals(className))) {
-//                throw new AssertionError(className);
-//            }
-//        } catch (ClassNotFoundException e) {
-//            throw new AssertionError(e);
-//        }
+
+        if(length < DYNAMIC_LENGTH) {
+            throw new IllegalArgumentException("length must be non-negative or " + DYNAMIC_LENGTH + ". found: " + length);
+        }
     }
 
     @Override
@@ -77,12 +75,10 @@ abstract class ArrayType<T extends StackableType, A> extends DynamicType<A> {
                 return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
             }
             if (value instanceof Object[]) {
-                int len = 0;
-                for (Object element : (Object[]) value) {
-                    len += this.elementType.byteLength(element);
-                    if(this.elementType.dynamic) {
-                        len += ARRAY_LENGTH_BYTE_LEN;
-                    }
+                Object[] elements = (Object[]) value;
+                int len = elementType.dynamic ? elements.length << 5 : 0; // 32 bytes per offset
+                for (Object element : elements) {
+                    len += elementType.byteLength(element);
                 }
                 return dynamic ? ARRAY_LENGTH_BYTE_LEN + len : len;
             }
@@ -106,7 +102,7 @@ abstract class ArrayType<T extends StackableType, A> extends DynamicType<A> {
         final int arrayLen;
         final int idx;
         if(dynamic) {
-            arrayLen = ARRAY_LENGTH_TYPE.decodeStatic(buffer, index);
+            arrayLen = ARRAY_LENGTH_TYPE.decode(buffer, index);
             System.out.println("arrayLen " + arrayLen + " @ " + index);
             checkLength(arrayLen);
             idx = index + ARRAY_LENGTH_BYTE_LEN;
@@ -221,7 +217,7 @@ abstract class ArrayType<T extends StackableType, A> extends DynamicType<A> {
         final int len = offsets.length;
         if(elementArrayType.dynamic) {
             for (int i = 0; i < len; i++) {
-                offsets[i] = Encoder.OFFSET_TYPE.decodeStatic(buffer, idx);
+                offsets[i] = Encoder.OFFSET_TYPE.decode(buffer, idx);
                 System.out.println("offset " + offsets[i] + " @ " + idx + ", points to " + (index + offsets[i]) + ", increment to " + (idx + AbstractInt256Type.INT_LENGTH_BYTES));
                 idx += AbstractInt256Type.INT_LENGTH_BYTES;
             }
@@ -234,7 +230,7 @@ abstract class ArrayType<T extends StackableType, A> extends DynamicType<A> {
         }
     }
 
-    private void decodeArrayTails(ArrayType elementArrayType, final byte[] buffer, final int index, final int[] offsets, final Object[] dest, int[] returnIndex) {
+    private static void decodeArrayTails(ArrayType elementArrayType, final byte[] buffer, final int index, final int[] offsets, final Object[] dest, int[] returnIndex) {
         final int len = offsets.length;
         for (int i = 0; i < len; i++) {
             int offset = offsets[i];
@@ -271,7 +267,8 @@ abstract class ArrayType<T extends StackableType, A> extends DynamicType<A> {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<" + elementType + ">(" + length + ")";
+        return dynamic ? "DYNAMIC[]" : "STATIC[]"
+                + "<" + elementType + ">(" + length + ")";
     }
 
     @Override

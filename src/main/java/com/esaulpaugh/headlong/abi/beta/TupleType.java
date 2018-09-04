@@ -12,8 +12,6 @@ class TupleType extends DynamicType<Tuple> {
 
     final StackableType[] elementTypes;
 
-//    transient int tag = -1; // to hold tuple end index temporarily
-
     private TupleType(String canonicalType, boolean dynamic, StackableType... elementTypes) {
         super(canonicalType, dynamic);
         this.elementTypes = elementTypes;
@@ -62,10 +60,10 @@ class TupleType extends DynamicType<Tuple> {
         int len = 0;
         for (int i = 0; i < elementTypes.length; i++) {
             StackableType type = elementTypes[i];
-            len += type.byteLength(tuple.elements[i]);
             if(type.dynamic) {
-                len += 32; // for offset
+                len += IntType.INT_LENGTH_BYTES; // for offset
             }
+            len += type.byteLength(tuple.elements[i]);
         }
 
         return len;
@@ -90,17 +88,17 @@ class TupleType extends DynamicType<Tuple> {
 
         int idx = index;
         for (int i = 0; i < tupleLen; i++) {
-            StackableType type = elementTypes[i];
-            if (type.dynamic) {
-                offsets[i] = Encoder.OFFSET_TYPE.decodeStatic(buffer, idx);
-                System.out.println("offset " + offsets[i] + " @ " + idx);
+            StackableType elementType = elementTypes[i];
+            if (elementType.dynamic) {
+                offsets[i] = Encoder.OFFSET_TYPE.decode(buffer, idx);
                 idx += AbstractInt256Type.INT_LENGTH_BYTES;
+                System.out.println("offset " + offsets[i] + " @ " + idx);
             } else {
-                if (type instanceof DynamicType) {
-                    members[i] = ((DynamicType) type).decodeDynamic(buffer, idx, returnIndex);
+                if (elementType instanceof DynamicType) {
+                    members[i] = ((DynamicType) elementType).decodeDynamic(buffer, idx, returnIndex);
                     idx = returnIndex[0];
                 } else {
-                    members[i] = ((StaticType) type).decodeStatic(buffer, idx);
+                    members[i] = elementType.decode(buffer, idx);
                     idx += AbstractInt256Type.INT_LENGTH_BYTES;
                 }
             }
