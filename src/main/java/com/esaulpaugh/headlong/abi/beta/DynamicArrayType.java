@@ -1,8 +1,9 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 /**
- * Represents any array with a variable byte-length, whether because the array length is not fixed or it contains at
- * least one variable-length (dynamic) element.
+ * Represents any array with a variable byte-length, whether because the array length is not fixed or it contains
+ * variable-length (dynamic) elements.
+ *
  */
 class DynamicArrayType<T extends StackableType, E> extends ArrayType<T, E> {
 

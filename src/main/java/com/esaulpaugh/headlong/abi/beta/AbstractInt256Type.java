@@ -5,7 +5,7 @@ import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
 
 import java.math.BigInteger;
 
-abstract class AbstractInt256Type<V> extends StackableType<V> { // instance of V should be instanceof Number or Boolean
+abstract class AbstractInt256Type<V> extends StaticType<V> { // instance of V should be instanceof Number or Boolean
 
     static final int INT_LENGTH_BYTES = 32;
 

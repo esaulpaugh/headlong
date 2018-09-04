@@ -184,10 +184,10 @@ abstract class Typing {
             case "bytes29":
             case "bytes30":
             case "bytes31":
-            case "bytes32": type = new StaticArrayType<ByteType, Byte>(canonicalType, info.className, info.arrayClassNameStub, (ByteType) info.elementType, info.arrayLength); break;
+            case "bytes32": type = new StaticArrayType<ByteType, byte[]>(canonicalType, info.className, info.arrayClassNameStub, (ByteType) info.elementType, info.arrayLength); break;
             case "bool": type = new BooleanType(); break;
             case "bytes":
-            case "string": type = new DynamicArrayType<ByteType, Byte>(canonicalType, info.className, info.arrayClassNameStub, (ByteType) info.elementType, DYNAMIC_LENGTH); break;
+            case "string": type = new DynamicArrayType<ByteType, byte[]>(canonicalType, info.className, info.arrayClassNameStub, (ByteType) info.elementType, DYNAMIC_LENGTH); break;
             default: type = null;
             }
         } else {
@@ -220,74 +220,3 @@ abstract class Typing {
         return isElement ? type.arrayClassNameStub() : type.className();
     }
 }
-
-//        int bits = Integer.parseUnsignedInt(abiBaseType, "uint".length(), abiBaseType.length(), 10); // Java 9
-
-//        int idx;
-//        // ~5,220 possible base types (mostly (u)fixedMxN)
-//        if (abi.charAt(0) == '(') {
-////            if(baseTuple == null) {
-////                throw new NullPointerException("baseTuple is null");
-////            }
-//            typeStack.push(baseTuple);
-//            return isElement ? CLASS_NAME_ELEMENT_TUPLE : CLASS_NAME_TUPLE;
-//        } else if ("bool".equals(abi)) {
-//            className = isElement ? BooleanType.ARRAY_CLASS_NAME_STUB : BooleanType.CLASS_NAME;
-//            typeStack.push(new BooleanType()); // com.esaulpaugh.headlong.abi.beta.ByteType.booleanType(abi, className)); // new ByteType(abi, className));
-//        } else if ("address".equals(abi)) { // same as uint160
-//            className = isElement ? BigIntegerType.ARRAY_CLASS_NAME_STUB : BigIntegerType.CLASS_NAME;
-//            typeStack.push(new BigIntegerType("address", 160, false)); // "uint160"
-////            typeStack.push(new StaticArrayType(abi, className, BYTE_PRIMITIVE, 20));
-//        } else if ((idx = abi.indexOf("int")) != -1) {
-//            if (abi.length() == "int".length()) {
-//                throw new IllegalArgumentException("non-canonical: " + abi);
-//            }
-//            int bitLength = Integer.parseUnsignedInt(abi.substring(idx + "int".length()), 10);
-//
-//            AbstractInt256Type integer = AbstractInt256Type.makeInt(abi, bitLength, abi.charAt(0) == 'u');
-//            className = isElement ? integer.arrayClassNameStub() : integer.className();
-//            typeStack.push(integer);
-//        } else if (abi.startsWith("fixed")) {
-//            if (abi.length() == "fixed".length()) {
-//                throw new IllegalArgumentException("non-canonical: " + abi);
-//            }
-//            final int indexOfX = abi.indexOf('x', "fixed".length());
-//            int bits = Integer.parseUnsignedInt(abi.substring("fixed".length(), indexOfX), 10);
-//            int scale = Integer.parseUnsignedInt(abi.substring(indexOfX + 1), 10);
-//            if(bits % 8 != 0 || bits < 8 || bits > 256 || scale < 1 || scale > 80) {
-//                return null;
-//            }
-//            className = isElement ? BigDecimalType.ARRAY_CLASS_NAME_STUB : BigDecimalType.CLASS_NAME;
-//            typeStack.push(new BigDecimalType(abi, bits, scale, true));
-//        } else if (abi.startsWith("ufixed")) {
-//            if (abi.length() == "ufixed".length()) {
-//                throw new IllegalArgumentException("non-canonical: " + abi);
-//            }
-//            final int indexOfX = abi.indexOf('x', "ufixed".length());
-//            int bits = Integer.parseUnsignedInt(abi.substring("ufixed".length(), indexOfX), 10);
-//            int scale = Integer.parseUnsignedInt(abi.substring(indexOfX + 1), 10);
-//            if(bits % 8 != 0 || bits < 8 || bits > 256 || scale < 1 || scale > 80) {
-//                return null;
-//            }
-//            className = isElement ? BigDecimalType.ARRAY_CLASS_NAME_STUB : BigDecimalType.CLASS_NAME;
-//            typeStack.push(new BigDecimalType(abi, bits, scale, false));
-//        } else if ("function".equals(abi)) {
-//            className = CLASS_NAME_ARRAY_BYTE;
-//            typeStack.push(new StaticArrayType<ByteType, Byte>(abi, className, UNSIGNED_BYTE_OBJECT, 24));
-//        } else if (abi.startsWith("bytes")) {
-//            className = CLASS_NAME_ARRAY_BYTE;
-//            if (abi.length() > "bytes".length()) {
-//                int bytes = Integer.parseUnsignedInt(abi.substring("bytes".length()), 10);
-//                if(bytes < 1 || bytes > 32) {
-//                    return null;
-//                }
-//                typeStack.push(new StaticArrayType<ByteType, Byte>(abi, className, UNSIGNED_BYTE_OBJECT, bytes));
-//            } else {
-//                typeStack.push(new DynamicArrayType<ByteType, Byte>(abi, className, UNSIGNED_BYTE_OBJECT, DYNAMIC_LENGTH));
-//            }
-//        } else if ("string".equals(abi)) {
-//            className = isElement ? CLASS_NAME_ELEMENT_STRING : CLASS_NAME_STRING;
-//            typeStack.push(new DynamicArrayType<ByteType, Byte>(abi, CLASS_NAME_STRING, UNSIGNED_BYTE_OBJECT, DYNAMIC_LENGTH));
-//        } else {
-//            return null;
-//        }

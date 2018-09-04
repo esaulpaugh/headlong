@@ -23,7 +23,7 @@ class BigIntegerType extends AbstractInt256Type<BigInteger> {
     }
 
     @Override
-    BigInteger decode(byte[] buffer, int index) {
+    BigInteger decodeStatic(byte[] buffer, int index) {
         BigInteger bi = new BigInteger(Arrays.copyOfRange(buffer, index, index + INT_LENGTH_BYTES));
         validateBigIntBitLen(bi);
         return bi;

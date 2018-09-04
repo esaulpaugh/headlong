@@ -1,19 +1,18 @@
 package com.esaulpaugh.headlong.abi.beta;
 
-import com.esaulpaugh.headlong.abi.beta.util.Pair;
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
 /**
  *
  */
-class TupleType extends StackableType<Tuple> {
+class TupleType extends DynamicType<Tuple> {
 
     private static final String CLASS_NAME = Tuple.class.getName();
     private static final String ARRAY_CLASS_NAME_STUB = Tuple[].class.getName().replaceFirst("\\[", "");
 
     final StackableType[] elementTypes;
 
-    transient int tag = -1; // to hold tuple end index temporarily
+//    transient int tag = -1; // to hold tuple end index temporarily
 
     private TupleType(String canonicalType, boolean dynamic, StackableType... elementTypes) {
         super(canonicalType, dynamic);
@@ -73,8 +72,16 @@ class TupleType extends StackableType<Tuple> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    Tuple decode(byte[] buffer, final int index) {
+    Tuple decode(byte[] buffer, int index) {
+        return decodeDynamic(buffer, index, new int[1]);
+    }
+
+    @Override
+    Tuple decodeDynamic(final byte[] buffer, final int index, final int[] returnIndex) {
+
+        if(returnIndex.length != 1) {
+            throw new IllegalArgumentException("returnIndex must be length 1");
+        }
 
         final int tupleLen = elementTypes.length;
         Object[] members = new Object[tupleLen];
@@ -85,20 +92,15 @@ class TupleType extends StackableType<Tuple> {
         for (int i = 0; i < tupleLen; i++) {
             StackableType type = elementTypes[i];
             if (type.dynamic) {
-                offsets[i] = Encoder.OFFSET_TYPE.decode(buffer, idx);
+                offsets[i] = Encoder.OFFSET_TYPE.decodeStatic(buffer, idx);
                 System.out.println("offset " + offsets[i] + " @ " + idx);
                 idx += AbstractInt256Type.INT_LENGTH_BYTES;
             } else {
-                if (type instanceof ArrayType) {
-                    Pair<Object, Integer> results = ((ArrayType) type).decodeArray(buffer, idx);
-                    members[i] = results.first;
-                    idx = results.second;
-                } else if (type instanceof TupleType) {
-                    TupleType tt = (TupleType) type;
-                    members[i] = tt.decode(buffer, idx);
-                    idx = tt.tag;
+                if (type instanceof DynamicType) {
+                    members[i] = ((DynamicType) type).decodeDynamic(buffer, idx, returnIndex);
+                    idx = returnIndex[0];
                 } else {
-                    members[i] = type.decode(buffer, idx);
+                    members[i] = ((StaticType) type).decodeStatic(buffer, idx);
                     idx += AbstractInt256Type.INT_LENGTH_BYTES;
                 }
             }
@@ -109,19 +111,16 @@ class TupleType extends StackableType<Tuple> {
                 idx = index + offsets[i];
                 if (idx > index) {
                     StackableType type = elementTypes[i];
-                    if (type instanceof ArrayType) {
-                        Pair<Object, Integer> results = ((ArrayType) type).decodeArray(buffer, idx);
-                        members[i] = results.first;
-//                    idx = results.second;
+                    if (type instanceof DynamicType) {
+                        members[i] = ((DynamicType) type).decodeDynamic(buffer, idx, returnIndex);
                     } else {
-                        members[i] = type.decode(buffer, idx);
+                        members[i] = ((StaticType) type).decodeStatic(buffer, idx);
                     }
                 }
             }
         }
 
-        this.tag = idx;
-
+        returnIndex[0] = idx;
         return new Tuple(members);
     }
 

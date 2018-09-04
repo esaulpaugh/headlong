@@ -3,7 +3,7 @@ package com.esaulpaugh.headlong.abi.beta;
 import static com.esaulpaugh.headlong.abi.beta.util.ClassNames.toFriendly;
 
 // TODO support model classes à la Student.java
-abstract class StackableType<T> {
+abstract class StackableType<V> {
 
     static final StackableType[] EMPTY_TYPE_ARRAY = new StackableType[0];
 
@@ -11,7 +11,7 @@ abstract class StackableType<T> {
 
     final boolean dynamic;
 
-    protected StackableType(String canonicalType, boolean dynamic) {
+    StackableType(String canonicalType, boolean dynamic) {
         this.canonicalType = canonicalType;
         this.dynamic = dynamic;
     }
@@ -22,7 +22,7 @@ abstract class StackableType<T> {
 
     abstract int byteLength(Object value);
 
-    abstract T decode(byte[] buffer, int index);
+    abstract V decode(byte[] buffer, int index);
 
     void validate(Object value) {
         validate(this, value);

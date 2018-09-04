@@ -116,24 +116,12 @@ public class BaseTypeInfo {
         return TYPE_INFO_MAP.get(canonical);
     }
 
-//    private static BaseTypeInfo fixedType(String canonical, int bitLength, int scale) {
-//        boolean signed = ;
-//        String nonCanonical;
-//        if(canonical.contains("fixed128x18")) {
-//            nonCanonical = canonical.charAt(0) == 'u' ? "ufixed" : "fixed";
-//        } else {
-//            nonCanonical = null;
-//        }
-//        return ;
-//        return new BaseTypeInfo(null, canonical, nonCanonical, canonical, BigDecimal.class, null);
-//    }
-
     @SuppressWarnings("unchecked")
     public static void main(String[] args0) {
 
         System.out.println(int[].class.getSuperclass());
 
-        if(true)return;
+//        if(true)return;
 
         final int capacity = 256;
 
@@ -219,6 +207,18 @@ public class BaseTypeInfo {
 
         return o;
     }
+
+//    private static BaseTypeInfo fixedType(String canonical, int bitLength, int scale) {
+//        boolean signed = ;
+//        String nonCanonical;
+//        if(canonical.contains("fixed128x18")) {
+//            nonCanonical = canonical.charAt(0) == 'u' ? "ufixed" : "fixed";
+//        } else {
+//            nonCanonical = null;
+//        }
+//        return ;
+//        return new BaseTypeInfo(null, canonical, nonCanonical, canonical, BigDecimal.class, null);
+//    }
 
 //    private static int putFixed(int o, Map<String, BaseTypeInfo> map, boolean unsigned) {
 //        final String stub = unsigned ? "ufixed" : "fixed";

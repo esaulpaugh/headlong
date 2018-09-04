@@ -3,7 +3,6 @@ package com.esaulpaugh.headlong.abi.beta.example;
 import com.esaulpaugh.headlong.abi.beta.Function;
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
@@ -39,7 +38,7 @@ public class DecodeTest {
 //        if(true)return;
 
         // (uint8),uint8,(int24,bytes),
-        Function f = new Function("((uint8),(int16)[2][1][],(int24)[],(int32)[],uint40,(int48)[],(uint))"); // ,(string),string
+        Function f = new Function("(uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))"); // ,(string),string
 //        Function f = new Function("(string[2][3][])");
 
 //        BigInteger five = BigInteger.valueOf(5);
@@ -83,11 +82,12 @@ public class DecodeTest {
         // new Tuple(new Tuple("five"))
         Object[] argsIn = new Object[] {
                 // ((uint8)(int8)[],(int8)[],(int8)[],uint8,(int8)[],(uint8))
+                BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(Byte.MAX_VALUE << 2)),
                 new Tuple((byte) 7),
                 new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple((short) 9), new Tuple((short) -11) } } },
                 new Tuple[] { new Tuple(13), new Tuple(-15) },
                 new Tuple[] { new Tuple(17), new Tuple(-19) },
-                17L,
+                Long.MAX_VALUE / 8_500_000,
                 new Tuple[] { new Tuple((long) 0x7e), new Tuple((long) -0x7e) },
                 new Tuple(BigInteger.TEN)
 

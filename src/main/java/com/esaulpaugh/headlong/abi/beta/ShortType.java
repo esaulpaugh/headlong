@@ -25,7 +25,7 @@ class ShortType extends AbstractInt256Type<Short> {
     }
 
     @Override
-    Short decode(byte[] buffer, int index) {
+    Short decodeStatic(byte[] buffer, int index) {
         BigInteger bi = new BigInteger(Arrays.copyOfRange(buffer, index, index + INT_LENGTH_BYTES));
         return bi.shortValueExact();
     }

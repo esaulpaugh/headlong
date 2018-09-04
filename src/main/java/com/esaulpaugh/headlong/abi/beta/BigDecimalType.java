@@ -27,7 +27,7 @@ class BigDecimalType extends AbstractInt256Type<BigDecimal> {
     }
 
     @Override
-    BigDecimal decode(byte[] buffer, int index) {
+    BigDecimal decodeStatic(byte[] buffer, int index) {
         BigInteger bi = new BigInteger(Arrays.copyOfRange(buffer, index, index + INT_LENGTH_BYTES));
         BigDecimal dec = new BigDecimal(bi, scale);
         validateBigIntBitLen(bi);

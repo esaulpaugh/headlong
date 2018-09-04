@@ -18,44 +18,49 @@ public class NotationParser {
 
     public static List<Object> parse(String notation) {
         List<Object> top = new ArrayList<>();
-        parse(notation, 0, notation.length(), top);
+        int[] pair = new int[2];
+        parse(notation, 0, notation.length(), top, pair);
         return top;
     }
 
-    private static int parse(String notation, int i, final int end, List<Object> parent) {
+    private static int parse(String notation, int i, final int end, List<Object> parent, int[] pair) {
 
+        int nextArrayEnd;
+
+        int nextObjectType;
+        int nextObjectIndex;
+
+        int objectStart;
+        int objectEnd;
         while (i < end) {
 
-            int endArray = notation.indexOf(Notation.OBJECT_ARRAY_SUFFIX, i);
-            if(endArray == -1) {
-                endArray = Integer.MAX_VALUE;
+            nextArrayEnd = notation.indexOf(Notation.OBJECT_ARRAY_SUFFIX, i);
+            if(nextArrayEnd == -1) {
+                nextArrayEnd = Integer.MAX_VALUE;
             }
-            Pair<Integer, Integer> nextObjectInfo = nextObject(notation, i);
-            if(nextObjectInfo == null) {
+            nextObjectStart(notation, i, pair);
+            nextObjectType = pair[0];
+            nextObjectIndex = pair[1];
+
+            if(nextObjectType == -1 && nextObjectIndex == -1) {
                 return Integer.MAX_VALUE;
             }
 
-            final Integer nextObjectndex = nextObjectInfo.second;
-
-            if(endArray < nextObjectndex) {
-                return endArray + OBJECT_ARRAY_SUFFIX_LEN;
+            if(nextArrayEnd < nextObjectIndex) {
+                return nextArrayEnd + OBJECT_ARRAY_SUFFIX_LEN;
             }
 
-            final int nextObjectType = nextObjectInfo.first;
-
-            int objectStart;
-            int objectEnd;
             switch (nextObjectType) {
             case STRING:
-                objectStart = nextObjectndex + STRING_PREFIX_LEN;
+                objectStart = nextObjectIndex + STRING_PREFIX_LEN;
                 objectEnd = notation.indexOf(Notation.STRING_SUFFIX, objectStart);
                 parent.add(Hex.decode(notation.substring(objectStart, objectEnd)));
                 i = objectEnd + STRING_SUFFIX_LEN;
                 break;
             case OBJECT_ARRAY:
-                objectStart = nextObjectndex + OBJECT_ARRAY_PREFIX_LEN;
+                objectStart = nextObjectIndex + OBJECT_ARRAY_PREFIX_LEN;
                 List<Object> childList = new ArrayList<>();
-                i = parse(notation, objectStart, end, childList);
+                i = parse(notation, objectStart, end, childList, pair);
                 parent.add(childList);
                 break;
             default: /* do nothing */
@@ -65,22 +70,32 @@ public class NotationParser {
         return end + OBJECT_ARRAY_SUFFIX_LEN;
     }
 
-    private static Pair<Integer, Integer> nextObject(String rlpon, int i) {
-        int o = rlpon.indexOf(Notation.OBJECT_ARRAY_PREFIX, i);
-        int s = rlpon.indexOf(Notation.STRING_PREFIX, i);
+    private static void nextObjectStart(String notation, int i, int[] pair) { // Pair<Integer, Integer>
+        int o = notation.indexOf(Notation.OBJECT_ARRAY_PREFIX, i);
+        int s = notation.indexOf(Notation.STRING_PREFIX, i);
 
         if(s == -1) {
             if(o == -1) {
-                return null;
+                pair[0] = -1;
+                pair[1] = -1;
+                return;
             }
-            return new Pair<>(OBJECT_ARRAY, o);
+            pair[0] = OBJECT_ARRAY;
+            pair[1] = o;
+            return; // new Pair<>(OBJECT_ARRAY, o);
         }
         if(o == -1) {
-            return new Pair<>(STRING, s);
+            pair[0] = STRING;
+            pair[1] = s;
+            return; // new Pair<>(STRING, s);
         }
-
-        return o < s
-                ? new Pair<>(OBJECT_ARRAY, o)
-                : new Pair<>(STRING, s);
+        if(o < s) {
+            pair[0] = OBJECT_ARRAY;
+            pair[1] = o;
+            return; // new Pair<>(OBJECT_ARRAY, o);
+        }
+        pair[0] = STRING;
+        pair[1] = s;
+//        return new Pair<>(STRING, s);
     }
 }

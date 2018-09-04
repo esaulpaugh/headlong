@@ -21,7 +21,7 @@ class ByteType extends AbstractInt256Type<Byte> {
     }
 
     @Override
-    Byte decode(byte[] buffer, int index) {
+    Byte decodeStatic(byte[] buffer, int index) {
         BigInteger bi = new BigInteger(Arrays.copyOfRange(buffer, index, index + INT_LENGTH_BYTES));
         return bi.byteValueExact();
     }

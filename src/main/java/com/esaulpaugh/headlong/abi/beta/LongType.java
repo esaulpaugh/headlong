@@ -23,7 +23,7 @@ class LongType extends AbstractInt256Type<Long> {
     }
 
     @Override
-    Long decode(byte[] buffer, int index) {
+    Long decodeStatic(byte[] buffer, int index) {
         BigInteger bi = new BigInteger(Arrays.copyOfRange(buffer, index, index + INT_LENGTH_BYTES));
         long l = bi.longValueExact();
         validateLongBitLen(l);
