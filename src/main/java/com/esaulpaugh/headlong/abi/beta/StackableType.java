@@ -48,6 +48,5 @@ abstract class StackableType<T> {
                         + " (" + toFriendly(value.getClass().getName()) + " not instanceof " + toFriendly(expectedClassName) + "/" + type.canonicalType + ")");
             }
         }
-        System.out.print("matches class " + expectedClassName + " ");
     }
 }

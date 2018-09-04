@@ -9,7 +9,7 @@ import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 class TupleType extends StackableType<Tuple> {
 
     private static final String CLASS_NAME = Tuple.class.getName();
-    private static final String ARRAY_CLASS_NAME_STUB = Tuple[].class.getName().replaceFirst("\\[]", "");
+    private static final String ARRAY_CLASS_NAME_STUB = Tuple[].class.getName().replaceFirst("\\[", "");
 
     final StackableType[] elementTypes;
 
@@ -137,7 +137,6 @@ class TupleType extends StackableType<Tuple> {
         if(expected != actual) {
             throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + actual + " != " + expected);
         }
-        System.out.println("tuple length valid;");
 
         checkTypes(this.elementTypes, elements);
     }

@@ -34,13 +34,11 @@ abstract class AbstractInt256Type<V> extends StackableType<V> { // instance of V
         if(bitLen > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + bitLen + " > " + bitLength);
         }
-        System.out.println("bit len valid: " + bitLen);
     }
 
     void validateBigIntBitLen(final BigInteger bigIntVal) {
         if(bigIntVal.bitLength() > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + bigIntVal.bitLength() + " > " + bitLength);
         }
-        System.out.println("bigint bit len valid: " + bigIntVal.bitLength());
     }
 }

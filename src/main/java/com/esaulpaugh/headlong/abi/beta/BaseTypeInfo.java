@@ -172,8 +172,6 @@ public class BaseTypeInfo {
         }
         System.out.println("\ncount = " + count);
 
-//        System.out.println(new BaseTypeInfo("int256", "int", null, BigInteger.class).toString());
-
         Map.Entry<String, BaseTypeInfo>[] entries = TYPE_INFO_MAP.entrySet().toArray(new Map.Entry[0]);
         Arrays.sort(entries, new MapComparator());
         for(Map.Entry<String, BaseTypeInfo> e : entries) {

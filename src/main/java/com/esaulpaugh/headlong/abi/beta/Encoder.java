@@ -32,8 +32,6 @@ class Encoder {
 
     static ByteBuffer encodeFunctionCall(Function function, Tuple argsTuple) {
 
-        System.out.println("requiredCanonicalization = " + function.requiredCanonicalization());
-
         final TupleType tupleType = function.paramTypes;
         final StackableType[] types = tupleType.elementTypes;
         final int expectedNumParams = types.length;
@@ -45,8 +43,6 @@ class Encoder {
         tupleType.validate(argsTuple);
 
         int encodingByteLen = tupleType.byteLength(argsTuple);
-
-        System.out.println(tupleType.dynamic + " " + encodingByteLen);
 
         final int allocation = SELECTOR_LEN + encodingByteLen;
 
@@ -60,7 +56,6 @@ class Encoder {
     }
 
     private static void insertTuple(TupleType tupleType, Tuple tuple, ByteBuffer outBuffer) {
-        System.out.println("insertTuple(" + tupleType + ")");
 
         LinkedList<StackableType> typeList = new LinkedList<>(Arrays.asList(tupleType.elementTypes));
         LinkedList<Object> valuesList = new LinkedList<>(Arrays.asList(tuple.elements));
@@ -243,18 +238,12 @@ class Encoder {
         final int n = elementTypes.length;
         for (int i = 0; i < n; i++) {
             StackableType t = elementTypes[i];
-//            int byteLen = t.byteLength(arguments[i]);
-//            System.out.print(arguments[i] + " --> " + byteLen + ", ");
             if(t.dynamic) {
                 headLengths += 32;
-                System.out.println("dynamic");
             } else {
                 headLengths += t.byteLength(elements[i]);
-                System.out.println("static");
             }
         }
-
-        System.out.println("**************** " + headLengths);
 
         return headLengths;
     }

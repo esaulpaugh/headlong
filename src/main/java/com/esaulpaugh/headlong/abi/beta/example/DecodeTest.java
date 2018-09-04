@@ -16,16 +16,12 @@ public class DecodeTest {
 
         String signature = "large((int24[][]))";
 
-        Function f0 = new Function(signature); // ,uint24,int24 "(uint8[][][][][][][][][][][][])"
-        final BigDecimal abba = new BigDecimal(BigInteger.valueOf(2).pow(128), 18);
-        final BigDecimal dabba = new BigDecimal(BigInteger.valueOf(2).pow(127), 18);
-        final BigDecimal upow = abba.subtract(BigDecimal.valueOf(1));
-        final BigDecimal pow = dabba.subtract(BigDecimal.valueOf(1));
+        Function f0 = new Function(signature);
+//        final BigDecimal abba = new BigDecimal(BigInteger.valueOf(2).pow(128), 18);
+//        final BigDecimal dabba = new BigDecimal(BigInteger.valueOf(2).pow(127), 18);
+//        final BigDecimal upow = abba.subtract(BigDecimal.valueOf(1));
+//        final BigDecimal pow = dabba.subtract(BigDecimal.valueOf(1));
 
-        System.out.println(abba);
-        System.out.println(dabba);
-        System.out.println(upow);
-        System.out.println(pow);
         Object[] args = new Object[] {
 
                 Tuple.singleton(new int[][] {
@@ -40,19 +36,7 @@ public class DecodeTest {
         Tuple t = f0.decodeCall(bb.array());
         System.out.println(Arrays.deepEquals(t.elements, args));
 
-//        for (int i = 0; i < 63; i++) {
-//            long x = Long.MIN_VALUE / (1L << i);
-//            int bitLen = BizarroIntegers.bitLen(x);
-//            System.out.println(x + " --> " + bitLen + " " + Arrays.toString(BizarroIntegers.toBytes(x)) + " " + Long.toBinaryString(x));
-//            if(bitLen != 63 - i) {
-//                throw new Error();
-//            }
-//        }
-//        System.out.println();
-//        for (int i = -17; i < 22; i++) {
-//            System.out.println(i + " --> " + BizarroIntegers.bitLen(i) + " " + Integer.toBinaryString(i));
-//        }
-        if(true)return;
+//        if(true)return;
 
         // (uint8),uint8,(int24,bytes),
         Function f = new Function("((uint8),(int16)[2][1][],(int24)[],(int32)[],uint40,(int48)[],(uint))"); // ,(string),string

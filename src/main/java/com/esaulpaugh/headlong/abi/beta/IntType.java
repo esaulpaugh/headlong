@@ -27,10 +27,9 @@ class IntType extends AbstractInt256Type<Integer> {
     @Override
     Integer decode(byte[] buffer, int index) {
         BigInteger bi = new BigInteger(Arrays.copyOfRange(buffer, index, index + INT_LENGTH_BYTES));
-        int i = bi.intValueExact();
-        System.out.println(bi.bitLength());
-        validateLongBitLen((long) i);
-        return i;
+        long longVal = bi.longValueExact();
+        validateLongBitLen(longVal);
+        return (int) longVal;
     }
 
     @Override

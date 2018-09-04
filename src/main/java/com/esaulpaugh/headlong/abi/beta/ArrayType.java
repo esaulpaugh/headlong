@@ -336,13 +336,11 @@ abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> 
     private void checkLength(int actual) {
         int expected = this.length;
         if(expected == DYNAMIC_LENGTH) { // -1
-            System.out.println("dynamic length");
             return;
         }
         if(actual != expected) {
             throw new IllegalArgumentException("array length mismatch: actual != expected: " + actual + " != " + expected);
         }
-        System.out.println("array length valid;");
     }
 
     private static int roundUp(int len) {
