@@ -5,13 +5,21 @@ import java.util.Arrays;
 
 class LongType extends AbstractInt256Type<Long> {
 
-    static final String CLASS_NAME = Long.class.getName();
-    static final String CLASS_NAME_ELEMENT = long[].class.getName().replaceFirst("\\[", "");
+    private static final String CLASS_NAME = Long.class.getName();
+    private static final String ARRAY_CLASS_NAME_STUB = long[].class.getName().replaceFirst("\\[", "");
 
-    static final int MAX_BIT_LEN = 64;
+    LongType(String canonicalType, int bitLength, boolean signed) {
+        super(canonicalType, bitLength, signed);
+    }
 
-    LongType(String canonicalAbiType, String className, int bitLength, boolean signed) {
-        super(canonicalAbiType, className, bitLength, signed);
+    @Override
+    String className() {
+        return CLASS_NAME;
+    }
+
+    @Override
+    String arrayClassNameStub() {
+        return ARRAY_CLASS_NAME_STUB;
     }
 
     @Override

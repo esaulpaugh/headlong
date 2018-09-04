@@ -3,25 +3,22 @@ package com.esaulpaugh.headlong.abi.beta;
 import static com.esaulpaugh.headlong.abi.beta.util.ClassNames.toFriendly;
 
 // TODO support model classes à la Student.java
-// TODO support vyper e.g. "decimal"
 abstract class StackableType<T> {
 
     static final StackableType[] EMPTY_TYPE_ARRAY = new StackableType[0];
 
-    protected final String canonicalAbiType;
-    protected final String className;
+    private final String canonicalType;
 
     final boolean dynamic;
 
-    protected StackableType(String canonicalAbiType, String className) {
-        this(canonicalAbiType, className, false);
-    }
-
-    protected StackableType(String canonicalAbiType, String className, boolean dynamic) {
-        this.canonicalAbiType = canonicalAbiType;
-        this.className = className;
+    protected StackableType(String canonicalType, boolean dynamic) {
+        this.canonicalType = canonicalType;
         this.dynamic = dynamic;
     }
+
+    abstract String className();
+
+    abstract String arrayClassNameStub();
 
     abstract int byteLength(Object value);
 
@@ -33,7 +30,7 @@ abstract class StackableType<T> {
 
     private static void validate(final StackableType type, final Object value) {
 
-        final String expectedClassName = type.className;
+        final String expectedClassName = type.className();
 
         // will throw NPE if argument null
         if(!expectedClassName.equals(value.getClass().getName())) {
@@ -48,7 +45,7 @@ abstract class StackableType<T> {
                         + value.getClass().getName()
                         + " not assignable to "
                         + expectedClassName
-                        + " (" + toFriendly(value.getClass().getName()) + " not instanceof " + toFriendly(expectedClassName) + "/" + type.canonicalAbiType + ")");
+                        + " (" + toFriendly(value.getClass().getName()) + " not instanceof " + toFriendly(expectedClassName) + "/" + type.canonicalType + ")");
             }
         }
         System.out.print("matches class " + expectedClassName + " ");

@@ -5,11 +5,21 @@ import java.util.Arrays;
 
 class BigIntegerType extends AbstractInt256Type<BigInteger> {
 
-    static final String CLASS_NAME = BigInteger.class.getName();
-    static final String CLASS_NAME_ELEMENT = BigInteger[].class.getName().replaceFirst("\\[", "");
+    private static final String CLASS_NAME = BigInteger.class.getName();
+    private static final String ARRAY_CLASS_NAME_STUB = BigInteger[].class.getName().replaceFirst("\\[", "");
 
-    BigIntegerType(String canonicalAbiType, String className, int bitLength, boolean signed) {
-        super(canonicalAbiType, className, bitLength, signed);
+    BigIntegerType(String canonicalType, int bitLength, boolean signed) {
+        super(canonicalType, bitLength, signed);
+    }
+
+    @Override
+    String className() {
+        return CLASS_NAME;
+    }
+
+    @Override
+    String arrayClassNameStub() {
+        return ARRAY_CLASS_NAME_STUB;
     }
 
     @Override

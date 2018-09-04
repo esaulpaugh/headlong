@@ -7,13 +7,23 @@ import java.util.Arrays;
 class BigDecimalType extends AbstractInt256Type<BigDecimal> {
 
     static final String CLASS_NAME = BigDecimal.class.getName();
-    static final String CLASS_NAME_ELEMENT = BigDecimal[].class.getName().replaceFirst("\\[", "");
+    static final String ARRAY_CLASS_NAME_STUB = BigDecimal[].class.getName().replaceFirst("\\[", "");
 
     final int scale;
 
-    BigDecimalType(String canonicalAbiType, String className, int bitLength, int scale, boolean signed) {
-        super(canonicalAbiType, className, bitLength, signed);
+    BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean signed) {
+        super(canonicalTypeString, bitLength, signed);
         this.scale = scale;
+    }
+
+    @Override
+    String className() {
+        return CLASS_NAME;
+    }
+
+    @Override
+    String arrayClassNameStub() {
+        return ARRAY_CLASS_NAME_STUB;
     }
 
     @Override

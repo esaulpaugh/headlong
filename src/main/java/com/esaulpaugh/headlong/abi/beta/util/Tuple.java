@@ -12,6 +12,14 @@ public class Tuple {
         this.elements = elements;
     }
 
+    public static Tuple singleton(Object element) {
+        return new Tuple(element);
+    }
+
+    public static Tuple withElements(Object[] elements) {
+        return new Tuple(elements);
+    }
+
     @Override
     public int hashCode() {
         int result = 1;

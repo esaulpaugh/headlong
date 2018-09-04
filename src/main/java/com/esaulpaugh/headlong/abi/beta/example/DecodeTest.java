@@ -14,7 +14,9 @@ public class DecodeTest {
 
     public static void main(String[] args0) throws ParseException {
 
-        Function f0 = new Function("(ufixed,fixed)"); // ,uint24,int24
+        String signature = "large((int24[][]))";
+
+        Function f0 = new Function(signature); // ,uint24,int24 "(uint8[][][][][][][][][][][][])"
         final BigDecimal abba = new BigDecimal(BigInteger.valueOf(2).pow(128), 18);
         final BigDecimal dabba = new BigDecimal(BigInteger.valueOf(2).pow(127), 18);
         final BigDecimal upow = abba.subtract(BigDecimal.valueOf(1));
@@ -24,7 +26,16 @@ public class DecodeTest {
         System.out.println(dabba);
         System.out.println(upow);
         System.out.println(pow);
-        Object[] args = new Object[] { upow, pow };
+        Object[] args = new Object[] {
+
+                Tuple.singleton(new int[][] {
+                        new int[] { 3, 5, 9 },
+
+                        new int[] { 1, 3, 5 }
+                }
+                )
+
+        };
         ByteBuffer bb = f0.encodeCall(args); // , pow, upow
         Tuple t = f0.decodeCall(bb.array());
         System.out.println(Arrays.deepEquals(t.elements, args));
@@ -41,7 +52,7 @@ public class DecodeTest {
 //        for (int i = -17; i < 22; i++) {
 //            System.out.println(i + " --> " + BizarroIntegers.bitLen(i) + " " + Integer.toBinaryString(i));
 //        }
-//        if(true)return;
+        if(true)return;
 
         // (uint8),uint8,(int24,bytes),
         Function f = new Function("((uint8),(int16)[2][1][],(int24)[],(int32)[],uint40,(int48)[],(uint))"); // ,(string),string

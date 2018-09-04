@@ -15,17 +15,17 @@ import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
 abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> {
 
     private static final int ARRAY_LENGTH_BYTE_LEN = IntType.MAX_BIT_LEN;
-    private static final IntType ARRAY_LENGTH_TYPE = new IntType("uint32", IntType.CLASS_NAME, ARRAY_LENGTH_BYTE_LEN, false);
+    private static final IntType ARRAY_LENGTH_TYPE = new IntType("uint32", ARRAY_LENGTH_BYTE_LEN, false);
 
     final T elementType;
     private final int length;
+    private final String className;
+    private final String arrayClassNameStub;
 
-    ArrayType(String canonicalAbiType, String className, T elementType, int length) {
-        this(canonicalAbiType, className, elementType, length, false);
-    }
-
-    ArrayType(String canonicalAbiType, String className, T elementType, int length, boolean dynamic) {
-        super(canonicalAbiType, className, dynamic);
+    ArrayType(String canonicalType, String className, String arrayClassNameStub, T elementType, int length, boolean dynamic) {
+        super(canonicalType, dynamic);
+        this.className = className;
+        this.arrayClassNameStub = arrayClassNameStub;
         this.elementType = elementType;
         this.length = length;
         try {
@@ -39,8 +39,65 @@ abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> 
     }
 
     @Override
+    String className() {
+        return className;
+    }
+
+    @Override
+    String arrayClassNameStub() {
+        return arrayClassNameStub;
+    }
+
+    @Override
     int byteLength(Object value) {
-        return getDataLen(value);
+        // dynamics get +32 for the array length
+        if(value.getClass().isArray()) {
+            if (value instanceof byte[]) {
+                int staticLen = roundUp(((byte[]) value).length);
+                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
+            }
+            if (value instanceof int[]) {
+                int staticLen = ((int[]) value).length << 5; // mul 32
+                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
+            }
+            if (value instanceof long[]) {
+                int staticLen = ((long[]) value).length << 5; // mul 32
+                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
+            }
+            if (value instanceof short[]) {
+                int staticLen = ((short[]) value).length << 5; // mul 32
+                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
+            }
+            if (value instanceof boolean[]) {
+                int staticLen = ((boolean[]) value).length << 5; // mul 32
+                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
+            }
+            if (value instanceof Number[]) {
+                int staticLen = ((Number[]) value).length << 5; // mul 32
+                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
+            }
+            if (value instanceof Object[]) {
+                int len = 0;
+                for (Object element : (Object[]) value) {
+                    len += this.elementType.byteLength(element);
+                    if(this.elementType.dynamic) {
+                        len += ARRAY_LENGTH_BYTE_LEN;
+                    }
+                }
+                return dynamic ? ARRAY_LENGTH_BYTE_LEN + len : len;
+            }
+        }
+        if (value instanceof String) { // always needs dynamic head
+            return ARRAY_LENGTH_BYTE_LEN + roundUp(((String) value).length());
+        }
+        if (value instanceof Number) {
+            return ARRAY_LENGTH_BYTE_LEN;
+        }
+        if (value instanceof Tuple) {
+            return dynamic ? ARRAY_LENGTH_BYTE_LEN + elementType.byteLength(value) : elementType.byteLength(value);
+        }
+        // shouldn't happen if type checks/validation already occurred
+        throw new IllegalArgumentException("unknown type: " + value.getClass().getName());
     }
 
     @Override
@@ -71,9 +128,7 @@ abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> 
         } else if(elementType instanceof AbstractInt256Type) {
             ByteBuffer bb = ByteBuffer.wrap(buffer, idx, arrayLen << 5); // mul 32
             final byte[] thirtyTwo = new byte[AbstractInt256Type.INT_LENGTH_BYTES];
-            if(elementType instanceof BooleanType) {
-                return decodeBooleanArray(arrayLen, bb, thirtyTwo);
-            } if(elementType instanceof ShortType) {
+            if(elementType instanceof ShortType) {
                 short[] shorts = new short[arrayLen];
                 for(int i = 0; i < arrayLen; i++) {
                     bb.get(thirtyTwo);
@@ -81,17 +136,20 @@ abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> 
                 }
                 return new Pair<>(shorts, bb.position());
             } else if(elementType instanceof IntType) {
+                final IntType intType = (IntType) elementType;
                 int[] ints = new int[arrayLen];
                 for(int i = 0; i < arrayLen; i++) {
                     bb.get(thirtyTwo);
-                    ints[i] = new BigInteger(thirtyTwo).intValueExact(); // validates that value is in int range
+                    long longVal = new BigInteger(thirtyTwo).longValueExact(); // throw on overflow
+                    intType.validateLongBitLen(longVal);
+                    ints[i] = (int) longVal;
                 }
                 return new Pair<>(ints, bb.position());
             } else if(elementType instanceof LongType) {
                 long[] longs = new long[arrayLen];
                 for(int i = 0; i < arrayLen; i++) {
                     bb.get(thirtyTwo);
-                    long longVal = new BigInteger(thirtyTwo).longValueExact();
+                    long longVal = new BigInteger(thirtyTwo).longValueExact(); // throw on overflow
                     ((LongType) elementType).validateLongBitLen(longVal);
                     longs[i] = longVal;
                 }
@@ -116,6 +174,8 @@ abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> 
                     bigInts[i] = new BigDecimal(temp, et.scale);
                 }
                 return new Pair<>(bigInts, bb.position());
+            } else if(elementType instanceof BooleanType) {
+                return decodeBooleanArray(arrayLen, bb, thirtyTwo);
             }
         } else if(elementType instanceof TupleType) {
             TupleType tt = (TupleType) elementType;
@@ -159,7 +219,7 @@ abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> 
         final int len = offsets.length;
         for (int i = 0; i < len; i++) {
             if (elementArrayType.dynamic) {
-                offsets[i] = IntType.OFFSET_TYPE.decode(buffer, idx);
+                offsets[i] = Encoder.OFFSET_TYPE.decode(buffer, idx);
                 System.out.println("offset " + offsets[i] + " @ " + idx + ", points to " + (index + offsets[i]) + ", increment to " + (idx + AbstractInt256Type.INT_LENGTH_BYTES));
                 idx += AbstractInt256Type.INT_LENGTH_BYTES;
             } else {
@@ -215,55 +275,36 @@ abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> 
         super.validate(value);
 
         if(value.getClass().isArray()) {
-//            StackableType elementType = ((ArrayType) this.typeStack.peek()).elementType;
-            if(value instanceof Object[]) { // includes BigInteger[]
-                Object[] arr = (Object[]) value;
-                final int len = arr.length;
-                checkLength(len);
-                int i = 0;
-                try {
-                    for ( ; i < len; i++) {
-                        elementType.validate(arr[i]);
-                    }
-                } catch (IllegalArgumentException | NullPointerException re) {
-                    throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
-                }
-            } else if (value instanceof byte[]) {
-                validateByteArray((byte[]) value);
+            if (value instanceof byte[]) {
+                checkLength(((byte[]) value).length);
             } else if (value instanceof int[]) {
                 validateIntArray((int[]) value);
             } else if (value instanceof long[]) {
                 validateLongArray((long[]) value);
             } else if (value instanceof short[]) {
-                validateShortArray((short[]) value);
+                checkLength(((short[]) value).length);
             } else if (value instanceof boolean[]) {
-                validateBooleanArray((boolean[]) value);
+                checkLength(((boolean[]) value).length);
+            } else if (value instanceof Object[]) { // includes BigInteger[]
+                Object[] arr = (Object[]) value;
+                final int len = arr.length;
+                checkLength(len);
+                int i = 0;
+                try {
+                    for (; i < len; i++) {
+                        elementType.validate(arr[i]);
+                    }
+                } catch (IllegalArgumentException | NullPointerException re) {
+                    throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
+                }
             } else {
                 throw new IllegalArgumentException("unrecognized type: " + value.getClass().getName());
             }
         } else if(value instanceof String) {
-            validateByteArray(((String) value).getBytes(StandardCharsets.UTF_8));
-//        } else if(value instanceof Number) {
-//            elementType.validate(value);
-////            _validateNumber(value, elementType);
-//        } else if(value instanceof Boolean) {
-//            elementType.validate(value);
-////            Type.validate(value, CLASS_NAME_BOOLEAN, elementType.canonicalAbiType); // TODO
+            checkLength(((String) value).getBytes(StandardCharsets.UTF_8).length);
         } else {
             throw new IllegalArgumentException("unrecognized type: " + value.getClass().getName());
         }
-    }
-
-    private void validateBooleanArray(boolean[] arr) {
-        checkLength(arr.length);
-    }
-
-    private void validateByteArray(byte[] arr) {
-        checkLength(arr.length);
-    }
-
-    private void validateShortArray(short[] arr) {
-        checkLength(arr.length);
     }
 
     private void validateIntArray(int[] arr) {
@@ -292,7 +333,7 @@ abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> 
         }
     }
 
-    void checkLength(int actual) {
+    private void checkLength(int actual) {
         int expected = this.length;
         if(expected == DYNAMIC_LENGTH) { // -1
             System.out.println("dynamic length");
@@ -304,67 +345,11 @@ abstract class ArrayType<T extends StackableType, E> extends StackableType<E[]> 
         System.out.println("array length valid;");
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
-
-    // dynamics get +32 for the array length
-    int getDataLen(Object value) {
-        if(value.getClass().isArray()) {
-            if (value instanceof byte[]) { // always needs dynamic head?
-                int staticLen = roundUp(((byte[]) value).length);
-                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
-            }
-            if (value instanceof int[]) {
-                int staticLen = ((int[]) value).length << 5; // mul 32
-                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
-            }
-            if (value instanceof long[]) {
-                int staticLen = ((long[]) value).length << 5; // mul 32
-                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
-            }
-            if (value instanceof short[]) {
-                int staticLen = ((short[]) value).length << 5; // mul 32
-                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
-            }
-            if (value instanceof boolean[]) {
-                int staticLen = ((boolean[]) value).length << 5; // mul 32
-                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
-            }
-            if (value instanceof Number[]) {
-                int staticLen = ((Number[]) value).length << 5; // mul 32
-                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
-            }
-//            if(value instanceof com.esaulpaugh.headlong.abi.beta.util.Tuple[]) {
-//                throw new Error();
-////                return elementType.byteLength(value);
-//            }
-        }
-        if (value instanceof String) { // always needs dynamic head
-            return ARRAY_LENGTH_BYTE_LEN + roundUp(((String) value).length());
-        }
-        if (value instanceof Number) {
-            return ARRAY_LENGTH_BYTE_LEN;
-        }
-        if (value instanceof com.esaulpaugh.headlong.abi.beta.util.Tuple) {
-            return dynamic ? ARRAY_LENGTH_BYTE_LEN + elementType.byteLength(value) : elementType.byteLength(value); // TODO
-        }
-        if (value instanceof Object[]) {
-            int len = 0;
-            for (Object element : (Object[]) value) {
-                len += this.elementType.byteLength(element);
-                if(this.elementType.dynamic) {
-                    len += ARRAY_LENGTH_BYTE_LEN;
-                }
-            }
-            return dynamic ? ARRAY_LENGTH_BYTE_LEN + len : len;
-//            throw new AssertionError("Object array not expected here");
-        }
-        // shouldn't happen if type checks/validation already occurred
-        throw new IllegalArgumentException("unknown type: " + value.getClass().getName());
-    }
-
-    // TODO move?
-    static int roundUp(int len) {
-        int mod = len % AbstractInt256Type.INT_LENGTH_BYTES;
-        return mod == 0 ? len : len + (AbstractInt256Type.INT_LENGTH_BYTES - mod);
+    private static int roundUp(int len) {
+//        int mod = len % AbstractInt256Type.INT_LENGTH_BYTES;
+        int mod = len & 31;
+        return mod == 0
+                ? len
+                : len + (32 - mod);
     }
 }

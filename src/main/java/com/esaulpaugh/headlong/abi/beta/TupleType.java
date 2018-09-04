@@ -8,24 +8,25 @@ import com.esaulpaugh.headlong.abi.beta.util.Tuple;
  */
 class TupleType extends StackableType<Tuple> {
 
+    private static final String CLASS_NAME = Tuple.class.getName();
+    private static final String ARRAY_CLASS_NAME_STUB = Tuple[].class.getName().replaceFirst("\\[]", "");
+
     final StackableType[] elementTypes;
 
     transient int tag = -1; // to hold tuple end index temporarily
 
-    TupleType(String canonicalAbiType, boolean dynamic, StackableType... elementTypes) {
-        super(canonicalAbiType, com.esaulpaugh.headlong.abi.beta.util.Tuple.class.getName(), dynamic); // Tuple.class.getName()
+    private TupleType(String canonicalType, boolean dynamic, StackableType... elementTypes) {
+        super(canonicalType, dynamic);
         this.elementTypes = elementTypes;
     }
 
-    static TupleType create(String canonicalAbiType, StackableType... members) {
-
+    static TupleType create(String canonicalType, StackableType... members) {
         for (StackableType type : members) {
             if(type.dynamic) {
-                return new TupleType(canonicalAbiType, true, members);
+                return new TupleType(canonicalType, true, members);
             }
         }
-
-        return new TupleType(canonicalAbiType, false, members);
+        return new TupleType(canonicalType, false, members);
     }
 
     @Override
@@ -39,6 +40,16 @@ class TupleType extends StackableType<Tuple> {
         }
         sb.replace(sb.length() - 1, sb.length(), "").append(')');
         return getClass().getSimpleName() + sb.toString();
+    }
+
+    @Override
+    String className() {
+        return CLASS_NAME;
+    }
+
+    @Override
+    String arrayClassNameStub() {
+        return ARRAY_CLASS_NAME_STUB;
     }
 
     @Override
@@ -74,7 +85,7 @@ class TupleType extends StackableType<Tuple> {
         for (int i = 0; i < tupleLen; i++) {
             StackableType type = elementTypes[i];
             if (type.dynamic) {
-                offsets[i] = IntType.OFFSET_TYPE.decode(buffer, idx);
+                offsets[i] = Encoder.OFFSET_TYPE.decode(buffer, idx);
                 System.out.println("offset " + offsets[i] + " @ " + idx);
                 idx += AbstractInt256Type.INT_LENGTH_BYTES;
             } else {
@@ -118,7 +129,7 @@ class TupleType extends StackableType<Tuple> {
     void validate(final Object value) {
         super.validate(value);
 
-        final com.esaulpaugh.headlong.abi.beta.util.Tuple tuple = (com.esaulpaugh.headlong.abi.beta.util.Tuple) value;
+        final Tuple tuple = (Tuple) value;
         final Object[] elements = tuple.elements;
 
         final int expected = this.elementTypes.length;

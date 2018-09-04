@@ -1,6 +1,5 @@
 package com.esaulpaugh.headlong.abi.beta;
 
-import com.esaulpaugh.headlong.abi.beta.util.Pair;
 import com.esaulpaugh.headlong.rlp.util.BizarroIntegers;
 import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
 
@@ -12,12 +11,12 @@ abstract class AbstractInt256Type<V> extends StackableType<V> { // instance of V
 
     private final int bitLength;
 
-    protected final boolean signed;
+//    protected final boolean signed;
 
-    AbstractInt256Type(String canonicalAbiType, String className, int bitLength, boolean signed) {
-        super(canonicalAbiType, className);
+    AbstractInt256Type(String canonicalType, int bitLength, boolean signed) {
+        super(canonicalType, false);
         this.bitLength = signed ? bitLength - 1 : bitLength;
-        this.signed = signed;
+//        this.signed = signed;
     }
 
     @Override
@@ -43,27 +42,5 @@ abstract class AbstractInt256Type<V> extends StackableType<V> { // instance of V
             throw new IllegalArgumentException("exceeds bit limit: " + bigIntVal.bitLength() + " > " + bitLength);
         }
         System.out.println("bigint bit len valid: " + bigIntVal.bitLength());
-    }
-
-    static Pair<String, AbstractInt256Type> makeInt(String abi, int bitLength, boolean isElement, boolean signed) {
-        String className;
-        AbstractInt256Type integer;
-        if (bitLength > LongType.MAX_BIT_LEN) {
-            className = isElement ? BigIntegerType.CLASS_NAME_ELEMENT : BigIntegerType.CLASS_NAME;
-            integer = new BigIntegerType(abi, BigIntegerType.CLASS_NAME, bitLength, signed);
-        } else if (bitLength > IntType.MAX_BIT_LEN) {
-            className = isElement ? LongType.CLASS_NAME_ELEMENT : LongType.CLASS_NAME;
-            integer = new LongType(abi, LongType.CLASS_NAME, bitLength, signed);
-        } else if (bitLength > 16) {
-            className = isElement ? IntType.CLASS_NAME_ELEMENT : IntType.CLASS_NAME;
-            integer = new IntType(abi, IntType.CLASS_NAME, bitLength, signed);
-        } else if (bitLength > 8) {
-            className = isElement ? ShortType.CLASS_NAME_ELEMENT : ShortType.CLASS_NAME;
-            integer = new ShortType(abi, ShortType.CLASS_NAME, signed);
-        } else {
-            className = isElement ? ByteType.CLASS_NAME_ELEMENT : ByteType.CLASS_NAME;
-            integer = new ByteType(abi, ByteType.CLASS_NAME, signed);
-        }
-        return new Pair<>(className, integer);
     }
 }

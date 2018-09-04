@@ -5,15 +5,23 @@ import java.util.Arrays;
 
 class IntType extends AbstractInt256Type<Integer> {
 
-    static final IntType OFFSET_TYPE = new IntType("uint32", IntType.CLASS_NAME, IntType.MAX_BIT_LEN, false);
-
-    static final String CLASS_NAME = Integer.class.getName();
-    static final String CLASS_NAME_ELEMENT = int[].class.getName().replaceFirst("\\[", "");
+    private static final String CLASS_NAME = Integer.class.getName();
+    private static final String ARRAY_CLASS_NAME_STUB = int[].class.getName().replaceFirst("\\[", "");
 
     static final int MAX_BIT_LEN = 32;
 
-    IntType(String canonicalAbiType, String className, int bitLength, boolean signed) {
-        super(canonicalAbiType, className, bitLength, signed);
+    IntType(String canonicalType, int bitLength, boolean signed) {
+        super(canonicalType, bitLength, signed);
+    }
+
+    @Override
+    String className() {
+        return CLASS_NAME;
+    }
+
+    @Override
+    String arrayClassNameStub() {
+        return ARRAY_CLASS_NAME_STUB;
     }
 
     @Override

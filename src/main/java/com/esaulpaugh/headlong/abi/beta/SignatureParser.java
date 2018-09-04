@@ -78,7 +78,6 @@ class SignatureParser {
             switch (c) {
             case '[':
                 break LOOP;
-//                Tuple.create(null, tupleTypes.get(tupleTypes.size() - 1));
             case ')':
                 if (tupleTypes.size() > 0) {
                     argEnd = argStart - 1;
@@ -94,15 +93,9 @@ class SignatureParser {
                     ArrayList<StackableType> innerTupleTypes = new ArrayList<>();
                     Pair<Integer, Integer> results = parseTuple(signature, argStart, canonicalOut, innerTupleTypes, illegalTypeCharMatcher);
 
-                    // TODO test DynamicArrayType (e.g. [4] w/ dynamic element) enforces specified len
-//                    new DynamicArrayType(canonicalAbiType, className, typeStack.peek());
-//                    new StaticArrayType(canonicalAbiType, className, typeStack.peek(), length);
-
-
-                    // TODO NON-CANONICAL, DON'T SUBSTRING
-                    // signature.substring(argEnd, argEnd)
                     StackableType[] members = innerTupleTypes.toArray(StackableType.EMPTY_TYPE_ARRAY);
 
+                    // don't pass non-canonical type string
                     TupleType tupleType = TupleType.create(null, members);
                     StackableType typleArray = null;
 

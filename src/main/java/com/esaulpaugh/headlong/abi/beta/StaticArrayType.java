@@ -5,8 +5,8 @@ package com.esaulpaugh.headlong.abi.beta;
  */
 class StaticArrayType<T extends StackableType, E> extends ArrayType<T, E> {
 
-    StaticArrayType(String canonicalAbiType, String className, T elementType, int length) {
-        super(canonicalAbiType, className, elementType, length);
+    StaticArrayType(String canonicalType, String className, String arrayClassNameStub, T elementType, int length) {
+        super(canonicalType, className, arrayClassNameStub, elementType, length, false);
         if(length < 0) {
             throw new NegativeArraySizeException();
         }

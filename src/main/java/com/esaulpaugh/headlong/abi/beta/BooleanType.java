@@ -5,11 +5,21 @@ import java.util.Arrays;
 
 class BooleanType extends AbstractInt256Type<Boolean> {
 
-    static final String CLASS_NAME = Boolean.class.getName();
-    static final String CLASS_NAME_ELEMENT = boolean[].class.getName().replaceFirst("\\[", "");
+    private static final String CLASS_NAME = Boolean.class.getName();
+    private static final String ARRAY_CLASS_NAME_STUB = boolean[].class.getName().replaceFirst("\\[", "");
 
-    BooleanType(String canonicalAbiType, String className) {
-        super(canonicalAbiType, className, 1, false);
+    BooleanType() {
+        super("bool", 1, false);
+    }
+
+    @Override
+    String className() {
+        return CLASS_NAME;
+    }
+
+    @Override
+    String arrayClassNameStub() {
+        return ARRAY_CLASS_NAME_STUB;
     }
 
     @Override
