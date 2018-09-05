@@ -34,12 +34,12 @@ public class BaseTypeInfo {
         map.put("address", new BaseTypeInfo(o++, "address", null, "uint160", BigInteger.class, null, 160, 0, false, -1, null));
         map.put("bytes", new BaseTypeInfo(o++, "bytes", byte[].class, -1, ByteType.UNSIGNED_BYTE_OBJECT));
         map.put("string", new BaseTypeInfo(o++, "string", String.class, -1, ByteType.UNSIGNED_BYTE_OBJECT));
-        map.put("decimal", new BaseTypeInfo(o++, "decimal", null, "fixed256x10", BigDecimal.class, null, 256, 10, true, -1, null));
+        map.put("decimal", new BaseTypeInfo(o++, "decimal", null, "fixed128x10", BigDecimal.class, null, 128, 10, true, -1, null));
 
         TYPE_INFO_MAP = Collections.unmodifiableMap(map);
     }
 
-    private transient final Integer ordinal; // for sorting
+//    private transient final Integer ordinal; // for sorting
 
     public final String canonical; // e.g. address
     public final String nonCanonical; // e.g. fixed
@@ -74,7 +74,7 @@ public class BaseTypeInfo {
                         boolean signed,
                         int arrayLength,
                         StackableType elementType) {
-        this.ordinal = ordinal;
+//        this.ordinal = ordinal;
         this.canonical = canonical.intern();
         this.nonCanonical = nonCanonical == null ? null : nonCanonical.intern();
         this.effective = effective.intern();
@@ -90,8 +90,7 @@ public class BaseTypeInfo {
 
     @Override
     public String toString() {
-        return ordinal + ") "
-                + canonical + ", "
+        return canonical + ", "
                 + (nonCanonical == null ? '-' : nonCanonical) + ", "
                 + (effective.equals(canonical) ? '-' : effective)
                 + ", \"" + className + "\", "
@@ -114,7 +113,8 @@ public class BaseTypeInfo {
     }
 
     /**
-     * Throws UnsupportedOperationException if TYPE_INFO_MAP is unmodifiable.
+     * May be used to modify (mangle) type attributes at runtime. Throws UnsupportedOperationException if TYPE_INFO_MAP
+     * is unmodifiable.
      *
      * @param info
      * @return
@@ -186,7 +186,7 @@ public class BaseTypeInfo {
 
     private static class MapComparator implements Comparator<Map.Entry<String, BaseTypeInfo>>, Serializable {
         public int compare(Map.Entry<String, BaseTypeInfo> a, Map.Entry<String, BaseTypeInfo> b) {
-            return Integer.compare(a.getValue().ordinal, b.getValue().ordinal);
+            return a.getKey().compareTo(b.getKey());
         }
     }
 
