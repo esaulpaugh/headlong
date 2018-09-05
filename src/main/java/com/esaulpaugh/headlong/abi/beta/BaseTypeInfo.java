@@ -14,7 +14,6 @@ public class BaseTypeInfo {
     private static final Map<String, BaseTypeInfo> TYPE_INFO_MAP;
 
     static {
-
         int o = 0;
         Map<String, BaseTypeInfo> map = new HashMap<>(HASH_MAP_INITIAL_CAPACITY);
 
@@ -112,6 +111,26 @@ public class BaseTypeInfo {
     public static BaseTypeInfo get(String canonical) {
 //        String canonical = canonicalize(raw);
         return TYPE_INFO_MAP.get(canonical);
+    }
+
+    /**
+     * Throws UnsupportedOperationException if TYPE_INFO_MAP is unmodifiable.
+     *
+     * @param info
+     * @return
+     */
+    public static BaseTypeInfo put(BaseTypeInfo info) {
+        return TYPE_INFO_MAP.put(info.canonical, info);
+    }
+
+    /**
+     * Throws UnsupportedOperationException if TYPE_INFO_MAP is unmodifiable.
+     *
+     * @param canonical
+     * @return
+     */
+    public static BaseTypeInfo remove(String canonical) {
+        return TYPE_INFO_MAP.remove(canonical);
     }
 
     @SuppressWarnings("unchecked")

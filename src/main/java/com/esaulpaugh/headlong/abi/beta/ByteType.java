@@ -1,7 +1,6 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 class ByteType extends AbstractInt256Type<Byte> {
 
@@ -10,9 +9,8 @@ class ByteType extends AbstractInt256Type<Byte> {
 
     private static final int MAX_BIT_LEN = 8;
 
-    static final ByteType SIGNED_BYTE_OBJECT = new ByteType("int8", true);
+//    static final ByteType SIGNED_BYTE_OBJECT = new ByteType("int8", true);
 //    static final ByteType SIGNED_BYTE_PRIMITIVE = new ByteType("int8", "B", true);
-
     static final ByteType UNSIGNED_BYTE_OBJECT = new ByteType("uint8", false);
 //    static final ByteType UNSIGNED_BYTE_PRIMITIVE = new ByteType("uint8", "B", false);
 
@@ -22,7 +20,9 @@ class ByteType extends AbstractInt256Type<Byte> {
 
     @Override
     Byte decode(byte[] buffer, int index) {
-        BigInteger bi = new BigInteger(Arrays.copyOfRange(buffer, index, index + INT_LENGTH_BYTES));
+        byte[] copy = new byte[INT_LENGTH_BYTES];
+        System.arraycopy(buffer, index, copy, 0, INT_LENGTH_BYTES);
+        BigInteger bi = new BigInteger(copy);
         return bi.byteValueExact();
     }
 

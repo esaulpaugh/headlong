@@ -1,7 +1,6 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 class BigIntegerType extends AbstractInt256Type<BigInteger> {
 
@@ -24,7 +23,9 @@ class BigIntegerType extends AbstractInt256Type<BigInteger> {
 
     @Override
     BigInteger decode(byte[] buffer, int index) {
-        BigInteger bi = new BigInteger(Arrays.copyOfRange(buffer, index, index + INT_LENGTH_BYTES));
+        byte[] copy = new byte[INT_LENGTH_BYTES];
+        System.arraycopy(buffer, index, copy, 0, INT_LENGTH_BYTES);
+        BigInteger bi = new BigInteger(copy);
         validateBigIntBitLen(bi);
         return bi;
     }

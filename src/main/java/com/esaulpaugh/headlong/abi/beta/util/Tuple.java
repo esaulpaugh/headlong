@@ -16,7 +16,11 @@ public class Tuple {
         return new Tuple(element);
     }
 
-    public static Tuple withElements(Object[] elements) {
+    public static Tuple withElements(Object... elements) {
+        return new Tuple(elements);
+    }
+
+    public static Tuple wrap(Object[] elements) {
         return new Tuple(elements);
     }
 

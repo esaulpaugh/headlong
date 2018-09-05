@@ -2,7 +2,7 @@ package com.esaulpaugh.headlong.abi.beta.example;
 
 import com.esaulpaugh.headlong.abi.beta.Function;
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
-import org.spongycastle.util.encoders.Hex;
+import com.esaulpaugh.headlong.rlp.util.Strings;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.abi.beta.Function.SELECTOR_LEN;
+import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
 
 public class EncodeTest {
 
@@ -68,7 +69,7 @@ public class EncodeTest {
         printABI(buffer.array());
 
         Function g = new Function("g(uint[][],string[])");
-        System.out.println(g.getSelectorHex());
+        System.out.println(g.selectorHex());
         buffer = g.encodeCall(
 //                (Object)
                 new BigInteger[][] {
@@ -84,17 +85,17 @@ public class EncodeTest {
         );
         printABI(buffer.array());
 
-        System.out.println("\n" + Hex.toHexString(buffer.array()));
+        System.out.println("\n" + Strings.encode(buffer.array(), HEX));
     }
 
     static void printABI(byte[] abi) {
-        System.out.println(Hex.toHexString(Arrays.copyOfRange(abi, 0, SELECTOR_LEN)));
+        System.out.println("ID\t" + Strings.encode(Arrays.copyOfRange(abi, 0, SELECTOR_LEN), HEX));
         final int end = abi.length;
         int i = SELECTOR_LEN;
         while(i < end) {
-            System.out.println( (i / 32) + "\t" + Hex.toHexString(Arrays.copyOfRange(abi, i, i + 32)));
+            System.out.println( (i / 32) + "\t" + Strings.encode(Arrays.copyOfRange(abi, i, i + 32), HEX));
             i += 32;
         }
-        System.out.println("\n" + Hex.toHexString(abi));
+        System.out.println("\n" + Strings.encode(abi, HEX));
     }
 }

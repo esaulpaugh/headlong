@@ -3,6 +3,7 @@ package com.esaulpaugh.headlong.abi.beta.example;
 import com.esaulpaugh.headlong.abi.beta.Function;
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
@@ -14,10 +15,18 @@ public class DecodeTest {
     // (bytes32)uint8)
     public static void main(String[] args0) throws ParseException {
 
+//        BaseTypeInfo.remove("decimal");
+
         // "large(bytes32[][])"
-        String signature = "(()[2])"; // (bytes1[3][2])[1]
+        String signature = "(((decimal),uint)[1],bool)"; // (bytes1[3][2])[1]
 
         Function f0 = new Function(signature);
+
+        System.out.println(f0.getCanonicalSignature());
+        System.out.println(f0.selectorHex());
+
+        System.out.println("CANONICAL: " + f0.getCanonicalSignature());
+
 //        final BigDecimal abba = new BigDecimal(BigInteger.valueOf(2).pow(128), 18);
 //        final BigDecimal dabba = new BigDecimal(BigInteger.valueOf(2).pow(127), 18);
 //        final BigDecimal upow = abba.subtract(BigDecimal.valueOf(1));
@@ -25,7 +34,8 @@ public class DecodeTest {
 
         Object[] args = new Object[] {
 
-                new Tuple[] { Tuple.EMPTY, Tuple.EMPTY }
+                new Tuple[] { new Tuple(Tuple.singleton(new BigDecimal(BigInteger.valueOf(7), 10)), BigInteger.ONE) },
+                true
 
 //                "01234567890123456789012345678901".getBytes()
 //                new byte[][][] { new byte[][] { "01234567890123456789012345678901".getBytes() } }
@@ -48,13 +58,15 @@ public class DecodeTest {
 
         };
         ByteBuffer bb = f0.encodeCall(args); // , pow, upow
-        Tuple t = f0.decodeCall(bb.array());
+        byte[] abi = bb.array();
+        EncodeTest.printABI(abi);
+        Tuple t = f0.decodeCall(abi);
         System.out.println("========= " + Arrays.deepEquals(t.elements, args));
 
 //        if(true)return;
 
         // (uint8),uint8,(int24,bytes),
-        Function f = new Function("(uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))"); // ,(string),string
+        Function f = new Function("(string[][][],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))"); // ,(string),string
 //        Function f = new Function("(string[2][3][])");
 
 //        BigInteger five = BigInteger.valueOf(5);
@@ -97,6 +109,9 @@ public class DecodeTest {
 
         // new Tuple(new Tuple("five"))
         Object[] argsIn = new Object[] {
+
+                triple,
+
                 // ((uint8)(int8)[],(int8)[],(int8)[],uint8,(int8)[],(uint8))
                 BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(Byte.MAX_VALUE << 2)),
                 new Tuple((byte) 7),
@@ -113,7 +128,7 @@ public class DecodeTest {
 //                new Tuple(new BigDecimal(BigInteger.ONE, 18)), new BigDecimal(BigInteger.ONE, 18)
         }; // , new Tuple(""), ""
 
-        byte[] abi = f.encodeCall(argsIn).array();
+        abi = f.encodeCall(argsIn).array();
 
         EncodeTest.printABI(abi);
 

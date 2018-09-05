@@ -8,7 +8,7 @@ import java.util.Deque;
 import static com.esaulpaugh.headlong.abi.beta.ArrayType.DYNAMIC_LENGTH;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-abstract class Typing {
+final class TypeFactory {
 
     static StackableType createForTuple(String canonicalType, TupleType baseTupleType) throws ParseException {
         if(baseTupleType == null) {
@@ -53,9 +53,10 @@ abstract class Typing {
             brackets.append('[');
             final String className = brackets.toString() + baseClassName;
 
-            final StackableType top = typeStack.peek();
+            final StackableType top = typeStack.peekFirst();
             final boolean dynamic = arrayLength == DYNAMIC_LENGTH || top.dynamic;
-            typeStack.push(new ArrayType<StackableType, Object>(canonicalType, className, null, top, arrayLength, dynamic));
+            // push onto stack
+            typeStack.addFirst(new ArrayType<StackableType, Object>(canonicalType, className, null, top, arrayLength, dynamic));
 
             return baseClassName;
         } else {
@@ -83,8 +84,7 @@ abstract class Typing {
         BaseTypeInfo info = BaseTypeInfo.get(canonicalType);
 
         if(info != null) {
-            // hash code should already be cached due to BaseTypeInfo.get()
-            switch (info.canonical) {
+            switch (canonicalType) { // canonicalType's hash code already cached from BaseTypeInfo.get()
             case "uint8": type = new ByteType(canonicalType, false); break;
             case "uint16": type = new ShortType(canonicalType, false); break;
             case "uint24":
@@ -201,7 +201,10 @@ abstract class Typing {
                 int idx;
                 boolean isSignedDecimal;
                 if ((isSignedDecimal = (idx = canonicalType.indexOf("fixed")) == 0) || idx == 1) {
-                    final int indexOfX = canonicalType.indexOf('x');
+                    if(idx == 1 && canonicalType.charAt(0) != 'u') {
+                        return null;
+                    }
+                    final int indexOfX = canonicalType.lastIndexOf('x');
                     int M = Integer.parseUnsignedInt(canonicalType.substring(idx + "fixed".length(), indexOfX), 10);
                     int N = Integer.parseUnsignedInt(canonicalType.substring(indexOfX + 1), 10); // everything after x
                     if ((M & 0b111) /* mod 8 */ == 0 && M >= 8 && M <= 256
@@ -220,7 +223,7 @@ abstract class Typing {
             return null;
         }
 
-        typeStack.push(type);
+        typeStack.addFirst(type);
         return isElement ? type.arrayClassNameStub() : type.className();
     }
 }

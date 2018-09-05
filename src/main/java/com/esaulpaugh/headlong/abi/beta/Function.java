@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
+import com.esaulpaugh.headlong.rlp.util.Strings;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.math.BigInteger;
@@ -24,15 +25,18 @@ public class Function {
 
     private final String canonicalSignature;
     private boolean requiredCanonicalization;
-    transient final byte[] selector = new byte[SELECTOR_LEN];
+    transient final byte[] selector;
     transient final TupleType paramTypes;
+
+    {
+        selector = new byte[SELECTOR_LEN];
+    }
 
     public Function(String signature) throws ParseException {
         StringBuilder canonicalSignature = new StringBuilder();
         List<StackableType> types = SignatureParser.parseFunctionSignature(signature, canonicalSignature);
         this.canonicalSignature = canonicalSignature.toString();
         this.requiredCanonicalization = !signature.equals(this.canonicalSignature);
-
         try {
             Keccak keccak256 = new Keccak(256);
             keccak256.update(this.canonicalSignature.getBytes(ASCII));
@@ -77,14 +81,14 @@ public class Function {
         return requiredCanonicalization;
     }
 
-    public byte[] getSelector() {
+    public byte[] selector() {
         byte[] out = new byte[selector.length];
         System.arraycopy(selector, 0, out, 0, out.length);
         return out;
     }
 
-    public String getSelectorHex() {
-        return String.format("%040x", new BigInteger(selector));
+    public String selectorHex() {
+        return Strings.encode(selector, Strings.HEX);
     }
 
     public static ByteBuffer encodeCall(String signature, Object... args) throws ParseException {

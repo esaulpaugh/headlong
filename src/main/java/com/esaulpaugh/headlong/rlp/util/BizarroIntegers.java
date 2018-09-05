@@ -222,45 +222,45 @@ public class BizarroIntegers {
     public static byte getByte(byte[] buffer, int index, int len) throws DecodeException {
         switch (len) {
         case 0: return (byte) 0xFF;
-        case 1: return _getByte(buffer, index, len);
+        case 1: return _getByte(buffer, index, 1);
         default: throw new IllegalArgumentException("len is out of range: " + len);
         }
     }
 
     public static short getShort(byte[] buffer, int index, int len) throws DecodeException {
-        // do sign extension for len < 2
+        // do sign extension for negative shorts, i.e. len < 2
         switch (len) {
         case 0: return (short) 0xFFFF;
-        case 1: return (short) (0xFF00 | _getByte(buffer, index, len)); // only negative integers will have len == 1; e.g. -256 = (short) (0xFF00 | 0x00000000)
-        case 2: return _getShort(buffer, index, len);
+        case 1: return (short) (0xFFFFFF00 | _getByte(buffer, index, 1));
+        case 2: return _getShort(buffer, index, 2);
         default: throw new IllegalArgumentException("len is out of range: " + len);
         }
     }
 
     public static int getInt(byte[] buffer, int index, int len) throws DecodeException {
-        // do sign extension for len < 4
+        // do sign extension for negative ints, i.e. len < 4
         switch (len) {
         case 0: return 0xFFFFFFFF;
-        case 1: return 0xFFFFFF00 | _getByte(buffer, index, len); // only negative integers will have len == 1; e.g. -256 = 0xFFFFFF00 | 0x00000000
-        case 2: return 0xFFFF0000 | _getShort(buffer, index, len);
-        case 3: return 0xFF000000 | _getInt(buffer, index, len);
-        case 4: return _getInt(buffer, index, len);
+        case 1: return 0xFFFFFF00 | _getByte(buffer, index, 1);
+        case 2: return 0xFFFF0000 | _getShort(buffer, index, 2);
+        case 3: return 0xFF000000 | _getInt(buffer, index, 3);
+        case 4: return _getInt(buffer, index, 4);
         default: throw new IllegalArgumentException("len is out of range: " + len);
         }
     }
 
     public static long getLong(final byte[] buffer, final int index, final int len) throws DecodeException {
-        // do sign extension for len < 8
+        // do sign extension for negative longs, i.e. len < 8
         switch (len) {
         case 0: return 0xFFFFFFFF_FFFFFFFFL;
-        case 1: return 0xFFFFFFFF_FFFFFF00L | _getByte(buffer, index, len); // only negative integers will have len == 1; e.g. -256 = 0xFFFFFFFF_FFFFFF00L | 0x00000000
-        case 2: return 0xFFFFFFFF_FFFF0000L | _getShort(buffer, index, len);
-        case 3: return 0xFFFFFFFF_FF000000L | _getInt(buffer, index, len);
-        case 4: return 0xFFFFFFFF_00000000L | _getInt(buffer, index, len);
-        case 5: return 0xFFFFFF00_00000000L | _getLong(buffer, index, len);
-        case 6: return 0xFFFF0000_00000000L | _getLong(buffer, index, len);
-        case 7: return 0xFF000000_00000000L | _getLong(buffer, index, len);
-        case 8: return _getLong(buffer, index, len);
+        case 1: return 0xFFFFFFFF_FFFFFF00L | _getByte(buffer, index, 1);
+        case 2: return 0xFFFFFFFF_FFFF0000L | _getShort(buffer, index, 2);
+        case 3: return 0xFFFFFFFF_FF000000L | _getInt(buffer, index, 3);
+        case 4: return 0xFFFFFFFF_00000000L | _getInt(buffer, index, 4);
+        case 5: return 0xFFFFFF00_00000000L | _getLong(buffer, index, 5);
+        case 6: return 0xFFFF0000_00000000L | _getLong(buffer, index, 6);
+        case 7: return 0xFF000000_00000000L | _getLong(buffer, index, 7);
+        case 8: return _getLong(buffer, index, 8);
         default: throw new IllegalArgumentException("len is out of range: " + len);
         }
     }
@@ -275,7 +275,7 @@ public class BizarroIntegers {
         int n = 0;
         if(val != -1) {
             n = 1;
-//            val = (short) (val >> Byte.SIZE); // ICAST_QUESTIONABLE_UNSIGNED_RIGHT_SHIFT
+//            val = (short) (val >>> Byte.SIZE); // ICAST_QUESTIONABLE_UNSIGNED_RIGHT_SHIFT
             val = (short) (val >> Byte.SIZE); // high bytes chopped off either way, see above
             if (val != -1) {
                 return 2;
