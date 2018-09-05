@@ -3,7 +3,6 @@ package com.esaulpaugh.headlong.abi.beta.example;
 import com.esaulpaugh.headlong.abi.beta.Function;
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
@@ -12,10 +11,11 @@ import java.util.Arrays;
 // TODO monte carlo smoke test
 public class DecodeTest {
 
+    // (bytes32)uint8)
     public static void main(String[] args0) throws ParseException {
 
         // "large(bytes32[][])"
-        String signature = "large(bytes32)"; // (bytes1[3][2])[1]
+        String signature = "(()[2])"; // (bytes1[3][2])[1]
 
         Function f0 = new Function(signature);
 //        final BigDecimal abba = new BigDecimal(BigInteger.valueOf(2).pow(128), 18);
@@ -25,7 +25,9 @@ public class DecodeTest {
 
         Object[] args = new Object[] {
 
-                "01234567890123456789012345678901".getBytes()
+                new Tuple[] { Tuple.EMPTY, Tuple.EMPTY }
+
+//                "01234567890123456789012345678901".getBytes()
 //                new byte[][][] { new byte[][] { "01234567890123456789012345678901".getBytes() } }
 
 //                new BigDecimal[][] { new BigDecimal[] { BigDecimal.valueOf(1.0000000001) }, new BigDecimal[] { BigDecimal.valueOf(2.0000000005) },  }

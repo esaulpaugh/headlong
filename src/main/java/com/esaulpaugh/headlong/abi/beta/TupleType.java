@@ -92,7 +92,6 @@ class TupleType extends DynamicType<Tuple> {
             if (elementType.dynamic) {
                 offsets[i] = Encoder.OFFSET_TYPE.decode(buffer, idx);
                 idx += AbstractInt256Type.INT_LENGTH_BYTES;
-                System.out.println("offset " + offsets[i] + " @ " + idx);
             } else {
                 if (elementType instanceof DynamicType) {
                     members[i] = ((DynamicType) elementType).decodeDynamic(buffer, idx, returnIndex);

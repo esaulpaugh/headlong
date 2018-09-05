@@ -103,7 +103,6 @@ class ArrayType<T extends StackableType, A> extends DynamicType<A> {
         final int idx;
         if(dynamic) {
             arrayLen = ARRAY_LENGTH_TYPE.decode(buffer, index);
-            System.out.println("arrayLen " + arrayLen + " @ " + index);
             checkLength(arrayLen);
             idx = index + ARRAY_LENGTH_BYTE_LEN;
         } else {
@@ -218,7 +217,6 @@ class ArrayType<T extends StackableType, A> extends DynamicType<A> {
         if(elementArrayType.dynamic) {
             for (int i = 0; i < len; i++) {
                 offsets[i] = Encoder.OFFSET_TYPE.decode(buffer, idx);
-                System.out.println("offset " + offsets[i] + " @ " + idx + ", points to " + (index + offsets[i]) + ", increment to " + (idx + AbstractInt256Type.INT_LENGTH_BYTES));
                 idx += AbstractInt256Type.INT_LENGTH_BYTES;
             }
             returnIndex[0] = idx;

@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -9,18 +10,18 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 abstract class Typing {
 
-    static StackableType createForTuple(String canonicalType, TupleType baseTupleType) {
+    static StackableType createForTuple(String canonicalType, TupleType baseTupleType) throws ParseException {
         if(baseTupleType == null) {
             throw new NullPointerException();
         }
         return create(canonicalType, baseTupleType);
     }
 
-    static StackableType create(String canonicalType) {
+    static StackableType create(String canonicalType) throws ParseException {
         return create(canonicalType, null);
     }
 
-    private static StackableType create(String canonicalType, TupleType baseTupleType) {
+    private static StackableType create(String canonicalType, TupleType baseTupleType) throws ParseException {
         Deque<StackableType> typeStack = new ArrayDeque<>();
         buildTypeStack(canonicalType, canonicalType.length() - 1, typeStack, new StringBuilder(), baseTupleType);
         return typeStack.peek();
@@ -30,8 +31,7 @@ abstract class Typing {
                                          final int index,
                                          final Deque<StackableType> typeStack,
                                          final StringBuilder brackets,
-                                         final StackableType baseTuple) {
-
+                                         final StackableType baseTuple) throws ParseException {
         if(canonicalType.charAt(index) == ']') {
 
             final int fromIndex = index - 1;
@@ -43,7 +43,11 @@ abstract class Typing {
             if(arrayOpenIndex == fromIndex) { // i.e. []
                 arrayLength = DYNAMIC_LENGTH;
             } else {
-                arrayLength = Integer.parseUnsignedInt(canonicalType.substring(arrayOpenIndex + 1, index));
+                try {
+                    arrayLength = Integer.parseUnsignedInt(canonicalType.substring(arrayOpenIndex + 1, index));
+                } catch (NumberFormatException nfe) {
+                    throw (ParseException) new ParseException("illegal argument", arrayOpenIndex).initCause(nfe);
+                }
             }
 
             brackets.append('[');
@@ -60,13 +64,12 @@ abstract class Typing {
 
             String javaBaseType;
             try {
-
                 javaBaseType = resolveBaseType(baseType, isArrayElement, typeStack, baseTuple);
             } catch (NumberFormatException nfe) {
                 javaBaseType = null;
             }
             if(javaBaseType == null) {
-                throw new IllegalArgumentException("unrecognized type: " + baseType + " (" + String.format("%040x", new BigInteger(baseType.getBytes(UTF_8))) + ")");
+                throw new ParseException("unrecognized type: " + baseType + " (" + String.format("%040x", new BigInteger(baseType.getBytes(UTF_8))) + ")", -1);
             }
 
             return javaBaseType;
@@ -188,7 +191,12 @@ abstract class Typing {
             }
         } else {
             if(canonicalType.startsWith("(")) {
-                type = baseTuple;
+                int last = canonicalType.charAt(canonicalType.length() - 1);
+                if(last == ')' || last == ']') {
+                    type = baseTuple;
+                } else {
+                    return null;
+                }
             } else {
                 int idx;
                 boolean isSignedDecimal;

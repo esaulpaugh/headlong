@@ -42,9 +42,7 @@ class Encoder {
 
         tupleType.validate(argsTuple);
 
-        int encodingByteLen = tupleType.byteLength(argsTuple);
-        final int allocation = SELECTOR_LEN + encodingByteLen;
-        System.out.println("allocating " + allocation);
+        final int allocation = SELECTOR_LEN + tupleType.byteLength(argsTuple);
         ByteBuffer outBuffer = ByteBuffer.wrap(new byte[allocation]); // ByteOrder.BIG_ENDIAN by default
 
         outBuffer.put(function.selector);
@@ -116,16 +114,12 @@ class Encoder {
     }
 
     private static void insertLength(int length, ByteBuffer dest) {
-        System.out.println("insertLength(" + length + ")");
         insertInt(length, dest);
     }
 
     private static void insertOffset(final int[] offset, StackableType paramType, Object object, ByteBuffer dest) {
-        System.out.println("\noffset[0] is " + offset[0]);
         insertInt(offset[0], dest);
-        System.out.println("offset[0] = " + offset[0] + " + " + paramType.byteLength(object) + " - " + 32);
-        offset[0] += paramType.byteLength(object); //  - 32
-        System.out.println("aka " + offset[0] + ", " + (offset[0] >>> 5));
+        offset[0] += paramType.byteLength(object);
     }
 
     private static void encodeTailsForTuple(List<StackableType> types, List<Object> values, ByteBuffer outBuffer) {

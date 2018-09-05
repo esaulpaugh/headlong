@@ -10,11 +10,8 @@ import java.util.regex.Pattern;
 
 class SignatureParser {
 
-    private static final String REGEX_NON_ASCII_CHAR = "[^\\p{ASCII}]{1,}";
-    private static final Pattern HAS_NON_ASCII_CHARS = Pattern.compile(REGEX_NON_ASCII_CHAR);
-
-    private static final String REGEX_NON_TYPE_CHAR = "[^a-z0-9\\[\\](),]{1,}";
-    private static final Pattern HAS_NON_TYPE_CHARS = Pattern.compile(REGEX_NON_TYPE_CHAR);
+    private static final Pattern HAS_NON_ASCII_CHARS = Pattern.compile("[^\\p{ASCII}]{1,}");
+    private static final Pattern HAS_NON_TYPE_CHARS = Pattern.compile("[^a-z0-9\\[\\](),]{1,}");
 
     static List<StackableType> parseFunctionSignature(final String signature, final StringBuilder canonicalOut) throws ParseException {
 
@@ -30,14 +27,7 @@ class SignatureParser {
 
         final Matcher illegalTypeCharMatcher = HAS_NON_TYPE_CHARS.matcher(signature);
 
-        Pair<Integer, Integer> results;
-        try {
-            results = parseTuple(signature, startParams, canonicalOut, typesOut, illegalTypeCharMatcher);
-        } catch (NonTerminationException nte) {
-            throw (ParseException) new ParseException("non-terminating signature", nte.getErrorOffset()).initCause(nte);
-        } catch (EmptyParameterException epe) {
-            throw (ParseException) new ParseException(epe.getMessage(), epe.getErrorOffset()).initCause(epe);
-        }
+        Pair<Integer, Integer> results = parseTuple(signature, startParams, canonicalOut, typesOut, illegalTypeCharMatcher);
 
         final int argEnd = results.first;
         final int sigEnd = signature.length();
@@ -47,18 +37,15 @@ class SignatureParser {
             throw new ParseException("non-terminating signature", sigEnd);
         }
         if (argEnd != terminator || terminator != sigEnd - 1) {
-            throw new ParseException("illegal signature termination: " + signature.substring(Math.max(0, argEnd)), argEnd);
+            int errorStart = Math.max(0, argEnd);
+            throw new ParseException("illegal signature termination: " + signature.substring(errorStart), errorStart);
         }
 
-        final int prevNonCanonicalIndex = results.second;
+        final int prevNonCanonicalIndex = results.second; // if 0, signature was already canonical
 
         canonicalOut.append(signature, prevNonCanonicalIndex, sigEnd);
 
-        System.out.println("canonical: " + canonicalOut.toString());
-
         return typesOut;
-
-//        return prevNonCanonicalIndex != 0;
     }
 
     private static Pair<Integer, Integer> parseTuple(final String signature,
@@ -87,50 +74,40 @@ class SignatureParser {
                 if (signature.charAt(argStart - 1) == ')') {
                     break LOOP;
                 }
-                throw new EmptyParameterException("empty parameter @ " + tupleTypes.size(), argStart);
+                throw new ParseException("empty parameter @ " + tupleTypes.size(), argStart);
             case '(': { // tuple element
                 try {
                     ArrayList<StackableType> innerTupleTypes = new ArrayList<>();
                     Pair<Integer, Integer> results = parseTuple(signature, argStart, canonicalOut, innerTupleTypes, illegalTypeCharMatcher);
+                    argEnd = results.first + 1;
+                    prevNonCanonicalIndex = results.second;
+                    StackableType childType = TupleType.create(null, innerTupleTypes.toArray(StackableType.EMPTY_TYPE_ARRAY)); // don't pass non-canonical type string
 
-                    StackableType[] members = innerTupleTypes.toArray(StackableType.EMPTY_TYPE_ARRAY);
-
-                    // don't pass non-canonical type string
-                    TupleType tupleType = TupleType.create(null, members);
-                    StackableType typleArray = null;
-
-                    int k = results.first + 1;
-                    int nextTerminator = -1;
-                    if(k < sigEnd && signature.charAt(k) == '[') {
-                        nextTerminator = nextParamTerminator(signature, k);
-                        if(nextTerminator > k) {
-                            typleArray = Typing.createForTuple(signature.substring(argStart, nextTerminator), tupleType);
+                    // check for array syntax
+                    if (argEnd < sigEnd && signature.charAt(argEnd) == '[') {
+                        final int nextTerminator = nextParamTerminator(signature, argEnd);
+                        if (nextTerminator > argEnd) {
+                            childType = Typing.createForTuple(signature.substring(argStart, nextTerminator), (TupleType) childType);
+                            argEnd = nextTerminator;
                         }
                     }
 
-                    if(typleArray != null) {
-                        tupleTypes.add(typleArray);
-                        argEnd = nextTerminator;
-                    } else {
-                        tupleTypes.add(tupleType);
-                        argEnd = results.first + 1;
-                    }
+                    tupleTypes.add(childType);
 
-                    prevNonCanonicalIndex = results.second;
-
-                } catch (EmptyParameterException epe) {
-                    throw (EmptyParameterException) new EmptyParameterException(epe.getMessage() + " @ " + tupleTypes.size(), epe.getErrorOffset()).initCause(epe);
+                } catch (ParseException pe) {
+                    throw (ParseException) new ParseException(pe.getMessage() + " @ " + tupleTypes.size(), pe.getErrorOffset()).initCause(pe);
                 }
+
                 if (argEnd >= sigEnd || signature.charAt(argEnd) != ',') {
                     break LOOP;
                 }
-                argStart = argEnd + 1;
+
                 break;
             }
             default: { // non-tuple element
                 argEnd = nextParamTerminator(signature, argStart + 1);
                 if (argEnd == -1) {
-                    throw new NonTerminationException("non-terminating tuple", startParams);
+                    break LOOP;
                 }
                 checkParamChars(illegalTypeCharMatcher, signature, argStart, argEnd);
                 String typeString = signature.substring(argStart, argEnd);
@@ -141,9 +118,13 @@ class SignatureParser {
                     prevNonCanonicalIndex = argEnd;
                 }
                 tupleTypes.add(Typing.create(typeString));
-                argStart = argEnd + 1;
+
+                if(argEnd >= sigEnd || signature.charAt(argEnd) == ')') {
+                    break LOOP;
+                }
             }
             }
+            argStart = argEnd + 1;
         }
 
         return new Pair<>(argEnd, prevNonCanonicalIndex);
@@ -190,9 +171,8 @@ class SignatureParser {
     }
 
     private static void checkParamChars(Matcher matcher, String signature, int argStart, int argEnd) throws ParseException {
-        Matcher illegalChars = matcher.region(argStart, argEnd);
-        if (illegalChars.find()) {
-            throw newIllegalCharacterException(true, signature, illegalChars.start());
+        if (matcher.region(argStart, argEnd).find()) {
+            throw newIllegalCharacterException(true, signature, matcher.start());
         }
     }
 

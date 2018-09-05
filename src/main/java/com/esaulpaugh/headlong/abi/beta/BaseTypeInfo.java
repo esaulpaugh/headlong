@@ -37,8 +37,6 @@ public class BaseTypeInfo {
         map.put("string", new BaseTypeInfo(o++, "string", String.class, -1, ByteType.UNSIGNED_BYTE_OBJECT));
         map.put("decimal", new BaseTypeInfo(o++, "decimal", null, "fixed256x10", BigDecimal.class, null, 256, 10, true, -1, null));
 
-        System.out.println("o = " + o);
-
         TYPE_INFO_MAP = Collections.unmodifiableMap(map);
     }
 
