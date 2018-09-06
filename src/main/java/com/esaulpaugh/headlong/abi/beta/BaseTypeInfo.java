@@ -39,23 +39,23 @@ public class BaseTypeInfo {
         TYPE_INFO_MAP = Collections.unmodifiableMap(map);
     }
 
-//    private transient final Integer ordinal; // for sorting
+//    private transient final int ordinal; // for sorting
 
-    public final String canonical; // e.g. address
-    public final String nonCanonical; // e.g. fixed
-    public final String effective; // e.g. uint160
+//    public final String canonical; // e.g. address
+//    public final String nonCanonical; // e.g. fixed
+//    public final String effective; // e.g. uint160
     public final String className; // e.g. java.lang.Boolean
     public final String arrayClassNameStub; // e.g. Z, e.g. Ljava.lang.BigInteger;
 
     public final int bitLength;
     public final int scale;
-    public final boolean signed;
+//    public final boolean signed;
 
     public final StackableType elementType;
 
     public final int arrayLength;
 
-    public BaseTypeInfo(Integer ordinal, String canonical, Class<?> objectClass, int arrayLength, StackableType elementType) {
+    public BaseTypeInfo(int ordinal, String canonical, Class<?> objectClass, int arrayLength, StackableType elementType) {
         this(ordinal, canonical, null, canonical, objectClass, null, -1, 0, false, arrayLength, elementType);
     }
 
@@ -75,25 +75,27 @@ public class BaseTypeInfo {
                         int arrayLength,
                         StackableType elementType) {
 //        this.ordinal = ordinal;
-        this.canonical = canonical.intern();
-        this.nonCanonical = nonCanonical == null ? null : nonCanonical.intern();
-        this.effective = effective.intern();
+//        this.canonical = canonical;
+//        this.nonCanonical = nonCanonical == null ? null : nonCanonical.intern();
+//        this.effective = effective.intern();
         this.className = objectClass.getName().intern();
         Object array = Array.newInstance(primitiveClass != null ? primitiveClass : objectClass, 0);
         this.arrayClassNameStub = array.getClass().getName().replaceFirst("\\[", "").intern();
         this.bitLength = bitLength;
         this.arrayLength = arrayLength;
         this.scale = scale;
-        this.signed = signed;
+//        this.signed = signed;
         this.elementType = elementType;
     }
 
     @Override
     public String toString() {
-        return canonical + ", "
-                + (nonCanonical == null ? '-' : nonCanonical) + ", "
-                + (effective.equals(canonical) ? '-' : effective)
-                + ", \"" + className + "\", "
+        return
+//                canonical + ", "
+//                + (nonCanonical == null ? '-' : nonCanonical) + ", "
+//                + (effective.equals(canonical) ? '-' : effective)
+//                + ", \"" +
+                        className + "\", "
                 + "\""+ arrayClassNameStub + '\"';
     }
 
@@ -119,8 +121,8 @@ public class BaseTypeInfo {
      * @param info
      * @return
      */
-    public static BaseTypeInfo put(BaseTypeInfo info) {
-        return TYPE_INFO_MAP.put(info.canonical, info);
+    public static BaseTypeInfo put(String canonical, BaseTypeInfo info) {
+        return TYPE_INFO_MAP.put(canonical, info);
     }
 
     /**

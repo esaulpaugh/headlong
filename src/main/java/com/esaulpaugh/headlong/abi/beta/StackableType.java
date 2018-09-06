@@ -22,7 +22,7 @@ abstract class StackableType<V> {
 
     abstract int byteLength(Object value);
 
-    abstract V decode(byte[] buffer, int index);
+    abstract V decode(byte[] buffer, int index); // TODO pass ByteBuffer?
 
     void validate(Object value) {
         validate(this, value);

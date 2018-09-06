@@ -109,7 +109,6 @@ class ArrayType<T extends StackableType, A> extends DynamicType<A> {
             arrayLen = length;
             idx = index;
         }
-
         if(elementType instanceof ByteType) {
             byte[] out = new byte[arrayLen];
             System.arraycopy(buffer, idx, out, 0, arrayLen);
@@ -118,76 +117,124 @@ class ArrayType<T extends StackableType, A> extends DynamicType<A> {
                 return (A) new String(out, CHARSET_UTF_8);
             }
             return (A) out;
-        } else if(elementType instanceof AbstractInt256Type) {
-            ByteBuffer bb = ByteBuffer.wrap(buffer, idx, arrayLen << 5); // mul 32
-            final byte[] thirtyTwo = new byte[AbstractInt256Type.INT_LENGTH_BYTES];
-            if(elementType instanceof ShortType) {
-                short[] shorts = new short[arrayLen];
-                for(int i = 0; i < arrayLen; i++) {
-                    bb.get(thirtyTwo);
-                    shorts[i] = new BigInteger(thirtyTwo).shortValueExact(); // validates that value is in short range
-                }
-                returnIndex[0] = bb.position();
-                return (A) shorts;
-            } else if(elementType instanceof IntType) {
-                final IntType intType = (IntType) elementType;
-                int[] ints = new int[arrayLen];
-                for(int i = 0; i < arrayLen; i++) {
-                    bb.get(thirtyTwo);
-                    long longVal = new BigInteger(thirtyTwo).longValueExact(); // throw on overflow
-                    intType.validateLongBitLen(longVal);
-                    ints[i] = (int) longVal;
-                }
-                returnIndex[0] = bb.position();
-                return (A) ints;
-            } else if(elementType instanceof LongType) {
-                final LongType lt = (LongType) elementType;
-                long[] longs = new long[arrayLen];
-                for(int i = 0; i < arrayLen; i++) {
-                    bb.get(thirtyTwo);
-                    long longVal = new BigInteger(thirtyTwo).longValueExact(); // throw on overflow
-                    lt.validateLongBitLen(longVal);
-                    longs[i] = longVal;
-                }
-                returnIndex[0] = bb.position();
-                return (A) longs;
-            } else if(elementType instanceof BigIntegerType) {
-                BigIntegerType et = (BigIntegerType) elementType;
-                BigInteger[] bigInts = new BigInteger[arrayLen];
-                for(int i = 0; i < arrayLen; i++) {
-                    bb.get(thirtyTwo);
-                    BigInteger temp = new BigInteger(thirtyTwo);
-                    et.validateBigIntBitLen(temp);
-                    bigInts[i] = temp;
-                }
-                returnIndex[0] = bb.position();
-                return (A) bigInts;
-            } else if(elementType instanceof BigDecimalType) {
-                BigDecimalType et = (BigDecimalType) elementType;
-                BigDecimal[] bigDecs = new BigDecimal[arrayLen];
-                for(int i = 0; i < arrayLen; i++) {
-                    bb.get(thirtyTwo);
-                    BigInteger temp = new BigInteger(thirtyTwo);
-                    et.validateBigIntBitLen(temp);
-                    bigDecs[i] = new BigDecimal(temp, et.scale);
-                }
-                returnIndex[0] = bb.position();
-                return (A) bigDecs;
-            } else if(elementType instanceof BooleanType) {
-                return (A) decodeBooleanArray(arrayLen, bb, thirtyTwo, returnIndex);
+        }
+        if(elementType instanceof AbstractInt256Type) {
+            final ByteBuffer bb = ByteBuffer.wrap(buffer, idx, arrayLen << 5); // mul 32
+            if (elementType instanceof BooleanType) {
+                return (A) decodeBooleanArray(bb, arrayLen, returnIndex);
+            }
+            final byte[] elementBuffer = new byte[AbstractInt256Type.INT_LENGTH_BYTES];
+            if (elementType instanceof ShortType) {
+                return (A) decodeShortArray(bb, arrayLen, elementBuffer, returnIndex);
+            }
+            if (elementType instanceof IntType) {
+                return (A) decodeIntArray((IntType) elementType, bb, arrayLen, elementBuffer, returnIndex);
+            }
+            if (elementType instanceof LongType) {
+                return (A) decodeLongArray((LongType) elementType, bb, arrayLen, elementBuffer, returnIndex);
+            }
+            if (elementType instanceof BigIntegerType) {
+                return (A) decodeBigIntegerArray((BigIntegerType) elementType, bb, arrayLen, elementBuffer, returnIndex);
+            }
+            if (elementType instanceof BigDecimalType) {
+                return (A) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, elementBuffer, returnIndex);
             }
             throw new Error();
         } else if(elementType instanceof TupleType) {
-            final TupleType tt = (TupleType) elementType;
-            Tuple[] tuples = new Tuple[arrayLen];
-            returnIndex[0] = idx;
-            for(int i = 0; i < arrayLen; i++) {
-                tuples[i] = tt.decodeDynamic(buffer, returnIndex[0], returnIndex);
-            }
-            return (A) tuples;
+            return (A) decodeTupleArray((TupleType) elementType, buffer, idx, arrayLen, returnIndex);
         } else {
             return (A) decodeObjectArray(arrayLen, buffer, idx, returnIndex);
         }
+    }
+
+    private static boolean[] decodeBooleanArray(ByteBuffer bb, int arrayLen, int[] returnIndex) {
+        boolean[] booleans = new boolean[arrayLen]; // elements are false by default
+        final int booleanOffset = AbstractInt256Type.INT_LENGTH_BYTES - Byte.BYTES;
+        for(int i = 0; i < arrayLen; i++) {
+            for (int j = 0; j < booleanOffset; j++) {
+                if(bb.get() != 0) {
+                    throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - j));
+                }
+            }
+            byte last = bb.get();
+            if(last == 1) {
+                booleans[i] = true;
+            } else if(last != 0) {
+                throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - AbstractInt256Type.INT_LENGTH_BYTES));
+            }
+        }
+        returnIndex[0] = bb.position();
+        return booleans;
+    }
+
+    private static short[] decodeShortArray(ByteBuffer bb, int arrayLen, byte[] elementBuffer, int[] returnIndex) {
+        short[] shorts = new short[arrayLen];
+        for (int i = 0; i < arrayLen; i++) {
+            bb.get(elementBuffer);
+            shorts[i] = new BigInteger(elementBuffer).shortValueExact(); // validates that value is in short range
+        }
+        returnIndex[0] = bb.position();
+        return shorts;
+    }
+
+    private static int[] decodeIntArray(IntType intType, ByteBuffer bb, int arrayLen, byte[] elementBuffer, int[] returnIndex) {
+        int[] ints = new int[arrayLen];
+        for (int i = 0; i < arrayLen; i++) {
+            ints[i] = (int) getLong(intType, bb, elementBuffer);
+        }
+        returnIndex[0] = bb.position();
+        return ints;
+    }
+
+    private static long[] decodeLongArray(LongType longType, ByteBuffer bb, int arrayLen, byte[] elementBuffer, int[] returnIndex) {
+        long[] longs = new long[arrayLen];
+        for (int i = 0; i < arrayLen; i++) {
+            longs[i] = getLong(longType, bb, elementBuffer);
+        }
+        returnIndex[0] = bb.position();
+        return longs;
+    }
+
+    private static BigInteger[] decodeBigIntegerArray(BigIntegerType bigIntegerType, ByteBuffer bb, int arrayLen, byte[] elementBuffer, int[] returnIndex) {
+        BigInteger[] bigInts = new BigInteger[arrayLen];
+        for (int i = 0; i < arrayLen; i++) {
+            bigInts[i] = getBigInteger(bigIntegerType, bb, elementBuffer);
+        }
+        returnIndex[0] = bb.position();
+        return bigInts;
+    }
+
+    private static BigDecimal[] decodeBigDecimalArray(BigDecimalType bigDecimalType, ByteBuffer bb, int arrayLen, byte[] elementBuffer, int[] returnIndex) {
+        BigDecimal[] bigDecs = new BigDecimal[arrayLen];
+        final int scale = bigDecimalType.scale;
+        for (int i = 0; i < arrayLen; i++) {
+            bigDecs[i] = new BigDecimal(getBigInteger(bigDecimalType, bb, elementBuffer), scale);
+        }
+        returnIndex[0] = bb.position();
+        return bigDecs;
+    }
+
+    private static Tuple[] decodeTupleArray(TupleType tupleType, byte[] buffer, int idx, int arrayLen, int[] returnIndex) {
+        Tuple[] tuples = new Tuple[arrayLen];
+        returnIndex[0] = idx;
+        for(int i = 0; i < arrayLen; i++) {
+            tuples[i] = tupleType.decodeDynamic(buffer, returnIndex[0], returnIndex);
+        }
+        return tuples;
+    }
+
+    private static long getLong(AbstractInt256Type type, ByteBuffer bb, byte[] elementBuffer) {
+        bb.get(elementBuffer);
+        long longVal = new BigInteger(elementBuffer).longValueExact(); // make sure high bytes are zero
+        type.validateLongBitLen(longVal); // validate lower 8 bytes
+        return longVal;
+    }
+
+    private static BigInteger getBigInteger(AbstractInt256Type type, ByteBuffer bb, byte[] elementBuffer) {
+        bb.get(elementBuffer);
+        BigInteger bigInt = new BigInteger(elementBuffer);
+        type.validateBigIntBitLen(bigInt);
+        return bigInt;
     }
 
     private Object[] decodeObjectArray(int arrayLen, byte[] buffer, final int index, int[] returnIndex) {
@@ -236,31 +283,6 @@ class ArrayType<T extends StackableType, A> extends DynamicType<A> {
                 dest[i] = elementArrayType.decodeDynamic(buffer, index + offset, returnIndex);
             }
         }
-    }
-
-    private static boolean[] decodeBooleanArray(int arrayLen, ByteBuffer bb, byte[] temp32, int[] returnIndex) {
-        boolean[] booleans = new boolean[arrayLen];
-        final int booleanOffset = AbstractInt256Type.INT_LENGTH_BYTES - Byte.BYTES;
-        for(int i = 0; i < arrayLen; i++) {
-            bb.get(temp32);
-            int j = 0;
-            for ( ; j < booleanOffset; j++) {
-                if(temp32[i] != 0) {
-                    throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - AbstractInt256Type.INT_LENGTH_BYTES));
-                }
-            }
-            byte last = temp32[j];
-            if(last == 0) {
-                booleans[i] = false;
-            } else if(last == 1) {
-                booleans[i] = true;
-            } else {
-                throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - AbstractInt256Type.INT_LENGTH_BYTES));
-            }
-        }
-
-        returnIndex[0] = bb.position();
-        return booleans;
     }
 
     @Override

@@ -347,18 +347,6 @@ public class RLPIntegers {
         }
     }
 
-//    public static int len(byte val) {
-//        return len(val & 0xFFL);
-//    }
-//
-//    public static int len(short val) {
-//        return len(val & 0xFFFFL);
-//    }
-//
-//    public static int len(int val) {
-//        return len(val & 0xFFFFFFFFL);
-//    }
-
     /**
      * Returns the byte length of an integer's minimal (without leading zeroes) two's complement representation. The
      * integer zero always has zero length.
