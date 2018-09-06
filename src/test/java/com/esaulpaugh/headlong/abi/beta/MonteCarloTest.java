@@ -5,10 +5,9 @@ import org.junit.Test;
 import java.security.SecureRandom;
 import java.text.ParseException;
 
-// -1908903771199546974
 public class MonteCarloTest {
 
-    private static final int N = 100000;
+    private static final int N = 30000;
 
     @Test
     public void monteCarlo() throws ParseException {
@@ -20,47 +19,18 @@ public class MonteCarloTest {
             seeds[i] = System.nanoTime() * (System.nanoTime() << 1) * (System.nanoTime() >> 1) * sr.nextLong();
         }
 
-        StringBuilder log = new StringBuilder();
-
-//        Random rng = new Random();
+//        StringBuilder log = new StringBuilder();
 
         int i = 0;
         for(final long seed : seeds) {
 //            System.out.println("new seed " + seed);
-            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed); // -667342700048419528L
+            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed);
             try {
                 final MonteCarloTestCase testCase = new MonteCarloTestCase(params);
 
-//                System.out.println("SEED = " + params.seed); // -3790512102648160282
+                boolean result = testCase.run();
 
-                System.out.println(i++ + ", " + testCase.run() + ", " + testCase.canonicalSignature); // .append('\n');
-
-//                rng.setSeed(-667342700048419528L); // -667342700048419528
-//                String rawFunctionSignature = generateFunctionSignature(rng, 0);
-//                System.out.println("raw: " + rawFunctionSignature);
-//                Function function = new Function(rawFunctionSignature);
-//                System.out.println(function.getCanonicalSignature());
-//                final Tuple in = generateTuple(function.paramTypes, rng);
-
-//                Function function = testCase.function();
-//                final Tuple in = testCase.argsTuple;
-//
-//                ByteBuffer abi = function.encodeCall(in);
-//
-//                byte[] array = abi.array();
-//
-////                EncodeTest.printABI(abi.array());
-//
-//                final Tuple out = function.decodeCall(array);
-//
-//                boolean equal = in.equals(out);
-//                System.out.println(equal);
-//
-//                if(!equal) {
-//                    findInequality(function.paramTypes, in, out);
-//                }
-//
-//                Assert.assertEquals(in, out);
+                System.out.println(i++ + ", " + result + ", " + testCase.canonicalSignature);
 
             } catch (Throwable t) {
                 System.err.println("SEED = " + params.seed);
@@ -68,6 +38,6 @@ public class MonteCarloTest {
             }
         }
 
-        System.out.println(log.toString());
+//        System.out.println(log.toString());
     }
 }

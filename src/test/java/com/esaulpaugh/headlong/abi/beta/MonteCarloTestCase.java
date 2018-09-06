@@ -27,7 +27,7 @@ public class MonteCarloTestCase {
         static final int DEFAULT_MAX_TUPLE_LENGTH = 4;
 
         static final int DEFAULT_MAX_ARRAY_DEPTH = 3;
-        static final int DEFAULT_MAX_ARRAY_LENGTH = 3;
+        static final int DEFAULT_MAX_ARRAY_LENGTH = 34;
 
         final int maxTupleLen;
         final int maxArrayLen;
@@ -73,7 +73,6 @@ public class MonteCarloTestCase {
         BaseTypeInfo.putFixed(0, fixedMap, true);
         BaseTypeInfo.putFixed(10000, fixedMap, false);
 
-        Random r = new Random(2552L);
         Set<String> fixedKeySet = fixedMap.keySet();
         FIXED_LIST = new ArrayList<>(fixedKeySet);
 
