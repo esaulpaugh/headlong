@@ -30,7 +30,7 @@ public class MonteCarloTestCase {
             CANONICAL_BASE_TYPE_STRINGS[i++] = canonical;
         }
         CANONICAL_BASE_TYPE_STRINGS[i++] = TUPLE_BASE_TYPE_STRING;
-        CANONICAL_BASE_TYPE_STRINGS[i++] = TUPLE_BASE_TYPE_STRING;
+        CANONICAL_BASE_TYPE_STRINGS[i++] = TUPLE_BASE_TYPE_STRING; // TODO (u)fixedMxN
 
     }
 
@@ -64,7 +64,7 @@ public class MonteCarloTestCase {
 
         byte[] array = abi.array();
 
-//                EncodeTest.printABI(abi.array());
+        EncodeTest.printABI(abi.array());
 
         final Tuple out = function.decodeCall(array);
 

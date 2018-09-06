@@ -9,7 +9,6 @@ import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.beta.util.ClassNames.toFriendly;
-import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 class ArrayType<T extends StackableType, A> extends StackableType<A> {
@@ -86,7 +85,9 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
             }
         }
         if (value instanceof String) { // always needs dynamic head
-            return ARRAY_LENGTH_BYTE_LEN + roundUp(((String) value).length());
+            String string = (String) value;
+            byte[] bytes = string.getBytes(UTF_8);
+            return ARRAY_LENGTH_BYTE_LEN + roundUp(bytes.length);
         }
         if (value instanceof Number) {
             return ARRAY_LENGTH_BYTE_LEN;
@@ -163,7 +164,7 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
         bb.get(out);
         bb.position(mark + roundUp(arrayLen));
         if(STRING_CLASS_NAME.equals(className)) {
-            return new String(out, CHARSET_UTF_8);
+            return new String(out, UTF_8);
         }
         return out;
     }

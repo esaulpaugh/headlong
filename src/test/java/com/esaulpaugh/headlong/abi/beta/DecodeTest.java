@@ -14,15 +14,19 @@ public class DecodeTest {
 
         final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(-667342700048419528L);
         final MonteCarloTestCase testCase = new MonteCarloTestCase(params);
-//        testCase.run();
-        // (address[],int88,int192[1][1][][7][],int24[][],int144,string[][5][][8][],decimal,uint64[][][7][],uint184)
-        Function function = testCase.function();
-        System.out.println(function.getCanonicalSignature());
-        TupleType tupleType = function.paramTypes;
+        testCase.run();
+
+        if(true) return;
+
+
+//        // (address[],int88,int192[1][1][][7][],int24[][],int144,string[][5][][8][],decimal,uint64[][][7][],uint184)
+//        Function function = testCase.function();
+//        System.out.println(function.getCanonicalSignature());
+//        TupleType tupleType = function.paramTypes;
         Tuple argsTuple = testCase.argsTuple;
-        // ------------------------------------------------
-        // (address[],int88,int192[1][1][][7][]) // ,int24[][],int144,string[][5][][8][],decimal,uint64[][][7][],uint184
-        // address[],int88,int192[1][1][][7][],int24[][],int144,
+//        // ------------------------------------------------
+//        // (address[],int88,int192[1][1][][7][]) // ,int24[][],int144,string[][5][][8][],decimal,uint64[][][7][],uint184
+//        // address[],int88,int192[1][1][][7][],int24[][],int144,
         Function f2 = new Function("(string[][5][][8][])");
         Tuple subtuple = argsTuple.subtuple(5, 6);
         ByteBuffer bb = f2.encodeCall(subtuple);
