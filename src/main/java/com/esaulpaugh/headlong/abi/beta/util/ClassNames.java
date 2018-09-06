@@ -3,6 +3,10 @@ package com.esaulpaugh.headlong.abi.beta.util;
 public class ClassNames {
 
     public static String toFriendly(String className) {
+        return toFriendly(className, null);
+    }
+
+    public static String toFriendly(String className, Integer arrayLength) {
 
         StringBuilder sb = new StringBuilder();
         final int split = className.lastIndexOf('[') + 1;
@@ -29,8 +33,15 @@ public class ClassNames {
         }
         }
 
-        for (int i = 0; i < split; i++) {
-            sb.append("[]");
+        if(split > 0) {
+            int i = 0;
+            if(arrayLength != null && arrayLength >= 0) {
+                sb.append('[').append(arrayLength).append(']');
+                i++;
+            }
+            for ( ; i < split; i++) {
+                sb.append("[]");
+            }
         }
 
         return sb.toString();

@@ -2,6 +2,7 @@ package com.esaulpaugh.headlong.abi.beta;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 
 class BigDecimalType extends AbstractInt256Type<BigDecimal> {
 
@@ -26,10 +27,9 @@ class BigDecimalType extends AbstractInt256Type<BigDecimal> {
     }
 
     @Override
-    BigDecimal decode(byte[] buffer, int index) {
-        byte[] copy = new byte[INT_LENGTH_BYTES];
-        System.arraycopy(buffer, index, copy, 0, INT_LENGTH_BYTES);
-        BigInteger bi = new BigInteger(copy);
+    BigDecimal decode(ByteBuffer bb, byte[] elementBuffer) {
+        bb.get(elementBuffer);
+        BigInteger bi = new BigInteger(elementBuffer);
         BigDecimal dec = new BigDecimal(bi, scale);
         validateBigIntBitLen(bi);
         return dec;

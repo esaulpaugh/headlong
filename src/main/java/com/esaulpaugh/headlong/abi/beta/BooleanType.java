@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 
 class BooleanType extends AbstractInt256Type<Boolean> {
 
@@ -22,10 +23,9 @@ class BooleanType extends AbstractInt256Type<Boolean> {
     }
 
     @Override
-    Boolean decode(byte[] buffer, int index) {
-        byte[] copy = new byte[INT_LENGTH_BYTES];
-        System.arraycopy(buffer, index, copy, 0, INT_LENGTH_BYTES);
-        BigInteger bi = new BigInteger(copy);
+    Boolean decode(ByteBuffer bb, byte[] elementBuffer) {
+        bb.get(elementBuffer);
+        BigInteger bi = new BigInteger(elementBuffer);
         switch (bi.byteValueExact()) {
         case 0: return Boolean.FALSE;
         case 1: return Boolean.TRUE;

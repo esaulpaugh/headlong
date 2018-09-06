@@ -2,10 +2,12 @@ package com.esaulpaugh.headlong.abi.beta;
 
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
+import java.nio.ByteBuffer;
+
 /**
  *
  */
-class TupleType extends DynamicType<Tuple> {
+class TupleType extends StackableType<Tuple> {
 
     private static final String CLASS_NAME = Tuple.class.getName();
     private static final String ARRAY_CLASS_NAME_STUB = Tuple[].class.getName().replaceFirst("\\[", "");
@@ -70,51 +72,47 @@ class TupleType extends DynamicType<Tuple> {
     }
 
     @Override
-    Tuple decode(byte[] buffer, int index) {
-        return decodeDynamic(buffer, index, new int[1]);
-    }
+    Tuple decode(ByteBuffer bb, byte[] elementBuffer) {
 
-    @Override
-    Tuple decodeDynamic(final byte[] buffer, final int index, final int[] returnIndex) {
-
-        if(returnIndex.length != 1) {
-            throw new IllegalArgumentException("returnIndex must be length 1");
-        }
+        final int index = bb.position(); // TODO remove eventually
 
         final int tupleLen = elementTypes.length;
-        Object[] members = new Object[tupleLen];
+        Object[] elements = new Object[tupleLen];
 
         int[] offsets = new int[tupleLen];
+        decodeHeads(bb, offsets, elementBuffer, elements);
 
-        int idx = index;
+        if(dynamic) {
+            decodeTails(bb, index, offsets, elementBuffer, elements);
+        }
+
+        return new Tuple(elements);
+    }
+
+    private void decodeHeads(ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) {
+        final int tupleLen = offsets.length;
         for (int i = 0; i < tupleLen; i++) {
             StackableType elementType = elementTypes[i];
             if (elementType.dynamic) {
-                offsets[i] = Encoder.OFFSET_TYPE.decode(buffer, idx);
-                idx += AbstractInt256Type.INT_LENGTH_BYTES;
+                offsets[i] = Encoder.OFFSET_TYPE.decode(bb, elementBuffer);
             } else {
-                if (elementType instanceof DynamicType) {
-                    members[i] = ((DynamicType) elementType).decodeDynamic(buffer, idx, returnIndex);
-                    idx = returnIndex[0];
-                } else {
-                    members[i] = elementType.decode(buffer, idx);
-                    idx += AbstractInt256Type.INT_LENGTH_BYTES;
-                }
+                dest[i] = elementType.decode(bb, elementBuffer);
             }
         }
+    }
 
-        if(!dynamic) {
-            returnIndex[0] = idx;
-            return new Tuple(members);
-        }
-
+    private void decodeTails(ByteBuffer bb, final int index, int[] offsets, byte[] elementBuffer, final Object[] dest) {
+        final int tupleLen = offsets.length;
         for (int i = 0; i < tupleLen; i++) {
-            idx = index + offsets[i];
-            if (idx > index) {
-                members[i] = ((DynamicType) elementTypes[i]).decodeDynamic(buffer, idx, returnIndex);
+            int offset = offsets[i];
+            if (offset > 0) {
+                if(bb.position() != index + offset) { // TODO remove this check eventually
+                    System.err.println(TupleType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
+                    bb.position(index + offset);
+                }
+                dest[i] = elementTypes[i].decode(bb, elementBuffer);
             }
         }
-        return new Tuple(members);
     }
 
     @Override

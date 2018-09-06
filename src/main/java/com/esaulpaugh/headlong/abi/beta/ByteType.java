@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 
 class ByteType extends AbstractInt256Type<Byte> {
 
@@ -19,10 +20,9 @@ class ByteType extends AbstractInt256Type<Byte> {
     }
 
     @Override
-    Byte decode(byte[] buffer, int index) {
-        byte[] copy = new byte[INT_LENGTH_BYTES];
-        System.arraycopy(buffer, index, copy, 0, INT_LENGTH_BYTES);
-        BigInteger bi = new BigInteger(copy);
+    Byte decode(ByteBuffer bb, byte[] elementBuffer) {
+        bb.get(elementBuffer);
+        BigInteger bi = new BigInteger(elementBuffer);
         return bi.byteValueExact();
     }
 

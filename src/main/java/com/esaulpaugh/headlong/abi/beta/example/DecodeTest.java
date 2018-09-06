@@ -18,7 +18,7 @@ public class DecodeTest {
 //        BaseTypeInfo.remove("decimal");
 
         // "large(bytes32[][])"
-        String signature = "(((decimal),uint)[1],bool)"; // (bytes1[3][2])[1]
+        String signature = "(bool[6][2],((decimal),uint)[1],bool)"; // (bytes1[3][2])[1]
 
         Function f0 = new Function(signature);
 
@@ -33,7 +33,7 @@ public class DecodeTest {
 //        final BigDecimal pow = dabba.subtract(BigDecimal.valueOf(1));
 
         Object[] args = new Object[] {
-
+                new boolean[][] { new boolean[] { true, true, false, false, true, false }, new boolean[] { true, true, false, false, true, false } },
                 new Tuple[] { new Tuple(Tuple.singleton(new BigDecimal(BigInteger.valueOf(7), 10)), BigInteger.ONE) },
                 true
 

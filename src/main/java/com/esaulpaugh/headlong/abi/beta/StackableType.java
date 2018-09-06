@@ -1,5 +1,7 @@
 package com.esaulpaugh.headlong.abi.beta;
 
+import java.nio.ByteBuffer;
+
 import static com.esaulpaugh.headlong.abi.beta.util.ClassNames.toFriendly;
 
 // TODO support model classes à la Student.java
@@ -22,7 +24,11 @@ abstract class StackableType<V> {
 
     abstract int byteLength(Object value);
 
-    abstract V decode(byte[] buffer, int index); // TODO pass ByteBuffer?
+    V decode(byte[] buffer, int index) {
+        return decode(ByteBuffer.wrap(buffer, index, buffer.length - index), new byte[AbstractInt256Type.INT_LENGTH_BYTES]);
+    }
+
+    abstract V decode(ByteBuffer buffer, byte[] elementBuffer);
 
     void validate(Object value) {
         validate(this, value);

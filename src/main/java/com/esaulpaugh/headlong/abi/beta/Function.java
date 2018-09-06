@@ -4,7 +4,6 @@ import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 import com.esaulpaugh.headlong.rlp.util.Strings;
 import com.joemelsha.crypto.hash.Keccak;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

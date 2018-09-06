@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 
 class ShortType extends AbstractInt256Type<Short> {
 
@@ -24,10 +25,9 @@ class ShortType extends AbstractInt256Type<Short> {
     }
 
     @Override
-    Short decode(byte[] buffer, int index) {
-        byte[] copy = new byte[INT_LENGTH_BYTES];
-        System.arraycopy(buffer, index, copy, 0, INT_LENGTH_BYTES);
-        BigInteger bi = new BigInteger(copy);
+    Short decode(ByteBuffer bb, byte[] elementBuffer) {
+        bb.get(elementBuffer);
+        BigInteger bi = new BigInteger(elementBuffer);
         return bi.shortValueExact();
     }
 }
