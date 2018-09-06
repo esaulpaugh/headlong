@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-class BigDecimalType extends AbstractInt256Type<BigDecimal> {
+class BigDecimalType extends AbstractUnitType<BigDecimal> {
 
     private static final String CLASS_NAME = BigDecimal.class.getName();
     private static final String ARRAY_CLASS_NAME_STUB = BigDecimal[].class.getName().replaceFirst("\\[", "");
@@ -27,9 +27,9 @@ class BigDecimalType extends AbstractInt256Type<BigDecimal> {
     }
 
     @Override
-    BigDecimal decode(ByteBuffer bb, byte[] elementBuffer) {
-        bb.get(elementBuffer);
-        BigInteger bi = new BigInteger(elementBuffer);
+    BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) {
+        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
+        BigInteger bi = new BigInteger(unitBuffer);
         BigDecimal dec = new BigDecimal(bi, scale);
         validateBigIntBitLen(bi);
         return dec;

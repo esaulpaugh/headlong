@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
+import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.beta.util.ClassNames.toFriendly;
 import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -107,7 +108,7 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
         } else {
             arrayLen = length;
         }
-        if(elementType instanceof AbstractInt256Type) {
+        if(elementType instanceof AbstractUnitType) {
             if(elementType instanceof ByteType) {
                 return (A) decodeByteArray(bb, arrayLen);
             }
@@ -139,7 +140,7 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
 
     private static boolean[] decodeBooleanArray(ByteBuffer bb, int arrayLen) {
         boolean[] booleans = new boolean[arrayLen]; // elements are false by default
-        final int booleanOffset = AbstractInt256Type.INT_LENGTH_BYTES - Byte.BYTES;
+        final int booleanOffset = UNIT_LENGTH_BYTES - Byte.BYTES;
         for(int i = 0; i < arrayLen; i++) {
             for (int j = 0; j < booleanOffset; j++) {
                 if(bb.get() != 0) {
@@ -150,7 +151,7 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
             if(last == 1) {
                 booleans[i] = true;
             } else if(last != 0) {
-                throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - AbstractInt256Type.INT_LENGTH_BYTES));
+                throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
             }
         }
         return booleans;
@@ -170,7 +171,7 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
     private static short[] decodeShortArray(ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
         short[] shorts = new short[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            bb.get(elementBuffer);
+            bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
             shorts[i] = new BigInteger(elementBuffer).shortValueExact(); // validates that value is in short range
         }
         return shorts;
@@ -217,15 +218,15 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
         return tuples;
     }
 
-    private static long getLong(AbstractInt256Type type, ByteBuffer bb, byte[] elementBuffer) {
-        bb.get(elementBuffer);
+    private static long getLong(AbstractUnitType type, ByteBuffer bb, byte[] elementBuffer) {
+        bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
         long longVal = new BigInteger(elementBuffer).longValueExact(); // make sure high bytes are zero
         type.validateLongBitLen(longVal); // validate lower 8 bytes
         return longVal;
     }
 
-    private static BigInteger getBigInteger(AbstractInt256Type type, ByteBuffer bb, byte[] elementBuffer) {
-        bb.get(elementBuffer);
+    private static BigInteger getBigInteger(AbstractUnitType type, ByteBuffer bb, byte[] elementBuffer) {
+        bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bigInt = new BigInteger(elementBuffer);
         type.validateBigIntBitLen(bigInt);
         return bigInt;

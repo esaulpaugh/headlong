@@ -5,13 +5,13 @@ import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
 
 import java.math.BigInteger;
 
-abstract class AbstractInt256Type<V> extends StackableType<V> { // instance of V should be instanceof Number or Boolean
+abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V should be instanceof Number or Boolean
 
-    static final int INT_LENGTH_BYTES = 32;
+    static final int UNIT_LENGTH_BYTES = 32;
 
     private final int bitLength;
 
-    AbstractInt256Type(String canonicalType, int bitLength, boolean signed) {
+    AbstractUnitType(String canonicalType, int bitLength, boolean signed) {
         super(canonicalType, false);
         this.bitLength = signed ? bitLength - 1 : bitLength;
 //        this.signed = signed;
@@ -19,7 +19,7 @@ abstract class AbstractInt256Type<V> extends StackableType<V> { // instance of V
 
     @Override
     int byteLength(Object value) {
-        return INT_LENGTH_BYTES;
+        return UNIT_LENGTH_BYTES;
     }
 
     @Override

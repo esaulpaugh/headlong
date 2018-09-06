@@ -2,6 +2,7 @@ package com.esaulpaugh.headlong.abi.beta;
 
 import java.nio.ByteBuffer;
 
+import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.beta.util.ClassNames.toFriendly;
 
 // TODO support model classes à la Student.java
@@ -25,10 +26,16 @@ abstract class StackableType<V> {
     abstract int byteLength(Object value);
 
     V decode(byte[] buffer, int index) {
-        return decode(ByteBuffer.wrap(buffer, index, buffer.length - index), new byte[AbstractInt256Type.INT_LENGTH_BYTES]);
+        return decode(ByteBuffer.wrap(buffer, index, buffer.length - index), new byte[UNIT_LENGTH_BYTES]);
     }
 
-    abstract V decode(ByteBuffer buffer, byte[] elementBuffer);
+    /**
+     *
+     * @param buffer    the buffer containing the encoded data
+     * @param unitBuffer a buffer of length {@link AbstractUnitType#UNIT_LENGTH_BYTES} in which to store intermediate values
+     * @return
+     */
+    abstract V decode(ByteBuffer buffer, byte[] unitBuffer);
 
     void validate(Object value) {
         validate(this, value);

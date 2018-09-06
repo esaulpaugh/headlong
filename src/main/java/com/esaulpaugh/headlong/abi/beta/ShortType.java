@@ -3,7 +3,7 @@ package com.esaulpaugh.headlong.abi.beta;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-class ShortType extends AbstractInt256Type<Short> {
+class ShortType extends AbstractUnitType<Short> {
 
     private static final String CLASS_NAME = Short.class.getName();
     private static final String ARRAY_CLASS_NAME_STUB = short[].class.getName().replaceFirst("\\[", "");
@@ -25,9 +25,9 @@ class ShortType extends AbstractInt256Type<Short> {
     }
 
     @Override
-    Short decode(ByteBuffer bb, byte[] elementBuffer) {
-        bb.get(elementBuffer);
-        BigInteger bi = new BigInteger(elementBuffer);
+    Short decode(ByteBuffer bb, byte[] unitBuffer) {
+        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
+        BigInteger bi = new BigInteger(unitBuffer);
         return bi.shortValueExact();
     }
 }

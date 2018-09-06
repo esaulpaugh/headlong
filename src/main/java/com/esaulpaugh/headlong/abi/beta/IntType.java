@@ -3,7 +3,7 @@ package com.esaulpaugh.headlong.abi.beta;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-class IntType extends AbstractInt256Type<Integer> {
+class IntType extends AbstractUnitType<Integer> {
 
     private static final String CLASS_NAME = Integer.class.getName();
     private static final String ARRAY_CLASS_NAME_STUB = int[].class.getName().replaceFirst("\\[", "");
@@ -25,9 +25,9 @@ class IntType extends AbstractInt256Type<Integer> {
     }
 
     @Override
-    Integer decode(ByteBuffer bb, byte[] elementBuffer) {
-        bb.get(elementBuffer);
-        BigInteger bi = new BigInteger(elementBuffer);
+    Integer decode(ByteBuffer bb, byte[] unitBuffer) {
+        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
+        BigInteger bi = new BigInteger(unitBuffer);
         long longVal = bi.longValueExact();
         validateLongBitLen(longVal);
         return (int) longVal;

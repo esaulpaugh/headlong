@@ -4,6 +4,8 @@ import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
 import java.nio.ByteBuffer;
 
+import static com.esaulpaugh.headlong.abi.beta.Encoder.OFFSET_LENGTH_BYTES;
+
 /**
  *
  */
@@ -63,7 +65,7 @@ class TupleType extends StackableType<Tuple> {
         for (int i = 0; i < elementTypes.length; i++) {
             StackableType type = elementTypes[i];
             if(type.dynamic) {
-                len += IntType.INT_LENGTH_BYTES; // for offset
+                len += OFFSET_LENGTH_BYTES;
             }
             len += type.byteLength(tuple.elements[i]);
         }

@@ -11,17 +11,19 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.beta.Function.SELECTOR_LEN;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 class Encoder {
 
+    static final int OFFSET_LENGTH_BYTES = UNIT_LENGTH_BYTES;
     static final IntType OFFSET_TYPE = new IntType("uint32", IntType.MAX_BIT_LEN, false);
 
     private static final byte ZERO_BYTE = (byte) 0;
 
-    private static final byte[] BOOLEAN_FALSE = new byte[AbstractInt256Type.INT_LENGTH_BYTES];
-    private static final byte[] BOOLEAN_TRUE = new byte[AbstractInt256Type.INT_LENGTH_BYTES];
+    private static final byte[] BOOLEAN_FALSE = new byte[UNIT_LENGTH_BYTES];
+    private static final byte[] BOOLEAN_TRUE = new byte[UNIT_LENGTH_BYTES];
 
     private static final byte[] NON_NEGATIVE_INT_PADDING = new byte[24];
     private static final byte[] NEGATIVE_INT_PADDING = new byte[24];
