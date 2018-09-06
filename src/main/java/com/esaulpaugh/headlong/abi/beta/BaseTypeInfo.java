@@ -135,6 +135,14 @@ public class BaseTypeInfo {
         return TYPE_INFO_MAP.remove(canonical);
     }
 
+    public static Set<String> keySet() {
+        return TYPE_INFO_MAP.keySet();
+    }
+
+//    public static Set<Map.Entry<String, BaseTypeInfo>> entrySet() {
+//        return TYPE_INFO_MAP.entrySet();
+//    }
+
     public static void main(String[] args0) {
 
         System.out.println(int[].class.getSuperclass());

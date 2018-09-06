@@ -1,69 +1,89 @@
-package com.esaulpaugh.headlong.abi.beta.example;
+package com.esaulpaugh.headlong.abi.beta;
 
-import com.esaulpaugh.headlong.abi.beta.Function;
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.Arrays;
 
-// TODO monte carlo smoke test
 public class DecodeTest {
 
     // (bytes32)uint8)
     public static void main(String[] args0) throws ParseException {
 
-//        BaseTypeInfo.remove("decimal");
-
-        // "large(bytes32[][])"
-        String signature = "(bool[6][2],((decimal),uint)[1],bool)"; // (bytes1[3][2])[1]
-
-        Function f0 = new Function(signature);
-
-        System.out.println(f0.getCanonicalSignature());
-        System.out.println(f0.selectorHex());
-
-        System.out.println("CANONICAL: " + f0.getCanonicalSignature());
-
-//        final BigDecimal abba = new BigDecimal(BigInteger.valueOf(2).pow(128), 18);
-//        final BigDecimal dabba = new BigDecimal(BigInteger.valueOf(2).pow(127), 18);
-//        final BigDecimal upow = abba.subtract(BigDecimal.valueOf(1));
-//        final BigDecimal pow = dabba.subtract(BigDecimal.valueOf(1));
-
-        Object[] args = new Object[] {
-                new boolean[][] { new boolean[] { true, true, false, false, true, false }, new boolean[] { true, true, false, false, true, false } },
-                new Tuple[] { new Tuple(Tuple.singleton(new BigDecimal(BigInteger.valueOf(7), 10)), BigInteger.ONE) },
-                true
-
-//                "01234567890123456789012345678901".getBytes()
-//                new byte[][][] { new byte[][] { "01234567890123456789012345678901".getBytes() } }
-
-//                new BigDecimal[][] { new BigDecimal[] { BigDecimal.valueOf(1.0000000001) }, new BigDecimal[] { BigDecimal.valueOf(2.0000000005) },  }
-//                new Tuple( new Tuple(new Tuple(new byte[][] { new byte[1] }, (byte) 9), Tuple.singleton("_".getBytes()), Tuple.singleton("yaaaaaaaaaaaaa".getBytes()) ), Tuple.singleton(new byte[45]) ),
-//                new Tuple( new Tuple(new Tuple(" ".getBytes(), "_".getBytes()), Tuple.singleton("_".getBytes()), Tuple.singleton("yaaaaaaaaaaaaa".getBytes()) ), Tuple.singleton(new byte[45]) ),
-//                new Tuple( new Tuple("_a".getBytes(), "yaaaaaaaaaaaaa".getBytes() ), Tuple.singleton(new byte[45]) )
-//                new Tuple[] {
-//                        Tuple.singleton(
-//                                new byte[][][] {
-//                                        new byte[][] { "_".getBytes(), "y".getBytes(), "y".getBytes() },
-//                                        new byte[][] { "a".getBytes(), "B".getBytes(), "z".getBytes() },
-//
-////                                new int[] { 3, 5, 9 },
-////                                new int[] { 1, 3, 5 }
-//                                }
-//                        )
-//                }
-
-        };
-        ByteBuffer bb = f0.encodeCall(args); // , pow, upow
-        byte[] abi = bb.array();
-        EncodeTest.printABI(abi);
-        Tuple t = f0.decodeCall(abi);
-        System.out.println("========= " + Arrays.deepEquals(t.elements, args));
+        final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(-667342700048419528L);
+        final MonteCarloTestCase testCase = new MonteCarloTestCase(params);
+//        testCase.run();
+        // (address[],int88,int192[1][1][][7][],int24[][],int144,string[][5][][8][],decimal,uint64[][][7][],uint184)
+        Function function = testCase.function();
+        System.out.println(function.getCanonicalSignature());
+        TupleType tupleType = function.paramTypes;
+        Tuple argsTuple = testCase.argsTuple;
+        // ------------------------------------------------
+        // (address[],int88,int192[1][1][][7][]) // ,int24[][],int144,string[][5][][8][],decimal,uint64[][][7][],uint184
+        // address[],int88,int192[1][1][][7][],int24[][],int144,
+        Function f2 = new Function("(string[][5][][8][])");
+        Tuple subtuple = argsTuple.subtuple(5, 6);
+        ByteBuffer bb = f2.encodeCall(subtuple);
 
 //        if(true)return;
+
+////        BaseTypeInfo.remove("decimal");
+//
+//        // "large(bytes32[][])"
+//        String signature = "(address[])"; // (bytes1[3][2])[1]
+//
+//        Function f0 = new Function(signature);
+//
+//        System.out.println(f0.getCanonicalSignature());
+//        System.out.println(f0.selectorHex());
+//
+//        System.out.println("CANONICAL: " + f0.getCanonicalSignature());
+//
+////        final BigDecimal abba = new BigDecimal(BigInteger.valueOf(2).pow(128), 18);
+////        final BigDecimal dabba = new BigDecimal(BigInteger.valueOf(2).pow(127), 18);
+////        final BigDecimal upow = abba.subtract(BigDecimal.valueOf(1));
+////        final BigDecimal pow = dabba.subtract(BigDecimal.valueOf(1));
+//
+//        //  != 166815876489431754686885849
+//        Object[] args = new Object[] {
+//
+//                new BigInteger[] { new BigInteger("994640482486759406802903684908903296859034869058") }
+//
+////                new BigInteger("-142669133331913314037895207")
+//
+////                new boolean[][] { new boolean[] { true, true, false, false, true, false }, new boolean[] { true, true, false, false, true, false } },
+////                new Tuple[] { new Tuple(Tuple.singleton(new BigDecimal(BigInteger.valueOf(7), 10)), BigInteger.ONE) },
+////                true
+//
+////                "01234567890123456789012345678901".getBytes()
+////                new byte[][][] { new byte[][] { "01234567890123456789012345678901".getBytes() } }
+//
+////                new BigDecimal[][] { new BigDecimal[] { BigDecimal.valueOf(1.0000000001) }, new BigDecimal[] { BigDecimal.valueOf(2.0000000005) },  }
+////                new Tuple( new Tuple(new Tuple(new byte[][] { new byte[1] }, (byte) 9), Tuple.singleton("_".getBytes()), Tuple.singleton("yaaaaaaaaaaaaa".getBytes()) ), Tuple.singleton(new byte[45]) ),
+////                new Tuple( new Tuple(new Tuple(" ".getBytes(), "_".getBytes()), Tuple.singleton("_".getBytes()), Tuple.singleton("yaaaaaaaaaaaaa".getBytes()) ), Tuple.singleton(new byte[45]) ),
+////                new Tuple( new Tuple("_a".getBytes(), "yaaaaaaaaaaaaa".getBytes() ), Tuple.singleton(new byte[45]) )
+////                new Tuple[] {
+////                        Tuple.singleton(
+////                                new byte[][][] {
+////                                        new byte[][] { "_".getBytes(), "y".getBytes(), "y".getBytes() },
+////                                        new byte[][] { "a".getBytes(), "B".getBytes(), "z".getBytes() },
+////
+//////                                new int[] { 3, 5, 9 },
+//////                                new int[] { 1, 3, 5 }
+////                                }
+////                        )
+////                }
+//
+//        };
+//        ByteBuffer bb = f0.encodeCall(args); // , pow, upow
+        byte[] abi = bb.array();
+        EncodeTest.printABI(abi);
+        Tuple t = f2.decodeCall(abi);
+        System.out.println("========= " + Arrays.deepEquals(t.elements, subtuple.elements));
+
+        if(true)return;
 
         // (uint8),uint8,(int24,bytes),
         Function f = new Function("(string[][][],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))"); // ,(string),string

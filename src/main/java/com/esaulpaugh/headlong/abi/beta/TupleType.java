@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import static com.esaulpaugh.headlong.abi.beta.Encoder.OFFSET_LENGTH_BYTES;
 
 /**
- *
+ * TODO subtupletype method like subtuple()
  */
 class TupleType extends StackableType<Tuple> {
 

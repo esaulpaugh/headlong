@@ -10,7 +10,7 @@ abstract class StackableType<V> {
 
     static final StackableType[] EMPTY_TYPE_ARRAY = new StackableType[0];
 
-    private final String canonicalType;
+    final String canonicalType;
 
     final boolean dynamic;
 

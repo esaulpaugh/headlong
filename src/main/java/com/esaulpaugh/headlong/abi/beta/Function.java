@@ -44,7 +44,8 @@ public class Function {
             throw new RuntimeException(de);
         }
 
-        this.paramTypes = TupleType.create(canonicalSignature.substring(canonicalSignature.indexOf("(")), types.toArray(EMPTY_TYPE_ARRAY));
+        String canonicalTupleTypeString = canonicalSignature.substring(canonicalSignature.indexOf("("));
+        this.paramTypes = TupleType.create(canonicalTupleTypeString, types.toArray(EMPTY_TYPE_ARRAY));
     }
 
     public Throwable error(Object... args) {

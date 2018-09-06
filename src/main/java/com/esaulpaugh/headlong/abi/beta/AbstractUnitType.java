@@ -9,7 +9,7 @@ abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V s
 
     static final int UNIT_LENGTH_BYTES = 32;
 
-    private final int bitLength;
+    final int bitLength;
 
     AbstractUnitType(String canonicalType, int bitLength, boolean signed) {
         super(canonicalType, false);

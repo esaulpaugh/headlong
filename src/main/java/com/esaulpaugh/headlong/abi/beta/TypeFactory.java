@@ -192,30 +192,9 @@ final class TypeFactory {
         } else {
             if(canonicalType.startsWith("(")) {
                 int last = canonicalType.charAt(canonicalType.length() - 1);
-                if(last == ')' || last == ']') {
-                    type = baseTuple;
-                } else {
-                    return null;
-                }
+                type = last == ')' || last == ']' ? baseTuple : null;
             } else {
-                int idx;
-                boolean isSignedDecimal;
-                if ((isSignedDecimal = (idx = canonicalType.indexOf("fixed")) == 0) || idx == 1) {
-                    if(idx == 1 && canonicalType.charAt(0) != 'u') {
-                        return null;
-                    }
-                    final int indexOfX = canonicalType.lastIndexOf('x');
-                    int M = Integer.parseUnsignedInt(canonicalType.substring(idx + "fixed".length(), indexOfX), 10);
-                    int N = Integer.parseUnsignedInt(canonicalType.substring(indexOfX + 1), 10); // everything after x
-                    if ((M & 0b111) /* mod 8 */ == 0 && M >= 8 && M <= 256
-                            && N > 0 && N <= 80) {
-                        type = new BigDecimalType(canonicalType, M, N, isSignedDecimal);
-                    } else {
-                        type = null;
-                    }
-                } else {
-                    type = null;
-                }
+                type = tryParseFixed(canonicalType);
             }
         }
 
@@ -225,5 +204,23 @@ final class TypeFactory {
 
         typeStack.addFirst(type);
         return isElement ? type.arrayClassNameStub() : type.className();
+    }
+
+    static BigDecimalType tryParseFixed(String canonicalType) {
+        int idx;
+        boolean isSignedDecimal;
+        if ((isSignedDecimal = (idx = canonicalType.indexOf("fixed")) == 0) || idx == 1) {
+            if(idx == 1 && canonicalType.charAt(0) != 'u') {
+                return null;
+            }
+            final int indexOfX = canonicalType.lastIndexOf('x');
+            int M = Integer.parseUnsignedInt(canonicalType.substring(idx + "fixed".length(), indexOfX), 10);
+            int N = Integer.parseUnsignedInt(canonicalType.substring(indexOfX + 1), 10); // everything after x
+            if ((M & 0b111) /* mod 8 */ == 0 && M >= 8 && M <= 256
+                    && N > 0 && N <= 80) {
+                return new BigDecimalType(canonicalType, M, N, isSignedDecimal);
+            }
+        }
+        return null;
     }
 }

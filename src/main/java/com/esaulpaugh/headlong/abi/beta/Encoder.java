@@ -20,6 +20,7 @@ class Encoder {
     static final int OFFSET_LENGTH_BYTES = UNIT_LENGTH_BYTES;
     static final IntType OFFSET_TYPE = new IntType("uint32", IntType.MAX_BIT_LEN, false);
 
+    private static final byte NEGATIVE_ONE_BYTE = (byte) 0xFF;
     private static final byte ZERO_BYTE = (byte) 0;
 
     private static final byte[] BOOLEAN_FALSE = new byte[UNIT_LENGTH_BYTES];
@@ -30,7 +31,7 @@ class Encoder {
 
     static {
         BOOLEAN_TRUE[BOOLEAN_TRUE.length-1] = 1;
-        Arrays.fill(NEGATIVE_INT_PADDING, (byte) 0xFF);
+        Arrays.fill(NEGATIVE_INT_PADDING, NEGATIVE_ONE_BYTE);
     }
 
     static ByteBuffer encodeFunctionCall(Function function, Tuple argsTuple) {
@@ -301,9 +302,10 @@ class Encoder {
 
     private static void insertInt(BigInteger bigGuy, ByteBuffer dest) {
         byte[] arr = bigGuy.toByteArray();
+        final byte paddingByte = bigGuy.signum() == -1 ? NEGATIVE_ONE_BYTE : ZERO_BYTE;
         final int lim = 32 - arr.length;
         for (int i = 0; i < lim; i++) {
-            dest.put((byte) 0);
+            dest.put(paddingByte);
         }
         dest.put(arr);
     }

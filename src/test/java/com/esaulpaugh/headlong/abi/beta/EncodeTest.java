@@ -1,6 +1,5 @@
-package com.esaulpaugh.headlong.abi.beta.example;
+package com.esaulpaugh.headlong.abi.beta;
 
-import com.esaulpaugh.headlong.abi.beta.Function;
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 import com.esaulpaugh.headlong.rlp.util.Strings;
 
@@ -88,7 +87,7 @@ public class EncodeTest {
         System.out.println("\n" + Strings.encode(buffer.array(), HEX));
     }
 
-    static void printABI(byte[] abi) {
+    public static void printABI(byte[] abi) {
         System.out.println("ID\t" + Strings.encode(Arrays.copyOfRange(abi, 0, SELECTOR_LEN), HEX));
         final int end = abi.length;
         int i = SELECTOR_LEN;

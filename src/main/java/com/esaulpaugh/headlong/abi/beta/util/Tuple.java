@@ -24,6 +24,10 @@ public class Tuple {
         return new Tuple(elements);
     }
 
+    public Tuple subtuple(int startIndex, int endIndex) {
+        return new Tuple(Arrays.copyOfRange(elements, startIndex, endIndex));
+    }
+
     @Override
     public int hashCode() {
         int result = 1;

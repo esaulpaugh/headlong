@@ -14,7 +14,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 class ArrayType<T extends StackableType, A> extends StackableType<A> {
 
-    private static final String STRING_CLASS_NAME = String.class.getName();
+    static final String STRING_CLASS_NAME = String.class.getName();
 
     private static final int ARRAY_LENGTH_BYTE_LEN = IntType.MAX_BIT_LEN;
     private static final IntType ARRAY_LENGTH_TYPE = new IntType("uint32", ARRAY_LENGTH_BYTE_LEN, false);
@@ -22,8 +22,8 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
     static final int DYNAMIC_LENGTH = -1;
 
     final T elementType;
-    private final int length;
-    private final String className;
+    final int length;
+    final String className;
     private final String arrayClassNameStub;
 
     ArrayType(String canonicalType, String className, String arrayClassNameStub, T elementType, int length, boolean dynamic) {
