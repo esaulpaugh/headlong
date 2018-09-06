@@ -135,7 +135,6 @@ public class BaseTypeInfo {
         return TYPE_INFO_MAP.remove(canonical);
     }
 
-    @SuppressWarnings("unchecked")
     public static void main(String[] args0) {
 
         System.out.println(int[].class.getSuperclass());
