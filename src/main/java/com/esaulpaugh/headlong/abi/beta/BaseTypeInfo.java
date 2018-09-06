@@ -139,6 +139,10 @@ public class BaseTypeInfo {
         return TYPE_INFO_MAP.keySet();
     }
 
+    public static Map<String, BaseTypeInfo> getBaseTypeInfoMap() {
+        return TYPE_INFO_MAP;
+    }
+
 //    public static Set<Map.Entry<String, BaseTypeInfo>> entrySet() {
 //        return TYPE_INFO_MAP.entrySet();
 //    }
@@ -246,19 +250,19 @@ public class BaseTypeInfo {
 //        return new BaseTypeInfo(null, canonical, nonCanonical, canonical, BigDecimal.class, null);
 //    }
 
-//    private static int putFixed(int o, Map<String, BaseTypeInfo> map, boolean unsigned) {
-//        final String stub = unsigned ? "ufixed" : "fixed";
-//        for(int M = 8; M <= 256; M+=8) {
-//            for (int N = 1; N <= 80; N++) {
-//                String canonical = stub + M + 'x' + N;
-//                map.put(canonical, new BaseTypeInfo(o++, canonical, null, canonical, BigDecimal.class, null, M, N, true, -1, null));
-//            }
-//        }
-//
-//        // overwrite 128x18 entry
-//        String special = stub + "128x18";
-//        map.put(special, new BaseTypeInfo(o++, special, stub, special, BigDecimal.class, null, 128, 18, true, -1, null));
-//
-//        return o;
-//    }
+    static int putFixed(int o, Map<String, BaseTypeInfo> map, boolean unsigned) {
+        final String stub = unsigned ? "ufixed" : "fixed";
+        for(int M = 8; M <= 256; M+=8) {
+            for (int N = 1; N <= 80; N++) {
+                String canonical = stub + M + 'x' + N;
+                map.put(canonical, new BaseTypeInfo(o++, canonical, null, canonical, BigDecimal.class, null, M, N, true, -1, null));
+            }
+        }
+
+        // overwrite 128x18 entry
+        String special = stub + "128x18";
+        map.put(special, new BaseTypeInfo(o++, special, stub, special, BigDecimal.class, null, 128, 18, true, -1, null));
+
+        return o;
+    }
 }

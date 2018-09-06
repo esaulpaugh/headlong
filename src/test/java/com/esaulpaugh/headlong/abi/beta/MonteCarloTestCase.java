@@ -1,13 +1,16 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
-import org.junit.Assert;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -18,20 +21,73 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class MonteCarloTestCase {
 
+    static class Params {
+
+        static final int DEFAULT_MAX_TUPLE_DEPTH = 7;
+        static final int DEFAULT_MAX_TUPLE_LENGTH = 4;
+
+        static final int DEFAULT_MAX_ARRAY_DEPTH = 3;
+        static final int DEFAULT_MAX_ARRAY_LENGTH = 3;
+
+        final int maxTupleLen;
+        final int maxArrayLen;
+
+        final int maxTupleDepth;
+        final int maxArrayDepth;
+
+        final long seed;
+
+        Params(long seed) {
+            this.maxTupleDepth = DEFAULT_MAX_TUPLE_DEPTH;
+            this.maxTupleLen = DEFAULT_MAX_TUPLE_LENGTH;
+            this.maxArrayDepth = DEFAULT_MAX_ARRAY_DEPTH;
+            this.maxArrayLen = DEFAULT_MAX_ARRAY_LENGTH;
+            this.seed = seed;
+        }
+
+        Params(int maxTupleDepth, int maxTupleLen, int maxArrayDepth, int maxArrayLen, long seed) {
+            this.maxTupleLen = maxTupleLen;
+            this.maxArrayLen = maxArrayLen;
+            this.maxTupleDepth = maxTupleDepth;
+            this.maxArrayDepth = maxArrayDepth;
+            this.seed = seed;
+        }
+    }
+
+    private static final int NUM_TUPLES_ADDED = 17;
+    private static final int NUM_FIXED_ADDED = 50;
+
+    private static final ArrayList<String> FIXED_LIST;
+
     private static String[] CANONICAL_BASE_TYPE_STRINGS;
 
-    private static final String TUPLE_BASE_TYPE_STRING = "(...)";
+    private static final String TUPLE_KEY = "(...)";
+
+    private static final int FIXED_START_INDEX;
 
     static {
-        final Set<String> keySet = BaseTypeInfo.keySet();
-        CANONICAL_BASE_TYPE_STRINGS = new String[keySet.size() + 2];
+
+        Map<String, BaseTypeInfo> baseInfoTypeMap = new HashMap<>(BaseTypeInfo.getBaseTypeInfoMap());
+
+        Map<String, BaseTypeInfo> fixedMap = new HashMap<>();
+        BaseTypeInfo.putFixed(0, fixedMap, true);
+        BaseTypeInfo.putFixed(10000, fixedMap, false);
+
+        Random r = new Random(2552L);
+        Set<String> fixedKeySet = fixedMap.keySet();
+        FIXED_LIST = new ArrayList<>(fixedKeySet);
+
+        final Set<String> keySet = baseInfoTypeMap.keySet();
+        final int numKeys = keySet.size();
+        FIXED_START_INDEX = numKeys + NUM_TUPLES_ADDED;
+        CANONICAL_BASE_TYPE_STRINGS = new String[FIXED_START_INDEX + NUM_FIXED_ADDED];
         int i = 0;
         for (String canonical : keySet) {
             CANONICAL_BASE_TYPE_STRINGS[i++] = canonical;
         }
-        CANONICAL_BASE_TYPE_STRINGS[i++] = TUPLE_BASE_TYPE_STRING;
-        CANONICAL_BASE_TYPE_STRINGS[i++] = TUPLE_BASE_TYPE_STRING; // TODO (u)fixedMxN
-
+        for (int j = 0; j < NUM_TUPLES_ADDED; j++) {
+            CANONICAL_BASE_TYPE_STRINGS[i++] = TUPLE_KEY;
+        }
     }
 
     final Params params;
@@ -43,6 +99,12 @@ public class MonteCarloTestCase {
         this.params = params;
 
         Random rng = new Random(params.seed);
+
+        int i = FIXED_START_INDEX;
+        Collections.shuffle(FIXED_LIST, rng);
+        for (int j = 0; j < NUM_FIXED_ADDED; j++) {
+            CANONICAL_BASE_TYPE_STRINGS[i++] = FIXED_LIST.get(j);
+        }
 
         String rawSig = generateFunctionSignature(rng, 0);
 
@@ -79,39 +141,6 @@ public class MonteCarloTestCase {
         return true;
     }
 
-    static class Params {
-
-        static final int DEFAULT_MAX_TUPLE_DEPTH = 10;
-        static final int DEFAULT_MAX_TUPLE_LENGTH = 12;
-
-        static final int DEFAULT_MAX_ARRAY_DEPTH = 5;
-        static final int DEFAULT_MAX_ARRAY_LENGTH = 12;
-
-        final int maxTupleLen;
-        final int maxArrayLen;
-
-        final int maxTupleDepth;
-        final int maxArrayDepth;
-
-        final long seed;
-
-        Params(long seed) {
-            this.maxTupleDepth = DEFAULT_MAX_TUPLE_DEPTH;
-            this.maxTupleLen = DEFAULT_MAX_TUPLE_LENGTH;
-            this.maxArrayDepth = DEFAULT_MAX_ARRAY_DEPTH;
-            this.maxArrayLen = DEFAULT_MAX_ARRAY_LENGTH;
-            this.seed = seed;
-        }
-
-        Params(int maxTupleDepth, int maxTupleLen, int maxArrayDepth, int maxArrayLen, long seed) {
-            this.maxTupleLen = maxTupleLen;
-            this.maxArrayLen = maxArrayLen;
-            this.maxTupleDepth = maxTupleDepth;
-            this.maxArrayDepth = maxArrayDepth;
-            this.seed = seed;
-        }
-    }
-
     Function function() {
         try {
             return new Function(canonicalSignature);
@@ -122,7 +151,7 @@ public class MonteCarloTestCase {
 
     private String generateFunctionSignature(Random r, int tupleDepth) throws ParseException {
 
-        StackableType[] types = new StackableType[r.nextInt(params.maxTupleLen)];
+        StackableType[] types = new StackableType[r.nextInt(1 + params.maxTupleLen)]; // 0 to max
         for (int i = 0; i < types.length; i++) {
             types[i] = generateType(r, tupleDepth);
         }
@@ -145,7 +174,7 @@ public class MonteCarloTestCase {
         int index = r.nextInt(CANONICAL_BASE_TYPE_STRINGS.length);
         String baseTypeString = CANONICAL_BASE_TYPE_STRINGS[index];
         StringBuilder sb = new StringBuilder(baseTypeString);
-        boolean isElement = r.nextBoolean();
+        boolean isElement = r.nextBoolean() && r.nextBoolean();
         if(isElement) {
             int arrayDepth = 1 + r.nextInt(params.maxArrayDepth);
             for (int i = 0; i < arrayDepth; i++) {
@@ -159,7 +188,7 @@ public class MonteCarloTestCase {
 
         String canonicalTypeString = sb.toString();
 
-        if(baseTypeString.equals(TUPLE_BASE_TYPE_STRING)) {
+        if(baseTypeString.equals(TUPLE_KEY)) {
             return generateTupleType(r, tupleDepth + 1);
 //            return TypeFactory.createForTuple(canonicalTypeString, generateTupleType(r, tupleDepth + 1));
         }
@@ -259,6 +288,9 @@ public class MonteCarloTestCase {
 //    }
 
     private static BigInteger generateBigInteger(Random r, int bitLimit) {
+        if((bitLimit & 0b111) == 7) {
+            return generateSignedBigInteger(r, bitLimit);
+        }
         byte[] thirtyTwo = new byte[UNIT_LENGTH_BYTES];
         final int len = 1 + r.nextInt(bitLimit >>> 3); // 1-32
         for (int i = UNIT_LENGTH_BYTES - len; i < UNIT_LENGTH_BYTES; i++) {
@@ -272,6 +304,10 @@ public class MonteCarloTestCase {
             return bi.negate();
         }
         return bi;
+    }
+
+    private static BigInteger generateSignedBigInteger(Random r, int bitLimit) {
+        return generateBigInteger(r, bitLimit + 1).divide(BigInteger.valueOf(2L));
     }
 
     private static BigDecimal generateBigDecimal(Random r, int bitLimit, int scale) {
