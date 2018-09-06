@@ -8,7 +8,7 @@ import java.text.ParseException;
 // -1908903771199546974
 public class MonteCarloTest {
 
-    private static final int N = 10;
+    private static final int N = 10000;
 
     @Test
     public void monteCarlo() throws ParseException {
@@ -20,17 +20,19 @@ public class MonteCarloTest {
             seeds[i] = sr.nextLong();
         }
 
+        StringBuilder log = new StringBuilder();
+
 //        Random rng = new Random();
 
         for(final long seed : seeds) {
-            System.out.println("new seed " + seed);
-            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(-667342700048419528L);
+//            System.out.println("new seed " + seed);
+            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed); // -667342700048419528L
             try {
                 final MonteCarloTestCase testCase = new MonteCarloTestCase(params);
 
-                System.out.println("SEED = " + params.seed); // -3790512102648160282
+//                System.out.println("SEED = " + params.seed); // -3790512102648160282
 
-                testCase.run();
+                log.append(testCase.run()).append('\n');
 
 //                rng.setSeed(-667342700048419528L); // -667342700048419528
 //                String rawFunctionSignature = generateFunctionSignature(rng, 0);
@@ -64,5 +66,7 @@ public class MonteCarloTest {
                 throw t;
             }
         }
+
+        System.out.println(log.toString());
     }
 }

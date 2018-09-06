@@ -57,25 +57,26 @@ public class MonteCarloTestCase {
         this(new Params(seed));
     }
 
-    void run() {
+    boolean run() {
         Function function = function();
 
         ByteBuffer abi = function.encodeCall(argsTuple);
 
         byte[] array = abi.array();
 
-        EncodeTest.printABI(abi.array());
+//        EncodeTest.printABI(abi.array());
 
         final Tuple out = function.decodeCall(array);
 
         boolean equal = argsTuple.equals(out);
-        System.out.println(equal);
+//        System.out.println(equal);
 
         if(!equal) {
             findInequality(function.paramTypes, argsTuple, out);
+            throw new RuntimeException(function.getCanonicalSignature());
         }
 
-        Assert.assertEquals(argsTuple, out);
+        return true;
     }
 
     static class Params {
@@ -159,7 +160,8 @@ public class MonteCarloTestCase {
         String canonicalTypeString = sb.toString();
 
         if(baseTypeString.equals(TUPLE_BASE_TYPE_STRING)) {
-            return TypeFactory.createForTuple(canonicalTypeString, generateTupleType(r, tupleDepth + 1));
+            return generateTupleType(r, tupleDepth + 1);
+//            return TypeFactory.createForTuple(canonicalTypeString, generateTupleType(r, tupleDepth + 1));
         }
         return TypeFactory.create(canonicalTypeString);
     }
@@ -364,7 +366,7 @@ public class MonteCarloTestCase {
     private static BigDecimal[] generateBigDecimalArray(final int len, int elementBitLimit, int elementScale, Random r) {
         BigDecimal[] bigDecs = new BigDecimal[len];
         for (int i = 0; i < len; i++) {
-            bigDecs[i] = generateBigDecimal(r, elementBitLimit, elementScale); // TODO
+            bigDecs[i] = generateBigDecimal(r, elementBitLimit, elementScale);
         }
         return bigDecs;
     }
