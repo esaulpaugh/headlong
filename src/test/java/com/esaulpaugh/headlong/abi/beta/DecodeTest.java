@@ -2,12 +2,17 @@ package com.esaulpaugh.headlong.abi.beta;
 
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.Arrays;
 
 public class DecodeTest {
+
+    private static BigDecimal f(long v, int s) {
+        return BigDecimal.valueOf(v, s);
+    }
 
     // (bytes32)uint8)
     public static void main(String[] args0) throws ParseException {
@@ -16,19 +21,40 @@ public class DecodeTest {
         final MonteCarloTestCase testCase = new MonteCarloTestCase(params);
         testCase.run();
 
-        if(true) return;
+//        if(true) return;
 
 
 //        // (address[],int88,int192[1][1][][7][],int24[][],int144,string[][5][][8][],decimal,uint64[][][7][],uint184)
 //        Function function = testCase.function();
 //        System.out.println(function.getCanonicalSignature());
 //        TupleType tupleType = function.paramTypes;
-        Tuple argsTuple = testCase.argsTuple;
+
+//        Tuple argsTuple = testCase.argsTuple;
 //        // ------------------------------------------------
 //        // (address[],int88,int192[1][1][][7][]) // ,int24[][],int144,string[][5][][8][],decimal,uint64[][][7][],uint184
 //        // address[],int88,int192[1][1][][7][],int24[][],int144,
-        Function f2 = new Function("(string[][5][][8][])");
-        Tuple subtuple = argsTuple.subtuple(5, 6);
+
+//        Function f2 = new Function("((fixed24x14[13][][4])[])");
+        Function f2 = new Function("((fixed24x14[])[1])");
+
+        final int s = 14;
+        final BigDecimal[] inner = new BigDecimal[] {  }; // f(1, s), f(2, s), f(3, s), f(4, s), f(4, s)
+        final BigDecimal[][] four = new BigDecimal[][] { inner };
+        final BigDecimal[] thirteen = new BigDecimal[] { f(1, s), f(2, s), f(3, s), f(4, s), f(5, s), f(6, s), f(7, s), f(8, s), f(9, s), f(10, s), f(11, s), f(12, s), f(13, s),  };
+
+    Tuple subtuple = new Tuple(
+                (Object) new Tuple[] { new Tuple(
+                        (Object) inner
+//                        (Object) new BigDecimal[][][] {
+//                        new BigDecimal[][] { thirteen, thirteen,  },
+//                        new BigDecimal[][] { },
+//                        new BigDecimal[][] { thirteen, thirteen, thirteen, thirteen },
+//                        new BigDecimal[][] { thirteen, thirteen, thirteen },
+//                        }
+                ) }
+        );
+
+//        Tuple subtuple = argsTuple.subtuple(5, 6);
         ByteBuffer bb = f2.encodeCall(subtuple);
 
 //        if(true)return;

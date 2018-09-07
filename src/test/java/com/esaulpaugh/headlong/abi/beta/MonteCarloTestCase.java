@@ -23,11 +23,11 @@ public class MonteCarloTestCase {
 
     static class Params {
 
-        static final int DEFAULT_MAX_TUPLE_DEPTH = 7;
+        static final int DEFAULT_MAX_TUPLE_DEPTH = 6;
         static final int DEFAULT_MAX_TUPLE_LENGTH = 4;
 
         static final int DEFAULT_MAX_ARRAY_DEPTH = 3;
-        static final int DEFAULT_MAX_ARRAY_LENGTH = 34;
+        static final int DEFAULT_MAX_ARRAY_LENGTH = 13;
 
         final int maxTupleLen;
         final int maxArrayLen;
@@ -172,7 +172,18 @@ public class MonteCarloTestCase {
     private StackableType generateType(Random r, final int tupleDepth) throws ParseException {
         int index = r.nextInt(CANONICAL_BASE_TYPE_STRINGS.length);
         String baseTypeString = CANONICAL_BASE_TYPE_STRINGS[index];
-        StringBuilder sb = new StringBuilder(baseTypeString);
+
+        StringBuilder sb;
+
+        TupleType tupleType = null;
+        if(baseTypeString.equals(TUPLE_KEY)) {
+            tupleType = generateTupleType(r, tupleDepth + 1);
+            sb = new StringBuilder(tupleType.canonicalType);
+//            return TypeFactory.createForTuple(canonicalTypeString, generateTupleType(r, tupleDepth + 1));
+        } else {
+            sb = new StringBuilder(baseTypeString);
+        }
+
         boolean isElement = r.nextBoolean() && r.nextBoolean();
         if(isElement) {
             int arrayDepth = 1 + r.nextInt(params.maxArrayDepth);
@@ -186,12 +197,9 @@ public class MonteCarloTestCase {
         }
 
         String canonicalTypeString = sb.toString();
-
-        if(baseTypeString.equals(TUPLE_KEY)) {
-            return generateTupleType(r, tupleDepth + 1);
-//            return TypeFactory.createForTuple(canonicalTypeString, generateTupleType(r, tupleDepth + 1));
-        }
-        return TypeFactory.create(canonicalTypeString);
+        return tupleType != null
+                ? TypeFactory.createForTuple(canonicalTypeString, tupleType)
+                : TypeFactory.create(canonicalTypeString);
     }
 
     private TupleType generateTupleType(Random r, int tupleDepth) throws ParseException {

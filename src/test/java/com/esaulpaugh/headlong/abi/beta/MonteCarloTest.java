@@ -7,7 +7,7 @@ import java.text.ParseException;
 
 public class MonteCarloTest {
 
-    private static final int N = 30000;
+    private static final int N = 90000;
 
     @Test
     public void monteCarlo() throws ParseException {
@@ -24,13 +24,15 @@ public class MonteCarloTest {
         int i = 0;
         for(final long seed : seeds) {
 //            System.out.println("new seed " + seed);
-            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed);
+            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed); // TODO -1442214311993141792
             try {
                 final MonteCarloTestCase testCase = new MonteCarloTestCase(params);
 
+                System.out.print(i++ + ", " + testCase.canonicalSignature + " :: ");
+
                 boolean result = testCase.run();
 
-                System.out.println(i++ + ", " + result + ", " + testCase.canonicalSignature);
+                System.out.println(result);
 
             } catch (Throwable t) {
                 System.err.println("SEED = " + params.seed);
