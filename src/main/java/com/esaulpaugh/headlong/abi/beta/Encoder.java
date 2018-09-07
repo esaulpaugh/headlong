@@ -15,6 +15,7 @@ import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTE
 import static com.esaulpaugh.headlong.abi.beta.Function.SELECTOR_LEN;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+// TODO use switch(type.getInt()) and unchecked cast instead of repeated instanceof
 class Encoder {
 
     static final int OFFSET_LENGTH_BYTES = UNIT_LENGTH_BYTES;

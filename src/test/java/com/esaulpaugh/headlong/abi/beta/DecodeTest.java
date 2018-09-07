@@ -17,9 +17,9 @@ public class DecodeTest {
     // (bytes32)uint8)
     public static void main(String[] args0) throws ParseException {
 
-        final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(-667342700048419528L);
-        final MonteCarloTestCase testCase = new MonteCarloTestCase(params);
-        testCase.run();
+//        final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(-667342700048419528L);
+//        final MonteCarloTestCase testCase = new MonteCarloTestCase(params);
+//        testCase.run();
 
 //        if(true) return;
 

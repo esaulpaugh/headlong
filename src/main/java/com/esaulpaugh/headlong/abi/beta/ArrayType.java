@@ -22,12 +22,21 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
 
     final T elementType;
     final int length;
-    final String className;
+//    final String className;
+    final Class clazz;
     private final String arrayClassNameStub;
+
+    private transient final boolean isString;
 
     ArrayType(String canonicalType, String className, String arrayClassNameStub, T elementType, int length, boolean dynamic) {
         super(canonicalType, dynamic);
-        this.className = className;
+//        this.className = className;
+        try {
+            this.clazz = Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        isString = STRING_CLASS_NAME.equals(clazz.getName());
         this.arrayClassNameStub = arrayClassNameStub;
         this.elementType = elementType;
         this.length = length;
@@ -39,7 +48,7 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
 
     @Override
     String className() {
-        return className;
+        return clazz.getName();
     }
 
     @Override
@@ -51,7 +60,7 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
     int byteLength(Object value) {
         // dynamics get +32 for the array length
         if(value.getClass().isArray()) {
-            if (value instanceof byte[]) {
+            if (value instanceof byte[]) { // TODO use switch(int) and unchecked cast instead of repeated instanceof
                 int staticLen = roundUp(((byte[]) value).length);
                 return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
             }
@@ -109,7 +118,7 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
         } else {
             arrayLen = length;
         }
-        if(elementType instanceof AbstractUnitType) {
+        if(elementType instanceof AbstractUnitType) { // TODO use switch(int) and unchecked cast instead of repeated instanceof
             if(elementType instanceof ByteType) {
                 return (A) decodeByteArray(bb, arrayLen);
             }
@@ -163,7 +172,7 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
         byte[] out = new byte[arrayLen];
         bb.get(out);
         bb.position(mark + roundUp(arrayLen));
-        if(STRING_CLASS_NAME.equals(className)) {
+        if(isString) {
             return new String(out, UTF_8);
         }
         return out;
@@ -239,12 +248,14 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
 
         final ArrayType elementArrayType = (ArrayType) elementType;
 
-        Object[] dest;
-        try {
-            dest = (Object[]) Array.newInstance(Class.forName(elementArrayType.className), arrayLen);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        Object[] dest = (Object[]) Array.newInstance(elementArrayType.clazz, arrayLen);
+
+//        Object[] dest;
+//        try {
+//            dest = (Object[]) Array.newInstance(Class.forName(elementArrayType.className), arrayLen);
+//        } catch (ClassNotFoundException e) {
+//            throw new RuntimeException(e);
+//        }
 
         int[] offsets = new int[arrayLen];
 
@@ -293,7 +304,7 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
     void validate(final Object value) {
         super.validate(value);
 
-        if(value.getClass().isArray()) {
+        if(value.getClass().isArray()) { // TODO use switch(int) and unchecked cast instead of repeated instanceof
             if (value instanceof byte[]) {
                 byte[] arr = (byte[]) value;
                 checkLength(arr, arr.length);
@@ -364,7 +375,7 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
         if(valueLength != expected) {
             String msg =
                     toFriendly(value.getClass().getName(), valueLength)+ " not instanceof " +
-                    toFriendly(className, expected) + ", " +
+                    toFriendly(clazz.getName(), expected) + ", " +
                     valueLength + " != " + expected;
             throw new IllegalArgumentException(msg);
         }

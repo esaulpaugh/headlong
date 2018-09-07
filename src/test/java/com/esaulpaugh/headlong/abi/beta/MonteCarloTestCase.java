@@ -26,8 +26,8 @@ public class MonteCarloTestCase {
         static final int DEFAULT_MAX_TUPLE_DEPTH = 6;
         static final int DEFAULT_MAX_TUPLE_LENGTH = 4;
 
-        static final int DEFAULT_MAX_ARRAY_DEPTH = 3;
-        static final int DEFAULT_MAX_ARRAY_LENGTH = 13;
+        static final int DEFAULT_MAX_ARRAY_DEPTH = 4;
+        static final int DEFAULT_MAX_ARRAY_LENGTH = 4;
 
         final int maxTupleLen;
         final int maxArrayLen;
@@ -54,7 +54,7 @@ public class MonteCarloTestCase {
         }
     }
 
-    private static final int NUM_TUPLES_ADDED = 17;
+    private static final int NUM_TUPLES_ADDED = 0; // 17
     private static final int NUM_FIXED_ADDED = 50;
 
     private static final ArrayList<String> FIXED_LIST;
@@ -184,6 +184,7 @@ public class MonteCarloTestCase {
             sb = new StringBuilder(baseTypeString);
         }
 
+        // TODO fix tuple arrays
         boolean isElement = r.nextBoolean() && r.nextBoolean();
         if(isElement) {
             int arrayDepth = 1 + r.nextInt(params.maxArrayDepth);
@@ -347,7 +348,6 @@ public class MonteCarloTestCase {
                 return generateBigIntegerArray(len, elementBitLimit, r);
             }
             if (elementType instanceof BigDecimalType) {
-//                int scale = ;
                 return generateBigDecimalArray(len, elementBitLimit, ((BigDecimalType) elementType).scale, r);
             }
             if(elementType instanceof BooleanType) {
@@ -431,12 +431,7 @@ public class MonteCarloTestCase {
 
     private Object[] generateObjectArray(ArrayType elementType, final int len, Random r) {
 
-        Object[] dest;
-        try {
-            dest = (Object[]) Array.newInstance(Class.forName(elementType.className), len);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        Object[] dest = (Object[]) Array.newInstance(elementType.clazz, len);
 
         for (int i = 0; i < len; i++) {
             dest[i] = generateArray(elementType, r);
