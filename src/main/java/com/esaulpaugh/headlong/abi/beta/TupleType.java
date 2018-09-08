@@ -130,6 +130,11 @@ class TupleType extends StackableType<Tuple> {
     }
 
     @Override
+    int typeCode() {
+        return TYPE_CODE_TUPLE;
+    }
+
+    @Override
     void validate(final Object value) {
         super.validate(value);
 

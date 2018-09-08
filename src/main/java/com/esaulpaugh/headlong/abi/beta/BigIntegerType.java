@@ -26,6 +26,11 @@ class BigIntegerType extends AbstractUnitType<BigInteger> {
     }
 
     @Override
+    int typeCode() {
+        return TYPE_CODE_BIG_INTEGER;
+    }
+
+    @Override
     void validate(Object object) {
         super.validate(object);
         validateBigIntBitLen((BigInteger) object);

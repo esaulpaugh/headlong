@@ -29,6 +29,11 @@ class IntType extends AbstractUnitType<Integer> {
     }
 
     @Override
+    int typeCode() {
+        return TYPE_CODE_INT;
+    }
+
+    @Override
     void validate(Object object) {
         super.validate(object);
         final long longVal = ((Number) object).longValue();

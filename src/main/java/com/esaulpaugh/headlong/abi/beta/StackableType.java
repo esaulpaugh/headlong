@@ -8,6 +8,17 @@ import static com.esaulpaugh.headlong.abi.beta.util.ClassNames.toFriendly;
 // TODO support model classes à la Student.java
 abstract class StackableType<V> {
 
+    static final int TYPE_CODE_BOOLEAN = 0;
+    static final int TYPE_CODE_BYTE = 1;
+    static final int TYPE_CODE_SHORT = 2;
+    static final int TYPE_CODE_INT = 3;
+    static final int TYPE_CODE_LONG = 4;
+    static final int TYPE_CODE_BIG_INTEGER = 5;
+    static final int TYPE_CODE_BIG_DECIMAL = 6;
+
+    static final int TYPE_CODE_ARRAY = 7;
+    static final int TYPE_CODE_TUPLE = 8;
+
     static final StackableType[] EMPTY_TYPE_ARRAY = new StackableType[0];
 
     final String canonicalType;
@@ -34,6 +45,8 @@ abstract class StackableType<V> {
      * @return
      */
     abstract V decode(ByteBuffer buffer, byte[] unitBuffer);
+
+    abstract int typeCode();
 
     void validate(Object value) {
         validate(this, value);

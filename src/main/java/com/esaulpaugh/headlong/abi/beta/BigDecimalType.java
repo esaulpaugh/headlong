@@ -31,6 +31,11 @@ class BigDecimalType extends AbstractUnitType<BigDecimal> {
     }
 
     @Override
+    int typeCode() {
+        return TYPE_CODE_BIG_DECIMAL;
+    }
+
+    @Override
     void validate(Object object) {
         super.validate(object);
         BigDecimal dec = (BigDecimal) object;

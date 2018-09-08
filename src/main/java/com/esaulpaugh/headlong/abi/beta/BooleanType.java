@@ -27,4 +27,9 @@ class BooleanType extends AbstractUnitType<Boolean> {
         default: throw new ArithmeticException("expected value 0 or 1");
         }
     }
+
+    @Override
+    int typeCode() {
+        return TYPE_CODE_BOOLEAN;
+    }
 }

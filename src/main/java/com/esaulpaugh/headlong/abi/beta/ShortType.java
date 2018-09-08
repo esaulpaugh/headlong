@@ -25,4 +25,9 @@ class ShortType extends AbstractUnitType<Short> {
         BigInteger bi = new BigInteger(unitBuffer);
         return bi.shortValueExact();
     }
+
+    @Override
+    int typeCode() {
+        return TYPE_CODE_SHORT;
+    }
 }

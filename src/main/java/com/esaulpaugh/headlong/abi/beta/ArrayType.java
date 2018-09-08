@@ -49,54 +49,40 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
 
     @Override
     int byteLength(Object value) {
+        int staticLen;
+        switch (elementType.typeCode()) {
+        case TYPE_CODE_BOOLEAN:
+            staticLen = ((boolean[]) value).length << 5; // mul 32
+            break;
+        case TYPE_CODE_BYTE:
+            staticLen = roundUp((isString ? ((String) value).getBytes(UTF_8) : (byte[]) value).length);
+            break;
+        case TYPE_CODE_SHORT:
+            staticLen = ((short[]) value).length << 5; // mul 32
+            break;
+        case TYPE_CODE_INT:
+            staticLen = ((int[]) value).length << 5; // mul 32
+            break;
+        case TYPE_CODE_LONG:
+            staticLen = ((long[]) value).length << 5; // mul 32
+            break;
+        case TYPE_CODE_BIG_INTEGER:
+        case TYPE_CODE_BIG_DECIMAL:
+            staticLen = ((Number[]) value).length << 5; // mul 32
+            break;
+        case TYPE_CODE_ARRAY:
+        case TYPE_CODE_TUPLE:
+            Object[] elements = (Object[]) value;
+            staticLen = elementType.dynamic ? elements.length << 5 : 0; // 32 bytes per offset
+            for (Object element : elements) {
+                staticLen += elementType.byteLength(element);
+            }
+            break;
+        default: throw new IllegalArgumentException("unrecognized type: " + value.getClass().getName());
+        }
+
         // dynamics get +32 for the array length
-        if(value.getClass().isArray()) {
-            if (value instanceof byte[]) { // TODO use switch(int) and unchecked cast instead of repeated instanceof
-                int staticLen = roundUp(((byte[]) value).length);
-                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
-            }
-            if (value instanceof int[]) {
-                int staticLen = ((int[]) value).length << 5; // mul 32
-                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
-            }
-            if (value instanceof long[]) {
-                int staticLen = ((long[]) value).length << 5; // mul 32
-                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
-            }
-            if (value instanceof short[]) {
-                int staticLen = ((short[]) value).length << 5; // mul 32
-                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
-            }
-            if (value instanceof boolean[]) {
-                int staticLen = ((boolean[]) value).length << 5; // mul 32
-                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
-            }
-            if (value instanceof Number[]) {
-                int staticLen = ((Number[]) value).length << 5; // mul 32
-                return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
-            }
-            if (value instanceof Object[]) {
-                Object[] elements = (Object[]) value;
-                int len = elementType.dynamic ? elements.length << 5 : 0; // 32 bytes per offset
-                for (Object element : elements) {
-                    len += elementType.byteLength(element);
-                }
-                return dynamic ? ARRAY_LENGTH_BYTE_LEN + len : len;
-            }
-        }
-        if (value instanceof String) { // always needs dynamic head
-            String string = (String) value;
-            byte[] bytes = string.getBytes(UTF_8);
-            return ARRAY_LENGTH_BYTE_LEN + roundUp(bytes.length);
-        }
-        if (value instanceof Number) {
-            return ARRAY_LENGTH_BYTE_LEN;
-        }
-        if (value instanceof Tuple) {
-            return dynamic ? ARRAY_LENGTH_BYTE_LEN + elementType.byteLength(value) : elementType.byteLength(value);
-        }
-        // shouldn't happen if type checks/validation already occurred
-        throw new IllegalArgumentException("unknown type: " + value.getClass().getName());
+        return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
     }
 
     @Override
@@ -111,46 +97,32 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
         } else {
             arrayLen = length;
         }
-        if(elementType instanceof AbstractUnitType) { // TODO use switch(int) and unchecked cast instead of repeated instanceof
-            if(elementType instanceof ByteType) {
-                return (A) decodeByteArray(bb, arrayLen);
-            }
-            if (elementType instanceof ShortType) {
-                return (A) decodeShortArray(bb, arrayLen, elementBuffer);
-            }
-            if (elementType instanceof IntType) {
-                return (A) decodeIntArray((IntType) elementType, bb, arrayLen, elementBuffer);
-            }
-            if (elementType instanceof LongType) {
-                return (A) decodeLongArray((LongType) elementType, bb, arrayLen, elementBuffer);
-            }
-            if (elementType instanceof BigIntegerType) {
-                return (A) decodeBigIntegerArray((BigIntegerType) elementType, bb, arrayLen, elementBuffer);
-            }
-            if (elementType instanceof BigDecimalType) {
-                return (A) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, elementBuffer);
-            }
-            if (elementType instanceof BooleanType) {
-                return (A) decodeBooleanArray(bb, arrayLen);
-            }
-            throw new Error();
-//        } else if(elementType instanceof TupleType) {
-//            return (A) decodeTupleArray((TupleType) elementType, bb, arrayLen, elementBuffer);
-        } else {
-            return (A) decodeObjectArray(arrayLen, bb, elementBuffer, elementType instanceof TupleType);
+
+        switch (elementType.typeCode()) {
+        case TYPE_CODE_BOOLEAN: return (A) decodeBooleanArray(bb, arrayLen, elementBuffer);
+        case TYPE_CODE_BYTE: return (A) decodeByteArray(bb, arrayLen);
+        case TYPE_CODE_SHORT: return (A) decodeShortArray(bb, arrayLen, elementBuffer);
+        case TYPE_CODE_INT: return (A) decodeIntArray((IntType) elementType, bb, arrayLen, elementBuffer);
+        case TYPE_CODE_LONG: return (A) decodeLongArray((LongType) elementType, bb, arrayLen, elementBuffer);
+        case TYPE_CODE_BIG_INTEGER: return (A) decodeBigIntegerArray((BigIntegerType) elementType, bb, arrayLen, elementBuffer);
+        case TYPE_CODE_BIG_DECIMAL: return (A) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, elementBuffer);
+        case TYPE_CODE_ARRAY:  return (A) decodeObjectArray(arrayLen, bb, elementBuffer, false);
+        case TYPE_CODE_TUPLE: return (A) decodeObjectArray(arrayLen, bb, elementBuffer, true);
+        default: throw new Error();
         }
     }
 
-    private static boolean[] decodeBooleanArray(ByteBuffer bb, int arrayLen) {
+    private static boolean[] decodeBooleanArray(ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
         boolean[] booleans = new boolean[arrayLen]; // elements are false by default
         final int booleanOffset = UNIT_LENGTH_BYTES - Byte.BYTES;
         for(int i = 0; i < arrayLen; i++) {
+            bb.get(elementBuffer);
             for (int j = 0; j < booleanOffset; j++) {
-                if(bb.get() != 0) {
+                if(elementBuffer[j] != 0) {
                     throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - j));
                 }
             }
-            byte last = bb.get();
+            byte last = elementBuffer[booleanOffset];
             if(last == 1) {
                 booleans[i] = true;
             } else if(last != 0) {
@@ -282,43 +254,27 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
     }
 
     @Override
+    int typeCode() {
+        return TYPE_CODE_ARRAY;
+    }
+
+    @Override
     void validate(final Object value) {
         super.validate(value);
-
-        if(value.getClass().isArray()) { // TODO use switch(int) and unchecked cast instead of repeated instanceof
-            if (value instanceof byte[]) {
-                byte[] arr = (byte[]) value;
-                checkLength(arr, arr.length);
-            } else if (value instanceof int[]) {
-                validateIntArray((int[]) value);
-            } else if (value instanceof long[]) {
-                validateLongArray((long[]) value);
-            } else if (value instanceof short[]) {
-                short[] arr = (short[]) value;
-                checkLength(arr, arr.length);
-            } else if (value instanceof boolean[]) {
-                boolean[] arr = (boolean[]) value;
-                checkLength(arr, arr.length);
-            } else if (value instanceof Object[]) { // includes BigInteger[]
-                Object[] arr = (Object[]) value;
-                final int len = arr.length;
-                checkLength(arr, len);
-                int i = 0;
-                try {
-                    for (; i < len; i++) {
-                        elementType.validate(arr[i]);
-                    }
-                } catch (IllegalArgumentException | NullPointerException re) {
-                    throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
-                }
-            } else {
-                throw new IllegalArgumentException("unrecognized type: " + value.getClass().getName());
-            }
-        } else if(value instanceof String) {
-            byte[] arr = ((String) value).getBytes(UTF_8);
-            checkLength(arr, arr.length);
-        } else {
-            throw new IllegalArgumentException("unrecognized type: " + value.getClass().getName());
+        switch (elementType.typeCode()) {
+        case TYPE_CODE_BOOLEAN: checkLength(value, ((boolean[]) value).length); return;
+        case TYPE_CODE_BYTE:
+            byte[] bytes = isString ? ((String) value).getBytes(UTF_8) : (byte[]) value;
+            checkLength(value, bytes.length);
+            return;
+        case TYPE_CODE_SHORT: checkLength(value, ((short[]) value).length); return;
+        case TYPE_CODE_INT: validateIntArray((int[]) value); return;
+        case TYPE_CODE_LONG: validateLongArray((long[]) value); return;
+        case TYPE_CODE_BIG_INTEGER:
+        case TYPE_CODE_BIG_DECIMAL:
+        case TYPE_CODE_ARRAY:
+        case TYPE_CODE_TUPLE: validateObjectArray((Object[]) value); return;
+        default: throw new IllegalArgumentException("unrecognized type: " + value.getClass().getName());
         }
     }
 
@@ -341,6 +297,19 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
         int i = 0;
         try {
             for ( ; i < len; i++) {
+                elementType.validate(arr[i]);
+            }
+        } catch (IllegalArgumentException | NullPointerException re) {
+            throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
+        }
+    }
+
+    private void validateObjectArray(Object[] arr) {
+        final int len = arr.length;
+        checkLength(arr, len);
+        int i = 0;
+        try {
+            for (; i < len; i++) {
                 elementType.validate(arr[i]);
             }
         } catch (IllegalArgumentException | NullPointerException re) {

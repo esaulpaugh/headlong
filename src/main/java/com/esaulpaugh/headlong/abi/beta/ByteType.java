@@ -20,6 +20,11 @@ class ByteType extends AbstractUnitType<Byte> {
     }
 
     @Override
+    String className() {
+        return CLASS_NAME;
+    }
+
+    @Override
     Byte decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
@@ -27,7 +32,7 @@ class ByteType extends AbstractUnitType<Byte> {
     }
 
     @Override
-    String className() {
-        return CLASS_NAME;
+    int typeCode() {
+        return TYPE_CODE_BYTE;
     }
 }
