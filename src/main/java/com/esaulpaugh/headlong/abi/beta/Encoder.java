@@ -13,6 +13,7 @@ import java.util.List;
 
 import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.beta.Function.SELECTOR_LEN;
+import static com.esaulpaugh.headlong.abi.beta.StackableType.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 // TODO use switch(type.getInt()) and unchecked cast instead of repeated instanceof
@@ -38,7 +39,7 @@ class Encoder {
     static ByteBuffer encodeFunctionCall(Function function, Tuple argsTuple) {
 
         final TupleType tupleType = function.paramTypes;
-        final StackableType[] types = tupleType.elementTypes;
+        final StackableType<?>[] types = tupleType.elementTypes;
 
         if(argsTuple.elements.length != types.length) {
             throw new IllegalArgumentException("argsTuple.elements.length <> types.length: " + argsTuple.elements.length + " != " + types.length);
@@ -57,23 +58,23 @@ class Encoder {
 
     private static void insertTuple(TupleType tupleType, Tuple tuple, ByteBuffer outBuffer) {
 
-        LinkedList<StackableType> typeList = new LinkedList<>(Arrays.asList(tupleType.elementTypes));
+        LinkedList<StackableType<?>> typeList = new LinkedList<>(Arrays.asList(tupleType.elementTypes));
         LinkedList<Object> valuesList = new LinkedList<>(Arrays.asList(tuple.elements));
 
         encodeHeadsForTuple(typeList, valuesList, headLengthSum(tupleType, tuple), outBuffer);
         encodeTailsForTuple(typeList, valuesList, outBuffer);
     }
 
-    private static void encodeHeadsForTuple(LinkedList<StackableType> types, LinkedList<Object> values, int headLengthSum, ByteBuffer outBuffer) {
+    private static void encodeHeadsForTuple(LinkedList<StackableType<?>> types, LinkedList<Object> values, int headLengthSum, ByteBuffer outBuffer) {
 
         final int[] offset = new int[] { headLengthSum };
 
-        Iterator<StackableType> ti = types.iterator();
+        Iterator<StackableType<?>> ti = types.iterator();
         Iterator<Object> vi = values.iterator();
 
         while(ti.hasNext()) {
 
-            StackableType type = ti.next();
+            StackableType<?> type = ti.next();
             Object val = vi.next();
 
             encodeHead(type, val, outBuffer, offset);
@@ -85,27 +86,25 @@ class Encoder {
         }
     }
 
-    private static void encodeHead(StackableType paramType, Object value, ByteBuffer dest, int[] offset) {
-        if(value instanceof String) {
-            insertOffset(offset, paramType, value, dest); // strings always dynamic
-        } else if(value.getClass().isArray()) {
-            if(paramType.dynamic) {
+    private static void encodeHead(StackableType<?> paramType, Object value, ByteBuffer dest, int[] offset) {
+
+        switch (paramType.typeCode()) {
+        case TYPE_CODE_BOOLEAN: insertBool((boolean) value, dest); return;
+        case TYPE_CODE_BYTE:
+        case TYPE_CODE_SHORT:
+        case TYPE_CODE_INT:
+        case TYPE_CODE_LONG: insertInt(((Number) value).longValue(), dest); return;
+        case TYPE_CODE_BIG_INTEGER: insertInt(((BigInteger) value), dest); return;
+        case TYPE_CODE_BIG_DECIMAL: insertInt(((BigDecimal) value).unscaledValue(), dest); return;
+        case TYPE_CODE_ARRAY:
+            if(paramType.dynamic) { // includes String
                 insertOffset(offset, paramType, value, dest);
             } else {
                 encodeArrayStatic((ArrayType) paramType, value, dest);
             }
-        } else if(value instanceof Tuple) {
-            insertTupleHead((TupleType) paramType, (Tuple) value, dest, offset);
-        } else if (value instanceof Number) {
-            if(value instanceof BigInteger) {
-                insertInt(((BigInteger) value), dest);
-            } else if(value instanceof BigDecimal) {
-                insertInt(((BigDecimal) value).unscaledValue(), dest);
-            } else {
-                insertInt(((Number) value).longValue(), dest);
-            }
-        } else if(value instanceof Boolean) {
-            insertBool((boolean) value, dest);
+            return;
+        case TYPE_CODE_TUPLE: insertTupleHead((TupleType) paramType, (Tuple) value, dest, offset); return;
+        default: throw new IllegalArgumentException("unexpected array type: " + paramType.toString());
         }
     }
 
@@ -121,67 +120,60 @@ class Encoder {
         insertInt(length, dest);
     }
 
-    private static void insertOffset(final int[] offset, StackableType paramType, Object object, ByteBuffer dest) {
+    private static void insertOffset(final int[] offset, StackableType<?> paramType, Object object, ByteBuffer dest) {
         insertInt(offset[0], dest);
         offset[0] += paramType.byteLength(object);
     }
 
-    private static void encodeTailsForTuple(List<StackableType> types, List<Object> values, ByteBuffer outBuffer) {
-        Iterator<StackableType> ti;
+    private static void encodeTailsForTuple(List<StackableType<?>> types, List<Object> values, ByteBuffer outBuffer) {
+        Iterator<StackableType<?>> ti;
         Iterator<Object> vi;
         for(ti = types.iterator(), vi = values.iterator(); ti.hasNext(); ) {
-            StackableType type = ti.next();
+            StackableType<?> type = ti.next();
             encodeTail(type, vi.next(), outBuffer);
         }
     }
 
-    /**
-     * No Booleans or Numbers expected, except as arrays
-     *
-     * @param type
-     * @param value
-     * @param dest
-     */
-    private static void encodeTail(StackableType type, Object value, ByteBuffer dest) {
-        if(value instanceof String) {
-            byte[] bytes = ((String) value).getBytes(UTF_8);
-            insertLength(bytes.length, dest);
-            insertBytes(bytes, dest);
-        } else if(value.getClass().isArray()) {
-            encodeArrayTail((ArrayType) type, value, dest);
-        } else if(value instanceof Tuple) {
+    private static void encodeTail(StackableType<?> type, Object value, ByteBuffer dest) {
+//        only dynamics expected
+        switch (type.typeCode()) {
+        case TYPE_CODE_ARRAY:
+            ArrayType arrayType = (ArrayType) type;
+            if(arrayType.isString) {
+                byte[] bytes = ((String) value).getBytes(UTF_8);
+                insertLength(bytes.length, dest);
+                insertBytes(bytes, dest);
+            } else {
+                encodeArrayTail(arrayType, value, dest);
+            }
+            return;
+        case TYPE_CODE_TUPLE:
             insertTuple((TupleType) type, (Tuple) value, dest);
-        } else {
-            throw new Error("unexpected type: " + value.getClass().getName());
+            return;
+        default:
+            throw new Error("unexpected type: " + type.toString());
         }
     }
 
     // ----------------------------------------------
 
     private static void encodeArrayStatic(ArrayType arrayType, Object value, ByteBuffer dest) {
-        if (value instanceof Object[]) {
-            if(value instanceof BigInteger[]) {
-                insertBigIntegers((BigInteger[]) value, dest);
-            } else if(value instanceof BigDecimal[]) {
-                insertBigDecimals((BigDecimal[]) value, dest);
-            } else {
-                final StackableType elementType = arrayType.elementType;
-                for(Object e : (Object[]) value) {
-                    encodeHead(elementType, e, dest, null);
-                }
+        switch (arrayType.elementType.typeCode()) {
+        case TYPE_CODE_BOOLEAN: insertBooleans((boolean[]) value, dest); return;
+        case TYPE_CODE_BYTE: insertBytes((byte[]) value, dest); return; // strings are dynamic, so not expected
+        case TYPE_CODE_SHORT: insertShorts((short[]) value, dest); return;
+        case TYPE_CODE_INT: insertInts((int[]) value, dest); return;
+        case TYPE_CODE_LONG: insertLongs((long[]) value, dest); return;
+        case TYPE_CODE_BIG_INTEGER: insertBigIntegers((BigInteger[]) value, dest); return;
+        case TYPE_CODE_BIG_DECIMAL: insertBigDecimals((BigDecimal[]) value, dest); return;
+        case TYPE_CODE_ARRAY:
+        case TYPE_CODE_TUPLE:
+            final StackableType<?> elementType = arrayType.elementType;
+            for(Object e : (Object[]) value) {
+                encodeHead(elementType, e, dest, null);
             }
-        } else if (value instanceof byte[]) {
-            insertBytes((byte[]) value, dest);
-        } else if (value instanceof short[]) {
-            insertShorts((short[]) value, dest);
-        } else if (value instanceof int[]) {
-            insertInts((int[]) value, dest);
-        } else if (value instanceof long[]) {
-            insertLongs((long[]) value, dest);
-        } else if(value instanceof boolean[]) {
-            insertBooleans((boolean[]) value, dest);
-        } else {
-            throw new IllegalArgumentException("unexpected array type: " + value.getClass().getName());
+            return;
+        default: throw new IllegalArgumentException("unexpected array type: " + arrayType.toString());
         }
     }
 
@@ -189,48 +181,42 @@ class Encoder {
         if(arrayType.dynamic) {
             insertLength(Array.getLength(value), dest);
         }
-        if (value instanceof Object[]) {
-            if(value instanceof BigInteger[]) {
-                insertBigIntegers((BigInteger[]) value, dest);
-            } else if(value instanceof BigDecimal[]) {
-                insertBigDecimals((BigDecimal[]) value, dest);
-            } else {
-                Object[] objects = (Object[]) value;
-                final StackableType elementType = arrayType.elementType;
-                if(elementType.dynamic) { // if elements are dynamic
-                    final int[] offset = new int[] { objects.length << 5 }; // mul 32 (0x20)
-                    for (Object element : objects) {
-                        insertOffset(offset, elementType, element, dest);
-                    }
-                }
+        final StackableType<?> elementType = arrayType.elementType;
+        switch (elementType.typeCode()) {
+        case TYPE_CODE_BOOLEAN: insertBooleans((boolean[]) value, dest); return;
+        case TYPE_CODE_BYTE: insertBytes((byte[]) value, dest); return;
+        case TYPE_CODE_SHORT: insertShorts((short[]) value, dest); return;
+        case TYPE_CODE_INT: insertInts((int[]) value, dest); return;
+        case TYPE_CODE_LONG: insertLongs((long[]) value, dest); return;
+        case TYPE_CODE_BIG_INTEGER: insertBigIntegers((BigInteger[]) value, dest); return;
+        case TYPE_CODE_BIG_DECIMAL: insertBigDecimals((BigDecimal[]) value, dest); return;
+        case TYPE_CODE_ARRAY:  // type for String[] has TYPE_CODE_ARRAY
+        case TYPE_CODE_TUPLE:
+            Object[] objects = (Object[]) value;
+            if (elementType.dynamic) { // if elements are dynamic
+                final int[] offset = new int[] { objects.length << 5 }; // mul 32 (0x20)
                 for (Object element : objects) {
-                    encodeTail(elementType, element, dest);
+                    insertOffset(offset, elementType, element, dest);
                 }
             }
-        } else if (value instanceof byte[]) {
-            insertBytes((byte[]) value, dest);
-        } else if (value instanceof int[]) {
-            insertInts((int[]) value, dest);
-        } else if (value instanceof long[]) {
-            insertLongs((long[]) value, dest);
-        } else if (value instanceof short[]) {
-            insertShorts((short[]) value, dest);
-        } else if(value instanceof boolean[]) {
-            insertBooleans((boolean[]) value, dest);
-        } else {
-            throw new Error("unexpected array type: " + value.getClass().getName());
+            for (Object element : objects) {
+                encodeTail(elementType, element, dest);
+            }
+            return;
+        default:
+            throw new IllegalArgumentException("unexpected array type: " + arrayType.toString());
         }
     }
 
     // ========================================
 
     private static int headLengthSum(TupleType tupleType, Tuple tuple) {
-        StackableType[] elementTypes = tupleType.elementTypes;
+        StackableType<?>[] elementTypes = tupleType.elementTypes;
         Object[] elements = tuple.elements;
         int headLengths = 0;
         final int n = elementTypes.length;
         for (int i = 0; i < n; i++) {
-            StackableType t = elementTypes[i];
+            StackableType<?> t = elementTypes[i];
             if(t.dynamic) {
                 headLengths += 32;
             } else {

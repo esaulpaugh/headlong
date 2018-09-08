@@ -14,15 +14,15 @@ class TupleType extends StackableType<Tuple> {
     private static final String CLASS_NAME = Tuple.class.getName();
     static final String ARRAY_CLASS_NAME_STUB = Tuple[].class.getName().replaceFirst("\\[", "");
 
-    final StackableType[] elementTypes;
+    final StackableType<?>[] elementTypes;
 
-    private TupleType(String canonicalType, boolean dynamic, StackableType... elementTypes) {
+    private TupleType(String canonicalType, boolean dynamic, StackableType<?>... elementTypes) {
         super(canonicalType, dynamic);
         this.elementTypes = elementTypes;
     }
 
-    static TupleType create(String canonicalType, StackableType... members) {
-        for (StackableType type : members) {
+    static TupleType create(String canonicalType, StackableType<?>... members) {
+        for (StackableType<?> type : members) {
             if(type.dynamic) {
                 return new TupleType(canonicalType, true, members);
             }
@@ -36,7 +36,7 @@ class TupleType extends StackableType<Tuple> {
             return "()";
         }
         StringBuilder sb = new StringBuilder("(");
-        for (StackableType memberType : elementTypes) {
+        for (StackableType<?> memberType : elementTypes) {
             sb.append(memberType).append(',');
         }
         sb.replace(sb.length() - 1, sb.length(), "").append(')');
@@ -58,7 +58,7 @@ class TupleType extends StackableType<Tuple> {
 
         int len = 0;
         for (int i = 0; i < elementTypes.length; i++) {
-            StackableType type = elementTypes[i];
+            StackableType<?> type = elementTypes[i];
             if(type.dynamic) {
                 len += OFFSET_LENGTH_BYTES;
             }
@@ -103,7 +103,7 @@ class TupleType extends StackableType<Tuple> {
 //        System.out.println("T heads " + convertPos(bb) + ", " + bb.position());
         final int tupleLen = offsets.length;
         for (int i = 0; i < tupleLen; i++) {
-            StackableType elementType = elementTypes[i];
+            StackableType<?> elementType = elementTypes[i];
             if (elementType.dynamic) {
                 offsets[i] = Encoder.OFFSET_TYPE.decode(bb, elementBuffer);
 //                System.out.println("T offset " + convertOffset(offsets[i]) + " @ " + convert(bb.position() - OFFSET_LENGTH_BYTES));
@@ -150,7 +150,7 @@ class TupleType extends StackableType<Tuple> {
         checkTypes(this.elementTypes, elements);
     }
 
-    private static void checkTypes(StackableType[] paramTypes, Object[] values) {
+    private static void checkTypes(StackableType<?>[] paramTypes, Object[] values) {
         final int n = paramTypes.length;
         int i = 0;
         try {

@@ -79,7 +79,7 @@ public class RLPEncoder {
             return encodeList(totalEncodedLen(elements), elements, dest, destIndex);
         }
         if(item instanceof Object[]) {
-            Iterable elements = Arrays.asList((Object[]) item);
+            Iterable<Object> elements = Arrays.asList((Object[]) item);
             return encodeList(totalEncodedLen(elements), elements, dest, destIndex);
         }
         if(item == null) {

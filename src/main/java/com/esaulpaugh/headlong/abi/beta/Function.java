@@ -33,7 +33,7 @@ public class Function {
 
     public Function(String signature) throws ParseException {
         StringBuilder canonicalSignature = new StringBuilder();
-        List<StackableType> types = SignatureParser.parseFunctionSignature(signature, canonicalSignature);
+        List<StackableType<?>> types = SignatureParser.parseFunctionSignature(signature, canonicalSignature);
         this.canonicalSignature = canonicalSignature.toString();
         this.requiredCanonicalization = !signature.equals(this.canonicalSignature);
         try {

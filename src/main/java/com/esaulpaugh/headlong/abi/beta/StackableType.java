@@ -19,7 +19,19 @@ abstract class StackableType<V> {
     static final int TYPE_CODE_ARRAY = 7;
     static final int TYPE_CODE_TUPLE = 8;
 
-    static final StackableType[] EMPTY_TYPE_ARRAY = new StackableType[0];
+//switch (type.typeCode()) {
+//        case TYPE_CODE_BOOLEAN:
+//        case TYPE_CODE_BYTE:
+//        case TYPE_CODE_SHORT:
+//        case TYPE_CODE_INT:
+//        case TYPE_CODE_LONG:
+//        case TYPE_CODE_BIG_INTEGER:
+//        case TYPE_CODE_BIG_DECIMAL:
+//        case TYPE_CODE_ARRAY:
+//        case TYPE_CODE_TUPLE:
+//    }
+
+    static final StackableType<?>[] EMPTY_TYPE_ARRAY = new StackableType<?>[0];
 
     final String canonicalType;
 
@@ -49,12 +61,7 @@ abstract class StackableType<V> {
     abstract int typeCode();
 
     void validate(Object value) {
-        validate(this, value);
-    }
-
-    private static void validate(final StackableType type, final Object value) {
-
-        final String expectedClassName = type.className();
+        final String expectedClassName = className();
 
         // will throw NPE if argument null
         if(!expectedClassName.equals(value.getClass().getName())) {
@@ -69,7 +76,7 @@ abstract class StackableType<V> {
                         + value.getClass().getName()
                         + " not assignable to "
                         + expectedClassName
-                        + " (" + toFriendly(value.getClass().getName()) + " not instanceof " + toFriendly(expectedClassName) + "/" + type.canonicalType + ")");
+                        + " (" + toFriendly(value.getClass().getName()) + " not instanceof " + toFriendly(expectedClassName) + "/" + canonicalType + ")");
             }
         }
     }

@@ -1,6 +1,5 @@
 package com.esaulpaugh.headlong.rlp.util;
 
-import com.esaulpaugh.headlong.abi.beta.util.Pair;
 import org.spongycastle.util.encoders.Hex;
 
 import java.util.ArrayList;

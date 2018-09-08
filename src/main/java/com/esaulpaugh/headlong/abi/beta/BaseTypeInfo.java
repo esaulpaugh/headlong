@@ -51,11 +51,11 @@ public class BaseTypeInfo {
     public final int scale;
 //    public final boolean signed;
 
-    public final StackableType elementType;
+    public final StackableType<?> elementType;
 
     public final int arrayLength;
 
-    public BaseTypeInfo(int ordinal, String canonical, Class<?> objectClass, int arrayLength, StackableType elementType) {
+    public BaseTypeInfo(int ordinal, String canonical, Class<?> objectClass, int arrayLength, StackableType<?> elementType) {
         this(ordinal, canonical, null, canonical, objectClass, null, -1, 0, false, arrayLength, elementType);
     }
 
@@ -73,7 +73,7 @@ public class BaseTypeInfo {
                         int scale,
                         boolean signed,
                         int arrayLength,
-                        StackableType elementType) {
+                        StackableType<?> elementType) {
 //        this.ordinal = ordinal;
 //        this.canonical = canonical;
 //        this.nonCanonical = nonCanonical == null ? null : nonCanonical.intern();

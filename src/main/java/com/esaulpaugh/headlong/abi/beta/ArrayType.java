@@ -11,7 +11,7 @@ import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTE
 import static com.esaulpaugh.headlong.abi.beta.util.ClassNames.toFriendly;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-class ArrayType<T extends StackableType, A> extends StackableType<A> {
+class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
 
     static final String STRING_CLASS_NAME = String.class.getName();
 
@@ -22,9 +22,9 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
 
     final T elementType;
     final int length;
-    final Class clazz;
+    final Class<?> clazz;
 
-    private transient final boolean isString;
+    transient final boolean isString;
 
     ArrayType(String canonicalType, String className, T elementType, int length, boolean dynamic) {
         super(canonicalType, dynamic);
@@ -185,14 +185,14 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
         return bigDecs;
     }
 
-    private static long getLong(AbstractUnitType type, ByteBuffer bb, byte[] elementBuffer) {
+    private static long getLong(AbstractUnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
         bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
         long longVal = new BigInteger(elementBuffer).longValueExact(); // make sure high bytes are zero
         type.validateLongBitLen(longVal); // validate lower 8 bytes
         return longVal;
     }
 
-    private static BigInteger getBigInteger(AbstractUnitType type, ByteBuffer bb, byte[] elementBuffer) {
+    private static BigInteger getBigInteger(AbstractUnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
         bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bigInt = new BigInteger(elementBuffer);
         type.validateBigIntBitLen(bigInt);

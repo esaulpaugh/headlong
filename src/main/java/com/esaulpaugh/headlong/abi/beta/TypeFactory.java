@@ -10,28 +10,28 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 final class TypeFactory {
 
-    static StackableType createForTuple(String canonicalType, TupleType baseTupleType) throws ParseException {
+    static StackableType<?> createForTuple(String canonicalType, TupleType baseTupleType) throws ParseException {
         if(baseTupleType == null) {
             throw new NullPointerException();
         }
         return create(canonicalType, baseTupleType);
     }
 
-    static StackableType create(String canonicalType) throws ParseException {
+    static StackableType<?> create(String canonicalType) throws ParseException {
         return create(canonicalType, null);
     }
 
-    private static StackableType create(String canonicalType, TupleType baseTupleType) throws ParseException {
-        Deque<StackableType> typeStack = new ArrayDeque<>();
+    private static StackableType<?> create(String canonicalType, TupleType baseTupleType) throws ParseException {
+        Deque<StackableType<?>> typeStack = new ArrayDeque<>();
         buildTypeStack(canonicalType, canonicalType.length() - 1, typeStack, new StringBuilder(), baseTupleType);
         return typeStack.peek();
     }
 
     private static String buildTypeStack(final String canonicalType,
                                          final int index,
-                                         final Deque<StackableType> typeStack,
+                                         final Deque<StackableType<?>> typeStack,
                                          final StringBuilder brackets,
-                                         final StackableType baseTuple) throws ParseException {
+                                         final StackableType<?> baseTuple) throws ParseException {
         if(canonicalType.charAt(index) == ']') {
 
             final int fromIndex = index - 1;
@@ -53,10 +53,10 @@ final class TypeFactory {
             brackets.append('[');
             final String className = brackets.toString() + baseClassName;
 
-            final StackableType top = typeStack.peekFirst();
+            final StackableType<?> top = typeStack.peekFirst();
             final boolean dynamic = arrayLength == DYNAMIC_LENGTH || top.dynamic;
             // push onto stack
-            typeStack.addFirst(new ArrayType<StackableType, Object>(canonicalType, className, top, arrayLength, dynamic));
+            typeStack.addFirst(new ArrayType<StackableType<?>, Object>(canonicalType, className, top, arrayLength, dynamic));
 
             return baseClassName;
         } else {
@@ -77,9 +77,9 @@ final class TypeFactory {
         }
     }
 
-    private static String resolveBaseType(final String canonicalType, boolean isElement, Deque<StackableType> typeStack, StackableType baseTuple) {
+    private static String resolveBaseType(final String canonicalType, boolean isElement, Deque<StackableType<?>> typeStack, StackableType<?> baseTuple) {
 
-        final StackableType type;
+        final StackableType<?> type;
 
         BaseTypeInfo info = BaseTypeInfo.get(canonicalType);
 

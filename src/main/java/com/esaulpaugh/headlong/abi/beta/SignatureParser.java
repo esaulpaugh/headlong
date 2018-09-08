@@ -8,12 +8,12 @@ import java.util.regex.Pattern;
 
 class SignatureParser {
 
-    private static final Pattern HAS_NON_ASCII_CHARS = Pattern.compile("[^\\p{ASCII}]{1,}");
-    private static final Pattern HAS_NON_TYPE_CHARS = Pattern.compile("[^a-z0-9\\[\\](),]{1,}");
+    private static final Pattern HAS_NON_ASCII_CHARS = Pattern.compile("[^\\p{ASCII}]+");
+    private static final Pattern HAS_NON_TYPE_CHARS = Pattern.compile("[^a-z0-9\\[\\](),]+");
 
-    static List<StackableType> parseFunctionSignature(final String signature, final StringBuilder canonicalOut) throws ParseException {
+    static List<StackableType<?>> parseFunctionSignature(final String signature, final StringBuilder canonicalOut) throws ParseException {
 
-        List<StackableType> typesOut = new ArrayList<>();
+        List<StackableType<?>> typesOut = new ArrayList<>();
 
         final int startParams = signature.indexOf('(');
 
@@ -48,7 +48,7 @@ class SignatureParser {
     private static ParseResult parseTuple(final String signature,
                                                      final int startParams,
                                                      final StringBuilder canonicalOut,
-                                                     final List<StackableType> tupleTypes,
+                                                     final List<StackableType<?>> tupleTypes,
                                                      final Matcher illegalTypeCharMatcher) throws ParseException {
         int argStart = startParams + 1;
         int argEnd = argStart; // this inital value is important for empty params case
@@ -74,11 +74,11 @@ class SignatureParser {
                 throw new ParseException("empty parameter @ " + tupleTypes.size(), argStart);
             case '(': // tuple element
                 try {
-                    ArrayList<StackableType> innerTupleTypes = new ArrayList<>();
+                    ArrayList<StackableType<?>> innerTupleTypes = new ArrayList<>();
                     ParseResult result = parseTuple(signature, argStart, canonicalOut, innerTupleTypes, illegalTypeCharMatcher);
                     argEnd = result.argumentEnd + 1;
                     prevNonCanonicalIndex = result.previousNonCanonicalIndex;
-                    StackableType childType = TupleType.create("(...)", innerTupleTypes.toArray(StackableType.EMPTY_TYPE_ARRAY)); // don't pass non-canonical type string
+                    StackableType<?> childType = TupleType.create("(...)", innerTupleTypes.toArray(StackableType.EMPTY_TYPE_ARRAY)); // don't pass non-canonical type string
 
                     // check for array syntax
                     if (argEnd < sigEnd && signature.charAt(argEnd) == '[') {
@@ -117,7 +117,7 @@ class SignatureParser {
                                                         final int argStart,
                                                         final StringBuilder canonicalOut,
                                                         int prevNonCanonicalIndex,
-                                                        final List<StackableType> tupleTypes,
+                                                        final List<StackableType<?>> tupleTypes,
                                                         final Matcher illegalTypeCharMatcher) throws ParseException {
         int argEnd = nextParamTerminator(signature, argStart + 1);
         if (argEnd == -1) {
