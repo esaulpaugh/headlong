@@ -188,7 +188,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     private static long getLong(AbstractUnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
         bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
         long longVal = new BigInteger(elementBuffer).longValueExact(); // make sure high bytes are zero
-        type.validateLongBitLen(longVal); // validate lower 8 bytes
+        type.validateLongElementBitLen(longVal); // validate lower 8 bytes
         return longVal;
     }
 
@@ -292,12 +292,14 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     }
 
     private void validateLongArray(long[] arr) {
+        LongType longType = (LongType) elementType;
         final int len = arr.length;
         checkLength(arr, len);
         int i = 0;
         try {
             for ( ; i < len; i++) {
-                elementType.validate(arr[i]);
+                longType.validateLongElementBitLen(arr[i]);
+//                elementType.validate(arr[i]);
             }
         } catch (IllegalArgumentException | NullPointerException re) {
             throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);

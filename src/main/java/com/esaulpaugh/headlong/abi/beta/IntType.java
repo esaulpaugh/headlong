@@ -10,8 +10,8 @@ class IntType extends AbstractUnitType<Integer> {
 
     static final int MAX_BIT_LEN = 32;
 
-    IntType(String canonicalType, int bitLength, boolean signed) {
-        super(canonicalType, bitLength, signed);
+    IntType(String canonicalType, int bitLength, boolean unsigned) {
+        super(canonicalType, bitLength, unsigned);
     }
 
     @Override

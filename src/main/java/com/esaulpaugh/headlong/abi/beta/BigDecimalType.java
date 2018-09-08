@@ -11,8 +11,8 @@ class BigDecimalType extends AbstractUnitType<BigDecimal> {
 
     final int scale;
 
-    BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean signed) {
-        super(canonicalTypeString, bitLength, signed);
+    BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean unsigned) {
+        super(canonicalTypeString, bitLength, unsigned);
         this.scale = scale;
     }
 

@@ -19,8 +19,8 @@ public class MonteCarloTestCase {
 
     static class Params {
 
-        static final int DEFAULT_MAX_TUPLE_DEPTH = 4; // 2
-        static final int DEFAULT_MAX_TUPLE_LENGTH = 9; // 4
+        static final int DEFAULT_MAX_TUPLE_DEPTH = 2; // 2
+        static final int DEFAULT_MAX_TUPLE_LENGTH = 3; // 4
 
         static final int DEFAULT_MAX_ARRAY_DEPTH = 4; // 2
         static final int DEFAULT_MAX_ARRAY_LENGTH = 4; // 35
@@ -241,11 +241,11 @@ public class MonteCarloTestCase {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return r.nextBoolean();
         case TYPE_CODE_BYTE: return generateByte(r);
-        case TYPE_CODE_SHORT: return generateShort(r);
-        case TYPE_CODE_INT: return generateInt(r, ((AbstractUnitType<?>) type).bitLength);
-        case TYPE_CODE_LONG: return generateLong(r, ((AbstractUnitType<?>) type).bitLength);
-        case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, ((AbstractUnitType<?>) type).bitLength);
-        case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, ((AbstractUnitType<?>) type).bitLength, ((BigDecimalType) type).scale);
+        case TYPE_CODE_SHORT: return generateShort(r, ((ShortType) type).unsigned);
+        case TYPE_CODE_INT: return generateInt(r, (IntType) type);
+        case TYPE_CODE_LONG: return generateLong(r, (LongType) type, false);
+        case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (AbstractUnitType) type);
+        case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
         case TYPE_CODE_ARRAY: return generateArray((ArrayType) type, r);
         case TYPE_CODE_TUPLE: return generateTuple((TupleType) type, r);
         default: throw new IllegalArgumentException("unexpected type: " + type.toString());
@@ -256,48 +256,88 @@ public class MonteCarloTestCase {
         return (byte) r.nextInt();
     }
 
-    private static short generateShort(Random r) {
+    private static short generateShort(Random r, boolean unsigned) {
         byte[] random = new byte[1 + r.nextInt(Short.BYTES)]; // 1-2
         r.nextBytes(random);
-        return new BigInteger(random).shortValueExact();
-    }
-
-    private static int generateInt(Random r, int bitLimit) {
-        byte[] buffer = new byte[1 + r.nextInt(bitLimit >>> 3)]; // 1-4
-        return new BigInteger(buffer).intValueExact();
-    }
-
-    private static long generateLong(Random r, int bitLimit) {
-        byte[] random = new byte[1 + r.nextInt(bitLimit >>> 3)]; // 1-8
-        r.nextBytes(random);
-        return new BigInteger(random).longValueExact();
-    }
-
-    private static BigInteger generateBigInteger(Random r, int bitLimit) {
-        if((bitLimit & 0b111) == 7) {
-            return generateSignedBigInteger(r, bitLimit);
+        short x = new BigInteger(random).shortValueExact();
+        if(unsigned && x < 0) {
+            return (short) ((-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0));
         }
-        byte[] thirtyTwo = new byte[UNIT_LENGTH_BYTES];
-        final int len = 1 + r.nextInt(bitLimit >>> 3); // 1-32
-        for (int i = UNIT_LENGTH_BYTES - len; i < UNIT_LENGTH_BYTES; i++) {
-            thirtyTwo[i] = (byte) r.nextInt();
-        }
-        BigInteger bi = new BigInteger(thirtyTwo);
-        if(r.nextBoolean()) {
-            if(bi.compareTo(BigInteger.ZERO) < 0) {
-                return bi.add(BigInteger.ONE).negate();
+        return x;
+    }
+
+    private static int generateInt(Random r, IntType intType) {
+        byte[] buffer = new byte[1 + r.nextInt(intType.bitLength >>> 3)]; // 1-4
+        int x = new BigInteger(buffer).intValueExact();
+        if(intType.unsigned && x < 0) {
+            int y = (-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0);
+            if(y < 0) {
+                throw new Error("x,y : " + x + "," + y);
             }
-            return bi.negate();
+            return y;
         }
-        return bi;
+        return x;
     }
 
-    private static BigInteger generateSignedBigInteger(Random r, int bitLimit) {
-        return generateBigInteger(r, bitLimit + 1).divide(BigInteger.valueOf(2L));
+    private static long generateLong(Random r, LongType longType, boolean isElement) {
+        byte[] random = new byte[1 + r.nextInt(longType.bitLength >>> 3)]; // 1-8
+        r.nextBytes(random);
+        long x = new BigInteger(random).longValueExact();
+        boolean unsigned = longType.unsigned && !isElement;
+        if(unsigned && x < 0) {
+            long a = x + 1;
+            long b = -a;
+            long c = b << 1;
+            int add = r.nextBoolean() ? 1 : 0;
+            long y = c + add;
+////            long y = (-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0);
+            if(y < 0) {
+                System.err.println(longType.bitLength);
+                System.err.println(a + ", " + b + ", " + c + ", " + y);
+                throw new Error("x,y : " + x + "," + y);
+            }
+            return y;
+        }
+        return x;
     }
 
-    private static BigDecimal generateBigDecimal(Random r, int bitLimit, int scale) {
-        return new BigDecimal(generateBigInteger(r, bitLimit), scale);
+    private static BigInteger generateBigInteger(Random r, AbstractUnitType type) {
+        byte[] thirtyTwo = new byte[UNIT_LENGTH_BYTES];
+        final int len = 1 + r.nextInt(type.bitLength >>> 3); // 1-32
+        boolean zero = true;
+        for (int i = UNIT_LENGTH_BYTES - len; i < UNIT_LENGTH_BYTES; i++) {
+            byte b = (byte) r.nextInt();
+            zero &= b == 0;
+            thirtyTwo[i] = b;
+        }
+        BigInteger nonneg = new BigInteger(zero ? 0 : 1, thirtyTwo);
+
+        if(type.unsigned) {
+            return nonneg.shiftRight(1);
+        }
+
+        BigInteger temp = nonneg.shiftRight(1);
+        return r.nextBoolean() ? temp : temp.add(BigInteger.ONE).negate();
+
+//        if(r.nextBoolean()) {
+//            if(bi.compareTo(BigInteger.ZERO) < 0) {
+//                return bi.add(BigInteger.ONE).negate();
+//            }
+//            return bi.negate();
+//        }
+//        return bi;
+    }
+
+//    private static BigInteger generateSignedBigInteger(Random r, int bitLimit) {
+//        BigInteger nonneg = generateUnsignedBigInteger(r, bitLimit);
+//        if(r.nextBoolean()) {
+//            return nonneg.negate().min(BigInteger.ONE);
+//        }
+//        return nonneg;
+//    }
+
+    private static BigDecimal generateBigDecimal(Random r, BigDecimalType type) {
+        return new BigDecimal(generateBigInteger(r, type), type.scale);
     }
 
     private Object generateArray(ArrayType arrayType, Random r) {
@@ -313,11 +353,11 @@ public class MonteCarloTestCase {
                 return generateString(len, r);
             }
             return generateByteArray(len, r);
-        case TYPE_CODE_SHORT: return generateShortArray(len, r);
-        case TYPE_CODE_INT: return generateIntArray(len, ((AbstractUnitType<?>) elementType).bitLength, r);
-        case TYPE_CODE_LONG: return generateLongArray(len, ((AbstractUnitType<?>) elementType).bitLength, r);
-        case TYPE_CODE_BIG_INTEGER: return generateBigIntegerArray(len, ((AbstractUnitType<?>) elementType).bitLength, r);
-        case TYPE_CODE_BIG_DECIMAL: return generateBigDecimalArray(len, ((AbstractUnitType<?>) elementType).bitLength, ((BigDecimalType) elementType).scale, r);
+        case TYPE_CODE_SHORT: return generateShortArray(len, ((ShortType) elementType).unsigned, r);
+        case TYPE_CODE_INT: return generateIntArray(len, (IntType) elementType, r);
+        case TYPE_CODE_LONG: return generateLongArray(len, (LongType) elementType, r);
+        case TYPE_CODE_BIG_INTEGER: return generateBigIntegerArray(len, (BigIntegerType) elementType, r);
+        case TYPE_CODE_BIG_DECIMAL: return generateBigDecimalArray(len, (BigDecimalType) elementType, r);
         case TYPE_CODE_ARRAY: return generateObjectArray((ArrayType) elementType, len, r);
         case TYPE_CODE_TUPLE: return generateTupleArray((TupleType) elementType, len, r);
         default: throw new IllegalArgumentException("unexpected element type: " + elementType.toString());
@@ -334,42 +374,42 @@ public class MonteCarloTestCase {
         return new String(generateByteArray(len, r), UTF_8);
     }
 
-    private static short[] generateShortArray(final int len, Random r) {
+    private static short[] generateShortArray(final int len, boolean unsigned, Random r) {
         short[] shorts = new short[len];
         for (int i = 0; i < len; i++) {
-            shorts[i] = generateShort(r);
+            shorts[i] = generateShort(r, unsigned);
         }
         return shorts;
     }
 
-    private static int[] generateIntArray(final int len, int elementBitLimit, Random r) {
+    private static int[] generateIntArray(final int len, IntType intType, Random r) {
         int[] ints = new int[len];
         for (int i = 0; i < len; i++) {
-            ints[i] = generateInt(r, elementBitLimit);
+            ints[i] = generateInt(r, intType);
         }
         return ints;
     }
 
-    private static long[] generateLongArray(final int len, int elementBitLimit, Random r) {
+    private static long[] generateLongArray(final int len, LongType longType, Random r) {
         long[] longs = new long[len];
         for (int i = 0; i < len; i++) {
-            longs[i] = generateLong(r, elementBitLimit);
+            longs[i] = generateLong(r, longType, true);
         }
         return longs;
     }
 
-    private static BigInteger[] generateBigIntegerArray(final int len, int elementBitLimit, Random r) {
+    private static BigInteger[] generateBigIntegerArray(final int len, BigIntegerType type, Random r) {
         BigInteger[] bigInts = new BigInteger[len];
         for (int i = 0; i < len; i++) {
-            bigInts[i] = generateBigInteger(r, elementBitLimit);
+            bigInts[i] = generateBigInteger(r, type);
         }
         return bigInts;
     }
 
-    private static BigDecimal[] generateBigDecimalArray(final int len, int elementBitLimit, int elementScale, Random r) {
+    private static BigDecimal[] generateBigDecimalArray(final int len, BigDecimalType type, Random r) {
         BigDecimal[] bigDecs = new BigDecimal[len];
         for (int i = 0; i < len; i++) {
-            bigDecs[i] = generateBigDecimal(r, elementBitLimit, elementScale);
+            bigDecs[i] = generateBigDecimal(r, type);
         }
         return bigDecs;
     }

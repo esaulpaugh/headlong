@@ -10,11 +10,12 @@ abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V s
     static final int UNIT_LENGTH_BYTES = 32;
 
     final int bitLength;
+    final boolean unsigned;
 
-    AbstractUnitType(String canonicalType, int bitLength, boolean signed) {
+    AbstractUnitType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, false);
-        this.bitLength = signed ? bitLength - 1 : bitLength;
-//        this.signed = signed;
+        this.bitLength = bitLength;
+        this.unsigned = unsigned;
     }
 
     @Override
@@ -32,11 +33,24 @@ abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V s
         if(bitLen > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + bitLen + " > " + bitLength);
         }
+        if(unsigned && longVal < 0) {
+            throw new IllegalArgumentException("negative value for unsigned type");
+        }
+    }
+
+    void validateLongElementBitLen(long longVal) {
+        final int bitLen = longVal >= 0 ? RLPIntegers.bitLen(longVal) : BizarroIntegers.bitLen(longVal);
+        if(bitLen > bitLength) {
+            throw new IllegalArgumentException("exceeds bit limit: " + bitLen + " > " + bitLength);
+        }
     }
 
     void validateBigIntBitLen(final BigInteger bigIntVal) {
         if(bigIntVal.bitLength() > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + bigIntVal.bitLength() + " > " + bitLength);
+        }
+        if(unsigned && bigIntVal.compareTo(BigInteger.ZERO) < 0) {
+            throw new IllegalArgumentException("negative value for unsigned type");
         }
     }
 }

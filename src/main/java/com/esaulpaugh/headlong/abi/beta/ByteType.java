@@ -12,11 +12,11 @@ class ByteType extends AbstractUnitType<Byte> {
 
 //    static final ByteType SIGNED_BYTE_OBJECT = new ByteType("int8", true);
 //    static final ByteType SIGNED_BYTE_PRIMITIVE = new ByteType("int8", "B", true);
-    static final ByteType UNSIGNED_BYTE_OBJECT = new ByteType("uint8", false);
+    static final ByteType UNSIGNED_BYTE_OBJECT = new ByteType("uint8", true);
 //    static final ByteType UNSIGNED_BYTE_PRIMITIVE = new ByteType("uint8", "B", false);
 
-    ByteType(String canonicalType, boolean signed) {
-        super(canonicalType, MAX_BIT_LEN, signed);
+    ByteType(String canonicalType, boolean unsigned) {
+        super(canonicalType, MAX_BIT_LEN, unsigned);
     }
 
     @Override

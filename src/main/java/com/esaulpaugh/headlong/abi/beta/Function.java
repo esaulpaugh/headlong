@@ -48,19 +48,6 @@ public class Function {
         this.paramTypes = TupleType.create(canonicalTupleTypeString, types.toArray(EMPTY_TYPE_ARRAY));
     }
 
-    public Throwable error(Object... args) {
-        return error(new Tuple(args));
-    }
-
-    public Throwable error(Tuple args) {
-        try {
-            paramTypes.validate(args);
-        } catch (Throwable t) {
-            return t;
-        }
-        return null;
-    }
-
     public ByteBuffer encodeCall(Object... args) {
         return Function.encodeCall(this, new Tuple(args));
     }

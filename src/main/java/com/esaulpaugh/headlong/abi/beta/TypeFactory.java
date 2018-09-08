@@ -77,23 +77,23 @@ final class TypeFactory {
         }
     }
 
-    private static String resolveBaseType(final String canonicalType, boolean isElement, Deque<StackableType<?>> typeStack, StackableType<?> baseTuple) {
+    private static String resolveBaseType(final String ct, boolean isElement, Deque<StackableType<?>> typeStack, StackableType<?> baseTuple) {
 
         final StackableType<?> type;
 
-        BaseTypeInfo info = BaseTypeInfo.get(canonicalType);
+        BaseTypeInfo info = BaseTypeInfo.get(ct);
 
         final String arrayClassNameStub;
         if(info != null) {
-            switch (canonicalType) { // canonicalType's hash code already cached from BaseTypeInfo.get()
-            case "uint8": type = new ByteType(canonicalType, false); break;
-            case "uint16": type = new ShortType(canonicalType, false); break;
-            case "uint24":
-            case "uint32": type = new IntType(canonicalType, info.bitLength, false); break;
+            switch (ct) { // canonicalType's hash code already cached from BaseTypeInfo.get()
+            case "uint8": type = isElement ? new ByteType(ct, true) : new IntType(ct, info.bitLength, true); break;
+            case "uint16":
+            case "uint24": type = new IntType(ct, info.bitLength, true); break;
+            case "uint32": type = isElement ? new IntType(ct, info.bitLength, true) : new LongType(ct, info.bitLength, true); break;
             case "uint40":
             case "uint48":
-            case "uint56":
-            case "uint64": type = new LongType(canonicalType, info.bitLength, false); break;
+            case "uint56": type = new LongType(ct, info.bitLength, true); break;
+            case "uint64": type = isElement ? new LongType(ct, info.bitLength, true) : new BigIntegerType(ct, info.bitLength, true); break;
             case "uint72":
             case "uint80":
             case "uint88":
@@ -118,15 +118,15 @@ final class TypeFactory {
             case "uint232":
             case "uint240":
             case "uint248":
-            case "uint256": type = new BigIntegerType(canonicalType, info.bitLength, false); break;
-            case "int8": type = new ByteType(canonicalType, true); break;
-            case "int16": type = new ShortType(canonicalType, true); break;
+            case "uint256": type = new BigIntegerType(ct, info.bitLength, true); break;
+            case "int8":
+            case "int16":
             case "int24":
-            case "int32": type = new IntType(canonicalType, info.bitLength, true); break;
+            case "int32": type = new IntType(ct, info.bitLength, false); break;
             case "int40":
             case "int48":
             case "int56":
-            case "int64": type = new LongType(canonicalType, info.bitLength, true); break;
+            case "int64": type = new LongType(ct, info.bitLength, false); break;
             case "int72":
             case "int80":
             case "int88":
@@ -150,7 +150,7 @@ final class TypeFactory {
             case "int232":
             case "int240":
             case "int248":
-            case "int256": type = new BigIntegerType(canonicalType, info.bitLength, true); break;
+            case "int256": type = new BigIntegerType(ct, info.bitLength, false); break;
             case "bytes1":
             case "bytes2":
             case "bytes3":
@@ -183,21 +183,21 @@ final class TypeFactory {
             case "bytes29":
             case "bytes30":
             case "bytes31":
-            case "bytes32": type = new ArrayType<ByteType, byte[]>(canonicalType, info.className, (ByteType) info.elementType, info.arrayLength, false); break;
+            case "bytes32": type = new ArrayType<ByteType, byte[]>(ct, info.className, (ByteType) info.elementType, info.arrayLength, false); break;
             case "bool": type = new BooleanType(); break;
             case "bytes":
-            case "string": type = new ArrayType<ByteType, byte[]>(canonicalType, info.className, (ByteType) info.elementType, DYNAMIC_LENGTH, true); break;
-            case "decimal": type = new BigDecimalType(canonicalType, info.bitLength, info.scale, true); break;
+            case "string": type = new ArrayType<ByteType, byte[]>(ct, info.className, (ByteType) info.elementType, DYNAMIC_LENGTH, true); break;
+            case "decimal": type = new BigDecimalType(ct, info.bitLength, info.scale, false); break;
             default: type = null;
             }
             arrayClassNameStub = info.arrayClassNameStub;
         } else {
-            if(canonicalType.startsWith("(")) {
-                int last = canonicalType.charAt(canonicalType.length() - 1);
+            if(ct.startsWith("(")) {
+                int last = ct.charAt(ct.length() - 1);
                 type = last == ')' || last == ']' ? baseTuple : null;
                 arrayClassNameStub = type != null ? TupleType.ARRAY_CLASS_NAME_STUB : null;
             } else {
-                type = tryParseFixed(canonicalType);
+                type = tryParseFixed(ct);
                 arrayClassNameStub = type != null ? BigDecimalType.ARRAY_CLASS_NAME_STUB : null;
             }
         }
@@ -212,8 +212,8 @@ final class TypeFactory {
 
     static BigDecimalType tryParseFixed(String canonicalType) {
         int idx;
-        boolean isSignedDecimal;
-        if ((isSignedDecimal = (idx = canonicalType.indexOf("fixed")) == 0) || idx == 1) {
+        boolean unsigned;
+        if ((unsigned = (idx = canonicalType.indexOf("fixed")) == 1) || idx == 0) {
             if(idx == 1 && canonicalType.charAt(0) != 'u') {
                 return null;
             }
@@ -222,7 +222,7 @@ final class TypeFactory {
             int N = Integer.parseUnsignedInt(canonicalType.substring(indexOfX + 1), 10); // everything after x
             if ((M & 0b111) /* mod 8 */ == 0 && M >= 8 && M <= 256
                     && N > 0 && N <= 80) {
-                return new BigDecimalType(canonicalType, M, N, isSignedDecimal);
+                return new BigDecimalType(canonicalType, M, N, unsigned);
             }
         }
         return null;

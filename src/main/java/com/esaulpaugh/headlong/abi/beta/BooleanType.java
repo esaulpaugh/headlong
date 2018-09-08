@@ -9,7 +9,7 @@ class BooleanType extends AbstractUnitType<Boolean> {
 //    private static final String ARRAY_CLASS_NAME_STUB = boolean[].class.getName().replaceFirst("\\[", "");
 
     BooleanType() {
-        super("bool", 1, false);
+        super("bool", 1, true);
     }
 
     @Override

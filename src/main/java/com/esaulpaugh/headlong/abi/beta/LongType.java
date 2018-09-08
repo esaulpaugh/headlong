@@ -8,8 +8,8 @@ class LongType extends AbstractUnitType<Long> {
     private static final String CLASS_NAME = Long.class.getName();
 //    private static final String ARRAY_CLASS_NAME_STUB = long[].class.getName().replaceFirst("\\[", "");
 
-    LongType(String canonicalType, int bitLength, boolean signed) {
-        super(canonicalType, bitLength, signed);
+    LongType(String canonicalType, int bitLength, boolean unsigned) {
+        super(canonicalType, bitLength, unsigned);
     }
 
     @Override

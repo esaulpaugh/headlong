@@ -33,7 +33,7 @@ public class EncodeTest {
         Function f0 = new Function("((int8,()))"); // bar(((((uint8))[1]))) // bar(((()[]))[1])
         Object[] args0 = new Object[] {
 //                (byte) 5
-                new Tuple((byte) 5, new Tuple())
+                new Tuple(5, new Tuple())
 //                new Tuple(new Tuple((byte) 5))
 //                new Tuple( (byte) 5, new Tuple() )
 //                new Tuple(new Tuple((byte) 5))
@@ -61,10 +61,10 @@ public class EncodeTest {
                 true,
                 new BigInteger[] { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3) }
         };
-        Throwable t = f2.error(args2);
-        if(t != null) {
-            System.err.println(t.getMessage());
-        }
+//        Throwable t = f2.error(args2);
+//        if(t != null) {
+//            System.err.println(t.getMessage());
+//        }
         buffer = f2.encodeCall(args2);
         printABI(buffer.array());
 

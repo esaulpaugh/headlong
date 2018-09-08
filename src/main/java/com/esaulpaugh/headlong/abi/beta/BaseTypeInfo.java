@@ -17,8 +17,8 @@ public class BaseTypeInfo {
         int o = 0;
         Map<String, BaseTypeInfo> map = new HashMap<>(HASH_MAP_INITIAL_CAPACITY);
 
-        o = putInts(o, map, false);
-        o = putInts(o, map, true);
+        o = putSignedInts(o, map);
+        o = putUnsignedInts(o, map);
 
         for (int i = 1; i <= 32; i++) {
             String canonical = "bytes" + i;
@@ -27,14 +27,14 @@ public class BaseTypeInfo {
 
         map.put(
                 "function",
-                new BaseTypeInfo(o++, "function", null, "bytes24", byte[].class, null, 24 * Byte.SIZE, 0, false, 24, ByteType.UNSIGNED_BYTE_OBJECT)
+                new BaseTypeInfo(o++, "function", null, "bytes24", byte[].class, null, 24 * Byte.SIZE, 0, true, 24, ByteType.UNSIGNED_BYTE_OBJECT)
         );
 
-        map.put("bool", new BaseTypeInfo(o++, "bool", Boolean.class, boolean.class, 1, false));
-        map.put("address", new BaseTypeInfo(o++, "address", null, "uint160", BigInteger.class, null, 160, 0, false, -1, null));
+        map.put("bool", new BaseTypeInfo(o++, "bool", Boolean.class, boolean.class, 1, true));
+        map.put("address", new BaseTypeInfo(o++, "address", null, "uint160", BigInteger.class, null, 160, 0, true, -1, null));
         map.put("bytes", new BaseTypeInfo(o++, "bytes", byte[].class, -1, ByteType.UNSIGNED_BYTE_OBJECT));
         map.put("string", new BaseTypeInfo(o++, "string", String.class, -1, ByteType.UNSIGNED_BYTE_OBJECT));
-        map.put("decimal", new BaseTypeInfo(o++, "decimal", null, "fixed128x10", BigDecimal.class, null, 128, 10, true, -1, null));
+        map.put("decimal", new BaseTypeInfo(o++, "decimal", null, "fixed128x10", BigDecimal.class, null, 128, 10, false, -1, null));
 
         TYPE_INFO_MAP = Collections.unmodifiableMap(map);
     }
@@ -49,18 +49,18 @@ public class BaseTypeInfo {
 
     public final int bitLength;
     public final int scale;
-//    public final boolean signed;
+//    public final boolean unsigned;
 
     public final StackableType<?> elementType;
 
     public final int arrayLength;
 
     public BaseTypeInfo(int ordinal, String canonical, Class<?> objectClass, int arrayLength, StackableType<?> elementType) {
-        this(ordinal, canonical, null, canonical, objectClass, null, -1, 0, false, arrayLength, elementType);
+        this(ordinal, canonical, null, canonical, objectClass, null, -1, 0, true, arrayLength, elementType);
     }
 
-    public BaseTypeInfo(Integer ordinal, String canonical, Class<?> objectClass, Class<?> primitiveClass, int bitLength, boolean signed) {
-        this(ordinal, canonical, null, canonical, objectClass, primitiveClass, bitLength, 0, signed, -1,null);
+    public BaseTypeInfo(Integer ordinal, String canonical, Class<?> objectClass, Class<?> primitiveClass, int bitLength, boolean unsigned) {
+        this(ordinal, canonical, null, canonical, objectClass, primitiveClass, bitLength, 0, unsigned, -1,null);
     }
 
     public BaseTypeInfo(Integer ordinal,
@@ -71,7 +71,7 @@ public class BaseTypeInfo {
                         Class<?> primitiveClass,
                         int bitLength,
                         int scale,
-                        boolean signed,
+                        boolean unsigned,
                         int arrayLength,
                         StackableType<?> elementType) {
 //        this.ordinal = ordinal;
@@ -84,7 +84,7 @@ public class BaseTypeInfo {
         this.bitLength = bitLength;
         this.arrayLength = arrayLength;
         this.scale = scale;
-//        this.signed = signed;
+//        this.unsigned = unsigned;
         this.elementType = elementType;
     }
 
@@ -203,37 +203,70 @@ public class BaseTypeInfo {
         }
     }
 
-    private static int putInts(int o, final Map<String, BaseTypeInfo> map, final boolean unsigned) {
-        final String stub = unsigned ? "uint" : "int";
-
-        final boolean signed = !unsigned;
-
+    private static int putSignedInts(int o, final Map<String, BaseTypeInfo> map) {
+        final String stub = "int";
         int i;
         String canonical;
-
-        for(i = 8; i <= 8; i+=8) {
+//        for(i = 8; i <= 8; i+=8) {
+//            canonical = stub + i;
+//            map.put(canonical, new BaseTypeInfo(o++, canonical, Byte.class, byte.class, i, false));
+//        }
+//        for( ; i <= 16; i+=8) {
+//            canonical = stub + i;
+//            map.put(canonical, new BaseTypeInfo(o++, canonical, Short.class, short.class, i, false));
+//        }
+        for( i = 8 ; i <= 32; i+=8) {
             canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(o++, canonical, Byte.class, byte.class, i, signed));
-        }
-        for( ; i <= 16; i+=8) {
-            canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(o++, canonical, Short.class, short.class, i, signed));
-        }
-        for( ; i <= 32; i+=8) {
-            canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(o++, canonical, Integer.class, int.class, i, signed));
+            map.put(canonical, new BaseTypeInfo(o++, canonical, Integer.class, int.class, i, false));
         }
         for( ; i <= 64; i+=8) {
             canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(o++, canonical, Long.class, long.class, i, signed));
+            map.put(canonical, new BaseTypeInfo(o++, canonical, Long.class, long.class, i, false));
+        }
+        for( ; i <= 248; i+=8) {
+            canonical = stub + i;
+            map.put(canonical, new BaseTypeInfo(o++, canonical, BigInteger.class, null, i, false));
+        }
+
+        // 256 added separately
+        String special = stub + "256";
+        map.put(special, new BaseTypeInfo(o++, special, stub, special, BigInteger.class, null, 256, 0, false, -1, null));
+
+        return o;
+    }
+
+    private static int putUnsignedInts(int o, final Map<String, BaseTypeInfo> map) {
+        final String stub = "uint";
+        int i;
+        String canonical;
+        for( i = 8; i <= 8; i+=8) {
+            canonical = stub + i;
+            map.put(canonical, new BaseTypeInfo(o++, canonical, Integer.class, byte.class, i, true));
+        }
+//        for( ; i <= 16; i+=8) {
+//            canonical = stub + i;
+//            map.put(canonical, new BaseTypeInfo(o++, canonical, Integer.class, int.class, i, true));
+//        }
+        for( ; i <= 32; i+=8) {
+            canonical = stub + i;
+            map.put(canonical, new BaseTypeInfo(o++, canonical, Long.class, int.class, i, true));
+        }
+        for( ; i < 64; i+=8) {
+            canonical = stub + i;
+            map.put(canonical, new BaseTypeInfo(o++, canonical, Long.class, long.class, i, true));
+        }
+        for( ; i <= 64; i+=8) {
+            canonical = stub + i;
+            map.put(canonical, new BaseTypeInfo(o++, canonical, BigInteger.class, long.class, i, true));
         }
         for( ; i < 256; i+=8) {
             canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(o++, canonical, BigInteger.class, null, i, signed));
+            map.put(canonical, new BaseTypeInfo(o++, canonical, BigInteger.class, null, i, true));
         }
 
+        // 256 added separately
         String special = stub + "256";
-        map.put(special, new BaseTypeInfo(o++, special, stub, special, BigInteger.class, null, 256, 0, signed, -1, null));
+        map.put(special, new BaseTypeInfo(o++, special, stub, special, BigInteger.class, null, 256, 0, true, -1, null));
 
         return o;
     }
@@ -255,13 +288,13 @@ public class BaseTypeInfo {
         for(int M = 8; M <= 256; M+=8) {
             for (int N = 1; N <= 80; N++) {
                 String canonical = stub + M + 'x' + N;
-                map.put(canonical, new BaseTypeInfo(o++, canonical, null, canonical, BigDecimal.class, null, M, N, true, -1, null));
+                map.put(canonical, new BaseTypeInfo(o++, canonical, null, canonical, BigDecimal.class, null, M, N, unsigned, -1, null));
             }
         }
 
         // overwrite 128x18 entry
         String special = stub + "128x18";
-        map.put(special, new BaseTypeInfo(o++, special, stub, special, BigDecimal.class, null, 128, 18, true, -1, null));
+        map.put(special, new BaseTypeInfo(o++, special, stub, special, BigDecimal.class, null, 128, 18, unsigned, -1, null));
 
         return o;
     }

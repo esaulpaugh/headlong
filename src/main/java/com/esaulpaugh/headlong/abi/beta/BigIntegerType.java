@@ -8,8 +8,8 @@ class BigIntegerType extends AbstractUnitType<BigInteger> {
     private static final String CLASS_NAME = BigInteger.class.getName();
 //    private static final String ARRAY_CLASS_NAME_STUB = BigInteger[].class.getName().replaceFirst("\\[", "");
 
-    BigIntegerType(String canonicalType, int bitLength, boolean signed) {
-        super(canonicalType, bitLength, signed);
+    BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {
+        super(canonicalType, bitLength, unsigned);
     }
 
     @Override

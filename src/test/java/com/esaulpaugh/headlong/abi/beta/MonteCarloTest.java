@@ -8,7 +8,7 @@ import java.util.Random;
 
 public class MonteCarloTest {
 
-    private static final Long MASTER_SEED = (long) (Math.sqrt(2.0) * Math.pow(10, 15));
+    private static final Long MASTER_SEED = null; // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
     private static final int N = 30_000;
 
@@ -40,7 +40,8 @@ public class MonteCarloTest {
         boolean result;
         for(final long seed : seeds) {
             // "(8527343108833427504,4,9,4,4)"
-            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed); //
+            // "(5215733063408107969,2,3,4,4)"
+            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed); // "(-6307556721730084796,2,3,4,4)"
             try {
                 testCase = new MonteCarloTestCase(params);
                 temp = testCase.canonicalSignature;

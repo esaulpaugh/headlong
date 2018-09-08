@@ -10,8 +10,8 @@ class ShortType extends AbstractUnitType<Short> {
 
     private static final int SHORT_LENGTH_BITS = 16;
 
-    ShortType(String canonicalType, boolean signed) {
-        super(canonicalType, SHORT_LENGTH_BITS, signed);
+    ShortType(String canonicalType, boolean unsigned) {
+        super(canonicalType, SHORT_LENGTH_BITS, unsigned);
     }
 
     @Override
