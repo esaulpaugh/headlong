@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 class BigDecimalType extends AbstractUnitType<BigDecimal> {
 
     private static final String CLASS_NAME = BigDecimal.class.getName();
-    private static final String ARRAY_CLASS_NAME_STUB = BigDecimal[].class.getName().replaceFirst("\\[", "");
+    static final String ARRAY_CLASS_NAME_STUB = BigDecimal[].class.getName().replaceFirst("\\[", "");
 
     final int scale;
 
@@ -19,11 +19,6 @@ class BigDecimalType extends AbstractUnitType<BigDecimal> {
     @Override
     String className() {
         return CLASS_NAME;
-    }
-
-    @Override
-    String arrayClassNameStub() {
-        return ARRAY_CLASS_NAME_STUB;
     }
 
     @Override

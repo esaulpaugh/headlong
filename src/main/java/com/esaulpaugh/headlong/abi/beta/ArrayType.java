@@ -22,22 +22,18 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
 
     final T elementType;
     final int length;
-//    final String className;
     final Class clazz;
-    private final String arrayClassNameStub;
 
     private transient final boolean isString;
 
-    ArrayType(String canonicalType, String className, String arrayClassNameStub, T elementType, int length, boolean dynamic) {
+    ArrayType(String canonicalType, String className, T elementType, int length, boolean dynamic) {
         super(canonicalType, dynamic);
-//        this.className = className;
         try {
             this.clazz = Class.forName(className);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
         isString = STRING_CLASS_NAME.equals(clazz.getName());
-        this.arrayClassNameStub = arrayClassNameStub;
         this.elementType = elementType;
         this.length = length;
 
@@ -49,11 +45,6 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
     @Override
     String className() {
         return clazz.getName();
-    }
-
-    @Override
-    String arrayClassNameStub() {
-        return arrayClassNameStub;
     }
 
     @Override

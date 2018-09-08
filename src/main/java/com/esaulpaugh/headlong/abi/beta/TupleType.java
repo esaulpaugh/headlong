@@ -12,7 +12,7 @@ import static com.esaulpaugh.headlong.abi.beta.Encoder.OFFSET_LENGTH_BYTES;
 class TupleType extends StackableType<Tuple> {
 
     private static final String CLASS_NAME = Tuple.class.getName();
-    private static final String ARRAY_CLASS_NAME_STUB = Tuple[].class.getName().replaceFirst("\\[", "");
+    static final String ARRAY_CLASS_NAME_STUB = Tuple[].class.getName().replaceFirst("\\[", "");
 
     final StackableType[] elementTypes;
 
@@ -46,11 +46,6 @@ class TupleType extends StackableType<Tuple> {
     @Override
     String className() {
         return CLASS_NAME;
-    }
-
-    @Override
-    String arrayClassNameStub() {
-        return ARRAY_CLASS_NAME_STUB;
     }
 
     @Override

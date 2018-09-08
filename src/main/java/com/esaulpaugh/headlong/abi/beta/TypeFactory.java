@@ -56,7 +56,7 @@ final class TypeFactory {
             final StackableType top = typeStack.peekFirst();
             final boolean dynamic = arrayLength == DYNAMIC_LENGTH || top.dynamic;
             // push onto stack
-            typeStack.addFirst(new ArrayType<StackableType, Object>(canonicalType, className, null, top, arrayLength, dynamic));
+            typeStack.addFirst(new ArrayType<StackableType, Object>(canonicalType, className, top, arrayLength, dynamic));
 
             return baseClassName;
         } else {
@@ -83,6 +83,7 @@ final class TypeFactory {
 
         BaseTypeInfo info = BaseTypeInfo.get(canonicalType);
 
+        final String arrayClassNameStub;
         if(info != null) {
             switch (canonicalType) { // canonicalType's hash code already cached from BaseTypeInfo.get()
             case "uint8": type = new ByteType(canonicalType, false); break;
@@ -182,19 +183,22 @@ final class TypeFactory {
             case "bytes29":
             case "bytes30":
             case "bytes31":
-            case "bytes32": type = new ArrayType<ByteType, byte[]>(canonicalType, info.className, info.arrayClassNameStub, (ByteType) info.elementType, info.arrayLength, false); break;
+            case "bytes32": type = new ArrayType<ByteType, byte[]>(canonicalType, info.className, (ByteType) info.elementType, info.arrayLength, false); break;
             case "bool": type = new BooleanType(); break;
             case "bytes":
-            case "string": type = new ArrayType<ByteType, byte[]>(canonicalType, info.className, info.arrayClassNameStub, (ByteType) info.elementType, DYNAMIC_LENGTH, true); break;
+            case "string": type = new ArrayType<ByteType, byte[]>(canonicalType, info.className, (ByteType) info.elementType, DYNAMIC_LENGTH, true); break;
             case "decimal": type = new BigDecimalType(canonicalType, info.bitLength, info.scale, true); break;
             default: type = null;
             }
+            arrayClassNameStub = info.arrayClassNameStub;
         } else {
             if(canonicalType.startsWith("(")) {
                 int last = canonicalType.charAt(canonicalType.length() - 1);
                 type = last == ')' || last == ']' ? baseTuple : null;
+                arrayClassNameStub = type != null ? TupleType.ARRAY_CLASS_NAME_STUB : null;
             } else {
                 type = tryParseFixed(canonicalType);
+                arrayClassNameStub = type != null ? BigDecimalType.ARRAY_CLASS_NAME_STUB : null;
             }
         }
 
@@ -203,7 +207,7 @@ final class TypeFactory {
         }
 
         typeStack.addFirst(type);
-        return isElement ? type.arrayClassNameStub() : type.className();
+        return isElement ? arrayClassNameStub : type.className();
     }
 
     static BigDecimalType tryParseFixed(String canonicalType) {

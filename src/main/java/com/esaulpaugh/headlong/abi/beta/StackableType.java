@@ -21,8 +21,6 @@ abstract class StackableType<V> {
 
     abstract String className();
 
-    abstract String arrayClassNameStub();
-
     abstract int byteLength(Object value);
 
     V decode(byte[] buffer, int index) {
