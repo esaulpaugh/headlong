@@ -78,7 +78,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
                 staticLen += elementType.byteLength(element);
             }
             break;
-        default: throw new IllegalArgumentException("unrecognized type: " + value.getClass().getName());
+        default: throw new IllegalArgumentException("unrecognized type: " + elementType.toString());
         }
 
         // dynamics get +32 for the array length
@@ -108,7 +108,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         case TYPE_CODE_BIG_DECIMAL: return (A) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, elementBuffer);
         case TYPE_CODE_ARRAY:  return (A) decodeObjectArray(arrayLen, bb, elementBuffer, false);
         case TYPE_CODE_TUPLE: return (A) decodeObjectArray(arrayLen, bb, elementBuffer, true);
-        default: throw new Error();
+        default: throw new IllegalArgumentException("unrecognized type: " + elementType.toString());
         }
     }
 

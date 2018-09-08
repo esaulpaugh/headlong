@@ -147,8 +147,12 @@ public class MonteCarloTestCase {
 //        System.out.println(equal);
 
         if(!equal) {
-            findInequality(function.paramTypes, argsTuple, out);
-            throw new RuntimeException(function.getCanonicalSignature());
+            try {
+                findInequality(function.paramTypes, argsTuple, out);
+                throw new RuntimeException(function.getCanonicalSignature());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         return true;
@@ -397,7 +401,7 @@ public class MonteCarloTestCase {
 
     // ------------------------------------------------------------------------
 
-    private static void findInequality(TupleType tupleType, Tuple in, Tuple out) {
+    private static void findInequality(TupleType tupleType, Tuple in, Tuple out) throws Exception {
         final int len = tupleType.elementTypes.length;
         for (int i = 0; i < len; i++) {
             StackableType<?> type = tupleType.elementTypes[i];
@@ -405,7 +409,7 @@ public class MonteCarloTestCase {
         }
     }
 
-    private static void findInequality(StackableType<?> elementType, Object in, Object out) {
+    private static void findInequality(StackableType<?> elementType, Object in, Object out) throws Exception {
         System.out.println("findInequality(" + elementType.getClass().getName() + ')');
         if(elementType instanceof AbstractUnitType<?>) {
             findInequality((AbstractUnitType<?>) elementType, in, out);
@@ -414,21 +418,21 @@ public class MonteCarloTestCase {
         } else if(elementType instanceof ArrayType) {
             findInequalityInArray((ArrayType) elementType, (Object[]) in, (Object[]) out);
         } else {
-            throw new Error();
+            throw new IllegalArgumentException("unrecognized type: " + elementType.toString());
         }
     }
 
-    private static void findInequality(AbstractUnitType<?> abstractUnitType, Object in, Object out) {
+    private static void findInequality(AbstractUnitType<?> abstractUnitType, Object in, Object out) throws Exception {
         if(!in.equals(out)) {
             if(in instanceof BigInteger && out instanceof BigInteger) {
                 System.err.println("bitLength: " + ((BigInteger) in).bitLength() + " =? " + ((BigInteger) out).bitLength());
             }
             System.err.println(in + " != " + out + " " + abstractUnitType.bitLength);
-            throw new Error();
+            throw new Exception();
         }
     }
 
-    private static void findInequalityInArray(ArrayType arrayType, Object[] in, Object[] out) {
+    private static void findInequalityInArray(ArrayType arrayType, Object[] in, Object[] out) throws Exception {
         final StackableType<?> elementType = arrayType.elementType;
         if (in.length != out.length) {
             throw new AssertionError(elementType.toString() + " len " + in.length + " != " + out.length);

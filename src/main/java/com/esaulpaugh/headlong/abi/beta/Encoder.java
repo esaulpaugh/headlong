@@ -7,16 +7,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.beta.Function.SELECTOR_LEN;
 import static com.esaulpaugh.headlong.abi.beta.StackableType.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-// TODO use switch(type.getInt()) and unchecked cast instead of repeated instanceof
 class Encoder {
 
     static final int OFFSET_LENGTH_BYTES = UNIT_LENGTH_BYTES;
@@ -57,38 +53,25 @@ class Encoder {
     }
 
     private static void insertTuple(TupleType tupleType, Tuple tuple, ByteBuffer outBuffer) {
+        final StackableType<?>[] types = tupleType.elementTypes;
+        final Object[] values = tuple.elements;
+        final int[] offset = new int[] { headLengthSum(types, values) };
 
-        LinkedList<StackableType<?>> typeList = new LinkedList<>(Arrays.asList(tupleType.elementTypes));
-        LinkedList<Object> valuesList = new LinkedList<>(Arrays.asList(tuple.elements));
-
-        encodeHeadsForTuple(typeList, valuesList, headLengthSum(tupleType, tuple), outBuffer);
-        encodeTailsForTuple(typeList, valuesList, outBuffer);
-    }
-
-    private static void encodeHeadsForTuple(LinkedList<StackableType<?>> types, LinkedList<Object> values, int headLengthSum, ByteBuffer outBuffer) {
-
-        final int[] offset = new int[] { headLengthSum };
-
-        Iterator<StackableType<?>> ti = types.iterator();
-        Iterator<Object> vi = values.iterator();
-
-        while(ti.hasNext()) {
-
-            StackableType<?> type = ti.next();
-            Object val = vi.next();
-
-            encodeHead(type, val, outBuffer, offset);
-
-            if(!type.dynamic) {
-                ti.remove();
-                vi.remove();
+        final int len = types.length;
+        int i;
+        for (i = 0; i < len; i++) {
+            encodeHead(types[i], values[i], outBuffer, offset);
+        }
+        for (i = 0; i < len; i++) {
+            StackableType<?> type = types[i];
+            if(type.dynamic) {
+                encodeTail(type, values[i], outBuffer);
             }
         }
     }
 
-    private static void encodeHead(StackableType<?> paramType, Object value, ByteBuffer dest, int[] offset) {
-
-        switch (paramType.typeCode()) {
+    private static void encodeHead(StackableType<?> type, Object value, ByteBuffer dest, int[] offset) {
+        switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: insertBool((boolean) value, dest); return;
         case TYPE_CODE_BYTE:
         case TYPE_CODE_SHORT:
@@ -97,41 +80,27 @@ class Encoder {
         case TYPE_CODE_BIG_INTEGER: insertInt(((BigInteger) value), dest); return;
         case TYPE_CODE_BIG_DECIMAL: insertInt(((BigDecimal) value).unscaledValue(), dest); return;
         case TYPE_CODE_ARRAY:
-            if(paramType.dynamic) { // includes String
-                insertOffset(offset, paramType, value, dest);
+            if (type.dynamic) { // includes String
+                insertOffset(offset, type, value, dest);
             } else {
-                encodeArrayStatic((ArrayType) paramType, value, dest);
+                encodeArrayStatic((ArrayType) type, value, dest);
             }
             return;
-        case TYPE_CODE_TUPLE: insertTupleHead((TupleType) paramType, (Tuple) value, dest, offset); return;
-        default: throw new IllegalArgumentException("unexpected array type: " + paramType.toString());
+        case TYPE_CODE_TUPLE:
+            if (type.dynamic) {
+                insertOffset(offset, type, value, dest);
+            } else {
+                insertTuple((TupleType) type, (Tuple) value, dest);
+            }
+            return;
+        default:
+            throw new IllegalArgumentException("unexpected array type: " + type.toString());
         }
-    }
-
-    private static void insertTupleHead(TupleType tupleType, Tuple tuple, ByteBuffer dest, int[] offset) {
-        if(tupleType.dynamic) {
-            insertOffset(offset, tupleType, tuple, dest);
-        } else {
-            insertTuple(tupleType, tuple, dest);
-        }
-    }
-
-    private static void insertLength(int length, ByteBuffer dest) {
-        insertInt(length, dest);
     }
 
     private static void insertOffset(final int[] offset, StackableType<?> paramType, Object object, ByteBuffer dest) {
         insertInt(offset[0], dest);
         offset[0] += paramType.byteLength(object);
-    }
-
-    private static void encodeTailsForTuple(List<StackableType<?>> types, List<Object> values, ByteBuffer outBuffer) {
-        Iterator<StackableType<?>> ti;
-        Iterator<Object> vi;
-        for(ti = types.iterator(), vi = values.iterator(); ti.hasNext(); ) {
-            StackableType<?> type = ti.next();
-            encodeTail(type, vi.next(), outBuffer);
-        }
     }
 
     private static void encodeTail(StackableType<?> type, Object value, ByteBuffer dest) {
@@ -141,7 +110,7 @@ class Encoder {
             ArrayType arrayType = (ArrayType) type;
             if(arrayType.isString) {
                 byte[] bytes = ((String) value).getBytes(UTF_8);
-                insertLength(bytes.length, dest);
+                insertInt(bytes.length, dest); // insertLength
                 insertBytes(bytes, dest);
             } else {
                 encodeArrayTail(arrayType, value, dest);
@@ -150,8 +119,7 @@ class Encoder {
         case TYPE_CODE_TUPLE:
             insertTuple((TupleType) type, (Tuple) value, dest);
             return;
-        default:
-            throw new Error("unexpected type: " + type.toString());
+        default: throw new IllegalArgumentException("unrecognized type: " + type.toString());
         }
     }
 
@@ -160,7 +128,7 @@ class Encoder {
     private static void encodeArrayStatic(ArrayType arrayType, Object value, ByteBuffer dest) {
         switch (arrayType.elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: insertBooleans((boolean[]) value, dest); return;
-        case TYPE_CODE_BYTE: insertBytes((byte[]) value, dest); return; // strings are dynamic, so not expected
+        case TYPE_CODE_BYTE: insertBytes((byte[]) value, dest); return;
         case TYPE_CODE_SHORT: insertShorts((short[]) value, dest); return;
         case TYPE_CODE_INT: insertInts((int[]) value, dest); return;
         case TYPE_CODE_LONG: insertLongs((long[]) value, dest); return;
@@ -179,7 +147,7 @@ class Encoder {
 
     private static void encodeArrayTail(ArrayType arrayType, Object value, ByteBuffer dest) {
         if(arrayType.dynamic) {
-            insertLength(Array.getLength(value), dest);
+            insertInt(Array.getLength(value), dest); // insertLength
         }
         final StackableType<?> elementType = arrayType.elementType;
         switch (elementType.typeCode()) {
@@ -210,20 +178,17 @@ class Encoder {
 
     // ========================================
 
-    private static int headLengthSum(TupleType tupleType, Tuple tuple) {
-        StackableType<?>[] elementTypes = tupleType.elementTypes;
-        Object[] elements = tuple.elements;
+    private static int headLengthSum(StackableType<?>[] elementTypes, Object[] elements) {
         int headLengths = 0;
         final int n = elementTypes.length;
         for (int i = 0; i < n; i++) {
             StackableType<?> t = elementTypes[i];
             if(t.dynamic) {
-                headLengths += 32;
+                headLengths += OFFSET_LENGTH_BYTES;
             } else {
                 headLengths += t.byteLength(elements[i]);
             }
         }
-
         return headLengths;
     }
 
@@ -299,6 +264,5 @@ class Encoder {
 
     private static void insertBool(boolean bool, ByteBuffer dest) {
         dest.put(bool ? BOOLEAN_TRUE : BOOLEAN_FALSE);
-//        insertInt(bool ? 1L : 0L, dest);
     }
 }
