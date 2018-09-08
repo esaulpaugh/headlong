@@ -93,9 +93,8 @@ public class BaseTypeInfo {
         return
 //                canonical + ", "
 //                + (nonCanonical == null ? '-' : nonCanonical) + ", "
-//                + (effective.equals(canonical) ? '-' : effective)
-//                + ", \"" +
-                        className + "\", "
+//                + (effective.equals(canonical) ? '-' : effective) + ", "
+                "\"" +className + "\", "
                 + "\""+ arrayClassNameStub + '\"';
     }
 

@@ -64,7 +64,6 @@ public class Unsigned {
         System.out.println();
         System.out.println(-2 + " --> " + uint8(-2));
         System.out.println(-1 + " --> " + uint8(-1));
-        System.out.println();
         System.out.println("2^8 = " + new BigDecimal(BigInteger.valueOf(2L).pow(8), 0));
         System.out.println();
     }
@@ -81,7 +80,6 @@ public class Unsigned {
         System.out.println();
         System.out.println(-2 + " --> " + uint16(-2));
         System.out.println(-1 + " --> " + uint16(-1));
-        System.out.println();
         System.out.println("2^16 = " + new BigDecimal(BigInteger.valueOf(2L).pow(16), 0));
         System.out.println();
     }
@@ -98,7 +96,6 @@ public class Unsigned {
         System.out.println();
         System.out.println(-2 + " --> " + uint32(-2));
         System.out.println(-1 + " --> " + uint32(-1));
-        System.out.println();
         System.out.println("2^32 = " + new BigDecimal(BigInteger.valueOf(2L).pow(32), 0));
         System.out.println();
     }
@@ -115,7 +112,6 @@ public class Unsigned {
         System.out.println();
         System.out.println(-2 + " --> " + uint64(-2));
         System.out.println(-1 + " --> " + uint64(-1));
-        System.out.println();
         System.out.println("2^64 = " + new BigDecimal(BigInteger.valueOf(2L).pow(64), 0));
         System.out.println();
     }

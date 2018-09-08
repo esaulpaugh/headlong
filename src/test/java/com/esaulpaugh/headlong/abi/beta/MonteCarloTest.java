@@ -6,11 +6,12 @@ import java.security.SecureRandom;
 import java.text.ParseException;
 import java.util.Random;
 
+//
 public class MonteCarloTest {
 
     private static final Long MASTER_SEED = null; // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
-    private static final int N = 30_000;
+    private static final int N = 10_000;
 
     private static long[] generateSeeds(long masterSeed) {
         Random r = new Random(masterSeed);

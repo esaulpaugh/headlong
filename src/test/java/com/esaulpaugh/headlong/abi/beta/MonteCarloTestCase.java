@@ -19,11 +19,11 @@ public class MonteCarloTestCase {
 
     static class Params {
 
-        static final int DEFAULT_MAX_TUPLE_DEPTH = 2; // 2
-        static final int DEFAULT_MAX_TUPLE_LENGTH = 3; // 4
+        static final int DEFAULT_MAX_TUPLE_DEPTH = 6; // 2
+        static final int DEFAULT_MAX_TUPLE_LENGTH = 30; // 4
 
-        static final int DEFAULT_MAX_ARRAY_DEPTH = 4; // 2
-        static final int DEFAULT_MAX_ARRAY_LENGTH = 4; // 35
+        static final int DEFAULT_MAX_ARRAY_DEPTH = 2; // 2
+        static final int DEFAULT_MAX_ARRAY_LENGTH = 1; // 35
 
         final int maxTupleDepth;
         final int maxTupleLen;
