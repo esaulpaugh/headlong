@@ -111,9 +111,11 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
     @Override
     @SuppressWarnings("unchecked")
     A decode(ByteBuffer bb, byte[] elementBuffer) {
+//        System.out.println("A decode " + toString() + " " + ((bb.position() - 4) >>> 5) + " " + dynamic);
         final int arrayLen;
         if(dynamic) {
             arrayLen = ARRAY_LENGTH_TYPE.decode(bb, elementBuffer);
+//            System.out.println("A LENGTH = " + arrayLen);
             checkDecodeLength(arrayLen, bb);
         } else {
             arrayLen = length;
@@ -141,10 +143,10 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
                 return (A) decodeBooleanArray(bb, arrayLen);
             }
             throw new Error();
-        } else if(elementType instanceof TupleType) {
-            return (A) decodeTupleArray((TupleType) elementType, bb, arrayLen, elementBuffer);
+//        } else if(elementType instanceof TupleType) {
+//            return (A) decodeTupleArray((TupleType) elementType, bb, arrayLen, elementBuffer);
         } else {
-            return (A) decodeObjectArray(arrayLen, bb, elementBuffer);
+            return (A) decodeObjectArray(arrayLen, bb, elementBuffer, elementType instanceof TupleType);
         }
     }
 
@@ -220,14 +222,6 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
         return bigDecs;
     }
 
-    private static Tuple[] decodeTupleArray(TupleType tupleType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
-        Tuple[] tuples = new Tuple[arrayLen];
-        for(int i = 0; i < arrayLen; i++) {
-            tuples[i] = tupleType.decode(bb, elementBuffer);
-        }
-        return tuples;
-    }
-
     private static long getLong(AbstractUnitType type, ByteBuffer bb, byte[] elementBuffer) {
         bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
         long longVal = new BigInteger(elementBuffer).longValueExact(); // make sure high bytes are zero
@@ -242,62 +236,58 @@ class ArrayType<T extends StackableType, A> extends StackableType<A> {
         return bigInt;
     }
 
-    private Object[] decodeObjectArray(int arrayLen, ByteBuffer bb, byte[] elementBuffer) {
+    private Object[] decodeObjectArray(int arrayLen, ByteBuffer bb, byte[] elementBuffer, boolean tupleArray) {
 
         final int index = bb.position(); // TODO remove eventually
 
-        final ArrayType elementArrayType = (ArrayType) elementType;
-
-        Object[] dest = (Object[]) Array.newInstance(elementArrayType.clazz, arrayLen);
-
-//        Object[] dest;
-//        try {
-//            dest = (Object[]) Array.newInstance(Class.forName(elementArrayType.className), arrayLen);
-//        } catch (ClassNotFoundException e) {
-//            throw new RuntimeException(e);
-//        }
+        Object[] dest = tupleArray
+                ? new Tuple[arrayLen]
+                : (Object[]) Array.newInstance(((ArrayType) elementType).clazz, arrayLen);
 
         int[] offsets = new int[arrayLen];
 
-        decodeArrayHeads(elementArrayType, bb, offsets, elementBuffer, dest);
+        decodeObjectArrayHeads(bb, offsets, elementBuffer, dest);
 
         if(dynamic) {
-            decodeArrayTails(elementArrayType, bb, index, offsets, elementBuffer, dest);
+            decodeObjectArrayTails(bb, index, offsets, elementBuffer, dest);
         }
         return dest;
     }
 
-    private static void decodeArrayHeads(ArrayType elementArrayType, ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) {
+    private void decodeObjectArrayHeads(ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) {
+//        System.out.println("A(O) heads " + ((bb.position() - 4) >>> 5) + ", " + bb.position());
         final int len = offsets.length;
-        if(elementArrayType.dynamic) {
+        if(elementType.dynamic) {
             for (int i = 0; i < len; i++) {
                 offsets[i] = Encoder.OFFSET_TYPE.decode(bb, elementBuffer);
+//                System.out.println("A(O) offset " + convertOffset(offsets[i]) + " @ " + convert(bb.position() - OFFSET_LENGTH_BYTES));
             }
         } else {
             for (int i = 0; i < len; i++) {
-                dest[i] = elementArrayType.decode(bb, elementBuffer);
+                dest[i] = elementType.decode(bb, elementBuffer);
             }
         }
     }
 
-    private static void decodeArrayTails(ArrayType elementArrayType, ByteBuffer bb, final int index, final int[] offsets, byte[] elementBuffer, final Object[] dest) {
+    private void decodeObjectArrayTails(ByteBuffer bb, final int index, final int[] offsets, byte[] elementBuffer, final Object[] dest) {
+//        System.out.println("A(O) tails " + ((bb.position() - 4) >>> 5) + ", " + bb.position());
         final int len = offsets.length;
         for (int i = 0; i < len; i++) {
             int offset = offsets[i];
+//            System.out.println("A(O) jumping to " + convert(index + offset));
             if (offset > 0) {
                 if(bb.position() != index + offset) { // TODO remove this check eventually
                     System.err.println(ArrayType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
                     bb.position(index + offset);
                 }
-                dest[i] = elementArrayType.decode(bb, elementBuffer);
+                dest[i] = elementType.decode(bb, elementBuffer);
             }
         }
     }
 
     @Override
     public String toString() {
-        return dynamic ? "DYNAMIC[]" : "STATIC[]"
-                + "<" + elementType + ">(" + length + ")";
+        return (dynamic ? "DYNAMIC[]" : "STATIC[]") + "<" + elementType + ">(" + length + ")";
     }
 
     @Override

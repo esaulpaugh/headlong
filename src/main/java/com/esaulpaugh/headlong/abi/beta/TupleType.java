@@ -73,8 +73,21 @@ class TupleType extends StackableType<Tuple> {
         return len;
     }
 
+    static int convertPos(ByteBuffer bb) {
+        return (bb.position() - 4) >>> 5;
+    }
+
+    static int convert(int pos) {
+        return convertOffset(pos - 4);
+    }
+
+    static int convertOffset(int pos) {
+        return pos >>> 5;
+    }
+
     @Override
     Tuple decode(ByteBuffer bb, byte[] elementBuffer) {
+//        System.out.println("T decode " + toString() + " " + convertPos(bb) + " " + dynamic);
 
         final int index = bb.position(); // TODO remove eventually
 
@@ -91,22 +104,26 @@ class TupleType extends StackableType<Tuple> {
         return new Tuple(elements);
     }
 
-    private void decodeHeads(ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) {
+    void decodeHeads(ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) {
+//        System.out.println("T heads " + convertPos(bb) + ", " + bb.position());
         final int tupleLen = offsets.length;
         for (int i = 0; i < tupleLen; i++) {
             StackableType elementType = elementTypes[i];
             if (elementType.dynamic) {
                 offsets[i] = Encoder.OFFSET_TYPE.decode(bb, elementBuffer);
+//                System.out.println("T offset " + convertOffset(offsets[i]) + " @ " + convert(bb.position() - OFFSET_LENGTH_BYTES));
             } else {
                 dest[i] = elementType.decode(bb, elementBuffer);
             }
         }
     }
 
-    private void decodeTails(ByteBuffer bb, final int index, int[] offsets, byte[] elementBuffer, final Object[] dest) {
+    void decodeTails(ByteBuffer bb, final int index, int[] offsets, byte[] elementBuffer, final Object[] dest) {
+//        System.out.println("T tails " + convertPos(bb) + ", " + bb.position());
         final int tupleLen = offsets.length;
         for (int i = 0; i < tupleLen; i++) {
             int offset = offsets[i];
+//            System.out.println("T jumping to " + convert(index + offset));
             if (offset > 0) {
                 if(bb.position() != index + offset) { // TODO remove this check eventually
                     System.err.println(TupleType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);

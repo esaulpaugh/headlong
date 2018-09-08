@@ -35,12 +35,23 @@ public class DecodeTest {
 //        // address[],int88,int192[1][1][][7][],int24[][],int144,
 
 //        Function f2 = new Function("((fixed24x14[13][][4])[])");
-        Function f2 = new Function("((fixed24x14[])[1])");
 
         final int s = 14;
         final BigDecimal[] inner = new BigDecimal[] {  }; // f(1, s), f(2, s), f(3, s), f(4, s), f(4, s)
         final BigDecimal[][] four = new BigDecimal[][] { inner };
         final BigDecimal[] thirteen = new BigDecimal[] { f(1, s), f(2, s), f(3, s), f(4, s), f(5, s), f(6, s), f(7, s), f(8, s), f(9, s), f(10, s), f(11, s), f(12, s), f(13, s),  };
+
+
+        Function f0 = new Function("(fixed24x14[])");
+        Tuple argg = new Tuple((Object) inner);
+        ByteBuffer b0 = f0.encodeCall(argg);
+        byte[] abi0 = b0.array();
+        EncodeTest.printABI(abi0);
+        Tuple x = f0.decodeCall(abi0);
+        System.out.println(x.equals(argg));
+
+        Function f2 = new Function("((fixed24x14[])[1])");
+
 
     Tuple subtuple = new Tuple(
                 (Object) new Tuple[] { new Tuple(

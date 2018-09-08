@@ -54,7 +54,7 @@ public class MonteCarloTestCase {
         }
     }
 
-    private static final int NUM_TUPLES_ADDED = 0; // 17
+    private static final int NUM_TUPLES_ADDED = 17; // 17
     private static final int NUM_FIXED_ADDED = 50;
 
     private static final ArrayList<String> FIXED_LIST;
@@ -184,7 +184,6 @@ public class MonteCarloTestCase {
             sb = new StringBuilder(baseTypeString);
         }
 
-        // TODO fix tuple arrays
         boolean isElement = r.nextBoolean() && r.nextBoolean();
         if(isElement) {
             int arrayDepth = 1 + r.nextInt(params.maxArrayDepth);

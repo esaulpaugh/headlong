@@ -24,15 +24,17 @@ public class MonteCarloTest {
         int i = 0;
         for(final long seed : seeds) {
 //            System.out.println("new seed " + seed);
-            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(-1442214311993141792L); // TODO -1442214311993141792L
+            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed); // TODO -1442214311993141792L
             try {
                 final MonteCarloTestCase testCase = new MonteCarloTestCase(params);
 
-//                System.out.print(i++ + ", " + testCase.canonicalSignature + " :: ");
+//                System.out.print(i + ", " + testCase.canonicalSignature + " :: ");
 
                 boolean result = testCase.run();
 
-                log.append(i++).append(' ').append(result).append('\n');
+                log.append(i).append(' ').append(result).append('\n');
+
+                i++;
 
 //                System.out.println(result);
 
