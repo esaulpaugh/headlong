@@ -54,7 +54,7 @@ abstract class StackableType<V> {
      *
      * @param buffer    the buffer containing the encoded data
      * @param unitBuffer a buffer of length {@link AbstractUnitType#UNIT_LENGTH_BYTES} in which to store intermediate values
-     * @return
+     * @return  the decoded value
      */
     abstract V decode(ByteBuffer buffer, byte[] unitBuffer);
 

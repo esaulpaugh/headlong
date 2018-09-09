@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import static com.esaulpaugh.headlong.rlp.util.RLPIntegers.EMPTY_BYTE_ARRAY;
 
 /**
- * Utility for encoding and decoding hexadecimal, base64, and utf-8 {@code String}s.
+ * Utility for encoding and decoding hexadecimal, base64, and utf-8 encoded {@code String}s.
  */
 public class Strings {
 
@@ -28,10 +28,10 @@ public class Strings {
 
     public static String encode(byte[] bytes, int from, int len, int encoding) {
         switch (encoding) {
-        case UTF_8: return toUtf8(bytes, from, len);
+        case UTF_8: return new String(bytes, from, len, StandardCharsets.UTF_8);
         case BASE64: return toBase64(bytes, from, len, WITH_PADDING);
         case HEX:
-        default: return toHex(bytes, from, len);
+        default: return Hex.toHexString(bytes, from, len);
         }
     }
 
@@ -42,14 +42,6 @@ public class Strings {
         case HEX:
         default: return fromHex(string);
         }
-    }
-
-    private static String toUtf8(byte[] bytes, int from, int len) {
-        return new String(bytes, from, len, StandardCharsets.UTF_8);
-    }
-
-    private static String toHex(byte[] bytes, int from, int len) {
-        return Hex.toHexString(bytes, from, len);
     }
 
     public static String toBase64(byte[] bytes, int from, int len, boolean withPadding) {
@@ -93,6 +85,7 @@ public class Strings {
 
     public static int calcDecodedLen(String string, int encoding) {
         switch (encoding) {
+        case UTF_8: return string.getBytes(CHARSET_UTF_8).length;
         case BASE64: return calcBase64DecodedLen(string);
         case HEX:
         default: return calcHexDecodedLen(string.length());

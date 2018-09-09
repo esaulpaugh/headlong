@@ -1,9 +1,9 @@
 package com.esaulpaugh.headlong.rlp.util;
 
-import org.spongycastle.util.encoders.Hex;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
 
 public class NotationParser {
 
@@ -53,7 +53,7 @@ public class NotationParser {
             case STRING:
                 objectStart = nextObjectIndex + STRING_PREFIX_LEN;
                 objectEnd = notation.indexOf(Notation.STRING_SUFFIX, objectStart);
-                parent.add(Hex.decode(notation.substring(objectStart, objectEnd)));
+                parent.add(Strings.decode(notation.substring(objectStart, objectEnd), HEX));
                 i = objectEnd + STRING_SUFFIX_LEN;
                 break;
             case OBJECT_ARRAY:

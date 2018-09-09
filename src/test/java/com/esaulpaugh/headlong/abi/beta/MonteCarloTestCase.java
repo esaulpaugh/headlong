@@ -19,11 +19,11 @@ public class MonteCarloTestCase {
 
     static class Params {
 
-        static final int DEFAULT_MAX_TUPLE_DEPTH = 6; // 2
-        static final int DEFAULT_MAX_TUPLE_LENGTH = 30; // 4
+        static final int DEFAULT_MAX_TUPLE_DEPTH = 4; // 2
+        static final int DEFAULT_MAX_TUPLE_LENGTH = 4; // 4
 
-        static final int DEFAULT_MAX_ARRAY_DEPTH = 2; // 2
-        static final int DEFAULT_MAX_ARRAY_LENGTH = 1; // 35
+        static final int DEFAULT_MAX_ARRAY_DEPTH = 4; // 2
+        static final int DEFAULT_MAX_ARRAY_LENGTH = 4; // 35
 
         final int maxTupleDepth;
         final int maxTupleLen;
@@ -172,8 +172,6 @@ public class MonteCarloTestCase {
         for (int i = 0; i < types.length; i++) {
             types[i] = generateType(r, tupleDepth);
         }
-//        TupleType tupleType = TupleType.create(TUPLE_BASE_TYPE_STRING, types);
-//        TupleType tupleType = generateTupleType(r, tupleDepth);
 
         StringBuilder signature = new StringBuilder("(");
         for (StackableType<?> t : types) {
@@ -244,7 +242,7 @@ public class MonteCarloTestCase {
         case TYPE_CODE_SHORT: return generateShort(r, ((ShortType) type).unsigned);
         case TYPE_CODE_INT: return generateInt(r, (IntType) type);
         case TYPE_CODE_LONG: return generateLong(r, (LongType) type, false);
-        case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (AbstractUnitType) type);
+        case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (AbstractUnitType<?>) type);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
         case TYPE_CODE_ARRAY: return generateArray((ArrayType) type, r);
         case TYPE_CODE_TUPLE: return generateTuple((TupleType) type, r);
@@ -270,11 +268,11 @@ public class MonteCarloTestCase {
         byte[] buffer = new byte[1 + r.nextInt(intType.bitLength >>> 3)]; // 1-4
         int x = new BigInteger(buffer).intValueExact();
         if(intType.unsigned && x < 0) {
-            int y = (-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0);
-            if(y < 0) {
-                throw new Error("x,y : " + x + "," + y);
-            }
-            return y;
+            return (-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0);
+//            if(y < 0) {
+//                throw new Error("x,y : " + x + "," + y);
+//            }
+//            return y;
         }
         return x;
     }
@@ -285,23 +283,12 @@ public class MonteCarloTestCase {
         long x = new BigInteger(random).longValueExact();
         boolean unsigned = longType.unsigned && !isElement;
         if(unsigned && x < 0) {
-            long a = x + 1;
-            long b = -a;
-            long c = b << 1;
-            int add = r.nextBoolean() ? 1 : 0;
-            long y = c + add;
-////            long y = (-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0);
-            if(y < 0) {
-                System.err.println(longType.bitLength);
-                System.err.println(a + ", " + b + ", " + c + ", " + y);
-                throw new Error("x,y : " + x + "," + y);
-            }
-            return y;
+            return ((-(x + 1)) << 1) + (r.nextBoolean() ? 1 : 0);
         }
         return x;
     }
 
-    private static BigInteger generateBigInteger(Random r, AbstractUnitType type) {
+    private static BigInteger generateBigInteger(Random r, AbstractUnitType<?> type) {
         byte[] thirtyTwo = new byte[UNIT_LENGTH_BYTES];
         final int len = 1 + r.nextInt(type.bitLength >>> 3); // 1-32
         boolean zero = true;
@@ -318,23 +305,7 @@ public class MonteCarloTestCase {
 
         BigInteger temp = nonneg.shiftRight(1);
         return r.nextBoolean() ? temp : temp.add(BigInteger.ONE).negate();
-
-//        if(r.nextBoolean()) {
-//            if(bi.compareTo(BigInteger.ZERO) < 0) {
-//                return bi.add(BigInteger.ONE).negate();
-//            }
-//            return bi.negate();
-//        }
-//        return bi;
     }
-
-//    private static BigInteger generateSignedBigInteger(Random r, int bitLimit) {
-//        BigInteger nonneg = generateUnsignedBigInteger(r, bitLimit);
-//        if(r.nextBoolean()) {
-//            return nonneg.negate().min(BigInteger.ONE);
-//        }
-//        return nonneg;
-//    }
 
     private static BigDecimal generateBigDecimal(Random r, BigDecimalType type) {
         return new BigDecimal(generateBigInteger(r, type), type.scale);

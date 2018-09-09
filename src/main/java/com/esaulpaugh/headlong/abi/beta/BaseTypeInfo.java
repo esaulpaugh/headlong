@@ -98,18 +98,7 @@ public class BaseTypeInfo {
                 + "\""+ arrayClassNameStub + '\"';
     }
 
-    private static String canonicalize(String raw) {
-        switch (raw) {
-        case "int": return "int256";
-        case "uint": return "uint256";
-        case "fixed": return "fixed128x18";
-        case "ufixed": return "ufixed128x18";
-        default: return raw;
-        }
-    }
-
     public static BaseTypeInfo get(String canonical) {
-//        String canonical = canonicalize(raw);
         return TYPE_INFO_MAP.get(canonical);
     }
 
@@ -117,8 +106,9 @@ public class BaseTypeInfo {
      * May be used to modify (mangle) type attributes at runtime. Throws UnsupportedOperationException if TYPE_INFO_MAP
      * is unmodifiable.
      *
-     * @param info
-     * @return
+     * @param canonical the key
+     * @param info  the value
+     * @return  the previous value
      */
     public static BaseTypeInfo put(String canonical, BaseTypeInfo info) {
         return TYPE_INFO_MAP.put(canonical, info);
@@ -127,8 +117,8 @@ public class BaseTypeInfo {
     /**
      * Throws UnsupportedOperationException if TYPE_INFO_MAP is unmodifiable.
      *
-     * @param canonical
-     * @return
+     * @param canonical the key
+     * @return  the value from the removed entry
      */
     public static BaseTypeInfo remove(String canonical) {
         return TYPE_INFO_MAP.remove(canonical);
@@ -141,10 +131,6 @@ public class BaseTypeInfo {
     public static Map<String, BaseTypeInfo> getBaseTypeInfoMap() {
         return TYPE_INFO_MAP;
     }
-
-//    public static Set<Map.Entry<String, BaseTypeInfo>> entrySet() {
-//        return TYPE_INFO_MAP.entrySet();
-//    }
 
     public static void main(String[] args0) {
 
@@ -269,18 +255,6 @@ public class BaseTypeInfo {
 
         return o;
     }
-
-//    private static BaseTypeInfo fixedType(String canonical, int bitLength, int scale) {
-//        boolean signed = ;
-//        String nonCanonical;
-//        if(canonical.contains("fixed128x18")) {
-//            nonCanonical = canonical.charAt(0) == 'u' ? "ufixed" : "fixed";
-//        } else {
-//            nonCanonical = null;
-//        }
-//        return ;
-//        return new BaseTypeInfo(null, canonical, nonCanonical, canonical, BigDecimal.class, null);
-//    }
 
     static int putFixed(int o, Map<String, BaseTypeInfo> map, boolean unsigned) {
         final String stub = unsigned ? "ufixed" : "fixed";

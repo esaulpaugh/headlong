@@ -38,8 +38,8 @@ public class DecodeTest {
 
         final int s = 14;
         final BigDecimal[] inner = new BigDecimal[] {  }; // f(1, s), f(2, s), f(3, s), f(4, s), f(4, s)
-        final BigDecimal[][] four = new BigDecimal[][] { inner };
-        final BigDecimal[] thirteen = new BigDecimal[] { f(1, s), f(2, s), f(3, s), f(4, s), f(5, s), f(6, s), f(7, s), f(8, s), f(9, s), f(10, s), f(11, s), f(12, s), f(13, s),  };
+//        final BigDecimal[][] four = new BigDecimal[][] { inner };
+//        final BigDecimal[] thirteen = new BigDecimal[] { f(1, s), f(2, s), f(3, s), f(4, s), f(5, s), f(6, s), f(7, s), f(8, s), f(9, s), f(10, s), f(11, s), f(12, s), f(13, s),  };
 
 
         Function f0 = new Function("(uint8,uint16,uint24,uint32,int8,int16,int24,int32)");

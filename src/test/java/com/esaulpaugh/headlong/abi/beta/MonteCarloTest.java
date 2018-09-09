@@ -11,7 +11,7 @@ public class MonteCarloTest {
 
     private static final Long MASTER_SEED = null; // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
-    private static final int N = 10_000;
+    private static final int N = 1_000_000;
 
     private static long[] generateSeeds(long masterSeed) {
         Random r = new Random(masterSeed);
@@ -42,6 +42,10 @@ public class MonteCarloTest {
         for(final long seed : seeds) {
             // "(8527343108833427504,4,9,4,4)"
             // "(5215733063408107969,2,3,4,4)"
+
+            // (8952920882133644975,256,2,1,1)
+
+            // (7042232989689500075,2000,2,1,1)
             final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed); // "(-6307556721730084796,2,3,4,4)"
             try {
                 testCase = new MonteCarloTestCase(params);
