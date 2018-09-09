@@ -381,7 +381,7 @@ public class Keccak extends MessageDigest {
             x = a[11] ^ t2; a[17] = (x << 10) | (x >>> (64 - 10));
             x = a[ 7] ^ t3; a[11] = (x <<  6) | (x >>> (64 -  6));
             x = a[10] ^ t1; a[ 7] = (x <<  3) | (x >>> (64 -  3));
-            a[10] = a_10_;
+//            a[10] = a_10_;
 
             // chi
             x0 = a[0]; x1 = a[1]; x2 = a[2]; x3 = a[3]; x4 = a[4];
@@ -398,7 +398,7 @@ public class Keccak extends MessageDigest {
             a[8] = x3 ^ ((~x4) & x0);
             a[9] = x4 ^ ((~x0) & x1);
 
-            x0 = a[10]; x1 = a[11]; x2 = a[12]; x3 = a[13]; x4 = a[14];
+            x0 = a_10_; x1 = a[11]; x2 = a[12]; x3 = a[13]; x4 = a[14];
             a[10] = x0 ^ ((~x1) & x2);
             a[11] = x1 ^ ((~x2) & x3);
             a[12] = x2 ^ ((~x3) & x4);
