@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
 }
 
 group 'com.esaulpaugh'
@@ -24,6 +25,20 @@ jar {
     finalizedBy(sourcesJar)
 }
 
+publishing {
+    publications {
+        headlong(MavenPublication) {
+            artifactId = 'headlong'
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+        }
+        }
+
+    }
+
+
+
 sourceCompatibility = 1.8
 
 repositories {
@@ -32,14 +47,21 @@ repositories {
 
 dependencies {
 
-//    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
-    implementation  group: 'com.madgag.spongycastle',
-                    name: 'prov',
-                    version: '1.58.0.0' // has junit 4.12
+//    implementation 'com.madgag.spongycastle:prov:1.58.0.0'
+    implementation 'com.madgag.spongycastle:core:1.58.0.0'
 
-    testImplementation  group: 'org.bouncycastle',
-                        name: 'bcprov-jdk15on',
-                        version: '1.60' // .jcajce.provider.digest
+//    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+//    implementation  group: 'com.madgag.spongycastle',
+//                    name: 'prov',
+//                    version: '1.58.0.0' // has junit 4.12
+
+//    testImplementation group: 'org.bouncycastle',
+//            name: 'bcprov-jdk15on',
+//            version: '1.60' // .jcajce.provider.digest
+
+    testImplementation group: 'junit',
+            name: 'junit',
+            version: '4.12'
 
 //    implementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.21'
 //    implementation group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.21'

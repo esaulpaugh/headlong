@@ -7,7 +7,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.spongycastle.crypto.Digest;
 import org.spongycastle.crypto.digests.KeccakDigest;
-import org.spongycastle.jcajce.provider.digest.Keccak.DigestKeccak;
 import org.spongycastle.util.encoders.Hex;
 
 import java.nio.charset.Charset;
@@ -95,86 +94,86 @@ public class Benchmark {
         System.out.println(((end - start) / 1000000.0) + " millis");
     }
 
-    @Test
-    public void keccakBenchmark() throws DigestException {
-        byte[] empty = "test".getBytes(UTF_8);
-        MessageDigest k_ = new Keccak(256);
-        k_.update(empty, 0, empty.length);
-        byte[] out = k_.digest();
-        System.out.println(Hex.toHexString(out));
-
-        Random r = new Random(new SecureRandom().nextLong());
-
-        for (int i = 20000; i >= 0; i--) {
-
-            byte[] input = new byte[i];
-            r.nextBytes(input);
-
-            if(i % 1000 == 0) System.out.println(input.length);
-
-            String prev, current;
-
-            byte[] output;
-
-            MessageDigest k0 = new Keccak(256);
-            final int random = r.nextInt(input.length + 1);
-            k0.update(input, 0, random);
-            k0.update(input, random, input.length - random);
-            output = k0.digest();
-            current = Hex.toHexString(output);
-//            System.out.println(current);
-            prev = current;
-
-            output = new Keccak(256).digest(input);
-            current = Hex.toHexString(output);
-//            System.out.println(current);
-            Assert.assertEquals(prev, current);
-            prev = current;
-
-            MessageDigest k = new Keccak(256);
-            k.update(input);
-            output = k.digest();
-            current = Hex.toHexString(output);
-//            System.out.println(current);
-            Assert.assertEquals(prev, current);
-            prev = current;
-
-            MessageDigest _256no = new Keccak(256);
-            _256no.update(input);
-            _256no.digest(output, 0, output.length);
-            current = Hex.toHexString(output);
-//            System.out.println(current);
-            Assert.assertEquals(prev, current);
-            prev = current;
-
-//            System.out.println();
-
-            MessageDigest md = new org.bouncycastle.jcajce.provider.digest.Keccak.Digest256();
-            md.update(input);
-            md.digest(output, 0, output.length);
-            current = Hex.toHexString(output);
-//            System.out.println(current);
-            Assert.assertEquals(prev, current);
-            prev = current;
-
-            MessageDigest digestKeccak = new DigestKeccak(256);
-            digestKeccak.update(input);
-            digestKeccak.digest(output, 0, output.length);
-            current = Hex.toHexString(output);
-//            System.out.println(current);
-            Assert.assertEquals(prev, current);
-            prev = current;
-
-            Digest spongy = new KeccakDigest(256);
-            spongy.update(input, 0, input.length);
-            spongy.doFinal(output, 0);
-            current = Hex.toHexString(output);
-//            System.out.println(current);
-            Assert.assertEquals(prev, current);
-            prev = current;
-
-        }
-
-        if(true)return;
-    }
+//    @Test
+//    public void keccakBenchmark() throws DigestException {
+//        byte[] empty = "test".getBytes(UTF_8);
+//        MessageDigest k_ = new Keccak(256);
+//        k_.update(empty, 0, empty.length);
+//        byte[] out = k_.digest();
+//        System.out.println(Hex.toHexString(out));
+//
+//        Random r = new Random(new SecureRandom().nextLong());
+//
+//        for (int i = 20000; i >= 0; i--) {
+//
+//            byte[] input = new byte[i];
+//            r.nextBytes(input);
+//
+//            if(i % 1000 == 0) System.out.println(input.length);
+//
+//            String prev, current;
+//
+//            byte[] output;
+//
+//            MessageDigest k0 = new Keccak(256);
+//            final int random = r.nextInt(input.length + 1);
+//            k0.update(input, 0, random);
+//            k0.update(input, random, input.length - random);
+//            output = k0.digest();
+//            current = Hex.toHexString(output);
+////            System.out.println(current);
+//            prev = current;
+//
+//            output = new Keccak(256).digest(input);
+//            current = Hex.toHexString(output);
+////            System.out.println(current);
+//            Assert.assertEquals(prev, current);
+//            prev = current;
+//
+//            MessageDigest k = new Keccak(256);
+//            k.update(input);
+//            output = k.digest();
+//            current = Hex.toHexString(output);
+////            System.out.println(current);
+//            Assert.assertEquals(prev, current);
+//            prev = current;
+//
+//            MessageDigest _256no = new Keccak(256);
+//            _256no.update(input);
+//            _256no.digest(output, 0, output.length);
+//            current = Hex.toHexString(output);
+////            System.out.println(current);
+//            Assert.assertEquals(prev, current);
+//            prev = current;
+//
+////            System.out.println();
+//
+//            MessageDigest md = new org.bouncycastle.jcajce.provider.digest.Keccak.Digest256();
+//            md.update(input);
+//            md.digest(output, 0, output.length);
+//            current = Hex.toHexString(output);
+////            System.out.println(current);
+//            Assert.assertEquals(prev, current);
+//            prev = current;
+//
+//            MessageDigest digestKeccak = new DigestKeccak(256);
+//            digestKeccak.update(input);
+//            digestKeccak.digest(output, 0, output.length);
+//            current = Hex.toHexString(output);
+////            System.out.println(current);
+//            Assert.assertEquals(prev, current);
+//            prev = current;
+//
+//            Digest spongy = new KeccakDigest(256);
+//            spongy.update(input, 0, input.length);
+//            spongy.doFinal(output, 0);
+//            current = Hex.toHexString(output);
+////            System.out.println(current);
+//            Assert.assertEquals(prev, current);
+//            prev = current;
+//
+//        }
+//
+//        if(true)return;
+//    }
 }
