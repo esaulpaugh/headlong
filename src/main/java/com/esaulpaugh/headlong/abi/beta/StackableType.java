@@ -43,6 +43,7 @@ abstract class StackableType<V> {
 
         // will throw NPE if argument null
         if(!expectedClassName.equals(value.getClass().getName())) {
+            // this pretty much only happens in the error case
             boolean isAssignable;
             try {
                 isAssignable = Class.forName(expectedClassName).isAssignableFrom(value.getClass());

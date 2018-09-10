@@ -9,6 +9,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 final class TypeFactory {
 
+    private static final ClassLoader CLASS_LOADER = TypeFactory.class.getClassLoader();
+
     static StackableType<?> createForTuple(String canonicalType, TupleType baseTupleType) throws ParseException {
         if(baseTupleType == null) {
             throw new NullPointerException();
@@ -50,7 +52,7 @@ final class TypeFactory {
             final String elementArrayClassNameStub = elementType.arrayClassNameStub();
             final Class<?> elementClass;
             if(elementType.typeCode() == TYPE_CODE_ARRAY) {
-                elementClass = Class.forName(elementType.className());
+                elementClass = Class.forName(elementType.className(), true, CLASS_LOADER);
             } else {
                 elementClass = null;
             }
