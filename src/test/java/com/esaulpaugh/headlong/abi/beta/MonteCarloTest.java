@@ -5,10 +5,7 @@ import org.junit.Test;
 import java.security.SecureRandom;
 import java.text.ParseException;
 import java.util.Random;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.TimeUnit;
 
 public class MonteCarloTest {
 
@@ -16,7 +13,7 @@ public class MonteCarloTest {
 
     private static final int N = 100_000;
 
-    private static long[] generateSeeds(long masterSeed) {
+    private static long[] generateSeeds(long masterSeed) { // (-2465594717398185362,4,4,4,4)		((int256),ufixed72x2,uint160)
         Random r = new Random(masterSeed);
         long[] seeds = new long[N];
         for (int i = 0; i < seeds.length; i++) {
@@ -66,7 +63,7 @@ public class MonteCarloTest {
             }
         }
 
-        System.out.println(log.toString());
+//        System.out.println(log.toString());
         System.out.println("MASTER_SEED = " + masterSeed);
     }
 
@@ -121,45 +118,45 @@ public class MonteCarloTest {
 
     private static final int TIMEOUT_SECONDS = 60;
 
-    @Test
-    public void threadedTest() throws ParseException {
-
-//        System.out.println(params);
-
-//        ForkJoinPool pool = ForkJoinPool.commonPool();
-
-        final long seed = System.nanoTime() * System.nanoTime() * System.nanoTime();
-        final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params("(5262708696611543287,4,4,4,4)"); //
-        final MonteCarloTestCase testCase = new MonteCarloTestCase(params);
-        System.out.println(testCase.function.getCanonicalSignature());
-        System.out.println(testCase.params);
-        ForkJoinTask<Void> task = new MonteCarloTask(testCase, 0, 8_000_000);
-
-        ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
-        pool.invoke(task);
-        pool.awaitQuiescence(TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        pool.shutdownNow();
-
-//        Thread[] threads = new Thread[8];
-//        final int len = threads.length;
-//        for (int i = 0; i < len; i++) {
-//            threads[i] = new Thread(() -> {
-//                for (int j = 0; j < 5_000_000; j++) {
-//                    testCase.run();
-//                }
-//            });
-//        }
+//    @Test
+//    public void threadedTest() throws ParseException {
 //
-//        final int len2 = len - 1;
-//        for (int i = 0; i < len2; i++) {
-//            threads[i].start();
-//        }
-//        threads[len2].run();
+////        System.out.println(params);
 //
-//        for (int i = 0; i < len2; i++) {
-//            threads[i].join();
-//        }
-    }
+////        ForkJoinPool pool = ForkJoinPool.commonPool();
+//
+//        final long seed = System.nanoTime() * System.nanoTime() * System.nanoTime();
+//        final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params("(5262708696611543287,4,4,4,4)"); //
+//        final MonteCarloTestCase testCase = new MonteCarloTestCase(params);
+//        System.out.println(testCase.function.getCanonicalSignature());
+//        System.out.println(testCase.params);
+//        ForkJoinTask<Void> task = new MonteCarloTask(testCase, 0, 8_000_000);
+//
+//        ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
+//        pool.invoke(task);
+//        pool.awaitQuiescence(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+//        pool.shutdownNow();
+//
+////        Thread[] threads = new Thread[8];
+////        final int len = threads.length;
+////        for (int i = 0; i < len; i++) {
+////            threads[i] = new Thread(() -> {
+////                for (int j = 0; j < 5_000_000; j++) {
+////                    testCase.run();
+////                }
+////            });
+////        }
+////
+////        final int len2 = len - 1;
+////        for (int i = 0; i < len2; i++) {
+////            threads[i].start();
+////        }
+////        threads[len2].run();
+////
+////        for (int i = 0; i < len2; i++) {
+////            threads[i].join();
+////        }
+//    }
 
     private static void sleep() {
         try {

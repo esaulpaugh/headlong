@@ -18,10 +18,24 @@ public class DecodeTest {
     public static void main(String[] args0) throws ParseException {
 
         Function f = new Function("baz(uint32,bool)");
-        ByteBuffer buffer = f.encodeCall(69L, true);
+        ByteBuffer one = f.encodeCall(69L, true);
+        ByteBuffer two = f.encodeCall(new Tuple(69L, true));
+        
 
-        System.out.println(Function.format(buffer.array()));
-        System.out.println(Function.hex(buffer.array()));
+        System.out.println(Function.hex(one.array()));
+        System.out.println(Function.format(two.array()));
+        
+        Tuple decoded = f.decodeCall((ByteBuffer) one.flip());
+        System.out.println(decoded.equals(new Tuple(69L, true)));
+        
+        
+        //        for(int i = 0; i < 250_000; i++) {
+//            Tuple decoded = f.decodeCall((ByteBuffer) buffer.flip());
+////            System.out.println(decoded.equals(new Tuple(69, true)));
+//        }
+        
+        if(true)return;
+        
 
 //        Keccak k = new Keccak(256);
 //
@@ -175,14 +189,14 @@ public class DecodeTest {
 //        BigDecimal[][] two = new BigDecimal[][] { a, b, c }; // a, b, c
 //        BigDecimal[][][] triple = new BigDecimal[][][] { one, two }; // one, two
 
-        String five = "five";
-        String seven = "seven";
-        String[] a = new String[] { five, five }; //
-        String[] b = new String[] { seven, seven }; //
-        String[] c = new String[] { five, seven }; //
-        String[][] one = new String[][] { a, b, a }; // a, b, a
-        String[][] two = new String[][] { a, b, c }; // a, b, c
-        String[][][] triple = new String[][][] { one, two }; // one, two
+//        String five = "five";
+//        String seven = "seven";
+//        String[] a = new String[] { five, five }; //
+//        String[] b = new String[] { seven, seven }; //
+//        String[] c = new String[] { five, seven }; //
+//        String[][] one = new String[][] { a, b, a }; // a, b, a
+//        String[][] two = new String[][] { a, b, c }; // a, b, c
+//        String[][][] triple = new String[][][] { one, two }; // one, two
 
 //        byte[] five = new byte[5];
 //        byte[] seven = new byte[7];
@@ -207,7 +221,7 @@ public class DecodeTest {
         // new Tuple(new Tuple("five"))
         Object[] argsIn = new Object[] {
 
-                triple,
+//                triple,
 
                 // ((uint8)(int8)[],(int8)[],(int8)[],uint8,(int8)[],(uint8))
                 BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(Byte.MAX_VALUE << 2)),

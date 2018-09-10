@@ -266,7 +266,7 @@ public class MonteCarloTestCase {
     private static short generateShort(Random r, boolean unsigned) {
         byte[] random = new byte[1 + r.nextInt(Short.BYTES)]; // 1-2
         r.nextBytes(random);
-        short x = new BigInteger(random).shortValueExact();
+        short x = new BigInteger(random).shortValue();
         if(unsigned && x < 0) {
             return (short) ((-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0));
         }
@@ -275,7 +275,7 @@ public class MonteCarloTestCase {
 
     private static int generateInt(Random r, IntType intType) {
         byte[] buffer = new byte[1 + r.nextInt(intType.bitLength >>> 3)]; // 1-4
-        int x = new BigInteger(buffer).intValueExact();
+        int x = new BigInteger(buffer).intValue();
         if(intType.unsigned && x < 0) {
             return (-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0);
 //            if(y < 0) {
@@ -289,7 +289,7 @@ public class MonteCarloTestCase {
     private static long generateLong(Random r, LongType longType, boolean isElement) {
         byte[] random = new byte[1 + r.nextInt(longType.bitLength >>> 3)]; // 1-8
         r.nextBytes(random);
-        long x = new BigInteger(random).longValueExact();
+        long x = new BigInteger(random).longValue();
         boolean unsigned = longType.unsigned && !isElement;
         if(unsigned && x < 0) {
             return ((-(x + 1)) << 1) + (r.nextBoolean() ? 1 : 0);

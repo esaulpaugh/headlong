@@ -33,6 +33,7 @@ class ShortType extends AbstractUnitType<Short> {
     Short decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
-        return bi.shortValueExact();
+        validateBigIntBitLen(bi);
+        return bi.shortValue();
     }
 }

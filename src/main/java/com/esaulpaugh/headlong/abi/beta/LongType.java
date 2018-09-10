@@ -39,8 +39,7 @@ class LongType extends AbstractUnitType<Long> {
     Long decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
-        long l = bi.longValueExact();
-        validateLongBitLen(l);
-        return l;
+        validateBigIntBitLen(bi);
+        return bi.longValue();
     }
 }

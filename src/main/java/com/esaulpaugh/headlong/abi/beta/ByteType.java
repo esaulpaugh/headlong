@@ -38,6 +38,7 @@ class ByteType extends AbstractUnitType<Byte> {
     Byte decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
-        return bi.byteValueExact();
+        validateBigIntBitLen(bi);
+        return bi.byteValue();
     }
 }

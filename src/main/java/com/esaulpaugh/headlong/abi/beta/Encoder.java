@@ -10,7 +10,7 @@ import java.util.Arrays;
 import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.beta.Function.SELECTOR_LEN;
 import static com.esaulpaugh.headlong.abi.beta.StackableType.*;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
 
 class Encoder {
 
@@ -122,7 +122,7 @@ class Encoder {
         case TYPE_CODE_ARRAY:
             ArrayType arrayType = (ArrayType) type;
             if(arrayType.isString) {
-                byte[] bytes = ((String) value).getBytes(UTF_8);
+                byte[] bytes = ((String) value).getBytes(CHARSET_UTF_8);
                 insertInt(bytes.length, dest); // insertLength
                 insertBytes(bytes, dest);
             } else {

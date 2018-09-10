@@ -18,13 +18,13 @@ public class Unsigned {
     public static final BigInteger INT88_RANGE = BigInteger.valueOf(2).pow(88);
     public static final BigInteger INT96_RANGE = BigInteger.valueOf(2).pow(96);
 
-    private static final int INT8_RANGE_INT = INT8_RANGE.intValueExact();
-    private static final int INT16_RANGE_INT = INT16_RANGE.intValueExact();
-    private static final int INT24_RANGE_INT = INT24_RANGE.intValueExact();
-    private static final long INT32_RANGE_LONG = INT32_RANGE.longValueExact();
-    private static final long INT40_RANGE_LONG = INT40_RANGE.longValueExact();
-    private static final long INT48_RANGE_LONG = INT48_RANGE.longValueExact();
-    private static final long INT56_RANGE_LONG = INT56_RANGE.longValueExact();
+    private static final int INT8_RANGE_INT = INT8_RANGE.intValue();
+    private static final int INT16_RANGE_INT = INT16_RANGE.intValue();
+    private static final int INT24_RANGE_INT = INT24_RANGE.intValue();
+    private static final long INT32_RANGE_LONG = INT32_RANGE.longValue();
+    private static final long INT40_RANGE_LONG = INT40_RANGE.longValue();
+    private static final long INT48_RANGE_LONG = INT48_RANGE.longValue();
+    private static final long INT56_RANGE_LONG = INT56_RANGE.longValue();
 
     public static BigInteger convert(BigInteger val, BigInteger range) {
         return val.compareTo(BigInteger.ZERO) >= 0 ? val : val.add(range);

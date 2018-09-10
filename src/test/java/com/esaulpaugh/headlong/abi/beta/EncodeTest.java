@@ -7,11 +7,9 @@ import org.junit.Assert;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.util.Arrays;
 
-import static com.esaulpaugh.headlong.abi.beta.Function.SELECTOR_LEN;
+import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
 import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
 
 public class EncodeTest {
@@ -60,7 +58,7 @@ public class EncodeTest {
 
         Function f2 = new Function("sam(bytes,bool,uint256[])"); // uint8[1][]
         Object[] args2 = new Object[] {
-                "dave".getBytes(StandardCharsets.UTF_8),
+                "dave".getBytes(CHARSET_UTF_8),
                 true,
                 new BigInteger[] { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3) }
         };

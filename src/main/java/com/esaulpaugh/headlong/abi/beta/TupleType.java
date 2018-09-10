@@ -105,11 +105,16 @@ class TupleType extends StackableType<Tuple> {
 
         int byteLength = 0;
         StackableType<?> type;
-        for (int i = 0; i < numTypes; i++) {
-            type = elementTypes[i];
-            byteLength += type.dynamic
-                    ? OFFSET_LENGTH_BYTES + type.validate(elements[i])
-                    : type.validate(elements[i]);
+        int i = 0;
+        try {
+            for ( ; i < numTypes; i++) {
+                type = elementTypes[i];
+                byteLength += type.dynamic
+                        ? OFFSET_LENGTH_BYTES + type.validate(elements[i])
+                        : type.validate(elements[i]);
+            }
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new IllegalArgumentException("illegal arg @ " + i + ": " + e.getMessage());
         }
 
         return byteLength;

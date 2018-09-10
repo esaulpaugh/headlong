@@ -31,7 +31,8 @@ class BooleanType extends AbstractUnitType<Boolean> {
     Boolean decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
-        switch (bi.byteValueExact()) {
+        validateBigIntBitLen(bi);
+        switch (bi.byteValue()) {
         case 0: return Boolean.FALSE;
         case 1: return Boolean.TRUE;
         default: throw new ArithmeticException("expected value 0 or 1");

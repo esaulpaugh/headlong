@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.beta.util.ClassNames.toFriendly;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
 
 class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
 
@@ -82,7 +82,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
             staticLen = ((boolean[]) value).length << LOG_2_UNIT_LENGTH_BYTES; // mul 32
             break;
         case TYPE_CODE_BYTE:
-            staticLen = roundUp((isString ? ((String) value).getBytes(UTF_8) : (byte[]) value).length);
+            staticLen = roundUp((isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length);
             break;
         case TYPE_CODE_SHORT:
             staticLen = ((short[]) value).length << LOG_2_UNIT_LENGTH_BYTES; // mul 32
@@ -125,7 +125,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: staticLen = checkLength(((boolean[]) value).length, value) << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BYTE:
-            byte[] bytes = isString ? ((String) value).getBytes(UTF_8) : (byte[]) value;
+            byte[] bytes = isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value;
             staticLen = roundUp(checkLength(bytes.length, value));
             break;
         case TYPE_CODE_SHORT: staticLen = checkLength(((short[]) value).length, value) << LOG_2_UNIT_LENGTH_BYTES; break;
@@ -285,7 +285,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         bb.get(out);
         bb.position(mark + roundUp(arrayLen));
         if(isString) {
-            return new String(out, UTF_8);
+            return new String(out, CHARSET_UTF_8);
         }
         return out;
     }
@@ -294,7 +294,11 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         short[] shorts = new short[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
             bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
-            shorts[i] = new BigInteger(elementBuffer).shortValueExact(); // validates that value is in short range
+            BigInteger bi = new BigInteger(elementBuffer);
+            if(bi.bitLength() > Short.SIZE) { // don't treat array elements as signed
+                throw new IllegalArgumentException("value not in short range");
+            }
+            shorts[i] = bi.shortValue();
         }
         return shorts;
     }
@@ -302,7 +306,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     private static int[] decodeIntArray(IntType intType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
         int[] ints = new int[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            ints[i] = (int) getLong(intType, bb, elementBuffer);
+            ints[i] = intType.decode(bb, elementBuffer);
         }
         return ints;
     }
@@ -310,7 +314,8 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     private static long[] decodeLongArray(LongType longType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
         long[] longs = new long[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            longs[i] = getLong(longType, bb, elementBuffer);
+            longs[i] = longType.decode(bb, elementBuffer);
+//            longs[i] = getLong(longType, bb, elementBuffer);
         }
         return longs;
     }
@@ -318,7 +323,8 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     private static BigInteger[] decodeBigIntegerArray(BigIntegerType bigIntegerType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            bigInts[i] = getBigInteger(bigIntegerType, bb, elementBuffer);
+            bigInts[i] = bigIntegerType.decode(bb, elementBuffer);
+//            bigInts[i] = getBigInteger(bigIntegerType, bb, elementBuffer);
         }
         return bigInts;
     }
@@ -327,24 +333,25 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         BigDecimal[] bigDecs = new BigDecimal[arrayLen];
         final int scale = bigDecimalType.scale;
         for (int i = 0; i < arrayLen; i++) {
-            bigDecs[i] = new BigDecimal(getBigInteger(bigDecimalType, bb, elementBuffer), scale);
+            bigDecs[i] = bigDecimalType.decode(bb, elementBuffer);
+//            bigDecs[i] = new BigDecimal(getBigInteger(bigDecimalType, bb, elementBuffer), scale);
         }
         return bigDecs;
     }
 
-    private static long getLong(AbstractUnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
-        bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
-        long longVal = new BigInteger(elementBuffer).longValueExact(); // make sure high bytes are zero
-        type.validateLongElementBitLen(longVal); // validate lower 8 bytes
-        return longVal;
-    }
-
-    private static BigInteger getBigInteger(AbstractUnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
-        bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
-        BigInteger bigInt = new BigInteger(elementBuffer);
-        type.validateBigIntBitLen(bigInt);
-        return bigInt;
-    }
+//    private static long getLong(AbstractUnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
+//        bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
+//        BigInteger bi = new BigInteger(elementBuffer);
+//        type.validateBigIntBitLen(bi);
+//        return bi.longValue();
+//    }
+//
+//    private static BigInteger getBigInteger(AbstractUnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
+//        bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
+//        BigInteger bigInt = new BigInteger(elementBuffer);
+//        type.validateBigIntBitLen(bigInt);
+//        return bigInt;
+//    }
 
     private Object[] decodeObjectArray(int arrayLen, ByteBuffer bb, byte[] elementBuffer, boolean tupleArray) { // 8.3%
 

@@ -4,7 +4,6 @@ import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
 
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 import static com.esaulpaugh.headlong.rlp.util.RLPIntegers.EMPTY_BYTE_ARRAY;
 
@@ -28,7 +27,7 @@ public class Strings {
 
     public static String encode(byte[] bytes, int from, int len, int encoding) {
         switch (encoding) {
-        case UTF_8: return new String(bytes, from, len, StandardCharsets.UTF_8);
+        case UTF_8: return new String(bytes, from, len, CHARSET_UTF_8);
         case BASE64: return toBase64(bytes, from, len, WITH_PADDING);
         case HEX:
         default: return Hex.toHexString(bytes, from, len);
@@ -55,7 +54,7 @@ public class Strings {
         if(utf8.isEmpty()) {
             return EMPTY_BYTE_ARRAY;
         }
-        return utf8.getBytes(StandardCharsets.UTF_8);
+        return utf8.getBytes(CHARSET_UTF_8);
     }
 
     private static byte[] fromHex(String hex) {

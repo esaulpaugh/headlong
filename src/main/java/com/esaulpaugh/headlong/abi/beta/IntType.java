@@ -41,8 +41,7 @@ class IntType extends AbstractUnitType<Integer> {
     Integer decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
-        long longVal = bi.longValueExact();
-        validateLongBitLen(longVal);
-        return (int) longVal;
+        validateBigIntBitLen(bi);
+        return bi.intValue();
     }
 }

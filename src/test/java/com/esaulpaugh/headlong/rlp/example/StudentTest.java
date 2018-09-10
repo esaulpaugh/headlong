@@ -27,7 +27,7 @@ public class StudentTest {
 
         StudentRLPAdapter adapter = new StudentRLPAdapter();
 
-        Student plato = adapter.decode(STUDENT_RLP_LIST);
+        Student plato = adapter.decode(STUDENT_RLP_LIST, 0);
 
         Assert.assertEquals(STUDENT_TO_STRING, plato.toString());
 

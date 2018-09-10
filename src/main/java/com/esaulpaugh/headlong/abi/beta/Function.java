@@ -5,7 +5,6 @@ import com.joemelsha.crypto.hash.Keccak;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.text.ParseException;
@@ -22,7 +21,7 @@ import static com.esaulpaugh.headlong.rlp.util.Strings.encode;
  */
 public class Function {
 
-    private static final Charset ASCII = StandardCharsets.US_ASCII;
+    private static final Charset ASCII = Charset.forName("US-ASCII");
 
     public static final int SELECTOR_LEN = 4;
 

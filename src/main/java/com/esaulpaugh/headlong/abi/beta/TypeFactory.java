@@ -5,7 +5,7 @@ import java.text.ParseException;
 
 import static com.esaulpaugh.headlong.abi.beta.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.beta.StackableType.TYPE_CODE_ARRAY;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
 
 final class TypeFactory {
 
@@ -64,7 +64,8 @@ final class TypeFactory {
             final boolean isArrayElement = index < canonicalType.length() - 1;
             StackableType<?> baseType = resolveBaseType(baseTypeString, isArrayElement, baseTuple);
             if(baseType == null) {
-                throw new ParseException("unrecognized type: " + baseTypeString + " (" + String.format("%040x", new BigInteger(baseTypeString.getBytes(UTF_8))) + ")", -1);
+                throw new ParseException("unrecognized type: "
+                        + baseTypeString + " (" + String.format("%040x", new BigInteger(baseTypeString.getBytes(CHARSET_UTF_8))) + ")", -1);
             }
             return baseType;
         }
