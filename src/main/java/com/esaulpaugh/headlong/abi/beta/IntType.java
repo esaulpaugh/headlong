@@ -5,8 +5,8 @@ import java.nio.ByteBuffer;
 
 class IntType extends AbstractUnitType<Integer> {
 
-    private static final String CLASS_NAME = Integer.class.getName();
-//    private static final String ARRAY_CLASS_NAME_STUB = int[].class.getName().replaceFirst("\\[", "");
+    static final String CLASS_NAME = Integer.class.getName();
+    static final String ARRAY_CLASS_NAME_STUB = ArrayType.getNameStub(int[].class);
 
     static final int MAX_BIT_LEN = 32;
 
@@ -17,6 +17,11 @@ class IntType extends AbstractUnitType<Integer> {
     @Override
     String className() {
         return CLASS_NAME;
+    }
+
+    @Override
+    String arrayClassNameStub() {
+        return ARRAY_CLASS_NAME_STUB;
     }
 
     @Override
@@ -34,9 +39,10 @@ class IntType extends AbstractUnitType<Integer> {
     }
 
     @Override
-    void validate(Object object) {
+    int validate(Object object) {
         super.validate(object);
         final long longVal = ((Number) object).longValue();
         validateLongBitLen(longVal);
+        return UNIT_LENGTH_BYTES;
     }
 }

@@ -2,10 +2,9 @@ package com.esaulpaugh.headlong.abi.beta;
 
 import java.math.BigInteger;
 import java.text.ParseException;
-import java.util.ArrayDeque;
-import java.util.Deque;
 
 import static com.esaulpaugh.headlong.abi.beta.ArrayType.DYNAMIC_LENGTH;
+import static com.esaulpaugh.headlong.abi.beta.StackableType.TYPE_CODE_ARRAY;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 final class TypeFactory {
@@ -22,68 +21,59 @@ final class TypeFactory {
     }
 
     private static StackableType<?> create(String canonicalType, TupleType baseTupleType) throws ParseException {
-        Deque<StackableType<?>> typeStack = new ArrayDeque<>();
-        buildTypeStack(canonicalType, canonicalType.length() - 1, typeStack, new StringBuilder(), baseTupleType);
-        return typeStack.peek();
+        try {
+            return buildType(canonicalType, canonicalType.length() - 1, baseTupleType);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private static String buildTypeStack(final String canonicalType,
-                                         final int index,
-                                         final Deque<StackableType<?>> typeStack,
-                                         final StringBuilder brackets,
-                                         final StackableType<?> baseTuple) throws ParseException {
-        if(canonicalType.charAt(index) == ']') {
+    private static StackableType<?> buildType(final String canonicalType, final int index, final StackableType<?> baseTuple) throws ParseException, ClassNotFoundException {
+
+        if(canonicalType.charAt(index) == ']') { // array
 
             final int fromIndex = index - 1;
             final int arrayOpenIndex = canonicalType.lastIndexOf('[', fromIndex);
 
-            final String baseClassName = buildTypeStack(canonicalType, arrayOpenIndex - 1, typeStack, brackets, baseTuple);
-
-            final int arrayLength;
+            final int length;
             if(arrayOpenIndex == fromIndex) { // i.e. []
-                arrayLength = DYNAMIC_LENGTH;
-            } else {
+                length = DYNAMIC_LENGTH;
+            } else { // e.g. [4]
                 try {
-                    arrayLength = Integer.parseUnsignedInt(canonicalType.substring(arrayOpenIndex + 1, index));
+                    length = Integer.parseUnsignedInt(canonicalType.substring(arrayOpenIndex + 1, index));
                 } catch (NumberFormatException nfe) {
                     throw (ParseException) new ParseException("illegal argument", arrayOpenIndex).initCause(nfe);
                 }
             }
 
-            brackets.append('[');
-            final String className = brackets.toString() + baseClassName;
-
-            final StackableType<?> top = typeStack.peekFirst();
-            final boolean dynamic = arrayLength == DYNAMIC_LENGTH || top.dynamic;
-            // push onto stack
-            typeStack.addFirst(new ArrayType<StackableType<?>, Object>(canonicalType, className, top, arrayLength, dynamic));
-
-            return baseClassName;
+            final StackableType<?> elementType = buildType(canonicalType, arrayOpenIndex - 1, baseTuple);
+            final String elementArrayClassNameStub = elementType.arrayClassNameStub();
+            final Class<?> elementClass;
+            if(elementType.typeCode() == TYPE_CODE_ARRAY) {
+                elementClass = Class.forName(elementType.className());
+            } else {
+                elementClass = null;
+            }
+            final String className = '[' + elementArrayClassNameStub;
+            final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
+            return new ArrayType<StackableType<?>, Object>(canonicalType, elementType, elementClass, className, className, length, dynamic);
         } else {
-            final String baseType = canonicalType.substring(0, index + 1);
-            final boolean isArrayElement = index != canonicalType.length() - 1;
-
-            String javaBaseType;
-            try {
-                javaBaseType = resolveBaseType(baseType, isArrayElement, typeStack, baseTuple);
-            } catch (NumberFormatException nfe) {
-                javaBaseType = null;
+            final String baseTypeString = canonicalType.substring(0, index + 1);
+            final boolean isArrayElement = index < canonicalType.length() - 1;
+            StackableType<?> baseType = resolveBaseType(baseTypeString, isArrayElement, baseTuple);
+            if(baseType == null) {
+                throw new ParseException("unrecognized type: " + baseTypeString + " (" + String.format("%040x", new BigInteger(baseTypeString.getBytes(UTF_8))) + ")", -1);
             }
-            if(javaBaseType == null) {
-                throw new ParseException("unrecognized type: " + baseType + " (" + String.format("%040x", new BigInteger(baseType.getBytes(UTF_8))) + ")", -1);
-            }
-
-            return javaBaseType;
+            return baseType;
         }
     }
 
-    private static String resolveBaseType(final String ct, boolean isElement, Deque<StackableType<?>> typeStack, StackableType<?> baseTuple) {
+    private static StackableType<?> resolveBaseType(final String ct, boolean isElement, StackableType<?> baseTuple) {
 
         final StackableType<?> type;
 
         BaseTypeInfo info = BaseTypeInfo.get(ct);
 
-        final String arrayClassNameStub;
         if(info != null) {
             switch (ct) { // canonicalType's hash code already cached from BaseTypeInfo.get()
             case "uint8": type = isElement ? new ByteType(ct, true) : new IntType(ct, info.bitLength, true); break;
@@ -183,31 +173,23 @@ final class TypeFactory {
             case "bytes29":
             case "bytes30":
             case "bytes31":
-            case "bytes32": type = new ArrayType<ByteType, byte[]>(ct, info.className, (ByteType) info.elementType, info.arrayLength, false); break;
+            case "bytes32": type = new ArrayType<ByteType, byte[]>(ct, (ByteType) info.elementType, Byte.class, info.className, info.arrayClassNameStub, info.arrayLength, false); break;
             case "bool": type = new BooleanType(); break;
             case "bytes":
-            case "string": type = new ArrayType<ByteType, byte[]>(ct, info.className, (ByteType) info.elementType, DYNAMIC_LENGTH, true); break;
+            case "string": type = new ArrayType<ByteType, byte[]>(ct, (ByteType) info.elementType, Byte.class, info.className, info.arrayClassNameStub, DYNAMIC_LENGTH, true); break;
             case "decimal": type = new BigDecimalType(ct, info.bitLength, info.scale, false); break;
             default: type = null;
             }
-            arrayClassNameStub = info.arrayClassNameStub;
         } else {
             if(ct.startsWith("(")) {
                 int last = ct.charAt(ct.length() - 1);
                 type = last == ')' || last == ']' ? baseTuple : null;
-                arrayClassNameStub = type != null ? TupleType.ARRAY_CLASS_NAME_STUB : null;
             } else {
                 type = tryParseFixed(ct);
-                arrayClassNameStub = type != null ? BigDecimalType.ARRAY_CLASS_NAME_STUB : null;
             }
         }
 
-        if(type == null) {
-            return null;
-        }
-
-        typeStack.addFirst(type);
-        return isElement ? arrayClassNameStub : type.className();
+        return type;
     }
 
     static BigDecimalType tryParseFixed(String canonicalType) {
@@ -218,11 +200,15 @@ final class TypeFactory {
                 return null;
             }
             final int indexOfX = canonicalType.lastIndexOf('x');
-            int M = Integer.parseUnsignedInt(canonicalType.substring(idx + "fixed".length(), indexOfX), 10);
-            int N = Integer.parseUnsignedInt(canonicalType.substring(indexOfX + 1), 10); // everything after x
-            if ((M & 0b111) /* mod 8 */ == 0 && M >= 8 && M <= 256
-                    && N > 0 && N <= 80) {
-                return new BigDecimalType(canonicalType, M, N, unsigned);
+            try {
+                int M = Integer.parseUnsignedInt(canonicalType.substring(idx + "fixed".length(), indexOfX), 10);
+                int N = Integer.parseUnsignedInt(canonicalType.substring(indexOfX + 1), 10); // everything after x
+                if ((M & 0b111) /* mod 8 */ == 0 && M >= 8 && M <= 256
+                        && N > 0 && N <= 80) {
+                    return new BigDecimalType(canonicalType, M, N, unsigned);
+                }
+            } catch (IndexOutOfBoundsException | NumberFormatException e) {
+                return null;
             }
         }
         return null;

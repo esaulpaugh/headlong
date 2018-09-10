@@ -41,9 +41,7 @@ class Encoder {
             throw new IllegalArgumentException("argsTuple.elements.length <> types.length: " + argsTuple.elements.length + " != " + types.length);
         }
 
-        tupleType.validate(argsTuple);
-
-        final int allocation = SELECTOR_LEN + tupleType.byteLength(argsTuple);
+        final int allocation = SELECTOR_LEN + tupleType.validate(argsTuple);
         ByteBuffer outBuffer = ByteBuffer.wrap(new byte[allocation]); // ByteOrder.BIG_ENDIAN by default
 
         outBuffer.put(function.selector);
@@ -62,10 +60,12 @@ class Encoder {
         for (i = 0; i < len; i++) {
             encodeHead(types[i], values[i], outBuffer, offset);
         }
-        for (i = 0; i < len; i++) {
-            StackableType<?> type = types[i];
-            if(type.dynamic) {
-                encodeTail(type, values[i], outBuffer);
+        if(tupleType.dynamic) {
+            for (i = 0; i < len; i++) {
+                StackableType<?> type = types[i];
+                if (type.dynamic) {
+                    encodeTail(type, values[i], outBuffer);
+                }
             }
         }
     }
@@ -146,33 +146,80 @@ class Encoder {
     }
 
     private static void encodeArrayTail(ArrayType arrayType, Object value, ByteBuffer dest) {
-        if(arrayType.dynamic) {
-            insertInt(Array.getLength(value), dest); // insertLength
-        }
+//        if(arrayType.dynamic) {
+//            // length could be gotten non-reflectively below but this saves code and should be decently fast
+//            insertInt(Array.getLength(value), dest); // insertLength
+//        }
         final StackableType<?> elementType = arrayType.elementType;
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: insertBooleans((boolean[]) value, dest); return;
-        case TYPE_CODE_BYTE: insertBytes((byte[]) value, dest); return;
-        case TYPE_CODE_SHORT: insertShorts((short[]) value, dest); return;
-        case TYPE_CODE_INT: insertInts((int[]) value, dest); return;
-        case TYPE_CODE_LONG: insertLongs((long[]) value, dest); return;
-        case TYPE_CODE_BIG_INTEGER: insertBigIntegers((BigInteger[]) value, dest); return;
-        case TYPE_CODE_BIG_DECIMAL: insertBigDecimals((BigDecimal[]) value, dest); return;
+        case TYPE_CODE_BOOLEAN:
+            boolean[] booleans = (boolean[]) value;
+            if(arrayType.dynamic) {
+                insertInt(booleans.length, dest);
+            }
+            insertBooleans(booleans, dest);
+            return;
+        case TYPE_CODE_BYTE:
+            byte[] bytes = (byte[]) value;
+            if(arrayType.dynamic) {
+                insertInt(bytes.length, dest);
+            }
+            insertBytes(bytes, dest);
+            return;
+        case TYPE_CODE_SHORT:
+            short[] shorts = (short[]) value;
+            if(arrayType.dynamic) {
+                insertInt(shorts.length, dest);
+            }
+            insertShorts(shorts, dest);
+            return;
+        case TYPE_CODE_INT:
+            int[] ints = (int[]) value;
+            if(arrayType.dynamic) {
+                insertInt(ints.length, dest);
+            }
+            insertInts(ints, dest);
+            return;
+        case TYPE_CODE_LONG:
+            long[] longs = (long[]) value;
+            if(arrayType.dynamic) {
+                insertInt(longs.length, dest);
+            }
+            insertLongs(longs, dest);
+            return;
+        case TYPE_CODE_BIG_INTEGER:
+            BigInteger[] bigInts = (BigInteger[]) value;
+            if(arrayType.dynamic) {
+                insertInt(bigInts.length, dest);
+            }
+            insertBigIntegers(bigInts, dest);
+            return;
+        case TYPE_CODE_BIG_DECIMAL:
+            BigDecimal[] bigDecs = (BigDecimal[]) value;
+            if(arrayType.dynamic) {
+                insertInt(bigDecs.length, dest);
+            }
+            insertBigDecimals(bigDecs, dest);
+            return;
         case TYPE_CODE_ARRAY:  // type for String[] has TYPE_CODE_ARRAY
         case TYPE_CODE_TUPLE:
-            Object[] objects = (Object[]) value;
-            if (elementType.dynamic) { // if elements are dynamic
-                final int[] offset = new int[] { objects.length << 5 }; // mul 32 (0x20)
-                for (Object element : objects) {
-                    insertOffset(offset, elementType, element, dest);
+            final Object[] objects = (Object[]) value;
+            final int len = objects.length;
+            if(arrayType.dynamic) {
+                insertInt(len, dest); // insertLength
+                if (elementType.dynamic) { // if elements are dynamic
+                    final int[] offset = new int[] { len << ArrayType.LOG_2_UNIT_LENGTH_BYTES }; // mul 32 (0x20)
+                    for (int i = 0; i < len; i++) {
+                        insertOffset(offset, elementType, objects[i], dest);
+                    }
                 }
             }
-            for (Object element : objects) {
-                encodeTail(elementType, element, dest);
+            for (int i = 0; i < len; i++) {
+                encodeTail(elementType, objects[i], dest);
             }
             return;
         default:
-            throw new IllegalArgumentException("unexpected array type: " + arrayType.toString());
+            throw new IllegalArgumentException("unexpected array element type: " + elementType.toString());
         }
     }
 

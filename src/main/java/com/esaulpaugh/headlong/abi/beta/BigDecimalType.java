@@ -6,8 +6,8 @@ import java.nio.ByteBuffer;
 
 class BigDecimalType extends AbstractUnitType<BigDecimal> {
 
-    private static final String CLASS_NAME = BigDecimal.class.getName();
-    static final String ARRAY_CLASS_NAME_STUB = BigDecimal[].class.getName().replaceFirst("\\[", "");
+    static final String CLASS_NAME = BigDecimal.class.getName();
+    static final String ARRAY_CLASS_NAME_STUB = ArrayType.getNameStub(BigDecimal[].class);
 
     final int scale;
 
@@ -19,6 +19,11 @@ class BigDecimalType extends AbstractUnitType<BigDecimal> {
     @Override
     String className() {
         return CLASS_NAME;
+    }
+
+    @Override
+    String arrayClassNameStub() {
+        return ARRAY_CLASS_NAME_STUB;
     }
 
     @Override
@@ -36,12 +41,13 @@ class BigDecimalType extends AbstractUnitType<BigDecimal> {
     }
 
     @Override
-    void validate(Object object) {
+    int validate(Object object) {
         super.validate(object);
         BigDecimal dec = (BigDecimal) object;
         validateBigIntBitLen(dec.unscaledValue());
         if(dec.scale() != scale) {
             throw new IllegalArgumentException("big decimal scale mismatch: actual != expected: " + dec.scale() + " != " + scale);
         }
+        return UNIT_LENGTH_BYTES;
     }
 }

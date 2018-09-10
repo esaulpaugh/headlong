@@ -1,11 +1,13 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
+import com.joemelsha.crypto.hash.Keccak;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.*;
 
@@ -32,17 +34,20 @@ public class MonteCarloTestCase {
         final int maxArrayDepth;
 
         final long seed;
+        final MessageDigest messageDigest;
 
         Params(long seed) {
             this.seed = seed;
+            this.messageDigest = new Keccak(256);
             this.maxTupleDepth = DEFAULT_MAX_TUPLE_DEPTH;
             this.maxTupleLen = DEFAULT_MAX_TUPLE_LENGTH;
             this.maxArrayDepth = DEFAULT_MAX_ARRAY_DEPTH;
             this.maxArrayLen = DEFAULT_MAX_ARRAY_LENGTH;
         }
 
-        Params(long seed, int maxTupleDepth, int maxTupleLen, int maxArrayDepth, int maxArrayLen) {
+        Params(long seed, MessageDigest messageDigest, int maxTupleDepth, int maxTupleLen, int maxArrayDepth, int maxArrayLen) {
             this.seed = seed;
+            this.messageDigest = messageDigest;
             this.maxTupleDepth = maxTupleDepth;
             this.maxTupleLen = maxTupleLen;
             this.maxArrayDepth = maxArrayDepth;
@@ -52,6 +57,7 @@ public class MonteCarloTestCase {
         Params(String paramsString) {
             String[] tokens = paramsString.substring(1, paramsString.length() - 1).split("[,]");
             this.seed = Long.parseLong(tokens[0]);
+            this.messageDigest = new Keccak(256);
             this.maxTupleDepth = Integer.parseInt(tokens[1]);
             this.maxTupleLen = Integer.parseInt(tokens[2]);
             this.maxArrayDepth = Integer.parseInt(tokens[3]);
@@ -80,7 +86,11 @@ public class MonteCarloTestCase {
 
         Map<String, BaseTypeInfo> baseInfoTypeMap = new HashMap<>(BaseTypeInfo.getBaseTypeInfoMap());
 
-        FIXED_LIST = generateFixedList();
+        try {
+            FIXED_LIST = generateFixedList();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
 
         final Set<String> keySet = baseInfoTypeMap.keySet();
         final int numKeys = keySet.size();
@@ -96,16 +106,16 @@ public class MonteCarloTestCase {
         CANONICAL_BASE_TYPE_STRINGS = arr;
     }
 
-    private static List<String> generateFixedList() {
+    private static List<String> generateFixedList() throws ClassNotFoundException {
         Map<String, BaseTypeInfo> fixedMap = new HashMap<>();
-        BaseTypeInfo.putFixed(0, fixedMap, true);
-        BaseTypeInfo.putFixed(10000, fixedMap, false);
+        BaseTypeInfo.putFixed(fixedMap, true);
+        BaseTypeInfo.putFixed(fixedMap, false);
         return Collections.unmodifiableList(new ArrayList<>(fixedMap.keySet()));
     }
 
-    private final Params params;
+    final Params params;
 
-    final String canonicalSignature;
+    final Function function;
     private final Tuple argsTuple;
 
     MonteCarloTestCase(Params params) throws ParseException {
@@ -121,10 +131,7 @@ public class MonteCarloTestCase {
 
         String rawSig = generateFunctionSignature(rng, 0);
 
-        Function function = new Function(rawSig);
-
-        this.canonicalSignature = function.getCanonicalSignature();
-
+        this.function = new Function(rawSig, params.messageDigest);
         this.argsTuple = generateTuple(function.paramTypes, rng);
     }
 
@@ -133,22 +140,32 @@ public class MonteCarloTestCase {
     }
 
     boolean run() {
-        Function function = function();
+        return run(this.argsTuple);
+    }
 
-        ByteBuffer abi = function.encodeCall(argsTuple);
+    boolean runNewRandomArgs() {
+        return run(generateTuple(function.paramTypes, new Random(System.nanoTime())));
+    }
 
-        byte[] array = abi.array();
+    boolean run(Tuple args) {
+        Function function = this.function;
+
+//        System.out.println(function.getCanonicalSignature());
+
+        ByteBuffer abi = function.encodeCall(args);
+
+//        byte[] array = abi.array();
 
 //        EncodeTest.printABI(abi.array());
 
-        final Tuple out = function.decodeCall(array);
+        final Tuple out = function.decodeCall((ByteBuffer) abi.flip());
 
-        boolean equal = argsTuple.equals(out);
+        boolean equal = args.equals(out);
 //        System.out.println(equal);
 
         if(!equal) {
             try {
-                findInequality(function.paramTypes, argsTuple, out);
+                findInequality(function.paramTypes, args, out);
                 throw new RuntimeException(function.getCanonicalSignature());
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -156,14 +173,6 @@ public class MonteCarloTestCase {
         }
 
         return true;
-    }
-
-    Function function() {
-        try {
-            return new Function(canonicalSignature);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private String generateFunctionSignature(Random r, int tupleDepth) throws ParseException {
@@ -329,7 +338,7 @@ public class MonteCarloTestCase {
         case TYPE_CODE_LONG: return generateLongArray(len, (LongType) elementType, r);
         case TYPE_CODE_BIG_INTEGER: return generateBigIntegerArray(len, (BigIntegerType) elementType, r);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimalArray(len, (BigDecimalType) elementType, r);
-        case TYPE_CODE_ARRAY: return generateObjectArray((ArrayType) elementType, len, r);
+        case TYPE_CODE_ARRAY: return generateObjectArray(arrayType, len, r);
         case TYPE_CODE_TUPLE: return generateTupleArray((TupleType) elementType, len, r);
         default: throw new IllegalArgumentException("unexpected element type: " + elementType.toString());
         }
@@ -400,10 +409,14 @@ public class MonteCarloTestCase {
         return tuples;
     }
 
-    private Object[] generateObjectArray(ArrayType elementType, final int len, Random r) {
+    private Object[] generateObjectArray(ArrayType arrayType, final int len, Random r) {
 
-        Object[] dest = (Object[]) Array.newInstance(elementType.clazz, len);
+        if(arrayType.elementClass == null) {
+            System.out.println(arrayType.toString());
+        }
+        Object[] dest = (Object[]) Array.newInstance(arrayType.elementClass, len);
 
+        final ArrayType elementType = (ArrayType) arrayType.elementType;
         for (int i = 0; i < len; i++) {
             dest[i] = generateArray(elementType, r);
         }

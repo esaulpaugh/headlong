@@ -5,8 +5,8 @@ import java.nio.ByteBuffer;
 
 class BigIntegerType extends AbstractUnitType<BigInteger> {
 
-    private static final String CLASS_NAME = BigInteger.class.getName();
-//    private static final String ARRAY_CLASS_NAME_STUB = BigInteger[].class.getName().replaceFirst("\\[", "");
+    static final String CLASS_NAME = BigInteger.class.getName();
+    static final String ARRAY_CLASS_NAME_STUB = ArrayType.getNameStub(BigInteger[].class);
 
     BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, bitLength, unsigned);
@@ -15,6 +15,11 @@ class BigIntegerType extends AbstractUnitType<BigInteger> {
     @Override
     String className() {
         return CLASS_NAME;
+    }
+
+    @Override
+    String arrayClassNameStub() {
+        return ARRAY_CLASS_NAME_STUB;
     }
 
     @Override
@@ -31,8 +36,9 @@ class BigIntegerType extends AbstractUnitType<BigInteger> {
     }
 
     @Override
-    void validate(Object object) {
+    int validate(Object object) {
         super.validate(object);
         validateBigIntBitLen((BigInteger) object);
+        return UNIT_LENGTH_BYTES;
     }
 }

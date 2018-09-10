@@ -1,9 +1,6 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 
 // saves ~1 MB of memory by not including fixed/ufixed types in the map
@@ -14,32 +11,76 @@ public class BaseTypeInfo {
     private static final Map<String, BaseTypeInfo> TYPE_INFO_MAP;
 
     static {
-        int o = 0;
         Map<String, BaseTypeInfo> map = new HashMap<>(HASH_MAP_INITIAL_CAPACITY);
 
-        o = putSignedInts(o, map);
-        o = putUnsignedInts(o, map);
+        try {
 
-        for (int i = 1; i <= 32; i++) {
-            String canonical = "bytes" + i;
-            map.put(canonical, new BaseTypeInfo(o++, canonical, byte[].class, i, ByteType.UNSIGNED_BYTE_OBJECT));
+            putSignedInts(map);
+            putUnsignedInts(map);
+
+            for (int i = 1; i <= 32; i++) {
+                String canonical = "bytes" + i;
+                map.put(canonical, new BaseTypeInfo(canonical, ArrayType.BYTE_ARRAY_CLASS_NAME, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB, i, ByteType.UNSIGNED_BYTE_OBJECT));
+            }
+
+            map.put(
+                    "function",
+                    new BaseTypeInfo(
+                            "function",
+                            null,
+                            "bytes24",
+                            ArrayType.BYTE_ARRAY_CLASS_NAME,
+                            ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB,
+                            24 * Byte.SIZE,
+                            0,
+                            true,
+                            24, ByteType.UNSIGNED_BYTE_OBJECT
+                    )
+            );
+
+            map.put("bytes", new BaseTypeInfo("bytes", ArrayType.BYTE_ARRAY_CLASS_NAME, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB, -1, ByteType.UNSIGNED_BYTE_OBJECT));
+            map.put("string", new BaseTypeInfo("string", ArrayType.STRING_CLASS_NAME, ArrayType.STRING_ARRAY_CLASS_NAME_STUB, -1, ByteType.UNSIGNED_BYTE_OBJECT));
+
+            map.put(
+                    "address",
+                    new BaseTypeInfo(
+                            "address", null,
+                            "uint160",
+                            BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB,
+                            160,
+                            0,
+                            true,
+                            -1, null
+                    )
+            );
+            map.put(
+                    "decimal",
+                    new BaseTypeInfo(
+                            "decimal", null,
+                            "fixed128x10",
+                            BigDecimalType.CLASS_NAME, BigDecimalType.ARRAY_CLASS_NAME_STUB,
+                            128,
+                            10,
+                            false,
+                            -1, null
+                    )
+            );
+            map.put(
+                    "bool",
+                    new BaseTypeInfo(
+                            "bool",
+                            BooleanType.CLASS_NAME, BooleanType.ARRAY_CLASS_NAME_STUB,
+                            1,
+                            true
+                    )
+            );
+
+            TYPE_INFO_MAP = Collections.unmodifiableMap(map);
+
+        } catch (ClassNotFoundException cnfe) {
+            throw new RuntimeException(cnfe);
         }
-
-        map.put(
-                "function",
-                new BaseTypeInfo(o++, "function", null, "bytes24", byte[].class, null, 24 * Byte.SIZE, 0, true, 24, ByteType.UNSIGNED_BYTE_OBJECT)
-        );
-
-        map.put("bool", new BaseTypeInfo(o++, "bool", Boolean.class, boolean.class, 1, true));
-        map.put("address", new BaseTypeInfo(o++, "address", null, "uint160", BigInteger.class, null, 160, 0, true, -1, null));
-        map.put("bytes", new BaseTypeInfo(o++, "bytes", byte[].class, -1, ByteType.UNSIGNED_BYTE_OBJECT));
-        map.put("string", new BaseTypeInfo(o++, "string", String.class, -1, ByteType.UNSIGNED_BYTE_OBJECT));
-        map.put("decimal", new BaseTypeInfo(o++, "decimal", null, "fixed128x10", BigDecimal.class, null, 128, 10, false, -1, null));
-
-        TYPE_INFO_MAP = Collections.unmodifiableMap(map);
     }
-
-//    private transient final int ordinal; // for sorting
 
 //    public final String canonical; // e.g. address
 //    public final String nonCanonical; // e.g. fixed
@@ -55,20 +96,19 @@ public class BaseTypeInfo {
 
     public final int arrayLength;
 
-    public BaseTypeInfo(int ordinal, String canonical, Class<?> objectClass, int arrayLength, StackableType<?> elementType) {
-        this(ordinal, canonical, null, canonical, objectClass, null, -1, 0, true, arrayLength, elementType);
+    public BaseTypeInfo(String canonical, String objectClassName, String arrayClassNameStub, int arrayLength, StackableType<?> elementType) {
+        this(canonical, null, canonical, objectClassName, arrayClassNameStub, -1, 0, true, arrayLength, elementType);
     }
 
-    public BaseTypeInfo(Integer ordinal, String canonical, Class<?> objectClass, Class<?> primitiveClass, int bitLength, boolean unsigned) {
-        this(ordinal, canonical, null, canonical, objectClass, primitiveClass, bitLength, 0, unsigned, -1,null);
+    public BaseTypeInfo(String canonical, String objectClassName, String arrayClassNameStub, int bitLength, boolean unsigned) {
+        this(canonical, null, canonical, objectClassName, arrayClassNameStub, bitLength, 0, unsigned, -1,null);
     }
 
-    public BaseTypeInfo(Integer ordinal,
-                        String canonical,
+    public BaseTypeInfo(String canonical,
                         String nonCanonical,
                         String effective,
-                        Class<?> objectClass,
-                        Class<?> primitiveClass,
+                        String objectClassName,
+                        String arrayClassNameStub,
                         int bitLength,
                         int scale,
                         boolean unsigned,
@@ -78,9 +118,18 @@ public class BaseTypeInfo {
 //        this.canonical = canonical;
 //        this.nonCanonical = nonCanonical == null ? null : nonCanonical.intern();
 //        this.effective = effective.intern();
-        this.className = objectClass.getName().intern();
-        Object array = Array.newInstance(primitiveClass != null ? primitiveClass : objectClass, 0);
-        this.arrayClassNameStub = array.getClass().getName().replaceFirst("\\[", "").intern();
+
+        if(arrayClassNameStub == null) {
+            throw new Error();
+//            arrayClassNameStub =
+//                    Array.newInstance(Class.forName(objectClassName))
+//                            .getClass().getName().replaceFirst("\\[", "").intern();
+//            arrayClassNameStub = objectClassName.replaceFirst("\\[", "").intern();
+        }
+
+        this.className = objectClassName.intern();
+        this.arrayClassNameStub = arrayClassNameStub.intern();
+
         this.bitLength = bitLength;
         this.arrayLength = arrayLength;
         this.scale = scale;
@@ -188,87 +237,81 @@ public class BaseTypeInfo {
         }
     }
 
-    private static int putSignedInts(int o, final Map<String, BaseTypeInfo> map) {
+    private static void putSignedInts(final Map<String, BaseTypeInfo> map) throws ClassNotFoundException {
         final String stub = "int";
-        int i;
+        int bitLength;
         String canonical;
 //        for(i = 8; i <= 8; i+=8) {
 //            canonical = stub + i;
-//            map.put(canonical, new BaseTypeInfo(o++, canonical, Byte.class, byte.class, i, false));
+//            map.put(canonical, new BaseTypeInfo(canonical, Byte.class, byte.class, i, false));
 //        }
 //        for( ; i <= 16; i+=8) {
 //            canonical = stub + i;
-//            map.put(canonical, new BaseTypeInfo(o++, canonical, Short.class, short.class, i, false));
+//            map.put(canonical, new BaseTypeInfo(canonical, Short.class, short.class, i, false));
 //        }
-        for( i = 8 ; i <= 32; i+=8) {
-            canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(o++, canonical, Integer.class, int.class, i, false));
+        for( bitLength = 8 ; bitLength <= 32; bitLength+=8) {
+            canonical = stub + bitLength;
+            map.put(canonical, new BaseTypeInfo(canonical, IntType.CLASS_NAME, IntType.ARRAY_CLASS_NAME_STUB, bitLength, false));
         }
-        for( ; i <= 64; i+=8) {
-            canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(o++, canonical, Long.class, long.class, i, false));
+        for( ; bitLength <= 64; bitLength+=8) {
+            canonical = stub + bitLength;
+            map.put(canonical, new BaseTypeInfo(canonical, LongType.CLASS_NAME, LongType.ARRAY_CLASS_NAME_STUB, bitLength, false));
         }
-        for( ; i <= 248; i+=8) {
-            canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(o++, canonical, BigInteger.class, null, i, false));
+        for( ; bitLength <= 248; bitLength+=8) {
+            canonical = stub + bitLength;
+            map.put(canonical, new BaseTypeInfo(canonical, BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB, bitLength, false));
         }
 
         // 256 added separately
         String special = stub + "256";
-        map.put(special, new BaseTypeInfo(o++, special, stub, special, BigInteger.class, null, 256, 0, false, -1, null));
-
-        return o;
+        map.put(special, new BaseTypeInfo(special, stub, special, BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB, 256, 0, false, -1, null));
     }
 
-    private static int putUnsignedInts(int o, final Map<String, BaseTypeInfo> map) {
+    private static void putUnsignedInts(final Map<String, BaseTypeInfo> map) throws ClassNotFoundException {
         final String stub = "uint";
         int i;
         String canonical;
         for( i = 8; i <= 8; i+=8) {
             canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(o++, canonical, Integer.class, byte.class, i, true));
+            map.put(canonical, new BaseTypeInfo(canonical, IntType.CLASS_NAME, ByteType.ARRAY_CLASS_NAME_STUB, i, true));
         }
 //        for( ; i <= 16; i+=8) {
 //            canonical = stub + i;
-//            map.put(canonical, new BaseTypeInfo(o++, canonical, Integer.class, int.class, i, true));
+//            map.put(canonical, new BaseTypeInfo(canonical, Integer.class, int.class, i, true));
 //        }
         for( ; i <= 32; i+=8) {
             canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(o++, canonical, Long.class, int.class, i, true));
+            map.put(canonical, new BaseTypeInfo(canonical, LongType.CLASS_NAME, IntType.ARRAY_CLASS_NAME_STUB, i, true));
         }
         for( ; i < 64; i+=8) {
             canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(o++, canonical, Long.class, long.class, i, true));
+            map.put(canonical, new BaseTypeInfo(canonical, LongType.CLASS_NAME, LongType.ARRAY_CLASS_NAME_STUB, i, true));
         }
         for( ; i <= 64; i+=8) {
             canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(o++, canonical, BigInteger.class, long.class, i, true));
+            map.put(canonical, new BaseTypeInfo(canonical, BigIntegerType.CLASS_NAME, LongType.ARRAY_CLASS_NAME_STUB, i, true));
         }
         for( ; i < 256; i+=8) {
             canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(o++, canonical, BigInteger.class, null, i, true));
+            map.put(canonical, new BaseTypeInfo(canonical, BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB, i, true));
         }
 
         // 256 added separately
         String special = stub + "256";
-        map.put(special, new BaseTypeInfo(o++, special, stub, special, BigInteger.class, null, 256, 0, true, -1, null));
-
-        return o;
+        map.put(special, new BaseTypeInfo(special, stub, special, BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB, 256, 0, true, -1, null));
     }
 
-    static int putFixed(int o, Map<String, BaseTypeInfo> map, boolean unsigned) {
+    static void putFixed(Map<String, BaseTypeInfo> map, boolean unsigned) throws ClassNotFoundException {
         final String stub = unsigned ? "ufixed" : "fixed";
         for(int M = 8; M <= 256; M+=8) {
             for (int N = 1; N <= 80; N++) {
                 String canonical = stub + M + 'x' + N;
-                map.put(canonical, new BaseTypeInfo(o++, canonical, null, canonical, BigDecimal.class, null, M, N, unsigned, -1, null));
+                map.put(canonical, new BaseTypeInfo(canonical, null, canonical, BigDecimalType.CLASS_NAME, BigDecimalType.ARRAY_CLASS_NAME_STUB, M, N, unsigned, -1, null));
             }
         }
 
         // overwrite 128x18 entry
         String special = stub + "128x18";
-        map.put(special, new BaseTypeInfo(o++, special, stub, special, BigDecimal.class, null, 128, 18, unsigned, -1, null));
-
-        return o;
+        map.put(special, new BaseTypeInfo(special, stub, special, BigDecimalType.CLASS_NAME, BigDecimalType.ARRAY_CLASS_NAME_STUB, 128, 18, unsigned, -1, null));
     }
 }

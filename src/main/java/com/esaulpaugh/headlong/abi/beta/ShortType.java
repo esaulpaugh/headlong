@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 class ShortType extends AbstractUnitType<Short> {
 
     private static final String CLASS_NAME = Short.class.getName();
-//    private static final String ARRAY_CLASS_NAME_STUB = short[].class.getName().replaceFirst("\\[", "");
+    private static final String ARRAY_CLASS_NAME_STUB = ArrayType.getNameStub(short[].class);
 
     private static final int SHORT_LENGTH_BITS = 16;
 
@@ -17,6 +17,11 @@ class ShortType extends AbstractUnitType<Short> {
     @Override
     String className() {
         return CLASS_NAME;
+    }
+
+    @Override
+    String arrayClassNameStub() {
+        return ARRAY_CLASS_NAME_STUB;
     }
 
     @Override

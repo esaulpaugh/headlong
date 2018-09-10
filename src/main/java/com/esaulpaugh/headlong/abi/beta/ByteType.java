@@ -5,8 +5,8 @@ import java.nio.ByteBuffer;
 
 class ByteType extends AbstractUnitType<Byte> {
 
-    private static final String CLASS_NAME = Byte.class.getName();
-//    private static final String ARRAY_CLASS_NAME_STUB = byte[].class.getName().replaceFirst("\\[", "");
+    static final String CLASS_NAME = Byte.class.getName();
+    static final String ARRAY_CLASS_NAME_STUB = ArrayType.getNameStub(byte[].class);
 
     private static final int MAX_BIT_LEN = 8;
 
@@ -22,6 +22,11 @@ class ByteType extends AbstractUnitType<Byte> {
     @Override
     String className() {
         return CLASS_NAME;
+    }
+
+    @Override
+    String arrayClassNameStub() {
+        return ARRAY_CLASS_NAME_STUB;
     }
 
     @Override

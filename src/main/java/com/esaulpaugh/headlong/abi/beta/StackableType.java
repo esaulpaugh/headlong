@@ -44,11 +44,17 @@ abstract class StackableType<V> {
 
     abstract String className();
 
+    abstract String arrayClassNameStub();
+
     abstract int byteLength(Object value);
 
-    V decode(byte[] buffer, int index) {
-        return decode(ByteBuffer.wrap(buffer, index, buffer.length - index), new byte[UNIT_LENGTH_BYTES]);
+    static byte[] newUnitBuffer() {
+        return new byte[UNIT_LENGTH_BYTES];
     }
+
+//    V decode(ByteBuffer byteBuffer) {
+//        return decode(byteBuffer, newUnitBuffer());
+//    }
 
     /**
      *
@@ -60,7 +66,7 @@ abstract class StackableType<V> {
 
     abstract int typeCode();
 
-    void validate(Object value) {
+    int validate(Object value) {
         final String expectedClassName = className();
 
         // will throw NPE if argument null
@@ -79,5 +85,7 @@ abstract class StackableType<V> {
                         + " (" + toFriendly(value.getClass().getName()) + " not instanceof " + toFriendly(expectedClassName) + "/" + canonicalType + ")");
             }
         }
+
+        return UNIT_LENGTH_BYTES;
     }
 }

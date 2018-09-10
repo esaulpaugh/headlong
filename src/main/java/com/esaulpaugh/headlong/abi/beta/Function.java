@@ -1,17 +1,19 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
-import com.esaulpaugh.headlong.rlp.util.Strings;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
+import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.List;
 
 import static com.esaulpaugh.headlong.abi.beta.StackableType.EMPTY_TYPE_ARRAY;
+import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
+import static com.esaulpaugh.headlong.rlp.util.Strings.encode;
 
 /**
  * Represents a function in an Ethereum contract. Can encode and decode function calls matching this function's signature.
@@ -22,7 +24,7 @@ public class Function {
 
     public static final int SELECTOR_LEN = 4;
 
-    private final String canonicalSignature;
+    final String canonicalSignature;
     private boolean requiredCanonicalization;
     transient final byte[] selector;
     transient final TupleType paramTypes;
@@ -32,20 +34,30 @@ public class Function {
     }
 
     public Function(String signature) throws ParseException {
-        StringBuilder canonicalSignature = new StringBuilder();
-        List<StackableType<?>> types = SignatureParser.parseFunctionSignature(signature, canonicalSignature);
-        this.canonicalSignature = canonicalSignature.toString();
-        this.requiredCanonicalization = !signature.equals(this.canonicalSignature);
+        this(signature, new Keccak(256));
+    }
+
+    /**
+     * Beware that {@code messageDigest} must be given in an {@link MessageDigest#INITIAL} (i.e. not
+     * {@link MessageDigest#IN_PROGRESS}) state.
+     *
+     * @param signature
+     * @param messageDigest
+     * @throws ParseException
+     */
+    public Function(String signature, MessageDigest messageDigest) throws ParseException {
+        StringBuilder canonicalBuilder = new StringBuilder();
+        List<StackableType<?>> types = SignatureParser.parseFunctionSignature(signature, canonicalBuilder);
+        final String canonicalSig = canonicalBuilder.toString();
         try {
-            Keccak keccak256 = new Keccak(256);
-            keccak256.update(this.canonicalSignature.getBytes(ASCII));
-            keccak256.digest(selector, 0, selector.length);
+            messageDigest.update(canonicalSig.getBytes(ASCII));
+            messageDigest.digest(selector, 0, SELECTOR_LEN);
         } catch (DigestException de) {
             throw new RuntimeException(de);
         }
-
-        String canonicalTupleTypeString = canonicalSignature.substring(canonicalSignature.indexOf("("));
-        this.paramTypes = TupleType.create(canonicalTupleTypeString, types.toArray(EMPTY_TYPE_ARRAY));
+        this.canonicalSignature = canonicalSig;
+        this.requiredCanonicalization = !signature.equals(canonicalSig);
+        this.paramTypes = TupleType.create(canonicalSig.substring(canonicalSig.indexOf('(')), types.toArray(EMPTY_TYPE_ARRAY));
     }
 
     public ByteBuffer encodeCall(Object... args) {
@@ -56,8 +68,20 @@ public class Function {
         return Function.encodeCall(this, argsTuple);
     }
 
-    public Tuple decodeCall(byte[] abi) {
-        return paramTypes.decode(abi, SELECTOR_LEN);
+    public Tuple decodeCall(byte[] array) {
+        return decodeCall(ByteBuffer.wrap(array));
+    }
+
+    public Tuple decodeCall(ByteBuffer abiBuffer) {
+        byte[] unitBuffer = StackableType.newUnitBuffer();
+        abiBuffer.get(unitBuffer, 0, SELECTOR_LEN);
+        for(int i = 0; i < SELECTOR_LEN; i++) {
+            if(unitBuffer[i] != this.selector[i]) {
+                throw new IllegalArgumentException("given selector does not match: expected: " + this.selectorHex()
+                        + ", found: " + encode(unitBuffer, 0, SELECTOR_LEN, HEX));
+            }
+        }
+        return paramTypes.decode(abiBuffer, unitBuffer);
     }
 
     public String getCanonicalSignature() {
@@ -75,11 +99,15 @@ public class Function {
     }
 
     public String selectorHex() {
-        return Strings.encode(selector, Strings.HEX);
+        return encode(selector, HEX);
     }
 
     public static ByteBuffer encodeCall(String signature, Object... args) throws ParseException {
         return Function.encodeCall(new Function(signature), new Tuple(args));
+    }
+
+    public static ByteBuffer encodeCall(String signature, MessageDigest messageDigest, Object... args) throws ParseException {
+        return Function.encodeCall(new Function(signature, messageDigest), new Tuple(args));
     }
 
     public static ByteBuffer encodeCall(Function function, Object... args) {

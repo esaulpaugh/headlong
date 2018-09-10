@@ -5,8 +5,8 @@ import java.nio.ByteBuffer;
 
 class BooleanType extends AbstractUnitType<Boolean> {
 
-    private static final String CLASS_NAME = Boolean.class.getName();
-//    private static final String ARRAY_CLASS_NAME_STUB = boolean[].class.getName().replaceFirst("\\[", "");
+    static final String CLASS_NAME = Boolean.class.getName();
+    static final String ARRAY_CLASS_NAME_STUB = ArrayType.getNameStub(boolean[].class);
 
     BooleanType() {
         super("bool", 1, true);
@@ -15,6 +15,11 @@ class BooleanType extends AbstractUnitType<Boolean> {
     @Override
     String className() {
         return CLASS_NAME;
+    }
+
+    @Override
+    String arrayClassNameStub() {
+        return ARRAY_CLASS_NAME_STUB;
     }
 
     @Override

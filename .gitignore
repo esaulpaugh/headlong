@@ -6,3 +6,4 @@ build/
 .navigation
 out/
 *.log
+/target/

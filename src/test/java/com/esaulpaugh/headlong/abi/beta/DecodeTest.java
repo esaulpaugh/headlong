@@ -1,12 +1,18 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
+import com.esaulpaugh.headlong.rlp.util.Strings;
+import com.joemelsha.crypto.hash.Keccak;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Arrays;
+
+import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
+import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
 
 public class DecodeTest {
 
@@ -16,6 +22,34 @@ public class DecodeTest {
 
     // (bytes32)uint8)
     public static void main(String[] args0) throws ParseException {
+
+//        Keccak k = new Keccak(256);
+//
+//        // c82bdef641b71a621829729392798cefd8d7fe600efeb7a95b2919fc069a9883 -- 7, 9, 11
+//        // 5ca9d4d77c79da4b8a2bb9c11708a954cb8158c98a4864176142dd72d22141cf -- "NINETY_NINE_LUFTBALLONS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11111!11!!11!1!1!!"
+//        // 842b907be20a8698c5c28237510a9ba65bdb991b5d7baeef64998196999f5375 -- 7, 9, 11, 12 + "yoyo"
+//
+//        byte[] digest;
+//
+//        // fcbdffde81d1e0977a6155a25d9407b27260c3553a67082b927a1b11dd12572f
+//        k.update("".getBytes(CHARSET_UTF_8));
+//        digest = k.digest();
+//        System.out.println(Strings.encode(digest, HEX));
+//
+//        k.update(new byte[] { 7, 9, 11 });
+//        digest = k.digest();
+//        System.out.println(Strings.encode(digest, HEX));
+//
+//        k.update("NINETY_NINE_LUFTBALLONS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11111!11!!11!1!1!!".getBytes(CHARSET_UTF_8));
+//        digest = k.digest();
+//        System.out.println(Strings.encode(digest, HEX));
+//
+//        k.update(new byte[] { 7, 9, 11, 12 });
+//        k.update("yoyo".getBytes(CHARSET_UTF_8));
+//        digest = k.digest();
+//        System.out.println(Strings.encode(digest, HEX));
+
+//        if(true)return;
 
 //        final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(-667342700048419528L);
 //        final MonteCarloTestCase testCase = new MonteCarloTestCase(params);
@@ -41,11 +75,11 @@ public class DecodeTest {
 //        final BigDecimal[][] four = new BigDecimal[][] { inner };
 //        final BigDecimal[] thirteen = new BigDecimal[] { f(1, s), f(2, s), f(3, s), f(4, s), f(5, s), f(6, s), f(7, s), f(8, s), f(9, s), f(10, s), f(11, s), f(12, s), f(13, s),  };
 
-
         Function f0 = new Function("(uint8,uint16,uint24,uint32,int8,int16,int24,int32)");
         Tuple argg = new Tuple(1, 2, 3, 4L, 5, 6, 7, 8);
         ByteBuffer b0 = f0.encodeCall(argg);
         byte[] abi0 = b0.array();
+        abi0[3] = -1;
         EncodeTest.printABI(abi0);
         Tuple x = f0.decodeCall(abi0);
         System.out.println(x.equals(argg));
