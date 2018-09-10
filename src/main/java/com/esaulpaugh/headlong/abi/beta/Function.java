@@ -9,8 +9,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 
+import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.beta.StackableType.EMPTY_TYPE_ARRAY;
 import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
 import static com.esaulpaugh.headlong.rlp.util.Strings.encode;
@@ -116,5 +118,43 @@ public class Function {
 
     public static ByteBuffer encodeCall(Function function, Tuple argsTuple) {
         return Encoder.encodeFunctionCall(function, argsTuple);
+    }
+
+    public static String format(byte[] abiCall) {
+        return format(abiCall, 0, abiCall.length);
+    }
+
+    /**
+     * Returns a formatted string for a given ABI-encoded function call.
+     *
+     * @param buffer   the buffer containing the ABI call
+     * @param offset    the offset into the input buffer of the ABI call
+     * @param length    the length of the ABI call
+     * @return  the formatted string
+     * @throws  IllegalArgumentException    if the input length mod 32 != 4
+     */
+    public static String format(byte[] buffer, int offset, final int length) {
+
+        if(length < 4 || ((length - 4) & 0b111) != 0) {
+            int mod = length % UNIT_LENGTH_BYTES;
+            throw new IllegalArgumentException("expected length mod " + UNIT_LENGTH_BYTES + " == 4, found: " + mod);
+        }
+
+        StringBuilder sb = new StringBuilder("ID\t")
+                .append(encode(Arrays.copyOfRange(buffer, offset, SELECTOR_LEN), HEX))
+                .append('\n');
+        int idx = offset + SELECTOR_LEN;
+        while(idx < length) {
+            sb.append(idx >>> ArrayType.LOG_2_UNIT_LENGTH_BYTES)
+                    .append('\t')
+                    .append(encode(Arrays.copyOfRange(buffer, idx, idx + UNIT_LENGTH_BYTES), HEX))
+                    .append('\n');
+            idx += UNIT_LENGTH_BYTES;
+        }
+        return sb.toString();
+    }
+
+    public static String hex(byte[] bytes) {
+        return encode(bytes, HEX);
     }
 }

@@ -119,14 +119,6 @@ public class BaseTypeInfo {
 //        this.nonCanonical = nonCanonical == null ? null : nonCanonical.intern();
 //        this.effective = effective.intern();
 
-        if(arrayClassNameStub == null) {
-            throw new Error();
-//            arrayClassNameStub =
-//                    Array.newInstance(Class.forName(objectClassName))
-//                            .getClass().getName().replaceFirst("\\[", "").intern();
-//            arrayClassNameStub = objectClassName.replaceFirst("\\[", "").intern();
-        }
-
         this.className = objectClassName.intern();
         this.arrayClassNameStub = arrayClassNameStub.intern();
 

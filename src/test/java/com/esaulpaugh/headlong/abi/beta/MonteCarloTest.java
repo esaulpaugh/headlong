@@ -1,7 +1,5 @@
 package com.esaulpaugh.headlong.abi.beta;
 
-import com.joemelsha.crypto.hash.Keccak;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.security.SecureRandom;
@@ -68,8 +66,8 @@ public class MonteCarloTest {
             }
         }
 
-//        System.out.println(log.toString());
-//        System.out.println("MASTER_SEED = " + masterSeed);
+        System.out.println(log.toString());
+        System.out.println("MASTER_SEED = " + masterSeed);
     }
 
     private static class MonteCarloTask extends RecursiveAction {
@@ -123,7 +121,6 @@ public class MonteCarloTest {
 
     private static final int TIMEOUT_SECONDS = 60;
 
-    @Ignore
     @Test
     public void threadedTest() throws ParseException {
 

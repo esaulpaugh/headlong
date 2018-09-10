@@ -30,14 +30,14 @@ class ByteType extends AbstractUnitType<Byte> {
     }
 
     @Override
+    int typeCode() {
+        return TYPE_CODE_BYTE;
+    }
+
+    @Override
     Byte decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
         return bi.byteValueExact();
-    }
-
-    @Override
-    int typeCode() {
-        return TYPE_CODE_BYTE;
     }
 }

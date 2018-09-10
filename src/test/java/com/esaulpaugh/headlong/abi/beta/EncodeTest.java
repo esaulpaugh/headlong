@@ -23,7 +23,7 @@ public class EncodeTest {
         Function f = new Function("f(uint,uint32[],bytes10,bytes)");
         Tuple args = new Tuple(BigInteger.valueOf(0x123), new int[] { 0x456, 0x789 }, "1234567890".getBytes(UTF_8), "Hello, world!".getBytes(UTF_8));
         ByteBuffer buffer = f.encodeCall(args);
-        printABI(buffer.array());
+        Function.format(buffer.array());
         Tuple decoded = f.decodeCall(buffer.array());
         Assert.assertEquals(args, decoded);
 
@@ -37,7 +37,7 @@ public class EncodeTest {
 //                new Tuple[] { new Tuple(new Tuple((Object) new Tuple[0])) }
         };
         _buffer = f00.encodeCall(args00);
-        printABI(_buffer.array());
+        Function.format(_buffer.array());
 
 //        if(true)return;
 
@@ -52,7 +52,7 @@ public class EncodeTest {
 //                new Tuple[] { new Tuple(new Tuple((Object) new Tuple[0])) }
         };
         _buffer = f0.encodeCall(args0);
-        printABI(_buffer.array());
+        Function.format(_buffer.array());
 
 //        if(true)return;
 
@@ -69,7 +69,7 @@ public class EncodeTest {
 //            System.err.println(t.getMessage());
 //        }
         buffer = f2.encodeCall(args2);
-        printABI(buffer.array());
+        Function.format(buffer.array());
 
         byte[] expected = Strings.decode("a5643bf20000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000464617665000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003", HEX);
         Assert.assertArrayEquals(expected, buffer.array());
@@ -89,19 +89,8 @@ public class EncodeTest {
                 },
                 new String[] { "one", "two", "three" }
         );
-        printABI(buffer.array());
+        Function.format(buffer.array());
 
         System.out.println("\n" + Strings.encode(buffer.array(), HEX));
-    }
-
-    public static void printABI(byte[] abi) {
-        System.out.println("ID\t" + Strings.encode(Arrays.copyOfRange(abi, 0, SELECTOR_LEN), HEX));
-        final int end = abi.length;
-        int i = SELECTOR_LEN;
-        while(i < end) {
-            System.out.println( (i / 32) + "\t" + Strings.encode(Arrays.copyOfRange(abi, i, i + 32), HEX));
-            i += 32;
-        }
-        System.out.println("\n" + Strings.encode(abi, HEX));
     }
 }

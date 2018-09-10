@@ -2,7 +2,6 @@ package com.esaulpaugh.headlong.abi.beta;
 
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
 
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -68,6 +67,20 @@ class Encoder {
                 }
             }
         }
+    }
+
+    private static int headLengthSum(StackableType<?>[] elementTypes, Object[] elements) {
+        int headLengths = 0;
+        final int n = elementTypes.length;
+        for (int i = 0; i < n; i++) {
+            StackableType<?> t = elementTypes[i];
+            if(t.dynamic) {
+                headLengths += OFFSET_LENGTH_BYTES;
+            } else {
+                headLengths += t.byteLength(elements[i]);
+            }
+        }
+        return headLengths;
     }
 
     private static void encodeHead(StackableType<?> type, Object value, ByteBuffer dest, int[] offset) {
@@ -146,10 +159,6 @@ class Encoder {
     }
 
     private static void encodeArrayTail(ArrayType arrayType, Object value, ByteBuffer dest) {
-//        if(arrayType.dynamic) {
-//            // length could be gotten non-reflectively below but this saves code and should be decently fast
-//            insertInt(Array.getLength(value), dest); // insertLength
-//        }
         final StackableType<?> elementType = arrayType.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN:
@@ -221,22 +230,6 @@ class Encoder {
         default:
             throw new IllegalArgumentException("unexpected array element type: " + elementType.toString());
         }
-    }
-
-    // ========================================
-
-    private static int headLengthSum(StackableType<?>[] elementTypes, Object[] elements) {
-        int headLengths = 0;
-        final int n = elementTypes.length;
-        for (int i = 0; i < n; i++) {
-            StackableType<?> t = elementTypes[i];
-            if(t.dynamic) {
-                headLengths += OFFSET_LENGTH_BYTES;
-            } else {
-                headLengths += t.byteLength(elements[i]);
-            }
-        }
-        return headLengths;
     }
 
     // -------------------------------------------------------------------------------------------------

@@ -25,14 +25,14 @@ class ShortType extends AbstractUnitType<Short> {
     }
 
     @Override
+    int typeCode() {
+        return TYPE_CODE_SHORT;
+    }
+
+    @Override
     Short decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
         return bi.shortValueExact();
-    }
-
-    @Override
-    int typeCode() {
-        return TYPE_CODE_SHORT;
     }
 }

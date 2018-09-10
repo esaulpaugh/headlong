@@ -53,16 +53,66 @@ class TupleType extends StackableType<Tuple> {
         return ARRAY_CLASS_NAME_STUB;
     }
 
-    static int convertPos(ByteBuffer bb) {
-        return (bb.position() - 4) >>> 5;
+    @Override
+    int typeCode() {
+        return TYPE_CODE_TUPLE;
     }
 
-    static int convert(int pos) {
-        return convertOffset(pos - 4);
+    @Override
+    int byteLength(Object value) {
+        Tuple tuple = (Tuple) value;
+        final Object[] elements = tuple.elements;
+
+        final StackableType<?>[] types = this.elementTypes;
+        final int numTypes = types.length;
+
+//        if(elements.length != numTypes) {
+//            throw new IllegalArgumentException("tuple length mismatch");
+//        }
+
+        int len = 0;
+        StackableType<?> type;
+        for (int i = 0; i < numTypes; i++) {
+            type = types[i];
+            len += type.dynamic
+                    ? OFFSET_LENGTH_BYTES + type.byteLength(elements[i])
+                    : type.byteLength(elements[i]);
+        }
+
+        return len;
     }
 
-    static int convertOffset(int pos) {
-        return pos >>> 5;
+    @Override
+    int validate(final Object value) {
+        super.validate(value);
+
+        final Tuple tuple = (Tuple) value;
+        final Object[] elements = tuple.elements;
+        final int actualLength = elements.length;
+
+        final StackableType<?>[] elementTypes = this.elementTypes;
+        final int expectedLength = elementTypes.length;
+
+        if(expectedLength != actualLength) {
+            throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + actualLength + " != " + expectedLength);
+        }
+
+        final int numTypes = elementTypes.length;
+
+//        if(elements.length != numTypes) {
+//            throw new IllegalArgumentException("tuple length mismatch");
+//        }
+
+        int byteLength = 0;
+        StackableType<?> type;
+        for (int i = 0; i < numTypes; i++) {
+            type = elementTypes[i];
+            byteLength += type.dynamic
+                    ? OFFSET_LENGTH_BYTES + type.validate(elements[i])
+                    : type.validate(elements[i]);
+        }
+
+        return byteLength;
     }
 
     @Override
@@ -117,65 +167,15 @@ class TupleType extends StackableType<Tuple> {
         }
     }
 
-    @Override
-    int typeCode() {
-        return TYPE_CODE_TUPLE;
-    }
-
-    @Override
-    int validate(final Object value) {
-        super.validate(value);
-
-        final Tuple tuple = (Tuple) value;
-        final Object[] elements = tuple.elements;
-        final int actualLength = elements.length;
-
-        final StackableType<?>[] elementTypes = this.elementTypes;
-        final int expectedLength = elementTypes.length;
-
-        if(expectedLength != actualLength) {
-            throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + actualLength + " != " + expectedLength);
-        }
-
-        final int numTypes = elementTypes.length;
-
-//        if(elements.length != numTypes) {
-//            throw new IllegalArgumentException("tuple length mismatch");
-//        }
-
-        int byteLength = 0;
-        StackableType<?> type;
-        for (int i = 0; i < numTypes; i++) {
-            type = elementTypes[i];
-            byteLength += type.dynamic
-                    ? OFFSET_LENGTH_BYTES + type.validate(elements[i])
-                    : type.validate(elements[i]);
-        }
-
-        return byteLength;
-    }
-
-    @Override
-    int byteLength(Object value) {
-        Tuple tuple = (Tuple) value;
-        final Object[] elements = tuple.elements;
-
-        final StackableType<?>[] types = this.elementTypes;
-        final int numTypes = types.length;
-
-//        if(elements.length != numTypes) {
-//            throw new IllegalArgumentException("tuple length mismatch");
-//        }
-
-        int len = 0;
-        StackableType<?> type;
-        for (int i = 0; i < numTypes; i++) {
-            type = types[i];
-            len += type.dynamic
-                    ? OFFSET_LENGTH_BYTES + type.byteLength(elements[i])
-                    : type.byteLength(elements[i]);
-        }
-
-        return len;
-    }
+//    static int convertPos(ByteBuffer bb) {
+//        return (bb.position() - 4) >>> 5;
+//    }
+//
+//    static int convert(int pos) {
+//        return convertOffset(pos - 4);
+//    }
+//
+//    static int convertOffset(int pos) {
+//        return pos >>> 5;
+//    }
 }

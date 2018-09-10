@@ -1,18 +1,12 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
-import com.esaulpaugh.headlong.rlp.util.Strings;
-import com.joemelsha.crypto.hash.Keccak;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Arrays;
-
-import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
-import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
 
 public class DecodeTest {
 
@@ -22,6 +16,12 @@ public class DecodeTest {
 
     // (bytes32)uint8)
     public static void main(String[] args0) throws ParseException {
+
+        Function f = new Function("baz(uint32,bool)");
+        ByteBuffer buffer = f.encodeCall(69L, true);
+
+        System.out.println(Function.format(buffer.array()));
+        System.out.println(Function.hex(buffer.array()));
 
 //        Keccak k = new Keccak(256);
 //
@@ -80,7 +80,7 @@ public class DecodeTest {
         ByteBuffer b0 = f0.encodeCall(argg);
         byte[] abi0 = b0.array();
         abi0[3] = -1;
-        EncodeTest.printABI(abi0);
+        Function.format(abi0);
         Tuple x = f0.decodeCall(abi0);
         System.out.println(x.equals(argg));
 
@@ -156,14 +156,14 @@ public class DecodeTest {
 //        };
 //        ByteBuffer bb = f0.encodeCall(args); // , pow, upow
         byte[] abi = bb.array();
-        EncodeTest.printABI(abi);
+        Function.format(abi);
         Tuple t = f2.decodeCall(abi);
         System.out.println("========= " + Arrays.deepEquals(t.elements, subtuple.elements));
 
         if(true)return;
 
         // (uint8),uint8,(int24,bytes),
-        Function f = new Function("(string[][][],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))"); // ,(string),string
+        Function f7 = new Function("(string[][][],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))"); // ,(string),string
 //        Function f = new Function("(string[2][3][])");
 
 //        BigInteger five = BigInteger.valueOf(5);
@@ -225,11 +225,11 @@ public class DecodeTest {
 //                new Tuple(new BigDecimal(BigInteger.ONE, 18)), new BigDecimal(BigInteger.ONE, 18)
         }; // , new Tuple(""), ""
 
-        abi = f.encodeCall(argsIn).array();
+        abi = f7.encodeCall(argsIn).array();
 
-        EncodeTest.printABI(abi);
+        Function.format(abi);
 
-        Tuple tupleOut = f.decodeCall(abi);
+        Tuple tupleOut = f7.decodeCall(abi);
         Object[] argsOut = tupleOut.elements;
 
         System.out.println("== " + Arrays.deepEquals(argsIn, argsOut));

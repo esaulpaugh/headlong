@@ -27,15 +27,6 @@ class BigDecimalType extends AbstractUnitType<BigDecimal> {
     }
 
     @Override
-    BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) {
-        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
-        BigInteger bi = new BigInteger(unitBuffer);
-        BigDecimal dec = new BigDecimal(bi, scale);
-        validateBigIntBitLen(bi);
-        return dec;
-    }
-
-    @Override
     int typeCode() {
         return TYPE_CODE_BIG_DECIMAL;
     }
@@ -49,5 +40,14 @@ class BigDecimalType extends AbstractUnitType<BigDecimal> {
             throw new IllegalArgumentException("big decimal scale mismatch: actual != expected: " + dec.scale() + " != " + scale);
         }
         return UNIT_LENGTH_BYTES;
+    }
+
+    @Override
+    BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) {
+        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
+        BigInteger bi = new BigInteger(unitBuffer);
+        BigDecimal dec = new BigDecimal(bi, scale);
+        validateBigIntBitLen(bi);
+        return dec;
     }
 }

@@ -19,13 +19,13 @@ abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V s
     }
 
     @Override
-    int byteLength(Object value) {
-        return UNIT_LENGTH_BYTES;
+    public String toString() {
+        return getClass().getSimpleName() + "(" + bitLength + ")";
     }
 
     @Override
-    public String toString() {
-        return getClass().getSimpleName() + "(" + bitLength + ")";
+    int byteLength(Object value) {
+        return UNIT_LENGTH_BYTES;
     }
 
     void validateLongBitLen(long longVal) {

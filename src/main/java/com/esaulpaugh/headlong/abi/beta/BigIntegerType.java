@@ -23,14 +23,6 @@ class BigIntegerType extends AbstractUnitType<BigInteger> {
     }
 
     @Override
-    BigInteger decode(ByteBuffer bb, byte[] unitBuffer) {
-        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
-        BigInteger bi = new BigInteger(unitBuffer);
-        validateBigIntBitLen(bi);
-        return bi;
-    }
-
-    @Override
     int typeCode() {
         return TYPE_CODE_BIG_INTEGER;
     }
@@ -40,5 +32,13 @@ class BigIntegerType extends AbstractUnitType<BigInteger> {
         super.validate(object);
         validateBigIntBitLen((BigInteger) object);
         return UNIT_LENGTH_BYTES;
+    }
+
+    @Override
+    BigInteger decode(ByteBuffer bb, byte[] unitBuffer) {
+        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
+        BigInteger bi = new BigInteger(unitBuffer);
+        validateBigIntBitLen(bi);
+        return bi;
     }
 }

@@ -192,7 +192,7 @@ final class TypeFactory {
         return type;
     }
 
-    static BigDecimalType tryParseFixed(String canonicalType) {
+    private static BigDecimalType tryParseFixed(String canonicalType) {
         int idx;
         boolean unsigned;
         if ((unsigned = (idx = canonicalType.indexOf("fixed")) == 1) || idx == 0) {

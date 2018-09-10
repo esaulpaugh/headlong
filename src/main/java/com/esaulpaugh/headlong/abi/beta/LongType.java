@@ -23,15 +23,6 @@ class LongType extends AbstractUnitType<Long> {
     }
 
     @Override
-    Long decode(ByteBuffer bb, byte[] unitBuffer) {
-        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
-        BigInteger bi = new BigInteger(unitBuffer);
-        long l = bi.longValueExact();
-        validateLongBitLen(l);
-        return l;
-    }
-
-    @Override
     int typeCode() {
         return TYPE_CODE_LONG;
     }
@@ -42,5 +33,14 @@ class LongType extends AbstractUnitType<Long> {
         final long longVal = ((Number) object).longValue();
         validateLongBitLen(longVal);
         return UNIT_LENGTH_BYTES;
+    }
+
+    @Override
+    Long decode(ByteBuffer bb, byte[] unitBuffer) {
+        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
+        BigInteger bi = new BigInteger(unitBuffer);
+        long l = bi.longValueExact();
+        validateLongBitLen(l);
+        return l;
     }
 }

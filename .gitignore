@@ -1,5 +1,8 @@
 *.iml
 .idea
+.classpath
+.project
+.settings
 .gradle
 build/
 *.jar
@@ -7,3 +10,4 @@ build/
 out/
 *.log
 /target/
+/bin/

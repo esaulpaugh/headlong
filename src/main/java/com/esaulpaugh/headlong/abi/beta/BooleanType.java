@@ -23,6 +23,11 @@ class BooleanType extends AbstractUnitType<Boolean> {
     }
 
     @Override
+    int typeCode() {
+        return TYPE_CODE_BOOLEAN;
+    }
+
+    @Override
     Boolean decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
@@ -31,10 +36,5 @@ class BooleanType extends AbstractUnitType<Boolean> {
         case 1: return Boolean.TRUE;
         default: throw new ArithmeticException("expected value 0 or 1");
         }
-    }
-
-    @Override
-    int typeCode() {
-        return TYPE_CODE_BOOLEAN;
     }
 }
