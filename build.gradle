@@ -45,7 +45,7 @@ repositories {
 dependencies {
 
 //    implementation 'com.madgag.spongycastle:prov:1.58.0.0'
-    implementation 'com.madgag.spongycastle:core:1.58.0.0'
+//    implementation 'com.madgag.spongycastle:core:1.58.0.0'
 
 //    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
 //    implementation  group: 'com.madgag.spongycastle',
