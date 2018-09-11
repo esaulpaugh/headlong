@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.abi.beta.util;
+package com.esaulpaugh.headlong.abi.util;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

@@ -1,10 +1,9 @@
-package com.esaulpaugh.headlong.abi.beta;
+package com.esaulpaugh.headlong.abi;
 
 import java.math.BigInteger;
 import java.text.ParseException;
 
-import static com.esaulpaugh.headlong.abi.beta.ArrayType.DYNAMIC_LENGTH;
-import static com.esaulpaugh.headlong.abi.beta.StackableType.TYPE_CODE_ARRAY;
+import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
 
 final class TypeFactory {
@@ -51,7 +50,7 @@ final class TypeFactory {
             final StackableType<?> elementType = buildType(canonicalType, arrayOpenIndex - 1, baseTuple);
             final String elementArrayClassNameStub = elementType.arrayClassNameStub();
             final Class<?> elementClass;
-            if(elementType.typeCode() == TYPE_CODE_ARRAY) {
+            if(elementType.typeCode() == StackableType.TYPE_CODE_ARRAY) {
                 elementClass = Class.forName(elementType.className(), true, CLASS_LOADER);
             } else {
                 elementClass = null;

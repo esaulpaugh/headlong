@@ -1,6 +1,6 @@
-package com.esaulpaugh.headlong.abi.beta;
+package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.beta.util.Tuple;
+import com.esaulpaugh.headlong.abi.util.Tuple;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -34,7 +34,7 @@ public class DecodeTest {
 ////            System.out.println(decoded.equals(new Tuple(69, true)));
 //        }
         
-        if(true)return;
+//        if(true)return;
         
 
 //        Keccak k = new Keccak(256);

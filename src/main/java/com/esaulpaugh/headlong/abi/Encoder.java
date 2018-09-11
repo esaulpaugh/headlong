@@ -1,16 +1,15 @@
-package com.esaulpaugh.headlong.abi.beta;
+package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.beta.util.Tuple;
+import com.esaulpaugh.headlong.abi.util.Tuple;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.abi.beta.Function.SELECTOR_LEN;
-import static com.esaulpaugh.headlong.abi.beta.StackableType.*;
+import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
+import static com.esaulpaugh.headlong.abi.StackableType.*;
 
 class Encoder {
 
@@ -40,7 +39,7 @@ class Encoder {
             throw new IllegalArgumentException("argsTuple.elements.length <> types.length: " + argsTuple.elements.length + " != " + types.length);
         }
 
-        final int allocation = SELECTOR_LEN + tupleType.validate(argsTuple);
+        final int allocation = Function.SELECTOR_LEN + tupleType.validate(argsTuple);
         ByteBuffer outBuffer = ByteBuffer.wrap(new byte[allocation]); // ByteOrder.BIG_ENDIAN by default
 
         outBuffer.put(function.selector);

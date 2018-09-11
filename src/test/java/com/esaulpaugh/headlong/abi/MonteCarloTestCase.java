@@ -1,6 +1,6 @@
-package com.esaulpaugh.headlong.abi.beta;
+package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.beta.util.Tuple;
+import com.esaulpaugh.headlong.abi.util.Tuple;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.lang.reflect.Array;
@@ -11,10 +11,10 @@ import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.*;
 
-import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.abi.beta.ArrayType.DYNAMIC_LENGTH;
-import static com.esaulpaugh.headlong.abi.beta.ArrayType.STRING_CLASS_NAME;
-import static com.esaulpaugh.headlong.abi.beta.StackableType.*;
+import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
+import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS_NAME;
+import static com.esaulpaugh.headlong.abi.StackableType.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class MonteCarloTestCase {

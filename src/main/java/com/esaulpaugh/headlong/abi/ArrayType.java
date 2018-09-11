@@ -1,26 +1,26 @@
-package com.esaulpaugh.headlong.abi.beta;
+package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.beta.util.Tuple;
+import com.esaulpaugh.headlong.abi.util.Tuple;
+import com.esaulpaugh.headlong.abi.util.ClassNames;
+import com.esaulpaugh.headlong.abi.util.Utils;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.LOG_2_UNIT_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.abi.beta.util.ClassNames.toFriendly;
-import static com.esaulpaugh.headlong.abi.beta.util.Utils.getNameStub;
-import static com.esaulpaugh.headlong.abi.beta.util.Utils.roundUp;
+import static com.esaulpaugh.headlong.abi.AbstractUnitType.LOG_2_UNIT_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.util.ClassNames.toFriendly;
 import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
 
 class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
 
     static final String BYTE_ARRAY_CLASS_NAME = byte[].class.getName();
-    static final String BYTE_ARRAY_ARRAY_CLASS_NAME_STUB = getNameStub(byte[][].class);
+    static final String BYTE_ARRAY_ARRAY_CLASS_NAME_STUB = Utils.getNameStub(byte[][].class);
 
     static final String STRING_CLASS_NAME = String.class.getName();
-    static final String STRING_ARRAY_CLASS_NAME_STUB = getNameStub(String[].class);
+    static final String STRING_ARRAY_CLASS_NAME_STUB = Utils.getNameStub(String[].class);
 
     private static final IntType ARRAY_LENGTH_TYPE = new IntType("uint32", IntType.MAX_BIT_LEN, false);
     private static final int ARRAY_LENGTH_BYTE_LEN = UNIT_LENGTH_BYTES;
@@ -83,7 +83,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
             staticLen = ((boolean[]) value).length << LOG_2_UNIT_LENGTH_BYTES; // mul 32
             break;
         case TYPE_CODE_BYTE:
-            staticLen = roundUp((isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length);
+            staticLen = Utils.roundUp((isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length);
             break;
         case TYPE_CODE_SHORT:
             staticLen = ((short[]) value).length << LOG_2_UNIT_LENGTH_BYTES; // mul 32
@@ -127,7 +127,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         case TYPE_CODE_BOOLEAN: staticLen = checkLength(((boolean[]) value).length, value) << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BYTE:
             byte[] bytes = isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value;
-            staticLen = roundUp(checkLength(bytes.length, value));
+            staticLen = Utils.roundUp(checkLength(bytes.length, value));
             break;
         case TYPE_CODE_SHORT: staticLen = checkLength(((short[]) value).length, value) << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_INT: staticLen = validateIntArray((int[]) value); break;
@@ -214,8 +214,8 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         if(expected != DYNAMIC_LENGTH) { // -1
             if (valueLength != expected) {
                 String msg =
-                        toFriendly(value.getClass().getName(), valueLength) + " not instanceof " +
-                                toFriendly(className, expected) + ", " +
+                        ClassNames.toFriendly(value.getClass().getName(), valueLength) + " not instanceof " +
+                                ClassNames.toFriendly(className, expected) + ", " +
                                 valueLength + " != " + expected;
                 throw new IllegalArgumentException(msg);
             }
@@ -284,7 +284,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         final int mark = bb.position();
         byte[] out = new byte[arrayLen];
         bb.get(out);
-        bb.position(mark + roundUp(arrayLen));
+        bb.position(mark + Utils.roundUp(arrayLen));
         if(isString) {
             return new String(out, CHARSET_UTF_8);
         }

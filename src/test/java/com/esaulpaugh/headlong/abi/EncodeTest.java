@@ -1,6 +1,6 @@
-package com.esaulpaugh.headlong.abi.beta;
+package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.beta.util.Tuple;
+import com.esaulpaugh.headlong.abi.util.Tuple;
 import com.esaulpaugh.headlong.rlp.util.Strings;
 import org.junit.Assert;
 
@@ -25,7 +25,7 @@ public class EncodeTest {
         Tuple decoded = f.decodeCall(buffer.array());
         Assert.assertEquals(args, decoded);
 
-        if(true)return;
+//        if(true)return;
 
         ByteBuffer _buffer;
 

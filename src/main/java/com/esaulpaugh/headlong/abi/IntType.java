@@ -1,16 +1,18 @@
-package com.esaulpaugh.headlong.abi.beta;
+package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.beta.util.Utils;
+import com.esaulpaugh.headlong.abi.util.Utils;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-class BigIntegerType extends AbstractUnitType<BigInteger> {
+class IntType extends AbstractUnitType<Integer> {
 
-    static final String CLASS_NAME = BigInteger.class.getName();
-    static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(BigInteger[].class);
+    static final String CLASS_NAME = Integer.class.getName();
+    static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(int[].class);
 
-    BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {
+    static final int MAX_BIT_LEN = 32;
+
+    IntType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, bitLength, unsigned);
     }
 
@@ -26,21 +28,22 @@ class BigIntegerType extends AbstractUnitType<BigInteger> {
 
     @Override
     int typeCode() {
-        return TYPE_CODE_BIG_INTEGER;
+        return TYPE_CODE_INT;
     }
 
     @Override
     int validate(Object object) {
         super.validate(object);
-        validateBigIntBitLen((BigInteger) object);
+        final long longVal = ((Number) object).longValue();
+        validateLongBitLen(longVal);
         return UNIT_LENGTH_BYTES;
     }
 
     @Override
-    BigInteger decode(ByteBuffer bb, byte[] unitBuffer) {
+    Integer decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigIntBitLen(bi);
-        return bi;
+        return bi.intValue();
     }
 }

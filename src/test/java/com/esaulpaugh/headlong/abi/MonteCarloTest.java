@@ -1,15 +1,14 @@
-package com.esaulpaugh.headlong.abi.beta;
+package com.esaulpaugh.headlong.abi;
 
 import org.junit.Test;
 
 import java.security.SecureRandom;
 import java.text.ParseException;
 import java.util.Random;
-import java.util.concurrent.RecursiveAction;
 
 public class MonteCarloTest {
 
-    private static final Long MASTER_SEED = (long) (Math.sqrt(2.0) * Math.pow(10, 15));
+    private static final Long MASTER_SEED = null; // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
     private static final int N = 100_000;
 

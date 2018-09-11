@@ -1,6 +1,6 @@
-package com.esaulpaugh.headlong.abi.beta;
+package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.beta.util.Tuple;
+import com.esaulpaugh.headlong.abi.util.Tuple;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.nio.ByteBuffer;
@@ -11,8 +11,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.abi.beta.StackableType.EMPTY_TYPE_ARRAY;
+import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
 import static com.esaulpaugh.headlong.rlp.util.Strings.encode;
 
@@ -58,7 +57,7 @@ public class Function {
         }
         this.canonicalSignature = canonicalSig;
         this.requiredCanonicalization = !signature.equals(canonicalSig);
-        this.paramTypes = TupleType.create(canonicalSig.substring(canonicalSig.indexOf('(')), types.toArray(EMPTY_TYPE_ARRAY));
+        this.paramTypes = TupleType.create(canonicalSig.substring(canonicalSig.indexOf('(')), types.toArray(StackableType.EMPTY_TYPE_ARRAY));
     }
 
     public ByteBuffer encodeCall(Object... args) {

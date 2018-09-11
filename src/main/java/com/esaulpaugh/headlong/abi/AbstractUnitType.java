@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.abi.beta;
+package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.rlp.util.BizarroIntegers;
 import com.esaulpaugh.headlong.rlp.util.RLPIntegers;

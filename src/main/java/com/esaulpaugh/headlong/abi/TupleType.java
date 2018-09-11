@@ -1,11 +1,11 @@
-package com.esaulpaugh.headlong.abi.beta;
+package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.beta.util.Tuple;
-import com.esaulpaugh.headlong.abi.beta.util.Utils;
+import com.esaulpaugh.headlong.abi.util.Tuple;
+import com.esaulpaugh.headlong.abi.util.Utils;
 
 import java.nio.ByteBuffer;
 
-import static com.esaulpaugh.headlong.abi.beta.Encoder.OFFSET_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.Encoder.OFFSET_LENGTH_BYTES;
 
 /**
  * TODO subtupletype method like subtuple()

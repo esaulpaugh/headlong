@@ -1,9 +1,10 @@
-package com.esaulpaugh.headlong.abi.beta;
+package com.esaulpaugh.headlong.abi;
+
+import com.esaulpaugh.headlong.abi.util.ClassNames;
 
 import java.nio.ByteBuffer;
 
-import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.abi.beta.util.ClassNames.toFriendly;
+import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
 
 // TODO support model classes à la Student.java
 abstract class StackableType<V> {
@@ -55,7 +56,7 @@ abstract class StackableType<V> {
                         + value.getClass().getName()
                         + " not assignable to "
                         + expectedClassName
-                        + " (" + toFriendly(value.getClass().getName()) + " not instanceof " + toFriendly(expectedClassName) + "/" + canonicalType + ")");
+                        + " (" + ClassNames.toFriendly(value.getClass().getName()) + " not instanceof " + ClassNames.toFriendly(expectedClassName) + "/" + canonicalType + ")");
             }
         }
 

@@ -1,6 +1,6 @@
-package com.esaulpaugh.headlong.abi.beta;
+package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.beta.util.Utils;
+import com.esaulpaugh.headlong.abi.util.Utils;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;

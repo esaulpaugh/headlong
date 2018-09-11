@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.abi.beta;
+package com.esaulpaugh.headlong.abi;
 
 import java.io.Serializable;
 import java.util.*;
