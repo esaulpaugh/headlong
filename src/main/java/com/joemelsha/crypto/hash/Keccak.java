@@ -40,8 +40,8 @@ public class Keccak extends MessageDigest {
 
     protected transient ByteBuffer out;
 
-    public Keccak(int digestSizeBytes) {
-        this("Keccak-", digestSizeBytes);
+    public Keccak(int digestSizeBits) {
+        this("Keccak-", digestSizeBits);
     }
 
     protected Keccak(String variantPrefix, int digestSizeBits) {
