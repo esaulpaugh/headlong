@@ -1,12 +1,14 @@
 package com.esaulpaugh.headlong.abi.beta;
 
+import com.esaulpaugh.headlong.abi.beta.util.Utils;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 class ShortType extends AbstractUnitType<Short> {
 
     private static final String CLASS_NAME = Short.class.getName();
-    private static final String ARRAY_CLASS_NAME_STUB = ArrayType.getNameStub(short[].class);
+    private static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(short[].class);
 
     private static final int SHORT_LENGTH_BITS = 16;
 

@@ -217,7 +217,7 @@ class Encoder {
             if(arrayType.dynamic) {
                 insertInt(len, dest); // insertLength
                 if (elementType.dynamic) { // if elements are dynamic
-                    final int[] offset = new int[] { len << ArrayType.LOG_2_UNIT_LENGTH_BYTES }; // mul 32 (0x20)
+                    final int[] offset = new int[] { len << 5 }; // mul 32 (0x20)
                     for (int i = 0; i < len; i++) {
                         insertOffset(offset, elementType, objects[i], dest);
                     }

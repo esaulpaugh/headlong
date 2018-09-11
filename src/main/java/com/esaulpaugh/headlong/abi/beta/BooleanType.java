@@ -1,12 +1,14 @@
 package com.esaulpaugh.headlong.abi.beta;
 
+import com.esaulpaugh.headlong.abi.beta.util.Utils;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 class BooleanType extends AbstractUnitType<Boolean> {
 
     static final String CLASS_NAME = Boolean.class.getName();
-    static final String ARRAY_CLASS_NAME_STUB = ArrayType.getNameStub(boolean[].class);
+    static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(boolean[].class);
 
     BooleanType() {
         super("bool", 1, true);

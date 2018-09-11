@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.abi.beta;
 
 import com.esaulpaugh.headlong.abi.beta.util.Tuple;
+import com.esaulpaugh.headlong.abi.beta.util.Utils;
 
 import java.nio.ByteBuffer;
 
@@ -12,7 +13,7 @@ import static com.esaulpaugh.headlong.abi.beta.Encoder.OFFSET_LENGTH_BYTES;
 class TupleType extends StackableType<Tuple> {
 
     private static final String CLASS_NAME = Tuple.class.getName();
-    private static final String ARRAY_CLASS_NAME_STUB = ArrayType.getNameStub(Tuple[].class);
+    private static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(Tuple[].class);
 
     final StackableType<?>[] elementTypes;
 
@@ -171,16 +172,4 @@ class TupleType extends StackableType<Tuple> {
             }
         }
     }
-
-//    static int convertPos(ByteBuffer bb) {
-//        return (bb.position() - 4) >>> 5;
-//    }
-//
-//    static int convert(int pos) {
-//        return convertOffset(pos - 4);
-//    }
-//
-//    static int convertOffset(int pos) {
-//        return pos >>> 5;
-//    }
 }

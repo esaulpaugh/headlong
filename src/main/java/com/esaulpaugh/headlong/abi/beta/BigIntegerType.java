@@ -1,12 +1,14 @@
 package com.esaulpaugh.headlong.abi.beta;
 
+import com.esaulpaugh.headlong.abi.beta.util.Utils;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 class BigIntegerType extends AbstractUnitType<BigInteger> {
 
     static final String CLASS_NAME = BigInteger.class.getName();
-    static final String ARRAY_CLASS_NAME_STUB = ArrayType.getNameStub(BigInteger[].class);
+    static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(BigInteger[].class);
 
     BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, bitLength, unsigned);

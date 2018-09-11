@@ -144,7 +144,7 @@ public class Function {
                 .append('\n');
         int idx = offset + SELECTOR_LEN;
         while(idx < length) {
-            sb.append(idx >>> ArrayType.LOG_2_UNIT_LENGTH_BYTES)
+            sb.append(idx >>> AbstractUnitType.LOG_2_UNIT_LENGTH_BYTES)
                     .append('\t')
                     .append(encode(Arrays.copyOfRange(buffer, idx, idx + UNIT_LENGTH_BYTES), HEX))
                     .append('\n');

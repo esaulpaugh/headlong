@@ -1,12 +1,14 @@
 package com.esaulpaugh.headlong.abi.beta;
 
+import com.esaulpaugh.headlong.abi.beta.util.Utils;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 class ByteType extends AbstractUnitType<Byte> {
 
     static final String CLASS_NAME = Byte.class.getName();
-    static final String ARRAY_CLASS_NAME_STUB = ArrayType.getNameStub(byte[].class);
+    static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(byte[].class);
 
     private static final int MAX_BIT_LEN = 8;
 

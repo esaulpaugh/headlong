@@ -1,12 +1,14 @@
 package com.esaulpaugh.headlong.abi.beta;
 
+import com.esaulpaugh.headlong.abi.beta.util.Utils;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 class IntType extends AbstractUnitType<Integer> {
 
     static final String CLASS_NAME = Integer.class.getName();
-    static final String ARRAY_CLASS_NAME_STUB = ArrayType.getNameStub(int[].class);
+    static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(int[].class);
 
     static final int MAX_BIT_LEN = 32;
 

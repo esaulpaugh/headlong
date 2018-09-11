@@ -67,57 +67,57 @@ public class MonteCarloTest {
         System.out.println("MASTER_SEED = " + masterSeed);
     }
 
-    private static class MonteCarloTask extends RecursiveAction {
-
-        private static final int THRESHOLD = 50_000;
-
-        final MonteCarloTestCase testCase;
-        private final int start;
-        private final int end;
-
-        MonteCarloTask(final MonteCarloTestCase testCase, int start, int end) {
-            this.testCase = testCase;
-            this.start = start;
-            this.end = end;
-        }
-
-        @Override
-        protected void compute() {
-//            System.out.println("compute(" + start + ", " + end + ")");
-            final int start = this.start;
-            final int end = this.end;
-            final int n = end - start;
-            if(n < THRESHOLD) {
-//                System.out.println("n = " + n);
-
-                final MonteCarloTestCase tc = this.testCase;
-
-//                long[] seeds = new long[n];
-//                for (int i = 0; i < n; i++) {
-//                    seeds[i] = System.nanoTime() * (System.nanoTime() << 1) * (System.nanoTime() >> 1);
-//                }
-
-//                try {
-                    for (int j = 0; j < n; j++) {
-                        tc.run();
-//                        tc.runNewRandomArgs(); // new MonteCarloTestCase(new MonteCarloTestCase.Params(seeds[j]))
-                    }
-//                } catch (ParseException pe) {
-//                    throw new RuntimeException(pe);
-//                }
-
-            } else {
-                final int midpoint = start + (n / 2);
-                invokeAll(
-                        new MonteCarloTask(testCase, start, midpoint),
-                        new MonteCarloTask(testCase, midpoint, end)
-                );
-            }
-        }
-    }
-
-    private static final int TIMEOUT_SECONDS = 60;
-
+//    private static class MonteCarloTask extends RecursiveAction {
+//
+//        private static final int THRESHOLD = 50_000;
+//
+//        final MonteCarloTestCase testCase;
+//        private final int start;
+//        private final int end;
+//
+//        MonteCarloTask(final MonteCarloTestCase testCase, int start, int end) {
+//            this.testCase = testCase;
+//            this.start = start;
+//            this.end = end;
+//        }
+//
+//        @Override
+//        protected void compute() {
+////            System.out.println("compute(" + start + ", " + end + ")");
+//            final int start = this.start;
+//            final int end = this.end;
+//            final int n = end - start;
+//            if(n < THRESHOLD) {
+////                System.out.println("n = " + n);
+//
+//                final MonteCarloTestCase tc = this.testCase;
+//
+////                long[] seeds = new long[n];
+////                for (int i = 0; i < n; i++) {
+////                    seeds[i] = System.nanoTime() * (System.nanoTime() << 1) * (System.nanoTime() >> 1);
+////                }
+//
+////                try {
+//                    for (int j = 0; j < n; j++) {
+//                        tc.run();
+////                        tc.runNewRandomArgs(); // new MonteCarloTestCase(new MonteCarloTestCase.Params(seeds[j]))
+//                    }
+////                } catch (ParseException pe) {
+////                    throw new RuntimeException(pe);
+////                }
+//
+//            } else {
+//                final int midpoint = start + (n / 2);
+//                invokeAll(
+//                        new MonteCarloTask(testCase, start, midpoint),
+//                        new MonteCarloTask(testCase, midpoint, end)
+//                );
+//            }
+//        }
+//    }
+//
+//    private static final int TIMEOUT_SECONDS = 60;
+//
 //    @Test
 //    public void threadedTest() throws ParseException {
 //

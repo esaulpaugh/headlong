@@ -7,13 +7,14 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
+import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.LOG_2_UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.beta.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.beta.util.ClassNames.toFriendly;
+import static com.esaulpaugh.headlong.abi.beta.util.Utils.getNameStub;
+import static com.esaulpaugh.headlong.abi.beta.util.Utils.roundUp;
 import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
 
 class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
-
-    static final int LOG_2_UNIT_LENGTH_BYTES = 31 - Integer.numberOfLeadingZeros(UNIT_LENGTH_BYTES);
 
     static final String BYTE_ARRAY_CLASS_NAME = byte[].class.getName();
     static final String BYTE_ARRAY_ARRAY_CLASS_NAME_STUB = getNameStub(byte[][].class);
@@ -149,7 +150,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         try {
             for ( ; i < len; i++) {
                 // validate without boxing primitive
-                intType.validateLongElementBitLen(arr[i]);
+                intType.validatePrimitiveElement(arr[i]);
             }
         } catch (IllegalArgumentException | NullPointerException re) {
             throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
@@ -165,7 +166,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         try {
             for ( ; i < len; i++) {
                 // validate without boxing primitive
-                longType.validateLongElementBitLen(arr[i]);
+                longType.validatePrimitiveElement(arr[i]);
             }
         } catch (IllegalArgumentException | NullPointerException re) {
             throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
@@ -306,7 +307,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     private static int[] decodeIntArray(IntType intType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
         int[] ints = new int[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            ints[i] = intType.decode(bb, elementBuffer);
+            ints[i] = getIntElement(intType, bb, elementBuffer);
         }
         return ints;
     }
@@ -314,8 +315,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     private static long[] decodeLongArray(LongType longType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
         long[] longs = new long[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            longs[i] = longType.decode(bb, elementBuffer);
-//            longs[i] = getLong(longType, bb, elementBuffer);
+            longs[i] = getLongElement(longType, bb, elementBuffer);
         }
         return longs;
     }
@@ -323,8 +323,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     private static BigInteger[] decodeBigIntegerArray(BigIntegerType bigIntegerType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            bigInts[i] = bigIntegerType.decode(bb, elementBuffer);
-//            bigInts[i] = getBigInteger(bigIntegerType, bb, elementBuffer);
+            bigInts[i] = getBigIntElement(bigIntegerType, bb, elementBuffer);
         }
         return bigInts;
     }
@@ -333,25 +332,31 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         BigDecimal[] bigDecs = new BigDecimal[arrayLen];
         final int scale = bigDecimalType.scale;
         for (int i = 0; i < arrayLen; i++) {
-            bigDecs[i] = bigDecimalType.decode(bb, elementBuffer);
-//            bigDecs[i] = new BigDecimal(getBigInteger(bigDecimalType, bb, elementBuffer), scale);
+            bigDecs[i] = new BigDecimal(getBigIntElement(bigDecimalType, bb, elementBuffer), scale);
         }
         return bigDecs;
     }
 
-//    private static long getLong(AbstractUnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
-//        bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
-//        BigInteger bi = new BigInteger(elementBuffer);
-//        type.validateBigIntBitLen(bi);
-//        return bi.longValue();
-//    }
-//
-//    private static BigInteger getBigInteger(AbstractUnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
-//        bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
-//        BigInteger bigInt = new BigInteger(elementBuffer);
-//        type.validateBigIntBitLen(bigInt);
-//        return bigInt;
-//    }
+    private static int getIntElement(AbstractUnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
+        bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
+        BigInteger bi = new BigInteger(elementBuffer);
+        type.validateBigIntElement(bi);
+        return bi.intValue();
+    }
+
+    private static long getLongElement(AbstractUnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
+        bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
+        BigInteger bi = new BigInteger(elementBuffer);
+        type.validateBigIntElement(bi);
+        return bi.longValue();
+    }
+
+    private static BigInteger getBigIntElement(AbstractUnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
+        bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
+        BigInteger bigInt = new BigInteger(elementBuffer);
+        type.validateBigIntElement(bigInt);
+        return bigInt;
+    }
 
     private Object[] decodeObjectArray(int arrayLen, ByteBuffer bb, byte[] elementBuffer, boolean tupleArray) { // 8.3%
 
@@ -405,22 +410,5 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
                 dest[i] = elementType.decode(bb, elementBuffer);
             }
         }
-    }
-
-    private static int roundUp(int len) {
-        int mod = len & 31;
-        return mod == 0
-                ? len
-                : len + (32 - mod);
-    }
-
-    static String getNameStub(Class<?> arrayClass) {
-        if(arrayClass.isArray()) {
-            String className = arrayClass.getName();
-            if(className.charAt(0) == '[') {
-                return className.substring(1);
-            }
-        }
-        throw new IllegalArgumentException("unexpected class: " + arrayClass.getName());
     }
 }
