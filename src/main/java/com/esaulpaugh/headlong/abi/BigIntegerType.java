@@ -7,6 +7,8 @@ import java.nio.ByteBuffer;
 
 class BigIntegerType extends AbstractUnitType<BigInteger> {
 
+    private static final long serialVersionUID = 1927234170955324325L;
+
     static final String CLASS_NAME = BigInteger.class.getName();
     static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(BigInteger[].class);
 

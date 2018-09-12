@@ -4,6 +4,7 @@ import com.esaulpaugh.headlong.abi.util.Tuple;
 import com.esaulpaugh.headlong.abi.util.Utils;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.abi.Encoder.OFFSET_LENGTH_BYTES;
 
@@ -11,6 +12,8 @@ import static com.esaulpaugh.headlong.abi.Encoder.OFFSET_LENGTH_BYTES;
  * TODO subtupletype method like subtuple()
  */
 class TupleType extends StackableType<Tuple> {
+
+    private static final long serialVersionUID = -8630808789515788419L;
 
     private static final String CLASS_NAME = Tuple.class.getName();
     private static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(Tuple[].class);
@@ -171,5 +174,23 @@ class TupleType extends StackableType<Tuple> {
                 dest[i] = elementTypes[i].decode(bb, elementBuffer);
             }
         }
+    }
+
+    // TODO eventually just rely on super.hashCode() hashing canonicalType and dynamic
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + Arrays.hashCode(elementTypes);
+        return result;
+    }
+
+    // TODO eventually just rely on super.equals() checking canonicalType and dynamic
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        TupleType tupleType = (TupleType) o;
+        return Arrays.equals(elementTypes, tupleType.elementTypes);
     }
 }

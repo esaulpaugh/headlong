@@ -3,6 +3,7 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.abi.util.Tuple;
 import com.joemelsha.crypto.hash.Keccak;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.DigestException;
@@ -10,6 +11,7 @@ import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
@@ -18,14 +20,18 @@ import static com.esaulpaugh.headlong.rlp.util.Strings.encode;
 /**
  * Represents a function in an Ethereum contract. Can encode and decode function calls matching this function's signature.
  */
-public class Function {
+public class Function implements Serializable {
+
+    private static final long serialVersionUID = -1151351210657573607L;
 
     private static final Charset ASCII = Charset.forName("US-ASCII");
 
     public static final int SELECTOR_LEN = 4;
 
     final String canonicalSignature;
-    private boolean requiredCanonicalization;
+    private final String hashAlgorithm;
+
+    private transient final boolean requiredCanonicalization;
     transient final byte[] selector;
     transient final TupleType paramTypes;
 
@@ -58,6 +64,7 @@ public class Function {
         this.canonicalSignature = canonicalSig;
         this.requiredCanonicalization = !signature.equals(canonicalSig);
         this.paramTypes = TupleType.create(canonicalSig.substring(canonicalSig.indexOf('(')), types.toArray(StackableType.EMPTY_TYPE_ARRAY));
+        this.hashAlgorithm = messageDigest.getAlgorithm();
     }
 
     public ByteBuffer encodeCall(Object... args) {
@@ -86,6 +93,10 @@ public class Function {
 
     public String getCanonicalSignature() {
         return canonicalSignature;
+    }
+
+    public String getHashAlgorithm() {
+        return hashAlgorithm;
     }
 
     public boolean requiredCanonicalization() {
@@ -154,5 +165,35 @@ public class Function {
 
     public static String hex(byte[] bytes) {
         return encode(bytes, HEX);
+    }
+
+    // use readResolve to avoid setting transient final fields
+    private Object readResolve() {
+        try {
+            return new Function(this.canonicalSignature);
+        } catch (ParseException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        // do not hash requiredCanonicalization
+        return Objects.hash(
+                canonicalSignature,
+                hashAlgorithm,
+                paramTypes // hash transient paramTypes just to be sure TODO
+        );
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Function other = (Function) o;
+        // do not check requiredCanonicalization
+        return Objects.equals(canonicalSignature, other.canonicalSignature)
+                && Objects.equals(hashAlgorithm, other.hashAlgorithm)
+                && Objects.equals(paramTypes, other.paramTypes); // check transient paramTypes just to be sure TODO
     }
 }

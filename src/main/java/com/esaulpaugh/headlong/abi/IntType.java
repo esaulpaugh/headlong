@@ -7,6 +7,8 @@ import java.nio.ByteBuffer;
 
 class IntType extends AbstractUnitType<Integer> {
 
+    private static final long serialVersionUID = 5521950056991650120L;
+
     static final String CLASS_NAME = Integer.class.getName();
     static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(int[].class);
 

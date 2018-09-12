@@ -3,6 +3,7 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.abi.util.Tuple;
 import com.joemelsha.crypto.hash.Keccak;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -17,9 +18,15 @@ import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS_NAME;
 import static com.esaulpaugh.headlong.abi.StackableType.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class MonteCarloTestCase {
+public class MonteCarloTestCase implements Serializable {
 
-    static class Params {
+    private static final long serialVersionUID = -7544539781150389976L;
+
+    private static final ThreadLocal<MessageDigest> KECCAK_THREAD_LOCAL = ThreadLocal.withInitial(() -> new Keccak(256));
+
+    static class Params implements Serializable {
+
+        private static final long serialVersionUID = 4986365275807940869L;
 
         static final int DEFAULT_MAX_TUPLE_DEPTH = 4; // 2
         static final int DEFAULT_MAX_TUPLE_LENGTH = 4; // 4
@@ -34,20 +41,17 @@ public class MonteCarloTestCase {
         final int maxArrayDepth;
 
         final long seed;
-        final MessageDigest messageDigest;
 
         Params(long seed) {
             this.seed = seed;
-            this.messageDigest = new Keccak(256);
             this.maxTupleDepth = DEFAULT_MAX_TUPLE_DEPTH;
             this.maxTupleLen = DEFAULT_MAX_TUPLE_LENGTH;
             this.maxArrayDepth = DEFAULT_MAX_ARRAY_DEPTH;
             this.maxArrayLen = DEFAULT_MAX_ARRAY_LENGTH;
         }
 
-        Params(long seed, MessageDigest messageDigest, int maxTupleDepth, int maxTupleLen, int maxArrayDepth, int maxArrayLen) {
+        Params(long seed, int maxTupleDepth, int maxTupleLen, int maxArrayDepth, int maxArrayLen) {
             this.seed = seed;
-            this.messageDigest = messageDigest;
             this.maxTupleDepth = maxTupleDepth;
             this.maxTupleLen = maxTupleLen;
             this.maxArrayDepth = maxArrayDepth;
@@ -57,7 +61,6 @@ public class MonteCarloTestCase {
         Params(String paramsString) {
             String[] tokens = paramsString.substring(1, paramsString.length() - 1).split("[,]");
             this.seed = Long.parseLong(tokens[0]);
-            this.messageDigest = new Keccak(256);
             this.maxTupleDepth = Integer.parseInt(tokens[1]);
             this.maxTupleLen = Integer.parseInt(tokens[2]);
             this.maxArrayDepth = Integer.parseInt(tokens[3]);
@@ -68,6 +71,23 @@ public class MonteCarloTestCase {
         public String toString() {
             // (seed,mtd,mtl,mad,mal)
             return "(" + seed + ',' + maxTupleDepth + ',' + maxTupleLen + ',' + maxArrayDepth + ',' + maxArrayLen + ')';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Params params = (Params) o;
+            return maxTupleDepth == params.maxTupleDepth &&
+                    maxTupleLen == params.maxTupleLen &&
+                    maxArrayLen == params.maxArrayLen &&
+                    maxArrayDepth == params.maxArrayDepth &&
+                    seed == params.seed;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(maxTupleDepth, maxTupleLen, maxArrayLen, maxArrayDepth, seed);
         }
     }
 
@@ -114,9 +134,8 @@ public class MonteCarloTestCase {
     }
 
     final Params params;
-
     final Function function;
-    private final Tuple argsTuple;
+    final Tuple argsTuple;
 
     MonteCarloTestCase(Params params) throws ParseException {
         this.params = params;
@@ -131,7 +150,7 @@ public class MonteCarloTestCase {
 
         String rawSig = generateFunctionSignature(rng, 0);
 
-        this.function = new Function(rawSig, params.messageDigest);
+        this.function = new Function(rawSig, KECCAK_THREAD_LOCAL.get());
         this.argsTuple = generateTuple(function.paramTypes, rng);
     }
 
@@ -468,5 +487,20 @@ public class MonteCarloTestCase {
                 findInequality(elementType, ie, oe);
             }
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(params, function, argsTuple);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MonteCarloTestCase that = (MonteCarloTestCase) o;
+        return Objects.equals(params, that.params) &&
+                Objects.equals(function, that.function) &&
+                Objects.equals(argsTuple, that.argsTuple);
     }
 }

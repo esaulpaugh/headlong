@@ -5,8 +5,11 @@ import com.esaulpaugh.headlong.abi.util.Utils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 class BigDecimalType extends AbstractUnitType<BigDecimal> {
+
+    private static final long serialVersionUID = -4619900038530235710L;
 
     static final String CLASS_NAME = BigDecimal.class.getName();
     static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(BigDecimal[].class);
@@ -51,5 +54,21 @@ class BigDecimalType extends AbstractUnitType<BigDecimal> {
         BigDecimal dec = new BigDecimal(bi, scale);
         validateBigIntBitLen(bi);
         return dec;
+    }
+
+    // TODO eventually just rely on super.hashCode() hashing canonicalType and dynamic
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), scale);
+    }
+
+    // TODO eventually just rely on super.equals() checking canonicalType and dynamic
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        BigDecimalType other = (BigDecimalType) o;
+        return scale == other.scale;
     }
 }

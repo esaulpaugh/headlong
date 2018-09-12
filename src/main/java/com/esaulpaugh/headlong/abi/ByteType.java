@@ -7,6 +7,8 @@ import java.nio.ByteBuffer;
 
 class ByteType extends AbstractUnitType<Byte> {
 
+    private static final long serialVersionUID = 3723872788867891232L;
+
     static final String CLASS_NAME = Byte.class.getName();
     static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(byte[].class);
 

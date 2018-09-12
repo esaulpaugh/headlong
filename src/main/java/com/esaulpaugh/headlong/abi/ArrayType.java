@@ -1,20 +1,22 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Tuple;
 import com.esaulpaugh.headlong.abi.util.ClassNames;
+import com.esaulpaugh.headlong.abi.util.Tuple;
 import com.esaulpaugh.headlong.abi.util.Utils;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 import static com.esaulpaugh.headlong.abi.AbstractUnitType.LOG_2_UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.abi.util.ClassNames.toFriendly;
 import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
 
 class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
+
+    private static final long serialVersionUID = 2446103381769828948L;
 
     static final String BYTE_ARRAY_CLASS_NAME = byte[].class.getName();
     static final String BYTE_ARRAY_ARRAY_CLASS_NAME_STUB = Utils.getNameStub(byte[][].class);
@@ -410,5 +412,40 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
                 dest[i] = elementType.decode(bb, elementBuffer);
             }
         }
+    }
+
+    // use readResolve to avoid setting transient final field isString
+    private Object readResolve() {
+        return new ArrayType<StackableType<?>, Object>(
+                canonicalType,
+                elementType,
+                elementClass,
+                className,
+                arrayClassNameStub,
+                length,
+                dynamic
+                );
+    }
+
+    // TODO eventually just rely on super.hashCode() hashing canonicalType and dynamic
+    @Override
+    public int hashCode() {
+        // don't hash transient isString
+        return Objects.hash(super.hashCode(), length, elementClass, className, arrayClassNameStub, elementType);
+    }
+
+    // TODO eventually just rely on super.equals() checking canonicalType
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        ArrayType<?, ?> arrayType = (ArrayType<?, ?>) o;
+        // don't check transient isString
+        return length == arrayType.length
+                && elementClass == arrayType.elementClass
+                && Objects.equals(className, arrayType.className)
+                && Objects.equals(arrayClassNameStub, arrayType.arrayClassNameStub)
+                && Objects.equals(elementType, arrayType.elementType);
     }
 }

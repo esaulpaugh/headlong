@@ -2,12 +2,15 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.ClassNames;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
 
 // TODO support model classes à la Student.java
-abstract class StackableType<V> {
+abstract class StackableType<V> implements Serializable {
+
+    private static final long serialVersionUID = 4531737301646109454L;
 
     static final int TYPE_CODE_BOOLEAN = 0;
     static final int TYPE_CODE_BYTE = 1;
@@ -23,7 +26,6 @@ abstract class StackableType<V> {
     static final StackableType<?>[] EMPTY_TYPE_ARRAY = new StackableType<?>[0];
 
     final String canonicalType;
-
     final boolean dynamic;
 
     StackableType(String canonicalType, boolean dynamic) {
@@ -73,5 +75,21 @@ abstract class StackableType<V> {
 
     static byte[] newUnitBuffer() {
         return new byte[UNIT_LENGTH_BYTES];
+    }
+
+    @Override
+    public int hashCode() {
+        return dynamic
+                ? canonicalType.hashCode()
+                : -canonicalType.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StackableType<?> other = (StackableType<?>) o;
+        return dynamic == other.dynamic
+                && canonicalType.equals(other.canonicalType);
     }
 }

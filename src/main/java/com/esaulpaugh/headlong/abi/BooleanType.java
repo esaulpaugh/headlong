@@ -7,6 +7,8 @@ import java.nio.ByteBuffer;
 
 class BooleanType extends AbstractUnitType<Boolean> {
 
+    private static final long serialVersionUID = -437935895006302627L;
+
     static final String CLASS_NAME = Boolean.class.getName();
     static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(boolean[].class);
 

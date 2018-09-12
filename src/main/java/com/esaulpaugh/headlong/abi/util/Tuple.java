@@ -1,8 +1,9 @@
 package com.esaulpaugh.headlong.abi.util;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class Tuple {
+public class Tuple implements Serializable {
 
     public static final Tuple EMPTY = new Tuple();
 
@@ -30,16 +31,14 @@ public class Tuple {
 
     @Override
     public int hashCode() {
-        int result = 1;
-        for (Object obj : elements) {
-            result = 31 * result + obj.hashCode();
-        }
-        return result;
+        return Arrays.deepHashCode(elements);
     }
 
     @Override
-    public boolean equals(Object object) {
-        return object instanceof Tuple
-                && Arrays.deepEquals(this.elements, ((Tuple) object).elements);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tuple other = (Tuple) o;
+        return Arrays.deepEquals(this.elements, other.elements);
     }
 }

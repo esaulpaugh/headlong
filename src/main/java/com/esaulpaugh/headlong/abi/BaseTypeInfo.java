@@ -224,12 +224,14 @@ public class BaseTypeInfo {
     }
 
     private static class MapComparator implements Comparator<Map.Entry<String, BaseTypeInfo>>, Serializable {
+        private static final long serialVersionUID = -765405845176007435L;
+
         public int compare(Map.Entry<String, BaseTypeInfo> a, Map.Entry<String, BaseTypeInfo> b) {
             return a.getKey().compareTo(b.getKey());
         }
     }
 
-    private static void putSignedInts(final Map<String, BaseTypeInfo> map) throws ClassNotFoundException {
+    private static void putSignedInts(final Map<String, BaseTypeInfo> map) {
         final String stub = "int";
         int bitLength;
         String canonical;
@@ -293,7 +295,7 @@ public class BaseTypeInfo {
         map.put(special, new BaseTypeInfo(special, stub, special, BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB, 256, 0, true, -1, null));
     }
 
-    static void putFixed(Map<String, BaseTypeInfo> map, boolean unsigned) throws ClassNotFoundException {
+    static void putFixed(Map<String, BaseTypeInfo> map, boolean unsigned) {
         final String stub = unsigned ? "ufixed" : "fixed";
         for(int M = 8; M <= 256; M+=8) {
             for (int N = 1; N <= 80; N++) {
@@ -305,5 +307,23 @@ public class BaseTypeInfo {
         // overwrite 128x18 entry
         String special = stub + "128x18";
         map.put(special, new BaseTypeInfo(special, stub, special, BigDecimalType.CLASS_NAME, BigDecimalType.ARRAY_CLASS_NAME_STUB, 128, 18, unsigned, -1, null));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(className, arrayClassNameStub, bitLength, scale, elementType, arrayLength);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BaseTypeInfo that = (BaseTypeInfo) o;
+        return bitLength == that.bitLength &&
+                scale == that.scale &&
+                arrayLength == that.arrayLength &&
+                Objects.equals(className, that.className) &&
+                Objects.equals(arrayClassNameStub, that.arrayClassNameStub) &&
+                Objects.equals(elementType, that.elementType);
     }
 }

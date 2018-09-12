@@ -7,6 +7,8 @@ import java.nio.ByteBuffer;
 
 class ShortType extends AbstractUnitType<Short> {
 
+    private static final long serialVersionUID = -8064633105605031334L;
+
     private static final String CLASS_NAME = Short.class.getName();
     private static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(short[].class);
 
