@@ -27,7 +27,7 @@ public class RLPEncoder {
         }
     }
 
-    private static long totalEncodedLen(Iterable objects) {
+    private static long totalEncodedLen(Iterable<?> objects) {
         long total = 0;
         for (Object obj : objects) {
             total += itemEncodedLen(obj);
@@ -39,8 +39,8 @@ public class RLPEncoder {
         if (obj instanceof byte[]) {
             return stringEncodedLen((byte[]) obj);
         }
-        if (obj instanceof Iterable) {
-            return listEncodedLen((Iterable) obj);
+        if (obj instanceof Iterable<?>) {
+            return listEncodedLen((Iterable<?>) obj);
         }
         if(obj instanceof Object[]) {
             return listEncodedLen(Arrays.asList((Object[]) obj));
@@ -62,7 +62,7 @@ public class RLPEncoder {
         return 1 + dataLen;
     }
 
-    private static long listEncodedLen(Iterable elements) {
+    private static long listEncodedLen(Iterable<?> elements) {
         final long listDataLen = totalEncodedLen(elements);
         if (isLong(listDataLen)) {
             return 1 + RLPIntegers.len(listDataLen) + listDataLen;
@@ -74,8 +74,8 @@ public class RLPEncoder {
         if (item instanceof byte[]) {
             return encodeString((byte[]) item, dest, destIndex);
         }
-        if (item instanceof Iterable) {
-            Iterable elements = (Iterable) item;
+        if (item instanceof Iterable<?>) {
+            Iterable<?> elements = (Iterable<?>) item;
             return encodeList(totalEncodedLen(elements), elements, dest, destIndex);
         }
         if(item instanceof Object[]) {
@@ -116,7 +116,7 @@ public class RLPEncoder {
         return destIndex + dataLen;
     }
 
-    private static int encodeList(long dataLen, Iterable elements, byte[] dest, int destIndex) {
+    private static int encodeList(long dataLen, Iterable<?> elements, byte[] dest, int destIndex) {
         destIndex = encodeListPrefix(dataLen, dest, destIndex);
         return encodeSequentially(elements, dest, destIndex);
     }
@@ -157,7 +157,7 @@ public class RLPEncoder {
         return dest;
     }
 
-    public static byte[] encodeSequentially(Iterable objects) {
+    public static byte[] encodeSequentially(Iterable<?> objects) {
         byte[] dest = new byte[(int) totalEncodedLen(objects)];
         encodeSequentially(objects, dest, 0);
         return dest;
@@ -186,7 +186,7 @@ public class RLPEncoder {
      * @param destIndex
      * @return
      */
-    public static int encodeSequentially(Iterable objects, byte[] dest, int destIndex) {
+    public static int encodeSequentially(Iterable<?> objects, byte[] dest, int destIndex) {
         for (Object obj : objects) {
             destIndex = encodeItem(obj, dest, destIndex);
         }
@@ -205,7 +205,7 @@ public class RLPEncoder {
      * @param elements
      * @return
      */
-    public static byte[] encodeAsList(Iterable elements) {
+    public static byte[] encodeAsList(Iterable<?> elements) {
         long listDataLen = totalEncodedLen(elements);
         byte[] dest = new byte[prefixLength(listDataLen) + (int) listDataLen];
         encodeList(listDataLen, elements, dest, 0);
@@ -223,7 +223,7 @@ public class RLPEncoder {
      * @param dest
      * @param destIndex
      */
-    public static void encodeAsList(Iterable elements, byte[] dest, int destIndex) {
+    public static void encodeAsList(Iterable<?> elements, byte[] dest, int destIndex) {
         long listDataLen = totalEncodedLen(elements);
         encodeList(listDataLen, elements, dest, destIndex);
     }

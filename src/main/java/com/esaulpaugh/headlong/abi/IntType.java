@@ -12,8 +12,6 @@ class IntType extends AbstractUnitType<Integer> {
     static final String CLASS_NAME = Integer.class.getName();
     static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(int[].class);
 
-    static final int MAX_BIT_LEN = 32;
-
     IntType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, bitLength, unsigned);
     }

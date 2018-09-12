@@ -1,7 +1,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.ClassNames;
-import com.esaulpaugh.headlong.abi.util.Tuple;
 import com.esaulpaugh.headlong.abi.util.Utils;
 
 import java.lang.reflect.Array;
@@ -24,7 +23,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     static final String STRING_CLASS_NAME = String.class.getName();
     static final String STRING_ARRAY_CLASS_NAME_STUB = Utils.getNameStub(String[].class);
 
-    private static final IntType ARRAY_LENGTH_TYPE = new IntType("uint32", IntType.MAX_BIT_LEN, false);
+    private static final IntType ARRAY_LENGTH_TYPE = new IntType("int32", Integer.SIZE, false);
     private static final int ARRAY_LENGTH_BYTE_LEN = UNIT_LENGTH_BYTES;
 
     static final int DYNAMIC_LENGTH = -1;

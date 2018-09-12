@@ -1,13 +1,17 @@
-package com.esaulpaugh.headlong.abi.util;
+package com.esaulpaugh.headlong.abi;
 
 import java.io.Serializable;
+import java.util.AbstractList;
 import java.util.Arrays;
+import java.util.RandomAccess;
 
-public class Tuple implements Serializable {
+public class Tuple extends AbstractList<Object> implements RandomAccess, Serializable {
+
+    private static final long serialVersionUID = -6849167468060212408L;
 
     public static final Tuple EMPTY = new Tuple();
 
-    public final Object[] elements;
+    final Object[] elements;
 
     public Tuple(Object... elements) {
         this.elements = elements;
@@ -26,7 +30,20 @@ public class Tuple implements Serializable {
     }
 
     public Tuple subtuple(int startIndex, int endIndex) {
-        return new Tuple(Arrays.copyOfRange(elements, startIndex, endIndex));
+        final int len = endIndex - startIndex;
+        Object[] copy = new Object[len];
+        System.arraycopy(elements, startIndex, copy, 0, len);
+        return new Tuple(copy);
+    }
+
+    @Override
+    public Object get(int index) {
+        return elements[index];
+    }
+
+    @Override
+    public int size() {
+        return elements.length;
     }
 
     @Override

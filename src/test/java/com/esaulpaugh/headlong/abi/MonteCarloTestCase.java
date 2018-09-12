@@ -1,6 +1,5 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Tuple;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.io.Serializable;
@@ -272,7 +271,7 @@ public class MonteCarloTestCase implements Serializable {
         case TYPE_CODE_LONG: return generateLong(r, (LongType) type, false);
         case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (AbstractUnitType<?>) type);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
-        case TYPE_CODE_ARRAY: return generateArray((ArrayType) type, r);
+        case TYPE_CODE_ARRAY: return generateArray((ArrayType<?, ?>) type, r);
         case TYPE_CODE_TUPLE: return generateTuple((TupleType) type, r);
         default: throw new IllegalArgumentException("unexpected type: " + type.toString());
         }
@@ -339,7 +338,7 @@ public class MonteCarloTestCase implements Serializable {
         return new BigDecimal(generateBigInteger(r, type), type.scale);
     }
 
-    private Object generateArray(ArrayType arrayType, Random r) {
+    private Object generateArray(ArrayType<?, ?> arrayType, Random r) {
         StackableType<?> elementType = arrayType.elementType;
         final int len = arrayType.length == DYNAMIC_LENGTH
                 ? r.nextInt(params.maxArrayLen + 1) // 0 to max
@@ -428,14 +427,14 @@ public class MonteCarloTestCase implements Serializable {
         return tuples;
     }
 
-    private Object[] generateObjectArray(ArrayType arrayType, final int len, Random r) {
+    private Object[] generateObjectArray(ArrayType<?, ?> arrayType, final int len, Random r) {
 
         if(arrayType.elementClass == null) {
             System.out.println(arrayType.toString());
         }
         Object[] dest = (Object[]) Array.newInstance(arrayType.elementClass, len);
 
-        final ArrayType elementType = (ArrayType) arrayType.elementType;
+        final ArrayType<?, ?> elementType = (ArrayType<?, ?>) arrayType.elementType;
         for (int i = 0; i < len; i++) {
             dest[i] = generateArray(elementType, r);
         }
@@ -458,8 +457,8 @@ public class MonteCarloTestCase implements Serializable {
             findInequality((AbstractUnitType<?>) elementType, in, out);
         } else if(elementType instanceof TupleType) {
             findInequality((TupleType) elementType, (Tuple) in, (Tuple) out);
-        } else if(elementType instanceof ArrayType) {
-            findInequalityInArray((ArrayType) elementType, (Object[]) in, (Object[]) out);
+        } else if(elementType instanceof ArrayType<?, ?>) {
+            findInequalityInArray((ArrayType<?, ?>) elementType, (Object[]) in, (Object[]) out);
         } else {
             throw new IllegalArgumentException("unrecognized type: " + elementType.toString());
         }
@@ -475,7 +474,7 @@ public class MonteCarloTestCase implements Serializable {
         }
     }
 
-    private static void findInequalityInArray(ArrayType arrayType, Object[] in, Object[] out) throws Exception {
+    private static void findInequalityInArray(ArrayType<?, ?> arrayType, Object[] in, Object[] out) throws Exception {
         final StackableType<?> elementType = arrayType.elementType;
         if (in.length != out.length) {
             throw new AssertionError(elementType.toString() + " len " + in.length + " != " + out.length);

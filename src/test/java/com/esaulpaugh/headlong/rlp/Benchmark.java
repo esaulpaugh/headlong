@@ -15,7 +15,7 @@ public class Benchmark {
 
     @Test
     public void decodeMicroBenchmark() throws DecodeException {
-        Student plato;
+        Student plato = null;
 //        StudentRLPAdapter adapter = new StudentRLPAdapter();
 
         byte[] rlp = STUDENT_RLP_SEQUENTIAL;
@@ -45,7 +45,7 @@ public class Benchmark {
 
 //        Assert.assertArrayEquals(STUDENT_RLP_SEQUENTIAL, temp);
 
-        System.out.println(((end - start) / 1000000.0) + " millis");
+        System.out.println(((end - start) / 1000000.0) + " millis " + plato);
 
     }
 

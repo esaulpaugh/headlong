@@ -78,7 +78,7 @@ abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V s
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AbstractUnitType other = (AbstractUnitType) o;
+        AbstractUnitType<?> other = (AbstractUnitType<?>) o;
         return unsigned == other.unsigned
                 && bitLength == other.bitLength;
     }

@@ -1,6 +1,5 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Tuple;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.io.Serializable;

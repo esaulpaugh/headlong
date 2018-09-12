@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MonteCarloTest {
 
-    private static final Long MASTER_SEED = null; // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
+    private Long masterSeed = null; // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
     private static final int N = 100_000;
 
@@ -35,11 +35,11 @@ public class MonteCarloTest {
 
         SecureRandom sr = new SecureRandom();
 
-        final long masterSeed = MASTER_SEED != null
-                ? MASTER_SEED
-                : System.nanoTime() * (System.nanoTime() << 1) * (System.nanoTime() >> 1) * sr.nextLong();
+        if(masterSeed == null) {
+            masterSeed = seed(System.nanoTime()) * sr.nextLong();
+        }
 
-        final long[]seeds = generateSeeds(masterSeed);
+        final long[] seeds = generateSeeds(masterSeed);
 
         StringBuilder log = new StringBuilder();
 
@@ -213,10 +213,6 @@ public class MonteCarloTest {
         ObjectInputStream ois = new ObjectInputStream(bais);
 
         final MonteCarloTask deserialized = (MonteCarloTask) ois.readObject();
-
-        if(deserialized.testCase.function.canonicalSignature.contains("string")) {
-            System.out.println("contains string");
-        }
 
         boolean equal = deserialized.equals(task);
         int d_hash = deserialized.hashCode();

@@ -1,7 +1,5 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Tuple;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -14,7 +12,7 @@ import static com.esaulpaugh.headlong.abi.StackableType.*;
 class Encoder {
 
     static final int OFFSET_LENGTH_BYTES = UNIT_LENGTH_BYTES;
-    static final IntType OFFSET_TYPE = new IntType("uint32", IntType.MAX_BIT_LEN, false);
+    static final IntType OFFSET_TYPE = new IntType("int32", Integer.SIZE, false);
 
     private static final byte NEGATIVE_ONE_BYTE = (byte) 0xFF;
     private static final byte ZERO_BYTE = (byte) 0;
@@ -36,7 +34,7 @@ class Encoder {
         final StackableType<?>[] types = tupleType.elementTypes;
 
         if(argsTuple.elements.length != types.length) {
-            throw new IllegalArgumentException("argsTuple.elements.length <> types.length: " + argsTuple.elements.length + " != " + types.length);
+            throw new IllegalArgumentException("argsTuple.size() <> types.length: " + argsTuple.size() + " != " + types.length);
         }
 
         final int allocation = Function.SELECTOR_LEN + tupleType.validate(argsTuple);
@@ -95,7 +93,7 @@ class Encoder {
             if (type.dynamic) { // includes String
                 insertOffset(offset, type, value, dest);
             } else {
-                encodeArrayStatic((ArrayType) type, value, dest);
+                encodeArrayStatic((ArrayType<?, ?>) type, value, dest);
             }
             return;
         case TYPE_CODE_TUPLE:
@@ -119,7 +117,7 @@ class Encoder {
 //        only dynamics expected
         switch (type.typeCode()) {
         case TYPE_CODE_ARRAY:
-            ArrayType arrayType = (ArrayType) type;
+            ArrayType<?, ?> arrayType = (ArrayType<?, ?>) type;
             if(arrayType.isString) {
                 byte[] bytes = ((String) value).getBytes(CHARSET_UTF_8);
                 insertInt(bytes.length, dest); // insertLength
@@ -137,7 +135,7 @@ class Encoder {
 
     // ----------------------------------------------
 
-    private static void encodeArrayStatic(ArrayType arrayType, Object value, ByteBuffer dest) {
+    private static void encodeArrayStatic(ArrayType<?, ?> arrayType, Object value, ByteBuffer dest) {
         switch (arrayType.elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: insertBooleans((boolean[]) value, dest); return;
         case TYPE_CODE_BYTE: insertBytes((byte[]) value, dest); return;
@@ -157,7 +155,7 @@ class Encoder {
         }
     }
 
-    private static void encodeArrayTail(ArrayType arrayType, Object value, ByteBuffer dest) {
+    private static void encodeArrayTail(ArrayType<?, ?> arrayType, Object value, ByteBuffer dest) {
         final StackableType<?> elementType = arrayType.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN:

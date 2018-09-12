@@ -12,10 +12,8 @@ class ShortType extends AbstractUnitType<Short> {
     private static final String CLASS_NAME = Short.class.getName();
     private static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(short[].class);
 
-    private static final int SHORT_LENGTH_BITS = 16;
-
     ShortType(String canonicalType, boolean unsigned) {
-        super(canonicalType, SHORT_LENGTH_BITS, unsigned);
+        super(canonicalType, Short.SIZE, unsigned);
     }
 
     @Override

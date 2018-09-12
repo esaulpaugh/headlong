@@ -1,6 +1,5 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Tuple;
 import com.esaulpaugh.headlong.abi.util.Utils;
 
 import java.nio.ByteBuffer;
@@ -8,9 +7,6 @@ import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.abi.Encoder.OFFSET_LENGTH_BYTES;
 
-/**
- * TODO subtupletype method like subtuple()
- */
 class TupleType extends StackableType<Tuple> {
 
     private static final long serialVersionUID = -8630808789515788419L;

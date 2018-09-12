@@ -1,7 +1,5 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Tuple;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -84,7 +82,7 @@ public class DecodeTest {
 
 //        Function f2 = new Function("((fixed24x14[13][][4])[])");
 
-        final int s = 14;
+//        final int s = 14;
         final BigDecimal[] inner = new BigDecimal[] {  }; // f(1, s), f(2, s), f(3, s), f(4, s), f(4, s)
 //        final BigDecimal[][] four = new BigDecimal[][] { inner };
 //        final BigDecimal[] thirteen = new BigDecimal[] { f(1, s), f(2, s), f(3, s), f(4, s), f(5, s), f(6, s), f(7, s), f(8, s), f(9, s), f(10, s), f(11, s), f(12, s), f(13, s),  };
@@ -93,12 +91,12 @@ public class DecodeTest {
         Tuple argg = new Tuple(1, 2, 3, 4L, 5, 6, 7, 8);
         ByteBuffer b0 = f0.encodeCall(argg);
         byte[] abi0 = b0.array();
-        abi0[3] = -1;
+//        abi0[3] = -1;
         Function.format(abi0);
         Tuple x = f0.decodeCall(abi0);
         System.out.println(x.equals(argg));
 
-        if(true)return;
+//        if(true)return;
 
         Function f2 = new Function("((fixed24x14[])[1])");
 
