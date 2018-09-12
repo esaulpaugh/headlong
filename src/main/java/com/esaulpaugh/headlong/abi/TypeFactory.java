@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.text.ParseException;
 
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
-import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
+import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
 final class TypeFactory {
 
@@ -41,7 +41,10 @@ final class TypeFactory {
                 length = DYNAMIC_LENGTH;
             } else { // e.g. [4]
                 try {
-                    length = Integer.parseUnsignedInt(canonicalType.substring(arrayOpenIndex + 1, index));
+                    length = Integer.parseInt(canonicalType.substring(arrayOpenIndex + 1, index));
+                    if(length < 0) {
+                        throw new ParseException("negative array size", arrayOpenIndex + 1);
+                    }
                 } catch (NumberFormatException nfe) {
                     throw (ParseException) new ParseException("illegal argument", arrayOpenIndex).initCause(nfe);
                 }
@@ -203,9 +206,9 @@ final class TypeFactory {
             }
             final int indexOfX = canonicalType.lastIndexOf('x');
             try {
-                int M = Integer.parseUnsignedInt(canonicalType.substring(idx + "fixed".length(), indexOfX), 10);
-                int N = Integer.parseUnsignedInt(canonicalType.substring(indexOfX + 1), 10); // everything after x
-                if ((M & 0b111) /* mod 8 */ == 0 && M >= 8 && M <= 256
+                int M = Integer.parseInt(canonicalType.substring(idx + "fixed".length(), indexOfX), 10);
+                int N = Integer.parseInt(canonicalType.substring(indexOfX + 1), 10); // everything after x
+                if ((M & 0x7) /* mod 8 */ == 0 && M >= 8 && M <= 256
                         && N > 0 && N <= 80) {
                     return new BigDecimalType(canonicalType, M, N, unsigned);
                 }

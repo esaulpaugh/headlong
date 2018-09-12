@@ -1,10 +1,10 @@
-package com.esaulpaugh.headlong.rlp.util;
+package com.esaulpaugh.headlong.util;
 
 import org.spongycastle.util.encoders.Base64;
 
 import java.nio.charset.Charset;
 
-import static com.esaulpaugh.headlong.rlp.util.RLPIntegers.EMPTY_BYTE_ARRAY;
+import static com.esaulpaugh.headlong.util.Utils.EMPTY_BYTE_ARRAY;
 
 /**
  * Utility for encoding and decoding hexadecimal, base64, and utf-8 encoded {@code String}s.

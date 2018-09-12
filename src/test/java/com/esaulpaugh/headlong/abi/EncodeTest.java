@@ -1,6 +1,6 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.rlp.util.Strings;
+import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Assert;
 
 import java.math.BigInteger;
@@ -8,8 +8,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 
-import static com.esaulpaugh.headlong.rlp.util.Strings.CHARSET_UTF_8;
-import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
+import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
+import static com.esaulpaugh.headlong.util.Strings.HEX;
 
 public class EncodeTest {
 

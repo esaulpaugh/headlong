@@ -5,13 +5,13 @@ import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
-import com.esaulpaugh.headlong.rlp.util.Strings;
+import com.esaulpaugh.headlong.util.Strings;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
-import static com.esaulpaugh.headlong.rlp.util.Strings.UTF_8;
+import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 public class Student implements RLPEncodeable {
 

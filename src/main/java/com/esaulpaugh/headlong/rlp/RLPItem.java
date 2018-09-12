@@ -3,7 +3,7 @@ package com.esaulpaugh.headlong.rlp;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
 import com.esaulpaugh.headlong.rlp.util.Notation;
-import com.esaulpaugh.headlong.rlp.util.Strings;
+import com.esaulpaugh.headlong.util.Strings;
 
 import java.math.BigInteger;
 import java.util.Arrays;

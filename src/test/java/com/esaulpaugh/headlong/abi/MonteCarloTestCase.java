@@ -21,7 +21,12 @@ public class MonteCarloTestCase implements Serializable {
 
     private static final long serialVersionUID = -7544539781150389976L;
 
-    private static final ThreadLocal<MessageDigest> KECCAK_THREAD_LOCAL = ThreadLocal.withInitial(() -> new Keccak(256));
+    private static final ThreadLocal<MessageDigest> KECCAK_THREAD_LOCAL = new ThreadLocal<MessageDigest>() {
+        @Override
+        public MessageDigest initialValue() {
+            return new Keccak(256);
+        }
+    };
 
     static class Params implements Serializable {
 
@@ -282,7 +287,7 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     private static short generateShort(Random r, boolean unsigned) {
-        byte[] random = new byte[1 + r.nextInt(Short.BYTES)]; // 1-2
+        byte[] random = new byte[1 + r.nextInt(2)]; // 1-2 // Short.BYTES
         r.nextBytes(random);
         short x = new BigInteger(random).shortValue();
         if(unsigned && x < 0) {

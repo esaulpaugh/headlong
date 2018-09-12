@@ -1,15 +1,16 @@
 package com.esaulpaugh.headlong.rlp.util;
 
+import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.security.SecureRandom;
 import java.util.Random;
 
-import static com.esaulpaugh.headlong.rlp.util.Strings.BASE64;
-import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
-import static com.esaulpaugh.headlong.rlp.util.Strings.NO_PADDING;
-import static com.esaulpaugh.headlong.rlp.util.Strings.UTF_8;
+import static com.esaulpaugh.headlong.util.Strings.BASE64;
+import static com.esaulpaugh.headlong.util.Strings.HEX;
+import static com.esaulpaugh.headlong.util.Strings.NO_PADDING;
+import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 public class StringsTest {
 

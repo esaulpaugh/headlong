@@ -2,7 +2,7 @@ package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.rlp.DecodeException;
 
-import static com.esaulpaugh.headlong.rlp.util.RLPIntegers.EMPTY_BYTE_ARRAY;
+import static com.esaulpaugh.headlong.util.Utils.EMPTY_BYTE_ARRAY;
 
 /**
  * Negative integers are stored in a minimal big-endian two's complement representation. Non-negative integers are stored

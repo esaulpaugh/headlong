@@ -1,6 +1,6 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Utils;
+import com.esaulpaugh.headlong.abi.util.ClassNames;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -12,7 +12,7 @@ class TupleType extends StackableType<Tuple> {
     private static final long serialVersionUID = -8630808789515788419L;
 
     private static final String CLASS_NAME = Tuple.class.getName();
-    private static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(Tuple[].class);
+    private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getNameStub(Tuple[].class);
 
     final StackableType<?>[] elementTypes;
 

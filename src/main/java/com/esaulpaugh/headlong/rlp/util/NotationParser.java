@@ -1,9 +1,11 @@
 package com.esaulpaugh.headlong.rlp.util;
 
+import com.esaulpaugh.headlong.util.Strings;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
+import static com.esaulpaugh.headlong.util.Strings.HEX;
 
 public class NotationParser {
 

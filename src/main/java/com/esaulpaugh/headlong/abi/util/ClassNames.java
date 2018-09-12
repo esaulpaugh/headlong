@@ -46,4 +46,14 @@ public class ClassNames {
 
         return sb.toString();
     }
+
+    public static String getNameStub(Class<?> arrayClass) {
+        if(arrayClass.isArray()) {
+            String className = arrayClass.getName();
+            if(className.charAt(0) == '[') {
+                return className.substring(1);
+            }
+        }
+        throw new IllegalArgumentException("unexpected class: " + arrayClass.getName());
+    }
 }

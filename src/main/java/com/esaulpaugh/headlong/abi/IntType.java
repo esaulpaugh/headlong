@@ -1,6 +1,6 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Utils;
+import com.esaulpaugh.headlong.abi.util.ClassNames;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -10,7 +10,7 @@ class IntType extends AbstractUnitType<Integer> {
     private static final long serialVersionUID = 5521950056991650120L;
 
     static final String CLASS_NAME = Integer.class.getName();
-    static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(int[].class);
+    static final String ARRAY_CLASS_NAME_STUB = ClassNames.getNameStub(int[].class);
 
     IntType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, bitLength, unsigned);

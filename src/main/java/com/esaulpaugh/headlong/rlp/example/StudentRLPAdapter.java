@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
-import static com.esaulpaugh.headlong.rlp.util.Strings.UTF_8;
+import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 public class StudentRLPAdapter implements RLPAdapter<Student> {
 

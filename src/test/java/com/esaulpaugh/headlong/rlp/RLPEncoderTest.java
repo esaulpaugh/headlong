@@ -1,12 +1,12 @@
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.util.Strings;
+import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
 
-import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
+import static com.esaulpaugh.headlong.util.Strings.HEX;
 
 public class RLPEncoderTest {
 

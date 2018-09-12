@@ -4,9 +4,9 @@ import com.esaulpaugh.headlong.rlp.DecodeException;
 
 import java.math.BigInteger;
 
-public class RLPIntegers {
+import static com.esaulpaugh.headlong.util.Utils.EMPTY_BYTE_ARRAY;
 
-    static final  byte[] EMPTY_BYTE_ARRAY = new byte[0];
+public class RLPIntegers {
 
     /**
      * Returns an integer's minimal big-endian two's complement representation. The integer zero is represented by the

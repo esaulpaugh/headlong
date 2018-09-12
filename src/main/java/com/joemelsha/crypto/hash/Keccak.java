@@ -122,14 +122,14 @@ public class Keccak extends MessageDigest {
         }
 
         int rateBits = this.rateBits;
-        if ((rateBits & 0b111) != 0) {
+        if ((rateBits & 0x7) != 0) { // 0b111
             throw new IllegalStateException("Cannot update while in bit mode");
         }
 
         long[] state = this.state;
         int rateBytes = rateBits >>> 3;
 
-        int rateBytesWord = rateBytes & 0b111;
+        int rateBytesWord = rateBytes & 0x7; // 0b111
         if (rateBytesWord > 0) {
             int c = 8 - rateBytesWord;
             if (c > remaining)
@@ -177,7 +177,7 @@ public class Keccak extends MessageDigest {
                 in.order(order);
             }
             this.rateBits = rateWords << 6;
-            remaining &= 0b111;
+            remaining &= 0x7; // 0b111
         }
 
         if (rateWords >= rateSizeWords) {
@@ -256,7 +256,7 @@ public class Keccak extends MessageDigest {
                     rateWords++;
                 } while (rateWords < c);
             } while (outWords > 0);
-            remaining &= 0b111;
+            remaining &= 0x7; // 0b111
         }
 
         if (remaining > 0) {

@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.rlp.util;
+package com.esaulpaugh.headlong.util;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -57,7 +57,7 @@ public final class FastHex {
     }
 
     public static byte[] decode(String hex, final int offset, final int length) {
-        if ((length & 0b1) != 0) {
+        if ((length & 0x01) != 0) {
             throw new IllegalArgumentException("length must be a multiple of two");
         }
         final int bytesLen = length >> 1;

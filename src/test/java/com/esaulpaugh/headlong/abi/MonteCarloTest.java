@@ -192,11 +192,14 @@ public class MonteCarloTest {
         Thread[] threads = new Thread[8];
         final int len = threads.length;
         for (int i = 0; i < len; i++) {
-            threads[i] = new Thread(() -> {
-                for (int j = 0; j < 500; j++) {
-                    testCase.run();
+            threads[i] = new Thread() {
+                @Override
+                public void run() {
+                    for (int j = 0; j < 500; j++) {
+                        testCase.run();
+                    }
                 }
-            });
+            };
         }
 
         final int len2 = len - 1;

@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
-import static com.esaulpaugh.headlong.rlp.util.Strings.encode;
+import static com.esaulpaugh.headlong.util.Strings.HEX;
+import static com.esaulpaugh.headlong.util.Strings.encode;
 
 /**
  * Represents a function in an Ethereum contract. Can encode and decode function calls matching this function's signature.

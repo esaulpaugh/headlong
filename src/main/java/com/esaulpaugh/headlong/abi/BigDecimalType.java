@@ -1,6 +1,6 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Utils;
+import com.esaulpaugh.headlong.abi.util.ClassNames;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -12,7 +12,7 @@ class BigDecimalType extends AbstractUnitType<BigDecimal> {
     private static final long serialVersionUID = -4619900038530235710L;
 
     static final String CLASS_NAME = BigDecimal.class.getName();
-    static final String ARRAY_CLASS_NAME_STUB = Utils.getNameStub(BigDecimal[].class);
+    static final String ARRAY_CLASS_NAME_STUB = ClassNames.getNameStub(BigDecimal[].class);
 
     final int scale;
 

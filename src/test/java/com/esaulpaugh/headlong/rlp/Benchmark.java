@@ -2,13 +2,13 @@ package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.rlp.example.Student;
 import com.esaulpaugh.headlong.rlp.util.Notation;
-import com.esaulpaugh.headlong.rlp.util.Strings;
+import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Test;
 
 import java.text.DecimalFormat;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
-import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
+import static com.esaulpaugh.headlong.util.Strings.HEX;
 
 public class Benchmark {
 

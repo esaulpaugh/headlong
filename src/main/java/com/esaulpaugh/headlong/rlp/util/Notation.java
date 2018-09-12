@@ -2,12 +2,13 @@ package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.rlp.DataType;
 import com.esaulpaugh.headlong.rlp.DecodeException;
+import com.esaulpaugh.headlong.util.Strings;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
-import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
+import static com.esaulpaugh.headlong.util.Strings.HEX;
 
 /**
  * An object notation for RLP, not unlike JSON. Call {@link #parse()} to parse the notation into the original list of objects.
