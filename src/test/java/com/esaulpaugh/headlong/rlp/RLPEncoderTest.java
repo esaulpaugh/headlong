@@ -1,10 +1,12 @@
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.rlp.util.Strings;
 import org.junit.Assert;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
 
 import java.util.List;
+
+import static com.esaulpaugh.headlong.rlp.util.Strings.HEX;
 
 public class RLPEncoderTest {
 
@@ -18,8 +20,8 @@ public class RLPEncoderTest {
         byte[] encoded = RLPEncoder.encodeSequentially(objects);
 
         Assert.assertEquals(
-                Hex.toHexString(new byte[] { (byte)0xc0, (byte)0x80 }),
-                Hex.toHexString(encoded)
+                Strings.encode(new byte[] { (byte)0xc0, (byte)0x80 }, HEX),
+                Strings.encode(encoded, HEX)
         );
     }
 
@@ -34,8 +36,8 @@ public class RLPEncoderTest {
         byte[] encoded = RLPEncoder.encodeAsList(objects);
 
         Assert.assertEquals(
-                Hex.toHexString(new byte[] { (byte)0xc2, (byte)0xc0, (byte)0x80 }),
-                Hex.toHexString(encoded)
+                Strings.encode(new byte[] { (byte)0xc2, (byte)0xc0, (byte)0x80 }, HEX),
+                Strings.encode(encoded, HEX)
         );
     }
 

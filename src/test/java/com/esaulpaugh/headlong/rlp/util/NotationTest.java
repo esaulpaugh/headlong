@@ -4,7 +4,6 @@ import com.esaulpaugh.headlong.rlp.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import org.junit.Assert;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
 
 import java.util.List;
 
@@ -21,7 +20,7 @@ public class NotationTest {
 
     @Test
     public void parse() throws DecodeException {
-        byte[] rlp2 = Hex.decode("8363617420c2c00900");
+        byte[] rlp2 = Strings.decode("8363617420c2c00900", HEX);
         String notation = Notation.forEncoding(rlp2).toString();
         System.out.println(notation);
 

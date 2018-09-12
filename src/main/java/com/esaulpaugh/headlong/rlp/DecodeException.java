@@ -1,7 +1,7 @@
 package com.esaulpaugh.headlong.rlp;
 
 /**
- * Thrown to indicate a failed attempt to decode illegal or otherwise undecodeable RLP data.
+ * Thrown to indicate a failed attempt to decode illegal or otherwise undecodeable data.
  */
 public class DecodeException extends Exception {
 

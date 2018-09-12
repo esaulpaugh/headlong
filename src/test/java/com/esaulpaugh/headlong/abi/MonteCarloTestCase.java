@@ -266,7 +266,7 @@ public class MonteCarloTestCase implements Serializable {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return r.nextBoolean();
         case TYPE_CODE_BYTE: return generateByte(r);
-        case TYPE_CODE_SHORT: return generateShort(r, ((ShortType) type).unsigned);
+//        case TYPE_CODE_SHORT: return generateShort(r, ((ShortType) type).unsigned);
         case TYPE_CODE_INT: return generateInt(r, (IntType) type);
         case TYPE_CODE_LONG: return generateLong(r, (LongType) type, false);
         case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (AbstractUnitType<?>) type);
@@ -351,7 +351,7 @@ public class MonteCarloTestCase implements Serializable {
                 return generateString(len, r);
             }
             return generateByteArray(len, r);
-        case TYPE_CODE_SHORT: return generateShortArray(len, ((ShortType) elementType).unsigned, r);
+//        case TYPE_CODE_SHORT: return generateShortArray(len, ((ShortType) elementType).unsigned, r);
         case TYPE_CODE_INT: return generateIntArray(len, (IntType) elementType, r);
         case TYPE_CODE_LONG: return generateLongArray(len, (LongType) elementType, r);
         case TYPE_CODE_BIG_INTEGER: return generateBigIntegerArray(len, (BigIntegerType) elementType, r);
