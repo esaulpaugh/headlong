@@ -32,17 +32,17 @@ public class MonteCarloTestCase implements Serializable {
 
         private static final long serialVersionUID = 4986365275807940869L;
 
-        static final int DEFAULT_MAX_TUPLE_DEPTH = 1; // 2
-        static final int DEFAULT_MAX_TUPLE_LENGTH = 5; // 4
+        static final int DEFAULT_MAX_TUPLE_DEPTH = 1;
+        static final int DEFAULT_MAX_TUPLE_LENGTH = 5;
 
-        static final int DEFAULT_MAX_ARRAY_DEPTH = 1; // 2
-        static final int DEFAULT_MAX_ARRAY_LENGTH = 33; // 35
+        static final int DEFAULT_MAX_ARRAY_DEPTH = 1;
+        static final int DEFAULT_MAX_ARRAY_LENGTH = 33; // does not apply to static base types e.g. bytes1-32
 
         final int maxTupleDepth;
         final int maxTupleLen;
 
-        final int maxArrayLen;
         final int maxArrayDepth;
+        final int maxArrayLen;
 
         final long seed;
 
@@ -225,8 +225,12 @@ public class MonteCarloTestCase implements Serializable {
 
         TupleType tupleType = null;
         if(baseTypeString.equals(TUPLE_KEY)) {
-            tupleType = generateTupleType(r, tupleDepth + 1);
-            sb = new StringBuilder(tupleType.canonicalType);
+            if(tupleDepth < params.maxTupleDepth) {
+                tupleType = generateTupleType(r, tupleDepth + 1);
+                sb = new StringBuilder(tupleType.canonicalType);
+            } else {
+                sb = new StringBuilder("uint256");
+            }
         } else {
             sb = new StringBuilder(baseTypeString);
         }
@@ -237,7 +241,7 @@ public class MonteCarloTestCase implements Serializable {
             for (int i = 0; i < arrayDepth; i++) {
                 sb.append('[');
                 if(r.nextBoolean()) {
-                    sb.append(1 + r.nextInt(params.maxArrayLen));
+                    sb.append(r.nextInt(params.maxArrayLen + 1));
                 }
                 sb.append(']');
             }
@@ -250,9 +254,9 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     private TupleType generateTupleType(Random r, int tupleDepth) throws ParseException {
-        if(tupleDepth >= params.maxTupleDepth) {
-            return TupleType.create("()");
-        }
+//        if(tupleDepth >= params.maxTupleDepth) {
+//            return TupleType.create("()");
+//        }
         return new Function(generateFunctionSignature(r, tupleDepth)).paramTypes;
     }
 

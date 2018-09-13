@@ -65,6 +65,10 @@ public class Function implements Serializable {
         this.paramTypes = TupleType.create(canonicalSig.substring(canonicalSig.indexOf('(')), types.toArray(StackableType.EMPTY_TYPE_ARRAY));
         this.hashAlgorithm = messageDigest.getAlgorithm();
     }
+    
+    public static Function parse(String signature) throws ParseException {
+        return new Function(signature);
+    }
 
     public ByteBuffer encodeCall(Object... args) {
         return Function.encodeCall(this, new Tuple(args));
