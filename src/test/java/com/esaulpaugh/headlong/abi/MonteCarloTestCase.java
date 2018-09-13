@@ -32,11 +32,11 @@ public class MonteCarloTestCase implements Serializable {
 
         private static final long serialVersionUID = 4986365275807940869L;
 
-        static final int DEFAULT_MAX_TUPLE_DEPTH = 4; // 2
-        static final int DEFAULT_MAX_TUPLE_LENGTH = 4; // 4
+        static final int DEFAULT_MAX_TUPLE_DEPTH = 1; // 2
+        static final int DEFAULT_MAX_TUPLE_LENGTH = 5; // 4
 
-        static final int DEFAULT_MAX_ARRAY_DEPTH = 4; // 2
-        static final int DEFAULT_MAX_ARRAY_LENGTH = 4; // 35
+        static final int DEFAULT_MAX_ARRAY_DEPTH = 1; // 2
+        static final int DEFAULT_MAX_ARRAY_LENGTH = 33; // 35
 
         final int maxTupleDepth;
         final int maxTupleLen;

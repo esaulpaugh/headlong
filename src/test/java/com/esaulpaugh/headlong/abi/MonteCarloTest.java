@@ -71,7 +71,7 @@ public class MonteCarloTest {
             }
         }
 
-//        System.out.println(log.toString());
+        System.out.println(log.toString());
         System.out.println("MASTER_SEED = " + masterSeed);
     }
 

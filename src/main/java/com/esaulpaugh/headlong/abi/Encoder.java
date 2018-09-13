@@ -28,22 +28,32 @@ class Encoder {
         Arrays.fill(NEGATIVE_INT_PADDING, NEGATIVE_ONE_BYTE);
     }
 
+    static int calcEncodingLength(Function function, Tuple argsTuple) {
+        return Function.SELECTOR_LEN + function.paramTypes.validate(argsTuple);
+    }
+
     static ByteBuffer encodeFunctionCall(Function function, Tuple argsTuple) {
 
         final TupleType tupleType = function.paramTypes;
-        final StackableType<?>[] types = tupleType.elementTypes;
-
-        if(argsTuple.elements.length != types.length) {
-            throw new IllegalArgumentException("argsTuple.size() <> types.length: " + argsTuple.size() + " != " + types.length);
-        }
+//        final StackableType<?>[] types = tupleType.elementTypes;
+//
+//        if(argsTuple.elements.length != types.length) {
+//            throw new IllegalArgumentException("argsTuple.size() <> types.length: " + argsTuple.size() + " != " + types.length);
+//        }
 
         final int allocation = Function.SELECTOR_LEN + tupleType.validate(argsTuple);
         ByteBuffer outBuffer = ByteBuffer.wrap(new byte[allocation]); // ByteOrder.BIG_ENDIAN by default
 
-        outBuffer.put(function.selector);
-        insertTuple(tupleType, argsTuple, outBuffer);
+        encodeFunctionCall(function, argsTuple, outBuffer);
+//        outBuffer.put(function.selector);
+//        insertTuple(tupleType, argsTuple, outBuffer);
 
         return outBuffer;
+    }
+
+    static void encodeFunctionCall(Function function, Tuple argsTuple, ByteBuffer dest) {
+        dest.put(function.selector);
+        insertTuple(function.paramTypes, argsTuple, dest);
     }
 
     private static void insertTuple(TupleType tupleType, Tuple tuple, ByteBuffer outBuffer) {

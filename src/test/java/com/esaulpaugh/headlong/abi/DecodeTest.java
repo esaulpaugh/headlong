@@ -16,15 +16,31 @@ public class DecodeTest {
     public static void main(String[] args0) throws ParseException {
 
         Function f = new Function("baz(uint32,bool)");
-        ByteBuffer one = f.encodeCall(69L, true);
-        ByteBuffer two = f.encodeCall(new Tuple(69L, true));
-        
 
-        System.out.println(Function.hex(one.array()));
-        System.out.println(Function.format(two.array()));
+        ByteBuffer encoded = f.encodeCall(69L, true);
+        Tuple args = f.decodeCall(encoded.flip());
+
+        ByteBuffer buffer = ByteBuffer.allocate(f.lengthFor(args));
         
-        Tuple decoded = f.decodeCall((ByteBuffer) one.flip());
-        System.out.println(decoded.equals(new Tuple(69L, true)));
+        System.out.println("equals = " +
+                f.encodeCall(args, buffer)
+                        .decodeCall(buffer.flip())
+                        .equals(args)
+        );
+        System.out.println("0x" + Function.hex(encoded.array()));
+        System.out.println(Function.format(buffer.array()));
+
+        if(true)return;
+
+
+//        ByteBuffer two = f.encodeCall(new Tuple(69L, true));
+//
+//
+//        System.out.println(Function.hex(one.array()));
+//        System.out.println(Function.format(two.array()));
+//
+//        Tuple decoded = f.decodeCall((ByteBuffer) one.flip());
+//        System.out.println(decoded.equals(new Tuple(69L, true)));
         
         
         //        for(int i = 0; i < 250_000; i++) {

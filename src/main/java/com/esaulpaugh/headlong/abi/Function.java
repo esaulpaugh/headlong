@@ -74,6 +74,15 @@ public class Function implements Serializable {
         return Function.encodeCall(this, argsTuple);
     }
 
+    public int lengthFor(Tuple argsTuple) {
+        return Encoder.calcEncodingLength(this, argsTuple);
+    }
+
+    public Function encodeCall(Tuple argsTuple, ByteBuffer dest) {
+        Encoder.encodeFunctionCall(this, argsTuple, dest);
+        return this;
+    }
+
     public Tuple decodeCall(byte[] array) {
         return decodeCall(ByteBuffer.wrap(array));
     }
@@ -167,7 +176,7 @@ public class Function implements Serializable {
     }
 
     // use readResolve to avoid setting transient final fields
-    private Object readResolve() {
+    private Object readResolve() { // TODO handle hashAlgorithm/messageDigest
         try {
             return new Function(this.canonicalSignature);
         } catch (ParseException e) {

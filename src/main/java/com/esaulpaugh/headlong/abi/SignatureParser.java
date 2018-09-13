@@ -128,15 +128,16 @@ class SignatureParser {
         if (argEnd == -1) {
             return new ParseResult(-1, prevNonCanonicalIndex);
         }
-        checkParamChars(illegalTypeCharMatcher, signature, argStart, argEnd);
-        String typeString = signature.substring(argStart, argEnd);
-        String canonicalized = canonicalize(signature, typeString, argStart, argEnd);
-        if (canonicalized != null) {
-            typeString = canonicalized;
-            canonicalOut.append(signature, prevNonCanonicalIndex, argStart).append(typeString);
+        checkTypeChars(illegalTypeCharMatcher, signature, argStart, argEnd);
+        final String typeString = signature.substring(argStart, argEnd);
+        final String replacement = getCanonicalReplacement(signature, typeString, argStart, argEnd);
+        if (replacement == null) {
+            tupleTypes.add(TypeFactory.create(typeString));
+        } else {
+            tupleTypes.add(TypeFactory.create(replacement));
+            canonicalOut.append(signature, prevNonCanonicalIndex, argStart).append(replacement);
             prevNonCanonicalIndex = argEnd;
         }
-        tupleTypes.add(TypeFactory.create(typeString));
 
         return new ParseResult(argEnd, prevNonCanonicalIndex);
     }
@@ -153,7 +154,7 @@ class SignatureParser {
         return Math.min(comma, close);
     }
 
-    private static String canonicalize(String signature, String typeString, int argStart, final int argEnd) {
+    private static String getCanonicalReplacement(String signature, String typeString, int argStart, final int argEnd) {
         final int splitIndex;
         final String piece;
         if (typeString.endsWith("int")) {
@@ -181,7 +182,7 @@ class SignatureParser {
         }
     }
 
-    private static void checkParamChars(Matcher matcher, String signature, int argStart, int argEnd) throws ParseException {
+    private static void checkTypeChars(Matcher matcher, String signature, int argStart, int argEnd) throws ParseException {
         if (matcher.region(argStart, argEnd).find()) {
             throw newIllegalCharacterException(true, signature, matcher.start());
         }
