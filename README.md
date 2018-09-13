@@ -1,4 +1,4 @@
-Contract ABI codec and Recursive Length Prefix codec for Java. Includes an optimized Keccak implementation.
+Contract ABI codec and Recursive Length Prefix codec for Java. Includes a fast hex codec and an optimized Keccak implementation.
 
 See the wiki for details: https://github.com/esaulpaugh/headlong/wiki
 
