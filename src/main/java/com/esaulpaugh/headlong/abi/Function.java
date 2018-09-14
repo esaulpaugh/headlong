@@ -46,8 +46,8 @@ public class Function implements Serializable {
      * Beware that {@code messageDigest} must be given in an {@link MessageDigest#INITIAL} (i.e. not
      * {@link MessageDigest#IN_PROGRESS}) state.
      *
-     * @param signature
-     * @param messageDigest
+     * @param signature the function signature
+     * @param messageDigest the hash function with which to generate the 4-byte selector
      * @throws ParseException
      */
     public Function(String signature, MessageDigest messageDigest) throws ParseException {
@@ -141,8 +141,8 @@ public class Function implements Serializable {
         return Encoder.encodeFunctionCall(function, argsTuple);
     }
 
-    public static String format(byte[] abiCall) {
-        return format(abiCall, 0, abiCall.length);
+    public static String formatABI(byte[] abiCall) {
+        return formatABI(abiCall, 0, abiCall.length);
     }
 
     /**
@@ -154,7 +154,7 @@ public class Function implements Serializable {
      * @return  the formatted string
      * @throws  IllegalArgumentException    if the input length mod 32 != 4
      */
-    public static String format(byte[] buffer, int offset, final int length) {
+    public static String formatABI(byte[] buffer, int offset, final int length) {
 
         if(length < 4 || ((length - 4) & 0b111) != 0) {
             int mod = length % UNIT_LENGTH_BYTES;
