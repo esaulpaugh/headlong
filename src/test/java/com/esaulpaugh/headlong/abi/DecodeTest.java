@@ -17,18 +17,36 @@ public class DecodeTest {
 
         Function f = new Function("baz(uint32,bool)");
 
-        ByteBuffer encoded = f.encodeCall(69L, true);
-        Tuple args = f.decodeCall(encoded.flip());
+    ByteBuffer encoded = f.encodeCall(69L, true); // arguments auto-boxed and wrapped in a Tuple
+    Tuple args = f.decodeCall(encoded.flip()); // Tuple is an immutable list of Objects, in this case { Long.valueOf(69L), Boolean.TRUE }
 
-        ByteBuffer buffer = ByteBuffer.allocate(f.lengthFor(args));
+    ByteBuffer buffer = ByteBuffer.allocate(f.lengthFor(args));
         
-        System.out.println("equals = " +
-                f.encodeCall(args, buffer)
-                        .decodeCall(buffer.flip())
-                        .equals(args)
-        );
-        System.out.println("0x" + Function.hex(encoded.array()));
-        System.out.println(Function.format(buffer.array()));
+    System.out.println("equals = " +
+            f.encodeCall(args, buffer)
+                    .decodeCall(buffer.flip())
+                    .equals(args)
+    );
+    System.out.println("0x" + Function.hex(encoded.array()));
+    System.out.println(Function.formatABI(buffer.array()));
+
+        
+//        Function f = new Function("baz(uint32,bool)");
+//
+//        ByteBuffer encoded = f.encodeCall(69L, true);
+//        Tuple args = f.decodeCall(encoded.flip());
+//
+//        ByteBuffer buffer = ByteBuffer.allocate(f.lengthFor(args));
+//        
+//        System.out.println("equals = " +
+//                f.encodeCall(args, buffer)
+//                        .decodeCall(buffer.flip())
+//                        .equals(args)
+//        );
+//        System.out.println("0x" + Function.hex(encoded.array()));
+//        System.out.println(Function.format(buffer.array()));
+//        
+//        System.out.println("eeee " + args.equals(new Tuple(Long.valueOf(69L), Boolean.TRUE)));
 
         if(true)return;
 
@@ -108,7 +126,7 @@ public class DecodeTest {
         ByteBuffer b0 = f0.encodeCall(argg);
         byte[] abi0 = b0.array();
 //        abi0[3] = -1;
-        Function.format(abi0);
+        Function.formatABI(abi0);
         Tuple x = f0.decodeCall(abi0);
         System.out.println(x.equals(argg));
 
@@ -184,7 +202,7 @@ public class DecodeTest {
 //        };
 //        ByteBuffer bb = f0.encodeCall(args); // , pow, upow
         byte[] abi = bb.array();
-        Function.format(abi);
+        Function.formatABI(abi);
         Tuple t = f2.decodeCall(abi);
         System.out.println("========= " + Arrays.deepEquals(t.elements, subtuple.elements));
 
@@ -255,7 +273,7 @@ public class DecodeTest {
 
         abi = f7.encodeCall(argsIn).array();
 
-        Function.format(abi);
+        Function.formatABI(abi);
 
         Tuple tupleOut = f7.decodeCall(abi);
         Object[] argsOut = tupleOut.elements;
