@@ -2,11 +2,7 @@ package com.esaulpaugh.headlong.abi;
 
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.security.SecureRandom;
 import java.text.ParseException;
 import java.util.Objects;
@@ -14,7 +10,6 @@ import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.TimeUnit;
 
 public class MonteCarloTest {
 
@@ -22,7 +17,7 @@ public class MonteCarloTest {
 
     private static final int N = 100_000;
 
-    private static long[] generateSeeds(long masterSeed) { // (-2465594717398185362,4,4,4,4)		((int256),ufixed72x2,uint160)
+    private static long[] generateSeeds(long masterSeed) {
         Random r = new Random(masterSeed);
         long[] seeds = new long[N];
         for (int i = 0; i < seeds.length; i++) {
@@ -37,7 +32,7 @@ public class MonteCarloTest {
         SecureRandom sr = new SecureRandom();
 
         if(masterSeed == null) {
-            masterSeed = seed(System.nanoTime()) * sr.nextLong();
+            masterSeed = seed(System.nanoTime()) ^ sr.nextLong();
         }
 
         final long[] seeds = generateSeeds(masterSeed);
@@ -49,13 +44,8 @@ public class MonteCarloTest {
         MonteCarloTestCase testCase;
         boolean result;
         for(final long seed : seeds) {
-            // "(8527343108833427504,4,9,4,4)"
-            // "(5215733063408107969,2,3,4,4)"
 
-            // (8952920882133644975,256,2,1,1)
-
-            // (7042232989689500075,2000,2,1,1)
-            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed); // "(-6307556721730084796,2,3,4,4)"
+            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed); // "(-6609536284954208096,1,5,1,33)"
             try {
                 testCase = new MonteCarloTestCase(params);
                 temp = testCase.function.canonicalSignature;
@@ -142,7 +132,7 @@ public class MonteCarloTest {
         }
     }
 
-    private static final int TIMEOUT_SECONDS = 60;
+//    private static final int TIMEOUT_SECONDS = 60;
 
     @Test
     public void threadedTest() throws ParseException, InterruptedException, IOException, ClassNotFoundException {
@@ -187,7 +177,7 @@ public class MonteCarloTest {
 
         ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
         pool.invoke(task);
-//        pool.awaitQuiescence(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+//        pool.awaitQuiescence(TIMEOUT_SECONDS, TimeUnit.SECONDS); // Java 1.8+
         ForkJoinTask.helpQuiesce();
         pool.shutdownNow();
 
