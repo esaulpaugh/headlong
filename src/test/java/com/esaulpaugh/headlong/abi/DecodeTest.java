@@ -18,13 +18,13 @@ public class DecodeTest {
         Function f = new Function("baz(uint32,bool)");
 
     ByteBuffer encoded = f.encodeCall(69L, true); // arguments auto-boxed and wrapped in a Tuple
-    Tuple args = f.decodeCall(encoded.flip()); // Tuple is an immutable list of Objects, in this case { Long.valueOf(69L), Boolean.TRUE }
+    Tuple args = f.decodeCall((ByteBuffer) encoded.flip()); // Tuple is an immutable list of Objects, in this case { Long.valueOf(69L), Boolean.TRUE }
 
     ByteBuffer buffer = ByteBuffer.allocate(f.lengthFor(args));
         
     System.out.println("equals = " +
             f.encodeCall(args, buffer)
-                    .decodeCall(buffer.flip())
+                    .decodeCall((ByteBuffer) buffer.flip())
                     .equals(args)
     );
     System.out.println("0x" + Function.hex(encoded.array()));
