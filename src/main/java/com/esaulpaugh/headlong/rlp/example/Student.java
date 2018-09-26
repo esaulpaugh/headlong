@@ -82,7 +82,7 @@ public class Student implements RLPEncodeable {
 //        return Arrays.deepHashCode(new Object[]{ name, gpa, publicKey, balance });
 
         return name == null ? 31 : name.hashCode()
-                * Float.hashCode(gpa)
+                * Float.floatToIntBits(gpa)
                 * (publicKey == null ? 31 : publicKey.hashCode())
                 * (balance == null ? 31 : balance.hashCode());
     }

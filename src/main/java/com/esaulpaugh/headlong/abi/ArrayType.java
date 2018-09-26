@@ -263,7 +263,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
 
     private static boolean[] decodeBooleanArray(ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
         boolean[] booleans = new boolean[arrayLen]; // elements are false by default
-        final int booleanOffset = UNIT_LENGTH_BYTES - Byte.BYTES;
+        final int booleanOffset = UNIT_LENGTH_BYTES - 1; // Byte.BYTES
         for(int i = 0; i < arrayLen; i++) {
             bb.get(elementBuffer);
             for (int j = 0; j < booleanOffset; j++) {
