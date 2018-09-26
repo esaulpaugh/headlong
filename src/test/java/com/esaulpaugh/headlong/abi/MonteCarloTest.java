@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.TimeUnit;
 
@@ -186,7 +187,8 @@ public class MonteCarloTest {
 
         ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
         pool.invoke(task);
-        pool.awaitQuiescence(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+//        pool.awaitQuiescence(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        ForkJoinTask.helpQuiesce();
         pool.shutdownNow();
 
         Thread[] threads = new Thread[8];
@@ -249,7 +251,6 @@ public class MonteCarloTest {
     }
 
     private static long seed(final long nanoTime) {
-//        final long time = System.nanoTime();
         final long a = System.nanoTime() << 1;
         final long b = -System.nanoTime() >> 1;
         final long c = nanoTime * a * b;
@@ -257,18 +258,6 @@ public class MonteCarloTest {
         final long e = c >> 32;
         final long f = c ^ d;
         final long g = c ^ e;
-        final long h = f + g;
-
-//        System.out.println("nanoTime = " + nanoTime);
-//        System.out.println("a = " + a);
-//        System.out.println("b = " + b);
-//        System.out.println("c = " + c);
-//        System.out.println("d = " + d);
-//        System.out.println("e = " + e);
-//        System.out.println("f = " + f);
-//        System.out.println("g = " + g);
-//        System.out.println("return " + h);
-
-        return h;
+        return f + g;
     }
 }

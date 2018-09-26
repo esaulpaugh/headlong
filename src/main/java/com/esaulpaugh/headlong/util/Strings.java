@@ -21,7 +21,7 @@ public class Strings {
     public static final boolean NO_PADDING = false;
 
     public static String encode(byte[] bytes) {
-        return FastHex.encode(bytes, 0, bytes.length);
+        return FastHex.encodeToString(bytes, 0, bytes.length);
     }
 
     public static byte[] decode(String encoded) {
@@ -37,7 +37,7 @@ public class Strings {
         case UTF_8: return new String(bytes, from, len, CHARSET_UTF_8);
         case BASE64: return toBase64(bytes, from, len, WITH_PADDING);
         case HEX:
-        default: return FastHex.encode(bytes, from, len);
+        default: return FastHex.encodeToString(bytes, from, len);
         }
     }
 

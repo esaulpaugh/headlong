@@ -1,9 +1,12 @@
 package com.esaulpaugh.headlong.util;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Random;
 
 public final class FastHex {
+
+    private static final Charset ASCII = Charset.forName("US-ASCII");
 
     private static final int[] ENCODE_TABLE = new int[1 << Byte.SIZE];
     private static final int[] DECODE_TABLE = new int[1 << Byte.SIZE];
@@ -45,7 +48,18 @@ public final class FastHex {
         DECODE_TABLE['f'] = 15;
     }
 
-    public static String encode(byte[] buffer, final int offset, final int length) {
+    public static byte[] encode(byte[] buffer, final int offset, final int length) {
+        final int end = offset + length;
+        byte[] bytes = new byte[length << 1];
+        for (int i = offset, j = 0; i < end; i++, j+=2) {
+            int x = ENCODE_TABLE[buffer[i] & 0xFF];
+            bytes[j] = (byte) (x >>> Byte.SIZE);
+            bytes[j + 1] = (byte) (x & 0xFF);
+        }
+        return bytes;
+    }
+
+    public static String encodeToString(byte[] buffer, final int offset, final int length) {
         final int end = offset + length;
         char[] chars = new char[length << 1];
         for (int i = offset, j = 0; i < end; i++, j+=2) {
@@ -56,18 +70,18 @@ public final class FastHex {
         return new String(chars);
     }
 
-    public static byte[] decode(String hex, final int offset, final int length) {
+    public static byte[] decode(byte[] hexBytes, final int offset, final int length) {
         if ((length & 0x01) != 0) {
             throw new IllegalArgumentException("length must be a multiple of two");
         }
         final int bytesLen = length >> 1;
         byte[] bytes = new byte[bytesLen];
         for (int i = 0, j = offset; i < bytesLen; i++, j+=2) {
-            int a = DECODE_TABLE[hex.charAt(j)];
+            int a = DECODE_TABLE[hexBytes[j]];
             if (a == -1) {
                 throw new IllegalArgumentException("illegal char @ " + j);
             }
-            int b = DECODE_TABLE[hex.charAt(j + 1)];
+            int b = DECODE_TABLE[hexBytes[j + 1]];
             if (b == -1) {
                 throw new IllegalArgumentException("illegal char @ " + (j + 1));
             }
@@ -76,10 +90,33 @@ public final class FastHex {
         return bytes;
     }
 
+    public static byte[] decode(String hex, final int offset, final int length) {
+        return decode(hex.getBytes(ASCII), offset, length);
+
+//        if ((length & 0x01) != 0) {
+//            throw new IllegalArgumentException("length must be a multiple of two");
+//        }
+//        final int bytesLen = length >> 1;
+//        byte[] bytes = new byte[bytesLen];
+//        for (int i = 0, j = offset; i < bytesLen; i++, j+=2) {
+//            int a = DECODE_TABLE[hex.charAt(j)];
+//            if (a == -1) {
+//                throw new IllegalArgumentException("illegal char @ " + j);
+//            }
+//            int b = DECODE_TABLE[hex.charAt(j + 1)];
+//            if (b == -1) {
+//                throw new IllegalArgumentException("illegal char @ " + (j + 1));
+//            }
+//            bytes[i] = (byte) ((a << 4) | b);
+//        }
+//        return bytes;
+    }
+
     public static void main(String[] args0) {
         byte[] test = new byte[] { -128, -127, -126, -1, 0, 1, 2, 3, 4, 5 };
-        String s = encode(test, 0, test.length);
-        System.out.println(s);
+        String s = encodeToString(test, 0, test.length);
+        String s2 = new String(encode(test, 0, test.length), ASCII);
+        System.out.println(s + " " + s2);
         byte[] bb = decode(s, 0, s.length());
         System.out.println(Arrays.toString(bb) + " " + Arrays.equals(bb, test));
 
@@ -101,7 +138,7 @@ public final class FastHex {
         byte[] bytes = null;
 
         for (byte[] rando : randoms) {
-            str = encode(rando, 0, rando.length);
+            str = encodeToString(rando, 0, rando.length);
             bytes = decode(str, 0, str.length()); // ---------- 1.76
 //            bytes = org.spongycastle.util.encoders.Hex.decode(str);
 
@@ -114,7 +151,7 @@ public final class FastHex {
         }
         start = System.nanoTime();
         for (byte[] rando : randoms) {
-            str = encode(rando, 0, rando.length); // 0.88
+            str = encodeToString(rando, 0, rando.length); // 0.88
             bytes = decode(str, 0, str.length()); // 2.14
 //            bytes = org.spongycastle.util.encoders.Hex.decode(str); // 4.18
         }
