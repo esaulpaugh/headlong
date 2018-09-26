@@ -12,7 +12,7 @@ class TupleType extends StackableType<Tuple> {
     private static final long serialVersionUID = -8630808789515788419L;
 
     private static final String CLASS_NAME = Tuple.class.getName();
-    private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getNameStub(Tuple[].class);
+    private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(Tuple[].class);
 
     final StackableType<?>[] elementTypes;
 

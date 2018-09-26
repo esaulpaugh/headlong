@@ -150,7 +150,8 @@ public class RLPDecoderTest {
                 Short.MAX_VALUE,
                 Short.MAX_VALUE * 50,
                 Short.MAX_VALUE * 1000,
-                Integer.MAX_VALUE - 13
+                Integer.MAX_VALUE / 13 // try this if using 32-bit java and getting OOME
+//                Integer.MAX_VALUE - 13
         };
 
         for (long dataLen : dataLengths) {

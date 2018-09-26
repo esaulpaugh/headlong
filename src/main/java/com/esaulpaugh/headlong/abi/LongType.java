@@ -10,7 +10,7 @@ class LongType extends AbstractUnitType<Long> {
     private static final long serialVersionUID = 4781086907270769671L;
 
     static final String CLASS_NAME = Long.class.getName();
-    static final String ARRAY_CLASS_NAME_STUB = ClassNames.getNameStub(long[].class);
+    static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(long[].class);
 
     LongType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, bitLength, unsigned);

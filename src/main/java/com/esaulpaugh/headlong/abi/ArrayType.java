@@ -18,10 +18,10 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     private static final long serialVersionUID = 2446103381769828948L;
 
     static final String BYTE_ARRAY_CLASS_NAME = byte[].class.getName();
-    static final String BYTE_ARRAY_ARRAY_CLASS_NAME_STUB = ClassNames.getNameStub(byte[][].class);
+    static final String BYTE_ARRAY_ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(byte[][].class);
 
     static final String STRING_CLASS_NAME = String.class.getName();
-    static final String STRING_ARRAY_CLASS_NAME_STUB = ClassNames.getNameStub(String[].class);
+    static final String STRING_ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(String[].class);
 
     private static final IntType ARRAY_LENGTH_TYPE = new IntType("int32", Integer.SIZE, false);
     private static final int ARRAY_LENGTH_BYTE_LEN = UNIT_LENGTH_BYTES;

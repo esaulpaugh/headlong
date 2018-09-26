@@ -10,7 +10,7 @@
 //    private static final long serialVersionUID = -8064633105605031334L;
 //
 //    private static final String CLASS_NAME = Short.class.getName();
-//    private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getNameStub(short[].class);
+//    private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(short[].class);
 //
 //    ShortType(String canonicalType, boolean unsigned) {
 //        super(canonicalType, Short.SIZE, unsigned);

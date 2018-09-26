@@ -10,7 +10,7 @@ class ByteType extends AbstractUnitType<Byte> {
     private static final long serialVersionUID = 3723872788867891232L;
 
     static final String CLASS_NAME = Byte.class.getName();
-    static final String ARRAY_CLASS_NAME_STUB = ClassNames.getNameStub(byte[].class);
+    static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(byte[].class);
 
     private static final int MAX_BIT_LEN = 8;
 

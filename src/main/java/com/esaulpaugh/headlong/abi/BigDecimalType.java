@@ -12,7 +12,7 @@ class BigDecimalType extends AbstractUnitType<BigDecimal> {
     private static final long serialVersionUID = -4619900038530235710L;
 
     static final String CLASS_NAME = BigDecimal.class.getName();
-    static final String ARRAY_CLASS_NAME_STUB = ClassNames.getNameStub(BigDecimal[].class);
+    static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(BigDecimal[].class);
 
     final int scale;
 

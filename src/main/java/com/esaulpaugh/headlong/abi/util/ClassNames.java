@@ -47,7 +47,7 @@ public class ClassNames {
         return sb.toString();
     }
 
-    public static String getNameStub(Class<?> arrayClass) {
+    public static String getArrayClassNameStub(Class<?> arrayClass) {
         if(arrayClass.isArray()) {
             String className = arrayClass.getName();
             if(className.charAt(0) == '[') {
