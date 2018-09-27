@@ -6,6 +6,8 @@ import java.util.Random;
 
 public final class FastHex {
 
+    private static final int NIBBLE_BITS = Byte.SIZE / 2;
+
     private static final Charset ASCII = Charset.forName("US-ASCII");
 
     private static final int[] ENCODE_TABLE = new int[1 << Byte.SIZE];
@@ -18,8 +20,7 @@ public final class FastHex {
                 '8', '9', 'A', 'B',
                 'C', 'D', 'E', 'F' };
         for (int i = 0; i < ENCODE_TABLE.length; i++) {
-            int val = (ints[(i & 0xF0) >>> 4] << 8) | ints[i & 0x0F];
-            ENCODE_TABLE[i] = val;
+            ENCODE_TABLE[i] = (ints[(i & 0xF0) >>> NIBBLE_BITS] << Byte.SIZE) | ints[i & 0x0F];
         }
 
         Arrays.fill(DECODE_TABLE, -1);
@@ -52,9 +53,9 @@ public final class FastHex {
         final int end = offset + length;
         byte[] bytes = new byte[length << 1];
         for (int i = offset, j = 0; i < end; i++, j+=2) {
-            int x = ENCODE_TABLE[buffer[i] & 0xFF];
-            bytes[j] = (byte) (x >>> Byte.SIZE);
-            bytes[j + 1] = (byte) (x & 0xFF);
+            int hexPair = ENCODE_TABLE[buffer[i] & 0xFF];
+            bytes[j] = (byte) (hexPair >>> Byte.SIZE); // left byte
+            bytes[j+1] = (byte) (hexPair & 0xFF); // right byte
         }
         return bytes;
     }
@@ -63,9 +64,9 @@ public final class FastHex {
         final int end = offset + length;
         char[] chars = new char[length << 1];
         for (int i = offset, j = 0; i < end; i++, j+=2) {
-            int x = ENCODE_TABLE[buffer[i] & 0xFF];
-            chars[j] = (char) (x >>> Byte.SIZE);
-            chars[j + 1] = (char) (x & 0xFF);
+            int hexPair = ENCODE_TABLE[buffer[i] & 0xFF];
+            chars[j] = (char) (hexPair >>> Byte.SIZE); // left char
+            chars[j+1] = (char) (hexPair & 0xFF); // right char
         }
         return new String(chars);
     }
@@ -77,15 +78,15 @@ public final class FastHex {
         final int bytesLen = length >> 1;
         byte[] bytes = new byte[bytesLen];
         for (int i = 0, j = offset; i < bytesLen; i++, j+=2) {
-            int a = DECODE_TABLE[hexBytes[j]];
-            if (a == -1) {
-                throw new IllegalArgumentException("illegal char @ " + j);
+            int left = DECODE_TABLE[hexBytes[j]];
+            if (left == -1) {
+                throw new IllegalArgumentException("illegal val @ " + j);
             }
-            int b = DECODE_TABLE[hexBytes[j + 1]];
-            if (b == -1) {
-                throw new IllegalArgumentException("illegal char @ " + (j + 1));
+            int right = DECODE_TABLE[hexBytes[j+1]];
+            if (right == -1) {
+                throw new IllegalArgumentException("illegal val @ " + (j + 1));
             }
-            bytes[i] = (byte) ((a << 4) | b);
+            bytes[i] = (byte) ((left << NIBBLE_BITS) | right);
         }
         return bytes;
     }
@@ -139,7 +140,7 @@ public final class FastHex {
 
         for (byte[] rando : randoms) {
             str = encodeToString(rando, 0, rando.length);
-            bytes = decode(str, 0, str.length()); // ---------- 1.76
+            bytes = decode(str, 0, str.length());
 //            bytes = org.spongycastle.util.encoders.Hex.decode(str);
 
 //            str2 = org.spongycastle.util.encoders.Hex.toHexString(rando, 0, rando.length);
@@ -151,9 +152,9 @@ public final class FastHex {
         }
         start = System.nanoTime();
         for (byte[] rando : randoms) {
-            str = encodeToString(rando, 0, rando.length); // 0.88
+            str = encodeToString(rando, 0, rando.length);
             bytes = decode(str, 0, str.length()); // 2.14
-//            bytes = org.spongycastle.util.encoders.Hex.decode(str); // 4.18
+//            bytes = org.spongycastle.util.encoders.Hex.decode(str);
         }
         end = System.nanoTime();
 
