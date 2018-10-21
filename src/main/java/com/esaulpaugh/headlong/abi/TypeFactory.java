@@ -6,6 +6,9 @@ import java.text.ParseException;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
+/**
+ * Creates the appropriate {@link StackableType} object for a given canonical type string.
+ */
 final class TypeFactory {
 
     private static final ClassLoader CLASS_LOADER = TypeFactory.class.getClassLoader();

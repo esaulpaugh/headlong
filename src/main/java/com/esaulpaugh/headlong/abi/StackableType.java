@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
 
-// TODO support model classes à la Student.java
+// TODO support model classes à la Student.java?
 abstract class StackableType<V> implements Serializable {
 
     private static final long serialVersionUID = 4531737301646109454L;

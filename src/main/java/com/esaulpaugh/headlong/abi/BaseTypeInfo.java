@@ -1,9 +1,23 @@
 package com.esaulpaugh.headlong.abi;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
-// saves ~1 MB of memory by not including fixed/ufixed types in the map
+/**
+ * An object to hold metadata about a base type, such as the type's Java class name. A metadata object for each type is
+ * stored in {@link #TYPE_INFO_MAP} which is used by {@link TypeFactory#resolveBaseType(String, boolean, StackableType)}
+ * to generate a base type.
+ *
+ * fixed/ufixed types, which number in the thousands, are not included in the map, saving about 1 MB of memory. These
+ * are parsed by {@link TypeFactory}.
+ */
 public class BaseTypeInfo {
 
     private static final int HASH_MAP_INITIAL_CAPACITY = 256;
@@ -13,73 +27,67 @@ public class BaseTypeInfo {
     static {
         Map<String, BaseTypeInfo> map = new HashMap<>(HASH_MAP_INITIAL_CAPACITY);
 
-        try {
+        putSignedInts(map);
+        putUnsignedInts(map);
 
-            putSignedInts(map);
-            putUnsignedInts(map);
-
-            for (int i = 1; i <= 32; i++) {
-                String canonical = "bytes" + i;
-                map.put(canonical, new BaseTypeInfo(canonical, ArrayType.BYTE_ARRAY_CLASS_NAME, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB, i, ByteType.UNSIGNED_BYTE_OBJECT));
-            }
-
-            map.put(
-                    "function",
-                    new BaseTypeInfo(
-                            "function",
-                            null,
-                            "bytes24",
-                            ArrayType.BYTE_ARRAY_CLASS_NAME,
-                            ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB,
-                            24 * Byte.SIZE,
-                            0,
-                            true,
-                            24, ByteType.UNSIGNED_BYTE_OBJECT
-                    )
-            );
-
-            map.put("bytes", new BaseTypeInfo("bytes", ArrayType.BYTE_ARRAY_CLASS_NAME, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB, -1, ByteType.UNSIGNED_BYTE_OBJECT));
-            map.put("string", new BaseTypeInfo("string", ArrayType.STRING_CLASS_NAME, ArrayType.STRING_ARRAY_CLASS_NAME_STUB, -1, ByteType.UNSIGNED_BYTE_OBJECT));
-
-            map.put(
-                    "address",
-                    new BaseTypeInfo(
-                            "address", null,
-                            "uint160",
-                            BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB,
-                            160,
-                            0,
-                            true,
-                            -1, null
-                    )
-            );
-            map.put(
-                    "decimal",
-                    new BaseTypeInfo(
-                            "decimal", null,
-                            "fixed128x10",
-                            BigDecimalType.CLASS_NAME, BigDecimalType.ARRAY_CLASS_NAME_STUB,
-                            128,
-                            10,
-                            false,
-                            -1, null
-                    )
-            );
-            map.put(
-                    "bool",
-                    new BaseTypeInfo(
-                            "bool",
-                            BooleanType.CLASS_NAME, BooleanType.ARRAY_CLASS_NAME_STUB,
-                            1,
-                            true
-                    )
-            );
-
-            TYPE_INFO_MAP = Collections.unmodifiableMap(map);
-
-        } catch (ClassNotFoundException cnfe) {
-            throw new RuntimeException(cnfe);
+        for (int i = 1; i <= 32; i++) {
+            String canonical = "bytes" + i;
+            map.put(canonical, new BaseTypeInfo(canonical, ArrayType.BYTE_ARRAY_CLASS_NAME, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB, i, ByteType.UNSIGNED_BYTE_OBJECT));
         }
+
+        map.put(
+                "function",
+                new BaseTypeInfo(
+                        "function",
+                        null,
+                        "bytes24",
+                        ArrayType.BYTE_ARRAY_CLASS_NAME,
+                        ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB,
+                        24 * Byte.SIZE,
+                        0,
+                        true,
+                        24, ByteType.UNSIGNED_BYTE_OBJECT
+                )
+        );
+
+        map.put("bytes", new BaseTypeInfo("bytes", ArrayType.BYTE_ARRAY_CLASS_NAME, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB, -1, ByteType.UNSIGNED_BYTE_OBJECT));
+        map.put("string", new BaseTypeInfo("string", ArrayType.STRING_CLASS_NAME, ArrayType.STRING_ARRAY_CLASS_NAME_STUB, -1, ByteType.UNSIGNED_BYTE_OBJECT));
+
+        map.put(
+                "address",
+                new BaseTypeInfo(
+                        "address", null,
+                        "uint160",
+                        BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB,
+                        160,
+                        0,
+                        true,
+                        -1, null
+                )
+        );
+        map.put(
+                "decimal",
+                new BaseTypeInfo(
+                        "decimal", null,
+                        "fixed128x10",
+                        BigDecimalType.CLASS_NAME, BigDecimalType.ARRAY_CLASS_NAME_STUB,
+                        128,
+                        10,
+                        false,
+                        -1, null
+                )
+        );
+        map.put(
+                "bool",
+                new BaseTypeInfo(
+                        "bool",
+                        BooleanType.CLASS_NAME, BooleanType.ARRAY_CLASS_NAME_STUB,
+                        1,
+                        true
+                )
+        );
+
+        TYPE_INFO_MAP = Collections.unmodifiableMap(map);
     }
 
 //    public final String canonical; // e.g. address
@@ -139,6 +147,11 @@ public class BaseTypeInfo {
                 + "\""+ arrayClassNameStub + '\"';
     }
 
+    /**
+     * Returns the canonical type's metadata object if it exists.
+     * @param canonical
+     * @return
+     */
     public static BaseTypeInfo get(String canonical) {
         return TYPE_INFO_MAP.get(canonical);
     }
@@ -211,7 +224,7 @@ public class BaseTypeInfo {
         map.put(special, new BaseTypeInfo(special, stub, special, BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB, 256, 0, false, -1, null));
     }
 
-    private static void putUnsignedInts(final Map<String, BaseTypeInfo> map) throws ClassNotFoundException {
+    private static void putUnsignedInts(final Map<String, BaseTypeInfo> map) {
         final String stub = "uint";
         int i;
         String canonical;
