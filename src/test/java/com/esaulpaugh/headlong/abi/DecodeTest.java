@@ -1,5 +1,9 @@
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Utils;
+import com.joemelsha.crypto.hash.Keccak;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -14,6 +18,10 @@ public class DecodeTest {
 
     // (bytes32)uint8)
     public static void main(String[] args0) throws ParseException {
+
+        Keccak k = new Keccak(256);
+        System.out.println(FastHex.encodeToString(k.digest(Utils.EMPTY_BYTE_ARRAY), 0, 32));
+        if(true)return;
 
         Function f = new Function("baz(uint32,bool)");
 

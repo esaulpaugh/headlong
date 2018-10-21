@@ -301,8 +301,8 @@ public class Keccak extends MessageDigest {
 //        if (inBits < 0 || inBits > 64)
 //            throw new IllegalArgumentException("Invalid valueBits: " + 0 + " < " + inBits + " > " + 64);
 
-//        if (inBits <= 0)
-//            return;
+        if (inBits <= 0)
+            return;
 
         int rateBits = this.rateBits;
         int rateBitsWord = rateBits & 0x3f;
