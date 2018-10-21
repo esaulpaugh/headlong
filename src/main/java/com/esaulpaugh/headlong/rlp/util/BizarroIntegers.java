@@ -5,18 +5,17 @@ import com.esaulpaugh.headlong.rlp.DecodeException;
 import static com.esaulpaugh.headlong.util.Utils.EMPTY_BYTE_ARRAY;
 
 /**
- * Negative integers are stored in a minimal big-endian two's complement representation. Non-negative integers are stored
- * full-length.
+ * The mirror image of {@link Integers}. Not compatible with the RLP specification.
  *
- *-256L = 0x00
- * -16L = 0xf0
- *  -1L = 0x
- *   0L = 0x0000000000000000
- *   1L = 0x0000000000000001
- *  16L = 0x0000000000000010
+ * Negative integers are stored in a minimal big-endian two's complement representation. Non-negative integers are
+ * stored full-length. Negative one is represented by the empty byte array. Numbers are sign-extended on decode.
  *
- *  Negative one is represented by the empty byte array. Numbers are sign-extended on decode.
- *
+ * -256L ≡ 0x00
+ *  -16L ≡ 0xf0
+ *   -1L ≡ 0x
+ *    0L ≡ 0x0000000000000000
+ *    1L ≡ 0x0000000000000001
+ *   16L ≡ 0x0000000000000010
  */
 public class BizarroIntegers {
 
@@ -340,6 +339,11 @@ public class BizarroIntegers {
         return n;
     }
 
+    /**
+     * Will always return {@link Long#SIZE} for non-negative integers. See also {@link Integers#bitLen(long)}.
+     * @param val
+     * @return
+     */
     public static int bitLen(long val) {
         return Long.SIZE - Long.numberOfLeadingZeros(~val);
     }
@@ -351,7 +355,7 @@ public class BizarroIntegers {
 //            if(n != len(i)) throw new Exception("len doesn't match");
 //            long result = getLong(dest, 1, n);
 //            if(i != result) {
-//                System.out.println(Hex.toHexString(RLPIntegers.toBytes(i)) + " vs \n" + Hex.toHexString(RLPIntegers.toBytes(result)));
+//                System.out.println(Hex.toHexString(Integers.toBytes(i)) + " vs \n" + Hex.toHexString(Integers.toBytes(result)));
 //                throw new Exception(i + " != " + result);
 //            }
 //        }
@@ -362,7 +366,7 @@ public class BizarroIntegers {
 //        private long start, end;
 //
 //        public CustomThread(long start, long end) {
-//            System.out.println(Hex.toHexString(RLPIntegers.toBytes(start)) + " --> " + Hex.toHexString(RLPIntegers.toBytes(end)));
+//            System.out.println(Hex.toHexString(Integers.toBytes(start)) + " --> " + Hex.toHexString(Integers.toBytes(end)));
 //            this.start = start;
 //            this.end = end;
 //        }
@@ -394,7 +398,7 @@ public class BizarroIntegers {
 //            nextStart = end;
 //        }
 //
-//        System.out.println(Hex.toHexString(RLPIntegers.toBytes(nextStart)) + " --> " + Hex.toHexString(RLPIntegers.toBytes(finalEnd)));
+//        System.out.println(Hex.toHexString(Integers.toBytes(nextStart)) + " --> " + Hex.toHexString(Integers.toBytes(finalEnd)));
 //        testNegativeLongs(nextStart, finalEnd);
 //
 //        for (Thread t : threads) {
@@ -403,7 +407,7 @@ public class BizarroIntegers {
 //    }
 //
 //    public static void main(String[] args0) throws Exception {
-//
+//          if(true)return;
 ////        System.out.println((short) (byte) -2);
 //
 ////        for(int i = 0; i < 256; i++) {
@@ -460,24 +464,24 @@ public class BizarroIntegers {
 //
 //        System.out.println(veryEnd - veryStart);
 //
-//        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Short.MAX_VALUE)));
-//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((short) Byte.MAX_VALUE)));
-//        System.out.println(Hex.toHexString(RLPIntegers.toBytes((short) Byte.MIN_VALUE)));
-//        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Short.MIN_VALUE)));
+//        System.out.println(Hex.toHexString(Integers.toBytes(Short.MAX_VALUE)));
+//        System.out.println(Hex.toHexString(Integers.toBytes((short) Byte.MAX_VALUE)));
+//        System.out.println(Hex.toHexString(Integers.toBytes((short) Byte.MIN_VALUE)));
+//        System.out.println(Hex.toHexString(Integers.toBytes(Short.MIN_VALUE)));
 //
 //        System.out.println(Hex.toHexString(toBytes(Short.MAX_VALUE)));
 //        System.out.println(Hex.toHexString(toBytes((short) Byte.MAX_VALUE)));
 //        System.out.println(Hex.toHexString(toBytes((short) Byte.MIN_VALUE)));
 //        System.out.println(Hex.toHexString(toBytes(Short.MIN_VALUE)));
 //
-////        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Long.MAX_VALUE)));
-////        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Integer.MAX_VALUE)));
-////        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Short.MAX_VALUE)));
-////        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Byte.MAX_VALUE)));
-////        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Byte.MIN_VALUE)));
-////        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Short.MIN_VALUE)));
-////        System.out.println(Hex.toHexString(RLPIntegers.toBytes((long) Integer.MIN_VALUE)));
-////        System.out.println(Hex.toHexString(RLPIntegers.toBytes(Long.MIN_VALUE)));
+////        System.out.println(Hex.toHexString(Integers.toBytes(Long.MAX_VALUE)));
+////        System.out.println(Hex.toHexString(Integers.toBytes((long) Integer.MAX_VALUE)));
+////        System.out.println(Hex.toHexString(Integers.toBytes((long) Short.MAX_VALUE)));
+////        System.out.println(Hex.toHexString(Integers.toBytes((long) Byte.MAX_VALUE)));
+////        System.out.println(Hex.toHexString(Integers.toBytes((long) Byte.MIN_VALUE)));
+////        System.out.println(Hex.toHexString(Integers.toBytes((long) Short.MIN_VALUE)));
+////        System.out.println(Hex.toHexString(Integers.toBytes((long) Integer.MIN_VALUE)));
+////        System.out.println(Hex.toHexString(Integers.toBytes(Long.MIN_VALUE)));
 ////
 ////        System.out.println(Hex.toHexString(toBytes(Long.MAX_VALUE)));
 ////        System.out.println(Hex.toHexString(toBytes((long) Integer.MAX_VALUE)));

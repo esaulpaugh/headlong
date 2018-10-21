@@ -117,7 +117,7 @@ public class Unsigned {
     }
 
     public static void main(String[] args) {
-
+        if(true)return;
         System.out.println(INT8_RANGE + " " + Math.pow(2, 8));
         System.out.println(INT16_RANGE + " " + BigInteger.valueOf(2).pow(16));
         System.out.println(INT24_RANGE + " " + BigInteger.valueOf(2).pow(24));

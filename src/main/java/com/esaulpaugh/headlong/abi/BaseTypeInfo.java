@@ -173,57 +173,6 @@ public class BaseTypeInfo {
         return TYPE_INFO_MAP;
     }
 
-    public static void main(String[] args0) {
-
-        System.out.println(int[].class.getSuperclass());
-
-//        if(true)return;
-
-        final int capacity = 256;
-
-        Set<String> keySet = TYPE_INFO_MAP.keySet();
-
-        int c, code, index;
-
-        System.out.println(
-                ((capacity - 1) & ("bool".hashCode() ^ ("bool".hashCode() >>> 16)))
-                        + " == "
-                        +  ((capacity - 1) & ("string".hashCode() ^ ("string".hashCode() >>> 16)))
-        );
-
-        int count = 0;
-        HashSet<Integer> hashCodes = new HashSet<>();
-        for(String key : keySet) {
-            code = key.hashCode();
-            index = (capacity - 1) & code;
-            if(!hashCodes.add(index)) {
-                System.out.print(key + "(" + index + "),");
-                count++;
-            }
-        }
-        System.out.println("\ncount = " + count);
-
-        count = 0;
-        hashCodes = new HashSet<>();
-
-        for(String key : keySet) {
-            code = (c = key.hashCode()) ^ (c >>> 16);
-            index = (capacity - 1) & code;
-            if(!hashCodes.add(index)) {
-                System.out.print(key + "(" + index + "),");
-                count++;
-            }
-        }
-        System.out.println("\ncount = " + count);
-
-        @SuppressWarnings("unchecked")
-        Map.Entry<String, BaseTypeInfo>[] entries = TYPE_INFO_MAP.entrySet().toArray(new Map.Entry[0]);
-        Arrays.sort(entries, new MapComparator());
-        for(Map.Entry<String, BaseTypeInfo> e : entries) {
-            System.out.println(e.getKey() + " --> " + e.getValue());
-        }
-    }
-
     private static class MapComparator implements Comparator<Map.Entry<String, BaseTypeInfo>>, Serializable {
         private static final long serialVersionUID = -765405845176007435L;
 
@@ -326,5 +275,58 @@ public class BaseTypeInfo {
                 Objects.equals(className, that.className) &&
                 Objects.equals(arrayClassNameStub, that.arrayClassNameStub) &&
                 Objects.equals(elementType, that.elementType);
+    }
+
+    public static void main(String[] args0) {
+
+        if(true)return;
+
+        System.out.println(int[].class.getSuperclass());
+
+//        if(true)return;
+
+        final int capacity = 256;
+
+        Set<String> keySet = TYPE_INFO_MAP.keySet();
+
+        int c, code, index;
+
+        System.out.println(
+                ((capacity - 1) & ("bool".hashCode() ^ ("bool".hashCode() >>> 16)))
+                        + " == "
+                        +  ((capacity - 1) & ("string".hashCode() ^ ("string".hashCode() >>> 16)))
+        );
+
+        int count = 0;
+        HashSet<Integer> hashCodes = new HashSet<>();
+        for(String key : keySet) {
+            code = key.hashCode();
+            index = (capacity - 1) & code;
+            if(!hashCodes.add(index)) {
+                System.out.print(key + "(" + index + "),");
+                count++;
+            }
+        }
+        System.out.println("\ncount = " + count);
+
+        count = 0;
+        hashCodes = new HashSet<>();
+
+        for(String key : keySet) {
+            code = (c = key.hashCode()) ^ (c >>> 16);
+            index = (capacity - 1) & code;
+            if(!hashCodes.add(index)) {
+                System.out.print(key + "(" + index + "),");
+                count++;
+            }
+        }
+        System.out.println("\ncount = " + count);
+
+        @SuppressWarnings("unchecked")
+        Map.Entry<String, BaseTypeInfo>[] entries = TYPE_INFO_MAP.entrySet().toArray(new Map.Entry[0]);
+        Arrays.sort(entries, new MapComparator());
+        for(Map.Entry<String, BaseTypeInfo> e : entries) {
+            System.out.println(e.getKey() + " --> " + e.getValue());
+        }
     }
 }

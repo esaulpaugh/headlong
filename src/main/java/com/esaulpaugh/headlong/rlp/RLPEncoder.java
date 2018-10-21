@@ -1,6 +1,6 @@
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
+import com.esaulpaugh.headlong.rlp.util.Integers;
 
 import java.util.Arrays;
 
@@ -21,7 +21,7 @@ public class RLPEncoder {
 
     private static int prefixLength(long dataLen) {
         if (isLong(dataLen)) {
-            return 1 + RLPIntegers.len(dataLen);
+            return 1 + Integers.len(dataLen);
         } else {
             return 1;
         }
@@ -54,7 +54,7 @@ public class RLPEncoder {
     private static int stringEncodedLen(byte[] byteString) {
         final int dataLen = byteString.length;
         if (isLong(dataLen)) {
-            return 1 + RLPIntegers.len(dataLen) + dataLen;
+            return 1 + Integers.len(dataLen) + dataLen;
         }
         if (dataLen == 1 && byteString[0] >= 0x00) { // same as (bytes[0] & 0xFF) < 0x80
             return 1;
@@ -65,7 +65,7 @@ public class RLPEncoder {
     private static long listEncodedLen(Iterable<?> elements) {
         final long listDataLen = totalEncodedLen(elements);
         if (isLong(listDataLen)) {
-            return 1 + RLPIntegers.len(listDataLen) + listDataLen;
+            return 1 + Integers.len(listDataLen) + listDataLen;
         }
         return 1 + listDataLen;
     }
@@ -91,7 +91,7 @@ public class RLPEncoder {
     private static int encodeString(byte[] data, byte[] dest, int destIndex) {
         final int dataLen = data.length;
         if (isLong(dataLen)) { // long string
-            int n = RLPIntegers.putLong(dataLen, dest, destIndex + 1);
+            int n = Integers.putLong(dataLen, dest, destIndex + 1);
             dest[destIndex] = (byte) (STRING_LONG_OFFSET + (byte) n);
             destIndex += 1 + n;
             System.arraycopy(data, 0, dest, destIndex, dataLen);
@@ -129,7 +129,7 @@ public class RLPEncoder {
 
     private static int encodeLongListPrefix(final long dataLen, byte[] dest, final int destIndex) {
         final int lengthIndex = destIndex + 1;
-        final int n = RLPIntegers.putLong(dataLen, dest, lengthIndex);
+        final int n = Integers.putLong(dataLen, dest, lengthIndex);
         dest[destIndex] = (byte) (LIST_LONG_OFFSET + (byte) n);
         return lengthIndex + n;
     }

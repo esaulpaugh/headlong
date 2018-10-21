@@ -1,6 +1,6 @@
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
+import com.esaulpaugh.headlong.rlp.util.Integers;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -75,10 +75,10 @@ public class RLPDecoderTest {
                 (long) (Integer.MAX_VALUE * 0.921) // lower this if you can't increase heap
         };
         for (long dataLen : dataLengths) {
-            lol = RLPIntegers.len(dataLen);
+            lol = Integers.len(dataLen);
             buffer = new byte[1 + lol + (int) dataLen];
             buffer[0] = (byte) (0xb7 + lol);
-            RLPIntegers.putLong(dataLen, buffer, 1);
+            Integers.putLong(dataLen, buffer, 1);
             huge = (RLPString) RLP_STRICT.wrap(buffer);
             data = huge.asString(UTF_8);
             System.out.println(dataLen);
@@ -114,17 +114,17 @@ public class RLPDecoderTest {
 
         for (long dataLen : dataLengths) {
             System.out.println("dataLen = " + dataLen);
-            lol = RLPIntegers.len(dataLen);
+            lol = Integers.len(dataLen);
             System.out.println("length of length = " + lol);
             buffer = new byte[1 + lol + (int) dataLen];
             buffer[0] = (byte) (0xf7 + lol);
-            RLPIntegers.putLong(dataLen, buffer, 1);
+            Integers.putLong(dataLen, buffer, 1);
             i = 1 + lol;
             int size = 0;
             final int lim = buffer.length - elementEncodedLen;
             while(i < lim) {
                 buffer[i] = elementLeadByte;
-//                RLPIntegers.putLong(elementDataLen, buffer, i + 1);
+//                Integers.putLong(elementDataLen, buffer, i + 1);
                 size++;
                 i += elementEncodedLen;
             }
@@ -156,12 +156,12 @@ public class RLPDecoderTest {
 
         for (long dataLen : dataLengths) {
             System.out.println("dataLen = " + dataLen);
-            lol = RLPIntegers.len(dataLen);
+            lol = Integers.len(dataLen);
             System.out.println("length of length = " + lol);
             buffer = new byte[1 + lol + (int) dataLen];
             Arrays.fill(buffer, (byte) 0x09);
             buffer[0] = (byte) (0xf7 + lol);
-            RLPIntegers.putLong(dataLen, buffer, 1);
+            Integers.putLong(dataLen, buffer, 1);
             i = 1 + lol;
             final int size = buffer.length - i;
 

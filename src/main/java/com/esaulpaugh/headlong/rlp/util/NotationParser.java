@@ -7,6 +7,9 @@ import java.util.List;
 
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 
+/**
+ * Decodes RLP object notation as defined by the {@link Notation} class.
+ */
 public class NotationParser {
 
     private static final int OBJECT_ARRAY = 0;
@@ -17,6 +20,11 @@ public class NotationParser {
     private static final int STRING_PREFIX_LEN = Notation.STRING_PREFIX.length();
     private static final int STRING_SUFFIX_LEN = Notation.STRING_SUFFIX.length();
 
+    /**
+     * Returns the object hierarchy represented by the notation.
+     * @param notation
+     * @return
+     */
     public static List<Object> parse(String notation) {
         List<Object> top = new ArrayList<>();
         int[] pair = new int[2];
@@ -83,17 +91,17 @@ public class NotationParser {
             }
             pair[0] = OBJECT_ARRAY;
             pair[1] = o;
-            return; // new Pair<>(OBJECT_ARRAY, o);
+            return;
         }
         if(o == -1) {
             pair[0] = STRING;
             pair[1] = s;
-            return; // new Pair<>(STRING, s);
+            return;
         }
         if(o < s) {
             pair[0] = OBJECT_ARRAY;
             pair[1] = o;
-            return; // new Pair<>(OBJECT_ARRAY, o);
+            return;
         }
         pair[0] = STRING;
         pair[1] = s;

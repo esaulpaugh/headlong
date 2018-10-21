@@ -6,7 +6,10 @@ import java.math.BigInteger;
 
 import static com.esaulpaugh.headlong.util.Utils.EMPTY_BYTE_ARRAY;
 
-public class RLPIntegers {
+/**
+ * Utility for reading and writing integers from and to RLP format.
+ */
+public class Integers {
 
     /**
      * Returns an integer's minimal big-endian two's complement representation. The integer zero is represented by the
@@ -450,12 +453,17 @@ public class RLPIntegers {
         return n;
     }
 
+    /**
+     * Will always return {@link Long#SIZE} for negative integers. See also {@link BizarroIntegers#bitLen(long)}.
+     * @param val
+     * @return
+     */
     public static int bitLen(long val) {
         return Long.SIZE - Long.numberOfLeadingZeros(val);
     }
 
     public static void insertBytes(int n, byte[] b, int i, byte w, byte x, byte y, byte z) {
-        insertBytes(n, b, i, (byte) 0, (byte) 0, (byte) 0, (byte) 0, w, x, y, z);
+        insertBytes(n, b, i, (byte)0, (byte)0, (byte)0, (byte)0, w, x, y, z);
     }
 
     /**

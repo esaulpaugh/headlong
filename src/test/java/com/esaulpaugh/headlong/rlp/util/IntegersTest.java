@@ -9,7 +9,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
 
-public class RLPIntegersTest {
+public class IntegersTest {
 
     @Test
     public void putGetByte_fast() throws DecodeException {
@@ -17,8 +17,8 @@ public class RLPIntegersTest {
         for (int j = 0; j < 1_000_000; j++) {
             for (int i = -128; i < 128; i++) {
                 byte b = (byte) i;
-                int n = RLPIntegers.putByte(b, one, 0);
-                byte r = RLPIntegers.getByte(one, 0, n);
+                int n = Integers.putByte(b, one, 0);
+                byte r = Integers.getByte(one, 0, n);
                 Assert.assertEquals(b, r);
             }
         }
@@ -30,8 +30,8 @@ public class RLPIntegersTest {
         for (int j = 0; j < 10_000; j++) {
             for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
                 short s = (short) i;
-                int n = RLPIntegers.putShort(s, two, 0);
-                short r = RLPIntegers.getShort(two, 0, n);
+                int n = Integers.putShort(s, two, 0);
+                short r = Integers.getShort(two, 0, n);
                 Assert.assertEquals(s, r);
             }
         }
@@ -42,8 +42,8 @@ public class RLPIntegersTest {
         byte[] four = new byte[4];
         for (long lo = Integer.MIN_VALUE; lo <= Integer.MAX_VALUE; lo++) {
             int i = (int) lo;
-            int n = RLPIntegers.putInt(i, four, 0);
-            int r = RLPIntegers.getInt(four, 0, n);
+            int n = Integers.putInt(i, four, 0);
+            int r = Integers.getInt(four, 0, n);
             Assert.assertEquals(i, r);
         }
     }
@@ -54,8 +54,8 @@ public class RLPIntegersTest {
         for (int j = 0; j < 1_000_000; j++) {
             for (int i = -128; i < 128; i++) {
                 byte b = (byte) i;
-                int n = RLPIntegers.putLong(0xFFL & b, one, 0);
-                byte r = RLPIntegers.getByte(one, 0, n);
+                int n = Integers.putLong(0xFFL & b, one, 0);
+                byte r = Integers.getByte(one, 0, n);
                 Assert.assertEquals(b, r);
             }
         }
@@ -67,8 +67,8 @@ public class RLPIntegersTest {
         for (int j = 0; j < 10_000; j++) {
             for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
                 short s = (short) i;
-                int n = RLPIntegers.putLong(0xFFFFL & s, two, 0);
-                short r = RLPIntegers.getShort(two, 0, n);
+                int n = Integers.putLong(0xFFFFL & s, two, 0);
+                short r = Integers.getShort(two, 0, n);
                 Assert.assertEquals(s, r);
             }
         }
@@ -82,8 +82,8 @@ public class RLPIntegersTest {
         byte[] four = new byte[4];
         for (long lo = Integer.MIN_VALUE; lo <= Integer.MAX_VALUE; lo++) {
             int i = (int) lo;
-            int n = RLPIntegers.putLong(0xFFFFFFFFL & i, four, 0);
-            int r = RLPIntegers.getInt(four, 0, n);
+            int n = Integers.putLong(0xFFFFFFFFL & i, four, 0);
+            int r = Integers.getInt(four, 0, n);
             Assert.assertEquals(i, r);
         }
     }
@@ -95,8 +95,8 @@ public class RLPIntegersTest {
         final long lim = Long.MAX_VALUE - (long) Math.pow(2.0, 24);
         for (long i = Long.MAX_VALUE; i >= lim; i--) {
             long lo = rand.nextLong();
-            int n = RLPIntegers.putLong(lo, eight, 0);
-            long r = RLPIntegers.getLong(eight, 0, n);
+            int n = Integers.putLong(lo, eight, 0);
+            long r = Integers.getLong(eight, 0, n);
             Assert.assertEquals(lo, r);
         }
     }
@@ -105,7 +105,7 @@ public class RLPIntegersTest {
     public void lenByte() {
         for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
             byte b = (byte) i;
-            int len = RLPIntegers.len(b);
+            int len = Integers.len(b);
             Assert.assertEquals(b == 0 ? 0 : 1, len);
         }
     }
@@ -114,7 +114,7 @@ public class RLPIntegersTest {
     public void lenShort() {
         for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
             short s = (short) i;
-            int len = RLPIntegers.len(s);
+            int len = Integers.len(s);
             Assert.assertEquals(
                     s == 0
                             ? 0
@@ -130,7 +130,7 @@ public class RLPIntegersTest {
     public void lenInt() {
         for (long lo = Integer.MIN_VALUE; lo <= Integer.MAX_VALUE; lo++) {
             int i = (int) lo;
-            int len = RLPIntegers.len(i);
+            int len = Integers.len(i);
             Assert.assertEquals(
                     i == 0
                             ? 0
@@ -152,7 +152,7 @@ public class RLPIntegersTest {
 
         for (int i = 0; i < Short.MAX_VALUE; i++) {
             long lo = rand.nextLong();
-            int len = RLPIntegers.len(lo);
+            int len = Integers.len(lo);
             Assert.assertEquals(
                     lo == 0
                             ? 0
@@ -183,47 +183,47 @@ public class RLPIntegersTest {
         final byte a = 1, b = 11, c = 111, d = 9, e = 99, f = -1, g = -100, h = 64;
 
         Arrays.fill(ten, (byte) 0);
-        RLPIntegers.insertBytes(0, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
+        Integers.insertBytes(0, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
         Assert.assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        RLPIntegers.insertBytes(1, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
+        Integers.insertBytes(1, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
         Assert.assertArrayEquals(new byte[] { 0, d, 0, 0, 0, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        RLPIntegers.insertBytes(2, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
+        Integers.insertBytes(2, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
         Assert.assertArrayEquals(new byte[] { 0, c, d, 0, 0, 0, 0, 0, 0, 0 }, ten);
         Arrays.fill(ten, (byte) 0);
 
         Arrays.fill(ten, (byte) 0);
-        RLPIntegers.insertBytes(3, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
+        Integers.insertBytes(3, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
         Assert.assertArrayEquals(new byte[] { 0, b, c, d, 0, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        RLPIntegers.insertBytes(4, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
+        Integers.insertBytes(4, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
         Assert.assertArrayEquals(new byte[] { 0, a, b, c, d, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        RLPIntegers.insertBytes(5, ten, 1, (byte) 0, (byte) 0, (byte) 0, a, b, c, d, e);
+        Integers.insertBytes(5, ten, 1, (byte) 0, (byte) 0, (byte) 0, a, b, c, d, e);
         Assert.assertArrayEquals(new byte[] { 0, a, b, c, d, e, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        RLPIntegers.insertBytes(6, ten, 1, (byte) 0, (byte) 0, a, b, c, d, e, f);
+        Integers.insertBytes(6, ten, 1, (byte) 0, (byte) 0, a, b, c, d, e, f);
         Assert.assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        RLPIntegers.insertBytes(7, ten, 1, (byte) 0, a, b, c, d, e, f, g);
+        Integers.insertBytes(7, ten, 1, (byte) 0, a, b, c, d, e, f, g);
         Assert.assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, g, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        RLPIntegers.insertBytes(8, ten, 1, a, b, c, d, e, f, g, h);
+        Integers.insertBytes(8, ten, 1, a, b, c, d, e, f, g, h);
         Assert.assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, g, h, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         byte[] src = new byte[4];
         Random rand = new Random(new SecureRandom().nextLong());
         rand.nextBytes(src);
-        RLPIntegers.insertBytes(3, ten, ten.length - 3, (byte) 0, src[1], src[2], src[3]);
+        Integers.insertBytes(3, ten, ten.length - 3, (byte) 0, src[1], src[2], src[3]);
         Assert.assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, src[1], src[2], src[3] }, ten);
     }
 
@@ -236,8 +236,8 @@ public class RLPIntegersTest {
         final int lim = Short.MAX_VALUE * 10;
         for(int i = 0; i < lim; i++) {
             BigInteger big = BigInteger.valueOf(rand.nextLong()).multiply(BigInteger.valueOf(Long.MAX_VALUE));
-            int n = RLPIntegers.putBigInt(big, dest, 0);
-            BigInteger r = RLPIntegers.getBigInt(dest, 0, n);
+            int n = Integers.putBigInt(big, dest, 0);
+            BigInteger r = Integers.getBigInt(dest, 0, n);
             Assert.assertEquals(big, r);
         }
     }

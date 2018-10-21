@@ -4,13 +4,20 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Random;
 
+/**
+ * Uses a larger encoding table to speed up encoding.
+ */
 public final class FastHex {
 
     private static final int NIBBLE_BITS = Byte.SIZE / 2;
 
     private static final Charset ASCII = Charset.forName("US-ASCII");
 
+    // Byte values index directly into the encoding table (size 256) whose elements contain two char values each,
+    // encoded together as an int.
     private static final int[] ENCODE_TABLE = new int[1 << Byte.SIZE];
+
+    // Char values index directly into the decoding table (size 128).
     private static final int[] DECODE_TABLE = new int[1 << Byte.SIZE];
 
     static {
@@ -114,6 +121,7 @@ public final class FastHex {
     }
 
     public static void main(String[] args0) {
+        if(true)return;
         byte[] test = new byte[] { -128, -127, -126, -1, 0, 1, 2, 3, 4, 5 };
         String s = encodeToString(test, 0, test.length);
         String s2 = new String(encode(test, 0, test.length), ASCII);

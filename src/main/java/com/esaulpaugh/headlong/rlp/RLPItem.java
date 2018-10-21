@@ -1,7 +1,7 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
-import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
+import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Strings;
 
@@ -49,7 +49,7 @@ public abstract class RLPItem {
             if (_dataIndex > containerEnd) {
                 throw new DecodeException("element @ index " + index + " exceeds its container; indices: " + _dataIndex + " > " + containerEnd);
             }
-            _dataLength = RLPIntegers.getLong(buffer, lengthIndex, diff);
+            _dataLength = Integers.getLong(buffer, lengthIndex, diff);
             if(_dataLength < MIN_LONG_DATA_LEN) {
                 throw new DecodeException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
             }
@@ -118,7 +118,7 @@ public abstract class RLPItem {
     /**
      * Wise man says only empty items are false.
      *
-     * @see RLPIntegers#putByte(byte, byte[], int)
+     * @see Integers#putByte(byte, byte[], int)
      * @return
      */
     public boolean asBoolean() {
@@ -139,19 +139,19 @@ public abstract class RLPItem {
     }
 
     public byte asByte() throws DecodeException {
-        return RLPIntegers.getByte(buffer, dataIndex, dataLength);
+        return Integers.getByte(buffer, dataIndex, dataLength);
     }
 
     public short asShort() throws DecodeException {
-        return RLPIntegers.getShort(buffer, dataIndex, dataLength);
+        return Integers.getShort(buffer, dataIndex, dataLength);
     }
 
     public int asInt() throws DecodeException {
-        return RLPIntegers.getInt(buffer, dataIndex, dataLength);
+        return Integers.getInt(buffer, dataIndex, dataLength);
     }
 
     public long asLong() throws DecodeException {
-        return RLPIntegers.getLong(buffer, dataIndex, dataLength);
+        return Integers.getLong(buffer, dataIndex, dataLength);
     }
 
     public BigInteger asBigInt() {

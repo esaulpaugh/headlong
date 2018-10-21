@@ -1,6 +1,6 @@
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
+import com.esaulpaugh.headlong.rlp.util.Integers;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -121,7 +121,7 @@ public class RLPList extends RLPItem {
         int destDataIndex = 1 + n;
         byte[] dest = new byte[destDataIndex + srcDataLen];
         dest[0] = (byte) (LIST_LONG_OFFSET + n);
-        RLPIntegers.insertBytes(n, dest, 1, a, b, c, d);
+        Integers.insertBytes(n, dest, 1, a, b, c, d);
 
         copyElements(srcElements, dest, destDataIndex);
 

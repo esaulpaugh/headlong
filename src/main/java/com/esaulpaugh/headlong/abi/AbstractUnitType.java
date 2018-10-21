@@ -1,10 +1,14 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.rlp.util.BizarroIntegers;
-import com.esaulpaugh.headlong.rlp.util.RLPIntegers;
+import com.esaulpaugh.headlong.rlp.util.Integers;
 
 import java.math.BigInteger;
 
+/**
+ * Superclass for any 32-byte ("unit") Contract ABI type. Usually numbers or boolean.
+ * @param <V>
+ */
 abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V should be instanceof Number or Boolean
 
     private static final long serialVersionUID = -8553020326426335481L;
@@ -33,7 +37,9 @@ abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V s
 
     // don't do unsigned check for array element
     void validatePrimitiveElement(long longVal) {
-        final int bitLen = longVal >= 0 ? RLPIntegers.bitLen(longVal) : BizarroIntegers.bitLen(longVal);
+        final int bitLen = longVal >= 0
+                ? Integers.bitLen(longVal) // gives correct bit length for non-negative integers only
+                : BizarroIntegers.bitLen(longVal); // gives correct bit length for negative integers only
         if(bitLen > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + bitLen + " > " + bitLength);
         }
@@ -49,7 +55,7 @@ abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V s
     // --------------------------------
 
     void validateLongBitLen(long longVal) {
-        final int bitLen = longVal >= 0 ? RLPIntegers.bitLen(longVal) : BizarroIntegers.bitLen(longVal);
+        final int bitLen = longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal);
         if(bitLen > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + bitLen + " > " + bitLength);
         }
