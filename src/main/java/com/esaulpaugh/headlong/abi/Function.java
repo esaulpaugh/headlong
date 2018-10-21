@@ -17,7 +17,7 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.encode;
 
 /**
- * Represents a function in an Ethereum contract. Can encode and decode function calls matching this function's signature.
+ * Represents a function in an Ethereum contract. Can encode and decode calls matching this function's signature.
  */
 public class Function implements Serializable {
 
@@ -48,7 +48,7 @@ public class Function implements Serializable {
      *
      * @param signature the function signature
      * @param messageDigest the hash function with which to generate the 4-byte selector
-     * @throws ParseException
+     * @throws ParseException   if the signature is malformed
      */
     public Function(String signature, MessageDigest messageDigest) throws ParseException {
         StringBuilder canonicalBuilder = new StringBuilder();

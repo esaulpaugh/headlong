@@ -1,6 +1,5 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.ABIUtils;
 import com.esaulpaugh.headlong.abi.util.ClassNames;
 
 import java.lang.reflect.Array;
@@ -35,10 +34,6 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
 
     final int length;
     transient final boolean isString;
-
-//    ArrayType(String canonicalType, T elementType, String elementClassName, String className, String arrayClassNameStub, int length, boolean dynamic) throws ClassNotFoundException {
-//        this(canonicalType, elementType, Class.forName(elementClassName), className, arrayClassNameStub, length, dynamic);
-//    }
 
     ArrayType(String canonicalType, T elementType, Class<?> elementClass, String className, String arrayClassNameStub, int length, boolean dynamic) {
         super(canonicalType, dynamic);
@@ -84,7 +79,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
             staticLen = ((boolean[]) value).length << LOG_2_UNIT_LENGTH_BYTES; // mul 32
             break;
         case TYPE_CODE_BYTE:
-            staticLen = ABIUtils.roundUp((isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length);
+            staticLen = roundLengthUp((isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length);
             break;
         case TYPE_CODE_SHORT:
             staticLen = ((short[]) value).length << LOG_2_UNIT_LENGTH_BYTES; // mul 32
@@ -128,7 +123,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         case TYPE_CODE_BOOLEAN: staticLen = checkLength(((boolean[]) value).length, value) << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BYTE:
             byte[] bytes = isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value;
-            staticLen = ABIUtils.roundUp(checkLength(bytes.length, value));
+            staticLen = roundLengthUp(checkLength(bytes.length, value));
             break;
         case TYPE_CODE_SHORT: staticLen = checkLength(((short[]) value).length, value) << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_INT: staticLen = validateIntArray((int[]) value); break;
@@ -224,16 +219,6 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         return valueLength;
     }
 
-    private void checkDecodeLength(int valueLength, ByteBuffer bb) {
-        final int expected = this.length;
-        if(expected == DYNAMIC_LENGTH) { // -1
-            return;
-        }
-        if(valueLength != expected) {
-            throw new IllegalArgumentException("array length mismatch @ " + (bb.position() - ARRAY_LENGTH_BYTE_LEN) + ": actual != expected: " + valueLength + " != " + expected);
-        }
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     A decode(ByteBuffer bb, byte[] elementBuffer) {
@@ -241,8 +226,12 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         final int arrayLen;
         if(dynamic) {
             arrayLen = ARRAY_LENGTH_TYPE.decode(bb, elementBuffer);
-//            System.out.println("A LENGTH = " + arrayLen);
-            checkDecodeLength(arrayLen, bb);
+            final int expectedLen = this.length;
+            if(expectedLen != DYNAMIC_LENGTH && arrayLen != expectedLen) {
+                throw new IllegalArgumentException("array length mismatch @ "
+                        + (bb.position() - ARRAY_LENGTH_BYTE_LEN)
+                        + ": actual != expected: " + arrayLen + " != " + expectedLen);
+            }
         } else {
             arrayLen = length;
         }
@@ -285,7 +274,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         final int mark = bb.position();
         byte[] out = new byte[arrayLen];
         bb.get(out);
-        bb.position(mark + ABIUtils.roundUp(arrayLen));
+        bb.position(mark + roundLengthUp(arrayLen));
         if(isString) {
             return new String(out, CHARSET_UTF_8);
         }
@@ -411,6 +400,18 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
                 dest[i] = elementType.decode(bb, elementBuffer);
             }
         }
+    }
+
+    /**
+     * Rounds a length up to the nearest multiple of 32. If {@code len} is already a multiple, method has no effect.
+     * @param len   the length, a non-negative integer
+     * @return  the rounded-up value
+     */
+    public static int roundLengthUp(int len) {
+        int mod = len & 31;
+        return mod == 0
+                ? len
+                : len + (32 - mod);
     }
 
     // use readResolve to avoid setting transient final field isString
