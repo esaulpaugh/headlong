@@ -96,20 +96,20 @@ public class BaseTypeInfo {
     public final String className; // e.g. java.lang.Boolean
     public final String arrayClassNameStub; // e.g. Z, e.g. Ljava.lang.BigInteger;
 
-    public final int bitLength;
+    public final int bitLen;
     public final int scale;
 //    public final boolean unsigned;
 
     public final StackableType<?> elementType;
 
-    public final int arrayLength;
+    public final int arrayLen;
 
-    public BaseTypeInfo(String canonical, String objectClassName, String arrayClassNameStub, int arrayLength, StackableType<?> elementType) {
-        this(canonical, null, canonical, objectClassName, arrayClassNameStub, -1, 0, true, arrayLength, elementType);
+    public BaseTypeInfo(String canonical, String objectClassName, String arrayClassNameStub, int arrayLen, StackableType<?> elementType) {
+        this(canonical, null, canonical, objectClassName, arrayClassNameStub, -1, 0, true, arrayLen, elementType);
     }
 
-    public BaseTypeInfo(String canonical, String objectClassName, String arrayClassNameStub, int bitLength, boolean unsigned) {
-        this(canonical, null, canonical, objectClassName, arrayClassNameStub, bitLength, 0, unsigned, -1,null);
+    public BaseTypeInfo(String canonical, String objectClassName, String arrayClassNameStub, int bitLen, boolean unsigned) {
+        this(canonical, null, canonical, objectClassName, arrayClassNameStub, bitLen, 0, unsigned, -1,null);
     }
 
     public BaseTypeInfo(String canonical,
@@ -117,10 +117,10 @@ public class BaseTypeInfo {
                         String effective,
                         String objectClassName,
                         String arrayClassNameStub,
-                        int bitLength,
+                        int bitLen,
                         int scale,
                         boolean unsigned,
-                        int arrayLength,
+                        int arrayLen,
                         StackableType<?> elementType) {
 //        this.ordinal = ordinal;
 //        this.canonical = canonical;
@@ -130,8 +130,8 @@ public class BaseTypeInfo {
         this.className = objectClassName.intern();
         this.arrayClassNameStub = arrayClassNameStub.intern();
 
-        this.bitLength = bitLength;
-        this.arrayLength = arrayLength;
+        this.bitLen = bitLen;
+        this.arrayLen = arrayLen;
         this.scale = scale;
 //        this.unsigned = unsigned;
         this.elementType = elementType;
@@ -274,7 +274,7 @@ public class BaseTypeInfo {
 
     @Override
     public int hashCode() {
-        return Objects.hash(className, arrayClassNameStub, bitLength, scale, elementType, arrayLength);
+        return Objects.hash(className, arrayClassNameStub, bitLen, scale, elementType, arrayLen);
     }
 
     @Override
@@ -282,9 +282,9 @@ public class BaseTypeInfo {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BaseTypeInfo that = (BaseTypeInfo) o;
-        return bitLength == that.bitLength &&
+        return bitLen == that.bitLen &&
                 scale == that.scale &&
-                arrayLength == that.arrayLength &&
+                arrayLen == that.arrayLen &&
                 Objects.equals(className, that.className) &&
                 Objects.equals(arrayClassNameStub, that.arrayClassNameStub) &&
                 Objects.equals(elementType, that.elementType);

@@ -7,7 +7,7 @@ import java.nio.charset.Charset;
 import static com.esaulpaugh.headlong.util.Utils.EMPTY_BYTE_ARRAY;
 
 /**
- * Utility for encoding and decoding hexadecimal, base64, and utf-8 encoded {@code String}s.
+ * Utility for encoding and decoding hexadecimal, Base64, and UTF-8-encoded {@code String}s.
  */
 public class Strings {
 

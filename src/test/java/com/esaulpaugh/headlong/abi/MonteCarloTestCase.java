@@ -476,7 +476,7 @@ public class MonteCarloTestCase implements Serializable {
     private static void findInequality(AbstractUnitType<?> abstractUnitType, Object in, Object out) throws Exception {
         if(!in.equals(out)) {
             if(in instanceof BigInteger && out instanceof BigInteger) {
-                System.err.println("bitLength: " + ((BigInteger) in).bitLength() + " =? " + ((BigInteger) out).bitLength());
+                System.err.println("bitLen: " + ((BigInteger) in).bitLength() + " =? " + ((BigInteger) out).bitLength());
             }
             System.err.println(in + " != " + out + " " + abstractUnitType.bitLength);
             throw new Exception();

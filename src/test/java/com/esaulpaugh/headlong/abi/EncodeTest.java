@@ -5,7 +5,6 @@ import org.junit.Assert;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.text.ParseException;
 
 import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
@@ -13,12 +12,12 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 
 public class EncodeTest {
 
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
-
     public static void main(String[] args_) throws ParseException {
 
+//        if(true)return;
+
         Function f = new Function("f(uint,uint32[],bytes10,bytes)");
-        Tuple args = new Tuple(BigInteger.valueOf(0x123), new int[] { 0x456, 0x789 }, "1234567890".getBytes(UTF_8), "Hello, world!".getBytes(UTF_8));
+        Tuple args = new Tuple(BigInteger.valueOf(0x123), new int[] { 0x456, 0x789 }, "1234567890".getBytes(CHARSET_UTF_8), "Hello, world!".getBytes(CHARSET_UTF_8));
         ByteBuffer buffer = f.encodeCall(args);
         Function.formatABI(buffer.array());
         Tuple decoded = f.decodeCall(buffer.array());
@@ -52,8 +51,6 @@ public class EncodeTest {
         Function.formatABI(_buffer.array());
 
 //        if(true)return;
-
-
 
         Function f2 = new Function("sam(bytes,bool,uint256[])"); // uint8[1][]
         Object[] args2 = new Object[] {

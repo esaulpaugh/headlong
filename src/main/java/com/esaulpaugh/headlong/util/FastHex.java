@@ -11,6 +11,8 @@ public final class FastHex {
 
     private static final int NIBBLE_BITS = Byte.SIZE / 2;
 
+    private static final int NO_MAPPING = -1;
+
     private static final Charset ASCII = Charset.forName("US-ASCII");
 
     // Byte values index directly into the encoding table (size 256) whose elements contain two char values each,
@@ -30,7 +32,7 @@ public final class FastHex {
             ENCODE_TABLE[i] = (ints[(i & 0xF0) >>> NIBBLE_BITS] << Byte.SIZE) | ints[i & 0x0F];
         }
 
-        Arrays.fill(DECODE_TABLE, -1);
+        Arrays.fill(DECODE_TABLE, NO_MAPPING);
 
         DECODE_TABLE['0'] = 0;
         DECODE_TABLE['1'] = 1;
@@ -78,6 +80,14 @@ public final class FastHex {
         return new String(chars);
     }
 
+    public static byte[] encode(byte[] buffer) {
+        return encode(buffer, 0, buffer.length);
+    }
+
+    public static String encodeToString(byte[] buffer) {
+        return encodeToString(buffer, 0, buffer.length);
+    }
+
     public static byte[] decode(byte[] hexBytes, final int offset, final int length) {
         if ((length & 0x01) != 0) {
             throw new IllegalArgumentException("length must be a multiple of two");
@@ -86,16 +96,21 @@ public final class FastHex {
         byte[] bytes = new byte[bytesLen];
         for (int i = 0, j = offset; i < bytesLen; i++, j+=2) {
             int left = DECODE_TABLE[hexBytes[j]];
-            if (left == -1) {
+            if (left == NO_MAPPING) {
                 throw new IllegalArgumentException("illegal val @ " + j);
             }
             int right = DECODE_TABLE[hexBytes[j+1]];
-            if (right == -1) {
+            if (right == NO_MAPPING) {
                 throw new IllegalArgumentException("illegal val @ " + (j + 1));
             }
             bytes[i] = (byte) ((left << NIBBLE_BITS) | right);
         }
         return bytes;
+    }
+
+    public static byte[] decode(String hex) {
+        return decode(hex.getBytes(ASCII), 0, hex.length());
+//        return decode(hex, 0, hex.length());
     }
 
     public static byte[] decode(String hex, final int offset, final int length) {
