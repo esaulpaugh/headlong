@@ -63,8 +63,8 @@ public final class FastHex {
         byte[] bytes = new byte[length << 1];
         for (int i = offset, j = 0; i < end; i++, j+=2) {
             int hexPair = ENCODE_TABLE[buffer[i] & 0xFF];
-            bytes[j] = (byte) (hexPair >>> Byte.SIZE); // left byte
-            bytes[j+1] = (byte) (hexPair & 0xFF); // right byte
+            bytes[j] = (byte) (hexPair >>> Byte.SIZE); // left
+            bytes[j+1] = (byte) (hexPair & 0xFF); // right
         }
         return bytes;
     }

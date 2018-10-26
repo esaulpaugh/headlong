@@ -51,7 +51,11 @@ public class MonteCarloTest {
                 temp = testCase.function.canonicalSignature;
                 result = testCase.run();
                 temp = null;
-                log.append('#').append(i).append(result ? " PASSED: " : " FAILED: ").append(params.toString()).append("\t\t").append(testCase.function.canonicalSignature).append('\n');
+                log.append('#').append(i).append(result ? " PASSED: " : " FAILED: ")
+                        .append(params.toString())
+                        .append("\t\t")
+                        .append(testCase.function.canonicalSignature.substring(testCase.function.canonicalSignature.indexOf('('))) // print function params
+                        .append('\n');
                 i++;
             } catch (Throwable t) {
                 System.out.println(log.toString());

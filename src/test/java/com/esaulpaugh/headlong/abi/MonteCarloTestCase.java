@@ -205,7 +205,7 @@ public class MonteCarloTestCase implements Serializable {
             types[i] = generateType(r, tupleDepth);
         }
 
-        StringBuilder signature = new StringBuilder("(");
+        StringBuilder signature = new StringBuilder(generateFunctionName(r) + "(");
         for (StackableType<?> t : types) {
             signature.append(t.canonicalType).append(',');
         }
@@ -379,6 +379,18 @@ public class MonteCarloTestCase implements Serializable {
 
     private static String generateString(int len, Random r) {
         return new String(generateByteArray(len, r), UTF_8);
+    }
+
+    private static String generateFunctionName(Random r) {
+        return generateASCIIString(r.nextInt(34), r).replace('(', '_');
+    }
+
+    private static String generateASCIIString(final int len, Random r) {
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < len; i++) {
+            sb.append((char) (r.nextInt(95) + 32));
+        }
+        return sb.toString();
     }
 
     private static short[] generateShortArray(final int len, boolean unsigned, Random r) {
