@@ -1,10 +1,12 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.rlp.util.Integers;
+import com.esaulpaugh.headlong.rlp.util.RLPIterator;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
 
@@ -86,6 +88,10 @@ public class RLPList extends RLPItem {
         }
     }
 
+    public Iterator iterator(RLPDecoder decoder) {
+        return new Iterator(decoder);
+    }
+
     private static void copyElements(Iterable<RLPItem> srcElements, byte[] dest, int destIndex) {
         for (final RLPItem element : srcElements) {
             final int elementLen = element.encodingLength();
@@ -126,5 +132,32 @@ public class RLPList extends RLPItem {
         copyElements(srcElements, dest, destDataIndex);
 
         return dest;
+    }
+
+    public class Iterator implements RLPIterator {
+
+        private final RLPDecoder decoder;
+
+        private int nextElementIndex;
+
+        Iterator(RLPDecoder decoder) {
+            this.decoder = decoder;
+            this.nextElementIndex = RLPList.this.dataIndex;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.nextElementIndex < RLPList.this.endIndex;
+        }
+
+        @Override
+        public RLPItem next() throws DecodeException {
+            if (this.nextElementIndex < RLPList.this.endIndex) {
+                RLPItem element = decoder.wrap(buffer, this.nextElementIndex, RLPList.this.endIndex);
+                this.nextElementIndex = element.endIndex;
+                return element;
+            }
+            throw new NoSuchElementException();
+        }
     }
 }

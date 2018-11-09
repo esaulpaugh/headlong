@@ -2,7 +2,6 @@ package com.esaulpaugh.headlong.rlp;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -19,6 +18,29 @@ public class RLPDecoder {
         this.lenient = lenient;
     }
 
+    public class SequenceIterator {
+
+        private final byte[] rlp;
+        private int index;
+        private final int end;
+
+        SequenceIterator(byte[] rlp, int start, int end) {
+            this.rlp = rlp;
+            this.index = start;
+            this.end = end;
+        }
+
+        public boolean hasNext() {
+            return index < end;
+        }
+
+        public RLPItem next() throws DecodeException {
+            RLPItem item = wrap(rlp, index);
+            this.index = item.endIndex;
+            return item;
+        }
+    }
+
     /**
      * Returns an iterator over the sequence of RLP items starting at {@code index}.
      *
@@ -27,7 +49,7 @@ public class RLPDecoder {
      * @return
      */
     public SequenceIterator sequenceIterator(byte[] buffer, int index) {
-        return new SequenceIterator(buffer, index, buffer.length, this);
+        return new SequenceIterator(buffer, index, buffer.length);
     }
 
     /**
@@ -38,9 +60,11 @@ public class RLPDecoder {
      * @return
      * @throws DecodeException
      */
-    public Iterator<RLPItem> listIterator(byte[] buffer, int index) throws DecodeException {
-        RLPList rlpList = (RLPList) RLP_STRICT.wrap(buffer, index);
-        return rlpList.elements(RLP_STRICT).iterator();
+    public RLPList.Iterator listIterator(byte[] buffer, int index) throws DecodeException {
+        return ((RLPList) wrap(buffer, index))
+                .iterator(this);
+//        RLPList rlpList = (RLPList) RLP_STRICT.wrap(buffer, index);
+//        return rlpList.elements(RLP_STRICT).iterator();
     }
 
     /**

@@ -2,7 +2,7 @@ package com.esaulpaugh.headlong.rlp.example;
 
 import com.esaulpaugh.headlong.rlp.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
-import com.esaulpaugh.headlong.rlp.SequenceIterator;
+import com.esaulpaugh.headlong.rlp.RLPList;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
@@ -29,19 +29,19 @@ public class Student implements RLPEncodeable {
 
     public Student(byte[] rlp, int index) throws DecodeException {
 
-        SequenceIterator iter = RLP_STRICT.sequenceIterator(rlp, index);
-
-        this.name = iter.next().asString(UTF_8);
-        this.gpa = iter.next().asFloat();
-        this.publicKey = iter.next().asBigInt();
-        this.balance = new BigDecimal(iter.next().asBigInt(), iter.next().asInt());
-
-//        Iterator<RLPItem> iter2 = RLP_STRICT.listIterator(rlp, index);
+//        RLPDecoder.SequenceIterator iter = RLP_STRICT.sequenceIterator(rlp, index);
 //
-//        this.name = iter2.next().asString(UTF_8);
-//        this.gpa = iter2.next().asFloat();
-//        this.publicKey = iter2.next().asBigInt();
-//        this.balance = new BigDecimal(iter2.next().asBigInt(), iter2.next().asInt());
+//        this.name = iter.next().asString(UTF_8);
+//        this.gpa = iter.next().asFloat();
+//        this.publicKey = iter.next().asBigInt();
+//        this.balance = new BigDecimal(iter.next().asBigInt(), iter.next().asInt());
+
+        RLPList.Iterator iter2 = RLP_STRICT.listIterator(rlp, index);
+
+        this.name = iter2.next().asString(UTF_8);
+        this.gpa = iter2.next().asFloat();
+        this.publicKey = iter2.next().asBigInt();
+        this.balance = new BigDecimal(iter2.next().asBigInt(), iter2.next().asInt());
 
 //        RLPItem item = RLP_STRICT.wrap(rlp, index);
 //        this.name = item.asString(UTF_8);
@@ -135,11 +135,11 @@ public class Student implements RLPEncodeable {
 
     @Override
     public byte[] toRLP() {
-        return RLPEncoder.encodeSequentially(toObjectArray());
+        return RLPEncoder.encodeAsList(toObjectArray());
     }
 
     @Override
     public void toRLP(byte[] dest, int destIndex) {
-        RLPEncoder.encodeSequentially(toObjectArray(), dest, destIndex);
+        RLPEncoder.encodeAsList(toObjectArray(), dest, destIndex);
     }
 }
