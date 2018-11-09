@@ -17,11 +17,11 @@ public class StudentTest {
 
     @Test
     public void decodeEncode() throws DecodeException {
-        Student plato = new Student(STUDENT_RLP_SEQUENTIAL, 0);
+        Student plato = new Student(STUDENT_RLP_LIST, 0);
         Assert.assertEquals(STUDENT_TO_STRING, plato.toString());
 
         byte[] rlp = plato.toRLP();
-        Assert.assertArrayEquals(STUDENT_RLP_SEQUENTIAL, rlp);
+        Assert.assertArrayEquals(STUDENT_RLP_LIST, rlp);
     }
 
     @Test

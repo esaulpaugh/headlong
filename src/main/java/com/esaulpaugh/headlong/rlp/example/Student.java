@@ -3,12 +3,15 @@ package com.esaulpaugh.headlong.rlp.example;
 import com.esaulpaugh.headlong.rlp.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
+import com.esaulpaugh.headlong.rlp.RLPList;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Iterator;
+import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
@@ -28,16 +31,21 @@ public class Student implements RLPEncodeable {
     }
 
     public Student(byte[] rlp, int index) throws DecodeException {
-        RLPItem item = RLP_STRICT.wrap(rlp, index);
-        this.name = item.asString(UTF_8);
-        item = RLP_STRICT.wrap(rlp, item.endIndex);
-        this.gpa = item.asFloat();
-        item = RLP_STRICT.wrap(rlp, item.endIndex);
-        this.publicKey = item.asBigInt();
-        item = RLP_STRICT.wrap(rlp, item.endIndex);
-        BigInteger intVal = item.asBigInt();
-        item = RLP_STRICT.wrap(rlp, item.endIndex);
-        this.balance = new BigDecimal(intVal, item.asInt());
+
+        RLPList rlpList = (RLPList) RLP_STRICT.wrap(rlp, index);
+        Iterator<RLPItem> iter = rlpList.elements(RLP_STRICT).iterator();
+
+        this.name = iter.next().asString(UTF_8);
+        this.gpa = iter.next().asFloat();
+        this.publicKey = iter.next().asBigInt();
+        this.balance = new BigDecimal(iter.next().asBigInt(), iter.next().asInt());
+
+//        RLPItem item = RLP_STRICT.wrap(rlp, index);
+//        this.name = item.asString(UTF_8);
+//        this.gpa = (item = RLP_STRICT.wrap(rlp, item.endIndex)).asFloat();
+//        this.publicKey = (item = RLP_STRICT.wrap(rlp, item.endIndex)).asBigInt();
+//        BigInteger intVal = (item = RLP_STRICT.wrap(rlp, item.endIndex)).asBigInt();
+//        this.balance = new BigDecimal(intVal, RLP_STRICT.wrap(rlp, item.endIndex).asInt());
     }
 
     public String getName() {
@@ -124,11 +132,11 @@ public class Student implements RLPEncodeable {
 
     @Override
     public byte[] toRLP() {
-        return RLPEncoder.encodeSequentially(toObjectArray());
+        return RLPEncoder.encodeAsList(toObjectArray());
     }
 
     @Override
     public void toRLP(byte[] dest, int destIndex) {
-        RLPEncoder.encodeSequentially(toObjectArray(), dest, destIndex);
+        RLPEncoder.encodeAsList(toObjectArray(), dest, destIndex);
     }
 }
