@@ -2,6 +2,7 @@ package com.esaulpaugh.headlong.rlp;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -19,7 +20,32 @@ public class RLPDecoder {
     }
 
     /**
+     * Returns an iterator over the sequence of RLP items starting at {@code index}.
+     *
+     * @param buffer
+     * @param index
+     * @return
+     */
+    public SequenceIterator sequenceIterator(byte[] buffer, int index) {
+        return new SequenceIterator(buffer, index, buffer.length, this);
+    }
+
+    /**
+     * Returns an iterator over the elements in the RLP list item at {@code index}.
+     *
+     * @param buffer    the array containing the list item
+     * @param index the index of the rlp list item
+     * @return
+     * @throws DecodeException
+     */
+    public Iterator<RLPItem> listIterator(byte[] buffer, int index) throws DecodeException {
+        RLPList rlpList = (RLPList) RLP_STRICT.wrap(buffer, index);
+        return rlpList.elements(RLP_STRICT).iterator();
+    }
+
+    /**
      * e.g. 0xC0
+     *
      * @param lengthOneRLP  a one-byte RLP encoding
      * @return  the item
      */
