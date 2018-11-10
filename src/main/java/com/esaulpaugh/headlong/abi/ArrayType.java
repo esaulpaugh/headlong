@@ -375,7 +375,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         final int len = offsets.length;
         if(elementType.dynamic) {
             for (int i = 0; i < len; i++) {
-                offsets[i] = Encoder.OFFSET_TYPE.decode(bb, elementBuffer);
+                offsets[i] = CallEncoder.OFFSET_TYPE.decode(bb, elementBuffer);
 //                System.out.println("A(O) offset " + convertOffset(offsets[i]) + " @ " + convert(bb.position() - OFFSET_LENGTH_BYTES));
             }
         } else {

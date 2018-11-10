@@ -5,7 +5,7 @@ import com.esaulpaugh.headlong.abi.util.ClassNames;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import static com.esaulpaugh.headlong.abi.Encoder.OFFSET_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.CallEncoder.OFFSET_LENGTH_BYTES;
 
 class TupleType extends StackableType<Tuple> {
 
@@ -147,7 +147,7 @@ class TupleType extends StackableType<Tuple> {
         for (int i = 0; i < tupleLen; i++) {
             elementType = elementTypes[i];
             if (elementType.dynamic) {
-                offsets[i] = Encoder.OFFSET_TYPE.decode(bb, elementBuffer);
+                offsets[i] = CallEncoder.OFFSET_TYPE.decode(bb, elementBuffer);
 //                System.out.println("T offset " + convertOffset(offsets[i]) + " @ " + convert(bb.position() - OFFSET_LENGTH_BYTES));
             } else {
                 dest[i] = elementType.decode(bb, elementBuffer);

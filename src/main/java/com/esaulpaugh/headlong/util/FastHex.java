@@ -26,36 +26,30 @@ public final class FastHex {
         final int[] ints = new int[] {
                 '0', '1', '2', '3',
                 '4', '5', '6', '7',
-                '8', '9', 'A', 'B',
-                'C', 'D', 'E', 'F' };
+                '8', '9', 'a', 'b',
+                'c', 'd', 'e', 'f' };
         for (int i = 0; i < ENCODE_TABLE.length; i++) {
             ENCODE_TABLE[i] = (ints[(i & 0xF0) >>> NIBBLE_BITS] << Byte.SIZE) | ints[i & 0x0F];
         }
 
         Arrays.fill(DECODE_TABLE, NO_MAPPING);
 
-        DECODE_TABLE['0'] = 0;
-        DECODE_TABLE['1'] = 1;
-        DECODE_TABLE['2'] = 2;
-        DECODE_TABLE['3'] = 3;
-        DECODE_TABLE['4'] = 4;
-        DECODE_TABLE['5'] = 5;
-        DECODE_TABLE['6'] = 6;
-        DECODE_TABLE['7'] = 7;
-        DECODE_TABLE['8'] = 8;
-        DECODE_TABLE['9'] = 9;
-        DECODE_TABLE['A'] = 10;
-        DECODE_TABLE['B'] = 11;
-        DECODE_TABLE['C'] = 12;
-        DECODE_TABLE['D'] = 13;
-        DECODE_TABLE['E'] = 14;
-        DECODE_TABLE['F'] = 15;
-        DECODE_TABLE['a'] = 10;
-        DECODE_TABLE['b'] = 11;
-        DECODE_TABLE['c'] = 12;
-        DECODE_TABLE['d'] = 13;
-        DECODE_TABLE['e'] = 14;
-        DECODE_TABLE['f'] = 15;
+        DECODE_TABLE['0'] = 0x00;
+        DECODE_TABLE['1'] = 0x01;
+        DECODE_TABLE['2'] = 0x02;
+        DECODE_TABLE['3'] = 0x03;
+        DECODE_TABLE['4'] = 0x04;
+        DECODE_TABLE['5'] = 0x05;
+        DECODE_TABLE['6'] = 0x06;
+        DECODE_TABLE['7'] = 0x07;
+        DECODE_TABLE['8'] = 0x08;
+        DECODE_TABLE['9'] = 0x09;
+        DECODE_TABLE['A'] = DECODE_TABLE['a'] = 0x0a;
+        DECODE_TABLE['B'] = DECODE_TABLE['b'] = 0x0b;
+        DECODE_TABLE['C'] = DECODE_TABLE['c'] = 0x0c;
+        DECODE_TABLE['D'] = DECODE_TABLE['d'] = 0x0d;
+        DECODE_TABLE['E'] = DECODE_TABLE['e'] = 0x0e;
+        DECODE_TABLE['F'] = DECODE_TABLE['f'] = 0x0f;
     }
 
     public static byte[] encode(byte[] buffer, final int offset, final int length) {

@@ -9,7 +9,7 @@ import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 import static com.esaulpaugh.headlong.abi.StackableType.*;
 
-class Encoder {
+class CallEncoder {
 
     static final int OFFSET_LENGTH_BYTES = UNIT_LENGTH_BYTES;
     static final IntType OFFSET_TYPE = new IntType("int32", Integer.SIZE, false);
@@ -32,7 +32,7 @@ class Encoder {
         return Function.SELECTOR_LEN + function.paramTypes.validate(argsTuple);
     }
 
-    static ByteBuffer encodeFunctionCall(Function function, Tuple argsTuple) {
+    static ByteBuffer encodeCall(Function function, Tuple argsTuple) {
 
         final TupleType tupleType = function.paramTypes;
 //        final StackableType<?>[] types = tupleType.elementTypes;
@@ -44,14 +44,14 @@ class Encoder {
         final int allocation = Function.SELECTOR_LEN + tupleType.validate(argsTuple);
         ByteBuffer outBuffer = ByteBuffer.wrap(new byte[allocation]); // ByteOrder.BIG_ENDIAN by default
 
-        encodeFunctionCall(function, argsTuple, outBuffer);
+        encodeCall(function, argsTuple, outBuffer);
 //        outBuffer.put(function.selector);
 //        insertTuple(tupleType, argsTuple, outBuffer);
 
         return outBuffer;
     }
 
-    static void encodeFunctionCall(Function function, Tuple argsTuple, ByteBuffer dest) {
+    static void encodeCall(Function function, Tuple argsTuple, ByteBuffer dest) {
         dest.put(function.selector);
         insertTuple(function.paramTypes, argsTuple, dest);
     }

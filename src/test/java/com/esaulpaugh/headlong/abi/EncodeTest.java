@@ -12,9 +12,22 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 
 public class EncodeTest {
 
+    private static final void x() throws ParseException {
+        Function f = new Function("baz(uint32,bool)");
+        ByteBuffer one = f.encodeCallForArgs(69L, true);
+        ByteBuffer two = f.encodeCall(new Tuple(69L, true));
+        System.out.println(Function.hex(one.array()));
+        System.out.println(Function.formatABI(two.array()));
+
+        Tuple decoded = f.decodeCall((ByteBuffer) one.flip());
+        System.out.println(decoded.equals(new Tuple(69L, true)));
+    }
+
     public static void main(String[] args_) throws ParseException {
 
-//        if(true)return;
+        x();
+
+        if(true)return;
 
         Function f = new Function("f(uint,uint32[],bytes10,bytes)");
         Tuple args = new Tuple(BigInteger.valueOf(0x123), new int[] { 0x456, 0x789 }, "1234567890".getBytes(CHARSET_UTF_8), "Hello, world!".getBytes(CHARSET_UTF_8));
@@ -32,7 +45,7 @@ public class EncodeTest {
                 new Tuple()
 //                new Tuple[] { new Tuple(new Tuple((Object) new Tuple[0])) }
         };
-        _buffer = f00.encodeCall(args00);
+        _buffer = f00.encodeCallForArgs(args00);
         Function.formatABI(_buffer.array());
 
 //        if(true)return;
@@ -47,7 +60,7 @@ public class EncodeTest {
 //                new Tuple( new Tuple( (Object) new Tuple[] { new Tuple(new Tuple((Object) (byte) 1 )) } ) )
 //                new Tuple[] { new Tuple(new Tuple((Object) new Tuple[0])) }
         };
-        _buffer = f0.encodeCall(args0);
+        _buffer = f0.encodeCallForArgs(args0);
         Function.formatABI(_buffer.array());
 
 //        if(true)return;
@@ -62,7 +75,7 @@ public class EncodeTest {
 //        if(t != null) {
 //            System.err.println(t.getMessage());
 //        }
-        buffer = f2.encodeCall(args2);
+        buffer = f2.encodeCallForArgs(args2);
         Function.formatABI(buffer.array());
 
         byte[] expected = Strings.decode("a5643bf20000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000464617665000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003", HEX);
@@ -70,7 +83,7 @@ public class EncodeTest {
 
         Function g = new Function("g(uint[][],string[])");
         System.out.println(g.selectorHex());
-        buffer = g.encodeCall(
+        buffer = g.encodeCallForArgs(
 //                (Object)
                 new BigInteger[][] {
                         new BigInteger[] {

@@ -25,10 +25,10 @@ public class DecodeTest {
 
         Function f = new Function("baz(uint32,bool)");
 
-    ByteBuffer encoded = f.encodeCall(69L, true); // arguments auto-boxed and wrapped in a Tuple
+    ByteBuffer encoded = f.encodeCallForArgs(69L, true); // arguments auto-boxed and wrapped in a Tuple
     Tuple args = f.decodeCall((ByteBuffer) encoded.flip()); // Tuple is an immutable list of Objects, in this case { Long.valueOf(69L), Boolean.TRUE }
 
-    ByteBuffer buffer = ByteBuffer.allocate(f.lengthFor(args));
+    ByteBuffer buffer = ByteBuffer.allocate(f.callLength(args));
         
     System.out.println("equals = " +
             f.encodeCall(args, buffer)
@@ -279,7 +279,7 @@ public class DecodeTest {
 //                new Tuple(new BigDecimal(BigInteger.ONE, 18)), new BigDecimal(BigInteger.ONE, 18)
         }; // , new Tuple(""), ""
 
-        abi = f7.encodeCall(argsIn).array();
+        abi = f7.encodeCallForArgs(argsIn).array();
 
         Function.formatABI(abi);
 

@@ -70,21 +70,25 @@ public class Function implements Serializable {
         return new Function(signature);
     }
 
-    public ByteBuffer encodeCall(Object... args) {
-        return Function.encodeCall(this, new Tuple(args));
+    public ByteBuffer encodeCallForArgs(Object... args) {
+        return encodeCall(new Tuple(args));
+    }
+
+    public int callLengthForArgs(Object... args) {
+        return callLength(new Tuple(args));
     }
 
     public ByteBuffer encodeCall(Tuple argsTuple) {
-        return Function.encodeCall(this, argsTuple);
-    }
-
-    public int lengthFor(Tuple argsTuple) {
-        return Encoder.calcEncodingLength(this, argsTuple);
+        return CallEncoder.encodeCall(this, argsTuple);
     }
 
     public Function encodeCall(Tuple argsTuple, ByteBuffer dest) {
-        Encoder.encodeFunctionCall(this, argsTuple, dest);
+        CallEncoder.encodeCall(this, argsTuple, dest);
         return this;
+    }
+
+    public int callLength(Tuple argsTuple) {
+        return CallEncoder.calcEncodingLength(this, argsTuple);
     }
 
     public Tuple decodeCall(byte[] array) {
@@ -125,21 +129,21 @@ public class Function implements Serializable {
         return encode(selector, HEX);
     }
 
-    public static ByteBuffer encodeCall(String signature, Object... args) throws ParseException {
-        return Function.encodeCall(new Function(signature), new Tuple(args));
-    }
-
-    public static ByteBuffer encodeCall(String signature, MessageDigest messageDigest, Object... args) throws ParseException {
-        return Function.encodeCall(new Function(signature, messageDigest), new Tuple(args));
-    }
-
-    public static ByteBuffer encodeCall(Function function, Object... args) {
-        return Function.encodeCall(function, new Tuple(args));
-    }
-
-    public static ByteBuffer encodeCall(Function function, Tuple argsTuple) {
-        return Encoder.encodeFunctionCall(function, argsTuple);
-    }
+//    public static ByteBuffer encodeCallForArgs(String signature, Object... args) throws ParseException {
+//        return Function.encodeCall(new Function(signature), new Tuple(args));
+//    }
+//
+//    public static ByteBuffer encodeCallForArgs(String signature, MessageDigest messageDigest, Object... args) throws ParseException {
+//        return Function.encodeCall(new Function(signature, messageDigest), new Tuple(args));
+//    }
+//
+//    public static ByteBuffer encodeCallForArgs(Function function, Object... args) {
+//        return Function.encodeCall(function, new Tuple(args));
+//    }
+//
+//    public static ByteBuffer encodeCall(Function function, Tuple argsTuple) {
+//        return CallEncoder.encodeCall(function, argsTuple);
+//    }
 
     public static String formatABI(byte[] abiCall) {
         return formatABI(abiCall, 0, abiCall.length);

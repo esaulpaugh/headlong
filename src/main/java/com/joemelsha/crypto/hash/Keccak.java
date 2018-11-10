@@ -286,7 +286,7 @@ public class Keccak extends MessageDigest {
     }
 
     protected void pad() {
-//        updateBits(0x6L, 3); // SHA-3 padding (little-endian): 011 = 0x6
+//        updateBits(0x6L, 3); // SHA-3 padding:011 (little-endian) = 0x6
         updateBits(0x1L, 1); // Keccak padding: 1
         if (rateBits >= rateSizeBits) {
             keccak(state);
