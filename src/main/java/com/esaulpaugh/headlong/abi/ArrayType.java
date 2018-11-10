@@ -392,6 +392,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
             int offset = offsets[i];
 //            System.out.println("A(O) jumping to " + convert(index + offset));
             if (offset > 0) {
+                /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
 //                if(bb.position() != index + offset) {
 //                    System.err.println(ArrayType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
 //                    bb.position(index + offset);

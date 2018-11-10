@@ -162,6 +162,7 @@ class TupleType extends StackableType<Tuple> {
             int offset = offsets[i];
 //            System.out.println("T jumping to " + convert(index + offset));
             if (offset > 0) {
+                /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
 //                if(bb.position() != index + offset) {
 //                    System.err.println(TupleType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
 //                    bb.position(index + offset);
