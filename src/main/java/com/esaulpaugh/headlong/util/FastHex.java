@@ -19,7 +19,7 @@ public final class FastHex {
     // encoded together as an int.
     private static final int[] ENCODE_TABLE = new int[1 << Byte.SIZE];
 
-    // Char values index directly into the decoding table (size 128).
+    // Char values index directly into the decoding table (size 256).
     private static final int[] DECODE_TABLE = new int[1 << Byte.SIZE];
 
     static {

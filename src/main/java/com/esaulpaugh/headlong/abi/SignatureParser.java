@@ -39,8 +39,7 @@ class SignatureParser {
             throw new ParseException("illegal signature termination: " + signature.substring(errorStart), errorStart);
         }
 
-
-        canonicalOut.append(signature, result.previousNonCanonicalIndex, sigEnd); // // if prevNonCanonicalIndex == 0, signature was already canonical
+        canonicalOut.append(signature, result.previousNonCanonicalIndex, sigEnd);// if prevNonCanonicalIndex == 0, signature was already canonical
 
         return typesOut;
     }

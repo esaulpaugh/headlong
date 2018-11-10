@@ -201,10 +201,10 @@ final class TypeFactory {
     }
 
     private static BigDecimalType tryParseFixed(String canonicalType) {
-        int idx;
-        boolean unsigned;
-        if ((unsigned = (idx = canonicalType.indexOf("fixed")) == 1) || idx == 0) {
-            if(idx == 1 && canonicalType.charAt(0) != 'u') {
+        final int idx = canonicalType.indexOf("fixed");
+        boolean unsigned = idx == 1;
+        if (unsigned || idx == 0) {
+            if(unsigned && canonicalType.charAt(0) != 'u') {
                 return null;
             }
             final int indexOfX = canonicalType.lastIndexOf('x');
