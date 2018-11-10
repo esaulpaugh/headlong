@@ -14,13 +14,15 @@ public class EncodeTest {
 
     private static final void x() throws ParseException {
         Function f = new Function("baz(uint32,bool)");
-        ByteBuffer one = f.encodeCallForArgs(69L, true);
-        ByteBuffer two = f.encodeCall(new Tuple(69L, true));
-        System.out.println(Function.hex(one.array()));
-        System.out.println(Function.formatABI(two.array()));
+        Tuple argsTuple = new Tuple(69L, true);
+        ByteBuffer one = f.encodeCall(argsTuple);
+        ByteBuffer two = f.encodeCallForArgs(69L, true);
 
-        Tuple decoded = f.decodeCall((ByteBuffer) one.flip());
-        System.out.println(decoded.equals(new Tuple(69L, true)));
+        System.out.println(Function.formatABI(one.array()));
+
+        Tuple decoded = f.decodeCall((ByteBuffer) two.flip());
+
+        System.out.println(decoded.equals(argsTuple));
     }
 
     public static void main(String[] args_) throws ParseException {
