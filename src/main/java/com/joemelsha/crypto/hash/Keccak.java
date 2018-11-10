@@ -187,8 +187,8 @@ public class Keccak extends MessageDigest {
         }
 
         if (remaining > 0) {
+            // remaining in [1, 7]
             long w = state[rateWords];
-            final int remainingBits = remaining << 3; // remaining in [1, 7]
             int shiftAmount = 0;
             switch (remaining) {
             case 7: w ^= in.get() & 0xFFL; shiftAmount = Byte.SIZE;
@@ -201,7 +201,7 @@ public class Keccak extends MessageDigest {
             }
 
             state[rateWords] = w;
-            this.rateBits += remainingBits;
+            this.rateBits += remaining << 3;
         }
     }
 
