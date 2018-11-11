@@ -124,7 +124,7 @@ class TupleType extends StackableType<Tuple> {
     Tuple decode(ByteBuffer bb, byte[] elementBuffer) {
 //        System.out.println("T decode " + toString() + " " + convertPos(bb) + " " + dynamic);
 
-//        final int index = bb.position(); // TODO remove eventually
+//        final int index = bb.position(); // TODO decodeTails needs index to operate in lenient mode
 
         final StackableType<?>[] elementTypes = this.elementTypes;
         final int tupleLen = elementTypes.length;
