@@ -47,13 +47,13 @@ public class NotationParser {
             if(nextArrayEnd == -1) {
                 nextArrayEnd = Integer.MAX_VALUE;
             }
-            nextObjectStart(notation, i, pair);
-            nextObjectType = pair[0];
-            nextObjectIndex = pair[1];
 
-            if(nextObjectType == -1 && nextObjectIndex == -1) {
+            if(!findNextObject(notation, i, pair)) {
                 return Integer.MAX_VALUE;
             }
+
+            nextObjectType = pair[0];
+            nextObjectIndex = pair[1];
 
             if(nextArrayEnd < nextObjectIndex) {
                 return nextArrayEnd + OBJECT_ARRAY_SUFFIX_LEN;
@@ -79,32 +79,30 @@ public class NotationParser {
         return end + OBJECT_ARRAY_SUFFIX_LEN;
     }
 
-    private static void nextObjectStart(String notation, int i, int[] pair) { // Pair<Integer, Integer>
+    private static boolean findNextObject(String notation, int i, int[] pair) { // Pair<Integer, Integer>
         int o = notation.indexOf(Notation.OBJECT_ARRAY_PREFIX, i);
         int s = notation.indexOf(Notation.STRING_PREFIX, i);
 
         if(s == -1) {
             if(o == -1) {
-                pair[0] = -1;
-                pair[1] = -1;
-                return;
+                return false;
             }
             pair[0] = OBJECT_ARRAY;
             pair[1] = o;
-            return;
+            return true;
         }
         if(o == -1) {
             pair[0] = STRING;
             pair[1] = s;
-            return;
+            return true;
         }
         if(o < s) {
             pair[0] = OBJECT_ARRAY;
             pair[1] = o;
-            return;
+            return true;
         }
         pair[0] = STRING;
         pair[1] = s;
-//        return new Pair<>(STRING, s);
+        return true;
     }
 }
