@@ -13,33 +13,81 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 public class NotationTest {
 
     private static final String NOTATION = "(\n" +
-            "  \"636174\", \n" +
-            "  \"20\", \n" +
-            "  { {  }, \"09\" }, \n" +
-            "  \"00\"\n" +
+            "  \"80\", \n" +
+            "  {\n" +
+            "    \"64\", \n" +
+            "    \"3b\", \n" +
+            "    { \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"60\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\", \"00\" }, \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"01\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"00\", \n" +
+            "    \"05\"\n" +
+            "  }\n" +
             ")";
 
     @Test
     public void parse() throws DecodeException {
-        byte[] rlp2 = Strings.decode("8363617420c2c00900", HEX);
-        String notation = Notation.forEncoding(rlp2).toString();
+
+        byte[] rlp = Strings.decode("8180f84a643bf20000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000005", HEX);
+        String notation = Notation.forEncoding(rlp).toString();
         System.out.println(notation);
 
     /*
-        (
-          "636174",
-          "20",
-          { {  }, "09" },
-          ""
-        )
+(
+  "80",
+  {
+    "64",
+    "3b",
+    { "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "60", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00", "00" },
+    "00",
+    "00",
+    "00",
+    "00",
+    "00",
+    "00",
+    "00",
+    "00",
+    "00",
+    "00",
+    "00",
+    "00",
+    "00",
+    "01",
+    "00",
+    "00",
+    "00",
+    "00",
+    "00",
+    "00",
+    "05"
+  }
+)
     */
 
-        Assert.assertEquals(NOTATION, notation);
+        Notation n = Notation.forEncoding(RLPEncoder.encodeSequentially(NotationParser.parse(NOTATION)));
+        Assert.assertEquals(n.toString(), notation);
 
         List<Object> rlp2Objects = NotationParser.parse(notation);
         byte[] rlp3 = RLPEncoder.encodeSequentially(rlp2Objects);
         System.out.println(Strings.encode(rlp3, HEX)); // "8363617420c2c00900"
 
-        Assert.assertArrayEquals(rlp2, rlp3);
+        Assert.assertArrayEquals(rlp, rlp3);
     }
 }

@@ -110,11 +110,7 @@ public class MonteCarloTestCase implements Serializable {
 
         Map<String, BaseTypeInfo> baseInfoTypeMap = new HashMap<>(BaseTypeInfo.getBaseTypeInfoMap());
 
-        try {
-            FIXED_LIST = generateFixedList();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        FIXED_LIST = generateFixedList();
 
         final Set<String> keySet = baseInfoTypeMap.keySet();
         final int numKeys = keySet.size();
@@ -130,7 +126,7 @@ public class MonteCarloTestCase implements Serializable {
         CANONICAL_BASE_TYPE_STRINGS = arr;
     }
 
-    private static List<String> generateFixedList() throws ClassNotFoundException {
+    private static List<String> generateFixedList() {
         Map<String, BaseTypeInfo> fixedMap = new HashMap<>();
         BaseTypeInfo.putFixed(fixedMap, true);
         BaseTypeInfo.putFixed(fixedMap, false);

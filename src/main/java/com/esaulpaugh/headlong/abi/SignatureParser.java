@@ -78,11 +78,12 @@ class SignatureParser {
                     argEnd = result.argumentEnd + 1;
                     prevNonCanonicalIndex = result.previousNonCanonicalIndex;
 
-                    String canonicalTypeString = signature.substring(argStart, argEnd);
+                    String nonCanonical = signature.substring(argStart, argEnd);
 //                    if(canonicalTypeString.charAt(0) != '(' || canonicalTypeString.charAt(canonicalTypeString.length() - 1) != ')') {
 //                        throw new Error();
 //                    }
-                    StackableType<?> childType = TupleType.create(canonicalTypeString, innerTupleTypes.toArray(StackableType.EMPTY_TYPE_ARRAY));
+                    // TODO passing non-canonical but create expects canonical
+                    StackableType<?> childType = TupleType.create(nonCanonical, innerTupleTypes.toArray(StackableType.EMPTY_TYPE_ARRAY));
 
                     // check for array syntax
                     if (argEnd < sigEnd && signature.charAt(argEnd) == '[') {
