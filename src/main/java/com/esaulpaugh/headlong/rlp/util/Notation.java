@@ -110,7 +110,7 @@ public class Notation {
 
     private static int buildLongList(final StringBuilder sb, final byte[] data, final int dataIndex, int end, final int depth) throws DecodeException {
 
-        String baseIndentation = getIndentation(depth);
+        final String baseIndentation = getIndentation(depth);
 
         if(depth != 0) {
             sb.append(OBJECT_ARRAY_PREFIX);
@@ -215,12 +215,12 @@ public class Notation {
                 break;
             case LIST_SHORT:
                 i = buildShortList(sb, data, elementDataIndex, elementEnd);
-                break;
-            case STRING_LONG:
-                break;
-            case LIST_LONG:
-                break;
-            default:
+//                break;
+//            case STRING_LONG:
+//                break;
+//            case LIST_LONG:
+//                break;
+//            default:
             }
         }
 

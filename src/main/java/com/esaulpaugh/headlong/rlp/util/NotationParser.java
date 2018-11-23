@@ -26,21 +26,20 @@ public class NotationParser {
      * @return
      */
     public static List<Object> parse(String notation) {
-        List<Object> top = new ArrayList<>();
+        List<Object> topLevelObjects = new ArrayList<>(); // a sequence (as in encodeSequentially)
         int[] pair = new int[2];
-        parse(notation, 0, notation.length(), top, pair);
-        return top;
+        parse(notation, 0, notation.length(), topLevelObjects, pair);
+        return topLevelObjects;
     }
 
     private static int parse(String notation, int i, final int end, List<Object> parent, int[] pair) {
 
         int nextArrayEnd;
 
-        int nextObjectType;
         int nextObjectIndex;
 
-        int objectStart;
-        int objectEnd;
+        int datumStart;
+        int datumEnd;
         while (i < end) {
 
             nextArrayEnd = notation.indexOf(Notation.OBJECT_ARRAY_SUFFIX, i);
@@ -52,27 +51,26 @@ public class NotationParser {
                 return Integer.MAX_VALUE;
             }
 
-            nextObjectType = pair[0];
-            nextObjectIndex = pair[1];
+            nextObjectIndex = pair[0];
 
             if(nextArrayEnd < nextObjectIndex) {
                 return nextArrayEnd + OBJECT_ARRAY_SUFFIX_LEN;
             }
 
-            switch (nextObjectType) {
+            switch (/* nextObjectType */ pair[1]) {
             case STRING:
-                objectStart = nextObjectIndex + STRING_PREFIX_LEN;
-                objectEnd = notation.indexOf(Notation.STRING_SUFFIX, objectStart);
-                parent.add(Strings.decode(notation.substring(objectStart, objectEnd), HEX));
-                i = objectEnd + STRING_SUFFIX_LEN;
+                datumStart = nextObjectIndex + STRING_PREFIX_LEN;
+                datumEnd = notation.indexOf(Notation.STRING_SUFFIX, datumStart);
+                parent.add(Strings.decode(notation.substring(datumStart, datumEnd), HEX));
+                i = datumEnd + STRING_SUFFIX_LEN;
                 break;
             case OBJECT_ARRAY:
-                objectStart = nextObjectIndex + OBJECT_ARRAY_PREFIX_LEN;
+                datumStart = nextObjectIndex + OBJECT_ARRAY_PREFIX_LEN;
                 List<Object> childList = new ArrayList<>();
-                i = parse(notation, objectStart, end, childList, pair);
+                i = parse(notation, datumStart, end, childList, pair);
                 parent.add(childList);
-                break;
-            default: /* do nothing */
+//                break;
+//            default: /* do nothing */
             }
         }
 
@@ -87,22 +85,22 @@ public class NotationParser {
             if(o == -1) {
                 return false;
             }
-            pair[0] = OBJECT_ARRAY;
-            pair[1] = o;
+            pair[0] = o;
+            pair[1] = OBJECT_ARRAY;
             return true;
         }
         if(o == -1) {
-            pair[0] = STRING;
-            pair[1] = s;
+            pair[0] = s;
+            pair[1] = STRING;
             return true;
         }
         if(o < s) {
-            pair[0] = OBJECT_ARRAY;
-            pair[1] = o;
+            pair[0] = o;
+            pair[1] = OBJECT_ARRAY;
             return true;
         }
-        pair[0] = STRING;
-        pair[1] = s;
+        pair[0] = s;
+        pair[1] = STRING;
         return true;
     }
 }
