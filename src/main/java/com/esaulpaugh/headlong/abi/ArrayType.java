@@ -350,7 +350,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
 
     private Object[] decodeObjectArray(int arrayLen, ByteBuffer bb, byte[] elementBuffer, boolean tupleArray) { // 8.3%
 
-//        final int index = bb.position();
+//        final int index = bb.position(); // TODO decodeObjectArrayTails needs index to operate in lenient mode
 
         final StackableType<?> elementType = this.elementType;
         Object[] dest;
@@ -392,6 +392,8 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
             int offset = offsets[i];
 //            System.out.println("A(O) jumping to " + convert(index + offset));
             if (offset > 0) {
+                // TODO add lenient flag?
+                /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
 //                if(bb.position() != index + offset) {
 //                    System.err.println(ArrayType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
 //                    bb.position(index + offset);
