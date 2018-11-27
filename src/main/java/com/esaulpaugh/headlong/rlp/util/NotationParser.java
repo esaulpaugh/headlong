@@ -12,13 +12,13 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
  */
 public class NotationParser {
 
-    private static final int OBJECT_ARRAY = 0;
+    private static final int LIST = 0;
     private static final int STRING = 1;
 
-    private static final int OBJECT_ARRAY_PREFIX_LEN = Notation.OBJECT_ARRAY_PREFIX.length();
-    private static final int OBJECT_ARRAY_SUFFIX_LEN = Notation.OBJECT_ARRAY_SUFFIX.length();
-    private static final int STRING_PREFIX_LEN = Notation.STRING_PREFIX.length();
-    private static final int STRING_SUFFIX_LEN = Notation.STRING_SUFFIX.length();
+    private static final int LIST_PREFIX_LEN = Notation.BEGIN_LIST.length();
+    private static final int LIST_SUFFIX_LEN = Notation.END_LIST.length();
+    private static final int STRING_PREFIX_LEN = Notation.BEGIN_STRING.length();
+    private static final int STRING_SUFFIX_LEN = Notation.END_STRING.length();
 
     /**
      * Returns the object hierarchy represented by the notation.
@@ -27,12 +27,12 @@ public class NotationParser {
      */
     public static List<Object> parse(String notation) {
         List<Object> topLevelObjects = new ArrayList<>(); // a sequence (as in encodeSequentially)
-        int[] pair = new int[2];
-        parse(notation, 0, notation.length(), topLevelObjects, pair);
+        int[] resultHolder = new int[2];
+        parse(notation, 0, notation.length(), topLevelObjects, resultHolder);
         return topLevelObjects;
     }
 
-    private static int parse(String notation, int i, final int end, List<Object> parent, int[] pair) {
+    private static int parse(String notation, int i, final int end, List<Object> parent, int[] resultHolder) {
 
         int nextArrayEnd;
 
@@ -42,65 +42,62 @@ public class NotationParser {
         int datumEnd;
         while (i < end) {
 
-            nextArrayEnd = notation.indexOf(Notation.OBJECT_ARRAY_SUFFIX, i);
+            nextArrayEnd = notation.indexOf(Notation.END_LIST, i);
             if(nextArrayEnd == -1) {
                 nextArrayEnd = Integer.MAX_VALUE;
             }
 
-            if(!findNextObject(notation, i, pair)) {
+            if(!findNextObject(notation, i, resultHolder)) {
                 return Integer.MAX_VALUE;
             }
 
-            nextObjectIndex = pair[0];
+            nextObjectIndex = resultHolder[0];
 
             if(nextArrayEnd < nextObjectIndex) {
-                return nextArrayEnd + OBJECT_ARRAY_SUFFIX_LEN;
+                return nextArrayEnd + LIST_SUFFIX_LEN;
             }
 
-            switch (/* nextObjectType */ pair[1]) {
+            switch (/* nextObjectType */ resultHolder[1]) {
             case STRING:
                 datumStart = nextObjectIndex + STRING_PREFIX_LEN;
-                datumEnd = notation.indexOf(Notation.STRING_SUFFIX, datumStart);
+                datumEnd = notation.indexOf(Notation.END_STRING, datumStart);
                 parent.add(Strings.decode(notation.substring(datumStart, datumEnd), HEX));
                 i = datumEnd + STRING_SUFFIX_LEN;
                 break;
-            case OBJECT_ARRAY:
-                datumStart = nextObjectIndex + OBJECT_ARRAY_PREFIX_LEN;
+            case LIST:
+                datumStart = nextObjectIndex + LIST_PREFIX_LEN;
                 List<Object> childList = new ArrayList<>();
-                i = parse(notation, datumStart, end, childList, pair);
+                i = parse(notation, datumStart, end, childList, resultHolder);
                 parent.add(childList);
 //                break;
 //            default: /* do nothing */
             }
         }
 
-        return end + OBJECT_ARRAY_SUFFIX_LEN;
+        return end + LIST_SUFFIX_LEN;
     }
 
-    private static boolean findNextObject(String notation, int i, int[] pair) { // Pair<Integer, Integer>
-        int o = notation.indexOf(Notation.OBJECT_ARRAY_PREFIX, i);
-        int s = notation.indexOf(Notation.STRING_PREFIX, i);
+    private static boolean findNextObject(String notation, int startIndex, int[] resultHolder) { // Pair<Integer, Integer>
+        int indexList = notation.indexOf(Notation.BEGIN_LIST, startIndex);
+        int indexString = notation.indexOf(Notation.BEGIN_STRING, startIndex);
 
-        if(s == -1) {
-            if(o == -1) {
+        if(indexString == -1) {
+            if(indexList == -1) {
                 return false;
+            } else {
+                resultHolder[0] = indexList;
+                resultHolder[1] = LIST;
             }
-            pair[0] = o;
-            pair[1] = OBJECT_ARRAY;
-            return true;
+        } else if(indexList == -1) {
+            resultHolder[0] = indexString;
+            resultHolder[1] = STRING;
+        } else if(indexList < indexString) {
+            resultHolder[0] = indexList;
+            resultHolder[1] = LIST;
+        } else {
+            resultHolder[0] = indexString;
+            resultHolder[1] = STRING;
         }
-        if(o == -1) {
-            pair[0] = s;
-            pair[1] = STRING;
-            return true;
-        }
-        if(o < s) {
-            pair[0] = o;
-            pair[1] = OBJECT_ARRAY;
-            return true;
-        }
-        pair[0] = s;
-        pair[1] = STRING;
         return true;
     }
 }

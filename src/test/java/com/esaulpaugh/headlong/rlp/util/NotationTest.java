@@ -12,7 +12,12 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 
 public class NotationTest {
 
+//    private static final String NOTATION = "(\n" +
+//            ")";
+
     private static final String NOTATION = "(\n" +
+            "  {  }, \n" +
+            "  { \"\" }, \n" +
             "  \"80\", \n" +
             "  {\n" +
             "    \"7f\", \n" +
@@ -47,7 +52,7 @@ public class NotationTest {
     @Test
     public void parse() throws DecodeException {
 
-        byte[] rlp = Strings.decode("8180f8607f3bcc0080860030ffcc00000000000000000000000000000000000000000000000001b8390102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738390005", HEX);
+        byte[] rlp = Strings.decode("c0c1808180f8607f3bcc0080860030ffcc00000000000000000000000000000000000000000000000001b8390102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738390005", HEX);
         String notation = Notation.forEncoding(rlp).toString(); // Arrays.copyOfRange(rlp, 10, rlp.length)
         System.out.println(notation);
 

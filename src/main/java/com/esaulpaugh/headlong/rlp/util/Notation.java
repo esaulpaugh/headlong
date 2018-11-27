@@ -17,15 +17,20 @@ public class Notation {
 
     private static final boolean LENIENT = true; // keep lenient so RLPItem.toString() doesn't throw, and to help with debugging
 
-    static final String OBJECT_ARRAY_PREFIX = "{";
-    static final String OBJECT_ARRAY_SUFFIX = "}";
-    static final String STRING_PREFIX = "\"";
-    static final String STRING_SUFFIX = "\"";
+    private static final String BEGIN_NOTATION = "(";
+    private static final String END_NOTATION = "\n)";
+
+    static final String BEGIN_LIST = "{";
+    static final String END_LIST = "}";
+    static final String BEGIN_STRING = "\"";
+    static final String END_STRING = "\"";
+
+    private static final String BEGIN_LIST_SHORT = BEGIN_LIST + " ";
 
     private static final String COMMA_SPACE = ", ";
-    private static final String END_ARRAY = OBJECT_ARRAY_SUFFIX + COMMA_SPACE;
-    private static final String BEGIN_ARRAY_SHORT = OBJECT_ARRAY_PREFIX + " ";
-    private static final String END_ARRAY_SHORT = " " + END_ARRAY;
+    private static final String LIST_LONG_END_COMMA_SPACE = END_LIST + COMMA_SPACE;
+    private static final String LIST_SHORT_END_COMMA_SPACE = " " + LIST_LONG_END_COMMA_SPACE;
+    private static final String STRING_END_COMMA_SPACE = END_STRING + COMMA_SPACE;
 
     private final String value;
 
@@ -88,7 +93,7 @@ public class Notation {
     }
 
     public static Notation forEncoding(byte[] buffer, int index, int end) throws DecodeException {
-        if(index < 0 || index >= buffer.length) {
+        if(index < 0) {
             throw new ArrayIndexOutOfBoundsException(index);
         }
 
@@ -97,7 +102,7 @@ public class Notation {
             throw new DecodeException("index > end: " + index + " > " + end);
         }
 
-        StringBuilder sb = new StringBuilder("(");
+        StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
         buildLongList(
                 sb,
                 buffer,
@@ -105,7 +110,7 @@ public class Notation {
                 end,
                 0
         );
-        return new Notation(sb.append("\n)").toString());
+        return new Notation(sb.append(END_NOTATION).toString());
     }
 
     private static int buildLongList(final StringBuilder sb, final byte[] data, final int dataIndex, int end, final int depth) throws DecodeException {
@@ -113,7 +118,7 @@ public class Notation {
         final String baseIndentation = getIndentation(depth);
 
         if(depth != 0) {
-            sb.append(OBJECT_ARRAY_PREFIX);
+            sb.append(BEGIN_LIST);
         }
 
         final int nextDepth = depth + 1;
@@ -173,14 +178,14 @@ public class Notation {
 
         if(depth != 0) {
             sb.append('\n')
-                    .append(baseIndentation).append(END_ARRAY);
+                    .append(baseIndentation).append(LIST_LONG_END_COMMA_SPACE);
         }
 
         return end;
     }
 
     private static int buildShortList(final StringBuilder sb, final byte[] data, final int dataIndex, final int end) throws DecodeException {
-        sb.append(BEGIN_ARRAY_SHORT);
+        sb.append(BEGIN_LIST_SHORT);
 
         int elementDataIndex = -1;
         int elementDataLen;
@@ -226,7 +231,7 @@ public class Notation {
 
         if (hasElement)
             stripFinalCommaAndSpace(sb);
-        sb.append(END_ARRAY_SHORT);
+        sb.append(LIST_SHORT_END_COMMA_SPACE);
 
         return end;
     }
@@ -249,7 +254,7 @@ public class Notation {
     private static int buildByte(StringBuilder sb, byte[] data, int i) {
         String string = Strings.encode(data, i, 1, HEX);
 
-        sb.append('\"').append(string).append("\", ");
+        sb.append(BEGIN_STRING).append(string).append(STRING_END_COMMA_SPACE);
 
         return i + 1;
     }
@@ -263,18 +268,15 @@ public class Notation {
 
         String string = Strings.encode(data, from, len, HEX);
 
-        sb.append('\"').append(string).append("\", ");
+        sb.append(BEGIN_STRING).append(string).append(STRING_END_COMMA_SPACE);
 
         return to;
     }
 
     @Override
     public boolean equals(Object other) {
-        if(!(other instanceof Notation)) {
-            return false;
-        }
-
-        return value.equals(((Notation) other).value);
+        return other instanceof Notation
+                && value.equals(((Notation) other).value);
     }
 
     @Override
