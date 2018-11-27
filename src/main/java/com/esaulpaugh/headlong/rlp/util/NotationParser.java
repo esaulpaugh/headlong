@@ -22,6 +22,7 @@ public class NotationParser {
 
     /**
      * Returns the object hierarchy represented by the notation.
+     *
      * @param notation
      * @return
      */
@@ -78,26 +79,21 @@ public class NotationParser {
     }
 
     private static boolean findNextObject(String notation, int startIndex, int[] resultHolder) { // Pair<Integer, Integer>
-        int indexList = notation.indexOf(Notation.BEGIN_LIST, startIndex);
-        int indexString = notation.indexOf(Notation.BEGIN_STRING, startIndex);
+        final int indexList = notation.indexOf(Notation.BEGIN_LIST, startIndex);
+        final int indexString = notation.indexOf(Notation.BEGIN_STRING, startIndex);
 
         if(indexString == -1) {
             if(indexList == -1) {
                 return false;
-            } else {
-                resultHolder[0] = indexList;
-                resultHolder[1] = LIST;
             }
-        } else if(indexList == -1) {
+        } else if(indexString < indexList || indexList == -1) {
             resultHolder[0] = indexString;
             resultHolder[1] = STRING;
-        } else if(indexList < indexString) {
-            resultHolder[0] = indexList;
-            resultHolder[1] = LIST;
-        } else {
-            resultHolder[0] = indexString;
-            resultHolder[1] = STRING;
+            return true;
         }
+        // indexString == -1 || indexList <= indexString
+        resultHolder[0] = indexList;
+        resultHolder[1] = LIST;
         return true;
     }
 }
