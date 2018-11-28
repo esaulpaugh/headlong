@@ -35,15 +35,9 @@ public class NotationParser {
 
     private static int parse(String notation, int i, final int end, List<Object> parent, int[] resultHolder) {
 
-        int nextArrayEnd;
-
-        int nextObjectIndex;
-
-        int datumStart;
-        int datumEnd;
         while (i < end) {
 
-            nextArrayEnd = notation.indexOf(Notation.END_LIST, i);
+            int nextArrayEnd = notation.indexOf(Notation.END_LIST, i);
             if(nextArrayEnd == -1) {
                 nextArrayEnd = Integer.MAX_VALUE;
             }
@@ -52,7 +46,7 @@ public class NotationParser {
                 return Integer.MAX_VALUE;
             }
 
-            nextObjectIndex = resultHolder[0];
+            int nextObjectIndex = resultHolder[0];
 
             if(nextArrayEnd < nextObjectIndex) {
                 return nextArrayEnd + LIST_SUFFIX_LEN;
@@ -60,15 +54,14 @@ public class NotationParser {
 
             switch (/* nextObjectType */ resultHolder[1]) {
             case STRING:
-                datumStart = nextObjectIndex + STRING_PREFIX_LEN;
-                datumEnd = notation.indexOf(Notation.END_STRING, datumStart);
+                int datumStart = nextObjectIndex + STRING_PREFIX_LEN;
+                int datumEnd = notation.indexOf(Notation.END_STRING, datumStart);
                 parent.add(Strings.decode(notation.substring(datumStart, datumEnd), HEX));
                 i = datumEnd + STRING_SUFFIX_LEN;
                 break;
             case LIST:
-                datumStart = nextObjectIndex + LIST_PREFIX_LEN;
                 List<Object> childList = new ArrayList<>();
-                i = parse(notation, datumStart, end, childList, resultHolder);
+                i = parse(notation, nextObjectIndex + LIST_PREFIX_LEN, end, childList, resultHolder);
                 parent.add(childList);
 //                break;
 //            default: /* do nothing */
