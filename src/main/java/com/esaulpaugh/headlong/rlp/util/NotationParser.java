@@ -35,11 +35,15 @@ public class NotationParser {
 
     private static int parse(String notation, int i, final int end, List<Object> parent, int[] resultHolder) {
 
+        int nextArrayEnd = -1;
+
         while (i < end) {
 
-            int nextArrayEnd = notation.indexOf(Notation.END_LIST, i);
-            if(nextArrayEnd == -1) {
-                nextArrayEnd = Integer.MAX_VALUE;
+            if(i > nextArrayEnd) { // only update nextArrayEnd when i has passed it
+                nextArrayEnd = notation.indexOf(Notation.END_LIST, i);
+                if(nextArrayEnd == -1) {
+                    nextArrayEnd = Integer.MAX_VALUE;
+                }
             }
 
             if(!findNextObject(notation, i, resultHolder)) {
