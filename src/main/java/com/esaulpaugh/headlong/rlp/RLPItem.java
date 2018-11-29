@@ -119,16 +119,18 @@ public abstract class RLPItem {
      * Wise man says only empty items are false.
      *
      * @see Integers#putByte(byte, byte[], int)
-     * @return
+     * @return  the boolean represenation for this item
      */
     public boolean asBoolean() {
         return dataLength != 0;
     }
 
     /**
+     * Returns the char representation for this item.
+     *
      * @see String#charAt(int)
-     * @return
-     * @throws DecodeException
+     * @return  the char representation
+     * @throws DecodeException  if this item is not interpretable as a char
      */
     public char asChar() throws DecodeException {
         return (char) asShort();
@@ -182,7 +184,10 @@ public abstract class RLPItem {
 
     /**
      * Clones this object.
-     * @return
+     *
+     * @param decoder either {@link RLPDecoder#RLP_STRICT} or {@link RLPDecoder#RLP_LENIENT}
+     * @return  an independent and exact copy
+     * @throws DecodeException  if an unexpected problem in decoding occurs
      */
     public RLPItem duplicate(RLPDecoder decoder) throws DecodeException {
         return decoder.wrap(encoding(), 0, Integer.MAX_VALUE);
@@ -225,7 +230,6 @@ public abstract class RLPItem {
 
     /**
      * @see Arrays#hashCode(byte[])
-     * @return
      */
     @Override
     public int hashCode() {

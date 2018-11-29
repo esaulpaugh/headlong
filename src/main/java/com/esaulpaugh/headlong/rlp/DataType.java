@@ -24,8 +24,9 @@ public enum DataType {
 
     /**
      * The first byte of an RLP encoding.
-     * @param leadByte
-     * @return  the type
+     *
+     * @param leadByte  the first (zeroth) byte of an RLP encoding
+     * @return  one of the five enumerated RLP data types
      */
     public static DataType type(byte leadByte) {
 
@@ -48,6 +49,7 @@ public enum DataType {
         case (byte) 0xE0: case (byte) 0xE1: case (byte) 0xE2: case (byte) 0xE3: case (byte) 0xE4: case (byte) 0xE5: case (byte) 0xE6: case (byte) 0xE7:
         case (byte) 0xE8: case (byte) 0xE9: case (byte) 0xEA: case (byte) 0xEB: case (byte) 0xEC: case (byte) 0xED: case (byte) 0xEE: case (byte) 0xEF:
         case (byte) 0xF0: case (byte) 0xF1: case (byte) 0xF2: case (byte) 0xF3: case (byte) 0xF4: case (byte) 0xF5: case (byte) 0xF6: case (byte) 0xF7: return LIST_SHORT;
+
         case (byte) 0xF8: case (byte) 0xF9: case (byte) 0xFA: case (byte) 0xFB: case (byte) 0xFC: case (byte) 0xFD: case (byte) 0xFE: case (byte) 0xFF: return LIST_LONG;
 
 //        case (byte) 0x00: case (byte) 0x01: case (byte) 0x02: case (byte) 0x03: case (byte) 0x04: case (byte) 0x05: case (byte) 0x06: case (byte) 0x07:

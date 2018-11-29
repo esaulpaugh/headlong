@@ -454,9 +454,10 @@ public class Integers {
     }
 
     /**
-     * Will always return {@link Long#SIZE} for negative integers. See also {@link BizarroIntegers#bitLen(long)}.
-     * @param val
-     * @return
+     * NOTE: will always return {@link Long#SIZE} for negative integers. See also {@link BizarroIntegers#bitLen(long)}.
+     *
+     * @param val   the long value
+     * @return  the bit length of the input
      */
     public static int bitLen(long val) {
         return Long.SIZE - Long.numberOfLeadingZeros(val);

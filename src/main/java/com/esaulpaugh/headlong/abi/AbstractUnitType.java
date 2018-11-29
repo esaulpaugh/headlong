@@ -7,7 +7,6 @@ import java.math.BigInteger;
 
 /**
  * Superclass for any 32-byte ("unit") Contract ABI type. Usually numbers or boolean.
- * @param <V>
  */
 abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V should be instanceof Number or Boolean
 

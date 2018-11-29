@@ -1,4 +1,4 @@
 rootProject.name = 'headlong'
 
+// deprecated
 enableFeaturePreview('STABLE_PUBLISHING')
-

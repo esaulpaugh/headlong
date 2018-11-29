@@ -54,10 +54,12 @@ public class RLPList extends RLPItem {
     }
 
     /**
-     * Use {@link #elements(RLPDecoder)} or {@link #elements(RLPDecoder, Collection)}
-     * @param results
-     * @param decoder
-     * @throws DecodeException
+     * Returns the full hierarchy represented by this RLPList.
+     * Deprecated. Use {@link #elements(RLPDecoder)} or {@link #elements(RLPDecoder, Collection)} instead
+     *
+     * @param results   the destination
+     * @param decoder   the decoder, either {@link RLPDecoder#RLP_STRICT} or {@link RLPDecoder#RLP_LENIENT}
+     * @throws DecodeException  if any element in the hierarchy fails to decode
      */
     @Deprecated
     public void elementsRecursive(Collection<Object> results, RLPDecoder decoder) throws DecodeException {

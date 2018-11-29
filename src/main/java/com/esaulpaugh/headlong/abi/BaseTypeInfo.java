@@ -148,9 +148,10 @@ public class BaseTypeInfo {
     }
 
     /**
-     * Returns the canonical type's metadata object if it exists.
-     * @param canonical
-     * @return
+     * Returns the canonical base type's metadata object if it exists.
+     *
+     * @param canonical the canonical type string for the base type
+     * @return  the metadata object
      */
     public static BaseTypeInfo get(String canonical) {
         return TYPE_INFO_MAP.get(canonical);
