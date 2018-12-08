@@ -19,22 +19,16 @@
     </properties>
     
     <dependencies>
-        <!--<dependency>-->
-            <!--<groupId>com.madgag.spongycastle</groupId>-->
-            <!--<artifactId>core</artifactId>-->
-            <!--<version>1.58.0.0</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.bouncycastle</groupId>-->
-            <!--<artifactId>bcprov-jdk15on</artifactId>-->
-            <!--<version>1.60</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.5</version>
         </dependency>
     </dependencies>
 

@@ -147,8 +147,8 @@ public class RLPEncoder {
      * @param b the byte to be encoded
      * @return  the encoding
      */
-    public static byte[] encodeAsString(byte b) {
-        return encodeAsString(new byte[] { b });
+    public static byte[] encode(byte b) {
+        return encode(new byte[] { b });
     }
 
     /**
@@ -157,7 +157,7 @@ public class RLPEncoder {
      * @param byteString    the byte string to be encoded
      * @return  the encoding
      */
-    public static byte[] encodeAsString(byte[] byteString) {
+    public static byte[] encode(byte[] byteString) {
         byte[] dest = new byte[stringEncodedLen(byteString)];
         encodeString(byteString, dest, 0);
         return dest;
