@@ -8,8 +8,8 @@ import java.text.ParseException;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.TimeUnit;
 
 public class MonteCarloTest {
 
@@ -44,8 +44,7 @@ public class MonteCarloTest {
         MonteCarloTestCase testCase;
         boolean result;
         for(final long seed : seeds) {
-
-            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed); // "(-6609536284954208096,1,5,1,33)"
+            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed);
             try {
                 testCase = new MonteCarloTestCase(params);
                 temp = testCase.function.canonicalSignature;
@@ -181,8 +180,8 @@ public class MonteCarloTest {
 
         ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
         pool.invoke(task);
-//        pool.awaitQuiescence(TIMEOUT_SECONDS, TimeUnit.SECONDS); // Java 1.8+
-        ForkJoinTask.helpQuiesce();
+        pool.awaitQuiescence(5, TimeUnit.SECONDS); // Java 8+
+//        ForkJoinTask.helpQuiesce(); // ClassCastException on Java 7
         pool.shutdownNow();
 
         Thread[] threads = new Thread[8];

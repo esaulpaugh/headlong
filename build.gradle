@@ -36,7 +36,7 @@ publishing {
     }
 }
 
-sourceCompatibility = 1.7
+sourceCompatibility = 8
 
 repositories {
     mavenCentral()

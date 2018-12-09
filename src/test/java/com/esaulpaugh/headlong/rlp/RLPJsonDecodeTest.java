@@ -14,12 +14,12 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
-public class RLPDecodeTest {
+public class RLPJsonDecodeTest {
 
     @Test
     public void testInvalid() throws IOException, DecodeException {
 
-        String testCasesJson = TestUtils.readResourceAsString(RLPEncodeTest.class, "tests/json/invalidRLPTest.json");
+        String testCasesJson = TestUtils.readResourceAsString(RLPJsonEncodeTest.class, "tests/json/invalidRLPTest.json");
 
         JsonParser parser = new JsonParser();
         JsonElement element = parser.parse(testCasesJson);

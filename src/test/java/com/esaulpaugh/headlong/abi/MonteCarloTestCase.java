@@ -7,6 +7,7 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.*;
@@ -15,7 +16,10 @@ import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS_NAME;
 import static com.esaulpaugh.headlong.abi.StackableType.*;
+import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Strings;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import org.junit.Assert;
 
 public class MonteCarloTestCase implements Serializable {
 
@@ -113,11 +117,13 @@ public class MonteCarloTestCase implements Serializable {
         FIXED_LIST = generateFixedList();
 
         final Set<String> keySet = baseInfoTypeMap.keySet();
-        final int numKeys = keySet.size();
+        ArrayList<String> ordered = new ArrayList<>(keySet);
+        Collections.sort(ordered);
+        final int numKeys = ordered.size();
         FIXED_START_INDEX = numKeys + NUM_TUPLES_ADDED;
         String[] arr = new String[numKeys + NUM_TUPLES_ADDED + NUM_FIXED_ADDED];
         int i = 0;
-        for (String canonical : keySet) {
+        for (String canonical : ordered) {
             arr[i++] = canonical;
         }
         for (int j = 0; j < NUM_TUPLES_ADDED; j++) {
@@ -130,7 +136,9 @@ public class MonteCarloTestCase implements Serializable {
         Map<String, BaseTypeInfo> fixedMap = new HashMap<>();
         BaseTypeInfo.putFixed(fixedMap, true);
         BaseTypeInfo.putFixed(fixedMap, false);
-        return Collections.unmodifiableList(new ArrayList<>(fixedMap.keySet()));
+        ArrayList<String> ordered = new ArrayList<>(fixedMap.keySet());
+        Collections.sort(ordered);
+        return Collections.unmodifiableList(ordered);
     }
 
     final Params params;
@@ -180,7 +188,6 @@ public class MonteCarloTestCase implements Serializable {
         final Tuple out = function.decodeCall((ByteBuffer) abi.flip());
 
         boolean equal = args.equals(out);
-//        System.out.println(equal);
 
         if(!equal) {
             try {
@@ -374,7 +381,8 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     private static String generateString(int len, Random r) {
-        return new String(generateByteArray(len, r), UTF_8);
+        byte[] bytes = generateByteArray(len, r);
+        return new String(bytes, UTF_8);
     }
 
     private static String generateFunctionName(Random r) {
@@ -475,7 +483,23 @@ public class MonteCarloTestCase implements Serializable {
         } else if(elementType instanceof TupleType) {
             findInequality((TupleType) elementType, (Tuple) in, (Tuple) out);
         } else if(elementType instanceof ArrayType<?, ?>) {
-            findInequalityInArray((ArrayType<?, ?>) elementType, (Object[]) in, (Object[]) out);
+            ArrayType<?, ?> arrayType = (ArrayType<?, ?>) elementType;
+            if(arrayType.isString) {
+                Assert.assertArrayEquals(Strings.decode((String) in, Strings.UTF_8), Strings.decode((String) out, Strings.UTF_8));
+                Assert.assertEquals(in, out);
+            } else {
+                if(Object[].class.isAssignableFrom(in.getClass())) {
+                    findInequalityInArray(arrayType, (Object[]) in, (Object[]) out);
+                } else if(byte[].class.isAssignableFrom(in.getClass())) {
+                    Assert.assertArrayEquals((byte[]) in, (byte[]) out);
+                } else if(int[].class.isAssignableFrom(in.getClass())) {
+                    Assert.assertArrayEquals((int[]) in, (int[]) out);
+                } else if(long[].class.isAssignableFrom(in.getClass())) {
+                    Assert.assertArrayEquals((long[]) in, (long[]) out);
+                } else {
+                    throw new RuntimeException("??");
+                }
+            }
         } else {
             throw new IllegalArgumentException("unrecognized type: " + elementType.toString());
         }

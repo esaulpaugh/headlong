@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
-public class ABITest {
+public class ABIJsonTest {
 
     private static final String RESOURCE = "tests/json/basic_abi_tests.json";
 
@@ -25,7 +25,7 @@ public class ABITest {
 
     static {
         try {
-            TEST_CASES = TestUtils.readResourceAsString(ABITest.class, RESOURCE);
+            TEST_CASES = TestUtils.readResourceAsString(ABIJsonTest.class, RESOURCE);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

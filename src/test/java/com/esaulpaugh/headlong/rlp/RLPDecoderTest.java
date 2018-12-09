@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiPredicate;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
@@ -179,117 +180,6 @@ public class RLPDecoderTest {
         }
     }
 
-//    @Test
-//    public void exceedsContainerShort() throws Throwable {
-//
-//        final Class<? extends Throwable> clazz = DecodeException.class;
-//
-//        byte[] a0 = new byte[] { (byte) 0x81 };
-//        byte[] a1 = new byte[] { (byte) 0xc1 };
-//
-//        assertThrown(clazz, "@ index 0", () -> RLP_LENIENT.wrap(a0, 0));
-//        assertThrown(clazz, "@ index 0", () -> RLP_LENIENT.wrap(a1, 0));
-//
-//        byte[] b0 = new byte[] { (byte) 0xc1, (byte) 0x81 };
-//        byte[] b1 = new byte[] { (byte) 0xc1, (byte) 0xc1 };
-//
-//        assertThrown(clazz, "@ index 1", () -> ((RLPList) RLP_LENIENT.wrap(b0, 0)).elements(RLP_STRICT));
-//        assertThrown(clazz, "@ index 1", () -> ((RLPList) RLP_LENIENT.wrap(b1, 0)).elements(RLP_STRICT));
-//
-//        byte[] c0 = new byte[] { (byte) 0xc1, (byte) 0x81, (byte) 0x00 };
-//        byte[] c1 = new byte[] { (byte) 0xc1, (byte) 0xc1, (byte) 0x00 };
-//
-//        assertThrown(clazz, "@ index 1", () -> ((RLPList) RLP_LENIENT.wrap(c0, 0)).elements(RLP_STRICT));
-//        assertThrown(clazz, "@ index 1", () -> ((RLPList) RLP_LENIENT.wrap(c1, 0)).elements(RLP_STRICT));
-//    }
-//
-//    @Test
-//    public void exceedsContainerLong() throws Throwable {
-//
-//        final Class<? extends Throwable> clazz = DecodeException.class;
-//
-//        byte[] a0 = new byte[57]; a0[0] = (byte) 0xb8; a0[1] = 56;
-//        byte[] a1 = new byte[57]; a1[0] = (byte) 0xf8; a1[1] = 56;
-//
-//        assertThrown(clazz, "@ index 0", () -> RLP_LENIENT.wrap(a0, 0));
-//        assertThrown(clazz, "@ index 0", () -> RLP_LENIENT.wrap(a1, 0));
-//
-//        byte[] b0 = new byte[58]; b0[0] = (byte) 0xf8; b0[1] = 56; b0[57] = (byte) 0x81;
-//        byte[] b1 = new byte[58]; b1[0] = (byte) 0xf8; b1[1] = 56; b1[56] = (byte) 0xc2;
-//
-//        assertThrown(clazz, "@ index 57", () -> ((RLPList) RLP_LENIENT.wrap(b0, 0)).elements(RLP_STRICT));
-//        assertThrown(clazz, "@ index 56", () -> ((RLPList) RLP_LENIENT.wrap(b1, 0)).elements(RLP_STRICT));
-//
-//        byte[] c0 = new byte[59]; c0[0] = (byte) 0xf8; c0[1] = 56; c0[57] = (byte) 0x81;
-//        byte[] c1 = new byte[59]; c1[0] = (byte) 0xf8; c1[1] = 56; c1[56] = (byte) 0xc2;
-//
-//        assertThrown(clazz, "@ index 57", () -> ((RLPList) RLP_LENIENT.wrap(c0, 0)).elements(RLP_STRICT));
-//        assertThrown(clazz, "@ index 56", () -> ((RLPList) RLP_LENIENT.wrap(c1, 0)).elements(RLP_STRICT));
-//    }
-//
-//    @Test
-//    public void booleans() throws DecodeException {
-//        byte[] burma17 = new byte[] { (byte) 0xc5, (byte) 0x82, (byte) 0x10, (byte) 0x10, (byte) 0xc0 };
-//
-//        RLPItem nonEmpty = RLP_LENIENT.wrap( burma17, 1);
-//        Assert.assertTrue(nonEmpty.asBoolean());
-//
-//        RLPItem empty = RLP_LENIENT.wrap( burma17, 4);
-//        Assert.assertFalse(empty.asBoolean());
-//    }
-//
-//    @Test
-//    public void chars() throws DecodeException {
-//        byte[] burma17 = new byte[] { (byte) 0xc5, (byte) 0x82, (byte) 0x10, (byte) 0x10, (byte) 0xc0 };
-//
-//        RLPItem nonEmpty = RLP_LENIENT.wrap( burma17, 1);
-//        Assert.assertEquals(Character.valueOf('\u1010'), Character.valueOf(nonEmpty.asChar()));
-//
-//        RLPItem empty = RLP_LENIENT.wrap( burma17, 4);
-//        Assert.assertEquals(Character.valueOf('\0'), Character.valueOf(empty.asChar()));
-//    }
-//
-//    private static final BiPredicate<Integer, Integer> UNTIL_COUNT_FIVE = (count, index) -> count < 5;
-//    private static final BiPredicate<Integer, Integer> UNTIL_INDEX_SEVEN = (count, index) -> index < 7;
-//
-//    @Test
-//    public void collectBiPredicate() throws DecodeException {
-//        byte[] rlp = new byte[9];
-//        for (int i = 0; i < rlp.length; i++) {
-//            rlp[i] = (byte) i;
-//        }
-//        Set<RLPItem> hashSet = new HashSet<>();
-//        int n = RLP_STRICT.collect(UNTIL_COUNT_FIVE, rlp, 0, hashSet);
-//        Assert.assertEquals(5, n);
-//        Assert.assertEquals(5, hashSet.size());
-//        for (int i = 0; i < 5; i++) {
-//            Assert.assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
-//        }
-//
-//        hashSet = new HashSet<>();
-//        n = RLP_STRICT.collect(UNTIL_INDEX_SEVEN, rlp, 0, hashSet);
-//        Assert.assertEquals(7, n);
-//        Assert.assertEquals(7, hashSet.size());
-//        for (int i = 0; i < 7; i++) {
-//            Assert.assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
-//        }
-//    }
-//
-//    @Test
-//    public void negativeDataLen() throws Throwable {
-//        byte[] alpha = new byte[] {
-//                (byte) 0xbf,
-//                (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF };
-//
-//        assertThrown(DecodeException.class, "found: -1", () -> RLP_LENIENT.wrap(alpha) );
-//
-//        byte[] beta = new byte[] {
-//                (byte) 0xbf,
-//                (byte) 0x80, 0, 0, 0, 0, 0, 0, 0 };
-//
-//        assertThrown(DecodeException.class, "found: -9223372036854775808", () -> RLP_LENIENT.wrap(beta) );
-//    }
-
     @Test
     public void exceedsContainerShort() throws Throwable {
 
@@ -298,20 +188,20 @@ public class RLPDecoderTest {
         byte[] a0 = new byte[] { (byte) 0x81 };
         byte[] a1 = new byte[] { (byte) 0xc1 };
 
-        assertThrown(clazz, "@ index 0", decodeList(a0));
-        assertThrown(clazz, "@ index 0", decodeList(a1));
+        assertThrown(clazz, "@ index 0", () -> RLP_LENIENT.wrap(a0, 0));
+        assertThrown(clazz, "@ index 0", () -> RLP_LENIENT.wrap(a1, 0));
 
         byte[] b0 = new byte[] { (byte) 0xc1, (byte) 0x81 };
         byte[] b1 = new byte[] { (byte) 0xc1, (byte) 0xc1 };
 
-        assertThrown(clazz, "@ index 1", decodeList(b0));
-        assertThrown(clazz, "@ index 1", decodeList(b1));
+        assertThrown(clazz, "@ index 1", () -> ((RLPList) RLP_LENIENT.wrap(b0, 0)).elements(RLP_STRICT));
+        assertThrown(clazz, "@ index 1", () -> ((RLPList) RLP_LENIENT.wrap(b1, 0)).elements(RLP_STRICT));
 
         byte[] c0 = new byte[] { (byte) 0xc1, (byte) 0x81, (byte) 0x00 };
         byte[] c1 = new byte[] { (byte) 0xc1, (byte) 0xc1, (byte) 0x00 };
 
-        assertThrown(clazz, "@ index 1", decodeList(c0));
-        assertThrown(clazz, "@ index 1", decodeList(c1));
+        assertThrown(clazz, "@ index 1", () -> ((RLPList) RLP_LENIENT.wrap(c0, 0)).elements(RLP_STRICT));
+        assertThrown(clazz, "@ index 1", () -> ((RLPList) RLP_LENIENT.wrap(c1, 0)).elements(RLP_STRICT));
     }
 
     @Test
@@ -322,20 +212,20 @@ public class RLPDecoderTest {
         byte[] a0 = new byte[57]; a0[0] = (byte) 0xb8; a0[1] = 56;
         byte[] a1 = new byte[57]; a1[0] = (byte) 0xf8; a1[1] = 56;
 
-        assertThrown(clazz, "@ index 0", wrap(a0));
-        assertThrown(clazz, "@ index 0", wrap(a1));
+        assertThrown(clazz, "@ index 0", () -> RLP_LENIENT.wrap(a0, 0));
+        assertThrown(clazz, "@ index 0", () -> RLP_LENIENT.wrap(a1, 0));
 
         byte[] b0 = new byte[58]; b0[0] = (byte) 0xf8; b0[1] = 56; b0[57] = (byte) 0x81;
         byte[] b1 = new byte[58]; b1[0] = (byte) 0xf8; b1[1] = 56; b1[56] = (byte) 0xc2;
 
-        assertThrown(clazz, "@ index 57", decodeList(b0));
-        assertThrown(clazz, "@ index 56", decodeList(b1));
+        assertThrown(clazz, "@ index 57", () -> ((RLPList) RLP_LENIENT.wrap(b0, 0)).elements(RLP_STRICT));
+        assertThrown(clazz, "@ index 56", () -> ((RLPList) RLP_LENIENT.wrap(b1, 0)).elements(RLP_STRICT));
 
         byte[] c0 = new byte[59]; c0[0] = (byte) 0xf8; c0[1] = 56; c0[57] = (byte) 0x81;
         byte[] c1 = new byte[59]; c1[0] = (byte) 0xf8; c1[1] = 56; c1[56] = (byte) 0xc2;
 
-        assertThrown(clazz, "@ index 57", decodeList(c0));
-        assertThrown(clazz, "@ index 56", decodeList(c1));
+        assertThrown(clazz, "@ index 57", () -> ((RLPList) RLP_LENIENT.wrap(c0, 0)).elements(RLP_STRICT));
+        assertThrown(clazz, "@ index 56", () -> ((RLPList) RLP_LENIENT.wrap(c1, 0)).elements(RLP_STRICT));
     }
 
     @Test
@@ -360,28 +250,50 @@ public class RLPDecoderTest {
         Assert.assertEquals(Character.valueOf('\0'), Character.valueOf(empty.asChar()));
     }
 
-//    private static final BiPredicate<Integer, Integer> UNTIL_COUNT_FIVE = (count, index) -> count < 5;
-//    private static final BiPredicate<Integer, Integer> UNTIL_INDEX_SEVEN = (count, index) -> index < 7;
+    private static final BiPredicate<Integer, Integer> UNTIL_COUNT_FIVE = (count, index) -> count < 5;
+    private static final BiPredicate<Integer, Integer> UNTIL_INDEX_SEVEN = (count, index) -> index < 7;
 
     @Test
-    public void collectBiPredicate() throws DecodeException {
+    public void collect() throws DecodeException {
         byte[] rlp = new byte[9];
         for (int i = 0; i < rlp.length; i++) {
             rlp[i] = (byte) i;
         }
         Set<RLPItem> hashSet = new HashSet<>();
-        final int n = 5;
-        RLP_STRICT.collect(n, rlp, 0, hashSet);
-        Assert.assertEquals(n, hashSet.size());
+        int n = RLP_STRICT.collect(rlp, 0, UNTIL_COUNT_FIVE, hashSet);
+        Assert.assertEquals(5, n);
+        Assert.assertEquals(5, hashSet.size());
         for (int i = 0; i < 5; i++) {
             Assert.assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
         }
 
         hashSet = new HashSet<>();
-        final int endIndex = 7;
-        RLP_STRICT.collect(rlp, 0, endIndex, hashSet);
-        Assert.assertEquals(endIndex, hashSet.size());
+        n = RLP_STRICT.collect(rlp, 0, UNTIL_INDEX_SEVEN, hashSet);
+        Assert.assertEquals(7, n);
+        Assert.assertEquals(7, hashSet.size());
         for (int i = 0; i < 7; i++) {
+            Assert.assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
+        }
+
+        hashSet = new HashSet<>();
+        RLP_STRICT.collectN(rlp, 4, 3, hashSet);
+        Assert.assertEquals(3, hashSet.size());
+        for (int i = 4; i < 7; i++) {
+            Assert.assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
+        }
+
+        hashSet = new HashSet<>();
+        n = RLP_STRICT.collectBefore(rlp, 1, 6, hashSet);
+        Assert.assertEquals(5, n);
+        Assert.assertEquals(5, hashSet.size());
+        for (int i = 1; i < 6; i++) {
+            Assert.assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
+        }
+
+        hashSet = new HashSet<>();
+        n = RLP_STRICT.collectAll(rlp, 0, hashSet);
+        Assert.assertEquals(9, n);
+        for (int i = 0; i < 9; i++) {
             Assert.assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
         }
     }
@@ -392,13 +304,13 @@ public class RLPDecoderTest {
                 (byte) 0xbf,
                 (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF };
 
-        assertThrown(DecodeException.class, "found: -1", wrap(alpha) );
+        assertThrown(DecodeException.class, "found: -1", () -> RLP_LENIENT.wrap(alpha) );
 
         byte[] beta = new byte[] {
                 (byte) 0xbf,
                 (byte) 0x80, 0, 0, 0, 0, 0, 0, 0 };
 
-        assertThrown(DecodeException.class, "found: -9223372036854775808", wrap(beta) );
+        assertThrown(DecodeException.class, "found: -9223372036854775808", () -> RLP_LENIENT.wrap(beta) );
     }
 
     private static CustomRunnable wrap(final byte[] rlp) {

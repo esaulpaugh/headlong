@@ -3,6 +3,7 @@ package com.esaulpaugh.headlong.rlp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiPredicate;
 
 /**
  * Decodes RLP-formatted data.
@@ -100,70 +101,42 @@ public class RLPDecoder {
         }
     }
 
-    public List<RLPItem> collect(byte[] encodings, int index, final int endIndex) throws DecodeException {
-        ArrayList<RLPItem> arrayList = new ArrayList<>();
-        collect(encodings, index, endIndex, arrayList);
-        return arrayList;
+    public List<RLPItem> collectAll(byte[] encodings, int index) throws DecodeException {
+        return collectBefore(encodings, index, encodings.length);
     }
 
-    public void collect(byte[] encodings, int index, final int endIndex, Collection<RLPItem> dest) throws DecodeException {
-        while (index < endIndex) {
-            RLPItem item = wrap(encodings, index);
-            dest.add(item);
-            index = item.endIndex;
-        }
+    public int collectAll(byte[] encodings, int index, Collection<RLPItem> dest) throws DecodeException {
+        return collectBefore(encodings, index, encodings.length, dest);
     }
 
-    public List<RLPItem> collect(final int n, byte[] encodings) throws DecodeException {
-        ArrayList<RLPItem> arrayList = new ArrayList<>(n);
-        collect(n, encodings, 0, arrayList);
-        return arrayList;
+    public List<RLPItem> collectBefore(byte[] encodings, int index, int endIndex) throws DecodeException {
+        ArrayList<RLPItem> dest = new ArrayList<>();
+        collectBefore(encodings, index, endIndex, dest);
+        return dest;
     }
 
-    public void collect(int n, byte[] encodings, int index, Collection<RLPItem> dest) throws DecodeException {
+    public int collectBefore(byte[] encodings, int index, int endIndex, Collection<RLPItem> dest) throws DecodeException {
+        return collect(encodings, index, (count, idx) -> idx < endIndex, dest);
+    }
+
+    public List<RLPItem> collectN(byte[] encodings, int index, int n) throws DecodeException {
+        ArrayList<RLPItem> dest = new ArrayList<>(n);
+        collect(encodings, index, (count, idx) -> count < n, dest);
+        return dest;
+    }
+
+    public void collectN(byte[] encodings, int index, int n, Collection<RLPItem> dest) throws DecodeException {
+        collect(encodings, index, (count, idx) -> count < n, dest);
+    }
+
+    public int collect(byte[] encodings, int index, BiPredicate<Integer, Integer> predicate, Collection<RLPItem> collection) throws DecodeException {
         int count = 0;
-        while (count < n) {
+        while (predicate.test(count, index)) {
             RLPItem item = wrap(encodings, index);
-            dest.add(item);
+            collection.add(item);
             count++;
             index = item.endIndex;
         }
+        return count;
     }
-
-    public void collect(byte[] encodings, int index, final int endIndex, RLPItem[] dest) throws DecodeException {
-        int count = 0;
-        while (index < endIndex) {
-            RLPItem item = wrap(encodings, index);
-            dest[count] = item;
-            count++;
-            index = item.endIndex;
-        }
-    }
-
-    public void collect(int n, byte[] encodings, int index, RLPItem[] dest) throws DecodeException {
-        int count = 0;
-        while (count < n) {
-            RLPItem item = wrap(encodings, index);
-            dest[count] = item;
-            count++;
-            index = item.endIndex;
-        }
-    }
-
-//    public List<RLPItem> collect(final int n, byte[] encodings) throws DecodeException {
-//        ArrayList<RLPItem> arrayList = new ArrayList<>(n);
-//        collect((count, i) -> count < n, encodings, 0, arrayList);
-//        return arrayList;
-//    }
-//
-//    public int collect(java.util.function.BiPredicate<Integer, Integer> predicate, byte[] encodings, int index, Collection<RLPItem> collection) throws DecodeException {
-//        int count = 0;
-//        while (predicate.test(count, index)) {
-//            RLPItem item = wrap(encodings, index);
-//            collection.add(item);
-//            count++;
-//            index = item.endIndex;
-//        }
-//        return count;
-//    }
 }

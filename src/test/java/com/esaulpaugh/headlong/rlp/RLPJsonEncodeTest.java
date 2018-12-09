@@ -18,12 +18,12 @@ import java.util.Set;
 
 import static com.esaulpaugh.headlong.TestUtils.*;
 
-public class RLPEncodeTest {
+public class RLPJsonEncodeTest {
 
     @Test
     public void testCases() throws IOException {
 
-        String testCasesJson = TestUtils.readResourceAsString(RLPEncodeTest.class, "tests/json/rlptest.json");
+        String testCasesJson = TestUtils.readResourceAsString(RLPJsonEncodeTest.class, "tests/json/rlptest.json");
 
         JsonParser parser = new JsonParser();
         JsonElement element = parser.parse(testCasesJson);
