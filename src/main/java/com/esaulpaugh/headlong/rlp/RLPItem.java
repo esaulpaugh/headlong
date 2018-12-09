@@ -27,15 +27,13 @@ public abstract class RLPItem {
     public final transient int dataLength;
     public final transient int endIndex;
 
-    RLPItem(final byte[] buffer, final int index, int containerEnd, final boolean lenient) throws DecodeException {
+    RLPItem(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) throws DecodeException {
         containerEnd = Math.min(buffer.length, containerEnd);
 
         final int _dataIndex;
         final long _dataLength;
-
-        final byte leadByte = buffer[index];
-        final DataType type = DataType.type(leadByte);
-        final int diff = leadByte - type.offset;
+        
+        final int diff = lead - type.offset;
         switch (type) {
         case SINGLE_BYTE: _dataIndex = index; _dataLength = 1; break;
         case STRING_SHORT:

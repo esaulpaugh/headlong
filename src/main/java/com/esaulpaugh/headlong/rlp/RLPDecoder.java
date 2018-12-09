@@ -1,5 +1,7 @@
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.util.Strings;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -19,29 +21,6 @@ public class RLPDecoder {
         this.lenient = lenient;
     }
 
-    public class SequenceIterator {
-
-        private final byte[] rlp;
-        private int index;
-        private final int end;
-
-        SequenceIterator(byte[] rlp, int start, int end) {
-            this.rlp = rlp;
-            this.index = start;
-            this.end = end;
-        }
-
-        public boolean hasNext() {
-            return index < end;
-        }
-
-        public RLPItem next() throws DecodeException {
-            RLPItem item = wrap(rlp, index);
-            this.index = item.endIndex;
-            return item;
-        }
-    }
-
     public SequenceIterator sequenceIterator(byte[] buffer) {
         return sequenceIterator(buffer, 0);
     }
@@ -54,7 +33,7 @@ public class RLPDecoder {
      * @return  an iterator over the elements in the sequence
      */
     public SequenceIterator sequenceIterator(byte[] buffer, int index) {
-        return new SequenceIterator(buffer, index, buffer.length);
+        return new SequenceIterator(RLPDecoder.this, buffer, index, buffer.length);
     }
 
     public RLPList.Iterator listIterator(byte[] buffer) throws DecodeException {
@@ -74,6 +53,52 @@ public class RLPDecoder {
                 .iterator(this);
 //        RLPList rlpList = (RLPList) RLP_STRICT.wrap(buffer, index);
 //        return rlpList.elements(RLP_STRICT).iterator();
+    }
+
+//    public RLPList wrapString(byte[] encoding) throws DecodeException {
+//        return wrapList(encoding, 0);
+//    }
+//
+//    public RLPList wrapString(byte[] buffer, int index) throws DecodeException {
+//        return wrapList(buffer, index, buffer.length);
+//    }
+//
+//    public RLPString wrapString(byte[] buffer, int index, int containerEnd) throws DecodeException {
+//        byte lead = buffer[index];
+//        DataType type = DataType.type(lead);
+//        switch (type) {
+//        case SINGLE_BYTE:
+//        case STRING_SHORT:
+//        case STRING_LONG:
+//            return new RLPString(lead, type, buffer, index, containerEnd, lenient);
+//        case LIST_SHORT:
+//        case LIST_LONG:
+//        default:
+//            throw new IllegalArgumentException("item is not a string");
+//        }
+//    }
+
+    public RLPList wrapList(byte[] encoding) throws DecodeException {
+        return wrapList(encoding, 0);
+    }
+
+    public RLPList wrapList(byte[] buffer, int index) throws DecodeException {
+        return wrapList(buffer, index, buffer.length);
+    }
+
+    public RLPList wrapList(byte[] buffer, int index, int containerEnd) throws DecodeException {
+        byte lead = buffer[index];
+        DataType type = DataType.type(lead);
+        switch (type) {
+        case LIST_SHORT:
+        case LIST_LONG:
+            return new RLPList(lead, type, buffer, index, containerEnd, lenient);
+        case SINGLE_BYTE:
+        case STRING_SHORT:
+        case STRING_LONG:
+        default:
+            throw new IllegalArgumentException("item is not a list");
+        }
     }
 
     /**
@@ -96,18 +121,24 @@ public class RLPDecoder {
     }
 
     RLPItem wrap(byte[] buffer, int index, int containerEnd) throws DecodeException {
-        switch (DataType.type(buffer[index])) {
+        byte lead = buffer[index];
+        DataType type = DataType.type(lead);
+        switch (type) {
         case SINGLE_BYTE:
         case STRING_SHORT:
         case STRING_LONG:
-            return new RLPString(buffer, index, containerEnd, lenient);
+            return new RLPString(lead, type, buffer, index, containerEnd, lenient);
         case LIST_SHORT:
         case LIST_LONG:
-            return new RLPList(buffer, index, containerEnd, lenient);
+            return new RLPList(lead, type, buffer, index, containerEnd, lenient);
         default:
             throw new AssertionError();
         }
     }
+
+    /*
+     *  Methods for gathering sequential items into a collection
+     */
 
     public List<RLPItem> collectAll(byte[] encodings) throws DecodeException {
         return collectAll(0, encodings);

@@ -15,8 +15,8 @@ import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
  */
 public class RLPList extends RLPItem {
 
-    RLPList(byte[] buffer, int index, int containerEnd, boolean lenient) throws DecodeException {
-        super(buffer, index, containerEnd, lenient);
+    RLPList(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) throws DecodeException {
+        super(lead, type, buffer, index, containerEnd, lenient);
     }
 
     /**
@@ -42,7 +42,8 @@ public class RLPList extends RLPItem {
         }
 
         try {
-            return new RLPList(dest, 0, dest.length, false);
+            byte lead = dest[0];
+            return new RLPList(lead, DataType.type(lead), dest, 0, dest.length, false);
         } catch (DecodeException de) {
             throw new AssertionError(de);
         }

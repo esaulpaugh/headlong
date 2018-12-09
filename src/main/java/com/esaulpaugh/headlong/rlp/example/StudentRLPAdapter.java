@@ -1,11 +1,12 @@
 package com.esaulpaugh.headlong.rlp.example;
 
 import com.esaulpaugh.headlong.rlp.DecodeException;
-import com.esaulpaugh.headlong.rlp.RLPDecoder;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
+import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
@@ -23,7 +24,7 @@ public class StudentRLPAdapter implements RLPAdapter<Student> {
                 new BigDecimal(iter.next().asBigInt(), iter.next().asInt())
         );
 
-//        RLPList rlpList = (RLPList) RLP_STRICT.wrap(rlp, index);
+//        RLPList rlpList = RLP_STRICT.wrapList(rlp, index);
 //        List<RLPItem> elements = rlpList.elements(RLP_STRICT);
 //        return new Student(
 //                elements.get(0).asString(UTF_8),
