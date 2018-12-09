@@ -1,7 +1,5 @@
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.util.Strings;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -82,16 +80,12 @@ public class RLPDecoder {
     }
 
     public RLPList wrapList(byte[] buffer, int index) throws DecodeException {
-        return wrapList(buffer, index, buffer.length);
-    }
-
-    public RLPList wrapList(byte[] buffer, int index, int containerEnd) throws DecodeException {
         byte lead = buffer[index];
         DataType type = DataType.type(lead);
         switch (type) {
         case LIST_SHORT:
         case LIST_LONG:
-            return new RLPList(lead, type, buffer, index, containerEnd, lenient);
+            return new RLPList(lead, type, buffer, index, /*containerEnd*/ buffer.length, lenient);
         case SINGLE_BYTE:
         case STRING_SHORT:
         case STRING_LONG:

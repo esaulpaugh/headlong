@@ -2,11 +2,9 @@ package com.esaulpaugh.headlong.rlp.example;
 
 import com.esaulpaugh.headlong.rlp.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
-import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
