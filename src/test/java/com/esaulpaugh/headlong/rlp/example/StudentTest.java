@@ -17,8 +17,8 @@ public class StudentTest {
 
     @Test
     public void decodeEncode() throws DecodeException {
-        final byte[] studentRlp = Strings.decode(STUDENT_RLP_LIST, HEX);
-        Student plato = new Student(studentRlp, 0);
+        final byte[] studentRlp = Strings.decode(STUDENT_RLP_SEQUENTIAL, HEX);
+        Student plato = new Student(studentRlp);
         Assert.assertEquals(STUDENT_TO_STRING, plato.toString());
 
         byte[] rlp = plato.toRLP();

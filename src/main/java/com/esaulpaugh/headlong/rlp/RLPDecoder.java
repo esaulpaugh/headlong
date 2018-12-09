@@ -42,6 +42,10 @@ public class RLPDecoder {
         }
     }
 
+    public SequenceIterator sequenceIterator(byte[] buffer) {
+        return sequenceIterator(buffer, 0);
+    }
+
     /**
      * Returns an iterator over the sequence of RLP items starting at {@code index}.
      *
@@ -51,6 +55,10 @@ public class RLPDecoder {
      */
     public SequenceIterator sequenceIterator(byte[] buffer, int index) {
         return new SequenceIterator(buffer, index, buffer.length);
+    }
+
+    public RLPList.Iterator listIterator(byte[] buffer) throws DecodeException {
+        return listIterator(buffer, 0);
     }
 
     /**
@@ -101,35 +109,47 @@ public class RLPDecoder {
         }
     }
 
-    public List<RLPItem> collectAll(byte[] encodings, int index) throws DecodeException {
-        return collectBefore(encodings, index, encodings.length);
+    public List<RLPItem> collectAll(byte[] encodings) throws DecodeException {
+        return collectAll(0, encodings);
     }
 
-    public int collectAll(byte[] encodings, int index, Collection<RLPItem> dest) throws DecodeException {
-        return collectBefore(encodings, index, encodings.length, dest);
+    public List<RLPItem> collectAll(int index, byte[] encodings) throws DecodeException {
+        return collectBefore(index, encodings, encodings.length);
     }
 
-    public List<RLPItem> collectBefore(byte[] encodings, int index, int endIndex) throws DecodeException {
+    public List<RLPItem> collectBefore(byte[] encodings, int endIndex) throws DecodeException {
+        return collectBefore(0, encodings, endIndex);
+    }
+
+    public List<RLPItem> collectBefore(int index, byte[] encodings, int endIndex) throws DecodeException {
         ArrayList<RLPItem> dest = new ArrayList<>();
-        collectBefore(encodings, index, endIndex, dest);
+        collectBefore(index, encodings, endIndex, dest);
         return dest;
     }
 
-    public int collectBefore(byte[] encodings, int index, int endIndex, Collection<RLPItem> dest) throws DecodeException {
-        return collect(encodings, index, (count, idx) -> idx < endIndex, dest);
+    public List<RLPItem> collectN(byte[] encodings, int n) throws DecodeException {
+        return collectN(0, encodings, n);
     }
 
-    public List<RLPItem> collectN(byte[] encodings, int index, int n) throws DecodeException {
+    public List<RLPItem> collectN(int index, byte[] encodings, int n) throws DecodeException {
         ArrayList<RLPItem> dest = new ArrayList<>(n);
-        collect(encodings, index, (count, idx) -> count < n, dest);
+        collect(index, encodings, (count, idx) -> count < n, dest);
         return dest;
+    }
+    // --------
+    public int collectAll(int index, byte[] encodings, Collection<RLPItem> dest) throws DecodeException {
+        return collectBefore(index, encodings, encodings.length, dest);
+    }
+
+    public int collectBefore(int index, byte[] encodings, int endIndex, Collection<RLPItem> dest) throws DecodeException {
+        return collect(index, encodings, (count, idx) -> idx < endIndex, dest);
     }
 
     public void collectN(byte[] encodings, int index, int n, Collection<RLPItem> dest) throws DecodeException {
-        collect(encodings, index, (count, idx) -> count < n, dest);
+        collect(index, encodings, (count, idx) -> count < n, dest);
     }
-
-    public int collect(byte[] encodings, int index, BiPredicate<Integer, Integer> predicate, Collection<RLPItem> collection) throws DecodeException {
+    // -------
+    public int collect(int index, byte[] encodings, BiPredicate<Integer, Integer> predicate, Collection<RLPItem> collection) throws DecodeException {
         int count = 0;
         while (predicate.test(count, index)) {
             RLPItem item = wrap(encodings, index);

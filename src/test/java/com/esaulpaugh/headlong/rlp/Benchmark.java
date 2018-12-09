@@ -20,7 +20,7 @@ public class Benchmark {
         Student plato = null;
 //        StudentRLPAdapter adapter = new StudentRLPAdapter();
 
-        byte[] rlp = Strings.decode(StudentTest.STUDENT_RLP_LIST, HEX);
+        byte[] rlp = Strings.decode(StudentTest.STUDENT_RLP_SEQUENTIAL, HEX);
 //        byte[] temp = new byte[rlp.length];
 
         final int n = 1_000_000;
@@ -31,14 +31,14 @@ public class Benchmark {
 
         // warmup
         for (int i = 0; i < 2_000_000; i++) {
-            plato = new Student(rlp, 0);
+            plato = new Student(rlp);
 //            plato.toRLP(temp, 0);
 //            rlp = adapter.encode(plato);
 //            plato = adapter.decode(rlp);
         }
         start = System.nanoTime();
         for (int i = 0; i < n; i++) {
-            plato = new Student(rlp, 0);
+            plato = new Student(rlp);
 //            plato.toRLP(temp, 0);
 //            rlp = adapter.encode(plato);
 //            plato = adapter.decode(rlp);
