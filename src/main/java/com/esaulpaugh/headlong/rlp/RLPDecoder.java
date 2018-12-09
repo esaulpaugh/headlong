@@ -49,8 +49,7 @@ public class RLPDecoder {
      * @throws DecodeException  if the RLP list failed to decode
      */
     public RLPList.Iterator listIterator(byte[] buffer, int index) throws DecodeException {
-        return ((RLPList) wrap(buffer, index))
-                .iterator(this);
+        return wrapList(buffer, index).iterator(this);
 //        RLPList rlpList = (RLPList) RLP_STRICT.wrap(buffer, index);
 //        return rlpList.elements(RLP_STRICT).iterator();
     }
