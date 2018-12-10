@@ -13,9 +13,6 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 
 public class NotationTest {
 
-//    private static final String NOTATION = "(\n" +
-//            ")";
-
     private static final String NOTATION = "(\n" +
             "  {  }, \n" +
             "  { \"\" }, \n" +

@@ -52,7 +52,7 @@ public final class FastHex {
         DECODE_TABLE['F'] = DECODE_TABLE['f'] = 0x0f;
     }
 
-    public static byte[] encode(byte[] buffer, final int offset, final int length) {
+    public static byte[] encodeToBytes(byte[] buffer, final int offset, final int length) {
         final int end = offset + length;
         byte[] bytes = new byte[length << 1];
         for (int i = offset, j = 0; i < end; i++, j+=2) {
@@ -74,8 +74,8 @@ public final class FastHex {
         return new String(chars);
     }
 
-    public static byte[] encode(byte[] buffer) {
-        return encode(buffer, 0, buffer.length);
+    public static byte[] encodeToBytes(byte[] buffer) {
+        return encodeToBytes(buffer, 0, buffer.length);
     }
 
     public static String encodeToString(byte[] buffer) {
@@ -133,7 +133,7 @@ public final class FastHex {
         if(true)return;
         byte[] test = new byte[] { -128, -127, -126, -1, 0, 1, 2, 3, 4, 5 };
         String s = encodeToString(test, 0, test.length);
-        String s2 = new String(encode(test, 0, test.length), ASCII);
+        String s2 = new String(encodeToBytes(test, 0, test.length), ASCII);
         System.out.println(s + " " + s2);
         byte[] bb = decode(s, 0, s.length());
         System.out.println(Arrays.toString(bb) + " " + Arrays.equals(bb, test));
