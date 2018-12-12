@@ -2,7 +2,7 @@ Contract ABI and Recursive Length Prefix made easy in Java. Everything heavily o
 
 Usage of the ABI codec:
 
-    Function f = new Function("baz(uint32,bool)"); // canonicalizes and parses signature automatically
+    Function f = new Function("baz(uint32,bool)"); // canonicalizes and parses any signature automatically
     Tuple argsTuple = new Tuple(69L, true);
     ByteBuffer one = f.encodeCall(argsTuple);
     ByteBuffer two = f.encodeCallForArgs(69L, true);
