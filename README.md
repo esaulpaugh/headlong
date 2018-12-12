@@ -1,4 +1,4 @@
-Contract ABI and Recursive Length Prefix made easy and ultra-fast in Java.
+Contract ABI and Recursive Length Prefix made easy in Java. Everything heavily optimized for maximum throughput (ABI function call encoding up to 652x faster than a popular competitor).
 
 Usage of the ABI codec:
 
@@ -60,8 +60,8 @@ Alternatively:
 * Use `mvn package` which outputs to /target
 * Add headlong as a project dependency
 
-Tests may take about 5 minutes to run. Test packages require junit and gson. Otherwise headlong has no dependencies. Size is ~108 KB as of 11/9/18
+Tests should take 2-4 minutes to run. Test packages require junit and gson. Otherwise headlong has no dependencies. Size is ~108 KB as of 11/9/18
 
-See the wiki for more: https://github.com/esaulpaugh/headlong/wiki
+See the wiki for more, such as RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
 Licensed under Apache 2.0
