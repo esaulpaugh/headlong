@@ -2,12 +2,12 @@ Contract ABI and Recursive Length Prefix made easy in Java. Everything heavily o
 
 Usage of the ABI codec:
 
-    Function f = new Function("baz(uint32,bool)");
+    Function f = new Function("baz(uint32,bool)"); // canonicalizes and parses signature automatically
     Tuple argsTuple = new Tuple(69L, true);
     ByteBuffer one = f.encodeCall(argsTuple);
     ByteBuffer two = f.encodeCallForArgs(69L, true);
     
-    System.out.println(Function.formatABI(one.array()));
+    System.out.println(Function.formatABI(one.array())); // a nicely formatted hex representation
     
     Tuple decoded = f.decodeCall((ByteBuffer) two.flip());
     
@@ -15,6 +15,7 @@ Usage of the ABI codec:
 
 And of the RLP codec:
 
+    // for an example class Student
     public Student(byte[] rlp) throws DecodeException {
         SequenceIterator iter = RLP_STRICT.sequenceIterator(rlp);
 
@@ -62,6 +63,6 @@ Alternatively:
 
 Tests should take 2-4 minutes to run. Test packages require junit and gson. Otherwise headlong has no dependencies. Size is ~108 KB as of 11/9/18
 
-See the wiki for more, such as RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
+See the wiki for more, such as RLP Lists and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
 Licensed under Apache 2.0
