@@ -164,7 +164,7 @@ public class RLPEncoder {
     }
 
     /**
-     * <p>Concatenates the encodings of n objects.
+     * Returns the concatenation of the encodings of the given objects in the given order.
      *
      * @param objects   the raw objects to be encoded in sequence
      * @return  the encoded sequence
@@ -176,7 +176,8 @@ public class RLPEncoder {
     }
 
     /**
-     * <p>Concatenates the encodings of n objects. The array containing the objects is <i>not</i> encoded.
+     * Returns the concatenation of the encodings of the given objects in the given order. The {@link Iterable}
+     * containing the objects is <i>not</i> encoded.
      *
      * @param objects   the raw objects to be encoded
      * @return  the encoded sequence
@@ -188,7 +189,8 @@ public class RLPEncoder {
     }
 
     /**
-     * <p>Concatenates the encodings of n objects. The array containing the objects is <i>not</i> encoded.
+     * Inserts the concatenation of the encodings of the given objects in the given order into the destination array.
+     * The array containing the objects is <i>not</i> encoded.
      *
      * @param objects   the raw objects to be encoded
      * @param dest  the destination for the sequence of RLP encodings
@@ -203,7 +205,8 @@ public class RLPEncoder {
     }
 
     /**
-     * <p>Concatenates the encodings of n objects. The {@code Iterable} containing the objects is <i>not</i> encoded.
+     * Inserts the concatenation of the encodings of the given objects in the given order into the destination array.
+     * The {@code Iterable} containing the objects is <i>not</i> encoded.
      *
      * @param objects   the raw objects to be encoded
      * @param dest  the destination for the sequence of RLP encodings
@@ -220,9 +223,9 @@ public class RLPEncoder {
     // ---------------------------------------------------------------------
 
     /**
-     * Encodes an {@code Iterable} as a list item, with all its elements.
+     * Returns the encoding of an RLP list item containing the given objects, encoded.
      *
-     * @param elements  the raw elements to be encoded as an RLPList
+     * @param elements  the raw elements to be encoded as an RLP list item
      * @return  the encoded RLP list item
      */
     public static byte[] encodeAsList(Object... elements) {
@@ -230,9 +233,10 @@ public class RLPEncoder {
     }
 
     /**
-     * Encodes an {@code Iterable} as a list item, with all its elements.
+     * Returns the encoding of an RLP list item containing the encoded elements of the given {@link Iterable} in the
+     * given order.
      *
-     * @param elements  the raw elements to be encoded as an RLPList
+     * @param elements  the raw elements to be encoded as an RLP list item
      * @return  the encoded RLP list item
      */
     public static byte[] encodeAsList(Iterable<?> elements) {
@@ -242,14 +246,23 @@ public class RLPEncoder {
         return dest;
     }
 
+    /**
+     * Inserts the encoding of an RLP list item, containing the encoded elements of the array in the given order, into
+     * the destination array.
+     *
+     * @param elements  the raw elements to be encoded as an RLP list item
+     * @param dest  the destination for the RLP encoding of the list
+     * @param destIndex the index into the destination for the list
+     */
     public static void encodeAsList(Object[] elements, byte[] dest, int destIndex) {
         encodeAsList(Arrays.asList(elements), dest, destIndex);
     }
 
     /**
-     * Encodes an {@code Iterable} as a list item, with all its elements.
+     * Inserts the encoding of an RLP list item, containing the encoded elements of the {@link Iterable} in the given
+     * order, into the destination array.
      *
-     * @param elements  the raw elements to be encoded as an RLPList
+     * @param elements  the raw elements to be encoded as an RLP list item
      * @param dest  the destination for the RLP encoding of the list
      * @param destIndex the index into the destination for the list
      */
@@ -259,7 +272,7 @@ public class RLPEncoder {
     }
 
     /**
-     * Wraps n encodings in a list item.
+     * Wraps n encodings in an RLPList.
      *
      * @param encodings the RLP-encoded elements of the new RLPList
      * @return  the RLPList containing the given elements
@@ -269,7 +282,7 @@ public class RLPEncoder {
     }
 
     /**
-     * Wraps n encodings in a list item.
+     * Wraps n encodings in an RLPList.
      *
      * @param encodings the RLP-encoded elements of the new RLPList
      * @return  the RLPList containing the given elements
