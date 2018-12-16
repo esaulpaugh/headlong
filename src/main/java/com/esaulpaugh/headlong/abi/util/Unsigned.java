@@ -1,138 +1,182 @@
 package com.esaulpaugh.headlong.abi.util;
 
-import java.math.BigDecimal;
+import com.esaulpaugh.headlong.rlp.util.BizarroIntegers;
+import com.esaulpaugh.headlong.rlp.util.Integers;
+
 import java.math.BigInteger;
 
+/**
+ * <p>
+ *     Basic utility methods for converting between signed and unsigned representation.
+ *     For greater functionality, consider Guava.
+ * </p>
+ */
 public class Unsigned {
 
-    public static final BigInteger INT8_RANGE = BigInteger.valueOf(2).pow(8);
-    public static final BigInteger INT16_RANGE = BigInteger.valueOf(2).pow(16);
-    public static final BigInteger INT24_RANGE = BigInteger.valueOf(2).pow(24);
-    public static final BigInteger INT32_RANGE = BigInteger.valueOf(2).pow(32);
-    public static final BigInteger INT40_RANGE = BigInteger.valueOf(2).pow(40);
-    public static final BigInteger INT48_RANGE = BigInteger.valueOf(2).pow(48);
-    public static final BigInteger INT56_RANGE = BigInteger.valueOf(2).pow(56);
-    public static final BigInteger INT64_RANGE = BigInteger.valueOf(2).pow(64);
-    public static final BigInteger INT72_RANGE = BigInteger.valueOf(2).pow(72);
-    public static final BigInteger INT80_RANGE = BigInteger.valueOf(2).pow(80);
-    public static final BigInteger INT88_RANGE = BigInteger.valueOf(2).pow(88);
-    public static final BigInteger INT96_RANGE = BigInteger.valueOf(2).pow(96);
-
-    private static final int INT8_RANGE_INT = INT8_RANGE.intValue();
-    private static final int INT16_RANGE_INT = INT16_RANGE.intValue();
-    private static final int INT24_RANGE_INT = INT24_RANGE.intValue();
-    private static final long INT32_RANGE_LONG = INT32_RANGE.longValue();
-    private static final long INT40_RANGE_LONG = INT40_RANGE.longValue();
-    private static final long INT48_RANGE_LONG = INT48_RANGE.longValue();
-    private static final long INT56_RANGE_LONG = INT56_RANGE.longValue();
-
-    public static BigInteger convert(BigInteger val, BigInteger range) {
-        return val.compareTo(BigInteger.ZERO) >= 0 ? val : val.add(range);
-    }
-
-    public static int uint8(int val) {
-        return val >= 0 ? val : val + INT8_RANGE_INT;
-    }
-
-    public static int uint16(int val) {
-        return val >= 0 ? val : val + INT16_RANGE_INT;
-    }
-
-    public static int uint24(int val) {
-        return val >= 0 ? val : val + INT24_RANGE_INT;
-    }
-
-    public static long uint32(int val) {
-        return val >= 0 ? (long) val : ((long) val) + INT32_RANGE_LONG;
-    }
-
-    public static BigInteger uint64(long val) {
-        return val >= 0
-                ? BigInteger.valueOf(val)
-                : BigInteger.valueOf(val).add(INT64_RANGE);
-    }
-
-    private static void test8() {
-        for (int i = Byte.MAX_VALUE - 2; i < Byte.MAX_VALUE; i++) {
-            System.out.println(i + " --> " + uint8(i));
+    public static long packUnsigned(long unsigned, UintType uintType) {
+        if(uintType.rangeLong == null) {
+            throw new IllegalArgumentException(uintType.numBits + "-bit range too big for type long");
         }
-        System.out.println(Byte.MAX_VALUE + " --> " + uint8(Byte.MAX_VALUE));
-        for (int i = Byte.MIN_VALUE; i < Byte.MIN_VALUE + 3; i++) {
-            System.out.println(i + " --> " + uint8(i));
+        if(unsigned < 0) {
+            throwNegativeUnsignedVal(unsigned);
         }
-
-        System.out.println();
-        System.out.println(-2 + " --> " + uint8(-2));
-        System.out.println(-1 + " --> " + uint8(-1));
-        System.out.println("2^8 = " + new BigDecimal(BigInteger.valueOf(2L).pow(8), 0));
-        System.out.println();
+        final int bitLen = Integers.bitLen(unsigned);
+        if(bitLen > uintType.numBits) {
+            throwTooManyBitsException(bitLen, uintType.numBits, false);
+        }
+        // if in upper half of range, subtract range
+        return unsigned >= uintType.rangeLong >> 1 // div 2
+                ? unsigned - uintType.rangeLong
+                : unsigned;
     }
 
-    private static void test16() {
-        for (int i = Short.MAX_VALUE - 2; i < Short.MAX_VALUE; i++) {
-            System.out.println(i + " --> " + uint16(i));
+    public static long unpackUnsigned(long signed, UintType uintType) {
+        if(uintType.maskLong == null) {
+            throw new IllegalArgumentException(uintType.numBits + "-bit range too big for type long");
         }
-        System.out.println(Short.MAX_VALUE + " --> " + uint16(Short.MAX_VALUE));
-        for (int i = Short.MIN_VALUE; i < Short.MIN_VALUE + 3; i++) {
-            System.out.println(i + " --> " + uint16(i));
+        final int bitLen = signed < 0 ? BizarroIntegers.bitLen(signed) : Integers.bitLen(signed);
+        if(bitLen >= uintType.numBits) {
+            throwTooManyBitsException(bitLen, uintType.numBits, true);
         }
-
-        System.out.println();
-        System.out.println(-2 + " --> " + uint16(-2));
-        System.out.println(-1 + " --> " + uint16(-1));
-        System.out.println("2^16 = " + new BigDecimal(BigInteger.valueOf(2L).pow(16), 0));
-        System.out.println();
+        return signed & uintType.maskLong;
     }
 
-    private static void test32() {
-        for (int i = Integer.MAX_VALUE - 2; i < Integer.MAX_VALUE; i++) {
-            System.out.println(i + " --> " + uint32(i));
+    public static BigInteger toSigned(BigInteger unsigned, UintType uintType) {
+        if(unsigned.compareTo(BigInteger.ZERO) < 0) {
+            throwNegativeUnsignedVal(unsigned);
         }
-        System.out.println(Integer.MAX_VALUE + " --> " + uint32(Integer.MAX_VALUE));
-        for (int i = Integer.MIN_VALUE; i < Integer.MIN_VALUE + 3; i++) {
-            System.out.println(i + " --> " + uint32(i));
+        final int bitLen = unsigned.bitLength();
+        if(bitLen > uintType.numBits) {
+            throwTooManyBitsException(bitLen, uintType.numBits, false);
         }
-
-        System.out.println();
-        System.out.println(-2 + " --> " + uint32(-2));
-        System.out.println(-1 + " --> " + uint32(-1));
-        System.out.println("2^32 = " + new BigDecimal(BigInteger.valueOf(2L).pow(32), 0));
-        System.out.println();
+        // if in upper half of range, subtract range
+        return unsigned.compareTo(uintType.range.shiftRight(1)) >= 0
+                ? unsigned.subtract(uintType.range)
+                : unsigned;
     }
 
-    private static void test64() {
-        for (long i = Long.MAX_VALUE - 2; i < Long.MAX_VALUE; i++) {
-            System.out.println(i + " --> " + uint64(i));
+    public static BigInteger toUnsigned(BigInteger signed, UintType uintType) {
+        final int bitLen = signed.bitLength();
+        if(bitLen >= uintType.numBits) {
+            throwTooManyBitsException(bitLen, uintType.numBits, true);
         }
-        System.out.println(Long.MAX_VALUE + " --> " + uint64(Long.MAX_VALUE));
-        for (long i = Long.MIN_VALUE; i < Long.MIN_VALUE + 3; i++) {
-            System.out.println(i + " --> " + uint64(i));
+        return signed.compareTo(BigInteger.ZERO) >= 0
+                ? signed
+                : signed.add(uintType.range);
+    }
+
+    private static void throwNegativeUnsignedVal(Number unsigned) {
+        throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
+    }
+
+    private static void throwTooManyBitsException(int bitLen, int rangeNumBits, boolean forSigned) {
+        throw forSigned
+                ? new IllegalArgumentException("signed has too many bits: " + bitLen + " is not < " + rangeNumBits)
+                : new IllegalArgumentException("unsigned has too many bits: " + bitLen + " > " + rangeNumBits);
+    }
+
+    /**
+     * Use {@code new UintType(8)} for uint8 et cetera.
+     */
+    public static class UintType {
+        public final int numBits;
+        public final BigInteger range;
+        public final Long rangeLong;
+        public final Long maskLong;
+
+        public UintType(int numBits) {
+            this.numBits = numBits;
+            this.range = BigInteger.valueOf(2).pow(numBits);
+            Long rangeLong, maskLong;
+            try {
+                rangeLong = range.longValueExact();
+                maskLong = range.subtract(BigInteger.ONE).longValueExact();
+            } catch (ArithmeticException ae) {
+                rangeLong = maskLong = null;
+            }
+            this.rangeLong = rangeLong;
+            this.maskLong = maskLong;
+        }
+    }
+
+    private static final class TestThread extends Thread {
+
+        private final BigInteger start, offset, end;
+
+        private TestThread(BigInteger start, BigInteger offset, BigInteger end) {
+            this.start = start;
+            this.offset = offset;
+            this.end = end;
         }
 
-        System.out.println();
-        System.out.println(-2 + " --> " + uint64(-2));
-        System.out.println(-1 + " --> " + uint64(-1));
-        System.out.println("2^64 = " + new BigDecimal(BigInteger.valueOf(2L).pow(64), 0));
-        System.out.println();
+        @Override
+        public void run() {
+        }
     }
 
     public static void main(String[] args) {
+
         if(true)return;
-        System.out.println(INT8_RANGE + " " + Math.pow(2, 8));
-        System.out.println(INT16_RANGE + " " + BigInteger.valueOf(2).pow(16));
-        System.out.println(INT24_RANGE + " " + BigInteger.valueOf(2).pow(24));
-        System.out.println(INT32_RANGE + " " + BigInteger.valueOf(2).pow(32));
-        System.out.println(INT64_RANGE + " " + BigInteger.valueOf(2).pow(64));
 
-        test16();
+        long a = Long.MIN_VALUE / 4 + 1;
+        long uu = unpackUnsigned(a, new UintType(62));
+        long ss = packUnsigned(uu, new UintType(62));
+        System.out.println(a + " " + uu + " " + ss);
 
-//        test8();
-//        test32();
+//        System.out.println(Long.toHexString(new UintType(2).rangeLong));
+//        //        long t = Integer.toUnsignedLong((int) rawVal);
+//        System.out.println(Long.toHexString(Integer.toUnsignedLong(-10)));
+//        System.out.println(Long.toHexString(-10 + 0x100));
+//        System.out.println(Long.toHexString(-10 & 0xFF));
 
-//        System.out.println(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE));
-//        System.out.println(toUnsigned(0xFFFFFFFF_FFFFFFFFL)); // 0x80000000_00000000L
-//        System.out.println(toUnsigned(0x80000000_00000000L)); // 0xFFFFFFFF_FFFFFFFFL
+        final UintType uintType = new UintType(3);
 
+        final BigInteger end = BigInteger.valueOf(9);
+        for (BigInteger i = BigInteger.valueOf(-9); i.compareTo(end) < 0; i = i.add(BigInteger.ONE)) {
+            try {
+                long ii = i.longValueExact();
+                long unsigned = unpackUnsigned(ii, uintType);
+                long orig = packUnsigned(unsigned, uintType);
+                System.out.println(i + " -> " + unsigned + " -> " + orig);
+                if(orig != ii) {
+                    throw new Error(orig + " != " + i);
+                }
+            } catch (IllegalArgumentException iae) {
+                System.out.println(i + " N/A -- " + iae.getMessage());
+            }
+        }
+
+        for (BigInteger i = BigInteger.valueOf(-9); i.compareTo(end) < 0; i = i.add(BigInteger.ONE)) {
+            try {
+                BigInteger unsigned = toUnsigned(i, uintType);
+                BigInteger orig = toSigned(unsigned, uintType);
+                System.out.println(i + " -> " + unsigned + " -> " + orig);
+                if(orig.compareTo(i) != 0) {
+                    throw new Error(orig + " != " + i);
+                }
+            } catch (IllegalArgumentException iae) {
+                System.out.println(i + " N/A -- " + iae.getMessage());
+            }
+        }
+
+        final BigInteger start = BigInteger.valueOf(2).pow(34).negate();
+        final BigInteger _end = BigInteger.valueOf(2).pow(33).negate();
+
+        Thread[] threads = new Thread[7];
+        int i;
+        for (i = 0; i < threads.length; i++) {
+            threads[i] = new TestThread(start, BigInteger.valueOf(i + 1), _end);
+            threads[i].start();
+        }
+        Thread main = new TestThread(start, BigInteger.valueOf(i + 1), _end);
+        main.run();
+
+        for (Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
-
 }
