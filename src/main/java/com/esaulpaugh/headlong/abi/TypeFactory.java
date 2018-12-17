@@ -44,7 +44,7 @@ final class TypeFactory {
                 length = DYNAMIC_LENGTH;
             } else { // e.g. [4]
                 try {
-                    length = Integer.parseUnsignedInt(canonicalType.substring(arrayOpenIndex + 1, index));
+                    length = Integer.parseInt(canonicalType.substring(arrayOpenIndex + 1, index));
                 } catch (NumberFormatException nfe) {
                     throw (ParseException) new ParseException("illegal argument", arrayOpenIndex + 1).initCause(nfe);
                 }
@@ -206,8 +206,8 @@ final class TypeFactory {
             }
             final int indexOfX = canonicalType.lastIndexOf('x');
             try {
-                int M = Integer.parseUnsignedInt(canonicalType.substring(idx + "fixed".length(), indexOfX));
-                int N = Integer.parseUnsignedInt(canonicalType.substring(indexOfX + 1)); // everything after x
+                int M = Integer.parseInt(canonicalType.substring(idx + "fixed".length(), indexOfX));
+                int N = Integer.parseInt(canonicalType.substring(indexOfX + 1)); // everything after x
                 if ((M & 0x7) /* mod 8 */ == 0 && M >= 8 && M <= 256
                         && N > 0 && N <= 80) {
                     return new BigDecimalType(canonicalType, M, N, unsigned);
