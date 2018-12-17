@@ -45,6 +45,9 @@ final class TypeFactory {
             } else { // e.g. [4]
                 try {
                     length = Integer.parseInt(canonicalType.substring(arrayOpenIndex + 1, index));
+                    if(length < 0) {
+                        throw new ParseException("negative array size", arrayOpenIndex + 1);
+                    }
                 } catch (NumberFormatException nfe) {
                     throw (ParseException) new ParseException("illegal argument", arrayOpenIndex + 1).initCause(nfe);
                 }
