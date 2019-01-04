@@ -32,7 +32,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     final String arrayClassNameStub;
 
     final int length;
-    transient final boolean isString;
+    /* transient */ final boolean isString;
 
     ArrayType(String canonicalType, T elementType, Class<?> elementClass, String className, String arrayClassNameStub, int length, boolean dynamic) {
         super(canonicalType, dynamic);
@@ -414,39 +414,4 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
                 ? len
                 : len + (32 - mod);
     }
-
-    // use readResolve to avoid setting transient final field isString
-    private Object readResolve() {
-        return new ArrayType<StackableType<?>, Object>(
-                canonicalType,
-                elementType,
-                elementClass,
-                className,
-                arrayClassNameStub,
-                length,
-                dynamic
-                );
-    }
-
-//    // TODO eventually just rely on super.hashCode() hashing canonicalType and dynamic
-//    @Override
-//    public int hashCode() {
-//        // don't hash transient isString
-//        return Objects.hash(super.hashCode(), length, elementClass, className, arrayClassNameStub, elementType);
-//    }
-//
-//    // TODO eventually just rely on super.equals() checking canonicalType
-//    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (o == null || getClass() != o.getClass()) return false;
-//        if (!super.equals(o)) return false;
-//        ArrayType<?, ?> arrayType = (ArrayType<?, ?>) o;
-//        // don't check transient isString
-//        return length == arrayType.length
-//                && elementClass == arrayType.elementClass
-//                && Objects.equals(className, arrayType.className)
-//                && Objects.equals(arrayClassNameStub, arrayType.arrayClassNameStub)
-//                && Objects.equals(elementType, arrayType.elementType);
-//    }
 }

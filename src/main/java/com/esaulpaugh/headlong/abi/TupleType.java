@@ -180,23 +180,4 @@ class TupleType extends StackableType<Tuple> {
         TupleType tupleType = (TupleType) o;
         return Arrays.equals(elementTypes, tupleType.elementTypes);
     }
-
-//    // TODO eventually just rely on super.hashCode() hashing canonicalType and dynamic
-//    @Override
-//    public int hashCode() {
-//        int result = super.hashCode();
-//        result = 31 * result + Arrays.hashCode(elementTypes);
-//        return result;
-//    }
-//
-//    // TODO eventually just rely on super.equals() checking canonicalType and dynamic
-//    @Override
-//    public boolean equals(Object o) {
-////        System.out.println(".");
-//        if (this == o) return true;
-//        if (o == null || getClass() != o.getClass()) return false;
-//        if (!super.equals(o)) return false;
-//        TupleType tupleType = (TupleType) o;
-//        return Arrays.equals(elementTypes, tupleType.elementTypes);
-//    }
 }

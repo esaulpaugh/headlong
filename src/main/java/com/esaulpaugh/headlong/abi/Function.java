@@ -29,9 +29,9 @@ public class Function implements Serializable {
     final String canonicalSignature;
     private final String hashAlgorithm;
 
-    private transient final boolean requiredCanonicalization;
-    transient final byte[] selector;
-    transient final TupleType paramTypes;
+    private /* transient */ final boolean requiredCanonicalization;
+    /* transient */ final byte[] selector;
+    /* transient */ final TupleType paramTypes;
 
     {
         selector = new byte[SELECTOR_LEN];
@@ -180,15 +180,6 @@ public class Function implements Serializable {
 
     public static String hex(byte[] bytes) {
         return encode(bytes, HEX);
-    }
-
-    // use readResolve to avoid setting transient final fields
-    private Object readResolve() { // TODO handle hashAlgorithm/messageDigest
-        try {
-            return new Function(this.canonicalSignature);
-        } catch (ParseException e) {
-            throw new IllegalArgumentException(e);
-        }
     }
 
     @Override

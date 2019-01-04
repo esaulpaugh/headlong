@@ -79,17 +79,13 @@ abstract class StackableType<V> implements Serializable {
 
     @Override
     public int hashCode() {
-        return dynamic
-                ? canonicalType.hashCode()
-                : -canonicalType.hashCode();
+        return canonicalType.hashCode();
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        StackableType<?> other = (StackableType<?>) o;
-        return dynamic == other.dynamic
-                && canonicalType.equals(other.canonicalType);
+        return canonicalType.equals(((StackableType<?>) o).canonicalType);
     }
 }

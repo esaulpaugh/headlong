@@ -54,20 +54,4 @@ class BigDecimalType extends AbstractUnitType<BigDecimal> {
         validateBigIntBitLen(bi);
         return dec;
     }
-
-//    // TODO eventually just rely on super.hashCode() hashing canonicalType and dynamic
-//    @Override
-//    public int hashCode() {
-//        return Objects.hash(super.hashCode(), scale);
-//    }
-//
-//    // TODO eventually just rely on super.equals() checking canonicalType and dynamic
-//    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (o == null || getClass() != o.getClass()) return false;
-//        if (!super.equals(o)) return false;
-//        BigDecimalType other = (BigDecimalType) o;
-//        return scale == other.scale;
-//    }
 }
