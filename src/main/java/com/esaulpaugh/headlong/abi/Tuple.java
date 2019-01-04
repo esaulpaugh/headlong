@@ -7,8 +7,6 @@ import java.util.RandomAccess;
 
 public class Tuple extends AbstractList<Object> implements RandomAccess, Serializable {
 
-    private static final long serialVersionUID = -6849167468060212408L;
-
     public static final Tuple EMPTY = new Tuple();
 
     final Object[] elements;

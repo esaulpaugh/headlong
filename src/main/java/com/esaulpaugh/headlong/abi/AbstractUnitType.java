@@ -10,8 +10,6 @@ import java.math.BigInteger;
  */
 abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V should be instanceof Number or Boolean
 
-    private static final long serialVersionUID = -8553020326426335481L;
-
     static final int UNIT_LENGTH_BYTES = 32;
     static final int LOG_2_UNIT_LENGTH_BYTES = 31 - Integer.numberOfLeadingZeros(UNIT_LENGTH_BYTES);
 

@@ -13,8 +13,6 @@ import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
 class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
 
-    private static final long serialVersionUID = 2446103381769828948L;
-
     static final String BYTE_ARRAY_CLASS_NAME = byte[].class.getName();
     static final String BYTE_ARRAY_ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(byte[][].class);
 
@@ -27,8 +25,8 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     static final int DYNAMIC_LENGTH = -1;
 
     final T elementType;
-    final String className;
     final Class<?> elementClass;
+    final String className;
     final String arrayClassNameStub;
 
     final int length;
@@ -36,17 +34,19 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
 
     ArrayType(String canonicalType, T elementType, Class<?> elementClass, String className, String arrayClassNameStub, int length, boolean dynamic) {
         super(canonicalType, dynamic);
-//        final String className = clazz.getName();
-        this.className = className;
-        isString = STRING_CLASS_NAME.equals(className);
-        this.elementClass = elementClass;
-        this.arrayClassNameStub = arrayClassNameStub;
+
         this.elementType = elementType;
+        this.elementClass = elementClass;
+        this.className = className;
+        this.arrayClassNameStub = arrayClassNameStub;
+
         this.length = length;
 
         if(length < DYNAMIC_LENGTH) {
             throw new IllegalArgumentException("length must be non-negative or " + DYNAMIC_LENGTH + ". found: " + length);
         }
+
+        this.isString = STRING_CLASS_NAME.equals(className);
     }
 
     @Override
@@ -221,7 +221,6 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     @Override
     @SuppressWarnings("unchecked")
     A decode(ByteBuffer bb, byte[] elementBuffer) {
-//        System.out.println("A decode " + toString() + " " + ((bb.position() - 4) >>> LOG_2_UNIT_LENGTH_BYTES) + " " + dynamic);
         final int arrayLen;
         if(dynamic) {
             arrayLen = ARRAY_LENGTH_TYPE.decode(bb, elementBuffer);
@@ -349,7 +348,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
 
     private Object[] decodeObjectArray(int arrayLen, ByteBuffer bb, byte[] elementBuffer, boolean tupleArray) { // 8.3%
 
-//        final int index = bb.position(); // TODO decodeObjectArrayTails needs index to operate in lenient mode
+//        final int index = bb.position(); // TODO must pass index to decodeObjectArrayTails if you want to support lenient mode
 
         final StackableType<?> elementType = this.elementType;
         Object[] dest;
@@ -370,12 +369,10 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     }
 
     private static void decodeObjectArrayHeads(StackableType<?>  elementType, ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) {
-//        System.out.println("A(O) heads " + ((bb.position() - 4) >>> LOG_2_UNIT_LENGTH_BYTES) + ", " + bb.position());
         final int len = offsets.length;
         if(elementType.dynamic) {
             for (int i = 0; i < len; i++) {
                 offsets[i] = CallEncoder.OFFSET_TYPE.decode(bb, elementBuffer);
-//                System.out.println("A(O) offset " + convertOffset(offsets[i]) + " @ " + convert(bb.position() - OFFSET_LENGTH_BYTES));
             }
         } else {
             for (int i = 0; i < len; i++) {
@@ -385,13 +382,10 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     }
 
     private static void decodeObjectArrayTails(StackableType<?> elementType, ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) {
-//        System.out.println("A(O) tails " + ((bb.position() - 4) >>> LOG_2_UNIT_LENGTH_BYTES) + ", " + bb.position());
         final int len = offsets.length;
         for (int i = 0; i < len; i++) {
             int offset = offsets[i];
-//            System.out.println("A(O) jumping to " + convert(index + offset));
             if (offset > 0) {
-                // TODO add lenient flag?
                 /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
 //                if(bb.position() != index + offset) {
 //                    System.err.println(ArrayType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);

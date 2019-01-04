@@ -9,8 +9,6 @@ import static com.esaulpaugh.headlong.abi.CallEncoder.OFFSET_LENGTH_BYTES;
 
 class TupleType extends StackableType<Tuple> {
 
-    private static final long serialVersionUID = -8630808789515788419L;
-
     private static final String CLASS_NAME = Tuple.class.getName();
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(Tuple[].class);
 
@@ -66,10 +64,6 @@ class TupleType extends StackableType<Tuple> {
         final StackableType<?>[] types = this.elementTypes;
         final int numTypes = types.length;
 
-//        if(elements.length != numTypes) {
-//            throw new IllegalArgumentException("tuple length mismatch");
-//        }
-
         int len = 0;
         StackableType<?> type;
         for (int i = 0; i < numTypes; i++) {
@@ -99,10 +93,6 @@ class TupleType extends StackableType<Tuple> {
 
         final int numTypes = elementTypes.length;
 
-//        if(elements.length != numTypes) {
-//            throw new IllegalArgumentException("tuple length mismatch");
-//        }
-
         int byteLength = 0;
         StackableType<?> type;
         int i = 0;
@@ -122,9 +112,8 @@ class TupleType extends StackableType<Tuple> {
 
     @Override
     Tuple decode(ByteBuffer bb, byte[] elementBuffer) {
-//        System.out.println("T decode " + toString() + " " + convertPos(bb) + " " + dynamic);
 
-//        final int index = bb.position(); // TODO decodeTails needs index to operate in lenient mode
+//        final int index = bb.position(); // TODO must pass index to decodeTails if you want to support lenient mode
 
         final StackableType<?>[] elementTypes = this.elementTypes;
         final int tupleLen = elementTypes.length;
@@ -141,7 +130,6 @@ class TupleType extends StackableType<Tuple> {
     }
 
     static void decodeHeads(ByteBuffer bb, StackableType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, Object[] dest) {
-//        System.out.println("T heads " + convertPos(bb) + ", " + bb.position());
         final int tupleLen = offsets.length;
         StackableType<?> elementType;
         for (int i = 0; i < tupleLen; i++) {
@@ -156,11 +144,9 @@ class TupleType extends StackableType<Tuple> {
     }
 
     static void decodeTails(ByteBuffer bb, final StackableType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, final Object[] dest) {
-//        System.out.println("T tails " + convertPos(bb) + ", " + bb.position());
         final int tupleLen = offsets.length;
         for (int i = 0; i < tupleLen; i++) {
             int offset = offsets[i];
-//            System.out.println("T jumping to " + convert(index + offset));
             if (offset > 0) {
                 /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
 //                if(bb.position() != index + offset) {

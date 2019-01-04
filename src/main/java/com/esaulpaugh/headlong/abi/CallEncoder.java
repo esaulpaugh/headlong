@@ -35,18 +35,11 @@ class CallEncoder {
     static ByteBuffer encodeCall(Function function, Tuple argsTuple) {
 
         final TupleType tupleType = function.paramTypes;
-//        final StackableType<?>[] types = tupleType.elementTypes;
-//
-//        if(argsTuple.elements.length != types.length) {
-//            throw new IllegalArgumentException("argsTuple.size() <> types.length: " + argsTuple.size() + " != " + types.length);
-//        }
 
         final int allocation = Function.SELECTOR_LEN + tupleType.validate(argsTuple);
         ByteBuffer outBuffer = ByteBuffer.wrap(new byte[allocation]); // ByteOrder.BIG_ENDIAN by default
 
         encodeCall(function, argsTuple, outBuffer);
-//        outBuffer.put(function.selector);
-//        insertTuple(tupleType, argsTuple, outBuffer);
 
         return outBuffer;
     }

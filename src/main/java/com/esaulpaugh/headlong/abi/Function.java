@@ -20,8 +20,6 @@ import static com.esaulpaugh.headlong.util.Strings.encode;
  */
 public class Function implements Serializable {
 
-    private static final long serialVersionUID = -1151351210657573607L;
-
     private static final Charset ASCII = Charset.forName("US-ASCII");
 
     public static final int SELECTOR_LEN = 4;
@@ -50,8 +48,7 @@ public class Function implements Serializable {
      * @throws ParseException   if the signature is malformed
      */
     public Function(String signature, MessageDigest messageDigest) throws ParseException {
-//        StringBuilder canonicalBuilder = new StringBuilder();
-        TupleType tupleType = SignatureParser.parseFunctionSignature(signature/*, canonicalBuilder*/);
+        TupleType tupleType = SignatureParser.parseFunctionSignature(signature);
         final String canonicalSig = signature.substring(0, signature.indexOf('(')) + tupleType.canonicalType;
         try {
             messageDigest.update(canonicalSig.getBytes(ASCII));
