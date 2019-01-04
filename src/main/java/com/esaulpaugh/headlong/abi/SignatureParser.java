@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class SignatureParser {
+public class SignatureParser {
 
     private static final Pattern HAS_NON_ASCII_CHARS = Pattern.compile("[^\\p{ASCII}]+");
     private static final Pattern HAS_NON_TYPE_CHARS = Pattern.compile("[^a-z0-9\\[\\](),]+");
 
-    static List<StackableType<?>> parseFunctionSignature(final String signature, final StringBuilder canonicalOut) throws ParseException {
+    static TupleType parseFunctionSignature(final String signature) throws ParseException {
 
         List<StackableType<?>> typesOut = new ArrayList<>();
 
@@ -25,9 +25,10 @@ class SignatureParser {
 
         final Matcher illegalTypeCharMatcher = HAS_NON_TYPE_CHARS.matcher(signature);
 
-        ParseResult result = parseTuple(signature, startParams, canonicalOut, typesOut, illegalTypeCharMatcher);
+        StringBuilder ctt = new StringBuilder("(");
+        final int argEnd = parseTuple(signature, startParams, typesOut, illegalTypeCharMatcher, ctt);
+        String canonical = completeTupleTypeString(ctt);
 
-        final int argEnd = result.argumentEnd;
         final int sigEnd = signature.length();
 
         int terminator = signature.indexOf(')', argEnd);
@@ -39,19 +40,16 @@ class SignatureParser {
             throw new ParseException("illegal signature termination: " + signature.substring(errorStart), errorStart);
         }
 
-        canonicalOut.append(signature, result.previousNonCanonicalIndex, sigEnd);// if prevNonCanonicalIndex == 0, signature was already canonical
-
-        return typesOut;
+        return TupleType.create(canonical, typesOut.toArray(StackableType.EMPTY_TYPE_ARRAY));
     }
 
-    private static ParseResult parseTuple(final String signature,
-                                                     final int startParams,
-                                                     final StringBuilder canonicalOut,
-                                                     final List<StackableType<?>> tupleTypes,
-                                                     final Matcher illegalTypeCharMatcher) throws ParseException {
+    private static int parseTuple(final String signature,
+                                  final int startParams,
+                                  final List<StackableType<?>> tupleTypes,
+                                  final Matcher illegalTypeCharMatcher,
+                                  final StringBuilder canonicalTupleType) throws ParseException {
         int argStart = startParams + 1;
         int argEnd = argStart; // this inital value is important for empty params case
-        int prevNonCanonicalIndex = 0;
 
         final int sigEnd = signature.length();
 
@@ -74,27 +72,27 @@ class SignatureParser {
             case '(': // tuple element
                 try {
                     ArrayList<StackableType<?>> innerTupleTypes = new ArrayList<>();
-                    ParseResult result = parseTuple(signature, argStart, canonicalOut, innerTupleTypes, illegalTypeCharMatcher);
-                    argEnd = result.argumentEnd + 1;
-                    prevNonCanonicalIndex = result.previousNonCanonicalIndex;
+                    StringBuilder ctt = new StringBuilder("(");
+                    int result = parseTuple(signature, argStart, innerTupleTypes, illegalTypeCharMatcher, ctt);
 
-                    String nonCanonical = signature.substring(argStart, argEnd);
-//                    if(canonicalTypeString.charAt(0) != '(' || canonicalTypeString.charAt(canonicalTypeString.length() - 1) != ')') {
-//                        throw new Error();
-//                    }
-                    // TODO passing non-canonical but create expects canonical
-                    StackableType<?> childType = TupleType.create(nonCanonical, innerTupleTypes.toArray(StackableType.EMPTY_TYPE_ARRAY));
+                    argEnd = result + 1;
+
+                    final String canonical = completeTupleTypeString(ctt);
+
+                    StackableType<?> childType = TupleType.create(canonical, innerTupleTypes.toArray(StackableType.EMPTY_TYPE_ARRAY));
 
                     // check for array syntax
                     if (argEnd < sigEnd && signature.charAt(argEnd) == '[') {
                         final int nextTerminator = nextParamTerminator(signature, argEnd);
                         if (nextTerminator > argEnd) {
-                            childType = TypeFactory.createForTuple(signature.substring(argStart, nextTerminator), (TupleType) childType);
+                            childType = TypeFactory.createForTuple(canonical + signature.substring(argEnd, nextTerminator), (TupleType) childType);
                             argEnd = nextTerminator;
                         }
                     }
 
                     tupleTypes.add(childType);
+
+                    canonicalTupleType.append(childType.canonicalType).append(',');
 
                 } catch (ParseException pe) {
                     throw (ParseException) new ParseException(pe.getMessage() + " @ " + tupleTypes.size(), pe.getErrorOffset()).initCause(pe);
@@ -105,41 +103,46 @@ class SignatureParser {
                 }
                 break;
             default: // non-tuple element
-                ParseResult result = parseNonTuple(signature, argStart, canonicalOut, prevNonCanonicalIndex, tupleTypes, illegalTypeCharMatcher);
-                argEnd = result.argumentEnd;
-                if(argEnd == -1 || argEnd >= sigEnd || signature.charAt(argEnd) == ')') {
-                    return result;
+                argEnd = parseNonTuple(signature, argStart, tupleTypes, illegalTypeCharMatcher, canonicalTupleType);
+                if (argEnd == -1 || argEnd >= sigEnd || signature.charAt(argEnd) == ')') {
+                    return argEnd;
                 }
-                prevNonCanonicalIndex = result.previousNonCanonicalIndex;
             }
             argStart = argEnd + 1;
         }
 
-        return new ParseResult(argEnd, prevNonCanonicalIndex);
+        return argEnd;
     }
 
-    private static ParseResult parseNonTuple(final String signature,
-                                                        final int argStart,
-                                                        final StringBuilder canonicalOut,
-                                                        int prevNonCanonicalIndex,
-                                                        final List<StackableType<?>> tupleTypes,
-                                                        final Matcher illegalTypeCharMatcher) throws ParseException {
+    private static int parseNonTuple(final String signature,
+                                             final int argStart,
+                                             final List<StackableType<?>> tupleTypes,
+                                             final Matcher illegalTypeCharMatcher,
+                                             final StringBuilder canonicalTupleType) throws ParseException {
+
         int argEnd = nextParamTerminator(signature, argStart + 1);
         if (argEnd == -1) {
-            return new ParseResult(-1, prevNonCanonicalIndex);
+            return -1;
         }
         checkTypeChars(illegalTypeCharMatcher, signature, argStart, argEnd);
-        final String typeString = signature.substring(argStart, argEnd);
+        String typeString = signature.substring(argStart, argEnd);
         final String replacement = getCanonicalReplacement(signature, typeString, argStart, argEnd);
-        if (replacement == null) {
-            tupleTypes.add(TypeFactory.create(typeString));
-        } else {
-            tupleTypes.add(TypeFactory.create(replacement));
-            canonicalOut.append(signature, prevNonCanonicalIndex, argStart).append(replacement);
-            prevNonCanonicalIndex = argEnd;
+        if(replacement != null) {
+            typeString = replacement;
         }
 
-        return new ParseResult(argEnd, prevNonCanonicalIndex);
+        tupleTypes.add(TypeFactory.create(typeString));
+        canonicalTupleType.append(typeString).append(',');
+
+        return argEnd;
+    }
+
+    private static String completeTupleTypeString(StringBuilder canonicalTupleType) {
+        final int n = canonicalTupleType.length();
+        if(n > 1) {
+            return canonicalTupleType.replace(n - 1, n, ")").toString();
+        }
+        return canonicalTupleType.append(")").toString();
     }
 
     private static int nextParamTerminator(String signature, int i) {
@@ -203,16 +206,6 @@ class SignatureParser {
         case 3: return "\\u0" + hex;
         case 4: return "\\u" + hex;
         default: return "\\u0000";
-        }
-    }
-
-    private static final class ParseResult {
-        final int argumentEnd;
-        final int previousNonCanonicalIndex;
-
-        ParseResult(int argumentEnd, int previousNonCanonicalIndex) {
-            this.argumentEnd = argumentEnd;
-            this.previousNonCanonicalIndex = previousNonCanonicalIndex;
         }
     }
 }

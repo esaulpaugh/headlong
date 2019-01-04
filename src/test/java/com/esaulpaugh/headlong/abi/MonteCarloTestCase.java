@@ -1,13 +1,14 @@
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.Strings;
 import com.joemelsha.crypto.hash.Keccak;
+import org.junit.Assert;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.*;
@@ -16,10 +17,7 @@ import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS_NAME;
 import static com.esaulpaugh.headlong.abi.StackableType.*;
-import com.esaulpaugh.headlong.util.FastHex;
-import com.esaulpaugh.headlong.util.Strings;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import org.junit.Assert;
 
 public class MonteCarloTestCase implements Serializable {
 
@@ -142,6 +140,7 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     final Params params;
+    final String rawSignature;
     final Function function;
     final Tuple argsTuple;
 
@@ -157,7 +156,12 @@ public class MonteCarloTestCase implements Serializable {
         }
 
         String rawSig = generateFunctionSignature(rng, 0);
+        rawSig = rawSig.replace("int256,", "int,");
+        rawSig = rawSig.replace("int256,", "int)");
+        rawSig = rawSig.replace("uint256,", "uint,");
+        rawSig = rawSig.replace("uint256,", "uint)");
 
+        this.rawSignature = rawSig;
         this.function = new Function(rawSig, KECCAK_THREAD_LOCAL.get());
         this.argsTuple = generateTuple(function.paramTypes, rng);
     }

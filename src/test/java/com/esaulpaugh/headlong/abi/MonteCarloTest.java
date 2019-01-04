@@ -243,7 +243,7 @@ public class MonteCarloTest {
         }
     }
 
-    private static long seed(final long nanoTime) {
+    static long seed(final long nanoTime) {
         final long a = System.nanoTime() << 1;
         final long b = -System.nanoTime() >> 1;
         final long c = nanoTime * a * b;

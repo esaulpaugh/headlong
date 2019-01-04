@@ -9,7 +9,6 @@ import java.security.DigestException;
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
@@ -51,9 +50,9 @@ public class Function implements Serializable {
      * @throws ParseException   if the signature is malformed
      */
     public Function(String signature, MessageDigest messageDigest) throws ParseException {
-        StringBuilder canonicalBuilder = new StringBuilder();
-        List<StackableType<?>> types = SignatureParser.parseFunctionSignature(signature, canonicalBuilder);
-        final String canonicalSig = canonicalBuilder.toString();
+//        StringBuilder canonicalBuilder = new StringBuilder();
+        TupleType tupleType = SignatureParser.parseFunctionSignature(signature/*, canonicalBuilder*/);
+        final String canonicalSig = signature.substring(0, signature.indexOf('(')) + tupleType.canonicalType;
         try {
             messageDigest.update(canonicalSig.getBytes(ASCII));
             messageDigest.digest(selector, 0, SELECTOR_LEN);
@@ -62,7 +61,7 @@ public class Function implements Serializable {
         }
         this.canonicalSignature = canonicalSig;
         this.requiredCanonicalization = !signature.equals(canonicalSig);
-        this.paramTypes = TupleType.create(canonicalSig.substring(canonicalSig.indexOf('(')), types.toArray(StackableType.EMPTY_TYPE_ARRAY));
+        this.paramTypes = tupleType;
         this.hashAlgorithm = messageDigest.getAlgorithm();
     }
     

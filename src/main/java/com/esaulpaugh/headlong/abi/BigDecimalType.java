@@ -5,7 +5,6 @@ import com.esaulpaugh.headlong.abi.util.ClassNames;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.util.Objects;
 
 class BigDecimalType extends AbstractUnitType<BigDecimal> {
 
@@ -56,19 +55,19 @@ class BigDecimalType extends AbstractUnitType<BigDecimal> {
         return dec;
     }
 
-    // TODO eventually just rely on super.hashCode() hashing canonicalType and dynamic
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), scale);
-    }
-
-    // TODO eventually just rely on super.equals() checking canonicalType and dynamic
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        BigDecimalType other = (BigDecimalType) o;
-        return scale == other.scale;
-    }
+//    // TODO eventually just rely on super.hashCode() hashing canonicalType and dynamic
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(super.hashCode(), scale);
+//    }
+//
+//    // TODO eventually just rely on super.equals() checking canonicalType and dynamic
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (o == null || getClass() != o.getClass()) return false;
+//        if (!super.equals(o)) return false;
+//        BigDecimalType other = (BigDecimalType) o;
+//        return scale == other.scale;
+//    }
 }

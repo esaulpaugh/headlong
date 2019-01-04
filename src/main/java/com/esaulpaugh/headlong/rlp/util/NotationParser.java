@@ -75,7 +75,7 @@ public class NotationParser {
         return end + LIST_SUFFIX_LEN;
     }
 
-    private static boolean findNextObject(String notation, int startIndex, int[] resultHolder) { // Pair<Integer, Integer>
+    private static boolean findNextObject(String notation, int startIndex, int[] resultHolder) {
         final int indexList = notation.indexOf(Notation.BEGIN_LIST, startIndex);
         final int indexString = notation.indexOf(Notation.BEGIN_STRING, startIndex);
 

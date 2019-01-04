@@ -72,19 +72,19 @@ abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V s
         }
     }
 
-    // TODO eventually just rely on super.hashCode() hashing canonicalType and dynamic
-    @Override
-    public int hashCode() {
-        return unsigned ? bitLength : -bitLength;
-    }
-
-    // TODO eventually just rely on super.equals() checking canonicalType and dynamic
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AbstractUnitType<?> other = (AbstractUnitType<?>) o;
-        return unsigned == other.unsigned
-                && bitLength == other.bitLength;
-    }
+//    // TODO eventually just rely on super.hashCode() hashing canonicalType and dynamic
+//    @Override
+//    public int hashCode() {
+//        return unsigned ? bitLength : -bitLength;
+//    }
+//
+//    // TODO eventually just rely on super.equals() checking canonicalType and dynamic
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (o == null || getClass() != o.getClass()) return false;
+//        AbstractUnitType<?> other = (AbstractUnitType<?>) o;
+//        return unsigned == other.unsigned
+//                && bitLength == other.bitLength;
+//    }
 }
