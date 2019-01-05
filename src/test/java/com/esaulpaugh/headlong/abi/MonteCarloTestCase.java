@@ -21,13 +21,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class MonteCarloTestCase implements Serializable {
 
-    private static final long serialVersionUID = -7544539781150389976L;
-
     private static final ThreadLocal<MessageDigest> KECCAK_THREAD_LOCAL = ThreadLocal.withInitial(() -> new Keccak(256));
 
     static class Params implements Serializable {
-
-        private static final long serialVersionUID = 4986365275807940869L;
 
         static final int DEFAULT_MAX_TUPLE_DEPTH = 1;
         static final int DEFAULT_MAX_TUPLE_LENGTH = 5;
@@ -97,7 +93,7 @@ public class MonteCarloTestCase implements Serializable {
 
     private static final List<String> FIXED_LIST;
 
-    private static String[] CANONICAL_BASE_TYPE_STRINGS;
+    private static final String[] CANONICAL_BASE_TYPE_STRINGS;
 
     private static final String TUPLE_KEY = "(...)";
 
@@ -150,14 +146,21 @@ public class MonteCarloTestCase implements Serializable {
             CANONICAL_BASE_TYPE_STRINGS[FIXED_START_INDEX + i] = FIXED_LIST.get(rng.nextInt(size));
         }
 
-        String rawSig = generateFunctionSignature(rng, 0);
-        rawSig = rawSig.replace("int256,", "int,");
-        rawSig = rawSig.replace("int256,", "int)");
-        rawSig = rawSig.replace("uint256,", "uint,");
-        rawSig = rawSig.replace("uint256,", "uint)");
+        String sig = generateFunctionSignature(rng, 0);
 
-        this.rawSignature = rawSig;
-        this.function = new Function(rawSig, KECCAK_THREAD_LOCAL.get());
+        // decanonicalize
+        sig = sig.replace("int256,", "int,");
+        sig = sig.replace("uint256,", "uint,");
+        sig = sig.replace("int256)", "int)");
+        sig = sig.replace("uint256)", "uint)");
+
+        sig = sig.replace("fixed128x18,", "fixed,");
+        sig = sig.replace("ufixed128x18,", "ufixed,");
+        sig = sig.replace("fixed128x18)", "fixed)");
+        sig = sig.replace("ufixed128x18)", "ufixed)");
+
+        this.rawSignature = sig;
+        this.function = new Function(sig, KECCAK_THREAD_LOCAL.get());
         this.argsTuple = generateTuple(function.paramTypes, rng);
     }
 

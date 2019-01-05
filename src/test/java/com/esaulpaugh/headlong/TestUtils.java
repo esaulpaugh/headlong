@@ -19,18 +19,14 @@ public class TestUtils {
 
     public static byte[] readFile(File file) throws IOException {
 
-        BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
-
         byte[] data = new byte[(int) file.length()];
 
-        try {
+        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
             int available;
             int offset = 0;
             while ((available = bis.available()) > 0) {
                 offset += bis.read(data, offset, available);
             }
-        } finally {
-            bis.close();
         }
 
         System.out.println("READ " + file.getName());
@@ -147,5 +143,4 @@ public class TestUtils {
         byte[] bytes = FastHex.decode(hex);
         return new BigInteger(bytes);
     }
-
 }

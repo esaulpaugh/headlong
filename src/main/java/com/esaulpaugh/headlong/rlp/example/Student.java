@@ -10,6 +10,8 @@ import com.esaulpaugh.headlong.util.Strings;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Objects;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
@@ -94,36 +96,21 @@ public class Student implements RLPEncodeable {
 
     @Override
     public int hashCode() {
-//        return Arrays.deepHashCode(new Object[]{ name, gpa, publicKey, balance });
-
-        return name == null ? 31 : name.hashCode()
-                * Float.floatToIntBits(gpa)
-                * (publicKey == null ? 31 : publicKey.hashCode())
-                * (balance == null ? 31 : balance.hashCode());
+        return Arrays.deepHashCode(new Object[] { name, gpa, publicKey, balance });
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof Student)) {
+        if(!(obj instanceof Student)) {
             return false;
         }
 
         Student other = (Student) obj;
 
-        if (name == null ? other.name != null : !name.equals(other.name)) {
-            return false;
-        }
-        if (Math.abs(gpa - other.gpa) > 0.00005) {
-            return false;
-        }
-        if (publicKey == null ? other.publicKey != null : !publicKey.equals(other.publicKey)) {
-            return false;
-        }
-        if(balance == null ? other.balance != null : !balance.equals(other.balance)) {
-            return false;
-        }
-
-        return true;
+        return Objects.equals(name, other.name)
+                && Math.abs(gpa - other.gpa) < 0.00005f
+                && Objects.equals(publicKey, other.publicKey)
+                && Objects.equals(balance, other.balance);
     }
 
     @Override
