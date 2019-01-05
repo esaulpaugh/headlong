@@ -185,9 +185,6 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
 
     /**
      * For arrays of arrays or arrays of tuples only.
-     *
-     * @param arr
-     * @return
      */
     private int validateObjectArray(Object[] arr) {
         final int len = arr.length;

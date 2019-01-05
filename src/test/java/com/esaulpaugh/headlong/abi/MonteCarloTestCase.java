@@ -149,15 +149,14 @@ public class MonteCarloTestCase implements Serializable {
         String sig = generateFunctionSignature(rng, 0);
 
         // decanonicalize
-        sig = sig.replace("int256,", "int,");
-        sig = sig.replace("uint256,", "uint,");
-        sig = sig.replace("int256)", "int)");
-        sig = sig.replace("uint256)", "uint)");
-
-        sig = sig.replace("fixed128x18,", "fixed,");
-        sig = sig.replace("ufixed128x18,", "ufixed,");
-        sig = sig.replace("fixed128x18)", "fixed)");
-        sig = sig.replace("ufixed128x18)", "ufixed)");
+        sig = sig.replace("int256,", "int,")
+                .replace("uint256,", "uint,")
+                .replace("int256)", "int)")
+                .replace("uint256)", "uint)")
+                .replace("fixed128x18,", "fixed,")
+                .replace("ufixed128x18,", "ufixed,")
+                .replace("fixed128x18)", "fixed)")
+                .replace("ufixed128x18)", "ufixed)");
 
         this.rawSignature = sig;
         this.function = new Function(sig, KECCAK_THREAD_LOCAL.get());

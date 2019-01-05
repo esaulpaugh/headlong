@@ -20,9 +20,7 @@ public class RLPList extends RLPItem {
     }
 
     /**
-     *
      * @param srcElements pre-encoded top-level elements of the list
-     * @return
      */
     static RLPList withElements(Iterable<RLPItem> srcElements) {
 
