@@ -45,13 +45,13 @@ abstract class StackableType<V> implements Serializable {
         // will throw NPE if argument null
         if(!expectedClassName.equals(value.getClass().getName())) {
             // this pretty much only happens in the error case
-            boolean isAssignable;
+            boolean assignable;
             try {
-                isAssignable = Class.forName(expectedClassName).isAssignableFrom(value.getClass());
+                assignable = Class.forName(expectedClassName).isAssignableFrom(value.getClass());
             } catch (ClassNotFoundException cnfe) {
-                isAssignable = false;
+                assignable = false;
             }
-            if(!isAssignable) {
+            if(!assignable) {
                 throw new IllegalArgumentException("class mismatch: "
                         + value.getClass().getName()
                         + " not assignable to "

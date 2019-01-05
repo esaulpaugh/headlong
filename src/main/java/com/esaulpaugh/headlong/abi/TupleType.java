@@ -87,7 +87,7 @@ class TupleType extends StackableType<Tuple> {
         final StackableType<?>[] elementTypes = this.elementTypes;
         final int expectedLength = elementTypes.length;
 
-        if(expectedLength != actualLength) {
+        if(actualLength != expectedLength) {
             throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + actualLength + " != " + expectedLength);
         }
 
@@ -136,7 +136,6 @@ class TupleType extends StackableType<Tuple> {
             elementType = elementTypes[i];
             if (elementType.dynamic) {
                 offsets[i] = CallEncoder.OFFSET_TYPE.decode(bb, elementBuffer);
-//                System.out.println("T offset " + convertOffset(offsets[i]) + " @ " + convert(bb.position() - OFFSET_LENGTH_BYTES));
             } else {
                 dest[i] = elementType.decode(bb, elementBuffer);
             }
