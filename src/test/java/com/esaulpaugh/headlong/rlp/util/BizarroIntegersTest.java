@@ -6,58 +6,42 @@ import org.junit.Test;
 
 import java.security.SecureRandom;
 import java.util.Random;
+import java.util.concurrent.ForkJoinPool;
 
 public class BizarroIntegersTest {
 
     @Test
-    public void putGetByte_fast() throws DecodeException {
+    public void putGetByte() throws DecodeException {
         byte[] one = new byte[1];
-        for (int j = 0; j < 1_000_000; j++) {
-            for (int i = -128; i < 128; i++) {
-                byte b = (byte) i;
-                int n = BizarroIntegers.putByte(b, one, 0);
-                byte r = BizarroIntegers.getByte(one, 0, n);
-                Assert.assertEquals(b, r);
-            }
+        for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
+            byte b = (byte) i;
+            int n = BizarroIntegers.putByte(b, one, 0);
+            byte r = BizarroIntegers.getByte(one, 0, n);
+            Assert.assertEquals(b, r);
         }
     }
 
     @Test
-    public void putGetShort_fast() throws DecodeException {
+    public void putGetShort() throws DecodeException {
         byte[] two = new byte[2];
-        for (int j = 0; j < 50_000; j++) {
-            for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
-                short s = (short) i;
-                int n = BizarroIntegers.putShort(s, two, 0);
-                short r = BizarroIntegers.getShort(two, 0, n);
-                Assert.assertEquals(s, r);
-            }
+        for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
+            short s = (short) i;
+            int n = BizarroIntegers.putShort(s, two, 0);
+            short r = BizarroIntegers.getShort(two, 0, n);
+            Assert.assertEquals(s, r);
         }
     }
 
     @Test
-    public void putGetInt_fast() throws DecodeException {
-        byte[] four = new byte[4];
-        for (long lo = Integer.MIN_VALUE; lo <= Integer.MAX_VALUE; lo++) {
-            int i = (int) lo;
-            int n = BizarroIntegers.putInt(i, four, 0);
-            int r = BizarroIntegers.getInt(four, 0, n);
-            Assert.assertEquals(i, r);
-        }
-    }
+    public void putGetInt() {
+        BizzaroIntTask root = new BizzaroIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE);
 
-    /* ignored because it takes 16 seconds on laptop */
-    // TODO forkjoin
-//    @Ignore
-    @Test
-    public void putGetInt() throws DecodeException {
-        byte[] four = new byte[4];
-        for (long lo = Integer.MIN_VALUE; lo <= Integer.MAX_VALUE; lo++) {
-            int i = (int) lo;
-            int n = BizarroIntegers.putInt(i, four, 0);
-            int r = BizarroIntegers.getInt(four, 0, n);
-            Assert.assertEquals(i, r);
-        }
+        int p = Runtime.getRuntime().availableProcessors();
+        System.out.println("p = " + p);
+
+        final ForkJoinPool pool = new ForkJoinPool();
+
+        pool.invoke(root);
     }
 
     @Test
@@ -145,6 +129,28 @@ public class BizarroIntegersTest {
                             : 8,
                     len
             );
+        }
+    }
+
+    private static final class BizzaroIntTask extends IntegersTest.IntTask {
+
+        public BizzaroIntTask(int start, int end) {
+            super(start, end);
+        }
+
+        @Override
+        protected void doWork() {
+            byte[] four = new byte[4];
+            try {
+                for (long lo = this.start; lo <= Integer.MAX_VALUE; lo++) {
+                    int i = (int) lo;
+                    int len = BizarroIntegers.putInt(i, four, 0);
+                    int r = BizarroIntegers.getInt(four, 0, len);
+                    Assert.assertEquals(i, r);
+                }
+            } catch (DecodeException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

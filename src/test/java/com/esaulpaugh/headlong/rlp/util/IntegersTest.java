@@ -8,84 +8,43 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveAction;
 
 public class IntegersTest {
 
     @Test
-    public void putGetByte_fast() throws DecodeException {
+    public void putGetByte() throws DecodeException {
         byte[] one = new byte[1];
-        for (int j = 0; j < 1_000_000; j++) {
-            for (int i = -128; i < 128; i++) {
-                byte b = (byte) i;
-                int n = Integers.putByte(b, one, 0);
-                byte r = Integers.getByte(one, 0, n);
-                Assert.assertEquals(b, r);
-            }
+        for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
+            byte b = (byte) i;
+            int n = Integers.putByte(b, one, 0);
+            byte r = Integers.getByte(one, 0, n);
+            Assert.assertEquals(b, r);
         }
     }
 
     @Test
-    public void putGetShort_fast() throws DecodeException {
+    public void putGetShort() throws DecodeException {
         byte[] two = new byte[2];
-        for (int j = 0; j < 10_000; j++) {
-            for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
-                short s = (short) i;
-                int n = Integers.putShort(s, two, 0);
-                short r = Integers.getShort(two, 0, n);
-                Assert.assertEquals(s, r);
-            }
+        for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
+            short s = (short) i;
+            int n = Integers.putShort(s, two, 0);
+            short r = Integers.getShort(two, 0, n);
+            Assert.assertEquals(s, r);
         }
     }
 
     @Test
-    public void putGetInt_fast() throws DecodeException {
-        byte[] four = new byte[4];
-        for (long lo = Integer.MIN_VALUE; lo <= Integer.MAX_VALUE; lo++) {
-            int i = (int) lo;
-            int n = Integers.putInt(i, four, 0);
-            int r = Integers.getInt(four, 0, n);
-            Assert.assertEquals(i, r);
-        }
-    }
+    public void putGetInt() {
+        IntTask root = new IntTask(Integer.MIN_VALUE, Integer.MAX_VALUE);
 
-    @Test
-    public void putGetByte_slow() throws DecodeException {
-        byte[] one = new byte[1];
-        for (int j = 0; j < 1_000_000; j++) {
-            for (int i = -128; i < 128; i++) {
-                byte b = (byte) i;
-                int n = Integers.putLong(0xFFL & b, one, 0);
-                byte r = Integers.getByte(one, 0, n);
-                Assert.assertEquals(b, r);
-            }
-        }
-    }
+        int p = Runtime.getRuntime().availableProcessors();
+        System.out.println("p = " + p);
 
-    @Test
-    public void putGetShort_slow() throws DecodeException {
-        byte[] two = new byte[2];
-        for (int j = 0; j < 10_000; j++) {
-            for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
-                short s = (short) i;
-                int n = Integers.putLong(0xFFFFL & s, two, 0);
-                short r = Integers.getShort(two, 0, n);
-                Assert.assertEquals(s, r);
-            }
-        }
-    }
+        final ForkJoinPool pool = new ForkJoinPool();
 
-    /* ignored because it takes 16 seconds on laptop */
-    // TODO forkjoin
-//    @Ignore
-    @Test
-    public void putGetInt_slow() throws DecodeException {
-        byte[] four = new byte[4];
-        for (long lo = Integer.MIN_VALUE; lo <= Integer.MAX_VALUE; lo++) {
-            int i = (int) lo;
-            int n = Integers.putLong(0xFFFFFFFFL & i, four, 0);
-            int r = Integers.getInt(four, 0, n);
-            Assert.assertEquals(i, r);
-        }
+        pool.invoke(root);
     }
 
     @Test
@@ -98,6 +57,21 @@ public class IntegersTest {
             int n = Integers.putLong(lo, eight, 0);
             long r = Integers.getLong(eight, 0, n);
             Assert.assertEquals(lo, r);
+        }
+    }
+
+    @Test
+    public void putGetBigInt() {
+        byte[] dest = new byte[17];
+        Arrays.fill(dest, (byte) -1);
+        Random rand = new Random(new SecureRandom().nextLong());
+
+        final int lim = Short.MAX_VALUE * 10;
+        for(int i = 0; i < lim; i++) {
+            BigInteger big = BigInteger.valueOf(rand.nextLong()).multiply(BigInteger.valueOf(Long.MAX_VALUE));
+            int n = Integers.putBigInt(big, dest, 0);
+            BigInteger r = Integers.getBigInt(dest, 0, n);
+            Assert.assertEquals(big, r);
         }
     }
 
@@ -227,18 +201,43 @@ public class IntegersTest {
         Assert.assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, src[1], src[2], src[3] }, ten);
     }
 
-    @Test
-    public void putGetBigInt() {
-        byte[] dest = new byte[17];
-        Arrays.fill(dest, (byte) -1);
-        Random rand = new Random(new SecureRandom().nextLong());
+    static class IntTask extends RecursiveAction {
 
-        final int lim = Short.MAX_VALUE * 10;
-        for(int i = 0; i < lim; i++) {
-            BigInteger big = BigInteger.valueOf(rand.nextLong()).multiply(BigInteger.valueOf(Long.MAX_VALUE));
-            int n = Integers.putBigInt(big, dest, 0);
-            BigInteger r = Integers.getBigInt(dest, 0, n);
-            Assert.assertEquals(big, r);
+        private static final int THRESHOLD = 500_000_000;
+
+        protected final int start, end;
+
+        public IntTask(int start, int end) {
+            this.start = start;
+            this.end = end;
+        }
+
+        @Override
+        protected void compute() {
+            final int n = end - start;
+            if (n > THRESHOLD) {
+                int midpoint = start + (n / 2);
+                invokeAll(
+                        new IntTask(start, midpoint),
+                        new IntTask(midpoint, end)
+                );
+            } else {
+                doWork();
+            }
+        }
+
+        protected void doWork() {
+            byte[] four = new byte[4];
+            try {
+                for (long lo = this.start; lo <= Integer.MAX_VALUE; lo++) {
+                    int i = (int) lo;
+                    int len = Integers.putInt(i, four, 0);
+                    int r = Integers.getInt(four, 0, len);
+                    Assert.assertEquals(i, r);
+                }
+            } catch (DecodeException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }
