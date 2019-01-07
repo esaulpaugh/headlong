@@ -151,10 +151,14 @@ public class MonteCarloTestCase implements Serializable {
         // decanonicalize
         sig = sig.replace("int256,", "int,")
                 .replace("uint256,", "uint,")
+                .replace("int256[", "int[")
+                .replace("uint256[", "uint[")
                 .replace("int256)", "int)")
                 .replace("uint256)", "uint)")
                 .replace("fixed128x18,", "fixed,")
                 .replace("ufixed128x18,", "ufixed,")
+                .replace("fixed128x18[", "fixed[")
+                .replace("ufixed128x18[", "ufixed[")
                 .replace("fixed128x18)", "fixed)")
                 .replace("ufixed128x18)", "ufixed)");
 

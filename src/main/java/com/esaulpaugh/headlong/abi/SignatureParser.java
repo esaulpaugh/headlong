@@ -114,6 +114,14 @@ public class SignatureParser {
         return argEnd;
     }
 
+    private static String completeTupleTypeString(StringBuilder canonicalTupleType) {
+        final int len = canonicalTupleType.length();
+        if(len == 1) {
+            return "()";
+        }
+        return canonicalTupleType.replace(len - 1, len, ")").toString(); // replace trailing comma
+    }
+
     private static int parseNonTuple(final String signature,
                                              final int argStart,
                                              final List<StackableType<?>> tupleTypes,
@@ -125,24 +133,13 @@ public class SignatureParser {
             return -1;
         }
         checkTypeChars(illegalTypeCharMatcher, signature, argStart, argEnd);
-        String typeString = signature.substring(argStart, argEnd);
-        final String replacement = getCanonicalReplacement(signature, typeString, argStart, argEnd);
-        if(replacement != null) {
-            typeString = replacement;
-        }
+
+        final String typeString = canonicalizeType(signature.substring(argStart, argEnd)); // , signature, argStart, argEnd
 
         tupleTypes.add(TypeFactory.create(typeString));
         canonicalTupleType.append(typeString).append(',');
 
         return argEnd;
-    }
-
-    private static String completeTupleTypeString(StringBuilder canonicalTupleType) {
-        final int n = canonicalTupleType.length();
-        if(n > 1) {
-            return canonicalTupleType.replace(n - 1, n, ")").toString();
-        }
-        return canonicalTupleType.append(")").toString();
     }
 
     private static int nextParamTerminator(String signature, int i) {
@@ -157,25 +154,28 @@ public class SignatureParser {
         return Math.min(comma, close);
     }
 
-    private static String getCanonicalReplacement(String signature, String typeString, int argStart, final int argEnd) {
-        final int splitIndex;
-        final String piece;
-        if (typeString.endsWith("int")) {
-            splitIndex = argEnd;
-            piece = "256";
-        } else if(typeString.endsWith("fixed")) {
-            splitIndex = argEnd;
-            piece = "128x18";
-        } else if(typeString.contains("int[")) {
-            splitIndex = signature.indexOf("int", argStart) + "int".length();
-            piece = "256";
-        } else if(typeString.contains("fixed[")) {
-            splitIndex = signature.indexOf("fixed", argStart) + "fixed".length();
-            piece = "128x18";
-        } else {
-            return null;
+    private static String canonicalizeType(String rawType) {
+        final int rawTypeLen = rawType.length();
+        String canonicalized = tryInsertMissingSuffix(rawType, rawTypeLen, "int", "256");
+        if(canonicalized == null) {
+            canonicalized = tryInsertMissingSuffix(rawType, rawTypeLen, "fixed", "128x18");
         }
-        return new StringBuilder().append(signature, argStart, splitIndex).append(piece).append(signature, splitIndex, argEnd).toString();
+        return canonicalized != null ? canonicalized : rawType;
+    }
+
+    private static String tryInsertMissingSuffix(String rawType, int rawTypeLen, String prefix, String suffix) {
+        final int prefixIndex = rawType.indexOf(prefix);
+        if(prefixIndex != -1) {
+            final int prefixEnd = prefixIndex + prefix.length();
+            if(rawTypeLen - prefixEnd == 0 || rawType.charAt(prefixEnd) == '[') { // ends w/ prefix or is ...prefix[...
+                return new StringBuilder()
+                        .append(rawType, 0, prefixEnd)
+                        .append(suffix)
+                        .append(rawType, prefixEnd, rawTypeLen)
+                        .toString();
+            }
+        }
+        return null;
     }
 
     private static void checkNameChars(String signature, int startParams) throws ParseException {
