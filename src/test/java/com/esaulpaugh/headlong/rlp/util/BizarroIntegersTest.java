@@ -142,7 +142,8 @@ public class BizarroIntegersTest {
         protected void doWork() {
             byte[] four = new byte[4];
             try {
-                for (long lo = this.start; lo <= Integer.MAX_VALUE; lo++) {
+                final long end = this.end;
+                for (long lo = this.start; lo <= end; lo++) {
                     int i = (int) lo;
                     int len = BizarroIntegers.putInt(i, four, 0);
                     int r = BizarroIntegers.getInt(four, 0, len);

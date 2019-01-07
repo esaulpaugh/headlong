@@ -203,20 +203,20 @@ public class IntegersTest {
 
     static class IntTask extends RecursiveAction {
 
-        private static final int THRESHOLD = 500_000_000;
+        private static final int THRESHOLD = 250_000_000;
 
-        protected final int start, end;
+        protected final long start, end;
 
-        public IntTask(int start, int end) {
+        protected IntTask(long start, long end) {
             this.start = start;
             this.end = end;
         }
 
         @Override
         protected void compute() {
-            final int n = end - start;
+            final long n = end - start;
             if (n > THRESHOLD) {
-                int midpoint = start + (n / 2);
+                long midpoint = start + (n / 2);
                 invokeAll(
                         new IntTask(start, midpoint),
                         new IntTask(midpoint, end)
@@ -229,7 +229,8 @@ public class IntegersTest {
         protected void doWork() {
             byte[] four = new byte[4];
             try {
-                for (long lo = this.start; lo <= Integer.MAX_VALUE; lo++) {
+                final long end = this.end;
+                for (long lo = this.start; lo <= end; lo++) {
                     int i = (int) lo;
                     int len = Integers.putInt(i, four, 0);
                     int r = Integers.getInt(four, 0, len);
