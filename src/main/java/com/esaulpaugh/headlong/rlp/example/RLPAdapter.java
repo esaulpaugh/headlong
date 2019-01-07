@@ -4,9 +4,10 @@ import com.esaulpaugh.headlong.rlp.DecodeException;
 
 public interface RLPAdapter<T> {
 
-    default T decode(byte[] rlp) throws DecodeException {
-        return decode(rlp, 0);
-    }
+    // default interface methods not supported on Android except Android N+
+//    default T decode(byte[] rlp) throws DecodeException {
+//        return decode(rlp, 0);
+//    }
 
     T decode(byte[] rlp, int index) throws DecodeException;
 
