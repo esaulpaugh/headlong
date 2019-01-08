@@ -68,7 +68,7 @@ Alternatively:
 * Use `mvn package` which outputs to /target
 * Add headlong as a project dependency
 
-Tests should take 2-4 minutes to run. Test packages require junit and gson. Otherwise headlong has no dependencies. Size is ~106 KB as of 12/13/18.
+Tests should take 1-2 minutes depending on how stronk your machine is. Test packages require junit and gson. Otherwise headlong has no dependencies. Size is ~106 KB as of 12/13/18.
 
 See the wiki for more, such as RLP Lists and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
