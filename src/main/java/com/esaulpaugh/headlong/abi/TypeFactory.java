@@ -54,14 +54,13 @@ final class TypeFactory {
             }
 
             final StackableType<?> elementType = buildType(canonicalType, arrayOpenIndex - 1, baseTuple);
-            final String elementArrayClassNameStub = elementType.arrayClassNameStub();
             final Class<?> elementClass;
             if(elementType.typeCode() == StackableType.TYPE_CODE_ARRAY) {
                 elementClass = Class.forName(elementType.className(), true, CLASS_LOADER);
             } else {
                 elementClass = null;
             }
-            final String className = '[' + elementArrayClassNameStub;
+            final String className = '[' + elementType.arrayClassNameStub();
             final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
             return new ArrayType<StackableType<?>, Object>(canonicalType, elementType, elementClass, className, className, length, dynamic);
         } else {
