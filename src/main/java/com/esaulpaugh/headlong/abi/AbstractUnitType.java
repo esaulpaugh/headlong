@@ -65,7 +65,7 @@ abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V s
         if(bigIntVal.bitLength() > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + bigIntVal.bitLength() + " > " + bitLength);
         }
-        if(unsigned && bigIntVal.compareTo(BigInteger.ZERO) < 0) {
+        if(unsigned && bigIntVal.signum() == -1) {
             throw new IllegalArgumentException("negative value for unsigned type");
         }
     }

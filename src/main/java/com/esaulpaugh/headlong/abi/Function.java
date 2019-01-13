@@ -40,7 +40,7 @@ public class Function implements Serializable {
     }
 
     /**
-     * Beware that {@code messageDigest} must be given in an {@link MessageDigest#INITIAL} (i.e. not
+     * Note that {@code messageDigest} must be given in an {@link MessageDigest#INITIAL} (i.e. not
      * {@link MessageDigest#IN_PROGRESS}) state.
      *
      * @param signature the function signature
@@ -78,7 +78,21 @@ public class Function implements Serializable {
         return CallEncoder.encodeCall(this, argsTuple);
     }
 
-    public Function encodeCall(Tuple argsTuple, ByteBuffer dest) {
+    /**
+     * Does not perform validation. Use {@link #callLength(Tuple)} to determine the minimum allocation.
+     *
+     * @param argsTuple     the call's arguments
+     * @param allocation    the byte length of the call
+     * @return
+     */
+    public ByteBuffer encodeCallDirect(Tuple argsTuple, int allocation) {
+        return CallEncoder.encodeCall(this, argsTuple, allocation);
+    }
+
+    public Function encodeCall(Tuple argsTuple, ByteBuffer dest, boolean validate) {
+        if(validate) {
+            paramTypes.validate(argsTuple);
+        }
         CallEncoder.encodeCall(this, argsTuple, dest);
         return this;
     }

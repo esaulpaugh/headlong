@@ -33,14 +33,12 @@ class CallEncoder {
     }
 
     static ByteBuffer encodeCall(Function function, Tuple argsTuple) {
+        return encodeCall(function, argsTuple, calcEncodingLength(function, argsTuple));
+    }
 
-        final TupleType tupleType = function.paramTypes;
-
-        final int allocation = Function.SELECTOR_LEN + tupleType.validate(argsTuple);
+    static ByteBuffer encodeCall(Function function, Tuple argsTuple, int allocation) {
         ByteBuffer outBuffer = ByteBuffer.wrap(new byte[allocation]); // ByteOrder.BIG_ENDIAN by default
-
         encodeCall(function, argsTuple, outBuffer);
-
         return outBuffer;
     }
 
@@ -112,15 +110,16 @@ class CallEncoder {
     }
 
     private static void insertOffset(final int[] offset, StackableType<?> paramType, Object object, ByteBuffer dest) {
-        insertInt(offset[0], dest);
-        offset[0] += paramType.byteLength(object);
+        final int val = offset[0];
+        insertInt(val, dest);
+        offset[0] = val + paramType.byteLength(object);
     }
 
     private static void encodeTail(StackableType<?> type, Object value, ByteBuffer dest) {
 //        only dynamics expected
         switch (type.typeCode()) {
         case TYPE_CODE_ARRAY:
-            ArrayType<?, ?> arrayType = (ArrayType<?, ?>) type;
+            final ArrayType<?, ?> arrayType = (ArrayType<?, ?>) type;
             if(arrayType.isString) {
                 byte[] bytes = ((String) value).getBytes(CHARSET_UTF_8);
                 insertInt(bytes.length, dest); // insertLength

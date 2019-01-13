@@ -5,6 +5,9 @@ import com.esaulpaugh.headlong.abi.util.ClassNames;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
+/**
+ * Unsigned 0 or 1.
+ */
 class BooleanType extends AbstractUnitType<Boolean> {
 
     static final String CLASS_NAME = Boolean.class.getName();
@@ -37,7 +40,7 @@ class BooleanType extends AbstractUnitType<Boolean> {
         switch (bi.byteValue()) {
         case 0: return Boolean.FALSE;
         case 1: return Boolean.TRUE;
-        default: throw new ArithmeticException("expected value 0 or 1");
+        default: throw new AssertionError();
         }
     }
 }
