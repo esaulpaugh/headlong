@@ -31,7 +31,7 @@ public class DecodeTest {
     ByteBuffer buffer = ByteBuffer.allocate(f.callLength(args));
         
     System.out.println("equals = " +
-            f.encodeCall(args, buffer)
+            f.encodeCall(args, buffer, false)
                     .decodeCall((ByteBuffer) buffer.flip())
                     .equals(args)
     );
