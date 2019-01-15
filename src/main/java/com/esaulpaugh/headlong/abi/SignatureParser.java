@@ -25,9 +25,9 @@ public class SignatureParser {
 
         final Matcher illegalTypeCharMatcher = HAS_NON_TYPE_CHARS.matcher(signature);
 
-        StringBuilder ctt = new StringBuilder("(");
-        final int argEnd = parseTuple(signature, startParams, typesOut, illegalTypeCharMatcher, ctt);
-        String canonical = completeTupleTypeString(ctt);
+        StringBuilder canonicalTupleType = new StringBuilder("(");
+        final int argEnd = parseTuple(signature, startParams, typesOut, illegalTypeCharMatcher, canonicalTupleType);
+        String canonical = completeTupleTypeString(canonicalTupleType);
 
         final int sigEnd = signature.length();
 
@@ -45,7 +45,7 @@ public class SignatureParser {
 
     private static int parseTuple(final String signature,
                                   final int startParams,
-                                  final List<StackableType<?>> tupleTypes,
+                                  final List<StackableType<?>> typesOut,
                                   final Matcher illegalTypeCharMatcher,
                                   final StringBuilder canonicalTupleType) throws ParseException {
         int argStart = startParams + 1;
@@ -60,7 +60,7 @@ public class SignatureParser {
             case '[':
                 break LOOP;
             case ')':
-                if (tupleTypes.size() > 0) {
+                if (typesOut.size() > 0) {
                     argEnd = argStart - 1;
                 }
                 break LOOP;
@@ -68,7 +68,7 @@ public class SignatureParser {
                 if (signature.charAt(argStart - 1) == ')') {
                     break LOOP;
                 }
-                throw new ParseException("empty parameter @ " + tupleTypes.size(), argStart);
+                throw new ParseException("empty parameter @ " + typesOut.size(), argStart);
             case '(': // tuple element
                 try {
                     ArrayList<StackableType<?>> innerTupleTypes = new ArrayList<>();
@@ -90,12 +90,12 @@ public class SignatureParser {
                         }
                     }
 
-                    tupleTypes.add(childType);
+                    typesOut.add(childType);
 
                     canonicalTupleType.append(childType.canonicalType).append(',');
 
                 } catch (ParseException pe) {
-                    throw (ParseException) new ParseException(pe.getMessage() + " @ " + tupleTypes.size(), pe.getErrorOffset()).initCause(pe);
+                    throw (ParseException) new ParseException(pe.getMessage() + " @ " + typesOut.size(), pe.getErrorOffset()).initCause(pe);
                 }
 
                 if (argEnd >= sigEnd || signature.charAt(argEnd) != ',') {
@@ -103,7 +103,7 @@ public class SignatureParser {
                 }
                 break;
             default: // non-tuple element
-                argEnd = parseNonTuple(signature, argStart, tupleTypes, illegalTypeCharMatcher, canonicalTupleType);
+                argEnd = parseNonTuple(signature, argStart, typesOut, illegalTypeCharMatcher, canonicalTupleType);
                 if (argEnd == -1 || argEnd >= sigEnd || signature.charAt(argEnd) == ')') {
                     return argEnd;
                 }
@@ -124,7 +124,7 @@ public class SignatureParser {
 
     private static int parseNonTuple(final String signature,
                                              final int argStart,
-                                             final List<StackableType<?>> tupleTypes,
+                                             final List<StackableType<?>> parentsElements,
                                              final Matcher illegalTypeCharMatcher,
                                              final StringBuilder canonicalTupleType) throws ParseException {
 
@@ -136,7 +136,7 @@ public class SignatureParser {
 
         final String typeString = canonicalizeType(signature.substring(argStart, argEnd)); // , signature, argStart, argEnd
 
-        tupleTypes.add(TypeFactory.create(typeString));
+        parentsElements.add(TypeFactory.create(typeString));
         canonicalTupleType.append(typeString).append(',');
 
         return argEnd;

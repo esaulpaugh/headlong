@@ -1,6 +1,8 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.ClassNames;
+import com.esaulpaugh.headlong.rlp.util.BizarroIntegers;
+import com.esaulpaugh.headlong.rlp.util.Integers;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -27,6 +29,17 @@ class IntType extends AbstractUnitType<Integer> {
     @Override
     int typeCode() {
         return TYPE_CODE_INT;
+    }
+
+    @Override
+    int byteLengthPacked(Object value) {
+        int val = (Integer) value;
+        if(val == -1) {
+            return 1;
+        }
+        return val >= 0
+                ? Integers.len(val)
+                : BizarroIntegers.len(val);
     }
 
     @Override

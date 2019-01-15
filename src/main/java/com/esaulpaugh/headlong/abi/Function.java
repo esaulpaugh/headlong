@@ -66,6 +66,10 @@ public class Function implements Serializable {
         return new Function(signature);
     }
 
+    public static TupleType parseTupleType(String tupleTypeString) throws ParseException {
+        return SignatureParser.parseFunctionSignature(tupleTypeString);
+    }
+
     public ByteBuffer encodeCallForArgs(Object... args) {
         return encodeCall(new Tuple(args));
     }

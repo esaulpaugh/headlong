@@ -33,6 +33,11 @@ class BooleanType extends AbstractUnitType<Boolean> {
     }
 
     @Override
+    int byteLengthPacked(Object value) {
+        return 1;
+    }
+
+    @Override
     Boolean decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);

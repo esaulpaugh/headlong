@@ -77,6 +77,22 @@ class TupleType extends StackableType<Tuple> {
     }
 
     @Override
+    int byteLengthPacked(Object value) {
+        Tuple tuple = (Tuple) value;
+        final Object[] elements = tuple.elements;
+
+        final StackableType<?>[] types = this.elementTypes;
+        final int numTypes = types.length;
+
+        int len = 0;
+        for (int i = 0; i < numTypes; i++) {
+            len += types[i].byteLengthPacked(elements[i]);
+        }
+
+        return len;
+    }
+
+    @Override
     int validate(final Object value) {
         super.validate(value);
 

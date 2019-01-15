@@ -39,6 +39,8 @@ abstract class StackableType<V> implements Serializable {
 
     abstract int byteLength(Object value);
 
+    abstract int byteLengthPacked(Object value);
+
     int validate(Object value) {
         final String expectedClassName = className();
 
