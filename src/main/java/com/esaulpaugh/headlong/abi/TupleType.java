@@ -181,4 +181,8 @@ class TupleType extends StackableType<Tuple> {
         TupleType tupleType = (TupleType) o;
         return Arrays.equals(elementTypes, tupleType.elementTypes);
     }
+
+    public void encodePacked(Tuple tuple, byte[] dest, int idx) {
+        PackedEncoder.insertTuple(this, tuple, dest, idx);
+    }
 }

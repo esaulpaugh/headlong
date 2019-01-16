@@ -21,5 +21,12 @@ public class PackedEncoderTest {
 
         Assert.assertEquals(FastHex.decode("ff42242448656c6c6f2c20776f726c6421").length, packedLen);
 
+        byte[] dest = new byte[packedLen];
+
+        tupleType.encodePacked(test, dest, 0);
+
+        System.out.println(FastHex.encodeToString(dest));
+
+        Assert.assertArrayEquals(FastHex.decode("ff42242448656c6c6f2c20776f726c6421"), dest);
     }
 }

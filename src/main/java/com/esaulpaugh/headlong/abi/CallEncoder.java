@@ -14,7 +14,7 @@ class CallEncoder {
     static final int OFFSET_LENGTH_BYTES = UNIT_LENGTH_BYTES;
     static final IntType OFFSET_TYPE = new IntType("int32", Integer.SIZE, false);
 
-    private static final byte NEGATIVE_ONE_BYTE = (byte) 0xFF;
+    static final byte NEGATIVE_ONE_BYTE = (byte) 0xFF;
     private static final byte ZERO_BYTE = (byte) 0;
 
     private static final byte[] BOOLEAN_FALSE = new byte[UNIT_LENGTH_BYTES];
