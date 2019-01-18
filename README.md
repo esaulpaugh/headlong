@@ -4,16 +4,17 @@ Usage of the ABI codec:
 
 ```java
 Function f = new Function("baz(uint32,bool)"); // canonicalizes and parses any signature automatically
-Tuple argsTuple = new Tuple(69L, true);
-// Two equivalent styles:
-ByteBuffer one = f.encodeCall(argsTuple);
-ByteBuffer two = f.encodeCallForArgs(69L, true); 
+Tuple args = new Tuple(69L, true);
 
-System.out.println(Function.formatABI(one.array())); // a formatted hex representation
+// Two equivalent styles:
+ByteBuffer one = f.encodeCall(args);
+ByteBuffer two = f.encodeCallWithArgs(69L, true);
+
+System.out.println(Function.formatCall(one.array())); // a multi-line hex representation
 
 Tuple decoded = f.decodeCall((ByteBuffer) two.flip());
 
-System.out.println(decoded.equals(argsTuple));
+System.out.println(decoded.equals(args));
 ```
 
 And of the RLP codec:
@@ -69,8 +70,8 @@ Alternatively:
 * Use `mvn package` which outputs to /target
 * Add headlong as a project dependency
 
-Tests should take 1-2 minutes depending on how stronk your machine is. Test packages require junit and gson. Otherwise headlong has no dependencies. Size is ~106 KB as of 01/08/19.
+Tests should take less than one minute to run. Test packages require junit and gson. Otherwise headlong has no dependencies. Jar size is ~109 KB as of 01/17/19.
 
-See the wiki for more, such as RLP Lists and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
+See the wiki for more, such as TupleTypes, packed encoding, RLP Lists, and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
 Licensed under Apache 2.0
