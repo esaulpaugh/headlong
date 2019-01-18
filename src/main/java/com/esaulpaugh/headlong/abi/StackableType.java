@@ -7,7 +7,6 @@ import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
 
-// TODO support model classes à la Student.java?
 abstract class StackableType<V> implements Serializable {
 
     static final int TYPE_CODE_BOOLEAN = 0;
@@ -87,5 +86,10 @@ abstract class StackableType<V> implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         return canonicalType.equals(((StackableType<?>) o).canonicalType);
+    }
+
+    @Override
+    public String toString() {
+        return canonicalType;
     }
 }

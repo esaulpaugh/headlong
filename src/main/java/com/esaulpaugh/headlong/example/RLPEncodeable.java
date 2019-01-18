@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.rlp.example;
+package com.esaulpaugh.headlong.example;
 
 public interface RLPEncodeable {
 

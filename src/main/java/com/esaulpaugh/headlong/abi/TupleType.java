@@ -30,19 +30,6 @@ public class TupleType extends StackableType<Tuple> {
     }
 
     @Override
-    public String toString() {
-        if(elementTypes.length == 0) {
-            return "()";
-        }
-        StringBuilder sb = new StringBuilder("(");
-        for (StackableType<?> memberType : elementTypes) {
-            sb.append(memberType).append(',');
-        }
-        sb.replace(sb.length() - 1, sb.length(), "").append(')');
-        return getClass().getSimpleName() + sb.toString();
-    }
-
-    @Override
     String className() {
         return CLASS_NAME;
     }
@@ -127,8 +114,12 @@ public class TupleType extends StackableType<Tuple> {
         return byteLength;
     }
 
+    public Tuple decode(ByteBuffer bb) {
+        return decode(bb, newUnitBuffer());
+    }
+
     @Override
-    Tuple decode(ByteBuffer bb, byte[] elementBuffer) {
+    Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
 
 //        final int index = bb.position(); // TODO must pass index to decodeTails if you want to support lenient mode
 
@@ -137,10 +128,10 @@ public class TupleType extends StackableType<Tuple> {
         Object[] elements = new Object[tupleLen];
 
         int[] offsets = new int[tupleLen];
-        decodeHeads(bb, elementTypes, offsets, elementBuffer, elements);
+        decodeHeads(bb, elementTypes, offsets, unitBuffer, elements);
 
         if(dynamic) {
-            decodeTails(bb, elementTypes, offsets, elementBuffer, elements);
+            decodeTails(bb, elementTypes, offsets, unitBuffer, elements);
         }
 
         return new Tuple(elements);
@@ -207,6 +198,12 @@ public class TupleType extends StackableType<Tuple> {
         if (!super.equals(o)) return false;
         TupleType tupleType = (TupleType) o;
         return Arrays.equals(elementTypes, tupleType.elementTypes);
+    }
+
+    public byte[] encodePacked(Tuple values) {
+        byte[] dest = new byte[byteLengthPacked(values)];
+        PackedEncoder.insertTuple(this, values, dest, 0);
+        return dest;
     }
 
     public void encodePacked(Tuple values, byte[] dest, int idx) {

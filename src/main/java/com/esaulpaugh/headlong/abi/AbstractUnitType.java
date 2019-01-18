@@ -23,11 +23,6 @@ abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V s
     }
 
     @Override
-    public String toString() {
-        return getClass().getSimpleName() + "(" + bitLength + ")";
-    }
-
-    @Override
     int byteLength(Object value) {
         return UNIT_LENGTH_BYTES;
     }

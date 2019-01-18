@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.rlp.example;
+package com.esaulpaugh.headlong.example;
 
 import com.esaulpaugh.headlong.rlp.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;

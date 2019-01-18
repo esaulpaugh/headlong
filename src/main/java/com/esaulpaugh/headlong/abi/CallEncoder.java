@@ -28,24 +28,24 @@ class CallEncoder {
         Arrays.fill(NEGATIVE_INT_PADDING, NEGATIVE_ONE_BYTE);
     }
 
-    static int calcEncodingLength(Function f, Tuple argsTuple, boolean validate) {
-        final int bodyLen = validate ? f.paramTypes.validate(argsTuple) : f.paramTypes.byteLength(argsTuple);
+    static int calcEncodingLength(Function f, Tuple args, boolean validate) {
+        final int bodyLen = validate ? f.paramTypes.validate(args) : f.paramTypes.byteLength(args);
         return Function.SELECTOR_LEN + bodyLen;
     }
 
-    static ByteBuffer encodeCall(Function function, Tuple argsTuple) {
-        return encodeCall(function, argsTuple, calcEncodingLength(function, argsTuple, true));
+    static ByteBuffer encodeCall(Function function, Tuple args) {
+        return encodeCall(function, args, calcEncodingLength(function, args, true));
     }
 
-    static ByteBuffer encodeCall(Function function, Tuple argsTuple, int allocation) {
+    static ByteBuffer encodeCall(Function function, Tuple args, int allocation) {
         ByteBuffer outBuffer = ByteBuffer.wrap(new byte[allocation]); // ByteOrder.BIG_ENDIAN by default
-        encodeCall(function, argsTuple, outBuffer);
+        encodeCall(function, args, outBuffer);
         return outBuffer;
     }
 
-    static void encodeCall(Function function, Tuple argsTuple, ByteBuffer dest) {
+    static void encodeCall(Function function, Tuple args, ByteBuffer dest) {
         dest.put(function.selector);
-        insertTuple(function.paramTypes, argsTuple, dest);
+        insertTuple(function.paramTypes, args, dest);
     }
 
     static void insertTuple(TupleType tupleType, Tuple tuple, ByteBuffer outBuffer) {

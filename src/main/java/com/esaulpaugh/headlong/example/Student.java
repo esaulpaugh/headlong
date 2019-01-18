@@ -1,5 +1,6 @@
-package com.esaulpaugh.headlong.rlp.example;
+package com.esaulpaugh.headlong.example;
 
+import com.esaulpaugh.headlong.abi.Tuple;
 import com.esaulpaugh.headlong.rlp.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
@@ -16,7 +17,7 @@ import java.util.Objects;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
-public class Student implements RLPEncodeable {
+public class Student implements RLPEncodeable, ABIEncodeable {
 
     private String name;
     private float gpa;
@@ -55,6 +56,13 @@ public class Student implements RLPEncodeable {
         this.publicKey = (item = RLP_STRICT.wrap(rlp, item.endIndex)).asBigInt();
         BigInteger intVal = (item = RLP_STRICT.wrap(rlp, item.endIndex)).asBigInt();
         this.balance = new BigDecimal(intVal, RLP_STRICT.wrap(rlp, item.endIndex).asInt());
+    }
+
+    public Student(Tuple values) {
+        this.name = (String) values.get(0);
+        this.gpa = ((BigDecimal) values.get(1)).floatValue();
+        this.publicKey = new BigInteger((byte[]) values.get(2));
+        this.balance = new BigDecimal(new BigInteger((byte[]) values.get(3)), (int) values.get(4));
     }
 
     public String getName() {
@@ -132,5 +140,10 @@ public class Student implements RLPEncodeable {
     @Override
     public void toRLP(byte[] dest, int destIndex) {
         RLPEncoder.encodeSequentially(toObjectArray(), dest, destIndex);
+    }
+
+    @Override
+    public Tuple toTuple() {
+        return new Tuple(name, BigDecimal.valueOf(gpa), publicKey.toByteArray(), balance.unscaledValue().toByteArray(), balance.scale());
     }
 }

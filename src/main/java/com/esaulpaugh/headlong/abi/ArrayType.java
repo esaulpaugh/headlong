@@ -50,11 +50,6 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
     }
 
     @Override
-    public String toString() {
-        return (dynamic ? "DYNAMIC[]" : "STATIC[]") + "<" + elementType + ">(" + length + ")";
-    }
-
-    @Override
     String className() {
         return className;
     }
