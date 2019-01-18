@@ -35,9 +35,7 @@ class BigDecimalType extends AbstractUnitType<BigDecimal> {
 
     @Override
     int byteLengthPacked(Object value) {
-        BigDecimal bigDecimal = (BigDecimal) value;
-        BigInteger bigInteger = bigDecimal.unscaledValue();
-        return bigInteger.toByteArray().length; // TODO optimize?
+        return bitLength >> 3; // div 8
     }
 
     @Override

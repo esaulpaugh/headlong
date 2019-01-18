@@ -66,6 +66,6 @@ public class EqualsTest {
         }
         array[array.length - 1] = (byte) 0xFE;
         System.out.println(Function.formatCall(array));
-        assertThrown(IllegalArgumentException.class, "negative value for unsigned type", () -> f.decodeCall(array));
+        assertThrown(IllegalArgumentException.class, "negative value for boolean type", () -> f.decodeCall(array));
     }
 }

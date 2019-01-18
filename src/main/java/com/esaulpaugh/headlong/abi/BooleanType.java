@@ -45,7 +45,7 @@ class BooleanType extends AbstractUnitType<Boolean> {
         switch (bi.byteValue()) {
         case 0: return Boolean.FALSE;
         case 1: return Boolean.TRUE;
-        default: throw new AssertionError();
+        default: throw new IllegalArgumentException("negative value for boolean type");
         }
     }
 }

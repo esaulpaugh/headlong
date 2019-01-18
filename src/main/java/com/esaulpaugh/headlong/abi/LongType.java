@@ -1,8 +1,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.ClassNames;
-import com.esaulpaugh.headlong.rlp.util.BizarroIntegers;
-import com.esaulpaugh.headlong.rlp.util.Integers;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -33,13 +31,7 @@ class LongType extends AbstractUnitType<Long> {
 
     @Override
     int byteLengthPacked(Object value) {
-        long val = (Long) value;
-        if(val == -1L) {
-            return 1;
-        }
-        return val >= 0
-                ? Integers.len(val)
-                : BizarroIntegers.len(val);
+        return bitLength >> 8; // div 8
     }
 
     @Override

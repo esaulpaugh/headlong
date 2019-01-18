@@ -31,9 +31,9 @@ public class PackedEncoder {
         case TYPE_CODE_BYTE:
         case TYPE_CODE_SHORT:
         case TYPE_CODE_INT:
-        case TYPE_CODE_LONG: return insertInt(((Number) value).longValue(), dest, idx);
-        case TYPE_CODE_BIG_INTEGER: return insertInt(((BigInteger) value), dest, idx);
-        case TYPE_CODE_BIG_DECIMAL: return insertInt(((BigDecimal) value).unscaledValue(), dest, idx);
+        case TYPE_CODE_LONG: return insertInt(((Number) value).longValue(), type.byteLengthPacked(value), dest, idx);
+        case TYPE_CODE_BIG_INTEGER: return insertInt(((BigInteger) value), type.byteLengthPacked(value), dest, idx);
+        case TYPE_CODE_BIG_DECIMAL: return insertInt(((BigDecimal) value).unscaledValue(), type.byteLengthPacked(value), dest, idx);
         case TYPE_CODE_ARRAY:
             return encodeArray((ArrayType<?, ?>) type, value, dest, idx);
         case TYPE_CODE_TUPLE:
@@ -49,11 +49,11 @@ public class PackedEncoder {
         case TYPE_CODE_BYTE:
             byte[] arr = arrayType.isString ? ((String) value).getBytes(Strings.CHARSET_UTF_8) : (byte[]) value;
             return insertBytes(arr, dest, idx);
-        case TYPE_CODE_SHORT: return insertShorts((short[]) value, dest, idx);
-        case TYPE_CODE_INT: return insertInts((int[]) value, dest, idx);
-        case TYPE_CODE_LONG: return insertLongs((long[]) value, dest, idx);
-        case TYPE_CODE_BIG_INTEGER: return insertBigIntegers((BigInteger[]) value, dest, idx);
-        case TYPE_CODE_BIG_DECIMAL: return insertBigDecimals((BigDecimal[]) value, dest, idx);
+        case TYPE_CODE_SHORT: return insertShorts((short[]) value, arrayType.elementType.byteLengthPacked(value), dest, idx);
+        case TYPE_CODE_INT: return insertInts((int[]) value, arrayType.elementType.byteLengthPacked(value), dest, idx);
+        case TYPE_CODE_LONG: return insertLongs((long[]) value, arrayType.elementType.byteLengthPacked(value), dest, idx);
+        case TYPE_CODE_BIG_INTEGER: return insertBigIntegers((BigInteger[]) value, arrayType.elementType.byteLengthPacked(value), dest, idx);
+        case TYPE_CODE_BIG_DECIMAL: return insertBigDecimals((BigDecimal[]) value, arrayType.elementType.byteLengthPacked(value), dest, idx);
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
             final StackableType<?> elementType = arrayType.elementType;
@@ -81,37 +81,37 @@ public class PackedEncoder {
         return idx + len;
     }
 
-    private static int insertShorts(short[] shorts, byte[] dest, int idx) {
+    private static int insertShorts(short[] shorts, int byteLen, byte[] dest, int idx) {
         for (short e : shorts) {
-            idx = insertInt(e, dest, idx);
+            idx = insertInt(e, byteLen, dest, idx);
         }
         return idx;
     }
 
-    private static int insertInts(int[] ints, byte[] dest, int idx) {
+    private static int insertInts(int[] ints, int byteLen, byte[] dest, int idx) {
         for (int e : ints) {
-            idx = insertInt(e, dest, idx);
+            idx = insertInt(e, byteLen, dest, idx);
         }
         return idx;
     }
 
-    private static int insertLongs(long[] longs, byte[] dest, int idx) {
+    private static int insertLongs(long[] longs, int byteLen, byte[] dest, int idx) {
         for (long e : longs) {
-            idx = insertInt(e, dest, idx);
+            idx = insertInt(e, byteLen, dest, idx);
         }
         return idx;
     }
 
-    private static int insertBigIntegers(BigInteger[] bigInts, byte[] dest, int idx) {
+    private static int insertBigIntegers(BigInteger[] bigInts, int byteLen, byte[] dest, int idx) {
         for (BigInteger e : bigInts) {
-            idx = insertInt(e, dest, idx);
+            idx = insertInt(e, byteLen, dest, idx);
         }
         return idx;
     }
 
-    private static int insertBigDecimals(BigDecimal[] bigDecs, byte[] dest, int idx) {
+    private static int insertBigDecimals(BigDecimal[] bigDecs, int byteLen, byte[] dest, int idx) {
         for (BigDecimal e : bigDecs) {
-            idx = insertInt(e.unscaledValue(), dest, idx);
+            idx = insertInt(e.unscaledValue(), byteLen, dest, idx);
         }
         return idx;
     }
@@ -123,21 +123,43 @@ public class PackedEncoder {
         return 1;
     }
 
-    private static int insertInt(long value, byte[] dest, int idx) {
+    private static int insertInt(long value, int byteLen, byte[] dest, int idx) {
         if(value >= 0) {
-            return idx + Integers.putLong(value, dest, idx);
+            Integers.putLong(value, dest, idx + (byteLen - Integers.len(value)));
+        } else {
+            if(value == -1) {
+                final int paddingBytes = byteLen - 1;
+                dest[idx + paddingBytes] = CallEncoder.NEGATIVE_ONE_BYTE;
+            } else {
+                final int paddingBytes = byteLen - BizarroIntegers.len(value);
+                BizarroIntegers.putLong(value, dest, idx + paddingBytes);
+                final int end = idx + paddingBytes;
+                for (int i = idx; i < end; i++) {
+                    dest[i] = CallEncoder.NEGATIVE_ONE_BYTE;
+                }
+            }
         }
-        if(value == -1L) {
-            dest[idx] = CallEncoder.NEGATIVE_ONE_BYTE;
-            return idx + 1;
-        }
-        return idx + BizarroIntegers.putLong(value, dest, idx);
+        return idx + byteLen;
+//        if(value >= 0) {
+//            return idx + Integers.putLong(value, dest, idx);
+//        }
+//        if(value == -1L) {
+//            dest[idx] = CallEncoder.NEGATIVE_ONE_BYTE;
+//            return idx + 1;
+//        }
+//        return idx + BizarroIntegers.putLong(value, dest, idx);
     }
 
-    private static int insertInt(BigInteger bigGuy, byte[] dest, int idx) {
+    private static int insertInt(BigInteger bigGuy, int byteLen, byte[] dest, int idx) {
         byte[] arr = bigGuy.toByteArray();
         final int len = arr.length;
-        System.arraycopy(arr, 0, dest, idx, len);
-        return idx + len;
+        System.arraycopy(arr, 0, dest, idx + (byteLen - len), len);
+        if(bigGuy.signum() == -1) {
+            final int end = byteLen - 1;
+            for (int i = 0; i < end; i++) {
+                dest[idx + i] = CallEncoder.NEGATIVE_ONE_BYTE;
+            }
+        }
+        return idx + byteLen;
     }
 }

@@ -51,17 +51,17 @@ abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V s
         if(bitLen > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + bitLen + " > " + bitLength);
         }
-        if(unsigned && longVal < 0) {
-            throw new IllegalArgumentException("negative value for unsigned type");
-        }
+//        if(unsigned && longVal < 0) {
+//            throw new IllegalArgumentException("negative value for unsigned type");
+//        }
     }
 
     void validateBigIntBitLen(final BigInteger bigIntVal) {
         if(bigIntVal.bitLength() > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + bigIntVal.bitLength() + " > " + bitLength);
         }
-        if(unsigned && bigIntVal.signum() == -1) {
-            throw new IllegalArgumentException("negative value for unsigned type");
-        }
+//        if(unsigned && bigIntVal.signum() == -1) {
+//            throw new IllegalArgumentException("negative value for unsigned type");
+//        }
     }
 }

@@ -114,23 +114,23 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         final StackableType<?> elementType = this.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN:
-            staticLen = ((boolean[]) value).length;
+            staticLen = ((boolean[]) value).length * elementType.byteLengthPacked(null);
             break;
         case TYPE_CODE_BYTE:
-            staticLen = (isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length;
+            staticLen = ((isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length) * elementType.byteLengthPacked(null);
             break;
         case TYPE_CODE_SHORT:
-            staticLen = ((short[]) value).length;
+            staticLen = ((short[]) value).length * elementType.byteLengthPacked(null);
             break;
         case TYPE_CODE_INT:
-            staticLen = ((int[]) value).length;
+            staticLen = ((int[]) value).length * elementType.byteLengthPacked(null);
             break;
         case TYPE_CODE_LONG:
-            staticLen = ((long[]) value).length;
+            staticLen = ((long[]) value).length * elementType.byteLengthPacked(null);
             break;
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
-            staticLen = ((Number[]) value).length;
+            staticLen = ((Number[]) value).length * elementType.byteLengthPacked(null);
             break;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:

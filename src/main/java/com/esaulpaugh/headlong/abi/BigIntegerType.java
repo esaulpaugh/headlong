@@ -31,8 +31,7 @@ class BigIntegerType extends AbstractUnitType<BigInteger> {
 
     @Override
     int byteLengthPacked(Object value) {
-        BigInteger bigInteger = (BigInteger) value;
-        return bigInteger.toByteArray().length; // TODO optimize?
+        return bitLength >> 3; // div 8
     }
 
     @Override

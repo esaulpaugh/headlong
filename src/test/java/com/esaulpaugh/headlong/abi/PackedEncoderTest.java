@@ -44,12 +44,23 @@ public class PackedEncoderTest {
 
         TupleType tt = TupleType.parse(tupleType.canonicalType);
 
-        byte[] dest2 = new byte[tt.byteLengthPacked(args)];
+        byte[] dest2 = tt.encodePacked(args);
 
-        tt.encodePacked(args, dest2, 0);
-
-        System.out.println(FastHex.encodeToString(dest2));
+//        System.out.println(FastHex.encodeToString(dest2));
     }
 
+    @Test
+    public void testTest() throws ParseException {
+
+        TupleType tupleType = TupleType.parse("(int24,int32)");
+
+        Tuple values = new Tuple(-2, -4);
+
+        tupleType.validate(values);
+
+        byte[] packed = tupleType.encodePacked(values);
+
+//        System.out.println(FastHex.encodeToString(packed));
+    }
 
 }

@@ -11,16 +11,18 @@ public class EncodeTest {
 
     @Test
     public void simpleFunctionTest() throws ParseException {
-        Function f = new Function("baz(uint32,bool)");
-        Tuple argsTuple = new Tuple(69L, true);
-        ByteBuffer one = f.encodeCall(argsTuple);
+        Function f = new Function("baz(uint32,bool)"); // canonicalizes and parses any signature automatically
+        Tuple args = new Tuple(69L, true);
+
+        // Two equivalent styles:
+        ByteBuffer one = f.encodeCall(args);
         ByteBuffer two = f.encodeCallWithArgs(69L, true);
 
-        System.out.println(Function.formatCall(one.array()));
+        System.out.println(Function.formatCall(one.array())); // a multi-line hex representation
 
         Tuple decoded = f.decodeCall((ByteBuffer) two.flip());
 
-        System.out.println(decoded.equals(argsTuple));
+        System.out.println(decoded.equals(args));
     }
 
     @Test
