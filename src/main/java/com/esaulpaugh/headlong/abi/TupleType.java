@@ -196,6 +196,10 @@ public class TupleType extends StackableType<Tuple> {
         return this;
     }
 
+    public int encodedLen(Tuple values) {
+        return validate(values);
+    }
+
     public int encodedLen(Tuple values, boolean validate) {
         return validate ? validate(values) : byteLength(values);
     }
