@@ -28,12 +28,13 @@ class CallEncoder {
         Arrays.fill(NEGATIVE_INT_PADDING, NEGATIVE_ONE_BYTE);
     }
 
-    static int calcEncodingLength(Function function, Tuple argsTuple) {
-        return Function.SELECTOR_LEN + function.paramTypes.validate(argsTuple);
+    static int calcEncodingLength(Function f, Tuple argsTuple, boolean validate) {
+        final int bodyLen = validate ? f.paramTypes.validate(argsTuple) : f.paramTypes.byteLength(argsTuple);
+        return Function.SELECTOR_LEN + bodyLen;
     }
 
     static ByteBuffer encodeCall(Function function, Tuple argsTuple) {
-        return encodeCall(function, argsTuple, calcEncodingLength(function, argsTuple));
+        return encodeCall(function, argsTuple, calcEncodingLength(function, argsTuple, true));
     }
 
     static ByteBuffer encodeCall(Function function, Tuple argsTuple, int allocation) {
@@ -47,7 +48,7 @@ class CallEncoder {
         insertTuple(function.paramTypes, argsTuple, dest);
     }
 
-    private static void insertTuple(TupleType tupleType, Tuple tuple, ByteBuffer outBuffer) {
+    static void insertTuple(TupleType tupleType, Tuple tuple, ByteBuffer outBuffer) {
         final StackableType<?>[] types = tupleType.elementTypes;
         final Object[] values = tuple.elements;
         final int[] offset = new int[] { headLengthSum(types, values) };

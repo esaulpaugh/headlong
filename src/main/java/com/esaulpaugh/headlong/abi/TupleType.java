@@ -3,11 +3,12 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.abi.util.ClassNames;
 
 import java.nio.ByteBuffer;
+import java.text.ParseException;
 import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.abi.CallEncoder.OFFSET_LENGTH_BYTES;
 
-class TupleType extends StackableType<Tuple> {
+public class TupleType extends StackableType<Tuple> {
 
     private static final String CLASS_NAME = Tuple.class.getName();
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(Tuple[].class);
@@ -77,7 +78,7 @@ class TupleType extends StackableType<Tuple> {
     }
 
     @Override
-    int byteLengthPacked(Object value) {
+    public int byteLengthPacked(Object value) {
         Tuple tuple = (Tuple) value;
         final Object[] elements = tuple.elements;
 
@@ -174,7 +175,33 @@ class TupleType extends StackableType<Tuple> {
         }
     }
 
-    public boolean recursiveEquals(Object o) {
+    public static TupleType parse(String tupleTypeString) throws ParseException {
+        return SignatureParser.parseFunctionSignature(tupleTypeString);
+    }
+
+    public ByteBuffer encodeElements(Object... elements) {
+        return encode(new Tuple(elements));
+    }
+
+    public ByteBuffer encode(Tuple values) {
+        ByteBuffer output = ByteBuffer.allocate(validate(values));
+        CallEncoder.insertTuple(this, values, output);
+        return output;
+    }
+
+    public int encodedLen(Tuple values, boolean validate) {
+        return validate ? validate(values) : byteLength(values);
+    }
+
+    public TupleType encode(Tuple values, ByteBuffer dest, boolean validate) {
+        if(validate) {
+            validate(values);
+        }
+        CallEncoder.insertTuple(this, values, dest);
+        return this;
+    }
+
+    boolean recursiveEquals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
@@ -182,7 +209,7 @@ class TupleType extends StackableType<Tuple> {
         return Arrays.equals(elementTypes, tupleType.elementTypes);
     }
 
-    public void encodePacked(Tuple tuple, byte[] dest, int idx) {
-        PackedEncoder.insertTuple(this, tuple, dest, idx);
+    public void encodePacked(Tuple values, byte[] dest, int idx) {
+        PackedEncoder.insertTuple(this, values, dest, idx);
     }
 }

@@ -11,7 +11,7 @@ public class PackedEncoderTest {
     @Test
     public void testPacked() throws ParseException {
 
-        TupleType tupleType = Function.parseTupleType("(int8,bytes1,uint16,string)");
+        TupleType tupleType = TupleType.parse("(int8,bytes1,uint16,string)");
 
         Tuple test = new Tuple(-1, new byte[] { 0x42 }, 0x2424, "Hello, world!");
 
@@ -28,5 +28,28 @@ public class PackedEncoderTest {
         System.out.println(FastHex.encodeToString(dest));
 
         Assert.assertArrayEquals(FastHex.decode("ff42242448656c6c6f2c20776f726c6421"), dest);
+
+        // ---------------------------
+
+        Function function = new Function(tupleType.canonicalType);
+
+        byte[] abi = FastHex.decode("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff420000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000024240000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000d48656c6c6f2c20776f726c642100000000000000000000000000000000000000");
+
+        byte[] call = new byte[Function.SELECTOR_LEN + abi.length];
+
+        System.arraycopy(function.selector, 0, call, 0, Function.SELECTOR_LEN);
+        System.arraycopy(abi, 0, call, Function.SELECTOR_LEN, abi.length);
+
+        Tuple args = function.decodeCall(call);
+
+        TupleType tt = TupleType.parse(tupleType.canonicalType);
+
+        byte[] dest2 = new byte[tt.byteLengthPacked(args)];
+
+        tt.encodePacked(args, dest2, 0);
+
+        System.out.println(FastHex.encodeToString(dest2));
     }
+
+
 }

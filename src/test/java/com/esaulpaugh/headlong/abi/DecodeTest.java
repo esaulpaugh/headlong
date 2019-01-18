@@ -25,7 +25,7 @@ public class DecodeTest {
 
         Function f = new Function("baz(uint32,bool)");
 
-    ByteBuffer encoded = f.encodeCallForArgs(69L, true); // arguments auto-boxed and wrapped in a Tuple
+    ByteBuffer encoded = f.encodeCallWithArgs(69L, true); // arguments auto-boxed and wrapped in a Tuple
     Tuple args = f.decodeCall((ByteBuffer) encoded.flip()); // Tuple is an immutable list of Objects, in this case { Long.valueOf(69L), Boolean.TRUE }
 
     ByteBuffer buffer = ByteBuffer.allocate(f.callLength(args));
@@ -35,8 +35,8 @@ public class DecodeTest {
                     .decodeCall((ByteBuffer) buffer.flip())
                     .equals(args)
     );
-    System.out.println("0x" + Function.hex(encoded.array()));
-    System.out.println(Function.formatABI(buffer.array()));
+    System.out.println("0x" + Function.hexOf(encoded.array()));
+    System.out.println(Function.formatCall(buffer.array()));
 
         
 //        Function f = new Function("baz(uint32,bool)");
@@ -134,7 +134,7 @@ public class DecodeTest {
         ByteBuffer b0 = f0.encodeCall(argg);
         byte[] abi0 = b0.array();
 //        abi0[3] = -1;
-        Function.formatABI(abi0);
+        Function.formatCall(abi0);
         Tuple x = f0.decodeCall(abi0);
         System.out.println(x.equals(argg));
 
@@ -210,7 +210,7 @@ public class DecodeTest {
 //        };
 //        ByteBuffer bb = f0.encodeCall(args); // , pow, upow
         byte[] abi = bb.array();
-        Function.formatABI(abi);
+        Function.formatCall(abi);
         Tuple t = f2.decodeCall(abi);
         System.out.println("========= " + Arrays.deepEquals(t.elements, subtuple.elements));
 
@@ -279,9 +279,9 @@ public class DecodeTest {
 //                new Tuple(new BigDecimal(BigInteger.ONE, 18)), new BigDecimal(BigInteger.ONE, 18)
         }; // , new Tuple(""), ""
 
-        abi = f7.encodeCallForArgs(argsIn).array();
+        abi = f7.encodeCallWithArgs(argsIn).array();
 
-        Function.formatABI(abi);
+        Function.formatCall(abi);
 
         Tuple tupleOut = f7.decodeCall(abi);
         Object[] argsOut = tupleOut.elements;

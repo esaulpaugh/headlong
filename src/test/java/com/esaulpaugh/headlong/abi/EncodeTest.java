@@ -16,9 +16,9 @@ public class EncodeTest {
         Function f = new Function("baz(uint32,bool)");
         Tuple argsTuple = new Tuple(69L, true);
         ByteBuffer one = f.encodeCall(argsTuple);
-        ByteBuffer two = f.encodeCallForArgs(69L, true);
+        ByteBuffer two = f.encodeCallWithArgs(69L, true);
 
-        System.out.println(Function.formatABI(one.array()));
+        System.out.println(Function.formatCall(one.array()));
 
         Tuple decoded = f.decodeCall((ByteBuffer) two.flip());
 
@@ -34,7 +34,7 @@ public class EncodeTest {
         Function f = new Function("f(uint,uint32[],bytes10,bytes)");
         Tuple args = new Tuple(BigInteger.valueOf(0x123), new int[] { 0x456, 0x789 }, "1234567890".getBytes(CHARSET_UTF_8), "Hello, world!".getBytes(CHARSET_UTF_8));
         ByteBuffer buffer = f.encodeCall(args);
-        Function.formatABI(buffer.array());
+        Function.formatCall(buffer.array());
         Tuple decoded = f.decodeCall(buffer.array());
         Assert.assertEquals(args, decoded);
 
@@ -47,8 +47,8 @@ public class EncodeTest {
                 new Tuple()
 //                new Tuple[] { new Tuple(new Tuple((Object) new Tuple[0])) }
         };
-        _buffer = f00.encodeCallForArgs(args00);
-        Function.formatABI(_buffer.array());
+        _buffer = f00.encodeCallWithArgs(args00);
+        Function.formatCall(_buffer.array());
 
 //        if(true)return;
 
@@ -62,8 +62,8 @@ public class EncodeTest {
 //                new Tuple( new Tuple( (Object) new Tuple[] { new Tuple(new Tuple((Object) (byte) 1 )) } ) )
 //                new Tuple[] { new Tuple(new Tuple((Object) new Tuple[0])) }
         };
-        _buffer = f0.encodeCallForArgs(args0);
-        Function.formatABI(_buffer.array());
+        _buffer = f0.encodeCallWithArgs(args0);
+        Function.formatCall(_buffer.array());
 
 //        if(true)return;
 
@@ -77,15 +77,15 @@ public class EncodeTest {
 //        if(t != null) {
 //            System.err.println(t.getMessage());
 //        }
-        buffer = f2.encodeCallForArgs(args2);
-        Function.formatABI(buffer.array());
+        buffer = f2.encodeCallWithArgs(args2);
+        Function.formatCall(buffer.array());
 
         byte[] expected = Strings.decode("a5643bf20000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000464617665000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003", HEX);
         Assert.assertArrayEquals(expected, buffer.array());
 
         Function g = new Function("g(uint[][],string[])");
         System.out.println(g.selectorHex());
-        buffer = g.encodeCallForArgs(
+        buffer = g.encodeCallWithArgs(
 //                (Object)
                 new BigInteger[][] {
                         new BigInteger[] {
@@ -98,7 +98,7 @@ public class EncodeTest {
                 },
                 new String[] { "one", "two", "three" }
         );
-        Function.formatABI(buffer.array());
+        Function.formatCall(buffer.array());
 
         System.out.println("\n" + Strings.encode(buffer.array(), HEX));
     }

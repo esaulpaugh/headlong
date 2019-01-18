@@ -3,10 +3,8 @@ package com.esaulpaugh.headlong.abi;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
-import java.util.Arrays;
 
 public class EqualsTest {
 
@@ -50,24 +48,24 @@ public class EqualsTest {
 
         final byte[] array = one.array();
 
-        System.out.println(Function.formatABI(array));
+        System.out.println(Function.formatCall(array));
 
         Tuple decoded;
 
         array[array.length - 1] = 0;
-        System.out.println(Function.formatABI(array));
+        System.out.println(Function.formatCall(array));
         decoded = f.decodeCall(array);
         Assert.assertNotEquals(decoded, argsTuple);
 
         array[array.length - 32] = (byte) 0x80;
-        System.out.println(Function.formatABI(array));
+        System.out.println(Function.formatCall(array));
         assertThrown(IllegalArgumentException.class, "exceeds bit limit", () -> f.decodeCall(array));
 
         for (int i = array.length - 32; i < array.length; i++) {
             array[i] = (byte) 0xFF;
         }
         array[array.length - 1] = (byte) 0xFE;
-        System.out.println(Function.formatABI(array));
+        System.out.println(Function.formatCall(array));
         assertThrown(IllegalArgumentException.class, "negative value for unsigned type", () -> f.decodeCall(array));
     }
 
