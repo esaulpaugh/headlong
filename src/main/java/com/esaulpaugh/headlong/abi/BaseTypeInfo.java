@@ -1,14 +1,6 @@
 package com.esaulpaugh.headlong.abi;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * An object to hold metadata about a base type, such as the type's Java class name. A metadata object for each type is
@@ -20,12 +12,10 @@ import java.util.Set;
  */
 public class BaseTypeInfo {
 
-    private static final int HASH_MAP_INITIAL_CAPACITY = 256;
-
     private static final Map<String, BaseTypeInfo> TYPE_INFO_MAP;
 
     static {
-        Map<String, BaseTypeInfo> map = new HashMap<>(HASH_MAP_INITIAL_CAPACITY);
+        Map<String, BaseTypeInfo> map = new HashMap<>(256);
 
         putSignedInts(map);
         putUnsignedInts(map);
@@ -187,37 +177,25 @@ public class BaseTypeInfo {
         return TYPE_INFO_MAP;
     }
 
-    private static class MapComparator implements Comparator<Map.Entry<String, BaseTypeInfo>>, Serializable {
-        private static final long serialVersionUID = -765405845176007435L;
-
-        public int compare(Map.Entry<String, BaseTypeInfo> a, Map.Entry<String, BaseTypeInfo> b) {
-            return a.getKey().compareTo(b.getKey());
-        }
-    }
-
     private static void putSignedInts(final Map<String, BaseTypeInfo> map) {
         final String stub = "int";
-        int bitLength;
+        int n;
         String canonical;
-//        for(i = 8; i <= 8; i+=8) {
-//            canonical = stub + i;
-//            map.put(canonical, new BaseTypeInfo(canonical, Byte.class, byte.class, i, false));
-//        }
-//        for( ; i <= 16; i+=8) {
-//            canonical = stub + i;
-//            map.put(canonical, new BaseTypeInfo(canonical, Short.class, short.class, i, false));
-//        }
-        for( bitLength = 8 ; bitLength <= 32; bitLength+=8) {
-            canonical = stub + bitLength;
-            map.put(canonical, new BaseTypeInfo(canonical, IntType.CLASS_NAME, IntType.ARRAY_CLASS_NAME_STUB, bitLength, false));
+        for( n = 8; n <= 8; n+=8) {
+            canonical = stub + n;
+            map.put(canonical, new BaseTypeInfo(canonical, ByteType.CLASS_NAME, ByteType.ARRAY_CLASS_NAME_STUB, n, false));
         }
-        for( ; bitLength <= 64; bitLength+=8) {
-            canonical = stub + bitLength;
-            map.put(canonical, new BaseTypeInfo(canonical, LongType.CLASS_NAME, LongType.ARRAY_CLASS_NAME_STUB, bitLength, false));
+        for( ; n <= 32; n+=8) {
+            canonical = stub + n;
+            map.put(canonical, new BaseTypeInfo(canonical, IntType.CLASS_NAME, IntType.ARRAY_CLASS_NAME_STUB, n, false));
         }
-        for( ; bitLength <= 248; bitLength+=8) {
-            canonical = stub + bitLength;
-            map.put(canonical, new BaseTypeInfo(canonical, BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB, bitLength, false));
+        for( ; n <= 64; n+=8) {
+            canonical = stub + n;
+            map.put(canonical, new BaseTypeInfo(canonical, LongType.CLASS_NAME, LongType.ARRAY_CLASS_NAME_STUB, n, false));
+        }
+        for( ; n <= 248; n+=8) {
+            canonical = stub + n;
+            map.put(canonical, new BaseTypeInfo(canonical, BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB, n, false));
         }
 
         // 256 added separately
@@ -227,31 +205,31 @@ public class BaseTypeInfo {
 
     private static void putUnsignedInts(final Map<String, BaseTypeInfo> map) {
         final String stub = "uint";
-        int i;
+        int n;
         String canonical;
-        for( i = 8; i <= 8; i+=8) {
-            canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(canonical, IntType.CLASS_NAME, ByteType.ARRAY_CLASS_NAME_STUB, i, true));
+        for( n = 8; n <= 8; n+=8) {
+            canonical = stub + n;
+            map.put(canonical, new BaseTypeInfo(canonical, IntType.CLASS_NAME, ByteType.ARRAY_CLASS_NAME_STUB, n, true));
         }
-//        for( ; i <= 16; i+=8) {
-//            canonical = stub + i;
-//            map.put(canonical, new BaseTypeInfo(canonical, Integer.class, int.class, i, true));
-//        }
-        for( ; i <= 32; i+=8) {
-            canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(canonical, LongType.CLASS_NAME, IntType.ARRAY_CLASS_NAME_STUB, i, true));
+        for( ; n <= 24; n+=8) {
+            canonical = stub + n;
+            map.put(canonical, new BaseTypeInfo(canonical, IntType.CLASS_NAME, IntType.ARRAY_CLASS_NAME_STUB, n, true));
         }
-        for( ; i < 64; i+=8) {
-            canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(canonical, LongType.CLASS_NAME, LongType.ARRAY_CLASS_NAME_STUB, i, true));
+        for( ; n <= 32; n+=8) {
+            canonical = stub + n;
+            map.put(canonical, new BaseTypeInfo(canonical, LongType.CLASS_NAME, IntType.ARRAY_CLASS_NAME_STUB, n, true));
         }
-        for( ; i <= 64; i+=8) {
-            canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(canonical, BigIntegerType.CLASS_NAME, LongType.ARRAY_CLASS_NAME_STUB, i, true));
+        for( ; n < 64; n+=8) {
+            canonical = stub + n;
+            map.put(canonical, new BaseTypeInfo(canonical, LongType.CLASS_NAME, LongType.ARRAY_CLASS_NAME_STUB, n, true));
         }
-        for( ; i < 256; i+=8) {
-            canonical = stub + i;
-            map.put(canonical, new BaseTypeInfo(canonical, BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB, i, true));
+        for( ; n <= 64; n+=8) {
+            canonical = stub + n;
+            map.put(canonical, new BaseTypeInfo(canonical, BigIntegerType.CLASS_NAME, LongType.ARRAY_CLASS_NAME_STUB, n, true));
+        }
+        for( ; n < 256; n+=8) {
+            canonical = stub + n;
+            map.put(canonical, new BaseTypeInfo(canonical, BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB, n, true));
         }
 
         // 256 added separately
@@ -289,58 +267,5 @@ public class BaseTypeInfo {
                 Objects.equals(className, that.className) &&
                 Objects.equals(arrayClassNameStub, that.arrayClassNameStub) &&
                 Objects.equals(elementType, that.elementType);
-    }
-
-    public static void main(String[] args0) {
-
-        if(true)return;
-
-        System.out.println(int[].class.getSuperclass());
-
-//        if(true)return;
-
-        final int capacity = 256;
-
-        Set<String> keySet = TYPE_INFO_MAP.keySet();
-
-        int c, code, index;
-
-        System.out.println(
-                ((capacity - 1) & ("bool".hashCode() ^ ("bool".hashCode() >>> 16)))
-                        + " == "
-                        +  ((capacity - 1) & ("string".hashCode() ^ ("string".hashCode() >>> 16)))
-        );
-
-        int count = 0;
-        HashSet<Integer> hashCodes = new HashSet<>();
-        for(String key : keySet) {
-            code = key.hashCode();
-            index = (capacity - 1) & code;
-            if(!hashCodes.add(index)) {
-                System.out.print(key + "(" + index + "),");
-                count++;
-            }
-        }
-        System.out.println("\ncount = " + count);
-
-        count = 0;
-        hashCodes = new HashSet<>();
-
-        for(String key : keySet) {
-            code = (c = key.hashCode()) ^ (c >>> 16);
-            index = (capacity - 1) & code;
-            if(!hashCodes.add(index)) {
-                System.out.print(key + "(" + index + "),");
-                count++;
-            }
-        }
-        System.out.println("\ncount = " + count);
-
-        @SuppressWarnings("unchecked")
-        Map.Entry<String, BaseTypeInfo>[] entries = TYPE_INFO_MAP.entrySet().toArray(new Map.Entry[0]);
-        Arrays.sort(entries, new MapComparator());
-        for(Map.Entry<String, BaseTypeInfo> e : entries) {
-            System.out.println(e.getKey() + " --> " + e.getValue());
-        }
     }
 }

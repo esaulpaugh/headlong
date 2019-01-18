@@ -15,7 +15,7 @@ import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 public class StringsTest {
 
     private void randomTest(Random r, int utf8) {
-        for (int i = 0; i < 500_000; i++) {
+        for (int i = 0; i < 20_000; i++) {
             byte[] x = new byte[r.nextInt(1000)]; // r.nextInt(14)
             r.nextBytes(x);
             String s = Strings.encode(x, utf8);
@@ -27,7 +27,7 @@ public class StringsTest {
     @Test
     public void utf8() {
         Random r = new Random(new SecureRandom().nextLong());
-        for (int j = 0; j < 500_000; j++) {
+        for (int j = 0; j < 20_000; j++) {
             byte[] x = new byte[r.nextInt(1000)]; // r.nextInt(14)
             for (int i = 0; i < x.length; i++) {
 //                x[i] = (byte) (r.nextInt(95) + 32);
@@ -55,7 +55,7 @@ public class StringsTest {
     @Test
     public void noPadding() {
         Random r = new Random(new SecureRandom().nextLong());
-        for (int i = 0; i < 500_000; i++) {
+        for (int i = 0; i < 20_000; i++) {
             byte[] x = new byte[r.nextInt(1000)]; // r.nextInt(14)
             r.nextBytes(x);
             String s = Strings.toBase64(x, 0, x.length, NO_PADDING);

@@ -37,14 +37,7 @@ public class IntegersTest {
 
     @Test
     public void putGetInt() {
-        IntTask root = new IntTask(Integer.MIN_VALUE, Integer.MAX_VALUE);
-
-        int p = Runtime.getRuntime().availableProcessors();
-        System.out.println("p = " + p);
-
-        final ForkJoinPool pool = new ForkJoinPool();
-
-        pool.invoke(root);
+        new ForkJoinPool().invoke(new IntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
     @Test
@@ -102,22 +95,7 @@ public class IntegersTest {
 
     @Test
     public void lenInt() {
-        for (long lo = Integer.MIN_VALUE; lo <= Integer.MAX_VALUE; lo++) {
-            int i = (int) lo;
-            int len = Integers.len(i);
-            Assert.assertEquals(
-                    i == 0
-                            ? 0
-                            : i > 0 && i < 256
-                            ? 1
-                            : i >= 256 && i < 65536
-                            ? 2
-                            : i >= 65536 && i < 16777216
-                            ? 3
-                            : 4,
-                    len
-            );
-        }
+        new ForkJoinPool().invoke(new LenIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
     @Test
@@ -238,6 +216,38 @@ public class IntegersTest {
                 }
             } catch (DecodeException e) {
                 throw new RuntimeException(e);
+            }
+        }
+    }
+
+    static class LenIntTask extends IntTask {
+
+        protected LenIntTask(long start, long end) {
+            super(start, end);
+        }
+
+        protected int len(int val) {
+            return Integers.len(val);
+        }
+
+        @Override
+        protected void doWork() {
+            final long end = this.end;
+            for (long lo = this.start; lo <= end; lo++) {
+                int i = (int) lo;
+                int len = len(i);
+                Assert.assertEquals(
+                        i == 0
+                                ? 0
+                                : i > 0 && i < 256
+                                ? 1
+                                : i >= 256 && i < 65536
+                                ? 2
+                                : i >= 65536 && i < 16777216
+                                ? 3
+                                : 4,
+                        len
+                );
             }
         }
     }

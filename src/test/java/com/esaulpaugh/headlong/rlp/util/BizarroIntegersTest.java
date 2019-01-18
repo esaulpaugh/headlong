@@ -34,14 +34,7 @@ public class BizarroIntegersTest {
 
     @Test
     public void putGetInt() {
-        BizzaroIntTask root = new BizzaroIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE);
-
-        int p = Runtime.getRuntime().availableProcessors();
-        System.out.println("p = " + p);
-
-        final ForkJoinPool pool = new ForkJoinPool();
-
-        pool.invoke(root);
+        new ForkJoinPool().invoke(new BizzaroIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
     @Test
@@ -84,22 +77,7 @@ public class BizarroIntegersTest {
 
     @Test
     public void lenInt() {
-        for (long lo = Integer.MIN_VALUE; lo <= Integer.MAX_VALUE; lo++) {
-            int i = (int) lo;
-            int len = BizarroIntegers.len(i);
-            Assert.assertEquals(
-                    i == -1
-                            ? 0
-                            : i < -1 && i >= -256
-                            ? 1
-                            : i < -256 && i >= -65536
-                            ? 2
-                            : i < -65536 && i >= -16777216
-                            ? 3
-                            : 4,
-                    len
-            );
-        }
+        new ForkJoinPool().invoke(new BizzaroLenIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
     @Test
@@ -152,6 +130,18 @@ public class BizarroIntegersTest {
             } catch (DecodeException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    private static final class BizzaroLenIntTask extends IntegersTest.LenIntTask {
+
+        public BizzaroLenIntTask(int start, int end) {
+            super(start, end);
+        }
+
+        @Override
+        protected int len(int val) {
+            return BizarroIntegers.len(val);
         }
     }
 }

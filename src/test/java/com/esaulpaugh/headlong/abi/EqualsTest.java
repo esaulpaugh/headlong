@@ -6,12 +6,12 @@ import org.junit.Test;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 
+import static com.esaulpaugh.headlong.TestUtils.assertThrown;
+
 public class EqualsTest {
 
     @Test
     public void testEquals() throws ParseException {
-
-        // "abc((int,uint)[1],((fixed,ufixed)))"
 
         int n = 0;
         do {
@@ -68,21 +68,4 @@ public class EqualsTest {
         System.out.println(Function.formatCall(array));
         assertThrown(IllegalArgumentException.class, "negative value for unsigned type", () -> f.decodeCall(array));
     }
-
-    private interface CustomRunnable {
-        void run() throws Throwable;
-    }
-
-    private static void assertThrown(Class<? extends Throwable> clazz, String substr, CustomRunnable r) throws Throwable {
-        try {
-            r.run();
-        } catch (Throwable t) {
-            if(clazz.isAssignableFrom(t.getClass()) && t.getMessage().contains(substr)) {
-                return;
-            }
-            throw t;
-        }
-        throw new AssertionError("no " + clazz.getName() + " thrown");
-    }
-
 }

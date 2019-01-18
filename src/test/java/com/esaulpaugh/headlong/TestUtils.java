@@ -143,4 +143,22 @@ public class TestUtils {
         byte[] bytes = FastHex.decode(hex);
         return new BigInteger(bytes);
     }
+
+    // -----------------
+
+    public interface CustomRunnable {
+        void run() throws Throwable;
+    }
+
+    public static void assertThrown(Class<? extends Throwable> clazz, String substr, CustomRunnable r) throws Throwable {
+        try {
+            r.run();
+        } catch (Throwable t) {
+            if(clazz.isAssignableFrom(t.getClass()) && t.getMessage().contains(substr)) {
+                return;
+            }
+            throw t;
+        }
+        throw new AssertionError("no " + clazz.getName() + " thrown");
+    }
 }

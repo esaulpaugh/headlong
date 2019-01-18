@@ -166,6 +166,14 @@ public class TupleType extends StackableType<Tuple> {
         }
     }
 
+    boolean recursiveEquals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        TupleType tupleType = (TupleType) o;
+        return Arrays.equals(elementTypes, tupleType.elementTypes);
+    }
+
     public static TupleType parse(String tupleTypeString) throws ParseException {
         return SignatureParser.parseFunctionSignature(tupleTypeString);
     }
@@ -180,10 +188,6 @@ public class TupleType extends StackableType<Tuple> {
         return output;
     }
 
-    public int encodedLen(Tuple values, boolean validate) {
-        return validate ? validate(values) : byteLength(values);
-    }
-
     public TupleType encode(Tuple values, ByteBuffer dest, boolean validate) {
         if(validate) {
             validate(values);
@@ -192,12 +196,8 @@ public class TupleType extends StackableType<Tuple> {
         return this;
     }
 
-    boolean recursiveEquals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        TupleType tupleType = (TupleType) o;
-        return Arrays.equals(elementTypes, tupleType.elementTypes);
+    public int encodedLen(Tuple values, boolean validate) {
+        return validate ? validate(values) : byteLength(values);
     }
 
     public byte[] encodePacked(Tuple values) {

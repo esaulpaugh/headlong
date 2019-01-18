@@ -1,10 +1,10 @@
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.Strings;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.text.ParseException;
@@ -19,8 +19,6 @@ import static com.esaulpaugh.headlong.util.Strings.encode;
  * Represents a function in an Ethereum contract. Can encode and decode calls matching this function's signature.
  */
 public class Function implements Serializable {
-
-    private static final Charset ASCII = Charset.forName("US-ASCII");
 
     public static final int SELECTOR_LEN = 4;
 
@@ -51,7 +49,7 @@ public class Function implements Serializable {
         TupleType tupleType = SignatureParser.parseFunctionSignature(signature);
         final String canonicalSig = signature.substring(0, signature.indexOf('(')) + tupleType.canonicalType;
         try {
-            messageDigest.update(canonicalSig.getBytes(ASCII));
+            messageDigest.update(canonicalSig.getBytes(Strings.CHARSET_ASCII));
             messageDigest.digest(selector, 0, SELECTOR_LEN);
         } catch (DigestException de) {
             throw new RuntimeException(de);
