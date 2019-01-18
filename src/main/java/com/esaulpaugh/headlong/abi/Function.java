@@ -81,6 +81,10 @@ public class Function implements Serializable {
     public String selectorHex() {
         return encode(selector, HEX);
     }
+
+    public TupleType getTupleType() {
+        return paramTypes;
+    }
     
     public static Function parse(String signature) throws ParseException {
         return new Function(signature);

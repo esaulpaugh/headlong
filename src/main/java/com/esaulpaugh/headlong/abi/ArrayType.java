@@ -110,41 +110,32 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
 
     @Override
     int byteLengthPacked(Object value) {
-        int staticLen;
         final StackableType<?> elementType = this.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN:
-            staticLen = ((boolean[]) value).length; // * 1
-            break;
+            return ((boolean[]) value).length; // * 1
         case TYPE_CODE_BYTE:
-            staticLen = (isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length; // * 1
-            break;
+            return (isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length; // * 1
         case TYPE_CODE_SHORT:
-            staticLen = ((short[]) value).length * elementType.byteLengthPacked(null);
-            break;
+            return ((short[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_INT:
-            staticLen = ((int[]) value).length * elementType.byteLengthPacked(null);
-            break;
+            return ((int[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_LONG:
-            staticLen = ((long[]) value).length * elementType.byteLengthPacked(null);
-            break;
+            return ((long[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
-            staticLen = ((Number[]) value).length * elementType.byteLengthPacked(null);
-            break;
+            return ((Number[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
             final Object[] elements = (Object[]) value;
+            int staticLen = 0;
             final int len = elements.length;
-            staticLen = 0;
             for (int i = 0; i < len; i++) {
                 staticLen += elementType.byteLengthPacked(elements[i]);
             }
             return staticLen;
         default: throw new IllegalArgumentException("unrecognized type: " + elementType.toString());
         }
-
-        return staticLen;
     }
 
     @Override

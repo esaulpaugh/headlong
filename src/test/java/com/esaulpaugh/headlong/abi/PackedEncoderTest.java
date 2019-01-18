@@ -11,15 +11,15 @@ public class PackedEncoderTest {
     @Test
     public void testPacked() throws ParseException {
 
-        TupleType tupleType = TupleType.parse("(int8,bytes1,uint16,string)");
+        TupleType tupleType = TupleType.parse("(int16,bytes1,uint16,string)");
 
-        Tuple test = new Tuple(-1, new byte[] { 0x42 }, 0x2424, "Hello, world!");
+        Tuple test = new Tuple(-1, new byte[] { 0x42 }, 0x03, "Hello, world!");
 
         tupleType.validate(test);
 
         int packedLen = tupleType.byteLengthPacked(test);
 
-        Assert.assertEquals(FastHex.decode("ff42242448656c6c6f2c20776f726c6421").length, packedLen);
+        Assert.assertEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421").length, packedLen);
 
         byte[] dest = new byte[packedLen];
 
@@ -27,13 +27,17 @@ public class PackedEncoderTest {
 
         System.out.println(FastHex.encodeToString(dest));
 
-        Assert.assertArrayEquals(FastHex.decode("ff42242448656c6c6f2c20776f726c6421"), dest);
+        Assert.assertArrayEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421"), dest);
 
         // ---------------------------
 
         Function function = new Function(tupleType.canonicalType);
 
-        byte[] abi = FastHex.decode("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff420000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000024240000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000d48656c6c6f2c20776f726c642100000000000000000000000000000000000000");
+        String hex = FastHex.encodeToString(function.getTupleType().encode(test).array());
+
+        System.out.println(hex);
+
+        byte[] abi = FastHex.decode("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff420000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000d48656c6c6f2c20776f726c642100000000000000000000000000000000000000");
 
         byte[] call = new byte[Function.SELECTOR_LEN + abi.length];
 
@@ -48,7 +52,7 @@ public class PackedEncoderTest {
 
         System.out.println(FastHex.encodeToString(dest2));
 
-        Assert.assertArrayEquals(FastHex.decode("ff42242448656c6c6f2c20776f726c6421"), dest2);
+        Assert.assertArrayEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421"), dest2);
 
     }
 

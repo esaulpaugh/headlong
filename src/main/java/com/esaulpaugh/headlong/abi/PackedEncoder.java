@@ -127,16 +127,17 @@ public class PackedEncoder {
         if(value >= 0) {
             Integers.putLong(value, dest, idx + (byteLen - Integers.len(value)));
         } else {
+            final int paddingBytes;
             if(value == -1) {
-                final int paddingBytes = byteLen - 1;
+                paddingBytes = byteLen - 1;
                 dest[idx + paddingBytes] = CallEncoder.NEGATIVE_ONE_BYTE;
             } else {
-                final int paddingBytes = byteLen - BizarroIntegers.len(value);
+                paddingBytes = byteLen - BizarroIntegers.len(value);
                 BizarroIntegers.putLong(value, dest, idx + paddingBytes);
-                final int end = idx + paddingBytes;
-                for (int i = idx; i < end; i++) {
-                    dest[i] = CallEncoder.NEGATIVE_ONE_BYTE;
-                }
+            }
+            final int end = idx + paddingBytes;
+            for (int i = idx; i < end; i++) {
+                dest[i] = CallEncoder.NEGATIVE_ONE_BYTE;
             }
         }
         return idx + byteLen;
