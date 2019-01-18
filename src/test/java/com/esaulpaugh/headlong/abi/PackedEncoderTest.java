@@ -46,7 +46,10 @@ public class PackedEncoderTest {
 
         byte[] dest2 = tt.encodePacked(args);
 
-//        System.out.println(FastHex.encodeToString(dest2));
+        System.out.println(FastHex.encodeToString(dest2));
+
+        Assert.assertArrayEquals(FastHex.decode("ff42242448656c6c6f2c20776f726c6421"), dest2);
+
     }
 
     @Test
@@ -60,7 +63,9 @@ public class PackedEncoderTest {
 
         byte[] packed = tupleType.encodePacked(values);
 
-//        System.out.println(FastHex.encodeToString(packed));
+        System.out.println(FastHex.encodeToString(packed));
+
+        Assert.assertArrayEquals(FastHex.decode("fffffefffffffc"), packed);
     }
 
 }

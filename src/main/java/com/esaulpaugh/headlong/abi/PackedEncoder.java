@@ -140,14 +140,6 @@ public class PackedEncoder {
             }
         }
         return idx + byteLen;
-//        if(value >= 0) {
-//            return idx + Integers.putLong(value, dest, idx);
-//        }
-//        if(value == -1L) {
-//            dest[idx] = CallEncoder.NEGATIVE_ONE_BYTE;
-//            return idx + 1;
-//        }
-//        return idx + BizarroIntegers.putLong(value, dest, idx);
     }
 
     private static int insertInt(BigInteger bigGuy, int byteLen, byte[] dest, int idx) {
