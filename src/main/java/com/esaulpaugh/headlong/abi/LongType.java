@@ -31,7 +31,7 @@ class LongType extends AbstractUnitType<Long> {
 
     @Override
     int byteLengthPacked(Object value) {
-        return bitLength >> 8; // div 8
+        return bitLength >> 3; // div 8
     }
 
     @Override
