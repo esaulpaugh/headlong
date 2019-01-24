@@ -53,6 +53,10 @@ Also includes a fast hex codec and an optimized Keccak implementation.
 
 ### Build
 
+Now available in Maven Central Repository.
+
+Or build locally:
+
 Clone the project and install to your local maven repository using `gradle publishToMavenLocal` or `mvn install`. Then you can use one of these:
 
 ```groovy
