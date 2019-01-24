@@ -200,7 +200,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         int i = 0;
         try {
             for ( ; i < len; i++) {
-                elementType.validate(numbers[i]);
+                elementType.validate(numbers[i]); // TODO don't check class name for every element
             }
         } catch (IllegalArgumentException | NullPointerException re) {
             throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);

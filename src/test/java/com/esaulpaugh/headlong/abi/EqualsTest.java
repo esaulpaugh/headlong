@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.text.ParseException;
+import java.util.Random;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 
@@ -13,10 +14,12 @@ public class EqualsTest {
     @Test
     public void testEquals() throws ParseException {
 
+        Random r = new Random(MonteCarloTest.seed(System.nanoTime()));
+
         int n = 0;
         do {
 
-            MonteCarloTestCase mctc = new MonteCarloTestCase(MonteCarloTest.seed(System.nanoTime()));
+            MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong());
 
             String raw = mctc.rawSignature;
             String canonical = mctc.function.canonicalSignature;
@@ -24,13 +27,12 @@ public class EqualsTest {
                 continue;
             }
 
-            Function a = new Function(raw);
+            Function a = mctc.function;
             Function b = new Function(canonical);
 
 //            System.out.println(raw);
 
-            boolean equals = a.paramTypes.recursiveEquals(b.paramTypes)
-                    && a.equals(b);
+            boolean equals = a.paramTypes.recursiveEquals(b.paramTypes);
 
 //            System.out.println(equals);
 
