@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
 
-abstract class StackableType<V> implements Serializable {
+abstract class StackableType<J> implements Serializable {
 
     static final int TYPE_CODE_BOOLEAN = 0;
     static final int TYPE_CODE_BYTE = 1;
@@ -70,7 +70,7 @@ abstract class StackableType<V> implements Serializable {
      * @param unitBuffer a buffer of length {@link AbstractUnitType#UNIT_LENGTH_BYTES} in which to store intermediate values
      * @return  the decoded value
      */
-    abstract V decode(ByteBuffer buffer, byte[] unitBuffer);
+    abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
 
     static byte[] newUnitBuffer() {
         return new byte[UNIT_LENGTH_BYTES];

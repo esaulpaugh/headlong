@@ -25,6 +25,7 @@ public class PackedEncoder {
         return idx;
     }
 
+    @SuppressWarnings("unchecked")
     private static int encode(StackableType<?> type, Object value, byte[] dest, int idx) {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return insertBool((boolean) value, dest, idx);
@@ -35,7 +36,7 @@ public class PackedEncoder {
         case TYPE_CODE_BIG_INTEGER: return insertInt(((BigInteger) value), type.byteLengthPacked(value), dest, idx);
         case TYPE_CODE_BIG_DECIMAL: return insertInt(((BigDecimal) value).unscaledValue(), type.byteLengthPacked(value), dest, idx);
         case TYPE_CODE_ARRAY:
-            return encodeArray((ArrayType<?, ?>) type, value, dest, idx);
+            return encodeArray((ArrayType<StackableType<?>, ?>) type, value, dest, idx);
         case TYPE_CODE_TUPLE:
             return insertTuple((TupleType) type, (Tuple) value, dest, idx);
         default:
@@ -43,7 +44,7 @@ public class PackedEncoder {
         }
     }
 
-    private static int encodeArray(ArrayType<?,?> arrayType, Object value, byte[] dest, int idx) {
+    private static int encodeArray(ArrayType<StackableType<?>,?> arrayType, Object value, byte[] dest, int idx) {
         switch (arrayType.elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return insertBooleans((boolean[]) value, dest, idx);
         case TYPE_CODE_BYTE:

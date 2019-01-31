@@ -196,7 +196,7 @@ public abstract class RLPItem {
         try {
             return Notation.forEncoding(buffer, index, endIndex).toString();
         } catch (DecodeException e) {
-            throw new AssertionError(e);
+            throw new RuntimeException(e);
         }
     }
 

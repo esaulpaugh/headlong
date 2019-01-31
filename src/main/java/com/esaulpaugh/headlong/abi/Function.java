@@ -85,7 +85,7 @@ public class Function implements Serializable {
     public TupleType getTupleType() {
         return paramTypes;
     }
-    
+
     public static Function parse(String signature) throws ParseException {
         return new Function(signature);
     }

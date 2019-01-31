@@ -15,11 +15,11 @@ public class MonteCarloTest {
 
     private Long masterSeed = null; // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
-    private static final int N = 100_000;
+    private static final int N = 50_000;
 
-    private static long[] generateSeeds(long masterSeed) {
+    private static long[] generateSeeds(long masterSeed, int n) {
         Random r = new Random(masterSeed);
-        long[] seeds = new long[N];
+        long[] seeds = new long[n];
         for (int i = 0; i < seeds.length; i++) {
             seeds[i] = r.nextLong();
         }
@@ -27,7 +27,7 @@ public class MonteCarloTest {
     }
 
     @Test
-    public void monteCarlo() throws ParseException {
+    public void monteCarloThreaded() throws InterruptedException {
 
         SecureRandom sr = new SecureRandom();
 
@@ -35,9 +35,38 @@ public class MonteCarloTest {
             masterSeed = seed(System.nanoTime()) ^ sr.nextLong();
         }
 
-        final long[] seeds = generateSeeds(masterSeed);
+        Thread[] threads = new Thread[7];
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = newThread(masterSeed + i, N);
+            threads[i].start();
+        }
 
-        StringBuilder log = new StringBuilder();
+        Thread t = newThread(masterSeed + 8, N);
+        t.run();
+
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        System.out.println((N * 8) + " done");
+    }
+
+    private static Thread newThread(long seed, int n) {
+        return new Thread(() -> {
+            try {
+                doMonteCarlo(seed, n);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private static void doMonteCarlo(long masterSeed, int n) throws ParseException {
+        SecureRandom sr = new SecureRandom();
+
+        final long[] seeds = generateSeeds(masterSeed, n);
+
+//        StringBuilder log = new StringBuilder();
 
         int i = 0;
         String temp = null;
@@ -50,14 +79,14 @@ public class MonteCarloTest {
                 temp = testCase.function.canonicalSignature;
                 result = testCase.run();
                 temp = null;
-                log.append('#').append(i).append(result ? " PASSED: " : " FAILED: ")
-                        .append(params.toString())
-                        .append("\t\t")
-                        .append(testCase.function.canonicalSignature.substring(testCase.function.canonicalSignature.indexOf('('))) // print function params
-                        .append('\n');
+//                log.append('#').append(i).append(result ? " PASSED: " : " FAILED: ")
+//                        .append(params.toString())
+//                        .append("\t\t")
+//                        .append(testCase.function.canonicalSignature.substring(testCase.function.canonicalSignature.indexOf('('))) // print function params
+//                        .append('\n');
                 i++;
             } catch (Throwable t) {
-                System.out.println(log.toString());
+//                System.out.println(log.toString());
                 sleep();
                 System.err.println("#" + i + " failed for " + params.toString() + "\t\t" + temp);
                 System.err.println("MASTER_SEED = " + masterSeed);
@@ -65,7 +94,7 @@ public class MonteCarloTest {
             }
         }
 
-        System.out.println(log.toString());
+//        System.out.println(log.toString());
         System.out.println("MASTER_SEED = " + masterSeed);
     }
 

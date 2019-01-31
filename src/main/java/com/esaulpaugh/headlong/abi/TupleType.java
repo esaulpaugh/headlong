@@ -153,15 +153,20 @@ public class TupleType extends StackableType<Tuple> {
     static void decodeTails(ByteBuffer bb, final StackableType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, final Object[] dest) {
         final int tupleLen = offsets.length;
         for (int i = 0; i < tupleLen; i++) {
-            int offset = offsets[i];
-            if (offset > 0) {
+            final StackableType<?> type = elementTypes[i];
+            final int offset = offsets[i];
+            final boolean offsetExists = offset > 0;
+            if(type.dynamic ^ offsetExists) { // if not matching
+                throw new IllegalArgumentException(type.dynamic ? "offset not found" : "offset found for static element");
+            }
+            if (offsetExists) {
                 /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
 //                if(bb.position() != index + offset) {
 //                    System.err.println(TupleType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
 //                    bb.position(index + offset);
 //                    throw new RuntimeException();
 //                }
-                dest[i] = elementTypes[i].decode(bb, elementBuffer);
+                dest[i] = type.decode(bb, elementBuffer);
             }
         }
     }

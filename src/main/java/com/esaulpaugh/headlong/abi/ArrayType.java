@@ -11,7 +11,7 @@ import static com.esaulpaugh.headlong.abi.AbstractUnitType.LOG_2_UNIT_LENGTH_BYT
 import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
-class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
+class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
 
     static final String BYTE_ARRAY_CLASS_NAME = byte[].class.getName();
     static final String BYTE_ARRAY_ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(byte[][].class);
@@ -152,8 +152,8 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         case TYPE_CODE_SHORT: staticLen = checkLength(((short[]) value).length, value) << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_INT: staticLen = validateIntArray((int[]) value); break;
         case TYPE_CODE_LONG: staticLen = validateLongArray((long[]) value); break;
-        case TYPE_CODE_BIG_INTEGER:
-        case TYPE_CODE_BIG_DECIMAL: staticLen = validateBigNumberArray((Number[]) value); break;
+        case TYPE_CODE_BIG_INTEGER: staticLen = validateBigIntegerArray((BigInteger[]) value); break;
+        case TYPE_CODE_BIG_DECIMAL: staticLen = validateBigDecimalArray((BigDecimal[]) value); break;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: staticLen = validateObjectArray((Object[]) value); break;
         default: throw new IllegalArgumentException("unrecognized type: " + value.getClass().getName());
@@ -194,13 +194,34 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
     }
 
-    private int validateBigNumberArray(Number[] numbers) {
-        final int len = numbers.length;
-        checkLength(len, numbers);
+    private int validateBigIntegerArray(BigInteger[] bigIntegers) {
+        final int len = bigIntegers.length;
+        checkLength(len, bigIntegers);
+        BigIntegerType bigIntegerType = (BigIntegerType) elementType;
         int i = 0;
         try {
             for ( ; i < len; i++) {
-                elementType.validate(numbers[i]); // TODO don't check class name for every element
+                bigIntegerType.validateBigIntBitLen(bigIntegers[i]);
+            }
+        } catch (IllegalArgumentException | NullPointerException re) {
+            throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
+        }
+        return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
+    }
+
+    private int validateBigDecimalArray(BigDecimal[] bigDecimals) {
+        final int len = bigDecimals.length;
+        checkLength(len, bigDecimals);
+        BigDecimalType bigDecimalType = (BigDecimalType) elementType;
+        final int scale = bigDecimalType.scale;
+        int i = 0;
+        try {
+            for ( ; i < len; i++) {
+                BigDecimal element = bigDecimals[i];
+                if(element.scale() != scale) {
+                    throw new IllegalArgumentException("unexpected scale: " + element.scale());
+                }
+                bigDecimalType.validateBigIntBitLen(element.unscaledValue());
             }
         } catch (IllegalArgumentException | NullPointerException re) {
             throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
@@ -242,7 +263,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
 
     @Override
     @SuppressWarnings("unchecked")
-    A decode(ByteBuffer bb, byte[] elementBuffer) {
+    J decode(ByteBuffer bb, byte[] elementBuffer) {
         final int arrayLen;
         if(dynamic) {
             arrayLen = ARRAY_LENGTH_TYPE.decode(bb, elementBuffer);
@@ -257,15 +278,15 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         }
 
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return (A) decodeBooleanArray(bb, arrayLen, elementBuffer);
-        case TYPE_CODE_BYTE: return (A) decodeByteArray(bb, arrayLen);
-        case TYPE_CODE_SHORT: return (A) decodeShortArray(bb, arrayLen, elementBuffer);
-        case TYPE_CODE_INT: return (A) decodeIntArray((IntType) elementType, bb, arrayLen, elementBuffer);
-        case TYPE_CODE_LONG: return (A) decodeLongArray((LongType) elementType, bb, arrayLen, elementBuffer);
-        case TYPE_CODE_BIG_INTEGER: return (A) decodeBigIntegerArray((BigIntegerType) elementType, bb, arrayLen, elementBuffer);
-        case TYPE_CODE_BIG_DECIMAL: return (A) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, elementBuffer);
-        case TYPE_CODE_ARRAY:  return (A) decodeObjectArray(arrayLen, bb, elementBuffer, false);
-        case TYPE_CODE_TUPLE: return (A) decodeObjectArray(arrayLen, bb, elementBuffer, true);
+        case TYPE_CODE_BOOLEAN: return (J) decodeBooleanArray(bb, arrayLen, elementBuffer);
+        case TYPE_CODE_BYTE: return (J) decodeByteArray(bb, arrayLen);
+        case TYPE_CODE_SHORT: return (J) decodeShortArray(bb, arrayLen, elementBuffer);
+        case TYPE_CODE_INT: return (J) decodeIntArray((IntType) elementType, bb, arrayLen, elementBuffer);
+        case TYPE_CODE_LONG: return (J) decodeLongArray((LongType) elementType, bb, arrayLen, elementBuffer);
+        case TYPE_CODE_BIG_INTEGER: return (J) decodeBigIntegerArray((BigIntegerType) elementType, bb, arrayLen, elementBuffer);
+        case TYPE_CODE_BIG_DECIMAL: return (J) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, elementBuffer);
+        case TYPE_CODE_ARRAY:  return (J) decodeObjectArray(arrayLen, bb, elementBuffer, false);
+        case TYPE_CODE_TUPLE: return (J) decodeObjectArray(arrayLen, bb, elementBuffer, true);
         default: throw new IllegalArgumentException("unrecognized type: " + elementType.toString());
         }
     }
@@ -368,7 +389,7 @@ class ArrayType<T extends StackableType<?>, A> extends StackableType<A> {
         return bigInt;
     }
 
-    private Object[] decodeObjectArray(int arrayLen, ByteBuffer bb, byte[] elementBuffer, boolean tupleArray) { // 8.3%
+    private Object[] decodeObjectArray(int arrayLen, ByteBuffer bb, byte[] elementBuffer, boolean tupleArray) {
 
 //        final int index = bb.position(); // TODO must pass index to decodeObjectArrayTails if you want to support lenient mode
 
