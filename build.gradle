@@ -6,6 +6,10 @@ plugins {
 group 'com.esaulpaugh'
 version '1.0-SNAPSHOT'
 
+test {
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+}
+
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir

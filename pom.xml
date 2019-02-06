@@ -77,6 +77,8 @@
                 <version>2.22.1</version>
                 <configuration>
                     <useSystemClassLoader>false</useSystemClassLoader>
+                    <parallel>all</parallel>
+                    <threadCount>2</threadCount>
                 </configuration>
             </plugin>
             <plugin>

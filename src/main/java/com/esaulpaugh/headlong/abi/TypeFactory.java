@@ -181,7 +181,7 @@ final class TypeFactory {
             case "bytes30":
             case "bytes31":
             case "bytes32": type = new ArrayType<ByteType, byte[]>(ct, (ByteType) info.elementType, Byte.class, info.className, info.arrayClassNameStub, info.arrayLen, false); break;
-            case "bool": type = new BooleanType(); break;
+            case "bool": type = BooleanType.INSTANCE; break;
             case "bytes":
             case "string": type = new ArrayType<ByteType, byte[]>(ct, (ByteType) info.elementType, Byte.class, info.className, info.arrayClassNameStub, DYNAMIC_LENGTH, true); break;
             case "decimal": type = new BigDecimalType(ct, info.bitLen, info.scale, false); break;

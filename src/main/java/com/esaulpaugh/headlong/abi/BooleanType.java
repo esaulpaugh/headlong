@@ -10,10 +10,12 @@ import java.nio.ByteBuffer;
  */
 class BooleanType extends AbstractUnitType<Boolean> {
 
+    static final BooleanType INSTANCE = new BooleanType();
+
     static final String CLASS_NAME = Boolean.class.getName();
     static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(boolean[].class);
 
-    BooleanType() {
+    private BooleanType() {
         super("bool", 1, true);
     }
 
