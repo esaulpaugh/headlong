@@ -464,6 +464,9 @@ public class Integers {
     }
 
     public static void insertBytes(int n, byte[] b, int i, byte w, byte x, byte y, byte z) {
+        if(n > 4) {
+            throw new IllegalArgumentException("n must be <= 4");
+        }
         insertBytes(n, b, i, (byte)0, (byte)0, (byte)0, (byte)0, w, x, y, z);
     }
 

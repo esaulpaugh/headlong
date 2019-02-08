@@ -121,8 +121,9 @@ public class Function implements Serializable {
     public Tuple decodeCall(ByteBuffer abiBuffer) {
         byte[] unitBuffer = StackableType.newUnitBuffer();
         abiBuffer.get(unitBuffer, 0, SELECTOR_LEN);
+        final byte[] selector = this.selector;
         for(int i = 0; i < SELECTOR_LEN; i++) {
-            if(unitBuffer[i] != this.selector[i]) {
+            if(unitBuffer[i] != selector[i]) {
                 throw new IllegalArgumentException("given selector does not match: expected: " + this.selectorHex()
                         + ", found: " + encode(unitBuffer, 0, SELECTOR_LEN, HEX));
             }
