@@ -9,7 +9,7 @@ import java.math.BigInteger;
 
 import static com.esaulpaugh.headlong.abi.StackableType.*;
 
-public class PackedEncoder {
+class PackedEncoder {
 
     static int insertTuple(TupleType tupleType, Tuple tuple, byte[] dest, int idx) {
 

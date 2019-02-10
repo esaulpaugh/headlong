@@ -180,7 +180,7 @@ public class TupleType extends StackableType<Tuple> {
     }
 
     public static TupleType parse(String tupleTypeString) throws ParseException {
-        return SignatureParser.parseFunctionSignature(tupleTypeString);
+        return TupleTypeParser.parseTupleType(tupleTypeString);
     }
 
     public ByteBuffer encodeElements(Object... elements) {

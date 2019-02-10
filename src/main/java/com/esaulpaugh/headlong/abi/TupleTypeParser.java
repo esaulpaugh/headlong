@@ -6,48 +6,41 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SignatureParser {
+class TupleTypeParser {
 
-    private static final Pattern HAS_NON_ASCII_CHARS = Pattern.compile("[^\\p{ASCII}]+");
     private static final Pattern HAS_NON_TYPE_CHARS = Pattern.compile("[^a-z0-9\\[\\](),]+");
 
-    static TupleType parseFunctionSignature(final String signature) throws ParseException {
+    static TupleType parseTupleType(final String rawTupleTypeString) throws ParseException {
 
-        List<StackableType<?>> typesOut = new ArrayList<>();
-
-        final int startParams = signature.indexOf('(');
-
-        if(startParams < 0) {
+        if(rawTupleTypeString.charAt(0) != '(') {
             throw new ParseException("params start not found", 0);
         }
 
-        checkNameChars(signature, startParams);
+        final int startParams = 0;
+        final List<StackableType<?>> typesOut = new ArrayList<>();
+        final Matcher illegalTypeCharMatcher = HAS_NON_TYPE_CHARS.matcher(rawTupleTypeString);
+        final StringBuilder canonicalBuilder = new StringBuilder("(");
+        final int argEnd = parseTupleType(rawTupleTypeString, startParams, typesOut, illegalTypeCharMatcher, canonicalBuilder);
 
-        final Matcher illegalTypeCharMatcher = HAS_NON_TYPE_CHARS.matcher(signature);
+        final int end = rawTupleTypeString.length();
 
-        StringBuilder canonicalTupleType = new StringBuilder("(");
-        final int argEnd = parseTuple(signature, startParams, typesOut, illegalTypeCharMatcher, canonicalTupleType);
-        String canonical = completeTupleTypeString(canonicalTupleType);
-
-        final int sigEnd = signature.length();
-
-        int terminator = signature.indexOf(')', argEnd);
+        final int terminator = rawTupleTypeString.indexOf(')', argEnd);
         if (terminator == -1) {
-            throw new ParseException("non-terminating signature", sigEnd);
+            throw new ParseException("non-terminating tuple", end);
         }
-        if (argEnd != terminator || terminator != sigEnd - 1) {
+        if (argEnd != terminator || terminator != end - 1) {
             int errorStart = Math.max(0, argEnd);
-            throw new ParseException("illegal signature termination: " + signature.substring(errorStart), errorStart);
+            throw new ParseException("illegal tuple termination: " + rawTupleTypeString.substring(errorStart), errorStart);
         }
 
-        return TupleType.create(canonical, typesOut.toArray(StackableType.EMPTY_TYPE_ARRAY));
+        return TupleType.create(completeTupleTypeString(canonicalBuilder), typesOut.toArray(StackableType.EMPTY_TYPE_ARRAY));
     }
 
-    private static int parseTuple(final String signature,
-                                  final int startParams,
-                                  final List<StackableType<?>> typesOut,
-                                  final Matcher illegalTypeCharMatcher,
-                                  final StringBuilder canonicalTupleType) throws ParseException {
+    private static int parseTupleType(final String signature,
+                                      final int startParams,
+                                      final List<StackableType<?>> typesOut,
+                                      final Matcher illegalTypeCharMatcher,
+                                      final StringBuilder canonicalTupleType) throws ParseException {
         int argStart = startParams + 1;
         int argEnd = argStart; // this inital value is important for empty params case
 
@@ -73,7 +66,7 @@ public class SignatureParser {
                 try {
                     ArrayList<StackableType<?>> innerTupleTypes = new ArrayList<>();
                     StringBuilder ctt = new StringBuilder("(");
-                    int result = parseTuple(signature, argStart, innerTupleTypes, illegalTypeCharMatcher, ctt);
+                    int result = parseTupleType(signature, argStart, innerTupleTypes, illegalTypeCharMatcher, ctt);
 
                     argEnd = result + 1;
 
@@ -168,21 +161,12 @@ public class SignatureParser {
         if(prefixIndex != -1) {
             final int prefixEnd = prefixIndex + prefix.length();
             if(rawTypeLen - prefixEnd == 0 || rawType.charAt(prefixEnd) == '[') { // ends w/ prefix or is ...prefix[...
-                return new StringBuilder()
-                        .append(rawType, 0, prefixEnd)
-                        .append(suffix)
-                        .append(rawType, prefixEnd, rawTypeLen)
-                        .toString();
+                return rawType.substring(0, prefixEnd)
+                        + suffix
+                        + rawType.substring(prefixEnd, rawTypeLen);
             }
         }
         return null;
-    }
-
-    private static void checkNameChars(String signature, int startParams) throws ParseException {
-        Matcher illegalChars = HAS_NON_ASCII_CHARS.matcher(signature).region(0, startParams);
-        if(illegalChars.find()) {
-            throw newIllegalCharacterException(false, signature, illegalChars.start());
-        }
     }
 
     private static void checkTypeChars(Matcher matcher, String signature, int argStart, int argEnd) throws ParseException {
@@ -191,7 +175,7 @@ public class SignatureParser {
         }
     }
 
-    private static ParseException newIllegalCharacterException(boolean forNonTypeChar, String signature, int start) {
+    static ParseException newIllegalCharacterException(boolean forNonTypeChar, String signature, int start) {
         char c = signature.charAt(start);
         return new ParseException(
                 "non-" + (forNonTypeChar ? "type" : "ascii") + " character at index " + start

@@ -10,6 +10,8 @@ import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
@@ -19,6 +21,8 @@ import static com.esaulpaugh.headlong.util.Strings.encode;
  * Represents a function in an Ethereum contract. Can encode and decode calls matching this function's signature.
  */
 public class Function implements Serializable {
+
+    private static final Pattern HAS_NON_ASCII_CHARS = Pattern.compile("[^\\p{ASCII}]+");
 
     public static final int SELECTOR_LEN = 4;
 
@@ -45,9 +49,21 @@ public class Function implements Serializable {
      * @param messageDigest the hash function with which to generate the 4-byte selector
      * @throws ParseException   if the signature is malformed
      */
-    public Function(String signature, MessageDigest messageDigest) throws ParseException {
-        TupleType tupleType = SignatureParser.parseFunctionSignature(signature);
-        final String canonicalSig = signature.substring(0, signature.indexOf('(')) + tupleType.canonicalType;
+    public Function(final String signature, final MessageDigest messageDigest) throws ParseException {
+
+        final int split = signature.indexOf('(');
+
+        final String functionName = signature.substring(0, split);
+
+        final Matcher illegalChars = HAS_NON_ASCII_CHARS.matcher(functionName);
+        if(illegalChars.find()) {
+            throw TupleTypeParser.newIllegalCharacterException(false, signature, illegalChars.start());
+        }
+
+        final String rawTupleTypeString = signature.substring(split);
+
+        final TupleType tupleType = TupleTypeParser.parseTupleType(rawTupleTypeString);
+        final String canonicalSig = functionName + tupleType.canonicalType;
         try {
             messageDigest.update(canonicalSig.getBytes(Strings.CHARSET_ASCII));
             messageDigest.digest(selector, 0, SELECTOR_LEN);

@@ -10,7 +10,7 @@ import java.util.*;
  * fixed/ufixed types, which number in the thousands, are not included in the map, saving about 1 MB of memory. These
  * are parsed by {@link TypeFactory}.
  */
-public class BaseTypeInfo {
+class BaseTypeInfo {
 
     private static final Map<String, BaseTypeInfo> TYPE_INFO_MAP;
 
