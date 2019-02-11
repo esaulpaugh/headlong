@@ -39,7 +39,14 @@ class BigDecimalType extends AbstractUnitType<BigDecimal> {
     }
 
     @Override
-    int validate(Object object) {
+    public BigDecimal parseArgument(String s) {
+        BigDecimal bigDec = new BigDecimal(new BigInteger(s), scale);
+        validate(bigDec);
+        return bigDec;
+    }
+
+    @Override
+    public int validate(Object object) {
         super.validate(object);
         BigDecimal dec = (BigDecimal) object;
         validateBigIntBitLen(dec.unscaledValue());

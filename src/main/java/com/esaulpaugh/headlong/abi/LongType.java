@@ -35,7 +35,14 @@ class LongType extends AbstractUnitType<Long> {
     }
 
     @Override
-    int validate(Object object) {
+    public Long parseArgument(String s) {
+        Long lo = Long.parseLong(s);
+        validate(lo);
+        return lo;
+    }
+
+    @Override
+    public int validate(Object object) {
         super.validate(object);
         final long longVal = ((Number) object).longValue();
         validateLongBitLen(longVal);

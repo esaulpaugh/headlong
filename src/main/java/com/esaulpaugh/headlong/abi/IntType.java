@@ -35,7 +35,14 @@ class IntType extends AbstractUnitType<Integer> {
     }
 
     @Override
-    int validate(Object object) {
+    public Integer parseArgument(String s) {
+        Integer in = Integer.parseInt(s);
+        validate(in);
+        return in;
+    }
+
+    @Override
+    public int validate(Object object) {
         super.validate(object);
         final long longVal = ((Number) object).longValue();
         validateLongBitLen(longVal);

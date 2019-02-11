@@ -138,8 +138,17 @@ class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    int validate(final Object value) {
+    public J parseArgument(String s) {
+        if(isString) {
+            return (J) s;
+        }
+        return null; // TODO
+    }
+
+    @Override
+    public int validate(final Object value) {
         super.validate(value);
 
         final int staticLen;

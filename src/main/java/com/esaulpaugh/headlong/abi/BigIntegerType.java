@@ -35,7 +35,14 @@ class BigIntegerType extends AbstractUnitType<BigInteger> {
     }
 
     @Override
-    int validate(Object object) {
+    public BigInteger parseArgument(String s) {
+        BigInteger bigInt = new BigInteger(s);
+        validate(bigInt);
+        return bigInt;
+    }
+
+    @Override
+    public int validate(Object object) {
         super.validate(object);
         validateBigIntBitLen((BigInteger) object);
         return UNIT_LENGTH_BYTES;

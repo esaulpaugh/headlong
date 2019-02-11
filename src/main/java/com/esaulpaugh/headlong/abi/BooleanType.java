@@ -40,6 +40,13 @@ class BooleanType extends AbstractUnitType<Boolean> {
     }
 
     @Override
+    public Boolean parseArgument(String s) {
+        Boolean bool = Boolean.parseBoolean(s);
+        validate(bool);
+        return bool;
+    }
+
+    @Override
     Boolean decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);

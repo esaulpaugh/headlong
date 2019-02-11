@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
 
-abstract class StackableType<J> implements Serializable {
+public abstract class StackableType<J> implements Serializable {
 
     static final int TYPE_CODE_BOOLEAN = 0;
     static final int TYPE_CODE_BYTE = 1;
@@ -30,6 +30,14 @@ abstract class StackableType<J> implements Serializable {
         this.dynamic = dynamic;
     }
 
+    public String getCanonicalType() {
+        return canonicalType;
+    }
+
+    public boolean isDynamic() {
+        return dynamic;
+    }
+
     abstract String className();
 
     abstract String arrayClassNameStub();
@@ -40,7 +48,9 @@ abstract class StackableType<J> implements Serializable {
 
     abstract int byteLengthPacked(Object value);
 
-    int validate(Object value) {
+    public abstract J parseArgument(String s);
+
+    public int validate(Object value) {
         final String expectedClassName = className();
 
         // will throw NPE if argument null

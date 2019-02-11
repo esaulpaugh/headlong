@@ -42,6 +42,13 @@ class ByteType extends AbstractUnitType<Byte> {
     }
 
     @Override
+    public Byte parseArgument(String s) {
+        Byte b = Byte.parseByte(s);
+        validate(b);
+        return b;
+    }
+
+    @Override
     Byte decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);

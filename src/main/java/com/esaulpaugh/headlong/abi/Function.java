@@ -53,6 +53,10 @@ public class Function implements Serializable {
 
         final int split = signature.indexOf('(');
 
+        if(split < 0) {
+            throw new ParseException("params start not found", signature.length());
+        }
+
         final String functionName = signature.substring(0, split);
 
         final Matcher illegalChars = HAS_NON_ASCII_CHARS.matcher(functionName);
