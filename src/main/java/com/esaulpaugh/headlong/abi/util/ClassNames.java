@@ -56,4 +56,21 @@ public class ClassNames {
         }
         throw new IllegalArgumentException("unexpected class: " + arrayClass.getName());
     }
+
+    public static String getArrayElementClassName(String arrayClassName) {
+        if(arrayClassName.charAt(0) == '[') {
+
+            int begin = arrayClassName.charAt(1) == 'L'
+                    ? 2
+                    : 1;
+
+            int end = arrayClassName.charAt(arrayClassName.length() - 1) == ';'
+                    ? arrayClassName.length() - 1
+                    : arrayClassName.length();
+
+            return arrayClassName.substring(begin, end);
+        }
+
+        throw new IllegalArgumentException("unrecognized format");
+    }
 }

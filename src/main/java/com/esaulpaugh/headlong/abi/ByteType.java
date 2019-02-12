@@ -22,7 +22,7 @@ class ByteType extends AbstractUnitType<Byte> {
     }
 
     @Override
-    String className() {
+    public String className() {
         return CLASS_NAME;
     }
 

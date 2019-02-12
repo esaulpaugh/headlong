@@ -19,7 +19,7 @@ class BigDecimalType extends AbstractUnitType<BigDecimal> {
     }
 
     @Override
-    String className() {
+    public String className() {
         return CLASS_NAME;
     }
 

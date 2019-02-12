@@ -38,7 +38,7 @@ public abstract class StackableType<J> implements Serializable {
         return dynamic;
     }
 
-    abstract String className();
+    public abstract String className();
 
     abstract String arrayClassNameStub();
 

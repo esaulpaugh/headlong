@@ -20,7 +20,7 @@ class BooleanType extends AbstractUnitType<Boolean> {
     }
 
     @Override
-    String className() {
+    public String className() {
         return CLASS_NAME;
     }
 

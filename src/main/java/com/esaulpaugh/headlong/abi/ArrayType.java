@@ -11,7 +11,7 @@ import static com.esaulpaugh.headlong.abi.AbstractUnitType.LOG_2_UNIT_LENGTH_BYT
 import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
-class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
+public class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
 
     static final String BYTE_ARRAY_CLASS_NAME = byte[].class.getName();
     static final String BYTE_ARRAY_ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(byte[][].class);
@@ -49,8 +49,16 @@ class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
         this.isString = STRING_CLASS_NAME.equals(className);
     }
 
+    public T getElementType() {
+        return elementType;
+    }
+
+    public String getElementClassName() {
+        return ClassNames.getArrayElementClassName(className());
+    }
+
     @Override
-    String className() {
+    public String className() {
         return className;
     }
 
@@ -138,13 +146,9 @@ class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public J parseArgument(String s) {
-        if(isString) {
-            return (J) s;
-        }
-        return null; // TODO
+        throw new UnsupportedOperationException();
     }
 
     @Override

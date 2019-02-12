@@ -34,7 +34,7 @@ public class TupleType extends StackableType<Tuple> {
     }
 
     @Override
-    String className() {
+    public String className() {
         return CLASS_NAME;
     }
 
@@ -85,6 +85,11 @@ public class TupleType extends StackableType<Tuple> {
     }
 
     @Override
+    public Tuple parseArgument(String s) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public int validate(final Object value) {
         super.validate(value);
 
@@ -116,6 +121,10 @@ public class TupleType extends StackableType<Tuple> {
         }
 
         return byteLength;
+    }
+
+    public Tuple decode(byte[] array) {
+        return decode(ByteBuffer.wrap(array));
     }
 
     public Tuple decode(ByteBuffer bb) {
@@ -185,11 +194,6 @@ public class TupleType extends StackableType<Tuple> {
 
     public static TupleType parse(String rawTupleTypeString) throws ParseException {
         return TupleTypeParser.parseTupleType(rawTupleTypeString);
-    }
-
-    @Override
-    public Tuple parseArgument(String s) {
-        return null; // TODO
     }
 
     public ByteBuffer encodeElements(Object... elements) {

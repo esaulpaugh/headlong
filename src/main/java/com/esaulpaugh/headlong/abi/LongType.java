@@ -15,7 +15,7 @@ class LongType extends AbstractUnitType<Long> {
     }
 
     @Override
-    String className() {
+    public String className() {
         return CLASS_NAME;
     }
 

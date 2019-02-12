@@ -15,7 +15,7 @@ class BigIntegerType extends AbstractUnitType<BigInteger> {
     }
 
     @Override
-    String className() {
+    public String className() {
         return CLASS_NAME;
     }
 

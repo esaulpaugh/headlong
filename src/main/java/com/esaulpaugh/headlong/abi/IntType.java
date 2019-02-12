@@ -15,7 +15,7 @@ class IntType extends AbstractUnitType<Integer> {
     }
 
     @Override
-    String className() {
+    public String className() {
         return CLASS_NAME;
     }
 

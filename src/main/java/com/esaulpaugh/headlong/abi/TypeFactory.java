@@ -26,17 +26,20 @@ final class TypeFactory {
 
     private static StackableType<?> create(String canonicalType, TupleType baseTupleType) throws ParseException {
         try {
-            return buildType(canonicalType, canonicalType.length() - 1, baseTupleType);
+            return buildType(canonicalType, false, baseTupleType);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static StackableType<?> buildType(final String canonicalType, final int index, final StackableType<?> baseTuple) throws ParseException, ClassNotFoundException {
+    private static StackableType<?> buildType(final String canonicalType, boolean isArrayElement, final StackableType<?> baseTuple) throws ParseException, ClassNotFoundException {
 
-        if(canonicalType.charAt(index) == ']') { // array
+        final int end = canonicalType.length();
+        final int idxOfLast = end - 1;
 
-            final int fromIndex = index - 1;
+        if(canonicalType.charAt(idxOfLast) == ']') { // array
+
+            final int fromIndex = idxOfLast - 1;
             final int arrayOpenIndex = canonicalType.lastIndexOf('[', fromIndex);
 
             final int length;
@@ -44,7 +47,7 @@ final class TypeFactory {
                 length = DYNAMIC_LENGTH;
             } else { // e.g. [4]
                 try {
-                    length = Integer.parseInt(canonicalType.substring(arrayOpenIndex + 1, index));
+                    length = Integer.parseInt(canonicalType.substring(arrayOpenIndex + 1, idxOfLast));
                     if(length < 0) {
                         throw new ParseException("negative array size", arrayOpenIndex + 1);
                     }
@@ -53,7 +56,7 @@ final class TypeFactory {
                 }
             }
 
-            final StackableType<?> elementType = buildType(canonicalType, arrayOpenIndex - 1, baseTuple);
+            final StackableType<?> elementType = buildType(canonicalType.substring(0, arrayOpenIndex), true, baseTuple);
             final Class<?> elementClass;
             if(elementType.typeCode() == StackableType.TYPE_CODE_ARRAY) {
                 elementClass = Class.forName(elementType.className(), true, CLASS_LOADER);
@@ -64,12 +67,11 @@ final class TypeFactory {
             final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
             return new ArrayType<StackableType<?>, Object>(canonicalType, elementType, elementClass, className, className, length, dynamic);
         } else {
-            final String baseTypeString = canonicalType.substring(0, index + 1);
-            final boolean isArrayElement = index < canonicalType.length() - 1;
-            StackableType<?> baseType = resolveBaseType(baseTypeString, isArrayElement, baseTuple);
+//            final boolean isArrayElement = index < canonicalType.length() - 1;
+            StackableType<?> baseType = resolveBaseType(canonicalType, isArrayElement, baseTuple);
             if(baseType == null) {
                 throw new ParseException("unrecognized type: "
-                        + baseTypeString + " (" + String.format("%040x", new BigInteger(baseTypeString.getBytes(CHARSET_UTF_8))) + ")", -1);
+                        + canonicalType + " (" + String.format("%040x", new BigInteger(canonicalType.getBytes(CHARSET_UTF_8))) + ")", -1);
             }
             return baseType;
         }
