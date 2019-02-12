@@ -60,11 +60,11 @@ public class ClassNames {
     public static String getArrayElementClassName(String arrayClassName) {
         if(arrayClassName.charAt(0) == '[') {
 
-            int begin = arrayClassName.charAt(1) == 'L'
-                    ? 2
-                    : 1;
+            boolean arrayStub = arrayClassName.charAt(1) == 'L';
 
-            int end = arrayClassName.charAt(arrayClassName.length() - 1) == ';'
+            int begin = arrayStub ? 2 : 1;
+
+            int end = arrayStub && arrayClassName.charAt(arrayClassName.length() - 1) == ';'
                     ? arrayClassName.length() - 1
                     : arrayClassName.length();
 
