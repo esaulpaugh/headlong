@@ -57,6 +57,14 @@ public class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
         return ClassNames.getArrayElementClassName(className());
     }
 
+    public int getLength() {
+        return length;
+    }
+
+    public boolean isString() {
+        return isString;
+    }
+
     @Override
     public String className() {
         return className;
