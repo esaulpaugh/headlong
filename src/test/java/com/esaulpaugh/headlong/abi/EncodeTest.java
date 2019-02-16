@@ -1,5 +1,6 @@
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.TestUtils;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -8,6 +9,13 @@ import java.text.ParseException;
 import java.util.Arrays;
 
 public class EncodeTest {
+
+    @Test
+    public void illegalCharsTest() throws Throwable {
+        TestUtils.assertThrown(ParseException.class, "non-ascii char, '\u02a6' \\u02a6, @ index 2", () -> new Function("ba\u02a6z(uint32,bool)"));
+
+        TestUtils.assertThrown(ParseException.class, "non-type char, '\u02a6' \\u02a6, @ index 4 of element 0 of element 1", () -> new Function("baz(int32,(bool\u02a6))"));
+    }
 
     @Test
     public void simpleFunctionTest() throws ParseException {

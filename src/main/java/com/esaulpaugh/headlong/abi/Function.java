@@ -59,9 +59,10 @@ public class Function implements Serializable {
 
         final String functionName = signature.substring(0, split);
 
-        final Matcher illegalChars = HAS_NON_ASCII_CHARS.matcher(functionName);
-        if(illegalChars.find()) {
-            throw TupleTypeParser.newIllegalCharacterException(false, signature, illegalChars.start());
+        final Matcher matcher = HAS_NON_ASCII_CHARS.matcher(functionName);
+        if(matcher.find()) {
+            char c = signature.charAt(matcher.start());
+            throw new ParseException("non-ascii char, \'" + c + "\' " + TupleTypeParser.escapeChar(c) + ", @ index " + matcher.start(), matcher.start());
         }
 
         final String rawTupleTypeString = signature.substring(split);

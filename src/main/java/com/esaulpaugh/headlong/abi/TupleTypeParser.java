@@ -41,29 +41,29 @@ class TupleTypeParser {
                                       final List<StackableType<?>> typesOut,
                                       final Matcher illegalTypeCharMatcher,
                                       final StringBuilder canonicalTupleType) throws ParseException {
-        int argStart = startParams + 1;
-        int argEnd = argStart; // this inital value is important for empty params case
+        try {
+            int argStart = startParams + 1;
+            int argEnd = argStart; // this inital value is important for empty params case
 
-        final int sigEnd = signature.length();
+            final int sigEnd = signature.length();
 
-        LOOP:
-        while (argStart < sigEnd) {
-            char c = signature.charAt(argStart);
-            switch (c) {
-            case '[':
-                break LOOP;
-            case ')':
-                if (typesOut.size() > 0) {
-                    argEnd = argStart - 1;
-                }
-                break LOOP;
-            case ',':
-                if (signature.charAt(argStart - 1) == ')') {
+            LOOP:
+            while (argStart < sigEnd) {
+                char c = signature.charAt(argStart);
+                switch (c) {
+                case '[':
                     break LOOP;
-                }
-                throw new ParseException("empty parameter @ " + typesOut.size(), argStart);
-            case '(': // tuple element
-                try {
+                case ')':
+                    if (typesOut.size() > 0) {
+                        argEnd = argStart - 1;
+                    }
+                    break LOOP;
+                case ',':
+                    if (signature.charAt(argStart - 1) == ')') {
+                        break LOOP;
+                    }
+                    throw new ParseException("empty parameter @ " + typesOut.size(), argStart);
+                case '(': // tuple element
                     ArrayList<StackableType<?>> innerTupleTypes = new ArrayList<>();
                     StringBuilder ctt = new StringBuilder("(");
                     int result = parseTupleType(signature, argStart, innerTupleTypes, illegalTypeCharMatcher, ctt);
@@ -87,24 +87,24 @@ class TupleTypeParser {
 
                     canonicalTupleType.append(childType.canonicalType).append(',');
 
-                } catch (ParseException pe) {
-                    throw (ParseException) new ParseException(pe.getMessage() + " @ " + typesOut.size(), pe.getErrorOffset()).initCause(pe);
+                    if (argEnd >= sigEnd || signature.charAt(argEnd) != ',') {
+                        break LOOP;
+                    }
+                    break;
+                default: // non-tuple element
+                    argEnd = parseNonTuple(signature, argStart, typesOut, illegalTypeCharMatcher, canonicalTupleType);
+                    if (argEnd == -1 || argEnd >= sigEnd || signature.charAt(argEnd) == ')') {
+                        return argEnd;
+                    }
                 }
-
-                if (argEnd >= sigEnd || signature.charAt(argEnd) != ',') {
-                    break LOOP;
-                }
-                break;
-            default: // non-tuple element
-                argEnd = parseNonTuple(signature, argStart, typesOut, illegalTypeCharMatcher, canonicalTupleType);
-                if (argEnd == -1 || argEnd >= sigEnd || signature.charAt(argEnd) == ')') {
-                    return argEnd;
-                }
+                argStart = argEnd + 1;
             }
-            argStart = argEnd + 1;
-        }
 
-        return argEnd;
+            return argEnd;
+
+        } catch (ParseException pe) {
+            throw (ParseException) new ParseException(pe.getMessage() + " of element " + typesOut.size(), pe.getErrorOffset()).initCause(pe);
+        }
     }
 
     private static String completeTupleTypeString(StringBuilder canonicalTupleType) {
@@ -171,18 +171,13 @@ class TupleTypeParser {
 
     private static void checkTypeChars(Matcher matcher, String signature, int argStart, int argEnd) throws ParseException {
         if (matcher.region(argStart, argEnd).find()) {
-            throw newIllegalCharacterException(true, signature, matcher.start());
+            char c = signature.charAt(matcher.start());
+            throw new ParseException("non-type char, \'" + c + "\' " + escapeChar(c) + ", @ index " + (matcher.start() - argStart), // index into type string
+                    matcher.start());
         }
     }
 
-    static ParseException newIllegalCharacterException(boolean forNonTypeChar, String signature, int start) {
-        char c = signature.charAt(start);
-        return new ParseException(
-                "non-" + (forNonTypeChar ? "type" : "ascii") + " character at index " + start
-                        + ": \'" + c + "\', " + escapeChar(c), start);
-    }
-
-    private static String escapeChar(char c) {
+    static String escapeChar(char c) {
         String hex = Integer.toHexString((int) c);
         switch (hex.length()) {
         case 1: return "\\u000" + hex;
