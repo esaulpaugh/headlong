@@ -54,6 +54,9 @@ class TupleTypeParser {
                 case '[':
                     break LOOP;
                 case ')':
+                    if(signature.charAt(argStart - 1) == ',') {
+                        throw new ParseException("empty parameter", argStart);
+                    }
                     if (typesOut.size() > 0) {
                         argEnd = argStart - 1;
                     }
@@ -62,7 +65,7 @@ class TupleTypeParser {
                     if (signature.charAt(argStart - 1) == ')') {
                         break LOOP;
                     }
-                    throw new ParseException("empty parameter @ " + typesOut.size(), argStart);
+                    throw new ParseException("empty parameter", argStart);
                 case '(': // tuple element
                     ArrayList<StackableType<?>> innerTupleTypes = new ArrayList<>();
                     StringBuilder ctt = new StringBuilder("(");
@@ -103,6 +106,9 @@ class TupleTypeParser {
             return argEnd;
 
         } catch (ParseException pe) {
+            if(pe.getMessage().equals("empty parameter")) {
+                throw (ParseException) new ParseException(pe.getMessage() + " @ " + typesOut.size(), pe.getErrorOffset()).initCause(pe);
+            }
             throw (ParseException) new ParseException(pe.getMessage() + " of element " + typesOut.size(), pe.getErrorOffset()).initCause(pe);
         }
     }

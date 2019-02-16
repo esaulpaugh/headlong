@@ -11,6 +11,11 @@ import java.util.Arrays;
 public class EncodeTest {
 
     @Test
+    public void emptyParamTest() throws Throwable {
+        TestUtils.assertThrown(ParseException.class, "empty parameter @ 1 of element 1", () -> new Function("baz(int,(int,))"));
+    }
+
+    @Test
     public void illegalCharsTest() throws Throwable {
         TestUtils.assertThrown(ParseException.class, "non-ascii char, '\u02a6' \\u02a6, @ index 2", () -> new Function("ba\u02a6z(uint32,bool)"));
 
