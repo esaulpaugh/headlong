@@ -51,6 +51,8 @@ public byte[] toRLP() {
 
 Also includes a fast hex codec and an optimized Keccak implementation.
 
+See also the example app that demos the ABI encoder: https://github.com/esaulpaugh/headlong-android
+
 ### Build
 
 Now available in Maven Central Repository.
