@@ -62,7 +62,6 @@ public class MonteCarloTest {
     }
 
     private static void doMonteCarlo(long masterSeed, int n) throws ParseException {
-        SecureRandom sr = new SecureRandom();
 
         final long[] seeds = generateSeeds(masterSeed, n);
 

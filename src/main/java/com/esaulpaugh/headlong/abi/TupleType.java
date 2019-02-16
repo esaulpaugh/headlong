@@ -30,7 +30,7 @@ public class TupleType extends StackableType<Tuple> {
     }
 
     public StackableType<?>[] getElementTypes() {
-        return elementTypes;
+        return Arrays.copyOf(elementTypes, elementTypes.length);
     }
 
     @Override

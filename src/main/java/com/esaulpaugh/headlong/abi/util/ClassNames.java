@@ -73,4 +73,29 @@ public class ClassNames {
 
         throw new IllegalArgumentException("unrecognized format");
     }
+
+    public static String fromArrayClassNameStub(String arrayClassNameStub) {
+
+        StringBuilder sb = new StringBuilder();
+
+        switch (arrayClassNameStub) {
+        case "B": sb.append(Byte.class.getName()); break;
+        case "S": sb.append(Short.class.getName()); break;
+        case "I": sb.append(Integer.class.getName()); break;
+        case "J": sb.append(Long.class.getName()); break;
+        case "F": sb.append(Float.class.getName()); break;
+        case "D": sb.append(Double.class.getName()); break;
+        case "C": sb.append(Character.class.getName()); break;
+        case "Z": sb.append(Boolean.class.getName()); break;
+        default: {
+            if (arrayClassNameStub.startsWith("L")
+                    && arrayClassNameStub.endsWith(";")) {
+                sb.append('[')
+                        .append(arrayClassNameStub);
+            }
+        }
+        }
+
+        return sb.toString();
+    }
 }
