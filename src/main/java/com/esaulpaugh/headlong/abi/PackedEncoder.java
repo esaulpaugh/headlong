@@ -45,19 +45,19 @@ class PackedEncoder {
     }
 
     private static int encodeArray(ArrayType<StackableType<?>,?> arrayType, Object value, byte[] dest, int idx) {
-        switch (arrayType.elementType.typeCode()) {
+        final StackableType<?> elementType = arrayType.elementType;
+        switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return insertBooleans((boolean[]) value, dest, idx);
         case TYPE_CODE_BYTE:
             byte[] arr = arrayType.isString ? ((String) value).getBytes(Strings.CHARSET_UTF_8) : (byte[]) value;
             return insertBytes(arr, dest, idx);
-        case TYPE_CODE_SHORT: return insertShorts((short[]) value, arrayType.elementType.byteLengthPacked(value), dest, idx);
-        case TYPE_CODE_INT: return insertInts((int[]) value, arrayType.elementType.byteLengthPacked(value), dest, idx);
-        case TYPE_CODE_LONG: return insertLongs((long[]) value, arrayType.elementType.byteLengthPacked(value), dest, idx);
-        case TYPE_CODE_BIG_INTEGER: return insertBigIntegers((BigInteger[]) value, arrayType.elementType.byteLengthPacked(value), dest, idx);
-        case TYPE_CODE_BIG_DECIMAL: return insertBigDecimals((BigDecimal[]) value, arrayType.elementType.byteLengthPacked(value), dest, idx);
+        case TYPE_CODE_SHORT: return insertShorts((short[]) value, elementType.byteLengthPacked(value), dest, idx);
+        case TYPE_CODE_INT: return insertInts((int[]) value, elementType.byteLengthPacked(value), dest, idx);
+        case TYPE_CODE_LONG: return insertLongs((long[]) value, elementType.byteLengthPacked(value), dest, idx);
+        case TYPE_CODE_BIG_INTEGER: return insertBigIntegers((BigInteger[]) value, elementType.byteLengthPacked(value), dest, idx);
+        case TYPE_CODE_BIG_DECIMAL: return insertBigDecimals((BigDecimal[]) value, elementType.byteLengthPacked(value), dest, idx);
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
-            final StackableType<?> elementType = arrayType.elementType;
             for(Object e : (Object[]) value) {
                 idx = encode(elementType, e, dest, idx);
             }

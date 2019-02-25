@@ -4,6 +4,7 @@ import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.text.ParseException;
 
 public class PackedEncoderTest {
@@ -70,6 +71,50 @@ public class PackedEncoderTest {
         System.out.println(FastHex.encodeToString(packed));
 
         Assert.assertArrayEquals(FastHex.decode("fffffe0100"), packed);
+
+        Tuple decoded = PackedDecodingHacks.decode(tupleType, packed);
+
+        Assert.assertEquals(values, decoded);
+    }
+
+    @Test
+    public void testDecodeA() throws ParseException {
+
+        TupleType tupleType = TupleType.parse("(uint64[],uint64[1],uint64)");
+
+        Tuple values = new Tuple( new long[] { 9L }, new long[] { 5L }, BigInteger.valueOf(6L));
+
+        tupleType.validate(values);
+
+        byte[] packed = tupleType.encodePacked(values);
+
+        System.out.println(FastHex.encodeToString(packed));
+
+        Assert.assertArrayEquals(FastHex.decode("000000000000000900000000000000050000000000000006"), packed);
+
+        Tuple decoded = PackedDecodingHacks.decode(tupleType, packed);
+
+        Assert.assertEquals(values, decoded);
+    }
+
+    @Test
+    public void testDecodeB() throws ParseException {
+
+        TupleType tupleType = TupleType.parse("(uint64[],int)");
+
+        Tuple values = new Tuple(new long[] { 1L, 2L, 3L, 4L }, BigInteger.ONE);
+
+        tupleType.validate(values);
+
+        byte[] packed = tupleType.encodePacked(values);
+
+        System.out.println(FastHex.encodeToString(packed));
+
+        Assert.assertArrayEquals(FastHex.decode("00000000000000010000000000000002000000000000000300000000000000040000000000000000000000000000000000000000000000000000000000000001"), packed);
+
+        Tuple decoded = PackedDecodingHacks.decode(tupleType, packed);
+
+        Assert.assertEquals(values, decoded);
     }
 
 }
