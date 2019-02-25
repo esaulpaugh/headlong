@@ -59,9 +59,9 @@ public class PackedEncoderTest {
     @Test
     public void testTest() throws ParseException {
 
-        TupleType tupleType = TupleType.parse("(int24,int32)");
+        TupleType tupleType = TupleType.parse("(int24,bool,bool)");
 
-        Tuple values = new Tuple(-2, -4);
+        Tuple values = new Tuple(-2, true, false);
 
         tupleType.validate(values);
 
@@ -69,7 +69,7 @@ public class PackedEncoderTest {
 
         System.out.println(FastHex.encodeToString(packed));
 
-        Assert.assertArrayEquals(FastHex.decode("fffffefffffffc"), packed);
+        Assert.assertArrayEquals(FastHex.decode("fffffe0100"), packed);
     }
 
 }

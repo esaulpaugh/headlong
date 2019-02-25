@@ -121,7 +121,7 @@ class PackedEncoder {
 
     private static int insertBool(boolean value, byte[] dest, int idx) {
         dest[idx] = value ? (byte) 1 : (byte) 0;
-        return 1;
+        return idx + 1;
     }
 
     private static int insertInt(long value, int byteLen, byte[] dest, int idx) {
