@@ -113,7 +113,7 @@ class TupleTypeParser {
         }
     }
 
-    private static String completeTupleTypeString(StringBuilder canonicalTupleType) {
+    static String completeTupleTypeString(StringBuilder canonicalTupleType) {
         final int len = canonicalTupleType.length();
         if(len == 1) {
             return "()";
