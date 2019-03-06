@@ -34,14 +34,14 @@ public class PackedDecodingHacks {
 
         final StackableType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
-        Object[] elements = new Object[len];
+        final Object[] elements = new Object[len];
 
         int idx = end;
 
         Integer mark = null;
 
         for (int i = len - 1; i >= 0; i--) {
-            StackableType<?> type = elementTypes[i];
+            final StackableType<?> type = elementTypes[i];
             if (type.dynamic) {
                 mark = i;
                 break;
@@ -69,7 +69,7 @@ public class PackedDecodingHacks {
             final int m = mark;
             idx = 0;
             for (int i = 0; i <= m; i++) {
-                StackableType<?> type = elementTypes[i];
+                final StackableType<?> type = elementTypes[i];
                 switch (type.typeCode()) {
                 case TYPE_CODE_BOOLEAN: elements[i] = decodeBoolean(buffer, idx); idx++; break;
                 case TYPE_CODE_BYTE: elements[i] = buffer[idx]; idx++; break;
@@ -96,9 +96,9 @@ public class PackedDecodingHacks {
 
         final StackableType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
-        Object[] elements = new Object[len];
+        final Object[] elements = new Object[len];
         for (int i = 0; i < len; i++) {
-            StackableType<?> type = elementTypes[i];
+            final StackableType<?> type = elementTypes[i];
             switch (type.typeCode()) {
             case TYPE_CODE_BOOLEAN: elements[i] = decodeBoolean(buffer, idx); idx++; break;
             case TYPE_CODE_BYTE: elements[i] = buffer[idx]; idx++; break;
