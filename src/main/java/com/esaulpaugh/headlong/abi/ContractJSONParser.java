@@ -17,11 +17,19 @@ public class ContractJSONParser {
             if(element.isJsonObject()) {
                 final JsonObject elementObj = (JsonObject) element;
                 if ("function".equals(getType(elementObj))) {
-                    list.add(new Function(buildFunctionSignature(elementObj)));
+                    list.add(parseFunction(elementObj));
                 }
             }
         }
         return list;
+    }
+
+    public static Function parseFunction(String json) throws ParseException {
+        return parseFunction(new JsonParser().parse(json).getAsJsonObject());
+    }
+
+    private static Function parseFunction(JsonObject object) throws ParseException {
+        return new Function(buildFunctionSignature(object));
     }
 
     public static List<JsonObject> getEvents(String json) {
