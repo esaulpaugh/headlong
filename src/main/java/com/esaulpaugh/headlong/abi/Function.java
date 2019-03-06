@@ -81,6 +81,10 @@ public class Function implements Serializable {
         this.hashAlgorithm = messageDigest.getAlgorithm();
     }
 
+    public String getName() {
+        return canonicalSignature.substring(0, canonicalSignature.indexOf('('));
+    }
+
     public String getCanonicalSignature() {
         return canonicalSignature;
     }

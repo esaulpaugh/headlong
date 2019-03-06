@@ -79,7 +79,7 @@ public class ContractJSONParserTest {
         List<Function> functions = ContractJSONParser.getFunctions(JSON_ARRAY);
 
         for(Function f :functions) {
-            System.out.println(f.canonicalSignature);
+            System.out.println(f.getName() + " : " + f.canonicalSignature);
         }
     }
 
