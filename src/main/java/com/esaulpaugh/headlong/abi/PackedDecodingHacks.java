@@ -13,7 +13,7 @@ import static com.esaulpaugh.headlong.abi.StackableType.*;
  */
 public class PackedDecodingHacks {
 
-    static Tuple decode(TupleType tupleType, byte[] buffer) {
+    public static Tuple decode(TupleType tupleType, byte[] buffer) {
 
         int numDynamic = 0;
 
@@ -30,7 +30,7 @@ public class PackedDecodingHacks {
         }
     }
 
-    static Tuple decodeTopTuple(TupleType tupleType, byte[] buffer, int end) {
+    private static Tuple decodeTopTuple(TupleType tupleType, byte[] buffer, int end) {
 
         final StackableType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
@@ -55,10 +55,9 @@ public class PackedDecodingHacks {
             case TYPE_CODE_BIG_INTEGER: idx -= type.byteLengthPacked(null); end = idx; decodeBigInteger((BigIntegerType) type, buffer, idx, elements, i); break;
             case TYPE_CODE_BIG_DECIMAL: idx -= type.byteLengthPacked(null); end = idx; decodeBigDecimal((BigDecimalType) type, buffer, idx, elements, i); break;
             case TYPE_CODE_ARRAY: {
-                ArrayType arrayType = (ArrayType) type;
-                idx -= arrayType.elementType.byteLengthPacked(null) * arrayType.length;
-                end = idx;
-                idx -= decodeArrayDynamic((ArrayType) type, buffer, idx, idx, elements, i);
+                final ArrayType arrayType = (ArrayType) type;
+                end = idx = idx - (arrayType.elementType.byteLengthPacked(null) * arrayType.length);
+                idx -= decodeArrayDynamic(arrayType, buffer, idx, end, elements, i);
                 break;
             }
             case TYPE_CODE_TUPLE: throw new UnsupportedOperationException("nested tuple"); // idx -= decodeTupleDynamic(tupleType, buffer, 0, idx, elements, i); break;
@@ -165,17 +164,18 @@ public class PackedDecodingHacks {
 
     private static int decodeArrayDynamic(ArrayType arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) {
         final StackableType<?> elementType = arrayType.elementType;
-        final int byteLen = elementType.byteLengthPacked(null);
+        final int byteLen;
+        try {
+            byteLen = elementType.byteLengthPacked(null);
+        } catch (NullPointerException npe) {
+            throw new IllegalArgumentException("nested array");
+        }
 
         final int arrayLen;
         if (arrayType.length != -1) {
             arrayLen = arrayType.length;
         } else {
-            try {
-                arrayLen = (end - idx) / byteLen;
-            } catch (NullPointerException npe) {
-                throw new IllegalArgumentException("nested array");
-            }
+            arrayLen = (end - idx) / byteLen;
         }
 
         switch (elementType.typeCode()) {
@@ -186,7 +186,7 @@ public class PackedDecodingHacks {
         case TYPE_CODE_LONG: return decodeLongArray(arrayType.elementType, arrayLen, buffer, idx, dest, destIdx) * byteLen;
         case TYPE_CODE_BIG_INTEGER: return decodeBigIntegerArray(arrayType.elementType, arrayLen, buffer, idx, dest, destIdx) * byteLen;
         case TYPE_CODE_BIG_DECIMAL: return decodeBigDecimalArray((BigDecimalType) arrayType.elementType, arrayLen, buffer, idx, dest, destIdx) * byteLen;
-        case TYPE_CODE_ARRAY: throw new UnsupportedOperationException();
+        case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: throw new UnsupportedOperationException();
         default: throw new IllegalArgumentException("unexpected array type: " + arrayType.toString());
         }

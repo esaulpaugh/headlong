@@ -12,7 +12,11 @@ public class EncodeTest {
 
     @Test
     public void emptyParamTest() throws Throwable {
-        TestUtils.assertThrown(ParseException.class, "empty parameter @ 1 of element 1", () -> new Function("baz(int,(int,))"));
+        TestUtils.assertThrown(ParseException.class, "empty parameter @ 0", () -> new Function("baz(,)"));
+
+        TestUtils.assertThrown(ParseException.class, "empty parameter @ 1", () -> new Function("baz(bool,)"));
+
+        TestUtils.assertThrown(ParseException.class, "empty parameter @ 1 of element 1", () -> new Function("baz(bool,(int,,))"));
     }
 
     @Test
