@@ -1,5 +1,8 @@
 package com.esaulpaugh.headlong.abi;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -74,12 +77,26 @@ public class ContractJSONParserTest {
             "]";
 
     @Test
-    public void testParseFunctions() throws ParseException {
+    public void testGetFunctions() throws ParseException {
 
         List<Function> functions = ContractJSONParser.getFunctions(JSON_ARRAY);
 
-        for(Function f :functions) {
+        for(Function f : functions) {
             System.out.println(f.getName() + " : " + f.canonicalSignature);
+        }
+    }
+
+    @Test
+    public void testGetEvents() {
+        List<JsonObject> events = ContractJSONParser.getEvents(JSON_ARRAY);
+
+        for(JsonObject eventObj : events) {
+            System.out.println(eventObj.get("name") + ", " + eventObj.get("type"));
+            JsonArray inputs = eventObj.get("inputs").getAsJsonArray();
+            for (JsonElement element : inputs) {
+                JsonObject input = (JsonObject) element;
+                System.out.println("  " + input.get("name") + ", " + input.get("type") + ", " + input.get("indexed"));
+            }
         }
     }
 

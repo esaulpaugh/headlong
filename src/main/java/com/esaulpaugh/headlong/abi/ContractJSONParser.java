@@ -14,9 +14,24 @@ public class ContractJSONParser {
     public static List<Function> getFunctions(String json) throws ParseException {
         final List<Function> list = new ArrayList<>();
         for(JsonElement element : new JsonParser().parse(json).getAsJsonArray()) {
-            final JsonObject elementObj = element.getAsJsonObject();
-            if("function".equals(getType(elementObj))) {
-                list.add(new Function(buildFunctionSignature(elementObj)));
+            if(element.isJsonObject()) {
+                final JsonObject elementObj = (JsonObject) element;
+                if ("function".equals(getType(elementObj))) {
+                    list.add(new Function(buildFunctionSignature(elementObj)));
+                }
+            }
+        }
+        return list;
+    }
+
+    public static List<JsonObject> getEvents(String json) {
+        final List<JsonObject> list = new ArrayList<>();
+        for(JsonElement element : new JsonParser().parse(json).getAsJsonArray()) {
+            if(element.isJsonObject()) {
+                final JsonObject elementObj = (JsonObject) element;
+                if ("event".equals(getType(elementObj))) {
+                    list.add(elementObj);
+                }
             }
         }
         return list;
