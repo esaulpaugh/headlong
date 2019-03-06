@@ -78,7 +78,7 @@ Alternatively:
 * Use `mvn package` which outputs to /target
 * Add headlong as a project dependency
 
-Tests should take less than one minute to run. Test packages require junit and gson. Otherwise headlong has no dependencies. Jar size is ~109 KB as of 01/17/19.
+Depends on gson. Tests should take less than one minute to run. Test packages require junit. Jar size is ~119 KB as of 03/06/19.
 
 See the wiki for more, such as TupleTypes, packed encoding, RLP Lists, and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
