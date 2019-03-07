@@ -91,9 +91,6 @@ public class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
         case TYPE_CODE_BYTE:
             staticLen = roundLengthUp((isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length);
             break;
-        case TYPE_CODE_SHORT:
-            staticLen = ((short[]) value).length << LOG_2_UNIT_LENGTH_BYTES; // mul 32
-            break;
         case TYPE_CODE_INT:
             staticLen = ((int[]) value).length << LOG_2_UNIT_LENGTH_BYTES; // mul 32
             break;
@@ -132,8 +129,6 @@ public class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
             return ((boolean[]) value).length; // * 1
         case TYPE_CODE_BYTE:
             return (isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length; // * 1
-        case TYPE_CODE_SHORT:
-            return ((short[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_INT:
             return ((int[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_LONG:
@@ -170,7 +165,6 @@ public class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
             byte[] bytes = isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value;
             staticLen = roundLengthUp(checkLength(bytes.length, value));
             break;
-        case TYPE_CODE_SHORT: staticLen = checkLength(((short[]) value).length, value) << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_INT: staticLen = validateIntArray((int[]) value); break;
         case TYPE_CODE_LONG: staticLen = validateLongArray((long[]) value); break;
         case TYPE_CODE_BIG_INTEGER: staticLen = validateBigIntegerArray((BigInteger[]) value); break;
@@ -301,7 +295,6 @@ public class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return (J) decodeBooleanArray(bb, arrayLen, elementBuffer);
         case TYPE_CODE_BYTE: return (J) decodeByteArray(bb, arrayLen);
-        case TYPE_CODE_SHORT: return (J) decodeShortArray(bb, arrayLen, elementBuffer);
         case TYPE_CODE_INT: return (J) decodeIntArray((IntType) elementType, bb, arrayLen, elementBuffer);
         case TYPE_CODE_LONG: return (J) decodeLongArray((LongType) elementType, bb, arrayLen, elementBuffer);
         case TYPE_CODE_BIG_INTEGER: return (J) decodeBigIntegerArray((BigIntegerType) elementType, bb, arrayLen, elementBuffer);
@@ -341,19 +334,6 @@ public class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
             return new String(out, CHARSET_UTF_8);
         }
         return out;
-    }
-
-    private static short[] decodeShortArray(ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
-        short[] shorts = new short[arrayLen];
-        for (int i = 0; i < arrayLen; i++) {
-            bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
-            BigInteger bi = new BigInteger(elementBuffer);
-            if(bi.bitLength() > Short.SIZE) { // don't treat array elements as signed
-                throw new IllegalArgumentException("value not in short range");
-            }
-            shorts[i] = bi.shortValue();
-        }
-        return shorts;
     }
 
     private static int[] decodeIntArray(IntType intType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) {

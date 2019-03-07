@@ -30,7 +30,6 @@ class PackedEncoder {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return insertBool((boolean) value, dest, idx);
         case TYPE_CODE_BYTE:
-        case TYPE_CODE_SHORT:
         case TYPE_CODE_INT:
         case TYPE_CODE_LONG: return insertInt(((Number) value).longValue(), type.byteLengthPacked(value), dest, idx);
         case TYPE_CODE_BIG_INTEGER: return insertInt(((BigInteger) value), type.byteLengthPacked(value), dest, idx);
@@ -51,7 +50,6 @@ class PackedEncoder {
         case TYPE_CODE_BYTE:
             byte[] arr = arrayType.isString ? ((String) value).getBytes(Strings.CHARSET_UTF_8) : (byte[]) value;
             return insertBytes(arr, dest, idx);
-        case TYPE_CODE_SHORT: return insertShorts((short[]) value, elementType.byteLengthPacked(value), dest, idx);
         case TYPE_CODE_INT: return insertInts((int[]) value, elementType.byteLengthPacked(value), dest, idx);
         case TYPE_CODE_LONG: return insertLongs((long[]) value, elementType.byteLengthPacked(value), dest, idx);
         case TYPE_CODE_BIG_INTEGER: return insertBigIntegers((BigInteger[]) value, elementType.byteLengthPacked(value), dest, idx);
@@ -80,13 +78,6 @@ class PackedEncoder {
         final int len = bytes.length;
         System.arraycopy(bytes, 0, dest, idx, len);
         return idx + len;
-    }
-
-    private static int insertShorts(short[] shorts, int byteLen, byte[] dest, int idx) {
-        for (short e : shorts) {
-            idx = insertInt(e, byteLen, dest, idx);
-        }
-        return idx;
     }
 
     private static int insertInts(int[] ints, int byteLen, byte[] dest, int idx) {

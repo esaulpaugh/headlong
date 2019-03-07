@@ -149,17 +149,18 @@ public class MonteCarloTestCase implements Serializable {
         String sig = generateFunctionSignature(rng, 0);
 
         // decanonicalize
-        sig = sig.replace("int256,", "int,")
-                .replace("uint256,", "uint,")
+        sig = sig
+                .replace("int256,", "int,")
                 .replace("int256[", "int[")
-                .replace("uint256[", "uint[")
                 .replace("int256)", "int)")
+                .replace("uint256,", "uint,")
+                .replace("uint256[", "uint[")
                 .replace("uint256)", "uint)")
                 .replace("fixed128x18,", "fixed,")
-                .replace("ufixed128x18,", "ufixed,")
                 .replace("fixed128x18[", "fixed[")
-                .replace("ufixed128x18[", "ufixed[")
                 .replace("fixed128x18)", "fixed)")
+                .replace("ufixed128x18,", "ufixed,")
+                .replace("ufixed128x18[", "ufixed[")
                 .replace("ufixed128x18)", "ufixed)");
 
         this.rawSignature = sig;
@@ -171,24 +172,18 @@ public class MonteCarloTestCase implements Serializable {
         this(new Params(seed));
     }
 
-    boolean run() {
-        return run(this.argsTuple);
+    void run() {
+        run(this.argsTuple);
     }
 
-    boolean runNewRandomArgs() {
-        return run(generateTuple(function.paramTypes, new Random(System.nanoTime())));
+    void runNewRandomArgs() {
+        run(generateTuple(function.paramTypes, new Random(System.nanoTime())));
     }
 
-    boolean run(Tuple args) {
+    void run(Tuple args) {
         Function function = this.function;
 
-//        System.out.println(function.getCanonicalSignature());
-
         ByteBuffer abi = function.encodeCall(args);
-
-//        byte[] array = abi.array();
-
-//        EncodeTest.printABI(abi.array());
 
         final Tuple out = function.decodeCall((ByteBuffer) abi.flip());
 
@@ -202,8 +197,6 @@ public class MonteCarloTestCase implements Serializable {
                 throw new RuntimeException(e);
             }
         }
-
-        return true;
     }
 
     private String generateFunctionSignature(Random r, int tupleDepth) throws ParseException {
@@ -298,25 +291,11 @@ public class MonteCarloTestCase implements Serializable {
         return (byte) r.nextInt();
     }
 
-    private static short generateShort(Random r, boolean unsigned) {
-        byte[] random = new byte[1 + r.nextInt(2)]; // 1-2 // Short.BYTES
-        r.nextBytes(random);
-        short x = new BigInteger(random).shortValue();
-        if(unsigned && x < 0) {
-            return (short) ((-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0));
-        }
-        return x;
-    }
-
     private static int generateInt(Random r, IntType intType) {
         byte[] buffer = new byte[1 + r.nextInt(intType.bitLength >>> 3)]; // 1-4
         int x = new BigInteger(buffer).intValue();
         if(intType.unsigned && x < 0) {
             return (-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0);
-//            if(y < 0) {
-//                throw new Error("x,y : " + x + "," + y);
-//            }
-//            return y;
         }
         return x;
     }
@@ -368,7 +347,6 @@ public class MonteCarloTestCase implements Serializable {
                 return generateString(len, r);
             }
             return generateByteArray(len, r);
-//        case TYPE_CODE_SHORT: return generateShortArray(len, ((ShortType) elementType).unsigned, r);
         case TYPE_CODE_INT: return generateIntArray(len, (IntType) elementType, r);
         case TYPE_CODE_LONG: return generateLongArray(len, (LongType) elementType, r);
         case TYPE_CODE_BIG_INTEGER: return generateBigIntegerArray(len, (BigIntegerType) elementType, r);
@@ -400,14 +378,6 @@ public class MonteCarloTestCase implements Serializable {
             sb.append((char) (r.nextInt(95) + 32));
         }
         return sb.toString();
-    }
-
-    private static short[] generateShortArray(final int len, boolean unsigned, Random r) {
-        short[] shorts = new short[len];
-        for (int i = 0; i < len; i++) {
-            shorts[i] = generateShort(r, unsigned);
-        }
-        return shorts;
     }
 
     private static int[] generateIntArray(final int len, IntType intType, Random r) {
@@ -493,13 +463,14 @@ public class MonteCarloTestCase implements Serializable {
                 Assert.assertArrayEquals(Strings.decode((String) in, Strings.UTF_8), Strings.decode((String) out, Strings.UTF_8));
                 Assert.assertEquals(in, out);
             } else {
-                if(Object[].class.isAssignableFrom(in.getClass())) {
+                final Class<?> inClass = in.getClass();
+                if(Object[].class.isAssignableFrom(inClass)) {
                     findInequalityInArray(arrayType, (Object[]) in, (Object[]) out);
-                } else if(byte[].class.isAssignableFrom(in.getClass())) {
+                } else if(byte[].class.isAssignableFrom(inClass)) {
                     Assert.assertArrayEquals((byte[]) in, (byte[]) out);
-                } else if(int[].class.isAssignableFrom(in.getClass())) {
+                } else if(int[].class.isAssignableFrom(inClass)) {
                     Assert.assertArrayEquals((int[]) in, (int[]) out);
-                } else if(long[].class.isAssignableFrom(in.getClass())) {
+                } else if(long[].class.isAssignableFrom(inClass)) {
                     Assert.assertArrayEquals((long[]) in, (long[]) out);
                 } else {
                     throw new RuntimeException("??");

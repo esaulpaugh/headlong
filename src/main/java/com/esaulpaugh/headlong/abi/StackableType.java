@@ -11,14 +11,13 @@ public abstract class StackableType<J> implements Serializable {
 
     static final int TYPE_CODE_BOOLEAN = 0;
     static final int TYPE_CODE_BYTE = 1;
-    static final int TYPE_CODE_SHORT = 2;
-    static final int TYPE_CODE_INT = 3;
-    static final int TYPE_CODE_LONG = 4;
-    static final int TYPE_CODE_BIG_INTEGER = 5;
-    static final int TYPE_CODE_BIG_DECIMAL = 6;
+    static final int TYPE_CODE_INT = 2;
+    static final int TYPE_CODE_LONG = 3;
+    static final int TYPE_CODE_BIG_INTEGER = 4;
+    static final int TYPE_CODE_BIG_DECIMAL = 5;
 
-    static final int TYPE_CODE_ARRAY = 7;
-    static final int TYPE_CODE_TUPLE = 8;
+    static final int TYPE_CODE_ARRAY = 6;
+    static final int TYPE_CODE_TUPLE = 7;
 
     static final StackableType<?>[] EMPTY_TYPE_ARRAY = new StackableType<?>[0];
 

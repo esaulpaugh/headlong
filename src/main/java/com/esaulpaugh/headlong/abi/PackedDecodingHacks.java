@@ -49,7 +49,6 @@ public class PackedDecodingHacks {
             switch (type.typeCode()) {
             case TYPE_CODE_BOOLEAN: idx--; end = idx; elements[i] = decodeBoolean(buffer, idx); break;
             case TYPE_CODE_BYTE: idx--; end = idx; elements[i] = buffer[idx]; break;
-            case TYPE_CODE_SHORT: throw new UnsupportedOperationException("short not supported");
             case TYPE_CODE_INT: idx -= type.byteLengthPacked(null); end = idx; decodeInt((IntType) type, buffer, idx, elements, i); break;
             case TYPE_CODE_LONG: idx -= type.byteLengthPacked(null); end = idx; decodeLong((LongType) type, buffer, idx, elements, i); break;
             case TYPE_CODE_BIG_INTEGER: idx -= type.byteLengthPacked(null); end = idx; decodeBigInteger((BigIntegerType) type, buffer, idx, elements, i); break;
@@ -72,7 +71,6 @@ public class PackedDecodingHacks {
                 switch (type.typeCode()) {
                 case TYPE_CODE_BOOLEAN: elements[i] = decodeBoolean(buffer, idx); idx++; break;
                 case TYPE_CODE_BYTE: elements[i] = buffer[idx]; idx++; break;
-                case TYPE_CODE_SHORT: throw new UnsupportedOperationException("short not supported");
                 case TYPE_CODE_INT: idx += decodeInt((IntType) type, buffer, idx, elements, i); break;
                 case TYPE_CODE_LONG: idx += decodeLong((LongType) type, buffer, idx, elements, i); break;
                 case TYPE_CODE_BIG_INTEGER: idx += decodeBigInteger((BigIntegerType) type, buffer, idx, elements, i); break;
@@ -101,7 +99,6 @@ public class PackedDecodingHacks {
             switch (type.typeCode()) {
             case TYPE_CODE_BOOLEAN: elements[i] = decodeBoolean(buffer, idx); idx++; break;
             case TYPE_CODE_BYTE: elements[i] = buffer[idx]; idx++; break;
-            case TYPE_CODE_SHORT: throw new UnsupportedOperationException("short not supported");
             case TYPE_CODE_INT: idx += decodeInt((IntType) type, buffer, idx, elements, i); break;
             case TYPE_CODE_LONG: idx += decodeLong((LongType) type, buffer, idx, elements, i); break;
             case TYPE_CODE_BIG_INTEGER: idx += decodeBigInteger((BigIntegerType) type, buffer, idx, elements, i); break;
@@ -181,7 +178,6 @@ public class PackedDecodingHacks {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return decodeBooleanArray(arrayLen, buffer, idx, dest, destIdx) * byteLen;
         case TYPE_CODE_BYTE: return decodeByteArray(arrayLen, buffer, idx, dest, destIdx) * byteLen;
-        case TYPE_CODE_SHORT: throw new UnsupportedOperationException("short not supported");
         case TYPE_CODE_INT: return decodeIntArray(arrayType.elementType, arrayLen, buffer, idx, dest, destIdx) * byteLen;
         case TYPE_CODE_LONG: return decodeLongArray(arrayType.elementType, arrayLen, buffer, idx, dest, destIdx) * byteLen;
         case TYPE_CODE_BIG_INTEGER: return decodeBigIntegerArray(arrayType.elementType, arrayLen, buffer, idx, dest, destIdx) * byteLen;

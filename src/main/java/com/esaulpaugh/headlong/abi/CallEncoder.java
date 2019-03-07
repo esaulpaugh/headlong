@@ -86,7 +86,6 @@ class CallEncoder {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: insertBool((boolean) value, dest); return;
         case TYPE_CODE_BYTE:
-        case TYPE_CODE_SHORT:
         case TYPE_CODE_INT:
         case TYPE_CODE_LONG: insertInt(((Number) value).longValue(), dest); return;
         case TYPE_CODE_BIG_INTEGER: insertInt(((BigInteger) value), dest); return;
@@ -142,7 +141,6 @@ class CallEncoder {
         switch (arrayType.elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: insertBooleans((boolean[]) value, dest); return;
         case TYPE_CODE_BYTE: insertBytes((byte[]) value, dest); return;
-        case TYPE_CODE_SHORT: insertShorts((short[]) value, dest); return;
         case TYPE_CODE_INT: insertInts((int[]) value, dest); return;
         case TYPE_CODE_LONG: insertLongs((long[]) value, dest); return;
         case TYPE_CODE_BIG_INTEGER: insertBigIntegers((BigInteger[]) value, dest); return;
@@ -174,13 +172,6 @@ class CallEncoder {
                 insertInt(bytes.length, dest);
             }
             insertBytes(bytes, dest);
-            return;
-        case TYPE_CODE_SHORT:
-            short[] shorts = (short[]) value;
-            if(arrayType.dynamic) {
-                insertInt(shorts.length, dest);
-            }
-            insertShorts(shorts, dest);
             return;
         case TYPE_CODE_INT:
             int[] ints = (int[]) value;
@@ -252,12 +243,6 @@ class CallEncoder {
         final int paddingLength = paddingLength(bytes.length);
         for (int i = 0; i < paddingLength; i++) {
             dest.put(ZERO_BYTE);
-        }
-    }
-
-    private static void insertShorts(short[] shorts, ByteBuffer dest) {
-        for (short e : shorts) {
-            insertInt(e, dest);
         }
     }
 

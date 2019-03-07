@@ -65,20 +65,21 @@ public class MonteCarloTest {
 
         final long[] seeds = generateSeeds(masterSeed, n);
 
-//        StringBuilder log = new StringBuilder();
+        StringBuilder log = new StringBuilder();
 
         int i = 0;
         String temp = null;
         MonteCarloTestCase testCase;
-        boolean result;
         for(final long seed : seeds) {
             final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed);
             try {
                 testCase = new MonteCarloTestCase(params);
                 temp = testCase.function.canonicalSignature;
-                result = testCase.run();
+                testCase.run();
                 temp = null;
-//                log.append('#').append(i).append(result ? " PASSED: " : " FAILED: ")
+//                log.append('#')
+//                        .append(i)
+//                        .append(" PASSED: ")
 //                        .append(params.toString())
 //                        .append("\t\t")
 //                        .append(testCase.function.canonicalSignature.substring(testCase.function.canonicalSignature.indexOf('('))) // print function params
