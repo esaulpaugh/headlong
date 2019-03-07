@@ -7,11 +7,11 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-import static com.esaulpaugh.headlong.abi.AbstractUnitType.LOG_2_UNIT_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.UnitType.LOG_2_UNIT_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
-public class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
+public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
     static final String BYTE_ARRAY_CLASS_NAME = byte[].class.getName();
     static final String BYTE_ARRAY_ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(byte[][].class);
@@ -83,7 +83,7 @@ public class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
     @Override
     int byteLength(Object value) {
         int staticLen;
-        final StackableType<?> elementType = this.elementType;
+        final ABIType<?> elementType = this.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN:
             staticLen = ((boolean[]) value).length << LOG_2_UNIT_LENGTH_BYTES; // mul 32
@@ -123,7 +123,7 @@ public class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
 
     @Override
     int byteLengthPacked(Object value) {
-        final StackableType<?> elementType = this.elementType;
+        final ABIType<?> elementType = this.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN:
             return ((boolean[]) value).length; // * 1
@@ -369,21 +369,21 @@ public class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
         return bigDecs;
     }
 
-    private static int getIntElement(AbstractUnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
+    private static int getIntElement(UnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
         bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(elementBuffer);
         type.validateBigIntElement(bi);
         return bi.intValue();
     }
 
-    private static long getLongElement(AbstractUnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
+    private static long getLongElement(UnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
         bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(elementBuffer);
         type.validateBigIntElement(bi);
         return bi.longValue();
     }
 
-    private static BigInteger getBigIntElement(AbstractUnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
+    private static BigInteger getBigIntElement(UnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
         bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bigInt = new BigInteger(elementBuffer);
         type.validateBigIntElement(bigInt);
@@ -394,7 +394,7 @@ public class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
 
 //        final int index = bb.position(); // TODO must pass index to decodeObjectArrayTails if you want to support lenient mode
 
-        final StackableType<?> elementType = this.elementType;
+        final ABIType<?> elementType = this.elementType;
         Object[] dest;
         if(tupleArray) {
             dest = new Tuple[arrayLen];
@@ -412,7 +412,7 @@ public class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
         return dest;
     }
 
-    private static void decodeObjectArrayHeads(StackableType<?>  elementType, ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) {
+    private static void decodeObjectArrayHeads(ABIType<?> elementType, ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) {
         final int len = offsets.length;
         if(elementType.dynamic) {
             for (int i = 0; i < len; i++) {
@@ -425,7 +425,7 @@ public class ArrayType<T extends StackableType<?>, J> extends StackableType<J> {
         }
     }
 
-    private static void decodeObjectArrayTails(StackableType<?> elementType, ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) {
+    private static void decodeObjectArrayTails(ABIType<?> elementType, ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) {
         final int len = offsets.length;
         for (int i = 0; i < len; i++) {
             int offset = offsets[i];

@@ -8,20 +8,20 @@ import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.abi.CallEncoder.OFFSET_LENGTH_BYTES;
 
-public class TupleType extends StackableType<Tuple> {
+public class TupleType extends ABIType<Tuple> {
 
     private static final String CLASS_NAME = Tuple.class.getName();
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(Tuple[].class);
 
-    final StackableType<?>[] elementTypes;
+    final ABIType<?>[] elementTypes;
 
-    private TupleType(String canonicalType, boolean dynamic, StackableType<?>... elementTypes) {
+    private TupleType(String canonicalType, boolean dynamic, ABIType<?>... elementTypes) {
         super(canonicalType, dynamic);
         this.elementTypes = elementTypes;
     }
 
-    static TupleType create(String canonicalType, StackableType<?>... members) {
-        for (StackableType<?> type : members) {
+    static TupleType create(String canonicalType, ABIType<?>... members) {
+        for (ABIType<?> type : members) {
             if(type.dynamic) {
                 return new TupleType(canonicalType, true, members);
             }
@@ -29,7 +29,7 @@ public class TupleType extends StackableType<Tuple> {
         return new TupleType(canonicalType, false, members);
     }
 
-    public StackableType<?>[] getElementTypes() {
+    public ABIType<?>[] getElementTypes() {
         return Arrays.copyOf(elementTypes, elementTypes.length);
     }
 
@@ -53,11 +53,11 @@ public class TupleType extends StackableType<Tuple> {
         Tuple tuple = (Tuple) value;
         final Object[] elements = tuple.elements;
 
-        final StackableType<?>[] types = this.elementTypes;
+        final ABIType<?>[] types = this.elementTypes;
         final int numTypes = types.length;
 
         int len = 0;
-        StackableType<?> type;
+        ABIType<?> type;
         for (int i = 0; i < numTypes; i++) {
             type = types[i];
             len += type.dynamic
@@ -73,7 +73,7 @@ public class TupleType extends StackableType<Tuple> {
         Tuple tuple = (Tuple) value;
         final Object[] elements = tuple.elements;
 
-        final StackableType<?>[] types = this.elementTypes;
+        final ABIType<?>[] types = this.elementTypes;
         final int numTypes = types.length;
 
         int len = 0;
@@ -97,7 +97,7 @@ public class TupleType extends StackableType<Tuple> {
         final Object[] elements = tuple.elements;
         final int actualLength = elements.length;
 
-        final StackableType<?>[] elementTypes = this.elementTypes;
+        final ABIType<?>[] elementTypes = this.elementTypes;
         final int expectedLength = elementTypes.length;
 
         if(actualLength != expectedLength) {
@@ -107,7 +107,7 @@ public class TupleType extends StackableType<Tuple> {
         final int numTypes = elementTypes.length;
 
         int byteLength = 0;
-        StackableType<?> type;
+        ABIType<?> type;
         int i = 0;
         try {
             for ( ; i < numTypes; i++) {
@@ -136,7 +136,7 @@ public class TupleType extends StackableType<Tuple> {
 
 //        final int index = bb.position(); // TODO must pass index to decodeTails if you want to support lenient mode
 
-        final StackableType<?>[] elementTypes = this.elementTypes;
+        final ABIType<?>[] elementTypes = this.elementTypes;
         final int tupleLen = elementTypes.length;
         Object[] elements = new Object[tupleLen];
 
@@ -150,9 +150,9 @@ public class TupleType extends StackableType<Tuple> {
         return new Tuple(elements);
     }
 
-    static void decodeHeads(ByteBuffer bb, StackableType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, Object[] dest) {
+    static void decodeHeads(ByteBuffer bb, ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, Object[] dest) {
         final int tupleLen = offsets.length;
-        StackableType<?> elementType;
+        ABIType<?> elementType;
         for (int i = 0; i < tupleLen; i++) {
             elementType = elementTypes[i];
             if (elementType.dynamic) {
@@ -163,10 +163,10 @@ public class TupleType extends StackableType<Tuple> {
         }
     }
 
-    static void decodeTails(ByteBuffer bb, final StackableType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, final Object[] dest) {
+    static void decodeTails(ByteBuffer bb, final ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, final Object[] dest) {
         final int tupleLen = offsets.length;
         for (int i = 0; i < tupleLen; i++) {
-            final StackableType<?> type = elementTypes[i];
+            final ABIType<?> type = elementTypes[i];
             final int offset = offsets[i];
             final boolean offsetExists = offset > 0;
             if(type.dynamic ^ offsetExists) { // if not matching

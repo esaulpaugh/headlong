@@ -17,7 +17,7 @@ class TupleTypeParser {
         }
 
         final int startParams = 0;
-        final List<StackableType<?>> typesOut = new ArrayList<>();
+        final List<ABIType<?>> typesOut = new ArrayList<>();
         final Matcher illegalTypeCharMatcher = HAS_NON_TYPE_CHARS.matcher(rawTupleTypeString);
         final StringBuilder canonicalBuilder = new StringBuilder("(");
         final int argEnd = parseTupleType(rawTupleTypeString, startParams, typesOut, illegalTypeCharMatcher, canonicalBuilder);
@@ -33,12 +33,12 @@ class TupleTypeParser {
             throw new ParseException("illegal tuple termination: " + rawTupleTypeString.substring(errorStart), errorStart);
         }
 
-        return TupleType.create(completeTupleTypeString(canonicalBuilder), typesOut.toArray(StackableType.EMPTY_TYPE_ARRAY));
+        return TupleType.create(completeTupleTypeString(canonicalBuilder), typesOut.toArray(ABIType.EMPTY_TYPE_ARRAY));
     }
 
     private static int parseTupleType(final String signature,
                                       final int startParams,
-                                      final List<StackableType<?>> typesOut,
+                                      final List<ABIType<?>> typesOut,
                                       final Matcher illegalTypeCharMatcher,
                                       final StringBuilder canonicalTupleType) throws ParseException {
         try {
@@ -67,7 +67,7 @@ class TupleTypeParser {
                     }
                     throw new ParseException("empty parameter", argStart);
                 case '(': // tuple element
-                    ArrayList<StackableType<?>> innerTupleTypes = new ArrayList<>();
+                    ArrayList<ABIType<?>> innerTupleTypes = new ArrayList<>();
                     StringBuilder ctt = new StringBuilder("(");
                     int result = parseTupleType(signature, argStart, innerTupleTypes, illegalTypeCharMatcher, ctt);
 
@@ -75,7 +75,7 @@ class TupleTypeParser {
 
                     final String canonical = completeTupleTypeString(ctt);
 
-                    StackableType<?> childType = TupleType.create(canonical, innerTupleTypes.toArray(StackableType.EMPTY_TYPE_ARRAY));
+                    ABIType<?> childType = TupleType.create(canonical, innerTupleTypes.toArray(ABIType.EMPTY_TYPE_ARRAY));
 
                     // check for array syntax
                     if (argEnd < sigEnd && signature.charAt(argEnd) == '[') {
@@ -123,7 +123,7 @@ class TupleTypeParser {
 
     private static int parseNonTuple(final String signature,
                                              final int argStart,
-                                             final List<StackableType<?>> parentsElements,
+                                             final List<ABIType<?>> parentsElements,
                                              final Matcher illegalTypeCharMatcher,
                                              final StringBuilder canonicalTupleType) throws ParseException {
 

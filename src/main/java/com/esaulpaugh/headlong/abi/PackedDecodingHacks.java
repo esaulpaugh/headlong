@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import static com.esaulpaugh.headlong.abi.StackableType.*;
+import static com.esaulpaugh.headlong.abi.ABIType.*;
 
 /**
  * Experimental. Unoptimized.
@@ -17,7 +17,7 @@ public class PackedDecodingHacks {
 
         int numDynamic = 0;
 
-        for (StackableType<?> type : tupleType.elementTypes) {
+        for (ABIType<?> type : tupleType.elementTypes) {
             if (type.dynamic) {
                 numDynamic++;
             }
@@ -32,7 +32,7 @@ public class PackedDecodingHacks {
 
     private static Tuple decodeTopTuple(TupleType tupleType, byte[] buffer, int end) {
 
-        final StackableType<?>[] elementTypes = tupleType.elementTypes;
+        final ABIType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
         final Object[] elements = new Object[len];
 
@@ -41,7 +41,7 @@ public class PackedDecodingHacks {
         Integer mark = null;
 
         for (int i = len - 1; i >= 0; i--) {
-            final StackableType<?> type = elementTypes[i];
+            final ABIType<?> type = elementTypes[i];
             if (type.dynamic) {
                 mark = i;
                 break;
@@ -67,7 +67,7 @@ public class PackedDecodingHacks {
             final int m = mark;
             idx = 0;
             for (int i = 0; i <= m; i++) {
-                final StackableType<?> type = elementTypes[i];
+                final ABIType<?> type = elementTypes[i];
                 switch (type.typeCode()) {
                 case TYPE_CODE_BOOLEAN: elements[i] = decodeBoolean(buffer, idx); idx++; break;
                 case TYPE_CODE_BYTE: elements[i] = buffer[idx]; idx++; break;
@@ -91,11 +91,11 @@ public class PackedDecodingHacks {
         int idx = 0;
         final int end = buffer.length;
 
-        final StackableType<?>[] elementTypes = tupleType.elementTypes;
+        final ABIType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
         final Object[] elements = new Object[len];
         for (int i = 0; i < len; i++) {
-            final StackableType<?> type = elementTypes[i];
+            final ABIType<?> type = elementTypes[i];
             switch (type.typeCode()) {
             case TYPE_CODE_BOOLEAN: elements[i] = decodeBoolean(buffer, idx); idx++; break;
             case TYPE_CODE_BYTE: elements[i] = buffer[idx]; idx++; break;
@@ -160,7 +160,7 @@ public class PackedDecodingHacks {
     }
 
     private static int decodeArrayDynamic(ArrayType arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) {
-        final StackableType<?> elementType = arrayType.elementType;
+        final ABIType<?> elementType = arrayType.elementType;
         final int byteLen;
         try {
             byteLen = elementType.byteLengthPacked(null);
@@ -204,7 +204,7 @@ public class PackedDecodingHacks {
         return arrayLen;
     }
 
-    private static int decodeIntArray(StackableType<?> elementType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
+    private static int decodeIntArray(ABIType<?> elementType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
         final int len = elementType.byteLengthPacked(null);
         int[] ints = new int[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
@@ -217,7 +217,7 @@ public class PackedDecodingHacks {
         return arrayLen;
     }
 
-    private static int decodeLongArray(StackableType<?> longType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
+    private static int decodeLongArray(ABIType<?> longType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
         final int len = longType.byteLengthPacked(null);
         long[] longs = new long[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
@@ -230,7 +230,7 @@ public class PackedDecodingHacks {
         return arrayLen;
     }
 
-    private static int decodeBigIntegerArray(StackableType<?> elementType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
+    private static int decodeBigIntegerArray(ABIType<?> elementType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
         final int len = elementType.byteLengthPacked(null);
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {

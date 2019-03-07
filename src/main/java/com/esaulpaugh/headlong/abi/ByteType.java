@@ -5,7 +5,7 @@ import com.esaulpaugh.headlong.abi.util.ClassNames;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-class ByteType extends AbstractUnitType<Byte> {
+class ByteType extends UnitType<Byte> {
 
     static final String CLASS_NAME = Byte.class.getName();
     static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(byte[].class);

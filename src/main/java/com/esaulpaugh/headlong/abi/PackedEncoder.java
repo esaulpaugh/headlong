@@ -7,13 +7,13 @@ import com.esaulpaugh.headlong.util.Strings;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import static com.esaulpaugh.headlong.abi.StackableType.*;
+import static com.esaulpaugh.headlong.abi.ABIType.*;
 
 class PackedEncoder {
 
     static int insertTuple(TupleType tupleType, Tuple tuple, byte[] dest, int idx) {
 
-        final StackableType<?>[] types = tupleType.elementTypes;
+        final ABIType<?>[] types = tupleType.elementTypes;
         final Object[] values = tuple.elements;
 
         final int len = types.length;
@@ -26,7 +26,7 @@ class PackedEncoder {
     }
 
     @SuppressWarnings("unchecked")
-    private static int encode(StackableType<?> type, Object value, byte[] dest, int idx) {
+    private static int encode(ABIType<?> type, Object value, byte[] dest, int idx) {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return insertBool((boolean) value, dest, idx);
         case TYPE_CODE_BYTE:
@@ -35,7 +35,7 @@ class PackedEncoder {
         case TYPE_CODE_BIG_INTEGER: return insertInt(((BigInteger) value), type.byteLengthPacked(value), dest, idx);
         case TYPE_CODE_BIG_DECIMAL: return insertInt(((BigDecimal) value).unscaledValue(), type.byteLengthPacked(value), dest, idx);
         case TYPE_CODE_ARRAY:
-            return encodeArray((ArrayType<StackableType<?>, ?>) type, value, dest, idx);
+            return encodeArray((ArrayType<ABIType<?>, ?>) type, value, dest, idx);
         case TYPE_CODE_TUPLE:
             return insertTuple((TupleType) type, (Tuple) value, dest, idx);
         default:
@@ -43,8 +43,8 @@ class PackedEncoder {
         }
     }
 
-    private static int encodeArray(ArrayType<StackableType<?>,?> arrayType, Object value, byte[] dest, int idx) {
-        final StackableType<?> elementType = arrayType.elementType;
+    private static int encodeArray(ArrayType<ABIType<?>,?> arrayType, Object value, byte[] dest, int idx) {
+        final ABIType<?> elementType = arrayType.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return insertBooleans((boolean[]) value, dest, idx);
         case TYPE_CODE_BYTE:

@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-class BigDecimalType extends AbstractUnitType<BigDecimal> {
+class BigDecimalType extends UnitType<BigDecimal> {
 
     static final String CLASS_NAME = BigDecimal.class.getName();
     static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(BigDecimal[].class);

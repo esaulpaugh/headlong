@@ -5,7 +5,7 @@ import com.esaulpaugh.headlong.abi.util.ClassNames;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-class BigIntegerType extends AbstractUnitType<BigInteger> {
+class BigIntegerType extends UnitType<BigInteger> {
 
     static final String CLASS_NAME = BigInteger.class.getName();
     static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(BigInteger[].class);

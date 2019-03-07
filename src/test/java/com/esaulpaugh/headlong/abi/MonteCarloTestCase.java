@@ -13,10 +13,10 @@ import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.*;
 
-import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS_NAME;
-import static com.esaulpaugh.headlong.abi.StackableType.*;
+import static com.esaulpaugh.headlong.abi.ABIType.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class MonteCarloTestCase implements Serializable {
@@ -201,13 +201,13 @@ public class MonteCarloTestCase implements Serializable {
 
     private String generateFunctionSignature(Random r, int tupleDepth) throws ParseException {
 
-        StackableType<?>[] types = new StackableType<?>[r.nextInt(1 + params.maxTupleLen)]; // 0 to max
+        ABIType<?>[] types = new ABIType<?>[r.nextInt(1 + params.maxTupleLen)]; // 0 to max
         for (int i = 0; i < types.length; i++) {
             types[i] = generateType(r, tupleDepth);
         }
 
         StringBuilder signature = new StringBuilder(generateFunctionName(r) + "(");
-        for (StackableType<?> t : types) {
+        for (ABIType<?> t : types) {
             signature.append(t.canonicalType).append(',');
         }
         if (types.length > 0) {
@@ -218,7 +218,7 @@ public class MonteCarloTestCase implements Serializable {
         return signature.toString();
     }
 
-    private StackableType<?> generateType(Random r, final int tupleDepth) throws ParseException {
+    private ABIType<?> generateType(Random r, final int tupleDepth) throws ParseException {
         int index = r.nextInt(CANONICAL_BASE_TYPE_STRINGS.length);
         String baseTypeString = CANONICAL_BASE_TYPE_STRINGS[index];
 
@@ -262,7 +262,7 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     private Tuple generateTuple(TupleType tupleType, Random r) {
-        final StackableType<?>[] types = tupleType.elementTypes;
+        final ABIType<?>[] types = tupleType.elementTypes;
         Object[] args = new Object[types.length];
 
         for (int i = 0; i < types.length; i++) {
@@ -272,14 +272,13 @@ public class MonteCarloTestCase implements Serializable {
         return new Tuple(args);
     }
 
-    private Object generateValue(StackableType<?> type, Random r) {
+    private Object generateValue(ABIType<?> type, Random r) {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return r.nextBoolean();
         case TYPE_CODE_BYTE: return generateByte(r);
-//        case TYPE_CODE_SHORT: return generateShort(r, ((ShortType) type).unsigned);
         case TYPE_CODE_INT: return generateInt(r, (IntType) type);
         case TYPE_CODE_LONG: return generateLong(r, (LongType) type, false);
-        case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (AbstractUnitType<?>) type);
+        case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (UnitType<?>) type);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
         case TYPE_CODE_ARRAY: return generateArray((ArrayType<?, ?>) type, r);
         case TYPE_CODE_TUPLE: return generateTuple((TupleType) type, r);
@@ -311,7 +310,7 @@ public class MonteCarloTestCase implements Serializable {
         return x;
     }
 
-    private static BigInteger generateBigInteger(Random r, AbstractUnitType<?> type) {
+    private static BigInteger generateBigInteger(Random r, UnitType<?> type) {
         byte[] thirtyTwo = new byte[UNIT_LENGTH_BYTES];
         final int len = 1 + r.nextInt(type.bitLength >>> 3); // 1-32
         boolean zero = true;
@@ -335,7 +334,7 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     private Object generateArray(ArrayType<?, ?> arrayType, Random r) {
-        StackableType<?> elementType = arrayType.elementType;
+        ABIType<?> elementType = arrayType.elementType;
         final int len = arrayType.length == DYNAMIC_LENGTH
                 ? r.nextInt(params.maxArrayLen + 1) // 0 to max
                 : arrayType.length;
@@ -446,15 +445,15 @@ public class MonteCarloTestCase implements Serializable {
     private static void findInequality(TupleType tupleType, Tuple in, Tuple out) throws Exception {
         final int len = tupleType.elementTypes.length;
         for (int i = 0; i < len; i++) {
-            StackableType<?> type = tupleType.elementTypes[i];
+            ABIType<?> type = tupleType.elementTypes[i];
             findInequality(type, in.elements[i], out.elements[i]);
         }
     }
 
-    private static void findInequality(StackableType<?> elementType, Object in, Object out) throws Exception {
+    private static void findInequality(ABIType<?> elementType, Object in, Object out) throws Exception {
         System.out.println("findInequality(" + elementType.getClass().getName() + ')');
-        if(elementType instanceof AbstractUnitType<?>) {
-            findInequality((AbstractUnitType<?>) elementType, in, out);
+        if(elementType instanceof UnitType<?>) {
+            findInequality((UnitType<?>) elementType, in, out);
         } else if(elementType instanceof TupleType) {
             findInequality((TupleType) elementType, (Tuple) in, (Tuple) out);
         } else if(elementType instanceof ArrayType<?, ?>) {
@@ -481,18 +480,18 @@ public class MonteCarloTestCase implements Serializable {
         }
     }
 
-    private static void findInequality(AbstractUnitType<?> abstractUnitType, Object in, Object out) throws Exception {
+    private static void findInequality(UnitType<?> unitType, Object in, Object out) throws Exception {
         if(!in.equals(out)) {
             if(in instanceof BigInteger && out instanceof BigInteger) {
                 System.err.println("bitLen: " + ((BigInteger) in).bitLength() + " =? " + ((BigInteger) out).bitLength());
             }
-            System.err.println(in + " != " + out + " " + abstractUnitType.bitLength);
+            System.err.println(in + " != " + out + " " + unitType.bitLength);
             throw new Exception();
         }
     }
 
     private static void findInequalityInArray(ArrayType<?, ?> arrayType, Object[] in, Object[] out) throws Exception {
-        final StackableType<?> elementType = arrayType.elementType;
+        final ABIType<?> elementType = arrayType.elementType;
         if (in.length != out.length) {
             throw new AssertionError(elementType.toString() + " len " + in.length + " != " + out.length);
         }

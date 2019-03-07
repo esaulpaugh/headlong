@@ -8,7 +8,7 @@ import java.math.BigInteger;
 /**
  * Superclass for any 32-byte ("unit") Contract ABI type. Usually numbers or boolean.
  */
-abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V should be instanceof Number or Boolean
+abstract class UnitType<V> extends ABIType<V> { // instance of V should be instanceof Number or Boolean
 
     static final int UNIT_LENGTH_BYTES = 32;
     static final int LOG_2_UNIT_LENGTH_BYTES = 31 - Integer.numberOfLeadingZeros(UNIT_LENGTH_BYTES);
@@ -16,7 +16,7 @@ abstract class AbstractUnitType<V> extends StackableType<V> { // instance of V s
     final int bitLength;
     final boolean unsigned;
 
-    AbstractUnitType(String canonicalType, int bitLength, boolean unsigned) {
+    UnitType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, false);
         this.bitLength = bitLength;
         this.unsigned = unsigned;

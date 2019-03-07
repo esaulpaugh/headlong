@@ -5,9 +5,9 @@ import com.esaulpaugh.headlong.abi.util.ClassNames;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 
-import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
-public abstract class StackableType<J> implements Serializable {
+public abstract class ABIType<J> implements Serializable {
 
     static final int TYPE_CODE_BOOLEAN = 0;
     static final int TYPE_CODE_BYTE = 1;
@@ -19,12 +19,12 @@ public abstract class StackableType<J> implements Serializable {
     static final int TYPE_CODE_ARRAY = 6;
     static final int TYPE_CODE_TUPLE = 7;
 
-    static final StackableType<?>[] EMPTY_TYPE_ARRAY = new StackableType<?>[0];
+    static final ABIType<?>[] EMPTY_TYPE_ARRAY = new ABIType<?>[0];
 
     final String canonicalType;
     final boolean dynamic;
 
-    StackableType(String canonicalType, boolean dynamic) {
+    ABIType(String canonicalType, boolean dynamic) {
         this.canonicalType = canonicalType;
         this.dynamic = dynamic;
     }
@@ -76,7 +76,7 @@ public abstract class StackableType<J> implements Serializable {
     /**
      *
      * @param buffer    the buffer containing the encoded data
-     * @param unitBuffer a buffer of length {@link AbstractUnitType#UNIT_LENGTH_BYTES} in which to store intermediate values
+     * @param unitBuffer a buffer of length {@link UnitType#UNIT_LENGTH_BYTES} in which to store intermediate values
      * @return  the decoded value
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
@@ -94,7 +94,7 @@ public abstract class StackableType<J> implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        return canonicalType.equals(((StackableType<?>) o).canonicalType);
+        return canonicalType.equals(((ABIType<?>) o).canonicalType);
     }
 
     @Override

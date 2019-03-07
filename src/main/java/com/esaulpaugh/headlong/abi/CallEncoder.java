@@ -5,9 +5,9 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
-import static com.esaulpaugh.headlong.abi.StackableType.*;
+import static com.esaulpaugh.headlong.abi.ABIType.*;
 
 class CallEncoder {
 
@@ -49,7 +49,7 @@ class CallEncoder {
     }
 
     static void insertTuple(TupleType tupleType, Tuple tuple, ByteBuffer outBuffer) {
-        final StackableType<?>[] types = tupleType.elementTypes;
+        final ABIType<?>[] types = tupleType.elementTypes;
         final Object[] values = tuple.elements;
         final int[] offset = new int[] { headLengthSum(types, values) };
 
@@ -60,7 +60,7 @@ class CallEncoder {
         }
         if(tupleType.dynamic) {
             for (i = 0; i < len; i++) {
-                StackableType<?> type = types[i];
+                ABIType<?> type = types[i];
                 if (type.dynamic) {
                     encodeTail(type, values[i], outBuffer);
                 }
@@ -68,11 +68,11 @@ class CallEncoder {
         }
     }
 
-    private static int headLengthSum(StackableType<?>[] elementTypes, Object[] elements) {
+    private static int headLengthSum(ABIType<?>[] elementTypes, Object[] elements) {
         int headLengths = 0;
         final int n = elementTypes.length;
         for (int i = 0; i < n; i++) {
-            StackableType<?> t = elementTypes[i];
+            ABIType<?> t = elementTypes[i];
             if(t.dynamic) {
                 headLengths += OFFSET_LENGTH_BYTES;
             } else {
@@ -82,7 +82,7 @@ class CallEncoder {
         return headLengths;
     }
 
-    private static void encodeHead(StackableType<?> type, Object value, ByteBuffer dest, int[] offset) {
+    private static void encodeHead(ABIType<?> type, Object value, ByteBuffer dest, int[] offset) {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: insertBool((boolean) value, dest); return;
         case TYPE_CODE_BYTE:
@@ -109,13 +109,13 @@ class CallEncoder {
         }
     }
 
-    private static void insertOffset(final int[] offset, StackableType<?> paramType, Object object, ByteBuffer dest) {
+    private static void insertOffset(final int[] offset, ABIType<?> paramType, Object object, ByteBuffer dest) {
         final int val = offset[0];
         insertInt(val, dest);
         offset[0] = val + paramType.byteLength(object);
     }
 
-    private static void encodeTail(StackableType<?> type, Object value, ByteBuffer dest) {
+    private static void encodeTail(ABIType<?> type, Object value, ByteBuffer dest) {
 //        only dynamics expected
         switch (type.typeCode()) {
         case TYPE_CODE_ARRAY:
@@ -147,7 +147,7 @@ class CallEncoder {
         case TYPE_CODE_BIG_DECIMAL: insertBigDecimals((BigDecimal[]) value, dest); return;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
-            final StackableType<?> elementType = arrayType.elementType;
+            final ABIType<?> elementType = arrayType.elementType;
             for(Object e : (Object[]) value) {
                 encodeHead(elementType, e, dest, null);
             }
@@ -157,7 +157,7 @@ class CallEncoder {
     }
 
     private static void encodeArrayTail(ArrayType<?, ?> arrayType, Object value, ByteBuffer dest) {
-        final StackableType<?> elementType = arrayType.elementType;
+        final ABIType<?> elementType = arrayType.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN:
             boolean[] booleans = (boolean[]) value;

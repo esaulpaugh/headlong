@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.esaulpaugh.headlong.abi.AbstractUnitType.UNIT_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.encode;
 
@@ -144,7 +144,7 @@ public class Function implements Serializable {
     }
 
     public Tuple decodeCall(ByteBuffer abiBuffer) {
-        byte[] unitBuffer = StackableType.newUnitBuffer();
+        byte[] unitBuffer = ABIType.newUnitBuffer();
         abiBuffer.get(unitBuffer, 0, SELECTOR_LEN);
         final byte[] selector = this.selector;
         for(int i = 0; i < SELECTOR_LEN; i++) {
@@ -202,7 +202,7 @@ public class Function implements Serializable {
                 .append('\n');
         int idx = offset + SELECTOR_LEN;
         while(idx < length) {
-            sb.append(idx >>> AbstractUnitType.LOG_2_UNIT_LENGTH_BYTES)
+            sb.append(idx >>> UnitType.LOG_2_UNIT_LENGTH_BYTES)
                     .append('\t')
                     .append(encode(Arrays.copyOfRange(buffer, idx, idx + UNIT_LENGTH_BYTES), HEX))
                     .append('\n');

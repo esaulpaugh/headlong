@@ -4,7 +4,7 @@ import java.util.*;
 
 /**
  * An object to hold metadata about a base type, such as the type's Java class name. A metadata object for each type is
- * stored in {@link #TYPE_INFO_MAP} which is used by {@link TypeFactory#resolveBaseType(String, boolean, StackableType)}
+ * stored in {@link #TYPE_INFO_MAP} which is used by {@link TypeFactory#resolveBaseType(String, boolean, ABIType)}
  * to generate a base type.
  *
  * fixed/ufixed types, which number in the thousands, are not included in the map, saving about 1 MB of memory. These
@@ -90,11 +90,11 @@ class BaseTypeInfo {
     public final int scale;
 //    public final boolean unsigned;
 
-    public final StackableType<?> elementType;
+    public final ABIType<?> elementType;
 
     public final int arrayLen;
 
-    public BaseTypeInfo(String canonical, String objectClassName, String arrayClassNameStub, int arrayLen, StackableType<?> elementType) {
+    public BaseTypeInfo(String canonical, String objectClassName, String arrayClassNameStub, int arrayLen, ABIType<?> elementType) {
         this(canonical, null, canonical, objectClassName, arrayClassNameStub, -1, 0, true, arrayLen, elementType);
     }
 
@@ -111,7 +111,7 @@ class BaseTypeInfo {
                         int scale,
                         boolean unsigned,
                         int arrayLen,
-                        StackableType<?> elementType) {
+                        ABIType<?> elementType) {
 //        this.ordinal = ordinal;
 //        this.canonical = canonical;
 //        this.nonCanonical = nonCanonical == null ? null : nonCanonical.intern();

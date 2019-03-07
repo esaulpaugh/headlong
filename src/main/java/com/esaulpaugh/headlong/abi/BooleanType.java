@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 /**
  * Unsigned 0 or 1.
  */
-class BooleanType extends AbstractUnitType<Boolean> {
+class BooleanType extends UnitType<Boolean> {
 
     static final BooleanType INSTANCE = new BooleanType();
 

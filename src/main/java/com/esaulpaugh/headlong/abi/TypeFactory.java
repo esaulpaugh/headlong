@@ -7,24 +7,24 @@ import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
 /**
- * Creates the appropriate {@link StackableType} object for a given canonical type string.
+ * Creates the appropriate {@link ABIType} object for a given canonical type string.
  */
 final class TypeFactory {
 
     private static final ClassLoader CLASS_LOADER = TypeFactory.class.getClassLoader();
 
-    static StackableType<?> createForTuple(String canonicalType, TupleType baseTupleType) throws ParseException {
+    static ABIType<?> createForTuple(String canonicalType, TupleType baseTupleType) throws ParseException {
         if(baseTupleType == null) {
             throw new NullPointerException();
         }
         return create(canonicalType, baseTupleType);
     }
 
-    static StackableType<?> create(String canonicalType) throws ParseException {
+    static ABIType<?> create(String canonicalType) throws ParseException {
         return create(canonicalType, null);
     }
 
-    private static StackableType<?> create(String canonicalType, TupleType baseTupleType) throws ParseException {
+    private static ABIType<?> create(String canonicalType, TupleType baseTupleType) throws ParseException {
         try {
             return buildType(canonicalType, false, baseTupleType);
         } catch (ClassNotFoundException e) {
@@ -32,7 +32,7 @@ final class TypeFactory {
         }
     }
 
-    private static StackableType<?> buildType(final String canonicalType, boolean isArrayElement, final StackableType<?> baseTuple) throws ParseException, ClassNotFoundException {
+    private static ABIType<?> buildType(final String canonicalType, boolean isArrayElement, final ABIType<?> baseTuple) throws ParseException, ClassNotFoundException {
 
         final int end = canonicalType.length();
         final int idxOfLast = end - 1;
@@ -56,19 +56,19 @@ final class TypeFactory {
                 }
             }
 
-            final StackableType<?> elementType = buildType(canonicalType.substring(0, arrayOpenIndex), true, baseTuple);
+            final ABIType<?> elementType = buildType(canonicalType.substring(0, arrayOpenIndex), true, baseTuple);
             final Class<?> elementClass;
-            if(elementType.typeCode() == StackableType.TYPE_CODE_ARRAY) {
+            if(elementType.typeCode() == ABIType.TYPE_CODE_ARRAY) {
                 elementClass = Class.forName(elementType.className(), true, CLASS_LOADER);
             } else {
                 elementClass = null;
             }
             final String className = '[' + elementType.arrayClassNameStub();
             final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
-            return new ArrayType<StackableType<?>, Object>(canonicalType, elementType, elementClass, className, className, length, dynamic);
+            return new ArrayType<ABIType<?>, Object>(canonicalType, elementType, elementClass, className, className, length, dynamic);
         } else {
 //            final boolean isArrayElement = index < canonicalType.length() - 1;
-            StackableType<?> baseType = resolveBaseType(canonicalType, isArrayElement, baseTuple);
+            ABIType<?> baseType = resolveBaseType(canonicalType, isArrayElement, baseTuple);
             if(baseType == null) {
                 throw new ParseException("unrecognized type: "
                         + canonicalType + " (" + String.format("%040x", new BigInteger(canonicalType.getBytes(CHARSET_UTF_8))) + ")", -1);
@@ -77,9 +77,9 @@ final class TypeFactory {
         }
     }
 
-    private static StackableType<?> resolveBaseType(final String ct, boolean isElement, StackableType<?> baseTuple) {
+    private static ABIType<?> resolveBaseType(final String ct, boolean isElement, ABIType<?> baseTuple) {
 
-        final StackableType<?> type;
+        final ABIType<?> type;
 
         BaseTypeInfo info = BaseTypeInfo.get(ct);
 
