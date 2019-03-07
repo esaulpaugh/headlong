@@ -75,9 +75,7 @@ public class PackedDecodingHacks {
                 case TYPE_CODE_LONG: idx += decodeLong((LongType) type, buffer, idx, elements, i); break;
                 case TYPE_CODE_BIG_INTEGER: idx += decodeBigInteger((BigIntegerType) type, buffer, idx, elements, i); break;
                 case TYPE_CODE_BIG_DECIMAL: idx += decodeBigDecimal((BigDecimalType) type, buffer, idx, elements, i); break;
-                case TYPE_CODE_ARRAY: idx += (i == m
-                        ? decodeArrayDynamic((ArrayType) type, buffer, idx, end, elements, i)
-                        : decodeArrayDynamic((ArrayType) type, buffer, idx, end, elements, i)); break;
+                case TYPE_CODE_ARRAY: idx += decodeArrayDynamic((ArrayType) type, buffer, idx, end, elements, i); break;
                 case TYPE_CODE_TUPLE: throw new UnsupportedOperationException("nested tuple"); // idx += decodeTupleDynamic((TupleType) type, buffer, idx, end, elements, i); break;
                 }
             }
@@ -103,9 +101,7 @@ public class PackedDecodingHacks {
             case TYPE_CODE_LONG: idx += decodeLong((LongType) type, buffer, idx, elements, i); break;
             case TYPE_CODE_BIG_INTEGER: idx += decodeBigInteger((BigIntegerType) type, buffer, idx, elements, i); break;
             case TYPE_CODE_BIG_DECIMAL: idx += decodeBigDecimal((BigDecimalType) type, buffer, idx, elements, i); break;
-            case TYPE_CODE_ARRAY: idx += (type.dynamic
-                    ? decodeArrayDynamic((ArrayType) type, buffer, idx, end, elements, i)
-                    : decodeArrayDynamic((ArrayType) type, buffer, idx, end, elements, i)); break;
+            case TYPE_CODE_ARRAY: idx += decodeArrayDynamic((ArrayType) type, buffer, idx, end, elements, i); break;
             case TYPE_CODE_TUPLE: throw new UnsupportedOperationException("nested tuple"); // idx += decodeTupleDynamic((TupleType) type, buffer, idx, end, elements, i); break;
             }
         }
