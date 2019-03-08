@@ -10,63 +10,63 @@ import java.util.List;
 
 public class ContractJSONParserTest {
 
-    private static final String FUNCTION_JSON = "{\"name\": \"foo\", \"type\": \"function\", \"inputs\": [ { \"name\": \"complex_nums\", \"type\": \"tuple[]\", \"components\": [ {\"name\": \"real\", \"type\": \"decimal\"}, { \"name\": \"imaginary\", \"type\": \"decimal\" } ] } ]}";
+    private static final String FUNCTION_A_JSON = "{\"name\": \"foo\", \"type\": \"function\", \"inputs\": [ {\"name\": \"complex_nums\", \"type\": \"tuple[]\", \"components\": [ {\"name\": \"real\", \"type\": \"decimal\"}, {\"name\": \"imaginary\", \"type\": \"decimal\"} ]} ]}";
 
-//    private static final String FUNCTION_JSON = "{\n" +
-//            "    \"name\": \"func\",\n" +
-//            "    \"type\": \"function\",\n" +
-//            "    \"inputs\": [\n" +
-//            "      {\n" +
-//            "        \"name\": \"aa\",\n" +
-//            "        \"type\": \"tuple\",\n" +
-//            "        \"components\": [\n" +
-//            "          {\n" +
-//            "            \"name\": \"aa_d\",\n" +
-//            "            \"type\": \"decimal\"\n" +
-//            "          },\n" +
-//            "          {\n" +
-//            "            \"name\": \"aa_f\",\n" +
-//            "            \"type\": \"fixed\"\n" +
-//            "          }\n" +
-//            "        ]\n" +
-//            "      },\n" +
-//            "      {\n" +
-//            "        \"name\": \"bb\",\n" +
-//            "        \"type\": \"fixed[]\",\n" +
-//            "        \"components\": [\n" +
-//            "        ]\n" +
-//            "      },\n" +
-//            "      {\n" +
-//            "        \"name\": \"cc\",\n" +
-//            "        \"type\": \"tuple\",\n" +
-//            "        \"components\": [\n" +
-//            "          {\n" +
-//            "            \"name\": \"cc_uint\",\n" +
-//            "            \"type\": \"uint256\"\n" +
-//            "          },\n" +
-//            "          {\n" +
-//            "            \"name\": \"cc_int_arr\",\n" +
-//            "            \"type\": \"int[]\"\n" +
-//            "          },\n" +
-//            "          {\n" +
-//            "            \"name\": \"cc_tuple_arr\",\n" +
-//            "            \"type\": \"tuple[]\",\n" +
-//            "            \"components\": [\n" +
-//            "              {\n" +
-//            "                \"name\": \"cc_tuple_arr_int_eight\",\n" +
-//            "                \"type\": \"int8\"\n" +
-//            "              },\n" +
-//            "              {\n" +
-//            "                \"name\": \"cc_tuple_arr_uint_forty\",\n" +
-//            "                \"type\": \"uint40\"\n" +
-//            "              }\n" +
-//            "            ]\n" +
-//            "          }\n" +
-//            "        ]\n" +
-//            "      }\n" +
-//            "    ],\n" +
-//            "    \"outputs\": []\n" +
-//            "  }\n";
+    private static final String FUNCTION_B_JSON = "{\n" +
+            "    \"name\": \"func\",\n" +
+            "    \"type\": \"function\",\n" +
+            "    \"inputs\": [\n" +
+            "      {\n" +
+            "        \"name\": \"aa\",\n" +
+            "        \"type\": \"tuple\",\n" +
+            "        \"components\": [\n" +
+            "          {\n" +
+            "            \"name\": \"aa_d\",\n" +
+            "            \"type\": \"decimal\"\n" +
+            "          },\n" +
+            "          {\n" +
+            "            \"name\": \"aa_f\",\n" +
+            "            \"type\": \"fixed\"\n" +
+            "          }\n" +
+            "        ]\n" +
+            "      },\n" +
+            "      {\n" +
+            "        \"name\": \"bb\",\n" +
+            "        \"type\": \"fixed[]\",\n" +
+            "        \"components\": [\n" +
+            "        ]\n" +
+            "      },\n" +
+            "      {\n" +
+            "        \"name\": \"cc\",\n" +
+            "        \"type\": \"tuple\",\n" +
+            "        \"components\": [\n" +
+            "          {\n" +
+            "            \"name\": \"cc_uint\",\n" +
+            "            \"type\": \"uint256\"\n" +
+            "          },\n" +
+            "          {\n" +
+            "            \"name\": \"cc_int_arr\",\n" +
+            "            \"type\": \"int[]\"\n" +
+            "          },\n" +
+            "          {\n" +
+            "            \"name\": \"cc_tuple_arr\",\n" +
+            "            \"type\": \"tuple[]\",\n" +
+            "            \"components\": [\n" +
+            "              {\n" +
+            "                \"name\": \"cc_tuple_arr_int_eight\",\n" +
+            "                \"type\": \"int8\"\n" +
+            "              },\n" +
+            "              {\n" +
+            "                \"name\": \"cc_tuple_arr_uint_forty\",\n" +
+            "                \"type\": \"uint40\"\n" +
+            "              }\n" +
+            "            ]\n" +
+            "          }\n" +
+            "        ]\n" +
+            "      }\n" +
+            "    ],\n" +
+            "    \"outputs\": []\n" +
+            "  }\n";
 
     private static final String CONTRACT_JSON = "[\n" +
             "  {\n" +
@@ -136,7 +136,9 @@ public class ContractJSONParserTest {
 
     @Test
     public void testParseFunction() throws ParseException {
-        Function f = ContractJSONParser.parseFunction(FUNCTION_JSON);
+        Function f = ContractJSONParser.parseFunction(FUNCTION_A_JSON);
+        System.out.println(f.getName() + " : " + f.canonicalSignature);
+        f = ContractJSONParser.parseFunction(FUNCTION_B_JSON);
         System.out.println(f.getName() + " : " + f.canonicalSignature);
     }
 
