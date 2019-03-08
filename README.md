@@ -6,6 +6,8 @@ Usage of the ABI codec:
 
 ```java
 Function f = new Function("baz(uint32,bool)"); // canonicalizes and parses any signature automatically
+Function f2 = Function.fromJson("{\"name\": \"foo\", \"type\": \"function\", \"inputs\": [ { \"name\": \"complex_nums\", \"type\": \"tuple[]\", \"components\": [ {\"name\": \"real\", \"type\": \"decimal\"}, { \"name\": \"imaginary\", \"type\": \"decimal\" } ] } ]}");
+
 Tuple args = new Tuple(69L, true);
 
 // Two equivalent styles:

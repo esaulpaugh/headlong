@@ -111,10 +111,6 @@ public class Function implements Serializable {
         return paramTypes;
     }
 
-    public static Function parse(String signature) throws ParseException {
-        return new Function(signature);
-    }
-
     public ByteBuffer encodeCallWithArgs(Object... args) {
         return encodeCall(new Tuple(args));
     }
@@ -213,5 +209,13 @@ public class Function implements Serializable {
 
     public static String hexOf(byte[] bytes) {
         return encode(bytes, HEX);
+    }
+
+    public static Function parse(String signature) throws ParseException {
+        return new Function(signature);
+    }
+
+    public static Function fromJson(String functionJson) throws ParseException {
+        return ContractJSONParser.parseFunction(functionJson);
     }
 }
