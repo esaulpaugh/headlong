@@ -72,7 +72,7 @@ public class PackedEncoderTest {
 
         Assert.assertArrayEquals(FastHex.decode("fffffe0100"), packed);
 
-        Tuple decoded = PackedDecodingHacks.decode(tupleType, packed);
+        Tuple decoded = PackedDecoder.decode(tupleType, packed);
 
         Assert.assertEquals(values, decoded);
     }
@@ -92,7 +92,7 @@ public class PackedEncoderTest {
 
         Assert.assertArrayEquals(FastHex.decode("000000000000000900000000000000050000000000000006"), packed);
 
-        Tuple decoded = PackedDecodingHacks.decode(tupleType, packed);
+        Tuple decoded = PackedDecoder.decode(tupleType, packed);
 
         Assert.assertEquals(values, decoded);
     }
@@ -112,7 +112,7 @@ public class PackedEncoderTest {
 
         Assert.assertArrayEquals(FastHex.decode("00000000000000010000000000000002000000000000000300000000000000040000000000000000000000000000000000000000000000000000000000000001"), packed);
 
-        Tuple decoded = PackedDecodingHacks.decode(tupleType, packed);
+        Tuple decoded = PackedDecoder.decode(tupleType, packed);
 
         Assert.assertEquals(values, decoded);
     }

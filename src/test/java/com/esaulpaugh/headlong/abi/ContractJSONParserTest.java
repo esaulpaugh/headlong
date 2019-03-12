@@ -5,6 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.junit.Test;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.List;
 
@@ -138,6 +140,7 @@ public class ContractJSONParserTest {
     public void testParseFunction() throws ParseException {
         Function f = ContractJSONParser.parseFunction(FUNCTION_A_JSON);
         System.out.println(f.getName() + " : " + f.canonicalSignature);
+        f.encodeCallWithArgs((Object) new Tuple[] { new Tuple(new BigDecimal(BigInteger.ONE, 10), new BigDecimal(BigInteger.TEN, 10)) });
         f = ContractJSONParser.parseFunction(FUNCTION_B_JSON);
         System.out.println(f.getName() + " : " + f.canonicalSignature);
     }
