@@ -21,9 +21,8 @@ class BaseTypeInfo {
         putUnsignedInts(map);
 
         for (int i = 1; i <= 32; i++) {
-            String canonical = "bytes" + i;
             map.put(
-                    canonical,
+                    "bytes" + i,
                     new BaseTypeInfo(
                             ArrayType.BYTE_ARRAY_CLASS_NAME,
                             ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB,
@@ -134,7 +133,7 @@ class BaseTypeInfo {
     }
 
     public BaseTypeInfo(String objectClassName, String arrayClassNameStub, int bitLen) {
-        this(objectClassName, arrayClassNameStub, bitLen, 0, -1,null);
+        this(objectClassName, arrayClassNameStub, bitLen, 0, -1, null);
     }
 
     public BaseTypeInfo(String objectClassName,
