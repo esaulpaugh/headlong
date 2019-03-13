@@ -22,10 +22,12 @@ public abstract class ABIType<J> implements Serializable {
     static final ABIType<?>[] EMPTY_TYPE_ARRAY = new ABIType<?>[0];
 
     final String canonicalType;
+    final Class<?> clazz;
     final boolean dynamic;
 
-    ABIType(String canonicalType, boolean dynamic) {
+    ABIType(String canonicalType, Class<?> clazz, boolean dynamic) {
         this.canonicalType = canonicalType;
+        this.clazz = clazz;
         this.dynamic = dynamic;
     }
 
@@ -37,7 +39,9 @@ public abstract class ABIType<J> implements Serializable {
         return dynamic;
     }
 
-    public abstract String className();
+    public Class<?> clazz() {
+        return clazz;
+    }
 
     abstract String arrayClassNameStub();
 
@@ -49,28 +53,20 @@ public abstract class ABIType<J> implements Serializable {
 
     public abstract J parseArgument(String s);
 
-    public int validate(Object value) {
-        final String expectedClassName = className();
+    public abstract int validate(Object value);
 
-        // will throw NPE if argument null
-        if(!expectedClassName.equals(value.getClass().getName())) {
+    void validateClass(Object value) {
+        // may throw NPE
+        if(clazz != value.getClass()) {
             // this pretty much only happens in the error case
-            boolean assignable;
-            try {
-                assignable = Class.forName(expectedClassName).isAssignableFrom(value.getClass());
-            } catch (ClassNotFoundException cnfe) {
-                assignable = false;
-            }
-            if(!assignable) {
+            if(!clazz.isAssignableFrom(value.getClass())) {
                 throw new IllegalArgumentException("class mismatch: "
                         + value.getClass().getName()
                         + " not assignable to "
-                        + expectedClassName
-                        + " (" + ClassNames.toFriendly(value.getClass().getName()) + " not instanceof " + ClassNames.toFriendly(expectedClassName) + "/" + canonicalType + ")");
+                        + clazz.getName()
+                        + " (" + ClassNames.toFriendly(value.getClass().getName()) + " not instanceof " + ClassNames.toFriendly(clazz.getName()) + "/" + canonicalType + ")");
             }
         }
-
-        return UNIT_LENGTH_BYTES;
     }
 
     /**

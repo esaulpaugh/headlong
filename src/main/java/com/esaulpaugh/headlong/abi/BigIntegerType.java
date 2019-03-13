@@ -7,16 +7,11 @@ import java.nio.ByteBuffer;
 
 class BigIntegerType extends UnitType<BigInteger> {
 
-    static final String CLASS_NAME = BigInteger.class.getName();
+    static final Class<?> CLASS = BigInteger.class;
     static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(BigInteger[].class);
 
     BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {
-        super(canonicalType, bitLength, unsigned);
-    }
-
-    @Override
-    public String className() {
-        return CLASS_NAME;
+        super(canonicalType, CLASS, bitLength, unsigned);
     }
 
     @Override
@@ -42,9 +37,9 @@ class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
-    public int validate(Object object) {
-        super.validate(object);
-        validateBigIntBitLen((BigInteger) object);
+    public int validate(Object value) {
+        validateClass(value);
+        validateBigIntBitLen((BigInteger) value);
         return UNIT_LENGTH_BYTES;
     }
 

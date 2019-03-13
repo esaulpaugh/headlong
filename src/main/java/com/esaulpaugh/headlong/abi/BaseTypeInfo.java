@@ -24,7 +24,7 @@ class BaseTypeInfo {
             map.put(
                     "bytes" + i,
                     new BaseTypeInfo(
-                            ArrayType.BYTE_ARRAY_CLASS_NAME,
+                            ArrayType.BYTE_ARRAY_CLASS,
                             ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB,
                             i,
                             ByteType.UNSIGNED_BYTE_OBJECT
@@ -34,12 +34,12 @@ class BaseTypeInfo {
 
         map.put(
                 "bytes",
-                new BaseTypeInfo(ArrayType.BYTE_ARRAY_CLASS_NAME, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB, -1, ByteType.UNSIGNED_BYTE_OBJECT)
+                new BaseTypeInfo(ArrayType.BYTE_ARRAY_CLASS, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB, -1, ByteType.UNSIGNED_BYTE_OBJECT)
         );
         map.put(
                 "function",
                 new BaseTypeInfo(
-                        ArrayType.BYTE_ARRAY_CLASS_NAME,
+                        ArrayType.BYTE_ARRAY_CLASS,
                         ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB,
                         24 * Byte.SIZE,
                         0,
@@ -49,19 +49,19 @@ class BaseTypeInfo {
         );
         map.put(
                 "string",
-                new BaseTypeInfo(ArrayType.STRING_CLASS_NAME, ArrayType.STRING_ARRAY_CLASS_NAME_STUB, -1, ByteType.UNSIGNED_BYTE_OBJECT)
+                new BaseTypeInfo(ArrayType.STRING_CLASS, ArrayType.STRING_ARRAY_CLASS_NAME_STUB, -1, ByteType.UNSIGNED_BYTE_OBJECT)
         );
         map.put(
                 "address",
-                new BaseTypeInfo(BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB, 160, 0, -1, null)
+                new BaseTypeInfo(BigIntegerType.CLASS, BigIntegerType.ARRAY_CLASS_NAME_STUB, 160, 0, -1, null)
         );
         map.put(
                 "decimal",
-                new BaseTypeInfo(BigDecimalType.CLASS_NAME, BigDecimalType.ARRAY_CLASS_NAME_STUB, 128, 10, -1, null)
+                new BaseTypeInfo(BigDecimalType.CLASS, BigDecimalType.ARRAY_CLASS_NAME_STUB, 128, 10, -1, null)
         );
         map.put(
                 "bool",
-                new BaseTypeInfo(BooleanType.CLASS_NAME, BooleanType.ARRAY_CLASS_NAME_STUB, 1)
+                new BaseTypeInfo(BooleanType.CLASS, BooleanType.ARRAY_CLASS_NAME_STUB, 1)
         );
 
         TYPE_INFO_MAP = Collections.unmodifiableMap(map);
@@ -70,39 +70,39 @@ class BaseTypeInfo {
     private static void putSignedInts(final Map<String, BaseTypeInfo> map) {
         int n;
         for(n=8;n <= 8; n+=8) {
-            map.put("int" + n, new BaseTypeInfo(ByteType.CLASS_NAME, ByteType.ARRAY_CLASS_NAME_STUB, n));
+            map.put("int" + n, new BaseTypeInfo(ByteType.CLASS, ByteType.ARRAY_CLASS_NAME_STUB, n));
         }
         for ( ; n <= 32; n+=8) {
-            map.put("int" + n, new BaseTypeInfo(IntType.CLASS_NAME, IntType.ARRAY_CLASS_NAME_STUB, n));
+            map.put("int" + n, new BaseTypeInfo(IntType.CLASS, IntType.ARRAY_CLASS_NAME_STUB, n));
         }
         for ( ; n <= 64; n+=8) {
-            map.put("int" + n, new BaseTypeInfo(LongType.CLASS_NAME, LongType.ARRAY_CLASS_NAME_STUB, n));
+            map.put("int" + n, new BaseTypeInfo(LongType.CLASS, LongType.ARRAY_CLASS_NAME_STUB, n));
         }
         for ( ; n <= 256; n+=8) {
-            map.put("int" + n, new BaseTypeInfo(BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB, n));
+            map.put("int" + n, new BaseTypeInfo(BigIntegerType.CLASS, BigIntegerType.ARRAY_CLASS_NAME_STUB, n));
         }
     }
 
     private static void putUnsignedInts(final Map<String, BaseTypeInfo> map) {
         int n;
         for(n=8;n <= 8; n+=8) {
-            map.put("uint" + n, new BaseTypeInfo(IntType.CLASS_NAME, ByteType.ARRAY_CLASS_NAME_STUB, n));
+            map.put("uint" + n, new BaseTypeInfo(IntType.CLASS, ByteType.ARRAY_CLASS_NAME_STUB, n));
         }
         for ( ; n <= 24; n+=8) {
-            map.put("uint" + n, new BaseTypeInfo(IntType.CLASS_NAME, IntType.ARRAY_CLASS_NAME_STUB, n));
+            map.put("uint" + n, new BaseTypeInfo(IntType.CLASS, IntType.ARRAY_CLASS_NAME_STUB, n));
         }
         for ( ; n <= 32; n+=8) {
-            map.put("uint" + n, new BaseTypeInfo(LongType.CLASS_NAME, IntType.ARRAY_CLASS_NAME_STUB, n));
+            map.put("uint" + n, new BaseTypeInfo(LongType.CLASS, IntType.ARRAY_CLASS_NAME_STUB, n));
         }
-        for ( ; n < 64; n+=8) {
-            map.put("uint" + n, new BaseTypeInfo(LongType.CLASS_NAME, LongType.ARRAY_CLASS_NAME_STUB, n));
+        for ( ; n <= 56; n+=8) {
+            map.put("uint" + n, new BaseTypeInfo(LongType.CLASS, LongType.ARRAY_CLASS_NAME_STUB, n));
         }
         // special case -- allow long for array elements
         for ( ; n <= 64; n+=8) {
-            map.put("uint" + n, new BaseTypeInfo(BigIntegerType.CLASS_NAME, LongType.ARRAY_CLASS_NAME_STUB, n));
+            map.put("uint" + n, new BaseTypeInfo(BigIntegerType.CLASS, LongType.ARRAY_CLASS_NAME_STUB, n));
         }
         for ( ; n <= 256; n+=8) {
-            map.put("uint" + n, new BaseTypeInfo(BigIntegerType.CLASS_NAME, BigIntegerType.ARRAY_CLASS_NAME_STUB, n));
+            map.put("uint" + n, new BaseTypeInfo(BigIntegerType.CLASS, BigIntegerType.ARRAY_CLASS_NAME_STUB, n));
         }
     }
 
@@ -112,13 +112,13 @@ class BaseTypeInfo {
             for (int N = 1; N <= 80; N++) {
                 map.put(
                         stub + M + 'x' + N,
-                        new BaseTypeInfo(BigDecimalType.CLASS_NAME, BigDecimalType.ARRAY_CLASS_NAME_STUB, M, N, -1, null)
+                        new BaseTypeInfo(BigDecimalType.CLASS, BigDecimalType.ARRAY_CLASS_NAME_STUB, M, N, -1, null)
                 );
             }
         }
     }
 
-    public final String className; // e.g. "java.lang.Boolean"
+    public final Class<?> clazz; // e.g. java.lang.Boolean.class
     public final String arrayClassNameStub; // e.g. "Z", e.g. "Ljava.lang.BigInteger;"
 
     public final int bitLen;
@@ -128,31 +128,26 @@ class BaseTypeInfo {
 
     public final int arrayLen;
 
-    public BaseTypeInfo(String objectClassName, String arrayClassNameStub, int arrayLen, ABIType<?> elementType) {
-        this(objectClassName, arrayClassNameStub, -1, 0, arrayLen, elementType);
+    public BaseTypeInfo(Class<?> clazz, String arrayClassNameStub, int arrayLen, ABIType<?> elementType) {
+        this(clazz, arrayClassNameStub, -1, 0, arrayLen, elementType);
     }
 
-    public BaseTypeInfo(String objectClassName, String arrayClassNameStub, int bitLen) {
-        this(objectClassName, arrayClassNameStub, bitLen, 0, -1, null);
+    public BaseTypeInfo(Class<?> clazz, String arrayClassNameStub, int bitLen) {
+        this(clazz, arrayClassNameStub, bitLen, 0, -1, null);
     }
 
-    public BaseTypeInfo(String objectClassName,
+    public BaseTypeInfo(Class<?> clazz,
                         String arrayClassNameStub,
                         int bitLen,
                         int scale,
                         int arrayLen,
                         ABIType<?> elementType) {
-        this.className = objectClassName.intern();
+        this.clazz = clazz;
         this.arrayClassNameStub = arrayClassNameStub.intern();
         this.bitLen = bitLen;
         this.arrayLen = arrayLen;
         this.scale = scale;
         this.elementType = elementType;
-    }
-
-    @Override
-    public String toString() {
-        return "\"" +className + "\", " + "\""+ arrayClassNameStub + '\"';
     }
 
     /**
@@ -171,7 +166,7 @@ class BaseTypeInfo {
 
     @Override
     public int hashCode() {
-        return Objects.hash(className, arrayClassNameStub, bitLen, scale, elementType, arrayLen);
+        return Objects.hash(clazz, arrayClassNameStub, bitLen, scale, elementType, arrayLen);
     }
 
     @Override
@@ -179,10 +174,10 @@ class BaseTypeInfo {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BaseTypeInfo that = (BaseTypeInfo) o;
-        return bitLen == that.bitLen &&
+        return clazz == that.clazz &&
+                bitLen == that.bitLen &&
                 scale == that.scale &&
                 arrayLen == that.arrayLen &&
-                Objects.equals(className, that.className) &&
                 Objects.equals(arrayClassNameStub, that.arrayClassNameStub) &&
                 Objects.equals(elementType, that.elementType);
     }

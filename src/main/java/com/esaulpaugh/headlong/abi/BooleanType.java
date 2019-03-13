@@ -10,18 +10,14 @@ import java.nio.ByteBuffer;
  */
 class BooleanType extends UnitType<Boolean> {
 
-    static final BooleanType INSTANCE = new BooleanType();
+    static final Class<?> CLASS = Boolean.class;
 
-    static final String CLASS_NAME = Boolean.class.getName();
     static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(boolean[].class);
 
-    private BooleanType() {
-        super("bool", 1, true);
-    }
+    static final BooleanType INSTANCE = new BooleanType();
 
-    @Override
-    public String className() {
-        return CLASS_NAME;
+    private BooleanType() {
+        super("bool", CLASS, 1, true);
     }
 
     @Override
@@ -47,6 +43,12 @@ class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
+    public int validate(Object value) {
+        validateClass(value);
+        return UNIT_LENGTH_BYTES;
+    }
+
+    @Override
     Boolean decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
@@ -54,7 +56,7 @@ class BooleanType extends UnitType<Boolean> {
         switch (bi.byteValue()) {
         case 0: return Boolean.FALSE;
         case 1: return Boolean.TRUE;
-        default: throw new IllegalArgumentException("negative value for boolean type");
+        default: throw new IllegalArgumentException("negative value given for boolean type");
         }
     }
 }

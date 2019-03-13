@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 
 class ByteType extends UnitType<Byte> {
 
-    static final String CLASS_NAME = Byte.class.getName();
+    static final Class<?> CLASS = Byte.class;
     static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(byte[].class);
 
     private static final int MAX_BIT_LEN = 8;
@@ -18,12 +18,7 @@ class ByteType extends UnitType<Byte> {
 //    static final ByteType UNSIGNED_BYTE_PRIMITIVE = new ByteType("uint8", "B", false);
 
     ByteType(String canonicalType, boolean unsigned) {
-        super(canonicalType, MAX_BIT_LEN, unsigned);
-    }
-
-    @Override
-    public String className() {
-        return CLASS_NAME;
+        super(canonicalType, CLASS, MAX_BIT_LEN, unsigned);
     }
 
     @Override
@@ -46,6 +41,12 @@ class ByteType extends UnitType<Byte> {
         Byte b = Byte.parseByte(s);
         validate(b);
         return b;
+    }
+
+    @Override
+    public int validate(Object value) {
+        validateClass(value);
+        return UNIT_LENGTH_BYTES;
     }
 
     @Override

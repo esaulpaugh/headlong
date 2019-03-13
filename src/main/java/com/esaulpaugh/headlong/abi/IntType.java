@@ -7,16 +7,11 @@ import java.nio.ByteBuffer;
 
 class IntType extends UnitType<Integer> {
 
-    static final String CLASS_NAME = Integer.class.getName();
+    static final Class<?> CLASS = Integer.class;
     static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(int[].class);
 
     IntType(String canonicalType, int bitLength, boolean unsigned) {
-        super(canonicalType, bitLength, unsigned);
-    }
-
-    @Override
-    public String className() {
-        return CLASS_NAME;
+        super(canonicalType, CLASS, bitLength, unsigned);
     }
 
     @Override
@@ -42,9 +37,9 @@ class IntType extends UnitType<Integer> {
     }
 
     @Override
-    public int validate(Object object) {
-        super.validate(object);
-        final long longVal = ((Number) object).longValue();
+    public int validate(Object value) {
+        validateClass(value);
+        final long longVal = ((Number) value).longValue();
         validateLongBitLen(longVal);
         return UNIT_LENGTH_BYTES;
     }

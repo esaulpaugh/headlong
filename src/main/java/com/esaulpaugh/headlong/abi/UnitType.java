@@ -16,8 +16,8 @@ abstract class UnitType<V> extends ABIType<V> { // instance of V should be insta
     final int bitLength;
     final boolean unsigned;
 
-    UnitType(String canonicalType, int bitLength, boolean unsigned) {
-        super(canonicalType, false);
+    UnitType(String canonicalType, Class<?> clazz, int bitLength, boolean unsigned) {
+        super(canonicalType, clazz, false);
         this.bitLength = bitLength;
         this.unsigned = unsigned;
     }
@@ -51,17 +51,17 @@ abstract class UnitType<V> extends ABIType<V> { // instance of V should be insta
         if(bitLen > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + bitLen + " > " + bitLength);
         }
-//        if(unsigned && longVal < 0) {
-//            throw new IllegalArgumentException("negative value for unsigned type");
-//        }
+        if(unsigned && longVal < 0) {
+            throw new IllegalArgumentException("signed value given for unsigned type");
+        }
     }
 
     void validateBigIntBitLen(final BigInteger bigIntVal) {
         if(bigIntVal.bitLength() > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + bigIntVal.bitLength() + " > " + bitLength);
         }
-//        if(unsigned && bigIntVal.signum() == -1) {
-//            throw new IllegalArgumentException("negative value for unsigned type");
-//        }
+        if(unsigned && bigIntVal.signum() == -1) {
+            throw new IllegalArgumentException("signed value given for unsigned type");
+        }
     }
 }

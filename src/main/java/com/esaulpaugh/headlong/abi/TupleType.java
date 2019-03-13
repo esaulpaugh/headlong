@@ -10,13 +10,13 @@ import static com.esaulpaugh.headlong.abi.CallEncoder.OFFSET_LENGTH_BYTES;
 
 public class TupleType extends ABIType<Tuple> {
 
-    private static final String CLASS_NAME = Tuple.class.getName();
+    private static final Class<?> CLASS = Tuple.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(Tuple[].class);
 
     final ABIType<?>[] elementTypes;
 
     private TupleType(String canonicalType, boolean dynamic, ABIType<?>... elementTypes) {
-        super(canonicalType, dynamic);
+        super(canonicalType, CLASS, dynamic);
         this.elementTypes = elementTypes;
     }
 
@@ -31,11 +31,6 @@ public class TupleType extends ABIType<Tuple> {
 
     public ABIType<?>[] getElementTypes() {
         return Arrays.copyOf(elementTypes, elementTypes.length);
-    }
-
-    @Override
-    public String className() {
-        return CLASS_NAME;
     }
 
     @Override
@@ -91,27 +86,25 @@ public class TupleType extends ABIType<Tuple> {
 
     @Override
     public int validate(final Object value) {
-        super.validate(value);
+        validateClass(value);
 
         final Tuple tuple = (Tuple) value;
         final Object[] elements = tuple.elements;
-        final int actualLength = elements.length;
 
         final ABIType<?>[] elementTypes = this.elementTypes;
-        final int expectedLength = elementTypes.length;
-
-        if(actualLength != expectedLength) {
-            throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + actualLength + " != " + expectedLength);
-        }
 
         final int numTypes = elementTypes.length;
 
+        if(elements.length != numTypes) {
+            throw new IllegalArgumentException("tuple length mismatch: actual != expected: " +
+                    elements.length + " != " + numTypes);
+        }
+
         int byteLength = 0;
-        ABIType<?> type;
         int i = 0;
         try {
             for ( ; i < numTypes; i++) {
-                type = elementTypes[i];
+                final ABIType<?> type = elementTypes[i];
                 byteLength += type.dynamic
                         ? OFFSET_LENGTH_BYTES + type.validate(elements[i])
                         : type.validate(elements[i]);

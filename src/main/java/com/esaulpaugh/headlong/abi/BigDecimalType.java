@@ -8,19 +8,14 @@ import java.nio.ByteBuffer;
 
 class BigDecimalType extends UnitType<BigDecimal> {
 
-    static final String CLASS_NAME = BigDecimal.class.getName();
+    static final Class<?> CLASS = BigDecimal.class;
     static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(BigDecimal[].class);
 
     final int scale;
 
     BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean unsigned) {
-        super(canonicalTypeString, bitLength, unsigned);
+        super(canonicalTypeString, CLASS, bitLength, unsigned);
         this.scale = scale;
-    }
-
-    @Override
-    public String className() {
-        return CLASS_NAME;
     }
 
     @Override
@@ -46,9 +41,9 @@ class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    public int validate(Object object) {
-        super.validate(object);
-        BigDecimal dec = (BigDecimal) object;
+    public int validate(Object value) {
+        validateClass(value);
+        BigDecimal dec = (BigDecimal) value;
         validateBigIntBitLen(dec.unscaledValue());
         if(dec.scale() != scale) {
             throw new IllegalArgumentException("big decimal scale mismatch: actual != expected: " + dec.scale() + " != " + scale);

@@ -13,10 +13,10 @@ import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
 public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
-    static final String BYTE_ARRAY_CLASS_NAME = byte[].class.getName();
+    static final Class<?> BYTE_ARRAY_CLASS = byte[].class;
     static final String BYTE_ARRAY_ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(byte[][].class);
 
-    static final String STRING_CLASS_NAME = String.class.getName();
+    static final Class<?> STRING_CLASS = String.class;
     static final String STRING_ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(String[].class);
 
     private static final IntType ARRAY_LENGTH_TYPE = new IntType("int32", Integer.SIZE, false);
@@ -26,18 +26,16 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
     final T elementType;
     final Class<?> elementClass;
-    final String className;
     final String arrayClassNameStub;
 
     final int length;
     /* transient */ final boolean isString;
 
-    ArrayType(String canonicalType, T elementType, Class<?> elementClass, String className, String arrayClassNameStub, int length, boolean dynamic) {
-        super(canonicalType, dynamic);
+    ArrayType(String canonicalType, Class<?> clazz, boolean dynamic, T elementType, Class<?> elementClass, String arrayClassNameStub, int length) {
+        super(canonicalType, clazz, dynamic);
 
         this.elementType = elementType;
         this.elementClass = elementClass;
-        this.className = className;
         this.arrayClassNameStub = arrayClassNameStub;
 
         this.length = length;
@@ -46,7 +44,7 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
             throw new IllegalArgumentException("length must be non-negative or " + DYNAMIC_LENGTH + ". found: " + length);
         }
 
-        this.isString = STRING_CLASS_NAME.equals(className);
+        this.isString = String.class == clazz;
     }
 
     public T getElementType() {
@@ -54,7 +52,7 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     public String getElementClassName() {
-        return ClassNames.getArrayElementClassName(className());
+        return ClassNames.getArrayElementClassName(clazz.getName());
     }
 
     public int getLength() {
@@ -65,10 +63,10 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         return isString;
     }
 
-    @Override
-    public String className() {
-        return className;
-    }
+//    @Override
+//    public String clazz() {
+//        return clazz.getName();
+//    }
 
     @Override
     String arrayClassNameStub() {
@@ -156,7 +154,7 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
     @Override
     public int validate(final Object value) {
-        super.validate(value);
+        validateClass(value);
 
         final int staticLen;
         switch (elementType.typeCode()) {
@@ -268,7 +266,7 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
             if (valueLength != expected) {
                 String msg =
                         ClassNames.toFriendly(value.getClass().getName(), valueLength) + " not instanceof " +
-                                ClassNames.toFriendly(className, expected) + ", " +
+                                ClassNames.toFriendly(clazz.getName(), expected) + ", " +
                                 valueLength + " != " + expected;
                 throw new IllegalArgumentException(msg);
             }

@@ -59,13 +59,13 @@ final class TypeFactory {
             final ABIType<?> elementType = buildType(canonicalType.substring(0, arrayOpenIndex), true, baseTuple);
             final Class<?> elementClass;
             if(elementType.typeCode() == ABIType.TYPE_CODE_ARRAY) {
-                elementClass = Class.forName(elementType.className(), true, CLASS_LOADER);
+                elementClass = elementType.clazz;
             } else {
                 elementClass = null;
             }
             final String className = '[' + elementType.arrayClassNameStub();
             final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
-            return new ArrayType<ABIType<?>, Object>(canonicalType, elementType, elementClass, className, className, length, dynamic);
+            return new ArrayType<ABIType<?>, Object>(canonicalType, Class.forName(className), dynamic, elementType, elementClass, className, length);
         } else {
 //            final boolean isArrayElement = index < canonicalType.length() - 1;
             ABIType<?> baseType = resolveBaseType(canonicalType, isArrayElement, baseTuple);
@@ -182,10 +182,10 @@ final class TypeFactory {
             case "bytes29":
             case "bytes30":
             case "bytes31":
-            case "bytes32": type = new ArrayType<ByteType, byte[]>(ct, (ByteType) info.elementType, Byte.class, info.className, info.arrayClassNameStub, info.arrayLen, false); break;
+            case "bytes32": type = new ArrayType<ByteType, byte[]>(ct, info.clazz, false, (ByteType) info.elementType, Byte.class, info.arrayClassNameStub, info.arrayLen); break;
             case "bool": type = BooleanType.INSTANCE; break;
             case "bytes":
-            case "string": type = new ArrayType<ByteType, byte[]>(ct, (ByteType) info.elementType, Byte.class, info.className, info.arrayClassNameStub, DYNAMIC_LENGTH, true); break;
+            case "string": type = new ArrayType<ByteType, byte[]>(ct, info.clazz, true, (ByteType) info.elementType, Byte.class, info.arrayClassNameStub, DYNAMIC_LENGTH); break;
             case "decimal": type = new BigDecimalType(ct, info.bitLen, info.scale, false); break;
             default: type = null;
             }
