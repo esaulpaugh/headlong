@@ -33,6 +33,8 @@ Tuple decoded = TupleType.parseElements("ufixed,string").decode(
                       + "7730307400000000000000000000000000000000000000000000000000000000"
                 )
         );
+        
+System.out.println(decoded.equals(new Tuple(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t")));
 ```
 
 ### RLP codec
