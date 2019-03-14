@@ -16,14 +16,14 @@ public class ContractJSONParser {
 
     static final String NAME = "name";
     static final String TYPE = "type";
+    static final String FUNCTION = "function";
     static final String INPUTS = "inputs";
     static final String OUTPUTS = "outputs";
-    static final String COMPONENTS = "components";
     static final String TUPLE = "tuple";
+    static final String COMPONENTS = "components";
     static final String EVENT = "event";
     static final String ANONYMOUS = "anonymous";
     static final String INDEXED = "indexed";
-    static final String FUNCTION = "function";
 
     public static List<Function> getFunctions(String json) throws ParseException {
         final MessageDigest digest = Function.newDefaultDigest();
@@ -106,8 +106,6 @@ public class ContractJSONParser {
             throw new IllegalArgumentException("unexpected type: " + type);
         }
 
-        final String name = getString(event, NAME);
-
         final JsonArray inputs = getArray(event, INPUTS);
         final int inputsLen = inputs.size();
         final ABIType<?>[] inputsArray = new ABIType<?>[inputsLen];
@@ -118,50 +116,36 @@ public class ContractJSONParser {
             inputsArray[i] = buildType(inputs.get(i).getAsJsonObject(), sb);
             indexed[i] = getBoolean(input, INDEXED, false, false);
         }
-
-        final String tupleTypeString = TupleTypeParser.completeTupleTypeString(sb);
-
-        return new Event(name, TupleType.create(tupleTypeString, inputsArray), indexed, getBoolean(event, ANONYMOUS, false, false));
+        return new Event(
+                getString(event, NAME),
+                TupleType.create(TupleTypeParser.completeTupleTypeString(sb), inputsArray),
+                indexed,
+                getBoolean(event, ANONYMOUS, false, false)
+        );
     }
 
-    static ABIType<?> buildType(JsonObject object, StringBuilder sb) throws ParseException {
-
+    private static ABIType<?> buildType(JsonObject object, StringBuilder parentSb) throws ParseException {
         final String type = getString(object, TYPE);
 
         if(type.startsWith(TUPLE)) {
-            return buildTypeForTuple(object, sb);
+            final JsonArray components = getArray(object, COMPONENTS);
+            final int componentsLen = components.size();
+            final StringBuilder sb = new StringBuilder("(");
+            final ABIType<?>[] elements = new ABIType[componentsLen];
+            for (int i = 0; i < componentsLen; i++) {
+                elements[i] = buildType(components.get(i).getAsJsonObject(), sb);
+            }
+            final TupleType base = TupleType.create(TupleTypeParser.completeTupleTypeString(sb), elements);
+
+            final String canonical = base.canonicalType + type.substring(TUPLE.length()); // suffix e.g. "[4][]"
+
+            parentSb.append(canonical).append(',');
+
+            return TypeFactory.createForTuple(canonical, base, getString(object, NAME));
         }
 
         final ABIType<?> abiType = TypeFactory.createFromJsonObject(object);
-        sb.append(abiType.canonicalType).append(',');
+        parentSb.append(abiType.canonicalType).append(',');
         return abiType;
-
-    }
-
-    static ABIType<?> buildTypeForTuple(JsonObject object, StringBuilder parentSb) throws ParseException {
-
-        final String type = getString(object, TYPE);
-
-        final String suffix = type.substring(TUPLE.length());
-
-        final JsonArray components = getArray(object, COMPONENTS);
-        final int componentsLen = components.size();
-
-
-        final StringBuilder sb = new StringBuilder("(");
-        final ABIType<?>[] elements = new ABIType[componentsLen];
-        for (int i = 0; i < componentsLen; i++) {
-            JsonObject component = components.get(i).getAsJsonObject();
-            elements[i] = buildType(component, sb);
-        }
-        final String baseTupleTypeString = TupleTypeParser.completeTupleTypeString(sb);
-
-        final TupleType base = TupleType.create(baseTupleTypeString, elements);
-
-        final String canonical = base.canonicalType + suffix;
-
-        parentSb.append(canonical).append(',');
-
-        return TypeFactory.createForTuple(canonical, base, getString(object, NAME));
     }
 }

@@ -57,5 +57,4 @@ public class Event {
         inputs.recursiveToString(sb);
         return sb.toString();
     }
-
 }
