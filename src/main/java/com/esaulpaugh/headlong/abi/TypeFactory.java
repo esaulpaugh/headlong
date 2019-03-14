@@ -1,7 +1,5 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.ClassNames;
-
 import java.math.BigInteger;
 import java.text.ParseException;
 
@@ -36,8 +34,7 @@ final class TypeFactory {
 
     private static ABIType<?> buildType(final String canonicalType, boolean isArrayElement, final ABIType<?> baseTuple) throws ParseException, ClassNotFoundException {
 
-        final int end = canonicalType.length();
-        final int idxOfLast = end - 1;
+        final int idxOfLast = canonicalType.length() - 1;
 
         if(canonicalType.charAt(idxOfLast) == ']') { // array
 
@@ -61,9 +58,8 @@ final class TypeFactory {
             final ABIType<?> elementType = buildType(canonicalType.substring(0, arrayOpenIndex), true, baseTuple);
             final String className = '[' + elementType.arrayClassNameStub();
             final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
-            return new ArrayType<ABIType<?>, Object>(canonicalType, Class.forName(className), dynamic, elementType, className, length);
+            return new ArrayType<ABIType<?>, Object>(canonicalType, Class.forName(className, false, CLASS_LOADER), dynamic, elementType, className, length);
         } else {
-//            final boolean isArrayElement = index < canonicalType.length() - 1;
             ABIType<?> baseType = resolveBaseType(canonicalType, isArrayElement, baseTuple);
             if(baseType == null) {
                 throw new ParseException("unrecognized type: "
@@ -81,7 +77,7 @@ final class TypeFactory {
 
         if(info != null) {
             switch (ct) { // canonicalType's hash code already cached from BaseTypeInfo.get()
-            case "uint8": type = isElement ? new ByteType(ct, true) : new IntType(ct, info.bitLen, true); break;
+            case "uint8": type = isElement ? ByteType.SIGNED : new IntType(ct, info.bitLen, true); break;
             case "uint16":
             case "uint24": type = new IntType(ct, info.bitLen, true); break;
             case "uint32": type = isElement ? new IntType(ct, info.bitLen, true) : new LongType(ct, info.bitLen, true); break;

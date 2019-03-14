@@ -61,11 +61,6 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         return isString;
     }
 
-//    @Override
-//    public String clazz() {
-//        return clazz.getName();
-//    }
-
     @Override
     String arrayClassNameStub() {
         return arrayClassNameStub;

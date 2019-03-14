@@ -27,14 +27,14 @@ class BaseTypeInfo {
                             ArrayType.BYTE_ARRAY_CLASS,
                             ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB,
                             i,
-                            ByteType.UNSIGNED_BYTE_OBJECT
+                            ByteType.UNSIGNED
                     )
             );
         }
 
         map.put(
                 "bytes",
-                new BaseTypeInfo(ArrayType.BYTE_ARRAY_CLASS, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB, -1, ByteType.UNSIGNED_BYTE_OBJECT)
+                new BaseTypeInfo(ArrayType.BYTE_ARRAY_CLASS, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB, -1, ByteType.UNSIGNED)
         );
         map.put(
                 "function",
@@ -44,12 +44,12 @@ class BaseTypeInfo {
                         24 * Byte.SIZE,
                         0,
                         24,
-                        ByteType.UNSIGNED_BYTE_OBJECT
+                        ByteType.UNSIGNED
                 )
         );
         map.put(
                 "string",
-                new BaseTypeInfo(ArrayType.STRING_CLASS, ArrayType.STRING_ARRAY_CLASS_NAME_STUB, -1, ByteType.UNSIGNED_BYTE_OBJECT)
+                new BaseTypeInfo(ArrayType.STRING_CLASS, ArrayType.STRING_ARRAY_CLASS_NAME_STUB, -1, ByteType.UNSIGNED)
         );
         map.put(
                 "address",
