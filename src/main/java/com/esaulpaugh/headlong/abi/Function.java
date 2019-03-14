@@ -138,11 +138,11 @@ public class Function implements Serializable {
         return this;
     }
 
-    public Tuple decodeReturnValues(byte[] returnVals) {
+    public Tuple decodeReturn(byte[] returnVals) {
         return outputTypes.decode(returnVals);
     }
 
-    public Tuple decodeReturnValues(ByteBuffer returnVals) {
+    public Tuple decodeReturn(ByteBuffer returnVals) {
         return outputTypes.decode(returnVals);
     }
 

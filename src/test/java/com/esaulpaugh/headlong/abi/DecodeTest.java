@@ -16,9 +16,9 @@ public class DecodeTest {
     @Test
     public void testDecode() throws ParseException {
 
-        Function g = new Function("g(uint[5][4][],(bool,int))", "(ufixed,string)");
+        Function getUfixedAndString = new Function("gogo((fixed[],int8)[1][][5])", "(ufixed,string)");
 
-        Tuple decoded = g.decodeReturnValues(
+        Tuple decoded = getUfixedAndString.decodeReturn(
                 FastHex.decode(
                         "0000000000000000000000000000000000000000000000000000000000000045"
                                 + "0000000000000000000000000000000000000000000000000000000000000020"
@@ -28,7 +28,7 @@ public class DecodeTest {
         );
         Assert.assertEquals(expected, decoded);
 
-        decoded = g.getOutputTypes().decode(
+        decoded = getUfixedAndString.getOutputTypes().decode(
                 FastHex.decode(
                         "0000000000000000000000000000000000000000000000000000000000000045"
                                 + "0000000000000000000000000000000000000000000000000000000000000020"
