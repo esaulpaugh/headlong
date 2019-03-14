@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Random;
 
 public class EncodeTest {
 
@@ -55,11 +56,21 @@ public class EncodeTest {
 
     @Test
     public void complexFunctionTest() throws ParseException {
-        Function f7 = new Function("(function[][][],string[][],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
+        Function f = new Function("(function[2][][],string[0][0],address[],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
+
+        byte[] func = new byte[24];
+        new Random().nextBytes(func);
+
+        String oneSixty = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+//        String oneSixty = "10000000000000000000000000000000000000000";
+        System.out.println(oneSixty + " " + oneSixty.length() * 4);
+        BigInteger addr = new BigInteger(oneSixty, 16);
+        System.out.println(addr);
 
         Object[] argsIn = new Object[] {
-                new byte[0][][][],
+                new byte[][][][] { new byte[][][] { new byte[][] { func, func } } },
                 new String[0][],
+                new BigInteger[] { addr },
                 BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(Byte.MAX_VALUE << 2)),
                 new Tuple(7),
                 new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple(9), new Tuple(-11) } } },
@@ -70,11 +81,11 @@ public class EncodeTest {
                 new Tuple(BigInteger.TEN)
         };
 
-        ByteBuffer abi = f7.encodeCallWithArgs(argsIn);
+        ByteBuffer abi = f.encodeCallWithArgs(argsIn);
 
         Function.formatCall(abi.array());
 
-        Tuple tupleOut = f7.decodeCall((ByteBuffer) abi.flip());
+        Tuple tupleOut = f.decodeCall((ByteBuffer) abi.flip());
         Object[] argsOut = tupleOut.elements;
 
         System.out.println("== " + Arrays.deepEquals(argsIn, argsOut));
