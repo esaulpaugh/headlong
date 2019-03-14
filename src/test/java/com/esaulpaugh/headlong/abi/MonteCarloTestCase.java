@@ -250,14 +250,11 @@ public class MonteCarloTestCase implements Serializable {
 
         String canonicalTypeString = sb.toString();
         return tupleType != null
-                ? TypeFactory.createForTuple(canonicalTypeString, tupleType)
-                : TypeFactory.create(canonicalTypeString);
+                ? TypeFactory.createForTuple(canonicalTypeString, tupleType, null)
+                : TypeFactory.create(canonicalTypeString, null);
     }
 
     private TupleType generateTupleType(Random r, int tupleDepth) throws ParseException {
-//        if(tupleDepth >= params.maxTupleDepth) {
-//            return TupleType.create("()");
-//        }
         return new Function(generateFunctionSignature(r, tupleDepth)).inputTypes;
     }
 

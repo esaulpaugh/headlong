@@ -81,7 +81,7 @@ class TupleTypeParser {
                     if (argEnd < sigEnd && signature.charAt(argEnd) == '[') {
                         final int nextTerminator = nextParamTerminator(signature, argEnd);
                         if (nextTerminator > argEnd) {
-                            childType = TypeFactory.createForTuple(canonical + signature.substring(argEnd, nextTerminator), (TupleType) childType);
+                            childType = TypeFactory.createForTuple(canonical + signature.substring(argEnd, nextTerminator), (TupleType) childType, null);
                             argEnd = nextTerminator;
                         }
                     }
@@ -135,7 +135,7 @@ class TupleTypeParser {
 
         final String typeString = canonicalizeType(signature.substring(argStart, argEnd)); // , signature, argStart, argEnd
 
-        parentsElements.add(TypeFactory.create(typeString));
+        parentsElements.add(TypeFactory.create(typeString, null));
         canonicalTupleType.append(typeString).append(',');
 
         return argEnd;

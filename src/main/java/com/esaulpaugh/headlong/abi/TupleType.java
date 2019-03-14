@@ -5,10 +5,12 @@ import com.esaulpaugh.headlong.abi.util.ClassNames;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import static com.esaulpaugh.headlong.abi.CallEncoder.OFFSET_LENGTH_BYTES;
 
-public class TupleType extends ABIType<Tuple> {
+public class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
     private static final Class<?> CLASS = Tuple.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(Tuple[].class);
@@ -231,5 +233,38 @@ public class TupleType extends ABIType<Tuple> {
 
     public void encodePacked(Tuple values, byte[] dest, int idx) {
         PackedEncoder.insertTuple(this, values, dest, idx);
+    }
+
+    @Override
+    public Iterator<ABIType<?>> iterator() {
+        return new Iterator<ABIType<?>>() {
+
+            private int index = 0;
+
+            @Override
+            public boolean hasNext() {
+                return index < elementTypes.length;
+            }
+
+            @Override
+            public ABIType<?> next() {
+                try {
+                    return elementTypes[index++];
+                } catch (ArrayIndexOutOfBoundsException aioobe) {
+                    throw new NoSuchElementException(aioobe.getMessage());
+                }
+            }
+        };
+    }
+
+    public void recursiveToString(StringBuilder sb) {
+        for(ABIType<?> e : this) {
+            if(e.typeCode() == TYPE_CODE_TUPLE) {
+                ((TupleType) e).recursiveToString(sb);
+                sb.append(' ').append(e.getName()).append(',');
+            } else {
+                sb.append(e).append(' ').append(e.getName()).append(',');
+            }
+        }
     }
 }

@@ -19,6 +19,7 @@ import static com.esaulpaugh.headlong.util.Strings.encode;
 
 /**
  * Represents a function in an Ethereum contract. Can encode and decode calls matching this function's signature.
+ * Can decode the function's return values.
  */
 public class Function implements Serializable {
 
@@ -29,7 +30,6 @@ public class Function implements Serializable {
     final String canonicalSignature;
     private final String hashAlgorithm;
 
-    private final boolean requiredCanonicalization;
     final byte[] selector;
     final TupleType inputTypes;
 
@@ -39,23 +39,31 @@ public class Function implements Serializable {
         selector = new byte[SELECTOR_LEN];
     }
 
+    Function(String canonicalSignature, MessageDigest messageDigest, TupleType inputTypes, TupleType outputTypes) {
+        initSelector(messageDigest, canonicalSignature);
+        this.canonicalSignature = canonicalSignature;
+        this.hashAlgorithm = messageDigest.getAlgorithm();
+        this.inputTypes = inputTypes;
+        this.outputTypes = outputTypes;
+    }
+
     public Function(String signature) throws ParseException {
         this(signature, null);
     }
 
     public Function(String signature, String outputs) throws ParseException {
-        this(signature, outputs, new Keccak(256));
+        this(signature, outputs, newDefaultDigest());
     }
 
     /**
      * Note that {@code messageDigest} must be given in an {@link MessageDigest#INITIAL} (i.e. not
      * {@link MessageDigest#IN_PROGRESS}) state.
-     *
      * @param signature the function signature
+     * @param outputs   the signature of the tuple containing the return types
      * @param messageDigest the hash function with which to generate the 4-byte selector
-     * @throws ParseException   if the signature is malformed
+     * @throws ParseException
      */
-    public Function(final String signature, String outputs, final MessageDigest messageDigest) throws ParseException {
+    public Function(String signature, String outputs, MessageDigest messageDigest) throws ParseException {
 
         final int split = signature.indexOf('(');
 
@@ -75,17 +83,25 @@ public class Function implements Serializable {
 
         final TupleType tupleType = TupleTypeParser.parseTupleType(rawTupleTypeString);
         final String canonicalSig = functionName + tupleType.canonicalType;
+
+        initSelector(messageDigest, canonicalSig);
+        this.canonicalSignature = canonicalSig;
+        this.hashAlgorithm = messageDigest.getAlgorithm();
+        this.inputTypes = tupleType;
+        this.outputTypes = outputs == null ? null : TupleType.parse(outputs);
+    }
+
+    public static MessageDigest newDefaultDigest() {
+        return new Keccak(256);
+    }
+
+    private void initSelector(MessageDigest messageDigest, String canonicalSignature) {
         try {
-            messageDigest.update(canonicalSig.getBytes(Strings.CHARSET_ASCII));
+            messageDigest.update(canonicalSignature.getBytes(Strings.CHARSET_ASCII));
             messageDigest.digest(selector, 0, SELECTOR_LEN);
         } catch (DigestException de) {
             throw new RuntimeException(de);
         }
-        this.canonicalSignature = canonicalSig;
-        this.requiredCanonicalization = !signature.equals(canonicalSig);
-        this.inputTypes = tupleType;
-        this.hashAlgorithm = messageDigest.getAlgorithm();
-        this.outputTypes = outputs == null ? null : TupleType.parse(outputs);
     }
 
     public String getName() {
@@ -98,10 +114,6 @@ public class Function implements Serializable {
 
     public String getHashAlgorithm() {
         return hashAlgorithm;
-    }
-
-    public boolean requiredCanonicalization() {
-        return requiredCanonicalization;
     }
 
     public byte[] selector() {

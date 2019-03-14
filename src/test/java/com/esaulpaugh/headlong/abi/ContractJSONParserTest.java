@@ -1,8 +1,5 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,7 +10,7 @@ import java.util.List;
 
 public class ContractJSONParserTest {
 
-    private static final String FUNCTION_A_JSON = "{\"name\": \"foo\", \"type\": \"function\", \"inputs\": [ {\"name\": \"complex_nums\", \"type\": \"tuple[]\", \"components\": [ {\"name\": \"real\", \"type\": \"decimal\"}, {\"name\": \"imaginary\", \"type\": \"decimal\"} ]} ], \"outputs\": [ {\"name\": \"count\", \"type\": \"uint64\" } ] }";
+    private static final String FUNCTION_A_JSON = "{\"name\": \"foo\", \"type\": \"function\", \"inputs\": [ {\"name\": \"complex_nums\", \"type\": \"tuple[]\", \"components\": [ {\"type\": \"decimal\"}, {\"type\": \"decimal\"} ]} ], \"outputs\": [ {\"name\": \"count\", \"type\": \"uint64\" } ] }";
 
     private static final String FUNCTION_B_JSON = "{\n" +
             "    \"name\": \"func\",\n" +
@@ -29,13 +26,13 @@ public class ContractJSONParserTest {
             "          },\n" +
             "          {\n" +
             "            \"name\": \"aa_f\",\n" +
-            "            \"type\": \"fixed\"\n" +
+            "            \"type\": \"fixed128x18\"\n" +
             "          }\n" +
             "        ]\n" +
             "      },\n" +
             "      {\n" +
             "        \"name\": \"bb\",\n" +
-            "        \"type\": \"fixed[]\",\n" +
+            "        \"type\": \"fixed128x18[]\",\n" +
             "        \"components\": [\n" +
             "        ]\n" +
             "      },\n" +
@@ -49,26 +46,24 @@ public class ContractJSONParserTest {
             "          },\n" +
             "          {\n" +
             "            \"name\": \"cc_int_arr\",\n" +
-            "            \"type\": \"int[]\"\n" +
+            "            \"type\": \"int256[]\"\n" +
             "          },\n" +
             "          {\n" +
             "            \"name\": \"cc_tuple_arr\",\n" +
             "            \"type\": \"tuple[]\",\n" +
             "            \"components\": [\n" +
             "              {\n" +
-            "                \"name\": \"cc_tuple_arr_int_eight\",\n" +
             "                \"type\": \"int8\"\n" +
             "              },\n" +
             "              {\n" +
-            "                \"name\": \"cc_tuple_arr_uint_forty\",\n" +
             "                \"type\": \"uint40\"\n" +
             "              }\n" +
             "            ]\n" +
             "          }\n" +
             "        ]\n" +
             "      }\n" +
-            "    ],\n" +
-            "    \"outputs\": []\n" +
+            "    ]\n" +
+//            ",    \"outputs\": []\n" +
             "  }\n";
 
     private static final String CONTRACT_JSON = "[\n" +
@@ -76,7 +71,7 @@ public class ContractJSONParserTest {
             "    \"type\":\"event\",\n" +
             "    \"inputs\": [\n" +
             "     {\"name\":\"a\",\"type\":\"bytes\",\"indexed\":true},\n" +
-            "     {\"name\":\"b\",\"type\":\"uint\",\"indexed\":false}\n" +
+            "     {\"name\":\"b\",\"type\":\"uint256\",\"indexed\":false}\n" +
             "    ],\n" +
             "    \"name\":\"an_event\"\n" +
             "  },\n" +
@@ -94,13 +89,13 @@ public class ContractJSONParserTest {
             "          },\n" +
             "          {\n" +
             "            \"name\": \"aa_f\",\n" +
-            "            \"type\": \"fixed\"\n" +
+            "            \"type\": \"fixed128x18\"\n" +
             "          }\n" +
             "        ]\n" +
             "      },\n" +
             "      {\n" +
             "        \"name\": \"bb\",\n" +
-            "        \"type\": \"fixed[]\",\n" +
+            "        \"type\": \"fixed128x18[]\",\n" +
             "        \"components\": [\n" +
             "        ]\n" +
             "      },\n" +
@@ -114,7 +109,7 @@ public class ContractJSONParserTest {
             "          },\n" +
             "          {\n" +
             "            \"name\": \"cc_int_arr\",\n" +
-            "            \"type\": \"int[]\"\n" +
+            "            \"type\": \"int256[]\"\n" +
             "          },\n" +
             "          {\n" +
             "            \"name\": \"cc_tuple_arr\",\n" +
@@ -139,14 +134,33 @@ public class ContractJSONParserTest {
 
     @Test
     public void testParseFunction() throws ParseException {
-        Function f = ContractJSONParser.parseFunction(FUNCTION_A_JSON);
+
+        Function f;
+        StringBuilder sb;
+
+        f = ContractJSONParser.parseFunction(FUNCTION_A_JSON);
         System.out.println(f.getName() + " : " + f.canonicalSignature + " : " + f.getOutputTypes().get(0));
         Assert.assertEquals(1, f.getOutputTypes().elementTypes.length);
         Assert.assertEquals("uint64", f.getOutputTypes().get(0).canonicalType);
         f.encodeCallWithArgs((Object) new Tuple[] { new Tuple(new BigDecimal(BigInteger.ONE, 10), new BigDecimal(BigInteger.TEN, 10)) });
+
+        sb = new StringBuilder();
+        f.inputTypes.recursiveToString(sb);
+        System.out.println("RECURSIVE = " + sb.toString());
+
+        sb = new StringBuilder();
+        f.getOutputTypes().recursiveToString(sb);
+        System.out.println("RECURSIVE = " + sb.toString());
+
         f = ContractJSONParser.parseFunction(FUNCTION_B_JSON);
         System.out.println(f.getName() + " : " + f.canonicalSignature);
+        Assert.assertNull(f.getOutputTypes());
         Assert.assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.canonicalSignature);
+
+
+        sb = new StringBuilder();
+        f.inputTypes.recursiveToString(sb);
+        System.out.println("RECURSIVE = " + sb.toString());
     }
 
     @Test
@@ -162,18 +176,13 @@ public class ContractJSONParserTest {
     }
 
     @Test
-    public void testGetEvents() {
-        List<JsonObject> events = ContractJSONParser.getEvents(CONTRACT_JSON);
+    public void testGetEvents() throws ParseException {
+        List<Event> events = ContractJSONParser.getEvents(CONTRACT_JSON);
 
         Assert.assertEquals(1, events.size());
 
-        for(JsonObject eventObj : events) {
-            System.out.println(eventObj.get("name") + ", " + eventObj.get("type"));
-            JsonArray inputs = eventObj.get("inputs").getAsJsonArray();
-            for (JsonElement element : inputs) {
-                JsonObject input = (JsonObject) element;
-                System.out.println("  " + input.get("name") + ", " + input.get("type") + ", " + input.get("indexed"));
-            }
+        for(Event event : events) {
+            System.out.println(event);
         }
     }
 

@@ -17,7 +17,7 @@ public class PackedDecoder {
 
         int numDynamic = 0;
 
-        for (ABIType<?> type : tupleType.elementTypes) {
+        for (ABIType<?> type : tupleType) {
             if (type.dynamic) {
                 numDynamic++;
             }

@@ -25,14 +25,26 @@ public abstract class ABIType<J> implements Serializable {
     final Class<?> clazz;
     final boolean dynamic;
 
+    private String name;
+
     ABIType(String canonicalType, Class<?> clazz, boolean dynamic) {
         this.canonicalType = canonicalType;
         this.clazz = clazz;
         this.dynamic = dynamic;
+        this.name = null;
+    }
+
+    ABIType setName(String name) {
+        this.name = name;
+        return this;
     }
 
     public String getCanonicalType() {
         return canonicalType;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public boolean isDynamic() {

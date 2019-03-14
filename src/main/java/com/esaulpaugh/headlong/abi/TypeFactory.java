@@ -1,9 +1,12 @@
 package com.esaulpaugh.headlong.abi;
 
+import com.google.gson.JsonObject;
+
 import java.math.BigInteger;
 import java.text.ParseException;
 
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
+import static com.esaulpaugh.headlong.abi.ContractJSONParser.*;
 import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
 /**
@@ -13,20 +16,28 @@ final class TypeFactory {
 
     private static final ClassLoader CLASS_LOADER = TypeFactory.class.getClassLoader();
 
-    static ABIType<?> createForTuple(String canonicalType, TupleType baseTupleType) throws ParseException {
+    static ABIType<?> createForTuple(String canonicalType, TupleType baseTupleType, String name) throws ParseException {
         if(baseTupleType == null) {
             throw new NullPointerException();
         }
-        return create(canonicalType, baseTupleType);
+        return create(canonicalType, baseTupleType, name);
     }
 
-    static ABIType<?> create(String canonicalType) throws ParseException {
-        return create(canonicalType, null);
+    static ABIType<?> createFromJsonObject(JsonObject abiType) throws ParseException {
+        final String type = getString(abiType, TYPE);
+        if(type.startsWith(TUPLE)) {
+            throw new IllegalArgumentException("not allowed here");
+        }
+        return create(type, null, getString(abiType, NAME, false));
     }
 
-    private static ABIType<?> create(String canonicalType, TupleType baseTupleType) throws ParseException {
+    static ABIType<?> create(String canonicalType, String name) throws ParseException {
+        return create(canonicalType, null, name);
+    }
+
+    private static ABIType<?> create(String canonicalType, TupleType baseTupleType, String name) throws ParseException {
         try {
-            return buildType(canonicalType, false, baseTupleType);
+            return buildType(canonicalType, false, baseTupleType).setName(name);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
