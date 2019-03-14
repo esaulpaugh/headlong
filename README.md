@@ -48,7 +48,7 @@ public Student(byte[] rlp) throws DecodeException {
 
     this.name = iter.next().asString(UTF_8);
     this.gpa = iter.next().asFloat();
-    this.publicKey = iter.next().asBigInt();
+    this.publicKey = iter.next().data();
     this.balance = new BigDecimal(iter.next().asBigInt(), iter.next().asInt());
 }
 
@@ -57,7 +57,7 @@ public Object[] toObjectArray() {
     return new Object[] {
             Strings.decode(name, UTF_8),
             FloatingPoint.toBytes(gpa),
-            publicKey.toByteArray(),
+            publicKey,
             balance.unscaledValue().toByteArray(),
             Integers.toBytes(balance.scale())
     };

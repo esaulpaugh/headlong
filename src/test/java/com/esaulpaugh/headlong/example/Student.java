@@ -19,15 +19,15 @@ import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 public class Student implements RLPEncodeable, ABIEncodeable {
 
-    private String name;
-    private float gpa;
-    private BigInteger publicKey;
-    private BigDecimal balance;
+    private final String name;
+    private final float gpa;
+    private final byte[] publicKey;
+    private final BigDecimal balance;
 
-    public Student(String name, float gpa, BigInteger publicKey, BigDecimal balance) {
+    public Student(String name, float gpa, byte[] publicKey, BigDecimal balance) {
         this.name = name;
         this.gpa = gpa;
-        this.publicKey = publicKey;
+        this.publicKey = Arrays.copyOf(publicKey, publicKey.length);
         this.balance = balance;
     }
 
@@ -36,7 +36,7 @@ public class Student implements RLPEncodeable, ABIEncodeable {
 
         this.name = iter.next().asString(UTF_8);
         this.gpa = iter.next().asFloat();
-        this.publicKey = iter.next().asBigInt();
+        this.publicKey = iter.next().data();
         this.balance = new BigDecimal(iter.next().asBigInt(), iter.next().asInt());
     }
 
@@ -53,7 +53,7 @@ public class Student implements RLPEncodeable, ABIEncodeable {
         RLPItem item = RLP_STRICT.wrap(rlp, index);
         this.name = item.asString(UTF_8);
         this.gpa = (item = RLP_STRICT.wrap(rlp, item.endIndex)).asFloat();
-        this.publicKey = (item = RLP_STRICT.wrap(rlp, item.endIndex)).asBigInt();
+        this.publicKey = (item = RLP_STRICT.wrap(rlp, item.endIndex)).data();
         BigInteger intVal = (item = RLP_STRICT.wrap(rlp, item.endIndex)).asBigInt();
         this.balance = new BigDecimal(intVal, RLP_STRICT.wrap(rlp, item.endIndex).asInt());
     }
@@ -61,7 +61,7 @@ public class Student implements RLPEncodeable, ABIEncodeable {
     public Student(Tuple values) {
         this.name = (String) values.get(0);
         this.gpa = ((BigDecimal) values.get(1)).floatValue();
-        this.publicKey = new BigInteger((byte[]) values.get(2));
+        this.publicKey = (byte[]) values.get(2);
         this.balance = new BigDecimal(new BigInteger((byte[]) values.get(3)), (int) values.get(4));
     }
 
@@ -69,37 +69,21 @@ public class Student implements RLPEncodeable, ABIEncodeable {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public float getGpa() {
         return gpa;
     }
 
-    public void setGpa(float gpa) {
-        this.gpa = gpa;
-    }
-
-    public BigInteger getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(BigInteger publicKey) {
-        this.publicKey = publicKey;
+    public byte[] getPublicKey() {
+        return Arrays.copyOf(publicKey, publicKey.length);
     }
 
     public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
-    }
-
     @Override
     public String toString() {
-        return name + ", " + gpa + ", " + publicKey + ", $" + balance;
+        return name + ", " + gpa + ", " + new BigInteger(publicKey) + ", $" + balance;
     }
 
     @Override
@@ -117,7 +101,7 @@ public class Student implements RLPEncodeable, ABIEncodeable {
 
         return Objects.equals(name, other.name)
                 && Math.abs(gpa - other.gpa) < 0.00005f
-                && Objects.equals(publicKey, other.publicKey)
+                && Arrays.equals(publicKey, other.publicKey)
                 && Objects.equals(balance, other.balance);
     }
 
@@ -126,7 +110,7 @@ public class Student implements RLPEncodeable, ABIEncodeable {
         return new Object[] {
                 Strings.decode(name, UTF_8),
                 FloatingPoint.toBytes(gpa),
-                publicKey.toByteArray(),
+                publicKey,
                 balance.unscaledValue().toByteArray(),
                 Integers.toBytes(balance.scale())
         };
@@ -144,6 +128,6 @@ public class Student implements RLPEncodeable, ABIEncodeable {
 
     @Override
     public Tuple toTuple() {
-        return new Tuple(name, BigDecimal.valueOf(gpa), publicKey.toByteArray(), balance.unscaledValue().toByteArray(), balance.scale());
+        return new Tuple(name, BigDecimal.valueOf(gpa), publicKey, balance.unscaledValue().toByteArray(), balance.scale());
     }
 }
