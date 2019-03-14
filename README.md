@@ -1,6 +1,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.esaulpaugh/headlong.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.esaulpaugh%22%20AND%20a:%22headlong%22)
 
-Contract ABI and Recursive Length Prefix made easy in Java (or Android). Everything heavily optimized for maximum throughput (ABI function call encoding up to 652x faster than a popular competitor).
+Contract ABI and Recursive Length Prefix made easy in Java (or Android). Everything heavily optimized for maximum throughput (ABI function call encoding up to 500x faster than a popular competitor).
 
 Usage of the ABI codec:
 
@@ -80,7 +80,7 @@ Alternatively:
 * Use `mvn package` which outputs to /target
 * Add headlong as a project dependency
 
-Depends on gson. Tests should take less than one minute to run. Test packages require junit. Jar size is ~119 KB as of 03/06/19.
+Depends on gson. Tests should take less than one minute to run. Test packages require junit. Jar size is ~112 KB as of 03/14/19.
 
 See the wiki for more, such as TupleTypes, packed encoding, RLP Lists, and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
