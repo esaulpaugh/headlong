@@ -1,12 +1,12 @@
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.util.JsonUtils;
 import com.google.gson.JsonObject;
 
 import java.math.BigInteger;
 import java.text.ParseException;
 
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
-import static com.esaulpaugh.headlong.abi.ContractJSONParser.*;
 import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
 /**
@@ -24,11 +24,11 @@ final class TypeFactory {
     }
 
     static ABIType<?> createFromJsonObject(JsonObject abiType) throws ParseException {
-        final String type = getString(abiType, TYPE);
-        if(type.startsWith(TUPLE)) {
+        final String type = JsonUtils.getString(abiType, ContractJSONParser.TYPE);
+        if(type.startsWith(ContractJSONParser.TUPLE)) {
             throw new IllegalArgumentException("not allowed here");
         }
-        return create(type, null, getString(abiType, NAME, false));
+        return create(type, null, JsonUtils.getString(abiType, ContractJSONParser.NAME, false));
     }
 
     static ABIType<?> create(String canonicalType, String name) throws ParseException {

@@ -6,7 +6,6 @@ import java.text.ParseException;
 import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.abi.ContractJSONParser.parseEvent;
-import static com.esaulpaugh.headlong.abi.ContractJSONParser.parseObject;
 
 public class Event {
 
@@ -44,7 +43,7 @@ public class Event {
     // ---------------------
 
     public static Event fromJson(String eventJson) throws ParseException {
-        return fromJsonObject(parseObject(eventJson));
+        return parseEvent(eventJson);
     }
 
     public static Event fromJsonObject(JsonObject event) throws ParseException {
