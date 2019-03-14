@@ -189,6 +189,10 @@ public class TupleType extends ABIType<Tuple> {
         return TupleTypeParser.parseTupleType(rawTupleTypeString);
     }
 
+    public static TupleType parseElements(String rawElementsString) throws ParseException {
+        return parse('(' + rawElementsString + ')');
+    }
+
     public ByteBuffer encodeElements(Object... elements) {
         return encode(new Tuple(elements));
     }
