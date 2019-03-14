@@ -2,7 +2,11 @@
 
 Contract ABI and Recursive Length Prefix made easy in Java (or Android). Everything heavily optimized for maximum throughput (ABI function call encoding up to 500x faster than a popular competitor).
 
-Usage of the ABI codec:
+## Usage
+
+### ABI codec
+
+#### Encoding
 
 ```java
 Function f = new Function("baz(uint32,bool)"); // canonicalizes and parses any signature automatically
@@ -15,13 +19,23 @@ ByteBuffer one = f.encodeCall(args);
 ByteBuffer two = f.encodeCallWithArgs(69L, true);
 
 System.out.println(Function.formatCall(one.array())); // a multi-line hex representation
-
-Tuple decoded = f.decodeCall((ByteBuffer) two.flip());
-
-System.out.println(decoded.equals(args));
+System.out.println(f.decodeCall((ByteBuffer) two.flip()).equals(args));
 ```
 
-And of the RLP codec:
+#### Decoding
+
+```java
+Tuple decoded = TupleType.parseElements("ufixed,string").decode(
+                FastHex.decode(
+                "0000000000000000000000000000000000000000000000000000000000000045"
+                        + "0000000000000000000000000000000000000000000000000000000000000020"
+                        + "0000000000000000000000000000000000000000000000000000000000000004"
+                        + "7730307400000000000000000000000000000000000000000000000000000000"
+                )
+        );
+```
+
+### RLP codec
 
 ```java
 // for an example class Student
