@@ -11,19 +11,32 @@ import java.text.ParseException;
 
 public class DecodeTest {
 
-    private final Tuple out = new Tuple(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
+    private final Tuple expected = new Tuple(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
 
     @Test
     public void testDecode() throws ParseException {
 
-        Tuple decoded = TupleType.parseElements("ufixed,string").decode(FastHex.decode(
-                "0000000000000000000000000000000000000000000000000000000000000045"
-                        + "0000000000000000000000000000000000000000000000000000000000000020"
-                        + "0000000000000000000000000000000000000000000000000000000000000004"
-                        + "7730307400000000000000000000000000000000000000000000000000000000"
-        ));
+        Function g = new Function("g(uint[5][4][],(bool,int))", "(ufixed,string)");
 
-        Assert.assertEquals(out, decoded);
+        Tuple decoded = g.decodeReturnValues(
+                FastHex.decode(
+                        "0000000000000000000000000000000000000000000000000000000000000045"
+                                + "0000000000000000000000000000000000000000000000000000000000000020"
+                                + "0000000000000000000000000000000000000000000000000000000000000004"
+                                + "7730307400000000000000000000000000000000000000000000000000000000"
+                )
+        );
+        Assert.assertEquals(expected, decoded);
+
+        decoded = g.getOutputTypes().decode(
+                FastHex.decode(
+                        "0000000000000000000000000000000000000000000000000000000000000045"
+                                + "0000000000000000000000000000000000000000000000000000000000000020"
+                                + "0000000000000000000000000000000000000000000000000000000000000004"
+                                + "7730307400000000000000000000000000000000000000000000000000000000"
+                )
+        );
+        Assert.assertEquals(expected, decoded);
 
         decoded = TupleType.parse("(ufixed,string)").decode(ByteBuffer.wrap(FastHex.decode(
                 "0000000000000000000000000000000000000000000000000000000000000045"
@@ -31,9 +44,15 @@ public class DecodeTest {
                         + "0000000000000000000000000000000000000000000000000000000000000004"
                         + "7730307400000000000000000000000000000000000000000000000000000000"
         )));
+        Assert.assertEquals(expected, decoded);
 
-        Assert.assertEquals(out, decoded);
-
+        decoded = TupleType.parseElements("ufixed,string").decode(ByteBuffer.wrap(FastHex.decode(
+                "0000000000000000000000000000000000000000000000000000000000000045"
+                        + "0000000000000000000000000000000000000000000000000000000000000020"
+                        + "0000000000000000000000000000000000000000000000000000000000000004"
+                        + "7730307400000000000000000000000000000000000000000000000000000000"
+        )));
+        Assert.assertEquals(expected, decoded);
     }
 
 }

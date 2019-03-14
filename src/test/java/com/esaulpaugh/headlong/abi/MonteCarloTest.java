@@ -86,7 +86,7 @@ public class MonteCarloTest {
 //                        .append('\n');
                 i++;
             } catch (Throwable t) {
-//                System.out.println(log.toString());
+                System.out.println(log.toString());
                 sleep();
                 System.err.println("#" + i + " failed for " + params.toString() + "\t\t" + temp);
                 System.err.println("MASTER_SEED = " + masterSeed);
@@ -94,7 +94,7 @@ public class MonteCarloTest {
             }
         }
 
-//        System.out.println(log.toString());
+        System.out.println(log.toString());
         System.out.println("MASTER_SEED = " + masterSeed);
     }
 

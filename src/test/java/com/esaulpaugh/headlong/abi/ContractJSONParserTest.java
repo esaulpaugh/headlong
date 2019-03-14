@@ -3,6 +3,7 @@ package com.esaulpaugh.headlong.abi;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public class ContractJSONParserTest {
 
-    private static final String FUNCTION_A_JSON = "{\"name\": \"foo\", \"type\": \"function\", \"inputs\": [ {\"name\": \"complex_nums\", \"type\": \"tuple[]\", \"components\": [ {\"name\": \"real\", \"type\": \"decimal\"}, {\"name\": \"imaginary\", \"type\": \"decimal\"} ]} ]}";
+    private static final String FUNCTION_A_JSON = "{\"name\": \"foo\", \"type\": \"function\", \"inputs\": [ {\"name\": \"complex_nums\", \"type\": \"tuple[]\", \"components\": [ {\"name\": \"real\", \"type\": \"decimal\"}, {\"name\": \"imaginary\", \"type\": \"decimal\"} ]} ], \"outputs\": [ {\"name\": \"count\", \"type\": \"uint64\" } ] }";
 
     private static final String FUNCTION_B_JSON = "{\n" +
             "    \"name\": \"func\",\n" +
@@ -139,10 +140,13 @@ public class ContractJSONParserTest {
     @Test
     public void testParseFunction() throws ParseException {
         Function f = ContractJSONParser.parseFunction(FUNCTION_A_JSON);
-        System.out.println(f.getName() + " : " + f.canonicalSignature);
+        System.out.println(f.getName() + " : " + f.canonicalSignature + " : " + f.getOutputTypes().get(0));
+        Assert.assertEquals(1, f.getOutputTypes().elementTypes.length);
+        Assert.assertEquals("uint64", f.getOutputTypes().get(0).canonicalType);
         f.encodeCallWithArgs((Object) new Tuple[] { new Tuple(new BigDecimal(BigInteger.ONE, 10), new BigDecimal(BigInteger.TEN, 10)) });
         f = ContractJSONParser.parseFunction(FUNCTION_B_JSON);
         System.out.println(f.getName() + " : " + f.canonicalSignature);
+        Assert.assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.canonicalSignature);
     }
 
     @Test
@@ -153,11 +157,15 @@ public class ContractJSONParserTest {
         for(Function f : functions) {
             System.out.println(f.getName() + " : " + f.canonicalSignature);
         }
+
+        Assert.assertEquals(1, functions.size());
     }
 
     @Test
     public void testGetEvents() {
         List<JsonObject> events = ContractJSONParser.getEvents(CONTRACT_JSON);
+
+        Assert.assertEquals(1, events.size());
 
         for(JsonObject eventObj : events) {
             System.out.println(eventObj.get("name") + ", " + eventObj.get("type"));

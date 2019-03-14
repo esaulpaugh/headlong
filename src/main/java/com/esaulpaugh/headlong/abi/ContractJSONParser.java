@@ -14,6 +14,7 @@ public class ContractJSONParser {
     private static final String NAME = "name";
     private static final String TYPE = "type";
     private static final String INPUTS = "inputs";
+    private static final String OUTPUTS = "outputs";
     private static final String COMPONENTS = "components";
     private static final String TUPLE = "tuple";
     private static final String FUNCTION = "function";
@@ -35,10 +36,6 @@ public class ContractJSONParser {
         return parseFunction(new JsonParser().parse(json).getAsJsonObject());
     }
 
-    private static Function parseFunction(JsonObject object) throws ParseException {
-        return new Function(buildFunctionSignature(object));
-    }
-
     public static List<JsonObject> getEvents(String json) {
         final List<JsonObject> list = new ArrayList<>();
         for(JsonElement element : new JsonParser().parse(json).getAsJsonArray()) {
@@ -52,17 +49,29 @@ public class ContractJSONParser {
         return list;
     }
 
-    private static String buildFunctionSignature(JsonObject function) {
+    private static Function parseFunction(JsonObject function) throws ParseException {
         String type = getString(function, TYPE);
         if(!FUNCTION.equals(type)) {
             throw new IllegalArgumentException("unexpected type: " + type);
         }
-        final StringBuilder sb = new StringBuilder("(");
+        StringBuilder sb = new StringBuilder("(");
         for(JsonElement element : getArray(function, INPUTS)) {
             sb.append(buildTypeString(element.getAsJsonObject()))
                     .append(',');
         }
-        return getString(function, NAME) + TupleTypeParser.completeTupleTypeString(sb);
+        String signature = getString(function, NAME) + TupleTypeParser.completeTupleTypeString(sb);
+
+        JsonArray outputs = tryGetArray(function, OUTPUTS);
+        if(outputs == null) {
+            return new Function(signature);
+        }
+        sb = new StringBuilder("(");
+        for(JsonElement element : outputs) {
+            sb.append(buildTypeString(element.getAsJsonObject()))
+                    .append(',');
+        }
+        String outputsString = TupleTypeParser.completeTupleTypeString(sb);
+        return new Function(signature, outputsString);
     }
 
     private static String buildTypeString(JsonObject object) {
@@ -94,12 +103,23 @@ public class ContractJSONParser {
 
     private static JsonArray getArray(JsonObject object, String key) {
         JsonElement element = object.get(key);
-        if(element == null) {
+        if (element == null) {
             throw new IllegalArgumentException(key + " not found");
         }
-        if(!element.isJsonArray()) {
+        if (!element.isJsonArray()) {
             throw new IllegalArgumentException(key + " is not an array");
         }
         return element.getAsJsonArray();
+    }
+
+    private static JsonArray tryGetArray(JsonObject object, String key) {
+        JsonElement element = object.get(key);
+        if(element != null) {
+            if(!element.isJsonArray()) {
+                throw new IllegalArgumentException(key + " is not an array");
+            }
+            return element.getAsJsonArray();
+        }
+        return null;
     }
 }

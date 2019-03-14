@@ -164,8 +164,8 @@ public class MonteCarloTestCase implements Serializable {
                 .replace("ufixed128x18)", "ufixed)");
 
         this.rawSignature = sig;
-        this.function = new Function(sig, KECCAK_THREAD_LOCAL.get());
-        this.argsTuple = generateTuple(function.paramTypes, rng);
+        this.function = new Function(sig, null, KECCAK_THREAD_LOCAL.get());
+        this.argsTuple = generateTuple(function.inputTypes, rng);
     }
 
     MonteCarloTestCase(long seed) throws ParseException {
@@ -177,7 +177,7 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     void runNewRandomArgs() {
-        run(generateTuple(function.paramTypes, new Random(System.nanoTime())));
+        run(generateTuple(function.inputTypes, new Random(System.nanoTime())));
     }
 
     void run(Tuple args) {
@@ -191,7 +191,7 @@ public class MonteCarloTestCase implements Serializable {
 
         if(!equal) {
             try {
-                findInequality(function.paramTypes, args, out);
+                findInequality(function.inputTypes, args, out);
                 throw new RuntimeException(function.getCanonicalSignature());
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -258,7 +258,7 @@ public class MonteCarloTestCase implements Serializable {
 //        if(tupleDepth >= params.maxTupleDepth) {
 //            return TupleType.create("()");
 //        }
-        return new Function(generateFunctionSignature(r, tupleDepth)).paramTypes;
+        return new Function(generateFunctionSignature(r, tupleDepth)).inputTypes;
     }
 
     private Tuple generateTuple(TupleType tupleType, Random r) {

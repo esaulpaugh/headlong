@@ -32,7 +32,7 @@ public class EqualsTest {
 
 //            System.out.println(raw);
 
-            boolean equals = a.paramTypes.recursiveEquals(b.paramTypes);
+            boolean equals = a.inputTypes.recursiveEquals(b.inputTypes);
 
 //            System.out.println(equals);
 

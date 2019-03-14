@@ -29,7 +29,11 @@ public class TupleType extends ABIType<Tuple> {
         return new TupleType(canonicalType, false, members);
     }
 
-    public ABIType<?>[] getElementTypes() {
+    public ABIType<?> get(int index) {
+        return elementTypes[index];
+    }
+
+    public ABIType<?>[] elements() {
         return Arrays.copyOf(elementTypes, elementTypes.length);
     }
 

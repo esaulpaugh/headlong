@@ -29,16 +29,22 @@ public class Function implements Serializable {
     final String canonicalSignature;
     private final String hashAlgorithm;
 
-    private /* transient */ final boolean requiredCanonicalization;
-    /* transient */ final byte[] selector;
-    /* transient */ final TupleType paramTypes;
+    private final boolean requiredCanonicalization;
+    final byte[] selector;
+    final TupleType inputTypes;
+
+    private final TupleType outputTypes;
 
     {
         selector = new byte[SELECTOR_LEN];
     }
 
     public Function(String signature) throws ParseException {
-        this(signature, new Keccak(256));
+        this(signature, null);
+    }
+
+    public Function(String signature, String outputs) throws ParseException {
+        this(signature, outputs, new Keccak(256));
     }
 
     /**
@@ -49,7 +55,7 @@ public class Function implements Serializable {
      * @param messageDigest the hash function with which to generate the 4-byte selector
      * @throws ParseException   if the signature is malformed
      */
-    public Function(final String signature, final MessageDigest messageDigest) throws ParseException {
+    public Function(final String signature, String outputs, final MessageDigest messageDigest) throws ParseException {
 
         final int split = signature.indexOf('(');
 
@@ -77,8 +83,9 @@ public class Function implements Serializable {
         }
         this.canonicalSignature = canonicalSig;
         this.requiredCanonicalization = !signature.equals(canonicalSig);
-        this.paramTypes = tupleType;
+        this.inputTypes = tupleType;
         this.hashAlgorithm = messageDigest.getAlgorithm();
+        this.outputTypes = outputs == null ? null : TupleType.parse(outputs);
     }
 
     public String getName() {
@@ -107,8 +114,12 @@ public class Function implements Serializable {
         return encode(selector, HEX);
     }
 
-    public TupleType getTupleType() {
-        return paramTypes;
+    public TupleType getInputTypes() {
+        return inputTypes;
+    }
+
+    public TupleType getOutputTypes() {
+        return outputTypes;
     }
 
     public ByteBuffer encodeCallWithArgs(Object... args) {
@@ -121,10 +132,18 @@ public class Function implements Serializable {
 
     public Function encodeCall(Tuple args, ByteBuffer dest, boolean validate) {
         if(validate) {
-            paramTypes.validate(args);
+            inputTypes.validate(args);
         }
         CallEncoder.encodeCall(this, args, dest);
         return this;
+    }
+
+    public Tuple decodeReturnValues(byte[] returnVals) {
+        return outputTypes.decode(returnVals);
+    }
+
+    public Tuple decodeReturnValues(ByteBuffer returnVals) {
+        return outputTypes.decode(returnVals);
     }
 
     public int callLength(Tuple args) {
@@ -149,28 +168,22 @@ public class Function implements Serializable {
                         + ", found: " + encode(unitBuffer, 0, SELECTOR_LEN, HEX));
             }
         }
-        return paramTypes.decode(abiBuffer, unitBuffer);
+        return inputTypes.decode(abiBuffer, unitBuffer);
     }
 
     @Override
     public int hashCode() {
-        // do not hash requiredCanonicalization
-        return Objects.hash(
-                canonicalSignature,
-                hashAlgorithm,
-                paramTypes // hash transient paramTypes just to be sure TODO
-        );
+        return Objects.hash(canonicalSignature, hashAlgorithm, outputTypes);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Function other = (Function) o;
-        // do not check requiredCanonicalization
-        return Objects.equals(canonicalSignature, other.canonicalSignature)
-                && Objects.equals(hashAlgorithm, other.hashAlgorithm)
-                && Objects.equals(paramTypes, other.paramTypes); // check transient paramTypes just to be sure TODO
+        Function function = (Function) o;
+        return canonicalSignature.equals(function.canonicalSignature) &&
+                hashAlgorithm.equals(function.hashAlgorithm) &&
+                Objects.equals(outputTypes, function.outputTypes);
     }
 
     public static String formatCall(byte[] abiCall) {

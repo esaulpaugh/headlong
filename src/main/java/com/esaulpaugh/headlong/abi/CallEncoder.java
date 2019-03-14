@@ -29,7 +29,7 @@ class CallEncoder {
     }
 
     static int calcEncodingLength(Function f, Tuple args, boolean validate) {
-        final int bodyLen = validate ? f.paramTypes.validate(args) : f.paramTypes.byteLength(args);
+        final int bodyLen = validate ? f.inputTypes.validate(args) : f.inputTypes.byteLength(args);
         return Function.SELECTOR_LEN + bodyLen;
     }
 
@@ -45,7 +45,7 @@ class CallEncoder {
 
     static void encodeCall(Function function, Tuple args, ByteBuffer dest) {
         dest.put(function.selector);
-        insertTuple(function.paramTypes, args, dest);
+        insertTuple(function.inputTypes, args, dest);
     }
 
     static void insertTuple(TupleType tupleType, Tuple tuple, ByteBuffer outBuffer) {
