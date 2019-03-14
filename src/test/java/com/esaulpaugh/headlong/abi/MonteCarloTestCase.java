@@ -251,7 +251,7 @@ public class MonteCarloTestCase implements Serializable {
         String canonicalTypeString = sb.toString();
         return tupleType != null
                 ? TypeFactory.createForTuple(canonicalTypeString, tupleType, null)
-                : TypeFactory.create(canonicalTypeString, null);
+                : TypeFactory.create(canonicalTypeString);
     }
 
     private TupleType generateTupleType(Random r, int tupleDepth) throws ParseException {

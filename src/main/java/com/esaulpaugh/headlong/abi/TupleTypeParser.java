@@ -135,7 +135,7 @@ class TupleTypeParser {
 
         final String typeString = canonicalizeType(signature.substring(argStart, argEnd)); // , signature, argStart, argEnd
 
-        parentsElements.add(TypeFactory.create(typeString, null));
+        parentsElements.add(TypeFactory.create(typeString));
         canonicalTupleType.append(typeString).append(',');
 
         return argEnd;

@@ -176,7 +176,6 @@ public class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 //                if(bb.position() != index + offset) {
 //                    System.err.println(TupleType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
 //                    bb.position(index + offset);
-//                    throw new RuntimeException();
 //                }
                 dest[i] = type.decode(bb, elementBuffer);
             }

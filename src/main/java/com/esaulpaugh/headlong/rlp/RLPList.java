@@ -19,6 +19,11 @@ public class RLPList extends RLPItem {
         super(lead, type, buffer, index, containerEnd, lenient);
     }
 
+    @Override
+    public boolean isList() {
+        return true;
+    }
+
     /**
      * @param srcElements pre-encoded top-level elements of the list
      */
@@ -45,11 +50,6 @@ public class RLPList extends RLPItem {
         } catch (DecodeException de) {
             throw new AssertionError(de);
         }
-    }
-
-    @Override
-    public boolean isList() {
-        return true;
     }
 
     /**

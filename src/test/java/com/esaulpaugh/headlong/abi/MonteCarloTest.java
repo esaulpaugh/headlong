@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MonteCarloTest {
 
-    private Long masterSeed = null; // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
+    private long masterMasterSeed; // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
     private static final int N = 50_000;
 
@@ -29,26 +29,20 @@ public class MonteCarloTest {
     @Test
     public void monteCarloThreaded() throws InterruptedException {
 
-        SecureRandom sr = new SecureRandom();
+        masterMasterSeed = seed(System.nanoTime()) ^ new SecureRandom().nextLong();
 
-        if(masterSeed == null) {
-            masterSeed = seed(System.nanoTime()) ^ sr.nextLong();
+        Thread[] threads = new Thread[Runtime.getRuntime().availableProcessors() - 1];
+        int i = 0;
+        while (i < threads.length) {
+            (threads[i] = newThread(masterMasterSeed + i++, N)).start();
         }
-
-        Thread[] threads = new Thread[7];
-        for (int i = 0; i < threads.length; i++) {
-            threads[i] = newThread(masterSeed + i, N);
-            threads[i].start();
-        }
-
-        Thread t = newThread(masterSeed + 8, N);
-        t.run();
+        newThread(masterMasterSeed + i++, N).run();
 
         for (Thread thread : threads) {
             thread.join();
         }
 
-        System.out.println((N * 8) + " done");
+        System.out.println((N * i) + " done, MASTER_MASTER_SEED = " + masterMasterSeed);
     }
 
     private static Thread newThread(long seed, int n) {

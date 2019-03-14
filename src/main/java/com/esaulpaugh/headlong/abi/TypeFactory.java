@@ -31,8 +31,8 @@ final class TypeFactory {
         return create(type, null, JsonUtils.getString(abiType, ContractJSONParser.NAME, false));
     }
 
-    static ABIType<?> create(String canonicalType, String name) throws ParseException {
-        return create(canonicalType, null, name);
+    static ABIType<?> create(String canonicalType) throws ParseException {
+        return create(canonicalType, null, null);
     }
 
     private static ABIType<?> create(String canonicalType, TupleType baseTupleType, String name) throws ParseException {

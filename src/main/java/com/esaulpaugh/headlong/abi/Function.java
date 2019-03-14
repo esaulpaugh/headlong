@@ -117,9 +117,7 @@ public class Function implements Serializable {
     }
 
     public byte[] selector() {
-        byte[] out = new byte[selector.length];
-        System.arraycopy(selector, 0, out, 0, out.length);
-        return out;
+        return Arrays.copyOf(selector, selector.length);
     }
 
     public String selectorHex() {

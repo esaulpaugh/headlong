@@ -56,46 +56,4 @@ public class ClassNames {
         }
         throw new IllegalArgumentException("unexpected class: " + arrayClass.getName());
     }
-
-//    public static String getArrayElementClassName(String arrayClassName) {
-//        if(arrayClassName.charAt(0) == '[') {
-//
-//            boolean arrayStub = arrayClassName.charAt(1) == 'L';
-//
-//            int begin = arrayStub ? 2 : 1;
-//
-//            int end = arrayStub && arrayClassName.charAt(arrayClassName.length() - 1) == ';'
-//                    ? arrayClassName.length() - 1
-//                    : arrayClassName.length();
-//
-//            return arrayClassName.substring(begin, end);
-//        }
-//
-//        throw new IllegalArgumentException("unrecognized format");
-//    }
-//
-//    public static String fromArrayClassNameStub(String arrayClassNameStub) {
-//
-//        StringBuilder sb = new StringBuilder();
-//
-//        switch (arrayClassNameStub) {
-//        case "B": sb.append(Byte.class.getName()); break;
-//        case "S": sb.append(Short.class.getName()); break;
-//        case "I": sb.append(Integer.class.getName()); break;
-//        case "J": sb.append(Long.class.getName()); break;
-//        case "F": sb.append(Float.class.getName()); break;
-//        case "D": sb.append(Double.class.getName()); break;
-//        case "C": sb.append(Character.class.getName()); break;
-//        case "Z": sb.append(Boolean.class.getName()); break;
-//        default: {
-//            if (arrayClassNameStub.startsWith("L")
-//                    && arrayClassNameStub.endsWith(";")) {
-//                sb.append('[')
-//                        .append(arrayClassNameStub);
-//            }
-//        }
-//        }
-//
-//        return sb.toString();
-//    }
 }
