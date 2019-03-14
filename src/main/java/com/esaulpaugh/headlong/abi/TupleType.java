@@ -261,10 +261,10 @@ public class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
         for(ABIType<?> e : this) {
             if(e.typeCode() == TYPE_CODE_TUPLE) {
                 ((TupleType) e).recursiveToString(sb);
-                sb.append(' ').append(e.getName()).append(',');
             } else {
-                sb.append(e).append(' ').append(e.getName()).append(',');
+                sb.append(e);
             }
+            sb.append(' ').append(e.getName()).append(',');
         }
     }
 }

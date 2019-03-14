@@ -49,10 +49,6 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         return elementType;
     }
 
-    public String getElementClassName() {
-        return ClassNames.getArrayElementClassName(clazz.getName());
-    }
-
     public int getLength() {
         return length;
     }
