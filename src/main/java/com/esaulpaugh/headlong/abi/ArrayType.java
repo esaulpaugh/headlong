@@ -25,17 +25,15 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     static final int DYNAMIC_LENGTH = -1;
 
     final T elementType;
-    final Class<?> elementClass;
     final String arrayClassNameStub;
 
     final int length;
     /* transient */ final boolean isString;
 
-    ArrayType(String canonicalType, Class<?> clazz, boolean dynamic, T elementType, Class<?> elementClass, String arrayClassNameStub, int length) {
+    ArrayType(String canonicalType, Class<?> clazz, boolean dynamic, T elementType, String arrayClassNameStub, int length) {
         super(canonicalType, clazz, dynamic);
 
         this.elementType = elementType;
-        this.elementClass = elementClass;
         this.arrayClassNameStub = arrayClassNameStub;
 
         this.length = length;
@@ -397,7 +395,7 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         if(tupleArray) {
             dest = new Tuple[arrayLen];
         } else {
-            dest = (Object[]) Array.newInstance(elementClass, arrayLen); // reflection ftw
+            dest = (Object[]) Array.newInstance(elementType.clazz, arrayLen); // reflection ftw
         }
 
         int[] offsets = new int[arrayLen];

@@ -428,10 +428,7 @@ public class MonteCarloTestCase implements Serializable {
 
     private Object[] generateObjectArray(ArrayType<?, ?> arrayType, final int len, Random r) {
 
-        if(arrayType.elementClass == null) {
-            System.out.println(arrayType.toString());
-        }
-        Object[] dest = (Object[]) Array.newInstance(arrayType.elementClass, len);
+        Object[] dest = (Object[]) Array.newInstance(arrayType.elementType.clazz, len);
 
         final ArrayType<?, ?> elementType = (ArrayType<?, ?>) arrayType.elementType;
         for (int i = 0; i < len; i++) {

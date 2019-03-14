@@ -43,11 +43,23 @@ public class EncodeTest {
     }
 
     @Test
-    public void complexFunctionTest() throws ParseException {
-        Function f7 = new Function("(string[][][],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
+    public void tupleArrayTest() throws ParseException {
+        Function f = new Function("((int16)[2][][1])");
 
         Object[] argsIn = new Object[] {
-                new String[0][][],
+                new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple(9), new Tuple(-11) } } }
+        };
+
+        f.encodeCallWithArgs(argsIn);
+    }
+
+    @Test
+    public void complexFunctionTest() throws ParseException {
+        Function f7 = new Function("(function[][][],string[][],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
+
+        Object[] argsIn = new Object[] {
+                new byte[0][][][],
+                new String[0][],
                 BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(Byte.MAX_VALUE << 2)),
                 new Tuple(7),
                 new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple(9), new Tuple(-11) } } },
