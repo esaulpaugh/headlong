@@ -61,7 +61,7 @@ public class Function implements Serializable {
      * @param signature the function signature
      * @param outputs   the signature of the tuple containing the return types
      * @param messageDigest the hash function with which to generate the 4-byte selector
-     * @throws ParseException
+     * @throws ParseException   if {@code signature} or {@code outputs} is malformed
      */
     public Function(String signature, String outputs, MessageDigest messageDigest) throws ParseException {
 
