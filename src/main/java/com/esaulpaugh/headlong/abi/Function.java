@@ -29,22 +29,23 @@ public class Function implements Serializable {
 
     final String canonicalSignature;
     private final String hashAlgorithm;
-
-    final byte[] selector;
-    final TupleType inputTypes;
-
     private final TupleType outputTypes;
+    private final String stateMutability;
+
+    final transient byte[] selector;
+    final transient TupleType inputTypes;
 
     {
         selector = new byte[SELECTOR_LEN];
     }
 
-    Function(String canonicalSignature, MessageDigest messageDigest, TupleType inputTypes, TupleType outputTypes) {
+    Function(String canonicalSignature, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) {
         initSelector(messageDigest, canonicalSignature);
         this.canonicalSignature = canonicalSignature;
-        this.hashAlgorithm = messageDigest.getAlgorithm();
         this.inputTypes = inputTypes;
         this.outputTypes = outputTypes;
+        this.stateMutability = stateMutability;
+        this.hashAlgorithm = messageDigest.getAlgorithm();
     }
 
     public Function(String signature) throws ParseException {
@@ -86,9 +87,10 @@ public class Function implements Serializable {
 
         initSelector(messageDigest, canonicalSig);
         this.canonicalSignature = canonicalSig;
-        this.hashAlgorithm = messageDigest.getAlgorithm();
         this.inputTypes = tupleType;
         this.outputTypes = outputs == null ? null : TupleType.parse(outputs);
+        this.stateMutability = null;
+        this.hashAlgorithm = messageDigest.getAlgorithm();
     }
 
     public static MessageDigest newDefaultDigest() {
@@ -130,6 +132,10 @@ public class Function implements Serializable {
 
     public TupleType getOutputTypes() {
         return outputTypes;
+    }
+
+    public String getStateMutability() {
+        return stateMutability;
     }
 
     public ByteBuffer encodeCallWithArgs(Object... args) {

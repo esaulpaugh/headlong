@@ -17,7 +17,7 @@ public class JsonUtils {
     }
 
     public static String getString(JsonObject object, String key) {
-        return getString(object, key, true);
+        return getString(object, key, true, null);
     }
 
     public static boolean getBoolean(JsonObject object, String key) {
@@ -28,13 +28,13 @@ public class JsonUtils {
         return getArray(object, key, true);
     }
 
-    public static String getString(JsonObject object, String key, boolean requireNonNull) {
+    public static String getString(JsonObject object, String key, boolean requireNonNull, String defaultVal) {
         JsonElement element = object.get(key);
         if(element == null) {
             if(requireNonNull) {
                 throw new IllegalArgumentException(key + " not found");
             }
-            return null;
+            return defaultVal;
         }
         if(!element.isJsonPrimitive() || !((JsonPrimitive) element).isString()) {
             throw new IllegalArgumentException(key + " is not a string");

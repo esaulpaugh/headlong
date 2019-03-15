@@ -12,6 +12,8 @@ import static com.esaulpaugh.headlong.abi.CallEncoder.OFFSET_LENGTH_BYTES;
 
 public class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
+//    public static final TupleType EMPTY = new TupleType("()", false);
+
     private static final Class<?> CLASS = Tuple.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(Tuple[].class);
 

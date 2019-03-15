@@ -28,7 +28,11 @@ final class TypeFactory {
         if(type.startsWith(ContractJSONParser.TUPLE)) {
             throw new IllegalArgumentException("not allowed here");
         }
-        return create(type, null, JsonUtils.getString(abiType, ContractJSONParser.NAME, false));
+        return create(
+                type,
+                null,
+                JsonUtils.getString(abiType, ContractJSONParser.NAME, false, null)
+        );
     }
 
     static ABIType<?> create(String canonicalType) throws ParseException {

@@ -17,8 +17,11 @@ public class ContractJSONParser {
     static final String NAME = "name";
     static final String TYPE = "type";
     static final String FUNCTION = "function";
+    static final String CONSTRUCTOR = "constructor";
+    static final String FALLBACK = "fallback";
     static final String INPUTS = "inputs";
     static final String OUTPUTS = "outputs";
+    static final String STATE_MUTABILITY = "stateMutability";
     static final String TUPLE = "tuple";
     static final String COMPONENTS = "components";
     static final String EVENT = "event";
@@ -31,8 +34,15 @@ public class ContractJSONParser {
         for(JsonElement element : parseArray(json)) {
             if(element.isJsonObject()) {
                 final JsonObject elementObj = (JsonObject) element;
-                if (FUNCTION.equals(getString(elementObj, TYPE))) {
+                String type = getString(elementObj, TYPE, false, null);
+                if(type == null) {
                     list.add(parseFunction(elementObj, digest));
+                } else {
+                    switch (type) {
+                    case FUNCTION:
+                    case CONSTRUCTOR:
+                    case FALLBACK: list.add(parseFunction(elementObj, digest));
+                    }
                 }
             }
         }
@@ -58,17 +68,18 @@ public class ContractJSONParser {
 
     private static Function parseFunction(JsonObject function, MessageDigest messageDigest) throws ParseException {
 
-        final String type = getString(function, TYPE);
-        if (!FUNCTION.equals(type)) {
-            throw new IllegalArgumentException("unexpected type: " + type);
-        }
-
-        final JsonArray inputs = getArray(function, INPUTS);
-        final int inputsLen = inputs.size();
-        final ABIType<?>[] inputsArray = new ABIType<?>[inputsLen];
         final StringBuilder inputsSB = new StringBuilder("(");
-        for (int i = 0; i < inputsLen; i++) {
-            inputsArray[i] = buildType(inputs.get(i).getAsJsonObject(), inputsSB);
+
+        final JsonArray inputs = getArray(function, INPUTS, false);
+        final ABIType<?>[] inputsArray;
+        if(inputs != null) {
+            final int inputsLen = inputs.size();
+            inputsArray = new ABIType<?>[inputsLen];
+            for (int i = 0; i < inputsLen; i++) {
+                inputsArray[i] = buildType(inputs.get(i).getAsJsonObject(), inputsSB);
+            }
+        } else {
+            inputsArray = ABIType.EMPTY_TYPE_ARRAY;
         }
 
         final JsonArray outputs = getArray(function, OUTPUTS, false);
@@ -86,13 +97,15 @@ public class ContractJSONParser {
             outputTypes = null;
         }
 
-        final Function protoFunction = Function.parse(getString(function, NAME) + TupleTypeParser.completeTupleTypeString(inputsSB));
+        final String name = getString(function, NAME, false, "");
+        final Function protoFunction = Function.parse(name + TupleTypeParser.completeTupleTypeString(inputsSB));
 
         return new Function(
                 protoFunction.canonicalSignature,
-                messageDigest,
                 TupleType.create(protoFunction.inputTypes.canonicalType, inputsArray),
-                outputTypes
+                outputTypes,
+                getString(function, STATE_MUTABILITY, false, null),
+                messageDigest
         );
     }
 
