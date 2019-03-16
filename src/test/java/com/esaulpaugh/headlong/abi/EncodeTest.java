@@ -25,7 +25,7 @@ public class EncodeTest {
         TestUtils.assertThrown(ParseException.class, "non-ascii char, '\u02a6' \\u02a6, @ index 2", () -> new Function("ba\u02a6z(uint32,bool)"));
 
         // "non-type char, '\u02a6' \\u02a6, @ index 4 of element 0 of element 1"
-        TestUtils.assertThrown(ParseException.class, "boolʦ (0000000000000000000000000000626f6f6ccaa6) of element 0 of element 1", () -> new Function("baz(int32,(bool\u02a6))"));
+        TestUtils.assertThrown(ParseException.class, "bool\u02a6 (0000000000000000000000000000626f6f6ccaa6) of element 0 of element 1", () -> new Function("baz(int32,(bool\u02a6))"));
     }
 
     @Test
