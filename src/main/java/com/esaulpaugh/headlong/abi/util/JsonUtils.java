@@ -17,24 +17,21 @@ public class JsonUtils {
     }
 
     public static String getString(JsonObject object, String key) {
-        return getString(object, key, true);
+        return getString(object, key, null);
     }
 
     public static boolean getBoolean(JsonObject object, String key) {
-        return getBoolean(object, key, true, false);
+        return getBoolean(object, key, null);
     }
 
     public static JsonArray getArray(JsonObject object, String key) {
-        return getArray(object, key, true);
+        return getArray(object, key, null);
     }
 
-    public static String getString(JsonObject object, String key, boolean requireNonNull) {
+    public static String getString(JsonObject object, String key, String defaultVal) {
         JsonElement element = object.get(key);
         if(element == null) {
-            if(requireNonNull) {
-                throw new IllegalArgumentException(key + " not found");
-            }
-            return null;
+            return defaultVal;
         }
         if(!element.isJsonPrimitive() || !((JsonPrimitive) element).isString()) {
             throw new IllegalArgumentException(key + " is not a string");
@@ -42,12 +39,9 @@ public class JsonUtils {
         return element.getAsString();
     }
 
-    public static boolean getBoolean(JsonObject object, String key, boolean requireNonNull, boolean defaultVal) {
+    public static boolean getBoolean(JsonObject object, String key, Boolean defaultVal) {
         JsonElement element = object.get(key);
         if(element == null) {
-            if(requireNonNull) {
-                throw new IllegalArgumentException(key + " not found");
-            }
             return defaultVal;
         }
         if(!element.isJsonPrimitive() || !((JsonPrimitive) element).isBoolean()) {
@@ -56,13 +50,10 @@ public class JsonUtils {
         return element.getAsBoolean();
     }
 
-    public static JsonArray getArray(JsonObject object, String key, boolean requireNonNull) {
+    public static JsonArray getArray(JsonObject object, String key, JsonArray defaultVal) {
         JsonElement element = object.get(key);
         if (element == null) {
-            if(requireNonNull) {
-                throw new IllegalArgumentException(key + " not found");
-            }
-            return null;
+            return defaultVal;
         }
         if (!element.isJsonArray()) {
             throw new IllegalArgumentException(key + " is not an array");

@@ -27,9 +27,33 @@ public class ContractJSONParser {
     private static final String EVENT = "event";
     private static final String ANONYMOUS = "anonymous";
     private static final String INDEXED = "indexed";
+    static final String CONSTRUCTOR = "constructor";
+    static final String FALLBACK = "fallback";
+    static final String STATE_MUTABILITY = "stateMutability";
 
     public static List<Function> parseFunctions(String json) throws ParseException {
         return parseObjects(json, true, false, Function.class);
+    }
+
+    public static List<Function> getFunctions(String json) throws ParseException {
+        final MessageDigest digest = Function.newDefaultDigest();
+        final List<Function> list = new ArrayList<>();
+        for(JsonElement element : parseArray(json)) {
+            if(element.isJsonObject()) {
+                final JsonObject elementObj = (JsonObject) element;
+                String type = getString(elementObj, TYPE);
+                if(type == null) {
+                    list.add(parseFunction(elementObj, digest));
+                } else {
+                    switch (type) {
+                    case FUNCTION:
+                    case CONSTRUCTOR:
+                    case FALLBACK: list.add(parseFunction(elementObj, digest));
+                    }
+                }
+            }
+        }
+        return list;
     }
 
     public static List<Event> parseEvents(String json) throws ParseException {
@@ -51,11 +75,19 @@ public class ContractJSONParser {
         for(JsonElement e : parseArray(json)) {
             if(e.isJsonObject()) {
                 JsonObject object = (JsonObject) e;
-                final String type = getString(object, TYPE);
-                if (functions && FUNCTION.equals(type)) {
-                    list.add(classofT.cast(parseFunction(object, defaultDigest.get())));
-                } else if(events && EVENT.equals(type)) {
-                    list.add(classofT.cast(parseEvent(object)));
+                String type = getString(object, TYPE);
+                switch (type) {
+                case FUNCTION:
+                case CONSTRUCTOR:
+                case FALLBACK:
+                    if(functions) {
+                        list.add(classofT.cast(parseFunction(object, defaultDigest.get())));
+                    }
+                    break;
+                case EVENT:
+                    if(events) {
+                        list.add(classofT.cast(parseEvent(object)));
+                    }
                 }
             }
         }
@@ -68,18 +100,20 @@ public class ContractJSONParser {
 
     private static Function parseFunction(JsonObject function, MessageDigest messageDigest) throws ParseException {
 
-        final String type = getString(function, TYPE);
-        if (!FUNCTION.equals(type)) {
-            throw new IllegalArgumentException("unexpected type: " + type);
-        }
-
         final JsonArray inputs = getArray(function, INPUTS);
-        final ArrayList<ABIType<?>> inputsList = new ArrayList<>(inputs.size());
-        for (JsonElement e : inputs) {
-            inputsList.add(buildType(e.getAsJsonObject())); // , inputsSB
+
+        final TupleType inputTypes;
+        if(inputs != null) {
+            final ArrayList<ABIType<?>> inputsList = new ArrayList<>(inputs.size());
+            for (JsonElement e : inputs) {
+                inputsList.add(buildType(e.getAsJsonObject()));
+            }
+            inputTypes = TupleType.create(inputsList);
+        } else {
+            inputTypes = TupleType.EMPTY;
         }
 
-        final JsonArray outputs = getArray(function, OUTPUTS, false);
+        final JsonArray outputs = getArray(function, OUTPUTS);
         final TupleType outputTypes;
         if (outputs != null) {
             final ArrayList<ABIType<?>> outputsList = new ArrayList<>(outputs.size());
@@ -91,7 +125,13 @@ public class ContractJSONParser {
             outputTypes = null;
         }
 
-        return new Function(getString(function, NAME), messageDigest, TupleType.create(inputsList), outputTypes);
+        return new Function(
+                getString(function, NAME),
+                inputTypes,
+                outputTypes,
+                getString(function, STATE_MUTABILITY),
+                messageDigest
+        );
     }
 
     static Event parseEvent(String eventJson) throws ParseException {
@@ -111,19 +151,19 @@ public class ContractJSONParser {
         for (int i = 0; i < inputsLen; i++) {
             JsonObject inputObj = inputs.get(i).getAsJsonObject();
             inputsList.add(buildType(inputObj));
-            indexed[i] = getBoolean(inputObj, INDEXED, false, false);
+            indexed[i] = getBoolean(inputObj, INDEXED);
         }
         return new Event(
                 getString(event, NAME),
                 TupleType.create(inputsList),
                 indexed,
-                getBoolean(event, ANONYMOUS, false, false)
+                getBoolean(event, ANONYMOUS, false)
         );
     }
 
     private static ABIType<?> buildType(JsonObject object) throws ParseException {
         final String type = getString(object, TYPE);
-        final String name = getString(object, ContractJSONParser.NAME, false);
+        final String name = getString(object, ContractJSONParser.NAME);
 
         if(type.startsWith(TUPLE)) {
             final JsonArray components = getArray(object, COMPONENTS);

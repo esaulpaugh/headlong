@@ -32,25 +32,17 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
     ArrayType(String canonicalType, Class<?> clazz, boolean dynamic, T elementType, String arrayClassNameStub, int length) {
         super(canonicalType, clazz, dynamic);
-
         this.elementType = elementType;
         this.arrayClassNameStub = arrayClassNameStub;
-
-        this.length = length;
-
         if(length < DYNAMIC_LENGTH) {
             throw new IllegalArgumentException("length must be non-negative or " + DYNAMIC_LENGTH + ". found: " + length);
         }
-
+        this.length = length;
         this.isString = String.class == clazz;
     }
 
     public T getElementType() {
         return elementType;
-    }
-
-    public String getElementClassName() {
-        return ClassNames.getArrayElementClassName(clazz.getName());
     }
 
     public int getLength() {
@@ -71,27 +63,27 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         return TYPE_CODE_ARRAY;
     }
 
+    /**
+     * LOG_2_UNIT_LENGTH_BYTES == 5
+     * x << 5 == x * 32
+     * @param value
+     * @return
+     */
     @Override
     int byteLength(Object value) {
         int staticLen;
         final ABIType<?> elementType = this.elementType;
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN:
-            staticLen = ((boolean[]) value).length << LOG_2_UNIT_LENGTH_BYTES; // mul 32
-            break;
-        case TYPE_CODE_BYTE:
-            staticLen = roundLengthUp((isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length);
-            break;
-        case TYPE_CODE_INT:
-            staticLen = ((int[]) value).length << LOG_2_UNIT_LENGTH_BYTES; // mul 32
-            break;
-        case TYPE_CODE_LONG:
-            staticLen = ((long[]) value).length << LOG_2_UNIT_LENGTH_BYTES; // mul 32
-            break;
+        case TYPE_CODE_BOOLEAN: staticLen = ((boolean[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
+        case TYPE_CODE_BYTE: staticLen =
+                roundLengthUp(
+                        (isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length
+                );
+                break;
+        case TYPE_CODE_INT: staticLen = ((int[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
+        case TYPE_CODE_LONG: staticLen = ((long[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BIG_INTEGER:
-        case TYPE_CODE_BIG_DECIMAL:
-            staticLen = ((Number[]) value).length << LOG_2_UNIT_LENGTH_BYTES; // mul 32
-            break;
+        case TYPE_CODE_BIG_DECIMAL: staticLen = ((Number[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
             final Object[] elements = (Object[]) value;
@@ -425,7 +417,6 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 //                if(bb.position() != index + offset) {
 //                    System.err.println(ArrayType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
 //                    bb.position(index + offset);
-//                    throw new RuntimeException();
 //                }
                 dest[i] = elementType.decode(bb, elementBuffer);
             }

@@ -132,6 +132,23 @@ public class ContractJSONParserTest {
             "  }\n" +
             "]";
 
+    private static final String FALLBACK_AND_CONSTRUCTOR =
+            "[\n" +
+                    "  {\n" +
+                    "    \"type\": \"fallback\",\n" +
+                    "    \"stateMutability\": \"pure\"" +
+                    "  },\n" +
+                    "  {\n" +
+                    "    \"type\": \"constructor\",\n" +
+                    "    \"inputs\": [\n" +
+                    "      {\n" +
+                    "        \"name\": \"aha\",\n" +
+                    "        \"type\": \"bool\"\n" +
+                    "      }\n" +
+                    "    ]\n" +
+                    "  }\n" +
+                    "]";
+
     private static void printTupleType(TupleType tupleType) {
         StringBuilder sb = new StringBuilder();
         tupleType.recursiveToString(sb);
@@ -164,13 +181,26 @@ public class ContractJSONParserTest {
     @Test
     public void testGetFunctions() throws ParseException {
 
-        List<Function> functions = ContractJSONParser.parseFunctions(CONTRACT_JSON);
+        List<Function> functions;
+
+        functions = ContractJSONParser.getFunctions(CONTRACT_JSON);
 
         for(Function f : functions) {
             System.out.println(f.getName() + " : " + f.canonicalSignature);
         }
 
         Assert.assertEquals(1, functions.size());
+        Assert.assertNull(functions.get(0).getStateMutability());
+
+        functions = ContractJSONParser.getFunctions(FALLBACK_AND_CONSTRUCTOR);
+
+        for(Function f : functions) {
+            System.out.println(f.getName() + " : " + f.canonicalSignature);
+        }
+
+        Assert.assertEquals(2, functions.size());
+        Assert.assertEquals("pure", functions.get(0).getStateMutability());
+        Assert.assertNull(functions.get(1).getStateMutability());
     }
 
     @Test

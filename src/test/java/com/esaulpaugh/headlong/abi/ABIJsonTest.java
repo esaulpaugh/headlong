@@ -1,18 +1,19 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.util.JsonUtils;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +40,7 @@ public class ABIJsonTest {
         final String result;
         final Function function;
 
-        private ABITestCase(String key, JsonArray args, JsonArray types, String result, Function function) {
+        private ABITestCase(String key, JsonArray args, String result, JsonArray types, Function function) {
             this.key = key;
             this.args = args;
             this.types = types;
@@ -49,10 +50,8 @@ public class ABIJsonTest {
 
         private static ABITestCase forKey(String key) throws ParseException {
 
-            JsonParser parser = new JsonParser();
-            JsonElement element = parser.parse(TEST_CASES);
-            JsonObject obj = element.getAsJsonObject();
-            Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
+            JsonObject tests = JsonUtils.parseObject(TEST_CASES);
+            Set<Map.Entry<String, JsonElement>> entries = tests.entrySet();
 
             JsonObject jsonObject = null;
             for (Map.Entry<String, JsonElement> e : entries) {
@@ -63,28 +62,24 @@ public class ABIJsonTest {
                 }
             }
             if (jsonObject == null) {
-                throw new RuntimeException("");
+                throw new RuntimeException(key + " not found");
             }
 
-            JsonArray args = jsonObject.get("args").getAsJsonArray();
-            JsonArray types = jsonObject.get("types").getAsJsonArray();
-            String result = jsonObject.get("result").getAsString();
+            JsonArray args = JsonUtils.getArray(jsonObject, "args");
+            String result = JsonUtils.getString(jsonObject, "result");
+            JsonArray types = JsonUtils.getArray(jsonObject, "types");
 
-            StringBuilder sb = new StringBuilder("test(");
+            ArrayList<ABIType<?>> list = new ArrayList<>(types.size());
+
             for (JsonElement type : types) {
-                sb.append(type.getAsString())
-                        .append(',');
+                list.add(TypeFactory.create(type.getAsString(), null));
             }
-            if (types.size() > 0) {
-                final int n = sb.length();
-                sb.replace(n - 1, n, "");
-            }
-            sb.append(')');
-            System.out.println(sb.toString());
 
-            Function function = Function.parse(sb.toString());
+            TupleType tt = TupleType.create(list);
 
-            return new ABITestCase(key, args, types, result, function);
+            System.out.println(tt.canonicalType);
+
+            return new ABITestCase(key, args, result, types, new Function("test" + tt.canonicalType));
         }
 
         private void test(Object[] argsArray) {

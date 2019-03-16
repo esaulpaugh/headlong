@@ -8,7 +8,7 @@ import java.util.function.BiPredicate;
 /**
  * Decodes RLP-formatted data.
  */
-public class RLPDecoder {
+public final class RLPDecoder {
 
     public static final RLPDecoder RLP_STRICT = new RLPDecoder(false);
     public static final RLPDecoder RLP_LENIENT = new RLPDecoder(true);
@@ -48,32 +48,7 @@ public class RLPDecoder {
      */
     public RLPList.Iterator listIterator(byte[] buffer, int index) throws DecodeException {
         return wrapList(buffer, index).iterator(this);
-//        RLPList rlpList = (RLPList) RLP_STRICT.wrap(buffer, index);
-//        return rlpList.elements(RLP_STRICT).iterator();
     }
-
-//    public RLPList wrapString(byte[] encoding) throws DecodeException {
-//        return wrapList(encoding, 0);
-//    }
-//
-//    public RLPList wrapString(byte[] buffer, int index) throws DecodeException {
-//        return wrapList(buffer, index, buffer.length);
-//    }
-//
-//    public RLPString wrapString(byte[] buffer, int index, int containerEnd) throws DecodeException {
-//        byte lead = buffer[index];
-//        DataType type = DataType.type(lead);
-//        switch (type) {
-//        case SINGLE_BYTE:
-//        case STRING_SHORT:
-//        case STRING_LONG:
-//            return new RLPString(lead, type, buffer, index, containerEnd, lenient);
-//        case LIST_SHORT:
-//        case LIST_LONG:
-//        default:
-//            throw new IllegalArgumentException("item is not a string");
-//        }
-//    }
 
     public RLPList wrapList(byte[] encoding) throws DecodeException {
         return wrapList(encoding, 0);

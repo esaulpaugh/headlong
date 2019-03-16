@@ -30,9 +30,10 @@ public class Function implements ABIObject, Serializable {
 
     final String canonicalSignature;
     private final String hashAlgorithm;
+    private final String stateMutability;
 
-    final byte[] selector;
-    final TupleType inputTypes;
+    final transient byte[] selector;
+    final transient TupleType inputTypes;
 
     final TupleType outputTypes;
 
@@ -40,13 +41,14 @@ public class Function implements ABIObject, Serializable {
         selector = new byte[SELECTOR_LEN];
     }
 
-    Function(String name, MessageDigest messageDigest, TupleType inputTypes, TupleType outputTypes) {
+    Function(String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) {
         final String canonical = name + inputTypes.canonicalType;
         initSelector(messageDigest, canonical);
         this.canonicalSignature = canonical;
         this.hashAlgorithm = messageDigest.getAlgorithm();
         this.inputTypes = inputTypes;
         this.outputTypes = outputTypes;
+        this.stateMutability = stateMutability;
     }
 
     public Function(String signature) throws ParseException {
@@ -88,9 +90,10 @@ public class Function implements ABIObject, Serializable {
 
         initSelector(messageDigest, canonicalSig);
         this.canonicalSignature = canonicalSig;
-        this.hashAlgorithm = messageDigest.getAlgorithm();
         this.inputTypes = tupleType;
         this.outputTypes = outputs == null ? null : TupleType.parse(outputs);
+        this.stateMutability = null;
+        this.hashAlgorithm = messageDigest.getAlgorithm();
     }
 
     public static MessageDigest newDefaultDigest() {
@@ -119,9 +122,7 @@ public class Function implements ABIObject, Serializable {
     }
 
     public byte[] selector() {
-        byte[] out = new byte[selector.length];
-        System.arraycopy(selector, 0, out, 0, out.length);
-        return out;
+        return Arrays.copyOf(selector, selector.length);
     }
 
     public String selectorHex() {
@@ -134,6 +135,10 @@ public class Function implements ABIObject, Serializable {
 
     public TupleType getOutputTypes() {
         return outputTypes;
+    }
+
+    public String getStateMutability() {
+        return stateMutability;
     }
 
     public ByteBuffer encodeCallWithArgs(Object... args) {

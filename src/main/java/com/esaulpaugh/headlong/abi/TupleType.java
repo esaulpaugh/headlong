@@ -10,6 +10,8 @@ import static com.esaulpaugh.headlong.abi.CallEncoder.OFFSET_LENGTH_BYTES;
 
 public class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
+    public static final TupleType EMPTY = new TupleType("()", false, new ABIType[0]);
+
     private static final Class<?> CLASS = Tuple.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(Tuple[].class);
 
@@ -191,7 +193,6 @@ public class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 //                if(bb.position() != index + offset) {
 //                    System.err.println(TupleType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
 //                    bb.position(index + offset);
-//                    throw new RuntimeException();
 //                }
                 dest[i] = type.decode(bb, elementBuffer);
             }
@@ -276,10 +277,10 @@ public class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
         for(ABIType<?> e : this) {
             if(e.typeCode() == TYPE_CODE_TUPLE) {
                 ((TupleType) e).recursiveToString(sb);
-                sb.append(' ').append(e.getName()).append(',');
             } else {
-                sb.append(e).append(' ').append(e.getName()).append(',');
+                sb.append(e);
             }
+            sb.append(' ').append(e.getName()).append(',');
         }
     }
 }

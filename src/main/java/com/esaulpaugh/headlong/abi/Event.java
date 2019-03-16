@@ -6,8 +6,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static com.esaulpaugh.headlong.abi.ContractJSONParser.parseEvent;
-
 public class Event implements ABIObject {
 
     private final String name;
@@ -82,11 +80,11 @@ public class Event implements ABIObject {
     // ---------------------
 
     public static Event fromJson(String eventJson) throws ParseException {
-        return parseEvent(eventJson);
+        return ContractJSONParser.parseEvent(eventJson);
     }
 
     public static Event fromJsonObject(JsonObject event) throws ParseException {
-        return parseEvent(event);
+        return ContractJSONParser.parseEvent(event);
     }
 
     @Override
