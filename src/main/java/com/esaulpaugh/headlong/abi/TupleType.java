@@ -4,9 +4,7 @@ import com.esaulpaugh.headlong.abi.util.ClassNames;
 
 import java.nio.ByteBuffer;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static com.esaulpaugh.headlong.abi.CallEncoder.OFFSET_LENGTH_BYTES;
 
@@ -17,18 +15,35 @@ public class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
     final ABIType<?>[] elementTypes;
 
-    private TupleType(String canonicalType, boolean dynamic, ABIType<?>... elementTypes) {
+    private TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes) {
         super(canonicalType, CLASS, dynamic);
         this.elementTypes = elementTypes;
     }
 
-    static TupleType create(String canonicalType, ABIType<?>... members) {
-        for (ABIType<?> type : members) {
-            if(type.dynamic) {
-                return new TupleType(canonicalType, true, members);
-            }
+    static <L extends List<ABIType<?>> & RandomAccess> TupleType create(L elementsList) {
+
+        final int len = elementsList.size();
+
+        final StringBuilder canonicalBuilder = new StringBuilder("(");
+        boolean dynamic = false;
+        final ABIType<?>[] elementsArray = new ABIType<?>[len];
+
+        for (int i = 0; i < len; i++) {
+            ABIType<?> e = elementsList.get(i);
+            canonicalBuilder.append(e.canonicalType).append(',');
+            dynamic |= e.dynamic;
+            elementsArray[i] = e;
         }
-        return new TupleType(canonicalType, false, members);
+
+        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elementsArray);
+    }
+
+    private static String completeTupleTypeString(StringBuilder canonicalTupleType) {
+        final int len = canonicalTupleType.length();
+        if(len == 1) {
+            return "()";
+        }
+        return canonicalTupleType.replace(len - 1, len, ")").toString(); // replace trailing comma
     }
 
     public ABIType<?> get(int index) {

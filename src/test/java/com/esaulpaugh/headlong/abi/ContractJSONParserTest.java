@@ -132,41 +132,39 @@ public class ContractJSONParserTest {
             "  }\n" +
             "]";
 
+    private static void printTupleType(TupleType tupleType) {
+        StringBuilder sb = new StringBuilder();
+        tupleType.recursiveToString(sb);
+        System.out.println("RECURSIVE = " + sb.toString());
+    }
+
     @Test
     public void testParseFunction() throws ParseException {
 
         Function f;
-        StringBuilder sb;
 
         f = ContractJSONParser.parseFunction(FUNCTION_A_JSON);
-        System.out.println(f.getName() + " : " + f.canonicalSignature + " : " + f.getOutputTypes().get(0));
-        Assert.assertEquals(1, f.getOutputTypes().elementTypes.length);
-        Assert.assertEquals("uint64", f.getOutputTypes().get(0).canonicalType);
+        System.out.println(f.getName() + " : " + f.canonicalSignature + " : " + f.outputTypes.get(0));
+        Assert.assertEquals(1, f.outputTypes.elementTypes.length);
+        Assert.assertEquals("uint64", f.outputTypes.get(0).canonicalType);
         f.encodeCallWithArgs((Object) new Tuple[] { new Tuple(new BigDecimal(BigInteger.ONE, 10), new BigDecimal(BigInteger.TEN, 10)) });
 
-        sb = new StringBuilder();
-        f.inputTypes.recursiveToString(sb);
-        System.out.println("RECURSIVE = " + sb.toString());
+        printTupleType(f.inputTypes);
 
-        sb = new StringBuilder();
-        f.getOutputTypes().recursiveToString(sb);
-        System.out.println("RECURSIVE = " + sb.toString());
+        printTupleType(f.outputTypes);
 
         f = ContractJSONParser.parseFunction(FUNCTION_B_JSON);
         System.out.println(f.getName() + " : " + f.canonicalSignature);
-        Assert.assertNull(f.getOutputTypes());
+        Assert.assertNull(f.outputTypes);
         Assert.assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.canonicalSignature);
 
-
-        sb = new StringBuilder();
-        f.inputTypes.recursiveToString(sb);
-        System.out.println("RECURSIVE = " + sb.toString());
+        printTupleType(f.inputTypes);
     }
 
     @Test
     public void testGetFunctions() throws ParseException {
 
-        List<Function> functions = ContractJSONParser.getFunctions(CONTRACT_JSON);
+        List<Function> functions = ContractJSONParser.parseFunctions(CONTRACT_JSON);
 
         for(Function f : functions) {
             System.out.println(f.getName() + " : " + f.canonicalSignature);
@@ -177,7 +175,7 @@ public class ContractJSONParserTest {
 
     @Test
     public void testGetEvents() throws ParseException {
-        List<Event> events = ContractJSONParser.getEvents(CONTRACT_JSON);
+        List<Event> events = ContractJSONParser.parseEvents(CONTRACT_JSON);
 
         Assert.assertEquals(1, events.size());
 
@@ -185,5 +183,4 @@ public class ContractJSONParserTest {
             System.out.println(event);
         }
     }
-
 }

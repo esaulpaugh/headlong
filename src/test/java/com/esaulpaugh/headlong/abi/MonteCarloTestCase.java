@@ -222,36 +222,35 @@ public class MonteCarloTestCase implements Serializable {
         int index = r.nextInt(CANONICAL_BASE_TYPE_STRINGS.length);
         String baseTypeString = CANONICAL_BASE_TYPE_STRINGS[index];
 
-        StringBuilder sb;
+        StringBuilder builder;
 
         TupleType tupleType = null;
         if(baseTypeString.equals(TUPLE_KEY)) {
             if(tupleDepth < params.maxTupleDepth) {
                 tupleType = generateTupleType(r, tupleDepth + 1);
-                sb = new StringBuilder(tupleType.canonicalType);
+                builder = new StringBuilder();
             } else {
-                sb = new StringBuilder("uint256");
+                builder = new StringBuilder("uint256");
             }
         } else {
-            sb = new StringBuilder(baseTypeString);
+            builder = new StringBuilder(baseTypeString);
         }
 
         boolean isElement = r.nextBoolean() && r.nextBoolean();
         if(isElement) {
             int arrayDepth = 1 + r.nextInt(params.maxArrayDepth);
             for (int i = 0; i < arrayDepth; i++) {
-                sb.append('[');
+                builder.append('[');
                 if(r.nextBoolean()) {
-                    sb.append(r.nextInt(params.maxArrayLen + 1));
+                    builder.append(r.nextInt(params.maxArrayLen + 1));
                 }
-                sb.append(']');
+                builder.append(']');
             }
         }
 
-        String canonicalTypeString = sb.toString();
         return tupleType != null
-                ? TypeFactory.createForTuple(canonicalTypeString, tupleType, null)
-                : TypeFactory.create(canonicalTypeString, null);
+                ? TypeFactory.createForTuple(tupleType, builder.toString(), null)
+                : TypeFactory.create(builder.toString(), null);
     }
 
     private TupleType generateTupleType(Random r, int tupleDepth) throws ParseException {

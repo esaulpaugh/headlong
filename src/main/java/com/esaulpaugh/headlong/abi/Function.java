@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.Strings;
+import com.esaulpaugh.headlong.util.Utils;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.io.Serializable;
@@ -21,7 +22,7 @@ import static com.esaulpaugh.headlong.util.Strings.encode;
  * Represents a function in an Ethereum contract. Can encode and decode calls matching this function's signature.
  * Can decode the function's return values.
  */
-public class Function implements Serializable {
+public class Function implements ABIObject, Serializable {
 
     private static final Pattern HAS_NON_ASCII_CHARS = Pattern.compile("[^\\p{ASCII}]+");
 
@@ -33,15 +34,16 @@ public class Function implements Serializable {
     final byte[] selector;
     final TupleType inputTypes;
 
-    private final TupleType outputTypes;
+    final TupleType outputTypes;
 
     {
         selector = new byte[SELECTOR_LEN];
     }
 
-    Function(String canonicalSignature, MessageDigest messageDigest, TupleType inputTypes, TupleType outputTypes) {
-        initSelector(messageDigest, canonicalSignature);
-        this.canonicalSignature = canonicalSignature;
+    Function(String name, MessageDigest messageDigest, TupleType inputTypes, TupleType outputTypes) {
+        final String canonical = name + inputTypes.canonicalType;
+        initSelector(messageDigest, canonical);
+        this.canonicalSignature = canonical;
         this.hashAlgorithm = messageDigest.getAlgorithm();
         this.inputTypes = inputTypes;
         this.outputTypes = outputTypes;
@@ -71,18 +73,18 @@ public class Function implements Serializable {
             throw new ParseException("params start not found", signature.length());
         }
 
-        final String functionName = signature.substring(0, split);
+        final String name = signature.substring(0, split);
 
-        final Matcher matcher = HAS_NON_ASCII_CHARS.matcher(functionName);
+        final Matcher matcher = HAS_NON_ASCII_CHARS.matcher(name);
         if(matcher.find()) {
-            char c = signature.charAt(matcher.start());
-            throw new ParseException("non-ascii char, \'" + c + "\' " + TupleTypeParser.escapeChar(c) + ", @ index " + matcher.start(), matcher.start());
+            throw newNonAsciiNameException(matcher, signature.charAt(matcher.start()));
         }
 
         final String rawTupleTypeString = signature.substring(split);
 
         final TupleType tupleType = TupleTypeParser.parseTupleType(rawTupleTypeString);
-        final String canonicalSig = functionName + tupleType.canonicalType;
+
+        final String canonicalSig = name + tupleType.canonicalType;
 
         initSelector(messageDigest, canonicalSig);
         this.canonicalSignature = canonicalSig;
@@ -242,5 +244,17 @@ public class Function implements Serializable {
 
     public static Function fromJson(String functionJson) throws ParseException {
         return ContractJSONParser.parseFunction(functionJson);
+    }
+
+    private static ParseException newNonAsciiNameException(Matcher matcher, char c) throws ParseException {
+        return new ParseException(
+                "non-ascii char, \'" + c + "\' " + Utils.escapeChar(c) + ", @ index " + matcher.start(),
+                matcher.start()
+        );
+    }
+
+    @Override
+    public int objectType() {
+        return ABIObject.FUNCTION;
     }
 }

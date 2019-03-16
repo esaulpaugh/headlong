@@ -1,11 +1,14 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.*;
 
@@ -14,38 +17,45 @@ import static com.esaulpaugh.headlong.abi.util.JsonUtils.*;
  */
 public class ContractJSONParser {
 
-    static final String NAME = "name";
-    static final String TYPE = "type";
-    static final String FUNCTION = "function";
-    static final String INPUTS = "inputs";
-    static final String OUTPUTS = "outputs";
-    static final String TUPLE = "tuple";
-    static final String COMPONENTS = "components";
-    static final String EVENT = "event";
-    static final String ANONYMOUS = "anonymous";
-    static final String INDEXED = "indexed";
+    private static final String NAME = "name";
+    private static final String TYPE = "type";
+    private static final String FUNCTION = "function";
+    private static final String INPUTS = "inputs";
+    private static final String OUTPUTS = "outputs";
+    private static final String TUPLE = "tuple";
+    private static final String COMPONENTS = "components";
+    private static final String EVENT = "event";
+    private static final String ANONYMOUS = "anonymous";
+    private static final String INDEXED = "indexed";
 
-    public static List<Function> getFunctions(String json) throws ParseException {
-        final MessageDigest digest = Function.newDefaultDigest();
-        final List<Function> list = new ArrayList<>();
-        for(JsonElement element : parseArray(json)) {
-            if(element.isJsonObject()) {
-                final JsonObject elementObj = (JsonObject) element;
-                if (FUNCTION.equals(getString(elementObj, TYPE))) {
-                    list.add(parseFunction(elementObj, digest));
-                }
-            }
-        }
-        return list;
+    public static List<Function> parseFunctions(String json) throws ParseException {
+        return parseObjects(json, true, false, Function.class);
     }
 
-    public static List<Event> getEvents(String json) throws ParseException {
-        final List<Event> list = new ArrayList<>();
-        for(JsonElement element : parseArray(json)) {
-            if(element.isJsonObject()) {
-                final JsonObject elementObj = (JsonObject) element;
-                if (EVENT.equals(getString(elementObj, TYPE))) {
-                    list.add(parseEvent(elementObj));
+    public static List<Event> parseEvents(String json) throws ParseException {
+        return parseObjects(json, false, true, Event.class);
+    }
+
+    public static List<ABIObject> parseObjects(String json) throws ParseException {
+        return parseObjects(json, true, true, ABIObject.class);
+    }
+
+    public static <T extends ABIObject> List<T> parseObjects(final String json,
+                                                             final boolean functions,
+                                                             final boolean events,
+                                                             final Class<T> classofT) throws ParseException {
+
+        final Supplier<MessageDigest> defaultDigest = functions ? Function::newDefaultDigest : null;
+
+        final List<T> list = new ArrayList<>();
+        for(JsonElement e : parseArray(json)) {
+            if(e.isJsonObject()) {
+                JsonObject object = (JsonObject) e;
+                final String type = getString(object, TYPE);
+                if (functions && FUNCTION.equals(type)) {
+                    list.add(classofT.cast(parseFunction(object, defaultDigest.get())));
+                } else if(events && EVENT.equals(type)) {
+                    list.add(classofT.cast(parseEvent(object)));
                 }
             }
         }
@@ -64,36 +74,24 @@ public class ContractJSONParser {
         }
 
         final JsonArray inputs = getArray(function, INPUTS);
-        final int inputsLen = inputs.size();
-        final ABIType<?>[] inputsArray = new ABIType<?>[inputsLen];
-        final StringBuilder inputsSB = new StringBuilder("(");
-        for (int i = 0; i < inputsLen; i++) {
-            inputsArray[i] = buildType(inputs.get(i).getAsJsonObject(), inputsSB);
+        final ArrayList<ABIType<?>> inputsList = new ArrayList<>(inputs.size());
+        for (JsonElement e : inputs) {
+            inputsList.add(buildType(e.getAsJsonObject())); // , inputsSB
         }
 
         final JsonArray outputs = getArray(function, OUTPUTS, false);
         final TupleType outputTypes;
         if (outputs != null) {
-            final int outputsLen = outputs.size();
-            final ABIType<?>[] outputsArray = new ABIType<?>[outputsLen];
-            final StringBuilder outputsSB = new StringBuilder("(");
-            for (int i = 0; i < outputsLen; i++) {
-                outputsArray[i] = buildType(outputs.get(i).getAsJsonObject(), outputsSB);
+            final ArrayList<ABIType<?>> outputsList = new ArrayList<>(outputs.size());
+            for (JsonElement e : outputs) {
+                outputsList.add(buildType(e.getAsJsonObject()));
             }
-            final String outputsTupleTypeString = TupleTypeParser.completeTupleTypeString(outputsSB);
-            outputTypes = TupleType.create(outputsTupleTypeString, outputsArray);
+            outputTypes = TupleType.create(outputsList);
         } else {
             outputTypes = null;
         }
 
-        final Function protoFunction = Function.parse(getString(function, NAME) + TupleTypeParser.completeTupleTypeString(inputsSB));
-
-        return new Function(
-                protoFunction.canonicalSignature,
-                messageDigest,
-                TupleType.create(protoFunction.inputTypes.canonicalType, inputsArray),
-                outputTypes
-        );
+        return new Function(getString(function, NAME), messageDigest, TupleType.create(inputsList), outputTypes);
     }
 
     static Event parseEvent(String eventJson) throws ParseException {
@@ -108,44 +106,35 @@ public class ContractJSONParser {
 
         final JsonArray inputs = getArray(event, INPUTS);
         final int inputsLen = inputs.size();
-        final ABIType<?>[] inputsArray = new ABIType<?>[inputsLen];
+        final ArrayList<ABIType<?>> inputsList = new ArrayList<>(inputs.size());
         final boolean[] indexed = new boolean[inputsLen];
-        final StringBuilder sb = new StringBuilder("(");
         for (int i = 0; i < inputsLen; i++) {
-            JsonObject input = inputs.get(i).getAsJsonObject();
-            inputsArray[i] = buildType(inputs.get(i).getAsJsonObject(), sb);
-            indexed[i] = getBoolean(input, INDEXED, false, false);
+            JsonObject inputObj = inputs.get(i).getAsJsonObject();
+            inputsList.add(buildType(inputObj));
+            indexed[i] = getBoolean(inputObj, INDEXED, false, false);
         }
         return new Event(
                 getString(event, NAME),
-                TupleType.create(TupleTypeParser.completeTupleTypeString(sb), inputsArray),
+                TupleType.create(inputsList),
                 indexed,
                 getBoolean(event, ANONYMOUS, false, false)
         );
     }
 
-    private static ABIType<?> buildType(JsonObject object, StringBuilder parentSb) throws ParseException {
+    private static ABIType<?> buildType(JsonObject object) throws ParseException {
         final String type = getString(object, TYPE);
+        final String name = getString(object, ContractJSONParser.NAME, false);
 
         if(type.startsWith(TUPLE)) {
             final JsonArray components = getArray(object, COMPONENTS);
-            final int componentsLen = components.size();
-            final StringBuilder sb = new StringBuilder("(");
-            final ABIType<?>[] elements = new ABIType[componentsLen];
-            for (int i = 0; i < componentsLen; i++) {
-                elements[i] = buildType(components.get(i).getAsJsonObject(), sb);
+            final ArrayList<ABIType<?>> componentsList = new ArrayList<>(components.size());
+            for (JsonElement c : components) {
+                componentsList.add(buildType(c.getAsJsonObject()));
             }
-            final TupleType base = TupleType.create(TupleTypeParser.completeTupleTypeString(sb), elements);
-
-            final String canonical = base.canonicalType + type.substring(TUPLE.length()); // suffix e.g. "[4][]"
-
-            parentSb.append(canonical).append(',');
-
-            return TypeFactory.createForTuple(canonical, base, getString(object, NAME));
+            final TupleType base = TupleType.create(componentsList);
+            final String suffix = type.substring(TUPLE.length()); // suffix e.g. "[4][]"
+            return TypeFactory.createForTuple(base, suffix, name);
         }
-
-        final ABIType<?> abiType = TypeFactory.createFromJsonObject(object);
-        parentSb.append(abiType.canonicalType).append(',');
-        return abiType;
+        return TypeFactory.create(type, null, name);
     }
 }

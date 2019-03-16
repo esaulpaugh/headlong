@@ -1,8 +1,5 @@
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.JsonUtils;
-import com.google.gson.JsonObject;
-
 import java.math.BigInteger;
 import java.text.ParseException;
 
@@ -16,26 +13,15 @@ final class TypeFactory {
 
     private static final ClassLoader CLASS_LOADER = TypeFactory.class.getClassLoader();
 
-    static ABIType<?> createForTuple(String canonicalType, TupleType baseTupleType, String name) throws ParseException {
-        if(baseTupleType == null) {
-            throw new NullPointerException();
-        }
-        return create(canonicalType, baseTupleType, name);
-    }
-
-    static ABIType<?> createFromJsonObject(JsonObject abiType) throws ParseException {
-        final String type = JsonUtils.getString(abiType, ContractJSONParser.TYPE);
-        if(type.startsWith(ContractJSONParser.TUPLE)) {
-            throw new IllegalArgumentException("not allowed here");
-        }
-        return create(type, null, JsonUtils.getString(abiType, ContractJSONParser.NAME, false));
+    static ABIType<?> createForTuple(TupleType baseTupleType, String suffix, String name) throws ParseException {
+        return create(baseTupleType.canonicalType + suffix, baseTupleType, name);
     }
 
     static ABIType<?> create(String canonicalType, String name) throws ParseException {
         return create(canonicalType, null, name);
     }
 
-    private static ABIType<?> create(String canonicalType, TupleType baseTupleType, String name) throws ParseException {
+    static ABIType<?> create(String canonicalType, TupleType baseTupleType, String name) throws ParseException {
         try {
             return buildType(canonicalType, false, baseTupleType).setName(name);
         } catch (ClassNotFoundException e) {
