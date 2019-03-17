@@ -67,7 +67,7 @@ public class ContractJSONParser {
     public static <T extends ABIObject> List<T> parseObjects(final String json,
                                                              final boolean functions,
                                                              final boolean events,
-                                                             final Class<T> classofT) throws ParseException {
+                                                             final Class<T> classOfT) throws ParseException {
 
         final Supplier<MessageDigest> defaultDigest = functions ? Function::newDefaultDigest : null;
 
@@ -81,12 +81,12 @@ public class ContractJSONParser {
                 case CONSTRUCTOR:
                 case FALLBACK:
                     if(functions) {
-                        list.add(classofT.cast(parseFunction(object, defaultDigest.get())));
+                        list.add(classOfT.cast(parseFunction(object, defaultDigest.get())));
                     }
                     break;
                 case EVENT:
                     if(events) {
-                        list.add(classofT.cast(parseEvent(object)));
+                        list.add(classOfT.cast(parseEvent(object)));
                     }
                 }
             }

@@ -19,7 +19,7 @@ public abstract class ABIType<J> implements Serializable {
     static final int TYPE_CODE_ARRAY = 6;
     static final int TYPE_CODE_TUPLE = 7;
 
-    static final ABIType<?>[] EMPTY_TYPE_ARRAY = new ABIType<?>[0];
+    public static final ABIType<?>[] EMPTY_TYPE_ARRAY = new ABIType<?>[0];
 
     final String canonicalType;
     final Class<?> clazz;

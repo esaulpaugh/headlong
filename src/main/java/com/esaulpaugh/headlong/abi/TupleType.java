@@ -10,7 +10,7 @@ import static com.esaulpaugh.headlong.abi.CallEncoder.OFFSET_LENGTH_BYTES;
 
 public class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
-    public static final TupleType EMPTY = new TupleType("()", false, new ABIType[0]);
+    public static final TupleType EMPTY = new TupleType("()", false, EMPTY_TYPE_ARRAY);
 
     private static final Class<?> CLASS = Tuple.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(Tuple[].class);
@@ -282,5 +282,43 @@ public class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
             }
             sb.append(' ').append(e.getName()).append(',');
         }
+    }
+
+    public TupleType subtuple(boolean[] manifest) {
+        return subtuple(manifest, false);
+    }
+
+    public TupleType subtuple(boolean[] manifest, boolean negate) {
+        final int len = checkLength(elementTypes, manifest);
+        final StringBuilder canonicalBuilder = new StringBuilder("(");
+        boolean dynamic = false;
+        final ABIType<?>[] selected = new ABIType<?>[getSelectionSize(manifest, negate)];
+        for (int m = 0, s = 0; m < len; m++) {
+            if(negate ^ manifest[m]) {
+                ABIType<?> e = elementTypes[m];
+                canonicalBuilder.append(e.canonicalType).append(',');
+                dynamic |= e.dynamic;
+                selected[s++] = e;
+            }
+        }
+        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected);
+    }
+
+    private static int checkLength(ABIType<?>[] elements, boolean[] manifest) {
+        final int len = manifest.length;
+        if(len != elements.length) {
+            throw new IllegalArgumentException("manifest.length != elements.length: " + manifest.length + " != " + elements.length);
+        }
+        return len;
+    }
+
+    private static int getSelectionSize(boolean[] manifest, boolean negate) {
+        int count = 0;
+        for (boolean b : manifest) {
+            if(b) {
+                count++;
+            }
+        }
+        return negate ? manifest.length - count : count;
     }
 }

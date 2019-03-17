@@ -251,7 +251,7 @@ public class Function implements ABIObject, Serializable {
         return ContractJSONParser.parseFunction(functionJson);
     }
 
-    private static ParseException newNonAsciiNameException(Matcher matcher, char c) throws ParseException {
+    private static ParseException newNonAsciiNameException(Matcher matcher, char c) {
         return new ParseException(
                 "non-ascii char, \'" + c + "\' " + Utils.escapeChar(c) + ", @ index " + matcher.start(),
                 matcher.start()

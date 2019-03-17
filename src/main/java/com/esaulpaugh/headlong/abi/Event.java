@@ -3,7 +3,6 @@ package com.esaulpaugh.headlong.abi;
 import com.google.gson.JsonObject;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Event implements ABIObject {
@@ -16,9 +15,17 @@ public class Event implements ABIObject {
 
     private final boolean anonymous;
 
-    Event(String name, TupleType inputs, boolean[] indexed, boolean anonymous) {
+    Event(String name, String paramsString, boolean[] indexed) throws ParseException {
+        this(name, paramsString, indexed, false);
+    }
+
+    Event(String name, String paramsString, boolean[] indexed, boolean anonymous) throws ParseException {
+        this(name, TupleType.parse(paramsString), indexed, anonymous);
+    }
+
+    Event(String name, TupleType params, boolean[] indexed, boolean anonymous) {
         this.name = name;
-        this.inputs = inputs;
+        this.inputs = params;
         this.indexManifest = Arrays.copyOf(indexed, indexed.length);
         this.anonymous = anonymous;
     }
@@ -31,7 +38,7 @@ public class Event implements ABIObject {
      * Returns the canonical type string for the tuple of inputs.
      * @return
      */
-    public String getArgsString() {
+    public String getParamsString() {
         return inputs.canonicalType;
     }
 
@@ -48,25 +55,11 @@ public class Event implements ABIObject {
     }
 
     public TupleType getIndexedParams() {
-        final ArrayList<ABIType<?>> indexedArgs = new ArrayList<>();
-        final ABIType<?>[] params = inputs.elementTypes;
-        for (int i = 0; i < indexManifest.length; i++) {
-            if(indexManifest[i]) {
-                indexedArgs.add(params[i]);
-            }
-        }
-        return TupleType.create(indexedArgs);
+        return inputs.subtuple(indexManifest);
     }
 
     public TupleType getNonIndexedParams() {
-        final ArrayList<ABIType<?>> nonIndexedArgs = new ArrayList<>();
-        final ABIType<?>[] params = inputs.elementTypes;
-        for (int i = 0; i < indexManifest.length; i++) {
-            if(!indexManifest[i]) {
-                nonIndexedArgs.add(params[i]);
-            }
-        }
-        return TupleType.create(nonIndexedArgs);
+        return inputs.subtuple(indexManifest, true);
     }
 
     @Override

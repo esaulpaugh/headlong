@@ -278,7 +278,7 @@ class CallEncoder {
     }
 
     private static void insertInt(BigInteger bigGuy, ByteBuffer dest) {
-        byte[] arr = bigGuy.toByteArray();
+        final byte[] arr = bigGuy.toByteArray();
         final byte paddingByte = bigGuy.signum() == -1 ? NEGATIVE_ONE_BYTE : ZERO_BYTE;
         final int lim = 32 - arr.length;
         for (int i = 0; i < lim; i++) {
