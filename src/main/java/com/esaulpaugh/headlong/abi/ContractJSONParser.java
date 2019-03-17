@@ -27,9 +27,9 @@ public class ContractJSONParser {
     private static final String EVENT = "event";
     private static final String ANONYMOUS = "anonymous";
     private static final String INDEXED = "indexed";
-    static final String CONSTRUCTOR = "constructor";
-    static final String FALLBACK = "fallback";
-    static final String STATE_MUTABILITY = "stateMutability";
+    private static final String CONSTRUCTOR = "constructor";
+    private static final String FALLBACK = "fallback";
+    private static final String STATE_MUTABILITY = "stateMutability";
 
     public static List<Function> parseFunctions(String json) throws ParseException {
         return parseObjects(json, true, false, Function.class);
@@ -77,7 +77,11 @@ public class ContractJSONParser {
         return parseFunction(parseObject(json), Function.newDefaultDigest());
     }
 
-    private static Function parseFunction(JsonObject function, MessageDigest messageDigest) throws ParseException {
+    public static Function parseFunction(JsonObject function) throws ParseException {
+        return parseFunction(function, Function.newDefaultDigest());
+    }
+
+    public static Function parseFunction(JsonObject function, MessageDigest messageDigest) throws ParseException {
 
         final JsonArray inputs = getArray(function, INPUTS);
 
@@ -142,7 +146,7 @@ public class ContractJSONParser {
 
     private static ABIType<?> buildType(JsonObject object) throws ParseException {
         final String type = getString(object, TYPE);
-        final String name = getString(object, ContractJSONParser.NAME);
+        final String name = getString(object, NAME);
 
         if(type.startsWith(TUPLE)) {
             final JsonArray components = getArray(object, COMPONENTS);

@@ -34,7 +34,7 @@ public class PackedEncoderTest {
 
         Function function = new Function(tupleType.canonicalType);
 
-        String hex = FastHex.encodeToString(function.getInputTypes().encode(test).array());
+        String hex = FastHex.encodeToString(function.getParamTypes().encode(test).array());
 
         System.out.println(hex);
 

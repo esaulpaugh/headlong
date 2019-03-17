@@ -7,8 +7,8 @@ import java.util.*;
  * stored in {@link #TYPE_INFO_MAP} which is used by {@link TypeFactory#resolveBaseType(String, boolean, ABIType)}
  * to generate a base type.
  *
- * fixed/ufixed types, which number in the thousands, are not included in the map, saving about 1 MB of memory. These
- * are parsed by {@link TypeFactory}.
+ * Except for fixed, ufixed, fixed128x18, and ufixed128x18, fixed/ufixed types, which number in the thousands, are not
+ * included in the map, saving about 1 MB of memory. These are parsed by {@link TypeFactory}.
  */
 class BaseTypeInfo {
 
@@ -70,14 +70,10 @@ class BaseTypeInfo {
                 18,
                 -1,
                 null);
-        map.put(
-                "fixed",
-                fixedType
-        );
-        map.put(
-                "ufixed",
-                fixedType
-        );
+        map.put("fixed", fixedType);
+        map.put("ufixed", fixedType);
+        map.put("fixed128x18", fixedType);
+        map.put("ufixed128x18", fixedType);
 
         TYPE_INFO_MAP = Collections.unmodifiableMap(map);
     }

@@ -15,15 +15,15 @@ public class Event implements ABIObject {
 
     private final boolean anonymous;
 
-    Event(String name, String paramsString, boolean[] indexed) throws ParseException {
+    public Event(String name, String paramsString, boolean[] indexed) throws ParseException {
         this(name, paramsString, indexed, false);
     }
 
-    Event(String name, String paramsString, boolean[] indexed, boolean anonymous) throws ParseException {
+    public Event(String name, String paramsString, boolean[] indexed, boolean anonymous) throws ParseException {
         this(name, TupleType.parse(paramsString), indexed, anonymous);
     }
 
-    Event(String name, TupleType params, boolean[] indexed, boolean anonymous) {
+    public Event(String name, TupleType params, boolean[] indexed, boolean anonymous) {
         this.name = name;
         this.inputs = params;
         this.indexManifest = Arrays.copyOf(indexed, indexed.length);
@@ -61,7 +61,10 @@ public class Event implements ABIObject {
         return sb.toString();
     }
 
-    // ---------------------
+    @Override
+    public int objectType() {
+        return ABIObject.EVENT;
+    }
 
     public static Event fromJson(String eventJson) throws ParseException {
         return ContractJSONParser.parseEvent(eventJson);
@@ -69,10 +72,5 @@ public class Event implements ABIObject {
 
     public static Event fromJsonObject(JsonObject event) throws ParseException {
         return ContractJSONParser.parseEvent(event);
-    }
-
-    @Override
-    public int objectType() {
-        return ABIObject.EVENT;
     }
 }

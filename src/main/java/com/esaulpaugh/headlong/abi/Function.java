@@ -2,6 +2,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.util.Utils;
+import com.google.gson.JsonObject;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.io.Serializable;
@@ -96,10 +97,6 @@ public class Function implements ABIObject, Serializable {
         this.hashAlgorithm = messageDigest.getAlgorithm();
     }
 
-    public static MessageDigest newDefaultDigest() {
-        return new Keccak(256);
-    }
-
     private void initSelector(MessageDigest messageDigest, String canonicalSignature) {
         try {
             messageDigest.update(canonicalSignature.getBytes(Strings.CHARSET_ASCII));
@@ -107,6 +104,13 @@ public class Function implements ABIObject, Serializable {
         } catch (DigestException de) {
             throw new RuntimeException(de);
         }
+    }
+
+    private static ParseException newNonAsciiNameException(Matcher matcher, char c) {
+        return new ParseException(
+                "non-ascii char, \'" + c + "\' " + Utils.escapeChar(c) + ", @ index " + matcher.start(),
+                matcher.start()
+        );
     }
 
     public String getName() {
@@ -121,15 +125,7 @@ public class Function implements ABIObject, Serializable {
         return hashAlgorithm;
     }
 
-    public byte[] selector() {
-        return Arrays.copyOf(selector, selector.length);
-    }
-
-    public String selectorHex() {
-        return encode(selector, HEX);
-    }
-
-    public TupleType getInputTypes() {
+    public TupleType getParamTypes() {
         return inputTypes;
     }
 
@@ -139,6 +135,14 @@ public class Function implements ABIObject, Serializable {
 
     public String getStateMutability() {
         return stateMutability;
+    }
+
+    public byte[] selector() {
+        return Arrays.copyOf(selector, selector.length);
+    }
+
+    public String selectorHex() {
+        return encode(selector, HEX);
     }
 
     public ByteBuffer encodeCallWithArgs(Object... args) {
@@ -190,6 +194,10 @@ public class Function implements ABIObject, Serializable {
         return inputTypes.decode(abiBuffer, unitBuffer);
     }
 
+    public static MessageDigest newDefaultDigest() {
+        return new Keccak(256);
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(canonicalSignature, hashAlgorithm, outputTypes);
@@ -203,6 +211,11 @@ public class Function implements ABIObject, Serializable {
         return canonicalSignature.equals(function.canonicalSignature) &&
                 hashAlgorithm.equals(function.hashAlgorithm) &&
                 Objects.equals(outputTypes, function.outputTypes);
+    }
+
+    @Override
+    public int objectType() {
+        return ABIObject.FUNCTION;
     }
 
     public static String formatCall(byte[] abiCall) {
@@ -239,10 +252,6 @@ public class Function implements ABIObject, Serializable {
         return sb.toString();
     }
 
-    public static String hexOf(byte[] bytes) {
-        return encode(bytes, HEX);
-    }
-
     public static Function parse(String signature) throws ParseException {
         return new Function(signature);
     }
@@ -251,15 +260,11 @@ public class Function implements ABIObject, Serializable {
         return ContractJSONParser.parseFunction(functionJson);
     }
 
-    private static ParseException newNonAsciiNameException(Matcher matcher, char c) {
-        return new ParseException(
-                "non-ascii char, \'" + c + "\' " + Utils.escapeChar(c) + ", @ index " + matcher.start(),
-                matcher.start()
-        );
+    public static Function fromJsonObject(JsonObject function) throws ParseException {
+        return ContractJSONParser.parseFunction(function);
     }
 
-    @Override
-    public int objectType() {
-        return ABIObject.FUNCTION;
+    public static String hexOf(byte[] bytes) {
+        return encode(bytes, HEX);
     }
 }

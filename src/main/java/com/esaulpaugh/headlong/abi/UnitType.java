@@ -11,7 +11,7 @@ import java.math.BigInteger;
 abstract class UnitType<V> extends ABIType<V> { // instance of V should be instanceof Number or Boolean
 
     static final int UNIT_LENGTH_BYTES = 32;
-    static final int LOG_2_UNIT_LENGTH_BYTES = 31 - Integer.numberOfLeadingZeros(UNIT_LENGTH_BYTES);
+    static final int LOG_2_UNIT_LENGTH_BYTES = 5;// Integer.SIZE - (Integer.numberOfLeadingZeros(UNIT_LENGTH_BYTES) + 1)
 
     final int bitLength;
     final boolean unsigned;
