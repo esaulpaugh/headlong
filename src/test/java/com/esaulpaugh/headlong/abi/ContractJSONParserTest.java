@@ -183,7 +183,7 @@ public class ContractJSONParserTest {
 
         List<Function> functions;
 
-        functions = ContractJSONParser.getFunctions(CONTRACT_JSON);
+        functions = ContractJSONParser.parseFunctions(CONTRACT_JSON);
 
         for(Function f : functions) {
             System.out.println(f.getName() + " : " + f.canonicalSignature);
@@ -192,7 +192,7 @@ public class ContractJSONParserTest {
         Assert.assertEquals(1, functions.size());
         Assert.assertNull(functions.get(0).getStateMutability());
 
-        functions = ContractJSONParser.getFunctions(FALLBACK_AND_CONSTRUCTOR);
+        functions = ContractJSONParser.parseFunctions(FALLBACK_AND_CONSTRUCTOR);
 
         for(Function f : functions) {
             System.out.println(f.getName() + " : " + f.canonicalSignature);

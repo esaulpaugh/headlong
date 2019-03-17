@@ -35,8 +35,9 @@ public class Event implements ABIObject {
     }
 
     /**
-     * Returns the canonical type string for the tuple of inputs.
-     * @return
+     * Returns the canonical type string for the params tuple (tuple of inputs).
+     *
+     * @return  the canonical type string
      */
     public String getParamsString() {
         return inputs.canonicalType;

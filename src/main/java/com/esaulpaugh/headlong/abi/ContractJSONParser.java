@@ -35,27 +35,6 @@ public class ContractJSONParser {
         return parseObjects(json, true, false, Function.class);
     }
 
-    public static List<Function> getFunctions(String json) throws ParseException {
-        final MessageDigest digest = Function.newDefaultDigest();
-        final List<Function> list = new ArrayList<>();
-        for(JsonElement element : parseArray(json)) {
-            if(element.isJsonObject()) {
-                final JsonObject elementObj = (JsonObject) element;
-                String type = getString(elementObj, TYPE);
-                if(type == null) {
-                    list.add(parseFunction(elementObj, digest));
-                } else {
-                    switch (type) {
-                    case FUNCTION:
-                    case CONSTRUCTOR:
-                    case FALLBACK: list.add(parseFunction(elementObj, digest));
-                    }
-                }
-            }
-        }
-        return list;
-    }
-
     public static List<Event> parseEvents(String json) throws ParseException {
         return parseObjects(json, false, true, Event.class);
     }
@@ -64,7 +43,7 @@ public class ContractJSONParser {
         return parseObjects(json, true, true, ABIObject.class);
     }
 
-    public static <T extends ABIObject> List<T> parseObjects(final String json,
+    private static <T extends ABIObject> List<T> parseObjects(final String json,
                                                              final boolean functions,
                                                              final boolean events,
                                                              final Class<T> classOfT) throws ParseException {

@@ -9,15 +9,17 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Random;
 
+import static com.esaulpaugh.headlong.abi.TupleTypeParser.EMPTY_PARAMETER;
+
 public class EncodeTest {
 
     @Test
     public void emptyParamTest() throws Throwable {
-        TestUtils.assertThrown(ParseException.class, "empty parameter @ 0", () -> new Function("baz(,)"));
+        TestUtils.assertThrown(ParseException.class, "@ index 0, " + EMPTY_PARAMETER, () -> new Function("baz(,)"));
 
-        TestUtils.assertThrown(ParseException.class, "empty parameter @ 1", () -> new Function("baz(bool,)"));
+        TestUtils.assertThrown(ParseException.class, "@ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,)"));
 
-        TestUtils.assertThrown(ParseException.class, "empty parameter @ 1 of element 1", () -> new Function("baz(bool,(int,,))"));
+        TestUtils.assertThrown(ParseException.class, "@ index 1, @ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,(int,,))"));
     }
 
     @Test
@@ -25,7 +27,7 @@ public class EncodeTest {
         TestUtils.assertThrown(ParseException.class, "non-ascii char, '\u02a6' \\u02a6, @ index 2", () -> new Function("ba\u02a6z(uint32,bool)"));
 
         // "non-type char, '\u02a6' \\u02a6, @ index 4 of element 0 of element 1"
-        TestUtils.assertThrown(ParseException.class, "bool\u02a6 (0000000000000000000000000000626f6f6ccaa6) of element 0 of element 1", () -> new Function("baz(int32,(bool\u02a6))"));
+        TestUtils.assertThrown(ParseException.class, "@ index 1, @ index 0, unrecognized type: bool\u02a6 (0000000000000000000000000000626f6f6ccaa6)", () -> new Function("baz(int32,(bool\u02a6))"));
     }
 
     @Test
@@ -57,7 +59,7 @@ public class EncodeTest {
 
     @Test
     public void complexFunctionTest() throws ParseException {
-        Function f = new Function("(function[2][][],string[0][0],address[],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
+        Function f = new Function("(function[2][][],bytes24,string[0][0],address[],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
 
         byte[] func = new byte[24];
         new Random(MonteCarloTest.seed(System.nanoTime())).nextBytes(func);
@@ -70,6 +72,7 @@ public class EncodeTest {
 
         Object[] argsIn = new Object[] {
                 new byte[][][][] { new byte[][][] { new byte[][] { func, func } } },
+                func,
                 new String[0][],
                 new BigInteger[] { addr },
                 BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(Byte.MAX_VALUE << 2)),

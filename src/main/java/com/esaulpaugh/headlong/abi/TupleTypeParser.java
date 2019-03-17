@@ -6,6 +6,8 @@ import java.util.List;
 
 class TupleTypeParser {
 
+    static final String EMPTY_PARAMETER = "empty parameter";
+
     static TupleType parseTupleType(final String rawTupleTypeString) throws ParseException {
 
         if(rawTupleTypeString.charAt(0) != '(') {
@@ -41,13 +43,12 @@ class TupleTypeParser {
         try {
             while (argStart < sigEnd) {
                 char c = signature.charAt(argStart);
-                SWITCH:
                 switch (c) {
                 case '[':
                     return argEnd;
                 case ')':
                     if(signature.charAt(argStart - 1) == ',') {
-                        throw new ParseException("empty parameter", argStart);
+                        throw new ParseException(EMPTY_PARAMETER, argStart);
                     }
                     if (typesOut.size() > 0) {
                         argEnd = argStart - 1;
@@ -57,7 +58,7 @@ class TupleTypeParser {
                     if (signature.charAt(argStart - 1) == ')') {
                         return argEnd;
                     }
-                    throw new ParseException("empty parameter", argStart);
+                    throw new ParseException(EMPTY_PARAMETER, argStart);
                 case '(': // tuple element
                     ArrayList<ABIType<?>> innerList = new ArrayList<>();
 
@@ -79,7 +80,7 @@ class TupleTypeParser {
                     if (argEnd >= sigEnd || signature.charAt(argEnd) != ',') {
                         return argEnd;
                     }
-                    break SWITCH;
+                    break /* switch */;
                 default: // non-tuple element
                     argEnd = nextParamTerminator(signature, argStart + 1);
                     if(argEnd == -1) {
@@ -94,10 +95,10 @@ class TupleTypeParser {
                 argStart = argEnd + 1;
             }
         } catch (ParseException pe) {
-            if(pe.getMessage().equals("empty parameter")) {
-                throw (ParseException) new ParseException(pe.getMessage() + " @ " + typesOut.size(), pe.getErrorOffset()).initCause(pe);
-            }
-            throw (ParseException) new ParseException(pe.getMessage() + " of element " + typesOut.size(), pe.getErrorOffset()).initCause(pe);
+            throw (ParseException) new ParseException(
+                    "@ index " + typesOut.size() + ", " + pe.getMessage(),
+                    pe.getErrorOffset()
+            ).initCause(pe);
         }
         return argEnd;
     }
