@@ -86,7 +86,7 @@ class TupleTypeParser {
                     if(argEnd == -1) {
                         return -1;
                     } else {
-                        typesOut.add(TypeFactory.create(canonicalizeType(signature.substring(argStart, argEnd)), null));
+                        typesOut.add(TypeFactory.create(signature.substring(argStart, argEnd), null));
                         if (argEnd >= sigEnd || signature.charAt(argEnd) == ')') {
                             return argEnd;
                         }
@@ -113,27 +113,5 @@ class TupleTypeParser {
             return comma;
         }
         return Math.min(comma, close);
-    }
-
-    private static String canonicalizeType(String rawType) {
-        final int rawTypeLen = rawType.length();
-        String canonicalized = tryInsertMissingSuffix(rawType, rawTypeLen, "int", "256");
-        if(canonicalized == null) {
-            canonicalized = tryInsertMissingSuffix(rawType, rawTypeLen, "fixed", "128x18");
-        }
-        return canonicalized != null ? canonicalized : rawType;
-    }
-
-    private static String tryInsertMissingSuffix(String rawType, int rawTypeLen, String prefix, String suffix) {
-        final int prefixIndex = rawType.indexOf(prefix);
-        if(prefixIndex != -1) {
-            final int prefixEnd = prefixIndex + prefix.length();
-            if(rawTypeLen - prefixEnd == 0 || rawType.charAt(prefixEnd) == '[') { // ends w/ prefix or is ...prefix[...
-                return rawType.substring(0, prefixEnd)
-                        + suffix
-                        + rawType.substring(prefixEnd, rawTypeLen);
-            }
-        }
-        return null;
     }
 }

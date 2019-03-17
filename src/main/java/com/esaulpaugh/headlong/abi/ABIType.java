@@ -67,6 +67,15 @@ public abstract class ABIType<J> implements Serializable {
 
     public abstract int validate(Object value);
 
+    /**
+     * Decodes the data at the buffer's current position according to this {@link ABIType}.
+     *
+     * @param buffer    the buffer containing the encoded data
+     * @param unitBuffer a buffer of length {@link UnitType#UNIT_LENGTH_BYTES} in which to store intermediate values
+     * @return  the decoded value
+     */
+    abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
+
     void validateClass(Object value) {
         // may throw NPE
         if(clazz != value.getClass()) {
@@ -80,14 +89,6 @@ public abstract class ABIType<J> implements Serializable {
             }
         }
     }
-
-    /**
-     *
-     * @param buffer    the buffer containing the encoded data
-     * @param unitBuffer a buffer of length {@link UnitType#UNIT_LENGTH_BYTES} in which to store intermediate values
-     * @return  the decoded value
-     */
-    abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
 
     static byte[] newUnitBuffer() {
         return new byte[UNIT_LENGTH_BYTES];

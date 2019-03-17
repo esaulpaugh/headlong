@@ -63,6 +63,21 @@ class BaseTypeInfo {
                 "bool",
                 new BaseTypeInfo(BooleanType.CLASS, BooleanType.ARRAY_CLASS_NAME_STUB, 1)
         );
+        BaseTypeInfo fixedType = new BaseTypeInfo(
+                BigDecimalType.CLASS,
+                BigDecimalType.ARRAY_CLASS_NAME_STUB,
+                128,
+                18,
+                -1,
+                null);
+        map.put(
+                "fixed",
+                fixedType
+        );
+        map.put(
+                "ufixed",
+                fixedType
+        );
 
         TYPE_INFO_MAP = Collections.unmodifiableMap(map);
     }
@@ -81,6 +96,7 @@ class BaseTypeInfo {
         for ( ; n <= 256; n+=8) {
             map.put("int" + n, new BaseTypeInfo(BigIntegerType.CLASS, BigIntegerType.ARRAY_CLASS_NAME_STUB, n));
         }
+        map.put("int", map.get("int256"));
     }
 
     private static void putUnsignedInts(final Map<String, BaseTypeInfo> map) {
@@ -104,6 +120,7 @@ class BaseTypeInfo {
         for ( ; n <= 256; n+=8) {
             map.put("uint" + n, new BaseTypeInfo(BigIntegerType.CLASS, BigIntegerType.ARRAY_CLASS_NAME_STUB, n));
         }
+        map.put("uint", map.get("uint256"));
     }
 
     static void putFixed(Map<String, BaseTypeInfo> map, boolean unsigned) {
