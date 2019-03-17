@@ -10,10 +10,12 @@ import static com.esaulpaugh.headlong.abi.CallEncoder.OFFSET_LENGTH_BYTES;
 
 public class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
-    public static final TupleType EMPTY = new TupleType("()", false, EMPTY_TYPE_ARRAY);
-
     private static final Class<?> CLASS = Tuple.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(Tuple[].class);
+
+    private static final String EMPTY_TUPLE_STRING = "()";
+
+    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_TYPE_ARRAY);
 
     final ABIType<?>[] elementTypes;
 
@@ -43,7 +45,7 @@ public class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
     private static String completeTupleTypeString(StringBuilder canonicalTupleType) {
         final int len = canonicalTupleType.length();
         if(len == 1) {
-            return "()";
+            return EMPTY_TUPLE_STRING;
         }
         return canonicalTupleType.replace(len - 1, len, ")").toString(); // replace trailing comma
     }

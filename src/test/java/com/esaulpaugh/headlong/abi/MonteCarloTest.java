@@ -113,24 +113,9 @@ public class MonteCarloTest {
             final int end = this.end;
             final int n = end - start;
             if(n < THRESHOLD) {
-//                System.out.println("n = " + n);
-
-                final MonteCarloTestCase tc = this.testCase;
-
-//                long[] seeds = new long[n];
-//                for (int i = 0; i < n; i++) {
-//                    seeds[i] = System.nanoTime() * (System.nanoTime() << 1) * (System.nanoTime() >> 1);
-//                }
-
-//                try {
-                    for (int j = 0; j < n; j++) {
-                        tc.run();
-//                        tc.runNewRandomArgs(); // new MonteCarloTestCase(new MonteCarloTestCase.Params(seeds[j]))
-                    }
-//                } catch (ParseException pe) {
-//                    throw new RuntimeException(pe);
-//                }
-
+                for (int j = 0; j < n; j++) {
+                    this.testCase.run();
+                }
             } else {
                 final int midpoint = start + (n / 2);
                 invokeAll(

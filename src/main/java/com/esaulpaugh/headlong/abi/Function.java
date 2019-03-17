@@ -32,8 +32,8 @@ public class Function implements ABIObject, Serializable {
     private final String hashAlgorithm;
     private final String stateMutability;
 
-    final transient byte[] selector;
-    final transient TupleType inputTypes;
+    final byte[] selector;
+    final TupleType inputTypes;
 
     final TupleType outputTypes;
 

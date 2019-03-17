@@ -54,7 +54,8 @@ public class RLPList extends RLPItem {
 
     /**
      * Returns the full hierarchy represented by this RLPList.
-     * Deprecated. Use {@link #elements(RLPDecoder)} or {@link #elements(RLPDecoder, Collection)} instead
+     *
+     * @deprecated Use {@link #elements(RLPDecoder)} or {@link #elements(RLPDecoder, Collection)} instead.
      *
      * @param results   the destination
      * @param decoder   the decoder, either {@link RLPDecoder#RLP_STRICT} or {@link RLPDecoder#RLP_LENIENT}
