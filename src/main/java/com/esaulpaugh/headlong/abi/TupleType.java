@@ -286,11 +286,11 @@ public class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
         }
     }
 
-    public TupleType subtuple(boolean[] manifest) {
-        return subtuple(manifest, false);
+    public TupleType subTupleType(boolean[] manifest) {
+        return subTupleType(manifest, false);
     }
 
-    public TupleType subtuple(boolean[] manifest, boolean negate) {
+    public TupleType subTupleType(boolean[] manifest, boolean negate) {
         final int len = checkLength(elementTypes, manifest);
         final StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;

@@ -47,16 +47,15 @@ public class Event implements ABIObject {
     }
 
     public TupleType getIndexedParams() {
-        return inputs.subtuple(indexManifest);
+        return inputs.subTupleType(indexManifest);
     }
 
     public TupleType getNonIndexedParams() {
-        return inputs.subtuple(indexManifest, true);
+        return inputs.subTupleType(indexManifest, true);
     }
 
     @Override
     public String toString() {
-        System.out.println(getName());
         StringBuilder sb = new StringBuilder();
         inputs.recursiveToString(sb);
         return sb.toString();

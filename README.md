@@ -82,14 +82,14 @@ Or build locally:
 Clone the project and install to your local maven repository using `gradle publishToMavenLocal` or `mvn install`. Then you can use one of these:
 
 ```groovy
-implementation 'com.esaulpaugh:headlong:1.0-SNAPSHOT'
+implementation 'com.esaulpaugh:headlong:1.3.1-SNAPSHOT'
 ```
 
 ```xml
 <dependency>
     <groupId>com.esaulpaugh</groupId>
     <artifactId>headlong</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.3.1-SNAPSHOT</version>
 </dependency>
 ```
 Alternatively:
