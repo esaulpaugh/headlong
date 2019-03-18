@@ -9,6 +9,7 @@ import static com.esaulpaugh.headlong.rlp.DataType.LIST_SHORT_OFFSET;
 import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_LONG_OFFSET;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
+import static com.esaulpaugh.headlong.rlp.EIP778.KeyValuePair;
 
 /**
  * Encodes data to RLP format.
@@ -31,6 +32,15 @@ public class RLPEncoder {
         long total = 0;
         for (Object obj : objects) {
             total += itemEncodedLen(obj);
+        }
+        return total;
+    }
+
+    private static long totalEncodedLen(KeyValuePair[] pairs) {
+        long total = 0;
+        for (KeyValuePair kvp : pairs) {
+            total += itemEncodedLen(kvp.getKey());
+            total += itemEncodedLen(kvp.getValue());
         }
         return total;
     }
@@ -160,6 +170,18 @@ public class RLPEncoder {
     public static byte[] encode(byte[] byteString) {
         byte[] dest = new byte[stringEncodedLen(byteString)];
         encodeString(byteString, dest, 0);
+        return dest;
+    }
+
+    public static byte[] encodeEIP778RecordContent(long seq, KeyValuePair[] pairs) {
+        Arrays.sort(pairs);
+        byte[] seqBytes = Integers.toBytes(seq);
+        byte[] dest = new byte[seqBytes.length + (int) totalEncodedLen(pairs)];
+        int destIndex = encodeItem(seqBytes, dest, 0);
+        for (KeyValuePair pair : pairs) {
+            destIndex = encodeItem(pair.getKey(), dest, destIndex);
+            destIndex = encodeItem(pair.getValue(), dest, destIndex);
+        }
         return dest;
     }
 
