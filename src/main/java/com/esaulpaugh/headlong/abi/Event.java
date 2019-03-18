@@ -1,9 +1,13 @@
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonObject;
 
+import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.Arrays;
+
+import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 public class Event implements ABIObject {
 
@@ -30,6 +34,10 @@ public class Event implements ABIObject {
         this.anonymous = anonymous;
     }
 
+    public String signature() {
+        return name + inputs.canonicalType;
+    }
+
     public String getName() {
         return name;
     }
@@ -52,6 +60,14 @@ public class Event implements ABIObject {
 
     public TupleType getNonIndexedParams() {
         return inputs.subTupleType(indexManifest, true);
+    }
+
+    public byte[] topics0() {
+        return anonymous ? null : Function.newDefaultDigest().digest(Strings.decode(signature(), UTF_8));
+    }
+
+    public byte[] topics0(MessageDigest md) {
+        return anonymous ? null : md.digest(Strings.decode(signature(), UTF_8));
     }
 
     @Override
