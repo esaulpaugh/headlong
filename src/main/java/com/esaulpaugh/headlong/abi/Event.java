@@ -57,7 +57,7 @@ public class Event implements ABIObject {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        inputs.recursiveToString(sb);
+        inputs.toString(sb);
         return sb.toString();
     }
 

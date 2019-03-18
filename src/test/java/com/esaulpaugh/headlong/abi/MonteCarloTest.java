@@ -66,7 +66,7 @@ public class MonteCarloTest {
             final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed);
             try {
                 testCase = new MonteCarloTestCase(params);
-                temp = testCase.function.canonicalSignature;
+                temp = testCase.function.getCanonicalSignature();
                 testCase.run();
                 temp = null;
 //                log.append('#')
@@ -166,7 +166,7 @@ public class MonteCarloTest {
         do {
             seed++;
             temp = new MonteCarloTestCase(new MonteCarloTestCase.Params(seed));
-            sig = temp.function.canonicalSignature;
+            sig = temp.function.getCanonicalSignature();
         } while (!sig.contains("string")
                 || (!sig.contains("fixed") && !sig.contains("decimal"))
                 || (!sig.contains("int") && !sig.contains("address"))

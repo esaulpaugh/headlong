@@ -22,7 +22,7 @@ public class EqualsTest {
             MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong());
 
             String raw = mctc.rawSignature;
-            String canonical = mctc.function.canonicalSignature;
+            String canonical = mctc.function.getCanonicalSignature();
             if(raw.equals(canonical)) {
                 continue;
             }
@@ -32,7 +32,7 @@ public class EqualsTest {
 
 //            System.out.println(raw);
 
-            boolean equals = a.inputTypes.recursiveEquals(b.inputTypes);
+            boolean equals = a.getParamTypes().recursiveEquals(b.getParamTypes());
 
 //            System.out.println(equals);
 

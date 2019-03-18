@@ -25,31 +25,55 @@ import static com.esaulpaugh.headlong.util.Strings.encode;
  */
 public class Function implements ABIObject, Serializable {
 
-    private static final Pattern HAS_NON_ASCII_CHARS = Pattern.compile("[^\\p{ASCII}]+");
+    public enum FunctionType {
+
+        FALLBACK,
+        CONSTRUCTOR,
+        FUNCTION;
+
+        @Override
+        public String toString() {
+            return name().toLowerCase();
+        }
+
+        static FunctionType get(String value) {
+            switch (value) {
+            case ContractJSONParser.FALLBACK: return FALLBACK;
+            case ContractJSONParser.CONSTRUCTOR: return CONSTRUCTOR;
+            case ContractJSONParser.FUNCTION: return FUNCTION;
+            default: throw new IllegalArgumentException("no " + FunctionType.class.getName() + " found for " + value);
+            }
+        }
+    }
+
+    private static final Pattern NON_ASCII = Pattern.compile("[^\\p{ASCII}]+");
+
+    private static final Pattern ILLEGAL_NAME = Pattern.compile("[^\\p{ASCII}&&[^(]]+");
 
     public static final int SELECTOR_LEN = 4;
 
-    final String canonicalSignature;
+    private final FunctionType type;
+    private final String name;
+    private final TupleType inputTypes;
+    private final TupleType outputTypes;
+
+    private final byte[] selector;
     private final String hashAlgorithm;
+
     private final String stateMutability;
-
-    final byte[] selector;
-    final TupleType inputTypes;
-
-    final TupleType outputTypes;
 
     {
         selector = new byte[SELECTOR_LEN];
     }
 
-    Function(String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) {
-        final String canonical = name + inputTypes.canonicalType;
-        initSelector(messageDigest, canonical);
-        this.canonicalSignature = canonical;
-        this.hashAlgorithm = messageDigest.getAlgorithm();
-        this.inputTypes = inputTypes;
-        this.outputTypes = outputTypes;
+    Function(FunctionType type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) throws ParseException {
+        this.type = Objects.requireNonNull(type);
+        this.name = validateNameNullable(ILLEGAL_NAME, name);
+        this.inputTypes = inputTypes != null ? inputTypes : TupleType.EMPTY;;
+        this.outputTypes = outputTypes != null ? outputTypes : TupleType.EMPTY;
         this.stateMutability = stateMutability;
+        this.hashAlgorithm = messageDigest.getAlgorithm();
+        generatorSelector(messageDigest);
     }
 
     public Function(String signature) throws ParseException {
@@ -57,68 +81,73 @@ public class Function implements ABIObject, Serializable {
     }
 
     public Function(String signature, String outputs) throws ParseException {
-        this(signature, outputs, newDefaultDigest());
+        this(FunctionType.FUNCTION, signature, outputs, newDefaultDigest());
+    }
+
+    public Function(String signature, String outputs, MessageDigest messageDigest) throws ParseException {
+        this(FunctionType.FUNCTION, signature, outputs, messageDigest);
     }
 
     /**
      * Note that {@code messageDigest} must be given in an {@link MessageDigest#INITIAL} (i.e. not
-     * {@link MessageDigest#IN_PROGRESS}) state.
+     *      * {@link MessageDigest#IN_PROGRESS}) state.
+     * @param functionType  to denote function, constructor, or fallback
      * @param signature the function signature
      * @param outputs   the signature of the tuple containing the return types
      * @param messageDigest the hash function with which to generate the 4-byte selector
      * @throws ParseException   if {@code signature} or {@code outputs} is malformed
      */
-    public Function(String signature, String outputs, MessageDigest messageDigest) throws ParseException {
-
+    public Function(FunctionType functionType, String signature, String outputs, MessageDigest messageDigest) throws ParseException {
         final int split = signature.indexOf('(');
-
         if(split < 0) {
             throw new ParseException("params start not found", signature.length());
         }
+        final TupleType tupleType = TupleTypeParser.parseTupleType(signature.substring(split));
 
-        final String name = signature.substring(0, split);
-
-        final Matcher matcher = HAS_NON_ASCII_CHARS.matcher(name);
-        if(matcher.find()) {
-            throw newNonAsciiNameException(matcher, signature.charAt(matcher.start()));
-        }
-
-        final String rawTupleTypeString = signature.substring(split);
-
-        final TupleType tupleType = TupleTypeParser.parseTupleType(rawTupleTypeString);
-
-        final String canonicalSig = name + tupleType.canonicalType;
-
-        initSelector(messageDigest, canonicalSig);
-        this.canonicalSignature = canonicalSig;
+        this.type = Objects.requireNonNull(functionType);
+        this.name = validateNameNonNull(NON_ASCII, signature.substring(0, split));
         this.inputTypes = tupleType;
-        this.outputTypes = outputs == null ? null : TupleType.parse(outputs);
+        this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
         this.stateMutability = null;
         this.hashAlgorithm = messageDigest.getAlgorithm();
+        generatorSelector(messageDigest);
     }
 
-    private void initSelector(MessageDigest messageDigest, String canonicalSignature) {
+    private static String validateNameNullable(Pattern pattern, String name) throws ParseException {
+        return name != null ? validateNameNonNull(pattern, name) : "";
+    }
+
+    private static String validateNameNonNull(Pattern pattern, String name) throws ParseException {
+        Matcher matcher = pattern.matcher(name);
+        if (matcher.find()) {
+            final char c = name.charAt(matcher.start());
+            throw new ParseException(
+                    "illegal char " + Utils.escapeChar(c) + " \'" + c + "\' @ index " + matcher.start(),
+                    matcher.start()
+            );
+        }
+        return name;
+    }
+
+    private void generatorSelector(MessageDigest messageDigest) {
         try {
-            messageDigest.update(canonicalSignature.getBytes(Strings.CHARSET_ASCII));
+            messageDigest.update(getCanonicalSignature().getBytes(Strings.CHARSET_UTF_8));
             messageDigest.digest(selector, 0, SELECTOR_LEN);
         } catch (DigestException de) {
             throw new RuntimeException(de);
         }
     }
 
-    private static ParseException newNonAsciiNameException(Matcher matcher, char c) {
-        return new ParseException(
-                "non-ascii char, \'" + c + "\' " + Utils.escapeChar(c) + ", @ index " + matcher.start(),
-                matcher.start()
-        );
+    public FunctionType getType() {
+        return type;
     }
 
     public String getName() {
-        return canonicalSignature.substring(0, canonicalSignature.indexOf('('));
+        return name;
     }
 
     public String getCanonicalSignature() {
-        return canonicalSignature;
+        return name + inputTypes.canonicalType;
     }
 
     public String getHashAlgorithm() {
@@ -200,7 +229,9 @@ public class Function implements ABIObject, Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(canonicalSignature, hashAlgorithm, outputTypes);
+        int result = Objects.hash(type, name, inputTypes, outputTypes, hashAlgorithm, stateMutability);
+        result = 31 * result + Arrays.hashCode(selector);
+        return result;
     }
 
     @Override
@@ -208,9 +239,13 @@ public class Function implements ABIObject, Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Function function = (Function) o;
-        return canonicalSignature.equals(function.canonicalSignature) &&
+        return type == function.type &&
+                name.equals(function.name) &&
+                inputTypes.equals(function.inputTypes) &&
+                outputTypes.equals(function.outputTypes) &&
+                Arrays.equals(selector, function.selector) &&
                 hashAlgorithm.equals(function.hashAlgorithm) &&
-                Objects.equals(outputTypes, function.outputTypes);
+                Objects.equals(stateMutability, function.stateMutability);
     }
 
     @Override

@@ -42,7 +42,7 @@ public class PackedEncoderTest {
 
         byte[] call = new byte[Function.SELECTOR_LEN + abi.length];
 
-        System.arraycopy(function.selector, 0, call, 0, Function.SELECTOR_LEN);
+        System.arraycopy(function.selector(), 0, call, 0, Function.SELECTOR_LEN);
         System.arraycopy(abi, 0, call, Function.SELECTOR_LEN, abi.length);
 
         Tuple args = function.decodeCall(call);

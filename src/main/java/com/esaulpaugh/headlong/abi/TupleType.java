@@ -275,17 +275,6 @@ public class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
         };
     }
 
-    public void recursiveToString(StringBuilder sb) {
-        for(ABIType<?> e : this) {
-            if(e.typeCode() == TYPE_CODE_TUPLE) {
-                ((TupleType) e).recursiveToString(sb);
-            } else {
-                sb.append(e);
-            }
-            sb.append(' ').append(e.getName()).append(',');
-        }
-    }
-
     public TupleType subTupleType(boolean[] manifest) {
         return subTupleType(manifest, false);
     }

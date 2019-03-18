@@ -165,7 +165,7 @@ public class MonteCarloTestCase implements Serializable {
 
         this.rawSignature = sig;
         this.function = new Function(sig, null, KECCAK_THREAD_LOCAL.get());
-        this.argsTuple = generateTuple(function.inputTypes, rng);
+        this.argsTuple = generateTuple(function.getParamTypes(), rng);
     }
 
     MonteCarloTestCase(long seed) throws ParseException {
@@ -177,7 +177,7 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     void runNewRandomArgs() {
-        run(generateTuple(function.inputTypes, new Random(System.nanoTime())));
+        run(generateTuple(function.getParamTypes(), new Random(System.nanoTime())));
     }
 
     void run(Tuple args) {
@@ -191,7 +191,7 @@ public class MonteCarloTestCase implements Serializable {
 
         if(!equal) {
             try {
-                findInequality(function.inputTypes, args, out);
+                findInequality(function.getParamTypes(), args, out);
                 throw new RuntimeException(function.getCanonicalSignature());
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -254,7 +254,7 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     private TupleType generateTupleType(Random r, int tupleDepth) throws ParseException {
-        return new Function(generateFunctionSignature(r, tupleDepth)).inputTypes;
+        return new Function(generateFunctionSignature(r, tupleDepth)).getParamTypes();
     }
 
     private Tuple generateTuple(TupleType tupleType, Random r) {

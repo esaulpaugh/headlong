@@ -110,4 +110,24 @@ public abstract class ABIType<J> implements Serializable {
     public String toString() {
         return canonicalType;
     }
+
+    void toString(StringBuilder sb) {
+        switch (typeCode()) {
+        case TYPE_CODE_ARRAY:
+            sb.append("[");
+            ((ArrayType) this).elementType.toString(sb);
+            sb.append("]");
+            break;
+        case TYPE_CODE_TUPLE:
+            sb.append("(");
+            for(ABIType<?> e : ((TupleType) this)) {
+                e.toString(sb);
+            }
+            sb.append(")");
+            break;
+        default:
+            sb.append(this);
+        }
+        sb.append(' ').append(getName()).append(',');
+    }
 }

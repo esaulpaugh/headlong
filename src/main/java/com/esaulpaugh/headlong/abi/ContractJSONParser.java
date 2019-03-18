@@ -19,7 +19,7 @@ public class ContractJSONParser {
 
     private static final String NAME = "name";
     private static final String TYPE = "type";
-    private static final String FUNCTION = "function";
+    static final String FUNCTION = "function";
     private static final String INPUTS = "inputs";
     private static final String OUTPUTS = "outputs";
     private static final String TUPLE = "tuple";
@@ -27,8 +27,8 @@ public class ContractJSONParser {
     private static final String EVENT = "event";
     private static final String ANONYMOUS = "anonymous";
     private static final String INDEXED = "indexed";
-    private static final String CONSTRUCTOR = "constructor";
-    private static final String FALLBACK = "fallback";
+    static final String CONSTRUCTOR = "constructor";
+    static final String FALLBACK = "fallback";
     private static final String STATE_MUTABILITY = "stateMutability";
 
     public static List<Function> parseFunctions(String json) throws ParseException {
@@ -56,9 +56,9 @@ public class ContractJSONParser {
                 JsonObject object = (JsonObject) e;
                 String type = getString(object, TYPE);
                 switch (type) {
-                case FUNCTION:
-                case CONSTRUCTOR:
                 case FALLBACK:
+                case CONSTRUCTOR:
+                case FUNCTION:
                     if(functions) {
                         list.add(classOfT.cast(parseFunction(object, defaultDigest.get())));
                     }
@@ -109,6 +109,7 @@ public class ContractJSONParser {
         }
 
         return new Function(
+                Function.FunctionType.get(getString(function, TYPE)),
                 getString(function, NAME),
                 inputTypes,
                 outputTypes,

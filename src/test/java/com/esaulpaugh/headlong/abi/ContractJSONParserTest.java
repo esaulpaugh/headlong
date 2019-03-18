@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ContractJSONParserTest {
 
-    private static final String FUNCTION_A_JSON = "{\"name\": \"foo\", \"type\": \"function\", \"inputs\": [ {\"name\": \"complex_nums\", \"type\": \"tuple[]\", \"components\": [ {\"type\": \"decimal\"}, {\"type\": \"decimal\"} ]} ], \"outputs\": [ {\"name\": \"count\", \"type\": \"uint64\" } ] }";
+    private static final String FUNCTION_A_JSON = "{\"name\": \"foo\", \"type\": \"function\", \"inputs\": [ {\"name\": \"complex_nums\", \"type\": \"tuple[]\", \"components\": [ {\"type\": \"decimal\", \"name\": \"real\"}, {\"type\": \"decimal\", \"name\": \"imaginary\"} ]} ], \"outputs\": [ {\"name\": \"count\", \"type\": \"uint64\" } ] }";
 
     private static final String FUNCTION_B_JSON = "{\n" +
             "    \"name\": \"func\",\n" +
@@ -151,7 +151,7 @@ public class ContractJSONParserTest {
 
     private static void printTupleType(TupleType tupleType) {
         StringBuilder sb = new StringBuilder();
-        tupleType.recursiveToString(sb);
+        tupleType.toString(sb);
         System.out.println("RECURSIVE = " + sb.toString());
     }
 
@@ -161,21 +161,23 @@ public class ContractJSONParserTest {
         Function f;
 
         f = ContractJSONParser.parseFunction(FUNCTION_A_JSON);
-        System.out.println(f.getName() + " : " + f.canonicalSignature + " : " + f.outputTypes.get(0));
-        Assert.assertEquals(1, f.outputTypes.elementTypes.length);
-        Assert.assertEquals("uint64", f.outputTypes.get(0).canonicalType);
+        System.out.println(f.getName() + " : " + f.getCanonicalSignature() + " : " + f.getOutputTypes().get(0));
+        Assert.assertEquals(1, f.getParamTypes().elementTypes.length);
+        Assert.assertEquals("foo((decimal,decimal)[])", f.getCanonicalSignature());
+        Assert.assertEquals(1, f.getOutputTypes().elementTypes.length);
+        Assert.assertEquals("uint64", f.getOutputTypes().get(0).canonicalType);
         f.encodeCallWithArgs((Object) new Tuple[] { new Tuple(new BigDecimal(BigInteger.ONE, 10), new BigDecimal(BigInteger.TEN, 10)) });
 
-        printTupleType(f.inputTypes);
+        printTupleType(f.getParamTypes());
 
-        printTupleType(f.outputTypes);
+        printTupleType(f.getOutputTypes());
 
         f = ContractJSONParser.parseFunction(FUNCTION_B_JSON);
-        System.out.println(f.getName() + " : " + f.canonicalSignature);
-        Assert.assertNull(f.outputTypes);
-        Assert.assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.canonicalSignature);
+        System.out.println(f.getName() + " : " + f.getCanonicalSignature());
+        Assert.assertEquals(TupleType.EMPTY, f.getOutputTypes());
+        Assert.assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.getCanonicalSignature());
 
-        printTupleType(f.inputTypes);
+        printTupleType(f.getParamTypes());
     }
 
     @Test
@@ -185,22 +187,38 @@ public class ContractJSONParserTest {
 
         functions = ContractJSONParser.parseFunctions(CONTRACT_JSON);
 
-        for(Function f : functions) {
-            System.out.println(f.getName() + " : " + f.canonicalSignature);
-        }
-
         Assert.assertEquals(1, functions.size());
-        Assert.assertNull(functions.get(0).getStateMutability());
+
+        Function func = functions.get(0);
+
+        printTupleType(func.getParamTypes());
+
+        Assert.assertEquals(Function.FunctionType.FUNCTION, func.getType());
+        Assert.assertEquals("func", func.getName());
+        Assert.assertNull(func.getStateMutability());
 
         functions = ContractJSONParser.parseFunctions(FALLBACK_AND_CONSTRUCTOR);
 
-        for(Function f : functions) {
-            System.out.println(f.getName() + " : " + f.canonicalSignature);
+        Assert.assertEquals(2, functions.size());
+
+        for(Function x : functions) {
+            printTupleType(x.getParamTypes());
+            Assert.assertEquals("", x.getName());
+            Assert.assertEquals(TupleType.EMPTY, x.getOutputTypes());
         }
 
-        Assert.assertEquals(2, functions.size());
-        Assert.assertEquals("pure", functions.get(0).getStateMutability());
-        Assert.assertNull(functions.get(1).getStateMutability());
+        Function fallback = functions.get(0);
+        Function constructor = functions.get(1);
+
+        Assert.assertEquals(Function.FunctionType.FALLBACK, fallback.getType());
+        Assert.assertEquals(TupleType.EMPTY, fallback.getParamTypes());
+        Assert.assertEquals(TupleType.EMPTY, fallback.getOutputTypes());
+        Assert.assertEquals("pure", fallback.getStateMutability());
+
+        Assert.assertEquals(Function.FunctionType.CONSTRUCTOR, constructor.getType());
+        Assert.assertEquals(TupleType.parse("(bool)"), constructor.getParamTypes());
+        Assert.assertEquals(TupleType.EMPTY, fallback.getOutputTypes());
+        Assert.assertNull(constructor.getStateMutability());
     }
 
     @Test
@@ -209,8 +227,15 @@ public class ContractJSONParserTest {
 
         Assert.assertEquals(1, events.size());
 
-        for(Event event : events) {
-            System.out.println(event);
-        }
+        Event event = events.get(0);
+
+        Assert.assertEquals("an_event", event.getName());
+        Assert.assertEquals(TupleType.parse("(bytes,uint256)"), event.getParams());
+        Assert.assertEquals(TupleType.parse("(bytes)"), event.getIndexedParams());
+        Assert.assertEquals(TupleType.parse("(uint256)"), event.getNonIndexedParams());
+        Assert.assertArrayEquals(new boolean[] { true, false }, event.getIndexManifest());
+
+        Assert.assertEquals("a", event.getParams().get(0).getName());
+        Assert.assertEquals("b", event.getParams().get(1).getName());
     }
 }
