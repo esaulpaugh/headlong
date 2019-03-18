@@ -89,8 +89,6 @@ public class Function implements ABIObject, Serializable {
     }
 
     /**
-     * Note that {@code messageDigest} must be given in an {@link MessageDigest#INITIAL} (i.e. not
-     *      * {@link MessageDigest#IN_PROGRESS}) state.
      * @param functionType  to denote function, constructor, or fallback
      * @param signature the function signature
      * @param outputs   the signature of the tuple containing the return types
@@ -131,6 +129,7 @@ public class Function implements ABIObject, Serializable {
 
     private void generateSelector(MessageDigest messageDigest) {
         try {
+            messageDigest.reset();
             messageDigest.update(getCanonicalSignature().getBytes(Strings.CHARSET_UTF_8));
             messageDigest.digest(selector, 0, SELECTOR_LEN);
         } catch (DigestException de) {
