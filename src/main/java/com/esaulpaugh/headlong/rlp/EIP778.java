@@ -1,8 +1,10 @@
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.util.Strings;
-
 import java.util.Arrays;
+
+import static com.esaulpaugh.headlong.util.Strings.encode;
+import static com.esaulpaugh.headlong.util.Strings.decode;
+import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 public class EIP778 {
 
@@ -18,13 +20,13 @@ public class EIP778 {
 
         private byte[] record;
 
-        Record(long seq, KeyValuePair[] pairs, Signer signer) {
+        public Record(long seq, KeyValuePair[] pairs, Signer signer) {
             byte[] content = RLPEncoder.encodeEIP778RecordContent(seq, pairs);
             byte[] signature = signer.sign(RLPEncoder.encodeAsList((Object) content));
             byte[] record = RLPEncoder.encodeAsList(signature, content);
 
             if(record.length > MAX_RECORD_LEN) {
-                throw new IllegalArgumentException("record overflow: " + record.length + " > " + MAX_RECORD_LEN);
+                throw new IllegalArgumentException("record length exceeds maximum: " + record.length + " > " + MAX_RECORD_LEN);
             }
 
             this.record = record;
@@ -44,8 +46,8 @@ public class EIP778 {
         final byte[] value;
 
         public KeyValuePair(String key, String value) {
-            this.key = Strings.decode(key, Strings.UTF_8);
-            this.value = Strings.decode(value, Strings.UTF_8);
+            this.key = decode(key, UTF_8);
+            this.value = decode(value, UTF_8);
         }
 
         public KeyValuePair(byte[] key, byte[] value) {
@@ -63,7 +65,7 @@ public class EIP778 {
 
         @Override
         public String toString() {
-            return Strings.encode(key, Strings.UTF_8) + " --> " + Strings.encode(value, Strings.UTF_8);
+            return encode(key, UTF_8) + " --> " + encode(value, UTF_8);
         }
 
         @Override
@@ -78,16 +80,13 @@ public class EIP778 {
             final int len = Math.min(a.length, b.length);
             int i = 0;
             boolean mismatch = false;
-            for (; i < len; i++) {
+            for ( ; i < len; i++) {
                 if (a[i] != b[i]) {
                     mismatch = true;
                     break;
                 }
             }
-            if (mismatch) {
-                return Byte.compare(a[i], b[i]);
-            }
-            return a.length - b.length;
+            return mismatch ? a[i] - b[i] : a.length - b.length;
         }
     }
 }
