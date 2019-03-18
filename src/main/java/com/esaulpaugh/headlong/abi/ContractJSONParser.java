@@ -109,7 +109,7 @@ public class ContractJSONParser {
         }
 
         return new Function(
-                Function.FunctionType.get(getString(function, TYPE)),
+                Function.Type.get(getString(function, TYPE)),
                 getString(function, NAME),
                 inputTypes,
                 outputTypes,

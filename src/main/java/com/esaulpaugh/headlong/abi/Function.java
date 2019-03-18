@@ -25,7 +25,7 @@ import static com.esaulpaugh.headlong.util.Strings.encode;
  */
 public class Function implements ABIObject, Serializable {
 
-    public enum FunctionType {
+    public enum Type {
 
         FALLBACK,
         CONSTRUCTOR,
@@ -36,12 +36,12 @@ public class Function implements ABIObject, Serializable {
             return name().toLowerCase();
         }
 
-        static FunctionType get(String value) {
+        static Type get(String value) {
             switch (value) {
-            case ContractJSONParser.FALLBACK: return FunctionType.FALLBACK;
-            case ContractJSONParser.CONSTRUCTOR: return FunctionType.CONSTRUCTOR;
-            case ContractJSONParser.FUNCTION: return FunctionType.FUNCTION;
-            default: throw new IllegalArgumentException("no " + FunctionType.class.getSimpleName() + " found for " + value);
+            case ContractJSONParser.FALLBACK: return Type.FALLBACK;
+            case ContractJSONParser.CONSTRUCTOR: return Type.CONSTRUCTOR;
+            case ContractJSONParser.FUNCTION: return Type.FUNCTION;
+            default: throw new IllegalArgumentException("no " + Type.class.getSimpleName() + " found for " + value);
             }
         }
     }
@@ -52,7 +52,7 @@ public class Function implements ABIObject, Serializable {
 
     public static final int SELECTOR_LEN = 4;
 
-    private final FunctionType type;
+    private final Type type;
     private final String name;
     private final TupleType inputTypes;
     private final TupleType outputTypes;
@@ -66,7 +66,7 @@ public class Function implements ABIObject, Serializable {
         selector = new byte[SELECTOR_LEN];
     }
 
-    Function(FunctionType type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) throws ParseException {
+    Function(Type type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) throws ParseException {
         this.type = Objects.requireNonNull(type);
         this.name = validateNameNullable(ILLEGAL_NAME, name);
         this.inputTypes = inputTypes != null ? inputTypes : TupleType.EMPTY;
@@ -81,28 +81,28 @@ public class Function implements ABIObject, Serializable {
     }
 
     public Function(String signature, String outputs) throws ParseException {
-        this(FunctionType.FUNCTION, signature, outputs, newDefaultDigest());
+        this(Type.FUNCTION, signature, outputs, newDefaultDigest());
     }
 
     public Function(String signature, String outputs, MessageDigest messageDigest) throws ParseException {
-        this(FunctionType.FUNCTION, signature, outputs, messageDigest);
+        this(Type.FUNCTION, signature, outputs, messageDigest);
     }
 
     /**
-     * @param functionType  to denote function, constructor, or fallback
+     * @param type  to denote function, constructor, or fallback
      * @param signature the function signature
      * @param outputs   the signature of the tuple containing the return types
      * @param messageDigest the hash function with which to generate the 4-byte selector
      * @throws ParseException   if {@code signature} or {@code outputs} is malformed
      */
-    public Function(FunctionType functionType, String signature, String outputs, MessageDigest messageDigest) throws ParseException {
+    public Function(Type type, String signature, String outputs, MessageDigest messageDigest) throws ParseException {
         final int split = signature.indexOf('(');
         if(split < 0) {
             throw new ParseException("params start not found", signature.length());
         }
         final TupleType tupleType = TupleTypeParser.parseTupleType(signature.substring(split));
 
-        this.type = Objects.requireNonNull(functionType);
+        this.type = Objects.requireNonNull(type);
         this.name = validateNameNonNull(NON_ASCII, signature.substring(0, split));
         this.inputTypes = tupleType;
         this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
@@ -141,7 +141,7 @@ public class Function implements ABIObject, Serializable {
         return name + inputTypes.canonicalType;
     }
 
-    public FunctionType getType() {
+    public Type getType() {
         return type;
     }
 

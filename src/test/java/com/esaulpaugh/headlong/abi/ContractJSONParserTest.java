@@ -193,7 +193,7 @@ public class ContractJSONParserTest {
 
         printTupleType(func.getParamTypes());
 
-        Assert.assertEquals(Function.FunctionType.FUNCTION, func.getType());
+        Assert.assertEquals(Function.Type.FUNCTION, func.getType());
         Assert.assertEquals("func", func.getName());
         Assert.assertNull(func.getStateMutability());
 
@@ -210,12 +210,12 @@ public class ContractJSONParserTest {
         Function fallback = functions.get(0);
         Function constructor = functions.get(1);
 
-        Assert.assertEquals(Function.FunctionType.FALLBACK, fallback.getType());
+        Assert.assertEquals(Function.Type.FALLBACK, fallback.getType());
         Assert.assertEquals(TupleType.EMPTY, fallback.getParamTypes());
         Assert.assertEquals(TupleType.EMPTY, fallback.getOutputTypes());
         Assert.assertEquals("pure", fallback.getStateMutability());
 
-        Assert.assertEquals(Function.FunctionType.CONSTRUCTOR, constructor.getType());
+        Assert.assertEquals(Function.Type.CONSTRUCTOR, constructor.getType());
         Assert.assertEquals(TupleType.parse("(bool)"), constructor.getParamTypes());
         Assert.assertEquals(TupleType.EMPTY, fallback.getOutputTypes());
         Assert.assertNull(constructor.getStateMutability());
