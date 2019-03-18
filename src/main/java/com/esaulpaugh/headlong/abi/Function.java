@@ -38,10 +38,10 @@ public class Function implements ABIObject, Serializable {
 
         static FunctionType get(String value) {
             switch (value) {
-            case ContractJSONParser.FALLBACK: return FALLBACK;
-            case ContractJSONParser.CONSTRUCTOR: return CONSTRUCTOR;
-            case ContractJSONParser.FUNCTION: return FUNCTION;
-            default: throw new IllegalArgumentException("no " + FunctionType.class.getName() + " found for " + value);
+            case ContractJSONParser.FALLBACK: return FunctionType.FALLBACK;
+            case ContractJSONParser.CONSTRUCTOR: return FunctionType.CONSTRUCTOR;
+            case ContractJSONParser.FUNCTION: return FunctionType.FUNCTION;
+            default: throw new IllegalArgumentException("no " + FunctionType.class.getSimpleName() + " found for " + value);
             }
         }
     }
@@ -69,11 +69,11 @@ public class Function implements ABIObject, Serializable {
     Function(FunctionType type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) throws ParseException {
         this.type = Objects.requireNonNull(type);
         this.name = validateNameNullable(ILLEGAL_NAME, name);
-        this.inputTypes = inputTypes != null ? inputTypes : TupleType.EMPTY;;
+        this.inputTypes = inputTypes != null ? inputTypes : TupleType.EMPTY;
         this.outputTypes = outputTypes != null ? outputTypes : TupleType.EMPTY;
         this.stateMutability = stateMutability;
         this.hashAlgorithm = messageDigest.getAlgorithm();
-        generatorSelector(messageDigest);
+        generateSelector(messageDigest);
     }
 
     public Function(String signature) throws ParseException {
@@ -110,7 +110,7 @@ public class Function implements ABIObject, Serializable {
         this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
         this.stateMutability = null;
         this.hashAlgorithm = messageDigest.getAlgorithm();
-        generatorSelector(messageDigest);
+        generateSelector(messageDigest);
     }
 
     private static String validateNameNullable(Pattern pattern, String name) throws ParseException {
@@ -129,13 +129,17 @@ public class Function implements ABIObject, Serializable {
         return name;
     }
 
-    private void generatorSelector(MessageDigest messageDigest) {
+    private void generateSelector(MessageDigest messageDigest) {
         try {
             messageDigest.update(getCanonicalSignature().getBytes(Strings.CHARSET_UTF_8));
             messageDigest.digest(selector, 0, SELECTOR_LEN);
         } catch (DigestException de) {
             throw new RuntimeException(de);
         }
+    }
+
+    public String getCanonicalSignature() {
+        return name + inputTypes.canonicalType;
     }
 
     public FunctionType getType() {
@@ -146,14 +150,6 @@ public class Function implements ABIObject, Serializable {
         return name;
     }
 
-    public String getCanonicalSignature() {
-        return name + inputTypes.canonicalType;
-    }
-
-    public String getHashAlgorithm() {
-        return hashAlgorithm;
-    }
-
     public TupleType getParamTypes() {
         return inputTypes;
     }
@@ -162,16 +158,20 @@ public class Function implements ABIObject, Serializable {
         return outputTypes;
     }
 
-    public String getStateMutability() {
-        return stateMutability;
-    }
-
     public byte[] selector() {
         return Arrays.copyOf(selector, selector.length);
     }
 
     public String selectorHex() {
         return encode(selector, HEX);
+    }
+
+    public String getHashAlgorithm() {
+        return hashAlgorithm;
+    }
+
+    public String getStateMutability() {
+        return stateMutability;
     }
 
     public ByteBuffer encodeCallWithArgs(Object... args) {
