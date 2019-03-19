@@ -90,8 +90,8 @@ public class RLPList extends RLPItem {
         }
     }
 
-    public Iterator iterator(RLPDecoder decoder) {
-        return new Iterator(decoder);
+    public RLPListIterator iterator(RLPDecoder decoder) {
+        return new RLPListIterator(this, decoder);
     }
 
     private static void copyElements(Iterable<RLPItem> srcElements, byte[] dest, int destIndex) {
@@ -134,32 +134,5 @@ public class RLPList extends RLPItem {
         copyElements(srcElements, dest, destDataIndex);
 
         return dest;
-    }
-
-    public class Iterator implements RLPIterator {
-
-        private final RLPDecoder decoder;
-
-        private int nextElementIndex;
-
-        Iterator(RLPDecoder decoder) {
-            this.decoder = decoder;
-            this.nextElementIndex = RLPList.this.dataIndex;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return this.nextElementIndex < RLPList.this.endIndex;
-        }
-
-        @Override
-        public RLPItem next() throws DecodeException {
-            if (this.nextElementIndex < RLPList.this.endIndex) {
-                RLPItem element = decoder.wrap(buffer, this.nextElementIndex, RLPList.this.endIndex);
-                this.nextElementIndex = element.endIndex;
-                return element;
-            }
-            throw new NoSuchElementException();
-        }
     }
 }

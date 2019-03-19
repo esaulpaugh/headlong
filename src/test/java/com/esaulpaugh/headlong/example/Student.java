@@ -4,7 +4,7 @@ import com.esaulpaugh.headlong.abi.Tuple;
 import com.esaulpaugh.headlong.rlp.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
-import com.esaulpaugh.headlong.rlp.SequenceIterator;
+import com.esaulpaugh.headlong.rlp.RLPSequenceIterator;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
@@ -32,7 +32,7 @@ public class Student implements RLPEncodeable, ABIEncodeable {
     }
 
     public Student(byte[] rlp) throws DecodeException {
-        SequenceIterator iter = RLP_STRICT.sequenceIterator(rlp);
+        RLPSequenceIterator iter = RLP_STRICT.sequenceIterator(rlp);
 
         this.name = iter.next().asString(UTF_8);
         this.gpa = iter.next().asFloat();

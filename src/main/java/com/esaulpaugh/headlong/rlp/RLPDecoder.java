@@ -19,7 +19,7 @@ public final class RLPDecoder {
         this.lenient = lenient;
     }
 
-    public SequenceIterator sequenceIterator(byte[] buffer) {
+    public RLPSequenceIterator sequenceIterator(byte[] buffer) {
         return sequenceIterator(buffer, 0);
     }
 
@@ -30,11 +30,11 @@ public final class RLPDecoder {
      * @param index the index of the sequence
      * @return  an iterator over the elements in the sequence
      */
-    public SequenceIterator sequenceIterator(byte[] buffer, int index) {
-        return new SequenceIterator(RLPDecoder.this, buffer, index, buffer.length);
+    public RLPSequenceIterator sequenceIterator(byte[] buffer, int index) {
+        return new RLPSequenceIterator(RLPDecoder.this, buffer, index, buffer.length);
     }
 
-    public RLPList.Iterator listIterator(byte[] buffer) throws DecodeException {
+    public RLPListIterator listIterator(byte[] buffer) throws DecodeException {
         return listIterator(buffer, 0);
     }
 
@@ -46,7 +46,7 @@ public final class RLPDecoder {
      * @return  the iterator over the elements in the list
      * @throws DecodeException  if the RLP list failed to decode
      */
-    public RLPList.Iterator listIterator(byte[] buffer, int index) throws DecodeException {
+    public RLPListIterator listIterator(byte[] buffer, int index) throws DecodeException {
         return wrapList(buffer, index).iterator(this);
     }
 

@@ -34,17 +34,17 @@ public class EIP778Test {
         System.out.println("record len = " + record.length);
         System.out.println("record = " + FastHex.encodeToString(record) + '\n');
 
-        RLPList.Iterator iter = RLPDecoder.RLP_STRICT.listIterator(record);
+        RLPListIterator listIter = RLPDecoder.RLP_STRICT.listIterator(record);
 
-        System.out.println("signature = " + iter.next().asString(Strings.HEX));
+        System.out.println("signature = " + listIter.next().asString(Strings.HEX));
 
-        SequenceIterator iter2 = RLPDecoder.RLP_STRICT.sequenceIterator(iter.next().data());
+        RLPSequenceIterator seqIter = RLPDecoder.RLP_STRICT.sequenceIterator(listIter.next().data());
 
-        System.out.println("seq = " + iter2.next().asLong());
+        System.out.println("seq = " + seqIter.next().asLong());
 
-        while (iter2.hasNext()) {
-            System.out.println(iter2.next().asString(Strings.UTF_8) + ", "
-                    + iter2.next().asString(Strings.UTF_8));
+        while (seqIter.hasNext()) {
+            System.out.println(seqIter.next().asString(Strings.UTF_8) + ", "
+                    + seqIter.next().asString(Strings.UTF_8));
         }
     }
 }

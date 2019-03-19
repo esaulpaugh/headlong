@@ -18,7 +18,7 @@ public class EIP778 {
 
     public static class Record {
 
-        private byte[] record;
+        private final byte[] record;
 
         public Record(long seq, KeyValuePair[] pairs, Signer signer) {
             byte[] content = RLPEncoder.encodeEIP778RecordContent(seq, pairs);

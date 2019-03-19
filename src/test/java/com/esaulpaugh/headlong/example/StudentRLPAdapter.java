@@ -3,6 +3,7 @@ package com.esaulpaugh.headlong.example;
 import com.esaulpaugh.headlong.rlp.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPList;
+import com.esaulpaugh.headlong.rlp.RLPListIterator;
 
 import java.math.BigDecimal;
 
@@ -14,7 +15,7 @@ public class StudentRLPAdapter implements RLPAdapter<Student> {
     @Override
     public Student decode(byte[] rlp, int index) throws DecodeException {
 
-        RLPList.Iterator iter = RLP_STRICT.listIterator(rlp, index);
+        RLPListIterator iter = RLP_STRICT.listIterator(rlp, index);
 
         return new Student(iter.next().asString(UTF_8),
                 iter.next().asFloat(),
