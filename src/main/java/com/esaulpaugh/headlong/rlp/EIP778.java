@@ -51,21 +51,34 @@ public class EIP778 {
         }
 
         public KeyValuePair(byte[] key, byte[] value) {
-            this.key = key;
-            this.value = value;
+            this.key = Arrays.copyOf(key, key.length);
+            this.value = Arrays.copyOf(value, value.length);
         }
 
         public byte[] getKey() {
-            return key;
+            return Arrays.copyOf(key, key.length);
         }
 
         public byte[] getValue() {
-            return value;
+            return Arrays.copyOf(value, value.length);
         }
 
         @Override
         public String toString() {
             return encode(key, UTF_8) + " --> " + encode(value, UTF_8);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(key);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            KeyValuePair that = (KeyValuePair) o;
+            return Arrays.equals(key, that.key);
         }
 
         @Override
