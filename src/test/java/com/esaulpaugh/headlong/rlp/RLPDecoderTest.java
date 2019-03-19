@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.BiPredicate;
 
@@ -313,6 +314,39 @@ public class RLPDecoderTest {
                 (byte) 0x80, 0, 0, 0, 0, 0, 0, 0 };
 
         assertThrown(DecodeException.class, "found: -9223372036854775808", wrapLenient(beta));
+    }
+
+    @Test
+    public void iterators() throws Throwable {
+        byte[] a = new byte[] { 1 };
+        byte[] b = new byte[] { 2 };
+        byte[] c = new byte[0];
+
+        byte[] list = RLPEncoder.encodeAsList(a, b, c);
+        RLPListIterator listIter = RLP_STRICT.listIterator(list);
+
+        Assert.assertTrue(listIter.hasNext());
+        Assert.assertArrayEquals(a, listIter.next().data());
+        Assert.assertTrue(listIter.hasNext());
+        Assert.assertArrayEquals(b, listIter.next().data());
+        Assert.assertTrue(listIter.hasNext());
+        Assert.assertArrayEquals(c, listIter.next().data());
+
+        Assert.assertFalse(listIter.hasNext());
+        assertThrown(NoSuchElementException.class, listIter::next);
+
+        byte[] sequence = RLPEncoder.encodeSequentially(c, a, b);
+        RLPSequenceIterator seqIter = RLP_STRICT.sequenceIterator(sequence);
+
+        Assert.assertTrue(seqIter.hasNext());
+        Assert.assertArrayEquals(c, seqIter.next().data());
+        Assert.assertTrue(seqIter.hasNext());
+        Assert.assertArrayEquals(a, seqIter.next().data());
+        Assert.assertTrue(seqIter.hasNext());
+        Assert.assertArrayEquals(b, seqIter.next().data());
+
+        Assert.assertFalse(seqIter.hasNext());
+        assertThrown(NoSuchElementException.class, seqIter::next);
     }
 
     private static CustomRunnable wrapStrict(final byte[] rlp) {

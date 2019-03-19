@@ -150,11 +150,23 @@ public class TestUtils {
         void run() throws Throwable;
     }
 
+    public static void assertThrown(Class<? extends Throwable> clazz, CustomRunnable r) throws Throwable {
+        try {
+            r.run();
+        } catch (Throwable t) {
+            if (clazz.isAssignableFrom(t.getClass())) {
+                return;
+            }
+            throw t;
+        }
+        throw new AssertionError("no " + clazz.getName() + " thrown");
+    }
+
     public static void assertThrown(Class<? extends Throwable> clazz, String substr, CustomRunnable r) throws Throwable {
         try {
             r.run();
         } catch (Throwable t) {
-            if(clazz.isAssignableFrom(t.getClass()) && t.getMessage().contains(substr)) {
+            if (clazz.isAssignableFrom(t.getClass()) && t.getMessage().contains(substr)) {
                 return;
             }
             throw t;

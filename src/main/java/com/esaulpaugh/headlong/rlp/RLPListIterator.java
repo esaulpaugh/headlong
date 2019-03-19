@@ -24,7 +24,7 @@ public class RLPListIterator implements RLPIterator {
 
     @Override
     public RLPItem next() throws DecodeException {
-        if (this.nextElementIndex < list.endIndex) {
+        if (hasNext()) {
             RLPItem element = decoder.wrap(list.buffer, this.nextElementIndex, list.endIndex);
             this.nextElementIndex = element.endIndex;
             return element;

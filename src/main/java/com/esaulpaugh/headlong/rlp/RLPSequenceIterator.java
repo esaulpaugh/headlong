@@ -28,7 +28,7 @@ public class RLPSequenceIterator implements RLPIterator {
 
     @Override
     public RLPItem next() throws DecodeException {
-        if(index < end) {
+        if(hasNext()) {
             RLPItem item = decoder.wrap(rlp, index);
             this.index = item.endIndex;
             return item;
