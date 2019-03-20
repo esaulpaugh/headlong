@@ -66,8 +66,8 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     /**
      * LOG_2_UNIT_LENGTH_BYTES == 5
      * x << 5 == x * 32
-     * @param value
-     * @return
+     * @param value the value to measure
+     * @return  the length in bytes
      */
     @Override
     int byteLength(Object value) {

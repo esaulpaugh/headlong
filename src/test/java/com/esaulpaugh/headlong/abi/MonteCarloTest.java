@@ -186,9 +186,8 @@ public class MonteCarloTest {
 
         ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
         pool.invoke(task);
-        pool.awaitQuiescence(5, TimeUnit.SECONDS); // Java 8+
-//        ForkJoinTask.helpQuiesce(); // ClassCastException on Java 7
-        pool.shutdownNow();
+        pool.shutdown();
+        pool.awaitTermination(20, TimeUnit.SECONDS);
 
         Thread[] threads = new Thread[8];
         final int len = threads.length;
