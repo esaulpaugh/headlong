@@ -6,6 +6,9 @@ import static com.esaulpaugh.headlong.util.Strings.encode;
 import static com.esaulpaugh.headlong.util.Strings.decode;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
+/**
+ * Implementation of EIP 778: Ethereum Node Records (ENR), https://eips.ethereum.org/EIPS/eip-778
+ */
 public class EIP778 {
 
     private static final int MAX_RECORD_LEN = 300;
