@@ -15,6 +15,10 @@ public class Tuple extends AbstractList<Object> implements RandomAccess, Seriali
         this.elements = elements;
     }
 
+    public static Tuple of(Object... elements) {
+        return new Tuple(elements);
+    }
+
     public static Tuple singleton(Object element) {
         return new Tuple(element);
     }
