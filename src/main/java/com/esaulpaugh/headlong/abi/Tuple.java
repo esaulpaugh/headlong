@@ -23,14 +23,6 @@ public class Tuple extends AbstractList<Object> implements RandomAccess, Seriali
         return new Tuple(element);
     }
 
-    public static Tuple withElements(Object... elements) {
-        return new Tuple(elements);
-    }
-
-    public static Tuple wrap(Object[] elements) {
-        return new Tuple(elements);
-    }
-
     public Tuple subtuple(int startIndex, int endIndex) {
         final int len = endIndex - startIndex;
         Object[] copy = new Object[len];
