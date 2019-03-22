@@ -1,12 +1,10 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.rlp.util.Integers;
-import com.esaulpaugh.headlong.rlp.util.RLPIterator;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
 
