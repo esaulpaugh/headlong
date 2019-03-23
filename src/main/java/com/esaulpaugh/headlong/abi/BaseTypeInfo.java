@@ -4,11 +4,11 @@ import java.util.*;
 
 /**
  * An object to hold metadata about a base type, such as the type's Java class name. A metadata object for each type is
- * stored in {@link #TYPE_INFO_MAP} which is used by {@link TypeFactory#resolveBaseType(String, boolean, ABIType)}
+ * stored in {@link #TYPE_INFO_MAP} which is used by {@link TypeFactory#resolveBaseType(String, boolean, TupleType)}
  * to generate a base type.
  *
- * Except for fixed, ufixed, fixed128x18, and ufixed128x18, fixed/ufixed types, which number in the thousands, are not
- * included in the map, saving about 1 MB of memory. These are parsed by {@link TypeFactory}.
+ * fixed/ufixed types, which number in the thousands, are not included in the map (except for fixed, ufixed,
+ * fixed128x18, and ufixed128x18).
  */
 class BaseTypeInfo {
 
@@ -31,36 +31,16 @@ class BaseTypeInfo {
         putUnsignedInts(map);
 
         for (int i = 1; i <= 32; i++) {
-            map.put(
-                    "bytes" + i,
-                    new BaseTypeInfo(N_A, i)
-            );
+            map.put("bytes" + i, new BaseTypeInfo(N_A, i));
         }
 
-        map.put(
-                "bytes",
-                PRESENT
-        );
-        map.put(
-                "function",
-                new BaseTypeInfo(24 * Byte.SIZE, 24)
-        );
-        map.put(
-                "string",
-                PRESENT
-        );
-        map.put(
-                "address",
-                new BaseTypeInfo(160, N_A)
-        );
-        map.put(
-                "decimal",
-                new BaseTypeInfo(DECIMAL_BIT_LEN, N_A)
-        );
-        map.put(
-                "bool",
-                new BaseTypeInfo(1, N_A)
-        );
+        map.put("bytes", PRESENT);
+        map.put("function", new BaseTypeInfo(24 * Byte.SIZE, 24));
+        map.put("string", PRESENT);
+        map.put("address", new BaseTypeInfo(160, N_A));
+        map.put("decimal", new BaseTypeInfo(DECIMAL_BIT_LEN, N_A));
+        map.put("bool", new BaseTypeInfo(1, N_A));
+
         BaseTypeInfo fixedType = new BaseTypeInfo(FIXED_BIT_LEN, N_A);
         map.put("fixed", fixedType);
         map.put("ufixed", fixedType);
@@ -133,8 +113,7 @@ class BaseTypeInfo {
         this(bitLen, N_A);
     }
 
-    private BaseTypeInfo(int bitLen,
-                        int arrayLen) {
+    private BaseTypeInfo(int bitLen, int arrayLen) {
         this.bitLen = bitLen;
         this.arrayLen = arrayLen;
     }
@@ -163,7 +142,6 @@ class BaseTypeInfo {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BaseTypeInfo that = (BaseTypeInfo) o;
-        return bitLen == that.bitLen &&
-                arrayLen == that.arrayLen;
+        return bitLen == that.bitLen && arrayLen == that.arrayLen;
     }
 }
