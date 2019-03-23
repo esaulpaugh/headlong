@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.text.ParseException;
 
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
+import static com.esaulpaugh.headlong.abi.BaseTypeInfo.*;
 import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
 /**
@@ -173,15 +174,15 @@ final class TypeFactory {
             case "bytes29":
             case "bytes30":
             case "bytes31":
-            case "bytes32": type = new ArrayType<ByteType, byte[]>(baseTypeStr, info.clazz, false, (ByteType) info.elementType, info.arrayClassNameStub, info.arrayLen); break;
+            case "bytes32": type = new ArrayType<ByteType, byte[]>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB, info.arrayLen); break;
             case "bool": type = BooleanType.INSTANCE; break;
-            case "bytes":
-            case "string": type = new ArrayType<ByteType, byte[]>(baseTypeStr, info.clazz, true, (ByteType) info.elementType, info.arrayClassNameStub, DYNAMIC_LENGTH); break;
-            case "decimal": type = new BigDecimalType(baseTypeStr, info.bitLen, info.scale, false); break;
+            case "bytes": type = new ArrayType<ByteType, byte[]>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB, DYNAMIC_LENGTH); break;
+            case "string": type = new ArrayType<ByteType, byte[]>(baseTypeStr, ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, ArrayType.STRING_ARRAY_CLASS_NAME_STUB, DYNAMIC_LENGTH); break;
+            case "decimal": type = new BigDecimalType(baseTypeStr, info.bitLen, DECIMAL_SCALE, false); break;
             case "fixed":
-            case "fixed128x18": type = new BigDecimalType("fixed128x18", 128, 18, false); break;
+            case "fixed128x18": type = new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false); break;
             case "ufixed":
-            case "ufixed128x18": type = new BigDecimalType("ufixed128x18", 128, 18, true); break;
+            case "ufixed128x18": type = new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true); break;
             default: type = null;
             }
         } else {

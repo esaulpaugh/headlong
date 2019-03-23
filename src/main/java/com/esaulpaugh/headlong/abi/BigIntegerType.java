@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 class BigIntegerType extends UnitType<BigInteger> {
 
     static final Class<?> CLASS = BigInteger.class;
-    static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(BigInteger[].class);
+    private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(BigInteger[].class);
 
     BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, CLASS, bitLength, unsigned);

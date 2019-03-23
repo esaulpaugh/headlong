@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 class LongType extends UnitType<Long> {
 
     static final Class<?> CLASS = Long.class;
-    static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(long[].class);
+    private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(long[].class);
 
     LongType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, CLASS, bitLength, unsigned);

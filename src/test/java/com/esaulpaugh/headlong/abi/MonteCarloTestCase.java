@@ -103,7 +103,7 @@ public class MonteCarloTestCase implements Serializable {
 
         Map<String, BaseTypeInfo> baseInfoTypeMap = new HashMap<>(BaseTypeInfo.getBaseTypeInfoMap());
 
-        FIXED_LIST = generateFixedList();
+        FIXED_LIST = Collections.unmodifiableList(BaseTypeInfo.getOrderedFixedKeys());
 
         final Set<String> keySet = baseInfoTypeMap.keySet();
         ArrayList<String> ordered = new ArrayList<>(keySet);
@@ -119,15 +119,6 @@ public class MonteCarloTestCase implements Serializable {
             arr[i++] = TUPLE_KEY;
         }
         CANONICAL_BASE_TYPE_STRINGS = arr;
-    }
-
-    private static List<String> generateFixedList() {
-        Map<String, BaseTypeInfo> fixedMap = new HashMap<>();
-        BaseTypeInfo.putFixed(fixedMap, true);
-        BaseTypeInfo.putFixed(fixedMap, false);
-        ArrayList<String> ordered = new ArrayList<>(fixedMap.keySet());
-        Collections.sort(ordered);
-        return Collections.unmodifiableList(ordered);
     }
 
     final Params params;

@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 class ByteType extends UnitType<Byte> {
 
     static final Class<?> CLASS = Byte.class;
-    static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(byte[].class);
+    private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(byte[].class);
 
     private static final int MAX_BIT_LEN = 8;
 

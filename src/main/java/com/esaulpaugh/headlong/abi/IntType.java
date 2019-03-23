@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 class IntType extends UnitType<Integer> {
 
     static final Class<?> CLASS = Integer.class;
-    static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(int[].class);
+    private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(int[].class);
 
     IntType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, CLASS, bitLength, unsigned);
