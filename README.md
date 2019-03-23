@@ -1,6 +1,10 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.esaulpaugh/headlong.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.esaulpaugh%22%20AND%20a:%22headlong%22)
 
-Contract ABI and Recursive Length Prefix made easy in Java (or Android). Everything heavily optimized for maximum throughput (ABI function call encoding up to 575x faster than a popular competitor).
+Contract ABI and Recursive Length Prefix made easy in Java (or Android). Everything heavily optimized for maximum throughput (ABI function call encoding up to 500x faster than a popular competitor and one function creation plus one encode is up to 60x faster (`"f(uint,uint32[],bytes10,bytes)"`, openjdk 11.0.1)).
+
+ABI spec: https://solidity.readthedocs.io/en/latest/abi-spec.html
+
+RLP spec: https://github.com/ethereum/wiki/wiki/RLP
 
 ## Usage
 
