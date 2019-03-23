@@ -25,19 +25,19 @@ public class MonteCarloTestCase implements Serializable {
 
     static class Params implements Serializable {
 
-        static final int DEFAULT_MAX_TUPLE_DEPTH = 1;
-        static final int DEFAULT_MAX_TUPLE_LENGTH = 5;
+        private static final int DEFAULT_MAX_TUPLE_DEPTH = 1;
+        private static final int DEFAULT_MAX_TUPLE_LENGTH = 5;
 
-        static final int DEFAULT_MAX_ARRAY_DEPTH = 1;
-        static final int DEFAULT_MAX_ARRAY_LENGTH = 33; // does not apply to static base types e.g. bytes1-32
+        private static final int DEFAULT_MAX_ARRAY_DEPTH = 1;
+        private static final int DEFAULT_MAX_ARRAY_LENGTH = 33; // does not apply to static base types e.g. bytes1-32
 
-        final int maxTupleDepth;
-        final int maxTupleLen;
+        private final int maxTupleDepth;
+        private final int maxTupleLen;
 
-        final int maxArrayDepth;
-        final int maxArrayLen;
+        private final int maxArrayDepth;
+        private final int maxArrayLen;
 
-        final long seed;
+        private final long seed;
 
         Params(long seed) {
             this.seed = seed;
@@ -103,13 +103,11 @@ public class MonteCarloTestCase implements Serializable {
 
         Map<String, BaseTypeInfo> baseInfoTypeMap = new HashMap<>(BaseTypeInfo.getBaseTypeInfoMap());
 
-        FIXED_LIST = Collections.unmodifiableList(BaseTypeInfo.getOrderedFixedKeys());
-
         final Set<String> keySet = baseInfoTypeMap.keySet();
         ArrayList<String> ordered = new ArrayList<>(keySet);
         Collections.sort(ordered);
         final int numKeys = ordered.size();
-        FIXED_START_INDEX = numKeys + NUM_TUPLES_ADDED;
+
         String[] arr = new String[numKeys + NUM_TUPLES_ADDED + NUM_FIXED_ADDED];
         int i = 0;
         for (String canonical : ordered) {
@@ -119,6 +117,9 @@ public class MonteCarloTestCase implements Serializable {
             arr[i++] = TUPLE_KEY;
         }
         CANONICAL_BASE_TYPE_STRINGS = arr;
+
+        FIXED_START_INDEX = numKeys + NUM_TUPLES_ADDED;
+        FIXED_LIST = Collections.unmodifiableList(BaseTypeInfo.getOrderedFixedKeys());
     }
 
     final Params params;

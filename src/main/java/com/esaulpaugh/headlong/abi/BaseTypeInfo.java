@@ -106,8 +106,8 @@ class BaseTypeInfo {
         return ordered;
     }
 
-    public final int bitLen;
-    public final int arrayLen;
+    final int bitLen;
+    final int arrayLen;
 
     private BaseTypeInfo(int bitLen) {
         this(bitLen, N_A);
@@ -124,11 +124,11 @@ class BaseTypeInfo {
      * @param canonical the canonical type string for the base type
      * @return  the metadata object
      */
-    public static BaseTypeInfo get(String canonical) {
+    static BaseTypeInfo get(String canonical) {
         return TYPE_INFO_MAP.get(canonical);
     }
 
-    public static Map<String, BaseTypeInfo> getBaseTypeInfoMap() {
+    static Map<String, BaseTypeInfo> getBaseTypeInfoMap() {
         return TYPE_INFO_MAP;
     }
 

@@ -108,17 +108,12 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     int byteLengthPacked(Object value) {
         final ABIType<?> elementType = this.elementType;
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN:
-            return ((boolean[]) value).length; // * 1
-        case TYPE_CODE_BYTE:
-            return (isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length; // * 1
-        case TYPE_CODE_INT:
-            return ((int[]) value).length * elementType.byteLengthPacked(null);
-        case TYPE_CODE_LONG:
-            return ((long[]) value).length * elementType.byteLengthPacked(null);
+        case TYPE_CODE_BOOLEAN: return ((boolean[]) value).length; // * 1
+        case TYPE_CODE_BYTE: return (isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length; // * 1
+        case TYPE_CODE_INT: return ((int[]) value).length * elementType.byteLengthPacked(null);
+        case TYPE_CODE_LONG: return ((long[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_BIG_INTEGER:
-        case TYPE_CODE_BIG_DECIMAL:
-            return ((Number[]) value).length * elementType.byteLengthPacked(null);
+        case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
             final Object[] elements = (Object[]) value;
