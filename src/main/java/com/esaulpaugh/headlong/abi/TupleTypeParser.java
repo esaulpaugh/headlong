@@ -14,19 +14,17 @@ class TupleTypeParser {
             throw new ParseException("params start not found", 0);
         }
 
-        final int startParams = 0;
         final ArrayList<ABIType<?>> typesOut = new ArrayList<>();
-        final int argEnd = parseTupleType(rawTupleTypeString, startParams, typesOut);
-
-        final int end = rawTupleTypeString.length();
+        final int argEnd = parseTupleType(rawTupleTypeString, 0, typesOut);
 
         final int terminator = rawTupleTypeString.indexOf(')', argEnd);
+        final int end = rawTupleTypeString.length();
         if (terminator == -1) {
             throw new ParseException("non-terminating tuple", end);
         }
         if (argEnd != terminator || terminator != end - 1) {
-            int errorStart = Math.max(0, argEnd);
-            throw new ParseException("illegal tuple termination: " + rawTupleTypeString.substring(errorStart), errorStart);
+            int errStart = Math.max(0, argEnd);
+            throw new ParseException("illegal tuple termination: " + rawTupleTypeString.substring(errStart), errStart);
         }
 
         return TupleType.create(typesOut);

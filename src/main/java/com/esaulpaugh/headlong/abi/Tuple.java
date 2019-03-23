@@ -15,14 +15,6 @@ public class Tuple extends AbstractList<Object> implements RandomAccess, Seriali
         this.elements = elements;
     }
 
-    public static Tuple of(Object... elements) {
-        return new Tuple(elements);
-    }
-
-    public static Tuple singleton(Object element) {
-        return new Tuple(element);
-    }
-
     public Tuple subtuple(int startIndex, int endIndex) {
         final int len = endIndex - startIndex;
         Object[] copy = new Object[len];
@@ -51,5 +43,13 @@ public class Tuple extends AbstractList<Object> implements RandomAccess, Seriali
         if (o == null || getClass() != o.getClass()) return false;
         Tuple other = (Tuple) o;
         return Arrays.deepEquals(this.elements, other.elements);
+    }
+
+    public static Tuple of(Object... elements) {
+        return new Tuple(elements);
+    }
+
+    public static Tuple singleton(Object element) {
+        return new Tuple(element);
     }
 }

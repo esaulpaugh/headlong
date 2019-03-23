@@ -28,6 +28,10 @@ public class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
         final int len = elementsList.size();
 
+        if(len == 0) {
+            return EMPTY;
+        }
+
         final StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
         final ABIType<?>[] elementsArray = new ABIType<?>[len];
