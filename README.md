@@ -1,4 +1,5 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.esaulpaugh/headlong.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.esaulpaugh%22%20AND%20a:%22headlong%22)
+[![Gitter](https://badges.gitter.im/esaulpaugh-headlong/community.svg)](https://gitter.im/esaulpaugh-headlong/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 Contract ABI and Recursive Length Prefix made easy in Java (or Android). Everything heavily optimized for maximum throughput (ABI function call encoding up to 500x faster than a popular competitor and one function creation plus one encode is up to 60x faster (`"f(uint,uint32[],bytes10,bytes)"`, openjdk 11.0.1)).
 
