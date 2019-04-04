@@ -1,5 +1,6 @@
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.rlp.eip778.KeyValuePair;
 import com.esaulpaugh.headlong.rlp.util.Integers;
 
 import java.util.Arrays;
@@ -9,7 +10,6 @@ import static com.esaulpaugh.headlong.rlp.DataType.LIST_SHORT_OFFSET;
 import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_LONG_OFFSET;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
-import static com.esaulpaugh.headlong.rlp.EIP778.KeyValuePair;
 
 /**
  * Encodes data to RLP format.
@@ -183,6 +183,20 @@ public class RLPEncoder {
             destIndex = encodeItem(pair.getValue(), dest, destIndex);
         }
         return dest;
+    }
+
+    public static byte[] encodeEIP778Record(byte[] signature, byte[] content) {
+        final int contentLen = content.length;
+        final int dataLen = (int) itemEncodedLen(signature) + contentLen;
+        byte[] record = new byte[prefixLength(dataLen) + dataLen];
+
+        int destIndex = encodeListPrefix(dataLen, record, 0);
+
+        destIndex = encodeItem(signature, record, destIndex);
+
+        System.arraycopy(content, 0, record, destIndex, contentLen);
+
+        return record;
     }
 
     /**
