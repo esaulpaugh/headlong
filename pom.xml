@@ -6,11 +6,11 @@
 
     <groupId>com.esaulpaugh</groupId>
     <artifactId>headlong</artifactId>
-    
-    <packaging>jar</packaging>
     <version>1.3.2-SNAPSHOT</version>
+    <packaging>jar</packaging>
     
     <url>http://maven.apache.org</url>
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java-version>8</java-version>

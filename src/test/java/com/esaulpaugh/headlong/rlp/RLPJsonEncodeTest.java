@@ -23,23 +23,14 @@ public class RLPJsonEncodeTest {
     @Test
     public void testCases() throws IOException {
 
-        String testCasesJson = TestUtils.readResourceAsString(RLPJsonEncodeTest.class, "tests/json/rlptest.json");
+        String testCasesJson = TestUtils.readResourceAsString(RLPJsonEncodeTest.class, "tests/RLPTests/rlptest.json");
 
-        JsonParser parser = new JsonParser();
-        JsonElement element = parser.parse(testCasesJson);
-        JsonObject obj = element.getAsJsonObject();
-        Set<Map.Entry<String, JsonElement>> entries = obj.entrySet();
-
-        for (Map.Entry<String, JsonElement> entry : entries) {
+        for (Map.Entry<String, JsonElement> entry : parseEntrySet(testCasesJson)) {
 
             JsonObject jsonObject = entry.getValue().getAsJsonObject();
-            System.out.println(jsonObject);
             JsonElement in = jsonObject.get("in");
-            JsonElement out = jsonObject.get("out");
 
-            String outString = out.getAsString();
-
-            byte[] expected = FastHex.decode(outString.substring(outString.indexOf("0x") + "0x".length()));
+            byte[] expected = getOutBytes(entry);
             byte[] actual;
             if(in.isJsonArray()) {
 
@@ -84,4 +75,22 @@ public class RLPJsonEncodeTest {
         }
     }
 
+    static Set<Map.Entry<String, JsonElement>> parseEntrySet(String json) {
+        JsonParser parser = new JsonParser();
+        JsonElement element = parser.parse(json);
+        JsonObject obj = element.getAsJsonObject();
+        return obj.entrySet();
+    }
+
+    static byte[] getOutBytes(Map.Entry<String, JsonElement> e) {
+        JsonObject jsonObject = e.getValue().getAsJsonObject();
+
+        System.out.println(jsonObject);
+
+        JsonElement out = jsonObject.get("out");
+
+        String outString = out.getAsString();
+
+        return FastHex.decode(outString.substring(outString.indexOf("0x") + "0x".length()));
+    }
 }
