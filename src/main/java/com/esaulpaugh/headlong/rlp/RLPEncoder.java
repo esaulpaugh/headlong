@@ -5,11 +5,7 @@ import com.esaulpaugh.headlong.rlp.util.Integers;
 
 import java.util.Arrays;
 
-import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
-import static com.esaulpaugh.headlong.rlp.DataType.LIST_SHORT_OFFSET;
-import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
-import static com.esaulpaugh.headlong.rlp.DataType.STRING_LONG_OFFSET;
-import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
+import static com.esaulpaugh.headlong.rlp.DataType.*;
 
 /**
  * Encodes data to RLP format.
@@ -39,8 +35,7 @@ public class RLPEncoder {
     private static long totalEncodedLen(KeyValuePair[] pairs) {
         long total = 0;
         for (KeyValuePair kvp : pairs) {
-            total += itemEncodedLen(kvp.getKey());
-            total += itemEncodedLen(kvp.getValue());
+            total += itemEncodedLen(kvp.getKey()) + itemEncodedLen(kvp.getValue());
         }
         return total;
     }
@@ -78,6 +73,11 @@ public class RLPEncoder {
             return 1 + Integers.len(listDataLen) + listDataLen;
         }
         return 1 + listDataLen;
+    }
+
+    private static int encodeKeyValuePair(KeyValuePair pair, byte[] dest, int destIndex) {
+        destIndex = encodeString(pair.getKey(), dest, destIndex);
+        return encodeString(pair.getValue(), dest, destIndex);
     }
 
     private static int encodeItem(Object item, byte[] dest, int destIndex) {
@@ -173,32 +173,6 @@ public class RLPEncoder {
         return dest;
     }
 
-    public static byte[] encodeEIP778RecordContent(long seq, KeyValuePair[] pairs) {
-        Arrays.sort(pairs);
-        byte[] seqBytes = Integers.toBytes(seq);
-        byte[] dest = new byte[seqBytes.length + (int) totalEncodedLen(pairs)];
-        int destIndex = encodeItem(seqBytes, dest, 0);
-        for (KeyValuePair pair : pairs) {
-            destIndex = encodeItem(pair.getKey(), dest, destIndex);
-            destIndex = encodeItem(pair.getValue(), dest, destIndex);
-        }
-        return dest;
-    }
-
-    public static byte[] encodeEIP778Record(byte[] signature, byte[] content) {
-        final int contentLen = content.length;
-        final int dataLen = (int) itemEncodedLen(signature) + contentLen;
-        byte[] record = new byte[prefixLength(dataLen) + dataLen];
-
-        int destIndex = encodeListPrefix(dataLen, record, 0);
-
-        destIndex = encodeItem(signature, record, destIndex);
-
-        System.arraycopy(content, 0, record, destIndex, contentLen);
-
-        return record;
-    }
-
     /**
      * Returns the concatenation of the encodings of the given objects in the given order.
      *
@@ -234,8 +208,14 @@ public class RLPEncoder {
      * @return  the index into {@code dest} marking the end of the sequence
      */
     public static int encodeSequentially(Object[] objects, byte[] dest, int destIndex) {
-        for (Object item : objects) {
-            destIndex = encodeItem(item, dest, destIndex);
+        if(objects instanceof KeyValuePair[]) {
+            for (KeyValuePair kvp : (KeyValuePair[]) objects) {
+                destIndex = encodeKeyValuePair(kvp, dest, destIndex);
+            }
+        } else {
+            for (Object item : objects) {
+                destIndex = encodeItem(item, dest, destIndex);
+            }
         }
         return destIndex;
     }
@@ -325,5 +305,30 @@ public class RLPEncoder {
      */
     public static RLPList toList(Iterable<RLPItem> encodings) {
         return RLPList.withElements(encodings);
+    }
+
+    public static byte[] encodeEIP778RecordContent(long seq, KeyValuePair[] pairs) {
+        Arrays.sort(pairs);
+        byte[] seqBytes = Integers.toBytes(seq);
+        byte[] dest = new byte[seqBytes.length + (int) totalEncodedLen(pairs)];
+        int destIndex = encodeItem(seqBytes, dest, 0);
+
+        encodeSequentially(pairs, dest, destIndex);
+
+        return dest;
+    }
+
+    public static byte[] encodeEIP778Record(byte[] signature, byte[] content) {
+        final int contentLen = content.length;
+        final int dataLen = (int) itemEncodedLen(signature) + contentLen;
+        byte[] record = new byte[prefixLength(dataLen) + dataLen];
+
+        int destIndex = encodeListPrefix(dataLen, record, 0);
+
+        destIndex = encodeItem(signature, record, destIndex);
+
+        System.arraycopy(content, 0, record, destIndex, contentLen);
+
+        return record;
     }
 }

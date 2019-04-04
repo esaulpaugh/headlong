@@ -29,7 +29,7 @@ public class Record {
     public Record(long seq, KeyValuePair[] pairs, Signer signer) {
 
         byte[] content = RLPEncoder.encodeEIP778RecordContent(seq, pairs);
-        byte[] signature = signer.sign(RLPEncoder.encodeAsList((Object) content));
+        byte[] signature = signer.sign(RLPEncoder.encodeAsList((Object) content)); // TODO
 
         byte[] record = RLPEncoder.encodeEIP778Record(signature, content);
 
