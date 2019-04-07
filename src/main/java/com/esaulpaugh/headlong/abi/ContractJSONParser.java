@@ -64,9 +64,11 @@ public class ContractJSONParser {
                     }
                     break;
                 case EVENT:
-                    if(events) {
+                    if (events) {
                         list.add(classOfT.cast(parseEvent(object)));
                     }
+                    break;
+                default: /* skip */
                 }
             }
         }

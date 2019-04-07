@@ -220,12 +220,10 @@ public class Notation {
                 break;
             case LIST_SHORT:
                 i = buildShortList(sb, data, elementDataIndex, elementEnd);
-//                break;
-//            case STRING_LONG:
-//                break;
-//            case LIST_LONG:
-//                break;
-//            default:
+                break;
+            case STRING_LONG:
+            case LIST_LONG:
+            default: throw new RuntimeException("?");
             }
         }
 
