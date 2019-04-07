@@ -37,12 +37,14 @@ public class Function implements ABIObject, Serializable {
         }
 
         static Type get(String value) {
-            switch (value) {
-            case ContractJSONParser.FALLBACK: return Type.FALLBACK;
-            case ContractJSONParser.CONSTRUCTOR: return Type.CONSTRUCTOR;
-            case ContractJSONParser.FUNCTION: return Type.FUNCTION;
-            default: throw new IllegalArgumentException("no " + Type.class.getSimpleName() + " found for " + value);
+            if(value != null) {
+                switch (value) {
+                case ContractJSONParser.FALLBACK: return Type.FALLBACK;
+                case ContractJSONParser.CONSTRUCTOR: return Type.CONSTRUCTOR;
+                case ContractJSONParser.FUNCTION: return Type.FUNCTION;
+                }
             }
+            return null;
         }
     }
 

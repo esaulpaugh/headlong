@@ -82,40 +82,31 @@ public class ContractJSONParser {
     }
 
     public static Function parseFunction(JsonObject function, MessageDigest messageDigest) throws ParseException {
-
-        final JsonArray inputs = getArray(function, INPUTS);
-
-        final TupleType inputTypes;
-        if(inputs != null) {
-            final ArrayList<ABIType<?>> inputsList = new ArrayList<>(inputs.size());
-            for (JsonElement e : inputs) {
-                inputsList.add(buildType(e.getAsJsonObject()));
-            }
-            inputTypes = TupleType.create(inputsList);
-        } else {
-            inputTypes = TupleType.EMPTY;
+        final String typeString = getString(function, TYPE);
+        Function.Type type = Function.Type.get(typeString);
+        if(type == null) {
+            throw unexpectedException(TYPE, typeString);
         }
-
-        final JsonArray outputs = getArray(function, OUTPUTS);
-        final TupleType outputTypes;
-        if (outputs != null) {
-            final ArrayList<ABIType<?>> outputsList = new ArrayList<>(outputs.size());
-            for (JsonElement e : outputs) {
-                outputsList.add(buildType(e.getAsJsonObject()));
-            }
-            outputTypes = TupleType.create(outputsList);
-        } else {
-            outputTypes = null;
-        }
-
         return new Function(
-                Function.Type.get(getString(function, TYPE)),
+                type,
                 getString(function, NAME),
-                inputTypes,
-                outputTypes,
+                parseArrayForFunction(function, INPUTS),
+                parseArrayForFunction(function, OUTPUTS),
                 getString(function, STATE_MUTABILITY),
                 messageDigest
         );
+    }
+
+    private static TupleType parseArrayForFunction(JsonObject function, String name) throws ParseException {
+        final JsonArray array = getArray(function, name);
+        if (array != null) {
+            final ArrayList<ABIType<?>> list = new ArrayList<>(array.size());
+            for (JsonElement e : array) {
+                list.add(buildType(e.getAsJsonObject()));
+            }
+            return TupleType.create(list);
+        }
+        return null;
     }
 
     static Event parseEvent(String eventJson) throws ParseException {
@@ -125,10 +116,13 @@ public class ContractJSONParser {
     static Event parseEvent(JsonObject event) throws ParseException {
         final String type = getString(event, TYPE);
         if (!EVENT.equals(type)) {
-            throw new IllegalArgumentException("unexpected type: " + type);
+            throw unexpectedException(TYPE, type);
         }
 
         final JsonArray inputs = getArray(event, INPUTS);
+        if(inputs == null) {
+            throw notFoundException("array", INPUTS);
+        }
         final int inputsLen = inputs.size();
         final ArrayList<ABIType<?>> inputsList = new ArrayList<>(inputs.size());
         final boolean[] indexed = new boolean[inputsLen];
@@ -160,5 +154,14 @@ public class ContractJSONParser {
             return TypeFactory.createForTuple(base, suffix, name);
         }
         return TypeFactory.create(type, null, name);
+    }
+
+    private static IllegalArgumentException unexpectedException(String key, String value) {
+        return new IllegalArgumentException("unexpected " + key + ": " + (value == null ? null : "\"" + value + "\""));
+
+    }
+
+    private static IllegalArgumentException notFoundException(String elementType, String name) {
+        return new IllegalArgumentException(elementType + " \"" + name + "\" not found");
     }
 }

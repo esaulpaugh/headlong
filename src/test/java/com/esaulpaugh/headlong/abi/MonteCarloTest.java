@@ -47,8 +47,8 @@ public class MonteCarloTest {
         return new Thread(() -> {
             try {
                 doMonteCarlo(seed, n);
-            } catch (ParseException e) {
-                e.printStackTrace();
+            } catch (ParseException pe) {
+                throw new RuntimeException(pe);
             }
         });
     }

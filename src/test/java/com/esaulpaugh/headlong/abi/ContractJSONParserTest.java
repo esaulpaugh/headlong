@@ -1,5 +1,9 @@
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.TestUtils;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -237,5 +241,46 @@ public class ContractJSONParserTest {
 
         Assert.assertEquals("a", event.getParams().get(0).getName());
         Assert.assertEquals("b", event.getParams().get(1).getName());
+    }
+
+    @Test
+    public void parseEvent() throws Throwable {
+        JsonObject jsonObject = new JsonObject();
+
+        TestUtils.CustomRunnable runnable = () -> Event.fromJsonObject(jsonObject);
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: null", runnable);
+
+        jsonObject.add("type", new JsonPrimitive("event"));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "array \"inputs\" not found", runnable);
+
+        jsonObject.add("inputs", new JsonArray());
+        runnable.run();
+    }
+
+    @Test
+    public void parseFunction() throws Throwable {
+        JsonObject jsonObject = new JsonObject();
+
+        TestUtils.CustomRunnable runnable = () -> Function.fromJsonObject(jsonObject);
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: null", runnable);
+
+        jsonObject.add("type", new JsonPrimitive("event"));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: \"event\"", runnable);
+
+        jsonObject.add("type", new JsonPrimitive("function"));
+        runnable.run();
+
+        jsonObject.add("type", new JsonPrimitive("fallback"));
+        runnable.run();
+
+        jsonObject.add("type", new JsonPrimitive("constructor"));
+        runnable.run();
+
+        jsonObject.add("inputs", new JsonArray());
+        runnable.run();
     }
 }
