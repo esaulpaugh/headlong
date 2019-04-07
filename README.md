@@ -87,14 +87,14 @@ Or build locally:
 Clone the project and install to your local maven repository using `gradle publishToMavenLocal` or `mvn install`. Then you can use one of these:
 
 ```groovy
-implementation 'com.esaulpaugh:headlong:1.3.2-SNAPSHOT'
+implementation 'com.esaulpaugh:headlong:1.3.3-SNAPSHOT'
 ```
 
 ```xml
 <dependency>
     <groupId>com.esaulpaugh</groupId>
     <artifactId>headlong</artifactId>
-    <version>1.3.2-SNAPSHOT</version>
+    <version>1.3.3-SNAPSHOT</version>
 </dependency>
 ```
 Alternatively:
@@ -103,7 +103,7 @@ Alternatively:
 * Use `mvn package` which outputs to /target
 * Add headlong as a project dependency
 
-Depends on gson. Tests should take less than one minute to run. Test packages require junit. Jar size is ~120 KB as of 03/14/19.
+Depends on gson. Tests should take less than one minute to run. Test packages require junit. Jar size is ~124 KB as of 04/07/19.
 
 See the wiki for more, such as TupleTypes, packed encoding, RLP Lists, and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
