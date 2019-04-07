@@ -244,6 +244,31 @@ public class ContractJSONParserTest {
     }
 
     @Test
+    public void parseFunction() throws Throwable {
+        final JsonObject function = new JsonObject();
+
+        TestUtils.CustomRunnable parse = () -> Function.fromJsonObject(function);
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: null", parse);
+
+        function.add("type", new JsonPrimitive("event"));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: \"event\"", parse);
+
+        TestUtils.CustomRunnable[] updates = new TestUtils.CustomRunnable[] {
+                () -> function.add("type", new JsonPrimitive("function")),
+                () -> function.add("type", new JsonPrimitive("fallback")),
+                () -> function.add("type", new JsonPrimitive("constructor")),
+                () -> function.add("inputs", new JsonArray())
+        };
+
+        for(TestUtils.CustomRunnable update : updates) {
+            update.run();
+            parse.run();
+        }
+    }
+
+    @Test
     public void parseEvent() throws Throwable {
         JsonObject jsonObject = new JsonObject();
 
@@ -253,32 +278,7 @@ public class ContractJSONParserTest {
 
         jsonObject.add("type", new JsonPrimitive("event"));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "array \"inputs\" not found", runnable);
-
-        jsonObject.add("inputs", new JsonArray());
-        runnable.run();
-    }
-
-    @Test
-    public void parseFunction() throws Throwable {
-        JsonObject jsonObject = new JsonObject();
-
-        TestUtils.CustomRunnable runnable = () -> Function.fromJsonObject(jsonObject);
-
-        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: null", runnable);
-
-        jsonObject.add("type", new JsonPrimitive("event"));
-
-        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: \"event\"", runnable);
-
-        jsonObject.add("type", new JsonPrimitive("function"));
-        runnable.run();
-
-        jsonObject.add("type", new JsonPrimitive("fallback"));
-        runnable.run();
-
-        jsonObject.add("type", new JsonPrimitive("constructor"));
-        runnable.run();
+        TestUtils.assertThrown(IllegalArgumentException.class, "array \"inputs\" null or not found", runnable);
 
         jsonObject.add("inputs", new JsonArray());
         runnable.run();

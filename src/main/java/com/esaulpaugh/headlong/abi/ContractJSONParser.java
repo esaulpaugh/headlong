@@ -121,7 +121,7 @@ public class ContractJSONParser {
 
         final JsonArray inputs = getArray(event, INPUTS);
         if(inputs == null) {
-            throw notFoundException("array", INPUTS);
+            throw new IllegalArgumentException("array \"" + INPUTS + "\" null or not found");
         }
         final int inputsLen = inputs.size();
         final ArrayList<ABIType<?>> inputsList = new ArrayList<>(inputs.size());
@@ -159,9 +159,5 @@ public class ContractJSONParser {
     private static IllegalArgumentException unexpectedException(String key, String value) {
         return new IllegalArgumentException("unexpected " + key + ": " + (value == null ? null : "\"" + value + "\""));
 
-    }
-
-    private static IllegalArgumentException notFoundException(String elementType, String name) {
-        return new IllegalArgumentException(elementType + " \"" + name + "\" not found");
     }
 }

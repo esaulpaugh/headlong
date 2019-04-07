@@ -30,7 +30,7 @@ public class JsonUtils {
 
     public static String getString(JsonObject object, String key, String defaultVal) {
         JsonElement element = object.get(key);
-        if(element == null) {
+        if(element == null || element.isJsonNull()) {
             return defaultVal;
         }
         if(!element.isJsonPrimitive() || !((JsonPrimitive) element).isString()) {
@@ -41,7 +41,7 @@ public class JsonUtils {
 
     public static boolean getBoolean(JsonObject object, String key, Boolean defaultVal) {
         JsonElement element = object.get(key);
-        if(element == null) {
+        if(element == null || element.isJsonNull()) {
             return defaultVal;
         }
         if(!element.isJsonPrimitive() || !((JsonPrimitive) element).isBoolean()) {
@@ -52,7 +52,7 @@ public class JsonUtils {
 
     public static JsonArray getArray(JsonObject object, String key, JsonArray defaultVal) {
         JsonElement element = object.get(key);
-        if (element == null) {
+        if (element == null || element.isJsonNull()) {
             return defaultVal;
         }
         if (!element.isJsonArray()) {
