@@ -303,4 +303,8 @@ public class Function implements ABIObject, Serializable {
     public static String hexOf(byte[] bytes) {
         return encode(bytes, HEX);
     }
+
+    public static String hexOf(ByteBuffer buffer) {
+        return encode(buffer.array(), HEX);
+    }
 }

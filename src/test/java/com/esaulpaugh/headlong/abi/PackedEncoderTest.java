@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.text.ParseException;
 
 public class PackedEncoderTest {
@@ -22,13 +23,15 @@ public class PackedEncoderTest {
 
         Assert.assertEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421").length, packedLen);
 
-        byte[] dest = new byte[packedLen];
+        ByteBuffer dest = ByteBuffer.allocate(packedLen);
 
-        tupleType.encodePacked(test, dest, 0);
+        tupleType.encodePacked(test, dest);
 
-        System.out.println(FastHex.encodeToString(dest));
+        byte[] destArray = dest.array();
 
-        Assert.assertArrayEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421"), dest);
+        System.out.println(FastHex.encodeToString(destArray));
+
+        Assert.assertArrayEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421"), destArray);
 
         // ---------------------------
 
@@ -49,11 +52,12 @@ public class PackedEncoderTest {
 
         TupleType tt = TupleType.parse(tupleType.canonicalType);
 
-        byte[] dest2 = tt.encodePacked(args);
+        ByteBuffer dest2 = tt.encodePacked(args);
+        byte[] dest2Array = dest2.array();
 
-        System.out.println(FastHex.encodeToString(dest2));
+        System.out.println(FastHex.encodeToString(dest2Array));
 
-        Assert.assertArrayEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421"), dest2);
+        Assert.assertArrayEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421"), dest2Array);
 
     }
 
@@ -66,13 +70,14 @@ public class PackedEncoderTest {
 
         tupleType.validate(values);
 
-        byte[] packed = tupleType.encodePacked(values);
+        ByteBuffer packed = tupleType.encodePacked(values);
+        byte[] packedArray = packed.array();
 
-        System.out.println(FastHex.encodeToString(packed));
+        System.out.println(FastHex.encodeToString(packedArray));
 
-        Assert.assertArrayEquals(FastHex.decode("fffffe0100"), packed);
+        Assert.assertArrayEquals(FastHex.decode("fffffe0100"), packedArray);
 
-        Tuple decoded = PackedDecoder.decode(tupleType, packed);
+        Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
 
         Assert.assertEquals(values, decoded);
     }
@@ -80,19 +85,20 @@ public class PackedEncoderTest {
     @Test
     public void testDecodeA() throws ParseException {
 
-        TupleType tupleType = TupleType.parse("(uint64[],uint64[1],uint64)");
+        TupleType tupleType = TupleType.parse("(uint64[],uint64[1],uint64,int72)");
 
-        Tuple values = new Tuple( new long[] { 9L }, new long[] { 5L }, BigInteger.valueOf(6L));
+        Tuple values = new Tuple( new long[] { 9L }, new long[] { 5L }, BigInteger.valueOf(6L), BigInteger.valueOf(-1L));
 
         tupleType.validate(values);
 
-        byte[] packed = tupleType.encodePacked(values);
+        ByteBuffer packed = tupleType.encodePacked(values);
+        byte[] packedArray = packed.array();
 
-        System.out.println(FastHex.encodeToString(packed));
+        System.out.println(FastHex.encodeToString(packedArray));
 
-        Assert.assertArrayEquals(FastHex.decode("000000000000000900000000000000050000000000000006"), packed);
+        Assert.assertArrayEquals(FastHex.decode("000000000000000900000000000000050000000000000006ffffffffffffffffff"), packedArray);
 
-        Tuple decoded = PackedDecoder.decode(tupleType, packed);
+        Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
 
         Assert.assertEquals(values, decoded);
     }
@@ -106,13 +112,14 @@ public class PackedEncoderTest {
 
         tupleType.validate(values);
 
-        byte[] packed = tupleType.encodePacked(values);
+        ByteBuffer packed = tupleType.encodePacked(values);
+        byte[] packedArray = packed.array();
 
-        System.out.println(FastHex.encodeToString(packed));
+        System.out.println(FastHex.encodeToString(packedArray));
 
-        Assert.assertArrayEquals(FastHex.decode("00000000000000010000000000000002000000000000000300000000000000040000000000000000000000000000000000000000000000000000000000000001"), packed);
+        Assert.assertArrayEquals(FastHex.decode("00000000000000010000000000000002000000000000000300000000000000040000000000000000000000000000000000000000000000000000000000000001"), packedArray);
 
-        Tuple decoded = PackedDecoder.decode(tupleType, packed);
+        Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
 
         Assert.assertEquals(values, decoded);
     }

@@ -58,7 +58,7 @@ public class StudentTest {
 
         ByteBuffer reencoded = tt.encode(plato.toTuple());
 
-        System.out.println(Function.hexOf(reencoded.array()));
+        System.out.println(Function.hexOf(reencoded));
         System.out.println(Function.hexOf(tt.encodePacked(plato.toTuple())));
         System.out.println(plato);
 

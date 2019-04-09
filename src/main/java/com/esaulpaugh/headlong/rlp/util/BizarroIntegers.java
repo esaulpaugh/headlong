@@ -2,6 +2,8 @@ package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.rlp.DecodeException;
 
+import java.nio.ByteBuffer;
+
 import static com.esaulpaugh.headlong.util.Utils.EMPTY_BYTE_ARRAY;
 
 /**
@@ -166,6 +168,61 @@ public class BizarroIntegers {
         case 7: o[i]=b; o[i+1]=c; o[i+2]=d; o[i+3]=e; o[i+4]=f; o[i+5]=g; o[i+6]=h; return 7;
         default:
         o[i]=(byte)val; o[i+1]=b; o[i+2]=c; o[i+3]=d; o[i+4]=e; o[i+5]=f; o[i+6]=g; o[i+7]=h; return 8;
+        }
+    }
+
+    public static int putLong(long val, ByteBuffer o) {
+        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0;
+        int n = 0;
+        if(val != -1) {
+            n = 1;
+            h = (byte) val;
+            val = val >> Byte.SIZE;
+            if (val != -1) {
+                n = 2;
+                g = (byte) val;
+                val = val >> Byte.SIZE;
+                if (val != -1) {
+                    n = 3;
+                    f = (byte) val;
+                    val = val >> Byte.SIZE;
+                    if (val != -1) {
+                        n = 4;
+                        e = (byte) val;
+                        val = val >> Byte.SIZE;
+                        if (val != -1) {
+                            n = 5;
+                            d = (byte) val;
+                            val = val >> Byte.SIZE;
+                            if (val != -1) {
+                                n = 6;
+                                c = (byte) val;
+                                val = val >> Byte.SIZE;
+                                if (val != -1) {
+                                    n = 7;
+                                    b = (byte) val;
+                                    val = val >> Byte.SIZE;
+                                    if (val != -1) {
+                                        n = 8;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        switch (n) {
+        case 0: return 0;
+        case 1: o.put(h); return 1;
+        case 2: o.put(g); o.put(h); return 2;
+        case 3: o.put(f); o.put(g); o.put(h); return 3;
+        case 4: o.put(e); o.put(f); o.put(g); o.put(h); return 4;
+        case 5: o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 5;
+        case 6: o.put(c); o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 6;
+        case 7: o.put(b); o.put(c); o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 7;
+        default:
+            o.put((byte)val); o.put(b); o.put(c); o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 8;
         }
     }
 
