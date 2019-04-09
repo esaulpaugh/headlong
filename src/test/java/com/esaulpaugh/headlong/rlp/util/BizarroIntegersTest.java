@@ -1,10 +1,10 @@
 package com.esaulpaugh.headlong.rlp.util;
 
+import com.esaulpaugh.headlong.abi.MonteCarloTest;
 import com.esaulpaugh.headlong.rlp.DecodeException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.security.SecureRandom;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
 
@@ -39,7 +39,7 @@ public class BizarroIntegersTest {
 
     @Test
     public void putGetLong() throws DecodeException {
-        Random rand = new Random(new SecureRandom().nextLong());
+        Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
         byte[] eight = new byte[8];
         final long lim = Long.MAX_VALUE - (long) Math.pow(2.0, 24);
         for (long i = Long.MAX_VALUE; i >= lim; i--) {
@@ -82,7 +82,7 @@ public class BizarroIntegersTest {
 
     @Test
     public void lenLong() {
-        Random rand = new Random(new SecureRandom().nextLong());
+        Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
 
         for (int i = 0; i < Short.MAX_VALUE; i++) {
             long lo = rand.nextLong();

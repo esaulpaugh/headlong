@@ -3,7 +3,6 @@ package com.esaulpaugh.headlong.abi;
 import org.junit.Test;
 
 import java.io.*;
-import java.security.SecureRandom;
 import java.text.ParseException;
 import java.util.Objects;
 import java.util.Random;
@@ -27,7 +26,7 @@ public class MonteCarloTest {
     @Test
     public void monteCarloThreaded() throws InterruptedException {
 
-        long masterMasterSeed = getSeed(System.nanoTime()) ^ new SecureRandom().nextLong(); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
+        long masterMasterSeed = getSeed(System.nanoTime()); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
         Thread[] threads = new Thread[Runtime.getRuntime().availableProcessors() - 1];
         int i = 0;
