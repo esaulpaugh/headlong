@@ -119,11 +119,7 @@ public class Integers {
                 n = 2;
             }
         }
-        switch (n) {
-        case 0: return 0;
-        case 1: o[i]=b; return 1;
-        default: o[i]=(byte)val; o[i+1]=b; return 2;
-        }
+        return insertBytes(n, o, i, (byte) 0, (byte) 0, (byte) val, b);
     }
 
     /**
@@ -155,14 +151,7 @@ public class Integers {
                 }
             }
         }
-        switch (n) {
-        case 0: return 0;
-        case 1: o[i]=d; return 1;
-        case 2: o[i]=c; o[i+1]=d; return 2;
-        case 3: o[i]=b; o[i+1]=c; o[i+2]=d; return 3;
-        default:
-        o[i]=(byte)val; o[i+1]=b; o[i+2]=c; o[i+3]=d; return 4;
-        }
+        return insertBytes(n, o, i, (byte) val, b, c, d);
     }
 
     /**
@@ -470,11 +459,11 @@ public class Integers {
         return Long.SIZE - Long.numberOfLeadingZeros(val);
     }
 
-    public static void insertBytes(int n, byte[] b, int i, byte w, byte x, byte y, byte z) {
+    public static int insertBytes(int n, byte[] b, int i, byte w, byte x, byte y, byte z) {
         if(n > 4) {
             throw new IllegalArgumentException("n must be <= 4");
         }
-        insertBytes(n, b, i, (byte)0, (byte)0, (byte)0, (byte)0, w, x, y, z);
+        return insertBytes(n, b, i, (byte)0, (byte)0, (byte)0, (byte)0, w, x, y, z);
     }
 
     /**

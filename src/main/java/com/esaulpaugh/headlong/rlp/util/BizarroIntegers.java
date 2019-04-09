@@ -78,11 +78,7 @@ public class BizarroIntegers {
                 n = 2;
             }
         }
-        switch (n) {
-        case 0: return 0;
-        case 1: o[i]=b; return 1;
-        default: o[i]=(byte)val; o[i+1]=b; return 2;
-        }
+        return Integers.insertBytes(n, o, i, (byte)0, (byte) 0, (byte) val, b);
     }
 
     public static int putInt(int val, byte[] o, int i) {
@@ -103,14 +99,7 @@ public class BizarroIntegers {
                 }
             }
         }
-        switch (n) {
-        case 0: return 0;
-        case 1: o[i]=d; return 1;
-        case 2: o[i]=c; o[i+1]=d; return 2;
-        case 3: o[i]=b; o[i+1]=c; o[i+2]=d; return 3;
-        default:
-        o[i]=(byte)val; o[i+1]=b; o[i+2]=c; o[i+3]=d; return 4;
-        }
+        return Integers.insertBytes(n, o, i, (byte) val, b, c, d);
     }
 
     public static int putLong(long val, byte[] o, int i) {
