@@ -143,16 +143,13 @@ public class Integers {
         if(val != 0) {
             n = 1;
             d = (byte) val;
-            val >>>= Byte.SIZE;
-            if (val != 0) {
+            if ((val >>>= Byte.SIZE) != 0) {
                 n = 2;
                 c = (byte) val;
-                val >>>= Byte.SIZE;
-                if (val != 0) {
+                if ((val >>>= Byte.SIZE) != 0) {
                     n = 3;
                     b = (byte) val;
-                    val >>>= Byte.SIZE;
-                    if (val != 0) {
+                    if ((val >>>= Byte.SIZE) != 0) {
                         n = 4;
                     }
                 }
@@ -185,32 +182,25 @@ public class Integers {
         if(val != 0) {
             n = 1;
             h = (byte) val;
-            val >>>= Byte.SIZE;
-            if (val != 0) {
+            if ((val >>>= Byte.SIZE) != 0) {
                 n = 2;
                 g = (byte) val;
-                val >>>= Byte.SIZE;
-                if (val != 0) {
+                if ((val >>>= Byte.SIZE) != 0) {
                     n = 3;
                     f = (byte) val;
-                    val >>>= Byte.SIZE;
-                    if (val != 0) {
+                    if ((val >>>= Byte.SIZE) != 0) {
                         n = 4;
                         e = (byte) val;
-                        val >>>= Byte.SIZE;
-                        if (val != 0) {
+                        if ((val >>>= Byte.SIZE) != 0) {
                             n = 5;
                             d = (byte) val;
-                            val >>>= Byte.SIZE;
-                            if (val != 0) {
+                            if ((val >>>= Byte.SIZE) != 0) {
                                 n = 6;
                                 c = (byte) val;
-                                val >>>= Byte.SIZE;
-                                if (val != 0) {
+                                if ((val >>>= Byte.SIZE) != 0) {
                                     n = 7;
                                     b = (byte) val;
-                                    val >>>= Byte.SIZE;
-                                    if (val != 0) {
+                                    if ((val >>>= Byte.SIZE) != 0) {
                                         n = 8;
                                     }
                                 }
@@ -220,18 +210,7 @@ public class Integers {
                 }
             }
         }
-        switch (n) {
-        case 0: return 0;
-        case 1: o[i]=h; return 1;
-        case 2: o[i]=g; o[i+1]=h; return 2;
-        case 3: o[i]=f; o[i+1]=g; o[i+2]=h; return 3;
-        case 4: o[i]=e; o[i+1]=f; o[i+2]=g; o[i+3]=h; return 4;
-        case 5: o[i]=d; o[i+1]=e; o[i+2]=f; o[i+3]=g; o[i+4]=h; return 5;
-        case 6: o[i]=c; o[i+1]=d; o[i+2]=e; o[i+3]=f; o[i+4]=g; o[i+5]=h; return 6;
-        case 7: o[i]=b; o[i+1]=c; o[i+2]=d; o[i+3]=e; o[i+4]=f; o[i+5]=g; o[i+6]=h; return 7;
-        default:
-        o[i]=(byte)val; o[i+1]=b; o[i+2]=c; o[i+3]=d; o[i+4]=e; o[i+5]=f; o[i+6]=g; o[i+7]=h; return 8;
-        }
+        return insertBytes(n, o, i, (byte) val, b, c, d, e, f, g, h);
     }
 
     public static int putLong(long val, ByteBuffer o) {
@@ -240,32 +219,25 @@ public class Integers {
         if(val != 0) {
             n = 1;
             h = (byte) val;
-            val >>>= Byte.SIZE;
-            if (val != 0) {
+            if ((val >>>= Byte.SIZE) != 0) {
                 n = 2;
                 g = (byte) val;
-                val >>>= Byte.SIZE;
-                if (val != 0) {
+                if ((val >>>= Byte.SIZE) != 0) {
                     n = 3;
                     f = (byte) val;
-                    val >>>= Byte.SIZE;
-                    if (val != 0) {
+                    if ((val >>>= Byte.SIZE) != 0) {
                         n = 4;
                         e = (byte) val;
-                        val >>>= Byte.SIZE;
-                        if (val != 0) {
+                        if ((val >>>= Byte.SIZE) != 0) {
                             n = 5;
                             d = (byte) val;
-                            val >>>= Byte.SIZE;
-                            if (val != 0) {
+                            if ((val >>>= Byte.SIZE) != 0) {
                                 n = 6;
                                 c = (byte) val;
-                                val >>>= Byte.SIZE;
-                                if (val != 0) {
+                                if ((val >>>= Byte.SIZE) != 0) {
                                     n = 7;
                                     b = (byte) val;
-                                    val >>>= Byte.SIZE;
-                                    if (val != 0) {
+                                    if ((val >>>= Byte.SIZE) != 0) {
                                         n = 8;
                                     }
                                 }
@@ -275,18 +247,7 @@ public class Integers {
                 }
             }
         }
-        switch (n) {
-        case 0: return 0;
-        case 1: o.put(h); return 1;
-        case 2: o.put(g); o.put(h); return 2;
-        case 3: o.put(f); o.put(g); o.put(h); return 3;
-        case 4: o.put(e); o.put(f); o.put(g); o.put(h); return 4;
-        case 5: o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 5;
-        case 6: o.put(c); o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 6;
-        case 7: o.put(b); o.put(c); o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 7;
-        default:
-            o.put((byte)val); o.put(b); o.put(c); o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 8;
-        }
+        return insertBytes(n, o, (byte) val, b, c, d, e, f, g, h);
     }
 
     /**
@@ -450,14 +411,11 @@ public class Integers {
         int n = 0;
         if(val != 0) {
             n = 1;
-            val >>>= Byte.SIZE;
-            if (val != 0) {
+            if ((val >>>= Byte.SIZE) != 0) {
                 n = 2;
-                val >>>= Byte.SIZE;
-                if (val != 0) {
+                if ((val >>>= Byte.SIZE) != 0) {
                     n = 3;
-                    val >>>= Byte.SIZE;
-                    if (val != 0) {
+                    if (val >>> Byte.SIZE != 0) {
                         return 4;
                     }
                 }
@@ -477,26 +435,19 @@ public class Integers {
         int n = 0;
         if(val != 0) {
             n = 1;
-            val >>>= Byte.SIZE;
-            if (val != 0) {
+            if ((val >>>= Byte.SIZE) != 0) {
                 n = 2;
-                val >>>= Byte.SIZE;
-                if (val != 0) {
+                if ((val >>>= Byte.SIZE) != 0) {
                     n = 3;
-                    val >>>= Byte.SIZE;
-                    if (val != 0) {
+                    if ((val >>>= Byte.SIZE) != 0) {
                         n = 4;
-                        val >>>= Byte.SIZE;
-                        if (val != 0) {
+                        if ((val >>>= Byte.SIZE) != 0) {
                             n = 5;
-                            val >>>= Byte.SIZE;
-                            if (val != 0) {
+                            if ((val >>>= Byte.SIZE) != 0) {
                                 n = 6;
-                                val >>>= Byte.SIZE;
-                                if (val != 0) {
+                                if ((val >>>= Byte.SIZE) != 0) {
                                     n = 7;
-                                    val >>>= Byte.SIZE;
-                                    if (val != 0) {
+                                    if (val >>> Byte.SIZE != 0) {
                                         return 8;
                                     }
                                 }
@@ -539,8 +490,9 @@ public class Integers {
      * @param x     the lead byte if three bytes are to be inserted
      * @param y     the lead byte if two bytes are to be inserted
      * @param z     the last byte
+     * @return n    the number of bytes inserted
      */
-    public static void insertBytes(int n, byte[] b, int i, byte s, byte t, byte u, byte v, byte w, byte x, byte y, byte z) {
+    public static int insertBytes(int n, byte[] b, int i, byte s, byte t, byte u, byte v, byte w, byte x, byte y, byte z) {
         switch (n) { /* cases fall through */
         case 8: b[i++] = s;
         case 7: b[i++] = t;
@@ -550,7 +502,22 @@ public class Integers {
         case 3: b[i++] = x;
         case 2: b[i++] = y;
         case 1: b[i] = z;
-        case 0: return;
+        case 0: return n;
+        default: throw new IllegalArgumentException("n is out of range: " + n);
+        }
+    }
+
+    public static int insertBytes(int n, ByteBuffer b, byte s, byte t, byte u, byte v, byte w, byte x, byte y, byte z) {
+        switch (n) { /* cases fall through */
+        case 8: b.put(s);
+        case 7: b.put(t);
+        case 6: b.put(u);
+        case 5: b.put(v);
+        case 4: b.put(w);
+        case 3: b.put(x);
+        case 2: b.put(y);
+        case 1: b.put(z);
+        case 0: return n;
         default: throw new IllegalArgumentException("n is out of range: " + n);
         }
     }
