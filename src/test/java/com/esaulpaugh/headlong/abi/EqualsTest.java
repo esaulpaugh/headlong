@@ -14,7 +14,7 @@ public class EqualsTest {
     @Test
     public void testEquals() throws ParseException {
 
-        Random r = new Random(MonteCarloTest.seed(System.nanoTime()));
+        Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
 
         int n = 0;
         do {

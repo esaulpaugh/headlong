@@ -61,7 +61,7 @@ public class EncodeTest {
         Function f = new Function("(function[2][][],bytes24,string[0][0],address[],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
 
         byte[] func = new byte[24];
-        new Random(MonteCarloTest.seed(System.nanoTime())).nextBytes(func);
+        new Random(MonteCarloTest.getSeed(System.nanoTime())).nextBytes(func);
 
         String oneSixty = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 //        String oneSixty = "10000000000000000000000000000000000000000";

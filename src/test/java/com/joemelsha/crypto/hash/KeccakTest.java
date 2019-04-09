@@ -66,7 +66,7 @@ public class KeccakTest {
         Keccak k = new Keccak(256);
         KeccakDigest k_ = new KeccakDigest(256);
 
-        Random r = new Random(MonteCarloTest.seed(System.nanoTime()));
+        Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
 
         byte[] buffer = new byte[65];
         final int bound = buffer.length + 1;

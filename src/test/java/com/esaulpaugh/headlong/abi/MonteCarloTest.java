@@ -27,7 +27,7 @@ public class MonteCarloTest {
     @Test
     public void monteCarloThreaded() throws InterruptedException {
 
-        long masterMasterSeed = seed(System.nanoTime()) ^ new SecureRandom().nextLong(); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
+        long masterMasterSeed = getSeed(System.nanoTime()) ^ new SecureRandom().nextLong(); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
         Thread[] threads = new Thread[Runtime.getRuntime().availableProcessors() - 1];
         int i = 0;
@@ -154,9 +154,9 @@ public class MonteCarloTest {
         ObjectOutputStream oos = new ObjectOutputStream(baos);
 
         final long time = System.nanoTime();
-        long seed = seed(time);
+        long seed = getSeed(time);
         final long origSeed = seed;
-        final long seed2 = seed(time + 1);
+        final long seed2 = getSeed(time + 1);
         System.out.println("orig =  " + seed);
         System.out.println("seed2 = " + seed2);
         System.out.println("xor = " + Long.toHexString(seed ^ seed2));
@@ -245,14 +245,18 @@ public class MonteCarloTest {
         }
     }
 
-    public static long seed(final long nanoTime) {
-        final long a = System.nanoTime() << 1;
-        final long b = -System.nanoTime() >> 1;
-        final long c = nanoTime * a * b;
-        final long d = c << 32;
-        final long e = c >> 32;
-        final long f = c ^ d;
-        final long g = c ^ e;
-        return f + g;
+    public static long getSeed(final long protoseed) {
+        long c = protoseed * (System.nanoTime() << 1) * -System.nanoTime();
+        c ^= c << 32;
+        return c ^ (c >> 32);
     }
+
+//    public static void main(String[] args0) {
+//        byte[] x = new byte[8];
+//        for (int i = 1; i <= 20_000; i++) {
+//            long seed = getSeed(i);
+//            Integers.putLong(seed, x, 0);
+//            System.out.println(Strings.encode(x, Strings.BASE64));
+//        }
+//    }
 }
