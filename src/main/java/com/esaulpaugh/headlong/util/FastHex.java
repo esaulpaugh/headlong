@@ -9,14 +9,14 @@ public final class FastHex {
 
     private static final int NIBBLE_BITS = Byte.SIZE / 2;
 
-    private static final int NO_MAPPING = -1;
-
     // Byte values index directly into the encoding table (size 256) whose elements contain two char values each,
     // encoded together as an int.
     private static final int[] ENCODE_TABLE = new int[1 << Byte.SIZE];
 
     // Char values index directly into the decoding table (size 256).
-    private static final int[] DECODE_TABLE = new int[1 << Byte.SIZE];
+    private static final byte[] DECODE_TABLE = new byte[1 << Byte.SIZE];
+
+    private static final byte NO_MAPPING = -1;
 
     static {
         final int[] ints = new int[] {
@@ -85,11 +85,11 @@ public final class FastHex {
         final int bytesLen = length >> 1;
         byte[] bytes = new byte[bytesLen];
         for (int i = 0, j = offset; i < bytesLen; i++, j+=2) {
-            int left = DECODE_TABLE[hexBytes[j]];
+            byte left = DECODE_TABLE[hexBytes[j]];
             if (left == NO_MAPPING) {
                 throw new IllegalArgumentException("illegal val @ " + j);
             }
-            int right = DECODE_TABLE[hexBytes[j+1]];
+            byte right = DECODE_TABLE[hexBytes[j+1]];
             if (right == NO_MAPPING) {
                 throw new IllegalArgumentException("illegal val @ " + (j + 1));
             }

@@ -71,21 +71,27 @@ public class KeccakTest {
         byte[] buffer = new byte[65];
         final int bound = buffer.length + 1;
 
+        r.nextBytes(buffer);
+
         final int n = 1_000;
         for (int i = 0; i < n; i++) {
             final int numUpdates = r.nextInt(20);
             for (int j = 0; j < numUpdates; j++) {
                 final int len = r.nextInt(bound);
-                r.nextBytes(buffer);
+
 //                System.out.println(len + "\u0009\u0009" + FastHex.encodeToString(buffer, 0, len));
                 k.update(buffer, 0 , len);
                 k_.update(buffer, 0, len);
             }
 
+            byte[] a = k.digest();
+//            ByteBuffer zzz = ByteBuffer.allocate(32);
+//            k.digest(zzz);
+
             byte[] k_Output = new byte[k_.getDigestSize()];
             k_.doFinal(k_Output, 0);
 
-            Assert.assertArrayEquals(k.digest(), k_Output);
+            Assert.assertArrayEquals(a, k_Output);
 
 //            System.out.println(FastHex.encodeToString(k_Output));
         }
