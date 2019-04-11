@@ -1,13 +1,11 @@
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.util.RLPIterator;
-
 import java.util.NoSuchElementException;
 
 /**
  * For iterating over sequentially encoded RLP items.
  */
-public class RLPSequenceIterator implements RLPIterator {
+public class RLPSequenceIterator {
 
     private final RLPDecoder decoder;
     private final byte[] rlp;
@@ -21,12 +19,10 @@ public class RLPSequenceIterator implements RLPIterator {
         this.end = end;
     }
 
-    @Override
     public boolean hasNext() {
         return index < end;
     }
 
-    @Override
     public RLPItem next() throws DecodeException {
         if(hasNext()) {
             RLPItem item = decoder.wrap(rlp, index);

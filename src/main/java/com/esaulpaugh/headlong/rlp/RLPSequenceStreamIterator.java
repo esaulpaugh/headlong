@@ -1,11 +1,10 @@
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.util.RLPIterator;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.NoSuchElementException;
 
-public class RLPSequenceStreamIterator implements RLPIterator {
+public class RLPSequenceStreamIterator {
 
     private final RLPDecoder decoder;
     private final InputStream rlpStream;
@@ -13,36 +12,43 @@ public class RLPSequenceStreamIterator implements RLPIterator {
     private transient byte[] buffer;
     private transient int index;
 
+    private transient RLPItem rlpItem;
+
     RLPSequenceStreamIterator(RLPDecoder decoder, InputStream rlpStream) {
         this.decoder = decoder;
         this.rlpStream = rlpStream;
     }
 
-    @Override
     public boolean hasNext() {
-        if(buffer != null) {
-            try {
-                decoder.wrap(buffer, index);
-                return true;
-            } catch (DecodeException e) {
-                /* do nothing */
-            }
+        if(rlpItem != null) {
+            return true;
         }
         try {
-            index = 0;
-            final int available = rlpStream.available();
-            buffer = new byte[available];
-            return available > 0 && rlpStream.read(buffer) == available;
-        } catch (IOException e) {
+            if(buffer == null) {
+                index = 0;
+                buffer = new byte[rlpStream.available()];
+                if(rlpStream.read(buffer) <= 0) {
+                    buffer = null;
+                    return false;
+                }
+            }
+            rlpItem = decoder.wrap(buffer, index);
+            return true;
+        } catch (DecodeException e) {
             buffer = null;
+            return false;
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Override
-    public RLPItem next() throws DecodeException {
-        RLPItem item = decoder.wrap(buffer, index);
-        index = item.endIndex;
-        return item;
+    public RLPItem next() {
+        if(hasNext()) {
+            index = rlpItem.endIndex;
+            RLPItem item = rlpItem;
+            rlpItem = null;
+            return item;
+        }
+        throw new NoSuchElementException();
     }
 }

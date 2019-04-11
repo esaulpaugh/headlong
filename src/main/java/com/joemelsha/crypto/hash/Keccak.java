@@ -331,7 +331,6 @@ public class Keccak extends MessageDigest {
     }
 
     private static void keccak(long[] a) {
-        //@formatter:off
         int c, i;
         long x, a_10_;
         long x0, x1, x2, x3, x4;
@@ -404,7 +403,6 @@ public class Keccak extends MessageDigest {
 
             i++;
         } while (i < 24);
-        //@formatter:on
     }
 
     private static final long[] RC = { 0x0000000000000001L, 0x0000000000008082L, 0x800000000000808AL, 0x8000000080008000L, 0x000000000000808BL,

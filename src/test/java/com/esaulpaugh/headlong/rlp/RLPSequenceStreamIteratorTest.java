@@ -1,5 +1,6 @@
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -9,14 +10,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.NoSuchElementException;
 
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 public class RLPSequenceStreamIteratorTest {
 
-    @Ignore // run this by itself
+    @Ignore
     @Test
-    public void testStream() throws IOException, DecodeException, InterruptedException {
+    public void testStream() throws Throwable {
+
+        final byte[] TEST_BYTES = new byte[] { 0x00, 0x00, 0x00 };
+        final String TEST_STRING = "\u0009\u0009";
 
         final long zero = System.currentTimeMillis();
 
@@ -24,16 +29,21 @@ public class RLPSequenceStreamIteratorTest {
 
         Thread send = new Thread(() -> {
             try {
-                Thread.sleep(25L);
-                pos.write(new byte[] { 0x00, 0x00, 0x00 });
-                logWrite(zero);
-                Thread.sleep(50L);
-                pos.write(RLPEncoder.encode(Strings.decode("\u0009\u0009", UTF_8)));
+                pos.write(1);
+                Thread.sleep(20L);
+                for (byte b : TEST_BYTES) {
+                    pos.write(b);
+                    logWrite(zero);
+                }
+                Thread.sleep(20L);
+                pos.write(RLPEncoder.encode(Strings.decode(TEST_STRING, UTF_8)));
                 logWrite(zero);
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         });
+
+        int readNum = 0;
 
 
         PipedInputStream pis = new PipedInputStream();
@@ -41,55 +51,62 @@ public class RLPSequenceStreamIteratorTest {
 
         RLPSequenceStreamIterator iter = new RLPSequenceStreamIterator(RLPDecoder.RLP_STRICT, pis);
 
+        send.setPriority(Thread.MAX_PRIORITY);
         send.start();
+        send.setPriority(Thread.MAX_PRIORITY);
 
-        assertNotAvailable(pis);
         Assert.assertFalse(iter.hasNext());
-        logRead(false, zero);
+        logRead(zero, readNum++, false);
 
-        Thread.sleep(50L);
+        while(pis.available() <= 0) {
+            Thread.sleep(0, 500_000);
+            System.out.print('.');
+        }
+        System.out.println();
 
         assertAvailable(pis);
         Assert.assertTrue(iter.hasNext());
-        logRead(true, zero);
+        logRead(zero, readNum++, true);
 
-        Assert.assertArrayEquals(new byte[1], iter.next().data());
-        Assert.assertTrue(iter.hasNext());
-        Assert.assertArrayEquals(new byte[1], iter.next().data());
-        Assert.assertTrue(iter.hasNext());
-        Assert.assertArrayEquals(new byte[1], iter.next().data());
+        Assert.assertArrayEquals(new byte[] { 1 }, iter.next().data());
 
-        assertNotAvailable(pis);
         Assert.assertFalse(iter.hasNext());
-        logRead(false, zero);
+        logRead(zero, readNum++, false);
 
-        Thread.sleep(50L);
+        Thread.sleep(20L);
 
         assertAvailable(pis);
         Assert.assertTrue(iter.hasNext());
-        logRead(true, zero);
+        logRead(zero, readNum++, true);
 
-        Assert.assertEquals("\u0009\u0009", iter.next().asString(UTF_8));
+        Assert.assertTrue(iter.hasNext());
+        Assert.assertArrayEquals(new byte[1], iter.next().data());
+        Assert.assertTrue(iter.hasNext());
+        Assert.assertArrayEquals(new byte[1], iter.next().data());
+        Assert.assertTrue(iter.hasNext());
+        Assert.assertArrayEquals(new byte[1], iter.next().data());
 
-        assertNotAvailable(pis);
         Assert.assertFalse(iter.hasNext());
-        logRead(false, zero);
+        logRead(zero, readNum++, false);
+
+        Thread.sleep(20L);
+
+        assertAvailable(pis);
+        Assert.assertTrue(iter.hasNext());
+        logRead(zero, readNum++, true);
+        Assert.assertTrue(iter.hasNext());
+        Assert.assertTrue(iter.hasNext());
+
+        Assert.assertEquals(TEST_STRING, iter.next().asString(UTF_8));
+        TestUtils.assertThrown(NoSuchElementException.class, iter::next);
+
+        Assert.assertFalse(iter.hasNext());
+        logRead(zero, readNum++, false);
+        Assert.assertFalse(iter.hasNext());
+        Assert.assertFalse(iter.hasNext());
+        TestUtils.assertThrown(NoSuchElementException.class, iter::next);
 
         send.join();
-    }
-
-    private static void read(InputStream is, byte[] buffer) throws IOException {
-        int available = is.available();
-        int read = 0;
-        while (read < available) {
-            read += is.read(buffer);
-        }
-        System.out.println("read = " + read);
-    }
-
-    private static void assertNotAvailable(InputStream is) throws IOException {
-        final int available = is.available();
-        Assert.assertFalse("available: " + available, available > 0);
     }
 
     private static void assertAvailable(InputStream is) throws IOException {
@@ -101,7 +118,7 @@ public class RLPSequenceStreamIteratorTest {
         System.out.println("t=" + (System.currentTimeMillis() - zero) + "\u0009write");
     }
 
-    private static void logRead(boolean success, final long zero) {
-        System.out.println("t=" + (System.currentTimeMillis() - zero) + "\u0009read " + (success ? "success" : "failure"));
+    private static void logRead(final long zero, int readNum, boolean success) {
+        System.out.println("t=" + (System.currentTimeMillis() - zero) + "\u0009read " + (success ? "success" : "failure") + ", #" + readNum);
     }
 }
