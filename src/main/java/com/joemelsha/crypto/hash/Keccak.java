@@ -122,14 +122,14 @@ public class Keccak extends MessageDigest {
         }
 
         int rateBits = this.rateBits;
-        if ((rateBits & 0x7) != 0) { // 0b111
+        if ((rateBits & 0b111) != 0) {
             throw new IllegalStateException("Cannot update while in bit mode");
         }
 
         long[] state = this.state;
         int rateBytes = rateBits >>> 3;
 
-        int rateBytesWord = rateBytes & 0x7; // 0b111
+        int rateBytesWord = rateBytes & 0b111;
         if (rateBytesWord > 0) {
             int c = 8 - rateBytesWord;
             if (c > remaining)
@@ -177,7 +177,7 @@ public class Keccak extends MessageDigest {
                 in.order(order);
             }
             this.rateBits = rateWords << 6;
-            remaining &= 0x7; // 0b111
+            remaining &= 0b111;
         }
 
         if (rateWords >= rateSizeWords) {
@@ -256,7 +256,7 @@ public class Keccak extends MessageDigest {
                     rateWords++;
                 } while (rateWords < c);
             } while (outWords > 0);
-            remaining &= 0x7; // 0b111
+            remaining &= 0b111;
         }
 
         if (remaining > 0) {
@@ -321,7 +321,6 @@ public class Keccak extends MessageDigest {
         }
         if (rateBits >= rateSizeBits) {
             keccak(state);
-//            rateBits = 0;
             state[0] ^= in & (-1L >>> inBits);
             this.rateBits = inBits;
             return;
@@ -405,9 +404,11 @@ public class Keccak extends MessageDigest {
         } while (i < 24);
     }
 
-    private static final long[] RC = { 0x0000000000000001L, 0x0000000000008082L, 0x800000000000808AL, 0x8000000080008000L, 0x000000000000808BL,
+    private static final long[] RC = {
+            0x0000000000000001L, 0x0000000000008082L, 0x800000000000808AL, 0x8000000080008000L, 0x000000000000808BL,
             0x0000000080000001L, 0x8000000080008081L, 0x8000000000008009L, 0x000000000000008AL, 0x0000000000000088L,
             0x0000000080008009L, 0x000000008000000AL, 0x000000008000808BL, 0x800000000000008BL, 0x8000000000008089L,
             0x8000000000008003L, 0x8000000000008002L, 0x8000000000000080L, 0x000000000000800AL, 0x800000008000000AL,
-            0x8000000080008081L, 0x8000000000008080L, 0x0000000080000001L, 0x8000000080008008L };
+            0x8000000080008081L, 0x8000000000008080L, 0x0000000080000001L, 0x8000000080008008L
+    };
 }

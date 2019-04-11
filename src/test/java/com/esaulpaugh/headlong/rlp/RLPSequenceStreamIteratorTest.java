@@ -20,7 +20,7 @@ public class RLPSequenceStreamIteratorTest {
     @Test
     public void testStream() throws Throwable {
 
-        final byte[] TEST_BYTES = new byte[] { 0x00, 0x00, 0x00 };
+        final byte[] TEST_BYTES = new byte[] { 0x04, 0x03, 0x02 };
         final String TEST_STRING = "\u0009\u0009";
 
         final long zero = System.currentTimeMillis();
@@ -43,7 +43,7 @@ public class RLPSequenceStreamIteratorTest {
             }
         });
 
-        int readNum = 0;
+        int readNum = -1;
 
 
         PipedInputStream pis = new PipedInputStream();
@@ -56,7 +56,7 @@ public class RLPSequenceStreamIteratorTest {
         send.setPriority(Thread.MAX_PRIORITY);
 
         Assert.assertFalse(iter.hasNext());
-        logRead(zero, readNum++, false);
+        logRead(zero, ++readNum, false);
 
         while(pis.available() <= 0) {
             Thread.sleep(0, 500_000);
@@ -66,34 +66,34 @@ public class RLPSequenceStreamIteratorTest {
 
         assertAvailable(pis);
         Assert.assertTrue(iter.hasNext());
-        logRead(zero, readNum++, true);
+        logRead(zero, ++readNum, true);
 
         Assert.assertArrayEquals(new byte[] { 1 }, iter.next().data());
 
         Assert.assertFalse(iter.hasNext());
-        logRead(zero, readNum++, false);
+        logRead(zero, ++readNum, false);
 
         Thread.sleep(20L);
 
         assertAvailable(pis);
         Assert.assertTrue(iter.hasNext());
-        logRead(zero, readNum++, true);
+        logRead(zero, ++readNum, true);
 
         Assert.assertTrue(iter.hasNext());
-        Assert.assertArrayEquals(new byte[1], iter.next().data());
+        Assert.assertArrayEquals(new byte[] { 4 }, iter.next().data());
         Assert.assertTrue(iter.hasNext());
-        Assert.assertArrayEquals(new byte[1], iter.next().data());
+        Assert.assertArrayEquals(new byte[] { 3 }, iter.next().data());
         Assert.assertTrue(iter.hasNext());
-        Assert.assertArrayEquals(new byte[1], iter.next().data());
+        Assert.assertArrayEquals(new byte[] { 2}, iter.next().data());
 
         Assert.assertFalse(iter.hasNext());
-        logRead(zero, readNum++, false);
+        logRead(zero, ++readNum, false);
 
         Thread.sleep(20L);
 
         assertAvailable(pis);
         Assert.assertTrue(iter.hasNext());
-        logRead(zero, readNum++, true);
+        logRead(zero, ++readNum, true);
         Assert.assertTrue(iter.hasNext());
         Assert.assertTrue(iter.hasNext());
 
@@ -101,7 +101,7 @@ public class RLPSequenceStreamIteratorTest {
         TestUtils.assertThrown(NoSuchElementException.class, iter::next);
 
         Assert.assertFalse(iter.hasNext());
-        logRead(zero, readNum++, false);
+        logRead(zero, ++readNum, false);
         Assert.assertFalse(iter.hasNext());
         Assert.assertFalse(iter.hasNext());
         TestUtils.assertThrown(NoSuchElementException.class, iter::next);
