@@ -122,7 +122,7 @@ public class RLPSequenceStreamIteratorTest {
 
         RLPSequenceStreamIterator iter = new RLPSequenceStreamIterator(RLPDecoder.RLP_STRICT, pis);
 
-        pos.write((byte) 0x82);
+        pos.write(0x82);
         pos.write(0x48);
         pos.write(0x48);
         pos.write(100);

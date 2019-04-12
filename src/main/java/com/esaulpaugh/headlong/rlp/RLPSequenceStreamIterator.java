@@ -49,8 +49,8 @@ public class RLPSequenceStreamIterator {
                 }
                 buffer = newBuffer;
                 int read = rlpStream.read(buffer, readIndex, available);
-                if(read <= 0) {
-                    return false;
+                if(read != available) {
+                    throw new RuntimeException("read failed: " + read + " != " + available);
                 }
                 readIndex += read;
             }
