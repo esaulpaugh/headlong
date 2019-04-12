@@ -1,5 +1,7 @@
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+
 /**
  * Created by Evo on 1/19/2017.
  */

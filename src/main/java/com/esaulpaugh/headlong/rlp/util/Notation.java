@@ -1,9 +1,8 @@
 package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.rlp.DataType;
-import com.esaulpaugh.headlong.rlp.DecodeException;
-import com.esaulpaugh.headlong.rlp.RecoverableDecodeException;
-import com.esaulpaugh.headlong.rlp.UnrecoverableDecodeException;
+import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.util.Arrays;

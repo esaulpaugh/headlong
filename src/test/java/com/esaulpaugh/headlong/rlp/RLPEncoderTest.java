@@ -1,5 +1,6 @@
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Assert;
 import org.junit.Test;

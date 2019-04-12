@@ -2,6 +2,7 @@ package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.example.Student;
 import com.esaulpaugh.headlong.example.StudentTest;
+import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Test;

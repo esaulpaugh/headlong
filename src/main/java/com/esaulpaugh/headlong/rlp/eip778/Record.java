@@ -1,6 +1,6 @@
 package com.esaulpaugh.headlong.rlp.eip778;
 
-import com.esaulpaugh.headlong.rlp.DecodeException;
+import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPListIterator;
 import com.esaulpaugh.headlong.util.FastHex;

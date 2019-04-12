@@ -1,5 +1,7 @@
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -94,22 +96,18 @@ public final class RLPDecoder {
     }
 
     RLPItem wrap(byte[] buffer, int index, int containerEnd) throws DecodeException {
-        try {
-            byte lead = buffer[index];
-            DataType type = DataType.type(lead);
-            switch (type) {
-            case SINGLE_BYTE:
-            case STRING_SHORT:
-            case STRING_LONG:
-                return new RLPString(lead, type, buffer, index, containerEnd, lenient);
-            case LIST_SHORT:
-            case LIST_LONG:
-                return new RLPList(lead, type, buffer, index, containerEnd, lenient);
-            default:
-                throw new AssertionError();
-            }
-        } catch (ArrayIndexOutOfBoundsException aioobe) {
-            throw new UnrecoverableDecodeException(aioobe);
+        byte lead = buffer[index];
+        DataType type = DataType.type(lead);
+        switch (type) {
+        case SINGLE_BYTE:
+        case STRING_SHORT:
+        case STRING_LONG:
+            return new RLPString(lead, type, buffer, index, containerEnd, lenient);
+        case LIST_SHORT:
+        case LIST_LONG:
+            return new RLPList(lead, type, buffer, index, containerEnd, lenient);
+        default:
+            throw new AssertionError();
         }
     }
 

@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.rlp;
+package com.esaulpaugh.headlong.rlp.exception;
 
 public class RecoverableDecodeException extends DecodeException {
 
@@ -11,7 +11,7 @@ public class RecoverableDecodeException extends DecodeException {
     }
 
     @Override
-    boolean isRecoverable() {
+    public boolean isRecoverable() {
         return true;
     }
 }

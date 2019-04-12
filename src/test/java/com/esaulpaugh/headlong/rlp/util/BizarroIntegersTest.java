@@ -1,7 +1,7 @@
 package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
-import com.esaulpaugh.headlong.rlp.DecodeException;
+import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import org.junit.Assert;
 import org.junit.Test;
 

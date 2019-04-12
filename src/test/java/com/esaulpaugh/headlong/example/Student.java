@@ -1,7 +1,7 @@
 package com.esaulpaugh.headlong.example;
 
 import com.esaulpaugh.headlong.abi.Tuple;
-import com.esaulpaugh.headlong.rlp.DecodeException;
+import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPSequenceIterator;

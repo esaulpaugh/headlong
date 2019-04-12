@@ -1,5 +1,7 @@
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+
 import java.util.NoSuchElementException;
 
 /**
