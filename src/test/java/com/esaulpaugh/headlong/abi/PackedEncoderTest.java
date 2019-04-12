@@ -1,5 +1,8 @@
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.util.Integers;
+import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+import com.esaulpaugh.headlong.rlp.util.BizarroIntegers;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.Assert;
 import org.junit.Test;
@@ -122,6 +125,14 @@ public class PackedEncoderTest {
         Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
 
         Assert.assertEquals(values, decoded);
+    }
+
+    @Test
+    public void testSignExtend() throws DecodeException {
+        int expected = BizarroIntegers.getInt(FastHex.decode("8FFFFF"), 0, 3);
+        int result = Integers.getInt(FastHex.decode("8FFFFF"), 0, 3);
+        Assert.assertTrue(result < 0);
+        Assert.assertEquals(expected, result);
     }
 
 }

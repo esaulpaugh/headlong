@@ -15,7 +15,7 @@ public class Integers {
      * @return  the integer
      */
     public static int getInt(byte[] buffer, int i, int len) {
-        boolean negative = (buffer[i] & 0b1000000) != 0;
+        boolean negative = (buffer[i] & 0b1000_0000) != 0;
         int shiftAmount = 0;
         int val = 0;
         switch (len) { /* cases 4 through 1 fall through */

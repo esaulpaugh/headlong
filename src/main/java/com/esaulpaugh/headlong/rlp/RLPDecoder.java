@@ -22,8 +22,8 @@ public final class RLPDecoder {
         this.lenient = lenient;
     }
 
-    public RLPSequenceStreamIterator sequenceStreamIterator(RLPDecoder decoder, InputStream pis) {
-        return new RLPSequenceStreamIterator(decoder, pis);
+    public RLPSequenceStreamIterator sequenceStreamIterator(RLPDecoder decoder, InputStream rlpStream) {
+        return new RLPSequenceStreamIterator(decoder, rlpStream);
     }
 
     public RLPSequenceIterator sequenceIterator(byte[] buffer) {
