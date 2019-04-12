@@ -32,8 +32,12 @@ public class RLPSequenceStreamIterator {
         try {
             final int available = rlpStream.available();
             if(available > 0) {
-                int readOffset = updateBuffer(available);
-                int read = rlpStream.read(buffer, readOffset, available);
+                int keptBytes = buffer.length - index;
+                byte[] newBuffer = new byte[keptBytes + available];
+                System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
+                buffer = newBuffer;
+                index = 0;
+                int read = rlpStream.read(buffer, keptBytes, available);
                 if(read != available) {
                     throw new IOException("read failed: " + read + " != " + available);
                 }
@@ -49,15 +53,6 @@ public class RLPSequenceStreamIterator {
             }
             throw (UnrecoverableDecodeException) e;
         }
-    }
-
-    private int updateBuffer(int available) {
-        int keptBytes = buffer.length - index;
-        byte[] newBuffer = new byte[keptBytes + available];
-        System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
-        buffer = newBuffer;
-        index = 0;
-        return keptBytes;
     }
 
     public RLPItem next() throws IOException, UnrecoverableDecodeException {
