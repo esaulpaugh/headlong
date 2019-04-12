@@ -59,6 +59,14 @@ public final class FastHex {
         return bytes;
     }
 
+    public static String encodeToString(byte b) {
+        int hexPair = ENCODE_TABLE[b & 0xFF];
+        char[] chars = new char[2];
+        chars[0] = (char) (hexPair >>> Byte.SIZE); // left char
+        chars[1] = (char) (hexPair & 0xFF); // right char
+        return new String(chars);
+    }
+
     public static String encodeToString(byte[] buffer, final int offset, final int length) {
         final int end = offset + length;
         char[] chars = new char[length << 1];

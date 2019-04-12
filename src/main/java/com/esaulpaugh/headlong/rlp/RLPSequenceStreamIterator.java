@@ -11,12 +11,15 @@ public class RLPSequenceStreamIterator {
 
     private transient byte[] buffer;
     private transient int index;
+    private transient int readIndex;
 
     private transient RLPItem rlpItem;
 
     RLPSequenceStreamIterator(RLPDecoder decoder, InputStream rlpStream) {
         this.decoder = decoder;
         this.rlpStream = rlpStream;
+        this.buffer = new byte[this.index = 0]; // make sure index == buffer.length
+        this.readIndex = 0;
     }
 
     public boolean hasNext() {
@@ -24,18 +27,30 @@ public class RLPSequenceStreamIterator {
             return true;
         }
         try {
-            if(buffer == null) {
-                index = 0;
-                buffer = new byte[rlpStream.available()];
-                if(rlpStream.read(buffer) <= 0) {
-                    buffer = null;
+            final int available = rlpStream.available();
+            if(available > 0) {
+                byte[] newBuffer;
+                if (index == buffer.length) {
+                    index = 0;
+                    readIndex = 0;
+                    newBuffer = new byte[available];
+                } else {
+                    newBuffer = new byte[buffer.length + available];
+                    System.arraycopy(buffer, index, newBuffer, 0, readIndex - index);
+                }
+                buffer = newBuffer;
+                int read = rlpStream.read(buffer, readIndex, available);
+                if(read <= 0) {
                     return false;
                 }
+                readIndex += read;
+            }
+            if(index == buffer.length) {
+                return false;
             }
             rlpItem = decoder.wrap(buffer, index);
             return true;
         } catch (DecodeException e) {
-            buffer = null;
             return false;
         } catch (IOException e) {
             throw new RuntimeException(e);
