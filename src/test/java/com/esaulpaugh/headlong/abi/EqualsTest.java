@@ -21,9 +21,8 @@ public class EqualsTest {
 
             MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong());
 
-            String raw = mctc.rawSignature;
             String canonical = mctc.function.getCanonicalSignature();
-            if(raw.equals(canonical)) {
+            if(mctc.rawSignature.equals(canonical)) {
                 continue;
             }
 
@@ -39,7 +38,7 @@ public class EqualsTest {
             Assert.assertTrue(equals);
 
             n++;
-        } while (n < 10_000);
+        } while (n < 100);
     }
 
     @Test
