@@ -15,21 +15,19 @@ public class Integers {
      * @return  the integer
      */
     public static int getInt(byte[] buffer, int i, int len) {
-        boolean negative = (buffer[i] & 0b1000_0000) != 0;
         int shiftAmount = 0;
         int val = 0;
+        byte leftmost;
         switch (len) { /* cases 4 through 1 fall through */
         case 4: val = buffer[i+3] & 0xFF; shiftAmount = Byte.SIZE;
         case 3: val |= (buffer[i+2] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 2: val |= (buffer[i+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 1: val |= (buffer[i] & 0xFF) << shiftAmount;
-        case 0: break;
+        case 1: val |= ((leftmost = buffer[i]) & 0xFF) << shiftAmount; break;
         default: throw new IllegalArgumentException("len out of range: " + len);
         }
-        if(negative) {
+        if((leftmost & 0b1000_0000) != 0) { // negative
             // sign extend
             switch (len) {
-            case 0: val |= 0xFF;
             case 1: val |= 0xFF << 8;
             case 2: val |= 0xFF << 16;
             case 3: val |= 0xFF << 24;
@@ -47,9 +45,9 @@ public class Integers {
      * @return  the integer
      */
     public static long getLong(final byte[] buffer, final int i, final int len) {
-        boolean negative = (buffer[i] & 0b1000000) != 0;
         int shiftAmount = 0;
         long val = 0L;
+        byte leftmost;
         switch (len) { /* cases 8 through 1 fall through */
         case 8: val = buffer[i+7] & 0xFFL; shiftAmount = Byte.SIZE;
         case 7: val |= (buffer[i+6] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
@@ -58,14 +56,12 @@ public class Integers {
         case 4: val |= (buffer[i+3] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 3: val |= (buffer[i+2] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 2: val |= (buffer[i+1] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 1: val |= (buffer[i] & 0xFFL) << shiftAmount;
-        case 0: break;
+        case 1: val |= ((leftmost = buffer[i]) & 0xFFL) << shiftAmount; break;
         default: throw new IllegalArgumentException("len out of range: " + len);
         }
-        if(negative) {
+        if((leftmost & 0b1000_0000) != 0) {
             // sign extend
             switch (len) { /* cases fall through */
-            case 0: val |= 0xFF;
             case 1: val |= 0xFF << 8;
             case 2: val |= 0xFF << 16;
             case 3: val |= 0xFF << 24;
