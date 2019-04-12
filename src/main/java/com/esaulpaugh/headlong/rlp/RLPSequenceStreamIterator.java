@@ -22,6 +22,11 @@ public class RLPSequenceStreamIterator {
         this.readIndex = 0;
     }
 
+    // for test only
+    byte[] buffer() {
+        return buffer;
+    }
+
     public boolean hasNext() {
         if(rlpItem != null) {
             return true;
@@ -35,8 +40,12 @@ public class RLPSequenceStreamIterator {
                     readIndex = 0;
                     newBuffer = new byte[available];
                 } else {
-                    newBuffer = new byte[buffer.length + available];
-                    System.arraycopy(buffer, index, newBuffer, 0, readIndex - index);
+                    int keptBytes = readIndex - index;
+                    newBuffer = new byte[keptBytes + available];
+                    System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
+                    int droppedBytes = buffer.length - keptBytes;
+                    readIndex -= droppedBytes;
+                    index -= droppedBytes;
                 }
                 buffer = newBuffer;
                 int read = rlpStream.read(buffer, readIndex, available);

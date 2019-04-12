@@ -113,6 +113,27 @@ public class RLPSequenceStreamIteratorTest {
         send.join();
     }
 
+    @Test
+    public void testStream2() throws IOException {
+        readNum = -1;
+
+        final PipedOutputStream pos = new PipedOutputStream();
+        final PipedInputStream pis = new PipedInputStream(pos, 512);
+
+        RLPSequenceStreamIterator iter = new RLPSequenceStreamIterator(RLPDecoder.RLP_STRICT, pis);
+
+        pos.write((byte) 0x82);
+        pos.write(0x48);
+        pos.write(0x48);
+        pos.write(100);
+        pos.write(101);
+        Assert.assertArrayEquals(new byte[] { 0x48, 0x48 }, iter.next().data());
+        pos.write(102);
+        iter.hasNext();
+        Assert.assertArrayEquals(new byte[] { 100, 101, 102 }, iter.buffer());
+        Assert.assertArrayEquals(new byte[] { 100 }, iter.next().data());
+    }
+
     private void write(OutputStream os, byte b) throws IOException {
         os.write(b);
         logWrite(FastHex.encodeToString(b));
