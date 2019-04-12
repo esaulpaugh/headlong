@@ -55,11 +55,9 @@ public class RLPSequenceStreamIterator {
         int keptBytes = buffer.length - index;
         byte[] newBuffer = new byte[keptBytes + available];
         System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
-        int droppedBytes = buffer.length - keptBytes;
-        index -= droppedBytes;
-        int readOffset = buffer.length - droppedBytes;
         buffer = newBuffer;
-        return readOffset;
+        index = 0;
+        return keptBytes;
     }
 
     public RLPItem next() throws IOException, UnrecoverableDecodeException {
