@@ -1,5 +1,6 @@
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.rlp.util.Integers;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -24,21 +25,17 @@ import static com.esaulpaugh.headlong.TestUtils.CustomRunnable;
 public class RLPDecoderTest {
 
     @Test
-    public void strictAndLenient() throws DecodeException {
+    public void strictAndLenient() throws Throwable {
         byte[] invalidAf = new byte[] {
                 (byte)0xc8, (byte)0x80, 0, (byte)0x81, (byte) 0xAA, (byte)0x81, (byte)'\u0080', (byte)0x81, '\u007f', (byte)'\u230A' };
 
         RLPList list = (RLPList) RLP_STRICT.wrap(invalidAf);
 
-        Throwable t = null;
-        try {
-            list.elements(RLP_STRICT);
-        } catch (DecodeException e) {
-            t = e;
-        }
-        Assert.assertNotNull(t);
-        Assert.assertEquals(DecodeException.class, t.getClass());
-        Assert.assertEquals("invalid rlp for single byte @ 7", t.getMessage());
+        TestUtils.assertThrown(
+                UnrecoverableDecodeException.class,
+                "invalid rlp for single byte @ 7",
+                () -> list.elements(RLP_STRICT)
+        );
 
         list.elements(RLP_LENIENT);
     }

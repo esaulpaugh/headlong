@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.rlp.DecodeException;
+import com.esaulpaugh.headlong.rlp.UnrecoverableDecodeException;
 
 import java.nio.ByteBuffer;
 
@@ -180,7 +181,7 @@ public class BizarroIntegers {
         switch (len) {
         case 0: return 0;
         case 1: return buffer[i];
-        default: throw new DecodeException(new IllegalArgumentException("len is out of range: " + len));
+        default: throw new UnrecoverableDecodeException(new IllegalArgumentException("len is out of range: " + len));
         }
     }
 
@@ -191,7 +192,7 @@ public class BizarroIntegers {
         case 2: val = buffer[i+1] & 0xFF; shiftAmount = Byte.SIZE; // & 0xFF to promote to int before left shift
         case 1: val |= (buffer[i] & 0xFF) << shiftAmount;
         case 0: return (short) val;
-        default: throw new DecodeException(new IllegalArgumentException("len is out of range: " + len));
+        default: throw new UnrecoverableDecodeException(new IllegalArgumentException("len is out of range: " + len));
         }
     }
 
@@ -204,7 +205,7 @@ public class BizarroIntegers {
         case 2: val |= (buffer[i+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1: val |= (buffer[i] & 0xFF) << shiftAmount;
         case 0: return val;
-        default: throw new DecodeException(new IllegalArgumentException("len is out of range: " + len));
+        default: throw new UnrecoverableDecodeException(new IllegalArgumentException("len is out of range: " + len));
         }
     }
 
@@ -221,7 +222,7 @@ public class BizarroIntegers {
         case 2: val |= (buffer[i+1] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1: val |= (buffer[i] & 0xFFL) << shiftAmount;
         case 0: return val;
-        default: throw new DecodeException(new IllegalArgumentException("len is out of range: " + len));
+        default: throw new UnrecoverableDecodeException(new IllegalArgumentException("len is out of range: " + len));
         }
     }
 

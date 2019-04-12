@@ -109,7 +109,7 @@ public final class RLPDecoder {
                 throw new AssertionError();
             }
         } catch (ArrayIndexOutOfBoundsException aioobe) {
-            throw new DecodeException(aioobe);
+            throw new UnrecoverableDecodeException(aioobe);
         }
     }
 

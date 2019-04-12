@@ -45,11 +45,11 @@ public abstract class RLPItem {
             int lengthIndex = index + 1;
             _dataIndex = lengthIndex + diff; // DataType dictates that lengthOfLength guaranteed to be in [1,8]
             if (_dataIndex > containerEnd) {
-                throw new DecodeException("element @ index " + index + " exceeds its container; indices: " + _dataIndex + " > " + containerEnd);
+                throw exceedsContainer(index, _dataIndex, containerEnd, containerEnd == buffer.length);
             }
             _dataLength = Integers.getLong(buffer, lengthIndex, diff);
             if(_dataLength < MIN_LONG_DATA_LEN) {
-                throw new DecodeException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
+                throw new UnrecoverableDecodeException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
             }
             break;
         default: throw new AssertionError();
@@ -58,10 +58,10 @@ public abstract class RLPItem {
         final long _endIndex = _dataIndex + _dataLength;
 
         if(_endIndex > containerEnd) {
-            throw new DecodeException("element @ index " + index + " exceeds its container: " + _endIndex + " > " + containerEnd);
+            throw exceedsContainer(index, _dataIndex, containerEnd, containerEnd == buffer.length);
         }
         if(!lenient && _dataLength == 1 && type == STRING_SHORT && buffer[_dataIndex] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
-            throw new DecodeException("invalid rlp for single byte @ " + index);
+            throw new UnrecoverableDecodeException("invalid rlp for single byte @ " + index);
         }
 
         this.buffer = buffer;
@@ -69,6 +69,31 @@ public abstract class RLPItem {
         this.dataIndex = _dataIndex;
         this.dataLength = (int) _dataLength;
         this.endIndex = (int) _endIndex;
+    }
+
+    private static DecodeException exceedsContainer(int index, int end, int containerEnd, boolean recoverable) {
+        String msg = "element @ index " + index + " exceeds its container: " + end + " > " + containerEnd;
+        return recoverable ? new RecoverableDecodeException(msg) : new UnrecoverableDecodeException(msg);
+    }
+
+    public static int decodeLength(byte[] buffer, int index) throws DecodeException {
+        byte lead = buffer[index];
+        DataType type = DataType.type(lead);
+        int diff = lead - type.offset;
+        switch (type) {
+        case SINGLE_BYTE: return 1;
+        case STRING_SHORT:
+        case LIST_SHORT: return 1 + diff;
+        case STRING_LONG:
+        case LIST_LONG:
+            int prefixLen = 1 + diff;
+            long dataLength = Integers.getLong(buffer, index + 1, diff);
+            if((long) Integer.MAX_VALUE - dataLength < prefixLen) {
+                throw new UnrecoverableDecodeException("overflow");
+            }
+            return prefixLen + (int) dataLength;
+        default: throw new AssertionError();
+        }
     }
 
     public DataType type() {

@@ -3,14 +3,16 @@ package com.esaulpaugh.headlong.rlp;
 /**
  * Thrown to indicate a failed attempt to decode illegal or otherwise undecodeable data.
  */
-public class DecodeException extends Exception {
+public abstract class DecodeException extends Exception {
 
-    public DecodeException(String msg) {
+    DecodeException(String msg) {
         super(msg);
     }
 
-    public DecodeException(Throwable cause) {
+    DecodeException(Throwable cause) {
         super(cause);
     }
+
+    abstract boolean isRecoverable();
 
 }

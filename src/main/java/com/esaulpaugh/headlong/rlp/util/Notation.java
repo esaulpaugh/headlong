@@ -2,6 +2,8 @@ package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.rlp.DataType;
 import com.esaulpaugh.headlong.rlp.DecodeException;
+import com.esaulpaugh.headlong.rlp.RecoverableDecodeException;
+import com.esaulpaugh.headlong.rlp.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.util.Arrays;
@@ -57,10 +59,15 @@ public class Notation {
         }
     }
 
+    static DecodeException exceedsContainer(int index, long end, int containerEnd) {
+        String msg = "element @ index " + index + " exceeds its container: " + end + " > " + containerEnd;
+        return new UnrecoverableDecodeException(msg);
+    }
+
     private static int getShortElementEnd(int elementDataIndex, final int elementDataLen, final int containerEnd) throws DecodeException {
         final int end = elementDataIndex + elementDataLen;
         if (end > containerEnd) {
-            throw new DecodeException("element @ index " + (elementDataIndex - 1) + " exceeds its container: " + end + " > " + containerEnd);
+            throw exceedsContainer(elementDataIndex - 1, end, containerEnd);
         }
 
         return end;
@@ -69,7 +76,7 @@ public class Notation {
     private static int getLongElementEnd(byte[] data, final int leadByteIndex, final int dataIndex, final int containerEnd) throws DecodeException {
         int lengthIndex = leadByteIndex + 1;
         if (dataIndex > containerEnd) {
-            throw new DecodeException("element @ index " + leadByteIndex + " exceeds its container; indices: " + dataIndex + " > " + containerEnd);
+            throw exceedsContainer(leadByteIndex, dataIndex, containerEnd);
         }
         final int lengthLen = dataIndex - lengthIndex;
         final long dataLenLong = Integers.getLong(data, leadByteIndex + 1, lengthLen);
@@ -78,11 +85,12 @@ public class Notation {
 //        }
         final long end = lengthIndex + lengthLen + dataLenLong;
         if (end > containerEnd) {
-            throw new DecodeException("element @ index " + leadByteIndex + " exceeds its container; indices: " + end + " > " + containerEnd);
+            throw exceedsContainer(leadByteIndex, end, containerEnd);
         }
         final int dataLen = (int) dataLenLong;
         if (dataLen < MIN_LONG_DATA_LEN) {
-            throw new DecodeException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + dataLen + " for element @ " + leadByteIndex);
+            throw new UnrecoverableDecodeException("long element data length must be " + MIN_LONG_DATA_LEN
+                    + " or greater; found: " + dataLen + " for element @ " + leadByteIndex);
         }
 
         return (int) end;
@@ -99,7 +107,7 @@ public class Notation {
 
         end = Math.min(buffer.length, end);
         if(index > end) {
-            throw new DecodeException("index > end: " + index + " > " + end);
+            throw new UnrecoverableDecodeException("index > end: " + index + " > " + end);
         }
 
         StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
@@ -206,7 +214,7 @@ public class Notation {
                 break;
             case STRING_LONG:
             case LIST_LONG:
-                throw new DecodeException("surely, it cannot possibly fit. index: " + i);
+                throw new UnrecoverableDecodeException("surely, it cannot possibly fit. index: " + i);
             default:
                 throw new AssertionError();
             }
@@ -261,7 +269,7 @@ public class Notation {
 
         final int len = to - from;
         if(!LENIENT && len == 1 && data[from] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
-            throw new DecodeException("invalid rlp for single byte @ " + (from - 1));
+            throw new UnrecoverableDecodeException("invalid rlp for single byte @ " + (from - 1));
         }
 
         String string = Strings.encode(data, from, len, HEX);

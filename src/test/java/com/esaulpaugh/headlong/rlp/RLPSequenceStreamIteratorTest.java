@@ -114,7 +114,7 @@ public class RLPSequenceStreamIteratorTest {
     }
 
     @Test
-    public void testStream2() throws IOException {
+    public void testStream2() throws IOException, UnrecoverableDecodeException {
         readNum = -1;
 
         final PipedOutputStream pos = new PipedOutputStream();
@@ -132,6 +132,37 @@ public class RLPSequenceStreamIteratorTest {
         iter.hasNext();
         Assert.assertArrayEquals(new byte[] { 100, 101, 102 }, iter.buffer());
         Assert.assertArrayEquals(new byte[] { 100 }, iter.next().data());
+    }
+
+    @Test
+    public void testUnrecoverable() throws Throwable {
+
+        Class<? extends DecodeException> clazz = UnrecoverableDecodeException.class;
+
+        readNum = -1;
+
+        final PipedOutputStream pos = new PipedOutputStream();
+        final PipedInputStream pis = new PipedInputStream(pos, 512);
+
+        RLPSequenceStreamIterator iter = new RLPSequenceStreamIterator(RLPDecoder.RLP_STRICT, pis);
+
+        pos.write(0x81);
+        pos.write(0x00);
+
+        TestUtils.assertThrown(clazz, "invalid rlp for single byte @ 0", iter::hasNext);
+
+        iter = new RLPSequenceStreamIterator(RLPDecoder.RLP_STRICT, pis);
+
+        pos.write(0xf8);
+        pos.write(0x37);
+
+        for (int i = 0; i < 3; i++) {
+            TestUtils.assertThrown(
+                    clazz,
+                    "long element data length must be 56 or greater; found: 55 for element @ 0",
+                    iter::hasNext
+            );
+        }
     }
 
     private void write(OutputStream os, byte b) throws IOException {
@@ -161,12 +192,12 @@ public class RLPSequenceStreamIteratorTest {
 //        System.out.println(timestamp() + "\u0009now receiving");
     }
 
-    private void assertReadSuccess(RLPSequenceStreamIterator iter) {
+    private void assertReadSuccess(RLPSequenceStreamIterator iter) throws IOException, UnrecoverableDecodeException {
         Assert.assertTrue("no next() found, " + timestamp(), iter.hasNext());
         logRead(true);
     }
 
-    private void assertNoNext(RLPSequenceStreamIterator iter) {
+    private void assertNoNext(RLPSequenceStreamIterator iter) throws IOException, UnrecoverableDecodeException {
         if(iter.hasNext()) {
             throw new AssertionError("unexpected next(): " + iter.next().asString(HEX) + ", " + timestamp());
         }
