@@ -23,11 +23,6 @@ public class RLPSequenceStreamIterator {
         this.buffer = new byte[this.index = 0]; // make sure index == buffer.length
     }
 
-    // for test only
-    byte[] buffer() {
-        return buffer;
-    }
-
     public boolean hasNext() throws IOException, UnrecoverableDecodeException {
         if(rlpItem != null) {
             return true;

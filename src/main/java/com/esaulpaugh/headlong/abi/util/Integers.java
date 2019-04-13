@@ -6,6 +6,18 @@ import java.math.BigInteger;
 
 public class Integers {
 
+    private static final long PAD_1 = 0xFFFFFFFFFFFFFF00L;
+    private static final long PAD_2 = 0xFFFFFFFFFFFF0000L;
+    private static final long PAD_3 = 0xFFFFFFFFFF000000L;
+    private static final long PAD_4 = 0xFFFFFFFF00000000L;
+    private static final long PAD_5 = 0xFFFFFF0000000000L;
+    private static final long PAD_6 = 0xFFFF000000000000L;
+    private static final long PAD_7 = 0xFF00000000000000L;
+
+    private static final int INT_PAD_1 = 0xFFFFFF00;
+    private static final int INT_PAD_2 = 0xFFFF0000;
+    private static final int INT_PAD_3 = 0xFF000000;
+
     /**
      * Retrieves an integer up to four bytes in length. Big-endian two's complement format.
      *
@@ -25,12 +37,12 @@ public class Integers {
         case 1: val |= ((leftmost = buffer[i]) & 0xFF) << shiftAmount; break;
         default: throw new IllegalArgumentException("len out of range: " + len);
         }
-        if((leftmost & 0b1000_0000) != 0) { // negative
+        if(leftmost < 0) { // if negative
             // sign extend
             switch (len) {
-            case 1: val |= 0xFF << 8;
-            case 2: val |= 0xFF << 16;
-            case 3: val |= 0xFF << 24;
+            case 1: return val | INT_PAD_1;
+            case 2: return val | INT_PAD_2;
+            case 3: return val | INT_PAD_3;
             }
         }
         return val;
@@ -59,16 +71,16 @@ public class Integers {
         case 1: val |= ((leftmost = buffer[i]) & 0xFFL) << shiftAmount; break;
         default: throw new IllegalArgumentException("len out of range: " + len);
         }
-        if((leftmost & 0b1000_0000) != 0) {
+        if(leftmost < 0) {
             // sign extend
             switch (len) { /* cases fall through */
-            case 1: val |= 0xFF << 8;
-            case 2: val |= 0xFF << 16;
-            case 3: val |= 0xFF << 24;
-            case 4: val |= 0xFFL << 32;
-            case 5: val |= 0xFFL << 40;
-            case 6: val |= 0xFFL << 48;
-            case 7: val |= 0xFFL << 56;
+            case 1: return val | PAD_1;
+            case 2: return val | PAD_2;
+            case 3: return val | PAD_3;
+            case 4: return val | PAD_4;
+            case 5: return val | PAD_5;
+            case 6: return val | PAD_6;
+            case 7: return val | PAD_7;
             }
         }
         return val;
