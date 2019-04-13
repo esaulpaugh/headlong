@@ -286,8 +286,8 @@ public class Keccak extends MessageDigest {
     }
 
     protected void pad() {
-//        updateBits(0x6L, 3); // SHA-3 padding:011 (little-endian) = 0x6
         updateBits(0x1L, 1); // Keccak padding: 1
+//        updateBits(0x6L, 3); // SHA-3 padding:011 (little-endian) = 0x6
         if (rateBits >= rateSizeBits) {
             keccak(state);
         }
@@ -335,7 +335,7 @@ public class Keccak extends MessageDigest {
         long x0, x1, x2, x3, x4;
         long t0, t1, t2, t3, t4;
         long c0, c1, c2, c3, c4;
-        long[] rc = RC;
+        final long[] rc = RC;
 
         i = 0;
         do {

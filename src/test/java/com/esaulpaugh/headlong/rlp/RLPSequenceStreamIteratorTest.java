@@ -13,14 +13,17 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 public class RLPSequenceStreamIteratorTest {
 
-    private final Object notifySender = new Object();
-    private final Object notifyReceiver = new Object();
+    private final Object sender = new Object();
+    private final Object receiver = new Object();
+
+    private final AtomicBoolean canReceive = new AtomicBoolean(false);
 
     private long zero;
     private int readNum;
@@ -29,31 +32,39 @@ public class RLPSequenceStreamIteratorTest {
     private static final byte[] TEST_BYTES = new byte[] { 0x04, 0x03, 0x02 };
     private static final String TEST_STRING = "\u0009\u0009\u0030\u0031";
 
-    private Thread newSendThread(PipedOutputStream pos) {
-        return new Thread(() -> {
+    private class SendThread extends Thread {
+
+        private final PipedOutputStream pos;
+
+        private SendThread(PipedOutputStream pos) {
+            this.pos = pos;
+        }
+
+        @Override
+        public void run() {
             try {
-                endSend(true);
+                waitForReceiver();
                 write(pos, TEST_BYTE);
-                endSend(true);
+                waitForReceiver();
                 for (byte b : TEST_BYTES) {
                     write(pos, b);
                 }
-                endSend(true);
+                waitForReceiver();
                 byte[] rlpString = RLPEncoder.encode(Strings.decode(TEST_STRING, UTF_8));
                 int i = 0;
                 write(pos, rlpString[i++]);
-                endSend(true);
+                waitForReceiver();
                 write(pos, rlpString[i++]);
-                endSend(true);
+                waitForReceiver();
                 while(i < rlpString.length) {
                     write(pos, rlpString[i++]);
                 }
                 write(pos, TEST_BYTE);
-                endSend(false);
+                notifyReceiver();
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
             }
-        });
+        }
     }
 
     @Test
@@ -66,22 +77,22 @@ public class RLPSequenceStreamIteratorTest {
 
         RLPSequenceStreamIterator iter = new RLPSequenceStreamIterator(RLPDecoder.RLP_STRICT, pis);
 
-        Thread send = newSendThread(pos);
+        SendThread send = new SendThread(pos);
         send.setPriority(Thread.MAX_PRIORITY);
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         zero = System.nanoTime();
         send.start();
-        endReceive();
+        waitForSender();
 
         assertNoNext(iter);
 
-        endReceive();
+        waitForSender();
 
         assertReadSuccess(iter);
         Assert.assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().data());
         assertNoNext(iter);
 
-        endReceive();
+        waitForSender();
 
         for (byte b : TEST_BYTES) {
             assertReadSuccess(iter);
@@ -89,15 +100,15 @@ public class RLPSequenceStreamIteratorTest {
         }
         assertNoNext(iter);
 
-        endReceive();
+        waitForSender();
 
         assertNoNext(iter);
 
-        endReceive();
+        waitForSender();
 
         assertNoNext(iter);
 
-        endReceive();
+        waitForSender();
 
         assertReadSuccess(iter);
         Assert.assertTrue(iter.hasNext());
@@ -172,26 +183,36 @@ public class RLPSequenceStreamIteratorTest {
         logWrite(FastHex.encodeToString(b));
     }
 
-    private void endSend(boolean wait) throws InterruptedException {
-        synchronized (notifyReceiver) {
-            notifyReceiver.notify();
-        }
-        if(wait) {
-            synchronized (notifySender) {
-                notifySender.wait();
+    private void waitForSender() throws InterruptedException {
+        notifySender();
+        synchronized (receiver) {
+            while(!canReceive.get()) {
+                receiver.wait();
             }
         }
-//        System.out.println(timestamp() + "\u0009now sending");
     }
 
-    private void endReceive() throws InterruptedException {
-        synchronized (notifySender) {
-            notifySender.notify();
+    private void waitForReceiver() throws InterruptedException {
+        notifyReceiver();
+        synchronized (sender) {
+            while(canReceive.get()) {
+                sender.wait();
+            }
         }
-        synchronized (notifyReceiver) {
-            notifyReceiver.wait();
+    }
+
+    private void notifySender() {
+        synchronized (sender) {
+            canReceive.set(false);
+            sender.notify();
         }
-//        System.out.println(timestamp() + "\u0009now receiving");
+    }
+
+    private void notifyReceiver() {
+        synchronized (receiver) {
+            canReceive.set(true);
+            receiver.notify();
+        }
     }
 
     private void assertReadSuccess(RLPSequenceStreamIterator iter) throws IOException, UnrecoverableDecodeException {
