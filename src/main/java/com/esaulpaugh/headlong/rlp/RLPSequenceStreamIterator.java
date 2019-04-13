@@ -24,29 +24,29 @@ public class RLPSequenceStreamIterator {
     }
 
     public boolean hasNext() throws IOException, UnrecoverableDecodeException {
-        if(rlpItem != null) {
+        if (rlpItem != null) {
             return true;
         }
+        final int available = rlpStream.available();
+        if (available > 0) {
+            int keptBytes = buffer.length - index;
+            byte[] newBuffer = new byte[keptBytes + available];
+            System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
+            buffer = newBuffer;
+            index = 0;
+            int read = rlpStream.read(buffer, keptBytes, available);
+            if (read != available) {
+                throw new IOException("read failed: " + read + " != " + available);
+            }
+        }
+        if (index == buffer.length) {
+            return false;
+        }
         try {
-            final int available = rlpStream.available();
-            if(available > 0) {
-                int keptBytes = buffer.length - index;
-                byte[] newBuffer = new byte[keptBytes + available];
-                System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
-                buffer = newBuffer;
-                index = 0;
-                int read = rlpStream.read(buffer, keptBytes, available);
-                if(read != available) {
-                    throw new IOException("read failed: " + read + " != " + available);
-                }
-            }
-            if(index == buffer.length) {
-                return false;
-            }
             rlpItem = decoder.wrap(buffer, index);
             return true;
         } catch (DecodeException e) {
-            if(e.isRecoverable()) {
+            if (e.isRecoverable()) {
                 return false;
             }
             throw (UnrecoverableDecodeException) e;

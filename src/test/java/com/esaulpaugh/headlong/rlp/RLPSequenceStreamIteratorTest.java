@@ -83,11 +83,7 @@ public class RLPSequenceStreamIteratorTest {
             this.pos = new PipedOutputStream();
             this.canReceive = new AtomicBoolean(false);
             this.senderThread = new SendStreamThread(zero, pos, receiver, canReceive);
-            this.sender = senderThread.getSender();
-        }
-
-        public Throwable getThrowable() {
-            return throwable;
+            this.sender = senderThread.sender;
         }
 
         @Override
@@ -190,10 +186,6 @@ public class RLPSequenceStreamIteratorTest {
             this.os = os;
             this.receiver = receiver;
             this.canReceive = canReceive;
-        }
-
-        private Object getSender() {
-            return sender;
         }
 
         @Override

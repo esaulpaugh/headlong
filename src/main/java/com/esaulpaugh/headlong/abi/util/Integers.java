@@ -6,18 +6,6 @@ import java.math.BigInteger;
 
 public class Integers {
 
-    private static final long PAD_1 = 0xFFFFFFFFFFFFFF00L;
-    private static final long PAD_2 = 0xFFFFFFFFFFFF0000L;
-    private static final long PAD_3 = 0xFFFFFFFFFF000000L;
-    private static final long PAD_4 = 0xFFFFFFFF00000000L;
-    private static final long PAD_5 = 0xFFFFFF0000000000L;
-    private static final long PAD_6 = 0xFFFF000000000000L;
-    private static final long PAD_7 = 0xFF00000000000000L;
-
-    private static final int INT_PAD_1 = 0xFFFFFF00;
-    private static final int INT_PAD_2 = 0xFFFF0000;
-    private static final int INT_PAD_3 = 0xFF000000;
-
     /**
      * Retrieves an integer up to four bytes in length. Big-endian two's complement format.
      *
@@ -40,9 +28,9 @@ public class Integers {
         if(leftmost < 0) { // if negative
             // sign extend
             switch (len) {
-            case 1: return val | INT_PAD_1;
-            case 2: return val | INT_PAD_2;
-            case 3: return val | INT_PAD_3;
+            case 1: return val | 0xFFFFFF00;
+            case 2: return val | 0xFFFF0000;
+            case 3: return val | 0xFF000000;
             }
         }
         return val;
@@ -74,13 +62,13 @@ public class Integers {
         if(leftmost < 0) {
             // sign extend
             switch (len) { /* cases fall through */
-            case 1: return val | PAD_1;
-            case 2: return val | PAD_2;
-            case 3: return val | PAD_3;
-            case 4: return val | PAD_4;
-            case 5: return val | PAD_5;
-            case 6: return val | PAD_6;
-            case 7: return val | PAD_7;
+            case 1: return val | 0xFFFFFFFFFFFFFF00L;
+            case 2: return val | 0xFFFFFFFFFFFF0000L;
+            case 3: return val | 0xFFFFFFFFFF000000L;
+            case 4: return val | 0xFFFFFFFF00000000L;
+            case 5: return val | 0xFFFFFF0000000000L;
+            case 6: return val | 0xFFFF000000000000L;
+            case 7: return val | 0xFF00000000000000L;
             }
         }
         return val;
