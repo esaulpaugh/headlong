@@ -30,7 +30,7 @@ public class RLPStreamIteratorTest {
     private static final String TEST_STRING = "\u0009\u0009\u0030\u0031";
 
     @Test
-    public void testStream() throws Throwable {
+    public void testStreamHard() throws Throwable {
         ReceiveStreamThread thread = new ReceiveStreamThread();
         thread.start();
         thread.join();
@@ -70,7 +70,7 @@ public class RLPStreamIteratorTest {
     }
 
     @Test
-    public void testStream2() throws IOException, DecodeException {
+    public void testStreamEasy() throws IOException, DecodeException {
         byte[] rlpEncoded = new byte[] {
                 (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0xFF, (byte) 0x81, (byte) 0x90, (byte) 0x81, (byte) 0xb6, (byte) '\u230A',
                 (byte) 0xb8, 56, 0x09,(byte)0x80,-1,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, -3, -2, 0, 0,

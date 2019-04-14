@@ -1,13 +1,14 @@
 package com.esaulpaugh.headlong.rlp.eip778;
 
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+import com.esaulpaugh.headlong.rlp.RLPDecoder;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
+import com.esaulpaugh.headlong.rlp.RLPList;
 import com.esaulpaugh.headlong.rlp.RLPListIterator;
+import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.util.FastHex;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
@@ -20,57 +21,43 @@ public class Record {
 
     private static final int MAX_RECORD_LEN = 300;
 
-    private final long seq;
-
-    private final KeyValuePair[] pairs;
-
     private final byte[] record;
 
     public Record(long seq, KeyValuePair[] pairs, Signer signer) {
 
-        byte[] content = RLPEncoder.encodeEIP778RecordContent(seq, pairs);
-        byte[] signature = signer.sign(RLPEncoder.encodeAsList((Object) content)); // TODO
-
-        byte[] record = RLPEncoder.encodeEIP778Record(signature, content);
-
-        if(record.length > MAX_RECORD_LEN) {
-            throw new IllegalArgumentException("record length exceeds maximum: " + record.length + " > " + MAX_RECORD_LEN);
+        final int signatureLen = signer.signatureLength();
+        final int signatureItemLen = RLPEncoder.prefixLength(signatureLen) + signatureLen;
+        final long payloadLenLong = Integers.len(seq) + RLPEncoder.dataLen(pairs);
+        final long recordListPayloadLenLong = signatureItemLen + payloadLenLong;
+        final int recordPrefixLen = RLPEncoder.prefixLength(recordListPayloadLenLong);
+        final long recordLenLong = recordPrefixLen + recordListPayloadLenLong;
+        if(recordLenLong > MAX_RECORD_LEN) {
+            throw new IllegalArgumentException("record length exceeds maximum: " + recordLenLong + " > " + MAX_RECORD_LEN);
         }
 
-        this.seq = seq;
-        this.pairs = Arrays.copyOf(pairs, pairs.length);
+        final int recordLen = (int) recordLenLong;
+        byte[] record = new byte[recordLen];
+        RLPEncoder.insertListPrefix((int) recordListPayloadLenLong, record, 0);
+        int contentListOffset = recordPrefixLen + signatureItemLen - RLPEncoder.prefixLength(payloadLenLong);
+        RLPEncoder.insertRecordContentList((int) payloadLenLong, seq, pairs, record, contentListOffset);
+        byte[] signature = signer.sign(record, contentListOffset, recordLen - contentListOffset);
+        RLPEncoder.insertRecordSignature(signature, record, recordPrefixLen);
+
         this.record = record;
     }
 
-    public Record(byte[] record) throws DecodeException {
-        RLPListIterator iter = RLP_STRICT.listIterator(record);
-
-        iter.next(); // signature
-        this.seq = iter.next().asLong();
-
-        List<KeyValuePair> pairs =  new ArrayList<>();
-        while (iter.hasNext()) {
-            pairs.add(new KeyValuePair(iter.next().data(), iter.next().data()));
-        }
-        this.pairs = pairs.toArray(KeyValuePair.EMPTY_ARRAY);
-
+    public Record(byte[] record) {
         this.record = Arrays.copyOf(record, record.length);
     }
 
-    public byte[] getSignature() throws DecodeException {
-        return RLP_STRICT.listIterator(record).next().data();
-    }
-
-    public byte[] getContent() {
-        return RLPEncoder.encodeEIP778RecordContent(seq, pairs);
-    }
-
-    public byte[] getRecord() {
-        return Arrays.copyOf(record, record.length);
+    public RLPList getRecord(RLPDecoder decoder) throws DecodeException {
+        return decoder.wrapList(record);
     }
 
     public interface Signer {
-        byte[] sign(byte[] message);
+        int signatureLength();
+        byte[] sign(byte[] message, int off, int len);
+        void sign(byte[] message, int off, int len, byte[] dest, int destIdx);
     }
 
     @Override
@@ -81,10 +68,8 @@ public class Record {
             sb.append("record = ").append(FastHex.encodeToString(record)).append('\n');
 
             RLPListIterator iter = RLP_STRICT.listIterator(record);
-
             sb.append("signature = ").append(iter.next().asString(HEX)).append('\n');
             sb.append("seq = ").append(iter.next().asLong()).append('\n');
-
             while (iter.hasNext()) {
                 sb.append(iter.next().asString(UTF_8)).append(" --> ").append(iter.next().asString(HEX)).append('\n');
             }
@@ -96,7 +81,7 @@ public class Record {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(getRecord());
+        return Arrays.hashCode(record);
     }
 
     @Override
@@ -104,6 +89,6 @@ public class Record {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Record record1 = (Record) o;
-        return Arrays.equals(getRecord(), record1.getRecord());
+        return Arrays.equals(record, record1.record);
     }
 }

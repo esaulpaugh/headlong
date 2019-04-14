@@ -16,7 +16,7 @@ public class RLPEncoder {
         return dataLen >= MIN_LONG_DATA_LEN;
     }
 
-    private static int prefixLength(long dataLen) {
+    public static int prefixLength(long dataLen) {
         if (isLong(dataLen)) {
             return 1 + Integers.len(dataLen);
         } else {
@@ -32,7 +32,7 @@ public class RLPEncoder {
         return total;
     }
 
-    private static long totalEncodedLen(KeyValuePair[] pairs) {
+    public static long dataLen(KeyValuePair[] pairs) {
         long total = 0;
         for (KeyValuePair kvp : pairs) {
             total += itemEncodedLen(kvp.getKey()) + itemEncodedLen(kvp.getValue());
@@ -127,11 +127,11 @@ public class RLPEncoder {
     }
 
     private static int encodeList(long dataLen, Iterable<?> elements, byte[] dest, int destIndex) {
-        destIndex = encodeListPrefix(dataLen, dest, destIndex);
+        destIndex = insertListPrefix(dataLen, dest, destIndex);
         return encodeSequentially(elements, dest, destIndex);
     }
 
-    private static int encodeListPrefix(long dataLen, byte[] dest, int destIndex) {
+    public static int insertListPrefix(long dataLen, byte[] dest, int destIndex) {
         return isLong(dataLen)
                 ? encodeLongListPrefix(dataLen, dest, destIndex)
                 : encodeShortListPrefix(dataLen, dest, destIndex);
@@ -147,6 +147,20 @@ public class RLPEncoder {
     private static int encodeShortListPrefix(final long dataLen, byte[] dest, final int destIndex) {
         dest[destIndex] = (byte) (LIST_SHORT_OFFSET + (byte) dataLen);
         return destIndex + 1;
+    }
+
+    private static int encodeList(long dataLen, long seq, KeyValuePair[] pairs, byte[] dest, int destIndex) {
+        destIndex = insertListPrefix(dataLen, dest, destIndex);
+        return encodeSequentially(seq, pairs, dest, destIndex);
+    }
+
+    private static int encodeSequentially(long seq, KeyValuePair[] pairs, byte[] dest, int destIndex) {
+        byte[] seqBytes = Integers.toBytes(seq);
+        destIndex = encodeItem(seqBytes, dest, destIndex);
+        for (KeyValuePair kvp : pairs) {
+            destIndex = encodeKeyValuePair(kvp, dest, destIndex);
+        }
+        return destIndex;
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -307,28 +321,12 @@ public class RLPEncoder {
         return RLPList.withElements(encodings);
     }
 
-    public static byte[] encodeEIP778RecordContent(long seq, KeyValuePair[] pairs) {
-        Arrays.sort(pairs);
-        byte[] seqBytes = Integers.toBytes(seq);
-        byte[] dest = new byte[seqBytes.length + (int) totalEncodedLen(pairs)];
-        int destIndex = encodeItem(seqBytes, dest, 0);
-
-        encodeSequentially(pairs, dest, destIndex);
-
-        return dest;
+    public static int insertRecordSignature(byte[] signature, byte[] record, int offset) {
+        return encodeItem(signature, record, offset);
     }
 
-    public static byte[] encodeEIP778Record(byte[] signature, byte[] content) {
-        final int contentLen = content.length;
-        final int dataLen = (int) itemEncodedLen(signature) + contentLen;
-        byte[] record = new byte[prefixLength(dataLen) + dataLen];
-
-        int destIndex = encodeListPrefix(dataLen, record, 0);
-
-        destIndex = encodeItem(signature, record, destIndex);
-
-        System.arraycopy(content, 0, record, destIndex, contentLen);
-
-        return record;
+    public static void insertRecordContentList(int dataLen, long seq, KeyValuePair[] pairs, byte[] record, int offset) {
+        Arrays.sort(pairs);
+        encodeList(dataLen, seq, pairs, record, offset);
     }
 }
