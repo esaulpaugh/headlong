@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.NoSuchElementException;
 
-public class RLPSequenceStreamIterator {
+public class RLPStreamIterator {
 
     private final RLPDecoder decoder;
     private final InputStream rlpStream;
@@ -17,7 +17,7 @@ public class RLPSequenceStreamIterator {
 
     private transient RLPItem rlpItem;
 
-    RLPSequenceStreamIterator(RLPDecoder decoder, InputStream rlpStream) {
+    RLPStreamIterator(RLPDecoder decoder, InputStream rlpStream) {
         this.decoder = decoder;
         this.rlpStream = rlpStream;
         this.buffer = new byte[this.index = 0]; // make sure index == buffer.length

@@ -7,14 +7,14 @@ import java.util.NoSuchElementException;
 /**
  * For iterating over sequentially encoded RLP items.
  */
-public class RLPSequenceIterator {
+public class RLPIterator {
 
     private final RLPDecoder decoder;
     private final byte[] rlp;
     private int index;
     private final int end;
 
-    RLPSequenceIterator(RLPDecoder decoder, byte[] rlp, int start, int end) {
+    RLPIterator(RLPDecoder decoder, byte[] rlp, int start, int end) {
         this.decoder = decoder;
         this.rlp = rlp;
         this.index = start;

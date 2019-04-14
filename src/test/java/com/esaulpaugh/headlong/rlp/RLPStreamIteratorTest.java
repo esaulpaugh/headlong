@@ -8,17 +8,22 @@ import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
+import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 
-public class RLPSequenceStreamIteratorTest {
+public class RLPStreamIteratorTest {
 
     private static final byte TEST_BYTE = 0x79;
     private static final byte[] TEST_BYTES = new byte[] { 0x04, 0x03, 0x02 };
@@ -43,14 +48,14 @@ public class RLPSequenceStreamIteratorTest {
         final PipedOutputStream pos = new PipedOutputStream();
         final PipedInputStream pis = new PipedInputStream(pos, 512);
 
-        RLPSequenceStreamIterator iter = new RLPSequenceStreamIterator(RLPDecoder.RLP_STRICT, pis);
+        RLPStreamIterator iter = new RLPStreamIterator(RLP_STRICT, pis);
 
         pos.write(0x81);
         pos.write(0x00);
 
         TestUtils.assertThrown(clazz, "invalid rlp for single byte @ 0", iter::hasNext);
 
-        iter = new RLPSequenceStreamIterator(RLPDecoder.RLP_STRICT, pis);
+        iter = new RLPStreamIterator(RLP_STRICT, pis);
 
         pos.write(0xf8);
         pos.write(0x37);
@@ -62,6 +67,31 @@ public class RLPSequenceStreamIteratorTest {
                     iter::hasNext
             );
         }
+    }
+
+    @Test
+    public void testStream2() throws IOException, DecodeException {
+        byte[] rlpEncoded = new byte[] {
+                (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0xFF, (byte) 0x81, (byte) 0x90, (byte) 0x81, (byte) 0xb6, (byte) '\u230A',
+                (byte) 0xb8, 56, 0x09,(byte)0x80,-1,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, -3, -2, 0, 0,
+                (byte) 0xf8, 0x38, 0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 36, 74, 0, 0,
+                (byte) 0x84, 'c', 'a', 't', 's',
+                (byte) 0x84, 'd', 'o', 'g', 's',
+                (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
+        };
+
+        List<RLPItem> collected = RLP_STRICT.collectAll(rlpEncoded);
+
+        RLPStreamIterator iter = new RLPStreamIterator(RLP_STRICT, new ByteArrayInputStream(rlpEncoded));
+
+        List<RLPItem> streamed = new ArrayList<>();
+        while (iter.hasNext()) {
+            RLPItem item = iter.next();
+            System.out.println(Strings.encode(item.encoding()));
+            streamed.add(item);
+        }
+
+        Assert.assertTrue(Arrays.deepEquals(collected.toArray(RLPItem.EMPTY_ARRAY), streamed.toArray(RLPItem.EMPTY_ARRAY)));
     }
 
     private static class ReceiveStreamThread extends Thread {
@@ -91,7 +121,7 @@ public class RLPSequenceStreamIteratorTest {
             try {
                 final PipedInputStream pis = new PipedInputStream(pos, 512);
 
-                RLPSequenceStreamIterator iter = new RLPSequenceStreamIterator(RLPDecoder.RLP_STRICT, pis);
+                RLPStreamIterator iter = new RLPStreamIterator(RLP_STRICT, pis);
 
                 senderThread.setPriority(Thread.MAX_PRIORITY);
                 Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
@@ -163,12 +193,12 @@ public class RLPSequenceStreamIteratorTest {
             }
         }
 
-        private void assertNoNext(RLPSequenceStreamIterator iter) throws IOException, UnrecoverableDecodeException {
-            RLPSequenceStreamIteratorTest.assertNoNext(zero, ++readNum, iter);
+        private void assertNoNext(RLPStreamIterator iter) throws IOException, UnrecoverableDecodeException {
+            RLPStreamIteratorTest.assertNoNext(zero, ++readNum, iter);
         }
 
-        private void assertReadSuccess(RLPSequenceStreamIterator iter) throws IOException, UnrecoverableDecodeException {
-            RLPSequenceStreamIteratorTest.assertReadSuccess(zero, ++readNum, iter);
+        private void assertReadSuccess(RLPStreamIterator iter) throws IOException, UnrecoverableDecodeException {
+            RLPStreamIteratorTest.assertReadSuccess(zero, ++readNum, iter);
         }
     }
 
@@ -236,12 +266,12 @@ public class RLPSequenceStreamIteratorTest {
         }
     }
 
-    private static void assertReadSuccess(long zero, int readNum, RLPSequenceStreamIterator iter) throws IOException, UnrecoverableDecodeException {
+    private static void assertReadSuccess(long zero, int readNum, RLPStreamIterator iter) throws IOException, UnrecoverableDecodeException {
         Assert.assertTrue("no next() found, " + timestamp(zero), iter.hasNext());
         logRead(zero, readNum, true);
     }
 
-    private static void assertNoNext(long zero, int readNum, RLPSequenceStreamIterator iter) throws IOException, UnrecoverableDecodeException {
+    private static void assertNoNext(long zero, int readNum, RLPStreamIterator iter) throws IOException, UnrecoverableDecodeException {
         if(iter.hasNext()) {
             throw new AssertionError("unexpected next(): " + iter.next().asString(HEX) + ", " + timestamp(zero));
         }

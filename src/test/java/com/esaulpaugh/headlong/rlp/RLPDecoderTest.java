@@ -335,7 +335,7 @@ public class RLPDecoderTest {
         assertThrown(NoSuchElementException.class, listIter::next);
 
         byte[] sequence = RLPEncoder.encodeSequentially(c, a, b);
-        RLPSequenceIterator seqIter = RLP_STRICT.sequenceIterator(sequence);
+        RLPIterator seqIter = RLP_STRICT.sequenceIterator(sequence);
 
         Assert.assertTrue(seqIter.hasNext());
         Assert.assertArrayEquals(c, seqIter.next().data());

@@ -23,6 +23,8 @@ import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT;
  */
 public abstract class RLPItem {
 
+    public static final RLPItem[] EMPTY_ARRAY = new RLPItem[0];
+
     final byte[] buffer;
     public final int index;
 
