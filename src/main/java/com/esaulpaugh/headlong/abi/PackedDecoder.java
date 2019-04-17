@@ -23,11 +23,13 @@ public class PackedDecoder {
             }
         }
 
-        switch (numDynamic) {
-        case 0: return decodeTupleStatic(tupleType, buffer);
-        case 1: return decodeTopTuple(tupleType, buffer, buffer.length);
-        default: throw new IllegalArgumentException("multiple dynamic elements");
+        if(numDynamic == 0) {
+            return decodeTupleStatic(tupleType, buffer);
         }
+        if(numDynamic == 1) {
+            return decodeTopTuple(tupleType, buffer, buffer.length);
+        }
+        throw new IllegalArgumentException("multiple dynamic elements");
     }
 
     private static Tuple decodeTopTuple(TupleType tupleType, byte[] buffer, int end) {

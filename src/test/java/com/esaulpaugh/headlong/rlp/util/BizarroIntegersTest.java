@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.Supplier;
 
 public class BizarroIntegersTest {
 
@@ -39,14 +40,37 @@ public class BizarroIntegersTest {
 
     @Test
     public void putGetLong() throws DecodeException {
-        Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
-        byte[] eight = new byte[8];
-        final long lim = Long.MAX_VALUE - (long) Math.pow(2.0, 24);
-        for (long i = Long.MAX_VALUE; i >= lim; i--) {
-            long lo = rand.nextBoolean() ? rand.nextLong() : rand.nextInt();
+        final Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        final byte[] eight = new byte[8];
+        final long _2_24 = (long) Math.pow(2.0, Short.SIZE + Byte.SIZE);
+        final long _2_16 = (long) Math.pow(2.0, Short.SIZE);
+        final long _2_8 = (long) Math.pow(2.0, Byte.SIZE);
+        testLongs((int) _2_8, new Supplier<Long>() {
+            long lo = Byte.MIN_VALUE;
+            @Override
+            public Long get() {
+                return lo++;
+            }
+        }, eight);
+        testLongs(1000, () -> rand.nextInt() / _2_16, eight);
+        testLongs(1000, () -> rand.nextInt() / _2_8, eight);
+        testLongs(1000, () -> (long) rand.nextInt(), eight);
+        testLongs(1000, () -> rand.nextLong() / _2_24, eight);
+        testLongs(1000, () -> rand.nextLong() / _2_16, eight);
+        testLongs(1000, () -> rand.nextLong() / _2_8, eight);
+        testLongs(1000, rand::nextLong, eight);
+    }
+
+    private static void testLongs(int iterations, Supplier<Long> supplier, byte[] eight) throws DecodeException {
+//        System.out.println(n);
+//        System.out.print(lo >= 0 ? Integers.len(lo) : BizarroIntegers.len(lo));
+        for (long i = 0; i < iterations; i++) {
+            long lo = supplier.get();
             int n = BizarroIntegers.putLong(lo, eight, 0);
             long r = BizarroIntegers.getLong(eight, 0, n);
-            Assert.assertEquals(lo, r);
+            if(lo != r) {
+                throw new AssertionError(lo + "!= " + r);
+            }
         }
     }
 
@@ -63,15 +87,13 @@ public class BizarroIntegersTest {
     public void lenShort() {
         for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
             short s = (short) i;
+            int expectedLen = s >= 0 || s < -256 ? 2
+                    : s != -1 ? 1
+                    : 0;
             int len = BizarroIntegers.len(s);
-            Assert.assertEquals(
-                    s == -1
-                            ? 0
-                            : s < -1 && s >= -256
-                            ? 1
-                            : 2,
-                    len
-            );
+            if(expectedLen != len) {
+                throw new AssertionError(expectedLen + " != " + len);
+            }
         }
     }
 
@@ -82,31 +104,23 @@ public class BizarroIntegersTest {
 
     @Test
     public void lenLong() {
-        Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
-
-        for (int i = 0; i < Short.MAX_VALUE; i++) {
+        final Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        final int lim = (int) Math.pow(2.0, 15) - 1;
+        for (int i = 0; i < lim; i++) {
             long lo = rand.nextLong();
+            int expectedLen = lo >= 0 || lo < -72_057_594_037_927_936L ? 8
+                    : lo < -281_474_976_710_656L ? 7
+                    : lo < -1_099_511_627_776L ? 6
+                    : lo < -4_294_967_296L ? 5
+                    : lo < -16_777_216 ? 4
+                    : lo < -65_536 ? 3
+                    : lo < -256 ? 2
+                    : lo != -1 ? 1
+                    : 0;
             int len = BizarroIntegers.len(lo);
-            Assert.assertEquals(
-                    lo == -1
-                            ? 0
-                            : lo < -1 && lo >= -256
-                            ? 1
-                            : lo < -256 && lo >= -65536
-                            ? 2
-                            : lo < -65536 && lo >= -16777216
-                            ? 3
-                            : lo < -16777216 && lo >= -4_294_967_296L
-                            ? 4
-                            : lo < -4_294_967_296L && lo >= -1_099_511_627_776L
-                            ? 5
-                            : lo < -1_099_511_627_776L && lo >= -281_474_976_710_656L
-                            ? 6
-                            : lo < -281_474_976_710_656L && lo >= -72_057_594_037_927_936L
-                            ? 7
-                            : 8,
-                    len
-            );
+            if(expectedLen != len) {
+                throw new AssertionError(expectedLen + " != " + len);
+            }
         }
     }
 

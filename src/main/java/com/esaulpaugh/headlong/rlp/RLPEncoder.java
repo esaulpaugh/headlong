@@ -321,12 +321,12 @@ public class RLPEncoder {
         return RLPList.withElements(encodings);
     }
 
-    public static int insertRecordSignature(byte[] signature, byte[] record, int offset) {
-        return encodeItem(signature, record, offset);
-    }
-
     public static void insertRecordContentList(int dataLen, long seq, KeyValuePair[] pairs, byte[] record, int offset) {
         Arrays.sort(pairs);
         encodeList(dataLen, seq, pairs, record, offset);
+    }
+
+    public static int insertRecordSignature(byte[] signature, byte[] record, int offset) {
+        return encodeItem(signature, record, offset);
     }
 }
