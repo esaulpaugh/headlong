@@ -16,24 +16,24 @@ public class EIP778Test {
 
     private static final Record.Signer SIGNER = new Record.Signer() {
 
-        private final String sigHex =
+        private final byte[] SIG = FastHex.decode(
                 "7098ad865b00a582051940cb9cf36836572411a47278783077011599ed5cd16b" +
-                "76f2635f4e234738f30813a89eb9137e3e3df5266e3a1f11df72ecf1145ccb9c";
+                "76f2635f4e234738f30813a89eb9137e3e3df5266e3a1f11df72ecf1145ccb9c"
+        );
 
         @Override
         public int signatureLength() {
-            return FastHex.decode(sigHex).length;
+            return SIG.length;
         }
 
         @Override
         public byte[] sign(byte[] message, int off, int len) {
-            return FastHex.decode(sigHex);
+            return SIG;
         }
 
         @Override
         public void sign(byte[] message, int off, int len, byte[] dest, int destIdx) {
-            byte[] sig = FastHex.decode(sigHex);
-            System.arraycopy(sig, 0, dest, destIdx, sig.length);
+            System.arraycopy(SIG, 0, dest, destIdx, SIG.length);
         }
     };
 
