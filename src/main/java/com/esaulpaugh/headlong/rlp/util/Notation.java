@@ -159,22 +159,19 @@ public class Notation {
                 throw new AssertionError();
             }
             hasELement = true;
+            sb.append(ELEMENT_INDENTATION);
             switch (type) {
             case SINGLE_BYTE:
-                sb.append(ELEMENT_INDENTATION);
                 i = buildByte(sb, data, i);
                 break;
             case STRING_SHORT:
             case STRING_LONG:
-                sb.append(ELEMENT_INDENTATION);
                 i = buildString(sb, data, elementDataIndex, elementEnd);
                 break;
             case LIST_SHORT:
-                sb.append(ELEMENT_INDENTATION);
                 i = buildShortList(sb, data, elementDataIndex, elementEnd);
                 break;
             case LIST_LONG:
-                sb.append(ELEMENT_INDENTATION);
                 i = buildLongList(sb, data, elementDataIndex, elementEnd, nextDepth);
 //            default:
             }
@@ -194,22 +191,24 @@ public class Notation {
     private static int buildShortList(final StringBuilder sb, final byte[] data, final int dataIndex, final int end) throws DecodeException {
         sb.append(BEGIN_LIST_SHORT);
 
-        int elementDataIndex = -1;
-        int elementDataLen;
-        int elementEnd = -1;
         boolean hasElement = false;
         int i = dataIndex;
-        while (i < end) {
+        LOOP:
+        for ( ; i < end; ) {
             byte current = data[i];
             final DataType type = DataType.type(current);
+            hasElement = true;
             switch (type) {
             case SINGLE_BYTE:
-                break;
+                i = buildByte(sb, data, i);
+                continue LOOP;
             case STRING_SHORT:
             case LIST_SHORT:
-                elementDataIndex = i + 1;
-                elementDataLen = current - type.offset;
-                elementEnd = getShortElementEnd(elementDataIndex, elementDataLen, end);
+                int elementDataIndex = i + 1;
+                int elementEnd = getShortElementEnd(elementDataIndex, current - type.offset, end);
+                i = type == DataType.STRING_SHORT
+                        ? buildString(sb, data, elementDataIndex, elementEnd)
+                        : buildShortList(sb, data, elementDataIndex, elementEnd);
                 break;
             case STRING_LONG:
             case LIST_LONG:
@@ -217,27 +216,11 @@ public class Notation {
             default:
                 throw new AssertionError();
             }
-            hasElement = true;
-            switch (type) {
-            case SINGLE_BYTE:
-                i = buildByte(sb, data, i);
-                break;
-            case STRING_SHORT:
-                i = buildString(sb, data, elementDataIndex, elementEnd);
-                break;
-            case LIST_SHORT:
-                i = buildShortList(sb, data, elementDataIndex, elementEnd);
-                break;
-            case STRING_LONG:
-            case LIST_LONG:
-            default: throw new RuntimeException("?");
-            }
         }
-
-        if (hasElement)
+        if (hasElement) {
             stripFinalCommaAndSpace(sb);
+        }
         sb.append(LIST_SHORT_END_COMMA_SPACE);
-
         return end;
     }
 
