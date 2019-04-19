@@ -15,13 +15,12 @@ public class StringsTest {
     public void utf8() {
         Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
         for (int j = 0; j < 20_000; j++) {
-            byte[] x = new byte[rand.nextInt(1000)]; // rand.nextInt(14)
+            byte[] x = new byte[rand.nextInt(400)];
             for (int i = 0; i < x.length; i++) {
 //                x[i] = (byte) (r.nextInt(95) + 32);
                 x[i] = (byte) rand.nextInt(128);
             }
             String s = Strings.encode(x, UTF_8);
-//            System.out.println(s);
             byte[] y = Strings.decode(s, UTF_8);
             Assert.assertArrayEquals(x, y);
         }
@@ -31,7 +30,7 @@ public class StringsTest {
     public void hex() {
         Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
         for (int i = 0; i < 20_000; i++) {
-            byte[] x = new byte[rand.nextInt(400)]; // rand.nextInt(14)
+            byte[] x = new byte[rand.nextInt(400)];
             rand.nextBytes(x);
             String s = Strings.encode(x, HEX);
             byte[] y = Strings.decode(s, HEX);
@@ -43,7 +42,7 @@ public class StringsTest {
     public void padding() {
         Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
         for (int i = 0; i < 20_000; i++) {
-            byte[] x = new byte[rand.nextInt(400)]; // rand.nextInt(14)
+            byte[] x = new byte[rand.nextInt(400)];
             rand.nextBytes(x);
             String s = Strings.encode(x, BASE64);
             Assert.assertEquals(encodedLen(x.length, true), s.length());

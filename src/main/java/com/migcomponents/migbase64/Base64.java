@@ -1,7 +1,5 @@
 package com.migcomponents.migbase64;
 
-import java.util.Arrays;
-
 /**
  * A very fast and memory efficient class to encode and decode to and from BASE64 in full accordance
  * with RFC 2045.<br><br>
@@ -81,10 +79,10 @@ public class Base64 /* Modified by Evan Saulpaugh */
     // ****************************************************************************************
 
     /**
-     * Encodes a raw byte array into a BASE64 <code>char[]</code> representation i accordance with RFC 2045.
-     * @param sArr The bytes to convert. If <code>null</code> or length 0 an empty array will be returned.
-     * @param offset the offset of the input bytes
-     * @param len   the number of the input bytes
+     * Encodes a raw byte array into a BASE64 <code>char[]</code> representation in accordance with RFC 2045.
+     * @param sArr buffer containing the input. If <code>null</code> or length 0, an empty array will be returned.
+     * @param offset the offset into the buffer of the input bytes
+     * @param len   the length of the input, in bytes
      * @param lineSep Optional "\r\n" after 76 characters, unless end of file.<br>
      * No line separator will be in breach of RFC 2045 which specifies max 76 per line but will be a
      * little faster.
@@ -94,8 +92,9 @@ public class Base64 /* Modified by Evan Saulpaugh */
     public static char[] encodeToChars(byte[] sArr, int offset, int len, boolean lineSep, boolean pad) {
         // Check special case
         int sLen = sArr != null ? len : 0;
-        if (sLen == 0)
+        if (sLen == 0) {
             return EMPTY_CHAR_ARRAY;
+        }
 
         int strRemainder = 0;
         final int dLen;
@@ -162,18 +161,18 @@ public class Base64 /* Modified by Evan Saulpaugh */
     // ****************************************************************************************
 
     /**
-     * Encodes a raw byte array into a BASE64 <code>String</code> representation i accordance with RFC 2045.
-     * @param sArr The bytes to convert. If <code>null</code> or length 0 an empty array will be returned.
+     * Encodes a raw byte array into a BASE64 <code>String</code> representation in accordance with RFC 2045.
+     * @param buffer buffer containing the input. If <code>null</code> or length 0 an empty string will be returned.
      * @param lineSep Optional "\r\n" after 76 characters, unless end of file.<br>
      * No line separator will be in breach of RFC 2045 which specifies max 76 per line but will be a
      * little faster.
-     * @param offset the offset of the input bytes
-     * @param len   the number of the input bytes
+     * @param offset the offset into the buffer of the input bytes
+     * @param len   the length of the input, in bytes
      * @param pad    false if the output should not be padded by equals signs
      * @return A BASE64 encoded array. Never <code>null</code>.
      */
-    public static String encodeToString(byte[] sArr, int offset, int len, boolean lineSep, boolean pad) {
+    public static String encodeToString(byte[] buffer, int offset, int len, boolean lineSep, boolean pad) {
         // Reuse char[] since we can't create a String incrementally anyway and StringBuffer/Builder would be slower.
-        return new String(encodeToChars(sArr, offset, len, lineSep, pad));
+        return new String(encodeToChars(buffer, offset, len, lineSep, pad));
     }
 }

@@ -59,7 +59,6 @@ public class Strings {
     }
 
     public static String toBase64(byte[] bytes, int from, int len, boolean pad) {
-//        final int options = withPadding ? Base64.NO_OPTIONS : Base64.NO_PADDING;
         return Base64.encodeToString(bytes, from, len, false, pad);
     }
 
