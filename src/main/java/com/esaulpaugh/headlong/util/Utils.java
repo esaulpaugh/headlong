@@ -1,6 +1,10 @@
 package com.esaulpaugh.headlong.util;
 
+import java.nio.charset.Charset;
+
 public class Utils {
+
+    public static final Charset CHARSET_ASCII = Charset.forName("US-ASCII");
 
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 

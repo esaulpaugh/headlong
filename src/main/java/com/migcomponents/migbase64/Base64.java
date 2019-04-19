@@ -89,33 +89,37 @@ public class Base64 /* Modified by Evan Saulpaugh */
      * @param pad    false if the output should not be padded by equals signs
      * @return A BASE64 encoded array. Never <code>null</code>.
      */
-    public static char[] encodeToChars(byte[] sArr, int offset, int len, boolean lineSep, boolean pad) {
+    public static char[] encodeToChars(byte[] sArr, final int offset, final int len, boolean lineSep, boolean pad) {
         // Check special case
-        int sLen = sArr != null ? len : 0;
-        if (sLen == 0) {
+        if (sArr == null || len == 0) {
             return EMPTY_CHAR_ARRAY;
         }
 
-        int strRemainder = 0;
+        int remainder = len % 3;
+        final int strRemainder;
+        if(remainder == 1) {
+            strRemainder = 2;
+        } else if(remainder == 2) {
+            strRemainder = 3;
+        } else {
+            strRemainder = 0;
+        }
+
+        final int eLen = (len / 3) << 2;
         final int dLen;
         if(pad) {
-            int cCnt = ((sLen - 1) / 3 + 1) << 2;   // Returned character count
+            int cCnt = strRemainder == 0 ? eLen : eLen + 4; // ((sLen - 1) / 3 + 1) << 2
             dLen = cCnt + (lineSep ? (cCnt - 1) / 76 << 1 : 0);
         } else {
-            int inputRemainder = len % 3;
-            if(inputRemainder == 1) {
-                strRemainder = 2;
-            } else if(inputRemainder == 2) {
-                strRemainder = 3;
-            }
-            dLen = (len / 3 * 4) + strRemainder;
+            dLen = eLen + strRemainder;
         }
         char[] dArr = new char[dLen];
 
         // Encode even 24-bits
+        final int evenEnd = offset + ((len / 3) * 3);   // End of even 24-bits chunks
+        final int lineSepLim = dLen - 2;
         int s = offset;
-        final int eEnd = offset + ((sLen / 3) * 3);   // End of even 24-bits chunks
-        for (int d = 0, cc = 0; s < eEnd; ) {
+        for (int d = 0, cc = 0; s < evenEnd; ) {
             // Copy next three bytes into lower 24 bits of int, paying attension to sign.
             int i = (sArr[s++] & 0xff) << 16 | (sArr[s++] & 0xff) << 8 | (sArr[s++] & 0xff);
 
@@ -126,31 +130,35 @@ public class Base64 /* Modified by Evan Saulpaugh */
             dArr[d++] = CA[i & 0x3f];
 
             // Add optional line separator
-            if (lineSep && ++cc == 19 && d < dLen - 2) {
+            if (lineSep && ++cc == 19 && d < lineSepLim) {
                 dArr[d++] = '\r';
                 dArr[d++] = '\n';
                 cc = 0;
             }
         }
 
-        final int sEnd = offset + sLen;
         // Pad and encode last bits if source isn't even 24 bits.
-        final int left = sEnd - s; // 0 - 2.
+        final int end = offset + len;
+        final int left = end - s; // 0 - 2.
         if (left > 0) {
-            int i = ((sArr[eEnd] & 0xff) << 10) | (left == 2 ? ((sArr[sEnd - 1] & 0xff) << 2) : 0);
+            boolean twoLeft = left == 2;
+            int i = (sArr[evenEnd] & 0xff) << 10;
+            if(twoLeft) {
+                i |= (sArr[end - 1] & 0xff) << 2;
+            }
             if(pad) {
                 // Set last four chars
                 dArr[dLen - 4] = CA[i >> 12];
                 dArr[dLen - 3] = CA[(i >>> 6) & 0x3f];
-                dArr[dLen - 2] = left == 2 ? CA[i & 0x3f] : '=';
+                dArr[dLen - 2] = twoLeft ? CA[i & 0x3f] : '=';
                 dArr[dLen - 1] = '=';
             } else {
                 // Set last strRemainder chars
-                int shiftAmount = 12;
-                do {
-                    dArr[dLen - strRemainder] = CA[(i >> shiftAmount) & 0x3f];
-                    shiftAmount -= 6;
-                } while(--strRemainder > 0);
+                int idx = dLen - strRemainder;
+                dArr[idx] = CA[(i >> 12) & 0x3f];
+                if(++idx < dLen) {
+                    dArr[idx] = CA[(i >> 6) & 0x3f];
+                }
             }
         }
         return dArr;

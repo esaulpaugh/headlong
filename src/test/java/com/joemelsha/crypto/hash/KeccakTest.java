@@ -2,11 +2,11 @@ package com.joemelsha.crypto.hash;
 
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
 import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Utils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.spongycastle.crypto.digests.KeccakDigest;
 
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -15,10 +15,8 @@ public class KeccakTest {
     @Test
     public void testMultiUpdate() {
 
-        final Charset ascii = Charset.forName("US-ASCII");
-
-        final byte[] a = "abcdefghijklmnopqrstuvwxyz".getBytes(ascii);
-        final byte[] b = "ABCDEFG".getBytes(ascii);
+        final byte[] a = "abcdefghijklmnopqrstuvwxyz".getBytes(Utils.CHARSET_ASCII);
+        final byte[] b = "ABCDEFG".getBytes(Utils.CHARSET_ASCII);
         final byte[] input = new byte[a.length + b.length];
         System.arraycopy(a, 0, input, 0, a.length);
         System.arraycopy(b, 0, input, a.length, b.length);

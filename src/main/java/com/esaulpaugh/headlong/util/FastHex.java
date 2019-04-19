@@ -107,11 +107,11 @@ public final class FastHex {
     }
 
     public static byte[] decode(String hex) {
-        return decode(hex.getBytes(Strings.CHARSET_ASCII), 0, hex.length());
+        return decode(hex.getBytes(Utils.CHARSET_ASCII), 0, hex.length());
     }
 
     public static byte[] decode(String hex, final int offset, final int length) {
-        return decode(hex.getBytes(Strings.CHARSET_ASCII), offset, length);
+        return decode(hex.getBytes(Utils.CHARSET_ASCII), offset, length);
     }
 }
 

@@ -12,7 +12,6 @@ import static com.esaulpaugh.headlong.util.Utils.EMPTY_BYTE_ARRAY;
 public class Strings {
 
     public static final Charset CHARSET_UTF_8 = Charset.forName("UTF-8");
-    public static final Charset CHARSET_ASCII = Charset.forName("US-ASCII");
 
     public static final int UTF_8 = 0; // 256
     public static final int BASE64 = 1; // 64
