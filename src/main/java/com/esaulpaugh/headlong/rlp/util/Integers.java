@@ -2,6 +2,7 @@ package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
+import com.esaulpaugh.headlong.util.BizarroIntegers;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;

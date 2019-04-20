@@ -15,7 +15,7 @@ public class KeyValuePair implements Comparable<KeyValuePair> {
     public static final String TCP = "tcp";
     public static final String UDP = "udp";
 
-    public static final KeyValuePair[] EMPTY_ARRAY = new KeyValuePair[0];
+//    public static final KeyValuePair[] EMPTY_ARRAY = new KeyValuePair[0];
 
     final byte[] key;
     final byte[] value;

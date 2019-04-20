@@ -48,14 +48,14 @@ public class RLPStreamIteratorTest {
         final PipedOutputStream pos = new PipedOutputStream();
         final PipedInputStream pis = new PipedInputStream(pos, 512);
 
-        RLPStreamIterator iter = new RLPStreamIterator(RLP_STRICT, pis);
+        RLPStreamIterator iter = RLP_STRICT.sequenceStreamIterator(pis);
 
         pos.write(0x81);
         pos.write(0x00);
 
         TestUtils.assertThrown(clazz, "invalid rlp for single byte @ 0", iter::hasNext);
 
-        iter = new RLPStreamIterator(RLP_STRICT, pis);
+        iter = RLP_STRICT.sequenceStreamIterator(pis);
 
         pos.write(0xf8);
         pos.write(0x37);
@@ -82,7 +82,7 @@ public class RLPStreamIteratorTest {
 
         List<RLPItem> collected = RLP_STRICT.collectAll(rlpEncoded);
 
-        RLPStreamIterator iter = new RLPStreamIterator(RLP_STRICT, new ByteArrayInputStream(rlpEncoded));
+        RLPStreamIterator iter = RLP_STRICT.sequenceStreamIterator(new ByteArrayInputStream(rlpEncoded));
 
         List<RLPItem> streamed = new ArrayList<>();
         while (iter.hasNext()) {
@@ -121,7 +121,7 @@ public class RLPStreamIteratorTest {
             try {
                 final PipedInputStream pis = new PipedInputStream(pos, 512);
 
-                RLPStreamIterator iter = new RLPStreamIterator(RLP_STRICT, pis);
+                RLPStreamIterator iter = RLP_STRICT.sequenceStreamIterator(pis);
 
                 senderThread.setPriority(Thread.MAX_PRIORITY);
                 Thread.currentThread().setPriority(Thread.MAX_PRIORITY);

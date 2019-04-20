@@ -1,7 +1,6 @@
-package com.esaulpaugh.headlong.rlp.util;
+package com.esaulpaugh.headlong.util;
 
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
-import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
+import com.esaulpaugh.headlong.rlp.util.Integers;
 
 import java.nio.ByteBuffer;
 
@@ -177,26 +176,26 @@ public class BizarroIntegers {
         return Integers.insertBytes(n, o, (byte) val, b, c, d, e, f, g, h);
     }
 
-    private static byte _getByte(byte[] buffer, int i, int len) throws DecodeException {
+    private static byte _getByte(byte[] buffer, int i, int len) {
         switch (len) {
         case 0: return 0;
         case 1: return buffer[i];
-        default: throw new UnrecoverableDecodeException(new IllegalArgumentException("len is out of range: " + len));
+        default: throw new IllegalArgumentException("len is out of range: " + len);
         }
     }
 
-    private static short _getShort(byte[] buffer, int i, int len) throws DecodeException {
+    private static short _getShort(byte[] buffer, int i, int len) {
         int shiftAmount = 0;
         int val = 0;
         switch (len) { /* cases 2 through 1 fall through */
         case 2: val = buffer[i+1] & 0xFF; shiftAmount = Byte.SIZE; // & 0xFF to promote to int before left shift
         case 1: val |= (buffer[i] & 0xFF) << shiftAmount;
         case 0: return (short) val;
-        default: throw new UnrecoverableDecodeException(new IllegalArgumentException("len is out of range: " + len));
+        default: throw new IllegalArgumentException("len is out of range: " + len);
         }
     }
 
-    public static int _getInt(byte[] buffer, int i, int len) throws DecodeException {
+    public static int _getInt(byte[] buffer, int i, int len) {
         int shiftAmount = 0;
         int val = 0;
         switch (len) { /* cases 4 through 1 fall through */
@@ -205,11 +204,11 @@ public class BizarroIntegers {
         case 2: val |= (buffer[i+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1: val |= (buffer[i] & 0xFF) << shiftAmount;
         case 0: return val;
-        default: throw new UnrecoverableDecodeException(new IllegalArgumentException("len is out of range: " + len));
+        default: throw new IllegalArgumentException("len is out of range: " + len);
         }
     }
 
-    private static long _getLong(final byte[] buffer, final int i, final int len) throws DecodeException {
+    private static long _getLong(final byte[] buffer, final int i, final int len) {
         int shiftAmount = 0;
         long val = 0L;
         switch (len) { /* cases 8 through 1 fall through */
@@ -222,11 +221,11 @@ public class BizarroIntegers {
         case 2: val |= (buffer[i+1] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1: val |= (buffer[i] & 0xFFL) << shiftAmount;
         case 0: return val;
-        default: throw new UnrecoverableDecodeException(new IllegalArgumentException("len is out of range: " + len));
+        default: throw new IllegalArgumentException("len is out of range: " + len);
         }
     }
 
-    public static byte getByte(byte[] buffer, int index, int len) throws DecodeException {
+    public static byte getByte(byte[] buffer, int index, int len) {
         switch (len) {
         case 0: return (byte) 0xFF;
         case 1: return _getByte(buffer, index, 1);
@@ -234,7 +233,7 @@ public class BizarroIntegers {
         }
     }
 
-    public static short getShort(byte[] buffer, int index, int len) throws DecodeException {
+    public static short getShort(byte[] buffer, int index, int len) {
         // do sign extension for negative shorts, i.e. len < 2
         switch (len) {
         case 0: return (short) 0xFFFF;
@@ -244,7 +243,7 @@ public class BizarroIntegers {
         }
     }
 
-    public static int getInt(byte[] buffer, int index, int len) throws DecodeException {
+    public static int getInt(byte[] buffer, int index, int len) {
         // do sign extension for negative ints, i.e. len < 4
         switch (len) {
         case 0: return 0xFFFFFFFF;
@@ -256,7 +255,7 @@ public class BizarroIntegers {
         }
     }
 
-    public static long getLong(final byte[] buffer, final int index, final int len) throws DecodeException {
+    public static long getLong(final byte[] buffer, final int index, final int len) {
         // do sign extension for negative longs, i.e. len < 8
         switch (len) {
         case 0: return 0xFFFFFFFF_FFFFFFFFL;

@@ -1,6 +1,6 @@
 package com.esaulpaugh.headlong.abi.util;
 
-import com.esaulpaugh.headlong.rlp.util.BizarroIntegers;
+import com.esaulpaugh.headlong.util.BizarroIntegers;
 
 import java.math.BigInteger;
 

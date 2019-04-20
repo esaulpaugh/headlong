@@ -195,7 +195,7 @@ public class IntegersTest {
         Assert.assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, src[1], src[2], src[3] }, ten);
     }
 
-    static class IntTask extends RecursiveAction {
+    public static class IntTask extends RecursiveAction {
 
         private static final int THRESHOLD = 250_000_000;
 
@@ -238,7 +238,7 @@ public class IntegersTest {
         }
     }
 
-    static class LenIntTask extends IntTask {
+    public static class LenIntTask extends IntTask {
 
         protected LenIntTask(long start, long end) {
             super(start, end);

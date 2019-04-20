@@ -22,8 +22,13 @@ public final class RLPDecoder {
         this.lenient = lenient;
     }
 
-    public RLPStreamIterator sequenceStreamIterator(RLPDecoder decoder, InputStream rlpStream) {
-        return new RLPStreamIterator(decoder, rlpStream);
+    /**
+     * Returns an iterator over a stream of RLP items.
+     * @param rlpStream the stream of RLP items
+     * @return  an iterator over the items in the stream
+     */
+    public RLPStreamIterator sequenceStreamIterator(InputStream rlpStream) {
+        return new RLPStreamIterator(RLPDecoder.this, rlpStream);
     }
 
     public RLPIterator sequenceIterator(byte[] buffer) {
@@ -35,7 +40,7 @@ public final class RLPDecoder {
      *
      * @param buffer    the array containing the sequence
      * @param index the index of the sequence
-     * @return  an iterator over the elements in the sequence
+     * @return  an iterator over the items in the sequence
      */
     public RLPIterator sequenceIterator(byte[] buffer, int index) {
         return new RLPIterator(RLPDecoder.this, buffer, index, buffer.length);

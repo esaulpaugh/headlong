@@ -1,7 +1,7 @@
-package com.esaulpaugh.headlong.rlp.util;
+package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+import com.esaulpaugh.headlong.rlp.util.IntegersTest;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 public class BizarroIntegersTest {
 
     @Test
-    public void putGetByte() throws DecodeException {
+    public void putGetByte() {
         byte[] one = new byte[1];
         for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
             byte b = (byte) i;
@@ -23,7 +23,7 @@ public class BizarroIntegersTest {
     }
 
     @Test
-    public void putGetShort() throws DecodeException {
+    public void putGetShort() {
         byte[] two = new byte[2];
         for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
             short s = (short) i;
@@ -39,7 +39,7 @@ public class BizarroIntegersTest {
     }
 
     @Test
-    public void putGetLong() throws DecodeException {
+    public void putGetLong() {
         final Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
         final byte[] eight = new byte[8];
         final long _2_24 = (long) Math.pow(2.0, Short.SIZE + Byte.SIZE);
@@ -61,7 +61,7 @@ public class BizarroIntegersTest {
         testLongs(1000, rand::nextLong, eight);
     }
 
-    private static void testLongs(int iterations, Supplier<Long> supplier, byte[] eight) throws DecodeException {
+    private static void testLongs(int iterations, Supplier<Long> supplier, byte[] eight) {
 //        System.out.println(n);
 //        System.out.print(lo >= 0 ? Integers.len(lo) : BizarroIntegers.len(lo));
         for (long i = 0; i < iterations; i++) {
@@ -133,16 +133,12 @@ public class BizarroIntegersTest {
         @Override
         protected void doWork() {
             byte[] four = new byte[4];
-            try {
-                final long end = this.end;
-                for (long lo = this.start; lo <= end; lo++) {
-                    int i = (int) lo;
-                    int len = BizarroIntegers.putInt(i, four, 0);
-                    int r = BizarroIntegers.getInt(four, 0, len);
-                    Assert.assertEquals(i, r);
-                }
-            } catch (DecodeException e) {
-                throw new RuntimeException(e);
+            final long end = this.end;
+            for (long lo = this.start; lo <= end; lo++) {
+                int i = (int) lo;
+                int len = BizarroIntegers.putInt(i, four, 0);
+                int r = BizarroIntegers.getInt(four, 0, len);
+                Assert.assertEquals(i, r);
             }
         }
     }
