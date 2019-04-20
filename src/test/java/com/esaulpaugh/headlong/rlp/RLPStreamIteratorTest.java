@@ -99,7 +99,7 @@ public class RLPStreamIteratorTest {
         private final Object receiver = new Object();
         private final Object sender;
 
-        private long zero;
+        private final long zero;
         private final PipedOutputStream pos;
         private final AtomicBoolean canReceive;
 

@@ -28,7 +28,7 @@ import java.security.MessageDigest;
 public class Keccak extends MessageDigest {
 
     private static final int MAX_STATE_SIZE = 1600;
-    private static final int MAX_STATE_SIZE_WORDS = MAX_STATE_SIZE / 64;
+    private static final int MAX_STATE_SIZE_WORDS = MAX_STATE_SIZE / Long.SIZE;
 
     protected final int digestSizeBits;
     protected final transient int digestSizeBytes;
@@ -105,7 +105,7 @@ public class Keccak extends MessageDigest {
 
     @Override
     protected void engineUpdate(byte input) {
-        updateBits(input & 0xFFL, 8);
+        updateBits(input & 0xFFL, Byte.SIZE);
     }
 
     @Override
