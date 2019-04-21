@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Objects;
 
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
@@ -28,8 +29,11 @@ public class Event implements ABIObject {
     }
 
     public Event(String name, TupleType params, boolean[] indexed, boolean anonymous) {
-        this.name = name;
-        this.inputs = params;
+        this.name = Objects.requireNonNull(name);
+        this.inputs = Objects.requireNonNull(params);
+        if(indexed.length != inputs.elementTypes.length) {
+            throw new IllegalArgumentException("indexed.length doesn't match number of inputs");
+        }
         this.indexManifest = Arrays.copyOf(indexed, indexed.length);
         this.anonymous = anonymous;
     }
@@ -71,10 +75,25 @@ public class Event implements ABIObject {
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        inputs.toString(sb);
-        return sb.toString();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Event event = (Event) o;
+
+        if (anonymous != event.anonymous) return false;
+        if (!name.equals(event.name)) return false;
+        if (!inputs.equals(event.inputs)) return false;
+        return Arrays.equals(indexManifest, event.indexManifest);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + inputs.hashCode();
+        result = 31 * result + Arrays.hashCode(indexManifest);
+        result = 31 * result + (anonymous ? 1 : 0);
+        return result;
     }
 
     @Override

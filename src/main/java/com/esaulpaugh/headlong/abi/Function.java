@@ -12,7 +12,6 @@ import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -48,9 +47,9 @@ public class Function implements ABIObject, Serializable {
         }
     }
 
-    private static final Pattern NON_ASCII = Pattern.compile("[^\\p{ASCII}]+");
+    private static final Pattern NON_ASCII_CHAR = Pattern.compile("[^\\p{ASCII}]+");
 
-    private static final Pattern ILLEGAL_NAME = Pattern.compile("[^\\p{ASCII}&&[^(]]+");
+    private static final Pattern ILLEGAL_NAME_CHAR = Pattern.compile("[^\\p{ASCII}&&[^(]]+");
 
     public static final int SELECTOR_LEN = 4;
 
@@ -70,7 +69,7 @@ public class Function implements ABIObject, Serializable {
 
     Function(Type type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) throws ParseException {
         this.type = Objects.requireNonNull(type);
-        this.name = validateNameNullable(ILLEGAL_NAME, name);
+        this.name = name != null ? Utils.validateChars(ILLEGAL_NAME_CHAR, name) : "";
         this.inputTypes = inputTypes != null ? inputTypes : TupleType.EMPTY;
         this.outputTypes = outputTypes != null ? outputTypes : TupleType.EMPTY;
         this.stateMutability = stateMutability;
@@ -105,28 +104,12 @@ public class Function implements ABIObject, Serializable {
         final TupleType tupleType = TupleTypeParser.parseTupleType(signature.substring(split));
 
         this.type = Objects.requireNonNull(type);
-        this.name = validateNameNonNull(NON_ASCII, signature.substring(0, split));
+        this.name = Utils.validateChars(NON_ASCII_CHAR, signature.substring(0, split));
         this.inputTypes = tupleType;
         this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
         this.stateMutability = null;
         this.hashAlgorithm = messageDigest.getAlgorithm();
         generateSelector(messageDigest);
-    }
-
-    private static String validateNameNullable(Pattern pattern, String name) throws ParseException {
-        return name != null ? validateNameNonNull(pattern, name) : "";
-    }
-
-    private static String validateNameNonNull(Pattern pattern, String name) throws ParseException {
-        Matcher matcher = pattern.matcher(name);
-        if (matcher.find()) {
-            final char c = name.charAt(matcher.start());
-            throw new ParseException(
-                    "illegal char " + Utils.escapeChar(c) + " \'" + c + "\' @ index " + matcher.start(),
-                    matcher.start()
-            );
-        }
-        return name;
     }
 
     private void generateSelector(MessageDigest messageDigest) {

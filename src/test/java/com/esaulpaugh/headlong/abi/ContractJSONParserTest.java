@@ -281,6 +281,17 @@ public class ContractJSONParserTest {
         TestUtils.assertThrown(IllegalArgumentException.class, "array \"inputs\" null or not found", runnable);
 
         jsonObject.add("inputs", new JsonArray());
+
+        TestUtils.assertThrown(NullPointerException.class, runnable);
+
+        jsonObject.add("name", new JsonPrimitive("a_name"));
+
         runnable.run();
+
+        Event expectedA = new Event("a_name", "()", new boolean[0]);
+        Event expectedB = new Event("a_name", TupleType.EMPTY, new boolean[0], false);
+
+        Assert.assertEquals(expectedA, Event.fromJsonObject(jsonObject));
+        Assert.assertEquals(expectedB, expectedA);
     }
 }

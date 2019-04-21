@@ -1,7 +1,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.Integers;
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.util.BizarroIntegers;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.Assert;
@@ -128,7 +127,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testSignExtendInt() throws DecodeException {
+    public void testSignExtendInt() {
         int expected = BizarroIntegers.getInt(FastHex.decode("8FFFFF"), 0, 3);
         int result = Integers.getInt(FastHex.decode("8FFFFF"), 0, 3);
         Assert.assertTrue(result < 0);
@@ -136,7 +135,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testSignExtendLong() throws DecodeException {
+    public void testSignExtendLong() {
         long expectedL = BizarroIntegers.getLong(FastHex.decode("8FFFFFFFFF"), 0, 5);
         long resultL = Integers.getLong(FastHex.decode("8FFFFFFFFF"), 0, 5);
         Assert.assertTrue(resultL < 0);
