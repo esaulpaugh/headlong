@@ -1,7 +1,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.esaulpaugh/headlong.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.esaulpaugh%22%20AND%20a:%22headlong%22)
 [![Gitter](https://badges.gitter.im/esaulpaugh-headlong/community.svg)](https://gitter.im/esaulpaugh-headlong/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-Contract ABI and Recursive Length Prefix made easy in Java (or Android). Everything heavily optimized for maximum throughput (ABI function call encoding up to 500x faster than a popular competitor and one function creation plus one encode is up to 60x faster (`"f(uint,uint32[],bytes10,bytes)"`, openjdk 11.0.1)).
+Contract ABI and Recursive Length Prefix made easy for the JVM. Everything heavily optimized for maximum throughput (ABI function call encoding up to 500x faster than a popular competitor. One function creation plus one encode up to 60x faster (`"f(uint,uint32[],bytes10,bytes)"`, openjdk 11.0.1)).
 
 ABI spec: https://solidity.readthedocs.io/en/latest/abi-spec.html
 
@@ -76,8 +76,6 @@ public byte[] toRLP() {
 
 Also includes a fast hex codec and an optimized Keccak implementation.
 
-See also the example app that demos the ABI encoder: https://github.com/esaulpaugh/headlong-android
-
 ### Build
 
 Now available in Maven Central Repository.
@@ -87,24 +85,24 @@ Or build locally:
 Clone the project and install to your local maven repository using `gradle publishToMavenLocal` or `mvn install`. Then you can use one of these:
 
 ```groovy
-implementation 'com.esaulpaugh:headlong:1.4.1-SNAPSHOT'
+implementation 'com.esaulpaugh:headlong:1.4.2-SNAPSHOT'
 ```
 
 ```xml
 <dependency>
     <groupId>com.esaulpaugh</groupId>
     <artifactId>headlong</artifactId>
-    <version>1.4.1-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
 </dependency>
 ```
 Alternatively:
 
-* Run `gradle build` or `gradle jar` which output to /build/libs
-* Use `mvn package` which outputs to /target
+* Run `gradle build` or `gradle jar` which output to `/build/libs`
+* Use `mvn package` which outputs to `/target`
 * Add headlong as a project dependency
 
-Depends on gson. Tests should take less than one minute to run. Test packages require junit. Jar size is ~124 KB as of 04/07/19.
+Depends on gson. Tests should take less than one minute to run. Test packages require junit and spongycastle. Jar size is ~115 KB as of 04/21/19.
 
 See the wiki for more, such as TupleTypes, packed encoding, RLP Lists, and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
-Licensed under Apache 2.0
+Licensed under Apache 2.0 terms
