@@ -1,14 +1,19 @@
-package com.esaulpaugh.headlong.rlp;
+package com.esaulpaugh.headlong.rlp.eip778;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.rlp.eip778.KeyValuePair;
-import com.esaulpaugh.headlong.rlp.eip778.Record;
+import com.esaulpaugh.headlong.rlp.RLPDecoder;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.*;
+import java.util.HashSet;
+import java.util.Set;
+
+import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.ID;
+import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.IP;
+import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.SECP256K1;
+import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.UDP;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
@@ -30,11 +35,6 @@ public class EIP778Test {
         public byte[] sign(byte[] message, int off, int len) {
             return SIG;
         }
-
-        @Override
-        public void sign(byte[] message, int off, int len, byte[] dest, int destIdx) {
-            System.arraycopy(SIG, 0, dest, destIdx, SIG.length);
-        }
     };
 
     private static final Record VECTOR = new Record(
@@ -49,27 +49,38 @@ public class EIP778Test {
 
     @Test
     public void testEip778() throws DecodeException {
-
-        long seq = 1L;
-
-        KeyValuePair[] pairs = new KeyValuePair[] {
+        final KeyValuePair[] pairs = new KeyValuePair[] {
                 new KeyValuePair(IP, "7f000001", HEX),
                 new KeyValuePair(UDP, "765f", HEX),
                 new KeyValuePair(ID, "v4", UTF_8),
                 new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
         };
 
-        for (KeyValuePair p : pairs) {
-            System.out.println(p);
-        }
-
-        Record record = new Record(seq, pairs, SIGNER);
-
-        System.out.println(record);
+        Record record = new Record(1L, pairs, SIGNER);
 
         Assert.assertEquals(VECTOR.getRecord(RLPDecoder.RLP_STRICT), record.getRecord(RLPDecoder.RLP_STRICT));
         Assert.assertEquals(VECTOR.toString(), record.toString());
         Assert.assertEquals(VECTOR, record);
+    }
+
+    @Test
+    public void nineLengths() throws DecodeException {
+        final KeyValuePair[] pairs = new KeyValuePair[] {};
+        Set<Integer> recordLengths = new HashSet<>();
+        for (long seq = 0, p = 0; p <= 64; p +=8, seq = (long) Math.pow(2.0, p)) {
+            long temp = seq - 2;
+            int i = 0;
+            do {
+                if(temp >= 0) {
+                    Record r = new Record(temp, pairs, SIGNER);
+                    int len = r.getRecord(RLPDecoder.RLP_STRICT).encodingLength();
+                    System.out.println(temp + " -> " + len);
+                    recordLengths.add(len);
+                }
+                temp++;
+            } while (++i < 4);
+        }
+        Assert.assertEquals(9, recordLengths.size());
     }
 
     @Test

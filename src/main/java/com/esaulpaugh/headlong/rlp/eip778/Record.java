@@ -5,7 +5,6 @@ import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPList;
 import com.esaulpaugh.headlong.rlp.RLPListIterator;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
-import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.util.FastHex;
 
 import java.util.Arrays;
@@ -24,10 +23,9 @@ public class Record {
     private final byte[] record;
 
     public Record(long seq, KeyValuePair[] pairs, Signer signer) {
-
         final int signatureLen = signer.signatureLength();
         final int signatureItemLen = RLPEncoder.prefixLength(signatureLen) + signatureLen;
-        final long payloadLenLong = Integers.len(seq) + RLPEncoder.dataLen(pairs);
+        final long payloadLenLong = RLPEncoder.encodedLen(seq) + RLPEncoder.dataLen(pairs);
         final long recordListPayloadLenLong = signatureItemLen + payloadLenLong;
         final int recordPrefixLen = RLPEncoder.prefixLength(recordListPayloadLenLong);
         final long recordLenLong = recordPrefixLen + recordListPayloadLenLong;
@@ -57,7 +55,6 @@ public class Record {
     public interface Signer {
         int signatureLength();
         byte[] sign(byte[] message, int off, int len);
-        void sign(byte[] message, int off, int len, byte[] dest, int destIdx);
     }
 
     @Override

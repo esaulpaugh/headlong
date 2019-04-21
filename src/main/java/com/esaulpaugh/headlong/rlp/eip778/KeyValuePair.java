@@ -6,7 +6,6 @@ import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.util.Strings.*;
 
-
 public class KeyValuePair implements Comparable<KeyValuePair> {
 
     public static final String ID = "id";

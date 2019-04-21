@@ -12,6 +12,14 @@ import static com.esaulpaugh.headlong.rlp.DataType.*;
  */
 public class RLPEncoder {
 
+    public static long encodedLen(long val) {
+        int dataLen = Integers.len(val);
+        if(dataLen == 1) {
+            return (byte) val >= 0x00 ? 1 : 2;
+        }
+        return 1 + dataLen;
+    }
+
     private static boolean isLong(long dataLen) {
         return dataLen >= MIN_LONG_DATA_LEN;
     }
@@ -98,15 +106,28 @@ public class RLPEncoder {
         throw new IllegalArgumentException("unsupported object type: " + item.getClass().getName());
     }
 
+    private static int encodeString(long val, byte[] dest, int destIndex) {
+        final int dataLen = Integers.len(val);
+        // short string
+        if (dataLen == 1) {
+            byte first = (byte) val;
+            if (first >= 0x00) { // same as (first & 0xFF) < 0x80
+                dest[destIndex++] = first;
+                return destIndex;
+            } else {
+                dest[destIndex++] = (byte) (STRING_SHORT_OFFSET + dataLen);
+                dest[destIndex++] = first;
+                return destIndex;
+            }
+        }
+        // dataLen is 0 or 2-8
+        dest[destIndex++] = (byte) (STRING_SHORT_OFFSET + dataLen);
+        Integers.putLong(val, dest, destIndex);
+        return destIndex + dataLen;
+    }
+
     private static int encodeString(byte[] data, byte[] dest, int destIndex) {
         final int dataLen = data.length;
-        if (isLong(dataLen)) { // long string
-            int n = Integers.putLong(dataLen, dest, destIndex + 1);
-            dest[destIndex] = (byte) (STRING_LONG_OFFSET + (byte) n);
-            destIndex += 1 + n;
-            System.arraycopy(data, 0, dest, destIndex, dataLen);
-            return destIndex + dataLen;
-        }
         // short string
         if (dataLen == 1) {
             byte first = data[0];
@@ -114,13 +135,20 @@ public class RLPEncoder {
                 dest[destIndex++] = first;
                 return destIndex;
             } else {
-                dest[destIndex++] = (byte) (STRING_SHORT_OFFSET + (byte) dataLen);
+                dest[destIndex++] = (byte) (STRING_SHORT_OFFSET + dataLen);
                 dest[destIndex++] = first;
                 return destIndex;
             }
         }
+        if (isLong(dataLen)) { // long string
+            int n = Integers.putLong(dataLen, dest, destIndex + 1);
+            dest[destIndex] = (byte) (STRING_LONG_OFFSET + n);
+            destIndex += 1 + n;
+            System.arraycopy(data, 0, dest, destIndex, dataLen);
+            return destIndex + dataLen;
+        }
         // dataLen is 0 or 2-55
-        dest[destIndex++] = (byte) (STRING_SHORT_OFFSET + (byte) dataLen);
+        dest[destIndex++] = (byte) (STRING_SHORT_OFFSET + dataLen);
         // 56-case switch statement is faster than for loop, but arraycopy is faster than both
         System.arraycopy(data, 0, dest, destIndex, dataLen);
         return destIndex + dataLen;
@@ -155,8 +183,7 @@ public class RLPEncoder {
     }
 
     private static int encodeSequentially(long seq, KeyValuePair[] pairs, byte[] dest, int destIndex) {
-        byte[] seqBytes = Integers.toBytes(seq);
-        destIndex = encodeItem(seqBytes, dest, destIndex);
+        destIndex = encodeString(seq, dest, destIndex);
         for (KeyValuePair kvp : pairs) {
             destIndex = encodeKeyValuePair(kvp, dest, destIndex);
         }
@@ -322,6 +349,9 @@ public class RLPEncoder {
     }
 
     public static void insertRecordContentList(int dataLen, long seq, KeyValuePair[] pairs, byte[] record, int offset) {
+        if(seq < 0) {
+            throw new IllegalArgumentException("negative seq");
+        }
         Arrays.sort(pairs);
         encodeList(dataLen, seq, pairs, record, offset);
     }
