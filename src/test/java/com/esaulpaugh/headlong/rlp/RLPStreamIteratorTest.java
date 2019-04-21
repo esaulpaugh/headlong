@@ -194,7 +194,7 @@ public class RLPStreamIteratorTest {
         }
 
         private void assertNoNext(RLPStreamIterator iter) throws IOException, UnrecoverableDecodeException {
-            RLPStreamIteratorTest.assertNoNext(zero, ++readNum, iter);
+            RLPStreamIteratorTest.assertNoNext(zero, iter);
         }
 
         private void assertReadSuccess(RLPStreamIterator iter) throws IOException, UnrecoverableDecodeException {
@@ -271,11 +271,11 @@ public class RLPStreamIteratorTest {
         logRead(zero, readNum, true);
     }
 
-    private static void assertNoNext(long zero, int readNum, RLPStreamIterator iter) throws IOException, UnrecoverableDecodeException {
+    private static void assertNoNext(long zero, RLPStreamIterator iter) throws IOException, UnrecoverableDecodeException {
         if(iter.hasNext()) {
             throw new AssertionError("unexpected next(): " + iter.next().asString(HEX) + ", " + timestamp(zero));
         }
-        logRead(zero, readNum, false);
+        logRead(zero, -1, false);
     }
 
     private static void logWrite(long zero, String message) {
