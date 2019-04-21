@@ -38,11 +38,6 @@ public class KeyValuePair implements Comparable<KeyValuePair> {
     }
 
     @Override
-    public String toString() {
-        return encode(key, UTF_8) + " --> " + encode(value, Strings.HEX);
-    }
-
-    @Override
     public int hashCode() {
         return Arrays.hashCode(key);
     }
@@ -53,6 +48,11 @@ public class KeyValuePair implements Comparable<KeyValuePair> {
         if (o == null || getClass() != o.getClass()) return false;
         KeyValuePair that = (KeyValuePair) o;
         return Arrays.equals(key, that.key);
+    }
+
+    @Override
+    public String toString() {
+        return encode(key, UTF_8) + " --> " + encode(value, Strings.HEX);
     }
 
     @Override

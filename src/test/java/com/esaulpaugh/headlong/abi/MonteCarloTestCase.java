@@ -65,9 +65,8 @@ public class MonteCarloTestCase implements Serializable {
         }
 
         @Override
-        public String toString() {
-            // (seed,mtd,mtl,mad,mal)
-            return "(" + seed + ',' + maxTupleDepth + ',' + maxTupleLen + ',' + maxArrayDepth + ',' + maxArrayLen + ')';
+        public int hashCode() {
+            return Objects.hash(maxTupleDepth, maxTupleLen, maxArrayLen, maxArrayDepth, seed);
         }
 
         @Override
@@ -83,8 +82,9 @@ public class MonteCarloTestCase implements Serializable {
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(maxTupleDepth, maxTupleLen, maxArrayLen, maxArrayDepth, seed);
+        public String toString() {
+            // (seed,mtd,mtl,mad,mal)
+            return "(" + seed + ',' + maxTupleDepth + ',' + maxTupleLen + ',' + maxArrayDepth + ',' + maxArrayLen + ')';
         }
     }
 

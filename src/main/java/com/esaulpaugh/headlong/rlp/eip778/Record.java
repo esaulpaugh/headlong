@@ -58,6 +58,19 @@ public class Record {
     }
 
     @Override
+    public int hashCode() {
+        return Arrays.hashCode(record);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Record record1 = (Record) o;
+        return Arrays.equals(record, record1.record);
+    }
+
+    @Override
     public String toString() {
         try {
             StringBuilder sb = new StringBuilder();
@@ -74,18 +87,5 @@ public class Record {
         } catch (DecodeException de) {
             throw new RuntimeException(de);
         }
-    }
-
-    @Override
-    public int hashCode() {
-        return Arrays.hashCode(record);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Record record1 = (Record) o;
-        return Arrays.equals(record, record1.record);
     }
 }

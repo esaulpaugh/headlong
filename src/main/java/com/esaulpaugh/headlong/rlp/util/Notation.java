@@ -262,14 +262,14 @@ public class Notation {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return other instanceof Notation
-                && value.equals(((Notation) other).value);
+    public int hashCode() {
+        return value.hashCode();
     }
 
     @Override
-    public int hashCode() {
-        return value.hashCode();
+    public boolean equals(Object other) {
+        return other instanceof Notation
+                && value.equals(((Notation) other).value);
     }
 
     @Override

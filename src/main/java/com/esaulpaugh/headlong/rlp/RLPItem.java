@@ -221,13 +221,17 @@ public abstract class RLPItem {
         return decoder.wrap(encoding(), 0, Integer.MAX_VALUE);
     }
 
+    /**
+     * @see Arrays#hashCode(byte[])
+     */
     @Override
-    public String toString() {
-        try {
-            return Notation.forEncoding(buffer, index, endIndex).toString();
-        } catch (DecodeException e) {
-            throw new RuntimeException(e);
+    public int hashCode() {
+
+        int result = 1;
+        for (int i = index; i < endIndex; i++) {
+            result = 31 * result + buffer[i];
         }
+        return result;
     }
 
     @Override
@@ -256,16 +260,12 @@ public abstract class RLPItem {
         return true;
     }
 
-    /**
-     * @see Arrays#hashCode(byte[])
-     */
     @Override
-    public int hashCode() {
-
-        int result = 1;
-        for (int i = index; i < endIndex; i++) {
-            result = 31 * result + buffer[i];
+    public String toString() {
+        try {
+            return Notation.forEncoding(buffer, index, endIndex).toString();
+        } catch (DecodeException e) {
+            throw new RuntimeException(e);
         }
-        return result;
     }
 }

@@ -82,11 +82,6 @@ public class Student implements RLPEncodeable, ABIEncodeable {
     }
 
     @Override
-    public String toString() {
-        return name + ", " + gpa + ", " + new BigInteger(publicKey) + ", $" + balance;
-    }
-
-    @Override
     public int hashCode() {
         return Arrays.deepHashCode(new Object[] { name, gpa, publicKey, balance });
     }
@@ -103,6 +98,11 @@ public class Student implements RLPEncodeable, ABIEncodeable {
                 && Math.abs(gpa - other.gpa) < 0.00005f
                 && Arrays.equals(publicKey, other.publicKey)
                 && Objects.equals(balance, other.balance);
+    }
+
+    @Override
+    public String toString() {
+        return name + ", " + gpa + ", " + new BigInteger(publicKey) + ", $" + balance;
     }
 
     @Override
