@@ -12,9 +12,6 @@ import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.*;
 
-/**
- * Experimental. Unoptimized.
- */
 public class ContractJSONParser {
 
     private static final String NAME = "name";
