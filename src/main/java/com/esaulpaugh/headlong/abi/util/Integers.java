@@ -1,7 +1,5 @@
 package com.esaulpaugh.headlong.abi.util;
 
-import com.esaulpaugh.headlong.util.BizarroIntegers;
-
 import java.math.BigInteger;
 
 public class Integers {

@@ -6,6 +6,7 @@ import com.esaulpaugh.headlong.rlp.RLPList;
 import com.esaulpaugh.headlong.rlp.RLPListIterator;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Strings;
 
 import java.util.Arrays;
 
@@ -75,7 +76,7 @@ public class Record {
         try {
             StringBuilder sb = new StringBuilder();
             sb.append("record len = ").append(record.length).append('\n');
-            sb.append("record = ").append(FastHex.encodeToString(record)).append('\n');
+            sb.append("record = ").append(Strings.encode(record)).append('\n');
 
             RLPListIterator iter = RLP_STRICT.listIterator(record);
             sb.append("signature = ").append(iter.next().asString(HEX)).append('\n');

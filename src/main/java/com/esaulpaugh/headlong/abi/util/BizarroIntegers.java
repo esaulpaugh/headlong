@@ -1,4 +1,4 @@
-package com.esaulpaugh.headlong.util;
+package com.esaulpaugh.headlong.abi.util;
 
 import com.esaulpaugh.headlong.rlp.util.Integers;
 

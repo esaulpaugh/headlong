@@ -20,8 +20,12 @@ public class RLPEncoder {
         return 1 + dataLen;
     }
 
-    private static boolean isLong(long dataLen) {
-        return dataLen >= MIN_LONG_DATA_LEN;
+    public static long dataLen(KeyValuePair[] pairs) {
+        long total = 0;
+        for (KeyValuePair kvp : pairs) {
+            total += itemEncodedLen(kvp.getKey()) + itemEncodedLen(kvp.getValue());
+        }
+        return total;
     }
 
     public static int prefixLength(long dataLen) {
@@ -32,18 +36,22 @@ public class RLPEncoder {
         }
     }
 
+    public static int insertListPrefix(long dataLen, byte[] dest, int destIndex) {
+        return isLong(dataLen)
+                ? encodeLongListPrefix(dataLen, dest, destIndex)
+                : encodeShortListPrefix(dataLen, dest, destIndex);
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    private static boolean isLong(long dataLen) {
+        return dataLen >= MIN_LONG_DATA_LEN;
+    }
+
     private static long totalEncodedLen(Iterable<?> objects) {
         long total = 0;
         for (Object obj : objects) {
             total += itemEncodedLen(obj);
-        }
-        return total;
-    }
-
-    public static long dataLen(KeyValuePair[] pairs) {
-        long total = 0;
-        for (KeyValuePair kvp : pairs) {
-            total += itemEncodedLen(kvp.getKey()) + itemEncodedLen(kvp.getValue());
         }
         return total;
     }
@@ -157,12 +165,6 @@ public class RLPEncoder {
     private static int encodeList(long dataLen, Iterable<?> elements, byte[] dest, int destIndex) {
         destIndex = insertListPrefix(dataLen, dest, destIndex);
         return encodeSequentially(elements, dest, destIndex);
-    }
-
-    public static int insertListPrefix(long dataLen, byte[] dest, int destIndex) {
-        return isLong(dataLen)
-                ? encodeLongListPrefix(dataLen, dest, destIndex)
-                : encodeShortListPrefix(dataLen, dest, destIndex);
     }
 
     private static int encodeLongListPrefix(final long dataLen, byte[] dest, final int destIndex) {

@@ -1,7 +1,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.Integers;
-import com.esaulpaugh.headlong.util.BizarroIntegers;
+import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.Assert;
 import org.junit.Test;
