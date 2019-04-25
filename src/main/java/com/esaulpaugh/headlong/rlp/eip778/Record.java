@@ -2,10 +2,10 @@ package com.esaulpaugh.headlong.rlp.eip778;
 
 import com.esaulpaugh.headlong.rlp.RLPDecoder;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
+import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
 import com.esaulpaugh.headlong.rlp.RLPListIterator;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
-import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.util.Arrays;
@@ -49,13 +49,48 @@ public class Record {
         this.record = Arrays.copyOf(record, record.length);
     }
 
-    public RLPList getRecord(RLPDecoder decoder) throws DecodeException {
-        return decoder.wrapList(record);
+    RLPList getRecord() throws DecodeException {
+        return RLP_STRICT.wrapList(record);
+    }
+
+    public RLPItem getSignature() throws DecodeException {
+        return RLP_STRICT.wrapList(record, 0).iterator(RLP_STRICT).next();
+    }
+
+    public RLPList getContent() throws DecodeException {
+        return RLP_STRICT.wrapList(getContent(RLP_STRICT.wrapList(record, 0)));
+    }
+
+    private byte[] getSignature(RLPList recordList) throws DecodeException {
+        return recordList.iterator(RLP_STRICT).next().data();
+    }
+
+    private byte[] getContent(RLPList recordList) throws DecodeException {
+        int elementsIndex = recordList.iterator(RLP_STRICT).next().endIndex;
+        int dataLen = recordList.encodingLength() - elementsIndex;
+        byte[] content = new byte[RLPEncoder.prefixLength(dataLen) + dataLen];
+        int prefixLen = RLPEncoder.insertListPrefix(dataLen, content, 0);
+        System.arraycopy(record, elementsIndex, content, prefixLen, dataLen);
+        return content;
+    }
+
+    public RLPList decode(Verifier verifier) throws DecodeException {
+        RLPList recordList = RLPDecoder.RLP_STRICT.wrapList(record, 0);
+        byte[] signature = getSignature(recordList);
+        byte[] content = getContent(recordList);
+        if(verifier.verify(signature, content)) { // verify content
+            return RLPDecoder.RLP_STRICT.wrapList(content);
+        }
+        return null;
     }
 
     public interface Signer {
         int signatureLength();
         byte[] sign(byte[] message, int off, int len);
+    }
+
+    public interface Verifier {
+        boolean verify(byte[] signature, byte[] content) throws DecodeException;
     }
 
     @Override

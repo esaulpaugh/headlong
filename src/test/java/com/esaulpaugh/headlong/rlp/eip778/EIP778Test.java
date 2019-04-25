@@ -2,6 +2,8 @@ package com.esaulpaugh.headlong.rlp.eip778;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.rlp.RLPDecoder;
+import com.esaulpaugh.headlong.rlp.RLPList;
+import com.esaulpaugh.headlong.rlp.RLPListIterator;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.Assert;
@@ -58,9 +60,25 @@ public class EIP778Test {
 
         Record record = new Record(1L, pairs, SIGNER);
 
-        Assert.assertEquals(VECTOR.getRecord(RLPDecoder.RLP_STRICT), record.getRecord(RLPDecoder.RLP_STRICT));
+        Assert.assertEquals(VECTOR.getSignature(), record.getSignature());
+        Assert.assertEquals(VECTOR.getContent(), record.getContent());
+        Assert.assertEquals(VECTOR.getRecord(), record.getRecord());
         Assert.assertEquals(VECTOR.toString(), record.toString());
         Assert.assertEquals(VECTOR, record);
+
+        RLPList content = record.decode((s,c) -> true);
+        System.out.println("verified = " + content);
+        if(content != null) {
+            RLPListIterator iter = content.iterator(RLPDecoder.RLP_STRICT);
+            System.out.println("seq = " + iter.next().asLong());
+
+            KeyValuePair[] decodedPairs = new KeyValuePair[pairs.length];
+            int i = 0;
+            while (iter.hasNext()) {
+                decodedPairs[i++] = new KeyValuePair(iter.next().data(), iter.next().data());
+            }
+            Assert.assertArrayEquals(pairs, decodedPairs);
+        }
     }
 
     @Test
@@ -73,7 +91,7 @@ public class EIP778Test {
             do {
                 if(temp >= 0) {
                     Record r = new Record(temp, pairs, SIGNER);
-                    int len = r.getRecord(RLPDecoder.RLP_STRICT).encodingLength();
+                    int len = r.getRecord().encodingLength();
                     System.out.println(temp + " -> " + len);
                     recordLengths.add(len);
                 }
