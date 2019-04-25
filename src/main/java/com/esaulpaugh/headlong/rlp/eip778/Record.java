@@ -1,10 +1,6 @@
 package com.esaulpaugh.headlong.rlp.eip778;
 
-import com.esaulpaugh.headlong.rlp.RLPDecoder;
-import com.esaulpaugh.headlong.rlp.RLPEncoder;
-import com.esaulpaugh.headlong.rlp.RLPItem;
-import com.esaulpaugh.headlong.rlp.RLPList;
-import com.esaulpaugh.headlong.rlp.RLPListIterator;
+import com.esaulpaugh.headlong.rlp.*;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 
@@ -54,30 +50,26 @@ public class Record {
     }
 
     public RLPItem getSignature() throws DecodeException {
-        return RLP_STRICT.wrapList(record, 0).iterator(RLP_STRICT).next();
+        return RLP_STRICT.listIterator(record).next();
     }
 
     public RLPList getContent() throws DecodeException {
-        return RLP_STRICT.wrapList(getContent(RLP_STRICT.wrapList(record, 0)));
+        RLPItem signatureItem = RLP_STRICT.listIterator(record).next();
+        return RLP_STRICT.wrapList(getContent(signatureItem.endIndex));
     }
 
-    private byte[] getSignature(RLPList recordList) throws DecodeException {
-        return recordList.iterator(RLP_STRICT).next().data();
-    }
-
-    private byte[] getContent(RLPList recordList) throws DecodeException {
-        int elementsIndex = recordList.iterator(RLP_STRICT).next().endIndex;
-        int dataLen = recordList.encodingLength() - elementsIndex;
+    private byte[] getContent(int index) {
+        int dataLen = record.length - index;
         byte[] content = new byte[RLPEncoder.prefixLength(dataLen) + dataLen];
         int prefixLen = RLPEncoder.insertListPrefix(dataLen, content, 0);
-        System.arraycopy(record, elementsIndex, content, prefixLen, dataLen);
+        System.arraycopy(record, index, content, prefixLen, dataLen);
         return content;
     }
 
     public RLPList decode(Verifier verifier) throws DecodeException {
-        RLPList recordList = RLPDecoder.RLP_STRICT.wrapList(record, 0);
-        byte[] signature = getSignature(recordList);
-        byte[] content = getContent(recordList);
+        RLPItem signatureItem = RLP_STRICT.listIterator(record).next();
+        byte[] signature = signatureItem.data();
+        byte[] content = getContent(signatureItem.endIndex);
         if(verifier.verify(signature, content)) { // verify content
             return RLPDecoder.RLP_STRICT.wrapList(content);
         }
