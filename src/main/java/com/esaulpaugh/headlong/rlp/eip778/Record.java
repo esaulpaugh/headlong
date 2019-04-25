@@ -2,13 +2,9 @@ package com.esaulpaugh.headlong.rlp.eip778;
 
 import com.esaulpaugh.headlong.rlp.*;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
-import com.esaulpaugh.headlong.util.Strings;
-
-import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
-import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 /**
  * Implementation of EIP 778: Ethereum Node Records (ENR), https://eips.ethereum.org/EIPS/eip-778
@@ -17,7 +13,7 @@ public class Record {
 
     private static final int MAX_RECORD_LEN = 300;
 
-    private final byte[] record;
+    private final RLPList record;
 
     public Record(long seq, KeyValuePair[] pairs, Signer signer) {
         final int signatureLen = signer.signatureLength();
@@ -38,38 +34,51 @@ public class Record {
         byte[] signature = signer.sign(record, contentListOffset, recordLen - contentListOffset);
         RLPEncoder.insertRecordSignature(signature, record, recordPrefixLen);
 
+        try {
+            this.record = RLP_STRICT.wrapList(record);
+        } catch (DecodeException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Record(RLPList record) {
         this.record = record;
     }
 
-    public Record(byte[] record) {
-        this.record = Arrays.copyOf(record, record.length);
+    public static Record decode(byte[] record) throws DecodeException {
+        return new Record(RLP_STRICT.wrapList(record));
     }
 
-    RLPList getRecord() throws DecodeException {
-        return RLP_STRICT.wrapList(record);
+    public RLPList getRecord() {
+        return record;
     }
 
     public RLPItem getSignature() throws DecodeException {
-        return RLP_STRICT.listIterator(record).next();
+        return getRecord().iterator(RLP_STRICT).next();
     }
 
     public RLPList getContent() throws DecodeException {
-        RLPItem signatureItem = RLP_STRICT.listIterator(record).next();
-        return RLP_STRICT.wrapList(getContent(signatureItem.endIndex));
+        return RLP_STRICT.wrapList(getContentBytes(getSignature().endIndex));
     }
 
-    private byte[] getContent(int index) {
-        int dataLen = record.length - index;
-        byte[] content = new byte[RLPEncoder.prefixLength(dataLen) + dataLen];
-        int prefixLen = RLPEncoder.insertListPrefix(dataLen, content, 0);
-        System.arraycopy(record, index, content, prefixLen, dataLen);
+    public long getSeq() throws DecodeException {
+        RLPListIterator iter = new RLPListIterator(getRecord(), RLP_STRICT);
+        iter.next();
+        return iter.next().asLong();
+    }
+
+    private byte[] getContentBytes(int index) {
+        int contentDataLen = record.encodingLength() - index;
+        byte[] content = new byte[RLPEncoder.prefixLength(contentDataLen) + contentDataLen];
+        int prefixLen = RLPEncoder.insertListPrefix(contentDataLen, content, 0);
+        record.copyBytes(index, content, prefixLen, contentDataLen);
         return content;
     }
 
     public RLPList decode(Verifier verifier) throws DecodeException {
-        RLPItem signatureItem = RLP_STRICT.listIterator(record).next();
+        RLPItem signatureItem = getSignature();
         byte[] signature = signatureItem.data();
-        byte[] content = getContent(signatureItem.endIndex);
+        byte[] content = getContentBytes(signatureItem.endIndex);
         if(verifier.verify(signature, content)) { // verify content
             return RLPDecoder.RLP_STRICT.wrapList(content);
         }
@@ -87,33 +96,18 @@ public class Record {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(record);
+        return record.hashCode();
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Record record1 = (Record) o;
-        return Arrays.equals(record, record1.record);
+        return record.equals(((Record) o).record);
     }
 
     @Override
     public String toString() {
-        try {
-            StringBuilder sb = new StringBuilder();
-            sb.append("record len = ").append(record.length).append('\n');
-            sb.append("record = ").append(Strings.encode(record)).append('\n');
-
-            RLPListIterator iter = RLP_STRICT.listIterator(record);
-            sb.append("signature = ").append(iter.next().asString(HEX)).append('\n');
-            sb.append("seq = ").append(iter.next().asLong()).append('\n');
-            while (iter.hasNext()) {
-                sb.append(iter.next().asString(UTF_8)).append(" --> ").append(iter.next().asString(HEX)).append('\n');
-            }
-            return sb.toString();
-        } catch (DecodeException de) {
-            throw new RuntimeException(de);
-        }
+        return record.asString(HEX);
     }
 }

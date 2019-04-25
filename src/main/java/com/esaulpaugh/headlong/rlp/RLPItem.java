@@ -118,12 +118,6 @@ public abstract class RLPItem {
         return copy;
     }
 
-    public int exportEncoding(byte[] dest, int destIndex) {
-        int encodingLen = encodingLength();
-        System.arraycopy(buffer, index, dest, destIndex, encodingLen);
-        return destIndex + encodingLen;
-    }
-
     public byte[] data() {
         byte[] copy = new byte[dataLength];
         System.arraycopy(buffer, dataIndex, copy, 0, dataLength);
@@ -136,6 +130,17 @@ public abstract class RLPItem {
         byte[] range = new byte[len];
         System.arraycopy(buffer, from, range, 0, len);
         return range;
+    }
+
+    public void copyBytes(int index, byte[] dest, int destIndex, int len) {
+        checkRangeBounds(index, index + len);
+        System.arraycopy(buffer, index, dest, destIndex, len);
+    }
+
+    public int exportEncoding(byte[] dest, int destIndex) {
+        int encodingLen = encodingLength();
+        System.arraycopy(buffer, index, dest, destIndex, encodingLen);
+        return destIndex + encodingLen;
     }
 
     public int exportData(byte[] dest, int destIndex) {

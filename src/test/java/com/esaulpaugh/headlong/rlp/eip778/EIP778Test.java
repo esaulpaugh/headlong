@@ -12,10 +12,7 @@ import org.junit.Test;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.ID;
-import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.IP;
-import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.SECP256K1;
-import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.UDP;
+import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.*;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
@@ -39,15 +36,23 @@ public class EIP778Test {
         }
     };
 
-    private static final Record VECTOR = new Record(
-            FastHex.decode(
-                    "f884b8407098ad865b00a582051940cb9cf36836572411a4727878307701" +
-                            "1599ed5cd16b76f2635f4e234738f30813a89eb9137e3e3df5266e3a1f11" +
-                            "df72ecf1145ccb9c01826964827634826970847f00000189736563703235" +
-                            "366b31a103ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1" +
-                            "400f3258cd31388375647082765f"
-            )
-    );
+    private static final Record VECTOR;
+
+    static {
+        try {
+            VECTOR = Record.decode(
+                        FastHex.decode(
+                                "f884b8407098ad865b00a582051940cb9cf36836572411a4727878307701" +
+                                        "1599ed5cd16b76f2635f4e234738f30813a89eb9137e3e3df5266e3a1f11" +
+                                        "df72ecf1145ccb9c01826964827634826970847f00000189736563703235" +
+                                        "366b31a103ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1" +
+                                        "400f3258cd31388375647082765f"
+                        )
+                );
+        } catch (DecodeException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Test
     public void testEip778() throws DecodeException {
@@ -70,7 +75,12 @@ public class EIP778Test {
         System.out.println("verified = " + content);
         if(content != null) {
             RLPListIterator iter = content.iterator(RLPDecoder.RLP_STRICT);
-            System.out.println("seq = " + iter.next().asLong());
+
+            Assert.assertEquals(VECTOR.getSeq(), record.getSeq());
+
+            long seq = iter.next().asLong();
+
+            Assert.assertEquals(1L, seq);
 
             KeyValuePair[] decodedPairs = new KeyValuePair[pairs.length];
             int i = 0;
@@ -82,7 +92,7 @@ public class EIP778Test {
     }
 
     @Test
-    public void nineLengths() throws DecodeException {
+    public void nineLengths() {
         final KeyValuePair[] pairs = new KeyValuePair[] {};
         Set<Integer> recordLengths = new HashSet<>();
         for (long seq = 0, p = 0; p <= 64; p +=8, seq = (long) Math.pow(2.0, p)) {
