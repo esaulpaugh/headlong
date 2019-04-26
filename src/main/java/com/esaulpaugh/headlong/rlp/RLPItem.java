@@ -81,26 +81,6 @@ public abstract class RLPItem {
         return recoverable ? new RecoverableDecodeException(msg) : new UnrecoverableDecodeException(msg);
     }
 
-    public static int decodeLength(byte[] buffer, int index) throws DecodeException {
-        byte lead = buffer[index];
-        DataType type = DataType.type(lead);
-        int diff = lead - type.offset;
-        switch (type) {
-        case SINGLE_BYTE: return 1;
-        case STRING_SHORT:
-        case LIST_SHORT: return 1 + diff;
-        case STRING_LONG:
-        case LIST_LONG:
-            int prefixLen = 1 + diff;
-            long dataLength = Integers.getLong(buffer, index + 1, diff);
-            if((long) Integer.MAX_VALUE - dataLength < prefixLen) {
-                throw new UnrecoverableDecodeException("overflow");
-            }
-            return prefixLen + (int) dataLength;
-        default: throw new AssertionError();
-        }
-    }
-
     public DataType type() {
         return DataType.type(buffer[index]);
     }

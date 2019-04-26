@@ -26,12 +26,28 @@ import static com.esaulpaugh.headlong.TestUtils.CustomRunnable;
 
 public class RLPDecoderTest {
 
+    private static final byte[] LONG_LIST_BYTES = new byte[] {
+            (byte) 0xf8, (byte) 148,
+            (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0xFF, (byte) 0x81, (byte) 0x90, (byte) 0x81, (byte) 0xb6, (byte) '\u230A',
+            (byte) 0xb8, 56, 0x09,(byte)0x80,-1,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, -3, -2, 0, 0,
+            (byte) 0xf8, 0x38, 0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 36, 74, 0, 0,
+            (byte) 0x84, 'c', 'a', 't', 's',
+            (byte) 0x84, 'd', 'o', 'g', 's',
+            (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
+    };
+
+    @Test
+    public void duplicate() throws DecodeException {
+        RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
+        Assert.assertEquals(rlpList, rlpList.duplicate(RLP_STRICT));
+    }
+
     @Test
     public void strictAndLenient() throws Throwable {
         byte[] invalidAf = new byte[] {
                 (byte)0xc8, (byte)0x80, 0, (byte)0x81, (byte) 0xAA, (byte)0x81, (byte)'\u0080', (byte)0x81, '\u007f', (byte)'\u230A' };
 
-        RLPList list = (RLPList) RLP_STRICT.wrap(invalidAf);
+        RLPList list = RLP_STRICT.wrapList(invalidAf);
 
         TestUtils.assertThrown(
                 UnrecoverableDecodeException.class,
@@ -44,17 +60,7 @@ public class RLPDecoderTest {
 
     @Test
     public void list() throws DecodeException {
-        byte[] rlpEncoded = new byte[] {
-                (byte) 0xf8, (byte) 148,
-                (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0xFF, (byte) 0x81, (byte) 0x90, (byte) 0x81, (byte) 0xb6, (byte) '\u230A',
-                (byte) 0xb8, 56, 0x09,(byte)0x80,-1,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, -3, -2, 0, 0,
-                (byte) 0xf8, 0x38, 0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 36, 74, 0, 0,
-                (byte) 0x84, 'c', 'a', 't', 's',
-                (byte) 0x84, 'd', 'o', 'g', 's',
-                (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
-        };
-
-        RLPList rlpList = (RLPList) RLP_STRICT.wrap(rlpEncoded);
+        RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
         List<RLPItem> actualList = rlpList.elements(RLP_STRICT);
 
         Assert.assertEquals(148, rlpList.dataLength);
@@ -132,7 +138,7 @@ public class RLPDecoderTest {
                 i += elementEncodedLen;
             }
             size += buffer.length - i;
-            huge = (RLPList) RLP_STRICT.wrap(buffer);
+            huge = RLP_STRICT.wrapList(buffer);
             ArrayList<RLPItem> elements = new ArrayList<>(size);
             huge.elements(RLP_STRICT, elements);
             System.out.println("trailing single byte items = " + (buffer.length - i));
@@ -168,7 +174,7 @@ public class RLPDecoderTest {
             i = 1 + lol;
             final int size = buffer.length - i;
 
-            huge = (RLPList) RLP_STRICT.wrap(buffer);
+            huge = RLP_STRICT.wrapList(buffer);
 
             int count = 0;
             int j = huge.dataIndex;
@@ -348,15 +354,11 @@ public class RLPDecoderTest {
         assertThrown(NoSuchElementException.class, seqIter::next);
     }
 
-    private static CustomRunnable wrapStrict(final byte[] rlp) {
-        return () -> RLP_STRICT.wrap(rlp, 0);
-    }
-
     private static CustomRunnable wrapLenient(final byte[] rlp) {
         return () -> RLP_LENIENT.wrap(rlp, 0);
     }
 
     private static CustomRunnable decodeList(final byte[] rlp) {
-        return () -> ((RLPList) RLP_LENIENT.wrap(rlp, 0)).elements(RLP_STRICT);
+        return () -> RLP_LENIENT.wrapList(rlp, 0).elements(RLP_STRICT);
     }
 }

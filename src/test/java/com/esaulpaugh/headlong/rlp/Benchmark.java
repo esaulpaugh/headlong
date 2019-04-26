@@ -60,17 +60,17 @@ public class Benchmark {
 
         long start, end;
 
-        rlpList = (RLPList) RLP_LENIENT.wrap(rlp);
+        rlpList = RLP_LENIENT.wrapList(rlp);
         rlpList.elements(RLP_LENIENT);
 
         // warmup
         for (int i = 0; i < 5_500_000; i++) {
-            rlpList = (RLPList) RLP_LENIENT.wrap(rlp);
+            rlpList = RLP_LENIENT.wrapList(rlp);
             rlpList.elements(RLP_LENIENT);
         }
         start = System.nanoTime();
         for (int i = 0; i < n; i++) {
-            rlpList = (RLPList) RLP_LENIENT.wrap(rlp);
+            rlpList = RLP_LENIENT.wrapList(rlp);
             rlpList.elements(RLP_LENIENT);
         }
         end = System.nanoTime();
