@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
@@ -26,8 +27,33 @@ import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 public class RLPStreamIteratorTest {
 
     private static final byte TEST_BYTE = 0x79;
-    private static final byte[] TEST_BYTES = new byte[] { 0x04, 0x03, 0x02 };
-    private static final String TEST_STRING = "\u0009\u0009\u0030\u0031";
+    private static final byte[] TEST_BYTES = "\'wort\'X3".getBytes(CHARSET_UTF_8);
+    private static final String TEST_STRING = "2401";
+
+    @Test
+    public void testStreamEasy() throws IOException, DecodeException {
+        byte[] rlpEncoded = new byte[] {
+                (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0xFF, (byte) 0x81, (byte) 0x90, (byte) 0x81, (byte) 0xb6, (byte) '\u230A',
+                (byte) 0xb8, 56, 0x09,(byte)0x80,-1,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, -3, -2, 0, 0,
+                (byte) 0xf8, 0x38, 0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 36, 74, 0, 0,
+                (byte) 0x84, 'c', 'a', 't', 's',
+                (byte) 0x84, 'd', 'o', 'g', 's',
+                (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
+        };
+
+        List<RLPItem> collected = RLP_STRICT.collectAll(rlpEncoded);
+
+        RLPStreamIterator iter = RLP_STRICT.sequenceStreamIterator(new ByteArrayInputStream(rlpEncoded));
+
+        List<RLPItem> streamed = new ArrayList<>();
+        while (iter.hasNext()) {
+            RLPItem item = iter.next();
+            System.out.println(Strings.encode(item.encoding()));
+            streamed.add(item);
+        }
+
+        Assert.assertTrue(Arrays.deepEquals(collected.toArray(RLPItem.EMPTY_ARRAY), streamed.toArray(RLPItem.EMPTY_ARRAY)));
+    }
 
     @Test
     public void testStreamHard() throws Throwable {
@@ -67,31 +93,6 @@ public class RLPStreamIteratorTest {
                     iter::hasNext
             );
         }
-    }
-
-    @Test
-    public void testStreamEasy() throws IOException, DecodeException {
-        byte[] rlpEncoded = new byte[] {
-                (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0xFF, (byte) 0x81, (byte) 0x90, (byte) 0x81, (byte) 0xb6, (byte) '\u230A',
-                (byte) 0xb8, 56, 0x09,(byte)0x80,-1,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, -3, -2, 0, 0,
-                (byte) 0xf8, 0x38, 0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 36, 74, 0, 0,
-                (byte) 0x84, 'c', 'a', 't', 's',
-                (byte) 0x84, 'd', 'o', 'g', 's',
-                (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
-        };
-
-        List<RLPItem> collected = RLP_STRICT.collectAll(rlpEncoded);
-
-        RLPStreamIterator iter = RLP_STRICT.sequenceStreamIterator(new ByteArrayInputStream(rlpEncoded));
-
-        List<RLPItem> streamed = new ArrayList<>();
-        while (iter.hasNext()) {
-            RLPItem item = iter.next();
-            System.out.println(Strings.encode(item.encoding()));
-            streamed.add(item);
-        }
-
-        Assert.assertTrue(Arrays.deepEquals(collected.toArray(RLPItem.EMPTY_ARRAY), streamed.toArray(RLPItem.EMPTY_ARRAY)));
     }
 
     private static class ReceiveStreamThread extends Thread {
@@ -262,7 +263,7 @@ public class RLPStreamIteratorTest {
 
         private void write(byte b) throws IOException {
             os.write(b);
-            logWrite(zero, FastHex.encodeToString(b));
+            logWrite(zero, "\'" + (char) b + "\' (0x" + FastHex.encodeToString(b) +")");
         }
     }
 
