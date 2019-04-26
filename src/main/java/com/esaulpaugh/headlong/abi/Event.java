@@ -111,11 +111,6 @@ public class Event implements ABIObject {
         return result;
     }
 
-    @Override
-    public int objectType() {
-        return ABIObject.EVENT;
-    }
-
     public static Event fromJson(String eventJson) throws ParseException {
         return ContractJSONParser.parseEvent(eventJson);
     }

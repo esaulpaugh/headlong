@@ -51,10 +51,6 @@ public class ContractJSONParser {
         return parseObjects(json, false, true, Event.class);
     }
 
-    public static List<ABIObject> parseObjects(String json) throws ParseException {
-        return parseObjects(json, true, true, ABIObject.class);
-    }
-
     private static <T extends ABIObject> List<T> parseObjects(final String json,
                                                              final boolean functions,
                                                              final boolean events,

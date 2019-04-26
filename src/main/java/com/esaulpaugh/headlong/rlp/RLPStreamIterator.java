@@ -27,10 +27,10 @@ public class RLPStreamIterator {
     private final RLPDecoder decoder;
     private final InputStream rlpStream;
 
-    private transient byte[] buffer;
-    private transient int index;
+    private byte[] buffer;
+    private int index;
 
-    private transient RLPItem rlpItem;
+    private RLPItem rlpItem;
 
     RLPStreamIterator(RLPDecoder decoder, InputStream rlpStream) {
         this.decoder = decoder;

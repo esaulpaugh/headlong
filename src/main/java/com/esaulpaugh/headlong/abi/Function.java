@@ -247,11 +247,6 @@ public class Function implements ABIObject, Serializable {
                 Objects.equals(stateMutability, function.stateMutability);
     }
 
-    @Override
-    public int objectType() {
-        return ABIObject.FUNCTION;
-    }
-
     public static String formatCall(byte[] abiCall) {
         return formatCall(abiCall, 0, abiCall.length);
     }

@@ -31,8 +31,8 @@ public class KeyValuePair implements Comparable<KeyValuePair> {
 
 //    public static final KeyValuePair[] EMPTY_ARRAY = new KeyValuePair[0];
 
-    final byte[] key;
-    final byte[] value;
+    private final byte[] key;
+    private final byte[] value;
 
     public KeyValuePair(String key, String value, int valueEncoding) {
         this.key = decode(key, UTF_8);
