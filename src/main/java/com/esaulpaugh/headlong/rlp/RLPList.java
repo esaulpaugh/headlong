@@ -66,29 +66,6 @@ public class RLPList extends RLPItem {
         }
     }
 
-    /**
-     * Returns the full hierarchy represented by this RLPList.
-     *
-     * @deprecated Use {@link #elements(RLPDecoder)} or {@link #elements(RLPDecoder, Collection)} instead.
-     *
-     * @param results   the destination
-     * @param decoder   the decoder, either {@link RLPDecoder#RLP_STRICT} or {@link RLPDecoder#RLP_LENIENT}
-     * @throws DecodeException  if any element in the hierarchy fails to decode
-     */
-    @Deprecated
-    public void elementsRecursive(Collection<Object> results, RLPDecoder decoder) throws DecodeException {
-        List<RLPItem> actualList = elements(decoder);
-        for (RLPItem element : actualList) {
-            if(element.isList()) {
-                List<Object> subList = new ArrayList<>();
-                ((RLPList) element).elementsRecursive(subList, decoder);
-                results.add(subList);
-            } else {
-                results.add(element);
-            }
-        }
-    }
-
     public List<RLPItem> elements(RLPDecoder decoder) throws DecodeException {
         ArrayList<RLPItem> arrayList = new ArrayList<>();
         elements(decoder, arrayList);

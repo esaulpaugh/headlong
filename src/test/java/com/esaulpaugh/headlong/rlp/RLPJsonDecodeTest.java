@@ -24,6 +24,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class RLPJsonDecodeTest {
@@ -65,7 +67,20 @@ public class RLPJsonDecodeTest {
             item.asString(Strings.HEX);
         } else {
             ArrayList<Object> collector = new ArrayList<>();
-            ((RLPList) item).elementsRecursive(collector, RLPDecoder.RLP_STRICT);
+            elementsRecursive((RLPList) item, collector, RLPDecoder.RLP_STRICT);
+        }
+    }
+
+    private static void elementsRecursive(RLPList list, Collection<Object> results, RLPDecoder decoder) throws DecodeException {
+        List<RLPItem> actualList = list.elements(decoder);
+        for (RLPItem element : actualList) {
+            if(element instanceof RLPList) {
+                List<Object> subList = new ArrayList<>();
+                elementsRecursive((RLPList) element, subList, decoder);
+                results.add(subList);
+            } else {
+                results.add(element);
+            }
         }
     }
 }
