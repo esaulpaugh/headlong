@@ -86,7 +86,7 @@ public class Record {
         int contentDataLen = record.encodingLength() - index;
         byte[] content = new byte[RLPEncoder.prefixLength(contentDataLen) + contentDataLen];
         int prefixLen = RLPEncoder.insertListPrefix(contentDataLen, content, 0);
-        record.copyRange(index, index + contentDataLen, content, prefixLen);
+        record.exportRange(index, index + contentDataLen, content, prefixLen);
         return content;
     }
 
