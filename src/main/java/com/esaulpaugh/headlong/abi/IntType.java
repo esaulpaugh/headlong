@@ -20,7 +20,7 @@ import com.esaulpaugh.headlong.abi.util.ClassNames;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-class IntType extends UnitType<Integer> {
+final class IntType extends UnitType<Integer> {
 
     static final Class<?> CLASS = Integer.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(int[].class);

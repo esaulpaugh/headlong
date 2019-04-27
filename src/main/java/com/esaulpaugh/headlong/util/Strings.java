@@ -24,7 +24,7 @@ import static com.esaulpaugh.headlong.util.Utils.EMPTY_BYTE_ARRAY;
 /**
  * Utility for encoding and decoding hexadecimal, Base64, and UTF-8-encoded {@code String}s.
  */
-public class Strings {
+public final class Strings {
 
     public static final Charset CHARSET_UTF_8 = Charset.forName("UTF-8");
 

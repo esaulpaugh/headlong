@@ -20,7 +20,7 @@ import com.esaulpaugh.headlong.abi.util.ClassNames;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-class LongType extends UnitType<Long> {
+final class LongType extends UnitType<Long> {
 
     static final Class<?> CLASS = Long.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(long[].class);

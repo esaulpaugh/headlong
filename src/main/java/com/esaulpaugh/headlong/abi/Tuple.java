@@ -20,7 +20,7 @@ import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.RandomAccess;
 
-public class Tuple extends AbstractList<Object> implements RandomAccess, Serializable {
+public final class Tuple extends AbstractList<Object> implements RandomAccess, Serializable {
 
     public static final Tuple EMPTY = new Tuple();
 

@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.*;
 
-public class ContractJSONParser {
+public final class ContractJSONParser {
 
     private static final String NAME = "name";
     private static final String TYPE = "type";

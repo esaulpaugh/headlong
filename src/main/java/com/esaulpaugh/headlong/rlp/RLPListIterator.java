@@ -19,7 +19,7 @@ import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 
 import java.util.NoSuchElementException;
 
-public class RLPListIterator {
+public final class RLPListIterator {
 
     private final RLPList list;
     private final RLPDecoder decoder;

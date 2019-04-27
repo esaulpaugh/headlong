@@ -27,7 +27,7 @@ import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
 /**
  * Created by Evo on 1/19/2017.
  */
-public class RLPList extends RLPItem {
+public final class RLPList extends RLPItem {
 
     RLPList(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) throws DecodeException {
         super(lead, type, buffer, index, containerEnd, lenient);

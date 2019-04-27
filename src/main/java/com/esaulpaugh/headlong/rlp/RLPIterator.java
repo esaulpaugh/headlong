@@ -22,7 +22,7 @@ import java.util.NoSuchElementException;
 /**
  * For iterating over sequentially encoded RLP items.
  */
-public class RLPIterator {
+public final class RLPIterator {
 
     private final RLPDecoder decoder;
     private final byte[] rlp;

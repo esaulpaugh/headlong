@@ -24,7 +24,7 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 /**
  * Implementation of EIP 778: Ethereum Node Records (ENR), https://eips.ethereum.org/EIPS/eip-778
  */
-public class Record {
+public final class Record {
 
     private static final int MAX_RECORD_LEN = 300;
 

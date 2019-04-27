@@ -25,7 +25,7 @@ import java.util.Objects;
 
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
-public class Event implements ABIObject {
+public final class Event implements ABIObject {
 
     private final String name;
 

@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.abi.ABIType.*;
 
-class PackedEncoder {
+final class PackedEncoder {
 
     static void insertTuple(TupleType tupleType, Tuple tuple, ByteBuffer dest) {
 

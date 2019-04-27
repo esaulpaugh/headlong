@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-class BigDecimalType extends UnitType<BigDecimal> {
+final class BigDecimalType extends UnitType<BigDecimal> {
 
     static final Class<?> CLASS = BigDecimal.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(BigDecimal[].class);

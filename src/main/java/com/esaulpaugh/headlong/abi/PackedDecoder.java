@@ -26,7 +26,7 @@ import static com.esaulpaugh.headlong.abi.ABIType.*;
 /**
  * Experimental. Unoptimized.
  */
-public class PackedDecoder {
+public final class PackedDecoder {
 
     public static Tuple decode(TupleType tupleType, byte[] buffer) {
 

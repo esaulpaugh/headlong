@@ -21,7 +21,7 @@ import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.util.Strings.*;
 
-public class KeyValuePair implements Comparable<KeyValuePair> {
+public final class KeyValuePair implements Comparable<KeyValuePair> {
 
     public static final String ID = "id";
     public static final String SECP256K1 = "secp256k1";

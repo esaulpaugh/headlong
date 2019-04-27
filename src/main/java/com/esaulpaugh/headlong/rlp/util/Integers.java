@@ -27,7 +27,7 @@ import static com.esaulpaugh.headlong.util.Utils.EMPTY_BYTE_ARRAY;
 /**
  * Utility for reading and writing integers from and to RLP format.
  */
-public class Integers {
+public final class Integers {
 
     /**
      * Returns an integer's minimal big-endian two's complement representation. The integer zero is represented by the

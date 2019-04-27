@@ -152,7 +152,7 @@ public class Integers {
     /**
      * Use {@code new UintType(8)} for uint8 et cetera.
      */
-    public static class UintType {
+    public static final class UintType {
 
         private static final BigInteger TWO = BigInteger.valueOf(2L);
 

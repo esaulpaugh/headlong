@@ -19,7 +19,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-class TupleTypeParser {
+final class TupleTypeParser {
 
     static final String EMPTY_PARAMETER = "empty parameter";
 

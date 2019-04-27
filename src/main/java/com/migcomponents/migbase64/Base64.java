@@ -69,7 +69,7 @@ package com.migcomponents.migbase64;
  *         Time: 11:31:11
  */
 
-public class Base64 /* Modified by Evan Saulpaugh */
+public final class Base64 /* Modified by Evan Saulpaugh */
 {
     private static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
     private static final char[] EMPTY_CHAR_ARRAY = new char[0];

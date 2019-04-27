@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
 /**
  * Unsigned 0 or 1.
  */
-class BooleanType extends UnitType<Boolean> {
+final class BooleanType extends UnitType<Boolean> {
 
     static final Class<?> CLASS = Boolean.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(boolean[].class);

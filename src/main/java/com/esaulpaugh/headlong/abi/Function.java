@@ -37,7 +37,7 @@ import static com.esaulpaugh.headlong.util.Strings.encode;
  * Represents a function in an Ethereum contract. Can encode and decode calls matching this function's signature.
  * Can decode the function's return values.
  */
-public class Function implements ABIObject, Serializable {
+public final class Function implements ABIObject, Serializable {
 
     public enum Type {
 

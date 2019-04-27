@@ -25,7 +25,7 @@ import static com.esaulpaugh.headlong.rlp.DataType.*;
 /**
  * Encodes data to RLP format.
  */
-public class RLPEncoder {
+public final class RLPEncoder {
 
     public static long encodedLen(long val) {
         int dataLen = Integers.len(val);

@@ -26,7 +26,7 @@ import static com.esaulpaugh.headlong.abi.UnitType.LOG_2_UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
-public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
+public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
     static final Class<?> BYTE_ARRAY_CLASS = byte[].class;
     static final String BYTE_ARRAY_ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(byte[][].class);

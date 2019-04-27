@@ -20,7 +20,7 @@ import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Utils {
+public final class Utils {
 
     public static final Charset CHARSET_ASCII = Charset.forName("US-ASCII");
 

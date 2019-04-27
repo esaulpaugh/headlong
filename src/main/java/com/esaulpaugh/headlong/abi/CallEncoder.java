@@ -24,7 +24,7 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 import static com.esaulpaugh.headlong.abi.ABIType.*;
 
-class CallEncoder {
+final class CallEncoder {
 
     static final int OFFSET_LENGTH_BYTES = UNIT_LENGTH_BYTES;
     static final IntType OFFSET_TYPE = new IntType("int32", Integer.SIZE, false);

@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 /**
  * Utility for reading and writing floating point numbers from and to RLP format.
  */
-public class FloatingPoint {
+public final class FloatingPoint {
 
     /* float */
 

@@ -25,7 +25,7 @@ import java.util.*;
  * fixed/ufixed types, which number in the thousands, are not included in the map (except for fixed, ufixed,
  * fixed128x18, and ufixed128x18).
  */
-class BaseTypeInfo {
+final class BaseTypeInfo {
 
     private static final int DECIMAL_BIT_LEN = 128;
     static final int DECIMAL_SCALE = 10;
