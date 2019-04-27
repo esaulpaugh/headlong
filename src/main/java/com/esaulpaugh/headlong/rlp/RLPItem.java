@@ -119,6 +119,21 @@ public abstract class RLPItem {
         return copy;
     }
 
+    public int copy(byte[] dest, int destIndex) {
+        return copyRange(index, endIndex, dest, destIndex);
+    }
+
+    public int copyData(byte[] dest, int destIndex) {
+        return copyRange(dataIndex, endIndex, dest, destIndex);
+    }
+
+    public int copyRange(int from, int to, byte[] dest, int destIndex) {
+        checkRangeBounds(from, to);
+        int len = to - from;
+        System.arraycopy(buffer, from, dest, destIndex, len);
+        return destIndex + len;
+    }
+
     public byte[] copyOfRange(int from, int to) {
         checkRangeBounds(from, to);
         final int len = to - from;
@@ -127,20 +142,13 @@ public abstract class RLPItem {
         return range;
     }
 
-    public void copyBytes(int index, byte[] dest, int destIndex, int len) {
-        checkRangeBounds(index, index + len);
-        System.arraycopy(buffer, index, dest, destIndex, len);
-    }
-
-    public int exportEncoding(byte[] dest, int destIndex) {
-        int encodingLen = encodingLength();
-        System.arraycopy(buffer, index, dest, destIndex, encodingLen);
-        return destIndex + encodingLen;
-    }
-
-    public int exportData(byte[] dest, int destIndex) {
-        System.arraycopy(buffer, dataIndex, dest, destIndex, dataLength);
-        return endIndex;
+    private void checkRangeBounds(int from, int to) {
+        if(from < dataIndex) {
+            throw new IndexOutOfBoundsException(from + " < " + dataIndex);
+        }
+        if(to > endIndex) {
+            throw new IndexOutOfBoundsException(to + " > " + endIndex);
+        }
     }
 
     /**
@@ -194,20 +202,6 @@ public abstract class RLPItem {
 
     public double asDouble() throws DecodeException {
         return FloatingPoint.getDouble(data(), 0, dataLength);
-    }
-
-    public String encodeRange(int from, int to, int encoding) {
-        checkRangeBounds(from, to);
-        return Strings.encode(buffer, from, to - from, encoding);
-    }
-
-    private void checkRangeBounds(int from, int to) {
-        if(from < dataIndex) {
-            throw new IndexOutOfBoundsException(from + " < " + dataIndex);
-        }
-        if(to > endIndex) {
-            throw new IndexOutOfBoundsException(to + " > " + endIndex);
-        }
     }
 
     /**
