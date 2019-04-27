@@ -119,27 +119,27 @@ public abstract class RLPItem {
         return copy;
     }
 
-    public int copy(byte[] dest, int destIndex) {
-        return copyRange(index, endIndex, dest, destIndex);
-    }
-
-    public int copyData(byte[] dest, int destIndex) {
-        return copyRange(dataIndex, endIndex, dest, destIndex);
-    }
-
-    public int copyRange(int from, int to, byte[] dest, int destIndex) {
-        checkRangeBounds(from, to);
-        int len = to - from;
-        System.arraycopy(buffer, from, dest, destIndex, len);
-        return destIndex + len;
-    }
-
     public byte[] copyOfRange(int from, int to) {
         checkRangeBounds(from, to);
         final int len = to - from;
         byte[] range = new byte[len];
         System.arraycopy(buffer, from, range, 0, len);
         return range;
+    }
+
+    public int export(byte[] dest, int destIndex) {
+        return exportRange(index, endIndex, dest, destIndex);
+    }
+
+    public int exportData(byte[] dest, int destIndex) {
+        return exportRange(dataIndex, endIndex, dest, destIndex);
+    }
+
+    public int exportRange(int from, int to, byte[] dest, int destIndex) {
+        checkRangeBounds(from, to);
+        int len = to - from;
+        System.arraycopy(buffer, from, dest, destIndex, len);
+        return destIndex + len;
     }
 
     private void checkRangeBounds(int from, int to) {
