@@ -105,7 +105,7 @@ public final class Record {
     }
 
     public interface Verifier {
-        void verify(byte[] signature, byte[] content) throws DecodeException, SignatureException;
+        void verify(byte[] signature, byte[] content) throws SignatureException;
     }
 
     @Override
