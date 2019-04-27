@@ -18,6 +18,8 @@ package com.esaulpaugh.headlong.rlp.eip778;
 import com.esaulpaugh.headlong.rlp.*;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 
+import java.security.SignatureException;
+
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 
@@ -90,14 +92,11 @@ public final class Record {
         return content;
     }
 
-    public RLPList decode(Verifier verifier) throws DecodeException {
+    public RLPList decode(Verifier verifier) throws DecodeException, SignatureException {
         RLPItem signatureItem = getSignature();
-        byte[] signature = signatureItem.data();
         byte[] content = getContentBytes(signatureItem.endIndex);
-        if(verifier.verify(signature, content)) { // verify content
-            return RLPDecoder.RLP_STRICT.wrapList(content);
-        }
-        return null;
+        verifier.verify(signatureItem.data(), content); // verify content
+        return RLPDecoder.RLP_STRICT.wrapList(content);
     }
 
     public interface Signer {
@@ -106,7 +105,7 @@ public final class Record {
     }
 
     public interface Verifier {
-        boolean verify(byte[] signature, byte[] content) throws DecodeException;
+        void verify(byte[] signature, byte[] content) throws DecodeException, SignatureException;
     }
 
     @Override

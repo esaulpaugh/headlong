@@ -24,6 +24,7 @@ import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.security.SignatureException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -70,7 +71,7 @@ public class EIP778Test {
     }
 
     @Test
-    public void testEip778() throws DecodeException {
+    public void testEip778() throws DecodeException, SignatureException {
         final KeyValuePair[] pairs = new KeyValuePair[] {
                 new KeyValuePair(IP, "7f000001", HEX),
                 new KeyValuePair(UDP, "765f", HEX),
@@ -86,24 +87,22 @@ public class EIP778Test {
         Assert.assertEquals(VECTOR.toString(), record.toString());
         Assert.assertEquals(VECTOR, record);
 
-        RLPList content = record.decode((s,c) -> true);
+        RLPList content = record.decode((s,c) -> {});
         System.out.println("verified = " + content);
-        if(content != null) {
-            RLPListIterator iter = content.iterator(RLPDecoder.RLP_STRICT);
+        RLPListIterator iter = content.iterator(RLPDecoder.RLP_STRICT);
 
-            Assert.assertEquals(VECTOR.getSeq(), record.getSeq());
+        Assert.assertEquals(VECTOR.getSeq(), record.getSeq());
 
-            long seq = iter.next().asLong();
+        long seq = iter.next().asLong();
 
-            Assert.assertEquals(1L, seq);
+        Assert.assertEquals(1L, seq);
 
-            KeyValuePair[] decodedPairs = new KeyValuePair[pairs.length];
-            int i = 0;
-            while (iter.hasNext()) {
-                decodedPairs[i++] = new KeyValuePair(iter.next().data(), iter.next().data());
-            }
-            Assert.assertArrayEquals(pairs, decodedPairs);
+        KeyValuePair[] decodedPairs = new KeyValuePair[pairs.length];
+        int i = 0;
+        while (iter.hasNext()) {
+            decodedPairs[i++] = new KeyValuePair(iter.next().data(), iter.next().data());
         }
+        Assert.assertArrayEquals(pairs, decodedPairs);
     }
 
     @Test

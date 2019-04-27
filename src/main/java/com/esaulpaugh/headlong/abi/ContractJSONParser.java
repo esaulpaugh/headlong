@@ -116,7 +116,7 @@ public final class ContractJSONParser {
             }
             return TupleType.create(list);
         }
-        return null;
+        return TupleType.EMPTY;
     }
 
     static Event parseEvent(String eventJson) throws ParseException {

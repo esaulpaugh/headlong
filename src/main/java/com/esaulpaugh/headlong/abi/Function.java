@@ -85,8 +85,8 @@ public final class Function implements ABIObject, Serializable {
     Function(Type type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) throws ParseException {
         this.type = Objects.requireNonNull(type);
         this.name = name != null ? Utils.validateChars(ILLEGAL_NAME_CHAR, name) : "";
-        this.inputTypes = inputTypes != null ? inputTypes : TupleType.EMPTY;
-        this.outputTypes = outputTypes != null ? outputTypes : TupleType.EMPTY;
+        this.inputTypes = Objects.requireNonNull(inputTypes);
+        this.outputTypes = Objects.requireNonNull(outputTypes);
         this.stateMutability = stateMutability;
         this.hashAlgorithm = messageDigest.getAlgorithm();
         generateSelector(messageDigest);
