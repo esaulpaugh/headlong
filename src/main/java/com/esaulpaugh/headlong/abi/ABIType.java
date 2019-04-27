@@ -49,25 +49,25 @@ public abstract class ABIType<J> implements Serializable {
         this.name = null;
     }
 
-    ABIType setName(String name) {
-        this.name = name;
-        return this;
-    }
-
     public String getCanonicalType() {
         return canonicalType;
     }
 
-    public String getName() {
-        return name;
+    public Class<?> clazz() {
+        return clazz;
     }
 
     public boolean isDynamic() {
         return dynamic;
     }
 
-    public Class<?> clazz() {
-        return clazz;
+    public String getName() {
+        return name;
+    }
+
+    ABIType setName(String name) {
+        this.name = name;
+        return this;
     }
 
     abstract String arrayClassNameStub();

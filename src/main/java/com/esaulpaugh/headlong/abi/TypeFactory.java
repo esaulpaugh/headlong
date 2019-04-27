@@ -71,7 +71,7 @@ final class TypeFactory {
             final ABIType<?> elementType = buildType(type.substring(0, arrayOpenIndex), true, baseTupleType);
             final String className = '[' + elementType.arrayClassNameStub();
             final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
-            return new ArrayType<ABIType<?>, Object>(type, Class.forName(className, false, CLASS_LOADER), dynamic, elementType, className, length);
+            return new ArrayType<ABIType<?>, Object>(type, Class.forName(className, false, CLASS_LOADER), dynamic, elementType, length, className);
         } else {
             ABIType<?> baseType = resolveBaseType(type, isArrayElement, baseTupleType);
             if(baseType == null) {
@@ -189,10 +189,10 @@ final class TypeFactory {
             case "bytes29":
             case "bytes30":
             case "bytes31":
-            case "bytes32": type = new ArrayType<ByteType, byte[]>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB, info.arrayLen); break;
+            case "bytes32": type = new ArrayType<ByteType, byte[]>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, info.arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB); break;
             case "bool": type = BooleanType.INSTANCE; break;
-            case "bytes": type = new ArrayType<ByteType, byte[]>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB, DYNAMIC_LENGTH); break;
-            case "string": type = new ArrayType<ByteType, byte[]>(baseTypeStr, ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, ArrayType.STRING_ARRAY_CLASS_NAME_STUB, DYNAMIC_LENGTH); break;
+            case "bytes": type = new ArrayType<ByteType, byte[]>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB); break;
+            case "string": type = new ArrayType<ByteType, byte[]>(baseTypeStr, ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME_STUB); break;
             case "decimal": type = new BigDecimalType(baseTypeStr, info.bitLen, DECIMAL_SCALE, false); break;
             case "fixed":
             case "fixed128x18": type = new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false); break;

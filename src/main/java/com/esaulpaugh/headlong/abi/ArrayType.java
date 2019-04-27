@@ -40,19 +40,19 @@ public class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     static final int DYNAMIC_LENGTH = -1;
 
     final T elementType;
-    final String arrayClassNameStub;
-
     final int length;
     /* transient */ final boolean isString;
 
-    ArrayType(String canonicalType, Class<?> clazz, boolean dynamic, T elementType, String arrayClassNameStub, int length) {
+    final String arrayClassNameStub;
+
+    ArrayType(String canonicalType, Class<?> clazz, boolean dynamic, T elementType, int length, String arrayClassNameStub) {
         super(canonicalType, clazz, dynamic);
         this.elementType = elementType;
-        this.arrayClassNameStub = arrayClassNameStub;
         if(length < DYNAMIC_LENGTH) {
             throw new IllegalArgumentException("length must be non-negative or " + DYNAMIC_LENGTH + ". found: " + length);
         }
         this.length = length;
+        this.arrayClassNameStub = arrayClassNameStub;
         this.isString = String.class == clazz;
     }
 
