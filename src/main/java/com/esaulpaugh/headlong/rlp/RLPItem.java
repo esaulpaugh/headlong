@@ -219,7 +219,7 @@ public abstract class RLPItem {
      * @see Arrays#hashCode(byte[])
      */
     @Override
-    public int hashCode() {
+    public final int hashCode() {
 
         int result = 1;
         for (int i = index; i < endIndex; i++) {
@@ -229,7 +229,7 @@ public abstract class RLPItem {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if(!(obj instanceof RLPItem)) {
             return false;
         }

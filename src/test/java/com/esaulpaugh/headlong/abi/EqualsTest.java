@@ -52,6 +52,8 @@ public class EqualsTest {
 
             Assert.assertTrue(equals);
 
+            Assert.assertEquals(a, b);
+
             n++;
         } while (n < 100);
     }

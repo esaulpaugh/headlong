@@ -38,12 +38,12 @@ abstract class UnitType<V> extends ABIType<V> { // instance of V should be insta
     }
 
     @Override
-    int byteLength(Object value) {
+    final int byteLength(Object value) {
         return UNIT_LENGTH_BYTES;
     }
 
     // don't do unsigned check for array element
-    void validatePrimitiveElement(long longVal) {
+    final void validatePrimitiveElement(long longVal) {
         final int bitLen = longVal >= 0
                 ? Integers.bitLen(longVal) // gives correct bit length for non-negative integers only
                 : BizarroIntegers.bitLen(longVal); // gives correct bit length for negative integers only
@@ -53,7 +53,7 @@ abstract class UnitType<V> extends ABIType<V> { // instance of V should be insta
     }
 
     // don't do unsigned check for array element
-    void validateBigIntElement(final BigInteger bigIntVal) {
+    final void validateBigIntElement(final BigInteger bigIntVal) {
         if(bigIntVal.bitLength() > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + bigIntVal.bitLength() + " > " + bitLength);
         }
@@ -61,7 +61,7 @@ abstract class UnitType<V> extends ABIType<V> { // instance of V should be insta
 
     // --------------------------------
 
-    void validateLongBitLen(long longVal) {
+    final void validateLongBitLen(long longVal) {
         final int bitLen = longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal);
         if(bitLen > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + bitLen + " > " + bitLength);
@@ -71,7 +71,7 @@ abstract class UnitType<V> extends ABIType<V> { // instance of V should be insta
         }
     }
 
-    void validateBigIntBitLen(final BigInteger bigIntVal) {
+    final void validateBigIntBitLen(final BigInteger bigIntVal) {
         if(bigIntVal.bitLength() > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + bigIntVal.bitLength() + " > " + bitLength);
         }

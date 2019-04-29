@@ -110,23 +110,23 @@ public abstract class ABIType<J> implements Serializable {
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return canonicalType.hashCode();
     }
 
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         return canonicalType.equals(((ABIType<?>) o).canonicalType);
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return canonicalType;
     }
 
-    void toString(StringBuilder sb) {
+    final void toString(StringBuilder sb) {
         switch (typeCode()) {
         case TYPE_CODE_ARRAY:
             sb.append("[");
