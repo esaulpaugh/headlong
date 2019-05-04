@@ -111,7 +111,7 @@ public class KeccakTest {
                 final int end = r.nextInt(bound);
                 final int start = end == 0 ? 0 : r.nextInt(end);
                 final int len = end - start;
-//                System.out.println(start + "," + len + "\t\t" + FastHex.encodeToString(buffer, start, len));
+//                System.out.println("[" + start + "-" + end + ")\t\t" + FastHex.encodeToString(buffer, start, len));
                 k.update(buffer, start, len);
                 k_.update(buffer, start, len);
             }

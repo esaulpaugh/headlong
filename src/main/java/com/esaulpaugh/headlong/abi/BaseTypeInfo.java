@@ -19,8 +19,7 @@ import java.util.*;
 
 /**
  * An object to hold metadata about a base type, such as the type's Java class name. A metadata object for each type is
- * stored in {@link #TYPE_INFO_MAP} which is used by {@link TypeFactory#resolveBaseType(String, boolean, TupleType)}
- * to generate a base type.
+ * stored in {@link #TYPE_INFO_MAP} which is used by TypeFactory to resolve the base type.
  *
  * fixed/ufixed types, which number in the thousands, are not included in the map (except for fixed, ufixed,
  * fixed128x18, and ufixed128x18).
