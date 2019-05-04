@@ -27,43 +27,55 @@ import java.util.Random;
 
 public class KeccakTest {
 
+    private static final byte[] PART_A = "abcdefghijklmnopqrstuvwxyz".getBytes(Utils.CHARSET_ASCII);
+    private static final byte[] PART_B = "ABCDEFG".getBytes(Utils.CHARSET_ASCII);
+    private static final byte[] WHOLE;
+
+    static {
+        WHOLE = new byte[PART_A.length + PART_B.length];
+        System.arraycopy(PART_A, 0, WHOLE, 0, PART_A.length);
+        System.arraycopy(PART_B, 0, WHOLE, PART_A.length, PART_B.length);
+    }
+
     @Test
     public void testMultiUpdate() {
+        testMultiUpdate(128);
+        testMultiUpdate(224);
+        testMultiUpdate(256);
+        testMultiUpdate(288);
+        testMultiUpdate(384);
+        testMultiUpdate(512);
+    }
 
-        final byte[] a = "abcdefghijklmnopqrstuvwxyz".getBytes(Utils.CHARSET_ASCII);
-        final byte[] b = "ABCDEFG".getBytes(Utils.CHARSET_ASCII);
-        final byte[] input = new byte[a.length + b.length];
-        System.arraycopy(a, 0, input, 0, a.length);
-        System.arraycopy(b, 0, input, a.length, b.length);
-
-        final Keccak k = new Keccak(256);
+    private static void testMultiUpdate(final int bitLen) {
+        final Keccak k = new Keccak(bitLen);
 
         k.reset();
         k.update(new byte[1]);
         k.update(new byte[7]);
 
         k.reset();
-        k.update(input);
+        k.update(WHOLE);
         byte[] k0 = k.digest();
 
         k.reset();
-        k.update(a);
-        k.update(b);
+        k.update(PART_A);
+        k.update(PART_B);
         byte[] k1 = k.digest();
 
         Assert.assertArrayEquals(k0, k1);
 
-        KeccakDigest k_ = new KeccakDigest(256);
+        KeccakDigest k_ = new KeccakDigest(bitLen);
 
         k_.reset();
-        k_.update(a, 0, a.length);
-        k_.update(b, 0, b.length);
-        byte[] output = new byte[32];
+        k_.update(PART_A, 0, PART_A.length);
+        k_.update(PART_B, 0, PART_B.length);
+        byte[] output = new byte[k_.getDigestSize()];
         k_.doFinal(output, 0);
         byte[] b0 = Arrays.copyOf(output, output.length);
 
         k_.reset();
-        k_.update(input, 0, input.length);
+        k_.update(WHOLE, 0, WHOLE.length);
         k_.doFinal(output, 0);
         byte[] b1 = Arrays.copyOf(output, output.length);
 
@@ -75,38 +87,41 @@ public class KeccakTest {
 
     @Test
     public void testRandom() {
+        testRandom(128, 100);
+        testRandom(224, 100);
+        testRandom(256, 200);
+        testRandom(288, 100);
+        testRandom(384, 100);
+        testRandom(512, 100);
+    }
 
-        Keccak k = new Keccak(256);
-        KeccakDigest k_ = new KeccakDigest(256);
+    private static void testRandom(final int bitLen, final int n) {
+        Keccak k = new Keccak(bitLen);
+        KeccakDigest k_ = new KeccakDigest(bitLen);
 
         Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
 
         byte[] buffer = new byte[65];
         final int bound = buffer.length + 1;
 
-        r.nextBytes(buffer);
-
-        final int n = 1_000;
         for (int i = 0; i < n; i++) {
+            r.nextBytes(buffer);
             final int numUpdates = r.nextInt(20);
             for (int j = 0; j < numUpdates; j++) {
-                final int len = r.nextInt(bound);
-
-//                System.out.println(len + "\u0009\u0009" + FastHex.encodeToString(buffer, 0, len));
-                k.update(buffer, 0 , len);
-                k_.update(buffer, 0, len);
+                final int end = r.nextInt(bound);
+                final int start = end == 0 ? 0 : r.nextInt(end);
+                final int len = end - start;
+//                System.out.println(start + "," + len + "\t\t" + FastHex.encodeToString(buffer, start, len));
+                k.update(buffer, start, len);
+                k_.update(buffer, start, len);
             }
 
             byte[] a = k.digest();
-//            ByteBuffer zzz = ByteBuffer.allocate(32);
-//            k.digest(zzz);
 
             byte[] k_Output = new byte[k_.getDigestSize()];
             k_.doFinal(k_Output, 0);
 
             Assert.assertArrayEquals(a, k_Output);
-
-//            System.out.println(FastHex.encodeToString(k_Output));
         }
     }
 }
