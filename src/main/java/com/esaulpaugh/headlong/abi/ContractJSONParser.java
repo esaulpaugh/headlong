@@ -55,7 +55,6 @@ public final class ContractJSONParser {
                                                              final boolean functions,
                                                              final boolean events,
                                                              final Class<T> classOfT) throws ParseException {
-
         final Supplier<MessageDigest> defaultDigest = functions ? Function::newDefaultDigest : null;
 
         final List<T> list = new ArrayList<>();
@@ -168,6 +167,5 @@ public final class ContractJSONParser {
 
     private static IllegalArgumentException unexpectedException(String key, String value) {
         return new IllegalArgumentException("unexpected " + key + ": " + (value == null ? null : "\"" + value + "\""));
-
     }
 }

@@ -89,11 +89,9 @@ public class Keccak extends MessageDigest {
 
     @Override
     protected void engineReset() {
-
         for (int i = 0; i < MAX_STATE_SIZE_WORDS; i++) {
             state[i] = 0L;
         }
-
         rateBits = 0;
         out = null;
     }

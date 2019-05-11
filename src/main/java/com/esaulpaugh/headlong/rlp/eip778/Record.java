@@ -54,7 +54,7 @@ public final class Record {
         try {
             this.record = RLP_STRICT.wrapList(record);
         } catch (DecodeException e) {
-            throw new RuntimeException(e);
+            throw new Error(e); // shouldn't happen
         }
     }
 

@@ -65,7 +65,7 @@ public abstract class ABIType<J> implements Serializable {
         return name;
     }
 
-    ABIType setName(String name) {
+    ABIType<J> setName(String name) {
         this.name = name;
         return this;
     }
@@ -130,7 +130,7 @@ public abstract class ABIType<J> implements Serializable {
         switch (typeCode()) {
         case TYPE_CODE_ARRAY:
             sb.append("[");
-            ((ArrayType) this).elementType.toString(sb);
+            ((ArrayType<?, ?>) this).elementType.toString(sb);
             sb.append("]");
             break;
         case TYPE_CODE_TUPLE:
