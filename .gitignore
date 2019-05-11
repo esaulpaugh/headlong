@@ -12,3 +12,4 @@ out/
 *.log
 /target/
 /bin/
+/classes/
