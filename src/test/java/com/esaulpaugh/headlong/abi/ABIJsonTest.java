@@ -153,6 +153,8 @@ public class ABIJsonTest {
         testCase.test(argsArray);
     }
 
+    private static final TestUtils.Parser<Object> BYTES_PARSER = (b) -> TestUtils.parseBytes(b.getAsString());
+
     @Test
     public void testExperimental1() throws ParseException {
 
@@ -163,12 +165,25 @@ public class ABIJsonTest {
 
         JsonArray arr = testCase.args.get(1).getAsJsonArray();
 
-        TestUtils.Parser<Object> byteArrayParser = (b) -> TestUtils.parseBytes(b.getAsString());
-        TestUtils.Parser<Tuple> tupleParser = (json) -> TestUtils.parseTuple(json, byteArrayParser);
+        TestUtils.Parser<Tuple> tupleParser = (json) -> TestUtils.parseTuple(json, BYTES_PARSER);
 
         argsArray[1] = TestUtils.getArrayParser(Tuple.class, 3, tupleParser).apply(arr);
 
-        argsArray[2] = TestUtils.getTupleParser(3, (b) -> TestUtils.parseInteger(b.getAsJsonPrimitive())).apply(testCase.args.get(2));
+        JsonObject args2 = testCase.args.get(2).getAsJsonObject();
+
+//        JsonArray elements = args2.getAsJsonArray("elements");
+//        JsonElement zero = elements.get(0);
+//        JsonElement one = elements.get(1);
+//        Tuple t = TestUtils.getTupleParser(2, (b) -> TestUtils.parseInteger(b.getAsJsonPrimitive()))
+//                .apply(zero);
+//        byte[] bytes = TestUtils.parseBytes(one.getAsString());
+//        argsArray[2] = new Tuple(t, bytes);
+
+        argsArray[2] = TestUtils.parseTuple(
+                args2,
+                TestUtils.getTupleParser(2, (b) -> TestUtils.parseInteger(b.getAsJsonPrimitive())),
+                BYTES_PARSER
+        );
 
         testCase.test(argsArray);
     }

@@ -208,6 +208,15 @@ public class TestUtils {
         return new Tuple(tupleElements);
     }
 
+    public static Tuple parseTuple(JsonElement in, Parser<?> ...elementParsers) {
+        JsonArray elements = in.getAsJsonObject().getAsJsonArray("elements");
+        Object[] tupleElements = new Object[elements.size()];
+        for (int i = 0; i < tupleElements.length; i++) {
+            tupleElements[i] = elementParsers[i].apply(elements.get(i));
+        }
+        return new Tuple(tupleElements);
+    }
+
     // -----------------
 
     public interface CustomRunnable {
