@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong;
 
+import com.esaulpaugh.headlong.abi.Tuple;
 import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
@@ -153,10 +154,29 @@ public class TestUtils {
         throw new UnsupportedOperationException("unsupported");
     }
 
+    public static Tuple[] parseTupleArray(JsonElement in) {
+        JsonArray arr = in.getAsJsonArray();
+        Tuple[] tuples = new Tuple[arr.size()];
+        for(int i = 0; i < tuples.length; i++) {
+            tuples[i] = parseTuple(arr.get(i));
+        }
+        return tuples;
+    }
+
     public static BigInteger parseAddress(JsonElement in) { // uint160
         String hex = "00" + in.getAsString().substring(2);
         byte[] bytes = FastHex.decode(hex);
         return new BigInteger(bytes);
+    }
+
+    public static Tuple parseTuple(JsonElement in) {
+        JsonArray elements = in.getAsJsonObject().getAsJsonArray("elements");
+        java.util.function.Function<JsonElement, Object> function = (e) -> TestUtils.parseBytes(e.getAsString());
+        Object[] tupleElements = new Object[elements.size()];
+        for (int j = 0; j < tupleElements.length; j++) {
+            tupleElements[j] = function.apply(elements.get(j));
+        }
+        return new Tuple(tupleElements);
     }
 
     // -----------------

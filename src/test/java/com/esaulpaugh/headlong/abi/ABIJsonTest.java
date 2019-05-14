@@ -87,7 +87,14 @@ public class ABIJsonTest {
             ArrayList<ABIType<?>> list = new ArrayList<>(types.size());
 
             for (JsonElement type : types) {
-                list.add(TypeFactory.create(type.getAsString(), null));
+                String s = type.getAsString();
+                final int openIdx = s.indexOf('(');
+                if(openIdx >= 0) {
+                    ABIType ttttt = Function.parse("(" + s + ")").getParamTypes().get(0);
+                    list.add(ttttt);
+                } else {
+                    list.add(TypeFactory.create(s, null));
+                }
             }
 
             TupleType tt = TupleType.create(list);
@@ -142,6 +149,23 @@ public class ABIJsonTest {
         Object[] argsArray = new Object[testCase.args.size()];
         argsArray[0] = TestUtils.parseBigInteger(testCase.args.get(0));
         argsArray[1] = TestUtils.parseAddress(testCase.args.get(1));
+
+        testCase.test(argsArray);
+    }
+
+    @Test
+    public void testExperimental1() throws ParseException {
+
+        ABITestCase testCase = ABITestCase.forKey("Experimental1");
+
+        Object[] argsArray = new Object[testCase.args.size()];
+        argsArray[0] = TestUtils.parseBigInteger(testCase.args.get(0));
+
+        JsonArray arr = testCase.args.get(1).getAsJsonArray();
+
+        argsArray[1] = TestUtils.parseTupleArray(arr);
+
+        argsArray[2] = TestUtils.parseBigInteger(testCase.args.get(2));
 
         testCase.test(argsArray);
     }
