@@ -35,7 +35,7 @@ import java.util.Set;
 
 public class ABIJsonTest {
 
-    private static final String RESOURCE = "tests/RLPTests/basic_abi_tests.json";
+    private static final String RESOURCE = "tests/ABITests/basic_abi_tests.json";
 
     private static final String TEST_CASES;
 
