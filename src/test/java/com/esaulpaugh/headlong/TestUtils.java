@@ -26,10 +26,12 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.function.Function;
 
 public class TestUtils {
 
@@ -154,13 +156,32 @@ public class TestUtils {
         throw new UnsupportedOperationException("unsupported");
     }
 
-    public static Tuple[] parseTupleArray(JsonElement in) {
-        JsonArray arr = in.getAsJsonArray();
-        Tuple[] tuples = new Tuple[arr.size()];
-        for(int i = 0; i < tuples.length; i++) {
-            tuples[i] = parseTuple(arr.get(i));
+    public static Function<JsonElement, ?> getArrayParser(Class<?> c, int depth, Parser<?> baseParser) {
+        try {
+            Class<?> prevClass = c;
+            Parser<?> prevParser = baseParser;
+            for (int i = 0; i < depth; i++) {
+                final Class finalPrevClass = prevClass;
+                final Parser<?> finalPrevParser = prevParser;
+                Parser<?> newParser = (JsonElement j) -> TestUtils.parseObjectArray(j, finalPrevClass, finalPrevParser);
+                final String className = prevClass.getName();
+                prevClass = Class.forName(className.startsWith("[") ? "[" + className : "[L" + className + ";");
+                prevParser = newParser;
+            }
+            return prevParser;
+
+        } catch (ClassNotFoundException cnfe) {
+            throw new RuntimeException(cnfe);
         }
-        return tuples;
+    }
+
+    public static <T> Object[] parseObjectArray(JsonElement in, Class<T> elementClass, Parser<T> elementParser) {
+        JsonArray arr = in.getAsJsonArray();
+        Object[] array = (Object[]) Array.newInstance(elementClass, arr.size());
+        for(int i = 0; i < array.length; i++) {
+            array[i] = elementParser.apply(arr.get(i));
+        }
+        return array;
     }
 
     public static BigInteger parseAddress(JsonElement in) { // uint160
@@ -169,12 +190,20 @@ public class TestUtils {
         return new BigInteger(bytes);
     }
 
-    public static Tuple parseTuple(JsonElement in) {
+    public static Parser<Tuple> getTupleParser(int depth, Parser<Object> baseParser) {
+        Parser prevParser = baseParser;
+        for (int i = 0; i < depth; i++) {
+            final Parser finalPrevParser = prevParser;
+            prevParser = (Parser<Tuple>) (JsonElement j) -> TestUtils.parseTuple(j, finalPrevParser);
+        }
+        return (Parser<Tuple>) prevParser;
+    }
+
+    public static Tuple parseTuple(JsonElement in, Parser<Object> elementParser) {
         JsonArray elements = in.getAsJsonObject().getAsJsonArray("elements");
-        java.util.function.Function<JsonElement, Object> function = (e) -> TestUtils.parseBytes(e.getAsString());
         Object[] tupleElements = new Object[elements.size()];
         for (int j = 0; j < tupleElements.length; j++) {
-            tupleElements[j] = function.apply(elements.get(j));
+            tupleElements[j] = elementParser.apply(elements.get(j));
         }
         return new Tuple(tupleElements);
     }
@@ -207,5 +236,8 @@ public class TestUtils {
             throw t;
         }
         throw new AssertionError("no " + clazz.getName() + " thrown");
+    }
+
+    public interface Parser<T> extends Function<JsonElement, T> {
     }
 }

@@ -163,9 +163,12 @@ public class ABIJsonTest {
 
         JsonArray arr = testCase.args.get(1).getAsJsonArray();
 
-        argsArray[1] = TestUtils.parseTupleArray(arr);
+        TestUtils.Parser<Object> byteArrayParser = (b) -> TestUtils.parseBytes(b.getAsString());
+        TestUtils.Parser<Tuple> tupleParser = (json) -> TestUtils.parseTuple(json, byteArrayParser);
 
-        argsArray[2] = TestUtils.parseBigInteger(testCase.args.get(2));
+        argsArray[1] = TestUtils.getArrayParser(Tuple.class, 3, tupleParser).apply(arr);
+
+        argsArray[2] = TestUtils.getTupleParser(3, (b) -> TestUtils.parseInteger(b.getAsJsonPrimitive())).apply(testCase.args.get(2));
 
         testCase.test(argsArray);
     }
