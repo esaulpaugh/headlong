@@ -153,7 +153,15 @@ public class ABIJsonTest {
         testCase.test(argsArray);
     }
 
-    private static final TestUtils.Parser<Object> BYTES_PARSER = (b) -> TestUtils.parseBytes(b.getAsString());
+    private static final TestUtils.Parser<Object> INT_ARRAY_PARSER = (e) -> {
+        JsonArray arr = e.getAsJsonArray();
+        final int len = arr.size();
+        int[] ints = new int[len];
+        for (int i = 0; i < len; i++) {
+            ints[i] = arr.get(i).getAsInt();
+        }
+        return ints;
+    };
 
     @Test
     public void testExperimental1() throws ParseException {
@@ -165,7 +173,7 @@ public class ABIJsonTest {
 
         JsonArray arr = testCase.args.get(1).getAsJsonArray();
 
-        TestUtils.Parser<Tuple> tupleParser = (json) -> TestUtils.parseTuple(json, BYTES_PARSER);
+        TestUtils.Parser<Tuple> tupleParser = (json) -> TestUtils.parseTuple(json, INT_ARRAY_PARSER);
 
         argsArray[1] = TestUtils.getArrayParser(Tuple.class, 3, tupleParser).apply(arr);
 
@@ -182,7 +190,7 @@ public class ABIJsonTest {
         argsArray[2] = TestUtils.parseTuple(
                 args2,
                 TestUtils.getTupleParser(2, (b) -> TestUtils.parseInteger(b.getAsJsonPrimitive())),
-                BYTES_PARSER
+                (b) -> TestUtils.parseBytes(b.getAsString())
         );
 
         testCase.test(argsArray);

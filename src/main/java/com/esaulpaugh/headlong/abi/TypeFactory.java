@@ -123,7 +123,7 @@ final class TypeFactory {
             case "int248":
             case "int256": type = new BigIntegerType(baseTypeStr, info.bitLen, false); break;
             case "int": type = new BigIntegerType("int256", info.bitLen, false); break;
-            case "uint8": type = isElement ? ByteType.SIGNED : new IntType(baseTypeStr, info.bitLen, true); break;
+            case "uint8":
             case "uint16":
             case "uint24": type = new IntType(baseTypeStr, info.bitLen, true); break;
             case "uint32": type = isElement ? new IntType(baseTypeStr, info.bitLen, true) : new LongType(baseTypeStr, info.bitLen, true); break;

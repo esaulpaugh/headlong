@@ -61,6 +61,18 @@ public class EncodeTest {
     }
 
     @Test
+    public void uint8ArrayTest() throws ParseException {
+        Function f = new Function("baz(uint8[])");
+
+        Tuple args = Tuple.singleton(new int[] { 0xFF, -1, 1, 2, 0 });
+        ByteBuffer two = f.encodeCall(args);
+
+        Tuple decoded = f.decodeCall((ByteBuffer) two.flip());
+
+        System.out.println(decoded.equals(args));
+    }
+
+    @Test
     public void tupleArrayTest() throws ParseException {
         Function f = new Function("((int16)[2][][1])");
 
