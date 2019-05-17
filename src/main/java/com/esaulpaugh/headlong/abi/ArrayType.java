@@ -54,6 +54,9 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         this.length = length;
         this.arrayClassNameStub = arrayClassNameStub;
         this.isString = String.class == clazz;
+        if(isString && length != DYNAMIC_LENGTH) {
+            throw new IllegalArgumentException("illegal fixed string length");
+        }
     }
 
     public T getElementType() {
@@ -86,37 +89,37 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
      */
     @Override
     int byteLength(Object value) {
-        int staticLen;
+        int len;
         final ABIType<?> elementType = this.elementType;
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: staticLen = ((boolean[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
-        case TYPE_CODE_BYTE: staticLen =
+        case TYPE_CODE_BOOLEAN: len = ((boolean[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
+        case TYPE_CODE_BYTE: len =
                 roundLengthUp(
                         (isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length
                 );
                 break;
-        case TYPE_CODE_INT: staticLen = ((int[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
-        case TYPE_CODE_LONG: staticLen = ((long[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
+        case TYPE_CODE_INT: len = ((int[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
+        case TYPE_CODE_LONG: len = ((long[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BIG_INTEGER:
-        case TYPE_CODE_BIG_DECIMAL: staticLen = ((Number[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
+        case TYPE_CODE_BIG_DECIMAL: len = ((Number[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
             final Object[] elements = (Object[]) value;
-            final int len = elements.length;
-            staticLen = 0;
-            for (int i = 0; i < len; i++) {
-                staticLen += elementType.byteLength(elements[i]);
+            final int n = elements.length;
+            len = 0;
+            for (int i = 0; i < n; i++) {
+                len += elementType.byteLength(elements[i]);
             }
             if(elementType.dynamic) { // implies this.dynamic
-                // 32 bytes per offset, 32 for array length
-                return (len << LOG_2_UNIT_LENGTH_BYTES) + ARRAY_LENGTH_BYTE_LEN + staticLen;
+                len += n << LOG_2_UNIT_LENGTH_BYTES; // 32 bytes per offset
             }
-            return staticLen;
+            break;
         default: throw new IllegalArgumentException("unrecognized type: " + elementType.toString());
         }
-
-        // dynamics get +32 for the array length
-        return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
+        // arrays with variable number of elements get +32 for the array length
+        return length == DYNAMIC_LENGTH
+                ? ARRAY_LENGTH_BYTE_LEN + len
+                : len;
     }
 
     @Override
@@ -166,8 +169,10 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_TUPLE: staticLen = validateObjectArray((Object[]) value); break;
         default: throw new IllegalArgumentException("unrecognized type: " + value.getClass().getName());
         }
-
-        return dynamic ? ARRAY_LENGTH_BYTE_LEN + staticLen : staticLen;
+        // arrays with variable number of elements get +32 for the array length
+        return length == DYNAMIC_LENGTH
+                ? ARRAY_LENGTH_BYTE_LEN + staticLen
+                : staticLen;
     }
 
     private int validateIntArray(int[] arr) {
@@ -272,18 +277,9 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     @Override
     @SuppressWarnings("unchecked")
     J decode(ByteBuffer bb, byte[] elementBuffer) {
-        final int arrayLen;
-        if(dynamic) {
-            arrayLen = ARRAY_LENGTH_TYPE.decode(bb, elementBuffer);
-            final int expectedLen = this.length;
-            if(expectedLen != DYNAMIC_LENGTH && arrayLen != expectedLen) {
-                throw new IllegalArgumentException("array length mismatch @ "
-                        + (bb.position() - ARRAY_LENGTH_BYTE_LEN)
-                        + ": actual != expected: " + arrayLen + " != " + expectedLen);
-            }
-        } else {
-            arrayLen = length;
-        }
+        final int arrayLen = length == DYNAMIC_LENGTH
+                ? ARRAY_LENGTH_TYPE.decode(bb, elementBuffer)
+                : length;
 
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return (J) decodeBooleanArray(bb, arrayLen, elementBuffer);

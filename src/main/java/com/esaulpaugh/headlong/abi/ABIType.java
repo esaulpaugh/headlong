@@ -43,7 +43,7 @@ public abstract class ABIType<J> implements Serializable {
     private String name;
 
     ABIType(String canonicalType, Class<?> clazz, boolean dynamic) {
-        this.canonicalType = canonicalType;
+        this.canonicalType = canonicalType; // .intern() to save memory and allow == comparison?
         this.clazz = clazz;
         this.dynamic = dynamic;
         this.name = null;

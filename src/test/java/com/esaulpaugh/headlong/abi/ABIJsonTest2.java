@@ -40,11 +40,14 @@ public class ABIJsonTest2 {
 
         private static final Integers.UintType ADDRESS = new Integers.UintType(160);
 
+        private final String name;
+
         private final TupleType types;
         private final Tuple values;
         private final byte[] result;
 
         public TestCase(JsonObject object) throws ParseException {
+            this.name = object.get("name").getAsString();
             String typesStr = object.get("types").getAsString();
             String valuesStr = object.get("values").getAsString();
             String resultStr = object.get("result").getAsString();
@@ -69,9 +72,18 @@ public class ABIJsonTest2 {
                 Assert.assertArrayEquals(result, encoding);
                 return true;
             } catch (AssertionError ae) {
-//                System.out.println(types.canonicalType);
-//                System.out.println(format(result) + "\n");
-//                System.out.println(format(encoding));
+                String[] resultTokens = format(result).split("[\n]");
+                String[] encodingTokens = format(encoding).split("[\n]");
+                System.out.println(types.canonicalType);
+                int i = 0;
+                for ( ; i < resultTokens.length; i++) {
+                    String r = resultTokens[i];
+                    String e = encodingTokens[i];
+                    System.out.println(r + " " + e + " " + (r.equals(e) ? "" : "**************"));
+                }
+                for ( ; i < encodingTokens.length; i++) {
+                    System.out.println("----------------------------------------------------------------" + " " + encodingTokens[i]);
+                }
                 return false;
             }
         }
@@ -80,10 +92,7 @@ public class ABIJsonTest2 {
             StringBuilder sb = new StringBuilder();
             int idx = 0;
             while(idx < abi.length) {
-                sb // .append(idx >>> UnitType.LOG_2_UNIT_LENGTH_BYTES)
-//                        .append('\t')
-                        .append(encode(Arrays.copyOfRange(abi, idx, idx + UNIT_LENGTH_BYTES), HEX))
-                        .append('\n');
+                sb.append(encode(Arrays.copyOfRange(abi, idx, idx + UNIT_LENGTH_BYTES), HEX)).append('\n');
                 idx += UNIT_LENGTH_BYTES;
             }
             return sb.toString();
@@ -114,15 +123,12 @@ public class ABIJsonTest2 {
                 return new BigDecimal(new BigInteger(valueValue), 18);
             }
             case ABIType.TYPE_CODE_ARRAY: return parseArray((ArrayType<?, ?>) type, value);
-            case ABIType.TYPE_CODE_TUPLE: {
-                return parseTuple((TupleType) type, value.getAsJsonObject().get("value").getAsJsonArray());
-            }
+            case ABIType.TYPE_CODE_TUPLE: return parseTuple((TupleType) type, value.getAsJsonObject().get("value").getAsJsonArray());
             default: throw new Error();
             }
         }
 
         private static Object parseArray(ArrayType<?, ?> arrayType, JsonElement value) {
-            // System.out.println("____ " + arrayType.canonicalType);
             if (arrayType.isString) {
                 return value.getAsJsonObject().get("value").getAsString();
             } else if (value.isJsonArray()) {
@@ -195,15 +201,18 @@ public class ABIJsonTest2 {
 
     @Test
     public void testMegaJson() throws ParseException {
-//        int i = 0;
+        int i = 0;
         int failed = 0;
         for (JsonElement e : TEST_CASES) {
-//            System.out.println(i);
-            if(!new TestCase(e.getAsJsonObject()).test()) {
+            TestCase t = new TestCase(e.getAsJsonObject());
+            if(!t.test()) {
+                System.out.println("failure @ " + i + " " + t.name);
                 failed++;
+            } else {
+                System.out.println("success @ " + i);
             }
-//            i++;
+            i++;
         }
-        System.out.println("failed = " + failed);
+        System.out.println("failed = " + failed + "/" + i);
     }
 }

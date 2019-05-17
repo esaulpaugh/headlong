@@ -80,7 +80,7 @@ final class TupleTypeParser {
                     TupleType tupleType = TupleType.create(innerList);
 
                     // check for suffix i.e. array syntax
-                    if (argEnd < sigEnd && signature.charAt(argEnd) == '[') {
+                    if (argEnd < sigEnd && signature.charAt(argEnd) == '[') { // TODO allow parsing of non-tuple types by end-user
                         final int nextTerminator = nextParamTerminator(signature, argEnd);
                         if (nextTerminator > argEnd) {
                             String suffix = signature.substring(argEnd, nextTerminator); // e.g. "[4][]"

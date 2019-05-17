@@ -176,42 +176,42 @@ final class CallEncoder {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN:
             boolean[] booleans = (boolean[]) value;
-            if(arrayType.dynamic) {
+            if(arrayType.length == ArrayType.DYNAMIC_LENGTH) {
                 insertInt(booleans.length, dest);
             }
             insertBooleans(booleans, dest);
             return;
         case TYPE_CODE_BYTE:
             byte[] bytes = (byte[]) value;
-            if(arrayType.dynamic) {
+            if(arrayType.length == ArrayType.DYNAMIC_LENGTH) {
                 insertInt(bytes.length, dest);
             }
             insertBytes(bytes, dest);
             return;
         case TYPE_CODE_INT:
             int[] ints = (int[]) value;
-            if(arrayType.dynamic) {
+            if(arrayType.length == ArrayType.DYNAMIC_LENGTH) {
                 insertInt(ints.length, dest);
             }
             insertInts(ints, dest);
             return;
         case TYPE_CODE_LONG:
             long[] longs = (long[]) value;
-            if(arrayType.dynamic) {
+            if(arrayType.length == ArrayType.DYNAMIC_LENGTH) {
                 insertInt(longs.length, dest);
             }
             insertLongs(longs, dest);
             return;
         case TYPE_CODE_BIG_INTEGER:
             BigInteger[] bigInts = (BigInteger[]) value;
-            if(arrayType.dynamic) {
+            if(arrayType.length == ArrayType.DYNAMIC_LENGTH) {
                 insertInt(bigInts.length, dest);
             }
             insertBigIntegers(bigInts, dest);
             return;
         case TYPE_CODE_BIG_DECIMAL:
             BigDecimal[] bigDecs = (BigDecimal[]) value;
-            if(arrayType.dynamic) {
+            if(arrayType.length == ArrayType.DYNAMIC_LENGTH) {
                 insertInt(bigDecs.length, dest);
             }
             insertBigDecimals(bigDecs, dest);
@@ -221,7 +221,9 @@ final class CallEncoder {
             final Object[] objects = (Object[]) value;
             final int len = objects.length;
             if(arrayType.dynamic) {
-                insertInt(len, dest); // insertLength
+                if(arrayType.length == ArrayType.DYNAMIC_LENGTH) {
+                    insertInt(len, dest); // insertLength
+                }
                 if (elementType.dynamic) { // if elements are dynamic
                     final int[] offset = new int[] { len << 5 }; // mul 32 (0x20)
                     for (int i = 0; i < len; i++) {
