@@ -15,7 +15,13 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.joemelsha.crypto.hash.Keccak;
 import org.junit.Assert;
 
@@ -40,11 +46,11 @@ public class MonteCarloTestCase implements Serializable {
 
     static class Params implements Serializable {
 
-        private static final int DEFAULT_MAX_TUPLE_DEPTH = 1;
-        private static final int DEFAULT_MAX_TUPLE_LENGTH = 5;
+        private static final int DEFAULT_MAX_TUPLE_DEPTH = 3;
+        private static final int DEFAULT_MAX_TUPLE_LENGTH = 3;
 
-        private static final int DEFAULT_MAX_ARRAY_DEPTH = 1;
-        private static final int DEFAULT_MAX_ARRAY_LENGTH = 33; // does not apply to static base types e.g. bytes1-32
+        private static final int DEFAULT_MAX_ARRAY_DEPTH = 3;
+        private static final int DEFAULT_MAX_ARRAY_LENGTH = 3; // does not apply to static base types e.g. bytes1-32
 
         private final int maxTupleDepth;
         private final int maxTupleLen;
@@ -177,6 +183,109 @@ public class MonteCarloTestCase implements Serializable {
 
     MonteCarloTestCase(long seed) throws ParseException {
         this(new Params(seed));
+    }
+
+    JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) throws ParseException {
+
+        Function f = Function.parse(name + this.function.getParamTypes().canonicalType); // this.function;
+
+//        System.out.println(f.getCanonicalSignature());
+
+        ByteBuffer abi = f.encodeCall(this.argsTuple);
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.add("name", new JsonPrimitive(name));
+        jsonObject.add("types", serializeTypes(f.getParamTypes(), gson));
+        jsonObject.add("values", serializeValues(this.argsTuple, gson));
+        jsonObject.add("result", new JsonPrimitive("0x" + FastHex.encodeToString(abi.array())));
+        jsonObject.add("version", version);
+
+        return jsonObject;
+    }
+
+    private static JsonPrimitive serializeTypes(TupleType tupleType, Gson gson) {
+        JsonArray array = new JsonArray();
+
+        for(ABIType<?> type : tupleType) {
+            array.add(new JsonPrimitive(type.canonicalType.replace("(", "tuple(")));
+        }
+        return new JsonPrimitive(gson.toJson(array));
+    }
+
+    private static JsonPrimitive serializeValues(Tuple tuple, Gson gson) {
+        JsonArray valuesArray = new JsonArray();
+        for(Object val : tuple) {
+            valuesArray.add(toJsonElement(val));
+        }
+        return new JsonPrimitive(gson.toJson(valuesArray));
+    }
+
+    private static JsonElement toJsonElement(Object val) {
+        if(val instanceof Boolean) {
+            JsonObject object = new JsonObject();
+            object.add("type", new JsonPrimitive("bool"));
+            object.add("value", new JsonPrimitive(val.toString()));
+            return object;
+        } else if(val instanceof Integer || val instanceof Long) {
+            JsonObject object = new JsonObject();
+            object.add("type", new JsonPrimitive("number"));
+            object.add("value", new JsonPrimitive(val.toString()));
+            return object;
+        } else if(val instanceof BigInteger) {
+            JsonObject object = new JsonObject();
+            object.add("type", new JsonPrimitive("string"));
+            object.add("value", new JsonPrimitive("0x" + FastHex.encodeToString(((BigInteger) val).toByteArray())));
+            return object;
+        } else if(val instanceof BigDecimal) {
+            JsonObject object = new JsonObject();
+            object.add("type", new JsonPrimitive("number"));
+            object.add("value", new JsonPrimitive(((BigDecimal) val).unscaledValue().toString()));
+            return object;
+        } else if(val instanceof byte[]) {
+            JsonObject object = new JsonObject();
+            object.add("type", new JsonPrimitive("buffer"));
+            object.add("value", new JsonPrimitive("0x" + FastHex.encodeToString((byte[]) val)));
+            return object;
+        } else if(val instanceof String) {
+            JsonObject object = new JsonObject();
+            object.add("type", new JsonPrimitive("buffer"));
+            object.add("value", new JsonPrimitive((String) val));
+            return object;
+        } else if(val instanceof boolean[]) {
+            JsonArray array = new JsonArray();
+            for(boolean e : (boolean[]) val) {
+                array.add(toJsonElement(e));
+            }
+            return array;
+        } else if(val instanceof int[]) {
+            JsonArray array = new JsonArray();
+            for(int e : (int[]) val) {
+                array.add(toJsonElement(e));
+            }
+            return array;
+        } else if(val instanceof long[]) {
+            JsonArray array = new JsonArray();
+            for(long e : (long[]) val) {
+                array.add(toJsonElement(e));
+            }
+            return array;
+        } else if(val instanceof Object[]) {
+            JsonArray array = new JsonArray();
+            for(Object e : (Object[]) val) {
+                array.add(toJsonElement(e));
+            }
+            return array;
+        } else if(val instanceof Tuple) {
+            JsonObject object = new JsonObject();
+            object.add("type", new JsonPrimitive("tuple"));
+            JsonArray array = new JsonArray();
+            for(Object e : (Tuple) val) {
+                array.add(toJsonElement(e));
+            }
+            object.add("value", array);
+            return object;
+        }
+        throw new RuntimeException("???");
     }
 
     void run() {

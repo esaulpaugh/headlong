@@ -24,17 +24,8 @@ import static com.esaulpaugh.headlong.util.Strings.encode;
 
 public class ABIJsonTest2 {
 
-    private static final String RESOURCE = "tests/ethers-io/tests/tests/contract-interface-abi2.json";
-
-    private static final JsonArray TEST_CASES;
-
-    static {
-        try {
-            TEST_CASES = JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonTest.class, RESOURCE));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private static final String ABI_V2_CASES_PATH = "tests/ethers-io/tests/tests/contract-interface-abi2.json";
+    private static final String HEADLONG_CASES_PATH = "tests/headlong/tests/abi_tests.json";
 
     private static class TestCase {
 
@@ -42,11 +33,12 @@ public class ABIJsonTest2 {
 
         private final String name;
 
+        private final Function function;
         private final TupleType types;
         private final Tuple values;
         private final byte[] result;
 
-        public TestCase(JsonObject object) throws ParseException {
+        public TestCase(JsonObject object, boolean function) throws ParseException {
             this.name = object.get("name").getAsString();
             String typesStr = object.get("types").getAsString();
             String valuesStr = object.get("values").getAsString();
@@ -64,28 +56,61 @@ public class ABIJsonTest2 {
             this.types = TupleType.parse(tts);
             this.values = parseTuple(this.types, valuesArray);
             this.result = FastHex.decode(resultStr, 2, resultStr.length() - 2);
+
+            if(function) {
+                this.function = Function.parse(name + tts);
+            } else {
+                this.function = null;
+            }
         }
 
-        private boolean test() {
-            byte[] encoding = types.encode(values).array();
+        private boolean test(boolean function) {
+//            System.out.println(this.function.getCanonicalSignature());
+            byte[] encoding = function ? this.function.encodeCall(values).array() : types.encode(values).array();
             try {
                 Assert.assertArrayEquals(result, encoding);
                 return true;
             } catch (AssertionError ae) {
-                String[] resultTokens = format(result).split("[\n]");
-                String[] encodingTokens = format(encoding).split("[\n]");
-                System.out.println(types.canonicalType);
-                int i = 0;
-                for ( ; i < resultTokens.length; i++) {
-                    String r = resultTokens[i];
-                    String e = encodingTokens[i];
-                    System.out.println(r + " " + e + " " + (r.equals(e) ? "" : "**************"));
-                }
-                for ( ; i < encodingTokens.length; i++) {
-                    System.out.println("----------------------------------------------------------------" + " " + encodingTokens[i]);
+                if(function) {
+                    System.out.println(this.function.getCanonicalSignature() + ", " + this.values);
+                    System.out.println(buildCallComparison(result, encoding));
+                } else {
+                    String[] resultTokens = format(result).split("[\n]");
+                    String[] encodingTokens = format(encoding).split("[\n]");
+                    System.out.println(types.canonicalType);
+                    int i = 0;
+                    for (; i < resultTokens.length; i++) {
+                        String r = resultTokens[i];
+                        String e = encodingTokens[i];
+                        System.out.println(r + " " + e + " " + (r.equals(e) ? "" : "**************"));
+                    }
+                    for (; i < encodingTokens.length; i++) {
+                        System.out.println("----------------------------------------------------------------" + " " + encodingTokens[i]);
+                    }
                 }
                 throw ae;
             }
+        }
+
+        public static String buildCallComparison(byte[] expected, byte[] actual) {
+
+            StringBuilder sb = new StringBuilder("ID\t")
+                    .append(encode(Arrays.copyOfRange(expected, 0, Function.SELECTOR_LEN), HEX)).append(' ')
+                    .append(encode(Arrays.copyOfRange(actual, 0, Function.SELECTOR_LEN), HEX))
+                    .append('\n');
+            int idx = Function.SELECTOR_LEN;
+            final int min = Math.min(expected.length, actual.length);
+            while(idx < min) {
+                byte[] expectedRow = Arrays.copyOfRange(expected, idx, idx + UNIT_LENGTH_BYTES);
+                byte[] actualRow = Arrays.copyOfRange(actual, idx, idx + UNIT_LENGTH_BYTES);
+                sb.append(idx >>> UnitType.LOG_2_UNIT_LENGTH_BYTES)
+                        .append('\t')
+                        .append(encode(expectedRow, HEX)).append(' ')
+                        .append(encode(actualRow, HEX)).append(Arrays.equals(expectedRow, actualRow) ? "" : " *************")
+                        .append('\n');
+                idx += UNIT_LENGTH_BYTES;
+            }
+            return sb.toString();
         }
 
         private static String format(byte[] abi) {
@@ -100,7 +125,7 @@ public class ABIJsonTest2 {
 
         private static Object parseValue(ABIType<?> type, JsonElement value) {
             switch (type.typeCode()) {
-            case ABIType.TYPE_CODE_BOOLEAN: return value.getAsJsonPrimitive().getAsBoolean();
+            case ABIType.TYPE_CODE_BOOLEAN: return value.getAsJsonObject().get("value").getAsBoolean();
             case ABIType.TYPE_CODE_BYTE: return (byte) value.getAsJsonObject().get("value").getAsInt();
             case ABIType.TYPE_CODE_INT: return value.getAsJsonObject().get("value").getAsInt();
             case ABIType.TYPE_CODE_LONG: {
@@ -110,17 +135,25 @@ public class ABIJsonTest2 {
             }
             case ABIType.TYPE_CODE_BIG_INTEGER: {
                 JsonObject valueObj = value.getAsJsonObject();
+                String valueType = valueObj.get("type").getAsString();
                 String valueValue = valueObj.get("value").getAsString();
-                if("address".equals(type.canonicalType)) {
+                if("string".equals(valueType)) {
                     BigInteger val = new BigInteger(FastHex.decode(valueValue, 2, valueValue.length() - 2));
-                    return Integers.toUnsigned(val, ADDRESS);
+                    if("address".equals(type.canonicalType)) {
+                        return Integers.toUnsigned(val, ADDRESS);
+                    }
+                    BigIntegerType bigIntType = (BigIntegerType) type;
+                    if(bigIntType.unsigned) {
+                        return Integers.toUnsigned(val, new Integers.UintType(bigIntType.bitLength));
+                    }
+                    return val;
                 } else {
                     return new BigInteger(valueValue);
                 }
             }
             case ABIType.TYPE_CODE_BIG_DECIMAL: {
                 String valueValue = value.getAsJsonObject().get("value").getAsString();
-                return new BigDecimal(new BigInteger(valueValue), 18);
+                return new BigDecimal(new BigInteger(valueValue), ((BigDecimalType) type).scale);
             }
             case ABIType.TYPE_CODE_ARRAY: return parseArray((ArrayType<?, ?>) type, value);
             case ABIType.TYPE_CODE_TUPLE: return parseTuple((TupleType) type, value.getAsJsonObject().get("value").getAsJsonArray());
@@ -200,9 +233,20 @@ public class ABIJsonTest2 {
     }
 
     @Test
-    public void testMegaJson() throws ParseException {
-        for (JsonElement e : TEST_CASES) {
-            new TestCase(e.getAsJsonObject()).test();
+    public void testAbiV2Cases() throws ParseException, IOException {
+        final JsonArray testCases = JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonTest.class, ABI_V2_CASES_PATH));
+        for (JsonElement e : testCases) {
+            new TestCase(e.getAsJsonObject(), false).test(false);
         }
+        System.out.println(testCases.size() + " cases passed");
+    }
+
+    @Test
+    public void testHeadlongCases() throws ParseException, IOException {
+        final JsonArray testCases = JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonTest.class, HEADLONG_CASES_PATH));
+        for (JsonElement e : testCases) {
+            new TestCase(e.getAsJsonObject(), true).test(true);
+        }
+        System.out.println(testCases.size() + " cases passed");
     }
 }

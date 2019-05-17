@@ -15,9 +15,18 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonPrimitive;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.text.ParseException;
 import java.util.Objects;
 import java.util.Random;
@@ -36,6 +45,21 @@ public class MonteCarloTest {
             seeds[i] = r.nextLong();
         }
         return seeds;
+    }
+
+    @Ignore
+    @Test
+    public void printNewTestCases() throws ParseException {
+        final Gson ugly = new GsonBuilder().create();
+        final JsonPrimitive version = new JsonPrimitive("1.4.4+commit.3ad2258");
+        JsonArray array = new JsonArray();
+        int i = 0;
+        for(final long seed : generateSeeds(getSeed(System.nanoTime()), 250)) {
+            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed);
+            MonteCarloTestCase testCase = new MonteCarloTestCase(params);
+            array.add(testCase.toJsonElement(ugly, "headlong_" + i++, version));
+        }
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(array));
     }
 
     @Test
