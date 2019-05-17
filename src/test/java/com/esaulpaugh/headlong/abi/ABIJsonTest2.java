@@ -84,7 +84,7 @@ public class ABIJsonTest2 {
                 for ( ; i < encodingTokens.length; i++) {
                     System.out.println("----------------------------------------------------------------" + " " + encodingTokens[i]);
                 }
-                return false;
+                throw ae;
             }
         }
 
@@ -201,18 +201,8 @@ public class ABIJsonTest2 {
 
     @Test
     public void testMegaJson() throws ParseException {
-        int i = 0;
-        int failed = 0;
         for (JsonElement e : TEST_CASES) {
-            TestCase t = new TestCase(e.getAsJsonObject());
-            if(!t.test()) {
-                System.out.println("failure @ " + i + " " + t.name);
-                failed++;
-            } else {
-                System.out.println("success @ " + i);
-            }
-            i++;
+            new TestCase(e.getAsJsonObject()).test();
         }
-        System.out.println("failed = " + failed + "/" + i);
     }
 }
