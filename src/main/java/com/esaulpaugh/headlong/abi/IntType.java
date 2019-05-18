@@ -45,13 +45,6 @@ final class IntType extends UnitType<Integer> {
     }
 
     @Override
-    public Integer parseArgument(String s) {
-        Integer in = Integer.parseInt(s);
-        validate(in);
-        return in;
-    }
-
-    @Override
     public int validate(Object value) {
         validateClass(value);
         final long longVal = ((Number) value).longValue();
@@ -65,5 +58,12 @@ final class IntType extends UnitType<Integer> {
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigIntBitLen(bi);
         return bi.intValue();
+    }
+
+    @Override
+    public Integer parseArgument(String s) {
+        Integer in = Integer.parseInt(s);
+        validate(in);
+        return in;
     }
 }

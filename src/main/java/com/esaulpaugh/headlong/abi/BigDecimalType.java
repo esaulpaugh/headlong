@@ -49,13 +49,6 @@ final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    public BigDecimal parseArgument(String s) {
-        BigDecimal bigDec = new BigDecimal(new BigInteger(s), scale);
-        validate(bigDec);
-        return bigDec;
-    }
-
-    @Override
     public int validate(Object value) {
         validateClass(value);
         BigDecimal dec = (BigDecimal) value;
@@ -78,5 +71,12 @@ final class BigDecimalType extends UnitType<BigDecimal> {
         BigDecimal dec = new BigDecimal(bi, scale);
         validateBigIntBitLen(bi);
         return dec;
+    }
+
+    @Override
+    public BigDecimal parseArgument(String s) {
+        BigDecimal bigDec = new BigDecimal(new BigInteger(s), scale);
+        validate(bigDec);
+        return bigDec;
     }
 }

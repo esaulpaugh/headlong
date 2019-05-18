@@ -146,11 +146,6 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    public J parseArgument(String s) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public int validate(final Object value) {
         validateClass(value);
 
@@ -560,6 +555,11 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 dest[i] = elementType.decode(bb, elementBuffer);
             }
         }
+    }
+
+    @Override
+    public J parseArgument(String s) {
+        throw new UnsupportedOperationException();
     }
 
     /**

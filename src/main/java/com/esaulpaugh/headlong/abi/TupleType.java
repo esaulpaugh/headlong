@@ -116,11 +116,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    public Tuple parseArgument(String s) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public int validate(final Object value) {
         validateClass(value);
 
@@ -250,6 +245,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 dest[i] = type.decode(bb, elementBuffer);
             }
         }
+    }
+
+    @Override
+    public Tuple parseArgument(String s) {
+        throw new UnsupportedOperationException();
     }
 
     boolean recursiveEquals(Object o) {

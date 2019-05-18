@@ -57,13 +57,6 @@ final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    public Boolean parseArgument(String s) {
-        Boolean bool = Boolean.parseBoolean(s);
-        validate(bool);
-        return bool;
-    }
-
-    @Override
     public int validate(Object value) {
         validateClass(value);
         return UNIT_LENGTH_BYTES;
@@ -84,5 +77,12 @@ final class BooleanType extends UnitType<Boolean> {
         case 1: return Boolean.TRUE;
         default: throw new IllegalArgumentException("negative value given for boolean type");
         }
+    }
+
+    @Override
+    public Boolean parseArgument(String s) {
+        Boolean bool = Boolean.parseBoolean(s);
+        validate(bool);
+        return bool;
     }
 }

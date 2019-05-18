@@ -50,13 +50,6 @@ final class ByteType extends UnitType<Byte> {
     }
 
     @Override
-    public Byte parseArgument(String s) {
-        Byte b = Byte.parseByte(s);
-        validate(b);
-        return b;
-    }
-
-    @Override
     public int validate(Object value) {
         validateClass(value);
         return UNIT_LENGTH_BYTES;
@@ -68,5 +61,12 @@ final class ByteType extends UnitType<Byte> {
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigIntBitLen(bi);
         return bi.byteValue();
+    }
+
+    @Override
+    public Byte parseArgument(String s) {
+        Byte b = Byte.parseByte(s);
+        validate(b);
+        return b;
     }
 }

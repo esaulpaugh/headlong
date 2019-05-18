@@ -45,13 +45,6 @@ final class LongType extends UnitType<Long> {
     }
 
     @Override
-    public Long parseArgument(String s) {
-        Long lo = Long.parseLong(s);
-        validate(lo);
-        return lo;
-    }
-
-    @Override
     public int validate(Object value) {
         validateClass(value);
         final long longVal = ((Number) value).longValue();
@@ -65,5 +58,12 @@ final class LongType extends UnitType<Long> {
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigIntBitLen(bi);
         return bi.longValue();
+    }
+
+    @Override
+    public Long parseArgument(String s) {
+        Long lo = Long.parseLong(s);
+        validate(lo);
+        return lo;
     }
 }
