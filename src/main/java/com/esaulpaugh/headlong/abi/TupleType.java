@@ -61,14 +61,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elementsArray);
     }
 
-    private static String completeTupleTypeString(StringBuilder canonicalTupleType) {
-        final int len = canonicalTupleType.length();
-        if(len == 1) {
-            return EMPTY_TUPLE_STRING;
-        }
-        return canonicalTupleType.replace(len - 1, len, ")").toString(); // replace trailing comma
-    }
-
     public ABIType<?> get(int index) {
         return elementTypes[index];
     }
@@ -232,6 +224,14 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return TupleTypeParser.parseTupleType(rawTupleTypeString);
     }
 
+    public static TupleType of(String[] typeStrings) throws ParseException {
+        StringBuilder sb = new StringBuilder("(");
+        for (String str : typeStrings) {
+            sb.append(str).append(',');
+        }
+        return parse(completeTupleTypeString(sb));
+    }
+
     public static TupleType parseElements(String rawElementsString) throws ParseException {
         return parse('(' + rawElementsString + ')');
     }
@@ -330,5 +330,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             }
         }
         return negate ? manifest.length - count : count;
+    }
+
+    private static String completeTupleTypeString(StringBuilder ttsb) {
+        final int len = ttsb.length();
+        if(len == 1) {
+            return EMPTY_TUPLE_STRING;
+        }
+        return ttsb.replace(len - 1, len, ")").toString(); // replace trailing comma
     }
 }

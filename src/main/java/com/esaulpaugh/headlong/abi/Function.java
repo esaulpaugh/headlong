@@ -189,7 +189,7 @@ public final class Function implements ABIObject, Serializable {
         return this;
     }
 
-    public Tuple decodeReturn(byte[] returnVals) {
+    public Tuple decodeReturn(byte[] returnVals) { // TODO allow decoding of non-calls without a Function
         return outputTypes.decode(returnVals);
     }
 

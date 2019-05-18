@@ -47,18 +47,18 @@ public class ABIJsonTest2 {
             JsonArray typesArray = JsonUtils.parseArray(typesStr);
             JsonArray valuesArray = JsonUtils.parseArray(valuesStr);
 
-            StringBuilder tupleTypeString = new StringBuilder("(");
-            for (JsonElement e : typesArray) {
-                tupleTypeString.append(e.getAsString().replace("tuple", "")).append(',');
+            final int len = typesArray.size();
+            String[] typeStrings = new String[len];
+            for (int i = 0; i < len; i++) {
+                typeStrings[i] = typesArray.get(i).getAsString().replace("tuple", "");
             }
 
-            String tts = completeTupleTypeString(tupleTypeString);
-            this.types = TupleType.parse(tts);
+            this.types = TupleType.of(typeStrings);
             this.values = parseTuple(this.types, valuesArray);
             this.result = FastHex.decode(resultStr, 2, resultStr.length() - 2);
 
             if(function) {
-                this.function = Function.parse(name + tts);
+                this.function = Function.parse(name + types.canonicalType);
             } else {
                 this.function = null;
             }
@@ -221,14 +221,6 @@ public class ABIJsonTest2 {
                 elements[i] = parseValue(abiTypes[i], iter.next());
             }
             return new Tuple(elements);
-        }
-
-        private static String completeTupleTypeString(StringBuilder canonicalTupleType) {
-            final int len = canonicalTupleType.length();
-            if(len == 1) {
-                return "()";
-            }
-            return canonicalTupleType.replace(len - 1, len, ")").toString(); // replace trailing comma
         }
     }
 
