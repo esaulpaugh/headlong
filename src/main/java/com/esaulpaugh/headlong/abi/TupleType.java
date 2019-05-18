@@ -70,7 +70,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    String arrayClassNameStub() {
+    String classNameStub() {
         return ARRAY_CLASS_NAME_STUB;
     }
 

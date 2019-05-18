@@ -30,7 +30,7 @@ final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
-    String arrayClassNameStub() {
+    String classNameStub() {
         return ARRAY_CLASS_NAME_STUB;
     }
 

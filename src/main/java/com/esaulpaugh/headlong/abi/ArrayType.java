@@ -43,16 +43,16 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     final int length;
     /* transient */ final boolean isString;
 
-    final String arrayClassNameStub;
+    final String classNameStub;
 
-    ArrayType(String canonicalType, Class<J> clazz, boolean dynamic, T elementType, int length, String arrayClassNameStub) {
+    ArrayType(String canonicalType, Class<J> clazz, boolean dynamic, T elementType, int length, String classNameStub) {
         super(canonicalType, clazz, dynamic);
         this.elementType = elementType;
         if(length < DYNAMIC_LENGTH) {
             throw new IllegalArgumentException("length must be non-negative or " + DYNAMIC_LENGTH + ". found: " + length);
         }
         this.length = length;
-        this.arrayClassNameStub = arrayClassNameStub;
+        this.classNameStub = classNameStub;
         this.isString = String.class == clazz;
         if(isString && length != DYNAMIC_LENGTH) {
             throw new IllegalArgumentException("illegal fixed string length");
@@ -72,8 +72,8 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    String arrayClassNameStub() {
-        return arrayClassNameStub;
+    String classNameStub() {
+        return classNameStub;
     }
 
     @Override

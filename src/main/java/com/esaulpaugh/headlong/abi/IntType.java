@@ -30,7 +30,7 @@ final class IntType extends UnitType<Integer> {
     }
 
     @Override
-    String arrayClassNameStub() {
+    String classNameStub() {
         return ARRAY_CLASS_NAME_STUB;
     }
 

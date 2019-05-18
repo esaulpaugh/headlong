@@ -74,7 +74,7 @@ public abstract class ABIType<J> implements Serializable {
         return this;
     }
 
-    abstract String arrayClassNameStub();
+    abstract String classNameStub();
 
     abstract int typeCode();
 

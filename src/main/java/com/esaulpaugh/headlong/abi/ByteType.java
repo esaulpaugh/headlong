@@ -35,7 +35,7 @@ final class ByteType extends UnitType<Byte> {
     }
 
     @Override
-    String arrayClassNameStub() {
+    String classNameStub() {
         return ARRAY_CLASS_NAME_STUB;
     }
 

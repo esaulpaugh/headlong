@@ -42,7 +42,7 @@ final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    String arrayClassNameStub() {
+    String classNameStub() {
         return ARRAY_CLASS_NAME_STUB;
     }
 

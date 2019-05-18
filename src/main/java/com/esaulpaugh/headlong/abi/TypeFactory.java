@@ -69,9 +69,11 @@ final class TypeFactory {
             }
 
             final ABIType<?> elementType = buildType(type.substring(0, arrayOpenIndex), true, baseTupleType);
-            final String className = '[' + elementType.arrayClassNameStub();
+            final String arrayClassName = '[' + elementType.classNameStub();
+            @SuppressWarnings("unchecked")
+            final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
             final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
-            return new ArrayType<ABIType<?>, Object>(type, (Class<Object>) Class.forName(className, false, CLASS_LOADER), dynamic, elementType, length, className);
+            return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, arrayClassName);
         } else {
             ABIType<?> baseType = resolveBaseType(type, isArrayElement, baseTupleType);
             if(baseType == null) {

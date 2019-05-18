@@ -30,7 +30,7 @@ final class LongType extends UnitType<Long> {
     }
 
     @Override
-    String arrayClassNameStub() {
+    String classNameStub() {
         return ARRAY_CLASS_NAME_STUB;
     }
 
