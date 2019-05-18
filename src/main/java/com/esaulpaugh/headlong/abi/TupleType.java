@@ -224,7 +224,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return TupleTypeParser.parseTupleType(rawTupleTypeString);
     }
 
-    public static TupleType of(String[] typeStrings) throws ParseException {
+    public static TupleType of(String... typeStrings) throws ParseException {
         StringBuilder sb = new StringBuilder("(");
         for (String str : typeStrings) {
             sb.append(str).append(',');
