@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
 
 final class BigDecimalType extends UnitType<BigDecimal> {
 
-    static final Class<?> CLASS = BigDecimal.class;
+    static final Class<BigDecimal> CLASS = BigDecimal.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(BigDecimal[].class);
 
     final int scale;

@@ -22,7 +22,7 @@ import java.nio.ByteBuffer;
 
 final class BigIntegerType extends UnitType<BigInteger> {
 
-    static final Class<?> CLASS = BigInteger.class;
+    static final Class<BigInteger> CLASS = BigInteger.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(BigInteger[].class);
 
     BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {

@@ -25,7 +25,7 @@ import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
 
 public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
-    private static final Class<?> CLASS = Tuple.class;
+    private static final Class<Tuple> CLASS = Tuple.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(Tuple[].class);
 
     private static final String EMPTY_TUPLE_STRING = "()";

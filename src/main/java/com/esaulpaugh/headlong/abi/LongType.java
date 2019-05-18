@@ -22,7 +22,7 @@ import java.nio.ByteBuffer;
 
 final class LongType extends UnitType<Long> {
 
-    static final Class<?> CLASS = Long.class;
+    static final Class<Long> CLASS = Long.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(long[].class);
 
     LongType(String canonicalType, int bitLength, boolean unsigned) {

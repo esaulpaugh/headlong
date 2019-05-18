@@ -22,7 +22,7 @@ import java.nio.ByteBuffer;
 
 final class IntType extends UnitType<Integer> {
 
-    static final Class<?> CLASS = Integer.class;
+    static final Class<Integer> CLASS = Integer.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(int[].class);
 
     IntType(String canonicalType, int bitLength, boolean unsigned) {

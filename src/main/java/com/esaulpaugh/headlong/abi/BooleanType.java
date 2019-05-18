@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
  */
 final class BooleanType extends UnitType<Boolean> {
 
-    static final Class<?> CLASS = Boolean.class;
+    static final Class<Boolean> CLASS = Boolean.class;
     private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(boolean[].class);
 
     static final BooleanType INSTANCE = new BooleanType();

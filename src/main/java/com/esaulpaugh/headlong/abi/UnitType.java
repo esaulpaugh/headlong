@@ -32,7 +32,7 @@ abstract class UnitType<V> extends ABIType<V> { // instance of V should be insta
     final int bitLength;
     final boolean unsigned;
 
-    UnitType(String canonicalType, Class<?> clazz, int bitLength, boolean unsigned) {
+    UnitType(String canonicalType, Class<V> clazz, int bitLength, boolean unsigned) {
         super(canonicalType, clazz, false);
         this.bitLength = bitLength;
         this.unsigned = unsigned;

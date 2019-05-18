@@ -28,10 +28,10 @@ import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
 public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
-    static final Class<?> BYTE_ARRAY_CLASS = byte[].class;
+    static final Class<byte[]> BYTE_ARRAY_CLASS = byte[].class;
     static final String BYTE_ARRAY_ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(byte[][].class);
 
-    static final Class<?> STRING_CLASS = String.class;
+    static final Class<String> STRING_CLASS = String.class;
     static final String STRING_ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(String[].class);
 
     private static final IntType ARRAY_LENGTH_TYPE = new IntType("int32", Integer.SIZE, false);
@@ -45,7 +45,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
     final String arrayClassNameStub;
 
-    ArrayType(String canonicalType, Class<?> clazz, boolean dynamic, T elementType, int length, String arrayClassNameStub) {
+    ArrayType(String canonicalType, Class<J> clazz, boolean dynamic, T elementType, int length, String arrayClassNameStub) {
         super(canonicalType, clazz, dynamic);
         this.elementType = elementType;
         if(length < DYNAMIC_LENGTH) {

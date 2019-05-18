@@ -41,12 +41,12 @@ public abstract class ABIType<J> implements Serializable {
     public static final ABIType<?>[] EMPTY_TYPE_ARRAY = new ABIType<?>[0];
 
     final String canonicalType;
-    final Class<?> clazz;
+    final Class<J> clazz;
     final boolean dynamic;
 
     private String name;
 
-    ABIType(String canonicalType, Class<?> clazz, boolean dynamic) {
+    ABIType(String canonicalType, Class<J> clazz, boolean dynamic) {
         this.canonicalType = canonicalType; // .intern() to save memory and allow == comparison?
         this.clazz = clazz;
         this.dynamic = dynamic;
@@ -57,7 +57,7 @@ public abstract class ABIType<J> implements Serializable {
         return canonicalType;
     }
 
-    public Class<?> clazz() {
+    public Class<J> clazz() {
         return clazz;
     }
 
