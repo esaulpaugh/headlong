@@ -19,6 +19,7 @@ import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.rlp.util.Integers;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 
 /**
  * Superclass for any 32-byte ("unit") Contract ABI type. Usually numbers or boolean.
@@ -40,6 +41,16 @@ abstract class UnitType<V> extends ABIType<V> { // instance of V should be insta
     @Override
     final int byteLength(Object value) {
         return UNIT_LENGTH_BYTES;
+    }
+
+    @Override
+    void encodeHead(Object value, ByteBuffer dest, int[] offset) {
+        Encoding.insertInt(((Number) value).longValue(), dest);
+    }
+
+    @Override
+    void encodeTail(Object value, ByteBuffer dest) {
+        throw new UnsupportedOperationException();
     }
 
     // don't do unsigned check for array element

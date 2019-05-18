@@ -21,7 +21,7 @@ import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.*;
 
-import static com.esaulpaugh.headlong.abi.CallEncoder.OFFSET_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
 
 public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
@@ -152,6 +152,46 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return byteLength;
     }
 
+    @Override
+    void encodeHead(Object value, ByteBuffer dest, int[] offset) {
+        if (dynamic) {
+            Encoding.insertOffset(offset, this, value, dest);
+        } else {
+            encodeTail(value, dest);
+        }
+    }
+
+    @Override
+    void encodeTail(Object value, ByteBuffer dest) {
+        final Object[] values = ((Tuple) value).elements;
+        final int[] offset = new int[] { headLengthSum(values) };
+
+        final int len = elementTypes.length;
+        int i;
+        for (i = 0; i < len; i++) {
+            elementTypes[i].encodeHead(values[i], dest, offset);
+        }
+        if(dynamic) {
+            for (i = 0; i < len; i++) {
+                ABIType<?> type = elementTypes[i];
+                if (type.dynamic) {
+                    type.encodeTail(values[i], dest);
+                }
+            }
+        }
+    }
+
+    private int headLengthSum(Object[] elements) {
+        int headLengths = 0;
+        for (int i = 0; i < elementTypes.length; i++) {
+            ABIType<?> et = elementTypes[i];
+            headLengths += et.dynamic
+                    ? OFFSET_LENGTH_BYTES
+                    : et.byteLength(elements[i]);
+        }
+        return headLengths;
+    }
+
     public Tuple decode(byte[] array) {
         return decode(ByteBuffer.wrap(array));
     }
@@ -185,7 +225,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         for (int i = 0; i < tupleLen; i++) {
             elementType = elementTypes[i];
             if (elementType.dynamic) {
-                offsets[i] = CallEncoder.OFFSET_TYPE.decode(bb, elementBuffer);
+                offsets[i] = Encoding.OFFSET_TYPE.decode(bb, elementBuffer);
             } else {
                 dest[i] = elementType.decode(bb, elementBuffer);
             }
@@ -241,16 +281,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public ByteBuffer encode(Tuple values) {
-        ByteBuffer output = ByteBuffer.allocate(validate(values));
-        CallEncoder.insertTuple(this, values, output);
-        return output;
+        ByteBuffer dest = ByteBuffer.allocate(validate(values));
+        encodeTail(values, dest);
+        return dest;
     }
 
     public TupleType encode(Tuple values, ByteBuffer dest, boolean validate) {
         if(validate) {
             validate(values);
         }
-        CallEncoder.insertTuple(this, values, dest);
+        encodeTail(values, dest);
         return this;
     }
 

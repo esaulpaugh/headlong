@@ -129,7 +129,7 @@ final class PackedEncoder {
         } else {
             final int paddingBytes = byteLen - BizarroIntegers.len(value);
             for (int i = 0; i < paddingBytes; i++) {
-                dest.put(CallEncoder.NEGATIVE_ONE_BYTE);
+                dest.put(Encoding.NEGATIVE_ONE_BYTE);
             }
             BizarroIntegers.putLong(value, dest);
         }
@@ -140,7 +140,7 @@ final class PackedEncoder {
         final int paddingBytes = byteLen - arr.length;
         if(bigGuy.signum() == -1) {
             for (int i = 0; i < paddingBytes; i++) {
-                dest.put(CallEncoder.NEGATIVE_ONE_BYTE);
+                dest.put(Encoding.NEGATIVE_ONE_BYTE);
             }
         } else {
             for (int i = 0; i < paddingBytes; i++) {

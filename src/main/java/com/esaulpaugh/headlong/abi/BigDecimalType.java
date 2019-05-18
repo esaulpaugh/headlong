@@ -67,6 +67,11 @@ final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
+    void encodeHead(Object value, ByteBuffer dest, int[] offset) {
+        Encoding.insertInt(((BigDecimal) value).unscaledValue(), dest);
+    }
+
+    @Override
     BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);

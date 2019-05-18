@@ -16,11 +16,11 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.util.JsonUtils;
 import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -91,10 +91,9 @@ public class RLPJsonEncodeTest {
     }
 
     static Set<Map.Entry<String, JsonElement>> parseEntrySet(String json) {
-        JsonParser parser = new JsonParser();
-        JsonElement element = parser.parse(json);
-        JsonObject obj = element.getAsJsonObject();
-        return obj.entrySet();
+        return JsonUtils.parse(json)
+                .getAsJsonObject()
+                .entrySet();
     }
 
     static byte[] getOutBytes(Map.Entry<String, JsonElement> e) {

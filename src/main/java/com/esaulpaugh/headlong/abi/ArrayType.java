@@ -275,6 +275,139 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
+    void encodeHead(Object value, ByteBuffer dest, int[] offset) {
+        if (dynamic) { // includes String
+            Encoding.insertOffset(offset, this, value, dest);
+        } else {
+            encodeArrayTail(value, dest);
+        }
+    }
+
+    @Override
+    void encodeTail(Object value, ByteBuffer dest) {
+        if(isString) {
+            byte[] bytes = ((String) value).getBytes(CHARSET_UTF_8);
+            Encoding.insertInt(bytes.length, dest); // insertLength
+            insertBytes(bytes, dest);
+        } else {
+            encodeArrayTail(value, dest);
+        }
+    }
+
+    void encodeArrayTail(Object value, ByteBuffer dest) {
+        switch (elementType.typeCode()) {
+        case TYPE_CODE_BOOLEAN:
+            boolean[] booleans = (boolean[]) value;
+            if(length == ArrayType.DYNAMIC_LENGTH) {
+                Encoding.insertInt(booleans.length, dest);
+            }
+            insertBooleans(booleans, dest);
+            return;
+        case TYPE_CODE_BYTE:
+            byte[] bytes = (byte[]) value;
+            if(length == ArrayType.DYNAMIC_LENGTH) {
+                Encoding.insertInt(bytes.length, dest);
+            }
+            insertBytes(bytes, dest);
+            return;
+        case TYPE_CODE_INT:
+            int[] ints = (int[]) value;
+            if(length == ArrayType.DYNAMIC_LENGTH) {
+                Encoding.insertInt(ints.length, dest);
+            }
+            insertInts(ints, dest);
+            return;
+        case TYPE_CODE_LONG:
+            long[] longs = (long[]) value;
+            if(length == ArrayType.DYNAMIC_LENGTH) {
+                Encoding.insertInt(longs.length, dest);
+            }
+            insertLongs(longs, dest);
+            return;
+        case TYPE_CODE_BIG_INTEGER:
+            BigInteger[] bigInts = (BigInteger[]) value;
+            if(length == ArrayType.DYNAMIC_LENGTH) {
+                Encoding.insertInt(bigInts.length, dest);
+            }
+            insertBigIntegers(bigInts, dest);
+            return;
+        case TYPE_CODE_BIG_DECIMAL:
+            BigDecimal[] bigDecs = (BigDecimal[]) value;
+            if(length == ArrayType.DYNAMIC_LENGTH) {
+                Encoding.insertInt(bigDecs.length, dest);
+            }
+            insertBigDecimals(bigDecs, dest);
+            return;
+        case TYPE_CODE_ARRAY:  // type for String[] has elementType.typeCode() == TYPE_CODE_ARRAY
+        case TYPE_CODE_TUPLE:
+            final Object[] objects = (Object[]) value;
+            final int len = objects.length;
+            if(dynamic) {
+                if(length == ArrayType.DYNAMIC_LENGTH) {
+                    Encoding.insertInt(len, dest); // insertLength
+                }
+                if (elementType.dynamic) { // if elements are dynamic
+                    final int[] offset = new int[] { len << LOG_2_UNIT_LENGTH_BYTES }; // mul 32 (0x20)
+                    for (int i = 0; i < len; i++) {
+                        Encoding.insertOffset(offset, elementType, objects[i], dest);
+                    }
+                }
+            }
+            for (int i = 0; i < len; i++) {
+                elementType.encodeTail(objects[i], dest);
+            }
+            return;
+        default:
+            throw new IllegalArgumentException("unexpected array element type: " + elementType.toString());
+        }
+    }
+
+    private static void insertBooleans(boolean[] bools, ByteBuffer dest) {
+        for (boolean e : bools) {
+            dest.put(e ? BooleanType.BOOLEAN_TRUE : BooleanType.BOOLEAN_FALSE);
+        }
+    }
+
+    private static int paddingLength(int len) {
+        int mod = len & 31;
+        return mod == 0
+                ? 0
+                : 32 - mod;
+    }
+
+    static void insertBytes(byte[] bytes, ByteBuffer dest) {
+        dest.put(bytes);
+        final int paddingLength = paddingLength(bytes.length);
+        for (int i = 0; i < paddingLength; i++) {
+            dest.put(Encoding.ZERO_BYTE);
+        }
+    }
+
+    private static void insertInts(int[] ints, ByteBuffer dest) {
+        for (int e : ints) {
+            Encoding.insertInt(e, dest);
+        }
+    }
+
+    private static void insertLongs(long[] longs, ByteBuffer dest) {
+        for (long e : longs) {
+            Encoding.insertInt(e, dest);
+        }
+    }
+
+    private static void insertBigIntegers(BigInteger[] bigInts, ByteBuffer dest) {
+        for (BigInteger e : bigInts) {
+            Encoding.insertInt(e, dest);
+        }
+    }
+
+    private static void insertBigDecimals(BigDecimal[] bigDecs, ByteBuffer dest) {
+        for (BigDecimal e : bigDecs) {
+            Encoding.insertInt(e.unscaledValue(), dest);
+        }
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     J decode(ByteBuffer bb, byte[] elementBuffer) {
         final int arrayLen = length == DYNAMIC_LENGTH
@@ -405,7 +538,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         final int len = offsets.length;
         if(elementType.dynamic) {
             for (int i = 0; i < len; i++) {
-                offsets[i] = CallEncoder.OFFSET_TYPE.decode(bb, elementBuffer);
+                offsets[i] = Encoding.OFFSET_TYPE.decode(bb, elementBuffer);
             }
         } else {
             for (int i = 0; i < len; i++) {

@@ -22,6 +22,10 @@ import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
+/**
+ *
+ * @param <J>   this {@link ABIType}'s corresponding Java type
+ */
 public abstract class ABIType<J> implements Serializable {
 
     static final int TYPE_CODE_BOOLEAN = 0;
@@ -81,6 +85,10 @@ public abstract class ABIType<J> implements Serializable {
     public abstract J parseArgument(String s);
 
     public abstract int validate(Object value);
+
+    abstract void encodeHead(Object value, ByteBuffer dest, int[] offset);
+
+    abstract void encodeTail(Object value, ByteBuffer dest);
 
     /**
      * Decodes the data at the buffer's current position according to this {@link ABIType}.

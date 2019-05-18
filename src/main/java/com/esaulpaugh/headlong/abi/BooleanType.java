@@ -30,6 +30,13 @@ final class BooleanType extends UnitType<Boolean> {
 
     static final BooleanType INSTANCE = new BooleanType();
 
+    static final byte[] BOOLEAN_FALSE = new byte[UNIT_LENGTH_BYTES];
+    static final byte[] BOOLEAN_TRUE = new byte[UNIT_LENGTH_BYTES];
+
+    static {
+        BOOLEAN_TRUE[BOOLEAN_TRUE.length-1] = 1;
+    }
+
     private BooleanType() {
         super("bool", CLASS, 1, true);
     }
@@ -60,6 +67,11 @@ final class BooleanType extends UnitType<Boolean> {
     public int validate(Object value) {
         validateClass(value);
         return UNIT_LENGTH_BYTES;
+    }
+
+    @Override
+    void encodeHead(Object value, ByteBuffer dest, int[] offset) {
+        dest.put((boolean) value ? BOOLEAN_TRUE : BOOLEAN_FALSE);
     }
 
     @Override

@@ -65,7 +65,6 @@ public class ABIJsonTest2 {
         }
 
         private boolean test(boolean function) {
-//            System.out.println(this.function.getCanonicalSignature());
             byte[] encoding = function ? this.function.encodeCall(values).array() : types.encode(values).array();
             try {
                 Assert.assertArrayEquals(result, encoding);
@@ -82,7 +81,7 @@ public class ABIJsonTest2 {
                     for (; i < resultTokens.length; i++) {
                         String r = resultTokens[i];
                         String e = encodingTokens[i];
-                        System.out.println(r + " " + e + " " + (r.equals(e) ? "" : "**************"));
+                        System.out.println(r + " " + e + (r.equals(e) ? "" : " ****"));
                     }
                     for (; i < encodingTokens.length; i++) {
                         System.out.println("----------------------------------------------------------------" + " " + encodingTokens[i]);
@@ -106,7 +105,7 @@ public class ABIJsonTest2 {
                 sb.append(idx >>> UnitType.LOG_2_UNIT_LENGTH_BYTES)
                         .append('\t')
                         .append(encode(expectedRow, HEX)).append(' ')
-                        .append(encode(actualRow, HEX)).append(Arrays.equals(expectedRow, actualRow) ? "" : " *************")
+                        .append(encode(actualRow, HEX)).append(Arrays.equals(expectedRow, actualRow) ? "" : " ****")
                         .append('\n');
                 idx += UNIT_LENGTH_BYTES;
             }

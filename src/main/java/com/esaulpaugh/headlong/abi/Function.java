@@ -173,22 +173,6 @@ public final class Function implements ABIObject, Serializable {
         return stateMutability;
     }
 
-    public ByteBuffer encodeCallWithArgs(Object... args) {
-        return encodeCall(new Tuple(args));
-    }
-
-    public ByteBuffer encodeCall(Tuple args) {
-        return CallEncoder.encodeCall(this, args);
-    }
-
-    public Function encodeCall(Tuple args, ByteBuffer dest, boolean validate) {
-        if(validate) {
-            inputTypes.validate(args);
-        }
-        CallEncoder.encodeCall(this, args, dest);
-        return this;
-    }
-
     public Tuple decodeReturn(byte[] returnVals) { // TODO allow decoding of non-calls without a Function
         return outputTypes.decode(returnVals);
     }
@@ -198,11 +182,34 @@ public final class Function implements ABIObject, Serializable {
     }
 
     public int callLength(Tuple args) {
-        return CallEncoder.calcEncodingLength(this, args, true);
+        return callLength(args, true);
     }
 
     public int callLength(Tuple args, boolean validate) {
-        return CallEncoder.calcEncodingLength(this, args, validate);
+        return Function.SELECTOR_LEN + (validate ? inputTypes.validate(args) : inputTypes.byteLength(args));
+    }
+
+    public ByteBuffer encodeCallWithArgs(Object... args) {
+        return encodeCall(new Tuple(args));
+    }
+
+    public ByteBuffer encodeCall(Tuple args) {
+        ByteBuffer dest = ByteBuffer.wrap(new byte[callLength(args, true)]); // ByteOrder.BIG_ENDIAN by default
+        encodeCall(args, dest);
+        return dest;
+    }
+
+    public Function encodeCall(Tuple args, ByteBuffer dest, boolean validate) {
+        if(validate) {
+            inputTypes.validate(args);
+        }
+        encodeCall(args, dest);
+        return this;
+    }
+
+    private void encodeCall(Tuple args, ByteBuffer dest) {
+        dest.put(selector);
+        inputTypes.encodeTail(args, dest);
     }
 
     public Tuple decodeCall(byte[] array) {
