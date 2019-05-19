@@ -87,6 +87,7 @@ public class ABIJsonTest2 {
                         System.out.println("----------------------------------------------------------------" + " " + encodingTokens[i]);
                     }
                 }
+                // return false;
                 throw ae;
             }
         }

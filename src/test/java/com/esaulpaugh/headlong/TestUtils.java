@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong;
 
-import com.esaulpaugh.headlong.abi.Tuple;
 import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
@@ -26,12 +25,10 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.function.Function;
 
 public class TestUtils {
 
@@ -97,16 +94,10 @@ public class TestUtils {
     }
 
     public static int[] parseIntArray(final JsonArray array) {
-//        ArrayList<Object> arrayList = new ArrayList<>();
         final int size = array.size();
         int[] ints = new int[size];
         for (int i = 0; i < size; i++) {
             JsonElement element = array.get(i);
-//            if(element.isJsonObject()) {
-//
-//            } else if(element.isJsonArray()) {
-//
-//            } else
             if(element.isJsonPrimitive()) {
                 ints[i] = parseInteger(element);
             } else if(element.isJsonNull()) {
@@ -156,70 +147,11 @@ public class TestUtils {
         throw new UnsupportedOperationException("unsupported");
     }
 
-    public static Function<JsonElement, ?> getArrayParser(Class<?> c, int depth, Parser<?> baseParser) {
-        try {
-            Class<?> prevClass = c;
-            Parser<?> prevParser = baseParser;
-            for (int i = 0; i < depth; i++) {
-                final Class finalPrevClass = prevClass;
-                final Parser<?> finalPrevParser = prevParser;
-                Parser<?> newParser = (JsonElement j) -> TestUtils.parseObjectArray(j, finalPrevClass, finalPrevParser);
-                final String className = prevClass.getName();
-                prevClass = Class.forName(className.startsWith("[") ? "[" + className : "[L" + className + ";");
-                prevParser = newParser;
-            }
-            return prevParser;
-
-        } catch (ClassNotFoundException cnfe) {
-            throw new RuntimeException(cnfe);
-        }
-    }
-
-    public static <T> Object[] parseObjectArray(JsonElement in, Class<T> elementClass, Parser<T> elementParser) {
-        JsonArray arr = in.getAsJsonArray();
-        Object[] array = (Object[]) Array.newInstance(elementClass, arr.size());
-        for(int i = 0; i < array.length; i++) {
-            array[i] = elementParser.apply(arr.get(i));
-        }
-        return array;
-    }
-
     public static BigInteger parseAddress(JsonElement in) { // uint160
         String hex = "00" + in.getAsString().substring(2);
         byte[] bytes = FastHex.decode(hex);
         return new BigInteger(bytes);
     }
-
-    public static Parser<Tuple> getTupleParser(int depth, Parser<Object> baseParser) {
-        Parser prevParser = baseParser;
-        for (int i = 0; i < depth; i++) {
-            final Parser finalPrevParser = prevParser;
-            prevParser = (Parser<Tuple>) (JsonElement j) -> TestUtils.parseTuple(j, finalPrevParser);
-        }
-        @SuppressWarnings("unchecked")
-        Parser<Tuple> masterParser = (Parser<Tuple>) prevParser;
-        return masterParser;
-    }
-
-    public static Tuple parseTuple(JsonElement in, Parser<Object> elementParser) {
-        JsonArray elements = in.getAsJsonObject().getAsJsonArray("elements");
-        Object[] tupleElements = new Object[elements.size()];
-        for (int j = 0; j < tupleElements.length; j++) {
-            tupleElements[j] = elementParser.apply(elements.get(j));
-        }
-        return new Tuple(tupleElements);
-    }
-
-    public static Tuple parseTuple(JsonElement in, Parser<?>... elementParsers) {
-        JsonArray elements = in.getAsJsonObject().getAsJsonArray("elements");
-        Object[] tupleElements = new Object[elements.size()];
-        for (int i = 0; i < tupleElements.length; i++) {
-            tupleElements[i] = elementParsers[i].apply(elements.get(i));
-        }
-        return new Tuple(tupleElements);
-    }
-
-    // -----------------
 
     public interface CustomRunnable {
         void run() throws Throwable;
@@ -247,8 +179,5 @@ public class TestUtils {
             throw t;
         }
         throw new AssertionError("no " + clazz.getName() + " thrown");
-    }
-
-    public interface Parser<T> extends Function<JsonElement, T> {
     }
 }

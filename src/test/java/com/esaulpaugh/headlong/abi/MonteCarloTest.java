@@ -22,11 +22,7 @@ import com.google.gson.JsonPrimitive;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.text.ParseException;
 import java.util.Objects;
 import java.util.Random;
@@ -262,11 +258,9 @@ public class MonteCarloTest {
         System.out.println(deserialized.testCase.hashCode() + " == " + task.testCase.hashCode());
         System.out.println(deserialized.testCase.argsTuple.hashCode() + " == " + task.testCase.argsTuple.hashCode());
 
-
 //        System.out.println(deserialized.testCase.params.hashCode() + " == " + task.testCase.params.hashCode());
 //        System.out.println(deserialized.testCase.function.hashCode() + " == " + task.testCase.function.hashCode());
 //        System.out.println(deserialized.testCase.function.paramTypes.hashCode() + " == " + task.testCase.function.paramTypes.hashCode());
-
 
         if(!equal || d_hash != t_hash) {
             throw new AssertionError("deserialization failure");
@@ -288,13 +282,4 @@ public class MonteCarloTest {
         c ^= c << 32;
         return c ^ (c >> 32);
     }
-
-//    public static void main(String[] args0) {
-//        byte[] x = new byte[8];
-//        for (int i = 1; i <= 20_000; i++) {
-//            long seed = getSeed(i);
-//            Integers.putLong(seed, x, 0);
-//            System.out.println(Strings.encode(x, Strings.BASE64));
-//        }
-//    }
 }

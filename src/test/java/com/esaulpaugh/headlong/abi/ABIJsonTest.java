@@ -89,7 +89,7 @@ public class ABIJsonTest {
             for (JsonElement type : types) {
                 String s = type.getAsString();
                 final int openIdx = s.indexOf('(');
-                if(openIdx >= 0) {
+                if (openIdx >= 0) {
                     ABIType ttttt = Function.parse("(" + s + ")").getParamTypes().get(0);
                     list.add(ttttt);
                 } else {
@@ -149,49 +149,6 @@ public class ABIJsonTest {
         Object[] argsArray = new Object[testCase.args.size()];
         argsArray[0] = TestUtils.parseBigInteger(testCase.args.get(0));
         argsArray[1] = TestUtils.parseAddress(testCase.args.get(1));
-
-        testCase.test(argsArray);
-    }
-
-    private static final TestUtils.Parser<Object> INT_ARRAY_PARSER = (e) -> {
-        JsonArray arr = e.getAsJsonArray();
-        final int len = arr.size();
-        int[] ints = new int[len];
-        for (int i = 0; i < len; i++) {
-            ints[i] = arr.get(i).getAsInt();
-        }
-        return ints;
-    };
-
-    @Test
-    public void testExperimental1() throws ParseException {
-
-        ABITestCase testCase = ABITestCase.forKey("Experimental1");
-
-        Object[] argsArray = new Object[testCase.args.size()];
-        argsArray[0] = TestUtils.parseBigInteger(testCase.args.get(0));
-
-        JsonArray arr = testCase.args.get(1).getAsJsonArray();
-
-        TestUtils.Parser<Tuple> tupleParser = (json) -> TestUtils.parseTuple(json, INT_ARRAY_PARSER);
-
-        argsArray[1] = TestUtils.getArrayParser(Tuple.class, 3, tupleParser).apply(arr);
-
-        JsonObject args2 = testCase.args.get(2).getAsJsonObject();
-
-//        JsonArray elements = args2.getAsJsonArray("elements");
-//        JsonElement zero = elements.get(0);
-//        JsonElement one = elements.get(1);
-//        Tuple t = TestUtils.getTupleParser(2, (b) -> TestUtils.parseInteger(b.getAsJsonPrimitive()))
-//                .apply(zero);
-//        byte[] bytes = TestUtils.parseBytes(one.getAsString());
-//        argsArray[2] = new Tuple(t, bytes);
-
-        argsArray[2] = TestUtils.parseTuple(
-                args2,
-                TestUtils.getTupleParser(2, (b) -> TestUtils.parseInteger(b.getAsJsonPrimitive())),
-                (b) -> TestUtils.parseBytes(b.getAsString())
-        );
 
         testCase.test(argsArray);
     }
