@@ -16,6 +16,8 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.util.Strings;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -23,25 +25,27 @@ import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.function.Supplier;
 
+import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.abi.TupleTypeParser.EMPTY_PARAMETER;
 
 public class EncodeTest {
 
     @Test
     public void emptyParamTest() throws Throwable {
-        TestUtils.assertThrown(ParseException.class, "@ index 0, " + EMPTY_PARAMETER, () -> new Function("baz(,)"));
+        assertThrown(ParseException.class, "@ index 0, " + EMPTY_PARAMETER, () -> new Function("baz(,)"));
 
-        TestUtils.assertThrown(ParseException.class, "@ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,)"));
+        assertThrown(ParseException.class, "@ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,)"));
 
-        TestUtils.assertThrown(ParseException.class, "@ index 1, @ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,(int,,))"));
+        assertThrown(ParseException.class, "@ index 1, @ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,(int,,))"));
     }
 
     @Test
     public void illegalCharsTest() throws Throwable {
-        TestUtils.assertThrown(ParseException.class, "illegal char \\u02a6 '\u02a6' @ index 2", () -> new Function("ba\u02a6z(uint32,bool)"));
+        assertThrown(ParseException.class, "illegal char \\u02a6 '\u02a6' @ index 2", () -> new Function("ba\u02a6z(uint32,bool)"));
 
-        TestUtils.assertThrown(ParseException.class, "@ index 1, @ index 0, unrecognized type: bool\u02a6 (0000000000000000000000000000626f6f6ccaa6)", () -> new Function("baz(int32,(bool\u02a6))"));
+        assertThrown(ParseException.class, "@ index 1, @ index 0, unrecognized type: bool\u02a6 (0000000000000000000000000000626f6f6ccaa6)", () -> new Function("baz(int32,(bool\u02a6))"));
     }
 
     @Test
@@ -81,6 +85,54 @@ public class EncodeTest {
         };
 
         f.encodeCallWithArgs(argsIn);
+    }
+
+    @Test
+    public void fixedLengthDynamicArrayTest() throws Throwable {
+
+        final Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+
+        Supplier<Object> bytesSupplier = () -> { byte[] v = new byte[rand.nextInt(33)]; rand.nextBytes(v); return v; };
+        Supplier<Object> stringSupplier = () -> { byte[] v = new byte[rand.nextInt(33)]; rand.nextBytes(v); return new String(v, Strings.CHARSET_UTF_8); };
+        Supplier<Object> booleanArraySupplier = () -> { boolean[] v = new boolean[rand.nextInt(4)]; Arrays.fill(v, rand.nextBoolean()); return v; };
+        Supplier<Object> intArraySupplier = () -> { BigInteger[] v = new BigInteger[rand.nextInt(4)]; Arrays.fill(v, BigInteger.valueOf(rand.nextInt())); return v; };
+
+        testFixedLenDynamicArray("bytes", new byte[1 + rand.nextInt(34)][], bytesSupplier);
+        testFixedLenDynamicArray("string", new String[1 + rand.nextInt(34)], stringSupplier);
+        testFixedLenDynamicArray("bool[]", new boolean[1 + rand.nextInt(34)][], booleanArraySupplier);
+        testFixedLenDynamicArray("int[]", new BigInteger[1 + rand.nextInt(34)][], intArraySupplier);
+
+        final String msg = "array lengths differed, expected.length=32 actual.length=0";
+        assertThrown(AssertionError.class, msg, () -> testFixedLenDynamicArray("bytes", new byte[0][], null));
+        assertThrown(AssertionError.class, msg, () -> testFixedLenDynamicArray("string", new String[0], null));
+        assertThrown(AssertionError.class, msg, () -> testFixedLenDynamicArray("bool[]", new boolean[0][], null));
+        assertThrown(AssertionError.class, msg, () -> testFixedLenDynamicArray("int[]", new BigInteger[0][], null));
+    }
+
+    private static void testFixedLenDynamicArray(String baseType, Object[] args, Supplier<Object> supplier) throws ParseException {
+        final int n = args.length;
+        TupleType a = TupleType.of(baseType + "[" + n + "]");
+
+        String[] types = new String[n];
+        Arrays.fill(types, baseType);
+        TupleType b = TupleType.parse("(" + TupleType.of(types) + ")");
+
+        System.out.println(a + " vs " + b);
+
+        for (int i = 0; i < args.length; i++) {
+            args[i] = supplier.get();
+        }
+
+        Tuple aArgs = new Tuple((Object) args);
+        Tuple bArgs = new Tuple(new Tuple((Object[]) args));
+
+        byte[] aEncoding = a.encode(aArgs).array();
+        byte[] bEncoding = b.encode(bArgs).array();
+
+//        System.out.println(TupleType.format(aEncoding));
+//        System.out.println(TupleType.format(bEncoding));
+
+        Assert.assertArrayEquals(aEncoding, bEncoding);
     }
 
     @Test

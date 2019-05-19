@@ -16,12 +16,15 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.ClassNames;
+import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.*;
 
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.util.Strings.HEX;
 
 public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
@@ -378,5 +381,15 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             return EMPTY_TUPLE_STRING;
         }
         return ttsb.replace(len - 1, len, ")").toString(); // replace trailing comma
+    }
+
+    public static String format(byte[] abi) {
+        StringBuilder sb = new StringBuilder();
+        int idx = 0;
+        while(idx < abi.length) {
+            sb.append(Strings.encode(Arrays.copyOfRange(abi, idx, idx + UNIT_LENGTH_BYTES), HEX)).append('\n');
+            idx += UNIT_LENGTH_BYTES;
+        }
+        return sb.toString();
     }
 }

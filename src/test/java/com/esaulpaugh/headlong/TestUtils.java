@@ -196,7 +196,9 @@ public class TestUtils {
             final Parser finalPrevParser = prevParser;
             prevParser = (Parser<Tuple>) (JsonElement j) -> TestUtils.parseTuple(j, finalPrevParser);
         }
-        return (Parser<Tuple>) prevParser;
+        @SuppressWarnings("unchecked")
+        Parser<Tuple> masterParser = (Parser<Tuple>) prevParser;
+        return masterParser;
     }
 
     public static Tuple parseTuple(JsonElement in, Parser<Object> elementParser) {

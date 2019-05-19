@@ -74,8 +74,8 @@ public class ABIJsonTest2 {
                     System.out.println(this.function.getCanonicalSignature() + ", " + this.values);
                     System.out.println(buildCallComparison(result, encoding));
                 } else {
-                    String[] resultTokens = format(result).split("[\n]");
-                    String[] encodingTokens = format(encoding).split("[\n]");
+                    String[] resultTokens = TupleType.format(result).split("[\n]");
+                    String[] encodingTokens = TupleType.format(encoding).split("[\n]");
                     System.out.println(types.canonicalType);
                     int i = 0;
                     for (; i < resultTokens.length; i++) {
@@ -107,16 +107,6 @@ public class ABIJsonTest2 {
                         .append(encode(expectedRow, HEX)).append(' ')
                         .append(encode(actualRow, HEX)).append(Arrays.equals(expectedRow, actualRow) ? "" : " ****")
                         .append('\n');
-                idx += UNIT_LENGTH_BYTES;
-            }
-            return sb.toString();
-        }
-
-        private static String format(byte[] abi) {
-            StringBuilder sb = new StringBuilder();
-            int idx = 0;
-            while(idx < abi.length) {
-                sb.append(encode(Arrays.copyOfRange(abi, idx, idx + UNIT_LENGTH_BYTES), HEX)).append('\n');
                 idx += UNIT_LENGTH_BYTES;
             }
             return sb.toString();
