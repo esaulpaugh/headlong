@@ -15,7 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Assert;
 import org.junit.Test;
@@ -61,7 +61,7 @@ public class EncodeTest {
 
         Tuple decoded = f.decodeCall((ByteBuffer) two.flip());
 
-        System.out.println(decoded.equals(args));
+        Assert.assertEquals(decoded, args);
     }
 
     @Test
@@ -73,7 +73,7 @@ public class EncodeTest {
 
         Tuple decoded = f.decodeCall((ByteBuffer) two.flip());
 
-        System.out.println(decoded.equals(args));
+        Assert.assertEquals(decoded, args);
     }
 
     @Test
@@ -84,7 +84,9 @@ public class EncodeTest {
                 new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple(9), new Tuple(-11) } } }
         };
 
-        f.encodeCallWithArgs(argsIn);
+        ByteBuffer buf = f.encodeCallWithArgs(argsIn);
+
+        Assert.assertArrayEquals(FastHex.decode("f9354bbb0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000009fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5"), buf.array());
     }
 
     @Test
@@ -170,6 +172,6 @@ public class EncodeTest {
         Tuple tupleOut = f.decodeCall((ByteBuffer) abi.flip());
         Object[] argsOut = tupleOut.elements;
 
-        System.out.println("== " + Arrays.deepEquals(argsIn, argsOut));
+        Assert.assertTrue(Arrays.deepEquals(argsIn, argsOut));
     }
 }

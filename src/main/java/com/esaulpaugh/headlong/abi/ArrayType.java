@@ -289,46 +289,46 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         }
     }
 
-    void encodeArrayTail(Object value, ByteBuffer dest) {
+    private void encodeArrayTail(Object value, ByteBuffer dest) {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN:
             boolean[] booleans = (boolean[]) value;
-            if(length == ArrayType.DYNAMIC_LENGTH) {
+            if(length == DYNAMIC_LENGTH) {
                 Encoding.insertInt(booleans.length, dest);
             }
             insertBooleans(booleans, dest);
             return;
         case TYPE_CODE_BYTE:
             byte[] bytes = (byte[]) value;
-            if(length == ArrayType.DYNAMIC_LENGTH) {
+            if(length == DYNAMIC_LENGTH) {
                 Encoding.insertInt(bytes.length, dest);
             }
             insertBytes(bytes, dest);
             return;
         case TYPE_CODE_INT:
             int[] ints = (int[]) value;
-            if(length == ArrayType.DYNAMIC_LENGTH) {
+            if(length == DYNAMIC_LENGTH) {
                 Encoding.insertInt(ints.length, dest);
             }
             insertInts(ints, dest);
             return;
         case TYPE_CODE_LONG:
             long[] longs = (long[]) value;
-            if(length == ArrayType.DYNAMIC_LENGTH) {
+            if(length == DYNAMIC_LENGTH) {
                 Encoding.insertInt(longs.length, dest);
             }
             insertLongs(longs, dest);
             return;
         case TYPE_CODE_BIG_INTEGER:
             BigInteger[] bigInts = (BigInteger[]) value;
-            if(length == ArrayType.DYNAMIC_LENGTH) {
+            if(length == DYNAMIC_LENGTH) {
                 Encoding.insertInt(bigInts.length, dest);
             }
             insertBigIntegers(bigInts, dest);
             return;
         case TYPE_CODE_BIG_DECIMAL:
             BigDecimal[] bigDecs = (BigDecimal[]) value;
-            if(length == ArrayType.DYNAMIC_LENGTH) {
+            if(length == DYNAMIC_LENGTH) {
                 Encoding.insertInt(bigDecs.length, dest);
             }
             insertBigDecimals(bigDecs, dest);
@@ -338,7 +338,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
             final Object[] objects = (Object[]) value;
             final int len = objects.length;
             if(dynamic) {
-                if(length == ArrayType.DYNAMIC_LENGTH) {
+                if(length == DYNAMIC_LENGTH) {
                     Encoding.insertInt(len, dest); // insertLength
                 }
                 if (elementType.dynamic) { // if elements are dynamic
@@ -370,7 +370,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 : 32 - mod;
     }
 
-    static void insertBytes(byte[] bytes, ByteBuffer dest) {
+    private static void insertBytes(byte[] bytes, ByteBuffer dest) {
         dest.put(bytes);
         final int paddingLength = paddingLength(bytes.length);
         for (int i = 0; i < paddingLength; i++) {
