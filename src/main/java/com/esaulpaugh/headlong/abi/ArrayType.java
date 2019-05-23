@@ -26,6 +26,13 @@ import static com.esaulpaugh.headlong.abi.UnitType.LOG_2_UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
+/**
+ * Represents static array types such as bytes3 and uint16[3][2] and dynamic array types such as decimal[5][] or
+ * string[4].
+ *
+ * @param <T>   the {@link ABIType} for the elements of the array
+ * @param <J>   this {@link ArrayType}'s corresponding Java type
+ */
 public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
     static final Class<byte[]> BYTE_ARRAY_CLASS = byte[].class;
@@ -363,16 +370,10 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         }
     }
 
-    private static int paddingLength(int len) {
-        int mod = len & 31;
-        return mod == 0
-                ? 0
-                : 32 - mod;
-    }
-
     private static void insertBytes(byte[] bytes, ByteBuffer dest) {
         dest.put(bytes);
-        final int paddingLength = paddingLength(bytes.length);
+        final int remainder = bytes.length & (UNIT_LENGTH_BYTES - 1);
+        final int paddingLength = remainder != 0 ? UNIT_LENGTH_BYTES - remainder : 0;
         for (int i = 0; i < paddingLength; i++) {
             dest.put(Encoding.ZERO_BYTE);
         }

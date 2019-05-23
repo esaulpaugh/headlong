@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
 /**
+ * Represents a Contract ABI type such as uint256 or decimal. Used to validate, encode, and decode data.
  *
  * @param <J>   this {@link ABIType}'s corresponding Java type
  */

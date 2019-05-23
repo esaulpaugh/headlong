@@ -23,8 +23,10 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 
 jar {
     manifest {
-        attributes('Implementation-Title': project.name,
-                'Implementation-Version': project.version)
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version
+        )
     }
     finalizedBy(sourcesJar)
 }
