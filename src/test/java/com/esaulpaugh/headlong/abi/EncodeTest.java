@@ -20,6 +20,7 @@ import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
@@ -173,5 +174,55 @@ public class EncodeTest {
         Object[] argsOut = tupleOut.elements;
 
         Assert.assertTrue(Arrays.deepEquals(argsIn, argsOut));
+    }
+
+    @Test
+    public void paddingTest() throws ParseException {
+        Function f = new Function("(uint8,int64,bool,(string),bytes2,bytes,address,function,ufixed)");
+
+        for(ABIType<?> type : f.getParamTypes()) {
+            System.out.println(type.getClass().getSimpleName());
+        }
+
+        Tuple args = new Tuple(
+                1,
+                1L,
+                true,
+                Tuple.singleton("\u0002"),
+                new byte[] { 1, 0 },
+                new byte[] { 0x04 },
+                BigInteger.valueOf(8L),
+                new byte[] { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 },
+                new BigDecimal(BigInteger.TEN, 18)
+        );
+
+        final int len = f.callLength(args) + 7 + 8;
+
+        byte[] ffff = new byte[len];
+        Arrays.fill(ffff, (byte) 0xff);
+
+        ByteBuffer full = ByteBuffer.wrap(ffff).position(7);
+        ByteBuffer empty = ByteBuffer.allocate(len).position(7);
+
+        f.encodeCall(args, full, true)
+                .encodeCall(args, empty, true);
+
+        byte[] fullBytes = full.array();
+        byte[] emptyBytes = empty.array();
+        byte[] xor = new byte[len];
+        for(int i = 0; i < len; i++) {
+            xor[i] = (byte) (fullBytes[i] ^ emptyBytes[i]);
+        }
+
+        System.out.println(Function.hexOf(full));
+        System.out.println("^");
+        System.out.println(Function.hexOf(empty));
+        System.out.println("=");
+        System.out.println(Function.hexOf(xor));
+
+        Assert.assertArrayEquals(
+                FastHex.decode("ffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffff"),
+                xor
+        );
     }
 }
