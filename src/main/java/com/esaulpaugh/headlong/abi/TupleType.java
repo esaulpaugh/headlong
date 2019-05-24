@@ -42,26 +42,14 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         this.elementTypes = elementTypes;
     }
 
-    static <L extends List<ABIType<?>> & RandomAccess> TupleType create(L elementsList) {
-
-        final int len = elementsList.size();
-
-        if(len == 0) {
-            return EMPTY;
-        }
-
+    static <A extends ABIType<?>> TupleType create(A[] elements) {
         final StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
-        final ABIType<?>[] elementsArray = new ABIType<?>[len];
-
-        for (int i = 0; i < len; i++) {
-            ABIType<?> e = elementsList.get(i);
+        for (A e : elements) {
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
-            elementsArray[i] = e;
         }
-
-        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elementsArray);
+        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements);
     }
 
     public ABIType<?> get(int index) {

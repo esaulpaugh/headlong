@@ -42,7 +42,7 @@ final class TupleTypeParser {
             throw new ParseException("illegal tuple termination: " + rawTupleTypeString.substring(errStart), errStart);
         }
 
-        return TupleType.create(typesOut);
+        return TupleType.create(typesOut.toArray(ABIType.EMPTY_TYPE_ARRAY));
     }
 
     private static int parseTupleType(final String signature,
@@ -77,7 +77,7 @@ final class TupleTypeParser {
 
                     argEnd = parseTupleType(signature, argStart, innerList) + 1; // +1 to skip over trailing ')'
 
-                    TupleType tupleType = TupleType.create(innerList);
+                    TupleType tupleType = TupleType.create(innerList.toArray(ABIType.EMPTY_TYPE_ARRAY));
 
                     // check for suffix i.e. array syntax
                     if (argEnd < sigEnd && signature.charAt(argEnd) == '[') { // TODO allow parsing of non-tuple types by end-user

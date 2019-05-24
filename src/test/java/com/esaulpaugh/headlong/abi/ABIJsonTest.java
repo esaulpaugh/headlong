@@ -28,7 +28,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -84,20 +83,20 @@ public class ABIJsonTest {
             String result = JsonUtils.getString(jsonObject, "result");
             JsonArray types = JsonUtils.getArray(jsonObject, "types");
 
-            ArrayList<ABIType<?>> list = new ArrayList<>(types.size());
+            ABIType<?>[] array = new ABIType[types.size()];
 
+            int i = 0;
             for (JsonElement type : types) {
                 String s = type.getAsString();
                 final int openIdx = s.indexOf('(');
                 if (openIdx >= 0) {
-                    ABIType ttttt = Function.parse("(" + s + ")").getParamTypes().get(0);
-                    list.add(ttttt);
+                    array[i++] = Function.parse("(" + s + ")").getParamTypes().get(0);
                 } else {
-                    list.add(TypeFactory.create(s, null));
+                    array[i++] = TypeFactory.create(s, null);
                 }
             }
 
-            TupleType tt = TupleType.create(list);
+            TupleType tt = TupleType.create(array);
 
             System.out.println(tt.canonicalType);
 

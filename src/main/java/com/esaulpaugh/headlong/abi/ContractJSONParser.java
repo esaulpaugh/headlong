@@ -109,11 +109,12 @@ public final class ContractJSONParser {
     private static TupleType parseArrayForFunction(JsonObject function, String name) throws ParseException {
         final JsonArray array = getArray(function, name);
         if (array != null) {
-            final ArrayList<ABIType<?>> list = new ArrayList<>(array.size());
+            final ABIType<?>[] elementsArray = new ABIType[array.size()];
+            int i = 0;
             for (JsonElement e : array) {
-                list.add(buildType(e.getAsJsonObject()));
+                elementsArray[i++] = buildType(e.getAsJsonObject());
             }
-            return TupleType.create(list);
+            return TupleType.create(elementsArray);
         }
         return TupleType.EMPTY;
     }
@@ -133,16 +134,16 @@ public final class ContractJSONParser {
             throw new IllegalArgumentException("array \"" + INPUTS + "\" null or not found");
         }
         final int inputsLen = inputs.size();
-        final ArrayList<ABIType<?>> inputsList = new ArrayList<>(inputs.size());
+        final ABIType<?>[] inputsArray = new ABIType[inputs.size()];
         final boolean[] indexed = new boolean[inputsLen];
         for (int i = 0; i < inputsLen; i++) {
             JsonObject inputObj = inputs.get(i).getAsJsonObject();
-            inputsList.add(buildType(inputObj));
+            inputsArray[i] = buildType(inputObj);
             indexed[i] = getBoolean(inputObj, INDEXED);
         }
         return new Event(
                 getString(event, NAME),
-                TupleType.create(inputsList),
+                TupleType.create(inputsArray),
                 indexed,
                 getBoolean(event, ANONYMOUS, false)
         );
@@ -154,11 +155,12 @@ public final class ContractJSONParser {
 
         if(type.startsWith(TUPLE)) {
             final JsonArray components = getArray(object, COMPONENTS);
-            final ArrayList<ABIType<?>> componentsList = new ArrayList<>(components.size());
+            final ABIType<?>[] componentsArray = new ABIType[components.size()];
+            int i = 0;
             for (JsonElement c : components) {
-                componentsList.add(buildType(c.getAsJsonObject()));
+                componentsArray[i++] = buildType(c.getAsJsonObject());
             }
-            final TupleType base = TupleType.create(componentsList);
+            final TupleType base = TupleType.create(componentsArray);
             final String suffix = type.substring(TUPLE.length()); // suffix e.g. "[4][]"
             return TypeFactory.createForTuple(base, suffix, name);
         }
