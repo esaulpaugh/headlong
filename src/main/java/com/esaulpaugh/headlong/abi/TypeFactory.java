@@ -69,11 +69,11 @@ final class TypeFactory {
             }
 
             final ABIType<?> elementType = buildType(type.substring(0, arrayOpenIndex), true, baseTupleType);
-            final String arrayClassName = '[' + elementType.classNameStub();
+            final String arrayClassName = elementType.arrayClassName();
             @SuppressWarnings("unchecked")
             final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
             final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
-            return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, arrayClassName);
+            return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, '[' + arrayClassName);
         } else {
             ABIType<?> baseType = resolveBaseType(type, isArrayElement, baseTupleType);
             if(baseType == null) {
@@ -191,10 +191,10 @@ final class TypeFactory {
             case "bytes29":
             case "bytes30":
             case "bytes31":
-            case "bytes32": type = new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, info.arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB); break;
+            case "bytes32": type = new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, info.arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME); break;
             case "bool": type = BooleanType.INSTANCE; break;
-            case "bytes": type = new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME_STUB); break;
-            case "string": type = new ArrayType<>(baseTypeStr, ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME_STUB); break;
+            case "bytes": type = new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME); break;
+            case "string": type = new ArrayType<>(baseTypeStr, ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME); break;
             case "decimal": type = new BigDecimalType(baseTypeStr, info.bitLen, DECIMAL_SCALE, false); break;
             case "fixed":
             case "fixed128x18": type = new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false); break;

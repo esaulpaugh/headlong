@@ -19,7 +19,7 @@ import com.migcomponents.migbase64.Base64;
 
 import java.nio.charset.Charset;
 
-import static com.esaulpaugh.headlong.util.Utils.EMPTY_BYTE_ARRAY;
+import static com.esaulpaugh.headlong.abi.util.Utils.EMPTY_BYTE_ARRAY;
 
 /**
  * Utility for encoding and decoding hexadecimal, Base64, and UTF-8-encoded {@code String}s.
@@ -27,6 +27,7 @@ import static com.esaulpaugh.headlong.util.Utils.EMPTY_BYTE_ARRAY;
 public final class Strings {
 
     public static final Charset CHARSET_UTF_8 = Charset.forName("UTF-8");
+    public static final Charset CHARSET_ASCII = Charset.forName("US-ASCII");
 
     public static final int UTF_8 = 0; // 256
     public static final int BASE64 = 1; // 64

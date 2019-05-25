@@ -98,7 +98,7 @@ public final class FastHex {
     }
 
     public static byte[] decode(String hex, int offset, int length) {
-        return decode(hex.getBytes(Utils.CHARSET_ASCII), offset, length);
+        return decode(hex.getBytes(Strings.CHARSET_ASCII), offset, length);
     }
 
     public static byte[] decode(byte[] hexBytes, int off, final int len) {

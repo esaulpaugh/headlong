@@ -15,23 +15,21 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.ClassNames;
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 final class BigIntegerType extends UnitType<BigInteger> {
 
-    static final Class<BigInteger> CLASS = BigInteger.class;
-    private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(BigInteger[].class);
+    private static final Class<BigInteger> CLASS = BigInteger.class;
+    private static final String ARRAY_CLASS_NAME = BigInteger[].class.getName();
 
     BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, CLASS, bitLength, unsigned);
     }
 
     @Override
-    String classNameStub() {
-        return ARRAY_CLASS_NAME_STUB;
+    String arrayClassName() {
+        return ARRAY_CLASS_NAME;
     }
 
     @Override

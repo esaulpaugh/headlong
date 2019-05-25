@@ -19,7 +19,7 @@ import com.esaulpaugh.headlong.rlp.util.Integers;
 
 import java.nio.ByteBuffer;
 
-import static com.esaulpaugh.headlong.util.Utils.EMPTY_BYTE_ARRAY;
+import static com.esaulpaugh.headlong.abi.util.Utils.EMPTY_BYTE_ARRAY;
 
 /**
  * The mirror image of {@link Integers}. Not compatible with the RLP specification.

@@ -15,16 +15,14 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.ClassNames;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 final class BigDecimalType extends UnitType<BigDecimal> {
 
-    static final Class<BigDecimal> CLASS = BigDecimal.class;
-    private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(BigDecimal[].class);
+    private static final Class<BigDecimal> CLASS = BigDecimal.class;
+    private static final String ARRAY_CLASS_NAME = BigDecimal[].class.getName();
 
     final int scale;
 
@@ -34,8 +32,8 @@ final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    String classNameStub() {
-        return ARRAY_CLASS_NAME_STUB;
+    String arrayClassName() {
+        return ARRAY_CLASS_NAME;
     }
 
     @Override

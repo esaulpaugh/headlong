@@ -15,12 +15,13 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.ClassNames;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -29,7 +30,7 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
     private static final Class<Tuple> CLASS = Tuple.class;
-    private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(Tuple[].class);
+    private static final String ARRAY_CLASS_NAME = Tuple[].class.getName();
 
     private static final String EMPTY_TUPLE_STRING = "()";
 
@@ -61,8 +62,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    String classNameStub() {
-        return ARRAY_CLASS_NAME_STUB;
+    String arrayClassName() {
+        return ARRAY_CLASS_NAME;
     }
 
     @Override

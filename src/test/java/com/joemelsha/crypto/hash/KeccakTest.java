@@ -17,7 +17,7 @@ package com.joemelsha.crypto.hash;
 
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
 import com.esaulpaugh.headlong.util.FastHex;
-import com.esaulpaugh.headlong.util.Utils;
+import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Assert;
 import org.junit.Test;
 import org.spongycastle.crypto.digests.KeccakDigest;
@@ -27,8 +27,8 @@ import java.util.Random;
 
 public class KeccakTest {
 
-    private static final byte[] PART_A = "abcdefghijklmnopqrstuvwxyz".getBytes(Utils.CHARSET_ASCII);
-    private static final byte[] PART_B = "ABCDEFG".getBytes(Utils.CHARSET_ASCII);
+    private static final byte[] PART_A = "abcdefghijklmnopqrstuvwxyz".getBytes(Strings.CHARSET_ASCII);
+    private static final byte[] PART_B = "ABCDEFG".getBytes(Strings.CHARSET_ASCII);
     private static final byte[] WHOLE;
 
     static {

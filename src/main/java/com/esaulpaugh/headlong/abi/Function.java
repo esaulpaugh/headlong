@@ -16,7 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.Strings;
-import com.esaulpaugh.headlong.util.Utils;
+import com.esaulpaugh.headlong.abi.util.Utils;
 import com.google.gson.JsonObject;
 import com.joemelsha.crypto.hash.Keccak;
 

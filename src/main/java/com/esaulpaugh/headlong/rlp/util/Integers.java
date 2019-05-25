@@ -22,7 +22,7 @@ import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-import static com.esaulpaugh.headlong.util.Utils.EMPTY_BYTE_ARRAY;
+import static com.esaulpaugh.headlong.abi.util.Utils.EMPTY_BYTE_ARRAY;
 
 /**
  * Utility for reading and writing integers from and to RLP format.

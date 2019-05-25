@@ -201,8 +201,8 @@ public class EncodeTest {
         byte[] ffff = new byte[len];
         Arrays.fill(ffff, (byte) 0xff);
 
-        ByteBuffer full = ByteBuffer.wrap(ffff).position(7);
-        ByteBuffer empty = ByteBuffer.allocate(len).position(7);
+        ByteBuffer full = (ByteBuffer) ByteBuffer.wrap(ffff).position(7);
+        ByteBuffer empty = (ByteBuffer) ByteBuffer.allocate(len).position(7);
 
         f.encodeCall(args, full, true)
                 .encodeCall(args, empty, true);

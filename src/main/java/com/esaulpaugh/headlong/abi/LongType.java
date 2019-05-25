@@ -15,23 +15,21 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.ClassNames;
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 final class LongType extends UnitType<Long> {
 
-    static final Class<Long> CLASS = Long.class;
-    private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(long[].class);
+    private static final Class<Long> CLASS = Long.class;
+    private static final String ARRAY_CLASS_NAME = long[].class.getName();
 
     LongType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, CLASS, bitLength, unsigned);
     }
 
     @Override
-    String classNameStub() {
-        return ARRAY_CLASS_NAME_STUB;
+    String arrayClassName() {
+        return ARRAY_CLASS_NAME;
     }
 
     @Override

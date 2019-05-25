@@ -15,7 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.ClassNames;
+import com.esaulpaugh.headlong.abi.util.Utils;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
@@ -75,7 +75,7 @@ public abstract class ABIType<J> implements Serializable {
         return this;
     }
 
-    abstract String classNameStub();
+    abstract String arrayClassName();
 
     abstract int typeCode();
 
@@ -109,7 +109,7 @@ public abstract class ABIType<J> implements Serializable {
                         + value.getClass().getName()
                         + " not assignable to "
                         + clazz.getName()
-                        + " (" + ClassNames.toFriendly(value.getClass().getName()) + " not instanceof " + ClassNames.toFriendly(clazz.getName()) + "/" + canonicalType + ")");
+                        + " (" + Utils.friendlyClassName(value.getClass()) + " not instanceof " + Utils.friendlyClassName(clazz) + "/" + canonicalType + ")");
             }
         }
     }

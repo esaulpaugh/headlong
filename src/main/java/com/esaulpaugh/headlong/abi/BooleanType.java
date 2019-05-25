@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.ClassNames;
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
@@ -25,8 +23,8 @@ import java.nio.ByteBuffer;
  */
 final class BooleanType extends UnitType<Boolean> {
 
-    static final Class<Boolean> CLASS = Boolean.class;
-    private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(boolean[].class);
+    private static final Class<Boolean> CLASS = Boolean.class;
+    private static final String ARRAY_CLASS_NAME = boolean[].class.getName();
 
     static final BooleanType INSTANCE = new BooleanType();
 
@@ -42,8 +40,8 @@ final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    String classNameStub() {
-        return ARRAY_CLASS_NAME_STUB;
+    String arrayClassName() {
+        return ARRAY_CLASS_NAME;
     }
 
     @Override

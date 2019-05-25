@@ -15,15 +15,13 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.ClassNames;
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 final class ByteType extends UnitType<Byte> {
 
-    static final Class<Byte> CLASS = Byte.class;
-    private static final String ARRAY_CLASS_NAME_STUB = ClassNames.getArrayClassNameStub(byte[].class);
+    private static final Class<Byte> CLASS = Byte.class;
+    private static final String ARRAY_CLASS_NAME = byte[].class.getName();
 
     private static final int MAX_BIT_LEN = 8;
 
@@ -35,8 +33,8 @@ final class ByteType extends UnitType<Byte> {
     }
 
     @Override
-    String classNameStub() {
-        return ARRAY_CLASS_NAME_STUB;
+    String arrayClassName() {
+        return ARRAY_CLASS_NAME;
     }
 
     @Override
