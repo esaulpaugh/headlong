@@ -26,11 +26,15 @@ import java.util.*;
  */
 final class BaseTypeInfo {
 
+    private static final int ADDRESS_BIT_LEN = 160;
+
     private static final int DECIMAL_BIT_LEN = 128;
     static final int DECIMAL_SCALE = 10;
 
     static final int FIXED_BIT_LEN = 128;
     static final int FIXED_SCALE = 18;
+
+    private static final int FUNCTION_BYTE_LEN = 24;
 
     private static final int N_A = -1;
 
@@ -47,15 +51,15 @@ final class BaseTypeInfo {
         for (int i = 1; i <= 32; i++) {
             map.put("bytes" + i, new BaseTypeInfo(N_A, i));
         }
+        map.put("function", map.get("bytes" + FUNCTION_BYTE_LEN));
 
         map.put("bytes", PRESENT);
-        map.put("function", new BaseTypeInfo(24 * Byte.SIZE, 24));
         map.put("string", PRESENT);
-        map.put("address", new BaseTypeInfo(160, N_A));
-        map.put("decimal", new BaseTypeInfo(DECIMAL_BIT_LEN, N_A));
-        map.put("bool", new BaseTypeInfo(1, N_A));
+        map.put("address", new BaseTypeInfo(ADDRESS_BIT_LEN));
+        map.put("decimal", new BaseTypeInfo(DECIMAL_BIT_LEN));
+        map.put("bool", PRESENT);
 
-        BaseTypeInfo fixedType = new BaseTypeInfo(FIXED_BIT_LEN, N_A);
+        BaseTypeInfo fixedType = new BaseTypeInfo(FIXED_BIT_LEN);
         map.put("fixed", fixedType);
         map.put("ufixed", fixedType);
         map.put("fixed128x18", fixedType);

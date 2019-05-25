@@ -34,7 +34,7 @@ import static com.esaulpaugh.headlong.abi.util.Utils.EMPTY_BYTE_ARRAY;
  *    1L ≡ 0x0000000000000001
  *   16L ≡ 0x0000000000000010
  */
-public class BizarroIntegers {
+public final class BizarroIntegers {
 
     public static byte[] toBytes(byte val) {
         if(val == -1) {
@@ -352,7 +352,7 @@ public class BizarroIntegers {
     }
 
     /**
-     * NOTE: will always return {@link Long#SIZE} for non-negative integers. See also {@link Integers#bitLen(long)}.
+     * NOTE: will always return {@link Long#SIZE} for non-negative integers. See also {@link com.esaulpaugh.headlong.rlp.util.Integers#bitLen(long)}.
      *
      * @param val   the long value
      * @return  the bit length of the input

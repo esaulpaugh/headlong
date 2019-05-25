@@ -17,7 +17,7 @@ package com.esaulpaugh.headlong.abi.util;
 
 import java.math.BigInteger;
 
-public class Integers {
+public final class Integers {
 
     /**
      * Retrieves an integer up to four bytes in length. Big-endian two's complement format.

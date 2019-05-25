@@ -17,7 +17,7 @@ package com.esaulpaugh.headlong.abi.util;
 
 import com.google.gson.*;
 
-public class JsonUtils {
+public final class JsonUtils {
 
     public static JsonElement parse(String json) {
         return new JsonParser().parse(json);
