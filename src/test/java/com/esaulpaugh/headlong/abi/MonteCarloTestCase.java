@@ -159,7 +159,7 @@ public class MonteCarloTestCase implements Serializable {
             CANONICAL_BASE_TYPE_STRINGS[FIXED_START_INDEX + i] = FIXED_LIST.get(rng.nextInt(size));
         }
 
-        String sig = generateFunctionSignature(rng, 0);
+        String sig = generateFunctionName(rng) + generateTupleTypeString(rng, 0);
 
         // decanonicalize
         sig = sig
@@ -315,14 +315,14 @@ public class MonteCarloTestCase implements Serializable {
         }
     }
 
-    private String generateFunctionSignature(Random r, int tupleDepth) throws ParseException {
+    private String generateTupleTypeString(Random r, int tupleDepth) throws ParseException {
 
         ABIType<?>[] types = new ABIType<?>[r.nextInt(1 + params.maxTupleLen)]; // 0 to max
         for (int i = 0; i < types.length; i++) {
             types[i] = generateType(r, tupleDepth);
         }
 
-        StringBuilder signature = new StringBuilder(generateFunctionName(r) + "(");
+        StringBuilder signature = new StringBuilder("(");
         for (ABIType<?> t : types) {
             signature.append(t.canonicalType).append(',');
         }
@@ -338,39 +338,26 @@ public class MonteCarloTestCase implements Serializable {
         int index = r.nextInt(CANONICAL_BASE_TYPE_STRINGS.length);
         String baseTypeString = CANONICAL_BASE_TYPE_STRINGS[index];
 
-        StringBuilder builder;
-
-        TupleType tupleType = null;
         if(baseTypeString.equals(TUPLE_KEY)) {
-            if(tupleDepth < params.maxTupleDepth) {
-                tupleType = generateTupleType(r, tupleDepth + 1);
-                builder = new StringBuilder();
-            } else {
-                builder = new StringBuilder("uint256");
-            }
-        } else {
-            builder = new StringBuilder(baseTypeString);
+            baseTypeString = tupleDepth < params.maxTupleDepth
+                    ? generateTupleTypeString(r, tupleDepth + 1)
+                    : "uint256";
         }
 
+        StringBuilder sb = new StringBuilder(baseTypeString);
         boolean isElement = r.nextBoolean() && r.nextBoolean();
         if(isElement) {
             int arrayDepth = 1 + r.nextInt(params.maxArrayDepth);
             for (int i = 0; i < arrayDepth; i++) {
-                builder.append('[');
+                sb.append('[');
                 if(r.nextBoolean()) {
-                    builder.append(r.nextInt(params.maxArrayLen + 1));
+                    sb.append(r.nextInt(params.maxArrayLen + 1));
                 }
-                builder.append(']');
+                sb.append(']');
             }
         }
 
-        return tupleType != null
-                ? TypeFactory.createForTuple(tupleType, builder.toString(), null)
-                : TypeFactory.create(builder.toString());
-    }
-
-    private TupleType generateTupleType(Random r, int tupleDepth) throws ParseException {
-        return new Function(generateFunctionSignature(r, tupleDepth)).getParamTypes();
+        return TypeFactory.create(sb.toString());
     }
 
     private Tuple generateTuple(TupleType tupleType, Random r) {
