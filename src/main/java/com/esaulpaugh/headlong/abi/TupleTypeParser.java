@@ -22,6 +22,7 @@ import java.util.List;
 final class TupleTypeParser {
 
     static final String EMPTY_PARAMETER = "empty parameter";
+    private static final String NON_TERMINATING_TUPLE = "non-terminating tuple";
 
     static TupleType parseTupleType(final String rawTupleTypeString) throws ParseException {
 
@@ -30,27 +31,25 @@ final class TupleTypeParser {
         }
 
         final ArrayList<ABIType<?>> typesOut = new ArrayList<>();
-        final int argEnd = parseTupleType(rawTupleTypeString, 0, typesOut);
+        final int argEnd = parseTupleType(rawTupleTypeString, typesOut);
 
         final int terminator = rawTupleTypeString.indexOf(')', argEnd);
         final int end = rawTupleTypeString.length();
         if (terminator == -1) {
-            throw new ParseException("non-terminating tuple", end);
+            throw new ParseException(NON_TERMINATING_TUPLE, end);
         }
         if (argEnd != terminator || terminator != end - 1) {
             int errStart = Math.max(0, argEnd);
             throw new ParseException("illegal tuple termination: " + rawTupleTypeString.substring(errStart), errStart);
         }
 
-        return TupleType.create(typesOut.toArray(ABIType.EMPTY_TYPE_ARRAY));
+        return TupleType.wrap(typesOut.toArray(ABIType.EMPTY_TYPE_ARRAY));
     }
 
-    private static int parseTupleType(final String signature,
-                                      final int startParams,
-                                      final List<ABIType<?>> typesOut) throws ParseException {
+    private static int parseTupleType(final String signature, final List<ABIType<?>> typesOut) throws ParseException {
         final int sigEnd = signature.length();
 
-        int argStart = startParams + 1;
+        int argStart = 1;
         int argEnd = argStart; // this inital value is important for empty params case
 
         try {
@@ -72,34 +71,19 @@ final class TupleTypeParser {
                         return argEnd;
                     }
                     throw new ParseException(EMPTY_PARAMETER, argStart);
-                case '(': // tuple element
-                    ArrayList<ABIType<?>> innerList = new ArrayList<>();
-
-                    argEnd = parseTupleType(signature, argStart, innerList) + 1; // +1 to skip over trailing ')'
-
-                    TupleType tupleType = TupleType.create(innerList.toArray(ABIType.EMPTY_TYPE_ARRAY));
-
-                    // check for suffix i.e. array syntax
-                    if (argEnd < sigEnd && signature.charAt(argEnd) == '[') { // TODO allow parsing of non-tuple types by end-user
-                        final int nextTerminator = nextParamTerminator(signature, argEnd);
-                        if (nextTerminator > argEnd) {
-                            String suffix = signature.substring(argEnd, nextTerminator); // e.g. "[4][]"
-                            typesOut.add(TypeFactory.createForTuple(tupleType, suffix, null));
-                            argEnd = nextTerminator;
-                        }
-                    } else {
-                        typesOut.add(tupleType);
-                    }
+                case '(': // tuple or tuple array
+                    argEnd = nextParamTerminator(signature, findTupleEnd(signature, argStart, sigEnd));
+                    typesOut.add(TypeFactory.create(signature.substring(argStart, argEnd)));
                     if (argEnd >= sigEnd || signature.charAt(argEnd) != ',') {
                         return argEnd;
                     }
-                    break /* switch */;
+                    break;
                 default: // non-tuple element
                     argEnd = nextParamTerminator(signature, argStart + 1);
                     if(argEnd == -1) {
                         return -1;
                     } else {
-                        typesOut.add(TypeFactory.create(signature.substring(argStart, argEnd), null));
+                        typesOut.add(TypeFactory.create(signature.substring(argStart, argEnd)));
                         if (argEnd >= sigEnd || signature.charAt(argEnd) == ')') {
                             return argEnd;
                         }
@@ -114,6 +98,26 @@ final class TupleTypeParser {
             ).initCause(pe);
         }
         return argEnd;
+    }
+
+    private static int findTupleEnd(String signature, final int tupleStart, final int sigEnd) throws ParseException {
+        int depth = 1;
+        int i = tupleStart + 1;
+        do {
+            if(i >= sigEnd) {
+                throw new ParseException(NON_TERMINATING_TUPLE, sigEnd);
+            }
+            char x = signature.charAt(i++);
+            if(x > ')') {
+                continue;
+            }
+            if(x == ')') {
+                depth--;
+            } else if(x == '(') {
+                depth++;
+            }
+        } while(depth > 0);
+        return i;
     }
 
     private static int nextParamTerminator(String signature, int i) {

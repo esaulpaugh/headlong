@@ -33,8 +33,8 @@ final class TypeFactory {
         return create(baseTupleType.canonicalType + suffix, baseTupleType, name);
     }
 
-    static ABIType<?> create(String type, String name) throws ParseException {
-        return create(type, null, name);
+    static ABIType<?> create(String type) throws ParseException {
+        return create(type, null, null);
     }
 
     static ABIType<?> create(String type, TupleType baseTupleType, String name) throws ParseException {
@@ -75,7 +75,7 @@ final class TypeFactory {
             final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
             return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, '[' + arrayClassName);
         } else {
-            ABIType<?> baseType = resolveBaseType(type, isArrayElement, baseTupleType);
+            ABIType<?> baseType = baseTupleType != null ? baseTupleType : resolveBaseType(type, isArrayElement);
             if(baseType == null) {
                 throw new ParseException("unrecognized type: "
                         + type + " (" + String.format("%040x", new BigInteger(type.getBytes(CHARSET_UTF_8))) + ")", -1);
@@ -84,10 +84,11 @@ final class TypeFactory {
         }
     }
 
-    private static ABIType<?> resolveBaseType(final String baseTypeStr, boolean isElement, TupleType baseTupleType) {
-
+    private static ABIType<?> resolveBaseType(final String baseTypeStr, boolean isElement) throws ParseException {
+        if(baseTypeStr.charAt(0) == '(') {
+            return TupleTypeParser.parseTupleType(baseTypeStr);
+        }
         final ABIType<?> type;
-
         BaseTypeInfo info = BaseTypeInfo.get(baseTypeStr);
 
         if(info != null) {
@@ -203,14 +204,7 @@ final class TypeFactory {
             default: type = null;
             }
         } else {
-            final int len = baseTypeStr.length();
-            if(len >= 2 && baseTypeStr.charAt(0) == '(') {
-                type = baseTypeStr.charAt(len - 1) == ')'
-                        ? baseTupleType
-                        : null;
-            } else {
-                type = tryParseFixed(baseTypeStr);
-            }
+            type = tryParseFixed(baseTypeStr);
         }
 
         return type;

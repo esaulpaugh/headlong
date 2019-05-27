@@ -366,7 +366,7 @@ public class MonteCarloTestCase implements Serializable {
 
         return tupleType != null
                 ? TypeFactory.createForTuple(tupleType, builder.toString(), null)
-                : TypeFactory.create(builder.toString(), null);
+                : TypeFactory.create(builder.toString());
     }
 
     private TupleType generateTupleType(Random r, int tupleDepth) throws ParseException {

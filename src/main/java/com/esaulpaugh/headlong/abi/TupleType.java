@@ -43,7 +43,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         this.elementTypes = elementTypes;
     }
 
-    static <A extends ABIType<?>> TupleType create(A[] elements) {
+    static <A extends ABIType<?>> TupleType wrap(A[] elements) {
         final StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
         for (A e : elements) {
@@ -253,7 +253,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public static TupleType parse(String rawTupleTypeString) throws ParseException {
-        return TupleTypeParser.parseTupleType(rawTupleTypeString);
+        return (TupleType) TypeFactory.create(rawTupleTypeString);
     }
 
     public static TupleType of(String... typeStrings) throws ParseException {

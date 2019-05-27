@@ -114,7 +114,7 @@ public final class ContractJSONParser {
             for (JsonElement e : array) {
                 elementsArray[i++] = buildType(e.getAsJsonObject());
             }
-            return TupleType.create(elementsArray);
+            return TupleType.wrap(elementsArray);
         }
         return TupleType.EMPTY;
     }
@@ -143,7 +143,7 @@ public final class ContractJSONParser {
         }
         return new Event(
                 getString(event, NAME),
-                TupleType.create(inputsArray),
+                TupleType.wrap(inputsArray),
                 indexed,
                 getBoolean(event, ANONYMOUS, false)
         );
@@ -160,7 +160,7 @@ public final class ContractJSONParser {
             for (JsonElement c : components) {
                 componentsArray[i++] = buildType(c.getAsJsonObject());
             }
-            final TupleType base = TupleType.create(componentsArray);
+            final TupleType base = TupleType.wrap(componentsArray);
             final String suffix = type.substring(TUPLE.length()); // suffix e.g. "[4][]"
             return TypeFactory.createForTuple(base, suffix, name);
         }

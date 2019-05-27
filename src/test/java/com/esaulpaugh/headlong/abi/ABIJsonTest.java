@@ -92,11 +92,11 @@ public class ABIJsonTest {
                 if (openIdx >= 0) {
                     array[i++] = Function.parse("(" + s + ")").getParamTypes().get(0);
                 } else {
-                    array[i++] = TypeFactory.create(s, null);
+                    array[i++] = TypeFactory.create(s);
                 }
             }
 
-            TupleType tt = TupleType.create(array);
+            TupleType tt = TupleType.wrap(array);
 
             System.out.println(tt.canonicalType);
 
