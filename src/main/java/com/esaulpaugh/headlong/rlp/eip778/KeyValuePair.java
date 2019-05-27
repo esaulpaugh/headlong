@@ -26,6 +26,7 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
     public static final String ID = "id";
     public static final String SECP256K1 = "secp256k1";
     public static final String IP = "ip";
+    public static final String IPv6 = "ip6";
     public static final String TCP = "tcp";
     public static final String UDP = "udp";
 

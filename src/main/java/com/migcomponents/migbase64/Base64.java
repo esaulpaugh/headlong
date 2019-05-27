@@ -111,7 +111,7 @@ public final class Base64 /* Modified by Evan Saulpaugh */
             int cCnt = strRemainder == 0 ? eLen : eLen + 4; // ((sLen - 1) / 3 + 1) << 2
             dLen = cCnt + (lineSep ? (cCnt - 1) / 76 << 1 : 0);
         } else {
-            dLen = eLen + strRemainder;
+            dLen = eLen + strRemainder + (lineSep ? (eLen - 1) / 76 << 1 : 0);
         }
         char[] dArr = new char[dLen];
 
@@ -154,10 +154,11 @@ public final class Base64 /* Modified by Evan Saulpaugh */
                 dArr[dLen - 1] = '=';
             } else {
                 // Set last strRemainder chars
-                int idx = dLen - strRemainder;
-                dArr[idx] = CA[(i >> 12) & 0x3f];
-                if(++idx < dLen) {
-                    dArr[idx] = CA[(i >> 6) & 0x3f];
+                final int idx = dLen - strRemainder;
+                switch (strRemainder) {
+                case 3: dArr[idx + 2] = CA[i & 0x3f];
+                case 2: dArr[idx + 1] = CA[(i >> 6) & 0x3f];
+                default: dArr[idx] = CA[(i >> 12) & 0x3f];
                 }
             }
         }

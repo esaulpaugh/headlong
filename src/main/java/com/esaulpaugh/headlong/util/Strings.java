@@ -37,11 +37,7 @@ public final class Strings {
     public static final boolean DONT_PAD = false;
 
     public static String encode(byte[] bytes) {
-        return FastHex.encodeToString(bytes, 0, bytes.length);
-    }
-
-    public static byte[] decode(String encoded) {
-        return FastHex.decode(encoded, 0, encoded.length());
+        return encode(bytes, HEX);
     }
 
     public static String encode(byte[] bytes, int encoding) {
@@ -51,36 +47,29 @@ public final class Strings {
     public static String encode(byte[] bytes, int from, int len, int encoding) {
         switch (encoding) {
         case UTF_8: return new String(bytes, from, len, CHARSET_UTF_8);
-        case BASE64: return toBase64(bytes, from, len, PAD);
+        case BASE64: return toBase64(bytes, from, len, true, PAD);
         case HEX:
         default: return FastHex.encodeToString(bytes, from, len);
         }
     }
 
+    public static byte[] decode(String encoded) {
+        return decode(encoded, HEX);
+    }
+
     public static byte[] decode(String string, int encoding) {
+        if(string.isEmpty()) {
+            return EMPTY_BYTE_ARRAY;
+        }
         switch (encoding) {
-        case UTF_8: return fromUtf8(string);
-        case BASE64: throw new UnsupportedOperationException(); // decoding no longer supported. try spongycastle
+        case UTF_8: return string.getBytes(CHARSET_UTF_8);
+        case BASE64: return java.util.Base64.getMimeDecoder().decode(string);
         case HEX:
-        default: return fromHex(string);
+        default: return FastHex.decode(string, 0 ,string.length());
         }
     }
 
-    private static byte[] fromUtf8(String utf8) {
-        if(utf8.isEmpty()) {
-            return EMPTY_BYTE_ARRAY;
-        }
-        return utf8.getBytes(CHARSET_UTF_8);
-    }
-
-    public static String toBase64(byte[] bytes, int from, int len, boolean pad) {
-        return Base64.encodeToString(bytes, from, len, false, pad);
-    }
-
-    private static byte[] fromHex(String hex) {
-        if(hex.isEmpty()) {
-            return EMPTY_BYTE_ARRAY;
-        }
-        return FastHex.decode(hex, 0 ,hex.length());
+    public static String toBase64(byte[] bytes, int from, int len, boolean lineSep, boolean pad) {
+        return Base64.encodeToString(bytes, from, len, lineSep, pad);
     }
 }

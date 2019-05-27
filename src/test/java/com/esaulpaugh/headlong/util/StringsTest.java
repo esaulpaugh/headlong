@@ -15,14 +15,16 @@
 */
 package com.esaulpaugh.headlong.util;
 
-import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Random;
 
-import static com.esaulpaugh.headlong.util.Strings.*;
+import static com.esaulpaugh.headlong.util.Strings.BASE64;
+import static com.esaulpaugh.headlong.util.Strings.DONT_PAD;
+import static com.esaulpaugh.headlong.util.Strings.HEX;
+import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 public class StringsTest {
 
@@ -54,47 +56,69 @@ public class StringsTest {
     }
 
     @Test
-    public void padding() {
+    public void base64Padded() {
+        Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        java.util.Base64.Encoder mimeEncoder = java.util.Base64.getMimeEncoder();
+        for(int j = 0; j < 160; j++) {
+            byte[] x = new byte[j];
+            for (int i = 0; i < 100; i++) {
+                rand.nextBytes(x);
+                String s = Strings.encode(x, BASE64);
+                String s2 = mimeEncoder.encodeToString(x);
+                Assert.assertEquals(encodedLen(x.length, true, true), s.length());
+                Assert.assertEquals(s2, s);
+                Assert.assertArrayEquals(x, Strings.decode(s, BASE64));
+            }
+        }
+    }
+
+    @Test
+    public void base64PaddedNoLineSep() {
         Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
         java.util.Base64.Encoder encoder = java.util.Base64.getEncoder();
         for(int j = 0; j < 160; j++) {
             byte[] x = new byte[j];
             for (int i = 0; i < 100; i++) {
                 rand.nextBytes(x);
-                String s = Strings.encode(x, BASE64);
+                String s = Strings.toBase64(x, 0, x.length, false, true);
                 String s2 = encoder.encodeToString(x);
-                Assert.assertEquals(encodedLen(x.length, true), s.length());
+                Assert.assertEquals(encodedLen(x.length, false, true), s.length());
                 Assert.assertEquals(s2, s);
+                Assert.assertArrayEquals(x, Strings.decode(s, BASE64));
             }
         }
     }
 
     @Test
-    public void noPadding() {
+    public void base64Unpadded() {
         Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
-        for(int j = 3; j < 160; j++) {
+        for(int j = 4; j < 160; j++) {
             byte[] x = new byte[j];
+            final boolean lineSep = rand.nextBoolean();
             for (int i = 0; i < 100; i++) {
                 rand.nextBytes(x);
                 int offset = rand.nextInt(x.length / 3);
                 int len = rand.nextInt(x.length / 2);
-                String s = com.migcomponents.migbase64.Base64.encodeToString(x, offset, len, false, DONT_PAD);
-                Assert.assertEquals(encodedLen(len, false), s.length());
+                String s = Strings.toBase64(x, offset, len, lineSep, DONT_PAD);
+                Assert.assertEquals(encodedLen(len, lineSep, false), s.length());
+                byte[] y = Strings.decode(s, BASE64);
+                for (int k = 0; k < len; k++) {
+                    if(y[k] != x[offset + k]) {
+                        throw new AssertionError(y[k] + " != " + x[offset + k]);
+                    }
+                }
             }
         }
     }
 
-    @Test
-    public void tryDecodeBase64() throws Throwable {
-        TestUtils.assertThrown(UnsupportedOperationException.class, () -> Strings.decode("", BASE64));
-    }
-
-    private static int encodedLen(int numBytes, boolean padding) {
+    private static int encodedLen(int numBytes, boolean lineSep, boolean padding) {
         if(padding) {
-            return numBytes / 3 * 4 + (numBytes % 3 > 0 ? 4 : 0);
+            int est = numBytes / 3 * 4 + (numBytes % 3 > 0 ? 4 : 0);
+            return est + (lineSep ? (est - 1) / 76 << 1 : 0);
         }
 //        return (int) StrictMath.ceil(inputLen * 4 / 3d);
         int estimated = numBytes / 3 * 4;
+        estimated += lineSep ? (estimated - 1) / 76 << 1 : 0;
         int mod = numBytes % 3;
         if(mod == 0) {
             return estimated;
