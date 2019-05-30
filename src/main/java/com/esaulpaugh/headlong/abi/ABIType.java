@@ -70,6 +70,7 @@ public abstract class ABIType<J> implements Serializable {
         return name;
     }
 
+    /* don't expose this; cached (nameless) instances are shared and must be immutable */
     ABIType<J> setName(String name) {
         this.name = name;
         return this;

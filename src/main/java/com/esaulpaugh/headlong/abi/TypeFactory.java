@@ -111,18 +111,16 @@ final class TypeFactory {
         }
 
         BaseTypeInfo info = BaseTypeInfo.get(baseTypeStr);
-
-        final ABIType<?> type;
         if(info != null) {
             switch (baseTypeStr) { // baseType's hash code already cached due to BaseTypeInfo.get(baseTypeStr)
             case "int8":
             case "int16":
             case "int24":
-            case "int32": type = new IntType(baseTypeStr, info.bitLen, false); break;
+            case "int32":   return new IntType(baseTypeStr, info.bitLen, false);
             case "int40":
             case "int48":
             case "int56":
-            case "int64": type = new LongType(baseTypeStr, info.bitLen, false); break;
+            case "int64":   return new LongType(baseTypeStr, info.bitLen, false);
             case "int72":
             case "int80":
             case "int88":
@@ -145,17 +143,17 @@ final class TypeFactory {
             case "int224":
             case "int232":
             case "int240":
-            case "int248": type = new BigIntegerType(baseTypeStr, info.bitLen, false); break;
+            case "int248":  return new BigIntegerType(baseTypeStr, info.bitLen, false);
             case "int256":
-            case "int": type = nameless ? NAMELESS_INT_TYPE : new BigIntegerType("int256", info.bitLen, false); break;
+            case "int":     return nameless ? NAMELESS_INT_TYPE : new BigIntegerType("int256", info.bitLen, false);
             case "uint8":
             case "uint16":
-            case "uint24": type = new IntType(baseTypeStr, info.bitLen, true); break;
-            case "uint32": type = isElement ? new IntType(baseTypeStr, info.bitLen, true) : new LongType(baseTypeStr, info.bitLen, true); break;
+            case "uint24":  return new IntType(baseTypeStr, info.bitLen, true);
+            case "uint32":  return isElement ? new IntType(baseTypeStr, info.bitLen, true) : new LongType(baseTypeStr, info.bitLen, true);
             case "uint40":
             case "uint48":
-            case "uint56": type = new LongType(baseTypeStr, info.bitLen, true); break;
-            case "uint64": type = isElement ? new LongType(baseTypeStr, info.bitLen, true) : new BigIntegerType(baseTypeStr, info.bitLen, true); break;
+            case "uint56":  return new LongType(baseTypeStr, info.bitLen, true);
+            case "uint64":  return isElement ? new LongType(baseTypeStr, info.bitLen, true) : new BigIntegerType(baseTypeStr, info.bitLen, true);
             case "uint72":
             case "uint80":
             case "uint88":
@@ -179,9 +177,9 @@ final class TypeFactory {
             case "uint224":
             case "uint232":
             case "uint240":
-            case "uint248": type = new BigIntegerType(baseTypeStr, info.bitLen, true); break;
+            case "uint248": return new BigIntegerType(baseTypeStr, info.bitLen, true);
             case "uint256":
-            case "uint": type = nameless ? NAMELESS_UINT_TYPE : new BigIntegerType("uint256", info.bitLen, true); break;
+            case "uint":    return nameless ? NAMELESS_UINT_TYPE : new BigIntegerType("uint256", info.bitLen, true);
             case "bytes1":
             case "bytes2":
             case "bytes3":
@@ -214,22 +212,21 @@ final class TypeFactory {
             case "bytes29":
             case "bytes30":
             case "bytes31":
-            case "bytes32": type = new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, info.arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME); break;
-            case "bool": type = nameless ? NAMELESS_BOOLEAN_TYPE : new BooleanType(); break;
-            case "bytes": type = nameless ? NAMELESS_BYTES_TYPE : new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME); break;
-            case "string": type = nameless ? NAMELESS_STRING_TYPE : new ArrayType<>(baseTypeStr, ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME); break;
-            case "decimal": type = nameless ? NAMELESS_DECIMAL_TYPE : new BigDecimalType(baseTypeStr, DECIMAL_BIT_LEN, DECIMAL_SCALE, false); break;
+            case "bytes32": return new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, info.arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME);
+            case "bool":    return nameless ? NAMELESS_BOOLEAN_TYPE : new BooleanType();
+            case "bytes":   return nameless ? NAMELESS_BYTES_TYPE : new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME);
+            case "string":  return nameless ? NAMELESS_STRING_TYPE : new ArrayType<>(baseTypeStr, ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME);
+            case "decimal": return nameless ? NAMELESS_DECIMAL_TYPE : new BigDecimalType(baseTypeStr, DECIMAL_BIT_LEN, DECIMAL_SCALE, false);
             case "fixed":
-            case "fixed128x18": type = nameless ? NAMELESS_FIXED_TYPE : new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false); break;
+            case "fixed128x18":
+                            return nameless ? NAMELESS_FIXED_TYPE : new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false);
             case "ufixed":
-            case "ufixed128x18": type = nameless ? NAMELESS_UFIXED_TYPE : new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true); break;
-            default: type = null;
+            case "ufixed128x18":
+                            return nameless ? NAMELESS_UFIXED_TYPE : new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true);
+            default:        return null;
             }
-        } else {
-            type = tryParseFixed(baseTypeStr);
         }
-
-        return type;
+        return tryParseFixed(baseTypeStr);
     }
 
     private static BigDecimalType tryParseFixed(final String type) {
@@ -241,8 +238,7 @@ final class TypeFactory {
                 // no parseUnsignedInt on Android?
                 int M = Integer.parseInt(type.substring(idx + "fixed".length(), indexOfX));
                 int N = Integer.parseInt(type.substring(indexOfX + 1)); // everything after x
-                if ((M & 0x7) /* mod 8 */ == 0 && M >= 8 && M <= 256
-                        && N > 0 && N <= 80) {
+                if ((M & 0x7) /* mod 8 */ == 0 && M >= 8 && M <= 256 && N > 0 && N <= 80) {
                     return new BigDecimalType(type, M, N, unsigned);
                 }
             } catch (IndexOutOfBoundsException | NumberFormatException e) {
