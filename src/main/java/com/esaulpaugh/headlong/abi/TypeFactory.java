@@ -88,9 +88,10 @@ final class TypeFactory {
         if(baseTypeStr.charAt(0) == '(') {
             return TupleTypeParser.parseTupleType(baseTypeStr);
         }
-        final ABIType<?> type;
+
         BaseTypeInfo info = BaseTypeInfo.get(baseTypeStr);
 
+        final ABIType<?> type;
         if(info != null) {
             switch (baseTypeStr) { // baseType's hash code already cached due to BaseTypeInfo.get(baseTypeStr)
             case "int8":

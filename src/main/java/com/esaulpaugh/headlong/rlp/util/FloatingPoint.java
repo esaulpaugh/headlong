@@ -54,7 +54,7 @@ public final class FloatingPoint {
 
     /* BigDecimal */
 
-    public BigDecimal getBigDecimal(byte[] bytes, int i, int unscaledNumBytes, int scale) {
+    public static BigDecimal getBigDecimal(byte[] bytes, int i, int unscaledNumBytes, int scale) {
         return new BigDecimal(Integers.getBigInt(bytes, i, unscaledNumBytes), scale);
     }
 }

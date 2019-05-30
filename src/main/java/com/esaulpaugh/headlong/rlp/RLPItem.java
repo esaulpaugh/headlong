@@ -23,6 +23,7 @@ import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Strings;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -197,11 +198,15 @@ public abstract class RLPItem {
     }
 
     public float asFloat() throws DecodeException {
-        return FloatingPoint.getFloat(data(), 0, dataLength);
+        return FloatingPoint.getFloat(buffer, dataIndex, dataLength);
     }
 
     public double asDouble() throws DecodeException {
-        return FloatingPoint.getDouble(data(), 0, dataLength);
+        return FloatingPoint.getDouble(buffer, dataIndex, dataLength);
+    }
+
+    public BigDecimal asBigDecimal(int scale) {
+        return FloatingPoint.getBigDecimal(buffer, dataIndex, dataLength, scale);
     }
 
     /**
