@@ -26,8 +26,6 @@ final class BooleanType extends UnitType<Boolean> {
     private static final Class<Boolean> CLASS = Boolean.class;
     private static final String ARRAY_CLASS_NAME = boolean[].class.getName();
 
-    static final BooleanType INSTANCE = new BooleanType();
-
     static final byte[] BOOLEAN_FALSE = new byte[UNIT_LENGTH_BYTES];
     static final byte[] BOOLEAN_TRUE = new byte[UNIT_LENGTH_BYTES];
 
@@ -35,7 +33,7 @@ final class BooleanType extends UnitType<Boolean> {
         BOOLEAN_TRUE[BOOLEAN_TRUE.length-1] = 1;
     }
 
-    private BooleanType() {
+    BooleanType() {
         super("bool", CLASS, 1, true);
     }
 
