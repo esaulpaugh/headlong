@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 
@@ -26,6 +27,19 @@ import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
  * Creates the appropriate {@link ABIType} object for a given canonical type string.
  */
 final class TypeFactory {
+
+    private static final ABIType<BigInteger> NAMELESS_INT_TYPE = new BigIntegerType("int256", 256, false);
+    private static final ABIType<BigInteger> NAMELESS_UINT_TYPE = new BigIntegerType("uint256", 256, true);
+
+    private static final ABIType<byte[]> NAMELESS_BYTES_TYPE = new ArrayType<>("bytes", ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME);
+
+    private static final ABIType<String> NAMELESS_STRING_TYPE = new ArrayType<>("string", ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME);
+
+    private static final ABIType<BigDecimal> NAMELESS_FIXED_TYPE = new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false);
+    private static final ABIType<BigDecimal> NAMELESS_UFIXED_TYPE = new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true);
+    private static final ABIType<BigDecimal> NAMELESS_DECIMAL_TYPE = new BigDecimalType("decimal", DECIMAL_BIT_LEN, DECIMAL_SCALE, false);
+
+    private static final ABIType<Boolean> NAMELESS_BOOLEAN_TYPE = new BooleanType();
 
     private static final ClassLoader CLASS_LOADER = TypeFactory.class.getClassLoader();
 
@@ -39,13 +53,17 @@ final class TypeFactory {
 
     static ABIType<?> create(String type, TupleType baseTupleType, String name) throws ParseException {
         try {
-            return buildType(type, false, baseTupleType).setName(name);
+            if(name == null) {
+                return buildType(type, false, baseTupleType, true);
+            }
+            return buildType(type, false, baseTupleType, false)
+                    .setName(name);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static ABIType<?> buildType(final String type, boolean isArrayElement, final TupleType baseTupleType) throws ParseException, ClassNotFoundException {
+    private static ABIType<?> buildType(String type, boolean isArrayElement, TupleType baseTupleType, boolean nameless) throws ParseException, ClassNotFoundException {
 
         final int idxOfLast = type.length() - 1;
 
@@ -68,14 +86,17 @@ final class TypeFactory {
                 }
             }
 
-            final ABIType<?> elementType = buildType(type.substring(0, arrayOpenIndex), true, baseTupleType);
+            final ABIType<?> elementType = buildType(type.substring(0, arrayOpenIndex), true, baseTupleType, nameless);
             final String arrayClassName = elementType.arrayClassName();
             @SuppressWarnings("unchecked")
             final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
             final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
             return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, '[' + arrayClassName);
         } else {
-            ABIType<?> baseType = baseTupleType != null ? baseTupleType : resolveBaseType(type, isArrayElement);
+            if(baseTupleType != null) {
+                return baseTupleType;
+            }
+            ABIType<?> baseType = resolveBaseType(type, isArrayElement, nameless);
             if(baseType == null) {
                 throw new ParseException("unrecognized type: "
                         + type + " (" + String.format("%040x", new BigInteger(type.getBytes(CHARSET_UTF_8))) + ")", -1);
@@ -84,7 +105,7 @@ final class TypeFactory {
         }
     }
 
-    private static ABIType<?> resolveBaseType(final String baseTypeStr, boolean isElement) throws ParseException {
+    private static ABIType<?> resolveBaseType(String baseTypeStr, boolean isElement, boolean nameless) throws ParseException {
         if(baseTypeStr.charAt(0) == '(') {
             return TupleTypeParser.parseTupleType(baseTypeStr);
         }
@@ -124,9 +145,9 @@ final class TypeFactory {
             case "int224":
             case "int232":
             case "int240":
-            case "int248":
-            case "int256": type = new BigIntegerType(baseTypeStr, info.bitLen, false); break;
-            case "int": type = new BigIntegerType("int256", info.bitLen, false); break;
+            case "int248": type = new BigIntegerType(baseTypeStr, info.bitLen, false); break;
+            case "int256":
+            case "int": type = nameless ? NAMELESS_INT_TYPE : new BigIntegerType("int256", info.bitLen, false); break;
             case "uint8":
             case "uint16":
             case "uint24": type = new IntType(baseTypeStr, info.bitLen, true); break;
@@ -158,9 +179,9 @@ final class TypeFactory {
             case "uint224":
             case "uint232":
             case "uint240":
-            case "uint248":
-            case "uint256": type = new BigIntegerType(baseTypeStr, info.bitLen, true); break;
-            case "uint": type = new BigIntegerType("uint256", info.bitLen, true); break;
+            case "uint248": type = new BigIntegerType(baseTypeStr, info.bitLen, true); break;
+            case "uint256":
+            case "uint": type = nameless ? NAMELESS_UINT_TYPE : new BigIntegerType("uint256", info.bitLen, true); break;
             case "bytes1":
             case "bytes2":
             case "bytes3":
@@ -194,14 +215,14 @@ final class TypeFactory {
             case "bytes30":
             case "bytes31":
             case "bytes32": type = new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, info.arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME); break;
-            case "bool": type = new BooleanType(); break;
-            case "bytes": type = new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME); break;
-            case "string": type = new ArrayType<>(baseTypeStr, ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME); break;
-            case "decimal": type = new BigDecimalType(baseTypeStr, info.bitLen, DECIMAL_SCALE, false); break;
+            case "bool": type = nameless ? NAMELESS_BOOLEAN_TYPE : new BooleanType(); break;
+            case "bytes": type = nameless ? NAMELESS_BYTES_TYPE : new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME); break;
+            case "string": type = nameless ? NAMELESS_STRING_TYPE : new ArrayType<>(baseTypeStr, ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME); break;
+            case "decimal": type = nameless ? NAMELESS_DECIMAL_TYPE : new BigDecimalType(baseTypeStr, DECIMAL_BIT_LEN, DECIMAL_SCALE, false); break;
             case "fixed":
-            case "fixed128x18": type = new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false); break;
+            case "fixed128x18": type = nameless ? NAMELESS_FIXED_TYPE : new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false); break;
             case "ufixed":
-            case "ufixed128x18": type = new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true); break;
+            case "ufixed128x18": type = nameless ? NAMELESS_UFIXED_TYPE : new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true); break;
             default: type = null;
             }
         } else {
@@ -211,7 +232,7 @@ final class TypeFactory {
         return type;
     }
 
-    private static BigDecimalType tryParseFixed(String type) {
+    private static BigDecimalType tryParseFixed(final String type) {
         final int idx = type.indexOf("fixed");
         boolean unsigned = false;
         if (idx == 0 || (unsigned = idx == 1 && type.charAt(0) == 'u')) {

@@ -28,7 +28,7 @@ final class BaseTypeInfo {
 
     private static final int ADDRESS_BIT_LEN = 160;
 
-    private static final int DECIMAL_BIT_LEN = 128;
+    static final int DECIMAL_BIT_LEN = 128;
     static final int DECIMAL_SCALE = 10;
 
     static final int FIXED_BIT_LEN = 128;
