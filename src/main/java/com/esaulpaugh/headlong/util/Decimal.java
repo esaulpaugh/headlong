@@ -18,12 +18,12 @@ public class Decimal {
         }
     }
 
-    public static String encodeToString(byte[] bytes, int i, final int len) {
+    public static String encodeToString(byte[] buffer, int i, final int len) {
         char[] chars = new char[len * CHARS_PER_BYTE];
         final int end = i + len;
         int j = 0;
         for ( ; i < end; i++) {
-            int idx = (bytes[i] & 0xFF) * CHARS_PER_BYTE;
+            int idx = (buffer[i] & 0xFF) * CHARS_PER_BYTE;
             chars[j++] = ENCODING[idx++];
             chars[j++] = ENCODING[idx++];
             chars[j++] = ENCODING[idx];
@@ -31,19 +31,28 @@ public class Decimal {
         return new String(chars);
     }
 
-    public static byte[] decode(String decimal, int i, final int len) {
+    public static byte[] decode(String src, int i, final int len) {
         if(len % CHARS_PER_BYTE != 0) {
             throw new IllegalArgumentException("length must be a multiple of " + CHARS_PER_BYTE);
         }
-        byte[] bytes = new byte[len / CHARS_PER_BYTE];
-        final int byteLen = bytes.length;
+        final int byteLen = len / CHARS_PER_BYTE;
+        byte[] bytes = new byte[byteLen];
         for (int j = 0; j < byteLen; j++) {
-            bytes[j] = (byte) (
-                      Character.digit(decimal.charAt(i++), 10) * 100
-                    + Character.digit(decimal.charAt(i++), 10) * 10
-                    + Character.digit(decimal.charAt(i++), 10)
-            );
+            bytes[j] = toByte(src.charAt(i++), src.charAt(i++), src.charAt(i++));
         }
         return bytes;
+    }
+
+    private static byte toByte(char a, char b, char c) {
+        if (a >= '0' && a <= '9'
+         && b >= '0' && b <= '9'
+         && c >= '0' && c <= '9') {
+            return (byte) (
+                    ((a - '0') * 100)
+                  + ((b - '0') * 10)
+                  + (c - '0')
+            );
+        }
+        throw new IllegalArgumentException("illegal digit");
     }
 }
