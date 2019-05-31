@@ -20,39 +20,55 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Random;
+import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.util.Strings.BASE64;
+import static com.esaulpaugh.headlong.util.Strings.DECIMAL;
 import static com.esaulpaugh.headlong.util.Strings.DONT_PAD;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 public class StringsTest {
 
+    private static final Random RAND = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+
+    private static final Supplier<byte[]> SUPPLY_RANDOM = () -> {
+        byte[] x = new byte[RAND.nextInt(400)];
+        RAND.nextBytes(x);
+        return x;
+    };
+
+    private static void testEncoding(int n, int encoding, Supplier<byte[]> supplier) {
+        for (int i = 0; i < n; i++) {
+            test(supplier.get(), encoding);
+        }
+    }
+
+    private static void test(byte[] x, int encoding) {
+        String s = Strings.encode(x, encoding);
+        byte[] y = Strings.decode(s, encoding);
+        Assert.assertArrayEquals(x, y);
+    }
+
     @Test
     public void utf8() {
-        Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
-        for (int j = 0; j < 20_000; j++) {
-            byte[] x = new byte[rand.nextInt(400)];
+        testEncoding(20_000, UTF_8, () -> {
+            byte[] x = new byte[RAND.nextInt(400)];
             for (int i = 0; i < x.length; i++) {
-//                x[i] = (byte) (r.nextInt(95) + 32);
-                x[i] = (byte) rand.nextInt(128);
+                x[i] = (byte) RAND.nextInt(128);
             }
-            String s = Strings.encode(x, UTF_8);
-            byte[] y = Strings.decode(s, UTF_8);
-            Assert.assertArrayEquals(x, y);
-        }
+            return x;
+        });
     }
 
     @Test
     public void hex() {
-        Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
-        for (int i = 0; i < 20_000; i++) {
-            byte[] x = new byte[rand.nextInt(400)];
-            rand.nextBytes(x);
-            String s = Strings.encode(x, HEX);
-            byte[] y = Strings.decode(s, HEX);
-            Assert.assertArrayEquals(x, y);
-        }
+        testEncoding(20_000, HEX, SUPPLY_RANDOM);
+    }
+
+    @Test
+    public void decimal() {
+        testEncoding(20_000, DECIMAL, SUPPLY_RANDOM);
     }
 
     @Test
@@ -65,7 +81,7 @@ public class StringsTest {
                 rand.nextBytes(x);
                 String s = Strings.encode(x, BASE64);
                 String s2 = mimeEncoder.encodeToString(x);
-                Assert.assertEquals(encodedLen(x.length, true, true), s.length());
+                Assert.assertEquals(base64EncodedLen(x.length, true, true), s.length());
                 Assert.assertEquals(s2, s);
                 Assert.assertArrayEquals(x, Strings.decode(s, BASE64));
             }
@@ -82,7 +98,7 @@ public class StringsTest {
                 rand.nextBytes(x);
                 String s = Strings.toBase64(x, 0, x.length, false, true);
                 String s2 = encoder.encodeToString(x);
-                Assert.assertEquals(encodedLen(x.length, false, true), s.length());
+                Assert.assertEquals(base64EncodedLen(x.length, false, true), s.length());
                 Assert.assertEquals(s2, s);
                 Assert.assertArrayEquals(x, Strings.decode(s, BASE64));
             }
@@ -100,7 +116,7 @@ public class StringsTest {
                 int offset = rand.nextInt(x.length / 3);
                 int len = rand.nextInt(x.length / 2);
                 String s = Strings.toBase64(x, offset, len, lineSep, DONT_PAD);
-                Assert.assertEquals(encodedLen(len, lineSep, false), s.length());
+                Assert.assertEquals(base64EncodedLen(len, lineSep, false), s.length());
                 byte[] y = Strings.decode(s, BASE64);
                 for (int k = 0; k < len; k++) {
                     if(y[k] != x[offset + k]) {
@@ -111,7 +127,7 @@ public class StringsTest {
         }
     }
 
-    private static int encodedLen(int numBytes, boolean lineSep, boolean padding) {
+    private static int base64EncodedLen(int numBytes, boolean lineSep, boolean padding) {
         if(padding) {
             int est = numBytes / 3 * 4 + (numBytes % 3 > 0 ? 4 : 0);
             return est + (lineSep ? (est - 1) / 76 << 1 : 0);
