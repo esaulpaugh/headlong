@@ -41,8 +41,8 @@ public abstract class RLPItem {
 
     public static final RLPItem[] EMPTY_ARRAY = new RLPItem[0];
 
-    final byte[] buffer;
-    public final int index;
+    protected final byte[] buffer;
+    protected final int index;
 
     public final transient int dataIndex;
     public final transient int dataLength;
@@ -92,7 +92,7 @@ public abstract class RLPItem {
         this.endIndex = (int) _endIndex;
     }
 
-    private static DecodeException exceedsContainer(int index, int end, int containerEnd, boolean recoverable) {
+    static DecodeException exceedsContainer(int index, int end, int containerEnd, boolean recoverable) {
         String msg = "element @ index " + index + " exceeds its container: " + end + " > " + containerEnd;
         return recoverable ? new RecoverableDecodeException(msg) : new UnrecoverableDecodeException(msg);
     }

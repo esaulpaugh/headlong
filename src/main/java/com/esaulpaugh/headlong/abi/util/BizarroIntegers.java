@@ -190,7 +190,7 @@ public final class BizarroIntegers {
         }
         return Integers.insertBytes(n, o, (byte) val, b, c, d, e, f, g, h);
     }
-
+// *******************
     private static byte _getByte(byte[] buffer, int i, int len) {
         switch (len) {
         case 0: return 0;
@@ -210,7 +210,7 @@ public final class BizarroIntegers {
         }
     }
 
-    public static int _getInt(byte[] buffer, int i, int len) {
+    private static int _getInt(byte[] buffer, int i, int len) {
         int shiftAmount = 0;
         int val = 0;
         switch (len) { /* cases 4 through 1 fall through */
@@ -239,7 +239,7 @@ public final class BizarroIntegers {
         default: throw new IllegalArgumentException("len is out of range: " + len);
         }
     }
-
+// *******************
     public static byte getByte(byte[] buffer, int index, int len) {
         switch (len) {
         case 0: return (byte) 0xFF;

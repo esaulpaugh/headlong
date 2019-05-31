@@ -50,7 +50,7 @@ public class Notation {
 
     private final String value;
 
-    Notation(String value) {
+    private Notation(String value) {
         if(value == null)
             throw new IllegalArgumentException("value cannot be null");
         this.value = value;
@@ -73,7 +73,7 @@ public class Notation {
         }
     }
 
-    static DecodeException exceedsContainer(int index, long end, int containerEnd) {
+    private static DecodeException exceedsContainer(int index, long end, int containerEnd) {
         String msg = "element @ index " + index + " exceeds its container: " + end + " > " + containerEnd;
         return new UnrecoverableDecodeException(msg);
     }

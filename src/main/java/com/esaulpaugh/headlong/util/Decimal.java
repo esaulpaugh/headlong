@@ -1,6 +1,6 @@
 package com.esaulpaugh.headlong.util;
 
-public class Decimal {
+public final class Decimal {
 
     private static final int NUM_BYTE_VALS = 1 << Byte.SIZE;
     private static final int CHARS_PER_BYTE = "255".length();
