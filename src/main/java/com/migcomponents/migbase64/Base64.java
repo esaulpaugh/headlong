@@ -155,7 +155,7 @@ public final class Base64 /* Modified by Evan Saulpaugh */
             } else {
                 // Set last strRemainder chars
                 final int idx = dLen - strRemainder;
-                switch (strRemainder) {
+                switch (strRemainder) { /* cases fall through */
                 case 3: dArr[idx + 2] = CA[i & 0x3f];
                 case 2: dArr[idx + 1] = CA[(i >> 6) & 0x3f];
                 default: dArr[idx] = CA[(i >> 12) & 0x3f];

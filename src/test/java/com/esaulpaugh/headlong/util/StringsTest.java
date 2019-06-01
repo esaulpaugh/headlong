@@ -33,27 +33,25 @@ public class StringsTest {
     private static final Random RAND = new Random(MonteCarloTest.getSeed(System.nanoTime()));
 
     private static final Supplier<byte[]> SUPPLY_RANDOM = () -> {
-        byte[] x = new byte[RAND.nextInt(400)];
+        byte[] x = new byte[RAND.nextInt(115)];
         RAND.nextBytes(x);
         return x;
     };
 
     private static void testEncoding(int n, int encoding, Supplier<byte[]> supplier) {
         for (int i = 0; i < n; i++) {
-            test(supplier.get(), encoding);
+            byte[] x = supplier.get();
+            Assert.assertArrayEquals(
+                    x,
+                    Strings.decode(Strings.encode(x, encoding), encoding)
+            );
         }
-    }
-
-    private static void test(byte[] x, int encoding) {
-        String s = Strings.encode(x, encoding);
-        byte[] y = Strings.decode(s, encoding);
-        Assert.assertArrayEquals(x, y);
     }
 
     @Test
     public void utf8() {
         testEncoding(20_000, UTF_8, () -> {
-            byte[] x = new byte[RAND.nextInt(400)];
+            byte[] x = new byte[RAND.nextInt(115)];
             for (int i = 0; i < x.length; i++) {
                 x[i] = (byte) RAND.nextInt(128);
             }

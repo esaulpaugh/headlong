@@ -33,6 +33,8 @@ import static com.esaulpaugh.headlong.abi.TupleTypeParser.EMPTY_PARAMETER;
 
 public class EncodeTest {
 
+    private static final Random RAND = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+
     @Test
     public void emptyParamTest() throws Throwable {
         assertThrown(ParseException.class, "@ index 0, " + EMPTY_PARAMETER, () -> new Function("baz(,)"));
@@ -93,17 +95,15 @@ public class EncodeTest {
     @Test
     public void fixedLengthDynamicArrayTest() throws Throwable {
 
-        final Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        Supplier<Object> bytesSupplier = () -> { byte[] v = new byte[RAND.nextInt(33)]; RAND.nextBytes(v); return v; };
+        Supplier<Object> stringSupplier = () -> { byte[] v = new byte[RAND.nextInt(33)]; RAND.nextBytes(v); return new String(v, Strings.CHARSET_UTF_8); };
+        Supplier<Object> booleanArraySupplier = () -> { boolean[] v = new boolean[RAND.nextInt(4)]; Arrays.fill(v, RAND.nextBoolean()); return v; };
+        Supplier<Object> intArraySupplier = () -> { BigInteger[] v = new BigInteger[RAND.nextInt(4)]; Arrays.fill(v, BigInteger.valueOf(RAND.nextInt())); return v; };
 
-        Supplier<Object> bytesSupplier = () -> { byte[] v = new byte[rand.nextInt(33)]; rand.nextBytes(v); return v; };
-        Supplier<Object> stringSupplier = () -> { byte[] v = new byte[rand.nextInt(33)]; rand.nextBytes(v); return new String(v, Strings.CHARSET_UTF_8); };
-        Supplier<Object> booleanArraySupplier = () -> { boolean[] v = new boolean[rand.nextInt(4)]; Arrays.fill(v, rand.nextBoolean()); return v; };
-        Supplier<Object> intArraySupplier = () -> { BigInteger[] v = new BigInteger[rand.nextInt(4)]; Arrays.fill(v, BigInteger.valueOf(rand.nextInt())); return v; };
-
-        testFixedLenDynamicArray("bytes", new byte[1 + rand.nextInt(34)][], bytesSupplier);
-        testFixedLenDynamicArray("string", new String[1 + rand.nextInt(34)], stringSupplier);
-        testFixedLenDynamicArray("bool[]", new boolean[1 + rand.nextInt(34)][], booleanArraySupplier);
-        testFixedLenDynamicArray("int[]", new BigInteger[1 + rand.nextInt(34)][], intArraySupplier);
+        testFixedLenDynamicArray("bytes", new byte[1 + RAND.nextInt(34)][], bytesSupplier);
+        testFixedLenDynamicArray("string", new String[1 + RAND.nextInt(34)], stringSupplier);
+        testFixedLenDynamicArray("bool[]", new boolean[1 + RAND.nextInt(34)][], booleanArraySupplier);
+        testFixedLenDynamicArray("int[]", new BigInteger[1 + RAND.nextInt(34)][], intArraySupplier);
 
         final String msg = "array lengths differed, expected.length=32 actual.length=0";
         assertThrown(AssertionError.class, msg, () -> testFixedLenDynamicArray("bytes", new byte[0][], null));
@@ -143,7 +143,7 @@ public class EncodeTest {
         Function f = new Function("(function[2][][],bytes24,string[0][0],address[],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
 
         byte[] func = new byte[24];
-        new Random(MonteCarloTest.getSeed(System.nanoTime())).nextBytes(func);
+        RAND.nextBytes(func);
 
         String oneSixty = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 //        String oneSixty = "10000000000000000000000000000000000000000";
