@@ -16,16 +16,16 @@
 package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
+import com.migcomponents.migbase64.Base64;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Random;
 import java.util.function.Supplier;
 
-import static com.esaulpaugh.headlong.util.Strings.BASE64;
 import static com.esaulpaugh.headlong.util.Strings.DECIMAL;
-import static com.esaulpaugh.headlong.util.Strings.DONT_PAD;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
+import static com.esaulpaugh.headlong.util.Strings.URL_SAFE_BASE64;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 public class StringsTest {
@@ -70,52 +70,57 @@ public class StringsTest {
     }
 
     @Test
-    public void base64Padded() {
+    public void base64NoOptions() {
         Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
         java.util.Base64.Encoder mimeEncoder = java.util.Base64.getMimeEncoder();
+        java.util.Base64.Decoder mimeDecoder = java.util.Base64.getMimeDecoder();
         for(int j = 0; j < 160; j++) {
             byte[] x = new byte[j];
             for (int i = 0; i < 100; i++) {
                 rand.nextBytes(x);
-                String s = Strings.encode(x, BASE64);
+                String s = Base64.encodeToString(x, 0, x.length, Base64.NO_OPTIONS);
                 String s2 = mimeEncoder.encodeToString(x);
                 Assert.assertEquals(base64EncodedLen(x.length, true, true), s.length());
                 Assert.assertEquals(s2, s);
-                Assert.assertArrayEquals(x, Strings.decode(s, BASE64));
+                Assert.assertArrayEquals(x, mimeDecoder.decode(s));
             }
         }
     }
 
     @Test
     public void base64PaddedNoLineSep() {
+
+        System.out.println((char) 0x2b);
+
         Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
-        java.util.Base64.Encoder encoder = java.util.Base64.getEncoder();
+        java.util.Base64.Encoder encoder = java.util.Base64.getUrlEncoder();
         for(int j = 0; j < 160; j++) {
             byte[] x = new byte[j];
             for (int i = 0; i < 100; i++) {
                 rand.nextBytes(x);
-                String s = Strings.toBase64(x, 0, x.length, false, true);
+                String s = Base64.encodeToString(x, 0, x.length, Base64.URL_SAFE_CHARS | Base64.NO_LINE_SEP);
                 String s2 = encoder.encodeToString(x);
                 Assert.assertEquals(base64EncodedLen(x.length, false, true), s.length());
                 Assert.assertEquals(s2, s);
-                Assert.assertArrayEquals(x, Strings.decode(s, BASE64));
+                Assert.assertArrayEquals(x, Strings.decode(s, URL_SAFE_BASE64));
             }
         }
     }
 
     @Test
-    public void base64Unpadded() {
+    public void base64Default() {
+        final boolean lineSep = false;
+        final boolean padding = false;
         Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
         for(int j = 4; j < 160; j++) {
             byte[] x = new byte[j];
-            final boolean lineSep = rand.nextBoolean();
             for (int i = 0; i < 100; i++) {
                 rand.nextBytes(x);
                 int offset = rand.nextInt(x.length / 3);
                 int len = rand.nextInt(x.length / 2);
-                String s = Strings.toBase64(x, offset, len, lineSep, DONT_PAD);
-                Assert.assertEquals(base64EncodedLen(len, lineSep, false), s.length());
-                byte[] y = Strings.decode(s, BASE64);
+                String s = Strings.encode(x, offset, len, URL_SAFE_BASE64);
+                Assert.assertEquals(base64EncodedLen(len, lineSep, padding), s.length());
+                byte[] y = Strings.decode(s, URL_SAFE_BASE64);
                 for (int k = 0; k < len; k++) {
                     if(y[k] != x[offset + k]) {
                         throw new AssertionError(y[k] + " != " + x[offset + k]);

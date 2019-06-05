@@ -71,7 +71,17 @@ package com.migcomponents.migbase64;
 
 public final class Base64 /* Modified by Evan Saulpaugh */
 {
-    private static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
+
+    public static final int NO_OPTIONS = 0;
+
+    public static final int NO_PADDING = 1;
+
+    public static final int NO_LINE_SEP = 2; // No "\r\n" after 76 characters
+
+    public static final int URL_SAFE_CHARS = 4;
+
+    private static final char[] TABLE_STANDARD = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
+    private static final char[] TABLE_URL_SAFE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
     private static final char[] EMPTY_CHAR_ARRAY = new char[0];
 
     // ****************************************************************************************
@@ -83,19 +93,22 @@ public final class Base64 /* Modified by Evan Saulpaugh */
      * @param sArr buffer containing the input. If <code>null</code> or length 0, an empty array will be returned.
      * @param offset the offset into the buffer of the input bytes
      * @param len   the length of the input, in bytes
-     * @param lineSep Optional "\r\n" after 76 characters, unless end of file.<br>
      * No line separator will be in breach of RFC 2045 which specifies max 76 per line but will be a
      * little faster.
-     * @param pad    false if the output should not be padded by equals signs
+     * @param flags    indicating the desired encoding options
      * @return A BASE64 encoded array. Never <code>null</code>.
      */
-    public static char[] encodeToChars(byte[] sArr, final int offset, final int len, boolean lineSep, boolean pad) {
+    public static char[] encodeToChars(byte[] sArr, final int offset, final int len, int flags) {
         // Check special case
         if (sArr == null || len == 0) {
             return EMPTY_CHAR_ARRAY;
         }
 
-        int remainder = len % 3;
+        final char[] table = (flags & URL_SAFE_CHARS) != 0 ? TABLE_URL_SAFE : TABLE_STANDARD;
+        final boolean pad = (flags & NO_PADDING) == 0;
+        final boolean lineSep = (flags & NO_LINE_SEP) == 0;
+
+        final int remainder = len % 3;
         final int strRemainder;
         if(remainder == 1) {
             strRemainder = 2;
@@ -124,10 +137,10 @@ public final class Base64 /* Modified by Evan Saulpaugh */
             int i = (sArr[s++] & 0xff) << 16 | (sArr[s++] & 0xff) << 8 | (sArr[s++] & 0xff);
 
             // Encode the int into four chars
-            dArr[d++] = CA[(i >>> 18) & 0x3f];
-            dArr[d++] = CA[(i >>> 12) & 0x3f];
-            dArr[d++] = CA[(i >>> 6) & 0x3f];
-            dArr[d++] = CA[i & 0x3f];
+            dArr[d++] = table[(i >>> 18) & 0x3f];
+            dArr[d++] = table[(i >>> 12) & 0x3f];
+            dArr[d++] = table[(i >>> 6) & 0x3f];
+            dArr[d++] = table[i & 0x3f];
 
             // Add optional line separator
             if (lineSep && ++cc == 19 && d < lineSepLim) {
@@ -148,17 +161,17 @@ public final class Base64 /* Modified by Evan Saulpaugh */
             }
             if(pad) {
                 // Set last four chars
-                dArr[dLen - 4] = CA[i >> 12];
-                dArr[dLen - 3] = CA[(i >>> 6) & 0x3f];
-                dArr[dLen - 2] = twoLeft ? CA[i & 0x3f] : '=';
+                dArr[dLen - 4] = table[i >> 12];
+                dArr[dLen - 3] = table[(i >>> 6) & 0x3f];
+                dArr[dLen - 2] = twoLeft ? table[i & 0x3f] : '=';
                 dArr[dLen - 1] = '=';
             } else {
                 // Set last strRemainder chars
                 final int idx = dLen - strRemainder;
                 switch (strRemainder) { /* cases fall through */
-                case 3: dArr[idx + 2] = CA[i & 0x3f];
-                case 2: dArr[idx + 1] = CA[(i >> 6) & 0x3f];
-                default: dArr[idx] = CA[(i >> 12) & 0x3f];
+                case 3: dArr[idx + 2] = table[i & 0x3f];
+                case 2: dArr[idx + 1] = table[(i >> 6) & 0x3f];
+                default: dArr[idx] = table[(i >> 12) & 0x3f];
                 }
             }
         }
@@ -172,16 +185,15 @@ public final class Base64 /* Modified by Evan Saulpaugh */
     /**
      * Encodes a raw byte array into a BASE64 <code>String</code> representation in accordance with RFC 2045.
      * @param buffer buffer containing the input. If <code>null</code> or length 0 an empty string will be returned.
-     * @param lineSep Optional "\r\n" after 76 characters, unless end of file.<br>
      * No line separator will be in breach of RFC 2045 which specifies max 76 per line but will be a
      * little faster.
      * @param offset the offset into the buffer of the input bytes
      * @param len   the length of the input, in bytes
-     * @param pad    false if the output should not be padded by equals signs
+     * @param flags    indicating the desired encoding options
      * @return A BASE64 encoded array. Never <code>null</code>.
      */
-    public static String encodeToString(byte[] buffer, int offset, int len, boolean lineSep, boolean pad) {
+    public static String encodeToString(byte[] buffer, int offset, int len, int flags) {
         // Reuse char[] since we can't create a String incrementally anyway and StringBuffer/Builder would be slower.
-        return new String(encodeToChars(buffer, offset, len, lineSep, pad));
+        return new String(encodeToChars(buffer, offset, len, flags));
     }
 }
