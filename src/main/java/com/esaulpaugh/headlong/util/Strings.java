@@ -32,12 +32,12 @@ public final class Strings {
     public static final Charset CHARSET_UTF_8 = Charset.forName("UTF-8");
     public static final Charset CHARSET_ASCII = Charset.forName("US-ASCII");
 
-    public static final int URL_SAFE_BASE64 = 3; // 64
+    public static final int BASE_64_URL_SAFE = 3; // 64
     public static final int DECIMAL = 2; // 10
     public static final int UTF_8 = 1; // 256
     public static final int HEX = 0; // 16
 
-    public static final int BASE64_OPTIONS = URL_SAFE_CHARS | NO_LINE_SEP | NO_PADDING;
+    public static final int URL_SAFE_OPTIONS = URL_SAFE_CHARS | NO_LINE_SEP | NO_PADDING;
 
     public static String encode(byte[] bytes) {
         return encode(bytes, HEX);
@@ -49,7 +49,7 @@ public final class Strings {
 
     public static String encode(byte[] bytes, int from, int len, int encoding) {
         switch (encoding) {
-        case URL_SAFE_BASE64: return Base64.encodeToString(bytes, from, len, BASE64_OPTIONS);
+        case BASE_64_URL_SAFE: return Base64.encodeToString(bytes, from, len, URL_SAFE_OPTIONS);
         case DECIMAL: return Decimal.encodeToString(bytes, from, len);
         case UTF_8: return new String(bytes, from, len, CHARSET_UTF_8);
         case HEX:
@@ -66,7 +66,7 @@ public final class Strings {
             return EMPTY_BYTE_ARRAY;
         }
         switch (encoding) {
-        case URL_SAFE_BASE64: return java.util.Base64.getUrlDecoder().decode(string);
+        case BASE_64_URL_SAFE: return java.util.Base64.getUrlDecoder().decode(string);
         case DECIMAL: return Decimal.decode(string, 0, string.length());
         case UTF_8: return string.getBytes(CHARSET_UTF_8);
         case HEX:

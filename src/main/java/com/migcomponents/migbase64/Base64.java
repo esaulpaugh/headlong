@@ -1,38 +1,6 @@
 package com.migcomponents.migbase64;
 
 /**
- * A very fast and memory efficient class to encode and decode to and from BASE64 in full accordance
- * with RFC 2045.<br><br>
- * On Windows XP sp1 with 1.4.2_04 and later ;), this encoder and decoder is about 10 times faster
- * on small arrays (10 - 1000 bytes) and 2-3 times as fast on larger arrays (10000 - 1000000 bytes)
- * compared to <code>sun.misc.Encoder()/Decoder()</code>.<br><br>
- *
- * On byte arrays the encoder is about 20% faster than Jakarta Commons Base64 Codec for encode and
- * about 50% faster for decoding large arrays. This implementation is about twice as fast on very small
- * arrays (less than 30 bytes). If source/destination is a <code>String</code> this
- * version is about three times as fast due to the fact that the Commons Codec result has to be recoded
- * to a <code>String</code> from <code>byte[]</code>, which is very expensive.<br><br>
- *
- * This encode/decode algorithm doesn't create any temporary arrays as many other codecs do, it only
- * allocates the resulting array. This produces less garbage and it is possible to handle arrays twice
- * as large as algorithms that create a temporary array. (E.g. Jakarta Commons Codec). It is unknown
- * whether Sun's <code>sun.misc.Encoder()/Decoder()</code> produce temporary arrays but since performance
- * is quite low it probably does.<br><br>
- *
- * The encoder produces the same output as the Sun one except that the Sun's encoder appends
- * a trailing line separator if the last character isn't a pad. Unclear why but it only adds to the
- * length and is probably a side effect. Both are in conformance with RFC 2045 though.<br>
- * Commons codec seem to always att a trailing line separator.<br><br>
- *
- * <b>Note!</b>
- * The encode/decode method pairs (types) come in three versions with the <b>exact</b> same algorithm and
- * thus a lot of code redundancy. This is to not create any temporary arrays for transcoding to/from different
- * format types. The methods not used can simply be commented out.<br><br>
- *
- * There is also a "fast" version of all decode methods that works the same way as the normal ones, but
- * har a few demands on the decoded input. Normally though, these fast verions should be used if the source if
- * the input is known and it hasn't bee tampered with.<br><br>
- *
  * If you find the code useful or you find a bug, please send me a note at base64 @ miginfocom . com.
  *
  * Licence (BSD):
@@ -69,8 +37,7 @@ package com.migcomponents.migbase64;
  *         Time: 11:31:11
  */
 
-public final class Base64 /* Modified by Evan Saulpaugh */
-{
+public final class Base64 /* Modified by Evan Saulpaugh */ {
 
     public static final int NO_OPTIONS = 0;
 
@@ -80,120 +47,89 @@ public final class Base64 /* Modified by Evan Saulpaugh */
 
     public static final int URL_SAFE_CHARS = 4;
 
-    private static final char[] TABLE_STANDARD = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
-    private static final char[] TABLE_URL_SAFE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
-    private static final char[] EMPTY_CHAR_ARRAY = new char[0];
+    private static final char[] TABLE_STANDARD;
+    private static final char[] TABLE_URL_SAFE;
 
-    // ****************************************************************************************
-    // *  char[] version
-    // ****************************************************************************************
-
-    /**
-     * Encodes a raw byte array into a BASE64 <code>char[]</code> representation in accordance with RFC 2045.
-     * @param sArr buffer containing the input. If <code>null</code> or length 0, an empty array will be returned.
-     * @param offset the offset into the buffer of the input bytes
-     * @param len   the length of the input, in bytes
-     * No line separator will be in breach of RFC 2045 which specifies max 76 per line but will be a
-     * little faster.
-     * @param flags    indicating the desired encoding options
-     * @return A BASE64 encoded array. Never <code>null</code>.
-     */
-    public static char[] encodeToChars(byte[] sArr, final int offset, final int len, int flags) {
-        // Check special case
-        if (sArr == null || len == 0) {
-            return EMPTY_CHAR_ARRAY;
-        }
-
-        final char[] table = (flags & URL_SAFE_CHARS) != 0 ? TABLE_URL_SAFE : TABLE_STANDARD;
-        final boolean pad = (flags & NO_PADDING) == 0;
-        final boolean lineSep = (flags & NO_LINE_SEP) == 0;
-
-        final int remainder = len % 3;
-        final int strRemainder;
-        if(remainder == 1) {
-            strRemainder = 2;
-        } else if(remainder == 2) {
-            strRemainder = 3;
-        } else {
-            strRemainder = 0;
-        }
-
-        final int eLen = (len / 3) << 2;
-        final int dLen;
-        if(pad) {
-            int cCnt = strRemainder == 0 ? eLen : eLen + 4; // ((sLen - 1) / 3 + 1) << 2
-            dLen = cCnt + (lineSep ? (cCnt - 1) / 76 << 1 : 0);
-        } else {
-            dLen = eLen + strRemainder + (lineSep ? (eLen - 1) / 76 << 1 : 0);
-        }
-        char[] dArr = new char[dLen];
-
-        // Encode even 24-bits
-        final int evenEnd = offset + ((len / 3) * 3);   // End of even 24-bits chunks
-        final int lineSepLim = dLen - 2;
-        int s = offset;
-        for (int d = 0, cc = 0; s < evenEnd; ) {
-            // Copy next three bytes into lower 24 bits of int, paying attension to sign.
-            int i = (sArr[s++] & 0xff) << 16 | (sArr[s++] & 0xff) << 8 | (sArr[s++] & 0xff);
-
-            // Encode the int into four chars
-            dArr[d++] = table[(i >>> 18) & 0x3f];
-            dArr[d++] = table[(i >>> 12) & 0x3f];
-            dArr[d++] = table[(i >>> 6) & 0x3f];
-            dArr[d++] = table[i & 0x3f];
-
-            // Add optional line separator
-            if (lineSep && ++cc == 19 && d < lineSepLim) {
-                dArr[d++] = '\r';
-                dArr[d++] = '\n';
-                cc = 0;
-            }
-        }
-
-        // Pad and encode last bits if source isn't even 24 bits.
-        final int end = offset + len;
-        final int left = end - s; // 0 - 2.
-        if (left > 0) {
-            boolean twoLeft = left == 2;
-            int i = (sArr[evenEnd] & 0xff) << 10;
-            if(twoLeft) {
-                i |= (sArr[end - 1] & 0xff) << 2;
-            }
-            if(pad) {
-                // Set last four chars
-                dArr[dLen - 4] = table[i >> 12];
-                dArr[dLen - 3] = table[(i >>> 6) & 0x3f];
-                dArr[dLen - 2] = twoLeft ? table[i & 0x3f] : '=';
-                dArr[dLen - 1] = '=';
-            } else {
-                // Set last strRemainder chars
-                final int idx = dLen - strRemainder;
-                switch (strRemainder) { /* cases fall through */
-                case 3: dArr[idx + 2] = table[i & 0x3f];
-                case 2: dArr[idx + 1] = table[(i >> 6) & 0x3f];
-                default: dArr[idx] = table[(i >> 12) & 0x3f];
-                }
-            }
-        }
-        return dArr;
+    static {
+        final String firstSixtyTwo = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        TABLE_STANDARD = (firstSixtyTwo + "+/").toCharArray();
+        TABLE_URL_SAFE = (firstSixtyTwo + "-_").toCharArray();
     }
 
-    // ****************************************************************************************
-    // * String version
-    // ****************************************************************************************
+    /**
+     * Encodes a raw byte array into a Base64 <code>String</code> representation in accordance with RFC 2045.
+     * @param buffer    buffer containing the input. If length 0, an empty array will be returned.
+     * @param off       the offset into the buffer of the input bytes
+     * @param len       the length of the input, in bytes
+     * @param flags     indicating the desired encoding options
+     * @return          a Base64-encoded array. Never <code>null</code>.
+     */
+    @SuppressWarnings("deprecation")
+    public static String encodeToString(byte[] buffer, int off, int len, int flags) {
+        byte[] enc = encodeToBytes(buffer, off, len, flags);
+        return new String(enc, 0, 0, enc.length);
+    }
 
     /**
-     * Encodes a raw byte array into a BASE64 <code>String</code> representation in accordance with RFC 2045.
-     * @param buffer buffer containing the input. If <code>null</code> or length 0 an empty string will be returned.
-     * No line separator will be in breach of RFC 2045 which specifies max 76 per line but will be a
-     * little faster.
-     * @param offset the offset into the buffer of the input bytes
-     * @param len   the length of the input, in bytes
-     * @param flags    indicating the desired encoding options
-     * @return A BASE64 encoded array. Never <code>null</code>.
+     * Encodes a raw byte array into a Base64 <code>char[]</code> representation in accordance with RFC 2045.
+     * @param buffer    buffer containing the input. If length 0, an empty array will be returned.
+     * @param bytesOff  the offset into the buffer of the input bytes
+     * @param bytesLen  the length of the input, in bytes
+     * @param flags     indicating the desired encoding options
+     * @return          a Base64-encoded array. Never <code>null</code>.
      */
-    public static String encodeToString(byte[] buffer, int offset, int len, int flags) {
-        // Reuse char[] since we can't create a String incrementally anyway and StringBuffer/Builder would be slower.
-        return new String(encodeToChars(buffer, offset, len, flags));
+    public static byte[] encodeToBytes(final byte[] buffer, int bytesOff, final int bytesLen, final int flags) {
+        final boolean noPad = (flags & NO_PADDING) != 0;
+        final boolean noLineSep = (flags & NO_LINE_SEP) != 0;
+
+        final int bytesLenMod3 = bytesLen % 3;
+        int charsLeft = bytesLenMod3 == 1 ? 2 : bytesLenMod3 == 2 ? 3 : 0;
+        final int bytesLenDiv3 = bytesLen / 3;
+        int tempLen = bytesLenDiv3 << 2; // * 4
+        if(noPad) {
+            tempLen += charsLeft;
+        } else if(charsLeft != 0) {
+            tempLen += 4;
+        }
+        final int outLen = noLineSep ? tempLen : tempLen + (((tempLen - 1) / 76) << 1);
+        final byte[] out = new byte[outLen];
+        final int evenBytesEnd = bytesOff + (bytesLenDiv3 * 3); // End of even 24-bits chunks
+        final char[] table = (flags & URL_SAFE_CHARS) != 0 ? TABLE_URL_SAFE : TABLE_STANDARD;
+
+        int i = bytesOff, o = 0, chungus = 0;
+        final int lineSepLim = outLen - 2;
+        while (i < evenBytesEnd) {
+            final int v = (buffer[i++] /* & 0xff */) << 16 | (buffer[i++] & 0xff) << 8 | (buffer[i++] & 0xff);
+            out[o++] = (byte) table[(v >>> 18) & 0x3f];
+            out[o++] = (byte) table[(v >>> 12) & 0x3f];
+            out[o++] = (byte) table[(v >>> 6) & 0x3f];
+            out[o++] = (byte) table[v & 0x3f];
+            if (!noLineSep && ++chungus == 19 /* big */ && o < lineSepLim) {
+                out[o++] = '\r';
+                out[o++] = '\n';
+                chungus = 0;
+            }
+        }
+        // Pad and encode last bits (if any)
+        final int bytesLeft = bytesOff + bytesLen - evenBytesEnd; // [0,2]
+        if(bytesLeft > 0) {
+            boolean twoBytesLeft = false;
+            int v = 0;
+            switch (bytesLeft) {
+            case 2: v |= (buffer[evenBytesEnd + 1] & 0xff) << 2; twoBytesLeft = true;
+            case 1: v |= (buffer[evenBytesEnd] /* & 0xff */) << 10;
+            }
+            if(!noPad) {
+                charsLeft += twoBytesLeft ? 1 : 2; // for equals signs
+            }
+            final int charsIdx = outLen - charsLeft;
+            switch (charsLeft) { /* cases fall through */
+            case 4:     out[charsIdx + 3]   = (byte) '=';
+            case 3:     out[charsIdx + 2]   = (byte) (twoBytesLeft ? table[v & 0x3f] : '=');
+            case 2:     out[charsIdx + 1]   = (byte) table[(v >> 6) & 0x3f];
+            default:    out[charsIdx]       = (byte) table[(v >> 12) & 0x3f];
+            }
+        }
+        return out;
     }
 }
