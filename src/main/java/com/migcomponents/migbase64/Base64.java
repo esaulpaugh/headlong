@@ -36,7 +36,6 @@ package com.migcomponents.migbase64;
  *         Date: 2004-aug-02
  *         Time: 11:31:11
  */
-
 public final class Base64 /* Modified by Evan Saulpaugh */ {
 
     public static final int NO_OPTIONS = 0;
@@ -57,12 +56,12 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
     }
 
     /**
-     * Encodes a raw byte array into a Base64 <code>String</code> representation in accordance with RFC 2045.
+     * Encodes a raw byte array into a Base64 <code>String</code>.
      * @param buffer    buffer containing the input. If length 0, an empty array will be returned.
      * @param off       the offset into the buffer of the input bytes
      * @param len       the length of the input, in bytes
      * @param flags     indicating the desired encoding options
-     * @return          a Base64-encoded array. Never <code>null</code>.
+     * @return          a Base64-encoded <code>String</code>. Never <code>null</code>.
      */
     @SuppressWarnings("deprecation")
     public static String encodeToString(byte[] buffer, int off, int len, int flags) {
@@ -71,7 +70,7 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
     }
 
     /**
-     * Encodes a raw byte array into a Base64 <code>char[]</code> representation in accordance with RFC 2045.
+     * Encodes a raw byte array into a Base64 <code>byte[]</code>.
      * @param buffer    buffer containing the input. If length 0, an empty array will be returned.
      * @param bytesOff  the offset into the buffer of the input bytes
      * @param bytesLen  the length of the input, in bytes
@@ -81,6 +80,7 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
     public static byte[] encodeToBytes(final byte[] buffer, int bytesOff, final int bytesLen, final int flags) {
         final boolean noPad = (flags & NO_PADDING) != 0;
         final boolean noLineSep = (flags & NO_LINE_SEP) != 0;
+        final char[] table = (flags & URL_SAFE_CHARS) != 0 ? TABLE_URL_SAFE : TABLE_STANDARD;
 
         final int bytesLenMod3 = bytesLen % 3;
         int charsLeft = bytesLenMod3 == 1 ? 2 : bytesLenMod3 == 2 ? 3 : 0;
@@ -93,14 +93,14 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
         }
         final int outLen = noLineSep ? tempLen : tempLen + (((tempLen - 1) / 76) << 1);
         final byte[] out = new byte[outLen];
-        final int evenBytesEnd = bytesOff + (bytesLenDiv3 * 3); // End of even 24-bits chunks
-        final char[] table = (flags & URL_SAFE_CHARS) != 0 ? TABLE_URL_SAFE : TABLE_STANDARD;
+        final int evenBytesLen = bytesLenDiv3 * 3;
+        final int evenBytesEnd = bytesOff + evenBytesLen; // End of even 24-bits chunks
 
         int i = bytesOff, o = 0, chungus = 0;
         final int lineSepLim = outLen - 2;
         while (i < evenBytesEnd) {
-            final int v = (buffer[i++] /* & 0xff */) << 16 | (buffer[i++] & 0xff) << 8 | (buffer[i++] & 0xff);
-            out[o++] = (byte) table[(v >>> 18) & 0x3f];
+            final int v = (buffer[i++] & 0xff) << 16 | (buffer[i++] & 0xff) << 8 | (buffer[i++] & 0xff);
+            out[o++] = (byte) table[v >>> 18]; // (v >>> 18) & 0x3f
             out[o++] = (byte) table[(v >>> 12) & 0x3f];
             out[o++] = (byte) table[(v >>> 6) & 0x3f];
             out[o++] = (byte) table[v & 0x3f];
@@ -110,14 +110,14 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
                 chungus = 0;
             }
         }
-        // Pad and encode last bits (if any)
-        final int bytesLeft = bytesOff + bytesLen - evenBytesEnd; // [0,2]
+        // Encode remaining bytes (if any)
+        final int bytesLeft = bytesLen - evenBytesLen; // [0,2]
         if(bytesLeft > 0) {
             boolean twoBytesLeft = false;
             int v = 0;
-            switch (bytesLeft) {
+            switch (bytesLeft) { /* cases fall through */
             case 2: v |= (buffer[evenBytesEnd + 1] & 0xff) << 2; twoBytesLeft = true;
-            case 1: v |= (buffer[evenBytesEnd] /* & 0xff */) << 10;
+            case 1: v |= (buffer[evenBytesEnd] & 0xff) << 10;
             }
             if(!noPad) {
                 charsLeft += twoBytesLeft ? 1 : 2; // for equals signs
@@ -127,7 +127,7 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
             case 4:     out[charsIdx + 3]   = (byte) '=';
             case 3:     out[charsIdx + 2]   = (byte) (twoBytesLeft ? table[v & 0x3f] : '=');
             case 2:     out[charsIdx + 1]   = (byte) table[(v >> 6) & 0x3f];
-            default:    out[charsIdx]       = (byte) table[(v >> 12) & 0x3f];
+            default:    out[charsIdx]       = (byte) table[v >> 12]; // (v >> 12) & 0x3f
             }
         }
         return out;
