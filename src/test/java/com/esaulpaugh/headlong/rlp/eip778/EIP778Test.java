@@ -34,11 +34,13 @@ import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 public class EIP778Test {
 
+    private static final String ENR_STRING = "enr:-IS4QHCYrYZbAKWCBRlAy5zzaDZXJBGkcnh4MHcBFZntXNFrdvJjX04jRzjzCBOonrkTfj499SZuOh8R33Ls8RRcy5wBgmlkgnY0gmlwhH8AAAGJc2VjcDI1NmsxoQPKY0yuDUmstAHYpMa2_oxVtw0RW_QAdpzBQA8yWM0xOIN1ZHCCdl8";
+
     private static final Record.Signer SIGNER = new Record.Signer() {
 
         private final byte[] SIG = FastHex.decode(
-                "7098ad865b00a582051940cb9cf36836572411a47278783077011599ed5cd16b" +
-                "76f2635f4e234738f30813a89eb9137e3e3df5266e3a1f11df72ecf1145ccb9c"
+                "7098ad865b00a582051940cb9cf36836572411a47278783077011599ed5cd16b"
+              + "76f2635f4e234738f30813a89eb9137e3e3df5266e3a1f11df72ecf1145ccb9c"
         );
 
         @Override
@@ -83,7 +85,7 @@ public class EIP778Test {
 
         Assert.assertEquals(VECTOR.getSignature(), record.getSignature());
         Assert.assertEquals(VECTOR.getContent(), record.getContent());
-        Assert.assertEquals(VECTOR.getRecord(), record.getRecord());
+        Assert.assertEquals(VECTOR.getRLP(), record.getRLP());
         Assert.assertEquals(VECTOR.toString(), record.toString());
         Assert.assertEquals(VECTOR, record);
 
@@ -103,6 +105,8 @@ public class EIP778Test {
             decodedPairs[i++] = new KeyValuePair(iter.next().data(), iter.next().data());
         }
         Assert.assertArrayEquals(pairs, decodedPairs);
+
+        Assert.assertEquals(ENR_STRING, record.toString());
     }
 
     @Test
@@ -115,7 +119,7 @@ public class EIP778Test {
             do {
                 if(temp >= 0) {
                     Record r = new Record(temp, pairs, SIGNER);
-                    int len = r.getRecord().encodingLength();
+                    int len = r.getRLP().encodingLength();
                     System.out.println(temp + " -> " + len);
                     recordLengths.add(len);
                 }

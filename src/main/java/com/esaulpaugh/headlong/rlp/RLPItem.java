@@ -266,4 +266,8 @@ public abstract class RLPItem {
             throw new RuntimeException(e);
         }
     }
+
+    public String toString(int encoding) {
+        return Strings.encode(buffer, index, encodingLength(), encoding);
+    }
 }

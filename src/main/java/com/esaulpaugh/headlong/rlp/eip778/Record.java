@@ -15,13 +15,17 @@
 */
 package com.esaulpaugh.headlong.rlp.eip778;
 
-import com.esaulpaugh.headlong.rlp.*;
+import com.esaulpaugh.headlong.rlp.RLPDecoder;
+import com.esaulpaugh.headlong.rlp.RLPEncoder;
+import com.esaulpaugh.headlong.rlp.RLPItem;
+import com.esaulpaugh.headlong.rlp.RLPList;
+import com.esaulpaugh.headlong.rlp.RLPListIterator;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 
 import java.security.SignatureException;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
-import static com.esaulpaugh.headlong.util.Strings.HEX;
+import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
 
 /**
  * Implementation of EIP 778: Ethereum Node Records (ENR), https://eips.ethereum.org/EIPS/eip-778
@@ -30,7 +34,9 @@ public final class Record {
 
     private static final int MAX_RECORD_LEN = 300;
 
-    private final RLPList record;
+    private static final String ENR_PREFIX = "enr:";
+
+    private final RLPList rlp;
 
     public Record(long seq, KeyValuePair[] pairs, Signer signer) {
         final int signatureLen = signer.signatureLength();
@@ -52,26 +58,26 @@ public final class Record {
         RLPEncoder.insertRecordSignature(signature, record, recordPrefixLen);
 
         try {
-            this.record = RLP_STRICT.wrapList(record);
+            this.rlp = RLP_STRICT.wrapList(record);
         } catch (DecodeException e) {
             throw new Error(e); // shouldn't happen
         }
     }
 
-    private Record(RLPList record) {
-        this.record = record;
+    private Record(RLPList recordRLP) {
+        this.rlp = recordRLP;
     }
 
     public static Record decode(byte[] record) throws DecodeException {
         return new Record(RLP_STRICT.wrapList(record));
     }
 
-    public RLPList getRecord() {
-        return record;
+    public RLPList getRLP() {
+        return rlp;
     }
 
     public RLPItem getSignature() throws DecodeException {
-        return getRecord().iterator(RLP_STRICT).next();
+        return getRLP().iterator(RLP_STRICT).next();
     }
 
     public RLPList getContent() throws DecodeException {
@@ -79,16 +85,16 @@ public final class Record {
     }
 
     public long getSeq() throws DecodeException {
-        RLPListIterator iter = new RLPListIterator(getRecord(), RLP_STRICT);
+        RLPListIterator iter = new RLPListIterator(getRLP(), RLP_STRICT);
         iter.next();
         return iter.next().asLong();
     }
 
     private byte[] getContentBytes(int index) {
-        int contentDataLen = record.encodingLength() - index;
+        int contentDataLen = rlp.encodingLength() - index;
         byte[] content = new byte[RLPEncoder.prefixLength(contentDataLen) + contentDataLen];
         int prefixLen = RLPEncoder.insertListPrefix(contentDataLen, content, 0);
-        record.exportRange(index, index + contentDataLen, content, prefixLen);
+        rlp.exportRange(index, index + contentDataLen, content, prefixLen);
         return content;
     }
 
@@ -110,18 +116,18 @@ public final class Record {
 
     @Override
     public int hashCode() {
-        return record.hashCode();
+        return rlp.hashCode();
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        return record.equals(((Record) o).record);
+        return rlp.equals(((Record) o).rlp);
     }
 
     @Override
     public String toString() {
-        return record.asString(HEX);
+        return ENR_PREFIX + rlp.toString(BASE_64_URL_SAFE);
     }
 }
