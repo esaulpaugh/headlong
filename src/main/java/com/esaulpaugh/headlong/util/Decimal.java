@@ -37,13 +37,13 @@ public final class Decimal {
             throw new IllegalArgumentException("length must be a multiple of " + CHARS_PER_BYTE);
         }
         byte[] bytes = new byte[byteLen];
-        for (int j = 0; j < byteLen; ) {
-            final int a = src.charAt(i++) - '0', b = src.charAt(i++) - '0', c = src.charAt(i++) - '0';
-            if (a >= 0 && a <= 9 && b >= 0 && b <= 9 && c >= 0 && c <= 9) {
-                bytes[j++] = (byte) (a * 100 + b * 10 + c);
-                continue;
+        for (int j = 0, a, b, c; i < len; bytes[j++] = (byte) (a * 100 + b * 10 + c)) {
+            a = src.charAt(i++) - '0';
+            b = src.charAt(i++) - '0';
+            c = src.charAt(i++) - '0';
+            if (a < 0 || a > 9 || b < 0 || b > 9 || c < 0 || c > 9) {
+                throw new IllegalArgumentException("illegal digit");
             }
-            throw new IllegalArgumentException("illegal digit");
         }
         return bytes;
     }

@@ -37,7 +37,7 @@ public final class Strings {
     public static final int UTF_8 = 1; // 256
     public static final int HEX = 0; // 16
 
-    public static final int URL_SAFE_OPTIONS = URL_SAFE_CHARS | NO_LINE_SEP | NO_PADDING;
+    public static final int URL_SAFE_FLAGS = URL_SAFE_CHARS | NO_LINE_SEP | NO_PADDING;
 
     public static String encode(byte[] bytes) {
         return encode(bytes, HEX);
@@ -49,7 +49,7 @@ public final class Strings {
 
     public static String encode(byte[] buffer, int from, int len, int encoding) {
         switch (encoding) {
-        case BASE_64_URL_SAFE: return Base64.encodeToString(buffer, from, len, URL_SAFE_OPTIONS);
+        case BASE_64_URL_SAFE: return Base64.encodeToString(buffer, from, len, URL_SAFE_FLAGS);
         case DECIMAL: return Decimal.encodeToString(buffer, from, len);
         case UTF_8: return new String(buffer, from, len, CHARSET_UTF_8);
         case HEX:

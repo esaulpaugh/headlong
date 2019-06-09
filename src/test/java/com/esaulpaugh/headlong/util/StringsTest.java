@@ -77,7 +77,7 @@ public class StringsTest {
         for(int j = 0; j < 250; j++) {
             byte[] x = new byte[j];
             rand.nextBytes(x);
-            String s = Base64.encodeToString(x, 0, j, Base64.NO_OPTIONS);
+            String s = Base64.encodeToString(x, 0, j, Base64.NO_FLAGS);
             String s2 = mimeEncoder.encodeToString(x);
             Assert.assertEquals(base64EncodedLen(j, true, true), s.length());
             Assert.assertEquals(s2, s);

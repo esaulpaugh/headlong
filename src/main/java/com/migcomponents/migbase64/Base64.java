@@ -38,7 +38,7 @@ package com.migcomponents.migbase64;
  */
 public final class Base64 /* Modified by Evan Saulpaugh */ {
 
-    public static final int NO_OPTIONS = 0;
+    public static final int NO_FLAGS = 0;
 
     public static final int NO_PADDING = 1;
 
@@ -46,14 +46,8 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
 
     public static final int URL_SAFE_CHARS = 4;
 
-    private static final char[] TABLE_STANDARD;
-    private static final char[] TABLE_URL_SAFE;
-
-    static {
-        final String firstSixtyTwo = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        TABLE_STANDARD = (firstSixtyTwo + "+/").toCharArray();
-        TABLE_URL_SAFE = (firstSixtyTwo + "-_").toCharArray();
-    }
+    private static final char[] TABLE_STANDARD = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
+    private static final char[] TABLE_URL_SAFE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
 
     /**
      * Encodes a raw byte array into a Base64 <code>String</code>.
@@ -77,28 +71,23 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
      * @param flags     indicating the desired encoding options
      * @return          a Base64-encoded array. Never <code>null</code>.
      */
-    public static byte[] encodeToBytes(final byte[] buffer, int bytesOff, final int bytesLen, final int flags) {
+    public static byte[] encodeToBytes(final byte[] buffer, final int bytesOff, final int bytesLen, final int flags) {
         final boolean noPad = (flags & NO_PADDING) != 0;
         final boolean noLineSep = (flags & NO_LINE_SEP) != 0;
         final char[] table = (flags & URL_SAFE_CHARS) != 0 ? TABLE_URL_SAFE : TABLE_STANDARD;
 
-        final int bytesLenMod3 = bytesLen % 3;
-        int charsLeft = bytesLenMod3 == 1 ? 2 : bytesLenMod3 == 2 ? 3 : 0;
-        final int bytesLenDiv3 = bytesLen / 3;
-        int tempLen = bytesLenDiv3 << 2; // * 4
-        if(noPad) {
-            tempLen += charsLeft;
-        } else if(charsLeft != 0) {
-            tempLen += 4;
-        }
-        final int outLen = noLineSep ? tempLen : tempLen + (((tempLen - 1) / 76) << 1);
-        final byte[] out = new byte[outLen];
-        final int evenBytesLen = bytesLenDiv3 * 3;
-        final int evenBytesEnd = bytesOff + evenBytesLen; // End of even 24-bits chunks
+        final int bytesChunks = bytesLen / 3;
+        final int bytesEvenLen = bytesChunks * 3;
+        final int bytesRemainder = bytesLen - bytesEvenLen; // bytesLen % 3; // [0,2]
+        final int charsRemainder = bytesRemainder == 1 ? 2 : bytesRemainder == 2 ? 3 : 0;
 
-        int i = bytesOff, o = 0, chungus = 0;
+        final int rawLen = (bytesChunks << 2) + (noPad ? charsRemainder : (charsRemainder != 0) ? 4 : 0);
+        final int outLen = noLineSep ? rawLen : rawLen + (((rawLen - 1) / 76) << 1);
+        final byte[] out = new byte[outLen];
+
         final int lineSepLim = outLen - 2;
-        while (i < evenBytesEnd) {
+        final int endEvenBytes = bytesOff + bytesEvenLen; // End of even 24-bits chunks
+        for (int i = bytesOff, o = 0, chungus = 0; i < endEvenBytes; ) {
             final int v = (buffer[i++] & 0xff) << 16 | (buffer[i++] & 0xff) << 8 | (buffer[i++] & 0xff);
             out[o++] = (byte) table[v >>> 18]; // (v >>> 18) & 0x3f
             out[o++] = (byte) table[(v >>> 12) & 0x3f];
@@ -111,17 +100,14 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
             }
         }
         // Encode remaining bytes (if any)
-        final int bytesLeft = bytesLen - evenBytesLen; // [0,2]
-        if(bytesLeft > 0) {
+        if(bytesRemainder > 0) {
             boolean twoBytesLeft = false;
             int v = 0;
-            switch (bytesLeft) { /* cases fall through */
-            case 2: v |= (buffer[evenBytesEnd + 1] & 0xff) << 2; twoBytesLeft = true;
-            case 1: v |= (buffer[evenBytesEnd] & 0xff) << 10;
+            switch (bytesRemainder) { /* cases fall through */
+            case 2: v |= (buffer[endEvenBytes + 1] & 0xff) << 2; twoBytesLeft = true;
+            case 1: v |= (buffer[endEvenBytes] & 0xff) << 10;
             }
-            if(!noPad) {
-                charsLeft += twoBytesLeft ? 1 : 2; // for equals signs
-            }
+            final int charsLeft = noPad ? charsRemainder : charsRemainder + (twoBytesLeft ? 1 : 2); // plus equals signs
             final int charsIdx = outLen - charsLeft;
             switch (charsLeft) { /* cases fall through */
             case 4:     out[charsIdx + 3]   = (byte) '=';
