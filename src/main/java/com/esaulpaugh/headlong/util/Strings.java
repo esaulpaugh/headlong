@@ -47,13 +47,13 @@ public final class Strings {
         return encode(bytes, 0, bytes.length, encoding);
     }
 
-    public static String encode(byte[] bytes, int from, int len, int encoding) {
+    public static String encode(byte[] buffer, int from, int len, int encoding) {
         switch (encoding) {
-        case BASE_64_URL_SAFE: return Base64.encodeToString(bytes, from, len, URL_SAFE_OPTIONS);
-        case DECIMAL: return Decimal.encodeToString(bytes, from, len);
-        case UTF_8: return new String(bytes, from, len, CHARSET_UTF_8);
+        case BASE_64_URL_SAFE: return Base64.encodeToString(buffer, from, len, URL_SAFE_OPTIONS);
+        case DECIMAL: return Decimal.encodeToString(buffer, from, len);
+        case UTF_8: return new String(buffer, from, len, CHARSET_UTF_8);
         case HEX:
-        default: return FastHex.encodeToString(bytes, from, len);
+        default: return FastHex.encodeToString(buffer, from, len);
         }
     }
 

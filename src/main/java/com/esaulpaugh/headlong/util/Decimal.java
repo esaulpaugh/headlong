@@ -32,27 +32,19 @@ public final class Decimal {
     }
 
     public static byte[] decode(String src, int i, final int len) {
-        if(len % CHARS_PER_BYTE != 0) {
+        final int byteLen = len / CHARS_PER_BYTE;
+        if(byteLen * CHARS_PER_BYTE != len) {
             throw new IllegalArgumentException("length must be a multiple of " + CHARS_PER_BYTE);
         }
-        final int byteLen = len / CHARS_PER_BYTE;
         byte[] bytes = new byte[byteLen];
-        for (int j = 0; j < byteLen; j++) {
-            bytes[j] = toByte(src.charAt(i++), src.charAt(i++), src.charAt(i++));
+        for (int j = 0; j < byteLen; ) {
+            final int a = src.charAt(i++) - '0', b = src.charAt(i++) - '0', c = src.charAt(i++) - '0';
+            if (a >= 0 && a <= 9 && b >= 0 && b <= 9 && c >= 0 && c <= 9) {
+                bytes[j++] = (byte) (a * 100 + b * 10 + c);
+                continue;
+            }
+            throw new IllegalArgumentException("illegal digit");
         }
         return bytes;
-    }
-
-    private static byte toByte(char a, char b, char c) {
-        if (a >= '0' && a <= '9'
-         && b >= '0' && b <= '9'
-         && c >= '0' && c <= '9') {
-            return (byte) (
-                    ((a - '0') * 100)
-                  + ((b - '0') * 10)
-                  + (c - '0')
-            );
-        }
-        throw new IllegalArgumentException("illegal digit");
     }
 }
