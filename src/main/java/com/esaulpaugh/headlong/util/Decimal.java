@@ -4,14 +4,13 @@ public final class Decimal {
 
     private static final int NUM_BYTE_VALS = 1 << Byte.SIZE;
     private static final int CHARS_PER_BYTE = "255".length();
-
     private static final char[] ENCODING = new char[NUM_BYTE_VALS * CHARS_PER_BYTE];
 
     static {
         int j = 0;
         for (int i = 0; i < NUM_BYTE_VALS; i++) {
             String str = String.valueOf(i);
-            final int len = str.length();
+            int len = str.length();
             ENCODING[j++] = len == CHARS_PER_BYTE ? str.charAt(0) : '0';
             ENCODING[j++] = len >= 2 ? str.charAt(len - 2) : '0';
             ENCODING[j++] = str.charAt(len - 1);
@@ -21,9 +20,8 @@ public final class Decimal {
     public static String encodeToString(byte[] buffer, int i, final int len) {
         char[] chars = new char[len * CHARS_PER_BYTE];
         final int end = i + len;
-        int j = 0;
-        for ( ; i < end; i++) {
-            int idx = (buffer[i] & 0xFF) * CHARS_PER_BYTE;
+        for (int j = 0; i < end; ) {
+            int idx = (buffer[i++] & 0xFF) * CHARS_PER_BYTE;
             chars[j++] = ENCODING[idx++];
             chars[j++] = ENCODING[idx++];
             chars[j++] = ENCODING[idx];

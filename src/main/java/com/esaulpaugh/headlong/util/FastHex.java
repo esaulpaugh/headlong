@@ -71,15 +71,10 @@ public final class FastHex {
         return encodeToString(buffer, 0, buffer.length);
     }
 
+    @SuppressWarnings("deprecation")
     public static String encodeToString(byte[] buffer, int off, final int len) {
-        final int end = off + len;
-        char[] chars = new char[len << 1];
-        for (int j = 0; off < end; off++, j+=2) {
-            int hexPair = ENCODE_TABLE[buffer[off] & 0xFF];
-            chars[j] = (char) (hexPair >>> Byte.SIZE); // left char
-            chars[j+1] = (char) (hexPair & 0xFF); // right char
-        }
-        return new String(chars);
+        byte[] enc = encodeToBytes(buffer, off, len);
+        return new String(enc, 0, 0, enc.length);
     }
 
     public static byte[] encodeToBytes(byte[] buffer, int off, final int len) {
@@ -121,4 +116,3 @@ public final class FastHex {
         return bytes;
     }
 }
-
