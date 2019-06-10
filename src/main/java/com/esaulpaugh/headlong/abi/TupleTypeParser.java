@@ -46,14 +46,12 @@ final class TupleTypeParser {
                 int fromIndex;
                 char c = rawTypeString.charAt(argStart);
                 switch (c) {
-                case '[':
-                    return argEnd;
+                case '(': // element is tuple or tuple array
+                    fromIndex = findSubtupleEnd(rawTypeString, end, argStart);
+                    break;
                 case ')':
-                    if(rawTypeString.charAt(argStart - 1) == ',') {
+                    if(rawTypeString.charAt(argEnd) == ',') {
                         throw new ParseException(EMPTY_PARAMETER, argStart);
-                    }
-                    if (elements.size() > 0) {
-                        argEnd = argStart - 1;
                     }
                     return argEnd;
                 case ',':
@@ -61,9 +59,6 @@ final class TupleTypeParser {
                         return argEnd;
                     }
                     throw new ParseException(EMPTY_PARAMETER, argStart);
-                case '(': // tuple or tuple array
-                    fromIndex = findSubtupleEnd(rawTypeString, end, argStart);
-                    break;
                 default: // non-tuple element
                     fromIndex = argStart + 1;
                 }
@@ -75,10 +70,8 @@ final class TupleTypeParser {
                 argStart = argEnd + 1; // jump over terminator
             }
         } catch (ParseException pe) {
-            throw (ParseException) new ParseException(
-                    "@ index " + elements.size() + ", " + pe.getMessage(),
-                    pe.getErrorOffset()
-            ).initCause(pe);
+            throw (ParseException) new ParseException("@ index " + elements.size() + ", " + pe.getMessage(), pe.getErrorOffset())
+                    .initCause(pe);
         }
         return argEnd;
     }
