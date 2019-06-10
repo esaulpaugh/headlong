@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.NoSuchElementException;
 
-public class RLPStreamIterator {
+public class RLPStreamIterator implements AutoCloseable {
 
     private final RLPDecoder decoder;
     private final InputStream rlpStream;
@@ -76,5 +76,10 @@ public class RLPStreamIterator {
             return item;
         }
         throw new NoSuchElementException();
+    }
+
+    @Override
+    public void close() throws IOException {
+        rlpStream.close();
     }
 }

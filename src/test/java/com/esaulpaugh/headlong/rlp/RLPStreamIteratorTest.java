@@ -55,19 +55,14 @@ public class RLPStreamIteratorTest {
                 (byte) 0x84, 'd', 'o', 'g', 's',
                 (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
         };
-
         List<RLPItem> collected = RLP_STRICT.collectAll(rlpEncoded);
-
-        RLPStreamIterator iter = RLP_STRICT.sequenceStreamIterator(new ByteArrayInputStream(rlpEncoded));
-
-        List<RLPItem> streamed = new ArrayList<>();
-        while (iter.hasNext()) {
-            RLPItem item = iter.next();
-            System.out.println(Strings.encode(item.encoding()));
-            streamed.add(item);
+        try (RLPStreamIterator iter = RLP_STRICT.sequenceStreamIterator(new ByteArrayInputStream(rlpEncoded))) {
+            List<RLPItem> streamed = new ArrayList<>();
+            while (iter.hasNext()) {
+                streamed.add(iter.next());
+            }
+            Assert.assertTrue(Arrays.deepEquals(collected.toArray(RLPItem.EMPTY_ARRAY), streamed.toArray(RLPItem.EMPTY_ARRAY)));
         }
-
-        Assert.assertTrue(Arrays.deepEquals(collected.toArray(RLPItem.EMPTY_ARRAY), streamed.toArray(RLPItem.EMPTY_ARRAY)));
     }
 
     @Test
@@ -83,30 +78,25 @@ public class RLPStreamIteratorTest {
 
     @Test
     public void testUnrecoverable() throws Throwable {
-
         Class<? extends DecodeException> clazz = UnrecoverableDecodeException.class;
 
-        final PipedOutputStream pos = new PipedOutputStream();
-        final PipedInputStream pis = new PipedInputStream(pos, 512);
-
-        RLPStreamIterator iter = RLP_STRICT.sequenceStreamIterator(pis);
-
-        pos.write(0x81);
-        pos.write(0x00);
-
-        TestUtils.assertThrown(clazz, "invalid rlp for single byte @ 0", iter::hasNext);
-
-        iter = RLP_STRICT.sequenceStreamIterator(pis);
-
-        pos.write(0xf8);
-        pos.write(0x37);
-
-        for (int i = 0; i < 3; i++) {
-            TestUtils.assertThrown(
-                    clazz,
-                    "long element data length must be 56 or greater; found: 55 for element @ 0",
-                    iter::hasNext
-            );
+        try (PipedOutputStream pos = new PipedOutputStream();
+             PipedInputStream pis = new PipedInputStream(pos, 512);
+             RLPStreamIterator iter = RLP_STRICT.sequenceStreamIterator(pis)) {
+            pos.write(0x81);
+            pos.write(0x00);
+            TestUtils.assertThrown(clazz, "invalid rlp for single byte @ 0", iter::hasNext);
+            try (RLPStreamIterator iter2 = RLP_STRICT.sequenceStreamIterator(pis)) {
+                pos.write(0xf8);
+                pos.write(0x37);
+                for (int i = 0; i < 3; i++) {
+                    TestUtils.assertThrown(
+                            clazz,
+                            "long element data length must be 56 or greater; found: 55 for element @ 0",
+                            iter2::hasNext
+                    );
+                }
+            }
         }
     }
 
@@ -134,10 +124,7 @@ public class RLPStreamIteratorTest {
 
         @Override
         public void run() {
-            try {
-                final PipedInputStream pis = new PipedInputStream(pos, 512);
-
-                RLPStreamIterator iter = RLP_STRICT.sequenceStreamIterator(pis);
+            try (RLPStreamIterator iter = RLP_STRICT.sequenceStreamIterator(new PipedInputStream(pos, 512))) {
 
                 senderThread.setPriority(Thread.MAX_PRIORITY);
                 Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
