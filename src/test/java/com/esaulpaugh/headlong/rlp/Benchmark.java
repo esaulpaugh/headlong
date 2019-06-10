@@ -20,6 +20,7 @@ import com.esaulpaugh.headlong.example.StudentTest;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Strings;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.text.DecimalFormat;
@@ -27,6 +28,7 @@ import java.text.DecimalFormat;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 
+@Ignore
 public class Benchmark {
 
     @Test

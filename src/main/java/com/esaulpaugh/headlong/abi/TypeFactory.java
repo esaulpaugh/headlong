@@ -18,9 +18,13 @@ package com.esaulpaugh.headlong.abi;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
+import java.util.ArrayList;
 
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
-import static com.esaulpaugh.headlong.abi.BaseTypeInfo.*;
+import static com.esaulpaugh.headlong.abi.BaseTypeInfo.DECIMAL_BIT_LEN;
+import static com.esaulpaugh.headlong.abi.BaseTypeInfo.DECIMAL_SCALE;
+import static com.esaulpaugh.headlong.abi.BaseTypeInfo.FIXED_BIT_LEN;
+import static com.esaulpaugh.headlong.abi.BaseTypeInfo.FIXED_SCALE;
 import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
 /**
@@ -107,9 +111,9 @@ final class TypeFactory {
         }
     }
 
-    private static ABIType<?> resolveBaseType(String baseTypeStr, boolean isElement, boolean nameless) throws ParseException {
+    private static ABIType<?> resolveBaseType(String baseTypeStr, boolean isElement, boolean nameless) throws ParseException, ClassNotFoundException {
         if(baseTypeStr.charAt(0) == '(') {
-            return TupleTypeParser.parseTupleType(baseTypeStr);
+            return parseTupleType(baseTypeStr);
         }
 
         BaseTypeInfo info = BaseTypeInfo.get(baseTypeStr);
@@ -248,5 +252,85 @@ final class TypeFactory {
             }
         }
         return null;
+    }
+
+    static final String EMPTY_PARAMETER = "empty parameter";
+    static final String ILLEGAL_TUPLE_TERMINATION = "illegal tuple termination";
+
+    private static TupleType parseTupleType(final String rawTypeStr) throws ParseException, ClassNotFoundException {
+        final int end = rawTypeStr.length();
+        final ArrayList<ABIType<?>> elements = new ArrayList<>();
+
+        int argEnd = 1; // this inital value is important for empty params case: "()"
+        try {
+            int argStart = 1; // after opening '('
+            WHILE:
+            while (argStart < end) {
+                int fromIndex;
+                char c = rawTypeStr.charAt(argStart);
+                switch (c) {
+                case '(': // element is tuple or tuple array
+                    fromIndex = findSubtupleEnd(rawTypeStr, end, argStart);
+                    break;
+                case ')':
+                    if(rawTypeStr.charAt(argEnd) == ',') {
+                        throw new ParseException(EMPTY_PARAMETER, argStart);
+                    }
+                    break WHILE;
+                case ',':
+                    if (rawTypeStr.charAt(argStart - 1) == ')') {
+                        break WHILE;
+                    }
+                    throw new ParseException(EMPTY_PARAMETER, argStart);
+                default: // non-tuple element
+                    fromIndex = argStart + 1;
+                }
+                argEnd = nextTerminator(rawTypeStr, fromIndex);
+                if(argEnd == -1) {
+                    break;
+                }
+                elements.add(buildType(rawTypeStr.substring(argStart, argEnd), false, null, true));
+                argStart = argEnd + 1; // jump over terminator
+            }
+        } catch (ParseException pe) {
+            throw (ParseException) new ParseException("@ index " + elements.size() + ", " + pe.getMessage(), pe.getErrorOffset())
+                    .initCause(pe);
+        }
+        if(argEnd < 0 || argEnd != end - 1 || rawTypeStr.charAt(argEnd) != ')') {
+            throw new ParseException(ILLEGAL_TUPLE_TERMINATION, Math.max(0, argEnd));
+        }
+        return TupleType.wrap(elements.toArray(ABIType.EMPTY_TYPE_ARRAY));
+    }
+
+    private static int findSubtupleEnd(String parentTypeString, final int end, final int subtupleStart) throws ParseException {
+        int depth = 1;
+        int i = subtupleStart + 1;
+        do {
+            if(i >= end) {
+                throw new ParseException(ILLEGAL_TUPLE_TERMINATION, end);
+            }
+            char x = parentTypeString.charAt(i++);
+            if(x > ')') {
+                continue;
+            }
+            if(x == ')') {
+                depth--;
+            } else if(x == '(') {
+                depth++;
+            }
+        } while(depth > 0);
+        return i;
+    }
+
+    private static int nextTerminator(String signature, int i) {
+        int comma = signature.indexOf(',', i);
+        int close = signature.indexOf(')', i);
+        if(comma == -1) {
+            return close;
+        }
+        if(close == -1) {
+            return comma;
+        }
+        return Math.min(comma, close);
     }
 }

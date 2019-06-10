@@ -29,8 +29,8 @@ import java.util.Random;
 import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.abi.TupleTypeParser.EMPTY_PARAMETER;
-import static com.esaulpaugh.headlong.abi.TupleTypeParser.ILLEGAL_TUPLE_TERMINATION;
+import static com.esaulpaugh.headlong.abi.TypeFactory.EMPTY_PARAMETER;
+import static com.esaulpaugh.headlong.abi.TypeFactory.ILLEGAL_TUPLE_TERMINATION;
 import static com.esaulpaugh.headlong.abi.TypeFactory.UNRECOGNIZED_TYPE;
 
 public class EncodeTest {
