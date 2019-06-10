@@ -30,25 +30,48 @@ import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.abi.TupleTypeParser.EMPTY_PARAMETER;
+import static com.esaulpaugh.headlong.abi.TupleTypeParser.ILLEGAL_TUPLE_TERMINATION;
+import static com.esaulpaugh.headlong.abi.TypeFactory.UNRECOGNIZED_TYPE;
 
 public class EncodeTest {
 
     private static final Random RAND = new Random(MonteCarloTest.getSeed(System.nanoTime()));
 
+    private static final Class<ParseException> PARSE_ERR = ParseException.class;
+
+    @Test
+    public void nonTerminatingTupleTest() throws Throwable {
+        assertThrown(PARSE_ERR, UNRECOGNIZED_TYPE, () -> TupleType.parse("aaaaaa"));
+
+        assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("("));
+
+        assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("(["));
+
+        assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("(int"));
+
+        assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("(bool[],"));
+
+        assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("(()"));
+
+        assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("(())..."));
+    }
+
     @Test
     public void emptyParamTest() throws Throwable {
-        assertThrown(ParseException.class, "@ index 0, " + EMPTY_PARAMETER, () -> new Function("baz(,)"));
+        assertThrown(PARSE_ERR, EMPTY_PARAMETER, () -> Function.parse("(,"));
 
-        assertThrown(ParseException.class, "@ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,)"));
+        assertThrown(PARSE_ERR, "@ index 0, " + EMPTY_PARAMETER, () -> new Function("baz(,)"));
 
-        assertThrown(ParseException.class, "@ index 1, @ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,(int,,))"));
+        assertThrown(PARSE_ERR, "@ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,)"));
+
+        assertThrown(PARSE_ERR, "@ index 1, @ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,(int,,))"));
     }
 
     @Test
     public void illegalCharsTest() throws Throwable {
-        assertThrown(ParseException.class, "illegal char \\u02a6 '\u02a6' @ index 2", () -> new Function("ba\u02a6z(uint32,bool)"));
+        assertThrown(PARSE_ERR, "illegal char \\u02a6 '\u02a6' @ index 2", () -> new Function("ba\u02a6z(uint32,bool)"));
 
-        assertThrown(ParseException.class, "@ index 1, @ index 0, unrecognized type: bool\u02a6 (0000000000000000000000000000626f6f6ccaa6)", () -> new Function("baz(int32,(bool\u02a6))"));
+        assertThrown(PARSE_ERR, "@ index 1, @ index 0, unrecognized type: bool\u02a6 (0000000000000000000000000000626f6f6ccaa6)", () -> new Function("baz(int32,(bool\u02a6))"));
     }
 
     @Test

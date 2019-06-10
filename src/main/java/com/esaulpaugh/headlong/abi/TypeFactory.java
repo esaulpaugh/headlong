@@ -28,6 +28,8 @@ import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
  */
 final class TypeFactory {
 
+    static final String UNRECOGNIZED_TYPE = "unrecognized type";
+
     private static final ABIType<BigInteger> NAMELESS_INT_TYPE = new BigIntegerType("int256", 256, false);
     private static final ABIType<BigInteger> NAMELESS_UINT_TYPE = new BigIntegerType("uint256", 256, true);
 
@@ -98,7 +100,7 @@ final class TypeFactory {
             }
             ABIType<?> baseType = resolveBaseType(type, isArrayElement, nameless);
             if(baseType == null) {
-                throw new ParseException("unrecognized type: "
+                throw new ParseException(UNRECOGNIZED_TYPE + ": "
                         + type + " (" + String.format("%040x", new BigInteger(type.getBytes(CHARSET_UTF_8))) + ")", -1);
             }
             return baseType;
