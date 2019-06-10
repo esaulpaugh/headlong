@@ -62,7 +62,7 @@ public final class RLPList extends RLPItem {
             byte lead = dest[0];
             return new RLPList(lead, DataType.type(lead), dest, 0, dest.length, false);
         } catch (DecodeException de) {
-            throw new AssertionError(de);
+            throw new RuntimeException(de);
         }
     }
 

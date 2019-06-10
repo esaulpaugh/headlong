@@ -127,7 +127,7 @@ public final class RLPDecoder {
         case LIST_LONG:
             return new RLPList(lead, type, buffer, index, containerEnd, lenient);
         default:
-            throw new AssertionError();
+            throw new RuntimeException();
         }
     }
 

@@ -73,7 +73,7 @@ public abstract class RLPItem {
                 throw new UnrecoverableDecodeException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
             }
             break;
-        default: throw new AssertionError();
+        default: throw new RuntimeException();
         }
 
         final long _endIndex = _dataIndex + _dataLength;

@@ -171,7 +171,7 @@ public class Notation {
                 elementEnd = getLongElementEnd(data, i, elementDataIndex, end);
                 break;
             default:
-                throw new AssertionError();
+                throw new RuntimeException();
             }
             hasELement = true;
             sb.append(ELEMENT_INDENTATION);
@@ -229,7 +229,7 @@ public class Notation {
             case LIST_LONG:
                 throw new UnrecoverableDecodeException("surely, it cannot possibly fit. index: " + i);
             default:
-                throw new AssertionError();
+                throw new RuntimeException();
             }
         }
         if (hasElement) {
