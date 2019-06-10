@@ -61,7 +61,7 @@ public final class Record {
         try {
             this.rlp = RLP_STRICT.wrapList(record);
         } catch (DecodeException e) {
-            throw new Error(e); // shouldn't happen
+            throw new RuntimeException(e); // shouldn't happen
         }
     }
 

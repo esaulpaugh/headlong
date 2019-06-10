@@ -32,7 +32,7 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
     public static final String TCP6 = "tcp6";
     public static final String UDP6 = "udp6";
 
-//    public static final KeyValuePair[] EMPTY_ARRAY = new KeyValuePair[0];
+    public static final KeyValuePair[] EMPTY_ARRAY = new KeyValuePair[0];
 
     private final byte[] key;
     private final byte[] value;

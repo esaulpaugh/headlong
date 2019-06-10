@@ -103,14 +103,13 @@ public class EIP778Test {
 
     @Test
     public void nineLengths() {
-        final KeyValuePair[] pairs = new KeyValuePair[] {};
         Set<Integer> recordLengths = new HashSet<>();
-        for (long seq = 0, p = 0; p <= 64; p +=8, seq = (long) Math.pow(2.0, p)) {
+        for (long p = 0, seq = 0; p <= 64; p += 8, seq = (long) Math.pow(2.0, p)) {
             long temp = seq - 2;
             int i = 0;
             do {
                 if(temp >= 0) {
-                    Record r = new Record(temp, pairs, SIGNER);
+                    Record r = new Record(temp, KeyValuePair.EMPTY_ARRAY, SIGNER);
                     int len = r.getRLP().encodingLength();
                     System.out.println(temp + " -> " + len);
                     recordLengths.add(len);
