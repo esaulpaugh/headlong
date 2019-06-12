@@ -55,15 +55,9 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     ArrayType(String canonicalType, Class<J> clazz, boolean dynamic, T elementType, int length, String arrayClassName) {
         super(canonicalType, clazz, dynamic);
         this.elementType = elementType;
-        if(length < DYNAMIC_LENGTH) {
-            throw new IllegalArgumentException("length must be non-negative or " + DYNAMIC_LENGTH + ". found: " + length);
-        }
         this.length = length;
         this.arrayClassName = arrayClassName;
         this.isString = String.class == clazz;
-        if(isString && length != DYNAMIC_LENGTH) {
-            throw new IllegalArgumentException("illegal fixed string length");
-        }
     }
 
     public T getElementType() {
