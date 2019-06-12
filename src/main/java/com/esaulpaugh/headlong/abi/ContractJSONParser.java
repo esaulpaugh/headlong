@@ -25,7 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static com.esaulpaugh.headlong.abi.util.JsonUtils.*;
+import static com.esaulpaugh.headlong.abi.util.JsonUtils.getArray;
+import static com.esaulpaugh.headlong.abi.util.JsonUtils.getBoolean;
+import static com.esaulpaugh.headlong.abi.util.JsonUtils.getString;
+import static com.esaulpaugh.headlong.abi.util.JsonUtils.parseArray;
+import static com.esaulpaugh.headlong.abi.util.JsonUtils.parseObject;
 
 public final class ContractJSONParser {
 

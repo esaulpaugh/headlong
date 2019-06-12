@@ -36,7 +36,7 @@ public class Keccak extends MessageDigest {
     private final transient int rateSizeWords;
 
     private final long[] state = new long[MAX_STATE_SIZE_WORDS];
-    private int rateBits = 0;
+    private int rateBits; // = 0
 
     protected transient ByteBuffer out;
 

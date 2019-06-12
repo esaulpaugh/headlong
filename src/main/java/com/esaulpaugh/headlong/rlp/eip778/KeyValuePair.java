@@ -19,7 +19,9 @@ import com.esaulpaugh.headlong.util.Strings;
 
 import java.util.Arrays;
 
-import static com.esaulpaugh.headlong.util.Strings.*;
+import static com.esaulpaugh.headlong.util.Strings.UTF_8;
+import static com.esaulpaugh.headlong.util.Strings.decode;
+import static com.esaulpaugh.headlong.util.Strings.encode;
 
 public final class KeyValuePair implements Comparable<KeyValuePair> {
 
@@ -77,7 +79,7 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
     public int compareTo(KeyValuePair o) {
         int result = compare(key, o.key);
         if(result == 0) {
-            throw new IllegalArgumentException("duplicate key: " + Strings.encode(o.key, UTF_8));
+            throw new IllegalArgumentException("duplicate key: " + encode(o.key, UTF_8));
         }
         return result;
     }

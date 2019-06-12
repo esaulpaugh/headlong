@@ -26,6 +26,7 @@ import java.security.DigestException;
 import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -47,7 +48,7 @@ public final class Function implements ABIObject, Serializable {
 
         @Override
         public String toString() {
-            return name().toLowerCase();
+            return name().toLowerCase(Locale.ENGLISH);
         }
 
         static Type get(String value) {
@@ -235,9 +236,8 @@ public final class Function implements ABIObject, Serializable {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(type, name, inputTypes, outputTypes, hashAlgorithm, stateMutability);
-        result = 31 * result + Arrays.hashCode(selector);
-        return result;
+        return 31 * Objects.hash(type, name, inputTypes, outputTypes, hashAlgorithm, stateMutability)
+                + Arrays.hashCode(selector);
     }
 
     @Override

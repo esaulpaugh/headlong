@@ -51,8 +51,9 @@ public class Notation {
     private final String value;
 
     private Notation(String value) {
-        if(value == null)
+        if(value == null) {
             throw new IllegalArgumentException("value cannot be null");
+        }
         this.value = value;
     }
 
@@ -88,10 +89,10 @@ public class Notation {
     }
 
     private static int getLongElementEnd(byte[] data, final int leadByteIndex, final int dataIndex, final int containerEnd) throws DecodeException {
-        int lengthIndex = leadByteIndex + 1;
         if (dataIndex > containerEnd) {
             throw exceedsContainer(leadByteIndex, dataIndex, containerEnd);
         }
+        final int lengthIndex = leadByteIndex + 1;
         final int lengthLen = dataIndex - lengthIndex;
         final long dataLenLong = Integers.getLong(data, leadByteIndex + 1, lengthLen);
 //        if (dataLenLong > MAX_ARRAY_LENGTH) {
@@ -114,11 +115,10 @@ public class Notation {
         return forEncoding(encoding, 0, encoding.length);
     }
 
-    public static Notation forEncoding(byte[] buffer, int index, int end) throws DecodeException {
+    public static Notation forEncoding(final byte[] buffer, final int index, int end) throws DecodeException {
         if(index < 0) {
             throw new ArrayIndexOutOfBoundsException(index);
         }
-
         end = Math.min(buffer.length, end);
         if(index > end) {
             throw new UnrecoverableDecodeException("index > end: " + index + " > " + end);
@@ -152,7 +152,7 @@ public class Notation {
         boolean hasELement = false;
         int i = dataIndex;
         while (i < end) {
-            sb.append("\n").append(baseIndentation);
+            sb.append('\n').append(baseIndentation);
             byte current = data[i];
             final DataType type = DataType.type(current);
             switch (type) {
@@ -191,15 +191,13 @@ public class Notation {
 //            default:
             }
         }
-
-        if (hasELement)
+        if (hasELement) {
             stripFinalCommaAndSpace(sb);
-
+        }
         if(depth != 0) {
             sb.append('\n')
                     .append(baseIndentation).append(LIST_LONG_END_COMMA_SPACE);
         }
-
         return end;
     }
 

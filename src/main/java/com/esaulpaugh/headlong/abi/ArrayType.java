@@ -121,7 +121,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 len += n << LOG_2_UNIT_LENGTH_BYTES; // 32 bytes per offset
             }
             break;
-        default: throw new IllegalArgumentException("unrecognized type: " + elementType.toString());
+        default: throw unrecognizedType(elementType.toString());
         }
         // arrays with variable number of elements get +32 for the array length
         return length == DYNAMIC_LENGTH
@@ -148,7 +148,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 staticLen += elementType.byteLengthPacked(elements[i]);
             }
             return staticLen;
-        default: throw new IllegalArgumentException("unrecognized type: " + elementType.toString());
+        default: throw unrecognizedType(elementType.toString());
         }
     }
 
@@ -169,7 +169,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_DECIMAL: staticLen = validateBigDecimalArray((BigDecimal[]) value); break;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: staticLen = validateObjectArray((Object[]) value); break;
-        default: throw new IllegalArgumentException("unrecognized type: " + value.getClass().getName());
+        default: throw unrecognizedType(value.getClass().getName());
         }
         // arrays with variable number of elements get +32 for the array length
         return length == DYNAMIC_LENGTH
@@ -187,7 +187,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 // validate without boxing primitive
                 intType.validatePrimitiveElement(arr[i]);
             }
-        } catch (IllegalArgumentException | NullPointerException re) {
+        } catch (RuntimeException re) {
             throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
         }
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
@@ -203,7 +203,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 // validate without boxing primitive
                 longType.validatePrimitiveElement(arr[i]);
             }
-        } catch (IllegalArgumentException | NullPointerException re) {
+        } catch (RuntimeException re) {
             throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
         }
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
@@ -218,7 +218,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
             for ( ; i < len; i++) {
                 bigIntegerType.validateBigIntBitLen(bigIntegers[i]);
             }
-        } catch (IllegalArgumentException | NullPointerException re) {
+        } catch (RuntimeException re) {
             throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
         }
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
@@ -238,7 +238,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 }
                 bigDecimalType.validateBigIntBitLen(element.unscaledValue());
             }
-        } catch (IllegalArgumentException | NullPointerException re) {
+        } catch (RuntimeException re) {
             throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
         }
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
@@ -256,7 +256,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
             for ( ; i < len; i++) {
                 byteLength += elementType.validate(arr[i]);
             }
-        } catch (IllegalArgumentException | NullPointerException re) {
+        } catch (RuntimeException re) {
             throw new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
         }
         return byteLength;
@@ -264,14 +264,12 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
     private int checkLength(final int valueLength, Object value) {
         final int expected = this.length;
-        if(expected != DYNAMIC_LENGTH) { // -1
-            if (valueLength != expected) {
-                String msg =
-                        Utils.friendlyClassName(value.getClass(), valueLength) + " not instanceof " +
-                                Utils.friendlyClassName(clazz, expected) + ", " +
-                                valueLength + " != " + expected;
-                throw new IllegalArgumentException(msg);
-            }
+        if(expected != DYNAMIC_LENGTH && valueLength != expected) {
+            String msg =
+                    Utils.friendlyClassName(value.getClass(), valueLength) + " not instanceof " +
+                            Utils.friendlyClassName(clazz, expected) + ", " +
+                            valueLength + " != " + expected;
+            throw new IllegalArgumentException(msg);
         }
         return valueLength;
     }
@@ -419,7 +417,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_DECIMAL: return (J) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, elementBuffer);
         case TYPE_CODE_ARRAY:  return (J) decodeObjectArray(arrayLen, bb, elementBuffer, false);
         case TYPE_CODE_TUPLE: return (J) decodeObjectArray(arrayLen, bb, elementBuffer, true);
-        default: throw new IllegalArgumentException("unrecognized type: " + elementType.toString());
+        default: throw unrecognizedType(elementType.toString());
         }
     }
 
@@ -556,6 +554,10 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 dest[i] = elementType.decode(bb, elementBuffer);
             }
         }
+    }
+
+    private static RuntimeException unrecognizedType(String type) {
+        return new RuntimeException("unrecognized type: " + type);
     }
 
     @Override

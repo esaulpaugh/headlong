@@ -20,7 +20,11 @@ import com.esaulpaugh.headlong.rlp.util.Integers;
 
 import java.util.Arrays;
 
-import static com.esaulpaugh.headlong.rlp.DataType.*;
+import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
+import static com.esaulpaugh.headlong.rlp.DataType.LIST_SHORT_OFFSET;
+import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
+import static com.esaulpaugh.headlong.rlp.DataType.STRING_LONG_OFFSET;
+import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
 
 /**
  * Encodes data to RLP format.

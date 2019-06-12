@@ -45,33 +45,32 @@ public abstract class ABIType<J> implements Serializable {
     final Class<J> clazz;
     final boolean dynamic;
 
-    private String name;
+    private String name = null;
 
     ABIType(String canonicalType, Class<J> clazz, boolean dynamic) {
         this.canonicalType = canonicalType; // .intern() to save memory and allow == comparison?
         this.clazz = clazz;
         this.dynamic = dynamic;
-        this.name = null;
     }
 
-    public String getCanonicalType() {
+    public final String getCanonicalType() {
         return canonicalType;
     }
 
-    public Class<J> clazz() {
+    public final Class<J> clazz() {
         return clazz;
     }
 
-    public boolean isDynamic() {
+    public final boolean isDynamic() {
         return dynamic;
     }
 
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
     /* don't expose this; cached (nameless) instances are shared and must be immutable */
-    ABIType<J> setName(String name) {
+    final ABIType<J> setName(String name) {
         this.name = name;
         return this;
     }
@@ -103,15 +102,12 @@ public abstract class ABIType<J> implements Serializable {
 
     void validateClass(Object value) {
         // may throw NPE
-        if(clazz != value.getClass()) {
-            // this pretty much only happens in the error case
-            if(!clazz.isAssignableFrom(value.getClass())) {
-                throw new IllegalArgumentException("class mismatch: "
-                        + value.getClass().getName()
-                        + " not assignable to "
-                        + clazz.getName()
-                        + " (" + Utils.friendlyClassName(value.getClass()) + " not instanceof " + Utils.friendlyClassName(clazz) + "/" + canonicalType + ")");
-            }
+        if(clazz != value.getClass() && !clazz.isAssignableFrom(value.getClass())) {
+            throw new IllegalArgumentException("class mismatch: "
+                    + value.getClass().getName()
+                    + " not assignable to "
+                    + clazz.getName()
+                    + " (" + Utils.friendlyClassName(value.getClass()) + " not instanceof " + Utils.friendlyClassName(clazz) + "/" + canonicalType + ")");
         }
     }
 
@@ -139,16 +135,16 @@ public abstract class ABIType<J> implements Serializable {
     final void toString(StringBuilder sb) {
         switch (typeCode()) {
         case TYPE_CODE_ARRAY:
-            sb.append("[");
+            sb.append('[');
             ((ArrayType<?, ?>) this).elementType.toString(sb);
-            sb.append("]");
+            sb.append(']');
             break;
         case TYPE_CODE_TUPLE:
-            sb.append("(");
-            for(ABIType<?> e : ((TupleType) this)) {
+            sb.append('(');
+            for(ABIType<?> e : (TupleType) this) {
                 e.toString(sb);
             }
-            sb.append(")");
+            sb.append(')');
             break;
         default:
             sb.append(this);

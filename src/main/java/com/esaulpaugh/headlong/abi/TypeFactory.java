@@ -25,7 +25,6 @@ import static com.esaulpaugh.headlong.abi.BaseTypeInfo.DECIMAL_BIT_LEN;
 import static com.esaulpaugh.headlong.abi.BaseTypeInfo.DECIMAL_SCALE;
 import static com.esaulpaugh.headlong.abi.BaseTypeInfo.FIXED_BIT_LEN;
 import static com.esaulpaugh.headlong.abi.BaseTypeInfo.FIXED_SCALE;
-import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
 /**
  * Creates the appropriate {@link ABIType} object for a given canonical type string.
@@ -47,7 +46,7 @@ final class TypeFactory {
 
     private static final ABIType<Boolean> NAMELESS_BOOLEAN_TYPE = new BooleanType();
 
-    private static final ClassLoader CLASS_LOADER = TypeFactory.class.getClassLoader();
+    private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
 
     static ABIType<?> createForTuple(TupleType baseTupleType, String suffix, String name) throws ParseException {
         return create(baseTupleType.canonicalType + suffix, baseTupleType, name);
