@@ -198,7 +198,7 @@ public class ABIJsonTest2 {
         }
 
         private static Tuple parseTuple(TupleType tupleType, JsonArray values) {
-            ABIType[] abiTypes = tupleType.elementTypes;
+            ABIType<?>[] abiTypes = tupleType.elementTypes;
             final int len = abiTypes.length;
             Object[] elements = new Object[len];
             int i = 0;

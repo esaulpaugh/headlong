@@ -172,7 +172,7 @@ public final class PackedDecoder {
         return len;
     }
 
-    private static int decodeArrayDynamic(ArrayType arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) {
+    private static int decodeArrayDynamic(ArrayType<? extends ABIType<?>, ?> arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) {
         final ABIType<?> elementType = arrayType.elementType;
         final int byteLen;
         try {

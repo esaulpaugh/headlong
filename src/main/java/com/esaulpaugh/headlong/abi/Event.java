@@ -82,7 +82,7 @@ public final class Event implements ABIObject {
     }
 
     public byte[] topics0() {
-        return anonymous ? null : Function.newDefaultDigest().digest(Strings.decode(signature(), UTF_8));
+        return topics0(Function.newDefaultDigest());
     }
 
     public byte[] topics0(MessageDigest md) {

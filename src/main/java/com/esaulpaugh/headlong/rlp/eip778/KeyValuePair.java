@@ -78,7 +78,7 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
     @Override
     public int compareTo(KeyValuePair o) {
         int result = compare(key, o.key);
-        if(result == 0) {
+        if (result == 0) {
             throw new IllegalArgumentException("duplicate key: " + encode(o.key, UTF_8));
         }
         return result;
