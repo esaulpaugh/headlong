@@ -23,16 +23,16 @@ public final class Utils {
 
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
-    public static String validateChars(Pattern pattern, String name) throws ParseException {
-        Matcher matcher = pattern.matcher(name);
+    public static String validateChars(Pattern pattern, String string) throws ParseException {
+        Matcher matcher = pattern.matcher(string);
         if (matcher.find()) {
-            final char c = name.charAt(matcher.start());
+            final char c = string.charAt(matcher.start());
             throw new ParseException(
                     "illegal char " + escapeChar(c) + " \'" + c + "\' @ index " + matcher.start(),
                     matcher.start()
             );
         }
-        return name;
+        return string;
     }
 
     public static String escapeChar(char c) {

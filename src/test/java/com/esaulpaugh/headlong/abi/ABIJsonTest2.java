@@ -29,8 +29,6 @@ public class ABIJsonTest2 {
 
     private static class TestCase {
 
-        private static final Integers.UintType ADDRESS = new Integers.UintType(160);
-
         private final String name;
 
         private final Function function;
@@ -129,9 +127,6 @@ public class ABIJsonTest2 {
                 String valueValue = valueObj.get("value").getAsString();
                 if("string".equals(valueType)) {
                     BigInteger val = new BigInteger(FastHex.decode(valueValue, 2, valueValue.length() - 2));
-                    if("address".equals(type.canonicalType)) {
-                        return Integers.toUnsigned(val, ADDRESS);
-                    }
                     BigIntegerType bigIntType = (BigIntegerType) type;
                     if(bigIntType.unsigned) {
                         return Integers.toUnsigned(val, new Integers.UintType(bigIntType.bitLength));

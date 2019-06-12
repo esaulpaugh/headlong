@@ -104,8 +104,7 @@ final class TypeFactory {
             }
             ABIType<?> baseType = resolveBaseType(type, isArrayElement, nameless);
             if(baseType == null) {
-                throw new ParseException(UNRECOGNIZED_TYPE + ": "
-                        + type + " (" + String.format("%040x", new BigInteger(type.getBytes(CHARSET_UTF_8))) + ")", -1);
+                throw new ParseException(UNRECOGNIZED_TYPE + ": " + type, -1);
             }
             return baseType;
         }
@@ -247,8 +246,7 @@ final class TypeFactory {
                 if ((M & 0x7) /* mod 8 */ == 0 && M >= 8 && M <= 256 && N > 0 && N <= 80) {
                     return new BigDecimalType(type, M, N, unsigned);
                 }
-            } catch (IndexOutOfBoundsException | NumberFormatException e) {
-                return null;
+            } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
             }
         }
         return null;
