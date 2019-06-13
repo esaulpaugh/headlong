@@ -55,6 +55,8 @@ public class RLPDecoderTest {
     public void duplicate() throws DecodeException {
         RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
         Assert.assertEquals(rlpList, rlpList.duplicate(RLP_STRICT));
+        RLPString rlpString = RLP_STRICT.wrapString((byte) 0x00);
+        Assert.assertEquals(rlpString, rlpString.duplicate(RLP_STRICT));
     }
 
     @Test

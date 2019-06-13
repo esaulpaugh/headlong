@@ -97,30 +97,30 @@ public abstract class RLPItem {
         return recoverable ? new RecoverableDecodeException(msg) : new UnrecoverableDecodeException(msg);
     }
 
-    public DataType type() {
+    public final DataType type() {
         return DataType.type(buffer[index]);
     }
 
     public abstract boolean isList();
 
-    public int encodingLength() {
+    public final int encodingLength() {
         return endIndex - index;
     }
 
-    public byte[] encoding() {
+    public final byte[] encoding() {
         final int len = encodingLength();
         byte[] copy = new byte[len];
         System.arraycopy(buffer, index, copy, 0, len);
         return copy;
     }
 
-    public byte[] data() {
+    public final byte[] data() {
         byte[] copy = new byte[dataLength];
         System.arraycopy(buffer, dataIndex, copy, 0, dataLength);
         return copy;
     }
 
-    public byte[] copyOfRange(int from, int to) {
+    public final byte[] copyOfRange(int from, int to) {
         checkRangeBounds(from, to);
         final int len = to - from;
         byte[] range = new byte[len];
@@ -128,15 +128,15 @@ public abstract class RLPItem {
         return range;
     }
 
-    public int export(byte[] dest, int destIndex) {
+    public final int export(byte[] dest, int destIndex) {
         return exportRange(index, endIndex, dest, destIndex);
     }
 
-    public int exportData(byte[] dest, int destIndex) {
+    public final int exportData(byte[] dest, int destIndex) {
         return exportRange(dataIndex, endIndex, dest, destIndex);
     }
 
-    public int exportRange(int from, int to, byte[] dest, int destIndex) {
+    public final int exportRange(int from, int to, byte[] dest, int destIndex) {
         checkRangeBounds(from, to);
         int len = to - from;
         System.arraycopy(buffer, from, dest, destIndex, len);
@@ -216,9 +216,7 @@ public abstract class RLPItem {
      * @return  an independent and exact copy
      * @throws DecodeException  if an unexpected problem in decoding occurs
      */
-    public RLPItem duplicate(RLPDecoder decoder) throws DecodeException {
-        return decoder.wrap(encoding(), 0, Integer.MAX_VALUE);
-    }
+    public abstract RLPItem duplicate(RLPDecoder decoder) throws DecodeException;
 
     /**
      * @see Arrays#hashCode(byte[])

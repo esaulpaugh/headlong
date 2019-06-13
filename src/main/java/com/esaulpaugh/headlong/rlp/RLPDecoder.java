@@ -76,6 +76,31 @@ public final class RLPDecoder {
     public RLPListIterator listIterator(byte[] buffer, int index) throws DecodeException {
         return wrapList(buffer, index).iterator(this);
     }
+    
+    public RLPString wrapString(byte lengthOneRlp) throws DecodeException {
+        return wrapString(new byte[] { lengthOneRlp }, 0);
+    }
+    
+    public RLPString wrapString(byte[] encoding) throws DecodeException {
+        return wrapString(encoding, 0);
+    }
+    
+    public RLPString wrapString(byte[] buffer, int index) throws DecodeException {
+        byte lead = buffer[index];
+        DataType type = DataType.type(lead);
+        switch (type) {
+        case SINGLE_BYTE:
+        case STRING_SHORT:
+        case STRING_LONG: return new RLPString(lead, type, buffer, index, Integer.MAX_VALUE, lenient);
+        case LIST_SHORT:
+        case LIST_LONG:
+        default: throw new IllegalArgumentException("item is not a string");
+        }
+    }
+    
+    public RLPList wrapList(byte lengthOneRlp) throws DecodeException {
+        return wrapList(new byte[] { lengthOneRlp }, 0);
+    }
 
     public RLPList wrapList(byte[] encoding) throws DecodeException {
         return wrapList(encoding, 0);
@@ -86,13 +111,11 @@ public final class RLPDecoder {
         DataType type = DataType.type(lead);
         switch (type) {
         case LIST_SHORT:
-        case LIST_LONG:
-            return new RLPList(lead, type, buffer, index, /*containerEnd*/ buffer.length, lenient);
+        case LIST_LONG: return new RLPList(lead, type, buffer, index, Integer.MAX_VALUE, lenient);
         case SINGLE_BYTE:
         case STRING_SHORT:
         case STRING_LONG:
-        default:
-            throw new IllegalArgumentException("item is not a list");
+        default: throw new IllegalArgumentException("item is not a list");
         }
     }
 
@@ -112,7 +135,7 @@ public final class RLPDecoder {
     }
 
     public RLPItem wrap(byte[] buffer, int index) throws DecodeException {
-        return wrap(buffer, index, buffer.length);
+        return wrap(buffer, index, Integer.MAX_VALUE);
     }
 
     RLPItem wrap(byte[] buffer, int index, int containerEnd) throws DecodeException {
@@ -121,13 +144,10 @@ public final class RLPDecoder {
         switch (type) {
         case SINGLE_BYTE:
         case STRING_SHORT:
-        case STRING_LONG:
-            return new RLPString(lead, type, buffer, index, containerEnd, lenient);
+        case STRING_LONG: return new RLPString(lead, type, buffer, index, containerEnd, lenient);
         case LIST_SHORT:
-        case LIST_LONG:
-            return new RLPList(lead, type, buffer, index, containerEnd, lenient);
-        default:
-            throw new RuntimeException();
+        case LIST_LONG: return new RLPList(lead, type, buffer, index, containerEnd, lenient);
+        default: throw new RuntimeException();
         }
     }
 

@@ -30,4 +30,9 @@ public final class RLPString extends RLPItem {
     public boolean isList() {
         return false;
     }
+    
+    @Override
+    public RLPString duplicate(RLPDecoder decoder) throws DecodeException {
+        return decoder.wrapString(encoding(), 0);
+    }
 }

@@ -126,4 +126,9 @@ public final class RLPList extends RLPItem {
 
         return dest;
     }
+    
+    @Override
+    public RLPList duplicate(RLPDecoder decoder) throws DecodeException {
+        return decoder.wrapList(encoding(), 0);
+    }
 }
