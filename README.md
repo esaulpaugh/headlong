@@ -1,13 +1,13 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.esaulpaugh/headlong.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.esaulpaugh%22%20AND%20a:%22headlong%22)
 [![Gitter](https://badges.gitter.im/esaulpaugh-headlong/community.svg)](https://gitter.im/esaulpaugh-headlong/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-SHA-256 (headlong-1.4.6.jar): bd86b0b264c3e256ec8d604af5edaf55d55fc3bfe2186383210630d1f19d49cf
-
 Contract ABI and Recursive Length Prefix made easy for the JVM. Everything heavily optimized for maximum throughput (ABI function call encoding up to 500x faster than a popular competitor. One function creation plus one encode up to 60x faster (`"f(uint,uint32[],bytes10,bytes)"`, openjdk 11.0.1)).
 
 ABI spec: https://solidity.readthedocs.io/en/latest/abi-spec.html
 
 RLP spec: https://github.com/ethereum/wiki/wiki/RLP
+
+SHA-256 (headlong-1.4.7.jar): a5041b9b0030e49f6674dda42010130777d472ad9237445f877be992630307fd
 
 ## Usage
 
@@ -87,14 +87,14 @@ Or build locally:
 Clone the project and install to your local maven repository using `gradle publishToMavenLocal` or `mvn install`. Then you can use one of these:
 
 ```groovy
-implementation 'com.esaulpaugh:headlong:1.4.7-SNAPSHOT'
+implementation 'com.esaulpaugh:headlong:1.4.8-SNAPSHOT'
 ```
 
 ```xml
 <dependency>
     <groupId>com.esaulpaugh</groupId>
     <artifactId>headlong</artifactId>
-    <version>1.4.7-SNAPSHOT</version>
+    <version>1.4.8-SNAPSHOT</version>
 </dependency>
 ```
 Alternatively:
