@@ -55,39 +55,33 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
 
     // don't do unsigned check for array element
     final void validatePrimitiveElement(long longVal) {
-        final int bitLen = longVal >= 0
-                ? Integers.bitLen(longVal) // gives correct bit length for non-negative integers only
-                : BizarroIntegers.bitLen(longVal); // gives correct bit length for negative integers only
-        if(bitLen > bitLength) {
-            throw new IllegalArgumentException("exceeds bit limit: " + bitLen + " > " + bitLength);
-        }
+        checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
     }
 
     // don't do unsigned check for array element
     final void validateBigIntElement(final BigInteger bigIntVal) {
-        if(bigIntVal.bitLength() > bitLength) {
-            throw new IllegalArgumentException("exceeds bit limit: " + bigIntVal.bitLength() + " > " + bitLength);
-        }
+    	checkBitLen(bigIntVal.bitLength());
     }
 
     // --------------------------------
 
     final void validateLongBitLen(long longVal) {
-        final int bitLen = longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal);
-        if(bitLen > bitLength) {
-            throw new IllegalArgumentException("exceeds bit limit: " + bitLen + " > " + bitLength);
-        }
+        checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
         if(unsigned && longVal < 0) {
             throw new IllegalArgumentException("signed value given for unsigned type");
         }
     }
 
     final void validateBigIntBitLen(final BigInteger bigIntVal) {
-        if(bigIntVal.bitLength() > bitLength) {
-            throw new IllegalArgumentException("exceeds bit limit: " + bigIntVal.bitLength() + " > " + bitLength);
-        }
+    	checkBitLen(bigIntVal.bitLength());
         if(unsigned && bigIntVal.signum() == -1) {
             throw new IllegalArgumentException("signed value given for unsigned type");
         }
+    }
+    
+    private void checkBitLen(int actual) {
+    	if(actual > bitLength) {
+    		throw new IllegalArgumentException("exceeds bit limit: " + actual + " > " + bitLength);
+    	}
     }
 }
