@@ -60,28 +60,28 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
 
     // don't do unsigned check for array element
     final void validateBigIntElement(final BigInteger bigIntVal) {
-    	checkBitLen(bigIntVal.bitLength());
+        checkBitLen(bigIntVal.bitLength());
     }
 
     // --------------------------------
 
     final void validateLongBitLen(long longVal) {
         checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
-        if(unsigned && longVal < 0) {
+        if (unsigned && longVal < 0) {
             throw new IllegalArgumentException("signed value given for unsigned type");
         }
     }
 
     final void validateBigIntBitLen(final BigInteger bigIntVal) {
-    	checkBitLen(bigIntVal.bitLength());
-        if(unsigned && bigIntVal.signum() == -1) {
+        checkBitLen(bigIntVal.bitLength());
+        if (unsigned && bigIntVal.signum() == -1) {
             throw new IllegalArgumentException("signed value given for unsigned type");
         }
     }
-    
+
     private void checkBitLen(int actual) {
-    	if(actual > bitLength) {
-    		throw new IllegalArgumentException("exceeds bit limit: " + actual + " > " + bitLength);
-    	}
+        if (actual > bitLength) {
+            throw new IllegalArgumentException("exceeds bit limit: " + actual + " > " + bitLength);
+        }
     }
 }
