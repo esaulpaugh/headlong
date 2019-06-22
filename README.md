@@ -1,7 +1,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.esaulpaugh/headlong.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.esaulpaugh%22%20AND%20a:%22headlong%22)
 [![Gitter](https://badges.gitter.im/esaulpaugh-headlong/community.svg)](https://gitter.im/esaulpaugh-headlong/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-Contract ABI and Recursive Length Prefix made easy for the JVM. Everything heavily optimized for maximum throughput (ABI function call encoding up to 500x faster than a popular competitor. One function creation plus one encode up to 60x faster (`"f(uint,uint32[],bytes10,bytes)"`, openjdk 11.0.1)).
+Contract ABI and Recursive Length Prefix made easy for the JVM. Everything heavily optimized for maximum throughput (ABI function call encoding up to 500x faster than a popular competitor. One function init plus one encode up to 50x faster (`"sam(bytes,bool,uint256[])"`, openjdk 12.0.1)).
 
 ABI spec: https://solidity.readthedocs.io/en/latest/abi-spec.html
 
@@ -103,7 +103,7 @@ Alternatively:
 * Use `mvn package` which outputs to `/target`
 * Add headlong as a project dependency
 
-Depends on gson. Tests should take less than one minute to run. Test packages require junit and spongycastle. Jar size is ~115 KB as of 04/21/19.
+Depends on gson. Tests should take less than one minute to run. Test packages require junit and spongycastle. Jar size is ~115 KB as of 06/21/19.
 
 See the wiki for more, such as TupleTypes, packed encoding, RLP Lists, and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
