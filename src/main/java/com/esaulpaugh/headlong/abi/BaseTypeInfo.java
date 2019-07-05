@@ -18,8 +18,7 @@ package com.esaulpaugh.headlong.abi;
 import java.util.*;
 
 /**
- * An object to hold metadata about a base type, such as the type's Java class name. A metadata object for each type is
- * stored in {@link #TYPE_INFO_MAP} which is used by TypeFactory to resolve the base type.
+ * An object to hold metadata about a base type. Metadata objects are stored in {@link #TYPE_INFO_MAP}.
  *
  * fixed/ufixed types, which number in the thousands, are not included in the map (except for fixed, ufixed,
  * fixed128x18, and ufixed128x18).
@@ -68,6 +67,45 @@ final class BaseTypeInfo {
         TYPE_INFO_MAP = Collections.unmodifiableMap(map);
     }
 
+    final int bitLen;
+    final int arrayLen;
+
+    private BaseTypeInfo(int bitLen) {
+        this(bitLen, N_A);
+    }
+
+    private BaseTypeInfo(int bitLen, int arrayLen) {
+        this.bitLen = bitLen;
+        this.arrayLen = arrayLen;
+    }
+
+    /**
+     * Returns the canonical base type's metadata object if it exists.
+     *
+     * @param canonical the canonical type string for the base type
+     * @return  the metadata object
+     */
+    static BaseTypeInfo get(String canonical) {
+        return TYPE_INFO_MAP.get(canonical);
+    }
+
+    static Map<String, BaseTypeInfo> getBaseTypeInfoMap() {
+        return TYPE_INFO_MAP;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(bitLen, arrayLen);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BaseTypeInfo that = (BaseTypeInfo) o;
+        return bitLen == that.bitLen && arrayLen == that.arrayLen;
+    }
+// ------------------------------------------------------------------
     private static final String INT = "int";
 
     private static void putSignedInts(final Map<String, BaseTypeInfo> map) {
@@ -126,44 +164,5 @@ final class BaseTypeInfo {
         }
         Collections.sort(ordered);
         return ordered;
-    }
-
-    final int bitLen;
-    final int arrayLen;
-
-    private BaseTypeInfo(int bitLen) {
-        this(bitLen, N_A);
-    }
-
-    private BaseTypeInfo(int bitLen, int arrayLen) {
-        this.bitLen = bitLen;
-        this.arrayLen = arrayLen;
-    }
-
-    /**
-     * Returns the canonical base type's metadata object if it exists.
-     *
-     * @param canonical the canonical type string for the base type
-     * @return  the metadata object
-     */
-    static BaseTypeInfo get(String canonical) {
-        return TYPE_INFO_MAP.get(canonical);
-    }
-
-    static Map<String, BaseTypeInfo> getBaseTypeInfoMap() {
-        return TYPE_INFO_MAP;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(bitLen, arrayLen);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        BaseTypeInfo that = (BaseTypeInfo) o;
-        return bitLen == that.bitLen && arrayLen == that.arrayLen;
     }
 }

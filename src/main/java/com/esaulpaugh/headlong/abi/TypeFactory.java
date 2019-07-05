@@ -267,7 +267,7 @@ final class TypeFactory {
                 char c = rawTypeStr.charAt(argStart);
                 switch (c) {
                 case '(': // element is tuple or tuple array
-                    fromIndex = findSubtupleEnd(rawTypeStr, end, argStart);
+                    fromIndex = findSubtupleEnd(rawTypeStr, end, argStart + 1);
                     break;
                 case ')':
                     if(rawTypeStr.charAt(argEnd) == ',') {
@@ -299,21 +299,21 @@ final class TypeFactory {
         return TupleType.wrap(elements.toArray(ABIType.EMPTY_TYPE_ARRAY));
     }
 
-    private static int findSubtupleEnd(String parentTypeString, final int end, final int subtupleStart) throws ParseException {
+    private static int findSubtupleEnd(String parentTypeString, final int end, int i) throws ParseException {
         int depth = 1;
-        int i = subtupleStart + 1;
         do {
-            if(i >= end) {
+            if(i < end) {
+                char x = parentTypeString.charAt(i++);
+                if(x > ')') {
+                    continue;
+                }
+                if(x == ')') {
+                    depth--;
+                } else if(x == '(') {
+                    depth++;
+                }
+            } else {
                 throw new ParseException(ILLEGAL_TUPLE_TERMINATION, end);
-            }
-            char x = parentTypeString.charAt(i++);
-            if(x > ')') {
-                continue;
-            }
-            if(x == ')') {
-                depth--;
-            } else if(x == '(') {
-                depth++;
             }
         } while(depth > 0);
         return i;
