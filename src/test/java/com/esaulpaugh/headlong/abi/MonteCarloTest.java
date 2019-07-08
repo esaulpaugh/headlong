@@ -32,49 +32,28 @@ import java.util.concurrent.TimeUnit;
 
 public class MonteCarloTest {
 
-    private static final int N = 50_000;
-
-    private static long[] generateSeeds(long masterSeed, int n) {
-        Random r = new Random(masterSeed);
-        long[] seeds = new long[n];
-        for (int i = 0; i < seeds.length; i++) {
-            seeds[i] = r.nextLong();
-        }
-        return seeds;
-    }
-
-    @Ignore
-    @Test
-    public void printNewTestCases() throws ParseException {
-        final Gson ugly = new GsonBuilder().create();
-        final JsonPrimitive version = new JsonPrimitive("1.4.4+commit.3ad2258");
-        JsonArray array = new JsonArray();
-        int i = 0;
-        for(final long seed : generateSeeds(getSeed(System.nanoTime()), 250)) {
-            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed);
-            MonteCarloTestCase testCase = new MonteCarloTestCase(params);
-            array.add(testCase.toJsonElement(ugly, "headlong_" + i++, version));
-        }
-        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(array));
-    }
+    private static final int N = 400_000;
 
     @Test
-    public void monteCarloThreaded() throws InterruptedException {
+    public void fuzzTest() throws InterruptedException {
 
-        long masterMasterSeed = getSeed(System.nanoTime()); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
+        final long masterMasterSeed = getSeed(System.nanoTime()); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
-        Thread[] threads = new Thread[Runtime.getRuntime().availableProcessors() - 1];
+        final int numProcessors = Runtime.getRuntime().availableProcessors();
+        final int threadsLen = numProcessors - 1;
+        final Thread[] threads = new Thread[threadsLen];
+        final int workPerProcessor = N / numProcessors;
         int i = 0;
         while (i < threads.length) {
-            (threads[i] = newThread(masterMasterSeed + i++, N)).start();
+            (threads[i] = newThread(masterMasterSeed + i++, workPerProcessor)).start();
         }
-        newThread(masterMasterSeed + i++, N).run();
+        newThread(masterMasterSeed + i++, workPerProcessor).run();
 
         for (Thread thread : threads) {
             thread.join();
         }
 
-        System.out.println((N * i) + " done, MASTER_MASTER_SEED = " + masterMasterSeed);
+        System.out.println((workPerProcessor * i) + " done, MASTER_MASTER_SEED = " + masterMasterSeed);
     }
 
     private static Thread newThread(long seed, int n) {
@@ -178,54 +157,23 @@ public class MonteCarloTest {
 //    private static final int TIMEOUT_SECONDS = 60;
 
     @Test
-    public void threadedTest() throws ParseException, InterruptedException, IOException, ClassNotFoundException {
+    public void testThreadSafety() throws ParseException, InterruptedException {
 
-//        System.out.println(params);
-
-//        ForkJoinPool pool = ForkJoinPool.commonPool();
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-
-        final long time = System.nanoTime();
-        long seed = getSeed(time);
-        final long origSeed = seed;
-        final long seed2 = getSeed(time + 1);
-        System.out.println("orig =  " + seed);
-        System.out.println("seed2 = " + seed2);
-        System.out.println("xor = " + Long.toHexString(seed ^ seed2));
-
-        MonteCarloTestCase temp;
-        String sig;
-        do {
-            seed++;
-            temp = new MonteCarloTestCase(new MonteCarloTestCase.Params(seed));
-            sig = temp.function.getCanonicalSignature();
-        } while (!sig.contains("string")
-                || (!sig.contains("fixed") && !sig.contains("decimal"))
-                || (!sig.contains("int") && !sig.contains("address"))
-                || (!sig.contains("bytes") && !sig.contains("function"))
-                || sig.indexOf('[') < 0
-                || sig.indexOf(')') == sig.length() - 1
-        );
-        System.out.println("n = " + (seed - origSeed));
-
-        final MonteCarloTestCase testCase = temp;
+        final MonteCarloTestCase testCase = newComplexTestCase();
 
         System.out.println(testCase.function.getCanonicalSignature());
         System.out.println(testCase.params);
-        final MonteCarloTask task = new MonteCarloTask(testCase, 0, 20_000);
+        final MonteCarloTask task = new MonteCarloTask(testCase, 0, N);
 
-        oos.writeObject(task);
-
-        ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
+        final int numProcessors = Runtime.getRuntime().availableProcessors();
+        ForkJoinPool pool = new ForkJoinPool();
         pool.invoke(task);
         pool.shutdown();
-        pool.awaitTermination(20, TimeUnit.SECONDS);
+        pool.awaitTermination(10, TimeUnit.SECONDS);
 
-        Thread[] threads = new Thread[8];
-        final int len = threads.length;
-        for (int i = 0; i < len; i++) {
+        Thread[] threads = new Thread[numProcessors];
+        final int threadsLen = threads.length;
+        for (int i = 0; i < threadsLen; i++) {
             threads[i] = new Thread(() -> {
                 for (int j = 0; j < 500; j++) {
                     testCase.run();
@@ -233,7 +181,7 @@ public class MonteCarloTest {
             });
         }
 
-        final int len2 = len - 1;
+        final int len2 = threadsLen - 1;
         for (int i = 0; i < len2; i++) {
             threads[i].start();
         }
@@ -242,31 +190,90 @@ public class MonteCarloTest {
         for (int i = 0; i < len2; i++) {
             threads[i].join();
         }
+    }
 
-        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        ObjectInputStream ois = new ObjectInputStream(bais);
+    @Test
+    public void testSerialization() throws IOException, ParseException, ClassNotFoundException {
 
-        final MonteCarloTask deserialized = (MonteCarloTask) ois.readObject();
+        final MonteCarloTestCase testCase = newComplexTestCase();
+        final MonteCarloTask original = new MonteCarloTask(testCase, 0, 1);
 
-        boolean equal = deserialized.equals(task);
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        new ObjectOutputStream(baos)
+                .writeObject(original);
+
+        final MonteCarloTask deserialized = (MonteCarloTask) new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()))
+                .readObject();
+
+        boolean equal = deserialized.equals(original);
         int d_hash = deserialized.hashCode();
-        int t_hash = task.hashCode();
+        int o_hash = original.hashCode();
 
         System.out.println("equal = " + equal);
-        System.out.println("hashCodes: " + d_hash + " " + t_hash);
+        System.out.println("hashCodes: " + d_hash + " " + o_hash);
 
-        System.out.println(deserialized.testCase.hashCode() + " == " + task.testCase.hashCode());
-        System.out.println(deserialized.testCase.argsTuple.hashCode() + " == " + task.testCase.argsTuple.hashCode());
+        System.out.println(deserialized.testCase.hashCode() + " == " + original.testCase.hashCode());
+        System.out.println(deserialized.testCase.argsTuple.hashCode() + " == " + original.testCase.argsTuple.hashCode());
 
 //        System.out.println(deserialized.testCase.params.hashCode() + " == " + task.testCase.params.hashCode());
 //        System.out.println(deserialized.testCase.function.hashCode() + " == " + task.testCase.function.hashCode());
 //        System.out.println(deserialized.testCase.function.paramTypes.hashCode() + " == " + task.testCase.function.paramTypes.hashCode());
 
-        if(!equal || d_hash != t_hash) {
+        if(!equal || d_hash != o_hash) {
             throw new AssertionError("deserialization failure");
         }
 
         System.out.println("successful deserialization");
+    }
+
+    private static MonteCarloTestCase newComplexTestCase() throws ParseException {
+        final long time = System.nanoTime();
+        long seed = getSeed(time);
+        final long origSeed = seed;
+        final long seed2 = getSeed(time + 1);
+        System.out.println("orig =  " + seed);
+        System.out.println("seed2 = " + seed2);
+        System.out.println("xor = " + Long.toHexString(seed ^ seed2));
+
+        MonteCarloTestCase testCase;
+        String sig;
+        do {
+            seed++;
+            testCase = new MonteCarloTestCase(new MonteCarloTestCase.Params(seed));
+            sig = testCase.function.getCanonicalSignature();
+        } while (!sig.contains("string")
+                || (!sig.contains("fixed") && !sig.contains("decimal"))
+                || (!sig.contains("int") && !sig.contains("address"))
+                || (!sig.contains("bytes") && !sig.contains("function"))
+                || sig.indexOf('[') < 0
+                || sig.indexOf(')') == sig.length() - 1
+        );
+        System.out.println("n = " + (seed - origSeed));
+        return testCase;
+    }
+
+    private static long[] generateSeeds(long masterSeed, int n) {
+        Random r = new Random(masterSeed);
+        long[] seeds = new long[n];
+        for (int i = 0; i < seeds.length; i++) {
+            seeds[i] = r.nextLong();
+        }
+        return seeds;
+    }
+
+    @Ignore
+    @Test
+    public void printNewTestCases() throws ParseException {
+        final Gson ugly = new GsonBuilder().create();
+        final JsonPrimitive version = new JsonPrimitive("1.4.4+commit.3ad2258");
+        JsonArray array = new JsonArray();
+        int i = 0;
+        for(final long seed : generateSeeds(getSeed(System.nanoTime()), 250)) {
+            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed);
+            MonteCarloTestCase testCase = new MonteCarloTestCase(params);
+            array.add(testCase.toJsonElement(ugly, "headlong_" + i++, version));
+        }
+        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(array));
     }
 
     private static void sleep() {
