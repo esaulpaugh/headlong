@@ -107,7 +107,7 @@ public class MonteCarloTest {
 
         private static final long serialVersionUID = -4228469691073264266L;
 
-        private static final int THRESHOLD = 50_000;
+        private static final int THRESHOLD = 10_000;
 
         final MonteCarloTestCase testCase;
         private final int start;
@@ -126,9 +126,11 @@ public class MonteCarloTest {
             final int end = this.end;
             final int n = end - start;
             if(n < THRESHOLD) {
+//                long startTime = System.nanoTime();
                 for (int j = 0; j < n; j++) {
                     this.testCase.run();
                 }
+//                System.out.println(n + " " + (System.nanoTime() - startTime) / 1_000_000.0);
             } else {
                 final int midpoint = start + (n / 2);
                 invokeAll(
@@ -154,38 +156,43 @@ public class MonteCarloTest {
         }
     }
 
-//    private static final int TIMEOUT_SECONDS = 60;
-
     @Test
     public void testThreadSafety() throws ParseException, InterruptedException {
 
-        final MonteCarloTestCase testCase = newComplexTestCase();
+        final MonteCarloTestCase one = newComplexTestCase();
+        final MonteCarloTestCase two = newComplexTestCase();
 
-        System.out.println(testCase.function.getCanonicalSignature());
-        System.out.println(testCase.params);
-        final MonteCarloTask task = new MonteCarloTask(testCase, 0, N);
+        System.out.println(one.function.getCanonicalSignature());
+        System.out.println(one.params);
+        System.out.println(two.function.getCanonicalSignature());
+        System.out.println(two.params);
+        final MonteCarloTask task = new MonteCarloTask(one, 0, 308_011);
 
         final int numProcessors = Runtime.getRuntime().availableProcessors();
-        ForkJoinPool pool = new ForkJoinPool();
-        pool.invoke(task);
-        pool.shutdown();
-        pool.awaitTermination(10, TimeUnit.SECONDS);
 
         Thread[] threads = new Thread[numProcessors];
         final int threadsLen = threads.length;
         for (int i = 0; i < threadsLen; i++) {
             threads[i] = new Thread(() -> {
                 for (int j = 0; j < 500; j++) {
-                    testCase.run();
+                    two.run();
                 }
             });
         }
+
+        ForkJoinPool pool = new ForkJoinPool();
 
         final int len2 = threadsLen - 1;
         for (int i = 0; i < len2; i++) {
             threads[i].start();
         }
+
+        pool.invoke(task);
+
         threads[len2].run();
+
+        pool.shutdown();
+        pool.awaitTermination(10, TimeUnit.SECONDS);
 
         for (int i = 0; i < len2; i++) {
             threads[i].join();
@@ -194,35 +201,18 @@ public class MonteCarloTest {
 
     @Test
     public void testSerialization() throws IOException, ParseException, ClassNotFoundException {
-
-        final MonteCarloTestCase testCase = newComplexTestCase();
-        final MonteCarloTask original = new MonteCarloTask(testCase, 0, 1);
-
+        final MonteCarloTask original = new MonteCarloTask(newComplexTestCase(), 0, 1);
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
         new ObjectOutputStream(baos)
                 .writeObject(original);
 
         final MonteCarloTask deserialized = (MonteCarloTask) new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()))
                 .readObject();
 
-        boolean equal = deserialized.equals(original);
-        int d_hash = deserialized.hashCode();
-        int o_hash = original.hashCode();
-
-        System.out.println("equal = " + equal);
-        System.out.println("hashCodes: " + d_hash + " " + o_hash);
-
-        System.out.println(deserialized.testCase.hashCode() + " == " + original.testCase.hashCode());
-        System.out.println(deserialized.testCase.argsTuple.hashCode() + " == " + original.testCase.argsTuple.hashCode());
-
-//        System.out.println(deserialized.testCase.params.hashCode() + " == " + task.testCase.params.hashCode());
-//        System.out.println(deserialized.testCase.function.hashCode() + " == " + task.testCase.function.hashCode());
-//        System.out.println(deserialized.testCase.function.paramTypes.hashCode() + " == " + task.testCase.function.paramTypes.hashCode());
-
-        if(!equal || d_hash != o_hash) {
+        if(!deserialized.equals(original)) {
             throw new AssertionError("deserialization failure");
         }
-
         System.out.println("successful deserialization");
     }
 
