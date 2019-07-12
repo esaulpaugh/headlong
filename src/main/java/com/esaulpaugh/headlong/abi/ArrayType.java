@@ -409,8 +409,8 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_LONG: return (J) decodeLongArray((LongType) elementType, bb, arrayLen, elementBuffer);
         case TYPE_CODE_BIG_INTEGER: return (J) decodeBigIntegerArray((BigIntegerType) elementType, bb, arrayLen, elementBuffer);
         case TYPE_CODE_BIG_DECIMAL: return (J) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, elementBuffer);
-        case TYPE_CODE_ARRAY:  return (J) decodeObjectArray(arrayLen, bb, elementBuffer, false);
-        case TYPE_CODE_TUPLE: return (J) decodeObjectArray(arrayLen, bb, elementBuffer, true);
+        case TYPE_CODE_ARRAY:
+        case TYPE_CODE_TUPLE: return (J) decodeObjectArray(arrayLen, bb, elementBuffer);
         default: throw unrecognizedTypeException(elementType.toString());
         }
     }
@@ -500,19 +500,13 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         return bigInt;
     }
 
-    private Object[] decodeObjectArray(int arrayLen, ByteBuffer bb, byte[] elementBuffer, boolean tupleArray) {
+    private Object[] decodeObjectArray(int arrayLen, ByteBuffer bb, byte[] elementBuffer) {
 
 //        final int index = bb.position(); // TODO must pass index to decodeObjectArrayTails if you want to support lenient mode
 
         final ABIType<?> elementType = this.elementType;
-        Object[] dest;
-        if(tupleArray) {
-            dest = new Tuple[arrayLen];
-        } else {
-            dest = (Object[]) Array.newInstance(elementType.clazz, arrayLen); // reflection ftw
-        }
-
         int[] offsets = new int[arrayLen];
+        Object[] dest = (Object[]) Array.newInstance(elementType.clazz, arrayLen); // reflection ftw
 
         decodeObjectArrayHeads(elementType, bb, offsets, elementBuffer, dest);
 
