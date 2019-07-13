@@ -29,6 +29,7 @@ import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class MonteCarloTest {
 
@@ -157,7 +158,7 @@ public class MonteCarloTest {
     }
 
     @Test
-    public void testThreadSafety() throws ParseException, InterruptedException {
+    public void testThreadSafety() throws ParseException, InterruptedException, TimeoutException {
 
         final MonteCarloTestCase one = newComplexTestCase();
         final MonteCarloTestCase two = newComplexTestCase();
@@ -192,7 +193,9 @@ public class MonteCarloTest {
         threads[len2].run();
 
         pool.shutdown();
-        pool.awaitTermination(10, TimeUnit.SECONDS);
+        if(!pool.awaitTermination(10, TimeUnit.SECONDS)) {
+            throw new TimeoutException("timeout");
+        }
 
         for (int i = 0; i < len2; i++) {
             threads[i].join();
