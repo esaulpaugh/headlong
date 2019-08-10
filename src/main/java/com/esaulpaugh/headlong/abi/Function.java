@@ -117,7 +117,12 @@ public final class Function implements ABIObject, Serializable {
         if(split < 0) {
             throw new ParseException("params start not found", signature.length());
         }
-        final TupleType tupleType = (TupleType) TypeFactory.create(signature.substring(split));
+        final TupleType tupleType;
+        try {
+            tupleType = (TupleType) TypeFactory.create(signature.substring(split));
+        } catch (ClassCastException cce) {
+            throw new ParseException("illegal signature termination", signature.length()); // e.g. "foo()[]"
+        }
 
         this.type = Objects.requireNonNull(type);
         this.name = Utils.validateChars(NON_ASCII_CHAR, signature.substring(0, split));

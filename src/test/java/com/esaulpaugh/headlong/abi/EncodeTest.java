@@ -18,6 +18,7 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -38,6 +39,34 @@ public class EncodeTest {
     private static final Random RAND = new Random(MonteCarloTest.getSeed(System.nanoTime()));
 
     private static final Class<ParseException> PARSE_ERR = ParseException.class;
+
+    @Ignore
+    @Test
+    public void fuzzSignatures() {
+
+//        new Function("R!|2([1])");
+//        new Function("HWD6()[]");
+//        new Function("foo()[]");
+
+        for (int i = 1; i < 33; i++) {
+            final int lim = (i + 1) * 99_000;
+            testRandomSigs(i, lim);
+        }
+    }
+
+    private static void testRandomSigs(final int i, final int lim) {
+        for (int j = 0; j < lim; j++) {
+            String sig = MonteCarloTestCase.generateASCIIString(i, RAND);
+            try {
+                Function.parse(sig);
+            } catch (ParseException pe) {
+                /* do nothing */
+            } catch (Throwable t) {
+                System.err.println(sig);
+                t.printStackTrace();
+            }
+        }
+    }
 
     @Test
     public void nonTerminatingTupleTest() throws Throwable {

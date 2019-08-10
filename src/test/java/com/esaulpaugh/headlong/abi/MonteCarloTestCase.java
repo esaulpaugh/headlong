@@ -470,7 +470,7 @@ public class MonteCarloTestCase implements Serializable {
         return generateASCIIString(r.nextInt(34), r).replace('(', '_');
     }
 
-    private static String generateASCIIString(final int len, Random r) {
+    static String generateASCIIString(final int len, Random r) {
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < len; i++) {
             sb.append((char) (r.nextInt(95) + 32));

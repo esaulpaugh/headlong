@@ -69,44 +69,45 @@ final class TypeFactory {
     }
 
     private static ABIType<?> buildType(String type, boolean isArrayElement, TupleType baseTupleType, boolean nameless) throws ParseException, ClassNotFoundException {
+        try {
+            final int idxOfLast = type.length() - 1;
+            if (type.charAt(idxOfLast) == ']') { // array
 
-        final int idxOfLast = type.length() - 1;
+                final int fromIndex = idxOfLast - 1;
+                final int arrayOpenIndex = type.lastIndexOf('[', fromIndex);
 
-        if(type.charAt(idxOfLast) == ']') { // array
-
-            final int fromIndex = idxOfLast - 1;
-            final int arrayOpenIndex = type.lastIndexOf('[', fromIndex);
-
-            final int length;
-            if(arrayOpenIndex == fromIndex) { // i.e. []
-                length = DYNAMIC_LENGTH;
-            } else { // e.g. [4]
-                try {
-                    length = Integer.parseInt(type.substring(arrayOpenIndex + 1, idxOfLast));
-                    if(length < 0) {
-                        throw new ParseException("negative array size", arrayOpenIndex + 1);
+                final int length;
+                if (arrayOpenIndex == fromIndex) { // i.e. []
+                    length = DYNAMIC_LENGTH;
+                } else { // e.g. [4]
+                    try {
+                        length = Integer.parseInt(type.substring(arrayOpenIndex + 1, idxOfLast));
+                        if (length < 0) {
+                            throw new ParseException("negative array size", arrayOpenIndex + 1);
+                        }
+                    } catch (NumberFormatException nfe) {
+                        throw (ParseException) new ParseException("illegal argument", arrayOpenIndex + 1).initCause(nfe);
                     }
-                } catch (NumberFormatException nfe) {
-                    throw (ParseException) new ParseException("illegal argument", arrayOpenIndex + 1).initCause(nfe);
+                }
+
+                final ABIType<?> elementType = buildType(type.substring(0, arrayOpenIndex), true, baseTupleType, nameless);
+                final String arrayClassName = elementType.arrayClassName();
+                @SuppressWarnings("unchecked") final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
+                final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
+                return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, '[' + arrayClassName);
+            } else {
+                if (baseTupleType != null) {
+                    return baseTupleType;
+                }
+                ABIType<?> baseType = resolveBaseType(type, isArrayElement, nameless);
+                if (baseType != null) {
+                    return baseType;
                 }
             }
-
-            final ABIType<?> elementType = buildType(type.substring(0, arrayOpenIndex), true, baseTupleType, nameless);
-            final String arrayClassName = elementType.arrayClassName();
-            @SuppressWarnings("unchecked")
-            final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
-            final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
-            return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, '[' + arrayClassName);
-        } else {
-            if(baseTupleType != null) {
-                return baseTupleType;
-            }
-            ABIType<?> baseType = resolveBaseType(type, isArrayElement, nameless);
-            if(baseType == null) {
-                throw new ParseException(UNRECOGNIZED_TYPE + ": " + type, -1);
-            }
-            return baseType;
+        } catch (StringIndexOutOfBoundsException sioobe) { // e.g. type equals "" or "82]" or "[]" or "[1]"
+            /* fall through */
         }
+        throw new ParseException(UNRECOGNIZED_TYPE + ": " + type, 0);
     }
 
     private static ABIType<?> resolveBaseType(String baseTypeStr, boolean isElement, boolean nameless) throws ParseException, ClassNotFoundException {
