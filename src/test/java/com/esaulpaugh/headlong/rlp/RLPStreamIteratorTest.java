@@ -137,14 +137,14 @@ public class RLPStreamIteratorTest {
                 waitForNotifiedSender();
 
                 assertReadSuccess(iter);
-                Assert.assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().data());
+                Assert.assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
                 assertNoNext(iter);
 
                 waitForNotifiedSender();
 
                 for (byte b : TEST_BYTES) {
                     assertReadSuccess(iter);
-                    Assert.assertArrayEquals(timestamp(zero), new byte[] { b }, iter.next().data());
+                    Assert.assertArrayEquals(timestamp(zero), new byte[] { b }, iter.next().asBytes());
                 }
                 assertNoNext(iter);
 
@@ -164,7 +164,7 @@ public class RLPStreamIteratorTest {
                 Assert.assertEquals(TEST_STRING, iter.next().asString(UTF_8));
                 assertReadSuccess(iter);
                 Assert.assertTrue(iter.hasNext());
-                Assert.assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().data());
+                Assert.assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
                 TestUtils.assertThrown(NoSuchElementException.class, iter::next);
                 assertNoNext(iter);
                 Assert.assertFalse(iter.hasNext());

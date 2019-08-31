@@ -109,7 +109,7 @@ public final class Record {
     public RLPList decode(Verifier verifier) throws DecodeException, SignatureException {
         RLPItem signatureItem = getSignature();
         byte[] content = getContentBytes(signatureItem.endIndex);
-        verifier.verify(signatureItem.data(), content); // verify content
+        verifier.verify(signatureItem.asBytes(), content); // verify content
         return RLPDecoder.RLP_STRICT.wrapList(content);
     }
 

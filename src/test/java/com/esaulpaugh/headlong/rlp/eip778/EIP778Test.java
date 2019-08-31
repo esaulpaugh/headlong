@@ -94,7 +94,7 @@ public class EIP778Test {
         KeyValuePair[] decodedPairs = new KeyValuePair[pairs.length];
         int i = 0;
         while (iter.hasNext()) {
-            decodedPairs[i++] = new KeyValuePair(iter.next().data(), iter.next().data());
+            decodedPairs[i++] = new KeyValuePair(iter.next().asBytes(), iter.next().asBytes());
         }
         Assert.assertArrayEquals(pairs, decodedPairs);
 

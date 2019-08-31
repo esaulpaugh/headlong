@@ -153,6 +153,14 @@ public abstract class RLPItem {
     }
 
     /**
+     * @see RLPItem#data()
+     * @return the byte array representation of this item's data
+     */
+    public byte[] asBytes() {
+        return data();
+    }
+
+    /**
      * Wise man says only empty items are false.
      *
      * @see Integers#putByte(byte, byte[], int)

@@ -51,7 +51,7 @@ public class Student implements RLPEncodeable, ABIEncodeable {
 
         this.name = iter.next().asString(UTF_8);
         this.gpa = iter.next().asFloat();
-        this.publicKey = iter.next().data();
+        this.publicKey = iter.next().asBytes();
         this.balance = new BigDecimal(iter.next().asBigInt(), iter.next().asInt());
     }
 
@@ -68,7 +68,7 @@ public class Student implements RLPEncodeable, ABIEncodeable {
         RLPItem item = RLP_STRICT.wrap(rlp, index);
         this.name = item.asString(UTF_8);
         this.gpa = (item = RLP_STRICT.wrap(rlp, item.endIndex)).asFloat();
-        this.publicKey = (item = RLP_STRICT.wrap(rlp, item.endIndex)).data();
+        this.publicKey = (item = RLP_STRICT.wrap(rlp, item.endIndex)).asBytes();
         BigInteger intVal = (item = RLP_STRICT.wrap(rlp, item.endIndex)).asBigInt();
         this.balance = new BigDecimal(intVal, RLP_STRICT.wrap(rlp, item.endIndex).asInt());
     }

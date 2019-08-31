@@ -92,7 +92,8 @@ final class TypeFactory {
 
                 final ABIType<?> elementType = buildType(type.substring(0, arrayOpenIndex), true, baseTupleType, nameless);
                 final String arrayClassName = elementType.arrayClassName();
-                @SuppressWarnings("unchecked") final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
+                @SuppressWarnings("unchecked")
+                final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
                 final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
                 return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, '[' + arrayClassName);
             } else {

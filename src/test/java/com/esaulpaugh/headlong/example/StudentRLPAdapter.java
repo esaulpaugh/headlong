@@ -33,7 +33,7 @@ public class StudentRLPAdapter implements RLPAdapter<Student> {
 
         return new Student(iter.next().asString(UTF_8),
                 iter.next().asFloat(),
-                iter.next().data(),
+                iter.next().asBytes(),
                 new BigDecimal(iter.next().asBigInt(), iter.next().asInt())
         );
 

@@ -348,11 +348,11 @@ public class RLPDecoderTest {
         RLPListIterator listIter = RLP_STRICT.listIterator(list);
 
         Assert.assertTrue(listIter.hasNext());
-        Assert.assertArrayEquals(a, listIter.next().data());
+        Assert.assertArrayEquals(a, listIter.next().asBytes());
         Assert.assertTrue(listIter.hasNext());
-        Assert.assertArrayEquals(b, listIter.next().data());
+        Assert.assertArrayEquals(b, listIter.next().asBytes());
         Assert.assertTrue(listIter.hasNext());
-        Assert.assertArrayEquals(c, listIter.next().data());
+        Assert.assertArrayEquals(c, listIter.next().asBytes());
 
         Assert.assertFalse(listIter.hasNext());
         assertThrown(NoSuchElementException.class, listIter::next);
@@ -361,11 +361,11 @@ public class RLPDecoderTest {
         RLPIterator seqIter = RLP_STRICT.sequenceIterator(sequence);
 
         Assert.assertTrue(seqIter.hasNext());
-        Assert.assertArrayEquals(c, seqIter.next().data());
+        Assert.assertArrayEquals(c, seqIter.next().asBytes());
         Assert.assertTrue(seqIter.hasNext());
-        Assert.assertArrayEquals(a, seqIter.next().data());
+        Assert.assertArrayEquals(a, seqIter.next().asBytes());
         Assert.assertTrue(seqIter.hasNext());
-        Assert.assertArrayEquals(b, seqIter.next().data());
+        Assert.assertArrayEquals(b, seqIter.next().asBytes());
 
         Assert.assertFalse(seqIter.hasNext());
         assertThrown(NoSuchElementException.class, seqIter::next);
