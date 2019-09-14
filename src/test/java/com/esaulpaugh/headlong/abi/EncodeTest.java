@@ -42,21 +42,40 @@ public class EncodeTest {
 
     @Ignore
     @Test
-    public void fuzzSignatures() {
+    public void fuzzSignatures() throws InterruptedException {
 
 //        new Function("R!|2([1])");
 //        new Function("HWD6()[]");
-//        new Function("foo()[]");
+//        new Function("foo()]");
 
-        for (int i = 1; i < 33; i++) {
-            final int lim = (i + 1) * 99_000;
-            testRandomSigs(i, lim);
+        Runnable r = () -> {
+            for (int len = 3; len < 21; len++) {
+                final int num = (len + 1) * 99_000;
+                testRandomSigs(len, num);
+            }
+        };
+        Thread[] threads = new Thread[7];
+        for (int i = 0; i < 7; i++) {
+            threads[i] = new Thread(r);
+            threads[i].start();
+        }
+        r.run();
+        for (int i = 0; i < 7; i++) {
+            threads[i].join();
         }
     }
 
-    private static void testRandomSigs(final int i, final int lim) {
-        for (int j = 0; j < lim; j++) {
-            String sig = MonteCarloTestCase.generateASCIIString(i, RAND);
+    private static String genString(final int len, final Random r) {
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < len; i++) {
+            sb.append((char) r.nextInt());
+        }
+        return sb.toString();
+    }
+
+    private static void testRandomSigs(final int len, final int num) {
+        for (int j = 0; j < num; j++) {
+            String sig = genString(len, RAND); // MonteCarloTestCase.generateASCIIString(len, RAND);
             try {
                 Function.parse(sig);
             } catch (ParseException pe) {

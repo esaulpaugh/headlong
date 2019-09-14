@@ -26,8 +26,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
-import static com.esaulpaugh.headlong.util.Strings.HEX;
-
 public class RLPEncoderTest {
 
     @Test
@@ -36,28 +34,21 @@ public class RLPEncoderTest {
                 new Object[0],
                 new byte[0]
         };
-
-        byte[] encoded = RLPEncoder.encodeSequentially(objects);
-
-        Assert.assertEquals(
-                Strings.encode(new byte[] { (byte)0xc0, (byte)0x80 }, HEX),
-                Strings.encode(encoded, HEX)
+        Assert.assertArrayEquals(
+                new byte[] { (byte)0xc0, (byte)0x80 },
+                RLPEncoder.encodeSequentially(objects)
         );
     }
 
     @Test
     public void encodeAsList() {
-
         Object[] objects = new Object[] {
                 new Object[0],
                 new byte[0]
         };
-
-        byte[] encoded = RLPEncoder.encodeAsList(objects);
-
-        Assert.assertEquals(
-                Strings.encode(new byte[] { (byte)0xc2, (byte)0xc0, (byte)0x80 }, HEX),
-                Strings.encode(encoded, HEX)
+        Assert.assertArrayEquals(
+                new byte[] { (byte)0xc2, (byte)0xc0, (byte)0x80 },
+                RLPEncoder.encodeAsList(objects)
         );
     }
 
