@@ -48,19 +48,19 @@ final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    int byteLengthPacked(Object value) {
+    int byteLengthPacked(Boolean value) {
         return 1;
     }
 
     @Override
-    public int validate(Object value) {
-        validateClass(value);
+    public int validate(Boolean value) {
+//        validateClass(value);
         return UNIT_LENGTH_BYTES;
     }
 
     @Override
-    void encodeHead(Object value, ByteBuffer dest, int[] offset) {
-        dest.put((boolean) value ? BOOLEAN_TRUE : BOOLEAN_FALSE);
+    void encodeHead(Boolean value, ByteBuffer dest, int[] offset) {
+        dest.put(value ? BOOLEAN_TRUE : BOOLEAN_FALSE);
     }
 
     @Override
@@ -80,5 +80,10 @@ final class BooleanType extends UnitType<Boolean> {
         Boolean bool = Boolean.parseBoolean(s);
         validate(bool);
         return bool;
+    }
+
+    @Override
+    public void encodePacked(Boolean value, ByteBuffer dest) {
+        dest.put(value ? (byte) 1 : (byte) 0);
     }
 }

@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Utils;
-
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 
@@ -79,15 +77,15 @@ public abstract class ABIType<J> implements Serializable {
 
     abstract int typeCode();
 
-    abstract int byteLength(Object value);
+    abstract int byteLength(J value);
 
-    abstract int byteLengthPacked(Object value);
+    abstract int byteLengthPacked(J value);
 
-    public abstract int validate(Object value);
+    public abstract int validate(J value);
 
-    abstract void encodeHead(Object value, ByteBuffer dest, int[] offset);
+    abstract void encodeHead(J value, ByteBuffer dest, int[] offset);
 
-    abstract void encodeTail(Object value, ByteBuffer dest);
+    abstract void encodeTail(J value, ByteBuffer dest);
 
     /**
      * Decodes the data at the buffer's current position according to this {@link ABIType}.
@@ -100,16 +98,7 @@ public abstract class ABIType<J> implements Serializable {
 
     public abstract J parseArgument(String s);
 
-    void validateClass(Object value) {
-        // may throw NPE
-        if(clazz != value.getClass() && !clazz.isAssignableFrom(value.getClass())) {
-            throw new IllegalArgumentException("class mismatch: "
-                    + value.getClass().getName()
-                    + " not assignable to "
-                    + clazz.getName()
-                    + " (" + Utils.friendlyClassName(value.getClass()) + " not instanceof " + Utils.friendlyClassName(clazz) + "/" + canonicalType + ")");
-        }
-    }
+    public abstract void encodePacked(J value, ByteBuffer dest);
 
     static byte[] newUnitBuffer() {
         return new byte[UNIT_LENGTH_BYTES];

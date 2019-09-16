@@ -39,17 +39,17 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
     }
 
     @Override
-    final int byteLength(Object value) {
+    final int byteLength(V value) {
         return UNIT_LENGTH_BYTES;
     }
 
     @Override
-    void encodeHead(Object value, ByteBuffer dest, int[] offset) {
+    void encodeHead(V value, ByteBuffer dest, int[] offset) {
         Encoding.insertInt(((Number) value).longValue(), dest);
     }
 
     @Override
-    void encodeTail(Object value, ByteBuffer dest) {
+    void encodeTail(V value, ByteBuffer dest) {
         throw new UnsupportedOperationException();
     }
 
@@ -83,5 +83,10 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
         if (actual > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + actual + " > " + bitLength);
         }
+    }
+
+    @Override
+    public void encodePacked(V value, ByteBuffer dest) {
+        Encoding.packInt(((Number) value).longValue(), byteLengthPacked(value), dest);
     }
 }

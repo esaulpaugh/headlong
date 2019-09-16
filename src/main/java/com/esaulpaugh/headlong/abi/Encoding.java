@@ -15,6 +15,9 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
+import com.esaulpaugh.headlong.rlp.util.Integers;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -36,7 +39,7 @@ final class Encoding {
         Arrays.fill(NEGATIVE_INT_PADDING, NEGATIVE_ONE_BYTE);
     }
 
-    static void insertOffset(final int[] offset, ABIType<?> paramType, Object object, ByteBuffer dest) {
+    static void insertOffset(final int[] offset, ABIType paramType, Object object, ByteBuffer dest) {
         final int val = offset[0];
         insertInt(val, dest);
         offset[0] = val + paramType.byteLength(object);
@@ -53,6 +56,34 @@ final class Encoding {
         final int lim = 32 - arr.length;
         for (int i = 0; i < lim; i++) {
             dest.put(paddingByte);
+        }
+        dest.put(arr);
+    }
+
+    static void packInt(long value, int byteLen, ByteBuffer dest) {
+        if(value >= 0) {
+            dest.position(dest.position() + (byteLen - Integers.len(value)));
+            Integers.putLong(value, dest);
+        } else {
+            final int paddingBytes = byteLen - BizarroIntegers.len(value);
+            for (int i = 0; i < paddingBytes; i++) {
+                dest.put(Encoding.NEGATIVE_ONE_BYTE);
+            }
+            BizarroIntegers.putLong(value, dest);
+        }
+    }
+
+    static void packInt(BigInteger bigGuy, int byteLen, ByteBuffer dest) {
+        byte[] arr = bigGuy.toByteArray();
+        final int paddingBytes = byteLen - arr.length;
+        if(bigGuy.signum() == -1) {
+            for (int i = 0; i < paddingBytes; i++) {
+                dest.put(Encoding.NEGATIVE_ONE_BYTE);
+            }
+        } else {
+            for (int i = 0; i < paddingBytes; i++) {
+                dest.put((byte) 0);
+            }
         }
         dest.put(arr);
     }

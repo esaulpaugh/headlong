@@ -42,24 +42,24 @@ final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    int byteLengthPacked(Object value) {
+    int byteLengthPacked(BigDecimal value) {
         return bitLength >> 3; // div 8
     }
 
     @Override
-    public int validate(Object value) {
-        validateClass(value);
-        BigDecimal dec = (BigDecimal) value;
-        validateBigIntBitLen(dec.unscaledValue());
-        if(dec.scale() != scale) {
-            throw new IllegalArgumentException("big decimal scale mismatch: actual != expected: " + dec.scale() + " != " + scale);
+    public int validate(BigDecimal value) {
+//        validateClass(value);
+//        BigDecimal dec = (BigDecimal) value;
+        validateBigIntBitLen(value.unscaledValue());
+        if(value.scale() != scale) {
+            throw new IllegalArgumentException("big decimal scale mismatch: actual != expected: " + value.scale() + " != " + scale);
         }
         return UNIT_LENGTH_BYTES;
     }
 
     @Override
-    void encodeHead(Object value, ByteBuffer dest, int[] offset) {
-        Encoding.insertInt(((BigDecimal) value).unscaledValue(), dest);
+    void encodeHead(BigDecimal value, ByteBuffer dest, int[] offset) {
+        Encoding.insertInt(value.unscaledValue(), dest);
     }
 
     @Override

@@ -72,15 +72,15 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    int byteLength(Object value) {
-        Tuple tuple = (Tuple) value;
-        final Object[] elements = tuple.elements;
+    int byteLength(Tuple value) {
+//        Tuple tuple = (Tuple) value;
+        final Object[] elements = value.elements;
 
         final ABIType<?>[] types = this.elementTypes;
         final int numTypes = types.length;
 
         int len = 0;
-        ABIType<?> type;
+        ABIType type;
         for (int i = 0; i < numTypes; i++) {
             type = types[i];
             len += type.dynamic
@@ -92,11 +92,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    public int byteLengthPacked(Object value) {
-        Tuple tuple = (Tuple) value;
-        final Object[] elements = tuple.elements;
+    public int byteLengthPacked(Tuple value) {
+//        Tuple tuple = (Tuple) value;
+        final Object[] elements = value.elements;
 
-        final ABIType<?>[] types = this.elementTypes;
+        final ABIType[] types = this.elementTypes;
         final int numTypes = types.length;
 
         int len = 0;
@@ -108,10 +108,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    public int validate(final Object value) {
-        validateClass(value);
+    public int validate(Tuple tuple) {
+//        validateClass(tuple);
 
-        final Tuple tuple = (Tuple) value;
         final Object[] elements = tuple.elements;
 
         final ABIType<?>[] elementTypes = this.elementTypes;
@@ -127,7 +126,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         int i = 0;
         try {
             for ( ; i < numTypes; i++) {
-                final ABIType<?> type = elementTypes[i];
+                final ABIType type = elementTypes[i];
                 byteLength += type.dynamic
                         ? OFFSET_LENGTH_BYTES + type.validate(elements[i])
                         : type.validate(elements[i]);
@@ -140,7 +139,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    void encodeHead(Object value, ByteBuffer dest, int[] offset) {
+    void encodeHead(Tuple value, ByteBuffer dest, int[] offset) {
         if (dynamic) {
             Encoding.insertOffset(offset, this, value, dest);
         } else {
@@ -149,18 +148,18 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    void encodeTail(Object value, ByteBuffer dest) {
+    void encodeTail(Tuple value, ByteBuffer dest) {
         final Object[] values = ((Tuple) value).elements;
         final int[] offset = new int[] { headLengthSum(values) };
 
         final int len = elementTypes.length;
         int i;
         for (i = 0; i < len; i++) {
-            elementTypes[i].encodeHead(values[i], dest, offset);
+            ((ABIType) elementTypes[i]).encodeHead(values[i], dest, offset);
         }
         if(dynamic) {
             for (i = 0; i < len; i++) {
-                ABIType<?> type = elementTypes[i];
+                ABIType type = elementTypes[i];
                 if (type.dynamic) {
                     type.encodeTail(values[i], dest);
                 }
@@ -171,7 +170,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     private int headLengthSum(Object[] elements) {
         int headLengths = 0;
         for (int i = 0; i < elementTypes.length; i++) {
-            ABIType<?> et = elementTypes[i];
+            ABIType et = elementTypes[i];
             headLengths += et.dynamic
                     ? OFFSET_LENGTH_BYTES
                     : et.byteLength(elements[i]);
@@ -300,8 +299,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return dest;
     }
 
-    public void encodePacked(Tuple values, ByteBuffer dest) {
-        PackedEncoder.insertTuple(this, values, dest);
+    @Override
+    public void encodePacked(Tuple value, ByteBuffer dest) {
+        final ABIType[] types = elementTypes;
+        final Object[] values = value.elements;
+
+        final int len = types.length;
+        int i;
+        for (i = 0; i < len; i++) {
+            types[i].encodePacked(values[i], dest);
+        }
     }
 
     @Override

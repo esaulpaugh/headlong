@@ -91,7 +91,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     @Override
     int byteLength(Object value) {
         int len;
-        final ABIType<?> elementType = this.elementType;
+        final ABIType elementType = this.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: len = ((boolean[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BYTE: len =
@@ -125,7 +125,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
     @Override
     int byteLengthPacked(Object value) {
-        final ABIType<?> elementType = this.elementType;
+        final ABIType elementType = this.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return ((boolean[]) value).length; // * 1
         case TYPE_CODE_BYTE: return (isString ? ((String) value).getBytes(StandardCharsets.UTF_8) : (byte[]) value).length; // * 1
@@ -147,8 +147,8 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    public int validate(final Object value) {
-        validateClass(value);
+    public int validate(J value) {
+//        validateClass(value);
 
         final int staticLen;
         switch (elementType.typeCode()) {
@@ -162,7 +162,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER: staticLen = validateBigIntegerArray((BigInteger[]) value); break;
         case TYPE_CODE_BIG_DECIMAL: staticLen = validateBigDecimalArray((BigDecimal[]) value); break;
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: staticLen = validateObjectArray((Object[]) value); break;
+        case TYPE_CODE_TUPLE: staticLen = validateObjectArray(value); break;
         default: throw unrecognizedTypeException(value.getClass().getName());
         }
         // arrays with variable number of elements get +32 for the array length
@@ -241,14 +241,15 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     /**
      * For arrays of arrays or arrays of tuples only.
      */
-    private int validateObjectArray(Object[] arr) {
+    private int validateObjectArray(J value) {
+        Object[] arr = (Object[]) value;
         final int len = arr.length;
         checkLength(len, arr);
         int byteLength = elementType.dynamic ? len << LOG_2_UNIT_LENGTH_BYTES : 0; // 32 bytes per offset
         int i = 0;
         try {
             for ( ; i < len; i++) {
-                byteLength += elementType.validate(arr[i]);
+                byteLength += ((ABIType) elementType).validate(arr[i]);
             }
         } catch (RuntimeException re) {
             throw validationException(re, i);
@@ -348,7 +349,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 }
             }
             for (int i = 0; i < len; i++) {
-                elementType.encodeTail(objects[i], dest);
+                ((ABIType) elementType).encodeTail(objects[i], dest);
             }
             return;
         default:
@@ -555,6 +556,64 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     @Override
     public J parseArgument(String s) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void encodePacked(J value, ByteBuffer dest) {
+        final ABIType elementType = this.elementType;
+        switch (elementType.typeCode()) {
+            case TYPE_CODE_BOOLEAN: packBooleans((boolean[]) value, dest); break;
+            case TYPE_CODE_BYTE:
+                byte[] arr = isString ? ((String) value).getBytes(StandardCharsets.UTF_8) : (byte[]) value;
+                packBytes(arr, dest); break;
+            case TYPE_CODE_INT: packInts((int[]) value, elementType.byteLengthPacked(null), dest); break;
+            case TYPE_CODE_LONG: packLongs((long[]) value, elementType.byteLengthPacked(null), dest); break;
+            case TYPE_CODE_BIG_INTEGER: packBigIntegers((BigInteger[]) value, elementType.byteLengthPacked(null), dest); break;
+            case TYPE_CODE_BIG_DECIMAL: packBigDecimals((BigDecimal[]) value, elementType.byteLengthPacked(null), dest); break;
+            case TYPE_CODE_ARRAY:
+            case TYPE_CODE_TUPLE:
+                for(Object e : (Object[]) value) {
+                    elementType.encodePacked(e, dest);
+                }
+                break;
+            default: throw new IllegalArgumentException("unexpected array type: " + toString());
+        }
+    }
+
+    private static void packBooleans(boolean[] bools, ByteBuffer dest) {
+        final int idx = dest.position();
+        final int len = bools.length;
+        for (int i = idx; i < len; i++) {
+            dest.put(bools[i] ? (byte) 1 : (byte) 0);
+        }
+    }
+
+    private static void packBytes(byte[] bytes, ByteBuffer dest) {
+        dest.put(bytes);
+    }
+
+    private static void packInts(int[] ints, int byteLen, ByteBuffer dest) {
+        for (int e : ints) {
+            Encoding.packInt(e, byteLen, dest);
+        }
+    }
+
+    private static void packLongs(long[] longs, int byteLen, ByteBuffer dest) {
+        for (long e : longs) {
+            Encoding.packInt(e, byteLen, dest);
+        }
+    }
+
+    private static void packBigIntegers(BigInteger[] bigInts, int byteLen, ByteBuffer dest) {
+        for (BigInteger e : bigInts) {
+            Encoding.packInt(e, byteLen, dest);
+        }
+    }
+
+    private static void packBigDecimals(BigDecimal[] bigDecs, int byteLen, ByteBuffer dest) {
+        for (BigDecimal e : bigDecs) {
+            Encoding.packInt(e.unscaledValue(), byteLen, dest);
+        }
     }
 
     /**

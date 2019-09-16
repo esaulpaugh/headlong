@@ -217,7 +217,7 @@ public final class PackedDecoder {
         return arrayLen;
     }
 
-    private static int decodeIntArray(ABIType<?> elementType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
+    private static int decodeIntArray(ABIType elementType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
         final int len = elementType.byteLengthPacked(null);
         int[] ints = new int[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
@@ -230,7 +230,7 @@ public final class PackedDecoder {
         return arrayLen;
     }
 
-    private static int decodeLongArray(ABIType<?> longType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
+    private static int decodeLongArray(ABIType longType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
         final int len = longType.byteLengthPacked(null);
         long[] longs = new long[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
@@ -243,7 +243,7 @@ public final class PackedDecoder {
         return arrayLen;
     }
 
-    private static int decodeBigIntegerArray(ABIType<?> elementType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
+    private static int decodeBigIntegerArray(ABIType elementType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
         final int len = elementType.byteLengthPacked(null);
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {

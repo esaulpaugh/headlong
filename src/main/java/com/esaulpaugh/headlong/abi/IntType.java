@@ -38,14 +38,14 @@ final class IntType extends UnitType<Integer> {
     }
 
     @Override
-    int byteLengthPacked(Object value) {
+    int byteLengthPacked(Integer value) {
         return bitLength >> 3; // div 8
     }
 
     @Override
-    public int validate(Object value) {
-        validateClass(value);
-        final long longVal = ((Number) value).longValue();
+    public int validate(Integer value) {
+//        validateClass(value);
+        final long longVal = value.longValue();
         validateLongBitLen(longVal);
         return UNIT_LENGTH_BYTES;
     }

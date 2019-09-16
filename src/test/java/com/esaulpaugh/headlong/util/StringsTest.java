@@ -23,10 +23,7 @@ import org.junit.Test;
 import java.util.Random;
 import java.util.function.Supplier;
 
-import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
-import static com.esaulpaugh.headlong.util.Strings.DECIMAL;
-import static com.esaulpaugh.headlong.util.Strings.HEX;
-import static com.esaulpaugh.headlong.util.Strings.UTF_8;
+import static com.esaulpaugh.headlong.util.Strings.*;
 
 public class StringsTest {
 
@@ -62,11 +59,6 @@ public class StringsTest {
     @Test
     public void hex() {
         testEncoding(20_000, HEX, SUPPLY_RANDOM);
-    }
-
-    @Test
-    public void decimal() {
-        testEncoding(20_000, DECIMAL, SUPPLY_RANDOM);
     }
 
     @Test

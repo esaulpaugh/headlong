@@ -43,13 +43,13 @@ final class ByteType extends UnitType<Byte> {
     }
 
     @Override
-    int byteLengthPacked(Object value) {
+    int byteLengthPacked(Byte value) {
         return 1;
     }
 
     @Override
-    public int validate(Object value) {
-        validateClass(value);
+    public int validate(Byte value) {
+//        validateClass(value);
         return UNIT_LENGTH_BYTES;
     }
 

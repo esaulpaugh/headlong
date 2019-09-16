@@ -38,7 +38,7 @@ final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
-    int byteLengthPacked(Object value) {
+    int byteLengthPacked(BigInteger value) {
         return bitLength >> 3; // div 8
     }
 
@@ -50,15 +50,15 @@ final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
-    public int validate(Object value) {
-        validateClass(value);
-        validateBigIntBitLen((BigInteger) value);
+    public int validate(BigInteger value) {
+//        validateClass(value);
+        validateBigIntBitLen(value);
         return UNIT_LENGTH_BYTES;
     }
 
     @Override
-    void encodeHead(Object value, ByteBuffer dest, int[] offset) {
-        Encoding.insertInt((BigInteger) value, dest);
+    void encodeHead(BigInteger value, ByteBuffer dest, int[] offset) {
+        Encoding.insertInt(value, dest);
     }
 
     @Override
