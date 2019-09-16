@@ -17,11 +17,11 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.rlp.util.Integers;
-import com.esaulpaugh.headlong.util.Strings;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import static com.esaulpaugh.headlong.abi.ABIType.*;
 
@@ -62,7 +62,7 @@ final class PackedEncoder {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: insertBooleans((boolean[]) value, dest); break;
         case TYPE_CODE_BYTE:
-            byte[] arr = arrayType.isString ? ((String) value).getBytes(Strings.CHARSET_UTF_8) : (byte[]) value;
+            byte[] arr = arrayType.isString ? ((String) value).getBytes(StandardCharsets.UTF_8) : (byte[]) value;
             insertBytes(arr, dest); break;
         case TYPE_CODE_INT: insertInts((int[]) value, elementType.byteLengthPacked(value), dest); break;
         case TYPE_CODE_LONG: insertLongs((long[]) value, elementType.byteLengthPacked(value), dest); break;

@@ -17,20 +17,15 @@ package com.esaulpaugh.headlong.util;
 
 import com.migcomponents.migbase64.Base64;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static com.esaulpaugh.headlong.abi.util.Utils.EMPTY_BYTE_ARRAY;
-import static com.migcomponents.migbase64.Base64.NO_LINE_SEP;
-import static com.migcomponents.migbase64.Base64.NO_PADDING;
-import static com.migcomponents.migbase64.Base64.URL_SAFE_CHARS;
+import static com.migcomponents.migbase64.Base64.*;
 
 /**
  * Utility for encoding and decoding hexadecimal, Base64, and UTF-8-encoded {@code String}s.
  */
 public final class Strings {
-
-    public static final Charset CHARSET_UTF_8 = Charset.forName("UTF-8");
-    public static final Charset CHARSET_ASCII = Charset.forName("US-ASCII");
 
     public static final int BASE_64_URL_SAFE = 3; // 64
     public static final int DECIMAL = 2; // 10
@@ -51,7 +46,7 @@ public final class Strings {
         switch (encoding) {
         case BASE_64_URL_SAFE: return Base64.encodeToString(buffer, from, len, URL_SAFE_FLAGS);
         case DECIMAL: return Decimal.encodeToString(buffer, from, len);
-        case UTF_8: return new String(buffer, from, len, CHARSET_UTF_8);
+        case UTF_8: return new String(buffer, from, len, StandardCharsets.UTF_8);
         case HEX:
         default: return FastHex.encodeToString(buffer, from, len);
         }
@@ -68,7 +63,7 @@ public final class Strings {
         switch (encoding) {
         case BASE_64_URL_SAFE: return java.util.Base64.getUrlDecoder().decode(string);
         case DECIMAL: return Decimal.decode(string, 0, string.length());
-        case UTF_8: return string.getBytes(CHARSET_UTF_8);
+        case UTF_8: return string.getBytes(StandardCharsets.UTF_8);
         case HEX:
         default: return FastHex.decode(string, 0 ,string.length());
         }

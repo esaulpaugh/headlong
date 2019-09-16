@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.FastHex;
-import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -24,15 +23,14 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.abi.TypeFactory.EMPTY_PARAMETER;
-import static com.esaulpaugh.headlong.abi.TypeFactory.ILLEGAL_TUPLE_TERMINATION;
-import static com.esaulpaugh.headlong.abi.TypeFactory.UNRECOGNIZED_TYPE;
+import static com.esaulpaugh.headlong.abi.TypeFactory.*;
 
 public class EncodeTest {
 
@@ -167,7 +165,7 @@ public class EncodeTest {
     public void fixedLengthDynamicArrayTest() throws Throwable {
 
         Supplier<Object> bytesSupplier = () -> { byte[] v = new byte[RAND.nextInt(33)]; RAND.nextBytes(v); return v; };
-        Supplier<Object> stringSupplier = () -> { byte[] v = new byte[RAND.nextInt(33)]; RAND.nextBytes(v); return new String(v, Strings.CHARSET_UTF_8); };
+        Supplier<Object> stringSupplier = () -> { byte[] v = new byte[RAND.nextInt(33)]; RAND.nextBytes(v); return new String(v, StandardCharsets.UTF_8); };
         Supplier<Object> booleanArraySupplier = () -> { boolean[] v = new boolean[RAND.nextInt(4)]; Arrays.fill(v, RAND.nextBoolean()); return v; };
         Supplier<Object> intArraySupplier = () -> { BigInteger[] v = new BigInteger[RAND.nextInt(4)]; Arrays.fill(v, BigInteger.valueOf(RAND.nextInt())); return v; };
 

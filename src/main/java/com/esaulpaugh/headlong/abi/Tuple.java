@@ -20,6 +20,10 @@ import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.RandomAccess;
 
+/**
+ * An ordered list of objects whose types should correspond to some {@link TupleType}. {@link Function}s encode/decode
+ * {@link Tuple}s containing arguments satisfying its parameters/return type. {@link Tuple}s can contain other tuples.
+ */
 public final class Tuple extends AbstractList<Object> implements RandomAccess, Serializable {
 
     public static final Tuple EMPTY = new Tuple();
@@ -27,7 +31,7 @@ public final class Tuple extends AbstractList<Object> implements RandomAccess, S
     final Object[] elements;
 
     public Tuple(Object... elements) {
-        this.elements = elements;
+        this.elements = elements; // array not guarded from external modification
     }
 
     public Tuple subtuple(int startIndex, int endIndex) {

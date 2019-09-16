@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 public class TestUtils {
@@ -55,7 +56,7 @@ public class TestUtils {
             throw new IOException("url null");
         }
         byte[] bytes = readFile(new File(url.getFile()));
-        return new String(bytes, Charset.forName("UTF-8"));
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     public static byte[] parsePrimitiveToBytes(JsonElement in) {
@@ -173,7 +174,8 @@ public class TestUtils {
         try {
             r.run();
         } catch (Throwable t) {
-            if (clazz.isAssignableFrom(t.getClass()) && t.getMessage().contains(substr)) {
+            if(clazz.isAssignableFrom(t.getClass())
+                    && (t.getMessage() == null || t.getMessage().contains(substr))) {
                 return;
             }
             throw t;

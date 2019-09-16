@@ -17,18 +17,18 @@ package com.joemelsha.crypto.hash;
 
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
 import com.esaulpaugh.headlong.util.FastHex;
-import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Assert;
 import org.junit.Test;
 import org.spongycastle.crypto.digests.KeccakDigest;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Random;
 
 public class KeccakTest {
 
-    private static final byte[] PART_A = "abcdefghijklmnopqrstuvwxyz".getBytes(Strings.CHARSET_ASCII);
-    private static final byte[] PART_B = "ABCDEFG".getBytes(Strings.CHARSET_ASCII);
+    private static final byte[] PART_A = "abcdefghijklmnopqrstuvwxyz".getBytes(StandardCharsets.US_ASCII);
+    private static final byte[] PART_B = "ABCDEFG".getBytes(StandardCharsets.US_ASCII);
     private static final byte[] WHOLE;
 
     static {

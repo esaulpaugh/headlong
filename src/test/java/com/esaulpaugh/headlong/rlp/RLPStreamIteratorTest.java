@@ -28,13 +28,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
@@ -42,7 +42,7 @@ import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 public class RLPStreamIteratorTest {
 
     private static final byte TEST_BYTE = 0x79;
-    private static final byte[] TEST_BYTES = "\'wort\'X3".getBytes(CHARSET_UTF_8);
+    private static final byte[] TEST_BYTES = "\'wort\'X3".getBytes(StandardCharsets.UTF_8);
     private static final String TEST_STRING = "2401";
 
     @Test

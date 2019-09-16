@@ -15,13 +15,13 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.abi.util.Utils;
 import com.google.gson.JsonObject;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.text.ParseException;
@@ -136,7 +136,7 @@ public final class Function implements ABIObject, Serializable {
     private void generateSelector(MessageDigest messageDigest) {
         try {
             messageDigest.reset();
-            messageDigest.update(getCanonicalSignature().getBytes(Strings.CHARSET_UTF_8));
+            messageDigest.update(getCanonicalSignature().getBytes(StandardCharsets.UTF_8));
             messageDigest.digest(selector, 0, SELECTOR_LEN);
         } catch (DigestException de) {
             throw new RuntimeException(de);

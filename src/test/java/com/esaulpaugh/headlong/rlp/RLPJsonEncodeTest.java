@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
@@ -74,7 +74,7 @@ public class RLPJsonEncodeTest {
                         actual = RLPEncoder.encode(inBytes);
                     } else {
                         String string = parseString(in);
-                        inBytes = string.getBytes(Charset.forName("UTF-8"));
+                        inBytes = string.getBytes(StandardCharsets.UTF_8);
                         actual = RLPEncoder.encode(inBytes);
                     }
                 }

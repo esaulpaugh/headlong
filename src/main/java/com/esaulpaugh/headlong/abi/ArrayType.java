@@ -21,13 +21,13 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import static com.esaulpaugh.headlong.abi.UnitType.LOG_2_UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.util.Strings.CHARSET_UTF_8;
 
 /**
- * Represents static array types such as bytes3 and uint16[3][2] and dynamic array types such as decimal[5][] or
+ * Represents static array types such as bytes3 or uint16[3][2] and dynamic array types such as decimal[5][] or
  * string[4].
  *
  * @param <T>   the {@link ABIType} for the elements of the array
@@ -96,7 +96,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BOOLEAN: len = ((boolean[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BYTE: len =
                 roundLengthUp(
-                        (isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length
+                        (isString ? ((String) value).getBytes(StandardCharsets.UTF_8) : (byte[]) value).length
                 );
                 break;
         case TYPE_CODE_INT: len = ((int[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
@@ -128,7 +128,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         final ABIType<?> elementType = this.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return ((boolean[]) value).length; // * 1
-        case TYPE_CODE_BYTE: return (isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value).length; // * 1
+        case TYPE_CODE_BYTE: return (isString ? ((String) value).getBytes(StandardCharsets.UTF_8) : (byte[]) value).length; // * 1
         case TYPE_CODE_INT: return ((int[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_LONG: return ((long[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_BIG_INTEGER:
@@ -154,7 +154,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: staticLen = checkLength(((boolean[]) value).length, value) << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BYTE:
-            byte[] bytes = isString ? ((String) value).getBytes(CHARSET_UTF_8) : (byte[]) value;
+            byte[] bytes = isString ? ((String) value).getBytes(StandardCharsets.UTF_8) : (byte[]) value;
             staticLen = roundLengthUp(checkLength(bytes.length, value));
             break;
         case TYPE_CODE_INT: staticLen = validateIntArray((int[]) value); break;
@@ -280,7 +280,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     @Override
     void encodeTail(Object value, ByteBuffer dest) {
         if(isString) {
-            byte[] bytes = ((String) value).getBytes(CHARSET_UTF_8);
+            byte[] bytes = ((String) value).getBytes(StandardCharsets.UTF_8);
             Encoding.insertInt(bytes.length, dest); // insertLength
             insertBytes(bytes, dest);
         } else {
@@ -441,7 +441,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         bb.get(out);
         bb.position(mark + roundLengthUp(arrayLen));
         if(isString) {
-            return new String(out, CHARSET_UTF_8);
+            return new String(out, StandardCharsets.UTF_8);
         }
         return out;
     }

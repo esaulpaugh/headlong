@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class RLPEncoderTest {
@@ -91,7 +92,7 @@ public class RLPEncoderTest {
 
         byte[] rlp = RLPEncoder.encodeSequentially(
                 Integers.toBytes((short) c),
-                str.getBytes(Strings.CHARSET_UTF_8),
+                str.getBytes(StandardCharsets.UTF_8),
                 Integers.toBytes(by),
                 Integers.toBytes(sh),
                 Integers.toBytes(i),
