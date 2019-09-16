@@ -27,7 +27,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
@@ -67,7 +66,7 @@ public class TestUtils {
             if(inString.startsWith("#")) {
                 return parseBigInteger(in).toByteArray();
             } else {
-                return inString.getBytes(Charset.forName("UTF-8"));
+                return inString.getBytes(StandardCharsets.UTF_8);
             }
         }
     }

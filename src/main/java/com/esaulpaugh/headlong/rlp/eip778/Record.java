@@ -60,8 +60,8 @@ public final class Record {
 
         try {
             this.rlp = RLP_STRICT.wrapList(record);
-        } catch (DecodeException e) {
-            throw new RuntimeException(e); // shouldn't happen
+        } catch (DecodeException e) { // shouldn't happen if above code is correct
+            throw new Error(e);
         }
     }
 
