@@ -191,9 +191,9 @@ public final class PackedDecoder {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return decodeBooleanArray(arrayLen, buffer, idx, dest, destIdx) * byteLen;
         case TYPE_CODE_BYTE: return decodeByteArray(arrayLen, buffer, idx, dest, destIdx) * byteLen;
-        case TYPE_CODE_INT: return decodeIntArray(arrayType.elementType, arrayLen, buffer, idx, dest, destIdx) * byteLen;
-        case TYPE_CODE_LONG: return decodeLongArray(arrayType.elementType, arrayLen, buffer, idx, dest, destIdx) * byteLen;
-        case TYPE_CODE_BIG_INTEGER: return decodeBigIntegerArray(arrayType.elementType, arrayLen, buffer, idx, dest, destIdx) * byteLen;
+        case TYPE_CODE_INT: return decodeIntArray(arrayType.elementType, arrayLen, elementType.byteLengthPacked(null), buffer, idx, dest, destIdx) * byteLen;
+        case TYPE_CODE_LONG: return decodeLongArray(arrayType.elementType, arrayLen, elementType.byteLengthPacked(null), buffer, idx, dest, destIdx) * byteLen;
+        case TYPE_CODE_BIG_INTEGER: return decodeBigIntegerArray(arrayType.elementType, arrayLen, elementType.byteLengthPacked(null), buffer, idx, dest, destIdx) * byteLen;
         case TYPE_CODE_BIG_DECIMAL: return decodeBigDecimalArray((BigDecimalType) arrayType.elementType, arrayLen, buffer, idx, dest, destIdx) * byteLen;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: throw new UnsupportedOperationException();
@@ -217,40 +217,40 @@ public final class PackedDecoder {
         return arrayLen;
     }
 
-    private static int decodeIntArray(ABIType elementType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        final int len = elementType.byteLengthPacked(null);
+    @SuppressWarnings("unchecked")
+    private static int decodeIntArray(ABIType intType, final int arrayLen, final int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
         int[] ints = new int[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            Integer val = Integers.getInt(buffer, idx, len);
-            elementType.validate(val);
+            Integer val = Integers.getInt(buffer, idx, elementLen);
+            intType.validate(val);
             ints[i] = val;
-            idx += len;
+            idx += elementLen;
         }
         dest[destIdx] = ints;
         return arrayLen;
     }
 
-    private static int decodeLongArray(ABIType longType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        final int len = longType.byteLengthPacked(null);
+    @SuppressWarnings("unchecked")
+    private static int decodeLongArray(ABIType longType, final int arrayLen, final int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
         long[] longs = new long[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            Long val = Integers.getLong(buffer, idx, len);
+            Long val = Integers.getLong(buffer, idx, elementLen);
             longType.validate(val);
             longs[i] = val;
-            idx += len;
+            idx += elementLen;
         }
         dest[destIdx] = longs;
         return arrayLen;
     }
 
-    private static int decodeBigIntegerArray(ABIType elementType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        final int len = elementType.byteLengthPacked(null);
+    @SuppressWarnings("unchecked")
+    private static int decodeBigIntegerArray(ABIType bigIntType, final int arrayLen, final int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            BigInteger val = com.esaulpaugh.headlong.rlp.util.Integers.getBigInt(buffer, idx, len);
-            elementType.validate(val);
+            BigInteger val = com.esaulpaugh.headlong.rlp.util.Integers.getBigInt(buffer, idx, elementLen);
+            bigIntType.validate(val);
             bigInts[i] = val;
-            idx += len;
+            idx += elementLen;
         }
         dest[destIdx] = bigInts;
         return arrayLen;

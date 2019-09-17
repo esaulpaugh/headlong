@@ -48,8 +48,6 @@ final class BigDecimalType extends UnitType<BigDecimal> {
 
     @Override
     public int validate(BigDecimal value) {
-//        validateClass(value);
-//        BigDecimal dec = (BigDecimal) value;
         validateBigIntBitLen(value.unscaledValue());
         if(value.scale() != scale) {
             throw new IllegalArgumentException("big decimal scale mismatch: actual != expected: " + value.scale() + " != " + scale);

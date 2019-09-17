@@ -39,6 +39,7 @@ final class Encoding {
         Arrays.fill(NEGATIVE_INT_PADDING, NEGATIVE_ONE_BYTE);
     }
 
+    @SuppressWarnings("unchecked")
     static void insertOffset(final int[] offset, ABIType paramType, Object object, ByteBuffer dest) {
         final int val = offset[0];
         insertInt(val, dest);

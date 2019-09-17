@@ -72,8 +72,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     int byteLength(Tuple value) {
-//        Tuple tuple = (Tuple) value;
         final Object[] elements = value.elements;
 
         final ABIType<?>[] types = this.elementTypes;
@@ -92,8 +92,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public int byteLengthPacked(Tuple value) {
-//        Tuple tuple = (Tuple) value;
         final Object[] elements = value.elements;
 
         final ABIType[] types = this.elementTypes;
@@ -108,9 +108,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public int validate(Tuple tuple) {
-//        validateClass(tuple);
-
         final Object[] elements = tuple.elements;
 
         final ABIType<?>[] elementTypes = this.elementTypes;
@@ -148,8 +147,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     void encodeTail(Tuple value, ByteBuffer dest) {
-        final Object[] values = ((Tuple) value).elements;
+        final Object[] values = value.elements;
         final int[] offset = new int[] { headLengthSum(values) };
 
         final int len = elementTypes.length;
@@ -167,6 +167,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
     }
 
+    @SuppressWarnings("unchecked")
     private int headLengthSum(Object[] elements) {
         int headLengths = 0;
         for (int i = 0; i < elementTypes.length; i++) {
@@ -300,6 +301,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void encodePacked(Tuple value, ByteBuffer dest) {
         final ABIType[] types = elementTypes;
         final Object[] values = value.elements;

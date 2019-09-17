@@ -54,7 +54,6 @@ final class BooleanType extends UnitType<Boolean> {
 
     @Override
     public int validate(Boolean value) {
-//        validateClass(value);
         return UNIT_LENGTH_BYTES;
     }
 

@@ -44,7 +44,6 @@ final class IntType extends UnitType<Integer> {
 
     @Override
     public int validate(Integer value) {
-//        validateClass(value);
         final long longVal = value.longValue();
         validateLongBitLen(longVal);
         return UNIT_LENGTH_BYTES;

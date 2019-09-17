@@ -89,9 +89,9 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
      * @return  the length in bytes
      */
     @Override
-    int byteLength(Object value) {
+    @SuppressWarnings("unchecked")
+    int byteLength(J value) {
         int len;
-        final ABIType elementType = this.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: len = ((boolean[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BYTE: len =
@@ -109,7 +109,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
             final int n = elements.length;
             len = 0;
             for (int i = 0; i < n; i++) {
-                len += elementType.byteLength(elements[i]);
+                len += ((ABIType) this.elementType).byteLength(elements[i]);
             }
             if(elementType.dynamic) { // implies this.dynamic
                 len += n << LOG_2_UNIT_LENGTH_BYTES; // 32 bytes per offset
@@ -124,8 +124,8 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    int byteLengthPacked(Object value) {
-        final ABIType elementType = this.elementType;
+    @SuppressWarnings("unchecked")
+    int byteLengthPacked(J value) {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return ((boolean[]) value).length; // * 1
         case TYPE_CODE_BYTE: return (isString ? ((String) value).getBytes(StandardCharsets.UTF_8) : (byte[]) value).length; // * 1
@@ -139,7 +139,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
             int staticLen = 0;
             final int len = elements.length;
             for (int i = 0; i < len; i++) {
-                staticLen += elementType.byteLengthPacked(elements[i]);
+                staticLen += ((ABIType) this.elementType).byteLengthPacked(elements[i]);
             }
             return staticLen;
         default: throw unrecognizedTypeException(elementType.toString());
@@ -148,8 +148,6 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
     @Override
     public int validate(J value) {
-//        validateClass(value);
-
         final int staticLen;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: staticLen = checkLength(((boolean[]) value).length, value) << LOG_2_UNIT_LENGTH_BYTES; break;
@@ -241,6 +239,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     /**
      * For arrays of arrays or arrays of tuples only.
      */
+    @SuppressWarnings("unchecked")
     private int validateObjectArray(J value) {
         Object[] arr = (Object[]) value;
         final int len = arr.length;
@@ -270,7 +269,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    void encodeHead(Object value, ByteBuffer dest, int[] offset) {
+    void encodeHead(J value, ByteBuffer dest, int[] offset) {
         if (dynamic) { // includes String
             Encoding.insertOffset(offset, this, value, dest);
         } else {
@@ -279,7 +278,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    void encodeTail(Object value, ByteBuffer dest) {
+    void encodeTail(J value, ByteBuffer dest) {
         if(isString) {
             byte[] bytes = ((String) value).getBytes(StandardCharsets.UTF_8);
             Encoding.insertInt(bytes.length, dest); // insertLength
@@ -289,7 +288,8 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         }
     }
 
-    private void encodeArrayTail(Object value, ByteBuffer dest) {
+    @SuppressWarnings("unchecked")
+    private void encodeArrayTail(J value, ByteBuffer dest) {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN:
             boolean[] booleans = (boolean[]) value;
@@ -559,8 +559,8 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void encodePacked(J value, ByteBuffer dest) {
-        final ABIType elementType = this.elementType;
         switch (elementType.typeCode()) {
             case TYPE_CODE_BOOLEAN: packBooleans((boolean[]) value, dest); break;
             case TYPE_CODE_BYTE:
@@ -573,7 +573,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
             case TYPE_CODE_ARRAY:
             case TYPE_CODE_TUPLE:
                 for(Object e : (Object[]) value) {
-                    elementType.encodePacked(e, dest);
+                    ((ABIType) this.elementType).encodePacked(e, dest);
                 }
                 break;
             default: throw new IllegalArgumentException("unexpected array type: " + toString());

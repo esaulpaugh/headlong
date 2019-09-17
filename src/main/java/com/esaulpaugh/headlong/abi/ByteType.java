@@ -49,7 +49,6 @@ final class ByteType extends UnitType<Byte> {
 
     @Override
     public int validate(Byte value) {
-//        validateClass(value);
         return UNIT_LENGTH_BYTES;
     }
 

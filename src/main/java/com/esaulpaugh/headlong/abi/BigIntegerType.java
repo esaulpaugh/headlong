@@ -51,7 +51,6 @@ final class BigIntegerType extends UnitType<BigInteger> {
 
     @Override
     public int validate(BigInteger value) {
-//        validateClass(value);
         validateBigIntBitLen(value);
         return UNIT_LENGTH_BYTES;
     }
