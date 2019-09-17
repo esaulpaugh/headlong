@@ -44,6 +44,14 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
     }
 
     @Override
+    public int validate(V value) {
+        if(value == null) {
+            throw new IllegalArgumentException("null");
+        }
+        return UNIT_LENGTH_BYTES;
+    }
+
+    @Override
     void encodeHead(V value, ByteBuffer dest, int[] offset) {
         Encoding.insertInt(((Number) value).longValue(), dest);
     }

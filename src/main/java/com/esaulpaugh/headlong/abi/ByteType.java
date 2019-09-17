@@ -48,11 +48,6 @@ final class ByteType extends UnitType<Byte> {
     }
 
     @Override
-    public int validate(Byte value) {
-        return UNIT_LENGTH_BYTES;
-    }
-
-    @Override
     Byte decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);

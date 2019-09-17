@@ -53,11 +53,6 @@ final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    public int validate(Boolean value) {
-        return UNIT_LENGTH_BYTES;
-    }
-
-    @Override
     void encodeHead(Boolean value, ByteBuffer dest, int[] offset) {
         dest.put(value ? BOOLEAN_TRUE : BOOLEAN_FALSE);
     }

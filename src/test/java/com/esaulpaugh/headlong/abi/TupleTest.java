@@ -11,9 +11,44 @@ import java.util.Random;
 public class TupleTest {
 
     @Test
+    public void fuzzNulls() throws Throwable {
+        Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        for (int i = 0; i < 1000; i++) {
+            MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong());
+            Tuple args = mctc.argsTuple;
+            if(args.elements.length > 0) {
+                int idx = r.nextInt(args.elements.length);
+                replace(args.elements, idx);
+                TestUtils.assertThrown(IllegalArgumentException.class, "null", () -> mctc.function.encodeCall(args));
+            }
+        }
+    }
+
+    private static void replace(Object[] parent, int index) {
+        Object element = parent[index];
+        if(element instanceof Object[]) {
+            Object[] eArr = (Object[]) element;
+            if(eArr.length > 0) {
+                Object inner = parent[index];
+                if(inner instanceof Object[]) {
+                    Object[] innerArr = (Object[]) inner;
+                    if(innerArr.length > 0) {
+                        innerArr[innerArr.length - 1] = null;
+                        return;
+                    }
+                }
+                eArr[0] = null;
+                return;
+            }
+        }
+        parent[index] = null;
+    }
+
+    @Test
     public void testSubtuple() throws Throwable {
 
         Object[] master = new Object[] {
+                null,
                 true,
                 (short) 77,
                 new Object[] {},
