@@ -11,6 +11,50 @@ import java.util.Random;
 public class TupleTest {
 
     @Test
+    public void testTypeSafety() throws Throwable {
+
+        for (int i = 0; i < 500; i++) {
+            MonteCarloTestCase testCase = new MonteCarloTestCase(MonteCarloTest.getSeed(System.nanoTime()));
+
+            Object[] elements = testCase.argsTuple.elements;
+
+            final int idx = 1;
+            if(elements.length > idx) {
+                Object e = elements[idx];
+                if(e instanceof Boolean) {
+                    elements[idx] = new Error();
+                } else if(e instanceof Integer) {
+                    elements[idx] = false;
+                } else if(e instanceof Long) {
+                    elements[idx] = 5;
+                } else if(e instanceof BigInteger) {
+                    elements[idx] = 9L;
+                } else if(e instanceof BigDecimal) {
+                    elements[idx] = BigInteger.TEN;
+                } else if(e instanceof Tuple) {
+                    elements[idx] = BigDecimal.ONE;
+                } else if(e instanceof Object[]) {
+                    elements[idx] = Tuple.EMPTY;
+                } else if(e instanceof byte[]) {
+                    elements[idx] = new BigInteger[0];
+                } else if(e instanceof int[]) {
+                    elements[idx] = new byte[0];
+                } else if(e instanceof long[]) {
+                    elements[idx] = new int[0];
+                } else if(e instanceof boolean[]) {
+                    elements[idx] = new long[0];
+                } else if(e instanceof String) {
+                    elements[idx] = new boolean[0];
+                } else {
+                    throw new Error();
+                }
+//                testCase.function.encodeCall(Tuple.of(elements));
+                TestUtils.assertThrown(IllegalArgumentException.class, "but found", () -> testCase.function.encodeCall(Tuple.of(elements)));
+            }
+        }
+    }
+
+    @Test
     public void fuzzNulls() throws Throwable {
         Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
         for (int i = 0; i < 1000; i++) {
