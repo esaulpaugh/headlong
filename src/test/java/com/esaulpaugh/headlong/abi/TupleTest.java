@@ -10,10 +10,98 @@ import java.util.Random;
 
 public class TupleTest {
 
+    private static final Object[] OBJECTS = new Object[] {
+            new byte[0],
+            new int[0],
+            new short[0],
+            new long[0],
+            new boolean[0],
+            new Throwable(),
+            new BigInteger[0],
+            new BigDecimal[0],
+            true,
+            5,
+            9L,
+            "aha",
+            '\0',
+            Tuple.EMPTY
+    };
+
+    @Test
+    public void testTypeSafety() throws Throwable {
+
+        Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+
+        for (int i = 0; i < 1000; i++) {
+
+            rand.setSeed(i);
+
+            MonteCarloTestCase testCase = new MonteCarloTestCase(i);
+
+//            System.out.println(i);
+
+            Object[] elements = testCase.argsTuple.elements;
+
+            final int idx = 0;
+            if(elements.length > idx) {
+                Object e = elements[idx];
+                Object replacement = OBJECTS[rand.nextInt(OBJECTS.length)];
+                if(e.getClass() != replacement.getClass()) {
+                    elements[idx] = replacement;
+                } else {
+                    elements[idx] = new Object();
+                }
+//                testCase.function.encodeCall(Tuple.of(elements));
+                try {
+                    TestUtils.assertThrown(IllegalArgumentException.class, "not assignable to", () -> testCase.function.encodeCall(Tuple.of(elements)));
+                } catch (AssertionError ae) {
+                    System.err.println(i);
+                    ae.printStackTrace();
+                    throw ae;
+                }
+            }
+        }
+    }
+
+    @Test
+    public void fuzzNulls() throws Throwable {
+        Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        for (int i = 0; i < 1000; i++) {
+            MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong());
+            Tuple args = mctc.argsTuple;
+            if(args.elements.length > 0) {
+                int idx = r.nextInt(args.elements.length);
+                replace(args.elements, idx);
+                TestUtils.assertThrown(IllegalArgumentException.class, "null", () -> mctc.function.encodeCall(args));
+            }
+        }
+    }
+
+    private static void replace(Object[] parent, int index) {
+        Object element = parent[index];
+        if(element instanceof Object[]) {
+            Object[] eArr = (Object[]) element;
+            if(eArr.length > 0) {
+                Object inner = parent[index];
+                if(inner instanceof Object[]) {
+                    Object[] innerArr = (Object[]) inner;
+                    if(innerArr.length > 0) {
+                        innerArr[innerArr.length - 1] = null;
+                        return;
+                    }
+                }
+                eArr[0] = null;
+                return;
+            }
+        }
+        parent[index] = null;
+    }
+
     @Test
     public void testSubtuple() throws Throwable {
 
         Object[] master = new Object[] {
+                null,
                 true,
                 (short) 77,
                 new Object[] {},
