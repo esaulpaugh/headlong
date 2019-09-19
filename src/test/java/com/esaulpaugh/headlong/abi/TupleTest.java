@@ -10,46 +10,55 @@ import java.util.Random;
 
 public class TupleTest {
 
+    private static final Object[] OBJECTS = new Object[] {
+            new byte[0],
+            new int[0],
+            new short[0],
+            new long[0],
+            new boolean[0],
+            new Throwable(),
+            new BigInteger[0],
+            new BigDecimal[0],
+            true,
+            5,
+            9L,
+            "aha",
+            '\0',
+            Tuple.EMPTY
+    };
+
     @Test
     public void testTypeSafety() throws Throwable {
 
+        Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+
         for (int i = 0; i < 500; i++) {
-            MonteCarloTestCase testCase = new MonteCarloTestCase(MonteCarloTest.getSeed(System.nanoTime()));
+
+            rand.setSeed(i);
+
+            MonteCarloTestCase testCase = new MonteCarloTestCase(i);
+
+            System.out.println(i);
 
             Object[] elements = testCase.argsTuple.elements;
 
             final int idx = 0;
             if(elements.length > idx) {
                 Object e = elements[idx];
-                if(e instanceof Boolean) {
-                    elements[idx] = "a string";
-                } else if(e instanceof Integer) {
-                    elements[idx] = false;
-                } else if(e instanceof Long) {
-                    elements[idx] = 5;
-                } else if(e instanceof BigInteger) {
-                    elements[idx] = 9L;
-                } else if(e instanceof BigDecimal) {
-                    elements[idx] = BigInteger.TEN;
-                } else if(e instanceof Tuple) {
-                    elements[idx] = BigDecimal.ONE;
-                } else if(e instanceof Object[]) {
-                    elements[idx] = Tuple.EMPTY;
-                } else if(e instanceof byte[]) {
-                    elements[idx] = new BigInteger[0];
-                } else if(e instanceof int[]) {
-                    elements[idx] = new byte[0];
-                } else if(e instanceof long[]) {
-                    elements[idx] = new int[0];
-                } else if(e instanceof boolean[]) {
-                    elements[idx] = new long[0];
-                } else if(e instanceof String) {
-                    elements[idx] = new boolean[0];
+                Object replacement = OBJECTS[rand.nextInt(OBJECTS.length)];
+                if(e.getClass() != replacement.getClass()) {
+                    elements[idx] = replacement;
                 } else {
-                    throw new Error();
+                    elements[idx] = new Object();
                 }
 //                testCase.function.encodeCall(Tuple.of(elements));
-                TestUtils.assertThrown(IllegalArgumentException.class, "but found", () -> testCase.function.encodeCall(Tuple.of(elements)));
+                try {
+                    TestUtils.assertThrown(IllegalArgumentException.class, "but found", () -> testCase.function.encodeCall(Tuple.of(elements)));
+                } catch (AssertionError ae) {
+                    System.err.println(i);
+                    ae.printStackTrace();
+                    throw ae;
+                }
             }
         }
     }

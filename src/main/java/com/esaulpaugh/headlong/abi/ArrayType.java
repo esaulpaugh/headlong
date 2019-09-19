@@ -23,6 +23,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
+import static com.esaulpaugh.headlong.abi.TupleType.unexpectedTypeException;
 import static com.esaulpaugh.headlong.abi.UnitType.LOG_2_UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
@@ -259,11 +260,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     private int checkLength(final int valueLength, Object value) {
         final int expected = this.length;
         if(expected != DYNAMIC_LENGTH && valueLength != expected) {
-            throw new IllegalArgumentException(
-                    Utils.friendlyClassName(value.getClass(), valueLength)
-                    + " not instanceof " + Utils.friendlyClassName(clazz, expected) + ", " +
-                    valueLength + " != " + expected
-            );
+            throw unexpectedTypeException(this, value);
         }
         return valueLength;
     }

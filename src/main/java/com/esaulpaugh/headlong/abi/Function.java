@@ -200,7 +200,7 @@ public final class Function implements ABIObject, Serializable {
     }
 
     public ByteBuffer encodeCall(Tuple args) {
-        ByteBuffer dest = ByteBuffer.wrap(new byte[callLength(args, true)]); // ByteOrder.BIG_ENDIAN by default
+        ByteBuffer dest = ByteBuffer.wrap(new byte[callLength(args, true)]); // validate in callLength; ByteOrder.BIG_ENDIAN by default
         encodeCall(args, dest);
         return dest;
     }

@@ -132,11 +132,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                             ? OFFSET_LENGTH_BYTES + type.validate(values[i])
                             : type.validate(values[i]);
                 } catch (ClassCastException cce) {
-                    throw classCastException(type, values[i]);
+                    throw unexpectedTypeException(type, values[i]);
                 }
             }
         } catch (RuntimeException re) {
-            throw new IllegalArgumentException("illegal arg @ " + i + ": " + re.getMessage());
+            throw new IllegalArgumentException("illegal arg @ " + i + ": " + re.getMessage(), re);
         }
 
         return byteLength;
@@ -163,7 +163,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             try {
                 ((ABIType) elementTypes[i]).encodeHead(values[i], dest, offset);
             } catch (ClassCastException cce) {
-                throw classCastException(elementTypes[i], values[i]);
+                throw unexpectedTypeException(elementTypes[i], values[i]);
             }
         }
         if (dynamic) {
@@ -174,13 +174,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                         type.encodeTail(values[i], dest);
                     }
                 } catch (ClassCastException cce) {
-                    throw classCastException(type, values[i]);
+                    throw unexpectedTypeException(type, values[i]);
                 }
             }
         }
     }
 
-    private static IllegalArgumentException classCastException(ABIType type, Object value) {
+    static IllegalArgumentException unexpectedTypeException(ABIType type, Object value) {
         return new IllegalArgumentException("unexpected class for " + type.canonicalType + ": expected " + type.clazz.getName() + " but found " + value.getClass().getName());
     }
 
