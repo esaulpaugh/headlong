@@ -18,11 +18,11 @@ public class TupleTest {
 
             Object[] elements = testCase.argsTuple.elements;
 
-            final int idx = 1;
+            final int idx = 0;
             if(elements.length > idx) {
                 Object e = elements[idx];
                 if(e instanceof Boolean) {
-                    elements[idx] = new Error();
+                    elements[idx] = "a string";
                 } else if(e instanceof Integer) {
                     elements[idx] = false;
                 } else if(e instanceof Long) {
