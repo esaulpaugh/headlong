@@ -22,7 +22,7 @@ import java.nio.ByteBuffer;
 import static com.esaulpaugh.headlong.abi.util.Utils.EMPTY_BYTE_ARRAY;
 
 /**
- * The mirror image of {@link Integers}. Not compatible with the RLP specification.
+ * The mirror image of {@link com.esaulpaugh.headlong.rlp.util.Integers}. Not compatible with the RLP specification.
  *
  * Negative integers are stored in a minimal big-endian two's complement representation. Non-negative integers are
  * stored full-length. Negative one is represented by the empty byte array. Numbers are sign-extended on decode.

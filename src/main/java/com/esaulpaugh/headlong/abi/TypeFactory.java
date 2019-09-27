@@ -27,7 +27,7 @@ import static com.esaulpaugh.headlong.abi.BaseTypeInfo.FIXED_BIT_LEN;
 import static com.esaulpaugh.headlong.abi.BaseTypeInfo.FIXED_SCALE;
 
 /**
- * Creates the appropriate {@link ABIType} object for a given canonical type string.
+ * Creates the appropriate {@link ABIType} object for a given type string.
  */
 final class TypeFactory {
 
