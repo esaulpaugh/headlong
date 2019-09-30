@@ -17,6 +17,10 @@ package com.esaulpaugh.headlong.abi.util;
 
 import java.math.BigInteger;
 
+/**
+ * Has methods for decoding packed integers. Has {@link UintType} for converting integers to and from signed and
+ * unsigned representation.
+ */
 public final class Integers {
 
     /**
