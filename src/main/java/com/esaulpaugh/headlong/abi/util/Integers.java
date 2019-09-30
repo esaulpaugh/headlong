@@ -27,7 +27,7 @@ public final class Integers {
      * @param len  the length in bytes of the integer's representation
      * @return  the integer
      */
-    public static int getInt(byte[] buffer, int i, int len) {
+    public static int getPackedInt(byte[] buffer, int i, int len) {
         int shiftAmount = 0;
         int val = 0;
         byte leftmost;
@@ -57,7 +57,7 @@ public final class Integers {
      * @param len  the length in bytes of the integer's representation
      * @return  the integer
      */
-    public static long getLong(final byte[] buffer, final int i, final int len) {
+    public static long getPackedLong(final byte[] buffer, final int i, final int len) {
         int shiftAmount = 0;
         long val = 0L;
         byte leftmost;
@@ -87,68 +87,6 @@ public final class Integers {
         return val;
     }
 
-    public static long packUnsigned(long unsigned, UintType uintType) {
-        if(uintType.rangeLong == null) {
-            throw new IllegalArgumentException(uintType.numBits + "-bit range too big for type long");
-        }
-        if(unsigned < 0) {
-            throwNegativeUnsignedVal(unsigned);
-        }
-        final int bitLen = com.esaulpaugh.headlong.rlp.util.Integers.bitLen(unsigned);
-        if(bitLen > uintType.numBits) {
-            throwTooManyBitsException(bitLen, uintType.numBits, false);
-        }
-        // if in upper half of range, subtract range
-        return unsigned >= uintType.rangeLong >> 1 // div 2
-                ? unsigned - uintType.rangeLong
-                : unsigned;
-    }
-
-    public static long unpackUnsigned(long signed, UintType uintType) {
-        if(uintType.maskLong == null) {
-            throw new IllegalArgumentException(uintType.numBits + "-bit range too big for type long");
-        }
-        final int bitLen = signed < 0 ? BizarroIntegers.bitLen(signed) : com.esaulpaugh.headlong.rlp.util.Integers.bitLen(signed);
-        if(bitLen >= uintType.numBits) {
-            throwTooManyBitsException(bitLen, uintType.numBits, true);
-        }
-        return signed & uintType.maskLong;
-    }
-
-    public static BigInteger toSigned(BigInteger unsigned, UintType uintType) {
-        if(unsigned.compareTo(BigInteger.ZERO) < 0) {
-            throwNegativeUnsignedVal(unsigned);
-        }
-        final int bitLen = unsigned.bitLength();
-        if(bitLen > uintType.numBits) {
-            throwTooManyBitsException(bitLen, uintType.numBits, false);
-        }
-        // if in upper half of range, subtract range
-        return unsigned.compareTo(uintType.range.shiftRight(1)) >= 0
-                ? unsigned.subtract(uintType.range)
-                : unsigned;
-    }
-
-    public static BigInteger toUnsigned(BigInteger signed, UintType uintType) {
-        final int bitLen = signed.bitLength();
-        if(bitLen >= uintType.numBits) {
-            throwTooManyBitsException(bitLen, uintType.numBits, true);
-        }
-        return signed.compareTo(BigInteger.ZERO) >= 0
-                ? signed
-                : signed.add(uintType.range);
-    }
-
-    private static void throwNegativeUnsignedVal(Number unsigned) {
-        throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
-    }
-
-    private static void throwTooManyBitsException(int bitLen, int rangeNumBits, boolean forSigned) {
-        throw forSigned
-                ? new IllegalArgumentException("signed has too many bits: " + bitLen + " is not < " + rangeNumBits)
-                : new IllegalArgumentException("unsigned has too many bits: " + bitLen + " > " + rangeNumBits);
-    }
-
     /**
      * Use {@code new UintType(8)} for uint8 et cetera.
      */
@@ -176,6 +114,68 @@ public final class Integers {
             }
             this.rangeLong = rangeLong;
             this.maskLong = maskLong;
+        }
+
+        public long toSigned(long unsigned) {
+            if(rangeLong == null) {
+                throw new IllegalArgumentException(numBits + "-bit range too big for type long");
+            }
+            if(unsigned < 0) {
+                throwNegativeUnsignedVal(unsigned);
+            }
+            final int bitLen = com.esaulpaugh.headlong.rlp.util.Integers.bitLen(unsigned);
+            if(bitLen > numBits) {
+                throwTooManyBitsException(bitLen, numBits, false);
+            }
+            // if in upper half of range, subtract range
+            return unsigned >= rangeLong >> 1 // div 2
+                    ? unsigned - rangeLong
+                    : unsigned;
+        }
+
+        public long toUnsigned(long signed) {
+            if(maskLong == null) {
+                throw new IllegalArgumentException(numBits + "-bit range too big for type long");
+            }
+            final int bitLen = signed < 0 ? BizarroIntegers.bitLen(signed) : com.esaulpaugh.headlong.rlp.util.Integers.bitLen(signed);
+            if(bitLen >= numBits) {
+                throwTooManyBitsException(bitLen, numBits, true);
+            }
+            return signed & maskLong;
+        }
+
+        public BigInteger toSigned(BigInteger unsigned) {
+            if(unsigned.compareTo(BigInteger.ZERO) < 0) {
+                throwNegativeUnsignedVal(unsigned);
+            }
+            final int bitLen = unsigned.bitLength();
+            if(bitLen > numBits) {
+                throwTooManyBitsException(bitLen, numBits, false);
+            }
+            // if in upper half of range, subtract range
+            return unsigned.compareTo(range.shiftRight(1)) >= 0
+                    ? unsigned.subtract(range)
+                    : unsigned;
+        }
+
+        public BigInteger toUnsigned(BigInteger signed) {
+            final int bitLen = signed.bitLength();
+            if(bitLen >= numBits) {
+                throwTooManyBitsException(bitLen, numBits, true);
+            }
+            return signed.compareTo(BigInteger.ZERO) >= 0
+                    ? signed
+                    : signed.add(range);
+        }
+
+        private static void throwNegativeUnsignedVal(Number unsigned) {
+            throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
+        }
+
+        private static void throwTooManyBitsException(int bitLen, int rangeNumBits, boolean forSigned) {
+            throw forSigned
+                    ? new IllegalArgumentException("signed has too many bits: " + bitLen + " is not < " + rangeNumBits)
+                    : new IllegalArgumentException("unsigned has too many bits: " + bitLen + " > " + rangeNumBits);
         }
     }
 }

@@ -141,7 +141,7 @@ public class ABIJsonTest2 {
                     BigInteger val = new BigInteger(FastHex.decode(valueValue, 2, valueValue.length() - 2));
                     BigIntegerType bigIntType = (BigIntegerType) type;
                     if(bigIntType.unsigned) {
-                        return Integers.toUnsigned(val, new Integers.UintType(bigIntType.bitLength));
+                        return new Integers.UintType(bigIntType.bitLength).toUnsigned(val);
                     }
                     return val;
                 } else {

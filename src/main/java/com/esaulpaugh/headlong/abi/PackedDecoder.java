@@ -141,7 +141,7 @@ public final class PackedDecoder {
 
     private static int decodeInt(IntType intType, byte[] buffer, int idx, Object[] dest, int destIdx) {
         final int len = intType.byteLengthPacked(null);
-        Integer val = Integers.getInt(buffer, idx, len);
+        Integer val = Integers.getPackedInt(buffer, idx, len);
         intType.validate(val);
         dest[destIdx] = val;
         return len;
@@ -149,7 +149,7 @@ public final class PackedDecoder {
 
     private static int decodeLong(LongType longType, byte[] buffer, int idx, Object[] dest, int destIdx) {
         final int len = longType.byteLengthPacked(null);
-        Long val = Integers.getLong(buffer, idx, len);
+        Long val = Integers.getPackedLong(buffer, idx, len);
         longType.validate(val);
         dest[destIdx] = val;
         return len;
@@ -221,7 +221,7 @@ public final class PackedDecoder {
         final int len = elementType.byteLengthPacked(null);
         int[] ints = new int[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            Integer val = Integers.getInt(buffer, idx, len);
+            Integer val = Integers.getPackedInt(buffer, idx, len);
             elementType.validate(val);
             ints[i] = val;
             idx += len;
@@ -234,7 +234,7 @@ public final class PackedDecoder {
         final int len = longType.byteLengthPacked(null);
         long[] longs = new long[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            Long val = Integers.getLong(buffer, idx, len);
+            Long val = Integers.getPackedLong(buffer, idx, len);
             longType.validate(val);
             longs[i] = val;
             idx += len;

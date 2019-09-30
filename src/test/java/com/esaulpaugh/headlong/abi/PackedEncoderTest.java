@@ -144,7 +144,7 @@ public class PackedEncoderTest {
     @Test
     public void testSignExtendInt() {
         int expected = BizarroIntegers.getInt(FastHex.decode("8FFFFF"), 0, 3);
-        int result = Integers.getInt(FastHex.decode("8FFFFF"), 0, 3);
+        int result = Integers.getPackedInt(FastHex.decode("8FFFFF"), 0, 3);
         Assert.assertTrue(result < 0);
         Assert.assertEquals(expected, result);
     }
@@ -152,7 +152,7 @@ public class PackedEncoderTest {
     @Test
     public void testSignExtendLong() {
         long expectedL = BizarroIntegers.getLong(FastHex.decode("8FFFFFFFFF"), 0, 5);
-        long resultL = Integers.getLong(FastHex.decode("8FFFFFFFFF"), 0, 5);
+        long resultL = Integers.getPackedLong(FastHex.decode("8FFFFFFFFF"), 0, 5);
         Assert.assertTrue(resultL < 0);
         Assert.assertEquals(expectedL, resultL);
     }
