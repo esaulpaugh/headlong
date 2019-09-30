@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi.util;
 
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
 import com.esaulpaugh.headlong.rlp.util.IntegersTest;
+import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,6 +26,32 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.function.Supplier;
 
 public class BizarroIntegersTest {
+
+    @Test
+    public void toBytes() {
+        StringBuilder sb = new StringBuilder();
+        for (byte i = -5; i < 5; i++)
+            sb.append(Strings.encode(BizarroIntegers.toBytes(i), Strings.HEX)).append(",");
+        Assert.assertEquals("fb,fc,fd,fe,,00,01,02,03,04,", sb.toString());
+        printAndReset(sb);
+        for (short i = -5; i < 5; i++)
+            sb.append(Strings.encode(BizarroIntegers.toBytes(i), Strings.HEX)).append(",");
+        Assert.assertEquals("fb,fc,fd,fe,,0000,0001,0002,0003,0004,", sb.toString());
+        printAndReset(sb);
+        for (int i = -5; i < 5; i++)
+            sb.append(Strings.encode(BizarroIntegers.toBytes(i), Strings.HEX)).append(",");
+        Assert.assertEquals("fb,fc,fd,fe,,00000000,00000001,00000002,00000003,00000004,", sb.toString());
+        printAndReset(sb);
+        for (long i = -5; i < 5; i++)
+            sb.append(Strings.encode(BizarroIntegers.toBytes(i), Strings.HEX)).append(",");
+        Assert.assertEquals("fb,fc,fd,fe,,0000000000000000,0000000000000001,0000000000000002,0000000000000003,0000000000000004,", sb.toString());
+        printAndReset(sb);
+    }
+
+    private static void printAndReset(StringBuilder sb) {
+        System.out.println(sb.toString());
+        sb.delete(0, sb.length());
+    }
 
     @Test
     public void putGetByte() {
