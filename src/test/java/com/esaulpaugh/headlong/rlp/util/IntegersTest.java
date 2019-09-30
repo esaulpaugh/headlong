@@ -15,8 +15,10 @@
 */
 package com.esaulpaugh.headlong.rlp.util;
 
+import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+import com.esaulpaugh.headlong.util.Strings;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,6 +30,27 @@ import java.util.concurrent.RecursiveAction;
 import java.util.function.Supplier;
 
 public class IntegersTest {
+
+    @Test
+    public void toBytes() {
+        StringBuilder sb = new StringBuilder();
+        for (byte i = -5; i < 5; i++)
+            sb.append(Strings.encode(Integers.toBytes(i), Strings.HEX)).append(',');
+        Assert.assertEquals("fb,fc,fd,fe,ff,,01,02,03,04,", sb.toString());
+        TestUtils.printAndReset(sb);
+        for (short i = -5; i < 5; i++)
+            sb.append(Strings.encode(Integers.toBytes(i), Strings.HEX)).append(',');
+        Assert.assertEquals("fffb,fffc,fffd,fffe,ffff,,01,02,03,04,", sb.toString());
+        TestUtils.printAndReset(sb);
+        for (int i = -5; i < 5; i++)
+            sb.append(Strings.encode(Integers.toBytes(i), Strings.HEX)).append(',');
+        Assert.assertEquals("fffffffb,fffffffc,fffffffd,fffffffe,ffffffff,,01,02,03,04,", sb.toString());
+        TestUtils.printAndReset(sb);
+        for (long i = -5; i < 5; i++)
+            sb.append(Strings.encode(Integers.toBytes(i), Strings.HEX)).append(',');
+        Assert.assertEquals("fffffffffffffffb,fffffffffffffffc,fffffffffffffffd,fffffffffffffffe,ffffffffffffffff,,01,02,03,04,", sb.toString());
+        TestUtils.printAndReset(sb);
+    }
 
     @Test
     public void putGetByte() throws DecodeException {

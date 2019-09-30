@@ -32,6 +32,11 @@ import java.util.ArrayList;
 
 public class TestUtils {
 
+    public static void printAndReset(StringBuilder sb) {
+        System.out.println(sb.toString());
+        sb.delete(0, sb.length());
+    }
+
     public static byte[] readFile(File file) throws IOException {
 
         byte[] data = new byte[(int) file.length()];

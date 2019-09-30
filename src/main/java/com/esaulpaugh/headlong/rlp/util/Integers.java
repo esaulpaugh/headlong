@@ -37,10 +37,7 @@ public final class Integers {
      * @return  the minimal representation
      */
     public static byte[] toBytes(byte val) {
-        if(val == 0) {
-            return EMPTY_BYTE_ARRAY;
-        }
-        return new byte[] { val };
+        return val != 0 ? new byte[] { val } : EMPTY_BYTE_ARRAY;
     }
 
     /**
@@ -51,9 +48,6 @@ public final class Integers {
      * @return  the minimal representation
      */
     public static byte[] toBytes(short val) {
-        if(val == 0) {
-            return EMPTY_BYTE_ARRAY;
-        }
         int n = len(val);
         byte[] bytes = new byte[n];
         putShort(val, bytes, 0);
@@ -68,9 +62,6 @@ public final class Integers {
      * @return  the minimal representation
      */
     public static byte[] toBytes(int val) {
-        if(val == 0) {
-            return EMPTY_BYTE_ARRAY;
-        }
         int n = len(val);
         byte[] bytes = new byte[n];
         putInt(val, bytes, 0);
@@ -85,9 +76,6 @@ public final class Integers {
      * @return  the minimal representation
      */
     public static byte[] toBytes(long val) {
-        if(val == 0) {
-            return EMPTY_BYTE_ARRAY;
-        }
         int n = len(val);
         byte[] bytes = new byte[n];
         putLong(val, bytes, 0);
