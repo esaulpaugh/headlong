@@ -41,22 +41,19 @@ public final class BizarroIntegers {
     }
 
     public static byte[] toBytes(short val) {
-        int n = len(val);
-        byte[] bytes = new byte[n];
+        byte[] bytes = new byte[len(val)];
         putShort(val, bytes, 0);
         return bytes;
     }
 
     public static byte[] toBytes(int val) {
-        int n = len(val);
-        byte[] bytes = new byte[n];
+        byte[] bytes = new byte[len(val)];
         putInt(val, bytes, 0);
         return bytes;
     }
 
     public static byte[] toBytes(long val) {
-        int n = len(val);
-        byte[] bytes = new byte[n];
+        byte[] bytes = new byte[len(val)];
         putLong(val, bytes, 0);
         return bytes;
     }
@@ -71,17 +68,15 @@ public final class BizarroIntegers {
 
     public static int putShort(short val, byte[] o, int i) {
         byte b = 0;
-        int n = 0;
-        if(val != -1) {
+        int n = 0, v = val;
+        if(v != -1) {
             n = 1;
-            b = (byte) val;
-//            val = (short) (val >>> Byte.SIZE); // ICAST_QUESTIONABLE_UNSIGNED_RIGHT_SHIFT
-            val = (short) (val >> Byte.SIZE); // high bytes chopped off either way, see above
-            if (val != -1) {
+            b = (byte) v;
+            if ((v >>= Byte.SIZE) != -1) {
                 n = 2;
             }
         }
-        return Integers.insertBytes(n, o, i, (byte)0, (byte) 0, (byte) val, b);
+        return Integers.insertBytes(n, o, i, (byte)0, (byte) 0, (byte) v, b);
     }
 
     public static int putInt(int val, byte[] o, int i) {
