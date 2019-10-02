@@ -275,18 +275,14 @@ public final class BizarroIntegers {
     }
 
     public static int len(byte val) {
-        if(val == -1)
-            return 0;
-        return 1;
+        return val != -1 ? 1 : 0;
     }
 
     public static int len(short val) {
         int n = 0;
         if(val != -1) {
             n = 1;
-//            val = (short) (val >>> Byte.SIZE); // ICAST_QUESTIONABLE_UNSIGNED_RIGHT_SHIFT
-            val = (short) (val >> Byte.SIZE); // high bytes chopped off either way, see above
-            if (val != -1) {
+            if (val >> Byte.SIZE != -1) {
                 return 2;
             }
         }
