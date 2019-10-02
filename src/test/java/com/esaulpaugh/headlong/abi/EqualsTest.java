@@ -15,14 +15,14 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.Random;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EqualsTest {
 
@@ -50,9 +50,9 @@ public class EqualsTest {
 
 //            System.out.println(equals);
 
-            Assert.assertTrue(equals);
+            assertTrue(equals);
 
-            Assert.assertEquals(a, b);
+            assertEquals(a, b);
 
             n++;
         } while (n < 100);
@@ -73,7 +73,7 @@ public class EqualsTest {
         array[array.length - 1] = 0;
         System.out.println(Function.formatCall(array));
         decoded = f.decodeCall(array);
-        Assert.assertNotEquals(decoded, argsTuple);
+        assertNotEquals(decoded, argsTuple);
 
         array[array.length - 32] = (byte) 0x80;
         System.out.println(Function.formatCall(array));

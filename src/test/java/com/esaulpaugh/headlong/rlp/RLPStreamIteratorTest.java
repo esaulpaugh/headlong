@@ -20,8 +20,7 @@ import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -38,6 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RLPStreamIteratorTest {
 
@@ -61,7 +61,7 @@ public class RLPStreamIteratorTest {
             while (iter.hasNext()) {
                 streamed.add(iter.next());
             }
-            Assert.assertTrue(Arrays.deepEquals(collected.toArray(RLPItem.EMPTY_ARRAY), streamed.toArray(RLPItem.EMPTY_ARRAY)));
+            assertTrue(Arrays.deepEquals(collected.toArray(RLPItem.EMPTY_ARRAY), streamed.toArray(RLPItem.EMPTY_ARRAY)));
         }
     }
 
@@ -137,14 +137,15 @@ public class RLPStreamIteratorTest {
                 waitForNotifiedSender();
 
                 assertReadSuccess(iter);
-                Assert.assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
+                assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
                 assertNoNext(iter);
 
                 waitForNotifiedSender();
 
                 for (byte b : TEST_BYTES) {
                     assertReadSuccess(iter);
-                    Assert.assertArrayEquals(timestamp(zero), new byte[] { b }, iter.next().asBytes());
+//                    timestamp(zero),
+                    assertArrayEquals(new byte[] { b }, iter.next().asBytes());
                 }
                 assertNoNext(iter);
 
@@ -159,16 +160,16 @@ public class RLPStreamIteratorTest {
                 waitForNotifiedSender();
 
                 assertReadSuccess(iter);
-                Assert.assertTrue(iter.hasNext());
-                Assert.assertTrue(iter.hasNext());
-                Assert.assertEquals(TEST_STRING, iter.next().asString(UTF_8));
+                assertTrue(iter.hasNext());
+                assertTrue(iter.hasNext());
+                assertEquals(TEST_STRING, iter.next().asString(UTF_8));
                 assertReadSuccess(iter);
-                Assert.assertTrue(iter.hasNext());
-                Assert.assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
+                assertTrue(iter.hasNext());
+                assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
                 TestUtils.assertThrown(NoSuchElementException.class, iter::next);
                 assertNoNext(iter);
-                Assert.assertFalse(iter.hasNext());
-                Assert.assertFalse(iter.hasNext());
+                assertFalse(iter.hasNext());
+                assertFalse(iter.hasNext());
                 TestUtils.assertThrown(NoSuchElementException.class, iter::next);
 
                 senderThread.join();
@@ -270,7 +271,8 @@ public class RLPStreamIteratorTest {
     }
 
     private static void assertReadSuccess(long zero, int readNum, RLPStreamIterator iter) throws IOException, UnrecoverableDecodeException {
-        Assert.assertTrue("no next() found, " + timestamp(zero), iter.hasNext());
+//        "no next() found, " + timestamp(zero)
+        assertTrue(iter.hasNext());
         logRead(zero, readNum, true);
     }
 

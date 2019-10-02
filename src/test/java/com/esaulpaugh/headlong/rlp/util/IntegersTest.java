@@ -19,8 +19,7 @@ import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Strings;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -29,6 +28,9 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import java.util.function.Supplier;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class IntegersTest {
 
     @Test
@@ -36,19 +38,19 @@ public class IntegersTest {
         StringBuilder sb = new StringBuilder();
         for (byte i = -5; i < 5; i++)
             sb.append(Strings.encode(Integers.toBytes(i), Strings.HEX)).append(',');
-        Assert.assertEquals("fb,fc,fd,fe,ff,,01,02,03,04,", sb.toString());
+        assertEquals("fb,fc,fd,fe,ff,,01,02,03,04,", sb.toString());
         TestUtils.printAndReset(sb);
         for (short i = -5; i < 5; i++)
             sb.append(Strings.encode(Integers.toBytes(i), Strings.HEX)).append(',');
-        Assert.assertEquals("fffb,fffc,fffd,fffe,ffff,,01,02,03,04,", sb.toString());
+        assertEquals("fffb,fffc,fffd,fffe,ffff,,01,02,03,04,", sb.toString());
         TestUtils.printAndReset(sb);
         for (int i = -5; i < 5; i++)
             sb.append(Strings.encode(Integers.toBytes(i), Strings.HEX)).append(',');
-        Assert.assertEquals("fffffffb,fffffffc,fffffffd,fffffffe,ffffffff,,01,02,03,04,", sb.toString());
+        assertEquals("fffffffb,fffffffc,fffffffd,fffffffe,ffffffff,,01,02,03,04,", sb.toString());
         TestUtils.printAndReset(sb);
         for (long i = -5; i < 5; i++)
             sb.append(Strings.encode(Integers.toBytes(i), Strings.HEX)).append(',');
-        Assert.assertEquals("fffffffffffffffb,fffffffffffffffc,fffffffffffffffd,fffffffffffffffe,ffffffffffffffff,,01,02,03,04,", sb.toString());
+        assertEquals("fffffffffffffffb,fffffffffffffffc,fffffffffffffffd,fffffffffffffffe,ffffffffffffffff,,01,02,03,04,", sb.toString());
         TestUtils.printAndReset(sb);
     }
 
@@ -59,7 +61,7 @@ public class IntegersTest {
             byte b = (byte) i;
             int n = Integers.putByte(b, one, 0);
             byte r = Integers.getByte(one, 0, n);
-            Assert.assertEquals(b, r);
+            assertEquals(b, r);
         }
     }
 
@@ -70,7 +72,7 @@ public class IntegersTest {
             short s = (short) i;
             int n = Integers.putShort(s, two, 0);
             short r = Integers.getShort(two, 0, n);
-            Assert.assertEquals(s, r);
+            assertEquals(s, r);
         }
     }
 
@@ -126,7 +128,7 @@ public class IntegersTest {
             BigInteger big = BigInteger.valueOf(rand.nextLong()).multiply(BigInteger.valueOf(Long.MAX_VALUE));
             int n = Integers.putBigInt(big, dest, 0);
             BigInteger r = Integers.getBigInt(dest, 0, n);
-            Assert.assertEquals(big, r);
+            assertEquals(big, r);
         }
     }
 
@@ -135,7 +137,7 @@ public class IntegersTest {
         for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
             byte b = (byte) i;
             int len = Integers.len(b);
-            Assert.assertEquals(b == 0 ? 0 : 1, len);
+            assertEquals(b == 0 ? 0 : 1, len);
         }
     }
 
@@ -144,7 +146,7 @@ public class IntegersTest {
         for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
             short s = (short) i;
             int len = Integers.len(s);
-            Assert.assertEquals(
+            assertEquals(
                     s == 0
                             ? 0
                             : s > 0 && s < 256
@@ -190,47 +192,47 @@ public class IntegersTest {
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(0, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
-        Assert.assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, ten);
+        assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(1, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
-        Assert.assertArrayEquals(new byte[] { 0, d, 0, 0, 0, 0, 0, 0, 0, 0 }, ten);
+        assertArrayEquals(new byte[] { 0, d, 0, 0, 0, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(2, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
-        Assert.assertArrayEquals(new byte[] { 0, c, d, 0, 0, 0, 0, 0, 0, 0 }, ten);
+        assertArrayEquals(new byte[] { 0, c, d, 0, 0, 0, 0, 0, 0, 0 }, ten);
         Arrays.fill(ten, (byte) 0);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(3, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
-        Assert.assertArrayEquals(new byte[] { 0, b, c, d, 0, 0, 0, 0, 0, 0 }, ten);
+        assertArrayEquals(new byte[] { 0, b, c, d, 0, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(4, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
-        Assert.assertArrayEquals(new byte[] { 0, a, b, c, d, 0, 0, 0, 0, 0 }, ten);
+        assertArrayEquals(new byte[] { 0, a, b, c, d, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(5, ten, 1, (byte) 0, (byte) 0, (byte) 0, a, b, c, d, e);
-        Assert.assertArrayEquals(new byte[] { 0, a, b, c, d, e, 0, 0, 0, 0 }, ten);
+        assertArrayEquals(new byte[] { 0, a, b, c, d, e, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(6, ten, 1, (byte) 0, (byte) 0, a, b, c, d, e, f);
-        Assert.assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, 0, 0, 0 }, ten);
+        assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(7, ten, 1, (byte) 0, a, b, c, d, e, f, g);
-        Assert.assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, g, 0, 0 }, ten);
+        assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, g, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         Integers.insertBytes(8, ten, 1, a, b, c, d, e, f, g, h);
-        Assert.assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, g, h, 0 }, ten);
+        assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, g, h, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         byte[] src = new byte[4];
         Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
         rand.nextBytes(src);
         Integers.insertBytes(3, ten, ten.length - 3, (byte) 0, src[1], src[2], src[3]);
-        Assert.assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, src[1], src[2], src[3] }, ten);
+        assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, src[1], src[2], src[3] }, ten);
     }
 
     public static class IntTask extends RecursiveAction {

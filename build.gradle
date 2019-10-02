@@ -52,7 +52,14 @@ repositories {
 dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
 
-    testImplementation 'junit:junit:4.13-beta-3'
+    test.useJUnitPlatform()
+
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.5.2"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.5.2"
+
+//    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:4.12.0"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.5.2"
+
     testImplementation 'com.madgag.spongycastle:core:1.58.0.0'
 
 //    testImplementation 'org.openjdk.jmh:jmh-core:1.21'

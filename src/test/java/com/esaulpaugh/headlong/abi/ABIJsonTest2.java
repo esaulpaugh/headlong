@@ -19,8 +19,7 @@ import com.esaulpaugh.headlong.util.FastHex;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -33,6 +32,7 @@ import java.util.Iterator;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.encode;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class ABIJsonTest2 {
 
@@ -77,7 +77,7 @@ public class ABIJsonTest2 {
         private boolean test(boolean function) {
             byte[] encoding = function ? this.function.encodeCall(values).array() : types.encode(values).array();
             try {
-                Assert.assertArrayEquals(result, encoding);
+                assertArrayEquals(result, encoding);
                 return true;
             } catch (AssertionError ae) {
                 if(function) {

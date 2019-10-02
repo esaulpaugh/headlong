@@ -19,8 +19,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.text.ParseException;
@@ -254,7 +254,7 @@ public class MonteCarloTest {
         return seeds;
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void printNewTestCases() throws ParseException {
         final Gson ugly = new GsonBuilder().create();

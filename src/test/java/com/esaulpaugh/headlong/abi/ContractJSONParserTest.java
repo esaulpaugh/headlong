@@ -19,13 +19,14 @@ import com.esaulpaugh.headlong.TestUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ContractJSONParserTest {
 
@@ -181,10 +182,10 @@ public class ContractJSONParserTest {
 
         f = ContractJSONParser.parseFunction(FUNCTION_A_JSON);
         System.out.println(f.getName() + " : " + f.getCanonicalSignature() + " : " + f.getOutputTypes().get(0));
-        Assert.assertEquals(1, f.getParamTypes().elementTypes.length);
-        Assert.assertEquals("foo((decimal,decimal)[])", f.getCanonicalSignature());
-        Assert.assertEquals(1, f.getOutputTypes().elementTypes.length);
-        Assert.assertEquals("uint64", f.getOutputTypes().get(0).canonicalType);
+        assertEquals(1, f.getParamTypes().elementTypes.length);
+        assertEquals("foo((decimal,decimal)[])", f.getCanonicalSignature());
+        assertEquals(1, f.getOutputTypes().elementTypes.length);
+        assertEquals("uint64", f.getOutputTypes().get(0).canonicalType);
         f.encodeCallWithArgs((Object) new Tuple[] { new Tuple(new BigDecimal(BigInteger.ONE, 10), new BigDecimal(BigInteger.TEN, 10)) });
 
         printTupleType(f.getParamTypes());
@@ -193,8 +194,8 @@ public class ContractJSONParserTest {
 
         f = ContractJSONParser.parseFunction(FUNCTION_B_JSON);
         System.out.println(f.getName() + " : " + f.getCanonicalSignature());
-        Assert.assertEquals(TupleType.EMPTY, f.getOutputTypes());
-        Assert.assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.getCanonicalSignature());
+        assertEquals(TupleType.EMPTY, f.getOutputTypes());
+        assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.getCanonicalSignature());
 
         printTupleType(f.getParamTypes());
     }
@@ -206,56 +207,56 @@ public class ContractJSONParserTest {
 
         functions = ContractJSONParser.parseFunctions(CONTRACT_JSON);
 
-        Assert.assertEquals(1, functions.size());
+        assertEquals(1, functions.size());
 
         Function func = functions.get(0);
 
         printTupleType(func.getParamTypes());
 
-        Assert.assertEquals(Function.Type.FUNCTION, func.getType());
-        Assert.assertEquals("func", func.getName());
-        Assert.assertNull(func.getStateMutability());
+        assertEquals(Function.Type.FUNCTION, func.getType());
+        assertEquals("func", func.getName());
+        assertNull(func.getStateMutability());
 
         functions = ContractJSONParser.parseFunctions(FALLBACK_AND_CONSTRUCTOR);
 
-        Assert.assertEquals(2, functions.size());
+        assertEquals(2, functions.size());
 
         for(Function x : functions) {
             printTupleType(x.getParamTypes());
-            Assert.assertEquals("", x.getName());
-            Assert.assertEquals(TupleType.EMPTY, x.getOutputTypes());
+            assertEquals("", x.getName());
+            assertEquals(TupleType.EMPTY, x.getOutputTypes());
         }
 
         Function fallback = functions.get(0);
         Function constructor = functions.get(1);
 
-        Assert.assertEquals(Function.Type.FALLBACK, fallback.getType());
-        Assert.assertEquals(TupleType.EMPTY, fallback.getParamTypes());
-        Assert.assertEquals(TupleType.EMPTY, fallback.getOutputTypes());
-        Assert.assertEquals("pure", fallback.getStateMutability());
+        assertEquals(Function.Type.FALLBACK, fallback.getType());
+        assertEquals(TupleType.EMPTY, fallback.getParamTypes());
+        assertEquals(TupleType.EMPTY, fallback.getOutputTypes());
+        assertEquals("pure", fallback.getStateMutability());
 
-        Assert.assertEquals(Function.Type.CONSTRUCTOR, constructor.getType());
-        Assert.assertEquals(TupleType.parse("(bool)"), constructor.getParamTypes());
-        Assert.assertEquals(TupleType.EMPTY, fallback.getOutputTypes());
-        Assert.assertNull(constructor.getStateMutability());
+        assertEquals(Function.Type.CONSTRUCTOR, constructor.getType());
+        assertEquals(TupleType.parse("(bool)"), constructor.getParamTypes());
+        assertEquals(TupleType.EMPTY, fallback.getOutputTypes());
+        assertNull(constructor.getStateMutability());
     }
 
     @Test
     public void testGetEvents() throws ParseException {
         List<Event> events = ContractJSONParser.parseEvents(CONTRACT_JSON);
 
-        Assert.assertEquals(1, events.size());
+        assertEquals(1, events.size());
 
         Event event = events.get(0);
 
-        Assert.assertEquals("an_event", event.getName());
-        Assert.assertEquals(TupleType.parse("(bytes,uint256)"), event.getParams());
-        Assert.assertEquals(TupleType.parse("(bytes)"), event.getIndexedParams());
-        Assert.assertEquals(TupleType.parse("(uint256)"), event.getNonIndexedParams());
-        Assert.assertArrayEquals(new boolean[] { true, false }, event.getIndexManifest());
+        assertEquals("an_event", event.getName());
+        assertEquals(TupleType.parse("(bytes,uint256)"), event.getParams());
+        assertEquals(TupleType.parse("(bytes)"), event.getIndexedParams());
+        assertEquals(TupleType.parse("(uint256)"), event.getNonIndexedParams());
+        assertArrayEquals(new boolean[] { true, false }, event.getIndexManifest());
 
-        Assert.assertEquals("a", event.getParams().get(0).getName());
-        Assert.assertEquals("b", event.getParams().get(1).getName());
+        assertEquals("a", event.getParams().get(0).getName());
+        assertEquals("b", event.getParams().get(1).getName());
     }
 
     @Test
@@ -306,7 +307,7 @@ public class ContractJSONParserTest {
         Event expectedA = new Event("a_name", "()", new boolean[0]);
         Event expectedB = new Event("a_name", TupleType.EMPTY, new boolean[0], false);
 
-        Assert.assertEquals(expectedA, Event.fromJsonObject(jsonObject));
-        Assert.assertEquals(expectedB, expectedA);
+        assertEquals(expectedA, Event.fromJsonObject(jsonObject));
+        assertEquals(expectedB, expectedA);
     }
 }

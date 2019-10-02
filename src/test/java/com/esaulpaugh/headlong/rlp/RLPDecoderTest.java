@@ -19,9 +19,8 @@ import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.rlp.util.Integers;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -38,6 +37,7 @@ import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.CustomRunnable;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RLPDecoderTest {
 
@@ -54,9 +54,9 @@ public class RLPDecoderTest {
     @Test
     public void duplicate() throws DecodeException {
         RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
-        Assert.assertEquals(rlpList, rlpList.duplicate(RLP_STRICT));
+        assertEquals(rlpList, rlpList.duplicate(RLP_STRICT));
         RLPString rlpString = RLP_STRICT.wrapString((byte) 0x00);
-        Assert.assertEquals(rlpString, rlpString.duplicate(RLP_STRICT));
+        assertEquals(rlpString, rlpString.duplicate(RLP_STRICT));
     }
 
     @Test
@@ -80,12 +80,12 @@ public class RLPDecoderTest {
         RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
         List<RLPItem> actualList = rlpList.elements(RLP_STRICT);
 
-        Assert.assertEquals(148, rlpList.dataLength);
-        Assert.assertEquals(6, actualList.size());
-        Assert.assertEquals(10, actualList.get(0).dataLength);
+        assertEquals(148, rlpList.dataLength);
+        assertEquals(6, actualList.size());
+        assertEquals(10, actualList.get(0).dataLength);
     }
 
-    @Ignore // run this by itself
+    @Disabled // run this by itself
     @Test
     public void hugeStrings() throws DecodeException {
         int lol;
@@ -108,11 +108,11 @@ public class RLPDecoderTest {
             huge = (RLPString) RLP_STRICT.wrap(buffer);
             data = huge.asString(UTF_8);
             System.out.println(dataLen);
-            Assert.assertEquals(dataLen, data.length());
+            assertEquals(dataLen, data.length());
         }
     }
 
-    @Ignore // memory hog, run by itself
+    @Disabled // memory hog, run by itself
     @Test
     public void hugeListsHighMem() throws DecodeException {
 
@@ -160,7 +160,7 @@ public class RLPDecoderTest {
             huge.elements(RLP_STRICT, elements);
             System.out.println("trailing single byte items = " + (buffer.length - i));
             System.out.println("list size = " + size);
-            Assert.assertEquals(size, elements.size());
+            assertEquals(size, elements.size());
         }
     }
 
@@ -201,7 +201,7 @@ public class RLPDecoderTest {
                 j = element.endIndex;
             }
             System.out.println("size = " + size + ", count = " + count + "\n");
-            Assert.assertEquals(size, count);
+            assertEquals(size, count);
         }
     }
 
@@ -258,10 +258,10 @@ public class RLPDecoderTest {
         byte[] burma17 = new byte[] { (byte) 0xc5, (byte) 0x82, (byte) 0x10, (byte) 0x10, (byte) 0xc0 };
 
         RLPItem nonEmpty = RLP_LENIENT.wrap( burma17, 1);
-        Assert.assertTrue(nonEmpty.asBoolean());
+        assertTrue(nonEmpty.asBoolean());
 
         RLPItem empty = RLP_LENIENT.wrap( burma17, 4);
-        Assert.assertFalse(empty.asBoolean());
+        assertFalse(empty.asBoolean());
     }
 
     @Test
@@ -269,10 +269,10 @@ public class RLPDecoderTest {
         byte[] burma17 = new byte[] { (byte) 0xc5, (byte) 0x82, (byte) 0x10, (byte) 0x10, (byte) 0xc0 };
 
         RLPItem nonEmpty = RLP_LENIENT.wrap( burma17, 1);
-        Assert.assertEquals(Character.valueOf('\u1010'), Character.valueOf(nonEmpty.asChar()));
+        assertEquals(Character.valueOf('\u1010'), Character.valueOf(nonEmpty.asChar()));
 
         RLPItem empty = RLP_LENIENT.wrap( burma17, 4);
-        Assert.assertEquals(Character.valueOf('\0'), Character.valueOf(empty.asChar()));
+        assertEquals(Character.valueOf('\0'), Character.valueOf(empty.asChar()));
     }
 
     private static final BiPredicate<Integer, Integer> UNTIL_COUNT_FIVE = (count, index) -> count < 5;
@@ -286,40 +286,40 @@ public class RLPDecoderTest {
         }
         Set<RLPItem> hashSet = new HashSet<>();
         int n = RLP_STRICT.collect(0, rlp, UNTIL_COUNT_FIVE, hashSet);
-        Assert.assertEquals(5, n);
-        Assert.assertEquals(5, hashSet.size());
+        assertEquals(5, n);
+        assertEquals(5, hashSet.size());
         for (int i = 0; i < 5; i++) {
-            Assert.assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
+            assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
         }
 
         hashSet = new HashSet<>();
         n = RLP_STRICT.collect(0, rlp, UNTIL_INDEX_SEVEN, hashSet);
-        Assert.assertEquals(7, n);
-        Assert.assertEquals(7, hashSet.size());
+        assertEquals(7, n);
+        assertEquals(7, hashSet.size());
         for (int i = 0; i < 7; i++) {
-            Assert.assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
+            assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
         }
 
         hashSet = new HashSet<>();
         RLP_STRICT.collectN(rlp, 4, 3, hashSet);
-        Assert.assertEquals(3, hashSet.size());
+        assertEquals(3, hashSet.size());
         for (int i = 4; i < 7; i++) {
-            Assert.assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
+            assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
         }
 
         hashSet = new HashSet<>();
         n = RLP_STRICT.collectBefore(1, rlp, 6, hashSet);
-        Assert.assertEquals(5, n);
-        Assert.assertEquals(5, hashSet.size());
+        assertEquals(5, n);
+        assertEquals(5, hashSet.size());
         for (int i = 1; i < 6; i++) {
-            Assert.assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
+            assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
         }
 
         hashSet = new HashSet<>();
         n = RLP_STRICT.collectAll(0, rlp, hashSet);
-        Assert.assertEquals(9, n);
+        assertEquals(9, n);
         for (int i = 0; i < 9; i++) {
-            Assert.assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
+            assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
         }
     }
 
@@ -347,27 +347,27 @@ public class RLPDecoderTest {
         byte[] list = RLPEncoder.encodeAsList(a, b, c);
         RLPListIterator listIter = RLP_STRICT.listIterator(list);
 
-        Assert.assertTrue(listIter.hasNext());
-        Assert.assertArrayEquals(a, listIter.next().asBytes());
-        Assert.assertTrue(listIter.hasNext());
-        Assert.assertArrayEquals(b, listIter.next().asBytes());
-        Assert.assertTrue(listIter.hasNext());
-        Assert.assertArrayEquals(c, listIter.next().asBytes());
+        assertTrue(listIter.hasNext());
+        assertArrayEquals(a, listIter.next().asBytes());
+        assertTrue(listIter.hasNext());
+        assertArrayEquals(b, listIter.next().asBytes());
+        assertTrue(listIter.hasNext());
+        assertArrayEquals(c, listIter.next().asBytes());
 
-        Assert.assertFalse(listIter.hasNext());
+        assertFalse(listIter.hasNext());
         assertThrown(NoSuchElementException.class, listIter::next);
 
         byte[] sequence = RLPEncoder.encodeSequentially(c, a, b);
         RLPIterator seqIter = RLP_STRICT.sequenceIterator(sequence);
 
-        Assert.assertTrue(seqIter.hasNext());
-        Assert.assertArrayEquals(c, seqIter.next().asBytes());
-        Assert.assertTrue(seqIter.hasNext());
-        Assert.assertArrayEquals(a, seqIter.next().asBytes());
-        Assert.assertTrue(seqIter.hasNext());
-        Assert.assertArrayEquals(b, seqIter.next().asBytes());
+        assertTrue(seqIter.hasNext());
+        assertArrayEquals(c, seqIter.next().asBytes());
+        assertTrue(seqIter.hasNext());
+        assertArrayEquals(a, seqIter.next().asBytes());
+        assertTrue(seqIter.hasNext());
+        assertArrayEquals(b, seqIter.next().asBytes());
 
-        Assert.assertFalse(seqIter.hasNext());
+        assertFalse(seqIter.hasNext());
         assertThrown(NoSuchElementException.class, seqIter::next);
     }
 

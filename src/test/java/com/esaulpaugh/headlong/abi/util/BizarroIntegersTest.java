@@ -19,12 +19,13 @@ import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
 import com.esaulpaugh.headlong.rlp.util.IntegersTest;
 import com.esaulpaugh.headlong.util.Strings;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Supplier;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BizarroIntegersTest {
 
@@ -33,19 +34,19 @@ public class BizarroIntegersTest {
         StringBuilder sb = new StringBuilder();
         for (byte i = -5; i < 5; i++)
             sb.append(Strings.encode(BizarroIntegers.toBytes(i), Strings.HEX)).append(',');
-        Assert.assertEquals("fb,fc,fd,fe,,00,01,02,03,04,", sb.toString());
+        assertEquals("fb,fc,fd,fe,,00,01,02,03,04,", sb.toString());
         TestUtils.printAndReset(sb);
         for (short i = -5; i < 5; i++)
             sb.append(Strings.encode(BizarroIntegers.toBytes(i), Strings.HEX)).append(',');
-        Assert.assertEquals("fb,fc,fd,fe,,0000,0001,0002,0003,0004,", sb.toString());
+        assertEquals("fb,fc,fd,fe,,0000,0001,0002,0003,0004,", sb.toString());
         TestUtils.printAndReset(sb);
         for (int i = -5; i < 5; i++)
             sb.append(Strings.encode(BizarroIntegers.toBytes(i), Strings.HEX)).append(',');
-        Assert.assertEquals("fb,fc,fd,fe,,00000000,00000001,00000002,00000003,00000004,", sb.toString());
+        assertEquals("fb,fc,fd,fe,,00000000,00000001,00000002,00000003,00000004,", sb.toString());
         TestUtils.printAndReset(sb);
         for (long i = -5; i < 5; i++)
             sb.append(Strings.encode(BizarroIntegers.toBytes(i), Strings.HEX)).append(',');
-        Assert.assertEquals("fb,fc,fd,fe,,0000000000000000,0000000000000001,0000000000000002,0000000000000003,0000000000000004,", sb.toString());
+        assertEquals("fb,fc,fd,fe,,0000000000000000,0000000000000001,0000000000000002,0000000000000003,0000000000000004,", sb.toString());
         TestUtils.printAndReset(sb);
     }
 
@@ -56,7 +57,7 @@ public class BizarroIntegersTest {
             byte b = (byte) i;
             int n = BizarroIntegers.putByte(b, one, 0);
             byte r = BizarroIntegers.getByte(one, 0, n);
-            Assert.assertEquals(b, r);
+            assertEquals(b, r);
         }
     }
 
@@ -67,7 +68,7 @@ public class BizarroIntegersTest {
             short s = (short) i;
             int n = BizarroIntegers.putShort(s, two, 0);
             short r = BizarroIntegers.getShort(two, 0, n);
-            Assert.assertEquals(s, r);
+            assertEquals(s, r);
         }
     }
 
@@ -117,7 +118,7 @@ public class BizarroIntegersTest {
         for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
             byte b = (byte) i;
             int len = BizarroIntegers.len(b);
-            Assert.assertEquals(b == -1 ? 0 : 1, len);
+            assertEquals(b == -1 ? 0 : 1, len);
         }
     }
 
@@ -176,7 +177,7 @@ public class BizarroIntegersTest {
                 int i = (int) lo;
                 int len = BizarroIntegers.putInt(i, four, 0);
                 int r = BizarroIntegers.getInt(four, 0, len);
-                Assert.assertEquals(i, r);
+                assertEquals(i, r);
             }
         }
     }

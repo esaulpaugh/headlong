@@ -19,13 +19,14 @@ import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RLPEncoderTest {
 
@@ -35,7 +36,7 @@ public class RLPEncoderTest {
                 new Object[0],
                 new byte[0]
         };
-        Assert.assertArrayEquals(
+        assertArrayEquals(
                 new byte[] { (byte)0xc0, (byte)0x80 },
                 RLPEncoder.encodeSequentially(objects)
         );
@@ -47,7 +48,7 @@ public class RLPEncoderTest {
                 new Object[0],
                 new byte[0]
         };
-        Assert.assertArrayEquals(
+        assertArrayEquals(
                 new byte[] { (byte)0xc2, (byte)0xc0, (byte)0x80 },
                 RLPEncoder.encodeAsList(objects)
         );
@@ -63,15 +64,15 @@ public class RLPEncoderTest {
         RLPList rlpList = RLPEncoder.toList(item0, item1, item2);
         List<RLPItem> elements = rlpList.elements(RLPDecoder.RLP_STRICT);
 
-        Assert.assertEquals(3, elements.size());
+        assertEquals(3, elements.size());
 
-        Assert.assertNotSame(elements.get(0), item0);
-        Assert.assertNotSame(elements.get(1), item1);
-        Assert.assertNotSame(elements.get(2), item2);
+        assertNotSame(elements.get(0), item0);
+        assertNotSame(elements.get(1), item1);
+        assertNotSame(elements.get(2), item2);
 
-        Assert.assertEquals(elements.get(0), item0);
-        Assert.assertEquals(elements.get(1), item1);
-        Assert.assertEquals(elements.get(2), item2);
+        assertEquals(elements.get(0), item0);
+        assertEquals(elements.get(1), item1);
+        assertEquals(elements.get(2), item2);
     }
 
     @Test
@@ -105,17 +106,17 @@ public class RLPEncoderTest {
 
         RLPIterator iter = RLPDecoder.RLP_STRICT.sequenceIterator(rlp);
 
-        Assert.assertEquals(iter.next().asChar(), c);
-        Assert.assertEquals(iter.next().asString(Strings.UTF_8), str);
-        Assert.assertEquals(iter.next().asByte(), by);
-        Assert.assertEquals(iter.next().asShort(), sh);
+        assertEquals(iter.next().asChar(), c);
+        assertEquals(iter.next().asString(Strings.UTF_8), str);
+        assertEquals(iter.next().asByte(), by);
+        assertEquals(iter.next().asShort(), sh);
 
-        Assert.assertEquals(iter.next().asInt(), i);
-        Assert.assertEquals(iter.next().asLong(), l);
-        Assert.assertEquals(iter.next().asBigInt(), bi);
+        assertEquals(iter.next().asInt(), i);
+        assertEquals(iter.next().asLong(), l);
+        assertEquals(iter.next().asBigInt(), bi);
 
-        Assert.assertEquals(iter.next().asFloat(), f, 0.0d);
-        Assert.assertEquals(iter.next().asDouble(), d, 0.0d);
-        Assert.assertEquals(iter.next().asBigDecimal(bd.scale()), bd);
+        assertEquals(iter.next().asFloat(), f, 0.0d);
+        assertEquals(iter.next().asDouble(), d, 0.0d);
+        assertEquals(iter.next().asBigDecimal(bd.scale()), bd);
     }
 }

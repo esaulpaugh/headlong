@@ -23,7 +23,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.joemelsha.crypto.hash.Keccak;
-import org.junit.Assert;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -39,6 +38,8 @@ import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
 import static com.esaulpaugh.headlong.abi.ABIType.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MonteCarloTestCase implements Serializable {
 
@@ -555,18 +556,18 @@ public class MonteCarloTestCase implements Serializable {
         } else if(elementType instanceof ArrayType<?, ?>) {
             ArrayType<?, ?> arrayType = (ArrayType<?, ?>) elementType;
             if(arrayType.isString) {
-                Assert.assertArrayEquals(Strings.decode((String) in, Strings.UTF_8), Strings.decode((String) out, Strings.UTF_8));
-                Assert.assertEquals(in, out);
+                assertArrayEquals(Strings.decode((String) in, Strings.UTF_8), Strings.decode((String) out, Strings.UTF_8));
+                assertEquals(in, out);
             } else {
                 final Class<?> inClass = in.getClass();
                 if(Object[].class.isAssignableFrom(inClass)) {
                     findInequalityInArray(arrayType, (Object[]) in, (Object[]) out);
                 } else if(byte[].class.isAssignableFrom(inClass)) {
-                    Assert.assertArrayEquals((byte[]) in, (byte[]) out);
+                    assertArrayEquals((byte[]) in, (byte[]) out);
                 } else if(int[].class.isAssignableFrom(inClass)) {
-                    Assert.assertArrayEquals((int[]) in, (int[]) out);
+                    assertArrayEquals((int[]) in, (int[]) out);
                 } else if(long[].class.isAssignableFrom(inClass)) {
-                    Assert.assertArrayEquals((long[]) in, (long[]) out);
+                    assertArrayEquals((long[]) in, (long[]) out);
                 } else {
                     throw new RuntimeException("??");
                 }
