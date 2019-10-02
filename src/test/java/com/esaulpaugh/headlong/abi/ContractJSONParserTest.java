@@ -16,9 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -30,70 +28,101 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ContractJSONParserTest {
 
-    private static final String FUNCTION_A_JSON = "{\"name\": \"foo\", \"type\": \"function\", \"inputs\": [ {\"name\": \"complex_nums\", \"type\": \"tuple[]\", \"components\": [ {\"type\": \"decimal\", \"name\": \"real\"}, {\"type\": \"decimal\", \"name\": \"imaginary\"} ]} ], \"outputs\": [ {\"name\": \"count\", \"type\": \"uint64\" } ] }";
+    private static final String FUNCTION_A_JSON = "{\n" +
+            "  \"name\": \"foo\",\n" +
+            "  \"type\": \"function\",\n" +
+            "  \"inputs\": [\n" +
+            "    {\n" +
+            "      \"name\": \"complex_nums\",\n" +
+            "      \"type\": \"tuple[]\",\n" +
+            "      \"components\": [\n" +
+            "        {\n" +
+            "          \"type\": \"decimal\",\n" +
+            "          \"name\": \"real\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "          \"type\": \"decimal\",\n" +
+            "          \"name\": \"imaginary\"\n" +
+            "        }\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  ],\n" +
+            "  \"outputs\": [\n" +
+            "    {\n" +
+            "      \"name\": \"count\",\n" +
+            "      \"type\": \"uint64\"\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
 
     private static final String FUNCTION_B_JSON = "{\n" +
-            "    \"name\": \"func\",\n" +
-            "    \"type\": \"function\",\n" +
-            "    \"inputs\": [\n" +
-            "      {\n" +
-            "        \"name\": \"aa\",\n" +
-            "        \"type\": \"tuple\",\n" +
-            "        \"components\": [\n" +
-            "          {\n" +
-            "            \"name\": \"aa_d\",\n" +
-            "            \"type\": \"decimal\"\n" +
-            "          },\n" +
-            "          {\n" +
-            "            \"name\": \"aa_f\",\n" +
-            "            \"type\": \"fixed128x18\"\n" +
-            "          }\n" +
-            "        ]\n" +
-            "      },\n" +
-            "      {\n" +
-            "        \"name\": \"bb\",\n" +
-            "        \"type\": \"fixed128x18[]\",\n" +
-            "        \"components\": [\n" +
-            "        ]\n" +
-            "      },\n" +
-            "      {\n" +
-            "        \"name\": \"cc\",\n" +
-            "        \"type\": \"tuple\",\n" +
-            "        \"components\": [\n" +
-            "          {\n" +
-            "            \"name\": \"cc_uint\",\n" +
-            "            \"type\": \"uint256\"\n" +
-            "          },\n" +
-            "          {\n" +
-            "            \"name\": \"cc_int_arr\",\n" +
-            "            \"type\": \"int256[]\"\n" +
-            "          },\n" +
-            "          {\n" +
-            "            \"name\": \"cc_tuple_arr\",\n" +
-            "            \"type\": \"tuple[]\",\n" +
-            "            \"components\": [\n" +
-            "              {\n" +
-            "                \"type\": \"int8\"\n" +
-            "              },\n" +
-            "              {\n" +
-            "                \"type\": \"uint40\"\n" +
-            "              }\n" +
-            "            ]\n" +
-            "          }\n" +
-            "        ]\n" +
-            "      }\n" +
-            "    ]\n" +
-//            ",    \"outputs\": []\n" +
-            "  }\n";
+            "  \"name\": \"func\",\n" +
+            "  \"type\": \"function\",\n" +
+            "  \"inputs\": [\n" +
+            "    {\n" +
+            "      \"name\": \"aa\",\n" +
+            "      \"type\": \"tuple\",\n" +
+            "      \"components\": [\n" +
+            "        {\n" +
+            "          \"name\": \"aa_d\",\n" +
+            "          \"type\": \"decimal\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "          \"name\": \"aa_f\",\n" +
+            "          \"type\": \"fixed128x18\"\n" +
+            "        }\n" +
+            "      ]\n" +
+            "    },\n" +
+            "    {\n" +
+            "      \"name\": \"bb\",\n" +
+            "      \"type\": \"fixed128x18[]\",\n" +
+            "      \"components\": []\n" +
+            "    },\n" +
+            "    {\n" +
+            "      \"name\": \"cc\",\n" +
+            "      \"type\": \"tuple\",\n" +
+            "      \"components\": [\n" +
+            "        {\n" +
+            "          \"name\": \"cc_uint\",\n" +
+            "          \"type\": \"uint256\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "          \"name\": \"cc_int_arr\",\n" +
+            "          \"type\": \"int256[]\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "          \"name\": \"cc_tuple_arr\",\n" +
+            "          \"type\": \"tuple[]\",\n" +
+            "          \"components\": [\n" +
+            "            {\n" +
+            "              \"type\": \"int8\"\n" +
+            "            },\n" +
+            "            {\n" +
+            "              \"type\": \"uint40\"\n" +
+            "            }\n" +
+            "          ]\n" +
+            "        }\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
 
     private static final String CONTRACT_JSON = "[\n" +
             "  {\n" +
-            "    \"type\":\"event\",\n" +
+            "    \"type\": \"event\",\n" +
             "    \"inputs\": [\n" +
-            "     {\"name\":\"a\",\"type\":\"bytes\",\"indexed\":true},\n" +
-            "     {\"name\":\"b\",\"type\":\"uint256\",\"indexed\":false}\n" +
+            "      {\n" +
+            "        \"name\": \"a\",\n" +
+            "        \"type\": \"bytes\",\n" +
+            "        \"indexed\": true\n" +
+            "      },\n" +
+            "      {\n" +
+            "        \"name\": \"b\",\n" +
+            "        \"type\": \"uint256\",\n" +
+            "        \"indexed\": false\n" +
+            "      }\n" +
             "    ],\n" +
-            "    \"name\":\"an_event\"\n" +
+            "    \"name\": \"an_event\"\n" +
             "  },\n" +
             "  {\n" +
             "    \"name\": \"func\",\n" +
@@ -116,8 +145,7 @@ public class ContractJSONParserTest {
             "      {\n" +
             "        \"name\": \"bb\",\n" +
             "        \"type\": \"fixed128x18[]\",\n" +
-            "        \"components\": [\n" +
-            "        ]\n" +
+            "        \"components\": []\n" +
             "      },\n" +
             "      {\n" +
             "        \"name\": \"cc\",\n" +
@@ -152,22 +180,21 @@ public class ContractJSONParserTest {
             "  }\n" +
             "]";
 
-    private static final String FALLBACK_AND_CONSTRUCTOR =
-            "[\n" +
-                    "  {\n" +
-                    "    \"type\": \"fallback\",\n" +
-                    "    \"stateMutability\": \"pure\"" +
-                    "  },\n" +
-                    "  {\n" +
-                    "    \"type\": \"constructor\",\n" +
-                    "    \"inputs\": [\n" +
-                    "      {\n" +
-                    "        \"name\": \"aha\",\n" +
-                    "        \"type\": \"bool\"\n" +
-                    "      }\n" +
-                    "    ]\n" +
-                    "  }\n" +
-                    "]";
+    private static final String FALLBACK_AND_CONSTRUCTOR = "[\n" +
+            "  {\n" +
+            "    \"type\": \"fallback\",\n" +
+            "    \"stateMutability\": \"pure\"\n" +
+            "  },\n" +
+            "  {\n" +
+            "    \"type\": \"constructor\",\n" +
+            "    \"inputs\": [\n" +
+            "      {\n" +
+            "        \"name\": \"aha\",\n" +
+            "        \"type\": \"bool\"\n" +
+            "      }\n" +
+            "    ]\n" +
+            "  }\n" +
+            "]";
 
     private static void printTupleType(TupleType tupleType) {
         StringBuilder sb = new StringBuilder();
