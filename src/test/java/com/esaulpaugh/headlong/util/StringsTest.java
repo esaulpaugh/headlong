@@ -66,11 +66,6 @@ public class StringsTest {
     }
 
     @Test
-    public void decimal() {
-        testEncoding(20_000, DECIMAL, SUPPLY_RANDOM);
-    }
-
-    @Test
     public void base64NoOptions() {
         Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
         java.util.Base64.Encoder mimeEncoder = java.util.Base64.getMimeEncoder();

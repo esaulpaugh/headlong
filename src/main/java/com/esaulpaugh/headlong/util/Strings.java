@@ -45,7 +45,7 @@ public final class Strings {
     public static String encode(byte[] buffer, int from, int len, int encoding) {
         switch (encoding) {
         case BASE_64_URL_SAFE: return Base64.encodeToString(buffer, from, len, URL_SAFE_FLAGS);
-        case DECIMAL: return Decimal.encodeToString(buffer, from, len);
+        case DECIMAL: throw new UnsupportedOperationException();
         case UTF_8: return new String(buffer, from, len, StandardCharsets.UTF_8);
         case HEX:
         default: return FastHex.encodeToString(buffer, from, len);
@@ -62,7 +62,7 @@ public final class Strings {
         }
         switch (encoding) {
         case BASE_64_URL_SAFE: return java.util.Base64.getUrlDecoder().decode(string);
-        case DECIMAL: return Decimal.decode(string, 0, string.length());
+        case DECIMAL: throw new UnsupportedOperationException();
         case UTF_8: return string.getBytes(StandardCharsets.UTF_8);
         case HEX:
         default: return FastHex.decode(string, 0 ,string.length());
