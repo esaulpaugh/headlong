@@ -44,12 +44,12 @@ public final class FloatingPoint {
         return Double.longBitsToDouble(Integers.getLong(bytes, i, numBytes));
     }
 
-    public static byte[] toBytes(double val) {
-        return Integers.toBytes(Double.doubleToLongBits(val));
-    }
-
     public static int putDouble(double val, byte[] bytes, int i) {
         return Integers.putLong(Double.doubleToLongBits(val), bytes, i);
+    }
+
+    public static byte[] toBytes(double val) {
+        return Integers.toBytes(Double.doubleToLongBits(val));
     }
 
     /* BigDecimal */
