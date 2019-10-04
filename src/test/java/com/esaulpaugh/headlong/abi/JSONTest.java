@@ -16,7 +16,9 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.util.JsonUtils;
 import com.google.gson.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -26,23 +28,23 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ContractJSONParserTest {
+public class JSONTest {
 
     private static final String FUNCTION_A_JSON = "{\n" +
-            "  \"name\": \"foo\",\n" +
             "  \"type\": \"function\",\n" +
+            "  \"name\": \"foo\",\n" +
             "  \"inputs\": [\n" +
             "    {\n" +
             "      \"name\": \"complex_nums\",\n" +
-            "      \"type\": \"tuple[]\",\n" +
+            "      \"type\": \"tuple[][]\",\n" +
             "      \"components\": [\n" +
             "        {\n" +
-            "          \"type\": \"decimal\",\n" +
-            "          \"name\": \"real\"\n" +
+            "          \"name\": \"real\",\n" +
+            "          \"type\": \"decimal\"\n" +
             "        },\n" +
             "        {\n" +
-            "          \"type\": \"decimal\",\n" +
-            "          \"name\": \"imaginary\"\n" +
+            "          \"name\": \"imaginary\",\n" +
+            "          \"type\": \"decimal\"\n" +
             "        }\n" +
             "      ]\n" +
             "    }\n" +
@@ -56,8 +58,8 @@ public class ContractJSONParserTest {
             "}";
 
     private static final String FUNCTION_B_JSON = "{\n" +
-            "  \"name\": \"func\",\n" +
             "  \"type\": \"function\",\n" +
+            "  \"name\": \"func\",\n" +
             "  \"inputs\": [\n" +
             "    {\n" +
             "      \"name\": \"aa\",\n" +
@@ -75,8 +77,7 @@ public class ContractJSONParserTest {
             "    },\n" +
             "    {\n" +
             "      \"name\": \"bb\",\n" +
-            "      \"type\": \"fixed128x18[]\",\n" +
-            "      \"components\": []\n" +
+            "      \"type\": \"fixed128x18[]\"\n" +
             "    },\n" +
             "    {\n" +
             "      \"name\": \"cc\",\n" +
@@ -125,8 +126,8 @@ public class ContractJSONParserTest {
             "    \"name\": \"an_event\"\n" +
             "  },\n" +
             "  {\n" +
-            "    \"name\": \"func\",\n" +
             "    \"type\": \"function\",\n" +
+            "    \"name\": \"func\",\n" +
             "    \"inputs\": [\n" +
             "      {\n" +
             "        \"name\": \"aa\",\n" +
@@ -144,8 +145,7 @@ public class ContractJSONParserTest {
             "      },\n" +
             "      {\n" +
             "        \"name\": \"bb\",\n" +
-            "        \"type\": \"fixed128x18[]\",\n" +
-            "        \"components\": []\n" +
+            "        \"type\": \"fixed128x18[]\"\n" +
             "      },\n" +
             "      {\n" +
             "        \"name\": \"cc\",\n" +
@@ -175,8 +175,7 @@ public class ContractJSONParserTest {
             "          }\n" +
             "        ]\n" +
             "      }\n" +
-            "    ],\n" +
-            "    \"outputs\": []\n" +
+            "    ]\n" +
             "  }\n" +
             "]";
 
@@ -203,23 +202,59 @@ public class ContractJSONParserTest {
     }
 
     @Test
+    public void testToJson() throws ParseException {
+
+        String[] jsons = new String[5];
+
+        int i = 0;
+        jsons[i++] = FUNCTION_A_JSON;
+        jsons[i++] = FUNCTION_B_JSON;
+        JsonArray contractArray = JsonUtils.parseArray(CONTRACT_JSON);
+        final int n = contractArray.size();
+        for (int j = 0; j < n; j++) {
+            JsonObject obj = contractArray.get(j).getAsJsonObject();
+            if(!obj.get("type").getAsString().equals("event")) {
+                jsons[i++] = JsonUtils.prettify(contractArray.get(j).getAsJsonObject());
+            }
+        }
+        JsonArray fallbackAndC = JsonUtils.parseArray(FALLBACK_AND_CONSTRUCTOR);
+        final int n2 = fallbackAndC.size();
+        for (int j = 0; j < n2; j++) {
+            jsons[i++] = JsonUtils.prettify(fallbackAndC.get(j).getAsJsonObject());
+        }
+
+        for (String originalJson : jsons) {
+            Function f = JSON.parseFunction(originalJson);
+            String newJson = f.toJson();
+            Assertions.assertNotEquals(originalJson, newJson);
+
+            Function r = Function.fromJson(newJson);
+            Assertions.assertEquals(f, r);
+
+            String pretty = JsonUtils.prettify(JsonUtils.parseObject(newJson));
+
+            Assertions.assertEquals(originalJson, pretty);
+        }
+    }
+
+    @Test
     public void testParseFunction() throws ParseException {
 
         Function f;
 
-        f = ContractJSONParser.parseFunction(FUNCTION_A_JSON);
+        f = JSON.parseFunction(FUNCTION_A_JSON);
         System.out.println(f.getName() + " : " + f.getCanonicalSignature() + " : " + f.getOutputTypes().get(0));
         assertEquals(1, f.getParamTypes().elementTypes.length);
-        assertEquals("foo((decimal,decimal)[])", f.getCanonicalSignature());
+        assertEquals("foo((decimal,decimal)[][])", f.getCanonicalSignature());
         assertEquals(1, f.getOutputTypes().elementTypes.length);
         assertEquals("uint64", f.getOutputTypes().get(0).canonicalType);
-        f.encodeCallWithArgs((Object) new Tuple[] { new Tuple(new BigDecimal(BigInteger.ONE, 10), new BigDecimal(BigInteger.TEN, 10)) });
+        f.encodeCallWithArgs((Object) new Tuple[][] { new Tuple[] { new Tuple(new BigDecimal(BigInteger.ONE, 10), new BigDecimal(BigInteger.TEN, 10)) } });
 
         printTupleType(f.getParamTypes());
 
         printTupleType(f.getOutputTypes());
 
-        f = ContractJSONParser.parseFunction(FUNCTION_B_JSON);
+        f = JSON.parseFunction(FUNCTION_B_JSON);
         System.out.println(f.getName() + " : " + f.getCanonicalSignature());
         assertEquals(TupleType.EMPTY, f.getOutputTypes());
         assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.getCanonicalSignature());
@@ -232,7 +267,7 @@ public class ContractJSONParserTest {
 
         List<Function> functions;
 
-        functions = ContractJSONParser.parseFunctions(CONTRACT_JSON);
+        functions = JSON.parseFunctions(CONTRACT_JSON);
 
         assertEquals(1, functions.size());
 
@@ -244,13 +279,13 @@ public class ContractJSONParserTest {
         assertEquals("func", func.getName());
         assertNull(func.getStateMutability());
 
-        functions = ContractJSONParser.parseFunctions(FALLBACK_AND_CONSTRUCTOR);
+        functions = JSON.parseFunctions(FALLBACK_AND_CONSTRUCTOR);
 
         assertEquals(2, functions.size());
 
         for(Function x : functions) {
             printTupleType(x.getParamTypes());
-            assertEquals("", x.getName());
+            assertNull(x.getName());
             assertEquals(TupleType.EMPTY, x.getOutputTypes());
         }
 
@@ -270,7 +305,7 @@ public class ContractJSONParserTest {
 
     @Test
     public void testGetEvents() throws ParseException {
-        List<Event> events = ContractJSONParser.parseEvents(CONTRACT_JSON);
+        List<Event> events = JSON.parseEvents(CONTRACT_JSON);
 
         assertEquals(1, events.size());
 

@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.util.JsonUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -266,7 +267,7 @@ public class MonteCarloTest {
             MonteCarloTestCase testCase = new MonteCarloTestCase(params);
             array.add(testCase.toJsonElement(ugly, "headlong_" + i++, version));
         }
-        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(array));
+        System.out.println(JsonUtils.prettify(array));
     }
 
     private static void sleep() {

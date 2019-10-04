@@ -18,6 +18,7 @@ package com.esaulpaugh.headlong.abi;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import java.security.MessageDigest;
 import java.text.ParseException;
@@ -31,7 +32,7 @@ import static com.esaulpaugh.headlong.abi.util.JsonUtils.getString;
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.parseArray;
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.parseObject;
 
-public final class ContractJSONParser {
+public final class JSON {
 
     private static final String NAME = "name";
     private static final String TYPE = "type";
@@ -173,5 +174,49 @@ public final class ContractJSONParser {
 
     private static IllegalArgumentException unexpectedException(String key, String value) {
         return new IllegalArgumentException("unexpected " + key + ": " + (value == null ? null : "\"" + value + "\""));
+    }
+// -------------------------------------------
+    public static JsonObject buildFunctionJson(Function f) {
+        JsonObject object = new JsonObject();
+        Function.Type type = f.getType();
+        object.add(TYPE, new JsonPrimitive(type.toString()));
+        if(type != Function.Type.FALLBACK) {
+            String name = f.getName();
+            if(name != null) {
+                object.add(NAME, new JsonPrimitive(name));
+            }
+            object.add(INPUTS, buildJsonArray(f.getParamTypes()));
+        }
+        JsonArray outputs = buildJsonArray(f.getOutputTypes());
+        object.add(OUTPUTS, outputs.size() == 0 ? null : outputs);
+        String stateMutability = f.getStateMutability();
+        object.add(STATE_MUTABILITY, stateMutability == null ? null : new JsonPrimitive(f.getStateMutability()));
+        return object;
+    }
+
+    private static JsonArray buildJsonArray(TupleType tupleType) {
+        JsonArray array = new JsonArray();
+        for (ABIType<?> e : tupleType.elementTypes) {
+            JsonObject arrayElement = new JsonObject();
+            String name = e.getName();
+            arrayElement.add(NAME, name == null ? null : new JsonPrimitive(e.getName()));
+            boolean tuple = e.canonicalType.startsWith("(");
+            String type = e.canonicalType;
+            if(tuple) {
+                String substring = type.substring(type.indexOf('('), type.lastIndexOf(')') + 1);
+                type = type.replace(substring, TUPLE);
+            }
+            arrayElement.add(TYPE, new JsonPrimitive(type));
+            if(tuple) {
+                ABIType<?> base = e;
+                while (base instanceof ArrayType) {
+                    base = ((ArrayType) base).elementType;
+                }
+                JsonArray components = buildJsonArray((TupleType) base);
+                arrayElement.add(COMPONENTS, components);
+            }
+            array.add(arrayElement);
+        }
+        return array;
     }
 }

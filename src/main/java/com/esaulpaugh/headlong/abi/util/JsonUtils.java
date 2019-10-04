@@ -75,4 +75,10 @@ public final class JsonUtils {
         }
         return element.getAsJsonArray();
     }
+
+    public static String prettify(JsonElement element) {
+        GsonBuilder gb = new GsonBuilder();
+        gb.setPrettyPrinting();
+        return gb.create().toJson(element);
+    }
 }

@@ -112,10 +112,10 @@ public final class Event implements ABIObject {
     }
 
     public static Event fromJson(String eventJson) throws ParseException {
-        return ContractJSONParser.parseEvent(eventJson);
+        return JSON.parseEvent(eventJson);
     }
 
     public static Event fromJsonObject(JsonObject event) throws ParseException {
-        return ContractJSONParser.parseEvent(event);
+        return JSON.parseEvent(event);
     }
 }

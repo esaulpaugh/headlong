@@ -54,9 +54,9 @@ public final class Function implements ABIObject, Serializable {
         static Type get(String value) {
             if(value != null) {
                 switch (value) {
-                case ContractJSONParser.FALLBACK: return Type.FALLBACK;
-                case ContractJSONParser.CONSTRUCTOR: return Type.CONSTRUCTOR;
-                case ContractJSONParser.FUNCTION: return Type.FUNCTION;
+                case JSON.FALLBACK: return Type.FALLBACK;
+                case JSON.CONSTRUCTOR: return Type.CONSTRUCTOR;
+                case JSON.FUNCTION: return Type.FUNCTION;
                 }
             }
             return null;
@@ -85,12 +85,13 @@ public final class Function implements ABIObject, Serializable {
 
     Function(Type type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) throws ParseException {
         this.type = Objects.requireNonNull(type);
-        this.name = name != null ? Utils.validateChars(ILLEGAL_NAME_CHAR, name) : "";
+        this.name = name != null ? Utils.validateChars(ILLEGAL_NAME_CHAR, name) : null;
         this.inputTypes = Objects.requireNonNull(inputTypes);
         this.outputTypes = Objects.requireNonNull(outputTypes);
         this.stateMutability = stateMutability;
         this.hashAlgorithm = messageDigest.getAlgorithm();
         generateSelector(messageDigest);
+        validateFunction();
     }
 
     public Function(String signature) throws ParseException {
@@ -125,12 +126,16 @@ public final class Function implements ABIObject, Serializable {
         }
 
         this.type = Objects.requireNonNull(type);
-        this.name = Utils.validateChars(NON_ASCII_CHAR, signature.substring(0, split));
+        String name = Utils.validateChars(NON_ASCII_CHAR, signature.substring(0, split));
+        this.name = name.isEmpty() && (type == Type.FALLBACK || type == Type.CONSTRUCTOR)
+                ? null
+                : name;
         this.inputTypes = tupleType;
         this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
         this.stateMutability = null;
         this.hashAlgorithm = messageDigest.getAlgorithm();
         generateSelector(messageDigest);
+        validateFunction();
     }
 
     private void generateSelector(MessageDigest messageDigest) {
@@ -143,7 +148,27 @@ public final class Function implements ABIObject, Serializable {
         }
     }
 
+    private void validateFunction() {
+        switch (type) {
+            case FALLBACK:
+                if(inputTypes.elementTypes.length > 0) {
+                    throw new IllegalArgumentException("this function type cannot have inputs");
+                }
+                /* falls through */
+            case CONSTRUCTOR:
+                if(name != null) {
+                    throw new IllegalArgumentException("this function type must be unnamed");
+                }
+                if(outputTypes.elementTypes.length > 0) {
+                    throw new IllegalArgumentException("this function type cannot have outputs");
+                }
+        }
+    }
+
     public String getCanonicalSignature() {
+        if(name == null) {
+            return inputTypes.canonicalType;
+        }
         return name + inputTypes.canonicalType;
     }
 
@@ -251,7 +276,7 @@ public final class Function implements ABIObject, Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         Function function = (Function) o;
         return type == function.type &&
-                name.equals(function.name) &&
+                Objects.equals(name, function.name) &&
                 inputTypes.equals(function.inputTypes) &&
                 outputTypes.equals(function.outputTypes) &&
                 Arrays.equals(selector, function.selector) &&
@@ -298,11 +323,20 @@ public final class Function implements ABIObject, Serializable {
     }
 
     public static Function fromJson(String functionJson) throws ParseException {
-        return ContractJSONParser.parseFunction(functionJson);
+        return JSON.parseFunction(functionJson);
     }
 
     public static Function fromJsonObject(JsonObject function) throws ParseException {
-        return ContractJSONParser.parseFunction(function);
+        return JSON.parseFunction(function);
+    }
+
+    public String toJson() {
+        return JSON.buildFunctionJson(this).toString();
+    }
+
+    @Override
+    public String toString() {
+        return toJson();
     }
 
     public static String hexOf(byte[] bytes) {
