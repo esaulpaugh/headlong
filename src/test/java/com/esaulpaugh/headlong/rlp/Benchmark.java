@@ -20,15 +20,15 @@ import com.esaulpaugh.headlong.example.StudentTest;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Strings;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.text.DecimalFormat;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 
-@Ignore
+@Disabled
 public class Benchmark {
 
     @Test
@@ -61,7 +61,7 @@ public class Benchmark {
         }
         end = System.nanoTime();
 
-//        Assert.assertArrayEquals(STUDENT_RLP_SEQUENTIAL, temp);
+//        assertArrayEquals(STUDENT_RLP_SEQUENTIAL, temp);
 
         System.out.println(((end - start) / 1000000.0) + " millis " + plato);
 

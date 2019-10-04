@@ -17,13 +17,14 @@ package com.joemelsha.crypto.hash;
 
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
 import com.esaulpaugh.headlong.util.FastHex;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.spongycastle.crypto.digests.KeccakDigest;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class KeccakTest {
 
@@ -63,7 +64,7 @@ public class KeccakTest {
         k.update(PART_B);
         byte[] k1 = k.digest();
 
-        Assert.assertArrayEquals(k0, k1);
+        assertArrayEquals(k0, k1);
 
         KeccakDigest k_ = new KeccakDigest(bitLen);
 
@@ -79,8 +80,8 @@ public class KeccakTest {
         k_.doFinal(output, 0);
         byte[] b1 = Arrays.copyOf(output, output.length);
 
-        Assert.assertArrayEquals(b0, b1);
-        Assert.assertArrayEquals(k0, b0);
+        assertArrayEquals(b0, b1);
+        assertArrayEquals(k0, b0);
 
         System.out.println(FastHex.encodeToString(b0));
     }
@@ -121,7 +122,7 @@ public class KeccakTest {
             byte[] k_Output = new byte[k_.getDigestSize()];
             k_.doFinal(k_Output, 0);
 
-            Assert.assertArrayEquals(a, k_Output);
+            assertArrayEquals(a, k_Output);
         }
     }
 }

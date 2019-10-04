@@ -16,13 +16,14 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.FastHex;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DecodeTest {
 
@@ -49,15 +50,15 @@ public class DecodeTest {
     public void testDecode() throws ParseException {
 
         Tuple decoded = FUNCTION.decodeReturn(RETURN_BYTES);
-        Assert.assertEquals(EXPECTED, decoded);
+        assertEquals(EXPECTED, decoded);
 
         decoded = FUNCTION.getOutputTypes().decode(RETURN_BYTES);
-        Assert.assertEquals(EXPECTED, decoded);
+        assertEquals(EXPECTED, decoded);
 
         decoded = TupleType.parse(FUNCTION.getOutputTypes().toString()).decode(ByteBuffer.wrap(RETURN_BYTES));
-        Assert.assertEquals(EXPECTED, decoded);
+        assertEquals(EXPECTED, decoded);
 
         decoded = TupleType.parseElements("ufixed,string").decode(ByteBuffer.wrap(RETURN_BYTES));
-        Assert.assertEquals(EXPECTED, decoded);
+        assertEquals(EXPECTED, decoded);
     }
 }

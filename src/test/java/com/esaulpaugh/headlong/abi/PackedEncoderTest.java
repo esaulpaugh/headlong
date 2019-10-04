@@ -18,12 +18,13 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.abi.util.Integers;
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.util.FastHex;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PackedEncoderTest {
 
@@ -38,7 +39,7 @@ public class PackedEncoderTest {
 
         int packedLen = tupleType.byteLengthPacked(test);
 
-        Assert.assertEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421").length, packedLen);
+        assertEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421").length, packedLen);
 
         ByteBuffer dest = ByteBuffer.allocate(packedLen);
 
@@ -48,7 +49,7 @@ public class PackedEncoderTest {
 
         System.out.println(FastHex.encodeToString(destArray));
 
-        Assert.assertArrayEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421"), destArray);
+        assertArrayEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421"), destArray);
 
         // ---------------------------
 
@@ -74,7 +75,7 @@ public class PackedEncoderTest {
 
         System.out.println(FastHex.encodeToString(dest2Array));
 
-        Assert.assertArrayEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421"), dest2Array);
+        assertArrayEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421"), dest2Array);
 
     }
 
@@ -92,11 +93,11 @@ public class PackedEncoderTest {
 
         System.out.println(FastHex.encodeToString(packedArray));
 
-        Assert.assertArrayEquals(FastHex.decode("fffffe0100"), packedArray);
+        assertArrayEquals(FastHex.decode("fffffe0100"), packedArray);
 
         Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
 
-        Assert.assertEquals(values, decoded);
+        assertEquals(values, decoded);
     }
 
     @Test
@@ -113,11 +114,11 @@ public class PackedEncoderTest {
 
         System.out.println(FastHex.encodeToString(packedArray));
 
-        Assert.assertArrayEquals(FastHex.decode("000000000000000900000000000000050000000000000006ffffffffffffffffff"), packedArray);
+        assertArrayEquals(FastHex.decode("000000000000000900000000000000050000000000000006ffffffffffffffffff"), packedArray);
 
         Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
 
-        Assert.assertEquals(values, decoded);
+        assertEquals(values, decoded);
     }
 
     @Test
@@ -134,26 +135,26 @@ public class PackedEncoderTest {
 
         System.out.println(FastHex.encodeToString(packedArray));
 
-        Assert.assertArrayEquals(FastHex.decode("00000000000000010000000000000002000000000000000300000000000000040000000000000000000000000000000000000000000000000000000000000001"), packedArray);
+        assertArrayEquals(FastHex.decode("00000000000000010000000000000002000000000000000300000000000000040000000000000000000000000000000000000000000000000000000000000001"), packedArray);
 
         Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
 
-        Assert.assertEquals(values, decoded);
+        assertEquals(values, decoded);
     }
 
     @Test
     public void testSignExtendInt() {
         int expected = BizarroIntegers.getInt(FastHex.decode("8FFFFF"), 0, 3);
         int result = Integers.getPackedInt(FastHex.decode("8FFFFF"), 0, 3);
-        Assert.assertTrue(result < 0);
-        Assert.assertEquals(expected, result);
+        assertTrue(result < 0);
+        assertEquals(expected, result);
     }
 
     @Test
     public void testSignExtendLong() {
         long expectedL = BizarroIntegers.getLong(FastHex.decode("8FFFFFFFFF"), 0, 5);
         long resultL = Integers.getPackedLong(FastHex.decode("8FFFFFFFFF"), 0, 5);
-        Assert.assertTrue(resultL < 0);
-        Assert.assertEquals(expectedL, resultL);
+        assertTrue(resultL < 0);
+        assertEquals(expectedL, resultL);
     }
 }

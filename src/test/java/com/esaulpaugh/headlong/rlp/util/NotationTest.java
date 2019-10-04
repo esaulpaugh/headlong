@@ -19,12 +19,13 @@ import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static com.esaulpaugh.headlong.util.Strings.HEX;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NotationTest {
 
@@ -74,12 +75,12 @@ public class NotationTest {
     */
 
         Notation n = Notation.forEncoding(RLPEncoder.encodeSequentially(NotationParser.parse(NOTATION)));
-        Assert.assertEquals(n.toString(), notation);
+        assertEquals(n.toString(), notation);
 
         List<Object> objects = NotationParser.parse(notation);
         byte[] rlp2 = RLPEncoder.encodeSequentially(objects);
         System.out.println(Strings.encode(rlp2, HEX));
 
-        Assert.assertArrayEquals(rlp, rlp2);
+        assertArrayEquals(rlp, rlp2);
     }
 }

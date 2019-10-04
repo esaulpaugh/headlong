@@ -16,9 +16,9 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.FastHex;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.abi.TypeFactory.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EncodeTest {
 
@@ -38,7 +39,7 @@ public class EncodeTest {
 
     private static final Class<ParseException> PARSE_ERR = ParseException.class;
 
-    @Ignore
+    @Disabled
     @Test
     public void fuzzSignatures() throws InterruptedException {
 
@@ -133,7 +134,7 @@ public class EncodeTest {
 
         Tuple decoded = f.decodeCall((ByteBuffer) two.flip());
 
-        Assert.assertEquals(decoded, args);
+        assertEquals(decoded, args);
     }
 
     @Test
@@ -145,7 +146,7 @@ public class EncodeTest {
 
         Tuple decoded = f.decodeCall((ByteBuffer) two.flip());
 
-        Assert.assertEquals(decoded, args);
+        assertEquals(decoded, args);
     }
 
     @Test
@@ -158,7 +159,7 @@ public class EncodeTest {
 
         ByteBuffer buf = f.encodeCallWithArgs(argsIn);
 
-        Assert.assertArrayEquals(FastHex.decode("f9354bbb0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000009fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5"), buf.array());
+        assertArrayEquals(FastHex.decode("f9354bbb0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000009fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5"), buf.array());
     }
 
     @Test
@@ -174,11 +175,11 @@ public class EncodeTest {
         testFixedLenDynamicArray("bool[]", new boolean[1 + RAND.nextInt(34)][], booleanArraySupplier);
         testFixedLenDynamicArray("int[]", new BigInteger[1 + RAND.nextInt(34)][], intArraySupplier);
 
-        final String msg = "array lengths differed, expected.length=32 actual.length=0";
-        assertThrown(AssertionError.class, msg, () -> testFixedLenDynamicArray("bytes", new byte[0][], null));
-        assertThrown(AssertionError.class, msg, () -> testFixedLenDynamicArray("string", new String[0], null));
-        assertThrown(AssertionError.class, msg, () -> testFixedLenDynamicArray("bool[]", new boolean[0][], null));
-        assertThrown(AssertionError.class, msg, () -> testFixedLenDynamicArray("int[]", new BigInteger[0][], null));
+        final String msg = "array lengths differ, expected: <32> but was: <0>";
+        assertThrown(AssertionFailedError.class, msg, () -> testFixedLenDynamicArray("bytes", new byte[0][], null));
+        assertThrown(AssertionFailedError.class, msg, () -> testFixedLenDynamicArray("string", new String[0], null));
+        assertThrown(AssertionFailedError.class, msg, () -> testFixedLenDynamicArray("bool[]", new boolean[0][], null));
+        assertThrown(AssertionFailedError.class, msg, () -> testFixedLenDynamicArray("int[]", new BigInteger[0][], null));
     }
 
     private static void testFixedLenDynamicArray(String baseType, Object[] args, Supplier<Object> supplier) throws ParseException {
@@ -204,7 +205,7 @@ public class EncodeTest {
 //        System.out.println(TupleType.format(aEncoding));
 //        System.out.println(TupleType.format(bEncoding));
 
-        Assert.assertArrayEquals(aEncoding, bEncoding);
+        assertArrayEquals(aEncoding, bEncoding);
     }
 
     @Test
@@ -242,7 +243,7 @@ public class EncodeTest {
         Tuple tupleOut = f.decodeCall((ByteBuffer) abi.flip());
         Object[] argsOut = tupleOut.elements;
 
-        Assert.assertTrue(Arrays.deepEquals(argsIn, argsOut));
+        assertTrue(Arrays.deepEquals(argsIn, argsOut));
     }
 
     @Test
@@ -289,7 +290,7 @@ public class EncodeTest {
         System.out.println("=");
         System.out.println(Function.hexOf(xor));
 
-        Assert.assertArrayEquals(
+        assertArrayEquals(
                 FastHex.decode("ffffffffffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffff"),
                 xor
         );

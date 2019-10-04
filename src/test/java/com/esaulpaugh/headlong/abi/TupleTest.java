@@ -1,12 +1,13 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TupleTest {
 
@@ -133,7 +134,7 @@ public class TupleTest {
                 final int n = j - i;
                 Object[] elements = new Object[n];
                 System.arraycopy(master, i, elements, 0, n);
-                Assert.assertEquals(tuple.subtuple(i, j), new Tuple(elements));
+                assertEquals(tuple.subtuple(i, j), new Tuple(elements));
 //                for (int k = i; k < j; k++) {
 //                    System.out.print((char) (k + 48));
 //                }

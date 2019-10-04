@@ -17,8 +17,7 @@ package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
 import com.migcomponents.migbase64.Base64;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 import java.util.function.Supplier;
@@ -27,6 +26,8 @@ import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
 import static com.esaulpaugh.headlong.util.Strings.DECIMAL;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StringsTest {
 
@@ -41,7 +42,7 @@ public class StringsTest {
     private static void testEncoding(int n, int encoding, Supplier<byte[]> supplier) {
         for (int i = 0; i < n; i++) {
             byte[] x = supplier.get();
-            Assert.assertArrayEquals(
+            assertArrayEquals(
                     x,
                     Strings.decode(Strings.encode(x, encoding), encoding)
             );
@@ -79,9 +80,9 @@ public class StringsTest {
             rand.nextBytes(x);
             String s = Base64.encodeToString(x, 0, j, Base64.NO_FLAGS);
             String s2 = mimeEncoder.encodeToString(x);
-            Assert.assertEquals(base64EncodedLen(j, true, true), s.length());
-            Assert.assertEquals(s2, s);
-            Assert.assertArrayEquals(x, mimeDecoder.decode(s));
+            assertEquals(base64EncodedLen(j, true, true), s.length());
+            assertEquals(s2, s);
+            assertArrayEquals(x, mimeDecoder.decode(s));
         }
     }
 
@@ -94,9 +95,9 @@ public class StringsTest {
             rand.nextBytes(x);
             String s = Base64.encodeToString(x, 0, j, Base64.URL_SAFE_CHARS | Base64.NO_LINE_SEP);
             String sControl = encoder.encodeToString(x);
-            Assert.assertEquals(base64EncodedLen(j, false, true), s.length());
-            Assert.assertEquals(sControl, s);
-            Assert.assertArrayEquals(x, Strings.decode(s, BASE_64_URL_SAFE));
+            assertEquals(base64EncodedLen(j, false, true), s.length());
+            assertEquals(sControl, s);
+            assertArrayEquals(x, Strings.decode(s, BASE_64_URL_SAFE));
         }
     }
 
@@ -109,7 +110,7 @@ public class StringsTest {
             int offset = rand.nextInt(j / 3);
             int len = rand.nextInt(j / 2);
             String s = Strings.encode(x, offset, len, BASE_64_URL_SAFE);
-            Assert.assertEquals(base64EncodedLen(len, false, false), s.length());
+            assertEquals(base64EncodedLen(len, false, false), s.length());
             byte[] y = Strings.decode(s, BASE_64_URL_SAFE);
             for (int k = 0; k < len; k++) {
                 if(y[k] != x[offset + k]) {

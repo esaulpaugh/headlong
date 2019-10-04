@@ -21,8 +21,7 @@ import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -32,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.esaulpaugh.headlong.TestUtils.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RLPJsonEncodeTest {
 
@@ -83,7 +83,7 @@ public class RLPJsonEncodeTest {
             String e = FastHex.encodeToString(expected);
             String a = FastHex.encodeToString(actual);
             try {
-                Assert.assertEquals(e, a);
+                assertEquals(e, a);
             } catch (Throwable t) {
                 t.printStackTrace();
             }

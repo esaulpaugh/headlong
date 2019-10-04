@@ -21,8 +21,7 @@ import com.esaulpaugh.headlong.rlp.RLPList;
 import com.esaulpaugh.headlong.rlp.RLPListIterator;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.security.SignatureException;
 import java.util.HashSet;
@@ -31,6 +30,8 @@ import java.util.Set;
 import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.*;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EIP778Test {
 
@@ -75,30 +76,30 @@ public class EIP778Test {
 
         Record record = new Record(1L, pairs, SIGNER);
 
-        Assert.assertEquals(VECTOR.getSignature(), record.getSignature());
-        Assert.assertEquals(VECTOR.getContent(), record.getContent());
-        Assert.assertEquals(VECTOR.getRLP(), record.getRLP());
-        Assert.assertEquals(VECTOR.toString(), record.toString());
-        Assert.assertEquals(VECTOR, record);
+        assertEquals(VECTOR.getSignature(), record.getSignature());
+        assertEquals(VECTOR.getContent(), record.getContent());
+        assertEquals(VECTOR.getRLP(), record.getRLP());
+        assertEquals(VECTOR.toString(), record.toString());
+        assertEquals(VECTOR, record);
 
         RLPList content = record.decode((s,c) -> {});
         System.out.println("verified = " + content);
         RLPListIterator iter = content.iterator(RLPDecoder.RLP_STRICT);
 
-        Assert.assertEquals(VECTOR.getSeq(), record.getSeq());
+        assertEquals(VECTOR.getSeq(), record.getSeq());
 
         long seq = iter.next().asLong();
 
-        Assert.assertEquals(1L, seq);
+        assertEquals(1L, seq);
 
         KeyValuePair[] decodedPairs = new KeyValuePair[pairs.length];
         int i = 0;
         while (iter.hasNext()) {
             decodedPairs[i++] = new KeyValuePair(iter.next().asBytes(), iter.next().asBytes());
         }
-        Assert.assertArrayEquals(pairs, decodedPairs);
+        assertArrayEquals(pairs, decodedPairs);
 
-        Assert.assertEquals(ENR_STRING, record.toString());
+        assertEquals(ENR_STRING, record.toString());
     }
 
     @Test
@@ -117,7 +118,7 @@ public class EIP778Test {
                 temp++;
             } while (++i < 4);
         }
-        Assert.assertEquals(9, recordLengths.size());
+        assertEquals(9, recordLengths.size());
     }
 
     @Test

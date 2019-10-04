@@ -19,13 +19,14 @@ import com.esaulpaugh.headlong.abi.Function;
 import com.esaulpaugh.headlong.abi.TupleType;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Strings;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 
 import static com.esaulpaugh.headlong.util.Strings.HEX;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StudentTest {
 
@@ -41,10 +42,10 @@ public class StudentTest {
     public void rlpDecodeEncode() throws DecodeException {
         final byte[] studentRlp = Strings.decode(STUDENT_RLP_SEQUENTIAL, HEX);
         Student plato = new Student(studentRlp);
-        Assert.assertEquals(STUDENT_TO_STRING, plato.toString());
+        assertEquals(STUDENT_TO_STRING, plato.toString());
 
         byte[] rlp = plato.toRLP();
-        Assert.assertArrayEquals(studentRlp, rlp);
+        assertArrayEquals(studentRlp, rlp);
     }
 
     @Test
@@ -55,12 +56,12 @@ public class StudentTest {
         final byte[] studentRlp = Strings.decode(STUDENT_RLP_LIST, HEX);
         Student plato = adapter.decode(studentRlp, 0);
 
-        Assert.assertEquals(STUDENT_TO_STRING, plato.toString());
+        assertEquals(STUDENT_TO_STRING, plato.toString());
 
         byte[] rlp = adapter.encode(plato);
 //        System.out.println(Hex.toHexString(rlp));
 
-        Assert.assertArrayEquals(studentRlp, rlp);
+        assertArrayEquals(studentRlp, rlp);
     }
 
     @Test
@@ -77,6 +78,6 @@ public class StudentTest {
         System.out.println(Function.hexOf(tt.encodePacked(plato.toTuple())));
         System.out.println(plato);
 
-        Assert.assertArrayEquals(studentAbi.array(), reencoded.array());
+        assertArrayEquals(studentAbi.array(), reencoded.array());
     }
 }
