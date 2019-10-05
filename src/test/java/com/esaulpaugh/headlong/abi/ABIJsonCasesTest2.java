@@ -34,7 +34,7 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.encode;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public class ABIJsonTest2 {
+public class ABIJsonCasesTest2 {
 
     private static final String ABI_V2_CASES_PATH = "tests/ethers-io/tests/tests/contract-interface-abi2.json";
     private static final String HEADLONG_CASES_PATH = "tests/headlong/tests/abi_tests.json";
@@ -223,7 +223,7 @@ public class ABIJsonTest2 {
 
     @Test
     public void testAbiV2Cases() throws ParseException, IOException {
-        final JsonArray testCases = JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonTest.class, ABI_V2_CASES_PATH));
+        final JsonArray testCases = JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonCasesTest.class, ABI_V2_CASES_PATH));
         for (JsonElement e : testCases) {
             new TestCase(e.getAsJsonObject(), false).test(false);
         }
@@ -232,7 +232,7 @@ public class ABIJsonTest2 {
 
     @Test
     public void testHeadlongCases() throws ParseException, IOException {
-        final JsonArray testCases = JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonTest.class, HEADLONG_CASES_PATH));
+        final JsonArray testCases = JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonCasesTest.class, HEADLONG_CASES_PATH));
         for (JsonElement e : testCases) {
             new TestCase(e.getAsJsonObject(), true).test(true);
         }

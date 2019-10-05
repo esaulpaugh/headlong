@@ -19,4 +19,7 @@ package com.esaulpaugh.headlong.abi;
  * Supertype of {@link Function} and {@link Event}.
  */
 interface ABIObject {
+
+    String toJson();
+
 }

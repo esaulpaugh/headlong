@@ -54,9 +54,9 @@ public final class Function implements ABIObject, Serializable {
         static Type get(String value) {
             if(value != null) {
                 switch (value) {
-                case JSON.FALLBACK: return Type.FALLBACK;
-                case JSON.CONSTRUCTOR: return Type.CONSTRUCTOR;
-                case JSON.FUNCTION: return Type.FUNCTION;
+                case ABIJSON.FALLBACK: return Type.FALLBACK;
+                case ABIJSON.CONSTRUCTOR: return Type.CONSTRUCTOR;
+                case ABIJSON.FUNCTION: return Type.FUNCTION;
                 }
             }
             return null;
@@ -323,15 +323,16 @@ public final class Function implements ABIObject, Serializable {
     }
 
     public static Function fromJson(String functionJson) throws ParseException {
-        return JSON.parseFunction(functionJson);
+        return ABIJSON.parseFunction(functionJson);
     }
 
     public static Function fromJsonObject(JsonObject function) throws ParseException {
-        return JSON.parseFunction(function);
+        return ABIJSON.parseFunction(function);
     }
 
+    @Override
     public String toJson() {
-        return JSON.buildFunctionJson(this).toString();
+        return ABIJSON.buildFunctionJson(this).toString();
     }
 
     @Override

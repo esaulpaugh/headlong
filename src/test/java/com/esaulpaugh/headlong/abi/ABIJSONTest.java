@@ -28,7 +28,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class JSONTest {
+public class ABIJSONTest {
 
     private static final String FUNCTION_A_JSON = "{\n" +
             "  \"type\": \"function\",\n" +
@@ -111,6 +111,7 @@ public class JSONTest {
     private static final String CONTRACT_JSON = "[\n" +
             "  {\n" +
             "    \"type\": \"event\",\n" +
+            "    \"name\": \"an_event\",\n" +
             "    \"inputs\": [\n" +
             "      {\n" +
             "        \"name\": \"a\",\n" +
@@ -122,8 +123,7 @@ public class JSONTest {
             "        \"type\": \"uint256\",\n" +
             "        \"indexed\": false\n" +
             "      }\n" +
-            "    ],\n" +
-            "    \"name\": \"an_event\"\n" +
+            "    ]\n" +
             "  },\n" +
             "  {\n" +
             "    \"type\": \"function\",\n" +
@@ -204,7 +204,7 @@ public class JSONTest {
     @Test
     public void testToJson() throws ParseException {
 
-        String[] jsons = new String[5];
+        String[] jsons = new String[6];
 
         int i = 0;
         jsons[i++] = FUNCTION_A_JSON;
@@ -212,10 +212,7 @@ public class JSONTest {
         JsonArray contractArray = JsonUtils.parseArray(CONTRACT_JSON);
         final int n = contractArray.size();
         for (int j = 0; j < n; j++) {
-            JsonObject obj = contractArray.get(j).getAsJsonObject();
-            if(!obj.get("type").getAsString().equals("event")) {
-                jsons[i++] = JsonUtils.prettify(contractArray.get(j).getAsJsonObject());
-            }
+            jsons[i++] = JsonUtils.prettify(contractArray.get(j).getAsJsonObject());
         }
         JsonArray fallbackAndC = JsonUtils.parseArray(FALLBACK_AND_CONSTRUCTOR);
         final int n2 = fallbackAndC.size();
@@ -224,15 +221,14 @@ public class JSONTest {
         }
 
         for (String originalJson : jsons) {
-            Function f = JSON.parseFunction(originalJson);
-            String newJson = f.toJson();
+            ABIObject orig = ABIJSON.parseABIObject(JsonUtils.parseObject(originalJson));
+            String newJson = orig.toJson();
             Assertions.assertNotEquals(originalJson, newJson);
 
-            Function r = Function.fromJson(newJson);
-            Assertions.assertEquals(f, r);
+            ABIObject reconstructed = ABIJSON.parseABIObject(newJson);
+            Assertions.assertEquals(orig, reconstructed);
 
             String pretty = JsonUtils.prettify(JsonUtils.parseObject(newJson));
-
             Assertions.assertEquals(originalJson, pretty);
         }
     }
@@ -242,7 +238,7 @@ public class JSONTest {
 
         Function f;
 
-        f = JSON.parseFunction(FUNCTION_A_JSON);
+        f = ABIJSON.parseFunction(FUNCTION_A_JSON);
         System.out.println(f.getName() + " : " + f.getCanonicalSignature() + " : " + f.getOutputTypes().get(0));
         assertEquals(1, f.getParamTypes().elementTypes.length);
         assertEquals("foo((decimal,decimal)[][])", f.getCanonicalSignature());
@@ -254,7 +250,7 @@ public class JSONTest {
 
         printTupleType(f.getOutputTypes());
 
-        f = JSON.parseFunction(FUNCTION_B_JSON);
+        f = ABIJSON.parseFunction(FUNCTION_B_JSON);
         System.out.println(f.getName() + " : " + f.getCanonicalSignature());
         assertEquals(TupleType.EMPTY, f.getOutputTypes());
         assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.getCanonicalSignature());
@@ -267,7 +263,7 @@ public class JSONTest {
 
         List<Function> functions;
 
-        functions = JSON.parseFunctions(CONTRACT_JSON);
+        functions = ABIJSON.parseFunctions(CONTRACT_JSON);
 
         assertEquals(1, functions.size());
 
@@ -279,7 +275,7 @@ public class JSONTest {
         assertEquals("func", func.getName());
         assertNull(func.getStateMutability());
 
-        functions = JSON.parseFunctions(FALLBACK_AND_CONSTRUCTOR);
+        functions = ABIJSON.parseFunctions(FALLBACK_AND_CONSTRUCTOR);
 
         assertEquals(2, functions.size());
 
@@ -305,7 +301,7 @@ public class JSONTest {
 
     @Test
     public void testGetEvents() throws ParseException {
-        List<Event> events = JSON.parseEvents(CONTRACT_JSON);
+        List<Event> events = ABIJSON.parseEvents(CONTRACT_JSON);
 
         assertEquals(1, events.size());
 

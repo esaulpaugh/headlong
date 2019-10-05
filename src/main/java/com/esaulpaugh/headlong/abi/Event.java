@@ -90,6 +90,15 @@ public final class Event implements ABIObject {
     }
 
     @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + inputs.hashCode();
+        result = 31 * result + Arrays.hashCode(indexManifest);
+        result = 31 * result + (anonymous ? 1 : 0);
+        return result;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -102,20 +111,21 @@ public final class Event implements ABIObject {
         return Arrays.equals(indexManifest, event.indexManifest);
     }
 
-    @Override
-    public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + inputs.hashCode();
-        result = 31 * result + Arrays.hashCode(indexManifest);
-        result = 31 * result + (anonymous ? 1 : 0);
-        return result;
-    }
-
     public static Event fromJson(String eventJson) throws ParseException {
-        return JSON.parseEvent(eventJson);
+        return ABIJSON.parseEvent(eventJson);
     }
 
     public static Event fromJsonObject(JsonObject event) throws ParseException {
-        return JSON.parseEvent(event);
+        return ABIJSON.parseEvent(event);
+    }
+
+    @Override
+    public String toJson() {
+        return ABIJSON.buildEventJson(this).toString();
+    }
+
+    @Override
+    public String toString() {
+        return toJson();
     }
 }

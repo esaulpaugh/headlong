@@ -32,7 +32,7 @@ import static com.esaulpaugh.headlong.abi.util.JsonUtils.getString;
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.parseArray;
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.parseObject;
 
-public final class JSON {
+public final class ABIJSON {
 
     private static final String NAME = "name";
     private static final String TYPE = "type";
@@ -47,6 +47,14 @@ public final class JSON {
     static final String CONSTRUCTOR = "constructor";
     static final String FALLBACK = "fallback";
     private static final String STATE_MUTABILITY = "stateMutability";
+
+    public static ABIObject parseABIObject(String json) throws ParseException {
+        return parseABIObject(parseObject(json));
+    }
+
+    public static ABIObject parseABIObject(JsonObject object) throws ParseException {
+        return EVENT.equals(getString(object, TYPE)) ? parseEvent(object) : parseFunction(object);
+    }
 
     public static List<Function> parseFunctions(String json) throws ParseException {
         return parseObjects(json, true, false, Function.class);
@@ -176,7 +184,7 @@ public final class JSON {
         return new IllegalArgumentException("unexpected " + key + ": " + (value == null ? null : "\"" + value + "\""));
     }
 // -------------------------------------------
-    public static JsonObject buildFunctionJson(Function f) {
+    static JsonObject buildFunctionJson(Function f) {
         JsonObject object = new JsonObject();
         Function.Type type = f.getType();
         object.add(TYPE, new JsonPrimitive(type.toString()));
@@ -185,18 +193,33 @@ public final class JSON {
             if(name != null) {
                 object.add(NAME, new JsonPrimitive(name));
             }
-            object.add(INPUTS, buildJsonArray(f.getParamTypes()));
+            object.add(INPUTS, buildJsonArray(f.getParamTypes(), null));
         }
-        JsonArray outputs = buildJsonArray(f.getOutputTypes());
+        JsonArray outputs = buildJsonArray(f.getOutputTypes(), null);
         object.add(OUTPUTS, outputs.size() == 0 ? null : outputs);
         String stateMutability = f.getStateMutability();
         object.add(STATE_MUTABILITY, stateMutability == null ? null : new JsonPrimitive(f.getStateMutability()));
         return object;
     }
 
-    private static JsonArray buildJsonArray(TupleType tupleType) {
+    static JsonObject buildEventJson(Event event) {
+        JsonObject object = new JsonObject();
+        object.add(TYPE, new JsonPrimitive(EVENT));
+        String name = event.getName();
+        if(name != null) {
+            object.add(NAME, new JsonPrimitive(name));
+        }
+        object.add(INPUTS, buildJsonArray(event.getParams(), event.getIndexManifest()));
+        return object;
+    }
+
+    private static JsonArray buildJsonArray(TupleType tupleType, boolean[] indexedManifest) {
         JsonArray array = new JsonArray();
-        for (ABIType<?> e : tupleType.elementTypes) {
+        ABIType<?>[] elements = tupleType.elementTypes;
+        final int len = elements.length;
+        boolean addIndex = indexedManifest != null;
+        for (int i = 0; i < len; i++) {
+            ABIType<?> e = elements[i];
             JsonObject arrayElement = new JsonObject();
             String name = e.getName();
             arrayElement.add(NAME, name == null ? null : new JsonPrimitive(e.getName()));
@@ -212,10 +235,13 @@ public final class JSON {
                 while (base instanceof ArrayType) {
                     base = ((ArrayType) base).elementType;
                 }
-                JsonArray components = buildJsonArray((TupleType) base);
+                JsonArray components = buildJsonArray((TupleType) base, null);
                 arrayElement.add(COMPONENTS, components);
             }
             array.add(arrayElement);
+            if(addIndex) {
+                arrayElement.add(INDEXED, new JsonPrimitive(indexedManifest[i]));
+            }
         }
         return array;
     }
