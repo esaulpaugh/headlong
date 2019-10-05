@@ -212,24 +212,23 @@ public class ABIJSONTest {
         JsonArray contractArray = JsonUtils.parseArray(CONTRACT_JSON);
         final int n = contractArray.size();
         for (int j = 0; j < n; j++) {
-            jsons[i++] = JsonUtils.prettify(contractArray.get(j).getAsJsonObject());
+            jsons[i++] = JsonUtils.toPrettyPrint(contractArray.get(j).getAsJsonObject());
         }
         JsonArray fallbackAndC = JsonUtils.parseArray(FALLBACK_AND_CONSTRUCTOR);
         final int n2 = fallbackAndC.size();
         for (int j = 0; j < n2; j++) {
-            jsons[i++] = JsonUtils.prettify(fallbackAndC.get(j).getAsJsonObject());
+            jsons[i++] = JsonUtils.toPrettyPrint(fallbackAndC.get(j).getAsJsonObject());
         }
 
         for (String originalJson : jsons) {
             ABIObject orig = ABIJSON.parseABIObject(JsonUtils.parseObject(originalJson));
-            String newJson = orig.toJson();
+            String newJson = orig.toJson(false);
             Assertions.assertNotEquals(originalJson, newJson);
 
             ABIObject reconstructed = ABIJSON.parseABIObject(newJson);
-            Assertions.assertEquals(orig, reconstructed);
 
-            String pretty = JsonUtils.prettify(JsonUtils.parseObject(newJson));
-            Assertions.assertEquals(originalJson, pretty);
+            Assertions.assertEquals(orig, reconstructed);
+            Assertions.assertEquals(originalJson, reconstructed.toJson(true));
         }
     }
 

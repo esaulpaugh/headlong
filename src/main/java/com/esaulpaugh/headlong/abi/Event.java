@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.util.JsonUtils;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonObject;
 
@@ -120,12 +121,13 @@ public final class Event implements ABIObject {
     }
 
     @Override
-    public String toJson() {
-        return ABIJSON.buildEventJson(this).toString();
+    public String toJson(boolean pretty) {
+        JsonObject object = ABIJSON.buildEventJson(this);
+        return pretty ? JsonUtils.toPrettyPrint(object) : object.toString();
     }
 
     @Override
     public String toString() {
-        return toJson();
+        return toJson(true);
     }
 }

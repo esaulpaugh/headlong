@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.util.JsonUtils;
 import com.esaulpaugh.headlong.abi.util.Utils;
 import com.google.gson.JsonObject;
 import com.joemelsha.crypto.hash.Keccak;
@@ -331,13 +332,14 @@ public final class Function implements ABIObject, Serializable {
     }
 
     @Override
-    public String toJson() {
-        return ABIJSON.buildFunctionJson(this).toString();
+    public String toJson(boolean pretty) {
+        JsonObject object = ABIJSON.buildFunctionJson(this);
+        return pretty ? JsonUtils.toPrettyPrint(object) : object.toString();
     }
 
     @Override
     public String toString() {
-        return toJson();
+        return toJson(true);
     }
 
     public static String hexOf(byte[] bytes) {

@@ -20,6 +20,5 @@ package com.esaulpaugh.headlong.abi;
  */
 interface ABIObject {
 
-    String toJson();
-
+    String toJson(boolean pretty);
 }

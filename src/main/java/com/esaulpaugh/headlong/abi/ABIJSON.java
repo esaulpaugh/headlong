@@ -125,7 +125,7 @@ public final class ABIJSON {
             final ABIType<?>[] elementsArray = new ABIType[array.size()];
             int i = 0;
             for (JsonElement e : array) {
-                elementsArray[i++] = buildType(e.getAsJsonObject());
+                elementsArray[i++] = parseType(e.getAsJsonObject());
             }
             return TupleType.wrap(elementsArray);
         }
@@ -151,7 +151,7 @@ public final class ABIJSON {
         final boolean[] indexed = new boolean[inputsLen];
         for (int i = 0; i < inputsLen; i++) {
             JsonObject inputObj = inputs.get(i).getAsJsonObject();
-            inputsArray[i] = buildType(inputObj);
+            inputsArray[i] = parseType(inputObj);
             indexed[i] = getBoolean(inputObj, INDEXED);
         }
         return new Event(
@@ -162,7 +162,7 @@ public final class ABIJSON {
         );
     }
 
-    private static ABIType<?> buildType(JsonObject object) throws ParseException {
+    private static ABIType<?> parseType(JsonObject object) throws ParseException {
         final String type = getString(object, TYPE);
         final String name = getString(object, NAME);
 
@@ -171,7 +171,7 @@ public final class ABIJSON {
             final ABIType<?>[] componentsArray = new ABIType[components.size()];
             int i = 0;
             for (JsonElement c : components) {
-                componentsArray[i++] = buildType(c.getAsJsonObject());
+                componentsArray[i++] = parseType(c.getAsJsonObject());
             }
             final TupleType base = TupleType.wrap(componentsArray);
             final String suffix = type.substring(TUPLE.length()); // suffix e.g. "[4][]"

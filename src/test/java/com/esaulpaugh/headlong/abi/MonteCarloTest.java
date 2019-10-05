@@ -267,7 +267,7 @@ public class MonteCarloTest {
             MonteCarloTestCase testCase = new MonteCarloTestCase(params);
             array.add(testCase.toJsonElement(ugly, "headlong_" + i++, version));
         }
-        System.out.println(JsonUtils.prettify(array));
+        System.out.println(JsonUtils.toPrettyPrint(array));
     }
 
     private static void sleep() {
