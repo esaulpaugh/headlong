@@ -17,7 +17,7 @@ SHA-256 (headlong-1.4.8.jar): daa70f280cd87a325ac15d8218c4e92e37ff54212b93c423d2
 
 ```java
 Function f = new Function("baz(uint32,bool)"); // canonicalizes and parses any signature automatically
-Function f2 = Function.fromJson("{\"name\": \"foo\", \"type\": \"function\", \"inputs\": [ {\"name\": \"complex_nums\", \"type\": \"tuple[]\", \"components\": [ {\"name\": \"real\", \"type\": \"decimal\"}, {\"name\": \"imaginary\", \"type\": \"decimal\"} ]} ]}");
+Function f2 = Function.fromJson("{\"type\":\"function\",\"name\":\"foo\",\"inputs\":[{\"name\":\"complex_nums\",\"type\":\"tuple[]\",\"components\":[{\"name\":\"real\",\"type\":\"decimal\"},{\"name\":\"imaginary\",\"type\":\"decimal\"}]}]}");
 
 Tuple args = new Tuple(69L, true);
 

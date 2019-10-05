@@ -105,7 +105,8 @@ public class ABIJSONTest {
             "        }\n" +
             "      ]\n" +
             "    }\n" +
-            "  ]\n" +
+            "  ],\n" +
+            "  \"stateMutability\": \"view\"\n" +
             "}";
 
     private static final String CONTRACT_JSON = "[\n" +
@@ -191,7 +192,8 @@ public class ABIJSONTest {
             "        \"name\": \"aha\",\n" +
             "        \"type\": \"bool\"\n" +
             "      }\n" +
-            "    ]\n" +
+            "    ],\n" +
+            "    \"stateMutability\": \"nonpayable\"\n" +
             "  }\n" +
             "]";
 
@@ -228,7 +230,7 @@ public class ABIJSONTest {
             ABIObject reconstructed = ABIJSON.parseABIObject(newJson);
 
             Assertions.assertEquals(orig, reconstructed);
-            Assertions.assertEquals(originalJson, reconstructed.toJson(true));
+            Assertions.assertEquals(originalJson, reconstructed.toString());
         }
     }
 
@@ -237,24 +239,81 @@ public class ABIJSONTest {
 
         Function f;
 
-        f = ABIJSON.parseFunction(FUNCTION_A_JSON);
+        f = Function.fromJson(FUNCTION_A_JSON);
         System.out.println(f.getName() + " : " + f.getCanonicalSignature() + " : " + f.getOutputTypes().get(0));
         assertEquals(1, f.getParamTypes().elementTypes.length);
         assertEquals("foo((decimal,decimal)[][])", f.getCanonicalSignature());
         assertEquals(1, f.getOutputTypes().elementTypes.length);
         assertEquals("uint64", f.getOutputTypes().get(0).canonicalType);
+        assertNull(f.getStateMutability());
         f.encodeCallWithArgs((Object) new Tuple[][] { new Tuple[] { new Tuple(new BigDecimal(BigInteger.ONE, 10), new BigDecimal(BigInteger.TEN, 10)) } });
 
         printTupleType(f.getParamTypes());
 
         printTupleType(f.getOutputTypes());
 
-        f = ABIJSON.parseFunction(FUNCTION_B_JSON);
+        f = Function.fromJson(FUNCTION_B_JSON);
         System.out.println(f.getName() + " : " + f.getCanonicalSignature());
         assertEquals(TupleType.EMPTY, f.getOutputTypes());
         assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.getCanonicalSignature());
+        assertEquals("view", f.getStateMutability());
 
         printTupleType(f.getParamTypes());
+
+        Function f2 = Function.fromJson("{\"name\": \"foo\", \"type\": \"function\", \"inputs\": [ {\"name\": \"complex_nums\", \"type\": \"tuple[]\", \"components\": [ {\"name\": \"real\", \"type\": \"decimal\"}, {\"name\": \"imaginary\", \"type\": \"decimal\"} ]} ]}");
+        System.out.println(f2.toJson(false));
+    }
+
+    @Test
+    public void testParseFunction2() throws Throwable {
+        final JsonObject function = new JsonObject();
+
+        TestUtils.CustomRunnable parse = () -> Function.fromJsonObject(function);
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: null", parse);
+
+        function.add("type", new JsonPrimitive("event"));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: \"event\"", parse);
+
+        TestUtils.CustomRunnable[] updates = new TestUtils.CustomRunnable[] {
+                () -> function.add("type", new JsonPrimitive("function")),
+                () -> function.add("type", new JsonPrimitive("fallback")),
+                () -> function.add("type", new JsonPrimitive("constructor")),
+                () -> function.add("inputs", new JsonArray())
+        };
+
+        for(TestUtils.CustomRunnable update : updates) {
+            update.run();
+            parse.run();
+        }
+    }
+
+    @Test
+    public void testParseEvent() throws Throwable {
+        JsonObject jsonObject = new JsonObject();
+
+        TestUtils.CustomRunnable runnable = () -> Event.fromJsonObject(jsonObject);
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: null", runnable);
+
+        jsonObject.add("type", new JsonPrimitive("event"));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "array \"inputs\" null or not found", runnable);
+
+        jsonObject.add("inputs", new JsonArray());
+
+        TestUtils.assertThrown(NullPointerException.class, runnable);
+
+        jsonObject.add("name", new JsonPrimitive("a_name"));
+
+        runnable.run();
+
+        Event expectedA = new Event("a_name", "()", new boolean[0]);
+        Event expectedB = new Event("a_name", TupleType.EMPTY, new boolean[0], false);
+
+        assertEquals(expectedA, Event.fromJsonObject(jsonObject));
+        assertEquals(expectedB, expectedA);
     }
 
     @Test
@@ -295,7 +354,7 @@ public class ABIJSONTest {
         assertEquals(Function.Type.CONSTRUCTOR, constructor.getType());
         assertEquals(TupleType.parse("(bool)"), constructor.getParamTypes());
         assertEquals(TupleType.EMPTY, fallback.getOutputTypes());
-        assertNull(constructor.getStateMutability());
+        assertEquals("nonpayable", constructor.getStateMutability());
     }
 
     @Test
@@ -314,57 +373,5 @@ public class ABIJSONTest {
 
         assertEquals("a", event.getParams().get(0).getName());
         assertEquals("b", event.getParams().get(1).getName());
-    }
-
-    @Test
-    public void parseFunction() throws Throwable {
-        final JsonObject function = new JsonObject();
-
-        TestUtils.CustomRunnable parse = () -> Function.fromJsonObject(function);
-
-        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: null", parse);
-
-        function.add("type", new JsonPrimitive("event"));
-
-        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: \"event\"", parse);
-
-        TestUtils.CustomRunnable[] updates = new TestUtils.CustomRunnable[] {
-                () -> function.add("type", new JsonPrimitive("function")),
-                () -> function.add("type", new JsonPrimitive("fallback")),
-                () -> function.add("type", new JsonPrimitive("constructor")),
-                () -> function.add("inputs", new JsonArray())
-        };
-
-        for(TestUtils.CustomRunnable update : updates) {
-            update.run();
-            parse.run();
-        }
-    }
-
-    @Test
-    public void parseEvent() throws Throwable {
-        JsonObject jsonObject = new JsonObject();
-
-        TestUtils.CustomRunnable runnable = () -> Event.fromJsonObject(jsonObject);
-
-        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: null", runnable);
-
-        jsonObject.add("type", new JsonPrimitive("event"));
-
-        TestUtils.assertThrown(IllegalArgumentException.class, "array \"inputs\" null or not found", runnable);
-
-        jsonObject.add("inputs", new JsonArray());
-
-        TestUtils.assertThrown(NullPointerException.class, runnable);
-
-        jsonObject.add("name", new JsonPrimitive("a_name"));
-
-        runnable.run();
-
-        Event expectedA = new Event("a_name", "()", new boolean[0]);
-        Event expectedB = new Event("a_name", TupleType.EMPTY, new boolean[0], false);
-
-        assertEquals(expectedA, Event.fromJsonObject(jsonObject));
-        assertEquals(expectedB, expectedA);
     }
 }
