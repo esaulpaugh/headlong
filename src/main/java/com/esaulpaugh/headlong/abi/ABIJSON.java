@@ -37,6 +37,8 @@ public final class ABIJSON {
     private static final String NAME = "name";
     private static final String TYPE = "type";
     static final String FUNCTION = "function";
+    static final String CONSTRUCTOR = "constructor";
+    static final String FALLBACK = "fallback";
     private static final String INPUTS = "inputs";
     private static final String OUTPUTS = "outputs";
     private static final String TUPLE = "tuple";
@@ -44,9 +46,11 @@ public final class ABIJSON {
     private static final String EVENT = "event";
     private static final String ANONYMOUS = "anonymous";
     private static final String INDEXED = "indexed";
-    static final String CONSTRUCTOR = "constructor";
-    static final String FALLBACK = "fallback";
     private static final String STATE_MUTABILITY = "stateMutability";
+//    static final String PURE = "pure";
+//    static final String VIEW = "view";
+//    static final String PAYABLE = "payable";
+//    static final String NONPAYABLE = "nonpayable";
 
     public static ABIObject parseABIObject(String json) throws ParseException {
         return parseABIObject(parseObject(json));
