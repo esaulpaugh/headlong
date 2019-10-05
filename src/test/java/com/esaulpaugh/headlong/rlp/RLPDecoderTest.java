@@ -85,7 +85,7 @@ public class RLPDecoderTest {
         assertEquals(10, actualList.get(0).dataLength);
     }
 
-    @Disabled // run this by itself
+    @Disabled("can cause OutOfMemoryError")
     @Test
     public void hugeStrings() throws DecodeException {
         int lol;
@@ -112,7 +112,7 @@ public class RLPDecoderTest {
         }
     }
 
-    @Disabled // memory hog, run by itself
+    @Disabled("can cause OutOfMemoryError")
     @Test
     public void hugeListsHighMem() throws DecodeException {
 

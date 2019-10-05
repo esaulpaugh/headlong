@@ -255,7 +255,7 @@ public class MonteCarloTest {
         return seeds;
     }
 
-    @Disabled
+    @Disabled("run if you need to generate random test cases")
     @Test
     public void printNewTestCases() throws ParseException {
         final Gson ugly = new GsonBuilder().create();

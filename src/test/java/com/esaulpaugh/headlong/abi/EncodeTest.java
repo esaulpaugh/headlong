@@ -39,7 +39,7 @@ public class EncodeTest {
 
     private static final Class<ParseException> PARSE_ERR = ParseException.class;
 
-    @Disabled
+    @Disabled("takes minutes to run")
     @Test
     public void fuzzSignatures() throws InterruptedException {
 

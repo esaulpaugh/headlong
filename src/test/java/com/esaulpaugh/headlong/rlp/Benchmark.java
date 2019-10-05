@@ -28,7 +28,7 @@ import java.text.DecimalFormat;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 
-@Disabled
+@Disabled("not very useful")
 public class Benchmark {
 
     @Test
