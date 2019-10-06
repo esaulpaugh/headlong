@@ -19,26 +19,20 @@ import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.rlp.util.Integers;
-import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiPredicate;
 
+import static com.esaulpaugh.headlong.TestUtils.CustomRunnable;
+import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
-import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.TestUtils.CustomRunnable;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RLPDecoderTest {

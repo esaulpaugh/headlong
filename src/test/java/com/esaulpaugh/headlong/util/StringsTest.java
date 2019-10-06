@@ -22,10 +22,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Random;
 import java.util.function.Supplier;
 
-import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
-import static com.esaulpaugh.headlong.util.Strings.DECIMAL;
-import static com.esaulpaugh.headlong.util.Strings.HEX;
-import static com.esaulpaugh.headlong.util.Strings.UTF_8;
+import static com.esaulpaugh.headlong.util.Strings.*;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
