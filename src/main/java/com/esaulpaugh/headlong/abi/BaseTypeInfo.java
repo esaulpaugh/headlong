@@ -44,8 +44,15 @@ final class BaseTypeInfo {
     static {
         Map<String, BaseTypeInfo> map = new HashMap<>(256);
 
-        putSignedInts(map);
-        putUnsignedInts(map);
+        for(int n = 8; n <= 256; n += 8) {
+            map.put("int" + n, new BaseTypeInfo(n));
+        }
+        map.put("int", map.get("int256"));
+
+        for(int n = 8; n <= 256; n += 8) {
+            map.put("uint" + n, new BaseTypeInfo(n));
+        }
+        map.put("uint", map.get("uint256"));
 
         for (int i = 1; i <= 32; i++) {
             map.put("bytes" + i, new BaseTypeInfo(N_A, i));
@@ -106,50 +113,6 @@ final class BaseTypeInfo {
         return bitLen == that.bitLen && arrayLen == that.arrayLen;
     }
 // ------------------------------------------------------------------
-    private static final String INT = "int";
-
-    private static void putSignedInts(final Map<String, BaseTypeInfo> map) {
-        int n;
-        for(n=8;n <= 8; n += 8) {
-            map.put(INT + n, new BaseTypeInfo(n));
-        }
-        for ( ; n <= 32; n += 8) {
-            map.put(INT + n, new BaseTypeInfo(n));
-        }
-        for ( ; n <= 64; n += 8) {
-            map.put(INT + n, new BaseTypeInfo(n));
-        }
-        for ( ; n <= 256; n += 8) {
-            map.put(INT + n, new BaseTypeInfo(n));
-        }
-        map.put(INT, map.get("int256"));
-    }
-
-    private static final String UINT = "uint";
-
-    private static void putUnsignedInts(final Map<String, BaseTypeInfo> map) {
-        int n;
-        for(n=8;n <= 8; n += 8) {
-            map.put(UINT + n, new BaseTypeInfo(n));
-        }
-        for ( ; n <= 24; n += 8) {
-            map.put(UINT + n, new BaseTypeInfo(n));
-        }
-        for ( ; n <= 32; n += 8) {
-            map.put(UINT + n, new BaseTypeInfo(n));
-        }
-        for ( ; n <= 56; n += 8) {
-            map.put(UINT + n, new BaseTypeInfo(n));
-        }
-        // special case -- allow long for array elements
-        for ( ; n <= 64; n += 8) {
-            map.put(UINT + n, new BaseTypeInfo(n));
-        }
-        for ( ; n <= 256; n += 8) {
-            map.put(UINT + n, new BaseTypeInfo(n));
-        }
-        map.put(UINT, map.get("uint256"));
-    }
 
     static List<String> getOrderedFixedKeys() {
         final ArrayList<String> ordered = new ArrayList<>();
