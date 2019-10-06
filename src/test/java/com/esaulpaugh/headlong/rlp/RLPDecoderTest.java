@@ -19,6 +19,8 @@ import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.rlp.util.Integers;
+import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -50,6 +52,26 @@ public class RLPDecoderTest {
             (byte) 0x84, 'd', 'o', 'g', 's',
             (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
     };
+
+    @Test
+    public void testListIterable() throws Throwable {
+        RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
+        for(RLPItem item : rlpList) {
+            System.out.println(item.asString(Strings.HEX));
+        }
+
+        byte[] copy = Arrays.copyOf(LONG_LIST_BYTES, LONG_LIST_BYTES.length);
+
+        copy[copy.length - 11]++;
+
+        RLPList brokenList = RLP_STRICT.wrapList(copy);
+
+        assertThrown(NoSuchElementException.class, "element @ index 139 exceeds its container: 151 > 150", () -> {
+            for(RLPItem item : brokenList) {
+                System.out.println(item.asString(Strings.HEX));
+            }
+        });
+    }
 
     @Test
     public void duplicate() throws DecodeException {

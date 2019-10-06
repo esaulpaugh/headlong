@@ -18,16 +18,14 @@ package com.esaulpaugh.headlong.rlp;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.util.Integers;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
 
 /**
  * Created by Evo on 1/19/2017.
  */
-public final class RLPList extends RLPItem {
+public final class RLPList extends RLPItem implements Iterable<RLPItem> {
 
     RLPList(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) throws DecodeException {
         super(lead, type, buffer, index, containerEnd, lenient);
@@ -130,5 +128,27 @@ public final class RLPList extends RLPItem {
     @Override
     public RLPList duplicate(RLPDecoder decoder) throws DecodeException {
         return decoder.wrapList(encoding(), 0);
+    }
+
+    @Override
+    public Iterator<RLPItem> iterator() {
+        return new Iterator<RLPItem>() {
+
+            private final RLPListIterator iter = iterator(RLPDecoder.RLP_STRICT);
+
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public RLPItem next() {
+                try {
+                    return iter.next();
+                } catch (DecodeException e) {
+                    throw new NoSuchElementException(e.getMessage()); // *** beware of RuntimeException ***
+                }
+            }
+        };
     }
 }

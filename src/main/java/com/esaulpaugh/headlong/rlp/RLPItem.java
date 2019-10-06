@@ -79,7 +79,7 @@ public abstract class RLPItem {
         final long _endIndex = _dataIndex + _dataLength;
 
         if(_endIndex > containerEnd) {
-            throw exceedsContainer(index, _dataIndex, containerEnd, containerEnd == buffer.length);
+            throw exceedsContainer(index, _endIndex, containerEnd, containerEnd == buffer.length);
         }
         if(!lenient && _dataLength == 1 && type == STRING_SHORT && buffer[_dataIndex] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
             throw new UnrecoverableDecodeException("invalid rlp for single byte @ " + index);
@@ -92,7 +92,7 @@ public abstract class RLPItem {
         this.endIndex = (int) _endIndex;
     }
 
-    static DecodeException exceedsContainer(int index, int end, int containerEnd, boolean recoverable) {
+    static DecodeException exceedsContainer(int index, long end, int containerEnd, boolean recoverable) {
         String msg = "element @ index " + index + " exceeds its container: " + end + " > " + containerEnd;
         return recoverable ? new RecoverableDecodeException(msg) : new UnrecoverableDecodeException(msg);
     }
