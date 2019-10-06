@@ -141,7 +141,7 @@ public class MonteCarloTestCase implements Serializable {
         CANONICAL_BASE_TYPE_STRINGS = arr;
 
         FIXED_START_INDEX = numKeys + NUM_TUPLES_ADDED;
-        FIXED_LIST = Collections.unmodifiableList(BaseTypeInfo.getOrderedFixedKeys());
+        FIXED_LIST = Collections.unmodifiableList(genOrderedFixedKeys());
     }
 
     final Params params;
@@ -614,5 +614,20 @@ public class MonteCarloTestCase implements Serializable {
         return Objects.equals(params, that.params) &&
                 Objects.equals(function, that.function) &&
                 Objects.equals(argsTuple, that.argsTuple);
+    }
+
+    private static List<String> genOrderedFixedKeys() {
+        final ArrayList<String> ordered = new ArrayList<>();
+        final String signedStub = "fixed";
+        final String unsignedStub = "ufixed";
+        for(int M = 8; M <= 256; M += 8) {
+            for (int N = 1; N <= 80; N++) {
+                final String suffix = Integer.toString(M) + 'x' + N;
+                ordered.add(signedStub + suffix);
+                ordered.add(unsignedStub + suffix);
+            }
+        }
+        Collections.sort(ordered);
+        return ordered;
     }
 }

@@ -39,19 +39,15 @@ final class BaseTypeInfo {
 
     private static final Map<String, BaseTypeInfo> TYPE_INFO_MAP;
 
-    private static final BaseTypeInfo PRESENT = new BaseTypeInfo(N_A, N_A);
-
     static {
         Map<String, BaseTypeInfo> map = new HashMap<>(256);
 
         for(int n = 8; n <= 256; n += 8) {
-            map.put("int" + n, new BaseTypeInfo(n));
+            BaseTypeInfo info = new BaseTypeInfo(n);
+            map.put("int" + n, info);
+            map.put("uint" + n, info);
         }
         map.put("int", map.get("int256"));
-
-        for(int n = 8; n <= 256; n += 8) {
-            map.put("uint" + n, new BaseTypeInfo(n));
-        }
         map.put("uint", map.get("uint256"));
 
         for (int i = 1; i <= 32; i++) {
@@ -59,11 +55,12 @@ final class BaseTypeInfo {
         }
         map.put("function", map.get("bytes" + FUNCTION_BYTE_LEN));
 
-        map.put("bytes", PRESENT);
-        map.put("string", PRESENT);
+        final BaseTypeInfo present = new BaseTypeInfo(N_A, N_A);
+        map.put("bytes", present);
+        map.put("string", present);
         map.put("address", new BaseTypeInfo(ADDRESS_BIT_LEN));
         map.put("decimal", new BaseTypeInfo(DECIMAL_BIT_LEN));
-        map.put("bool", PRESENT);
+        map.put("bool", present);
 
         BaseTypeInfo fixedType = new BaseTypeInfo(FIXED_BIT_LEN);
         map.put("fixed", fixedType);
@@ -111,21 +108,5 @@ final class BaseTypeInfo {
         if (o == null || getClass() != o.getClass()) return false;
         BaseTypeInfo that = (BaseTypeInfo) o;
         return bitLen == that.bitLen && arrayLen == that.arrayLen;
-    }
-// ------------------------------------------------------------------
-
-    static List<String> getOrderedFixedKeys() {
-        final ArrayList<String> ordered = new ArrayList<>();
-        final String signedStub = "fixed";
-        final String unsignedStub = "ufixed";
-        for(int M = 8; M <= 256; M += 8) {
-            for (int N = 1; N <= 80; N++) {
-                final String suffix = Integer.toString(M) + 'x' + N;
-                ordered.add(signedStub + suffix);
-                ordered.add(unsignedStub + suffix);
-            }
-        }
-        Collections.sort(ordered);
-        return ordered;
     }
 }
