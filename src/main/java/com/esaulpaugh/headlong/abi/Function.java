@@ -262,7 +262,7 @@ public final class Function implements ABIObject, Serializable {
     }
 
     public static MessageDigest newDefaultDigest() {
-        return new Keccak(256);
+        return new Keccak(256); // replace this with your preferred impl
     }
 
     @Override
@@ -283,6 +283,37 @@ public final class Function implements ABIObject, Serializable {
                 Arrays.equals(selector, function.selector) &&
                 hashAlgorithm.equals(function.hashAlgorithm) &&
                 Objects.equals(stateMutability, function.stateMutability);
+    }
+
+    public static Function parse(String signature) throws ParseException {
+        return new Function(signature);
+    }
+
+    public static Function fromJson(String functionJson) throws ParseException {
+        return ABIJSON.parseFunction(functionJson);
+    }
+
+    public static Function fromJsonObject(JsonObject function) throws ParseException {
+        return ABIJSON.parseFunction(function);
+    }
+
+    @Override
+    public String toJson(boolean pretty) {
+        JsonObject object = ABIJSON.buildFunctionJson(this);
+        return pretty ? JsonUtils.toPrettyPrint(object) : object.toString();
+    }
+
+    @Override
+    public String toString() {
+        return toJson(true);
+    }
+// ---------------------------------------------------------------------------------------------------------------------
+    public static String hexOf(byte[] bytes) {
+        return encode(bytes, HEX);
+    }
+
+    public static String hexOf(ByteBuffer buffer) {
+        return encode(buffer.array(), HEX);
     }
 
     public static String formatCall(byte[] abiCall) {
@@ -317,36 +348,5 @@ public final class Function implements ABIObject, Serializable {
             idx += UNIT_LENGTH_BYTES;
         }
         return sb.toString();
-    }
-
-    public static Function parse(String signature) throws ParseException {
-        return new Function(signature);
-    }
-
-    public static Function fromJson(String functionJson) throws ParseException {
-        return ABIJSON.parseFunction(functionJson);
-    }
-
-    public static Function fromJsonObject(JsonObject function) throws ParseException {
-        return ABIJSON.parseFunction(function);
-    }
-
-    @Override
-    public String toJson(boolean pretty) {
-        JsonObject object = ABIJSON.buildFunctionJson(this);
-        return pretty ? JsonUtils.toPrettyPrint(object) : object.toString();
-    }
-
-    @Override
-    public String toString() {
-        return toJson(true);
-    }
-
-    public static String hexOf(byte[] bytes) {
-        return encode(bytes, HEX);
-    }
-
-    public static String hexOf(ByteBuffer buffer) {
-        return encode(buffer.array(), HEX);
     }
 }
