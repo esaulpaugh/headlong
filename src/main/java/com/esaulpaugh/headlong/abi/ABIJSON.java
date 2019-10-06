@@ -236,8 +236,8 @@ public final class ABIJSON {
             arrayElement.add(TYPE, new JsonPrimitive(type));
             if(tuple) {
                 ABIType<?> base = e;
-                while (base instanceof ArrayType) {
-                    base = ((ArrayType) base).elementType;
+                while (base instanceof ArrayType<?, ?>) {
+                    base = ((ArrayType<?, ?>) base).elementType;
                 }
                 JsonArray components = buildJsonArray((TupleType) base, null);
                 arrayElement.add(COMPONENTS, components);
