@@ -127,12 +127,12 @@ public class UnsignedTest {
             case 1: x = r.nextLong() & 0x00FFFFFF_FFFFFFFFL; break;
             case 2: x = r.nextLong() & 0x0000FFFF_FFFFFFFFL; break;
             case 3: x = r.nextLong() & 0x000000FF_FFFFFFFFL; break;
-            case 4: x = r.nextLong()  & 0x00000000_FFFFFFFFL; break;
-            case 5: x = r.nextLong()  & 0x00000000_00FFFFFFL; break;
-            case 6: x = r.nextLong()  & 0x00000000_0000FFFFL; break;
-            case 7: x = r.nextLong()  & 0x00000000_000000FFL; break;
+            case 4: x = r.nextLong() & 0x00000000_FFFFFFFFL; break;
+            case 5: x = r.nextLong() & 0x00000000_00FFFFFFL; break;
+            case 6: x = r.nextLong() & 0x00000000_0000FFFFL; break;
+            case 7: x = r.nextLong() & 0x00000000_000000FFL; break;
             default: throw new Error();
         }
-        return x > 0 && r.nextBoolean() ? -x : x;
+        return r.nextBoolean() ? -x : x;
     }
 }
