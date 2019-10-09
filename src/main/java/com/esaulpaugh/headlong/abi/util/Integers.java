@@ -127,7 +127,8 @@ public final class Integers {
 
         public long toSigned(long unsigned) {
             if(rangeLong == null) {
-                throw new IllegalArgumentException(numBits + "-bit range too big for type long");
+                // beware of ArithmeticException
+                return toSigned(BigInteger.valueOf(unsigned)).longValueExact();
             }
             if(unsigned < 0) {
                 throwNegativeUnsignedVal(unsigned);
@@ -144,7 +145,8 @@ public final class Integers {
 
         public long toUnsigned(long signed) {
             if(maskLong == null) {
-                throw new IllegalArgumentException(numBits + "-bit range too big for type long");
+                // beware of ArithmeticException
+                return toUnsigned(BigInteger.valueOf(signed)).longValueExact();
             }
             final int bitLen = signed < 0 ? BizarroIntegers.bitLen(signed) : com.esaulpaugh.headlong.rlp.util.Integers.bitLen(signed);
             if(bitLen >= numBits) {
