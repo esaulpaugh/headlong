@@ -121,23 +121,18 @@ public class UnsignedTest {
     }
 
     private static long pickRandom(Random r) {
-        switch (r.nextInt(15)) {
-            case 0: return r.nextLong();
-            case 1: return r.nextLong() & 0x00FFFFFF_FFFFFFFFL;
-            case 2: return r.nextLong() & 0x0000FFFF_FFFFFFFFL;
-            case 3: return r.nextLong() & 0x000000FF_FFFFFFFFL;
-            case 4: return r.nextInt()  & 0x00000000_FFFFFFFFL;
-            case 5: return r.nextInt()  & 0x00000000_00FFFFFFL;
-            case 6: return r.nextInt()  & 0x00000000_0000FFFFL;
-            case 7: return r.nextInt()  & 0x00000000_000000FFL;
-            case 8: return r.nextInt()  & 0xFFFFFFFF_FFFFFF00L;
-            case 9: return r.nextInt()  & 0xFFFFFFFF_FFFF0000L;
-            case 10: return r.nextInt() & 0xFFFFFFFF_FF000000L;
-            case 11: return r.nextInt() & 0xFFFFFFFF_00000000L;
-            case 12: return r.nextLong()& 0xFFFFFF00_00000000L;
-            case 13: return r.nextLong()& 0xFFFF0000_00000000L;
-            case 14: return r.nextLong()& 0xFF000000_00000000L;
+        long x;
+        switch (r.nextInt(Long.BYTES)) {
+            case 0: x = r.nextLong(); break;
+            case 1: x = r.nextLong() & 0x00FFFFFF_FFFFFFFFL; break;
+            case 2: x = r.nextLong() & 0x0000FFFF_FFFFFFFFL; break;
+            case 3: x = r.nextLong() & 0x000000FF_FFFFFFFFL; break;
+            case 4: x = r.nextLong()  & 0x00000000_FFFFFFFFL; break;
+            case 5: x = r.nextLong()  & 0x00000000_00FFFFFFL; break;
+            case 6: x = r.nextLong()  & 0x00000000_0000FFFFL; break;
+            case 7: x = r.nextLong()  & 0x00000000_000000FFL; break;
             default: throw new Error();
         }
+        return x > 0 && r.nextBoolean() ? -x : x;
     }
 }
