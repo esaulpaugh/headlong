@@ -100,23 +100,28 @@ public final class Integers {
 
         public final int numBits;
         public final BigInteger range;
+        public BigInteger halfRange;
         public final Long rangeLong;
         public final Long maskLong;
+        public final Long halfRangeLong;
 
         public UintType(int numBits) {
             if(numBits < 0) {
                 throw new IllegalArgumentException("numBits must be non-negative");
             }
             this.numBits = numBits;
-            this.range = TWO.shiftLeft(numBits - 1); // .pow(numBits)
-            Long rangeLong, maskLong;
+            this.range = TWO.shiftLeft(numBits - 1); // TWO.pow(numBits)
+            this.halfRange = range.shiftRight(1);
+            Long rangeLong, halfRangeLong, maskLong;
             try {
                 rangeLong = range.longValueExact();
+                halfRangeLong = rangeLong >> 1;
                 maskLong = range.subtract(BigInteger.ONE).longValueExact();
             } catch (ArithmeticException ae) {
-                rangeLong = maskLong = null;
+                rangeLong = halfRangeLong = maskLong = null;
             }
             this.rangeLong = rangeLong;
+            this.halfRangeLong = halfRangeLong;
             this.maskLong = maskLong;
         }
 
@@ -132,7 +137,7 @@ public final class Integers {
                 throwTooManyBitsException(bitLen, numBits, false);
             }
             // if in upper half of range, subtract range
-            return unsigned >= rangeLong >> 1 // div 2
+            return unsigned >= halfRangeLong
                     ? unsigned - rangeLong
                     : unsigned;
         }
@@ -157,7 +162,7 @@ public final class Integers {
                 throwTooManyBitsException(bitLen, numBits, false);
             }
             // if in upper half of range, subtract range
-            return unsigned.compareTo(range.shiftRight(1)) >= 0
+            return unsigned.compareTo(halfRange) >= 0
                     ? unsigned.subtract(range)
                     : unsigned;
         }
