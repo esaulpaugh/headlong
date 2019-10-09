@@ -127,7 +127,6 @@ public final class Integers {
 
         public long toSigned(long unsigned) {
             if(rangeLong == null) {
-                // beware of ArithmeticException
                 return toSigned(BigInteger.valueOf(unsigned)).longValueExact();
             }
             if(unsigned < 0) {

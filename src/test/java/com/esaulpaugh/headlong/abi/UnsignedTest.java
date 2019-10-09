@@ -121,16 +121,23 @@ public class UnsignedTest {
     }
 
     private static long pickRandom(Random r) {
-        if(r.nextBoolean()) {
-            return r.nextLong();
+        switch (r.nextInt(15)) {
+            case 0: return r.nextLong();
+            case 1: return r.nextLong() & 0x00FFFFFF_FFFFFFFFL;
+            case 2: return r.nextLong() & 0x0000FFFF_FFFFFFFFL;
+            case 3: return r.nextLong() & 0x000000FF_FFFFFFFFL;
+            case 4: return r.nextInt()  & 0x00000000_FFFFFFFFL;
+            case 5: return r.nextInt()  & 0x00000000_00FFFFFFL;
+            case 6: return r.nextInt()  & 0x00000000_0000FFFFL;
+            case 7: return r.nextInt()  & 0x00000000_000000FFL;
+            case 8: return r.nextInt()  & 0xFFFFFFFF_FFFFFF00L;
+            case 9: return r.nextInt()  & 0xFFFFFFFF_FFFF0000L;
+            case 10: return r.nextInt() & 0xFFFFFFFF_FF000000L;
+            case 11: return r.nextInt() & 0xFFFFFFFF_00000000L;
+            case 12: return r.nextLong()& 0xFFFFFF00_00000000L;
+            case 13: return r.nextLong()& 0xFFFF0000_00000000L;
+            case 14: return r.nextLong()& 0xFF000000_00000000L;
+            default: throw new Error();
         }
-        if(r.nextBoolean()) {
-            return r.nextInt();
-        }
-        if(r.nextBoolean()) {
-            return r.nextInt(Short.MAX_VALUE);
-        }
-        long x = r.nextInt();
-        return r.nextBoolean() ? x : -x;
     }
 }
