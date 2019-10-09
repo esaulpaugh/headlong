@@ -60,7 +60,7 @@ public final class Function implements ABIObject, Serializable {
                 case ABIJSON.FUNCTION: return Type.FUNCTION;
                 }
             }
-            return null;
+            return value == null ? Type.FUNCTION : null;
         }
     }
 

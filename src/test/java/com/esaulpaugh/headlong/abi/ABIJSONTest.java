@@ -270,7 +270,7 @@ public class ABIJSONTest {
 
         TestUtils.CustomRunnable parse = () -> Function.fromJsonObject(function);
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: null", parse);
+        TestUtils.assertThrown(IllegalArgumentException.class, "regular functions must be named", parse);
 
         function.add("type", new JsonPrimitive("event"));
 
