@@ -102,21 +102,27 @@ public class UnsignedTest {
     @Test
     public void testUintTypeSymmetry() {
         Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
-        Integers.UintType type = new Integers.UintType(64);
-        final long mask = (long) (Math.pow(2, 64) - 1.0d);
-        for (int j = 0; j < 1_000; j++) {
-            long x = pickRandom(r);
-            x &= mask;
-            Assertions.assertEquals(x, type.toSigned(type.toUnsigned(x)));
-            Assertions.assertEquals(x, type.toUnsigned(type.toSigned(x)));
-            BigInteger bigIntX = BigInteger.valueOf(x);
-            Assertions.assertEquals(bigIntX, type.toUnsigned(type.toSigned(bigIntX)));
+        for (int i = 1; i < 64; i++) {
+            Integers.UintType type = new Integers.UintType(i);
+            final long mask = (long) Math.pow(2, i - 1) - 1L;
+            for (int j = 0; j < 25; j++) {
+                long x = pickRandom(r);
+                x &= mask;
+                Assertions.assertEquals(x, type.toSigned(type.toUnsigned(x)));
+                Assertions.assertEquals(x, type.toUnsigned(type.toSigned(x)));
+                BigInteger bigIntX = BigInteger.valueOf(x);
+                Assertions.assertEquals(bigIntX, type.toUnsigned(type.toSigned(bigIntX)));
+                Assertions.assertEquals(bigIntX, type.toSigned(type.toUnsigned(bigIntX)));
+            }
         }
-        for (int j = 0; j < 1_000; j++) {
-            BigInteger x = BigInteger.valueOf(pickRandom(r));
-            Assertions.assertEquals(x, type.toSigned(type.toUnsigned(x)));
-            x = x.abs();
-            Assertions.assertEquals(x, type.toUnsigned(type.toSigned(x)));
+        for (int i = 64; i <= 256; i++) {
+            Integers.UintType type = new Integers.UintType(i);
+            for (int j = 0; j < 25; j++) {
+                BigInteger x = BigInteger.valueOf(pickRandom(r));
+                Assertions.assertEquals(x, type.toSigned(type.toUnsigned(x)));
+                x = x.abs();
+                Assertions.assertEquals(x, type.toUnsigned(type.toSigned(x)));
+            }
         }
     }
 

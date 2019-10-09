@@ -102,7 +102,7 @@
                 <configuration>
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <parallel>all</parallel>
-                    <threadCount>2</threadCount>
+                    <threadCount>8</threadCount>
                 </configuration>
             </plugin>
             <plugin>

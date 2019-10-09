@@ -7,7 +7,7 @@ group 'com.esaulpaugh'
 version '1.4.9-SNAPSHOT'
 
 test {
-    maxParallelForks = (int) Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    maxParallelForks = (int) Runtime.runtime.availableProcessors() ?: 1
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
