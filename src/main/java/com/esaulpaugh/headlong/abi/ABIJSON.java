@@ -47,8 +47,8 @@ public final class ABIJSON {
     private static final String ANONYMOUS = "anonymous";
     private static final String INDEXED = "indexed";
     private static final String STATE_MUTABILITY = "stateMutability";
-//    static final String PURE = "pure";
-//    static final String VIEW = "view";
+    static final String PURE = "pure";
+    static final String VIEW = "view";
 //    static final String PAYABLE = "payable";
 //    static final String NONPAYABLE = "nonpayable";
 
@@ -199,10 +199,14 @@ public final class ABIJSON {
             }
             object.add(INPUTS, buildJsonArray(f.getParamTypes(), null));
         }
-        JsonArray outputs = buildJsonArray(f.getOutputTypes(), null);
-        object.add(OUTPUTS, outputs.size() == 0 ? null : outputs);
+        if(type != Function.Type.FALLBACK && type != Function.Type.CONSTRUCTOR) {
+            object.add(OUTPUTS, buildJsonArray(f.getOutputTypes(), null));
+        }
         String stateMutability = f.getStateMutability();
-        object.add(STATE_MUTABILITY, stateMutability == null ? null : new JsonPrimitive(f.getStateMutability()));
+        if(stateMutability != null) {
+            object.add(STATE_MUTABILITY, new JsonPrimitive(stateMutability));
+        }
+        object.add("constant", new JsonPrimitive(VIEW.equals(stateMutability) || PURE.equals(stateMutability)));
         return object;
     }
 
