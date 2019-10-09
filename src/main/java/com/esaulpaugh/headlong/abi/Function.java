@@ -163,6 +163,11 @@ public final class Function implements ABIObject, Serializable {
                 if(outputTypes.elementTypes.length > 0) {
                     throw new IllegalArgumentException("this function type cannot have outputs");
                 }
+                break;
+            case FUNCTION:
+                if(name == null) {
+                    throw new IllegalArgumentException("regular functions must be named");
+                }
         }
     }
 

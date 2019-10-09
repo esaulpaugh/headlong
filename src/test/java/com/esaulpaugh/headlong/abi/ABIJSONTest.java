@@ -276,11 +276,19 @@ public class ABIJSONTest {
 
         TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: \"event\"", parse);
 
+        function.add("type", new JsonPrimitive("function"));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "regular functions must be named", parse);
+
         TestUtils.CustomRunnable[] updates = new TestUtils.CustomRunnable[] {
-                () -> function.add("type", new JsonPrimitive("function")),
                 () -> function.add("type", new JsonPrimitive("fallback")),
                 () -> function.add("type", new JsonPrimitive("constructor")),
-                () -> function.add("inputs", new JsonArray())
+                () -> function.add("inputs", new JsonArray()),
+                () -> {
+                    function.remove("inputs");
+                    function.add("name", new JsonPrimitive(""));
+                    function.add("type", new JsonPrimitive("function"));
+                }
         };
 
         for(TestUtils.CustomRunnable update : updates) {
