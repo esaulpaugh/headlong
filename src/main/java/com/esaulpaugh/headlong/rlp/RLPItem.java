@@ -232,10 +232,8 @@ public abstract class RLPItem {
     @Override
     public final int hashCode() {
         int result = 1;
-        final byte[] buf = buffer;
-        final int end = endIndex;
-        for (int i = index; i < end; i++) {
-            result = 31 * result + buf[i];
+        for (int i = index; i < endIndex; i++) {
+            result = 31 * result + buffer[i];
         }
         return result;
     }

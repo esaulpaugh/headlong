@@ -71,7 +71,7 @@ public final class PackedDecoder {
             case TYPE_CODE_BIG_INTEGER: idx -= type.byteLengthPacked(null); end = idx; decodeBigInteger((BigIntegerType) type, buffer, idx, elements, i); break;
             case TYPE_CODE_BIG_DECIMAL: idx -= type.byteLengthPacked(null); end = idx; decodeBigDecimal((BigDecimalType) type, buffer, idx, elements, i); break;
             case TYPE_CODE_ARRAY: {
-                final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<? extends ABIType<?>, ?>) type;
+                final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<?, ?>) type;
                 end = idx = idx - (arrayType.elementType.byteLengthPacked(null) * arrayType.length);
                 idx -= decodeArrayDynamic(arrayType, buffer, idx, end, elements, i);
                 break;
@@ -92,7 +92,7 @@ public final class PackedDecoder {
                 case TYPE_CODE_LONG: idx += decodeLong((LongType) type, buffer, idx, elements, i); break;
                 case TYPE_CODE_BIG_INTEGER: idx += decodeBigInteger((BigIntegerType) type, buffer, idx, elements, i); break;
                 case TYPE_CODE_BIG_DECIMAL: idx += decodeBigDecimal((BigDecimalType) type, buffer, idx, elements, i); break;
-                case TYPE_CODE_ARRAY: idx += decodeArrayDynamic((ArrayType<? extends ABIType<?>, ?>) type, buffer, idx, end, elements, i); break;
+                case TYPE_CODE_ARRAY: idx += decodeArrayDynamic((ArrayType<?, ?>) type, buffer, idx, end, elements, i); break;
                 case TYPE_CODE_TUPLE: throw new UnsupportedOperationException("nested tuple"); // idx += decodeTupleDynamic((TupleType) type, buffer, idx, end, elements, i); break;
                 }
             }
@@ -118,7 +118,7 @@ public final class PackedDecoder {
             case TYPE_CODE_LONG: idx += decodeLong((LongType) type, buffer, idx, elements, i); break;
             case TYPE_CODE_BIG_INTEGER: idx += decodeBigInteger((BigIntegerType) type, buffer, idx, elements, i); break;
             case TYPE_CODE_BIG_DECIMAL: idx += decodeBigDecimal((BigDecimalType) type, buffer, idx, elements, i); break;
-            case TYPE_CODE_ARRAY: idx += decodeArrayDynamic((ArrayType<? extends ABIType<?>, ?>) type, buffer, idx, end, elements, i); break;
+            case TYPE_CODE_ARRAY: idx += decodeArrayDynamic((ArrayType<?, ?>) type, buffer, idx, end, elements, i); break;
             case TYPE_CODE_TUPLE: throw new UnsupportedOperationException("nested tuple"); // idx += decodeTupleDynamic((TupleType) type, buffer, idx, end, elements, i); break;
             }
         }
