@@ -43,8 +43,7 @@ public class NotationParser {
      */
     public static List<Object> parse(String notation) {
         List<Object> topLevelObjects = new ArrayList<>(); // a sequence (as in encodeSequentially)
-        int[] resultHolder = new int[2];
-        parse(notation, 0, notation.length(), topLevelObjects, resultHolder);
+        parse(notation, 0, notation.length(), topLevelObjects, new int[2]);
         return topLevelObjects;
     }
 

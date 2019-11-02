@@ -84,7 +84,6 @@ public class Notation {
         if (end > containerEnd) {
             throw exceedsContainer(elementDataIndex - 1, end, containerEnd);
         }
-
         return end;
     }
 
@@ -107,7 +106,6 @@ public class Notation {
             throw new UnrecoverableDecodeException("long element data length must be " + MIN_LONG_DATA_LEN
                     + " or greater; found: " + dataLen + " for element @ " + leadByteIndex);
         }
-
         return (int) end;
     }
 
@@ -123,7 +121,6 @@ public class Notation {
         if(index > end) {
             throw new UnrecoverableDecodeException("index > end: " + index + " > " + end);
         }
-
         StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
         buildLongList(
                 sb,
@@ -136,14 +133,11 @@ public class Notation {
     }
 
     private static int buildLongList(final StringBuilder sb, final byte[] data, final int dataIndex, int end, final int depth) throws DecodeException {
-
-        final String baseIndentation = getIndentation(depth);
-
         if(depth != 0) {
             sb.append(BEGIN_LIST);
         }
 
-        final int nextDepth = depth + 1;
+        final String baseIndentation = getIndentation(depth);
 
         int elementDataIndex = -1;
         int lengthLen;
@@ -187,7 +181,7 @@ public class Notation {
                 i = buildShortList(sb, data, elementDataIndex, elementEnd);
                 break;
             case LIST_LONG:
-                i = buildLongList(sb, data, elementDataIndex, elementEnd, nextDepth);
+                i = buildLongList(sb, data, elementDataIndex, elementEnd, depth + 1);
 //            default:
             }
         }
@@ -253,24 +247,16 @@ public class Notation {
     }
 
     private static int buildByte(StringBuilder sb, byte[] data, int i) {
-        String string = Strings.encode(data, i, 1, HEX);
-
-        sb.append(BEGIN_STRING).append(string).append(STRING_END_COMMA_SPACE);
-
+        sb.append(BEGIN_STRING).append(Strings.encode(data, i, 1, HEX)).append(STRING_END_COMMA_SPACE);
         return i + 1;
     }
 
     private static int buildString(StringBuilder sb, byte[] data, int from, int to) throws DecodeException {
-
         final int len = to - from;
         if(!LENIENT && len == 1 && data[from] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
             throw new UnrecoverableDecodeException("invalid rlp for single byte @ " + (from - 1));
         }
-
-        String string = Strings.encode(data, from, len, HEX);
-
-        sb.append(BEGIN_STRING).append(string).append(STRING_END_COMMA_SPACE);
-
+        sb.append(BEGIN_STRING).append(Strings.encode(data, from, len, HEX)).append(STRING_END_COMMA_SPACE);
         return to;
     }
 

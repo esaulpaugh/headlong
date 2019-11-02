@@ -47,10 +47,11 @@ public final class ABIJSON {
     private static final String ANONYMOUS = "anonymous";
     private static final String INDEXED = "indexed";
     private static final String STATE_MUTABILITY = "stateMutability";
-    static final String PURE = "pure";
-    static final String VIEW = "view";
-//    static final String PAYABLE = "payable";
-//    static final String NONPAYABLE = "nonpayable";
+    private static final String PURE = "pure";
+    private static final String VIEW = "view";
+//    private static final String PAYABLE = "payable";
+//    private static final String NONPAYABLE = "nonpayable";
+    private static final String CONSTANT = "constant"; // deprecated
 
     public static ABIObject parseABIObject(String json) throws ParseException {
         return parseABIObject(parseObject(json));
@@ -206,7 +207,7 @@ public final class ABIJSON {
         if(stateMutability != null) {
             object.add(STATE_MUTABILITY, new JsonPrimitive(stateMutability));
         }
-        object.add("constant", new JsonPrimitive(VIEW.equals(stateMutability) || PURE.equals(stateMutability)));
+        object.add(CONSTANT, new JsonPrimitive(VIEW.equals(stateMutability) || PURE.equals(stateMutability)));
         return object;
     }
 
