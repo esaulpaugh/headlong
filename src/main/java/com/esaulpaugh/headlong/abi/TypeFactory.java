@@ -80,13 +80,17 @@ final class TypeFactory {
                 if (arrayOpenIndex == fromIndex) { // i.e. []
                     length = DYNAMIC_LENGTH;
                 } else { // e.g. [4]
+                    final int startInt = arrayOpenIndex + 1;
                     try {
-                        length = Integer.parseInt(type.substring(arrayOpenIndex + 1, idxOfLast));
+                        length = Integer.parseInt(type.substring(startInt, idxOfLast));
                         if (length < 0) {
-                            throw new ParseException("negative array size", arrayOpenIndex + 1);
+                            throw new ParseException("negative array size", startInt);
+                        }
+                        if(idxOfLast - startInt > 1 && type.charAt(startInt) == '0') {
+                            throw new ParseException("leading zero in array length", startInt);
                         }
                     } catch (NumberFormatException nfe) {
-                        throw (ParseException) new ParseException("illegal argument", arrayOpenIndex + 1).initCause(nfe);
+                        throw (ParseException) new ParseException("illegal argument", startInt).initCause(nfe);
                     }
                 }
 

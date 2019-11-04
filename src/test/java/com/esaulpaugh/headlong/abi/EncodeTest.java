@@ -27,7 +27,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
@@ -40,7 +39,7 @@ public class EncodeTest {
 
     private static final Class<ParseException> PARSE_ERR = ParseException.class;
 
-    private static final char[] ALPHABET = ")uint8,[]".toCharArray();
+    private static final char[] ALPHABET = "(),abcdefgilmnorstuxy0123456789[]".toCharArray(); // ")uint8,[]"
     private static final int ALPHABET_LEN = ALPHABET.length;
 
     private static String gen(char[] temp, Random r) {
@@ -54,11 +53,9 @@ public class EncodeTest {
     @Disabled("takes minutes to run")
     @Test
     public void fuzzSignatures() throws InterruptedException {
-
-        final AtomicInteger valid = new AtomicInteger(0);
-
-        final Runnable r = () -> {
-            for (int len = 12; len < 13; len++) {
+        final Runnable runnable = () -> {
+            for (int len = 5; len <= 12; len++) {
+                System.out.println(len + "(" + Thread.currentThread().getId() + ")");
                 final char[] temp = new char[len];
                 temp[0] = '(';
                 temp[len - 1] = ')';
@@ -67,8 +64,7 @@ public class EncodeTest {
                     String sig = gen(temp, RAND);
                     try {
                         TupleType tt = TupleType.parse(sig);
-                        valid.incrementAndGet();
-                        System.out.println(len + " " + sig); // 12 (uint88[][])
+                        System.out.println("\t\t\t" + len + ' ' + sig);
                     } catch (ParseException pe) {
                         /* do nothing */
                     } catch (Throwable t) {
@@ -82,15 +78,13 @@ public class EncodeTest {
 
         final Thread[] threads = new Thread[7];
         for (int i = 0; i < threads.length; i++) {
-            threads[i] = new Thread(r);
+            threads[i] = new Thread(runnable);
             threads[i].start();
         }
-        r.run();
+        runnable.run();
         for (Thread thread : threads) {
             thread.join();
         }
-
-        System.out.println("valid = " + valid.get());
     }
 
     @Test
@@ -108,6 +102,8 @@ public class EncodeTest {
         assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("(()"));
 
         assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("(())..."));
+
+        assertThrown(PARSE_ERR, "illegal char", () -> Function.parse("œ()"));
     }
 
     @Test
@@ -142,6 +138,11 @@ public class EncodeTest {
         Tuple decoded = f.decodeCall((ByteBuffer) two.flip());
 
         assertEquals(decoded, args);
+    }
+
+    @Test
+    public void leadingZeroArrayLenTest() throws Throwable {
+        assertThrown(PARSE_ERR, "leading zero in array length", () -> Function.parse("zzz(()[04])"));
     }
 
     @Test
