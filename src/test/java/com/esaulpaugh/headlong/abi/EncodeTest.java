@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.FastHex;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
@@ -256,22 +257,24 @@ public class EncodeTest {
 
     @Test
     public void paddingTest() throws ParseException {
-        Function f = new Function("(uint8,int64,bool,(string),bytes2,bytes,address,function,ufixed)");
+        Function f = new Function("(bool,uint8,int64,address,ufixed,bytes2,(string),bytes,function)");
 
+        StringBuilder sb = new StringBuilder();
         for(ABIType<?> type : f.getParamTypes()) {
-            System.out.println(type.getClass().getSimpleName());
+            sb.append(type.getClass().getSimpleName()).append(',');
         }
+        Assertions.assertEquals("BooleanType,IntType,LongType,BigIntegerType,BigDecimalType,ArrayType,TupleType,ArrayType,ArrayType,", sb.toString());
 
         Tuple args = new Tuple(
+                true,
                 1,
                 1L,
-                true,
-                Tuple.singleton("\u0002"),
-                new byte[] { 1, 0 },
-                new byte[] { 0x04 },
                 BigInteger.valueOf(8L),
-                new byte[] { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 },
-                new BigDecimal(BigInteger.TEN, 18)
+                new BigDecimal(BigInteger.TEN, 18),
+                new byte[] { 1, 0 },
+                Tuple.singleton("\u0002"),
+                new byte[] { 0x04 },
+                new byte[] { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 }
         );
 
         final int len = f.callLength(args) + 7 + 8;
