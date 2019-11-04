@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
@@ -39,51 +40,57 @@ public class EncodeTest {
 
     private static final Class<ParseException> PARSE_ERR = ParseException.class;
 
+    private static final char[] ALPHABET = ")uint8,[]".toCharArray();
+    private static final int ALPHABET_LEN = ALPHABET.length;
+
+    private static String gen(char[] temp, Random r) {
+        final int lim = temp.length - 1;
+        for (int i = 1; i < lim; i++) {
+            temp[i] = ALPHABET[r.nextInt(ALPHABET_LEN)];
+        }
+        return new String(temp);
+    }
+
     @Disabled("takes minutes to run")
     @Test
     public void fuzzSignatures() throws InterruptedException {
 
-//        new Function("R!|2([1])");
-//        new Function("HWD6()[]");
-//        new Function("foo()]");
+        final AtomicInteger valid = new AtomicInteger(0);
 
-        Runnable r = () -> {
-            for (int len = 3; len < 21; len++) {
-                final int num = (len + 1) * 99_000;
-                testRandomSigs(len, num);
+        final Runnable r = () -> {
+            for (int len = 12; len < 13; len++) {
+                final char[] temp = new char[len];
+                temp[0] = '(';
+                temp[len - 1] = ')';
+                final int num = 10_000 + (int) Math.pow(3.7, len);
+                for (int j = 0; j < num; j++) {
+                    String sig = gen(temp, RAND);
+                    try {
+                        TupleType tt = TupleType.parse(sig);
+                        valid.incrementAndGet();
+                        System.out.println(len + " " + sig); // 12 (uint88[][])
+                    } catch (ParseException pe) {
+                        /* do nothing */
+                    } catch (Throwable t) {
+                        System.err.println(sig);
+                        t.printStackTrace();
+                        throw new RuntimeException(t);
+                    }
+                }
             }
         };
-        Thread[] threads = new Thread[7];
-        for (int i = 0; i < 7; i++) {
+
+        final Thread[] threads = new Thread[7];
+        for (int i = 0; i < threads.length; i++) {
             threads[i] = new Thread(r);
             threads[i].start();
         }
         r.run();
-        for (int i = 0; i < 7; i++) {
-            threads[i].join();
+        for (Thread thread : threads) {
+            thread.join();
         }
-    }
 
-    private static String genString(final int len, final Random r) {
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < len; i++) {
-            sb.append((char) r.nextInt());
-        }
-        return sb.toString();
-    }
-
-    private static void testRandomSigs(final int len, final int num) {
-        for (int j = 0; j < num; j++) {
-            String sig = genString(len, RAND); // MonteCarloTestCase.generateASCIIString(len, RAND);
-            try {
-                Function.parse(sig);
-            } catch (ParseException pe) {
-                /* do nothing */
-            } catch (Throwable t) {
-                System.err.println(sig);
-                t.printStackTrace();
-            }
-        }
+        System.out.println("valid = " + valid.get());
     }
 
     @Test

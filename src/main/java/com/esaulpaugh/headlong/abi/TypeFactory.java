@@ -289,7 +289,11 @@ final class TypeFactory {
                     break;
                 }
                 elements.add(buildType(rawTypeStr.substring(argStart, argEnd), false, null, true));
-                argStart = argEnd + 1; // jump over terminator
+                if(rawTypeStr.charAt(argEnd) == ',') {
+                    argStart = argEnd + 1; // jump over terminator
+                    continue;
+                }
+                break;
             }
         } catch (ParseException pe) {
             throw (ParseException) new ParseException("@ index " + elements.size() + ", " + pe.getMessage(), pe.getErrorOffset())
