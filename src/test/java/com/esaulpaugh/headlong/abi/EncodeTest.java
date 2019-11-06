@@ -43,26 +43,23 @@ public class EncodeTest {
     private static final char[] ALPHABET = "(),abcdefgilmnorstuxy0123456789[]".toCharArray(); // ")uint8,[]"
     private static final int ALPHABET_LEN = ALPHABET.length;
 
-    private static String gen(char[] temp, Random r) {
-        final int lim = temp.length - 1;
-        for (int i = 1; i < lim; i++) {
-            temp[i] = ALPHABET[r.nextInt(ALPHABET_LEN)];
-        }
-        return new String(temp);
-    }
-
     @Disabled("takes minutes to run")
     @Test
     public void fuzzSignatures() throws InterruptedException {
+        final Random r = RAND;
         final Runnable runnable = () -> {
-            for (int len = 5; len <= 12; len++) {
+            for (int len = 6; len <= 9; len++) {
                 System.out.println(len + "(" + Thread.currentThread().getId() + ")");
                 final char[] temp = new char[len];
                 temp[0] = '(';
                 temp[len - 1] = ')';
-                final int num = 10_000 + (int) Math.pow(3.7, len);
+                final int lim = temp.length - 1;
+                final int num = 4_000_000 + (int) Math.pow(3.7, len);
                 for (int j = 0; j < num; j++) {
-                    String sig = gen(temp, RAND);
+                    for (int i = 1; i < lim; i++) {
+                        temp[i] = ALPHABET[r.nextInt(ALPHABET_LEN)];
+                    }
+                    String sig = new String(temp);
                     try {
                         TupleType tt = TupleType.parse(sig);
                         System.out.println("\t\t\t" + len + ' ' + sig);
