@@ -114,16 +114,15 @@ public final class Integers {
      */
     public static int putShort(short val, byte[] o, int i) {
         byte b = 0;
-        int n = 0;
+        final int n;
         if(val != 0) {
-            n = 1;
             b = (byte) val;
 //            val = (short) (val >>> Byte.SIZE); // ICAST_QUESTIONABLE_UNSIGNED_RIGHT_SHIFT
             val = (short) (val >> Byte.SIZE); // high bytes chopped off either way, see above
             if (val != 0) {
                 n = 2;
-            }
-        }
+            } else n = 1;
+        } else n = 0;
         return insertBytes(n, o, i, (byte) 0, (byte) 0, (byte) val, b);
     }
 
@@ -140,22 +139,19 @@ public final class Integers {
      */
     public static int putInt(int val, byte[] o, int i) {
         byte b = 0, c = 0, d = 0;
-        int n = 0;
+        final int n;
         if(val != 0) {
-            n = 1;
             d = (byte) val;
             if ((val >>>= Byte.SIZE) != 0) {
-                n = 2;
                 c = (byte) val;
                 if ((val >>>= Byte.SIZE) != 0) {
-                    n = 3;
                     b = (byte) val;
                     if ((val >>>= Byte.SIZE) != 0) {
                         n = 4;
-                    }
-                }
-            }
-        }
+                    } else n = 3;
+                } else n = 2;
+            } else n = 1;
+        } else n = 0;
         return insertBytes(n, o, i, (byte) val, b, c, d);
     }
 
@@ -172,75 +168,61 @@ public final class Integers {
      */
     public static int putLong(long val, byte[] o, int i) {
         byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0;
-        int n = 0;
+        final int n;
         if(val != 0) {
-            n = 1;
             h = (byte) val;
             if ((val >>>= Byte.SIZE) != 0) {
-                n = 2;
                 g = (byte) val;
                 if ((val >>>= Byte.SIZE) != 0) {
-                    n = 3;
                     f = (byte) val;
                     if ((val >>>= Byte.SIZE) != 0) {
-                        n = 4;
                         e = (byte) val;
                         if ((val >>>= Byte.SIZE) != 0) {
-                            n = 5;
                             d = (byte) val;
                             if ((val >>>= Byte.SIZE) != 0) {
-                                n = 6;
                                 c = (byte) val;
                                 if ((val >>>= Byte.SIZE) != 0) {
-                                    n = 7;
                                     b = (byte) val;
                                     if ((val >>>= Byte.SIZE) != 0) {
                                         n = 8;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+                                    } else n = 7;
+                                } else n = 6;
+                            } else n = 5;
+                        } else n = 4;
+                    } else n = 3;
+                } else n = 2;
+            } else n = 1;
+        } else n = 0;
         return insertBytes(n, o, i, (byte) val, b, c, d, e, f, g, h);
     }
 
     public static int putLong(long val, ByteBuffer o) {
         byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0;
-        int n = 0;
+        final int n;
         if(val != 0) {
-            n = 1;
             h = (byte) val;
             if ((val >>>= Byte.SIZE) != 0) {
-                n = 2;
                 g = (byte) val;
                 if ((val >>>= Byte.SIZE) != 0) {
-                    n = 3;
                     f = (byte) val;
                     if ((val >>>= Byte.SIZE) != 0) {
-                        n = 4;
                         e = (byte) val;
                         if ((val >>>= Byte.SIZE) != 0) {
-                            n = 5;
                             d = (byte) val;
                             if ((val >>>= Byte.SIZE) != 0) {
-                                n = 6;
                                 c = (byte) val;
                                 if ((val >>>= Byte.SIZE) != 0) {
-                                    n = 7;
                                     b = (byte) val;
                                     if ((val >>>= Byte.SIZE) != 0) {
                                         n = 8;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+                                    } else n = 7;
+                                } else n = 6;
+                            } else n = 5;
+                        } else n = 4;
+                    } else n = 3;
+                } else n = 2;
+            } else n = 1;
+        } else n = 0;
         return insertBytes(n, o, (byte) val, b, c, d, e, f, g, h);
     }
 

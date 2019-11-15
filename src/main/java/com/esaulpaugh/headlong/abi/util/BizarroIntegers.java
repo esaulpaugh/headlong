@@ -68,109 +68,92 @@ public final class BizarroIntegers {
 
     public static int putShort(short val, byte[] o, int i) {
         byte b = 0;
-        int n = 0, v = val;
-        if(v != -1) {
-            n = 1;
+        int v = val;
+        final int n;
+        if (v != -1) {
             b = (byte) v;
             if ((v >>= Byte.SIZE) != -1) {
                 n = 2;
-            }
-        }
-        return Integers.insertBytes(n, o, i, (byte)0, (byte) 0, (byte) v, b);
+            } else n = 1;
+        } else n = 0;
+        return Integers.insertBytes(n, o, i, (byte) 0, (byte) 0, (byte) v, b);
     }
 
     public static int putInt(int val, byte[] o, int i) {
         byte b = 0, c = 0, d = 0;
-        int n = 0;
-        if(val != -1) {
-            n = 1;
+        final int n;
+        if (val != -1) {
             d = (byte) val;
             if ((val >>= Byte.SIZE) != -1) {
-                n = 2;
                 c = (byte) val;
                 if ((val >>= Byte.SIZE) != -1) {
-                    n = 3;
                     b = (byte) val;
                     if ((val >>= Byte.SIZE) != -1) {
                         n = 4;
-                    }
-                }
-            }
-        }
+                    } else n = 3;
+                } else n = 2;
+            } else n = 1;
+        } else n = 0;
         return Integers.insertBytes(n, o, i, (byte) val, b, c, d);
     }
 
     public static int putLong(long val, byte[] o, int i) {
         byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0;
-        int n = 0;
-        if(val != -1) {
-            n = 1;
+        final int n;
+        if (val != -1) {
             h = (byte) val;
             if ((val >>= Byte.SIZE) != -1) {
-                n = 2;
                 g = (byte) val;
                 if ((val >>= Byte.SIZE) != -1) {
-                    n = 3;
                     f = (byte) val;
                     if ((val >>= Byte.SIZE) != -1) {
-                        n = 4;
                         e = (byte) val;
                         if ((val >>= Byte.SIZE) != -1) {
-                            n = 5;
                             d = (byte) val;
                             if ((val >>= Byte.SIZE) != -1) {
-                                n = 6;
                                 c = (byte) val;
                                 if ((val >>= Byte.SIZE) != -1) {
-                                    n = 7;
                                     b = (byte) val;
                                     if ((val >>= Byte.SIZE) != -1) {
                                         n = 8;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+                                    } else n = 7;
+                                } else n = 6;
+                            } else n = 5;
+                        } else n = 4;
+                    } else n = 3;
+                } else n = 2;
+            } else n = 1;
+        } else n = 0;
         return Integers.insertBytes(n, o, i, (byte) val, b, c, d, e, f, g, h);
     }
 
     public static int putLong(long val, ByteBuffer o) {
         byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0;
-        int n = 0;
-        if(val != -1) {
-            n = 1;
+        final int n;
+        if (val != -1) {
             h = (byte) val;
             if ((val >>= Byte.SIZE) != -1) {
-                n = 2;
                 g = (byte) val;
                 if ((val >>= Byte.SIZE) != -1) {
-                    n = 3;
                     f = (byte) val;
                     if ((val >>= Byte.SIZE) != -1) {
-                        n = 4;
                         e = (byte) val;
                         if ((val >>= Byte.SIZE) != -1) {
-                            n = 5;
                             d = (byte) val;
                             if ((val >>= Byte.SIZE) != -1) {
-                                n = 6;
                                 c = (byte) val;
                                 if ((val >>= Byte.SIZE) != -1) {
-                                    n = 7;
                                     b = (byte) val;
                                     if ((val >>= Byte.SIZE) != -1) {
                                         n = 8;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+                                    } else n = 7;
+                                } else n = 6;
+                            } else n = 5;
+                        } else n = 4;
+                    } else n = 3;
+                } else n = 2;
+            } else n = 1;
+        } else n = 0;
         return Integers.insertBytes(n, o, (byte) val, b, c, d, e, f, g, h);
     }
 // *******************
