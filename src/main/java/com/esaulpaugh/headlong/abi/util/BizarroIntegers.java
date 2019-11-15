@@ -274,60 +274,43 @@ public final class BizarroIntegers {
     }
 
     public static int len(short val) {
-        int n = 0;
-        if(val != -1) {
-            n = 1;
-            if (val >> Byte.SIZE != -1) {
+        if(val != -1)
+            if (val >> Byte.SIZE != -1)
                 return 2;
-            }
-        }
-        return n;
+            else return 1;
+        return 0;
     }
 
     public static int len(int val) {
-        int n = 0;
-        if(val != -1) {
-            n = 1;
-            if ((val >>= Byte.SIZE) != -1) {
-                n = 2;
-                if ((val >>= Byte.SIZE) != -1) {
-                    n = 3;
-                    if (val >> Byte.SIZE != -1) {
+        if (val != -1)
+            if ((val >>= Byte.SIZE) != -1)
+                if ((val >>= Byte.SIZE) != -1)
+                    if (val >> Byte.SIZE != -1)
                         return 4;
-                    }
-                }
-            }
-        }
-        return n;
+                    else return 3;
+                else return 2;
+            else return 1;
+        return 0;
     }
 
     public static int len(long val) {
-        int n = 0;
-        if(val != -1) {
-            n = 1;
-            if ((val >>= Byte.SIZE) != -1) {
-                n = 2;
-                if ((val >>= Byte.SIZE) != -1) {
-                    n = 3;
-                    if ((val >>= Byte.SIZE) != -1) {
-                        n = 4;
-                        if ((val >>= Byte.SIZE) != -1) {
-                            n = 5;
-                            if ((val >>= Byte.SIZE) != -1) {
-                                n = 6;
-                                if ((val >>= Byte.SIZE) != -1) {
-                                    n = 7;
-                                    if (val >> Byte.SIZE != -1) {
+        if (val != -1)
+            if ((val >>= Byte.SIZE) != -1)
+                if ((val >>= Byte.SIZE) != -1)
+                    if ((val >>= Byte.SIZE) != -1)
+                        if ((val >>= Byte.SIZE) != -1)
+                            if ((val >>= Byte.SIZE) != -1)
+                                if ((val >>= Byte.SIZE) != -1)
+                                    if (val >> Byte.SIZE != -1)
                                         return 8;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return n;
+                                    else return 7;
+                                else return 6;
+                            else return 5;
+                        else return 4;
+                    else return 3;
+                else return 2;
+            else return 1;
+        return 0;
     }
 
     /**

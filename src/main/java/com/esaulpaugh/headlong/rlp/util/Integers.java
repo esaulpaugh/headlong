@@ -382,16 +382,11 @@ public final class Integers {
      * @return  the byte length
      */
     public static int len(short val) {
-        int n = 0;
-        if(val != 0) {
-            n = 1;
-//            val = (short) (val >>> Byte.SIZE); // ICAST_QUESTIONABLE_UNSIGNED_RIGHT_SHIFT
-            val = (short) (val >> Byte.SIZE); // high bytes chopped off either way, see above
-            if (val != 0) {
+        if(val != 0)
+            if (val >> Byte.SIZE != 0)
                 return 2;
-            }
-        }
-        return n;
+            else return 1;
+        return 0;
     }
 
     /**
@@ -402,20 +397,15 @@ public final class Integers {
      * @return  the byte length
      */
     public static int len(int val) {
-        int n = 0;
-        if(val != 0) {
-            n = 1;
-            if ((val >>>= Byte.SIZE) != 0) {
-                n = 2;
-                if ((val >>>= Byte.SIZE) != 0) {
-                    n = 3;
-                    if (val >>> Byte.SIZE != 0) {
+        if (val != 0)
+            if ((val >>>= Byte.SIZE) != 0)
+                if ((val >>>= Byte.SIZE) != 0)
+                    if (val >>> Byte.SIZE != 0)
                         return 4;
-                    }
-                }
-            }
-        }
-        return n;
+                    else return 3;
+                else return 2;
+            else return 1;
+        return 0;
     }
 
     /**
@@ -426,32 +416,23 @@ public final class Integers {
      * @return  the byte length
      */
     public static int len(long val) {
-        int n = 0;
-        if(val != 0) {
-            n = 1;
-            if ((val >>>= Byte.SIZE) != 0) {
-                n = 2;
-                if ((val >>>= Byte.SIZE) != 0) {
-                    n = 3;
-                    if ((val >>>= Byte.SIZE) != 0) {
-                        n = 4;
-                        if ((val >>>= Byte.SIZE) != 0) {
-                            n = 5;
-                            if ((val >>>= Byte.SIZE) != 0) {
-                                n = 6;
-                                if ((val >>>= Byte.SIZE) != 0) {
-                                    n = 7;
-                                    if (val >>> Byte.SIZE != 0) {
+        if (val != 0)
+            if ((val >>>= Byte.SIZE) != 0)
+                if ((val >>>= Byte.SIZE) != 0)
+                    if ((val >>>= Byte.SIZE) != 0)
+                        if ((val >>>= Byte.SIZE) != 0)
+                            if ((val >>>= Byte.SIZE) != 0)
+                                if ((val >>>= Byte.SIZE) != 0)
+                                    if (val >>> Byte.SIZE != 0)
                                         return 8;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return n;
+                                    else return 7;
+                                else return 6;
+                            else return 5;
+                        else return 4;
+                    else return 3;
+                else return 2;
+            else return 1;
+        return 0;
     }
 
     /**
