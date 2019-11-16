@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.Integers;
+import com.esaulpaugh.headlong.abi.util.JsonUtils;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -13,6 +14,14 @@ import java.text.ParseException;
 import java.util.Iterator;
 
 public class Deserializer {
+
+    public static TupleType parseTupleType(String ttStr) throws ParseException {
+        return parseTupleType(JsonUtils.parseArray(ttStr));
+    }
+
+    public static Tuple parseTupleValue(TupleType tupleType, String tupleStr) {
+        return parseTupleValue(tupleType, JsonUtils.parseArray(tupleStr));
+    }
 
     public static TupleType parseTupleType(JsonArray typesArray) throws ParseException {
         final int len = typesArray.size();
