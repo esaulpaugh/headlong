@@ -49,8 +49,8 @@ public class ABIJsonCasesTest2 {
             String valuesStr = object.get("values").getAsString();
             String resultStr = object.get("result").getAsString();
 
-            this.types = Deserializer.parseTupleType(JsonUtils.parseArray(typesStr));
-            this.values = Deserializer.parseTupleValue(this.types, JsonUtils.parseArray(valuesStr));
+            this.types = Deserializer.parseTupleType(typesStr);
+            this.values = Deserializer.parseTupleValue(this.types, valuesStr);
             this.result = FastHex.decode(resultStr, 2, resultStr.length() - 2);
 
             if(function) {
