@@ -351,9 +351,7 @@ public final class Integers {
      * @return  the byte length
      */
     public static int len(byte val) {
-        if(val == 0)
-            return 0;
-        return 1;
+        return val != 0 ? 1 : 0;
     }
 
     /**
@@ -428,10 +426,10 @@ public final class Integers {
     }
 
     public static int insertBytes(int n, byte[] b, int i, byte w, byte x, byte y, byte z) {
-        if(n > 4) {
-            throw new IllegalArgumentException("n must be <= 4");
+        if(n <= 4) {
+            return insertBytes(n, b, i, (byte)0, (byte)0, (byte)0, (byte)0, w, x, y, z);
         }
-        return insertBytes(n, b, i, (byte)0, (byte)0, (byte)0, (byte)0, w, x, y, z);
+        throw new IllegalArgumentException("n must be <= 4");
     }
 
     /**
