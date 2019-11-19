@@ -108,3 +108,7 @@ headlong depends on gson. Test suite should take less than one minute to run. Te
 See the wiki for more, such as TupleTypes, packed encoding, RLP Lists, and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
 Licensed under Apache 2.0 terms
+
+### Command line interface
+
+https://github.com/esaulpaugh/headlong-cli
