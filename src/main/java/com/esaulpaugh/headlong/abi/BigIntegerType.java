@@ -18,7 +18,7 @@ package com.esaulpaugh.headlong.abi;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-final class BigIntegerType extends UnitType<BigInteger> {
+public final class BigIntegerType extends UnitType<BigInteger> {
 
     private static final Class<BigInteger> CLASS = BigInteger.class;
     private static final String ARRAY_CLASS_NAME = BigInteger[].class.getName();
@@ -33,7 +33,7 @@ final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
-    int typeCode() {
+    public int typeCode() {
         return TYPE_CODE_BIG_INTEGER;
     }
 

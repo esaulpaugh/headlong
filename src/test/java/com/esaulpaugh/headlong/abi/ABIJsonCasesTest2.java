@@ -13,6 +13,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.util.Deserializer;
 import com.esaulpaugh.headlong.abi.util.JsonUtils;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.google.gson.JsonArray;

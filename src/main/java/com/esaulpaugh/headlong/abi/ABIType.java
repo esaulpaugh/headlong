@@ -29,15 +29,15 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
  */
 public abstract class ABIType<J> implements Serializable {
 
-    static final int TYPE_CODE_BOOLEAN = 0;
-    static final int TYPE_CODE_BYTE = 1;
-    static final int TYPE_CODE_INT = 2;
-    static final int TYPE_CODE_LONG = 3;
-    static final int TYPE_CODE_BIG_INTEGER = 4;
-    static final int TYPE_CODE_BIG_DECIMAL = 5;
+    public static final int TYPE_CODE_BOOLEAN = 0;
+    public static final int TYPE_CODE_BYTE = 1;
+    public static final int TYPE_CODE_INT = 2;
+    public static final int TYPE_CODE_LONG = 3;
+    public static final int TYPE_CODE_BIG_INTEGER = 4;
+    public static final int TYPE_CODE_BIG_DECIMAL = 5;
 
-    static final int TYPE_CODE_ARRAY = 6;
-    static final int TYPE_CODE_TUPLE = 7;
+    public static final int TYPE_CODE_ARRAY = 6;
+    public static final int TYPE_CODE_TUPLE = 7;
 
     public static final ABIType<?>[] EMPTY_TYPE_ARRAY = new ABIType<?>[0];
 
@@ -77,7 +77,7 @@ public abstract class ABIType<J> implements Serializable {
 
     abstract String arrayClassName();
 
-    abstract int typeCode();
+    public abstract int typeCode();
 
     abstract int byteLength(Object value);
 

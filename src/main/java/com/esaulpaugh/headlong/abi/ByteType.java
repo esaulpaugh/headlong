@@ -18,7 +18,7 @@ package com.esaulpaugh.headlong.abi;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-final class ByteType extends UnitType<Byte> {
+public final class ByteType extends UnitType<Byte> {
 
     private static final Class<Byte> CLASS = Byte.class;
     private static final String ARRAY_CLASS_NAME = byte[].class.getName();
@@ -38,7 +38,7 @@ final class ByteType extends UnitType<Byte> {
     }
 
     @Override
-    int typeCode() {
+    public int typeCode() {
         return TYPE_CODE_BYTE;
     }
 

@@ -21,7 +21,7 @@ import java.nio.ByteBuffer;
 /**
  * Unsigned 0 or 1.
  */
-final class BooleanType extends UnitType<Boolean> {
+public final class BooleanType extends UnitType<Boolean> {
 
     private static final Class<Boolean> CLASS = Boolean.class;
     private static final String ARRAY_CLASS_NAME = boolean[].class.getName();
@@ -43,7 +43,7 @@ final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    int typeCode() {
+    public int typeCode() {
         return TYPE_CODE_BOOLEAN;
     }
 

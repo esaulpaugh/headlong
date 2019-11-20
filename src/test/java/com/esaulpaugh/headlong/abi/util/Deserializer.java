@@ -1,7 +1,21 @@
-package com.esaulpaugh.headlong.abi;
+/*
+   Copyright 2019 Evan Saulpaugh
 
-import com.esaulpaugh.headlong.abi.util.Integers;
-import com.esaulpaugh.headlong.abi.util.JsonUtils;
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+package com.esaulpaugh.headlong.abi.util;
+
+import com.esaulpaugh.headlong.abi.*;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -33,7 +47,7 @@ public class Deserializer {
     }
 
     public static Tuple parseTupleValue(TupleType tupleType, JsonArray valuesArray) {
-        ABIType<?>[] abiTypes = tupleType.elementTypes;
+        ABIType<?>[] abiTypes = tupleType.elements();
         final int len = abiTypes.length;
         Object[] elements = new Object[len];
         int i = 0;
@@ -60,8 +74,8 @@ public class Deserializer {
                 if("string".equals(valueType)) {
                     BigInteger val = new BigInteger(FastHex.decode(valueValue, 2, valueValue.length() - 2));
                     BigIntegerType bigIntType = (BigIntegerType) type;
-                    if(bigIntType.unsigned) {
-                        return new Integers.UintType(bigIntType.bitLength).toUnsigned(val);
+                    if(bigIntType.isUnsigned()) {
+                        return new Integers.UintType(bigIntType.getBitLength()).toUnsigned(val);
                     }
                     return val;
                 } else {
@@ -70,7 +84,7 @@ public class Deserializer {
             }
             case ABIType.TYPE_CODE_BIG_DECIMAL: {
                 String valueValue = value.getAsJsonObject().get("value").getAsString();
-                return new BigDecimal(new BigInteger(valueValue), ((BigDecimalType) type).scale);
+                return new BigDecimal(new BigInteger(valueValue), ((BigDecimalType) type).getScale());
             }
             case ABIType.TYPE_CODE_ARRAY: return parseArrayValue((ArrayType<?, ?>) type, value);
             case ABIType.TYPE_CODE_TUPLE: return parseTupleValue((TupleType) type, value.getAsJsonObject().get("value").getAsJsonArray());
@@ -79,40 +93,40 @@ public class Deserializer {
     }
 
     private static Object parseArrayValue(ArrayType<?, ?> arrayType, JsonElement value) {
-        if (arrayType.isString) {
+        if (arrayType.isString()) {
             return value.getAsJsonObject().get("value").getAsString();
         } else if (value.isJsonArray()) {
             JsonArray valueValue = value.getAsJsonArray();
             final int len = valueValue.size();
-            final ABIType<?> elementType = arrayType.elementType;
+            final ABIType<?> elementType = arrayType.getElementType();
             int i = 0;
-            if (Boolean.class == elementType.clazz) {
+            if (Boolean.class == elementType.clazz()) {
                 boolean[] array = new boolean[len];
                 for (Iterator<JsonElement> iter = valueValue.iterator(); i < len; i++) {
                     array[i] = (Boolean) parseValue(elementType, iter.next());
                 }
                 return array;
-            } else if (Byte.class == elementType.clazz) {
+            } else if (Byte.class == elementType.clazz()) {
                 byte[] array = new byte[len];
                 for (Iterator<JsonElement> iter = valueValue.iterator(); i < len; i++) {
                     array[i] = (Byte) parseValue(elementType, iter.next());
                 }
                 return array;
             }
-            if (Integer.class == elementType.clazz) {
+            if (Integer.class == elementType.clazz()) {
                 int[] array = new int[len];
                 for (Iterator<JsonElement> iter = valueValue.iterator(); i < len; i++) {
                     array[i] = (Integer) parseValue(elementType, iter.next());
                 }
                 return array;
-            } else if (Long.class == elementType.clazz) {
+            } else if (Long.class == elementType.clazz()) {
                 long[] array = new long[len];
                 for (Iterator<JsonElement> iter = valueValue.iterator(); i < len; i++) {
                     array[i] = (Long) parseValue(elementType, iter.next());
                 }
                 return array;
             } else {
-                Object[] array = (Object[]) Array.newInstance(elementType.clazz, len);
+                Object[] array = (Object[]) Array.newInstance(elementType.clazz(), len);
                 for (Iterator<JsonElement> iter = valueValue.iterator(); i < len; i++) {
                     array[i] = parseValue(elementType, iter.next());
                 }

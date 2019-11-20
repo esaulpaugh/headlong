@@ -67,7 +67,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    int typeCode() {
+    public int typeCode() {
         return TYPE_CODE_TUPLE;
     }
 

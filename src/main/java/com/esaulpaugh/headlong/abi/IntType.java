@@ -18,7 +18,7 @@ package com.esaulpaugh.headlong.abi;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-final class IntType extends UnitType<Integer> {
+public final class IntType extends UnitType<Integer> {
 
     private static final Class<Integer> CLASS = Integer.class;
     private static final String ARRAY_CLASS_NAME = int[].class.getName();
@@ -33,7 +33,7 @@ final class IntType extends UnitType<Integer> {
     }
 
     @Override
-    int typeCode() {
+    public int typeCode() {
         return TYPE_CODE_INT;
     }
 

@@ -38,6 +38,14 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
         this.unsigned = unsigned;
     }
 
+    public int getBitLength() {
+        return bitLength;
+    }
+
+    public boolean isUnsigned() {
+        return unsigned;
+    }
+
     @Override
     final int byteLength(Object value) {
         return UNIT_LENGTH_BYTES;

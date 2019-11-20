@@ -18,7 +18,7 @@ package com.esaulpaugh.headlong.abi;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-final class LongType extends UnitType<Long> {
+public final class LongType extends UnitType<Long> {
 
     private static final Class<Long> CLASS = Long.class;
     private static final String ARRAY_CLASS_NAME = long[].class.getName();
@@ -33,7 +33,7 @@ final class LongType extends UnitType<Long> {
     }
 
     @Override
-    int typeCode() {
+    public int typeCode() {
         return TYPE_CODE_LONG;
     }
 

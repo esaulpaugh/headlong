@@ -19,7 +19,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-final class BigDecimalType extends UnitType<BigDecimal> {
+public final class BigDecimalType extends UnitType<BigDecimal> {
 
     private static final Class<BigDecimal> CLASS = BigDecimal.class;
     private static final String ARRAY_CLASS_NAME = BigDecimal[].class.getName();
@@ -31,13 +31,17 @@ final class BigDecimalType extends UnitType<BigDecimal> {
         this.scale = scale;
     }
 
+    public int getScale() {
+        return scale;
+    }
+
     @Override
     String arrayClassName() {
         return ARRAY_CLASS_NAME;
     }
 
     @Override
-    int typeCode() {
+    public int typeCode() {
         return TYPE_CODE_BIG_DECIMAL;
     }
 

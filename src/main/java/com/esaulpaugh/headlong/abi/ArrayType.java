@@ -78,7 +78,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    int typeCode() {
+    public int typeCode() {
         return TYPE_CODE_ARRAY;
     }
 
