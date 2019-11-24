@@ -108,7 +108,7 @@ public class BizarroIntegersTest {
             int n = BizarroIntegers.putLong(lo, eight, 0);
             long r = BizarroIntegers.getLong(eight, 0, n);
             if(lo != r) {
-                throw new AssertionError(lo + "!= " + r);
+                throw new AssertionError(lo + " != " + r);
             }
         }
     }

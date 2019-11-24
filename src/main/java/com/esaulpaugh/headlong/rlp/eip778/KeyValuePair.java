@@ -20,8 +20,6 @@ import com.esaulpaugh.headlong.util.Strings;
 import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
-import static com.esaulpaugh.headlong.util.Strings.decode;
-import static com.esaulpaugh.headlong.util.Strings.encode;
 
 public final class KeyValuePair implements Comparable<KeyValuePair> {
 
@@ -40,8 +38,8 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
     private final byte[] value;
 
     public KeyValuePair(String key, String value, int valueEncoding) {
-        this.key = decode(key, UTF_8);
-        this.value = decode(value, valueEncoding);
+        this.key = Strings.decode(key, UTF_8);
+        this.value = Strings.decode(value, valueEncoding);
     }
 
     public KeyValuePair(byte[] key, byte[] value) {
@@ -71,16 +69,16 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
 
     @Override
     public String toString() {
-        return encode(key, UTF_8) + " --> " + encode(value, Strings.HEX);
+        return Strings.encode(key, UTF_8) + " --> " + Strings.encode(value, Strings.HEX);
     }
 
     @Override
     public int compareTo(KeyValuePair o) {
         int result = compare(key, o.key);
-        if (result == 0) {
-            throw new IllegalArgumentException("duplicate key: " + encode(o.key, UTF_8));
+        if (result != 0) {
+            return result;
         }
-        return result;
+        throw new IllegalArgumentException("duplicate key: " + Strings.encode(o.key, UTF_8));
     }
 
     private static int compare(byte[] a, byte[] b) {

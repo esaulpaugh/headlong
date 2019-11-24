@@ -113,7 +113,7 @@ public final class Integers {
      * @return  the number of bytes inserted
      */
     public static int putShort(short val, byte[] o, int i) {
-        byte b = 0;
+        byte b;
         final int n;
         if(val != 0) {
             b = (byte) val;
@@ -122,7 +122,7 @@ public final class Integers {
             if (val != 0) {
                 n = 2;
             } else n = 1;
-        } else n = 0;
+        } else return 0;
         return insertBytes(n, o, i, (byte) 0, (byte) 0, (byte) val, b);
     }
 
@@ -138,7 +138,7 @@ public final class Integers {
      * @return  the number of bytes inserted
      */
     public static int putInt(int val, byte[] o, int i) {
-        byte b = 0, c = 0, d = 0;
+        byte b = 0, c = 0, d;
         final int n;
         if(val != 0) {
             d = (byte) val;
@@ -151,7 +151,7 @@ public final class Integers {
                     } else n = 3;
                 } else n = 2;
             } else n = 1;
-        } else n = 0;
+        } else return 0;
         return insertBytes(n, o, i, (byte) val, b, c, d);
     }
 
@@ -167,7 +167,7 @@ public final class Integers {
      * @return  the number of bytes inserted
      */
     public static int putLong(long val, byte[] o, int i) {
-        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0;
+        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h;
         final int n;
         if(val != 0) {
             h = (byte) val;
@@ -192,12 +192,12 @@ public final class Integers {
                     } else n = 3;
                 } else n = 2;
             } else n = 1;
-        } else n = 0;
+        } else return 0;
         return insertBytes(n, o, i, (byte) val, b, c, d, e, f, g, h);
     }
 
     public static int putLong(long val, ByteBuffer o) {
-        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0;
+        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h;
         final int n;
         if(val != 0) {
             h = (byte) val;
@@ -222,7 +222,7 @@ public final class Integers {
                     } else n = 3;
                 } else n = 2;
             } else n = 1;
-        } else n = 0;
+        } else return 0;
         return insertBytes(n, o, (byte) val, b, c, d, e, f, g, h);
     }
 

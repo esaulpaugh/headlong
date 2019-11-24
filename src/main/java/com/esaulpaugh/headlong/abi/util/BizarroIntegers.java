@@ -67,7 +67,7 @@ public final class BizarroIntegers {
     }
 
     public static int putShort(short val, byte[] o, int i) {
-        byte b = 0;
+        byte b;
         int v = val;
         final int n;
         if (v != -1) {
@@ -75,12 +75,12 @@ public final class BizarroIntegers {
             if ((v >>= Byte.SIZE) != -1) {
                 n = 2;
             } else n = 1;
-        } else n = 0;
+        } else return 0;
         return Integers.insertBytes(n, o, i, (byte) 0, (byte) 0, (byte) v, b);
     }
 
     public static int putInt(int val, byte[] o, int i) {
-        byte b = 0, c = 0, d = 0;
+        byte b = 0, c = 0, d;
         final int n;
         if (val != -1) {
             d = (byte) val;
@@ -93,12 +93,12 @@ public final class BizarroIntegers {
                     } else n = 3;
                 } else n = 2;
             } else n = 1;
-        } else n = 0;
+        } else return 0;
         return Integers.insertBytes(n, o, i, (byte) val, b, c, d);
     }
 
     public static int putLong(long val, byte[] o, int i) {
-        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0;
+        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h;
         final int n;
         if (val != -1) {
             h = (byte) val;
@@ -123,12 +123,12 @@ public final class BizarroIntegers {
                     } else n = 3;
                 } else n = 2;
             } else n = 1;
-        } else n = 0;
+        } else return 0;
         return Integers.insertBytes(n, o, i, (byte) val, b, c, d, e, f, g, h);
     }
 
     public static int putLong(long val, ByteBuffer o) {
-        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0;
+        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h;
         final int n;
         if (val != -1) {
             h = (byte) val;
@@ -153,27 +153,12 @@ public final class BizarroIntegers {
                     } else n = 3;
                 } else n = 2;
             } else n = 1;
-        } else n = 0;
+        } else return 0;
         return Integers.insertBytes(n, o, (byte) val, b, c, d, e, f, g, h);
     }
 // *******************
-    private static byte _getByte(byte[] buffer, int i, int len) {
-        switch (len) {
-        case 0: return 0;
-        case 1: return buffer[i];
-        default: throw new IllegalArgumentException("len is out of range: " + len);
-        }
-    }
-
-    private static short _getShort(byte[] buffer, int i, int len) {
-        int shiftAmount = 0;
-        int val = 0;
-        switch (len) { /* cases 2 through 1 fall through */
-        case 2: val = buffer[i+1] & 0xFF; shiftAmount = Byte.SIZE; // & 0xFF to promote to int before left shift
-        case 1: val |= (buffer[i] & 0xFF) << shiftAmount;
-        case 0: return (short) val;
-        default: throw new IllegalArgumentException("len is out of range: " + len);
-        }
+    private static int _getShortInt(byte[] buffer, int i) {
+        return (buffer[i+1] & 0xFF) | ((buffer[i] & 0xFF) << Byte.SIZE);
     }
 
     private static int _getInt(byte[] buffer, int i, int len) {
@@ -209,7 +194,7 @@ public final class BizarroIntegers {
     public static byte getByte(byte[] buffer, int index, int len) {
         switch (len) {
         case 0: return (byte) 0xFF;
-        case 1: return _getByte(buffer, index, 1);
+        case 1: return buffer[index];
         default: throw new IllegalArgumentException("len is out of range: " + len);
         }
     }
@@ -218,8 +203,8 @@ public final class BizarroIntegers {
         // do sign extension for negative shorts, i.e. len < 2
         switch (len) {
         case 0: return (short) 0xFFFF;
-        case 1: return (short) (0xFFFFFF00 | _getByte(buffer, index, 1));
-        case 2: return _getShort(buffer, index, 2);
+        case 1: return (short) (0xFFFFFF00 | buffer[index]);
+        case 2: return (short) _getShortInt(buffer, index);
         default: throw new IllegalArgumentException("len is out of range: " + len);
         }
     }
@@ -228,8 +213,8 @@ public final class BizarroIntegers {
         // do sign extension for negative ints, i.e. len < 4
         switch (len) {
         case 0: return 0xFFFFFFFF;
-        case 1: return 0xFFFFFF00 | _getByte(buffer, index, 1);
-        case 2: return 0xFFFF0000 | _getShort(buffer, index, 2);
+        case 1: return 0xFFFFFF00 | buffer[index];
+        case 2: return 0xFFFF0000 | _getShortInt(buffer, index);
         case 3: return 0xFF000000 | _getInt(buffer, index, 3);
         case 4: return _getInt(buffer, index, 4);
         default: throw new IllegalArgumentException("len is out of range: " + len);
@@ -240,8 +225,8 @@ public final class BizarroIntegers {
         // do sign extension for negative longs, i.e. len < 8
         switch (len) {
         case 0: return 0xFFFFFFFF_FFFFFFFFL;
-        case 1: return 0xFFFFFFFF_FFFFFF00L | _getByte(buffer, index, 1);
-        case 2: return 0xFFFFFFFF_FFFF0000L | _getShort(buffer, index, 2);
+        case 1: return 0xFFFFFFFF_FFFFFF00L | buffer[index];
+        case 2: return 0xFFFFFFFF_FFFF0000L | _getShortInt(buffer, index);
         case 3: return 0xFFFFFFFF_FF000000L | _getInt(buffer, index, 3);
         case 4: return 0xFFFFFFFF_00000000L | _getInt(buffer, index, 4);
         case 5: return 0xFFFFFF00_00000000L | _getLong(buffer, index, 5);

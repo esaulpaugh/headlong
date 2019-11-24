@@ -254,7 +254,7 @@ public final class Function implements ABIObject, Serializable {
     }
 
     public Tuple decodeCall(ByteBuffer abiBuffer) {
-        byte[] unitBuffer = ABIType.newUnitBuffer();
+        final byte[] unitBuffer = ABIType.newUnitBuffer();
         abiBuffer.get(unitBuffer, 0, SELECTOR_LEN);
         final byte[] selector = this.selector;
         for(int i = 0; i < SELECTOR_LEN; i++) {
