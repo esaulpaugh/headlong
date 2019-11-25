@@ -20,7 +20,7 @@ import com.google.gson.*;
 public final class JsonUtils {
 
     public static JsonElement parse(String json) {
-        return new JsonParser().parse(json);
+        return JsonParser.parseString(json);
     }
 
     public static JsonObject parseObject(String json) {
