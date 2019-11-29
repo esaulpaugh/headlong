@@ -76,13 +76,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         Tuple tuple = (Tuple) value;
         final Object[] elements = tuple.elements;
 
-        final ABIType<?>[] types = this.elementTypes;
-        final int numTypes = types.length;
-
         int len = 0;
         ABIType<?> type;
-        for (int i = 0; i < numTypes; i++) {
-            type = types[i];
+        for (int i = 0; i < elementTypes.length; i++) {
+            type = elementTypes[i];
             len += type.dynamic
                     ? OFFSET_LENGTH_BYTES + type.byteLength(elements[i])
                     : type.byteLength(elements[i]);
@@ -96,12 +93,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         Tuple tuple = (Tuple) value;
         final Object[] elements = tuple.elements;
 
-        final ABIType<?>[] types = this.elementTypes;
-        final int numTypes = types.length;
-
         int len = 0;
-        for (int i = 0; i < numTypes; i++) {
-            len += types[i].byteLengthPacked(elements[i]);
+        for (int i = 0; i < elementTypes.length; i++) {
+            len += elementTypes[i].byteLengthPacked(elements[i]);
         }
 
         return len;
@@ -113,8 +107,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
         final Tuple tuple = (Tuple) value;
         final Object[] elements = tuple.elements;
-
-        final ABIType<?>[] elementTypes = this.elementTypes;
 
         final int numTypes = elementTypes.length;
 
