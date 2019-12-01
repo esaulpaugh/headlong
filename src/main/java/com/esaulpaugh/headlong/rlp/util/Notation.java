@@ -163,9 +163,6 @@ public class Notation {
                 lengthLen = current - type.offset;
                 elementDataIndex = i + 1 + lengthLen;
                 elementEnd = getLongElementEnd(data, i, elementDataIndex, end);
-                break;
-            default:
-                throw new RuntimeException();
             }
             hasELement = true;
             sb.append(ELEMENT_INDENTATION);
@@ -182,7 +179,6 @@ public class Notation {
                 break;
             case LIST_LONG:
                 i = buildLongList(sb, data, elementDataIndex, elementEnd, depth + 1);
-//            default:
             }
         }
         if (hasELement) {
@@ -219,9 +215,8 @@ public class Notation {
                 break;
             case STRING_LONG:
             case LIST_LONG:
-                throw new UnrecoverableDecodeException("surely, it cannot possibly fit. index: " + i);
             default:
-                throw new RuntimeException();
+                throw new Error();
             }
         }
         if (hasElement) {

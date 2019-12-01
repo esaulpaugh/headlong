@@ -33,7 +33,7 @@ public class DecodeTest {
         try {
             FUNCTION = new Function("gogo((fixed[],int8)[1][][5])", "(ufixed,string)");
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            throw new Error(e);
         }
     }
 

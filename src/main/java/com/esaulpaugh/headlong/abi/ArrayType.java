@@ -115,7 +115,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 len += n << LOG_2_UNIT_LENGTH_BYTES; // 32 bytes per offset
             }
             break;
-        default: throw unrecognizedTypeException(elementType.toString());
+        default: throw new Error();
         }
         // arrays with variable number of elements get +32 for the array length
         return length == DYNAMIC_LENGTH
@@ -142,7 +142,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 staticLen += elementType.byteLengthPacked(elements[i]);
             }
             return staticLen;
-        default: throw unrecognizedTypeException(elementType.toString());
+        default: throw new Error();
         }
     }
 
@@ -163,7 +163,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_DECIMAL: staticLen = validateBigDecimalArray((BigDecimal[]) value); break;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: staticLen = validateObjectArray((Object[]) value); break;
-        default: throw unrecognizedTypeException(value.getClass().getName());
+        default: throw new Error();
         }
         // arrays with variable number of elements get +32 for the array length
         return length == DYNAMIC_LENGTH
@@ -351,8 +351,6 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 elementType.encodeTail(objects[i], dest);
             }
             return;
-        default:
-            throw unrecognizedTypeException(elementType.toString());
         }
     }
 
@@ -411,7 +409,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_DECIMAL: return (J) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, elementBuffer);
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: return (J) decodeObjectArray(arrayLen, bb, elementBuffer);
-        default: throw unrecognizedTypeException(elementType.toString());
+        default: throw new Error();
         }
     }
 
@@ -542,10 +540,6 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 dest[i] = elementType.decode(bb, elementBuffer);
             }
         }
-    }
-
-    private static RuntimeException unrecognizedTypeException(String type) {
-        return new RuntimeException("unrecognized type: " + type);
     }
 
     private static IllegalArgumentException validationException(RuntimeException re, int i) {

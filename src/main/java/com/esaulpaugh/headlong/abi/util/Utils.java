@@ -42,7 +42,7 @@ public final class Utils {
         case 2: return "\\u00" + hex;
         case 3: return "\\u0" + hex;
         case 4: return "\\u" + hex;
-        default: return "\\u0000";
+        default: throw new Error();
         }
     }
 
