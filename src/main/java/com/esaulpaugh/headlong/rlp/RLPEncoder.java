@@ -137,15 +137,7 @@ public final class RLPEncoder {
         final int dataLen = Integers.len(val);
         // short string
         if (dataLen == 1) {
-            byte first = (byte) val;
-            if (first >= 0x00) { // same as (first & 0xFF) < 0x80
-                dest[destIndex++] = first;
-                return destIndex;
-            } else {
-                dest[destIndex++] = (byte) (STRING_SHORT_OFFSET + dataLen);
-                dest[destIndex++] = first;
-                return destIndex;
-            }
+            return encodeLen1String((byte) val, dest, destIndex);
         }
         // dataLen is 0 or 2-8
         dest[destIndex++] = (byte) (STRING_SHORT_OFFSET + dataLen);
@@ -157,15 +149,7 @@ public final class RLPEncoder {
         final int dataLen = data.length;
         // short string
         if (dataLen == 1) {
-            byte first = data[0];
-            if (first >= 0x00) { // same as (first & 0xFF) < 0x80
-                dest[destIndex++] = first;
-                return destIndex;
-            } else {
-                dest[destIndex++] = (byte) (STRING_SHORT_OFFSET + dataLen);
-                dest[destIndex++] = first;
-                return destIndex;
-            }
+            return encodeLen1String(data[0], dest, destIndex);
         }
         if (isLong(dataLen)) { // long string
             int n = Integers.putLong(dataLen, dest, destIndex + 1);
@@ -179,6 +163,14 @@ public final class RLPEncoder {
         // 56-case switch statement is faster than for loop, but arraycopy is faster than both
         System.arraycopy(data, 0, dest, destIndex, dataLen);
         return destIndex + dataLen;
+    }
+
+    private static int encodeLen1String(byte first, byte[] dest, int destIndex) {
+        if (first < 0x00) { // same as (first & 0xFF) >= 0x80
+            dest[destIndex++] = (byte) (STRING_SHORT_OFFSET + 1);
+        }
+        dest[destIndex++] = first;
+        return destIndex;
     }
 
     private static int encodeList(long dataLen, Iterable<?> elements, byte[] dest, int destIndex) {
