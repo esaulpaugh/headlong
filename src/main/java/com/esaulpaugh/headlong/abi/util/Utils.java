@@ -28,7 +28,7 @@ public final class Utils {
         if (matcher.find()) {
             final char c = string.charAt(matcher.start());
             throw new ParseException(
-                    "illegal char " + escapeChar(c) + " \'" + c + "\' @ index " + matcher.start(),
+                    "illegal char " + escapeChar(c) + " '" + c + "' @ index " + matcher.start(),
                     matcher.start()
             );
         }
@@ -36,7 +36,7 @@ public final class Utils {
     }
 
     public static String escapeChar(char c) {
-        String hex = Integer.toHexString((int) c);
+        String hex = Integer.toHexString(c);
         switch (hex.length()) {
         case 1: return "\\u000" + hex;
         case 2: return "\\u00" + hex;
