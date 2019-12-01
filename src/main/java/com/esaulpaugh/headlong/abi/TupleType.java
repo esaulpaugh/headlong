@@ -84,7 +84,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     ? OFFSET_LENGTH_BYTES + type.byteLength(elements[i])
                     : type.byteLength(elements[i]);
         }
-
         return len;
     }
 
@@ -97,7 +96,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         for (int i = 0; i < elementTypes.length; i++) {
             len += elementTypes[i].byteLengthPacked(elements[i]);
         }
-
         return len;
     }
 
@@ -115,20 +113,19 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     elements.length + " != " + numTypes);
         }
 
-        int byteLength = 0;
+        int len = 0;
         int i = 0;
         try {
             for ( ; i < numTypes; i++) {
                 final ABIType<?> type = elementTypes[i];
-                byteLength += type.dynamic
+                len += type.dynamic
                         ? OFFSET_LENGTH_BYTES + type.validate(elements[i])
                         : type.validate(elements[i]);
             }
         } catch (RuntimeException re) {
             throw new IllegalArgumentException("illegal arg @ " + i + ": " + re.getMessage());
         }
-
-        return byteLength;
+        return len;
     }
 
     @Override
