@@ -19,6 +19,7 @@ import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Strings;
+import com.esaulpaugh.headlong.util.Utils;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -191,47 +192,47 @@ public class IntegersTest {
         final byte a = 1, b = 11, c = 111, d = 9, e = 99, f = -1, g = -100, h = 64;
 
         Arrays.fill(ten, (byte) 0);
-        Integers.insertBytes(0, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
+        Utils.insertBytes(0, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
         assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        Integers.insertBytes(1, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
+        Utils.insertBytes(1, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
         assertArrayEquals(new byte[] { 0, d, 0, 0, 0, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        Integers.insertBytes(2, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
+        Utils.insertBytes(2, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
         assertArrayEquals(new byte[] { 0, c, d, 0, 0, 0, 0, 0, 0, 0 }, ten);
         Arrays.fill(ten, (byte) 0);
 
         Arrays.fill(ten, (byte) 0);
-        Integers.insertBytes(3, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
+        Utils.insertBytes(3, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
         assertArrayEquals(new byte[] { 0, b, c, d, 0, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        Integers.insertBytes(4, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
+        Utils.insertBytes(4, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
         assertArrayEquals(new byte[] { 0, a, b, c, d, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        Integers.insertBytes(5, ten, 1, (byte) 0, (byte) 0, (byte) 0, a, b, c, d, e);
+        Utils.insertBytes(5, ten, 1, (byte) 0, (byte) 0, (byte) 0, a, b, c, d, e);
         assertArrayEquals(new byte[] { 0, a, b, c, d, e, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        Integers.insertBytes(6, ten, 1, (byte) 0, (byte) 0, a, b, c, d, e, f);
+        Utils.insertBytes(6, ten, 1, (byte) 0, (byte) 0, a, b, c, d, e, f);
         assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        Integers.insertBytes(7, ten, 1, (byte) 0, a, b, c, d, e, f, g);
+        Utils.insertBytes(7, ten, 1, (byte) 0, a, b, c, d, e, f, g);
         assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, g, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        Integers.insertBytes(8, ten, 1, a, b, c, d, e, f, g, h);
+        Utils.insertBytes(8, ten, 1, a, b, c, d, e, f, g, h);
         assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, g, h, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         byte[] src = new byte[4];
         Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
         rand.nextBytes(src);
-        Integers.insertBytes(3, ten, ten.length - 3, (byte) 0, src[1], src[2], src[3]);
+        Utils.insertBytes(3, ten, ten.length - 3, (byte) 0, src[1], src[2], src[3]);
         assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, src[1], src[2], src[3] }, ten);
     }
 

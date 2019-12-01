@@ -118,7 +118,13 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         int destDataIndex = 1 + n;
         byte[] dest = new byte[destDataIndex + srcDataLen];
         dest[0] = (byte) (LIST_LONG_OFFSET + n);
-        Integers.insertBytes(n, dest, 1, a, b, c, d);
+        int i = 1;
+        switch (n) { /* cases fall through */
+        case 4: dest[i++] = a;
+        case 3: dest[i++] = b;
+        case 2: dest[i++] = c;
+        case 1: dest[i] = d;
+        }
 
         copyElements(srcElements, dest, destDataIndex);
 

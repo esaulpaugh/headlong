@@ -113,17 +113,14 @@ public final class Integers {
      * @return  the number of bytes inserted
      */
     public static int putShort(short val, byte[] o, int i) {
-        byte b;
-        final int n;
         if(val != 0) {
-            b = (byte) val;
+            byte b = (byte) val;
 //            val = (short) (val >>> Byte.SIZE); // ICAST_QUESTIONABLE_UNSIGNED_RIGHT_SHIFT
             val = (short) (val >> Byte.SIZE); // high bytes chopped off either way, see above
             if (val != 0) {
-                n = 2;
-            } else n = 1;
+                o[i]=(byte) val; o[i+1]=b; return 2;
+            } else o[i]=b; return 1;
         } else return 0;
-        return insertBytes(n, o, i, (byte) 0, (byte) 0, (byte) val, b);
     }
 
     /**
@@ -138,21 +135,18 @@ public final class Integers {
      * @return  the number of bytes inserted
      */
     public static int putInt(int val, byte[] o, int i) {
-        byte b = 0, c = 0, d;
-        final int n;
         if(val != 0) {
-            d = (byte) val;
+            byte d = (byte) val;
             if ((val >>>= Byte.SIZE) != 0) {
-                c = (byte) val;
+                byte c = (byte) val;
                 if ((val >>>= Byte.SIZE) != 0) {
-                    b = (byte) val;
+                    byte b = (byte) val;
                     if ((val >>>= Byte.SIZE) != 0) {
-                        n = 4;
-                    } else n = 3;
-                } else n = 2;
-            } else n = 1;
+                        o[i]=(byte) val; o[i+1]=b; o[i+2]=c; o[i+3]=d; return 4;
+                    } else o[i]=b; o[i+1]=c; o[i+2]=d; return 3;
+                } else o[i]=c; o[i+1]=d; return 2;
+            } else o[i]=d; return 1;
         } else return 0;
-        return insertBytes(n, o, i, (byte) val, b, c, d);
     }
 
     /**
@@ -167,63 +161,57 @@ public final class Integers {
      * @return  the number of bytes inserted
      */
     public static int putLong(long val, byte[] o, int i) {
-        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h;
-        final int n;
         if(val != 0) {
-            h = (byte) val;
+            byte h = (byte) val;
             if ((val >>>= Byte.SIZE) != 0) {
-                g = (byte) val;
+                byte g = (byte) val;
                 if ((val >>>= Byte.SIZE) != 0) {
-                    f = (byte) val;
+                    byte f = (byte) val;
                     if ((val >>>= Byte.SIZE) != 0) {
-                        e = (byte) val;
+                        byte e = (byte) val;
                         if ((val >>>= Byte.SIZE) != 0) {
-                            d = (byte) val;
+                            byte d = (byte) val;
                             if ((val >>>= Byte.SIZE) != 0) {
-                                c = (byte) val;
+                                byte c = (byte) val;
                                 if ((val >>>= Byte.SIZE) != 0) {
-                                    b = (byte) val;
+                                    byte b = (byte) val;
                                     if ((val >>>= Byte.SIZE) != 0) {
-                                        n = 8;
-                                    } else n = 7;
-                                } else n = 6;
-                            } else n = 5;
-                        } else n = 4;
-                    } else n = 3;
-                } else n = 2;
-            } else n = 1;
+                                        o[i]=(byte) val; o[i+1]=b; o[i+2]=c; o[i+3]=d; o[i+4]=e; o[i+5]=f; o[i+6]=g; o[i+7]=h; return 8;
+                                    } else o[i]=b; o[i+1]=c; o[i+2]=d; o[i+3]=e; o[i+4]=f; o[i+5]=g; o[i+6]=h; return 7;
+                                } else o[i]=c; o[i+1]=d; o[i+2]=e; o[i+3]=f; o[i+4]=g; o[i+5]=h; return 6;
+                            } else o[i]=d; o[i+1]=e; o[i+2]=f; o[i+3]=g; o[i+4]=h; return 5;
+                        } else o[i]=e; o[i+1]=f; o[i+2]=g; o[i+3]=h; return 4;
+                    } else o[i]=f; o[i+1]=g; o[i+2]=h; return 3;
+                } else o[i]=g; o[i+1]=h; return 2;
+            } else o[i]=h; return 1;
         } else return 0;
-        return insertBytes(n, o, i, (byte) val, b, c, d, e, f, g, h);
     }
 
     public static int putLong(long val, ByteBuffer o) {
-        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h;
-        final int n;
         if(val != 0) {
-            h = (byte) val;
+            byte h = (byte) val;
             if ((val >>>= Byte.SIZE) != 0) {
-                g = (byte) val;
+                byte g = (byte) val;
                 if ((val >>>= Byte.SIZE) != 0) {
-                    f = (byte) val;
+                    byte f = (byte) val;
                     if ((val >>>= Byte.SIZE) != 0) {
-                        e = (byte) val;
+                        byte e = (byte) val;
                         if ((val >>>= Byte.SIZE) != 0) {
-                            d = (byte) val;
+                            byte d = (byte) val;
                             if ((val >>>= Byte.SIZE) != 0) {
-                                c = (byte) val;
+                                byte c = (byte) val;
                                 if ((val >>>= Byte.SIZE) != 0) {
-                                    b = (byte) val;
+                                    byte b = (byte) val;
                                     if ((val >>>= Byte.SIZE) != 0) {
-                                        n = 8;
-                                    } else n = 7;
-                                } else n = 6;
-                            } else n = 5;
-                        } else n = 4;
-                    } else n = 3;
-                } else n = 2;
-            } else n = 1;
+                                        o.put((byte) val); o.put(b); o.put(c); o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 8;
+                                    } else o.put(b); o.put(c); o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 7;
+                                } else o.put(c); o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 6;
+                            } else o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 5;
+                        } else o.put(e); o.put(f); o.put(g); o.put(h); return 4;
+                    } else o.put(f); o.put(g); o.put(h); return 3;
+                } else o.put(g); o.put(h); return 2;
+            } else o.put(h); return 1;
         } else return 0;
-        return insertBytes(n, o, (byte) val, b, c, d, e, f, g, h);
     }
 
     /**
@@ -423,58 +411,6 @@ public final class Integers {
      */
     public static int bitLen(long val) {
         return Long.SIZE - Long.numberOfLeadingZeros(val);
-    }
-
-    public static int insertBytes(int n, byte[] b, int i, byte w, byte x, byte y, byte z) {
-        if(n <= 4) {
-            return insertBytes(n, b, i, (byte)0, (byte)0, (byte)0, (byte)0, w, x, y, z);
-        }
-        throw new IllegalArgumentException("n must be <= 4");
-    }
-
-    /**
-     * Inserts bytes into an array in the order they are given.
-     * @param n     the number of bytes to insert
-     * @param b     the buffer into which the bytes will be inserted
-     * @param i     the index at which to insert
-     * @param s     the lead byte if eight bytes are to be inserted
-     * @param t     the lead byte if seven bytes are to be inserted
-     * @param u     the lead byte if six bytes are to be inserted
-     * @param v     the lead byte if five bytes are to be inserted
-     * @param w     the lead byte if four bytes are to be inserted
-     * @param x     the lead byte if three bytes are to be inserted
-     * @param y     the lead byte if two bytes are to be inserted
-     * @param z     the last byte
-     * @return n    the number of bytes inserted
-     */
-    public static int insertBytes(int n, byte[] b, int i, byte s, byte t, byte u, byte v, byte w, byte x, byte y, byte z) {
-        switch (n) { /* cases fall through */
-        case 8: b[i++] = s;
-        case 7: b[i++] = t;
-        case 6: b[i++] = u;
-        case 5: b[i++] = v;
-        case 4: b[i++] = w;
-        case 3: b[i++] = x;
-        case 2: b[i++] = y;
-        case 1: b[i] = z;
-        case 0: return n;
-        default: throw new IllegalArgumentException("n is out of range: " + n);
-        }
-    }
-
-    public static int insertBytes(int n, ByteBuffer b, byte s, byte t, byte u, byte v, byte w, byte x, byte y, byte z) {
-        switch (n) { /* cases fall through */
-        case 8: b.put(s);
-        case 7: b.put(t);
-        case 6: b.put(u);
-        case 5: b.put(v);
-        case 4: b.put(w);
-        case 3: b.put(x);
-        case 2: b.put(y);
-        case 1: b.put(z);
-        case 0: return n;
-        default: throw new IllegalArgumentException("n is out of range: " + n);
-        }
     }
 
     public static BigInteger getBigInt(byte[] bytes, int i, final int len) {

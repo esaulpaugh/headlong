@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi.util;
 
-import com.esaulpaugh.headlong.rlp.util.Integers;
-
 import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.abi.util.Utils.EMPTY_BYTE_ARRAY;
@@ -67,94 +65,82 @@ public final class BizarroIntegers {
     }
 
     public static int putShort(short val, byte[] o, int i) {
-        byte b;
         int v = val;
-        final int n;
-        if (v != -1) {
-            b = (byte) v;
+        if (val != -1) {
+            byte b = (byte) v;
             if ((v >>= Byte.SIZE) != -1) {
-                n = 2;
-            } else n = 1;
+                o[i]=(byte)v; o[i+1]=b; return 2;
+            } else o[i]=b; return 1;
         } else return 0;
-        return Integers.insertBytes(n, o, i, (byte) 0, (byte) 0, (byte) v, b);
     }
 
     public static int putInt(int val, byte[] o, int i) {
-        byte b = 0, c = 0, d;
-        final int n;
         if (val != -1) {
-            d = (byte) val;
+            byte d = (byte) val;
             if ((val >>= Byte.SIZE) != -1) {
-                c = (byte) val;
+                byte c = (byte) val;
                 if ((val >>= Byte.SIZE) != -1) {
-                    b = (byte) val;
+                    byte b = (byte) val;
                     if ((val >>= Byte.SIZE) != -1) {
-                        n = 4;
-                    } else n = 3;
-                } else n = 2;
-            } else n = 1;
+                        o[i]=(byte) val; o[i+1]=b; o[i+2]=c; o[i+3]=d; return 4;
+                    } else o[i]=b; o[i+1]=c; o[i+2]=d; return 3;
+                } else o[i]=c; o[i+1]=d; return 2;
+            } else o[i]=d; return 1;
         } else return 0;
-        return Integers.insertBytes(n, o, i, (byte) val, b, c, d);
     }
 
     public static int putLong(long val, byte[] o, int i) {
-        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h;
-        final int n;
         if (val != -1) {
-            h = (byte) val;
+            byte h = (byte) val;
             if ((val >>= Byte.SIZE) != -1) {
-                g = (byte) val;
+                byte g = (byte) val;
                 if ((val >>= Byte.SIZE) != -1) {
-                    f = (byte) val;
+                    byte f = (byte) val;
                     if ((val >>= Byte.SIZE) != -1) {
-                        e = (byte) val;
+                        byte e = (byte) val;
                         if ((val >>= Byte.SIZE) != -1) {
-                            d = (byte) val;
+                            byte d = (byte) val;
                             if ((val >>= Byte.SIZE) != -1) {
-                                c = (byte) val;
+                                byte c = (byte) val;
                                 if ((val >>= Byte.SIZE) != -1) {
-                                    b = (byte) val;
+                                    byte b = (byte) val;
                                     if ((val >>= Byte.SIZE) != -1) {
-                                        n = 8;
-                                    } else n = 7;
-                                } else n = 6;
-                            } else n = 5;
-                        } else n = 4;
-                    } else n = 3;
-                } else n = 2;
-            } else n = 1;
+                                        o[i]=(byte)val; o[i+1]=b; o[i+2]=c; o[i+3]=d; o[i+4]=e; o[i+5]=f; o[i+6]=g; o[i+7]=h; return 8;
+                                    } else o[i]=b; o[i+1]=c; o[i+2]=d; o[i+3]=e; o[i+4]=f; o[i+5]=g; o[i+6]=h; return 7;
+                                } else o[i]=c; o[i+1]=d; o[i+2]=e; o[i+3]=f; o[i+4]=g; o[i+5]=h; return 6;
+                            } else o[i]=d; o[i+1]=e; o[i+2]=f; o[i+3]=g; o[i+4]=h; return 5;
+                        } else o[i]=e; o[i+1]=f; o[i+2]=g; o[i+3]=h; return 4;
+                    } else o[i]=f; o[i+1]=g; o[i+2]=h; return 3;
+                } else o[i]=g; o[i+1]=h; return 2;
+            } else o[i]=h; return 1;
         } else return 0;
-        return Integers.insertBytes(n, o, i, (byte) val, b, c, d, e, f, g, h);
     }
 
     public static int putLong(long val, ByteBuffer o) {
-        byte b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h;
-        final int n;
         if (val != -1) {
-            h = (byte) val;
+            byte h = (byte) val;
             if ((val >>= Byte.SIZE) != -1) {
-                g = (byte) val;
+                byte g = (byte) val;
                 if ((val >>= Byte.SIZE) != -1) {
-                    f = (byte) val;
+                    byte f = (byte) val;
                     if ((val >>= Byte.SIZE) != -1) {
-                        e = (byte) val;
+                        byte e = (byte) val;
                         if ((val >>= Byte.SIZE) != -1) {
-                            d = (byte) val;
+                            byte d = (byte) val;
                             if ((val >>= Byte.SIZE) != -1) {
-                                c = (byte) val;
+                                byte c = (byte) val;
                                 if ((val >>= Byte.SIZE) != -1) {
-                                    b = (byte) val;
+                                    byte b = (byte) val;
                                     if ((val >>= Byte.SIZE) != -1) {
-                                        n = 8;
-                                    } else n = 7;
-                                } else n = 6;
-                            } else n = 5;
-                        } else n = 4;
-                    } else n = 3;
-                } else n = 2;
-            } else n = 1;
+                                        o.put((byte) val); o.put(b); o.put(c); o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 8;
+                                    } else o.put(b); o.put(c); o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 7;
+                                } else o.put(c); o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 6;
+                            } else o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 5;
+                        } else o.put(e); o.put(f); o.put(g); o.put(h); return 4;
+                    } else o.put(f); o.put(g); o.put(h); return 3;
+                } else o.put(g); o.put(h); return 2;
+            } else o.put(h); return 1;
         } else return 0;
-        return Integers.insertBytes(n, o, (byte) val, b, c, d, e, f, g, h);
     }
 // *******************
     private static int _getShortInt(byte[] buffer, int i) {
