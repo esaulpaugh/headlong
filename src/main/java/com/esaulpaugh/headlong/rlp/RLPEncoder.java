@@ -152,15 +152,12 @@ public final class RLPEncoder {
             return encodeLen1String(data[0], dest, destIndex);
         }
         if (isLong(dataLen)) { // long string
-            int n = Integers.putLong(dataLen, dest, destIndex + 1);
-            dest[destIndex] = (byte) (STRING_LONG_OFFSET + n);
-            destIndex += 1 + n;
-            System.arraycopy(data, 0, dest, destIndex, dataLen);
-            return destIndex + dataLen;
+            int lengthOfLength = Integers.putLong(dataLen, dest, destIndex + 1);
+            dest[destIndex] = (byte) (STRING_LONG_OFFSET + lengthOfLength);
+            destIndex += 1 + lengthOfLength;
+        } else {
+            dest[destIndex++] = (byte) (STRING_SHORT_OFFSET + dataLen); // dataLen is 0 or 2-55
         }
-        // dataLen is 0 or 2-55
-        dest[destIndex++] = (byte) (STRING_SHORT_OFFSET + dataLen);
-        // 56-case switch statement is faster than for loop, but arraycopy is faster than both
         System.arraycopy(data, 0, dest, destIndex, dataLen);
         return destIndex + dataLen;
     }
@@ -361,12 +358,12 @@ public final class RLPEncoder {
         return RLPList.withElements(encodings);
     }
 
-    public static void insertRecordContentList(int dataLen, long seq, KeyValuePair[] pairs, byte[] record, int offset) {
+    public static int insertRecordContentList(int dataLen, long seq, KeyValuePair[] pairs, byte[] record, int offset) {
         if(seq < 0) {
             throw new IllegalArgumentException("negative seq");
         }
         Arrays.sort(pairs);
-        encodeList(dataLen, seq, pairs, record, offset);
+        return encodeList(dataLen, seq, pairs, record, offset);
     }
 
     public static int insertRecordSignature(byte[] signature, byte[] record, int offset) {
