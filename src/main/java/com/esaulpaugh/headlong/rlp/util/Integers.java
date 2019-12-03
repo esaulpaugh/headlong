@@ -48,8 +48,7 @@ public final class Integers {
      * @return  the minimal representation
      */
     public static byte[] toBytes(short val) {
-        int n = len(val);
-        byte[] bytes = new byte[n];
+        byte[] bytes = new byte[len(val)];
         putShort(val, bytes, 0);
         return bytes;
     }
@@ -60,10 +59,9 @@ public final class Integers {
      *
      * @param val   the integer
      * @return  the minimal representation
-     */
+     */to
     public static byte[] toBytes(int val) {
-        int n = len(val);
-        byte[] bytes = new byte[n];
+        byte[] bytes = new byte[len(val)];
         putInt(val, bytes, 0);
         return bytes;
     }
@@ -76,8 +74,7 @@ public final class Integers {
      * @return  the minimal representation
      */
     public static byte[] toBytes(long val) {
-        int n = len(val);
-        byte[] bytes = new byte[n];
+        byte[] bytes = new byte[len(val)];
         putLong(val, bytes, 0);
         return bytes;
     }
