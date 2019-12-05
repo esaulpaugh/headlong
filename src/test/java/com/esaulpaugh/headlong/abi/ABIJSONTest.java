@@ -26,6 +26,8 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.List;
 
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ABIJSONTest {
@@ -204,9 +206,29 @@ public class ABIJSONTest {
             "  }\n" +
             "]";
 
+    private static void toString(ABIType<?> type, StringBuilder sb) {
+        switch (type.typeCode()) {
+        case TYPE_CODE_ARRAY:
+            sb.append('[');
+            toString(((ArrayType<?, ?>) type).elementType, sb);
+            sb.append(']');
+            break;
+        case TYPE_CODE_TUPLE:
+            sb.append('(');
+            for(ABIType<?> e : (TupleType) type) {
+                toString(e, sb);
+            }
+            sb.append(')');
+            break;
+        default:
+            sb.append(type);
+        }
+        sb.append(' ').append(type.getName()).append(',');
+    }
+
     private static void printTupleType(TupleType tupleType) {
         StringBuilder sb = new StringBuilder();
-        tupleType.toString(sb);
+        toString(tupleType, sb);
         System.out.println("RECURSIVE = " + sb.toString());
     }
 

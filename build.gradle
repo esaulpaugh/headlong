@@ -11,11 +11,13 @@ test {
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
+//    classifier = 'javadoc' // deprecated
     archiveClassifier.set('javadoc')
     from javadoc.destinationDir
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
+//    classifier = 'sources' // deprecated
     archiveClassifier.set('sources')
     from sourceSets.main.allSource
     finalizedBy(javadocJar)
@@ -41,7 +43,6 @@ sourceSets {
 publishing {
     publications {
         headlong(MavenPublication) {
-            artifactId = 'headlong'
             from components.java
             artifact sourcesJar
             artifact javadocJar
@@ -68,4 +69,10 @@ dependencies {
 
 //    implementation 'org.openjdk.jmh:jmh-core:1.22'
 //    implementation 'org.openjdk.jmh:jmh-generator-annprocess:1.22'
+}
+
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
 }
