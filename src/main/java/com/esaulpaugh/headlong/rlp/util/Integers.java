@@ -200,13 +200,13 @@ public final class Integers {
                                 if ((val >>>= Byte.SIZE) != 0) {
                                     byte b = (byte) val;
                                     if ((val >>>= Byte.SIZE) != 0) {
-                                        o.put((byte) val); o.put(b); o.put(c); o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 8;
-                                    } else o.put(b); o.put(c); o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 7;
-                                } else o.put(c); o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 6;
-                            } else o.put(d); o.put(e); o.put(f); o.put(g); o.put(h); return 5;
-                        } else o.put(e); o.put(f); o.put(g); o.put(h); return 4;
-                    } else o.put(f); o.put(g); o.put(h); return 3;
-                } else o.put(g); o.put(h); return 2;
+                                        o.put((byte) val).put(b).put(c).put(d).put(e).put(f).put(g).put(h); return 8;
+                                    } else o.put(b).put(c).put(d).put(e).put(f).put(g).put(h); return 7;
+                                } else o.put(c).put(d).put(e).put(f).put(g).put(h); return 6;
+                            } else o.put(d).put(e).put(f).put(g).put(h); return 5;
+                        } else o.put(e).put(f).put(g).put(h); return 4;
+                    } else o.put(f).put(g).put(h); return 3;
+                } else o.put(g).put(h); return 2;
             } else o.put(h); return 1;
         } else return 0;
     }
