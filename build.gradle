@@ -71,8 +71,8 @@ dependencies {
 //    implementation 'org.openjdk.jmh:jmh-generator-annprocess:1.22'
 }
 
-javadoc {
-    if(JavaVersion.current().isJava9Compatible()) {
-        options.addBooleanOption('html5', true)
-    }
-}
+//javadoc {
+//    if(JavaVersion.current().isJava9Compatible()) {
+//        options.addBooleanOption('html5', true)
+//    }
+//}

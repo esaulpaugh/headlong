@@ -156,7 +156,7 @@ public final class BizarroIntegers {
         case 2: val |= (buffer[i+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1: val |= (buffer[i] & 0xFF) << shiftAmount;
         case 0: return val;
-        default: throw new IllegalArgumentException("len is out of range: " + len);
+        default: throw outOfRangeException(len);
         }
     }
 
@@ -173,7 +173,7 @@ public final class BizarroIntegers {
         case 2: val |= (buffer[i+1] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1: val |= (buffer[i] & 0xFFL) << shiftAmount;
         case 0: return val;
-        default: throw new IllegalArgumentException("len is out of range: " + len);
+        default: throw outOfRangeException(len);
         }
     }
 // *******************
@@ -181,7 +181,7 @@ public final class BizarroIntegers {
         switch (len) {
         case 0: return (byte) 0xFF;
         case 1: return buffer[index];
-        default: throw new IllegalArgumentException("len is out of range: " + len);
+        default: throw outOfRangeException(len);
         }
     }
 
@@ -191,7 +191,7 @@ public final class BizarroIntegers {
         case 0: return (short) 0xFFFF;
         case 1: return (short) (0xFFFFFF00 | buffer[index]);
         case 2: return (short) _getShortInt(buffer, index);
-        default: throw new IllegalArgumentException("len is out of range: " + len);
+        default: throw outOfRangeException(len);
         }
     }
 
@@ -203,7 +203,7 @@ public final class BizarroIntegers {
         case 2: return 0xFFFF0000 | _getShortInt(buffer, index);
         case 3: return 0xFF000000 | _getInt(buffer, index, 3);
         case 4: return _getInt(buffer, index, 4);
-        default: throw new IllegalArgumentException("len is out of range: " + len);
+        default: throw outOfRangeException(len);
         }
     }
 
@@ -219,8 +219,12 @@ public final class BizarroIntegers {
         case 6: return 0xFFFF0000_00000000L | _getLong(buffer, index, 6);
         case 7: return 0xFF000000_00000000L | _getLong(buffer, index, 7);
         case 8: return _getLong(buffer, index, 8);
-        default: throw new IllegalArgumentException("len is out of range: " + len);
+        default: throw outOfRangeException(len);
         }
+    }
+
+    private static IllegalArgumentException outOfRangeException(int len) {
+        return new IllegalArgumentException("len is out of range: " + len);
     }
 
     public static int len(byte val) {

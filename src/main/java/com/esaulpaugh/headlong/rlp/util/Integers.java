@@ -228,11 +228,11 @@ public final class Integers {
         case 1:
             byte lead = buffer[i];
             if(lead == 0) {
-                throw new UnrecoverableDecodeException("deserialised integers with leading zeroes are invalid; index: " + i + ", len: " + len);
+                throw leadingZeroException(i, len);
             }
             return lead;
         case 0: return 0;
-        default: throw new UnrecoverableDecodeException(new IllegalArgumentException("len is out of range: " + len));
+        default: throw outOfRangeException(len);
         }
     }
 
@@ -255,12 +255,12 @@ public final class Integers {
         case 2: val = buffer[i+1] & 0xFF; shiftAmount = Byte.SIZE; // & 0xFF to promote to int before left shift
         case 1:
             byte lead = buffer[i];
-            val |= (lead & 0xFF) << shiftAmount;
             if(lead == 0) {
-                throw new UnrecoverableDecodeException("deserialised integers with leading zeroes are invalid; index: " + i + ", len: " + len);
+                throw leadingZeroException(i, len);
             }
+            val |= (lead & 0xFFL) << shiftAmount;
         case 0: return (short) val;
-        default: throw new UnrecoverableDecodeException(new IllegalArgumentException("len is out of range: " + len));
+        default: throw outOfRangeException(len);
         }
     }
 
@@ -285,12 +285,12 @@ public final class Integers {
         case 2: val |= (buffer[i+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1:
             byte lead = buffer[i];
-            val |= (lead & 0xFF) << shiftAmount;
             if(lead == 0) {
-                throw new UnrecoverableDecodeException("deserialised integers with leading zeroes are invalid; index: " + i + ", len: " + len);
+                throw leadingZeroException(i, len);
             }
+            val |= (lead & 0xFFL) << shiftAmount;
         case 0: return val;
-        default: throw new UnrecoverableDecodeException(new IllegalArgumentException("len is out of range: " + len));
+        default: throw outOfRangeException(len);
         }
     }
 
@@ -319,13 +319,21 @@ public final class Integers {
         case 2: val |= (buffer[i+1] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1:
             byte lead = buffer[i];
-            val |= (lead & 0xFFL) << shiftAmount;
             if(lead == 0) {
-                throw new UnrecoverableDecodeException("deserialised integers with leading zeroes are invalid; index: " + i + ", len: " + len);
+                throw leadingZeroException(i, len);
             }
+            val |= (lead & 0xFFL) << shiftAmount;
         case 0: return val;
-        default: throw new UnrecoverableDecodeException(new IllegalArgumentException("len is out of range: " + len));
+        default: throw outOfRangeException(len);
         }
+    }
+
+    private static UnrecoverableDecodeException leadingZeroException(int idx, int len) {
+        return new UnrecoverableDecodeException("deserialised integers with leading zeroes are invalid; index: " + idx + ", len: " + len);
+    }
+
+    private static UnrecoverableDecodeException outOfRangeException(int len) {
+        return new UnrecoverableDecodeException(new IllegalArgumentException("len is out of range: " + len));
     }
 
     /**
