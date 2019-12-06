@@ -24,6 +24,7 @@ import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.security.SignatureException;
+import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
@@ -38,6 +39,10 @@ public final class Record {
     private static final String ENR_PREFIX = "enr:";
 
     private final RLPList rlp;
+
+    public Record(long seq, List<KeyValuePair> pairs, Signer signer) {
+        this(seq, pairs.toArray(KeyValuePair.EMPTY_ARRAY), signer);
+    }
 
     public Record(long seq, KeyValuePair[] pairs, Signer signer) {
         final int signatureLen = signer.signatureLength();

@@ -24,13 +24,14 @@ import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Test;
 
 import java.security.SignatureException;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.*;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EIP778Test {
@@ -67,12 +68,12 @@ public class EIP778Test {
 
     @Test
     public void testEip778() throws DecodeException, SignatureException {
-        final KeyValuePair[] pairs = new KeyValuePair[] {
+        final List<KeyValuePair> pairs = Arrays.asList(
                 new KeyValuePair(IP, "7f000001", HEX),
                 new KeyValuePair(UDP, "765f", HEX),
                 new KeyValuePair(ID, "v4", UTF_8),
                 new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
-        };
+        );
 
         Record record = new Record(1L, pairs, SIGNER);
 
@@ -92,13 +93,12 @@ public class EIP778Test {
 
         assertEquals(1L, seq);
 
-        KeyValuePair[] decodedPairs = new KeyValuePair[pairs.length];
+        KeyValuePair[] arr = pairs.toArray(EMPTY_ARRAY);
+        Arrays.sort(arr);
         int i = 0;
         while (iter.hasNext()) {
-            decodedPairs[i++] = new KeyValuePair(iter.next().asBytes(), iter.next().asBytes());
+            assertEquals(arr[i++], new KeyValuePair(iter.next().asBytes(), iter.next().asBytes()));
         }
-        assertArrayEquals(pairs, decodedPairs);
-
         assertEquals(ENR_STRING, record.toString());
     }
 
