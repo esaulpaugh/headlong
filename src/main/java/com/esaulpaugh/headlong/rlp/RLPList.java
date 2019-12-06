@@ -37,46 +37,45 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
     }
 
     /**
-     * @param srcElements pre-encoded top-level elements of the list
+     * @param elements pre-encoded top-level elements of the list
      */
-    static RLPList withElements(Iterable<RLPItem> srcElements) {
+    static RLPList withElements(Iterable<RLPItem> elements) {
         int dataLen = 0;
-        for (RLPItem e : srcElements) {
+        for (RLPItem e : elements) {
             dataLen += e.encodingLength();
         }
-
-        byte[] dest;
-        if (dataLen < DataType.MIN_LONG_DATA_LEN) {
-            dest = new byte[1 + dataLen];
-            dest[0] = (byte) (DataType.LIST_SHORT_OFFSET + dataLen);
-            copyElements(srcElements, dest, 1);
-        } else {
-            dest = encodeListLong(dataLen, srcElements);
-        }
         try {
-            byte lead = dest[0];
-            return new RLPList(lead, DataType.type(lead), dest, 0, dest.length, false);
+            return RLPDecoder.RLP_STRICT.wrapList(
+                    dataLen < DataType.MIN_LONG_DATA_LEN
+                            ? encodeListShort(dataLen, elements)
+                            : encodeListLong(dataLen, elements)
+            );
         } catch (DecodeException de) {
             throw new RuntimeException(de);
         }
     }
 
-    private static void copyElements(Iterable<RLPItem> srcElements, byte[] dest, int destIndex) {
-        for (final RLPItem element : srcElements) {
-            final int elementLen = element.encodingLength();
-            System.arraycopy(element.buffer, element.index, dest, destIndex, elementLen);
-            destIndex += elementLen;
-        }
+    private static byte[] encodeListShort(final int dataLen, final Iterable<RLPItem> elements) {
+        byte[] dest = new byte[1 + dataLen];
+        dest[0] = (byte) (DataType.LIST_SHORT_OFFSET + dataLen);
+        copyElements(elements, dest, 1);
+        return dest;
     }
 
-    private static byte[] encodeListLong(final int srcDataLen, final Iterable<RLPItem> srcElements) {
-        byte[] length = Integers.toBytes(srcDataLen);
+    private static byte[] encodeListLong(final int dataLen, final Iterable<RLPItem> elements) {
+        byte[] length = Integers.toBytes(dataLen);
         int destHeaderLen = 1 + length.length;
-        byte[] dest = new byte[destHeaderLen + srcDataLen];
+        byte[] dest = new byte[destHeaderLen + dataLen];
         dest[0] = (byte) (LIST_LONG_OFFSET + length.length);
         System.arraycopy(length, 0, dest, 1, length.length);
-        copyElements(srcElements, dest, destHeaderLen);
+        copyElements(elements, dest, destHeaderLen);
         return dest;
+    }
+
+    private static void copyElements(Iterable<RLPItem> elements, byte[] dest, int destIndex) {
+        for (RLPItem e : elements) {
+            destIndex = e.export(dest, destIndex);
+        }
     }
 
     public List<RLPItem> elements(RLPDecoder decoder) throws DecodeException {
