@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+import com.esaulpaugh.headlong.rlp.util.Integers;
 
 import java.util.*;
 
@@ -39,14 +40,12 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
      * @param srcElements pre-encoded top-level elements of the list
      */
     static RLPList withElements(Iterable<RLPItem> srcElements) {
-
-        byte[] dest;
-
         int dataLen = 0;
-        for (RLPItem element : srcElements) {
-            dataLen += element.encodingLength();
+        for (RLPItem e : srcElements) {
+            dataLen += e.encodingLength();
         }
 
+        byte[] dest;
         if (dataLen < DataType.MIN_LONG_DATA_LEN) {
             dest = new byte[1 + dataLen];
             dest[0] = (byte) (DataType.LIST_SHORT_OFFSET + dataLen);
@@ -54,13 +53,30 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         } else {
             dest = encodeListLong(dataLen, srcElements);
         }
-
         try {
             byte lead = dest[0];
             return new RLPList(lead, DataType.type(lead), dest, 0, dest.length, false);
         } catch (DecodeException de) {
             throw new RuntimeException(de);
         }
+    }
+
+    private static void copyElements(Iterable<RLPItem> srcElements, byte[] dest, int destIndex) {
+        for (final RLPItem element : srcElements) {
+            final int elementLen = element.encodingLength();
+            System.arraycopy(element.buffer, element.index, dest, destIndex, elementLen);
+            destIndex += elementLen;
+        }
+    }
+
+    private static byte[] encodeListLong(final int srcDataLen, final Iterable<RLPItem> srcElements) {
+        byte[] length = Integers.toBytes(srcDataLen);
+        int destHeaderLen = 1 + length.length;
+        byte[] dest = new byte[destHeaderLen + srcDataLen];
+        dest[0] = (byte) (LIST_LONG_OFFSET + length.length);
+        System.arraycopy(length, 0, dest, 1, length.length);
+        copyElements(srcElements, dest, destHeaderLen);
+        return dest;
     }
 
     public List<RLPItem> elements(RLPDecoder decoder) throws DecodeException {
@@ -77,62 +93,14 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
             i = item.endIndex;
         }
     }
-
-    public RLPListIterator iterator(RLPDecoder decoder) {
-        return new RLPListIterator(this, decoder);
-    }
-
-    private static void copyElements(Iterable<RLPItem> srcElements, byte[] dest, int destIndex) {
-        for (final RLPItem element : srcElements) {
-            final int elementLen = element.encodingLength();
-            System.arraycopy(element.buffer, element.index, dest, destIndex, elementLen);
-            destIndex += elementLen;
-        }
-    }
-
-    private static byte[] encodeListLong(final int srcDataLen, final Iterable<RLPItem> srcElements) {
-
-        int t = srcDataLen;
-
-        byte a = 0, b = 0, c = 0, d;
-
-        int n = 1;
-        d = (byte) (t & 0xFF);
-        t = t >>> Byte.SIZE;
-        if(t != 0) {
-            n = 2;
-            c = (byte) (t & 0xFF);
-            t = t >>> Byte.SIZE;
-            if(t != 0) {
-                n = 3;
-                b = (byte) (t & 0xFF);
-                t = t >>> Byte.SIZE;
-                if(t != 0) {
-                    n = 4;
-                    a = (byte) (t & 0xFF);
-                }
-            }
-        }
-
-        int destDataIndex = 1 + n;
-        byte[] dest = new byte[destDataIndex + srcDataLen];
-        dest[0] = (byte) (LIST_LONG_OFFSET + n);
-        int i = 1;
-        switch (n) { /* cases fall through */
-        case 4: dest[i++] = a;
-        case 3: dest[i++] = b;
-        case 2: dest[i++] = c;
-        case 1: dest[i] = d;
-        }
-
-        copyElements(srcElements, dest, destDataIndex);
-
-        return dest;
-    }
     
     @Override
     public RLPList duplicate(RLPDecoder decoder) throws DecodeException {
         return decoder.wrapList(encoding(), 0);
+    }
+
+    public RLPListIterator iterator(RLPDecoder decoder) {
+        return new RLPListIterator(this, decoder);
     }
 
     @Override
