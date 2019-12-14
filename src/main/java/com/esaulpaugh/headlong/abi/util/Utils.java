@@ -54,9 +54,9 @@ public final class Utils {
         final String className = clazz.getName();
 
         final int split = className.lastIndexOf('[') + 1;
-
+        final boolean hasArraySuffix = split > 0;
+        final String base = hasArraySuffix ? className.substring(split) : className;
         final StringBuilder sb = new StringBuilder();
-        final String base = split > 0 ? className.substring(split) : className;
         switch (base) {
             case "B": sb.append("byte"); break;
             case "S": sb.append("short"); break;
@@ -77,7 +77,7 @@ public final class Utils {
                 }
             }
         }
-        if(split > 0) {
+        if(hasArraySuffix) {
             int i = 0;
             if(arrayLength != null && arrayLength >= 0) {
                 sb.append('[').append(arrayLength).append(']');

@@ -23,6 +23,7 @@ import java.util.RandomAccess;
 /**
  * An ordered list of objects whose types should correspond to some {@link TupleType}. {@link Function}s encode/decode
  * {@link Tuple}s containing arguments satisfying its parameters/return type. {@link Tuple}s can contain other tuples.
+ * Elements not safe from external or concurrent modification.
  */
 public final class Tuple extends AbstractList<Object> implements RandomAccess, Serializable {
 

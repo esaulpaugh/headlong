@@ -128,15 +128,13 @@ public final class Function implements ABIObject, Serializable {
 
         this.type = Objects.requireNonNull(type);
         String name = Utils.validateChars(NON_ASCII_CHAR, signature.substring(0, split));
-        this.name = name.isEmpty() && (type == Type.FALLBACK || type == Type.CONSTRUCTOR)
-                ? null
-                : name;
+        this.name = name.isEmpty() && (type == Type.FALLBACK || type == Type.CONSTRUCTOR) ? null : name;
         this.inputTypes = tupleType;
         this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
         this.stateMutability = null;
         this.hashAlgorithm = messageDigest.getAlgorithm();
-        generateSelector(messageDigest);
         validateFunction();
+        generateSelector(messageDigest);
     }
 
     private void generateSelector(MessageDigest messageDigest) {
