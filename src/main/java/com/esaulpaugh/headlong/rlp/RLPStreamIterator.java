@@ -68,14 +68,15 @@ public class RLPStreamIterator implements AutoCloseable {
         }
     }
 
-    public RLPItem next() throws IOException, UnrecoverableDecodeException {
-        if(hasNext()) {
+    public RLPItem next() {
+        try {
             index = rlpItem.endIndex;
             RLPItem item = rlpItem;
             rlpItem = null;
             return item;
+        } catch (NullPointerException npe) {
+            throw new NoSuchElementException();
         }
-        throw new NoSuchElementException();
     }
 
     @Override
