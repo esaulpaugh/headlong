@@ -122,7 +122,7 @@ final class TypeFactory {
 
         BaseTypeInfo info = BaseTypeInfo.get(baseTypeStr);
         if(info != null) {
-            switch (baseTypeStr) { // baseType's hash code already cached due to BaseTypeInfo.get(baseTypeStr)
+            switch (baseTypeStr) { // baseTypeStr's hash code already cached due to BaseTypeInfo.get(baseTypeStr)
             case "int8":
             case "int16":
             case "int24":
