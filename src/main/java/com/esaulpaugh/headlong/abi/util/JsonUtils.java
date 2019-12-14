@@ -77,8 +77,6 @@ public final class JsonUtils {
     }
 
     public static String toPrettyPrint(JsonElement element) {
-        GsonBuilder gb = new GsonBuilder();
-        gb.setPrettyPrinting();
-        return gb.create().toJson(element);
+        return new GsonBuilder().setPrettyPrinting().create().toJson(element);
     }
 }
