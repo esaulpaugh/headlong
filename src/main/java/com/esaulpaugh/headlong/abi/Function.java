@@ -75,25 +75,10 @@ public final class Function implements ABIObject, Serializable {
     private final TupleType inputTypes;
     private final TupleType outputTypes;
 
-    private final byte[] selector;
+    private final byte[] selector = new byte[SELECTOR_LEN];
     private final String hashAlgorithm;
 
     private final String stateMutability;
-
-    {
-        selector = new byte[SELECTOR_LEN];
-    }
-
-    public Function(Type type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) throws ParseException {
-        this.type = Objects.requireNonNull(type);
-        this.name = name != null ? Utils.validateChars(ILLEGAL_NAME_CHAR, name) : null;
-        this.inputTypes = Objects.requireNonNull(inputTypes);
-        this.outputTypes = Objects.requireNonNull(outputTypes);
-        this.stateMutability = stateMutability;
-        this.hashAlgorithm = messageDigest.getAlgorithm();
-        generateSelector(messageDigest);
-        validateFunction();
-    }
 
     public Function(String signature) throws ParseException {
         this(signature, null);
@@ -132,6 +117,17 @@ public final class Function implements ABIObject, Serializable {
         this.inputTypes = tupleType;
         this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
         this.stateMutability = null;
+        this.hashAlgorithm = messageDigest.getAlgorithm();
+        validateFunction();
+        generateSelector(messageDigest);
+    }
+
+    public Function(Type type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) throws ParseException {
+        this.type = Objects.requireNonNull(type);
+        this.name = name != null ? Utils.validateChars(ILLEGAL_NAME_CHAR, name) : null;
+        this.inputTypes = Objects.requireNonNull(inputTypes);
+        this.outputTypes = Objects.requireNonNull(outputTypes);
+        this.stateMutability = stateMutability;
         this.hashAlgorithm = messageDigest.getAlgorithm();
         validateFunction();
         generateSelector(messageDigest);

@@ -77,9 +77,7 @@ final class PackedEncoder {
         default: throw new IllegalArgumentException("unexpected array type: " + arrayType.toString());
         }
     }
-
     // ------------------------
-
     private static void insertBooleans(boolean[] bools, ByteBuffer dest) {
         final int idx = dest.position();
         final int len = bools.length;
@@ -115,9 +113,7 @@ final class PackedEncoder {
             insertInt(e.unscaledValue(), byteLen, dest);
         }
     }
-
     // ---------------------------
-
     private static void insertBool(boolean value, ByteBuffer dest) {
         dest.put(value ? (byte) 1 : (byte) 0);
     }
