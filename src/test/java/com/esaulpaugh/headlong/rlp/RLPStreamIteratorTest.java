@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class RLPStreamIteratorTest {
 
     private static final byte TEST_BYTE = 0x79;
-    private static final byte[] TEST_BYTES = "\'wort\'X3".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] TEST_BYTES = "'wort'X3".getBytes(StandardCharsets.UTF_8);
     private static final String TEST_STRING = "2401";
 
     @Test
@@ -266,7 +266,7 @@ public class RLPStreamIteratorTest {
 
         private void write(byte b) throws IOException {
             os.write(b);
-            logWrite(zero, "\'" + (char) b + "\' (0x" + FastHex.encodeToString(b) +")");
+            logWrite(zero, "'" + (char) b + "' (0x" + FastHex.encodeToString(b) +")");
         }
     }
 

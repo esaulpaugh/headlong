@@ -24,9 +24,7 @@ import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,45 +43,26 @@ public class RLPJsonEncodeTest {
             JsonObject jsonObject = entry.getValue().getAsJsonObject();
             JsonElement in = jsonObject.get("in");
 
-            byte[] expected = getOutBytes(entry);
-            byte[] actual;
+            byte[] actualBytes;
             if(in.isJsonArray()) {
-
-                ArrayList<Object> arrayList = parseArrayToBytesHierarchy(in.getAsJsonArray());
-
-                actual = RLPEncoder.encodeAsList(arrayList);
-
-
+                actualBytes = RLPEncoder.encodeAsList(parseArrayToBytesHierarchy(in.getAsJsonArray()));
             } else if(in.isJsonObject()) {
                 System.err.println("json object");
                 parseObject(in);
-                actual = null;
+                actualBytes = null;
             } else {
-
                 try {
-                    long lo = parseLong(in);
-                    actual = RLPEncoder.encode(Integers.toBytes(lo));
+                    actualBytes = RLPEncoder.encode(Integers.toBytes(parseLong(in)));
                 } catch (NumberFormatException nfe) {
-
-                    String inString = in.getAsString();
-
-                    byte[] inBytes;
-                    if(inString.startsWith("#")) {
-                        BigInteger inBigInt = parseBigIntegerStringPoundSign(in);
-                        inBytes = inBigInt.toByteArray();
-                        actual = RLPEncoder.encode(inBytes);
-                    } else {
-                        String string = parseString(in);
-                        inBytes = string.getBytes(StandardCharsets.UTF_8);
-                        actual = RLPEncoder.encode(inBytes);
-                    }
+                    actualBytes = RLPEncoder.encode(in.getAsString().startsWith("#")
+                            ? parseBigIntegerStringPoundSign(in).toByteArray()
+                            : parseString(in).getBytes(StandardCharsets.UTF_8));
                 }
             }
-
-            String e = FastHex.encodeToString(expected);
-            String a = FastHex.encodeToString(actual);
+            String expected = FastHex.encodeToString(getOutBytes(entry));
+            String actual = FastHex.encodeToString(actualBytes);
             try {
-                assertEquals(e, a);
+                assertEquals(expected, actual);
             } catch (Throwable t) {
                 t.printStackTrace();
             }
