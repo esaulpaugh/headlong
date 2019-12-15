@@ -212,11 +212,7 @@ public final class Function implements ABIObject, Serializable {
         return outputTypes.decode(returnVals);
     }
 
-    public int callLength(Tuple args) {
-        return callLength(args, true);
-    }
-
-    public int callLength(Tuple args, boolean validate) {
+    public int measureCallLength(Tuple args, boolean validate) {
         return Function.SELECTOR_LEN + (validate ? inputTypes.validate(args) : inputTypes.byteLength(args));
     }
 
@@ -225,7 +221,7 @@ public final class Function implements ABIObject, Serializable {
     }
 
     public ByteBuffer encodeCall(Tuple args) {
-        ByteBuffer dest = ByteBuffer.wrap(new byte[callLength(args, true)]); // ByteOrder.BIG_ENDIAN by default
+        ByteBuffer dest = ByteBuffer.wrap(new byte[measureCallLength(args, true)]); // ByteOrder.BIG_ENDIAN by default
         encodeCall(args, dest);
         return dest;
     }

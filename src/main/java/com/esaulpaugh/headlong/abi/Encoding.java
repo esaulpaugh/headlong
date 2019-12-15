@@ -37,9 +37,8 @@ final class Encoding {
     }
 
     static void insertOffset(final int[] offset, ABIType<?> paramType, Object object, ByteBuffer dest) {
-        final int val = offset[0];
-        insertInt(val, dest);
-        offset[0] = val + paramType.byteLength(object);
+        insertInt(offset[0], dest);
+        offset[0] += paramType.byteLength(object);
     }
 
     static void insertInt(long val, ByteBuffer dest) {
