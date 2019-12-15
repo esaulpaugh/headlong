@@ -156,10 +156,10 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
             byte[] bytes = !isString ? (byte[]) value : Strings.decode((String) value, UTF_8);
             staticLen = roundLengthUp(checkLength(bytes.length, value));
             break;
-        case TYPE_CODE_INT: staticLen = validateIntArray((int[]) value); break;
-        case TYPE_CODE_LONG: staticLen = validateLongArray((long[]) value); break;
-        case TYPE_CODE_BIG_INTEGER: staticLen = validateBigIntegerArray((BigInteger[]) value); break;
-        case TYPE_CODE_BIG_DECIMAL: staticLen = validateBigDecimalArray((BigDecimal[]) value); break;
+        case TYPE_CODE_INT: staticLen = validateIntArray((UnitType<?>) elementType, (int[]) value); break;
+        case TYPE_CODE_LONG: staticLen = validateLongArray((UnitType<?>) elementType, (long[]) value); break;
+        case TYPE_CODE_BIG_INTEGER: staticLen = validateBigIntegerArray((UnitType<?>) elementType, (BigInteger[]) value); break;
+        case TYPE_CODE_BIG_DECIMAL: staticLen = validateBigDecimalArray((BigDecimalType) elementType, (BigDecimal[]) value); break;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: staticLen = validateObjectArray((Object[]) value); break;
         default: throw new Error();
@@ -170,28 +170,28 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 : staticLen;
     }
 
-    private int validateIntArray(int[] arr) {
-        return validateArray(() -> arr.length, arr, (h) -> ((UnitType<?>) elementType).validatePrimitiveElement(arr[h[0]])); // validate without boxing primitive
+    private int validateIntArray(UnitType<?> unitType, int[] arr) {
+        return validateArray(() -> arr.length, arr, (h) -> unitType.validatePrimitiveElement(arr[h[0]])); // validate without boxing primitive
     }
 
-    private int validateLongArray(long[] arr) {
-        return validateArray(() -> arr.length, arr, (h) -> ((UnitType<?>) elementType).validatePrimitiveElement(arr[h[0]])); // validate without boxing primitive
+    private int validateLongArray(UnitType<?> unitType, long[] arr) {
+        return validateArray(() -> arr.length, arr, (h) -> unitType.validatePrimitiveElement(arr[h[0]])); // validate without boxing primitive
     }
 
-    private int validateBigIntegerArray(BigInteger[] bigIntegers) {
-        return validateArray(() -> bigIntegers.length, bigIntegers, (h) -> ((UnitType<?>) elementType).validateBigIntBitLen(bigIntegers[h[0]]));
+    private int validateBigIntegerArray(UnitType<?> unitType, BigInteger[] arr) {
+        return validateArray(() -> arr.length, arr, (h) -> unitType.validateBigIntBitLen(arr[h[0]]));
     }
 
-    private int validateBigDecimalArray(BigDecimal[] bigDecimals) {
-        BigDecimalType bigDecimalType = (BigDecimalType) elementType;
-        return validateArray(() -> bigDecimals.length, bigDecimals, (h) -> validateBigDecimal(bigDecimalType, bigDecimals[h[0]], bigDecimalType.scale));
+    private int validateBigDecimalArray(BigDecimalType bigDecimalType, BigDecimal[] arr) {
+        return validateArray(() -> arr.length, arr, (h) -> validateBigDecimal(bigDecimalType, arr[h[0]]));
     }
 
-    private void validateBigDecimal(BigDecimalType bigDecimalType, BigDecimal bigDecimal, final int scale) {
-        if (bigDecimal.scale() != scale) {
+    private void validateBigDecimal(BigDecimalType bigDecimalType, BigDecimal bigDecimal) {
+        if (bigDecimal.scale() == bigDecimalType.scale) {
+            bigDecimalType.validateBigIntBitLen(bigDecimal.unscaledValue());
+        } else {
             throw new IllegalArgumentException("unexpected scale: " + bigDecimal.scale());
         }
-        bigDecimalType.validateBigIntBitLen(bigDecimal.unscaledValue());
     }
 
     /**
@@ -230,14 +230,14 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
     private int checkLength(final int valueLength, Object array) {
         final int expected = this.length;
-        if(expected != DYNAMIC_LENGTH && valueLength != expected) {
-            throw new IllegalArgumentException(
-                    Utils.friendlyClassName(array.getClass(), valueLength)
-                    + " not instanceof " + Utils.friendlyClassName(clazz, expected) + ", " +
-                    valueLength + " != " + expected
-            );
+        if(expected == DYNAMIC_LENGTH || valueLength == expected) {
+            return valueLength;
         }
-        return valueLength;
+        throw new IllegalArgumentException(
+                Utils.friendlyClassName(array.getClass(), valueLength)
+                        + " not instanceof " + Utils.friendlyClassName(clazz, expected) + ", " +
+                        valueLength + " != " + expected
+        );
     }
 
     @Override
@@ -361,9 +361,8 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         for(int i = 0; i < arrayLen; i++) {
             bb.get(elementBuffer);
             for (int j = 0; j < booleanOffset; j++) {
-                if(elementBuffer[j] != 0) {
-                    throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - j));
-                }
+                if(elementBuffer[j] == 0) continue;
+                throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - j));
             }
             byte last = elementBuffer[booleanOffset];
             if(last == 1) {
