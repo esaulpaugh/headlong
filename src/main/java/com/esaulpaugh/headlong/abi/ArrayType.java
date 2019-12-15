@@ -151,10 +151,10 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
         final int staticLen;
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: staticLen = checkLength(((boolean[]) value).length, () -> value) << LOG_2_UNIT_LENGTH_BYTES; break;
+        case TYPE_CODE_BOOLEAN: staticLen = checkLength(((boolean[]) value).length, value) << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BYTE:
             byte[] bytes = !isString ? (byte[]) value : Strings.decode((String) value, UTF_8);
-            staticLen = roundLengthUp(checkLength(bytes.length, () -> value));
+            staticLen = roundLengthUp(checkLength(bytes.length, value));
             break;
         case TYPE_CODE_INT: staticLen = validateIntArray((int[]) value); break;
         case TYPE_CODE_LONG: staticLen = validateLongArray((long[]) value); break;
@@ -171,20 +171,20 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private int validateIntArray(int[] arr) {
-        return validateArray(() -> arr.length, () -> arr, (h) -> ((UnitType<?>) elementType).validatePrimitiveElement(arr[h[0]])); // validate without boxing primitive
+        return validateArray(() -> arr.length, arr, (h) -> ((UnitType<?>) elementType).validatePrimitiveElement(arr[h[0]])); // validate without boxing primitive
     }
 
     private int validateLongArray(long[] arr) {
-        return validateArray(() -> arr.length, () -> arr, (h) -> ((UnitType<?>) elementType).validatePrimitiveElement(arr[h[0]])); // validate without boxing primitive
+        return validateArray(() -> arr.length, arr, (h) -> ((UnitType<?>) elementType).validatePrimitiveElement(arr[h[0]])); // validate without boxing primitive
     }
 
     private int validateBigIntegerArray(BigInteger[] bigIntegers) {
-        return validateArray(() -> bigIntegers.length, () -> bigIntegers, (h) -> ((UnitType<?>) elementType).validateBigIntBitLen(bigIntegers[h[0]]));
+        return validateArray(() -> bigIntegers.length, bigIntegers, (h) -> ((UnitType<?>) elementType).validateBigIntBitLen(bigIntegers[h[0]]));
     }
 
     private int validateBigDecimalArray(BigDecimal[] bigDecimals) {
         BigDecimalType bigDecimalType = (BigDecimalType) elementType;
-        return validateArray(() -> bigDecimals.length, () -> bigDecimals, (h) -> validateBigDecimal(bigDecimalType, bigDecimals[h[0]], bigDecimalType.scale));
+        return validateArray(() -> bigDecimals.length, bigDecimals, (h) -> validateBigDecimal(bigDecimalType, bigDecimals[h[0]], bigDecimalType.scale));
     }
 
     private void validateBigDecimal(BigDecimalType bigDecimalType, BigDecimal bigDecimal, final int scale) {
@@ -199,7 +199,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
      */
     private int validateObjectArray(Object[] arr) {
         final int len = arr.length;
-        checkLength(len, () -> arr);
+        checkLength(len, arr);
         int byteLength = elementType.dynamic ? len << LOG_2_UNIT_LENGTH_BYTES : 0; // 32 bytes per offset
         int i = 0;
         try {
@@ -212,12 +212,12 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         return byteLength;
     }
 
-    private int validateArray(Supplier<Integer> supplyLength, Supplier<Object> supplyArray, Consumer<int[]> validateElement) {
+    private int validateArray(Supplier<Integer> supplyLength, Object array, Consumer<int[]> validateElement) {
         final int len = supplyLength.get();
-        checkLength(len, supplyArray);
+        checkLength(len, array);
         int i = 0;
-        int[] holder = new int[1];
         try {
+            int[] holder = new int[1];
             for ( ; i < len; i++) {
                 holder[0] = i;
                 validateElement.accept(holder);
@@ -228,11 +228,11 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
     }
 
-    private int checkLength(final int valueLength, Supplier<Object> getValue) {
+    private int checkLength(final int valueLength, Object array) {
         final int expected = this.length;
         if(expected != DYNAMIC_LENGTH && valueLength != expected) {
             throw new IllegalArgumentException(
-                    Utils.friendlyClassName(getValue.get().getClass(), valueLength)
+                    Utils.friendlyClassName(array.getClass(), valueLength)
                     + " not instanceof " + Utils.friendlyClassName(clazz, expected) + ", " +
                     valueLength + " != " + expected
             );
