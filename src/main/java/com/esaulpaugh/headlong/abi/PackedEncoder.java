@@ -17,25 +17,19 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.rlp.util.Integers;
+import com.esaulpaugh.headlong.util.Strings;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
 import static com.esaulpaugh.headlong.abi.ABIType.*;
 
 final class PackedEncoder {
 
     static void insertTuple(TupleType tupleType, Tuple tuple, ByteBuffer dest) {
-
-        final ABIType<?>[] types = tupleType.elementTypes;
-        final Object[] values = tuple.elements;
-
-        final int len = types.length;
-        int i;
-        for (i = 0; i < len; i++) {
-            encode(types[i], values[i], dest);
+        for (int i = 0; i < tupleType.elementTypes.length; i++) {
+            encode(tupleType.elementTypes[i], tuple.elements[i], dest);
         }
     }
 
@@ -62,7 +56,7 @@ final class PackedEncoder {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: insertBooleans((boolean[]) value, dest); break;
         case TYPE_CODE_BYTE:
-            byte[] arr = arrayType.isString ? ((String) value).getBytes(StandardCharsets.UTF_8) : (byte[]) value;
+            byte[] arr = !arrayType.isString ? (byte[]) value : Strings.decode((String) value, Strings.UTF_8);
             insertBytes(arr, dest); break;
         case TYPE_CODE_INT: insertInts((int[]) value, elementType.byteLengthPacked(value), dest); break;
         case TYPE_CODE_LONG: insertLongs((long[]) value, elementType.byteLengthPacked(value), dest); break;
