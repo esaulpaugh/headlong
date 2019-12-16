@@ -57,18 +57,14 @@ final class TypeFactory {
     }
 
     static ABIType<?> create(String type, TupleType baseTupleType, String name) throws ParseException {
-        try {
-            if(name == null) {
-                return buildType(type, false, baseTupleType, true);
-            }
-            return buildType(type, false, baseTupleType, false)
-                    .setName(name);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        if(name == null) {
+            return buildType(type, false, baseTupleType, true);
         }
+        return buildType(type, false, baseTupleType, false)
+                .setName(name);
     }
 
-    private static ABIType<?> buildType(String type, boolean isArrayElement, TupleType baseTupleType, boolean nameless) throws ParseException, ClassNotFoundException {
+    private static ABIType<?> buildType(String type, boolean isArrayElement, TupleType baseTupleType, boolean nameless) throws ParseException {
         try {
             final int idxOfLast = type.length() - 1;
             if (type.charAt(idxOfLast) == ']') { // array
@@ -109,6 +105,8 @@ final class TypeFactory {
                     return baseType;
                 }
             }
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         } catch (StringIndexOutOfBoundsException sioobe) { // e.g. type equals "" or "82]" or "[]" or "[1]"
             /* fall through */
         }

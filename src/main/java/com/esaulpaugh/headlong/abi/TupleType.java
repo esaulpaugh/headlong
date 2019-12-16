@@ -320,9 +320,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         final StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
         final ABIType<?>[] selected = new ABIType<?>[getSelectionSize(manifest, negate)];
-        for (int m = 0, s = 0; m < len; m++) {
-            if(negate ^ manifest[m]) {
-                ABIType<?> e = elementTypes[m];
+        for (int i = 0, s = 0; i < len; i++) {
+            if(negate ^ manifest[i]) {
+                ABIType<?> e = elementTypes[i];
                 canonicalBuilder.append(e.canonicalType).append(',');
                 dynamic |= e.dynamic;
                 selected[s++] = e;
