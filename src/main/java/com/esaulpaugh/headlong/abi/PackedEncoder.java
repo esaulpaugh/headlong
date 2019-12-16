@@ -73,9 +73,7 @@ final class PackedEncoder {
     }
     // ------------------------
     private static void insertBooleans(boolean[] bools, ByteBuffer dest) {
-        final int idx = dest.position();
-        final int len = bools.length;
-        for (int i = idx; i < len; i++) {
+        for (int i = 0; i < bools.length; i++) {
             dest.put(bools[i] ? (byte) 1 : (byte) 0);
         }
     }

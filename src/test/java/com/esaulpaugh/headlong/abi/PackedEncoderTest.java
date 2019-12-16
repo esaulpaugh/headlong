@@ -144,9 +144,9 @@ public class PackedEncoderTest {
 
     @Test
     public void testDecodeC() throws ParseException {
-        TupleType tupleType = TupleType.parse("(bool[],bool)");
+        TupleType tupleType = TupleType.parse("(bool,bool[],bool[2])");
 
-        Tuple values = new Tuple(new boolean[] { true, false, true }, true);
+        Tuple values = new Tuple(true, new boolean[] { true, true, true },  new boolean[] { true, false });
 
         tupleType.validate(values);
 
@@ -155,7 +155,7 @@ public class PackedEncoderTest {
 
         System.out.println(FastHex.encodeToString(packedArray));
 
-        assertArrayEquals(FastHex.decode("01000101"), packedArray);
+        assertArrayEquals(FastHex.decode("010101010100"), packedArray);
 
         Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
 
