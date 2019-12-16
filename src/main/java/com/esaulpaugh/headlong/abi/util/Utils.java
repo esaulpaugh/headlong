@@ -67,13 +67,9 @@ public final class Utils {
             case "C": sb.append("char"); break;
             case "Z": sb.append("boolean"); break;
             default: {
-                final int lastDotIndex = base.lastIndexOf('.');
+                int lastDotIndex = base.lastIndexOf('.');
                 if(lastDotIndex != -1) {
-                    if (base.charAt(0) == 'L') {
-                        sb.append(base, lastDotIndex + 1, base.length() - 1); // last char is semicolon
-                    } else {
-                        sb.append(base, lastDotIndex + 1, base.length()); // i.e. base.substring(dot + 1)
-                    }
+                    sb.append(base, lastDotIndex + 1, base.length() - (base.charAt(0) == 'L' ? 1 : 0));
                 }
             }
         }

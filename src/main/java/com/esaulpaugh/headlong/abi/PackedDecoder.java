@@ -116,10 +116,10 @@ public final class PackedDecoder {
     }
 
     private static Boolean decodeBoolean(byte b) {
-        if (b == 0) {
+        if (b == Encoding.ZERO_BYTE) {
             return Boolean.FALSE;
         }
-        if (b == 1) {
+        if (b == Encoding.ONE_BYTE) {
             return Boolean.TRUE;
         }
         throw new IllegalArgumentException("invalid boolean value");

@@ -22,6 +22,7 @@ import com.esaulpaugh.headlong.util.Strings;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
@@ -48,30 +49,42 @@ public class Notation {
     private static final String LIST_SHORT_END_COMMA_SPACE = " " + LIST_LONG_END_COMMA_SPACE;
     private static final String STRING_END_COMMA_SPACE = END_STRING + COMMA_SPACE;
 
+    private static final String[] INDENTATION_CACHE;
+
+    private static final String ELEMENT_INDENTATION = newIndentation(1);
+
+    static {
+        INDENTATION_CACHE = new String[16];
+        for (int i = 0; i < INDENTATION_CACHE.length; i++) {
+            INDENTATION_CACHE[i] = newIndentation(i);
+        }
+    }
+
     private final String value;
 
     private Notation(String value) {
-        if(value == null) {
-            throw new IllegalArgumentException("value cannot be null");
-        }
-        this.value = value;
+        this.value = Objects.requireNonNull(value);
     }
 
     public List<Object> parse() {
         return NotationParser.parse(value);
     }
 
-    private static final String[] INDENTATIONS;
+    public static Notation forEncoding(byte[] encoding) throws DecodeException {
+        return forEncoding(encoding, 0, encoding.length);
+    }
 
-    private static final int INDENTATION_CACHE_SIZE = 16;
-
-    private static final String ELEMENT_INDENTATION = newIndentation(1);
-
-    static {
-        INDENTATIONS = new String[INDENTATION_CACHE_SIZE];
-        for (int i = 0; i < INDENTATIONS.length; i++) {
-            INDENTATIONS[i] = newIndentation(i);
+    public static Notation forEncoding(final byte[] buffer, final int index, int end) throws DecodeException {
+        if(index < 0) {
+            throw new ArrayIndexOutOfBoundsException(index);
         }
+        end = Math.min(buffer.length, end);
+        if(index > end) {
+            throw new UnrecoverableDecodeException("index > end: " + index + " > " + end);
+        }
+        StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
+        buildLongList(sb, buffer, index, end, 0);
+        return new Notation(sb.append(END_NOTATION).toString());
     }
 
     private static DecodeException exceedsContainer(int index, long end, int containerEnd) {
@@ -94,9 +107,6 @@ public class Notation {
         final int lengthIndex = leadByteIndex + 1;
         final int lengthLen = dataIndex - lengthIndex;
         final long dataLenLong = Integers.getLong(data, leadByteIndex + 1, lengthLen);
-//        if (dataLenLong > MAX_ARRAY_LENGTH) {
-//            throw new DecodeException("too much data: " + dataLenLong + " > " + MAX_ARRAY_LENGTH);
-//        }
         final long end = lengthIndex + lengthLen + dataLenLong;
         if (end > containerEnd) {
             throw exceedsContainer(leadByteIndex, end, containerEnd);
@@ -107,29 +117,6 @@ public class Notation {
                     + " or greater; found: " + dataLen + " for element @ " + leadByteIndex);
         }
         return (int) end;
-    }
-
-    public static Notation forEncoding(byte[] encoding) throws DecodeException {
-        return forEncoding(encoding, 0, encoding.length);
-    }
-
-    public static Notation forEncoding(final byte[] buffer, final int index, int end) throws DecodeException {
-        if(index < 0) {
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
-        end = Math.min(buffer.length, end);
-        if(index > end) {
-            throw new UnrecoverableDecodeException("index > end: " + index + " > " + end);
-        }
-        StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
-        buildLongList(
-                sb,
-                buffer,
-                index,
-                end,
-                0
-        );
-        return new Notation(sb.append(END_NOTATION).toString());
     }
 
     private static int buildLongList(final StringBuilder sb, final byte[] data, final int dataIndex, int end, final int depth) throws DecodeException {
@@ -150,8 +137,7 @@ public class Notation {
             byte current = data[i];
             final DataType type = DataType.type(current);
             switch (type) {
-            case SINGLE_BYTE:
-                break;
+            case SINGLE_BYTE: break;
             case STRING_SHORT:
             case LIST_SHORT:
                 elementDataIndex = i + 1;
@@ -167,18 +153,11 @@ public class Notation {
             hasELement = true;
             sb.append(ELEMENT_INDENTATION);
             switch (type) {
-            case SINGLE_BYTE:
-                i = buildByte(sb, data, i);
-                break;
+            case SINGLE_BYTE: i = buildByte(sb, data, i); break;
             case STRING_SHORT:
-            case STRING_LONG:
-                i = buildString(sb, data, elementDataIndex, elementEnd);
-                break;
-            case LIST_SHORT:
-                i = buildShortList(sb, data, elementDataIndex, elementEnd);
-                break;
-            case LIST_LONG:
-                i = buildLongList(sb, data, elementDataIndex, elementEnd, depth + 1);
+            case STRING_LONG: i = buildString(sb, data, elementDataIndex, elementEnd); break;
+            case LIST_SHORT: i = buildShortList(sb, data, elementDataIndex, elementEnd); break;
+            case LIST_LONG: i = buildLongList(sb, data, elementDataIndex, elementEnd, depth + 1);
             }
         }
         if (hasELement) {
@@ -233,12 +212,12 @@ public class Notation {
     }
 
     private static String getIndentation(int n) {
-        return n >= INDENTATIONS.length ? newIndentation(n) : INDENTATIONS[n];
+        return n < INDENTATION_CACHE.length ? INDENTATION_CACHE[n] : newIndentation(n);
     }
 
     private static void stripFinalCommaAndSpace(StringBuilder sb) {
         final int n = sb.length();
-        sb.replace(n - 2, n, "");
+        sb.replace(n - COMMA_SPACE.length(), n, "");
     }
 
     private static int buildByte(StringBuilder sb, byte[] data, int i) {

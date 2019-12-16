@@ -20,8 +20,6 @@ import com.esaulpaugh.headlong.util.Strings;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.esaulpaugh.headlong.util.Strings.HEX;
-
 /**
  * Decodes RLP object notation as defined by the {@link Notation} class.
  */
@@ -74,7 +72,7 @@ public class NotationParser {
             case STRING:
                 int datumStart = nextObjectIndex + STRING_PREFIX_LEN;
                 int datumEnd = notation.indexOf(Notation.END_STRING, datumStart);
-                parent.add(Strings.decode(notation.substring(datumStart, datumEnd), HEX));
+                parent.add(Strings.decode(notation.substring(datumStart, datumEnd)));
                 i = datumEnd + STRING_SUFFIX_LEN;
                 break;
             case LIST:

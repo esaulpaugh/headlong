@@ -45,6 +45,8 @@ public class PackedEncoderTest {
 
         tupleType.encodePacked(test, dest);
 
+        assertEquals(packedLen, dest.position());
+
         byte[] destArray = dest.array();
 
         System.out.println(FastHex.encodeToString(destArray));
@@ -90,6 +92,7 @@ public class PackedEncoderTest {
 
         ByteBuffer packed = tupleType.encodePacked(values);
         byte[] packedArray = packed.array();
+        assertEquals(packedArray.length, packed.position());
 
         System.out.println(FastHex.encodeToString(packedArray));
 
@@ -111,6 +114,7 @@ public class PackedEncoderTest {
 
         ByteBuffer packed = tupleType.encodePacked(values);
         byte[] packedArray = packed.array();
+        assertEquals(packedArray.length, packed.position());
 
         System.out.println(FastHex.encodeToString(packedArray));
 
@@ -132,6 +136,7 @@ public class PackedEncoderTest {
 
         ByteBuffer packed = tupleType.encodePacked(values);
         byte[] packedArray = packed.array();
+        assertEquals(packedArray.length, packed.position());
 
         System.out.println(FastHex.encodeToString(packedArray));
 
@@ -152,6 +157,7 @@ public class PackedEncoderTest {
 
         ByteBuffer packed = tupleType.encodePacked(values);
         byte[] packedArray = packed.array();
+        assertEquals(packedArray.length, packed.position());
 
         System.out.println(FastHex.encodeToString(packedArray));
 

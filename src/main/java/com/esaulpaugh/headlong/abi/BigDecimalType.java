@@ -46,11 +46,6 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    int byteLengthPacked(Object value) {
-        return bitLength >> 3; // div 8
-    }
-
-    @Override
     public int validate(Object value) {
         validateClass(value);
         BigDecimal dec = (BigDecimal) value;

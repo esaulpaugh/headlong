@@ -38,11 +38,6 @@ public final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
-    int byteLengthPacked(Object value) {
-        return bitLength >> 3; // div 8
-    }
-
-    @Override
     public BigInteger parseArgument(String s) {
         BigInteger bigInt = new BigInteger(s);
         validate(bigInt);

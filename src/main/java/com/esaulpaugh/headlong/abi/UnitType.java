@@ -52,6 +52,19 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
     }
 
     @Override
+    int byteLengthPacked(Object value) {
+        return bitLength >> 3; // div 8
+    }
+
+    @Override
+    public int validate(Object value) {
+        validateClass(value);
+        final long longVal = ((Number) value).longValue();
+        validateLongBitLen(longVal);
+        return UNIT_LENGTH_BYTES;
+    }
+
+    @Override
     void encodeHead(Object value, ByteBuffer dest, int[] offset) {
         Encoding.insertInt(((Number) value).longValue(), dest);
     }
