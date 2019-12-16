@@ -36,16 +36,16 @@ final class PackedEncoder {
     @SuppressWarnings("unchecked")
     private static void encode(ABIType<?> type, Object value, ByteBuffer dest) {
         switch (type.typeCode()) {
-        case TYPE_CODE_BOOLEAN: insertBool((boolean) value, dest); break;
+        case TYPE_CODE_BOOLEAN: insertBool((boolean) value, dest); return;
         case TYPE_CODE_BYTE:
         case TYPE_CODE_INT:
-        case TYPE_CODE_LONG: insertInt(((Number) value).longValue(), type.byteLengthPacked(value), dest); break;
-        case TYPE_CODE_BIG_INTEGER: insertInt(((BigInteger) value), type.byteLengthPacked(value), dest); break;
-        case TYPE_CODE_BIG_DECIMAL: insertInt(((BigDecimal) value).unscaledValue(), type.byteLengthPacked(value), dest); break;
+        case TYPE_CODE_LONG: insertInt(((Number) value).longValue(), type.byteLengthPacked(value), dest); return;
+        case TYPE_CODE_BIG_INTEGER: insertInt(((BigInteger) value), type.byteLengthPacked(value), dest); return;
+        case TYPE_CODE_BIG_DECIMAL: insertInt(((BigDecimal) value).unscaledValue(), type.byteLengthPacked(value), dest); return;
         case TYPE_CODE_ARRAY:
-            encodeArray((ArrayType<ABIType<?>, ?>) type, value, dest); break;
+            encodeArray((ArrayType<ABIType<?>, ?>) type, value, dest); return;
         case TYPE_CODE_TUPLE:
-            insertTuple((TupleType) type, (Tuple) value, dest); break;
+            insertTuple((TupleType) type, (Tuple) value, dest); return;
         default:
             throw new IllegalArgumentException("unexpected array type: " + type.toString());
         }
@@ -54,20 +54,20 @@ final class PackedEncoder {
     private static void encodeArray(ArrayType<ABIType<?>,?> arrayType, Object value, ByteBuffer dest) {
         final ABIType<?> elementType = arrayType.elementType;
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: insertBooleans((boolean[]) value, dest); break;
+        case TYPE_CODE_BOOLEAN: insertBooleans((boolean[]) value, dest); return;
         case TYPE_CODE_BYTE:
             byte[] arr = !arrayType.isString ? (byte[]) value : Strings.decode((String) value, Strings.UTF_8);
-            insertBytes(arr, dest); break;
-        case TYPE_CODE_INT: insertInts((int[]) value, elementType.byteLengthPacked(value), dest); break;
-        case TYPE_CODE_LONG: insertLongs((long[]) value, elementType.byteLengthPacked(value), dest); break;
-        case TYPE_CODE_BIG_INTEGER: insertBigIntegers((BigInteger[]) value, elementType.byteLengthPacked(value), dest); break;
-        case TYPE_CODE_BIG_DECIMAL: insertBigDecimals((BigDecimal[]) value, elementType.byteLengthPacked(value), dest); break;
+            insertBytes(arr, dest); return;
+        case TYPE_CODE_INT: insertInts((int[]) value, elementType.byteLengthPacked(value), dest); return;
+        case TYPE_CODE_LONG: insertLongs((long[]) value, elementType.byteLengthPacked(value), dest); return;
+        case TYPE_CODE_BIG_INTEGER: insertBigIntegers((BigInteger[]) value, elementType.byteLengthPacked(value), dest); return;
+        case TYPE_CODE_BIG_DECIMAL: insertBigDecimals((BigDecimal[]) value, elementType.byteLengthPacked(value), dest); return;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
             for(Object e : (Object[]) value) {
                 encode(elementType, e, dest);
             }
-            break;
+            return;
         default: throw new IllegalArgumentException("unexpected array type: " + arrayType.toString());
         }
     }
