@@ -143,6 +143,26 @@ public class PackedEncoderTest {
     }
 
     @Test
+    public void testDecodeC() throws ParseException {
+        TupleType tupleType = TupleType.parse("(bool[],bool)");
+
+        Tuple values = new Tuple(new boolean[] { true, false, true }, true);
+
+        tupleType.validate(values);
+
+        ByteBuffer packed = tupleType.encodePacked(values);
+        byte[] packedArray = packed.array();
+
+        System.out.println(FastHex.encodeToString(packedArray));
+
+        assertArrayEquals(FastHex.decode("01000101"), packedArray);
+
+        Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
+
+        assertEquals(values, decoded);
+    }
+
+    @Test
     public void testSignExtendInt() {
         int expected = BizarroIntegers.getInt(FastHex.decode("8FFFFF"), 0, 3);
         int result = Integers.getPackedInt(FastHex.decode("8FFFFF"), 0, 3);

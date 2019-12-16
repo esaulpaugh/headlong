@@ -22,6 +22,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.abi.ABIType.*;
+import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 
 /**
  * Experimental. Unoptimized.
@@ -63,20 +64,15 @@ public final class PackedDecoder {
                 mark = i;
                 break;
             }
-            switch (type.typeCode()) {
-            case TYPE_CODE_BOOLEAN: idx--; end = idx; elements[i] = decodeBoolean(buffer, idx); break;
-            case TYPE_CODE_BYTE: idx--; end = idx; elements[i] = buffer[idx]; break;
-            case TYPE_CODE_INT: idx -= type.byteLengthPacked(null); end = idx; decodeInt((IntType) type, buffer, idx, elements, i); break;
-            case TYPE_CODE_LONG: idx -= type.byteLengthPacked(null); end = idx; decodeLong((LongType) type, buffer, idx, elements, i); break;
-            case TYPE_CODE_BIG_INTEGER: idx -= type.byteLengthPacked(null); end = idx; decodeBigInteger((BigIntegerType) type, buffer, idx, elements, i); break;
-            case TYPE_CODE_BIG_DECIMAL: idx -= type.byteLengthPacked(null); end = idx; decodeBigDecimal((BigDecimalType) type, buffer, idx, elements, i); break;
-            case TYPE_CODE_ARRAY: {
+
+            if(type.typeCode() == TYPE_CODE_ARRAY) {
                 final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<?, ?>) type;
-                end = idx = idx - (arrayType.elementType.byteLengthPacked(null) * arrayType.length);
+                end = idx -= (arrayType.elementType.byteLengthPacked(null) * arrayType.length);
                 idx -= decodeArrayDynamic(arrayType, buffer, idx, end, elements, i);
-                break;
-            }
-            case TYPE_CODE_TUPLE: throw new UnsupportedOperationException("nested tuple"); // idx -= decodeTupleDynamic(tupleType, buffer, 0, idx, elements, i); break;
+            } else if(type.typeCode() == TYPE_CODE_TUPLE) {
+                throw new UnsupportedOperationException("nested tuple");
+            } else {
+                end = idx -= decode(elementTypes[i], buffer, idx - type.byteLengthPacked(null), end, elements, i);
             }
         }
 
@@ -84,43 +80,34 @@ public final class PackedDecoder {
             final int m = mark;
             idx = 0;
             for (int i = 0; i <= m; i++) {
-                final ABIType<?> type = elementTypes[i];
-                switch (type.typeCode()) {
-                case TYPE_CODE_BOOLEAN: elements[i] = decodeBoolean(buffer, idx); idx++; break;
-                case TYPE_CODE_BYTE: elements[i] = buffer[idx]; idx++; break;
-                case TYPE_CODE_INT: idx += decodeInt((IntType) type, buffer, idx, elements, i); break;
-                case TYPE_CODE_LONG: idx += decodeLong((LongType) type, buffer, idx, elements, i); break;
-                case TYPE_CODE_BIG_INTEGER: idx += decodeBigInteger((BigIntegerType) type, buffer, idx, elements, i); break;
-                case TYPE_CODE_BIG_DECIMAL: idx += decodeBigDecimal((BigDecimalType) type, buffer, idx, elements, i); break;
-                case TYPE_CODE_ARRAY: idx += decodeArrayDynamic((ArrayType<?, ?>) type, buffer, idx, end, elements, i); break;
-                case TYPE_CODE_TUPLE: throw new UnsupportedOperationException("nested tuple"); // idx += decodeTupleDynamic((TupleType) type, buffer, idx, end, elements, i); break;
-                }
+                idx += decode(elementTypes[i], buffer, idx, end, elements, i);
             }
         }
 
         return new Tuple(elements);
     }
 
+    private static int decode(ABIType<?> type, byte[] buffer, int idx, int end, Object[] elements, int i) {
+        switch (type.typeCode()) {
+        case TYPE_CODE_BOOLEAN: elements[i] = decodeBoolean(buffer, idx); return type.byteLengthPacked(null);
+        case TYPE_CODE_BYTE: elements[i] = buffer[idx]; return type.byteLengthPacked(null);
+        case TYPE_CODE_INT: return decodeInt(type.byteLengthPacked(null), (IntType) type, buffer, idx, elements, i);
+        case TYPE_CODE_LONG: return decodeLong(type.byteLengthPacked(null), (LongType) type, buffer, idx, elements, i);
+        case TYPE_CODE_BIG_INTEGER: return decodeBigInteger(type.byteLengthPacked(null), (BigIntegerType) type, buffer, idx, elements, i);
+        case TYPE_CODE_BIG_DECIMAL: return decodeBigDecimal(type.byteLengthPacked(null), (BigDecimalType) type, buffer, idx, elements, i);
+        case TYPE_CODE_ARRAY: return decodeArrayDynamic((ArrayType<?, ?>) type, buffer, idx, end, elements, i);
+        }
+        throw new UnsupportedOperationException("nested tuple?"); // idx += decodeTupleDynamic((TupleType) type, buffer, idx, end, elements, i); break;
+    }
+
     private static Tuple decodeTupleStatic(TupleType tupleType, byte[] buffer) {
-
-        int idx = 0;
-        final int end = buffer.length;
-
         final ABIType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
         final Object[] elements = new Object[len];
+        int idx = 0;
+        final int end = buffer.length;
         for (int i = 0; i < len; i++) {
-            final ABIType<?> type = elementTypes[i];
-            switch (type.typeCode()) {
-            case TYPE_CODE_BOOLEAN: elements[i] = decodeBoolean(buffer, idx); idx++; break;
-            case TYPE_CODE_BYTE: elements[i] = buffer[idx]; idx++; break;
-            case TYPE_CODE_INT: idx += decodeInt((IntType) type, buffer, idx, elements, i); break;
-            case TYPE_CODE_LONG: idx += decodeLong((LongType) type, buffer, idx, elements, i); break;
-            case TYPE_CODE_BIG_INTEGER: idx += decodeBigInteger((BigIntegerType) type, buffer, idx, elements, i); break;
-            case TYPE_CODE_BIG_DECIMAL: idx += decodeBigDecimal((BigDecimalType) type, buffer, idx, elements, i); break;
-            case TYPE_CODE_ARRAY: idx += decodeArrayDynamic((ArrayType<?, ?>) type, buffer, idx, end, elements, i); break;
-            case TYPE_CODE_TUPLE: throw new UnsupportedOperationException("nested tuple"); // idx += decodeTupleDynamic((TupleType) type, buffer, idx, end, elements, i); break;
-            }
+            idx += decode(elementTypes[i], buffer, idx, end, elements, i);
         }
 
         Tuple tuple = new Tuple(elements);
@@ -139,133 +126,116 @@ public final class PackedDecoder {
         throw new IllegalArgumentException("invalid boolean value");
     }
 
-    private static int decodeInt(IntType intType, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        final int len = intType.byteLengthPacked(null);
-        Integer val = Integers.getPackedInt(buffer, idx, len);
+    private static int decodeInt(int elementLen, IntType intType, byte[] buffer, int idx, Object[] dest, int destIdx) {
+        Integer val = Integers.getPackedInt(buffer, idx, elementLen);
         intType.validate(val);
         dest[destIdx] = val;
-        return len;
+        return elementLen;
     }
 
-    private static int decodeLong(LongType longType, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        final int len = longType.byteLengthPacked(null);
-        Long val = Integers.getPackedLong(buffer, idx, len);
+    private static int decodeLong(int elementLen, LongType longType, byte[] buffer, int idx, Object[] dest, int destIdx) {
+        Long val = Integers.getPackedLong(buffer, idx, elementLen);
         longType.validate(val);
         dest[destIdx] = val;
-        return len;
+        return elementLen;
     }
 
-    private static int decodeBigInteger(BigIntegerType bigIntegerType, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        final int len = bigIntegerType.byteLengthPacked(null);
-        BigInteger val = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + len));
+    private static int decodeBigInteger(int elementLen, BigIntegerType bigIntegerType, byte[] buffer, int idx, Object[] dest, int destIdx) {
+        BigInteger val = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
         bigIntegerType.validate(val);
         dest[destIdx] = val;
-        return len;
+        return elementLen;
     }
 
-    private static int decodeBigDecimal(BigDecimalType bigDecimalType, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        final int len = bigDecimalType.byteLengthPacked(null);
-        BigInteger bigInteger = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + len));
+    private static int decodeBigDecimal(int elementLen, BigDecimalType bigDecimalType, byte[] buffer, int idx, Object[] dest, int destIdx) {
+        BigInteger bigInteger = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
         BigDecimal val = new BigDecimal(bigInteger, bigDecimalType.scale);
         bigDecimalType.validate(val);
         dest[destIdx] = val;
-        return len;
+        return elementLen;
     }
 
     private static int decodeArrayDynamic(ArrayType<? extends ABIType<?>, ?> arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) {
         final ABIType<?> elementType = arrayType.elementType;
-        final int byteLen;
+        final int elementByteLen;
         try {
-            byteLen = elementType.byteLengthPacked(null);
+            elementByteLen = elementType.byteLengthPacked(null);
         } catch (NullPointerException npe) {
             throw new IllegalArgumentException("nested array");
         }
 
-        final int arrayLen;
-        if (arrayType.length != -1) {
-            arrayLen = arrayType.length;
-        } else {
-            arrayLen = (end - idx) / byteLen;
-        }
-
+        final int arrayLen = arrayType.length == DYNAMIC_LENGTH ? (end - idx) / elementByteLen : arrayType.length;
+        final Object array;
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return decodeBooleanArray(arrayLen, buffer, idx, dest, destIdx) * byteLen;
-        case TYPE_CODE_BYTE: return decodeByteArray(arrayLen, buffer, idx, dest, destIdx) * byteLen;
-        case TYPE_CODE_INT: return decodeIntArray(arrayType.elementType, arrayLen, buffer, idx, dest, destIdx) * byteLen;
-        case TYPE_CODE_LONG: return decodeLongArray(arrayType.elementType, arrayLen, buffer, idx, dest, destIdx) * byteLen;
-        case TYPE_CODE_BIG_INTEGER: return decodeBigIntegerArray(arrayType.elementType, arrayLen, buffer, idx, dest, destIdx) * byteLen;
-        case TYPE_CODE_BIG_DECIMAL: return decodeBigDecimalArray((BigDecimalType) arrayType.elementType, arrayLen, buffer, idx, dest, destIdx) * byteLen;
+        case TYPE_CODE_BOOLEAN: array = decodeBooleanArray(arrayLen, buffer, idx); break;
+        case TYPE_CODE_BYTE: array = decodeByteArray(arrayLen, buffer, idx); break;
+        case TYPE_CODE_INT: array = decodeIntArray(elementByteLen, elementType, arrayLen, buffer, idx); break;
+        case TYPE_CODE_LONG: array = decodeLongArray(elementByteLen, elementType, arrayLen, buffer, idx); break;
+        case TYPE_CODE_BIG_INTEGER: array = decodeBigIntegerArray(elementByteLen, elementType, arrayLen, buffer, idx); break;
+        case TYPE_CODE_BIG_DECIMAL: array = decodeBigDecimalArray(elementByteLen, (BigDecimalType) elementType, arrayLen, buffer, idx); break;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: throw new UnsupportedOperationException();
         default: throw new IllegalArgumentException("unexpected array type: " + arrayType.toString());
         }
+        dest[destIdx] = array;
+        return arrayLen * elementByteLen;
     }
 
-    private static int decodeBooleanArray(int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
+    private static boolean[] decodeBooleanArray(int arrayLen, byte[] buffer, int idx) {
         boolean[] booleans = new boolean[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
             booleans[i] = decodeBoolean(buffer, idx + i);
         }
-        dest[destIdx] = booleans;
-        return arrayLen;
+        return booleans;
     }
 
-    private static int decodeByteArray(int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
+    private static byte[] decodeByteArray(int arrayLen, byte[] buffer, int idx) {
         byte[] bytes = new byte[arrayLen];
         System.arraycopy(buffer, idx, bytes, 0, arrayLen);
-        dest[destIdx] = bytes;
-        return arrayLen;
+        return bytes;
     }
 
-    private static int decodeIntArray(ABIType<?> elementType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        final int len = elementType.byteLengthPacked(null);
+    private static int[] decodeIntArray(int elementLen, ABIType<?> elementType, int arrayLen, byte[] buffer, int idx) {
         int[] ints = new int[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            Integer val = Integers.getPackedInt(buffer, idx, len);
+            Integer val = Integers.getPackedInt(buffer, idx, elementLen);
             elementType.validate(val);
             ints[i] = val;
-            idx += len;
+            idx += elementLen;
         }
-        dest[destIdx] = ints;
-        return arrayLen;
+        return ints;
     }
 
-    private static int decodeLongArray(ABIType<?> longType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        final int len = longType.byteLengthPacked(null);
+    private static long[] decodeLongArray(int elementLen, ABIType<?> longType, int arrayLen, byte[] buffer, int idx) {
         long[] longs = new long[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            Long val = Integers.getPackedLong(buffer, idx, len);
+            Long val = Integers.getPackedLong(buffer, idx, elementLen);
             longType.validate(val);
             longs[i] = val;
-            idx += len;
+            idx += elementLen;
         }
-        dest[destIdx] = longs;
-        return arrayLen;
+        return longs;
     }
 
-    private static int decodeBigIntegerArray(ABIType<?> elementType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        final int len = elementType.byteLengthPacked(null);
+    private static BigInteger[] decodeBigIntegerArray(int elementLen, ABIType<?> elementType, int arrayLen, byte[] buffer, int idx) {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            BigInteger val = com.esaulpaugh.headlong.rlp.util.Integers.getBigInt(buffer, idx, len);
+            BigInteger val = com.esaulpaugh.headlong.rlp.util.Integers.getBigInt(buffer, idx, elementLen);
             elementType.validate(val);
             bigInts[i] = val;
-            idx += len;
+            idx += elementLen;
         }
-        dest[destIdx] = bigInts;
-        return arrayLen;
+        return bigInts;
     }
 
-    private static int decodeBigDecimalArray(BigDecimalType elementType, int arrayLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        final int len = elementType.byteLengthPacked(null);
+    private static BigDecimal[] decodeBigDecimalArray(int elementLen, BigDecimalType elementType, int arrayLen, byte[] buffer, int idx) {
         BigDecimal[] bigDecimals = new BigDecimal[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            BigDecimal val = new BigDecimal(com.esaulpaugh.headlong.rlp.util.Integers.getBigInt(buffer, idx, len), elementType.scale);
+            BigDecimal val = new BigDecimal(com.esaulpaugh.headlong.rlp.util.Integers.getBigInt(buffer, idx, elementLen), elementType.scale);
             elementType.validate(val);
             bigDecimals[i] = val;
-            idx += len;
+            idx += elementLen;
         }
-        dest[destIdx] = bigDecimals;
-        return arrayLen;
+        return bigDecimals;
     }
 }
