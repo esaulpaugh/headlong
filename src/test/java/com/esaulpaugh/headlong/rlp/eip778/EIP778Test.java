@@ -100,6 +100,16 @@ public class EIP778Test {
     }
 
     @Test
+    public void testDuplicateKeys() throws Throwable {
+        byte[] keyBytes = new byte[0];
+        final List<KeyValuePair> pairs = Arrays.asList(new KeyValuePair(keyBytes, new byte[0]), new KeyValuePair(keyBytes, new byte[1]));
+        TestUtils.assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs.sort(PAIR_COMPARATOR));
+
+        final List<KeyValuePair> pairs2 = Arrays.asList(new KeyValuePair(new byte[] { 2 }, new byte[0]), new KeyValuePair(new byte[] { 2 }, new byte[1]));
+        TestUtils.assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs2.sort(PAIR_COMPARATOR));
+    }
+
+    @Test
     public void nineLengths() {
         Set<Integer> recordLengths = new HashSet<>();
         for (long p = 0, seq = 0; p <= 64; p += 8, seq = (long) Math.pow(2.0, p)) {

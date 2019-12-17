@@ -27,21 +27,21 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
     public static final Comparator<KeyValuePair> PAIR_COMPARATOR = (pa, pb) -> {
         byte[] a = pa.key;
         byte[] b = pb.key;
-        if (a == b) {
-            return 0;
-        }
-        final int len = Math.min(a.length, b.length);
-        int i = 0;
-        boolean mismatch = false;
-        for (; i < len; i++) {
-            if (a[i] != b[i]) {
-                mismatch = true;
-                break;
+        int result;
+        if(a != b) {
+            final int len = Math.min(a.length, b.length);
+            int i = 0;
+            boolean mismatch = false;
+            for (; i < len; i++) {
+                if (a[i] != b[i]) {
+                    mismatch = true;
+                    break;
+                }
             }
-        }
-        int result = mismatch ? a[i] - b[i] : a.length - b.length;
-        if(result != 0) {
-            return result;
+            result = mismatch ? a[i] - b[i] : a.length - b.length;
+            if(result != 0) {
+                return result;
+            }
         }
         throw new IllegalArgumentException("duplicate key: " + Strings.encode(pa.key, UTF_8));
     };
