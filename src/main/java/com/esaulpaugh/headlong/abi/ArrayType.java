@@ -93,8 +93,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
      */
     @Override
     int byteLength(Object value) {
-        int len;
-        final ABIType<?> elementType = this.elementType;
+        final int len;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: len = ((boolean[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BYTE: len = roundLengthUp((!isString ? (byte[]) value : Strings.decode((String) value, UTF_8)).length); break;
@@ -103,22 +102,22 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL: len = ((Number[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE:
-            final Object[] elements = (Object[]) value;
-            final int n = elements.length;
-            len = 0;
-            for (int i = 0; i < n; i++) {
-                len += elementType.byteLength(elements[i]);
-            }
-            if(elementType.dynamic) { // implies this.dynamic
-                len += n << LOG_2_UNIT_LENGTH_BYTES; // 32 bytes per offset
-            }
-            break;
+        case TYPE_CODE_TUPLE: len = calcObjArrByteLen((Object[]) value, elementType); break;
         default: throw new Error();
         }
         // arrays with variable number of elements get +32 for the array length
         return length == DYNAMIC_LENGTH
                 ? ARRAY_LENGTH_BYTE_LEN + len
+                : len;
+    }
+
+    private static int calcObjArrByteLen(Object[] elements, ABIType<?> elementType) {
+        int len = 0;
+        for (Object element : elements) {
+            len += elementType.byteLength(element);
+        }
+        return elementType.dynamic
+                ? len + (elements.length << LOG_2_UNIT_LENGTH_BYTES) // 32 bytes per offset
                 : len;
     }
 

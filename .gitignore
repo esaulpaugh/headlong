@@ -12,3 +12,4 @@
 *.jar
 *.log
 gradle.properties
+headlong.properties
