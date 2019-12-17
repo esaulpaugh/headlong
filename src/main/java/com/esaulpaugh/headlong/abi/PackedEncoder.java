@@ -67,36 +67,36 @@ final class PackedEncoder {
         }
     }
     // ------------------------
-    private static void insertBooleans(boolean[] bools, ByteBuffer dest) {
-        for (boolean bool : bools) {
+    private static void insertBooleans(boolean[] arr, ByteBuffer dest) {
+        for (boolean bool : arr) {
             insertBoolean(bool, dest);
         }
     }
 
-    private static void insertBytes(byte[] bytes, ByteBuffer dest) {
-        dest.put(bytes);
+    private static void insertBytes(byte[] arr, ByteBuffer dest) {
+        dest.put(arr);
     }
 
-    private static void insertInts(int[] ints, int byteLen, ByteBuffer dest) {
-        for (int e : ints) {
+    private static void insertInts(int[] arr, int byteLen, ByteBuffer dest) {
+        for (int e : arr) {
             insertInt(e, byteLen, dest);
         }
     }
 
-    private static void insertLongs(long[] longs, int byteLen, ByteBuffer dest) {
-        for (long e : longs) {
+    private static void insertLongs(long[] arr, int byteLen, ByteBuffer dest) {
+        for (long e : arr) {
             insertInt(e, byteLen, dest);
         }
     }
 
-    private static void insertBigIntegers(BigInteger[] bigInts, int byteLen, ByteBuffer dest) {
-        for (BigInteger e : bigInts) {
+    private static void insertBigIntegers(BigInteger[] arr, int byteLen, ByteBuffer dest) {
+        for (BigInteger e : arr) {
             insertInt(e, byteLen, dest);
         }
     }
 
-    private static void insertBigDecimals(BigDecimal[] bigDecs, int byteLen, ByteBuffer dest) {
-        for (BigDecimal e : bigDecs) {
+    private static void insertBigDecimals(BigDecimal[] arr, int byteLen, ByteBuffer dest) {
+        for (BigDecimal e : arr) {
             insertInt(e.unscaledValue(), byteLen, dest);
         }
     }

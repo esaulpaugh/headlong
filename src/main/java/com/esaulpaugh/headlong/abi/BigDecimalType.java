@@ -50,10 +50,10 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
         validateClass(value);
         BigDecimal dec = (BigDecimal) value;
         validateBigIntBitLen(dec.unscaledValue());
-        if(dec.scale() != scale) {
-            throw new IllegalArgumentException("big decimal scale mismatch: actual != expected: " + dec.scale() + " != " + scale);
+        if(dec.scale() == scale) {
+            return UNIT_LENGTH_BYTES;
         }
-        return UNIT_LENGTH_BYTES;
+        throw new IllegalArgumentException("big decimal scale mismatch: actual != expected: " + dec.scale() + " != " + scale);
     }
 
     @Override
@@ -65,9 +65,8 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
-        BigDecimal dec = new BigDecimal(bi, scale);
         validateBigIntBitLen(bi);
-        return dec;
+        return new BigDecimal(bi, scale);
     }
 
     @Override

@@ -89,7 +89,7 @@ public final class PackedDecoder {
 
     private static int decode(ABIType<?> type, byte[] buffer, int idx, int end, Object[] elements, int i) {
         switch (type.typeCode()) {
-        case TYPE_CODE_BOOLEAN: elements[i] = decodeBoolean(buffer[idx]); return type.byteLengthPacked(null);
+        case TYPE_CODE_BOOLEAN: elements[i] = BooleanType.decodeBoolean(buffer[idx]); return type.byteLengthPacked(null);
         case TYPE_CODE_BYTE: elements[i] = buffer[idx]; return type.byteLengthPacked(null);
         case TYPE_CODE_INT: return decodeInt(type.byteLengthPacked(null), (IntType) type, buffer, idx, elements, i);
         case TYPE_CODE_LONG: return decodeLong(type.byteLengthPacked(null), (LongType) type, buffer, idx, elements, i);
@@ -113,16 +113,6 @@ public final class PackedDecoder {
         Tuple tuple = new Tuple(elements);
         tupleType.validate(tuple);
         return tuple;
-    }
-
-    private static Boolean decodeBoolean(byte b) {
-        if (b == Encoding.ZERO_BYTE) {
-            return Boolean.FALSE;
-        }
-        if (b == Encoding.ONE_BYTE) {
-            return Boolean.TRUE;
-        }
-        throw new IllegalArgumentException("invalid boolean value");
     }
 
     private static int decodeInt(int elementLen, IntType intType, byte[] buffer, int idx, Object[] dest, int destIdx) {
@@ -183,7 +173,7 @@ public final class PackedDecoder {
     private static boolean[] decodeBooleanArray(int arrayLen, byte[] buffer, int idx) {
         boolean[] booleans = new boolean[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            booleans[i] = decodeBoolean(buffer[idx + i]);
+            booleans[i] = BooleanType.decodeBoolean(buffer[idx + i]);
         }
         return booleans;
     }

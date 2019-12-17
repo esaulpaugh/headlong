@@ -68,11 +68,11 @@ public final class BooleanType extends UnitType<Boolean> {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigIntBitLen(bi);
-        switch (bi.byteValue()) {
-        case 0: return Boolean.FALSE;
-        case 1: return Boolean.TRUE;
-        default: throw new IllegalArgumentException("negative value given for boolean type");
-        }
+        return decodeBoolean(bi.byteValue());
+    }
+
+    static Boolean decodeBoolean(byte b) {
+        return b == Encoding.ZERO_BYTE ? Boolean.FALSE : Boolean.TRUE;
     }
 
     @Override

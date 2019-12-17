@@ -15,7 +15,9 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -60,5 +62,33 @@ public class DecodeTest {
 
         decoded = TupleType.parseElements("ufixed,string").decode(ByteBuffer.wrap(RETURN_BYTES));
         assertEquals(EXPECTED, decoded);
+    }
+
+    @Test
+    public void testBoolean() throws Throwable {
+        TupleType tt = TupleType.parse("(bool)");
+
+        String[] tooBig = new String[] {
+                "0000000000000000000000000000000000000000000000000000000000000002",
+                "8000000000000000000000000000000000000000000000000000000000000000",
+        };
+        String[] tooSmall = new String[] {
+                "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+                "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE"
+        };
+        String[] justRight = new String[] {
+                "0000000000000000000000000000000000000000000000000000000000000000",
+                "0000000000000000000000000000000000000000000000000000000000000001"
+        };
+
+        for (String hex : tooBig) {
+            TestUtils.assertThrown(IllegalArgumentException.class, "exceeds bit limit", () -> tt.decode(Strings.decode(hex)));
+        }
+        for (String hex : tooSmall) {
+            TestUtils.assertThrown(IllegalArgumentException.class, "signed value given for unsigned type", () -> tt.decode(Strings.decode(hex)));
+        }
+        for (String hex : justRight) {
+            tt.decode(Strings.decode(hex));
+        }
     }
 }
