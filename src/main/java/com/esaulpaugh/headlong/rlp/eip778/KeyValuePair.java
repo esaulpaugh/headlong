@@ -28,8 +28,8 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
         byte[] a = pa.key;
         byte[] b = pb.key;
         if(a != b) {
-            final int len = Math.min(a.length, b.length);
             int i = 0;
+            final int len = Math.min(a.length, b.length);
             boolean mismatch = false;
             for ( ; i < len; i++) {
                 if (a[i] != b[i]) {
@@ -42,7 +42,7 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
                 return result;
             }
         }
-        throw new IllegalArgumentException("duplicate key: " + Strings.encode(pa.key, UTF_8));
+        throw new IllegalArgumentException("duplicate key: " + Strings.encode(a, UTF_8));
     };
 
     public static final String ID = "id";
