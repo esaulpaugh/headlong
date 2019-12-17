@@ -71,7 +71,7 @@ public class EIP778Test {
                 new KeyValuePair(ID, "v4", UTF_8),
                 new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
         );
-        KeyValuePair[] array = pairs.toArray(EMPTY_ARRAY);
+        KeyValuePair[] array = pairs.toArray(new KeyValuePair[0]);
 
         Record record = new Record(1L, pairs, SIGNER);
 
