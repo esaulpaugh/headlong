@@ -27,18 +27,17 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
     public static final Comparator<KeyValuePair> PAIR_COMPARATOR = (pa, pb) -> {
         byte[] a = pa.key;
         byte[] b = pb.key;
-        int result;
         if(a != b) {
             final int len = Math.min(a.length, b.length);
             int i = 0;
             boolean mismatch = false;
-            for (; i < len; i++) {
+            for ( ; i < len; i++) {
                 if (a[i] != b[i]) {
                     mismatch = true;
                     break;
                 }
             }
-            result = mismatch ? a[i] - b[i] : a.length - b.length;
+            int result = mismatch ? a[i] - b[i] : a.length - b.length;
             if(result != 0) {
                 return result;
             }
