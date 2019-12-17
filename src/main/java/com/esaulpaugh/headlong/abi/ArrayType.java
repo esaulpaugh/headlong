@@ -200,16 +200,16 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     private int validateObjectArray(Object[] arr) {
         final int len = arr.length;
         checkLength(len, arr);
-        int byteLength = elementType.dynamic ? len << LOG_2_UNIT_LENGTH_BYTES : 0; // 32 bytes per offset
         int i = 0;
         try {
+            int byteLength = elementType.dynamic ? len << LOG_2_UNIT_LENGTH_BYTES : 0; // 32 bytes per offset
             for ( ; i < len; i++) {
                 byteLength += elementType.validate(arr[i]);
             }
+            return byteLength;
         } catch (RuntimeException re) {
             throw validationException(re, i);
         }
-        return byteLength;
     }
 
     private int validateArray(Supplier<Integer> supplyLength, Object array, Consumer<int[]> validateElement) {

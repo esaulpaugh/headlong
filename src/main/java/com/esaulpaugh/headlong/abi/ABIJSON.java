@@ -225,27 +225,22 @@ public final class ABIJSON {
     private static JsonArray buildJsonArray(TupleType tupleType, boolean[] indexedManifest) {
         JsonArray array = new JsonArray();
         ABIType<?>[] elements = tupleType.elementTypes;
-        final int len = elements.length;
         boolean addIndexed = indexedManifest != null;
-        for (int i = 0; i < len; i++) {
+        for (int i = 0; i < elements.length; i++) {
             ABIType<?> e = elements[i];
             JsonObject arrayElement = new JsonObject();
             String name = e.getName();
-            arrayElement.add(NAME, name == null ? null : new JsonPrimitive(e.getName()));
-            boolean tuple = e.canonicalType.startsWith("(");
+            arrayElement.add(NAME, name == null ? null : new JsonPrimitive(name));
             String type = e.canonicalType;
-            if(tuple) {
-                String substring = type.substring(type.indexOf('('), type.lastIndexOf(')') + 1);
-                type = type.replace(substring, TUPLE);
-            }
-            arrayElement.add(TYPE, new JsonPrimitive(type));
-            if(tuple) {
+            if(type.startsWith("(")) { // tuple
+                arrayElement.add(TYPE, new JsonPrimitive(type.replace(type.substring(0, type.lastIndexOf(')') + 1), TUPLE)));
                 ABIType<?> base = e;
                 while (base instanceof ArrayType<?, ?>) {
                     base = ((ArrayType<?, ?>) base).elementType;
                 }
-                JsonArray components = buildJsonArray((TupleType) base, null);
-                arrayElement.add(COMPONENTS, components);
+                arrayElement.add(COMPONENTS, buildJsonArray((TupleType) base, null));
+            } else {
+                arrayElement.add(TYPE, new JsonPrimitive(type));
             }
             array.add(arrayElement);
             if(addIndexed) {
