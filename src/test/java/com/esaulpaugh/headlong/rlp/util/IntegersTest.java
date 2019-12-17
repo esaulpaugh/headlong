@@ -90,10 +90,10 @@ public class IntegersTest {
         final long _2_16 = (long) Math.pow(2.0, Short.SIZE);
         final long _2_8 = (long) Math.pow(2.0, Byte.SIZE);
         testLongs((int) _2_8, new Supplier<Long>() {
-            long lo = Byte.MIN_VALUE;
+            private long i = Byte.MIN_VALUE;
             @Override
             public Long get() {
-                return lo++;
+                return i++;
             }
         }, eight);
         testLongs(1000, () -> rand.nextInt() / _2_16, eight);

@@ -54,7 +54,7 @@ public class Notation {
     private static final String ELEMENT_INDENTATION = newIndentation(1);
 
     static {
-        INDENTATION_CACHE = new String[16];
+        INDENTATION_CACHE = new String[8];
         for (int i = 0; i < INDENTATION_CACHE.length; i++) {
             INDENTATION_CACHE[i] = newIndentation(i);
         }
@@ -88,8 +88,7 @@ public class Notation {
     }
 
     private static DecodeException exceedsContainer(int index, long end, int containerEnd) {
-        String msg = "element @ index " + index + " exceeds its container: " + end + " > " + containerEnd;
-        return new UnrecoverableDecodeException(msg);
+        return new UnrecoverableDecodeException("element @ index " + index + " exceeds its container: " + end + " > " + containerEnd);
     }
 
     private static int getShortElementEnd(int elementDataIndex, final int elementDataLen, final int containerEnd) throws DecodeException {
