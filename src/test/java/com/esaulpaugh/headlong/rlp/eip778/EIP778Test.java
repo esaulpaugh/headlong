@@ -24,10 +24,7 @@ import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Test;
 
 import java.security.SignatureException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.*;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
@@ -74,6 +71,7 @@ public class EIP778Test {
                 new KeyValuePair(ID, "v4", UTF_8),
                 new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
         );
+        KeyValuePair[] array = pairs.toArray(EMPTY_ARRAY);
 
         Record record = new Record(1L, pairs, SIGNER);
 
@@ -93,11 +91,10 @@ public class EIP778Test {
 
         assertEquals(1L, seq);
 
-        KeyValuePair[] arr = pairs.toArray(EMPTY_ARRAY);
-        Arrays.sort(arr);
+        Arrays.sort(array);
         int i = 0;
         while (iter.hasNext()) {
-            assertEquals(arr[i++], new KeyValuePair(iter.next().asBytes(), iter.next().asBytes()));
+            assertEquals(array[i++], new KeyValuePair(iter.next().asBytes(), iter.next().asBytes()));
         }
         assertEquals(ENR_STRING, record.toString());
     }
@@ -110,7 +107,7 @@ public class EIP778Test {
             int i = 0;
             do {
                 if(temp >= 0) {
-                    Record r = new Record(temp, KeyValuePair.EMPTY_ARRAY, SIGNER);
+                    Record r = new Record(temp, new ArrayList<>(0), SIGNER);
                     int len = r.getRLP().encodingLength();
                     System.out.println(temp + " -> " + len);
                     recordLengths.add(len);
@@ -125,13 +122,13 @@ public class EIP778Test {
     public void testDuplicateKey() throws Throwable {
         long seq = 3L;
 
-        KeyValuePair[] pairs = new KeyValuePair[] {
+        final List<KeyValuePair> pairs = Arrays.asList(
                 new KeyValuePair(IP, "7f000001", HEX),
                 new KeyValuePair(UDP, "765f", HEX),
                 new KeyValuePair(ID, "v4", UTF_8),
                 new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX),
                 new KeyValuePair(UDP, "765f", HEX)
-        };
+        );
 
         for (KeyValuePair p : pairs) {
             System.out.println(p);

@@ -18,10 +18,33 @@ package com.esaulpaugh.headlong.rlp.eip778;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 public final class KeyValuePair implements Comparable<KeyValuePair> {
+
+    public static final Comparator<KeyValuePair> PAIR_COMPARATOR = (pa, pb) -> {
+        byte[] a = pa.key;
+        byte[] b = pb.key;
+        if (a == b) {
+            return 0;
+        }
+        final int len = Math.min(a.length, b.length);
+        int i = 0;
+        boolean mismatch = false;
+        for (; i < len; i++) {
+            if (a[i] != b[i]) {
+                mismatch = true;
+                break;
+            }
+        }
+        int result = mismatch ? a[i] - b[i] : a.length - b.length;
+        if(result != 0) {
+            return result;
+        }
+        throw new IllegalArgumentException("duplicate key: " + Strings.encode(pa.key, UTF_8));
+    };
 
     public static final String ID = "id";
     public static final String SECP256K1 = "secp256k1";
@@ -73,27 +96,7 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
     }
 
     @Override
-    public int compareTo(KeyValuePair o) {
-        int result = compare(key, o.key);
-        if (result != 0) {
-            return result;
-        }
-        throw new IllegalArgumentException("duplicate key: " + Strings.encode(o.key, UTF_8));
-    }
-
-    private static int compare(byte[] a, byte[] b) {
-        if (a == b) {
-            return 0;
-        }
-        final int len = Math.min(a.length, b.length);
-        int i = 0;
-        boolean mismatch = false;
-        for ( ; i < len; i++) {
-            if (a[i] != b[i]) {
-                mismatch = true;
-                break;
-            }
-        }
-        return mismatch ? a[i] - b[i] : a.length - b.length;
+    public int compareTo(KeyValuePair other) {
+        return PAIR_COMPARATOR.compare(this, other);
     }
 }

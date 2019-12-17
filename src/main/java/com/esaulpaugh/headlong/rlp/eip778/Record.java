@@ -41,10 +41,6 @@ public final class Record {
     private final RLPList rlp;
 
     public Record(long seq, List<KeyValuePair> pairs, Signer signer) {
-        this(seq, pairs.toArray(KeyValuePair.EMPTY_ARRAY), signer);
-    }
-
-    public Record(long seq, KeyValuePair[] pairs, Signer signer) {
         final int signatureLen = signer.signatureLength();
         final int signatureItemLen = RLPEncoder.prefixLength(signatureLen) + signatureLen;
         final long payloadLenLong = RLPEncoder.encodedLen(seq) + RLPEncoder.dataLen(pairs);

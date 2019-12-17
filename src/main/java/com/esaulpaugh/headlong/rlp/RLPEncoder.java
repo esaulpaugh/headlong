@@ -19,6 +19,7 @@ import com.esaulpaugh.headlong.rlp.eip778.KeyValuePair;
 import com.esaulpaugh.headlong.rlp.util.Integers;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
 import static com.esaulpaugh.headlong.rlp.DataType.LIST_SHORT_OFFSET;
@@ -39,7 +40,7 @@ public final class RLPEncoder {
         return 1 + dataLen;
     }
 
-    public static long dataLen(KeyValuePair[] pairs) {
+    public static long dataLen(List<KeyValuePair> pairs) {
         long total = 0;
         for (KeyValuePair kvp : pairs) {
             total += itemEncodedLen(kvp.getKey()) + itemEncodedLen(kvp.getValue());
@@ -111,8 +112,15 @@ public final class RLPEncoder {
     }
 
     private static int encodeKeyValuePair(KeyValuePair pair, byte[] dest, int destIndex) {
-        destIndex = encodeString(pair.getKey(), dest, destIndex);
-        return encodeString(pair.getValue(), dest, destIndex);
+        return encodeString(pair.getValue(), dest, encodeString(pair.getKey(), dest, destIndex));
+    }
+
+    private static int encodeList(long dataLen, long seq, List<KeyValuePair> pairs, byte[] dest, int destIndex) {
+        destIndex = encodeString(seq, dest, insertListPrefix(dataLen, dest, destIndex));
+        for (KeyValuePair pair : pairs) {
+            destIndex = encodeKeyValuePair(pair, dest, destIndex);
+        }
+        return destIndex;
     }
 
     private static int encodeItem(Object item, byte[] dest, int destIndex) {
@@ -186,22 +194,7 @@ public final class RLPEncoder {
         dest[destIndex] = (byte) (LIST_SHORT_OFFSET + (byte) dataLen);
         return destIndex + 1;
     }
-
-    private static int encodeList(long dataLen, long seq, KeyValuePair[] pairs, byte[] dest, int destIndex) {
-        destIndex = insertListPrefix(dataLen, dest, destIndex);
-        return encodeSequentially(seq, pairs, dest, destIndex);
-    }
-
-    private static int encodeSequentially(long seq, KeyValuePair[] pairs, byte[] dest, int destIndex) {
-        destIndex = encodeString(seq, dest, destIndex);
-        for (KeyValuePair kvp : pairs) {
-            destIndex = encodeKeyValuePair(kvp, dest, destIndex);
-        }
-        return destIndex;
-    }
-
     // -----------------------------------------------------------------------------------------------------------------
-
     /**
      * Returns the RLP encoding of the given byte.
      *
@@ -358,11 +351,11 @@ public final class RLPEncoder {
         return RLPList.withElements(encodings);
     }
 
-    public static int insertRecordContentList(int dataLen, long seq, KeyValuePair[] pairs, byte[] record, int offset) {
+    public static int insertRecordContentList(int dataLen, long seq, List<KeyValuePair> pairs, byte[] record, int offset) {
         if(seq < 0) {
             throw new IllegalArgumentException("negative seq");
         }
-        Arrays.sort(pairs);
+        pairs.sort(KeyValuePair.PAIR_COMPARATOR);
         return encodeList(dataLen, seq, pairs, record, offset);
     }
 
