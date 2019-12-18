@@ -17,7 +17,7 @@ package com.esaulpaugh.headlong.rlp.example;
 
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPListIterator;
-import com.esaulpaugh.headlong.util.exception.DecodeException;
+import com.esaulpaugh.headlong.exception.DecodeException;
 
 import java.math.BigDecimal;
 

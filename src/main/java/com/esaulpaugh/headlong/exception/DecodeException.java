@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.util.exception;
+package com.esaulpaugh.headlong.exception;
 
 /**
  * Indicates a failure to decode illegal or otherwise undecodeable data.

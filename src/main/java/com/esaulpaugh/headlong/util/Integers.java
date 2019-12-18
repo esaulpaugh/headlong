@@ -15,14 +15,14 @@
 */
 package com.esaulpaugh.headlong.util;
 
-import com.esaulpaugh.headlong.util.exception.DecodeException;
-import com.esaulpaugh.headlong.util.exception.UnrecoverableDecodeException;
+import com.esaulpaugh.headlong.exception.DecodeException;
+import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 /**
- * Utility for reading and writing integers from and to RLP format.
+ * Utility for reading and writing integers from and to RLP-compatible format.
  */
 public final class Integers {
 

@@ -19,7 +19,7 @@ import com.esaulpaugh.headlong.rlp.example.RLPStudent;
 import com.esaulpaugh.headlong.rlp.example.RLPStudentTest;
 import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Strings;
-import com.esaulpaugh.headlong.util.exception.DecodeException;
+import com.esaulpaugh.headlong.exception.DecodeException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

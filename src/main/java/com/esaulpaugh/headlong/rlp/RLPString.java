@@ -15,7 +15,7 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.util.exception.DecodeException;
+import com.esaulpaugh.headlong.exception.DecodeException;
 
 /**
  * Created by Evo on 1/19/2017.
