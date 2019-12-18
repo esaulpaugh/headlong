@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Integers;
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Test;
@@ -171,7 +170,7 @@ public class PackedEncoderTest {
     @Test
     public void testSignExtendInt() {
         int expected = BizarroIntegers.getInt(FastHex.decode("8FFFFF"), 0, 3);
-        int result = Integers.getPackedInt(FastHex.decode("8FFFFF"), 0, 3);
+        int result = PackedDecoder.getPackedInt(FastHex.decode("8FFFFF"), 0, 3);
         assertTrue(result < 0);
         assertEquals(expected, result);
     }
@@ -179,7 +178,7 @@ public class PackedEncoderTest {
     @Test
     public void testSignExtendLong() {
         long expectedL = BizarroIntegers.getLong(FastHex.decode("8FFFFFFFFF"), 0, 5);
-        long resultL = Integers.getPackedLong(FastHex.decode("8FFFFFFFFF"), 0, 5);
+        long resultL = PackedDecoder.getPackedLong(FastHex.decode("8FFFFFFFFF"), 0, 5);
         assertTrue(resultL < 0);
         assertEquals(expectedL, resultL);
     }

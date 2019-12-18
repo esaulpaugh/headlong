@@ -16,7 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.abi.util.Integers;
+import com.esaulpaugh.headlong.abi.util.Uint;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +43,7 @@ public class UnsignedTest {
     @Test
     public void testToUnsigned() {
         for (int i = 2; i < 63; i++) {
-            final Integers.UintType type = new Integers.UintType(i);
+            final Uint type = new Uint(i);
             final long power = (long) Math.pow(2.0, i);
             for (long j = 0; j < 2; j++)
                 Assertions.assertEquals(j, type.toUnsigned(j));
@@ -51,7 +51,7 @@ public class UnsignedTest {
                 Assertions.assertEquals(power + j, type.toUnsigned(j));
         }
         for (int i = 2; i < 384; i++) {
-            final Integers.UintType type = new Integers.UintType(i);
+            final Uint type = new Uint(i);
             for (long j = 0; j < 2; j++) {
                 BigInteger bigJ = BigInteger.valueOf(j);
                 Assertions.assertEquals(bigJ, type.toUnsigned(bigJ));
@@ -69,7 +69,7 @@ public class UnsignedTest {
     @Test
     public void testToSigned() {
         for (int i = 2; i < 63; i++) {
-            final Integers.UintType type = new Integers.UintType(i);
+            final Uint type = new Uint(i);
             final long power = (long) Math.pow(2.0, i - 1);
             for (long j = power - 2; j < power; j++) {
                 Assertions.assertEquals(j, type.toSigned(j));
@@ -83,7 +83,7 @@ public class UnsignedTest {
         }
         final BigInteger two = BigInteger.valueOf(2L);
         for (int i = 2; i < 384; i++) {
-            final Integers.UintType type = new Integers.UintType(i);
+            final Uint type = new Uint(i);
             final BigInteger power = two.pow(i - 1);
             for (BigInteger j = power.subtract(two); j.compareTo(power) < 0; j = j.add(BigInteger.ONE)) {
 //                System.out.println("i=" + i + ", j=" + j + ": " + expected + " == " + actual);
@@ -100,10 +100,10 @@ public class UnsignedTest {
     }
 
     @Test
-    public void testUintTypeSymmetry() {
+    public void testUintSymmetry() {
         Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
         for (int i = 1; i < 64; i++) {
-            Integers.UintType type = new Integers.UintType(i);
+            Uint type = new Uint(i);
             final long mask = (long) Math.pow(2, i - 1) - 1L;
             for (int j = 0; j < 25; j++) {
                 long x = pickRandom(r);
@@ -116,7 +116,7 @@ public class UnsignedTest {
             }
         }
         for (int i = 64; i <= 256; i++) {
-            Integers.UintType type = new Integers.UintType(i);
+            Uint type = new Uint(i);
             for (int j = 0; j < 25; j++) {
                 BigInteger x = BigInteger.valueOf(pickRandom(r));
                 Assertions.assertEquals(x, type.toSigned(type.toUnsigned(x)));

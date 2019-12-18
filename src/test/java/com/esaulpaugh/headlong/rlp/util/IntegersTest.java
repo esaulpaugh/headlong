@@ -17,7 +17,8 @@ package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+import com.esaulpaugh.headlong.util.exception.DecodeException;
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.util.Utils;
 import org.junit.jupiter.api.Test;

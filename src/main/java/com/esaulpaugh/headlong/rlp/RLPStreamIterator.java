@@ -15,8 +15,8 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
-import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
+import com.esaulpaugh.headlong.util.exception.DecodeException;
+import com.esaulpaugh.headlong.util.exception.UnrecoverableDecodeException;
 
 import java.io.IOException;
 import java.io.InputStream;

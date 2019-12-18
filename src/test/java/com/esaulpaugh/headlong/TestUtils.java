@@ -15,7 +15,7 @@
 */
 package com.esaulpaugh.headlong;
 
-import com.esaulpaugh.headlong.rlp.util.Integers;
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonArray;

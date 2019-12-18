@@ -13,10 +13,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.rlp.util;
+package com.esaulpaugh.headlong.util;
 
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
-import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
+import com.esaulpaugh.headlong.util.exception.DecodeException;
+import com.esaulpaugh.headlong.util.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 
 import java.math.BigInteger;

@@ -13,10 +13,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.rlp.exception;
+package com.esaulpaugh.headlong.util.exception;
 
 /**
- * Indicates a failure to decode illegal or otherwise undecodeable data as per the RLP spec.
+ * Indicates a failure to decode illegal or otherwise undecodeable data.
  */
 public abstract class DecodeException extends Exception {
 

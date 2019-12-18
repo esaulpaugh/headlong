@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.rlp.exception;
+package com.esaulpaugh.headlong.util.exception;
 
 /**
  * Indicates a failure to decode an RLP item due to a short buffer, potentially because the item has not finished

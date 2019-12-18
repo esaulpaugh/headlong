@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Integers;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -116,14 +114,14 @@ public final class PackedDecoder {
     }
 
     private static int decodeInt(int elementLen, IntType intType, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        Integer val = Integers.getPackedInt(buffer, idx, elementLen);
+        Integer val = getPackedInt(buffer, idx, elementLen);
         intType.validate(val);
         dest[destIdx] = val;
         return elementLen;
     }
 
     private static int decodeLong(int elementLen, LongType longType, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        Long val = Integers.getPackedLong(buffer, idx, elementLen);
+        Long val = getPackedLong(buffer, idx, elementLen);
         longType.validate(val);
         dest[destIdx] = val;
         return elementLen;
@@ -187,7 +185,7 @@ public final class PackedDecoder {
     private static int[] decodeIntArray(int elementLen, ABIType<?> elementType, int arrayLen, byte[] buffer, int idx) {
         int[] ints = new int[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            Integer val = Integers.getPackedInt(buffer, idx, elementLen);
+            Integer val = getPackedInt(buffer, idx, elementLen);
             elementType.validate(val);
             ints[i] = val;
             idx += elementLen;
@@ -198,7 +196,7 @@ public final class PackedDecoder {
     private static long[] decodeLongArray(int elementLen, ABIType<?> longType, int arrayLen, byte[] buffer, int idx) {
         long[] longs = new long[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            Long val = Integers.getPackedLong(buffer, idx, elementLen);
+            Long val = getPackedLong(buffer, idx, elementLen);
             longType.validate(val);
             longs[i] = val;
             idx += elementLen;
@@ -209,7 +207,7 @@ public final class PackedDecoder {
     private static BigInteger[] decodeBigIntegerArray(int elementLen, ABIType<?> elementType, int arrayLen, byte[] buffer, int idx) {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            BigInteger val = com.esaulpaugh.headlong.rlp.util.Integers.getBigInt(buffer, idx, elementLen);
+            BigInteger val = com.esaulpaugh.headlong.util.Integers.getBigInt(buffer, idx, elementLen);
             elementType.validate(val);
             bigInts[i] = val;
             idx += elementLen;
@@ -220,11 +218,63 @@ public final class PackedDecoder {
     private static BigDecimal[] decodeBigDecimalArray(int elementLen, BigDecimalType elementType, int arrayLen, byte[] buffer, int idx) {
         BigDecimal[] bigDecimals = new BigDecimal[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            BigDecimal val = new BigDecimal(com.esaulpaugh.headlong.rlp.util.Integers.getBigInt(buffer, idx, elementLen), elementType.scale);
+            BigDecimal val = new BigDecimal(com.esaulpaugh.headlong.util.Integers.getBigInt(buffer, idx, elementLen), elementType.scale);
             elementType.validate(val);
             bigDecimals[i] = val;
             idx += elementLen;
         }
         return bigDecimals;
+    }
+
+    static int getPackedInt(byte[] buffer, int i, int len) {
+        int shiftAmount = 0;
+        int val = 0;
+        byte leftmost;
+        switch (len) { /* cases 4 through 1 fall through */
+        case 4: val = buffer[i+3] & 0xFF; shiftAmount = Byte.SIZE;
+        case 3: val |= (buffer[i+2] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 2: val |= (buffer[i+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 1: val |= ((leftmost = buffer[i]) & 0xFF) << shiftAmount; break;
+        default: throw new IllegalArgumentException("len out of range: " + len);
+        }
+        if(leftmost < 0) { // if negative
+            // sign extend
+            switch (len) {
+            case 1: return val | 0xFFFFFF00;
+            case 2: return val | 0xFFFF0000;
+            case 3: return val | 0xFF000000;
+            }
+        }
+        return val;
+    }
+
+    static long getPackedLong(final byte[] buffer, final int i, final int len) {
+        int shiftAmount = 0;
+        long val = 0L;
+        byte leftmost;
+        switch (len) { /* cases 8 through 1 fall through */
+        case 8: val = buffer[i+7] & 0xFFL; shiftAmount = Byte.SIZE;
+        case 7: val |= (buffer[i+6] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 6: val |= (buffer[i+5] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 5: val |= (buffer[i+4] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 4: val |= (buffer[i+3] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 3: val |= (buffer[i+2] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 2: val |= (buffer[i+1] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 1: val |= ((leftmost = buffer[i]) & 0xFFL) << shiftAmount; break;
+        default: throw new IllegalArgumentException("len out of range: " + len);
+        }
+        if(leftmost < 0) {
+            // sign extend
+            switch (len) { /* cases fall through */
+            case 1: return val | 0xFFFFFFFFFFFFFF00L;
+            case 2: return val | 0xFFFFFFFFFFFF0000L;
+            case 3: return val | 0xFFFFFFFFFF000000L;
+            case 4: return val | 0xFFFFFFFF00000000L;
+            case 5: return val | 0xFFFFFF0000000000L;
+            case 6: return val | 0xFFFF000000000000L;
+            case 7: return val | 0xFF00000000000000L;
+            }
+        }
+        return val;
     }
 }

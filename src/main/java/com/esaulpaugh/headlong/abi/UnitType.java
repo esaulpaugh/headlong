@@ -16,7 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
-import com.esaulpaugh.headlong.rlp.util.Integers;
+import com.esaulpaugh.headlong.util.Integers;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;

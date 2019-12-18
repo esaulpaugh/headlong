@@ -75,7 +75,7 @@ public class Deserializer {
                     BigInteger val = new BigInteger(FastHex.decode(valueValue, 2, valueValue.length() - 2));
                     BigIntegerType bigIntType = (BigIntegerType) type;
                     if(bigIntType.isUnsigned()) {
-                        return new Integers.UintType(bigIntType.getBitLength()).toUnsigned(val);
+                        return new Uint(bigIntType.getBitLength()).toUnsigned(val);
                     }
                     return val;
                 } else {

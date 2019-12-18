@@ -15,12 +15,14 @@
 */
 package com.esaulpaugh.headlong.abi.util;
 
+import com.esaulpaugh.headlong.util.Integers;
+
 import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.abi.util.Utils.EMPTY_BYTE_ARRAY;
 
 /**
- * The mirror image of {@link com.esaulpaugh.headlong.rlp.util.Integers}. Not compatible with the RLP specification.
+ * The mirror image of {@link Integers}. Not compatible with the RLP specification.
  *
  * Negative integers are stored in a minimal big-endian two's complement representation. Non-negative integers are
  * stored full-length. Negative one is represented by the empty byte array. Numbers are sign-extended on decode.
@@ -272,7 +274,7 @@ public final class BizarroIntegers {
     }
 
     /**
-     * NOTE: will always return {@link Long#SIZE} for non-negative integers. See also {@link com.esaulpaugh.headlong.rlp.util.Integers#bitLen(long)}.
+     * NOTE: will always return {@link Long#SIZE} for non-negative integers. See also {@link Integers#bitLen(long)}.
      *
      * @param val   the long value
      * @return  the bit length of the input
