@@ -16,10 +16,9 @@
 package com.esaulpaugh.headlong.abi.util;
 
 import com.esaulpaugh.headlong.util.Integers;
+import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
-
-import static com.esaulpaugh.headlong.abi.util.Utils.EMPTY_BYTE_ARRAY;
 
 /**
  * The mirror image of {@link Integers}. Not compatible with the RLP specification.
@@ -37,7 +36,7 @@ import static com.esaulpaugh.headlong.abi.util.Utils.EMPTY_BYTE_ARRAY;
 public final class BizarroIntegers {
 
     public static byte[] toBytes(byte val) {
-        return val != -1 ? new byte[] { val } : EMPTY_BYTE_ARRAY;
+        return val != -1 ? new byte[] { val } : Strings.EMPTY_BYTE_ARRAY;
     }
 
     public static byte[] toBytes(short val) {

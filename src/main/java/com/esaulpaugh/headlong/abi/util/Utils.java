@@ -21,8 +21,6 @@ import java.util.regex.Pattern;
 
 public final class Utils {
 
-    public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
-
     public static String validateChars(Pattern pattern, String string) throws ParseException {
         Matcher matcher = pattern.matcher(string);
         if (matcher.find()) {

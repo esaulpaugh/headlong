@@ -101,7 +101,7 @@ public class UnsignedTest {
 
     @Test
     public void testUintSymmetry() {
-        Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        Random r = new Random(TestUtils.getSeed(System.nanoTime()));
         for (int i = 1; i < 64; i++) {
             Uint type = new Uint(i);
             final long mask = (long) Math.pow(2, i - 1) - 1L;

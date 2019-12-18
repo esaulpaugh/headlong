@@ -17,12 +17,9 @@ package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.util.exception.DecodeException;
 import com.esaulpaugh.headlong.util.exception.UnrecoverableDecodeException;
-import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-
-import static com.esaulpaugh.headlong.abi.util.Utils.EMPTY_BYTE_ARRAY;
 
 /**
  * Utility for reading and writing integers from and to RLP format.
@@ -37,7 +34,7 @@ public final class Integers {
      * @return  the minimal representation
      */
     public static byte[] toBytes(byte val) {
-        return val != 0 ? new byte[] { val } : EMPTY_BYTE_ARRAY;
+        return val != 0 ? new byte[] { val } : Strings.EMPTY_BYTE_ARRAY;
     }
 
     /**
@@ -409,7 +406,7 @@ public final class Integers {
     }
 
     /**
-     * NOTE: will always return {@link Long#SIZE} for negative integers. See also {@link BizarroIntegers#bitLen(long)}.
+     * NOTE: will always return {@link Long#SIZE} for negative integers. See also abi.util.BizarroIntegers.bitLen(long).
      *
      * @param val   the long value
      * @return  the bit length of the input
