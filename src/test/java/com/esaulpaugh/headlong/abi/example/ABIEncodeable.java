@@ -13,14 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.example;
+package com.esaulpaugh.headlong.abi.example;
 
-public interface RLPEncodeable {
+import com.esaulpaugh.headlong.abi.Tuple;
 
-    Object[] toObjectArray();
+public interface ABIEncodeable {
 
-    byte[] toRLP();
-
-    void toRLP(byte[] dest, int destIndex);
+    Tuple toTuple();
 
 }

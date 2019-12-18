@@ -13,12 +13,19 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.example;
+package com.esaulpaugh.headlong.rlp.example;
 
-import com.esaulpaugh.headlong.abi.Tuple;
+import com.esaulpaugh.headlong.util.exception.DecodeException;
 
-public interface ABIEncodeable {
+public interface RLPAdapter<T> {
 
-    Tuple toTuple();
+    // default interface methods not supported on Android except Android N+
+//    default T decode(byte[] rlp) throws DecodeException {
+//        return decode(rlp, 0);
+//    }
+
+    T decode(byte[] rlp, int index) throws DecodeException;
+
+    byte[] encode(T t);
 
 }

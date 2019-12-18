@@ -15,8 +15,8 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.example.RLPStudent;
-import com.esaulpaugh.headlong.example.StudentTest;
+import com.esaulpaugh.headlong.rlp.example.RLPStudent;
+import com.esaulpaugh.headlong.rlp.example.RLPStudentTest;
 import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.util.exception.DecodeException;
@@ -36,7 +36,7 @@ public class Benchmark {
         RLPStudent plato = null;
 //        StudentRLPAdapter adapter = new StudentRLPAdapter();
 
-        byte[] rlp = Strings.decode(StudentTest.STUDENT_RLP_SEQUENTIAL, HEX);
+        byte[] rlp = Strings.decode(RLPStudentTest.STUDENT_RLP_SEQUENTIAL, HEX);
 //        byte[] temp = new byte[rlp.length];
 
         final int n = 1_000_000;

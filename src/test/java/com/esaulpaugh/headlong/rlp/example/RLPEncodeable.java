@@ -13,19 +13,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.example;
+package com.esaulpaugh.headlong.rlp.example;
 
-import com.esaulpaugh.headlong.util.exception.DecodeException;
+public interface RLPEncodeable {
 
-public interface RLPAdapter<T> {
+    Object[] toObjectArray();
 
-    // default interface methods not supported on Android except Android N+
-//    default T decode(byte[] rlp) throws DecodeException {
-//        return decode(rlp, 0);
-//    }
+    byte[] toRLP();
 
-    T decode(byte[] rlp, int index) throws DecodeException;
-
-    byte[] encode(T t);
+    void toRLP(byte[] dest, int destIndex);
 
 }
