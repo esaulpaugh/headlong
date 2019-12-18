@@ -16,7 +16,7 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.abi.util.JsonUtils;
+import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.google.gson.JsonElement;

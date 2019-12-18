@@ -1,7 +1,6 @@
 package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.abi.MonteCarloTest;
 import com.esaulpaugh.headlong.util.exception.DecodeException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
