@@ -188,6 +188,16 @@
   <import file="${basedir}/.idea/modules/module_headlong.jmh.xml"/>
   
   <import file="${basedir}/.idea/modules/module_headlong.test.xml"/>
+
+  <target name = "build-jar">
+    <jar destfile = "${proj.home}/build/lib/headlong-1.5.1-SNAPSHOT.jar"
+         basedir = "${proj.home}/build/classes/java/main">
+      <manifest>
+        <attribute name = "Implementation-Title" value = "headlong"/>
+        <attribute name = "Implementation-Version" value = "1.5.1-SNAPSHOT"/>
+      </manifest>
+    </jar>
+  </target>
   
   <target name="init" description="Build initialization">
     <!-- Perform any build initialization in this target -->
