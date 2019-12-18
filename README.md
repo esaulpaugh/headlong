@@ -101,6 +101,7 @@ Alternatively:
 
 * Run `gradle build` or `gradle jar` which output to `/build/libs`
 * Use `mvn package` which outputs to `/target`
+* Execute `ant all build-jar` which outputs to `/build/lib`
 * Add headlong as a project dependency
 
 ### Command line interface
