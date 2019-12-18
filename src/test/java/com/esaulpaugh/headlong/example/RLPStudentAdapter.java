@@ -15,23 +15,23 @@
 */
 package com.esaulpaugh.headlong.example;
 
-import com.esaulpaugh.headlong.util.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPListIterator;
+import com.esaulpaugh.headlong.util.exception.DecodeException;
 
 import java.math.BigDecimal;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
-public class StudentRLPAdapter implements RLPAdapter<Student> {
+public class RLPStudentAdapter implements RLPAdapter<RLPStudent> {
 
     @Override
-    public Student decode(byte[] rlp, int index) throws DecodeException {
+    public RLPStudent decode(byte[] rlp, int index) throws DecodeException {
 
         RLPListIterator iter = RLP_STRICT.listIterator(rlp, index);
 
-        return new Student(iter.next().asString(UTF_8),
+        return new RLPStudent(iter.next().asString(UTF_8),
                 iter.next().asFloat(),
                 iter.next().asBytes(),
                 new BigDecimal(iter.next().asBigInt(), iter.next().asInt())
@@ -39,16 +39,16 @@ public class StudentRLPAdapter implements RLPAdapter<Student> {
 
 //        RLPList rlpList = RLP_STRICT.wrapList(rlp, index);
 //        List<RLPItem> elements = rlpList.elements(RLP_STRICT);
-//        return new Student(
+//        return new RLPStudent(
 //                elements.get(0).asString(UTF_8),
 //                elements.get(1).asFloat(),
-//                elements.get(2).asBigInt(),
+//                elements.get(2).asBytes(),
 //                new BigDecimal(elements.get(3).asBigInt(), elements.get(4).asInt())
 //        );
     }
 
     @Override
-    public byte[] encode(Student student) {
+    public byte[] encode(RLPStudent student) {
         return RLPEncoder.encodeAsList(student.toObjectArray());
     }
 }

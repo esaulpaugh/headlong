@@ -15,11 +15,11 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.example.Student;
+import com.esaulpaugh.headlong.example.RLPStudent;
 import com.esaulpaugh.headlong.example.StudentTest;
-import com.esaulpaugh.headlong.util.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Strings;
+import com.esaulpaugh.headlong.util.exception.DecodeException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +33,7 @@ public class Benchmark {
 
     @Test
     public void decodeMicroBenchmark() throws DecodeException {
-        Student plato = null;
+        RLPStudent plato = null;
 //        StudentRLPAdapter adapter = new StudentRLPAdapter();
 
         byte[] rlp = Strings.decode(StudentTest.STUDENT_RLP_SEQUENTIAL, HEX);
@@ -47,14 +47,14 @@ public class Benchmark {
 
         // warmup
         for (int i = 0; i < 2_000_000; i++) {
-            plato = new Student(rlp);
+            plato = new RLPStudent(rlp);
 //            plato.toRLP(temp, 0);
 //            rlp = adapter.encode(plato);
 //            plato = adapter.decode(rlp);
         }
         start = System.nanoTime();
         for (int i = 0; i < n; i++) {
-            plato = new Student(rlp);
+            plato = new RLPStudent(rlp);
 //            plato.toRLP(temp, 0);
 //            rlp = adapter.encode(plato);
 //            plato = adapter.decode(rlp);

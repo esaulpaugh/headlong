@@ -41,7 +41,7 @@ public class StudentTest {
     @Test
     public void rlpDecodeEncode() throws DecodeException {
         final byte[] studentRlp = Strings.decode(STUDENT_RLP_SEQUENTIAL, HEX);
-        Student plato = new Student(studentRlp);
+        RLPStudent plato = new RLPStudent(studentRlp);
         assertEquals(STUDENT_TO_STRING, plato.toString());
 
         byte[] rlp = plato.toRLP();
@@ -51,10 +51,10 @@ public class StudentTest {
     @Test
     public void adapterDecodeEncode() throws DecodeException {
 
-        StudentRLPAdapter adapter = new StudentRLPAdapter();
+        RLPStudentAdapter adapter = new RLPStudentAdapter();
 
         final byte[] studentRlp = Strings.decode(STUDENT_RLP_LIST, HEX);
-        Student plato = adapter.decode(studentRlp, 0);
+        RLPStudent plato = adapter.decode(studentRlp, 0);
 
         assertEquals(STUDENT_TO_STRING, plato.toString());
 
@@ -70,7 +70,7 @@ public class StudentTest {
 
         TupleType tt = TupleType.parse("(string,fixed128x9,bytes,bytes,uint16)");
 
-        Student plato = new Student(tt.decode(studentAbi));
+        ABIStudent plato = new ABIStudent(tt.decode(studentAbi));
 
         ByteBuffer reencoded = tt.encode(plato.toTuple());
 
