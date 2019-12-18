@@ -17,17 +17,16 @@ package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
-import com.esaulpaugh.headlong.util.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.util.Utils;
+import com.esaulpaugh.headlong.util.exception.DecodeException;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveAction;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -80,7 +79,7 @@ public class IntegersTest {
 
     @Test
     public void putGetInt() {
-        new ForkJoinPool().invoke(new IntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        new ForkJoinPool().invoke(new Utils.IntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
     @Test
@@ -161,7 +160,7 @@ public class IntegersTest {
 
     @Test
     public void lenInt() {
-        new ForkJoinPool().invoke(new LenIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        new ForkJoinPool().invoke(new Utils.LenIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
     @Test
@@ -235,76 +234,5 @@ public class IntegersTest {
         rand.nextBytes(src);
         Utils.insertBytes(3, ten, ten.length - 3, (byte) 0, src[1], src[2], src[3]);
         assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, src[1], src[2], src[3] }, ten);
-    }
-
-    public static class IntTask extends RecursiveAction {
-
-        private static final int THRESHOLD = 250_000_000;
-
-        protected final long start, end;
-
-        protected IntTask(long start, long end) {
-            this.start = start;
-            this.end = end;
-        }
-
-        @Override
-        protected void compute() {
-            final long n = end - start;
-            if (n > THRESHOLD) {
-                long midpoint = start + (n / 2);
-                invokeAll(
-                        new IntTask(start, midpoint),
-                        new IntTask(midpoint, end)
-                );
-            } else {
-                doWork();
-            }
-        }
-
-        protected void doWork() {
-            byte[] four = new byte[4];
-            try {
-                final long end = this.end;
-                for (long lo = this.start; lo <= end; lo++) {
-                    int i = (int) lo;
-                    int len = Integers.putInt(i, four, 0);
-                    int r = Integers.getInt(four, 0, len);
-                    if(i != r) {
-                        throw new AssertionError(i + " !=" + r);
-                    }
-                }
-            } catch (DecodeException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    public static class LenIntTask extends IntTask {
-
-        protected LenIntTask(long start, long end) {
-            super(start, end);
-        }
-
-        protected int len(int val) {
-            return Integers.len(val);
-        }
-
-        @Override
-        protected void doWork() {
-            final long end = this.end;
-            for (long lo = this.start; lo <= end; lo++) {
-                int i = (int) lo;
-                int expectedLen = i < 0 || i >= 16_777_216 ? 4
-                        : i >= 65_536 ? 3
-                        : i >= 256 ? 2
-                        : i != 0 ? 1
-                        : 0;
-                int len = LenIntTask.this.len(i); // len(int) can be overridden by subclasses
-                if(expectedLen != len) {
-                    throw new AssertionError(expectedLen + " != " + len);
-                }
-            }
-        }
     }
 }

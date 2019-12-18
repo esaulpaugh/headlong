@@ -17,8 +17,8 @@ package com.esaulpaugh.headlong.abi.util;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.MonteCarloTest;
-import com.esaulpaugh.headlong.rlp.util.IntegersTest;
 import com.esaulpaugh.headlong.util.Strings;
+import com.esaulpaugh.headlong.util.Utils;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
@@ -163,7 +163,7 @@ public class BizarroIntegersTest {
         }
     }
 
-    private static final class BizzaroIntTask extends IntegersTest.IntTask {
+    private static final class BizzaroIntTask extends Utils.IntTask {
 
         public BizzaroIntTask(int start, int end) {
             super(start, end);
@@ -182,7 +182,7 @@ public class BizarroIntegersTest {
         }
     }
 
-    private static final class BizzaroLenIntTask extends IntegersTest.LenIntTask {
+    private static final class BizzaroLenIntTask extends Utils.LenIntTask {
 
         public BizzaroLenIntTask(int start, int end) {
             super(start, end);
