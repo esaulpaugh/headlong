@@ -16,8 +16,6 @@
 package com.esaulpaugh.headlong.abi.util;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.abi.MonteCarloTest;
-import com.esaulpaugh.headlong.rlp.util.IntegersTest;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
@@ -79,7 +77,7 @@ public class BizarroIntegersTest {
 
     @Test
     public void putGetLong() {
-        final Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        final Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
         final byte[] eight = new byte[8];
         final long _2_24 = (long) Math.pow(2.0, Short.SIZE + Byte.SIZE);
         final long _2_16 = (long) Math.pow(2.0, Short.SIZE);
@@ -143,7 +141,7 @@ public class BizarroIntegersTest {
 
     @Test
     public void lenLong() {
-        final Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        final Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
         final int lim = (int) Math.pow(2.0, 15) - 1;
         for (int i = 0; i < lim; i++) {
             long lo = rand.nextLong();
@@ -163,7 +161,7 @@ public class BizarroIntegersTest {
         }
     }
 
-    private static final class BizzaroIntTask extends IntegersTest.IntTask {
+    private static final class BizzaroIntTask extends TestUtils.IntTask {
 
         public BizzaroIntTask(int start, int end) {
             super(start, end);
@@ -182,7 +180,7 @@ public class BizarroIntegersTest {
         }
     }
 
-    private static final class BizzaroLenIntTask extends IntegersTest.LenIntTask {
+    private static final class BizzaroLenIntTask extends TestUtils.LenIntTask {
 
         public BizzaroLenIntTask(int start, int end) {
             super(start, end);

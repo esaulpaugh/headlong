@@ -16,19 +16,18 @@
 package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.abi.MonteCarloTest;
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
-import com.esaulpaugh.headlong.util.Utils;
+import com.esaulpaugh.headlong.exception.DecodeException;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveAction;
 import java.util.function.Supplier;
 
+import static com.esaulpaugh.headlong.TestUtils.insertBytes;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -79,12 +78,12 @@ public class IntegersTest {
 
     @Test
     public void putGetInt() {
-        new ForkJoinPool().invoke(new IntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        new ForkJoinPool().invoke(new TestUtils.IntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
     @Test
     public void putGetLong() throws DecodeException {
-        final Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        final Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
         final byte[] eight = new byte[8];
         final long _2_24 = (long) Math.pow(2.0, Short.SIZE + Byte.SIZE);
         final long _2_16 = (long) Math.pow(2.0, Short.SIZE);
@@ -122,7 +121,7 @@ public class IntegersTest {
     public void putGetBigInt() {
         byte[] dest = new byte[17];
         Arrays.fill(dest, (byte) -1);
-        Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
 
         final int lim = Short.MAX_VALUE * 10;
         for(int i = 0; i < lim; i++) {
@@ -160,12 +159,12 @@ public class IntegersTest {
 
     @Test
     public void lenInt() {
-        new ForkJoinPool().invoke(new LenIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        new ForkJoinPool().invoke(new TestUtils.LenIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
     @Test
     public void lenLong() {
-        final Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        final Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
         final int lim = (int) Math.pow(2.0, 15) - 1;
         for (int i = 0; i < lim; i++) {
             long lo = rand.nextLong();
@@ -186,124 +185,53 @@ public class IntegersTest {
     }
 
     @Test
-    public void insertBytes() {
+    public void testInsertBytes() {
         byte[] ten = new byte[10];
 
         final byte a = 1, b = 11, c = 111, d = 9, e = 99, f = -1, g = -100, h = 64;
 
         Arrays.fill(ten, (byte) 0);
-        Utils.insertBytes(0, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
+        insertBytes(0, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
         assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        Utils.insertBytes(1, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
+        insertBytes(1, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
         assertArrayEquals(new byte[] { 0, d, 0, 0, 0, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        Utils.insertBytes(2, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
+        insertBytes(2, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
         assertArrayEquals(new byte[] { 0, c, d, 0, 0, 0, 0, 0, 0, 0 }, ten);
         Arrays.fill(ten, (byte) 0);
 
         Arrays.fill(ten, (byte) 0);
-        Utils.insertBytes(3, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
+        insertBytes(3, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
         assertArrayEquals(new byte[] { 0, b, c, d, 0, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        Utils.insertBytes(4, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
+        insertBytes(4, ten, 1, (byte) 0, (byte) 0, (byte) 0, (byte) 0, a, b, c, d);
         assertArrayEquals(new byte[] { 0, a, b, c, d, 0, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        Utils.insertBytes(5, ten, 1, (byte) 0, (byte) 0, (byte) 0, a, b, c, d, e);
+        insertBytes(5, ten, 1, (byte) 0, (byte) 0, (byte) 0, a, b, c, d, e);
         assertArrayEquals(new byte[] { 0, a, b, c, d, e, 0, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        Utils.insertBytes(6, ten, 1, (byte) 0, (byte) 0, a, b, c, d, e, f);
+        insertBytes(6, ten, 1, (byte) 0, (byte) 0, a, b, c, d, e, f);
         assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, 0, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        Utils.insertBytes(7, ten, 1, (byte) 0, a, b, c, d, e, f, g);
+        insertBytes(7, ten, 1, (byte) 0, a, b, c, d, e, f, g);
         assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, g, 0, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        Utils.insertBytes(8, ten, 1, a, b, c, d, e, f, g, h);
+        insertBytes(8, ten, 1, a, b, c, d, e, f, g, h);
         assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, g, h, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
         byte[] src = new byte[4];
-        Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
         rand.nextBytes(src);
-        Utils.insertBytes(3, ten, ten.length - 3, (byte) 0, src[1], src[2], src[3]);
+        insertBytes(3, ten, ten.length - 3, (byte) 0, src[1], src[2], src[3]);
         assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, src[1], src[2], src[3] }, ten);
-    }
-
-    public static class IntTask extends RecursiveAction {
-
-        private static final int THRESHOLD = 250_000_000;
-
-        protected final long start, end;
-
-        protected IntTask(long start, long end) {
-            this.start = start;
-            this.end = end;
-        }
-
-        @Override
-        protected void compute() {
-            final long n = end - start;
-            if (n > THRESHOLD) {
-                long midpoint = start + (n / 2);
-                invokeAll(
-                        new IntTask(start, midpoint),
-                        new IntTask(midpoint, end)
-                );
-            } else {
-                doWork();
-            }
-        }
-
-        protected void doWork() {
-            byte[] four = new byte[4];
-            try {
-                final long end = this.end;
-                for (long lo = this.start; lo <= end; lo++) {
-                    int i = (int) lo;
-                    int len = Integers.putInt(i, four, 0);
-                    int r = Integers.getInt(four, 0, len);
-                    if(i != r) {
-                        throw new AssertionError(i + " !=" + r);
-                    }
-                }
-            } catch (DecodeException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    public static class LenIntTask extends IntTask {
-
-        protected LenIntTask(long start, long end) {
-            super(start, end);
-        }
-
-        protected int len(int val) {
-            return Integers.len(val);
-        }
-
-        @Override
-        protected void doWork() {
-            final long end = this.end;
-            for (long lo = this.start; lo <= end; lo++) {
-                int i = (int) lo;
-                int expectedLen = i < 0 || i >= 16_777_216 ? 4
-                        : i >= 65_536 ? 3
-                        : i >= 256 ? 2
-                        : i != 0 ? 1
-                        : 0;
-                int len = LenIntTask.this.len(i); // len(int) can be overridden by subclasses
-                if(expectedLen != len) {
-                    throw new AssertionError(expectedLen + " != " + len);
-                }
-            }
-        }
     }
 }

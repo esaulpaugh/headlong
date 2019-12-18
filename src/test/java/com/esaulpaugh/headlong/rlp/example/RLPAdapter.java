@@ -13,24 +13,19 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.rlp.exception;
+package com.esaulpaugh.headlong.rlp.example;
 
-/**
- * Indicates a failure to decode an RLP item due to a short buffer, potentially because the item has not finished
- * streaming, i.e. it is a prefix of some hypothetical, valid longer item.
- */
-public final class RecoverableDecodeException extends DecodeException {
+import com.esaulpaugh.headlong.exception.DecodeException;
 
-    public RecoverableDecodeException(String msg) {
-        super(msg);
-    }
+public interface RLPAdapter<T> {
 
-    public RecoverableDecodeException(Throwable cause) {
-        super(cause);
-    }
+    // default interface methods not supported on Android except Android N+
+//    default T decode(byte[] rlp) throws DecodeException {
+//        return decode(rlp, 0);
+//    }
 
-    @Override
-    public boolean isRecoverable() {
-        return true;
-    }
+    T decode(byte[] rlp, int index) throws DecodeException;
+
+    byte[] encode(T t);
+
 }

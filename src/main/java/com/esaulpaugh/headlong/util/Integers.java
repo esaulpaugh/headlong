@@ -13,19 +13,16 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.rlp.util;
+package com.esaulpaugh.headlong.util;
 
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
-import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
-import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
+import com.esaulpaugh.headlong.exception.DecodeException;
+import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-import static com.esaulpaugh.headlong.abi.util.Utils.EMPTY_BYTE_ARRAY;
-
 /**
- * Utility for reading and writing integers from and to RLP format.
+ * Utility for reading and writing integers from and to RLP-compatible format.
  */
 public final class Integers {
 
@@ -37,7 +34,7 @@ public final class Integers {
      * @return  the minimal representation
      */
     public static byte[] toBytes(byte val) {
-        return val != 0 ? new byte[] { val } : EMPTY_BYTE_ARRAY;
+        return val != 0 ? new byte[] { val } : Strings.EMPTY_BYTE_ARRAY;
     }
 
     /**
@@ -409,7 +406,7 @@ public final class Integers {
     }
 
     /**
-     * NOTE: will always return {@link Long#SIZE} for negative integers. See also {@link BizarroIntegers#bitLen(long)}.
+     * NOTE: will always return {@link Long#SIZE} for negative integers. See also abi.util.BizarroIntegers.bitLen(long).
      *
      * @param val   the long value
      * @return  the bit length of the input

@@ -15,7 +15,7 @@
 */
 package com.joemelsha.crypto.hash;
 
-import com.esaulpaugh.headlong.abi.MonteCarloTest;
+import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Test;
 import org.spongycastle.crypto.digests.KeccakDigest;
@@ -100,7 +100,7 @@ public class KeccakTest {
         Keccak k = new Keccak(bitLen);
         KeccakDigest k_ = new KeccakDigest(bitLen);
 
-        Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        Random r = new Random(TestUtils.getSeed(System.nanoTime()));
 
         byte[] buffer = new byte[65];
         final int bound = buffer.length + 1;

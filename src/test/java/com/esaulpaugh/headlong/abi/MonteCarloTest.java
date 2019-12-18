@@ -15,7 +15,8 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.JsonUtils;
+import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -39,7 +40,7 @@ public class MonteCarloTest {
     @Test
     public void fuzzTest() throws InterruptedException {
 
-        final long masterMasterSeed = getSeed(System.nanoTime()); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
+        final long masterMasterSeed = TestUtils.getSeed(System.nanoTime()); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
         final int numProcessors = Runtime.getRuntime().availableProcessors();
         final int threadsLen = numProcessors - 1;
@@ -222,9 +223,9 @@ public class MonteCarloTest {
 
     private static MonteCarloTestCase newComplexTestCase() throws ParseException {
         final long time = System.nanoTime();
-        long seed = getSeed(time);
+        long seed = TestUtils.getSeed(time);
         final long origSeed = seed;
-        final long seed2 = getSeed(time + 1);
+        final long seed2 = TestUtils.getSeed(time + 1);
         System.out.println("orig =  " + seed);
         System.out.println("seed2 = " + seed2);
         System.out.println("xor = " + Long.toHexString(seed ^ seed2));
@@ -262,7 +263,7 @@ public class MonteCarloTest {
         final JsonPrimitive version = new JsonPrimitive("1.4.4+commit.3ad2258");
         JsonArray array = new JsonArray();
         int i = 0;
-        for(final long seed : generateSeeds(getSeed(System.nanoTime()), 250)) {
+        for(final long seed : generateSeeds(TestUtils.getSeed(System.nanoTime()), 250)) {
             final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed);
             MonteCarloTestCase testCase = new MonteCarloTestCase(params);
             array.add(testCase.toJsonElement(ugly, "headlong_" + i++, version));
@@ -276,11 +277,5 @@ public class MonteCarloTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    public static long getSeed(final long protoseed) {
-        long c = protoseed * (System.nanoTime() << 1) * -System.nanoTime();
-        c ^= c << 32;
-        return c ^ (c >> 32);
     }
 }

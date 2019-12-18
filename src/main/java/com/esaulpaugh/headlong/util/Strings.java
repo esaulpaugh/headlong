@@ -19,13 +19,14 @@ import com.migcomponents.migbase64.Base64;
 
 import java.nio.charset.StandardCharsets;
 
-import static com.esaulpaugh.headlong.abi.util.Utils.EMPTY_BYTE_ARRAY;
 import static com.migcomponents.migbase64.Base64.*;
 
 /**
  * Utility for encoding and decoding hexadecimal, Base64, and UTF-8-encoded {@code String}s.
  */
 public final class Strings {
+
+    public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
     public static final int BASE_64_URL_SAFE = 3; // 64
     public static final int DECIMAL = 2; // 10

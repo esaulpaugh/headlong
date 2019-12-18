@@ -13,12 +13,20 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.example;
+package com.esaulpaugh.headlong.exception;
 
-import com.esaulpaugh.headlong.abi.Tuple;
+/**
+ * Indicates a failure to decode illegal or otherwise undecodeable data.
+ */
+public abstract class DecodeException extends Exception {
 
-public interface ABIEncodeable {
+    DecodeException(String msg) {
+        super(msg);
+    }
 
-    Tuple toTuple();
+    DecodeException(Throwable cause) {
+        super(cause);
+    }
 
+    public abstract boolean isRecoverable();
 }

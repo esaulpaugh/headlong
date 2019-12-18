@@ -1,7 +1,7 @@
 package com.esaulpaugh.headlong.rlp.util;
 
-import com.esaulpaugh.headlong.abi.MonteCarloTest;
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.exception.DecodeException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +13,7 @@ public class FloatingPointTest {
 
     @Test
     public void testFloat() throws DecodeException {
-        Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        Random r = new Random(TestUtils.getSeed(System.nanoTime()));
         for (int i = 0; i < 20; i++) {
             final float flo = r.nextFloat();
             byte[] floBytes = FloatingPoint.toBytes(flo);
@@ -28,7 +28,7 @@ public class FloatingPointTest {
 
     @Test
     public void testDouble() throws DecodeException {
-        Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        Random r = new Random(TestUtils.getSeed(System.nanoTime()));
         for (int i = 0; i < 20; i++) {
             final double dub = r.nextDouble();
             byte[] dubBytes = FloatingPoint.toBytes(dub);
@@ -43,7 +43,7 @@ public class FloatingPointTest {
 
     @Test
     public void testBigDecimal() {
-        Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        Random r = new Random(TestUtils.getSeed(System.nanoTime()));
         for (int i = 0; i < 20; i++) {
             byte[] random = new byte[1 + r.nextInt(20)];
             final BigDecimal bigDec = new BigDecimal(new BigInteger(random), r.nextInt(20));

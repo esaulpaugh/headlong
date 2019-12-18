@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -29,7 +30,7 @@ public class EqualsTest {
     @Test
     public void testEquals() throws ParseException {
 
-        Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        Random r = new Random(TestUtils.getSeed(System.nanoTime()));
 
         int n = 0;
         do {

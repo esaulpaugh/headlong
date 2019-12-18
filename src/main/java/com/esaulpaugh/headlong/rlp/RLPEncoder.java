@@ -16,7 +16,7 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.rlp.eip778.KeyValuePair;
-import com.esaulpaugh.headlong.rlp.util.Integers;
+import com.esaulpaugh.headlong.util.Integers;
 
 import java.util.Arrays;
 import java.util.List;

@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -36,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class EncodeTest {
 
-    private static final Random RAND = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+    private static final Random RAND = new Random(TestUtils.getSeed(System.nanoTime()));
 
     private static final Class<ParseException> PARSE_ERR = ParseException.class;
 

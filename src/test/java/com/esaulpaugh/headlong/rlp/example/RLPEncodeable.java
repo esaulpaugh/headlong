@@ -13,23 +13,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.rlp.exception;
+package com.esaulpaugh.headlong.rlp.example;
 
-/**
- * Indicates a failure to decode an RLP item that is unrecoverably malformed or exceeds the bounds of its parent item.
- */
-public final class UnrecoverableDecodeException extends DecodeException {
+public interface RLPEncodeable {
 
-    public UnrecoverableDecodeException(String msg) {
-        super(msg);
-    }
+    Object[] toObjectArray();
 
-    public UnrecoverableDecodeException(Throwable cause) {
-        super(cause);
-    }
+    byte[] toRLP();
 
-    @Override
-    public boolean isRecoverable() {
-        return false;
-    }
+    void toRLP(byte[] dest, int destIndex);
+
 }
