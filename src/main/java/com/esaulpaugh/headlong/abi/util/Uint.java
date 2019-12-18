@@ -3,7 +3,7 @@ package com.esaulpaugh.headlong.abi.util;
 import java.math.BigInteger;
 
 /**
- * For converting integers to and from signed and unsigned representation. Use {@code new UintType(8)} for uint8 et cetera.
+ * For converting integers to and from signed and unsigned representation. Use {@code new Uint(8)} for uint8 et cetera.
  */
 public final class Uint {
 
