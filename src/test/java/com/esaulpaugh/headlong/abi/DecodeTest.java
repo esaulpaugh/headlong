@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
@@ -23,21 +24,12 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.text.ParseException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DecodeTest {
 
-    private static final Function FUNCTION;
-
-    static {
-        try {
-            FUNCTION = new Function("gogo((fixed[],int8)[1][][5])", "(ufixed,string)");
-        } catch (ParseException e) {
-            throw new Error(e);
-        }
-    }
+    private static final Function FUNCTION = new Function("gogo((fixed[],int8)[1][][5])", "(ufixed,string)");
 
     private static final byte[] RETURN_BYTES = FastHex.decode(
               "0000000000000000000000000000000000000000000000000000000000000045"
@@ -49,7 +41,7 @@ public class DecodeTest {
     private static final Tuple EXPECTED = new Tuple(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
 
     @Test
-    public void testDecode() throws ParseException {
+    public void testDecode() throws DecodeException {
 
         Tuple decoded = FUNCTION.decodeReturn(RETURN_BYTES);
         assertEquals(EXPECTED, decoded);
@@ -82,10 +74,10 @@ public class DecodeTest {
         };
 
         for (String hex : tooBig) {
-            TestUtils.assertThrown(IllegalArgumentException.class, "exceeds bit limit", () -> tt.decode(Strings.decode(hex)));
+            TestUtils.assertThrown(DecodeException.class, "exceeds bit limit", () -> tt.decode(Strings.decode(hex)));
         }
         for (String hex : tooSmall) {
-            TestUtils.assertThrown(IllegalArgumentException.class, "signed value given for unsigned type", () -> tt.decode(Strings.decode(hex)));
+            TestUtils.assertThrown(DecodeException.class, "signed value given for unsigned type", () -> tt.decode(Strings.decode(hex)));
         }
         for (String hex : justRight) {
             tt.decode(Strings.decode(hex));

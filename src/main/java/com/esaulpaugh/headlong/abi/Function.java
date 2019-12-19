@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.abi.util.Utils;
 import com.google.gson.JsonObject;
@@ -80,15 +81,15 @@ public final class Function implements ABIObject, Serializable {
 
     private final String stateMutability;
 
-    public Function(String signature) throws ParseException {
+    public Function(String signature) {
         this(signature, null);
     }
 
-    public Function(String signature, String outputs) throws ParseException {
+    public Function(String signature, String outputs) {
         this(Type.FUNCTION, signature, outputs, newDefaultDigest());
     }
 
-    public Function(String signature, String outputs, MessageDigest messageDigest) throws ParseException {
+    public Function(String signature, String outputs, MessageDigest messageDigest) {
         this(Type.FUNCTION, signature, outputs, messageDigest);
     }
 
@@ -97,40 +98,48 @@ public final class Function implements ABIObject, Serializable {
      * @param signature the function signature
      * @param outputs   the signature of the tuple containing the return types
      * @param messageDigest the hash function with which to generate the 4-byte selector
-     * @throws ParseException   if {@code signature} or {@code outputs} is malformed
+     * @throws IllegalArgumentException   if {@code signature} or {@code outputs} is malformed
      */
-    public Function(Type type, String signature, String outputs, MessageDigest messageDigest) throws ParseException {
-        final int split = signature.indexOf('(');
-        if(split < 0) {
-            throw new ParseException("params start not found", signature.length());
-        }
-        final TupleType tupleType;
+    public Function(Type type, String signature, String outputs, MessageDigest messageDigest) {
         try {
-            tupleType = (TupleType) TypeFactory.create(signature.substring(split));
-        } catch (ClassCastException cce) {
-            throw new ParseException("illegal signature termination", signature.length()); // e.g. "foo()[]"
-        }
+            final int split = signature.indexOf('(');
+            if (split < 0) {
+                throw new ParseException("params start not found", signature.length());
+            }
+            final TupleType tupleType;
+            try {
+                tupleType = (TupleType) TypeFactory.create(signature.substring(split));
+            } catch (ClassCastException cce) {
+                throw new ParseException("illegal signature termination", signature.length()); // e.g. "foo()[]"
+            }
 
-        this.type = Objects.requireNonNull(type);
-        String name = Utils.validateChars(NON_ASCII_CHAR, signature.substring(0, split));
-        this.name = name.isEmpty() && (type == Type.FALLBACK || type == Type.CONSTRUCTOR) ? null : name;
-        this.inputTypes = tupleType;
-        this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
-        this.stateMutability = null;
-        this.hashAlgorithm = messageDigest.getAlgorithm();
-        validateFunction();
-        generateSelector(messageDigest);
+            this.type = Objects.requireNonNull(type);
+            String name = Utils.validateChars(NON_ASCII_CHAR, signature.substring(0, split));
+            this.name = name.isEmpty() && (type == Type.FALLBACK || type == Type.CONSTRUCTOR) ? null : name;
+            this.inputTypes = tupleType;
+            this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
+            this.stateMutability = null;
+            this.hashAlgorithm = messageDigest.getAlgorithm();
+            validateFunction();
+            generateSelector(messageDigest);
+        } catch (ParseException pe) {
+            throw Utils.illegalArgumentException(pe);
+        }
     }
 
-    public Function(Type type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) throws ParseException {
-        this.type = Objects.requireNonNull(type);
-        this.name = name != null ? Utils.validateChars(ILLEGAL_NAME_CHAR, name) : null;
-        this.inputTypes = Objects.requireNonNull(inputTypes);
-        this.outputTypes = Objects.requireNonNull(outputTypes);
-        this.stateMutability = stateMutability;
-        this.hashAlgorithm = messageDigest.getAlgorithm();
-        validateFunction();
-        generateSelector(messageDigest);
+    public Function(Type type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) {
+        try {
+            this.type = Objects.requireNonNull(type);
+            this.name = name != null ? Utils.validateChars(ILLEGAL_NAME_CHAR, name) : null;
+            this.inputTypes = Objects.requireNonNull(inputTypes);
+            this.outputTypes = Objects.requireNonNull(outputTypes);
+            this.stateMutability = stateMutability;
+            this.hashAlgorithm = messageDigest.getAlgorithm();
+            validateFunction();
+            generateSelector(messageDigest);
+        } catch (ParseException pe) {
+            throw Utils.illegalArgumentException(pe);
+        }
     }
 
     private void generateSelector(MessageDigest messageDigest) {
@@ -204,11 +213,11 @@ public final class Function implements ABIObject, Serializable {
         return stateMutability;
     }
 
-    public Tuple decodeReturn(byte[] returnVals) { // TODO allow decoding of non-calls without a Function
+    public Tuple decodeReturn(byte[] returnVals) throws DecodeException { // TODO allow decoding of non-calls without a Function
         return outputTypes.decode(returnVals);
     }
 
-    public Tuple decodeReturn(ByteBuffer returnVals) {
+    public Tuple decodeReturn(ByteBuffer returnVals) throws DecodeException {
         return outputTypes.decode(returnVals);
     }
 
@@ -239,11 +248,11 @@ public final class Function implements ABIObject, Serializable {
         inputTypes.encodeTail(args, dest);
     }
 
-    public Tuple decodeCall(byte[] array) {
+    public Tuple decodeCall(byte[] array) throws DecodeException {
         return decodeCall(ByteBuffer.wrap(array));
     }
 
-    public Tuple decodeCall(ByteBuffer abiBuffer) {
+    public Tuple decodeCall(ByteBuffer abiBuffer) throws DecodeException {
         final byte[] unitBuffer = ABIType.newUnitBuffer();
         abiBuffer.get(unitBuffer, 0, SELECTOR_LEN);
         final byte[] selector = this.selector;
@@ -280,7 +289,7 @@ public final class Function implements ABIObject, Serializable {
                 Objects.equals(stateMutability, function.stateMutability);
     }
 
-    public static Function parse(String signature) throws ParseException {
+    public static Function parse(String signature) {
         return new Function(signature);
     }
 

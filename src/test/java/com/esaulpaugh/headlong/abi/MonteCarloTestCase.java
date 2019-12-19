@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.util.Utils;
+import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.Gson;
@@ -149,7 +151,7 @@ public class MonteCarloTestCase implements Serializable {
     final Function function;
     final Tuple argsTuple;
 
-    MonteCarloTestCase(Params params) throws ParseException {
+    MonteCarloTestCase(Params params) {
         this.params = params;
 
         final Random rng = new Random(params.seed);
@@ -186,7 +188,7 @@ public class MonteCarloTestCase implements Serializable {
         this(new Params(seed));
     }
 
-    JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) throws ParseException {
+    JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) {
 
         Function f = Function.parse(name + this.function.getParamTypes().canonicalType); // this.function;
 
@@ -289,15 +291,15 @@ public class MonteCarloTestCase implements Serializable {
         throw new RuntimeException("???");
     }
 
-    void run() {
+    void run() throws DecodeException {
         run(this.argsTuple);
     }
 
-    void runNewRandomArgs() {
+    void runNewRandomArgs() throws DecodeException {
         run(generateTuple(function.getParamTypes(), new Random(System.nanoTime())));
     }
 
-    void run(Tuple args) {
+    void run(Tuple args) throws DecodeException {
         Function function = this.function;
 
         ByteBuffer abi = function.encodeCall(args);
@@ -316,7 +318,7 @@ public class MonteCarloTestCase implements Serializable {
         }
     }
 
-    private String generateTupleTypeString(Random r, int tupleDepth) throws ParseException {
+    private String generateTupleTypeString(Random r, int tupleDepth) {
 
         ABIType<?>[] types = new ABIType<?>[r.nextInt(1 + params.maxTupleLen)]; // 0 to max
         for (int i = 0; i < types.length; i++) {
@@ -335,7 +337,7 @@ public class MonteCarloTestCase implements Serializable {
         return signature.toString();
     }
 
-    private ABIType<?> generateType(Random r, final int tupleDepth) throws ParseException {
+    private ABIType<?> generateType(Random r, final int tupleDepth) {
         int index = r.nextInt(CANONICAL_BASE_TYPE_STRINGS.length);
         String baseTypeString = CANONICAL_BASE_TYPE_STRINGS[index];
 
@@ -357,8 +359,11 @@ public class MonteCarloTestCase implements Serializable {
                 sb.append(']');
             }
         }
-
-        return TypeFactory.create(sb.toString());
+        try {
+            return TypeFactory.create(sb.toString());
+        } catch (ParseException pe) {
+            throw Utils.illegalArgumentException(pe);
+        }
     }
 
     private Tuple generateTuple(TupleType tupleType, Random r) {

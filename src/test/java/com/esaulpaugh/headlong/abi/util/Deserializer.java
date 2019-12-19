@@ -25,12 +25,11 @@ import com.google.gson.JsonObject;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.ParseException;
 import java.util.Iterator;
 
 public class Deserializer {
 
-    public static TupleType parseTupleType(String ttStr) throws ParseException {
+    public static TupleType parseTupleType(String ttStr) {
         return parseTupleType(JsonUtils.parseArray(ttStr));
     }
 
@@ -38,7 +37,7 @@ public class Deserializer {
         return parseTupleValue(tupleType, JsonUtils.parseArray(tupleStr));
     }
 
-    public static TupleType parseTupleType(JsonArray typesArray) throws ParseException {
+    public static TupleType parseTupleType(JsonArray typesArray) {
         final int len = typesArray.size();
         String[] typeStrings = new String[len];
         for (int i = 0; i < len; i++) {

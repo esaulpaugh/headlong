@@ -15,6 +15,9 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.util.Utils;
+import com.esaulpaugh.headlong.exception.DecodeException;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -49,7 +52,11 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     public int validate(Object value) {
         validateClass(value);
         BigDecimal dec = (BigDecimal) value;
-        validateBigIntBitLen(dec.unscaledValue());
+        try {
+            validateBigIntBitLen(dec.unscaledValue());
+        } catch (DecodeException de) {
+            throw Utils.illegalArgumentException(de);
+        }
         if(dec.scale() == scale) {
             return UNIT_LENGTH_BYTES;
         }
@@ -62,7 +69,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) {
+    BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) throws DecodeException {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigIntBitLen(bi);

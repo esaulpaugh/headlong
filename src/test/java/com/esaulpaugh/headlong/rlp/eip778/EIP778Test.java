@@ -24,6 +24,7 @@ import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Test;
 
 import java.security.SignatureException;
+import java.text.ParseException;
 import java.util.*;
 
 import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.*;
@@ -58,7 +59,7 @@ public class EIP778Test {
     static {
         try {
             VECTOR = Record.parse(ENR_STRING);
-        } catch (DecodeException e) {
+        } catch (ParseException | DecodeException e) {
             throw new RuntimeException(e);
         }
     }
