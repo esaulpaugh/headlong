@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.abi.util.Utils;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
@@ -363,7 +362,7 @@ public class MonteCarloTestCase implements Serializable {
         try {
             return TypeFactory.create(sb.toString());
         } catch (ParseException pe) {
-            throw Utils.illegalArgumentException(pe);
+            throw new IllegalArgumentException(pe);
         }
     }
 

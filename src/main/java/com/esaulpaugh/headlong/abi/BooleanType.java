@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.exception.DecodeException;
 
 import java.math.BigInteger;
@@ -56,7 +55,7 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    public int validate(Object value) {
+    public int validate(Object value) throws ValidationException {
         validateClass(value);
         return UNIT_LENGTH_BYTES;
     }

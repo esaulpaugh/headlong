@@ -15,26 +15,11 @@
 */
 package com.esaulpaugh.headlong.abi.util;
 
-import com.esaulpaugh.headlong.abi.exception.ValidationException;
-import com.esaulpaugh.headlong.exception.DecodeException;
-
 import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class Utils {
-
-    public static IllegalArgumentException illegalArgumentException(ParseException pe) {
-        return new IllegalArgumentException(pe);
-    }
-
-    public static RuntimeException sneakyValidationException(ValidationException ve) {
-        return new RuntimeException(ve);
-    }
-
-    public static ValidationException validationException(DecodeException de) {
-        return new ValidationException(de.getMessage(), de);
-    }
 
     public static String validateChars(Pattern pattern, String string) throws ParseException {
         Matcher matcher = pattern.matcher(string);

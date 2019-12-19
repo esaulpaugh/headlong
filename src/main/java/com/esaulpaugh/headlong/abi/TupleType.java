@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.exception.ValidationException;
-import com.esaulpaugh.headlong.abi.util.Utils;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Strings;
@@ -233,7 +231,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    public Tuple parseArgument(String s) throws ValidationException {
+    public Tuple parseArgument(String s) {
         throw new UnsupportedOperationException();
     }
 
@@ -249,7 +247,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         try {
             return (TupleType) TypeFactory.create(rawTupleTypeString);
         } catch (ParseException pe) {
-            throw Utils.illegalArgumentException(pe);
+            throw new IllegalArgumentException(pe);
         }
     }
 

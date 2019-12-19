@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.abi.util.Utils;
 import com.esaulpaugh.headlong.exception.DecodeException;
 
@@ -103,10 +102,10 @@ public abstract class ABIType<J> implements Serializable {
 
     public abstract J parseArgument(String s) throws ValidationException;
 
-    void validateClass(Object value) {
+    void validateClass(Object value) throws ValidationException {
         // may throw NPE
         if(clazz != value.getClass() && !clazz.isAssignableFrom(value.getClass())) {
-            throw new IllegalArgumentException("class mismatch: "
+            throw new ValidationException("class mismatch: "
                     + value.getClass().getName()
                     + " not assignable to "
                     + clazz.getName()

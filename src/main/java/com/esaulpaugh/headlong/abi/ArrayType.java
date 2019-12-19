@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.abi.util.Utils;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
@@ -25,7 +24,6 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.abi.UnitType.LOG_2_UNIT_LENGTH_BYTES;
@@ -158,10 +156,10 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
             byte[] bytes = !isString ? (byte[]) value : Strings.decode((String) value, UTF_8);
             staticLen = roundLengthUp(checkLength(bytes.length, value));
             break;
-        case TYPE_CODE_INT: staticLen = validateIntArray((UnitType<?>) elementType, (int[]) value); break;
-        case TYPE_CODE_LONG: staticLen = validateLongArray((UnitType<?>) elementType, (long[]) value); break;
-        case TYPE_CODE_BIG_INTEGER: staticLen = validateBigIntegerArray((UnitType<?>) elementType, (BigInteger[]) value); break;
-        case TYPE_CODE_BIG_DECIMAL: staticLen = validateBigDecimalArray((BigDecimalType) elementType, (BigDecimal[]) value); break;
+        case TYPE_CODE_INT: staticLen = validateIntArray((int[]) value); break;
+        case TYPE_CODE_LONG: staticLen = validateLongArray((long[]) value); break;
+        case TYPE_CODE_BIG_INTEGER: staticLen = validateBigIntegerArray((BigInteger[]) value); break;
+        case TYPE_CODE_BIG_DECIMAL: staticLen = validateBigDecimalArray((BigDecimal[]) value); break;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: staticLen = validateObjectArray((Object[]) value); break;
         default: throw new Error();
@@ -172,68 +170,72 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 : staticLen;
     }
 
-    // TODO REVERT LAMBDA REFACTOR
-    private int validateIntArray(UnitType<?> unitType, int[] arr) {
-        return validateArray(() -> arr.length, arr, (h) -> {
-            try {
-                unitType.validatePrimitiveElement(arr[h[0]]); // validate without boxing primitive
-            } catch (DecodeException de) {
-                throw Utils.sneakyValidationException(new ValidationException(de));
-            }
-        });
-    }
-
-    private void validatePrimitiveElement(UnitType<?> unitType, int[] holder, long[] arr) {
+    private int validateIntArray(int[] arr) throws ValidationException {
+        IntType intType = (IntType) elementType;
+        final int len = arr.length;
+        checkLength(len, arr);
+        int i = 0;
         try {
-            unitType.validatePrimitiveElement(arr[holder[0]]);
-        } catch (DecodeException de) {
-            throw Utils.sneakyValidationException(new ValidationException(de));
-        }
-    }
-
-    private void validateBigIntBitLen(UnitType<?> unitType, int[] holder, BigInteger[] arr) {
-        try {
-            unitType.validateBigIntBitLen(arr[holder[0]]);
-        } catch (DecodeException de) {
-            throw Utils.sneakyValidationException(new ValidationException(de));
-        }
-    }
-
-    private void validateBigDecimal(BigDecimalType bigDecimalType, int[] holder, BigDecimal[] arr) {
-        try {
-            BigDecimal bigDecimal = arr[holder[0]];
-            if (bigDecimal.scale() == bigDecimalType.scale) {
-                bigDecimalType.validateBigIntBitLen(bigDecimal.unscaledValue());
-            } else {
-                throw new IllegalArgumentException("unexpected scale: " + bigDecimal.scale());
+            for ( ; i < len; i++) {
+                intType.validatePrimitiveElement(arr[i]); // validate without boxing primitive
             }
         } catch (DecodeException de) {
-            throw Utils.sneakyValidationException(new ValidationException(de));
+            throw validationException(de, i);
         }
+        return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
     }
 
-    private int validateLongArray(UnitType<?> unitType, long[] arr) throws ValidationException {
+    private int validateLongArray(long[] arr) throws ValidationException {
+        LongType longType = (LongType) elementType;
+        final int len = arr.length;
+        checkLength(len, arr);
+        int i = 0;
         try {
-            return validateArray(() -> arr.length, arr, (h) -> validatePrimitiveElement(unitType, h, arr)); // validate without boxing primitive
-        } catch (RuntimeException re) {
-            throw (ValidationException) re.getCause();
+            for ( ; i < len; i++) {
+                longType.validatePrimitiveElement(arr[i]); // validate without boxing primitive
+            }
+        } catch (DecodeException de) {
+            throw validationException(de, i);
         }
+        return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
     }
 
-    private int validateBigIntegerArray(UnitType<?> unitType, BigInteger[] arr) throws ValidationException {
+    private int validateBigIntegerArray(BigInteger[] arr) throws ValidationException {
+        final int len = arr.length;
+        checkLength(len, arr);
+        BigIntegerType bigIntegerType = (BigIntegerType) elementType;
+        int i = 0;
         try {
-            return validateArray(() -> arr.length, arr, (h) -> validateBigIntBitLen(unitType, h, arr));
-        } catch (RuntimeException re) {
-            throw (ValidationException) re.getCause();
+            for ( ; i < len; i++) {
+                bigIntegerType.validateBigIntBitLen(arr[i]);
+            }
+        } catch (DecodeException de) {
+            throw validationException(de, i);
         }
+        return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
     }
 
-    private int validateBigDecimalArray(BigDecimalType bigDecimalType, BigDecimal[] arr) throws ValidationException {
+    private int validateBigDecimalArray(BigDecimal[] arr) throws ValidationException {
+        final int len = arr.length;
+        checkLength(len, arr);
+        BigDecimalType bigDecimalType = (BigDecimalType) elementType;
+        int i = 0;
         try {
-            return validateArray(() -> arr.length, arr, (h) -> validateBigDecimal(bigDecimalType, h, arr));
-        } catch (RuntimeException re) {
-            throw (ValidationException) re.getCause();
+            for ( ; i < len; i++) {
+                BigDecimal element = arr[i];
+                bigDecimalType.validateBigIntBitLen(element.unscaledValue());
+                if(element.scale() != bigDecimalType.scale) {
+                    throw new ValidationException("unexpected scale: " + element.scale());
+                }
+            }
+        } catch (DecodeException de) {
+            throw validationException(de, i);
         }
+        return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
+    }
+
+    private static ValidationException validationException(DecodeException de, int i) {
+        return new ValidationException("index " + i + ": " + de.getMessage(), de);
     }
 
     /**
@@ -242,40 +244,24 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     private int validateObjectArray(Object[] arr) throws ValidationException {
         final int len = arr.length;
         checkLength(len, arr);
+        int byteLength = elementType.dynamic ? len << LOG_2_UNIT_LENGTH_BYTES : 0; // 32 bytes per offset
         int i = 0;
-        try {
-            int byteLength = elementType.dynamic ? len << LOG_2_UNIT_LENGTH_BYTES : 0; // 32 bytes per offset
-            for ( ; i < len; i++) {
-                byteLength += elementType.validate(arr[i]);
-            }
-            return byteLength;
-        } catch (RuntimeException re) {
-            throw validationException(re, i);
+        for ( ; i < len; i++) {
+            byteLength += elementType.validate(arr[i]);
         }
+        return byteLength;
     }
 
-    private int validateArray(Supplier<Integer> supplyLength, Object array, Consumer<int[]> validateElement) {
-        final int len = supplyLength.get();
-        checkLength(len, array);
-        int i = 0;
-        int[] holder = new int[1];
-        for (; i < len; i++) {
-            holder[0] = i;
-            validateElement.accept(holder);
-        }
-        return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
-    }
-
-    private int checkLength(final int valueLength, Object array) {
+    private int checkLength(final int valueLength, Object value) throws ValidationException {
         final int expected = this.length;
-        if(expected == DYNAMIC_LENGTH || valueLength == expected) {
-            return valueLength;
+        if(expected != DYNAMIC_LENGTH && valueLength != expected) {
+            throw new ValidationException(
+                    Utils.friendlyClassName(value.getClass(), valueLength)
+                            + " not instanceof " + Utils.friendlyClassName(clazz, expected) + ", " +
+                            valueLength + " != " + expected
+            );
         }
-        throw new IllegalArgumentException(
-                Utils.friendlyClassName(array.getClass(), valueLength)
-                        + " not instanceof " + Utils.friendlyClassName(clazz, expected) + ", " +
-                        valueLength + " != " + expected
-        );
+        return valueLength;
     }
 
     @Override
@@ -395,7 +381,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
     private static boolean[] decodeBooleanArray(ByteBuffer bb, int arrayLen, byte[] elementBuffer) throws DecodeException {
         boolean[] booleans = new boolean[arrayLen]; // elements are false by default
-        final int booleanOffset = UNIT_LENGTH_BYTES - 1; // Byte.BYTES
+        final int booleanOffset = UNIT_LENGTH_BYTES - Byte.BYTES;
         for(int i = 0; i < arrayLen; i++) {
             bb.get(elementBuffer);
             for (int j = 0; j < booleanOffset; j++) {
@@ -504,12 +490,8 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         }
     }
 
-    private static ValidationException validationException(RuntimeException re, int i) {
-        return new ValidationException("index " + i + ": " + re.getMessage(), re);
-    }
-
     @Override
-    public J parseArgument(String s) throws ValidationException {
+    public J parseArgument(String s) {
         throw new UnsupportedOperationException();
     }
 

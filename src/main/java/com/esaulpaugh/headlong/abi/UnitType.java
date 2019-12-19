@@ -15,9 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
-import com.esaulpaugh.headlong.abi.util.Utils;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Integers;

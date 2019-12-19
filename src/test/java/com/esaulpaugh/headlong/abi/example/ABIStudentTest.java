@@ -2,7 +2,7 @@ package com.esaulpaugh.headlong.abi.example;
 
 import com.esaulpaugh.headlong.abi.Function;
 import com.esaulpaugh.headlong.abi.TupleType;
-import com.esaulpaugh.headlong.abi.exception.ValidationException;
+import com.esaulpaugh.headlong.abi.ValidationException;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;

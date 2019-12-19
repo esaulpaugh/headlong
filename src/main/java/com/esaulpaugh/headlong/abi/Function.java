@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.abi.util.Utils;
@@ -124,7 +123,7 @@ public final class Function implements ABIObject, Serializable {
             validateFunction();
             generateSelector(messageDigest);
         } catch (ParseException pe) {
-            throw Utils.illegalArgumentException(pe);
+            throw new IllegalArgumentException(pe);
         }
     }
 
@@ -139,7 +138,7 @@ public final class Function implements ABIObject, Serializable {
             validateFunction();
             generateSelector(messageDigest);
         } catch (ParseException pe) {
-            throw Utils.illegalArgumentException(pe);
+            throw new IllegalArgumentException(pe);
         }
     }
 
