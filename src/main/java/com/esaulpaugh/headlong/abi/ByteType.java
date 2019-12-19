@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.exception.DecodeException;
 
 import java.math.BigInteger;
@@ -64,7 +65,7 @@ public final class ByteType extends UnitType<Byte> {
     }
 
     @Override
-    public Byte parseArgument(String s) {
+    public Byte parseArgument(String s) throws ValidationException {
         Byte b = Byte.parseByte(s);
         validate(b);
         return b;

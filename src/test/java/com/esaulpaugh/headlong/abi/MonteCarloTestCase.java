@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.abi.util.Utils;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
@@ -184,11 +185,11 @@ public class MonteCarloTestCase implements Serializable {
         this.argsTuple = generateTuple(function.getParamTypes(), rng);
     }
 
-    MonteCarloTestCase(long seed) throws ParseException {
+    MonteCarloTestCase(long seed) {
         this(new Params(seed));
     }
 
-    JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) {
+    JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) throws ValidationException {
 
         Function f = Function.parse(name + this.function.getParamTypes().canonicalType); // this.function;
 
@@ -291,15 +292,15 @@ public class MonteCarloTestCase implements Serializable {
         throw new RuntimeException("???");
     }
 
-    void run() throws DecodeException {
+    void run() throws ValidationException, DecodeException {
         run(this.argsTuple);
     }
 
-    void runNewRandomArgs() throws DecodeException {
+    void runNewRandomArgs() throws ValidationException, DecodeException {
         run(generateTuple(function.getParamTypes(), new Random(System.nanoTime())));
     }
 
-    void run(Tuple args) throws DecodeException {
+    void run(Tuple args) throws DecodeException, ValidationException {
         Function function = this.function;
 
         ByteBuffer abi = function.encodeCall(args);

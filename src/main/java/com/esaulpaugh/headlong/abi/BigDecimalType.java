@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.abi.util.Utils;
 import com.esaulpaugh.headlong.exception.DecodeException;
 
@@ -49,13 +50,13 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    public int validate(Object value) {
+    public int validate(Object value) throws ValidationException {
         validateClass(value);
         BigDecimal dec = (BigDecimal) value;
         try {
             validateBigIntBitLen(dec.unscaledValue());
         } catch (DecodeException de) {
-            throw Utils.illegalArgumentException(de);
+            throw new ValidationException(de);
         }
         if(dec.scale() == scale) {
             return UNIT_LENGTH_BYTES;
@@ -77,7 +78,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    public BigDecimal parseArgument(String s) {
+    public BigDecimal parseArgument(String s) throws ValidationException {
         BigDecimal bigDec = new BigDecimal(new BigInteger(s), scale);
         validate(bigDec);
         return bigDec;

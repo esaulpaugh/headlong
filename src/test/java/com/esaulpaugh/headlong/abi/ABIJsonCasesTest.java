@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
@@ -104,7 +105,7 @@ public class ABIJsonCasesTest {
             return new ABITestCase(key, args, result, types, new Function("test" + tt.canonicalType));
         }
 
-        private void test(Object[] argsArray) {
+        private void test(Object[] argsArray) throws ValidationException {
 
             Tuple t = new Tuple(argsArray);
             ByteBuffer bb = function.encodeCall(t);
@@ -117,7 +118,7 @@ public class ABIJsonCasesTest {
     }
 
     @Test
-    public void testGithubWikiTest() throws ParseException {
+    public void testGithubWikiTest() throws ParseException, ValidationException {
 
         ABITestCase testCase = ABITestCase.forKey("GithubWikiTest");
 
@@ -131,7 +132,7 @@ public class ABIJsonCasesTest {
     }
 
     @Test
-    public void testSingleInteger() throws ParseException {
+    public void testSingleInteger() throws ParseException, ValidationException {
 
         ABITestCase testCase = ABITestCase.forKey("SingleInteger");
 
@@ -142,7 +143,7 @@ public class ABIJsonCasesTest {
     }
 
     @Test
-    public void testIntegerAndAddress() throws ParseException {
+    public void testIntegerAndAddress() throws ParseException, ValidationException {
 
         ABITestCase testCase = ABITestCase.forKey("IntegerAndAddress");
 

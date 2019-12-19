@@ -15,7 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Utils;
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.exception.DecodeException;
 
 import java.math.BigInteger;
@@ -41,19 +41,19 @@ public final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
-    public BigInteger parseArgument(String s) {
+    public BigInteger parseArgument(String s) throws ValidationException {
         BigInteger bigInt = new BigInteger(s);
         validate(bigInt);
         return bigInt;
     }
 
     @Override
-    public int validate(Object value) {
+    public int validate(Object value) throws ValidationException {
         validateClass(value);
         try {
             validateBigIntBitLen((BigInteger) value);
         } catch (DecodeException de) {
-            throw Utils.illegalArgumentException(de);
+            throw new ValidationException(de);
         }
         return UNIT_LENGTH_BYTES;
     }

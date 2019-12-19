@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.Gson;
@@ -64,13 +65,13 @@ public class MonteCarloTest {
         return new Thread(() -> {
             try {
                 doMonteCarlo(seed, n);
-            } catch (DecodeException de) {
-                throw new RuntimeException(de);
+            } catch (ValidationException | DecodeException e) {
+                throw new RuntimeException(e);
             }
         });
     }
 
-    private static void doMonteCarlo(long masterSeed, int n) throws DecodeException {
+    private static void doMonteCarlo(long masterSeed, int n) throws ValidationException, DecodeException {
 
         final long[] seeds = generateSeeds(masterSeed, n);
 
@@ -135,8 +136,8 @@ public class MonteCarloTest {
                     for (int j = 0; j < n; j++) {
                         this.testCase.run();
                     }
-                } catch (DecodeException de) {
-                    throw new RuntimeException(de);
+                } catch (ValidationException | DecodeException e) {
+                    throw new RuntimeException(e);
                 }
 //                System.out.println(n + " " + (System.nanoTime() - startTime) / 1_000_000.0);
             } else {
@@ -186,8 +187,8 @@ public class MonteCarloTest {
                     for (int j = 0; j < 500; j++) {
                         two.run();
                     }
-                } catch (DecodeException de) {
-                    throw new RuntimeException(de);
+                } catch (ValidationException | DecodeException e) {
+                    throw new RuntimeException(e);
                 }
             });
         }
@@ -267,7 +268,7 @@ public class MonteCarloTest {
 
     @Disabled("run if you need to generate random test cases")
     @Test
-    public void printNewTestCases() {
+    public void printNewTestCases() throws ValidationException {
         final Gson ugly = new GsonBuilder().create();
         final JsonPrimitive version = new JsonPrimitive("1.4.4+commit.3ad2258");
         JsonArray array = new JsonArray();

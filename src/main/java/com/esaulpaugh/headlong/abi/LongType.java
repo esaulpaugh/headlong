@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.exception.DecodeException;
 
 import java.math.BigInteger;
@@ -48,7 +49,7 @@ public final class LongType extends UnitType<Long> {
     }
 
     @Override
-    public Long parseArgument(String s) {
+    public Long parseArgument(String s) throws ValidationException {
         Long lo = Long.parseLong(s);
         validate(lo);
         return lo;

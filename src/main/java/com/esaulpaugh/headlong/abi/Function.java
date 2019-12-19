@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.abi.util.Utils;
@@ -221,31 +222,25 @@ public final class Function implements ABIObject, Serializable {
         return outputTypes.decode(returnVals);
     }
 
-    public int measureCallLength(Tuple args, boolean validate) {
-        return Function.SELECTOR_LEN + (validate ? inputTypes.validate(args) : inputTypes.byteLength(args));
+    public int measureCallLength(Tuple args) throws ValidationException {
+        return Function.SELECTOR_LEN + inputTypes.validate(args);
     }
 
-    public ByteBuffer encodeCallWithArgs(Object... args) {
+    public ByteBuffer encodeCallWithArgs(Object... args) throws ValidationException {
         return encodeCall(new Tuple(args));
     }
 
-    public ByteBuffer encodeCall(Tuple args) {
-        ByteBuffer dest = ByteBuffer.wrap(new byte[measureCallLength(args, true)]); // ByteOrder.BIG_ENDIAN by default
+    public ByteBuffer encodeCall(Tuple args) throws ValidationException {
+        ByteBuffer dest = ByteBuffer.wrap(new byte[measureCallLength(args)]); // ByteOrder.BIG_ENDIAN by default
         encodeCall(args, dest);
         return dest;
     }
 
-    public Function encodeCall(Tuple args, ByteBuffer dest, boolean validate) {
-        if(validate) {
-            inputTypes.validate(args);
-        }
-        encodeCall(args, dest);
-        return this;
-    }
-
-    private void encodeCall(Tuple args, ByteBuffer dest) {
+    public Function encodeCall(Tuple args, ByteBuffer dest) throws ValidationException {
+        inputTypes.validate(args);
         dest.put(selector);
         inputTypes.encodeTail(args, dest);
+        return this;
     }
 
     public Tuple decodeCall(byte[] array) throws DecodeException {

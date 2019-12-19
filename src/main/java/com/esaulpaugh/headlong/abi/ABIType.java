@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.abi.util.Utils;
 import com.esaulpaugh.headlong.exception.DecodeException;
 
@@ -84,7 +85,7 @@ public abstract class ABIType<J> implements Serializable {
 
     abstract int byteLengthPacked(Object value);
 
-    public abstract int validate(Object value);
+    public abstract int validate(Object value) throws ValidationException;
 
     abstract void encodeHead(Object value, ByteBuffer dest, int[] offset);
 
@@ -100,7 +101,7 @@ public abstract class ABIType<J> implements Serializable {
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer) throws DecodeException;
 
-    public abstract J parseArgument(String s);
+    public abstract J parseArgument(String s) throws ValidationException;
 
     void validateClass(Object value) {
         // may throw NPE

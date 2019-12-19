@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.abi.util.Utils;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
@@ -103,7 +104,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    public int validate(final Object value) {
+    public int validate(final Object value) throws ValidationException {
         validateClass(value);
 
         final Tuple tuple = (Tuple) value;
@@ -126,7 +127,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                         : type.validate(elements[i]);
             }
         } catch (RuntimeException re) {
-            throw new IllegalArgumentException("illegal arg @ " + i + ": " + re.getMessage());
+            throw new ValidationException("illegal arg @ " + i + ": " + re.getMessage());
         }
         return len;
     }
@@ -232,7 +233,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    public Tuple parseArgument(String s) {
+    public Tuple parseArgument(String s) throws ValidationException {
         throw new UnsupportedOperationException();
     }
 
@@ -264,26 +265,24 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return parse('(' + rawElementsString + ')');
     }
 
-    public ByteBuffer encodeElements(Object... elements) {
+    public ByteBuffer encodeElements(Object... elements) throws ValidationException {
         return encode(new Tuple(elements));
     }
 
-    public ByteBuffer encode(Tuple values) {
+    public ByteBuffer encode(Tuple values) throws ValidationException {
         ByteBuffer dest = ByteBuffer.allocate(validate(values));
         encodeTail(values, dest);
         return dest;
     }
 
-    public TupleType encode(Tuple values, ByteBuffer dest, boolean validate) {
-        if(validate) {
-            validate(values);
-        }
+    public TupleType encode(Tuple values, ByteBuffer dest) throws ValidationException {
+        validate(values);
         encodeTail(values, dest);
         return this;
     }
 
-    public int measureEncodedLength(Tuple values, boolean validate) {
-        return validate ? validate(values) : byteLength(values);
+    public int measureEncodedLength(Tuple values) throws ValidationException {
+        return validate(values);
     }
 
     public ByteBuffer encodePacked(Tuple values) {

@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.exception.DecodeException;
 
 import java.math.BigInteger;
@@ -48,7 +49,7 @@ public final class IntType extends UnitType<Integer> {
     }
 
     @Override
-    public Integer parseArgument(String s) {
+    public Integer parseArgument(String s) throws ValidationException {
         Integer in = Integer.parseInt(s);
         validate(in);
         return in;

@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.*;
 import org.junit.jupiter.api.Assertions;
@@ -264,7 +265,7 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testParseFunction() throws ParseException {
+    public void testParseFunction() throws ParseException, ValidationException {
 
         Function f;
 

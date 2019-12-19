@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.abi.util.Utils;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
@@ -147,7 +148,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    public int validate(final Object value) {
+    public int validate(final Object value) throws ValidationException {
         validateClass(value);
 
         final int staticLen;
@@ -171,21 +172,22 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 : staticLen;
     }
 
+    // TODO REVERT LAMBDA REFACTOR
     private int validateIntArray(UnitType<?> unitType, int[] arr) {
         return validateArray(() -> arr.length, arr, (h) -> {
             try {
-                unitType.validatePrimitiveElement(arr[h[0]]);
+                unitType.validatePrimitiveElement(arr[h[0]]); // validate without boxing primitive
             } catch (DecodeException de) {
-                throw Utils.illegalArgumentException(de);
+                throw Utils.sneakyValidationException(new ValidationException(de));
             }
-        }); // validate without boxing primitive
+        });
     }
 
     private void validatePrimitiveElement(UnitType<?> unitType, int[] holder, long[] arr) {
         try {
             unitType.validatePrimitiveElement(arr[holder[0]]);
         } catch (DecodeException de) {
-            throw Utils.illegalArgumentException(de);
+            throw Utils.sneakyValidationException(new ValidationException(de));
         }
     }
 
@@ -193,7 +195,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         try {
             unitType.validateBigIntBitLen(arr[holder[0]]);
         } catch (DecodeException de) {
-            throw Utils.illegalArgumentException(de);
+            throw Utils.sneakyValidationException(new ValidationException(de));
         }
     }
 
@@ -206,26 +208,38 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 throw new IllegalArgumentException("unexpected scale: " + bigDecimal.scale());
             }
         } catch (DecodeException de) {
-            throw Utils.illegalArgumentException(de);
+            throw Utils.sneakyValidationException(new ValidationException(de));
         }
     }
 
-    private int validateLongArray(UnitType<?> unitType, long[] arr) {
-        return validateArray(() -> arr.length, arr, (h) -> validatePrimitiveElement(unitType, h, arr)); // validate without boxing primitive
+    private int validateLongArray(UnitType<?> unitType, long[] arr) throws ValidationException {
+        try {
+            return validateArray(() -> arr.length, arr, (h) -> validatePrimitiveElement(unitType, h, arr)); // validate without boxing primitive
+        } catch (RuntimeException re) {
+            throw (ValidationException) re.getCause();
+        }
     }
 
-    private int validateBigIntegerArray(UnitType<?> unitType, BigInteger[] arr) {
-        return validateArray(() -> arr.length, arr, (h) -> validateBigIntBitLen(unitType, h, arr));
+    private int validateBigIntegerArray(UnitType<?> unitType, BigInteger[] arr) throws ValidationException {
+        try {
+            return validateArray(() -> arr.length, arr, (h) -> validateBigIntBitLen(unitType, h, arr));
+        } catch (RuntimeException re) {
+            throw (ValidationException) re.getCause();
+        }
     }
 
-    private int validateBigDecimalArray(BigDecimalType bigDecimalType, BigDecimal[] arr) {
-        return validateArray(() -> arr.length, arr, (h) -> validateBigDecimal(bigDecimalType, h, arr));
+    private int validateBigDecimalArray(BigDecimalType bigDecimalType, BigDecimal[] arr) throws ValidationException {
+        try {
+            return validateArray(() -> arr.length, arr, (h) -> validateBigDecimal(bigDecimalType, h, arr));
+        } catch (RuntimeException re) {
+            throw (ValidationException) re.getCause();
+        }
     }
 
     /**
      * For arrays of arrays or arrays of tuples only.
      */
-    private int validateObjectArray(Object[] arr) {
+    private int validateObjectArray(Object[] arr) throws ValidationException {
         final int len = arr.length;
         checkLength(len, arr);
         int i = 0;
@@ -244,14 +258,10 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         final int len = supplyLength.get();
         checkLength(len, array);
         int i = 0;
-        try {
-            int[] holder = new int[1];
-            for ( ; i < len; i++) {
-                holder[0] = i;
-                validateElement.accept(holder);
-            }
-        } catch (RuntimeException re) {
-            throw validationException(re, i);
+        int[] holder = new int[1];
+        for (; i < len; i++) {
+            holder[0] = i;
+            validateElement.accept(holder);
         }
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
     }
@@ -494,12 +504,12 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         }
     }
 
-    private static IllegalArgumentException validationException(RuntimeException re, int i) {
-        return new IllegalArgumentException("index " + i + ": " + re.getMessage(), re);
+    private static ValidationException validationException(RuntimeException re, int i) {
+        return new ValidationException("index " + i + ": " + re.getMessage(), re);
     }
 
     @Override
-    public J parseArgument(String s) {
+    public J parseArgument(String s) throws ValidationException {
         throw new UnsupportedOperationException();
     }
 

@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.exception.DecodeException;
 
 import java.math.BigInteger;
@@ -78,7 +79,7 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    public Boolean parseArgument(String s) {
+    public Boolean parseArgument(String s) throws ValidationException {
         Boolean bool = Boolean.parseBoolean(s);
         validate(bool);
         return bool;

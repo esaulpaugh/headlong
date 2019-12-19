@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi.util;
 
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.exception.DecodeException;
 
 import java.text.ParseException;
@@ -27,8 +28,12 @@ public final class Utils {
         return new IllegalArgumentException(pe);
     }
 
-    public static IllegalArgumentException illegalArgumentException(DecodeException de) {
-        return new IllegalArgumentException(de.getMessage());
+    public static RuntimeException sneakyValidationException(ValidationException ve) {
+        return new RuntimeException(ve);
+    }
+
+    public static ValidationException validationException(DecodeException de) {
+        return new ValidationException(de.getMessage(), de);
     }
 
     public static String validateChars(Pattern pattern, String string) throws ParseException {

@@ -1,6 +1,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -54,7 +55,7 @@ public class TupleTest {
                 }
 //                testCase.function.encodeCall(Tuple.of(elements));
                 try {
-                    TestUtils.assertThrown(IllegalArgumentException.class, "not assignable to", () -> testCase.function.encodeCall(Tuple.of(elements)));
+                    TestUtils.assertThrown(ValidationException.class, "not assignable to", () -> testCase.function.encodeCall(Tuple.of(elements)));
                 } catch (AssertionError ae) {
                     System.err.println(i);
                     ae.printStackTrace();
@@ -73,7 +74,7 @@ public class TupleTest {
             if(args.elements.length > 0) {
                 int idx = r.nextInt(args.elements.length);
                 replace(args.elements, idx);
-                TestUtils.assertThrown(IllegalArgumentException.class, "null", () -> mctc.function.encodeCall(args));
+                TestUtils.assertThrown(ValidationException.class, "null", () -> mctc.function.encodeCall(args));
             }
         }
     }

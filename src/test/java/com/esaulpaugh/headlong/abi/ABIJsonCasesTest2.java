@@ -13,6 +13,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.exception.ValidationException;
 import com.esaulpaugh.headlong.abi.util.Deserializer;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.util.FastHex;
@@ -61,7 +62,7 @@ public class ABIJsonCasesTest2 {
             }
         }
 
-        private boolean test(boolean function) {
+        private boolean test(boolean function) throws ValidationException {
             byte[] encoding = function ? this.function.encodeCall(values).array() : types.encode(values).array();
             try {
                 assertArrayEquals(result, encoding);
@@ -112,7 +113,7 @@ public class ABIJsonCasesTest2 {
     }
 
     @Test
-    public void testAbiV2Cases() throws ParseException, IOException {
+    public void testAbiV2Cases() throws ParseException, IOException, ValidationException {
         final JsonArray testCases = JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonCasesTest.class, ABI_V2_CASES_PATH));
         for (JsonElement e : testCases) {
             new TestCase(e.getAsJsonObject(), false).test(false);
@@ -121,7 +122,7 @@ public class ABIJsonCasesTest2 {
     }
 
     @Test
-    public void testHeadlongCases() throws ParseException, IOException {
+    public void testHeadlongCases() throws ParseException, IOException, ValidationException {
         final JsonArray testCases = JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonCasesTest.class, HEADLONG_CASES_PATH));
         for (JsonElement e : testCases) {
             new TestCase(e.getAsJsonObject(), true).test(true);
