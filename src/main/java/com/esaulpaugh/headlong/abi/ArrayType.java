@@ -103,7 +103,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL: len = ((Number[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: len = calcObjArrByteLen((Object[]) value, elementType); break;
+        case TYPE_CODE_TUPLE: len = calcObjArrByteLen((Object[]) value); break;
         default: throw new Error();
         }
         // arrays with variable number of elements get +32 for the array length
@@ -112,7 +112,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 : len;
     }
 
-    private static int calcObjArrByteLen(Object[] elements, ABIType<?> elementType) {
+    private int calcObjArrByteLen(Object[] elements) {
         int len = 0;
         for (Object element : elements) {
             len += elementType.byteLength(element);
@@ -133,16 +133,17 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE:
-            final Object[] elements = (Object[]) value;
-            int staticLen = 0;
-            final int len = elements.length;
-            for (int i = 0; i < len; i++) {
-                staticLen += elementType.byteLengthPacked(elements[i]);
-            }
-            return staticLen;
+        case TYPE_CODE_TUPLE: return calcObjArrPackedByteLen((Object[]) value);
         default: throw new Error();
         }
+    }
+
+    private int calcObjArrPackedByteLen(Object[] elements) {
+        int packedLen = 0;
+        for (Object element : elements) {
+            packedLen += elementType.byteLengthPacked(element);
+        }
+        return packedLen;
     }
 
     @Override
