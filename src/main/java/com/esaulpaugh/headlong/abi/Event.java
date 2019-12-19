@@ -36,11 +36,11 @@ public final class Event implements ABIObject {
 
     private final boolean anonymous;
 
-    public Event(String name, String paramsString, boolean[] indexed) throws ParseException {
+    public Event(String name, String paramsString, boolean[] indexed) {
         this(name, paramsString, indexed, false);
     }
 
-    public Event(String name, String paramsString, boolean[] indexed, boolean anonymous) throws ParseException {
+    public Event(String name, String paramsString, boolean[] indexed, boolean anonymous) {
         this(name, TupleType.parse(paramsString), indexed, anonymous);
     }
 

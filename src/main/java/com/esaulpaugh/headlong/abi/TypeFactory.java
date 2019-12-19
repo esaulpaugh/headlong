@@ -86,7 +86,7 @@ final class TypeFactory {
                             throw new ParseException("leading zero in array length", startInt);
                         }
                     } catch (NumberFormatException nfe) {
-                        throw (ParseException) new ParseException("illegal argument", startInt).initCause(nfe);
+                        throw (ParseException) new ParseException("illegal number format", startInt).initCause(nfe);
                     }
                 }
 

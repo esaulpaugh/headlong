@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.exception.DecodeException;
+import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
@@ -100,7 +102,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    public int validate(final Object value) {
+    public int validate(final Object value) throws ValidationException {
         validateClass(value);
 
         final Tuple tuple = (Tuple) value;
@@ -123,7 +125,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                         : type.validate(elements[i]);
             }
         } catch (RuntimeException re) {
-            throw new IllegalArgumentException("illegal arg @ " + i + ": " + re.getMessage());
+            throw new ValidationException("illegal arg @ " + i + ": " + re.getMessage());
         }
         return len;
     }
@@ -168,16 +170,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return headLengths;
     }
 
-    public Tuple decode(byte[] array) {
+    public Tuple decode(byte[] array) throws DecodeException {
         return decode(ByteBuffer.wrap(array));
     }
 
-    public Tuple decode(ByteBuffer bb) {
+    public Tuple decode(ByteBuffer bb) throws DecodeException {
         return decode(bb, newUnitBuffer());
     }
 
     @Override
-    Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
+    Tuple decode(ByteBuffer bb, byte[] unitBuffer) throws DecodeException {
 
 //        final int index = bb.position(); // TODO must pass index to decodeTails if you want to support lenient mode
 
@@ -195,7 +197,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return new Tuple(elements);
     }
 
-    private static void decodeHeads(ByteBuffer bb, ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, Object[] dest) {
+    private static void decodeHeads(ByteBuffer bb, ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, Object[] dest) throws DecodeException {
         final int tupleLen = offsets.length;
         ABIType<?> elementType;
         for (int i = 0; i < tupleLen; i++) {
@@ -208,14 +210,14 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
     }
 
-    private static void decodeTails(ByteBuffer bb, final ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, final Object[] dest) {
+    private static void decodeTails(ByteBuffer bb, final ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, final Object[] dest) throws DecodeException {
         final int tupleLen = offsets.length;
         for (int i = 0; i < tupleLen; i++) {
             final ABIType<?> type = elementTypes[i];
             final int offset = offsets[i];
             final boolean offsetExists = offset > 0;
             if(type.dynamic ^ offsetExists) { // if not matching
-                throw new IllegalArgumentException(type.dynamic ? "offset not found" : "offset found for static element");
+                throw new UnrecoverableDecodeException(type.dynamic ? "offset not found" : "offset found for static element");
             }
             if (offsetExists) {
                 /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
@@ -241,11 +243,15 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return Arrays.equals(elementTypes, tupleType.elementTypes);
     }
 
-    public static TupleType parse(String rawTupleTypeString) throws ParseException {
-        return (TupleType) TypeFactory.create(rawTupleTypeString);
+    public static TupleType parse(String rawTupleTypeString) {
+        try {
+            return (TupleType) TypeFactory.create(rawTupleTypeString);
+        } catch (ParseException pe) {
+            throw new IllegalArgumentException(pe);
+        }
     }
 
-    public static TupleType of(String... typeStrings) throws ParseException {
+    public static TupleType of(String... typeStrings) {
         StringBuilder sb = new StringBuilder("(");
         for (String str : typeStrings) {
             sb.append(str).append(',');
@@ -253,30 +259,28 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return parse(completeTupleTypeString(sb));
     }
 
-    public static TupleType parseElements(String rawElementsString) throws ParseException {
+    public static TupleType parseElements(String rawElementsString) {
         return parse('(' + rawElementsString + ')');
     }
 
-    public ByteBuffer encodeElements(Object... elements) {
+    public ByteBuffer encodeElements(Object... elements) throws ValidationException {
         return encode(new Tuple(elements));
     }
 
-    public ByteBuffer encode(Tuple values) {
+    public ByteBuffer encode(Tuple values) throws ValidationException {
         ByteBuffer dest = ByteBuffer.allocate(validate(values));
         encodeTail(values, dest);
         return dest;
     }
 
-    public TupleType encode(Tuple values, ByteBuffer dest, boolean validate) {
-        if(validate) {
-            validate(values);
-        }
+    public TupleType encode(Tuple values, ByteBuffer dest) throws ValidationException {
+        validate(values);
         encodeTail(values, dest);
         return this;
     }
 
-    public int measureEncodedLength(Tuple values, boolean validate) {
-        return validate ? validate(values) : byteLength(values);
+    public int measureEncodedLength(Tuple values) throws ValidationException {
+        return validate(values);
     }
 
     public ByteBuffer encodePacked(Tuple values) {

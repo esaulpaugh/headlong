@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.Utils;
+import com.esaulpaugh.headlong.exception.DecodeException;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
@@ -83,7 +84,7 @@ public abstract class ABIType<J> implements Serializable {
 
     abstract int byteLengthPacked(Object value);
 
-    public abstract int validate(Object value);
+    public abstract int validate(Object value) throws ValidationException;
 
     abstract void encodeHead(Object value, ByteBuffer dest, int[] offset);
 
@@ -92,18 +93,19 @@ public abstract class ABIType<J> implements Serializable {
     /**
      * Decodes the data at the buffer's current position according to this {@link ABIType}.
      *
-     * @param buffer    the buffer containing the encoded data
-     * @param unitBuffer a buffer of length {@link UnitType#UNIT_LENGTH_BYTES} in which to store intermediate values
-     * @return  the decoded value
+     * @param buffer        the buffer containing the encoded data
+     * @param unitBuffer    a buffer of length {@link UnitType#UNIT_LENGTH_BYTES} in which to store intermediate values
+     * @return              the decoded value
+     * @throws DecodeException  if the data is malformed
      */
-    abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
+    abstract J decode(ByteBuffer buffer, byte[] unitBuffer) throws DecodeException;
 
-    public abstract J parseArgument(String s);
+    public abstract J parseArgument(String s) throws ValidationException;
 
-    void validateClass(Object value) {
+    void validateClass(Object value) throws ValidationException {
         // may throw NPE
         if(clazz != value.getClass() && !clazz.isAssignableFrom(value.getClass())) {
-            throw new IllegalArgumentException("class mismatch: "
+            throw new ValidationException("class mismatch: "
                     + value.getClass().getName()
                     + " not assignable to "
                     + clazz.getName()

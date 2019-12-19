@@ -24,6 +24,7 @@ import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.security.SignatureException;
+import java.text.ParseException;
 import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
@@ -70,11 +71,11 @@ public final class Record {
         this.rlp = recordRLP;
     }
 
-    public static Record parse(String enrString) throws DecodeException {
+    public static Record parse(String enrString) throws DecodeException, ParseException {
         if(enrString.startsWith(ENR_PREFIX)) {
             return decode(Strings.decode(enrString.substring(ENR_PREFIX.length()), BASE_64_URL_SAFE));
         }
-        throw new IllegalArgumentException("prefix \"" + ENR_PREFIX + "\" not found");
+        throw new ParseException("prefix \"" + ENR_PREFIX + "\" not found", 0);
     }
 
     public static Record decode(byte[] record) throws DecodeException {

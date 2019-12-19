@@ -25,7 +25,9 @@ public class TupleTest {
             9L,
             "aha",
             '\0',
-            Tuple.EMPTY
+            Tuple.EMPTY,
+            0.1f,
+            1.9d
     };
 
     @Test
@@ -39,8 +41,6 @@ public class TupleTest {
 
             MonteCarloTestCase testCase = new MonteCarloTestCase(i);
 
-//            System.out.println(i);
-
             Object[] elements = testCase.argsTuple.elements;
 
             final int idx = 0;
@@ -52,9 +52,8 @@ public class TupleTest {
                 } else {
                     elements[idx] = new Object();
                 }
-//                testCase.function.encodeCall(Tuple.of(elements));
                 try {
-                    TestUtils.assertThrown(IllegalArgumentException.class, "not assignable to", () -> testCase.function.encodeCall(Tuple.of(elements)));
+                    TestUtils.assertThrown(ValidationException.class, "not assignable to", () -> testCase.function.encodeCall(Tuple.of(elements)));
                 } catch (AssertionError ae) {
                     System.err.println(i);
                     ae.printStackTrace();
@@ -73,7 +72,7 @@ public class TupleTest {
             if(args.elements.length > 0) {
                 int idx = r.nextInt(args.elements.length);
                 replace(args.elements, idx);
-                TestUtils.assertThrown(IllegalArgumentException.class, "null", () -> mctc.function.encodeCall(args));
+                TestUtils.assertThrown(ValidationException.class, "null", () -> mctc.function.encodeCall(args));
             }
         }
     }
@@ -144,10 +143,10 @@ public class TupleTest {
     }
 
     private static void shuffle(Object[] arr, Random rand) {
-        for (int i = arr.length - 1; i > 0; i--) {
-            int o = rand.nextInt(i + 1);
+        for (int i = arr.length; i > 0; ) {
+            int o = rand.nextInt(i);
             Object x = arr[o];
-            arr[o] = arr[i];
+            arr[o] = arr[--i];
             arr[i] = x;
         }
     }

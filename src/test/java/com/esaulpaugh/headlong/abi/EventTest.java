@@ -17,14 +17,12 @@ package com.esaulpaugh.headlong.abi;
 
 import org.junit.jupiter.api.Test;
 
-import java.text.ParseException;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EventTest {
 
     @Test
-    public void testEvent() throws ParseException {
+    public void testEvent() {
         final String name = "ahoy";
         final boolean[] indexed = new boolean[] { false, false, true, false, true };
         final String paramsString ="(int,uint,(),bool[],ufixed256x10)";

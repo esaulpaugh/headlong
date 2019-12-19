@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
-import java.text.ParseException;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
@@ -63,13 +63,13 @@ public class MonteCarloTest {
         return new Thread(() -> {
             try {
                 doMonteCarlo(seed, n);
-            } catch (ParseException pe) {
-                throw new RuntimeException(pe);
+            } catch (ValidationException | DecodeException e) {
+                throw new RuntimeException(e);
             }
         });
     }
 
-    private static void doMonteCarlo(long masterSeed, int n) throws ParseException {
+    private static void doMonteCarlo(long masterSeed, int n) throws ValidationException, DecodeException {
 
         final long[] seeds = generateSeeds(masterSeed, n);
 
@@ -130,8 +130,12 @@ public class MonteCarloTest {
             final int n = end - start;
             if(n < THRESHOLD) {
 //                long startTime = System.nanoTime();
-                for (int j = 0; j < n; j++) {
-                    this.testCase.run();
+                try {
+                    for (int j = 0; j < n; j++) {
+                        this.testCase.run();
+                    }
+                } catch (ValidationException | DecodeException e) {
+                    throw new RuntimeException(e);
                 }
 //                System.out.println(n + " " + (System.nanoTime() - startTime) / 1_000_000.0);
             } else {
@@ -160,7 +164,7 @@ public class MonteCarloTest {
     }
 
     @Test
-    public void testThreadSafety() throws ParseException, InterruptedException, TimeoutException {
+    public void testThreadSafety() throws InterruptedException, TimeoutException {
 
         final MonteCarloTestCase one = newComplexTestCase();
         final MonteCarloTestCase two = newComplexTestCase();
@@ -177,8 +181,12 @@ public class MonteCarloTest {
         final int threadsLen = threads.length;
         for (int i = 0; i < threadsLen; i++) {
             threads[i] = new Thread(() -> {
-                for (int j = 0; j < 500; j++) {
-                    two.run();
+                try {
+                    for (int j = 0; j < 500; j++) {
+                        two.run();
+                    }
+                } catch (ValidationException | DecodeException e) {
+                    throw new RuntimeException(e);
                 }
             });
         }
@@ -205,7 +213,7 @@ public class MonteCarloTest {
     }
 
     @Test
-    public void testSerialization() throws IOException, ParseException, ClassNotFoundException {
+    public void testSerialization() throws IOException, ClassNotFoundException {
         final MonteCarloTask original = new MonteCarloTask(newComplexTestCase(), 0, 1);
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -221,7 +229,7 @@ public class MonteCarloTest {
         System.out.println("successful deserialization");
     }
 
-    private static MonteCarloTestCase newComplexTestCase() throws ParseException {
+    private static MonteCarloTestCase newComplexTestCase() {
         final long time = System.nanoTime();
         long seed = TestUtils.getSeed(time);
         final long origSeed = seed;
@@ -258,7 +266,7 @@ public class MonteCarloTest {
 
     @Disabled("run if you need to generate random test cases")
     @Test
-    public void printNewTestCases() throws ParseException {
+    public void printNewTestCases() throws ValidationException {
         final Gson ugly = new GsonBuilder().create();
         final JsonPrimitive version = new JsonPrimitive("1.4.4+commit.3ad2258");
         JsonArray array = new JsonArray();

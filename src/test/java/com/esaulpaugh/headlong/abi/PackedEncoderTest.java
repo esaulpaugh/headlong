@@ -16,19 +16,19 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
+import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.text.ParseException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PackedEncoderTest {
 
     @Test
-    public void testPacked() throws ParseException {
+    public void testPacked() throws DecodeException, ValidationException {
 
         TupleType tupleType = TupleType.parse("(int16,bytes1,uint16,string)");
 
@@ -81,7 +81,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testTest() throws ParseException {
+    public void testTest() throws ValidationException, DecodeException {
 
         TupleType tupleType = TupleType.parse("(int24,bool,bool)");
 
@@ -103,7 +103,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testDecodeA() throws ParseException {
+    public void testDecodeA() throws ValidationException, DecodeException {
 
         TupleType tupleType = TupleType.parse("(uint64[],uint64[1],uint64,int72)");
 
@@ -125,7 +125,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testDecodeB() throws ParseException {
+    public void testDecodeB() throws ValidationException, DecodeException {
 
         TupleType tupleType = TupleType.parse("(uint64[],int)");
 
@@ -147,7 +147,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testDecodeC() throws ParseException {
+    public void testDecodeC() throws ValidationException, DecodeException {
         TupleType tupleType = TupleType.parse("(bool,bool[],bool[2])");
 
         Tuple values = new Tuple(true, new boolean[] { true, true, true },  new boolean[] { true, false });
