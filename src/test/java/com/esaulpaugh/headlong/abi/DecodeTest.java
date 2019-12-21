@@ -40,7 +40,7 @@ public class DecodeTest {
     private static final Tuple EXPECTED = new Tuple(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
 
     @Test
-    public void testDecode() throws ValidationException {
+    public void testDecode() throws ABIException {
 
         Tuple decoded = FUNCTION.decodeReturn(RETURN_BYTES);
         assertEquals(EXPECTED, decoded);
@@ -73,10 +73,10 @@ public class DecodeTest {
         };
 
         for (String hex : tooBig) {
-            TestUtils.assertThrown(ValidationException.class, "exceeds bit limit", () -> tt.decode(Strings.decode(hex)));
+            TestUtils.assertThrown(ABIException.class, "exceeds bit limit", () -> tt.decode(Strings.decode(hex)));
         }
         for (String hex : tooSmall) {
-            TestUtils.assertThrown(ValidationException.class, "signed value given for unsigned type", () -> tt.decode(Strings.decode(hex)));
+            TestUtils.assertThrown(ABIException.class, "signed value given for unsigned type", () -> tt.decode(Strings.decode(hex)));
         }
         for (String hex : justRight) {
             tt.decode(Strings.decode(hex));

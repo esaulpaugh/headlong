@@ -83,7 +83,7 @@ public abstract class ABIType<J> implements Serializable {
 
     abstract int byteLengthPacked(Object value);
 
-    public abstract int validate(Object value) throws ValidationException;
+    public abstract int validate(Object value) throws ABIException;
 
     abstract void encodeHead(Object value, ByteBuffer dest, int[] offset);
 
@@ -95,16 +95,16 @@ public abstract class ABIType<J> implements Serializable {
      * @param buffer        the buffer containing the encoded data
      * @param unitBuffer    a buffer of length {@link UnitType#UNIT_LENGTH_BYTES} in which to store intermediate values
      * @return              the decoded value
-     * @throws ValidationException  if the data is malformed
+     * @throws ABIException  if the data is malformed
      */
-    abstract J decode(ByteBuffer buffer, byte[] unitBuffer) throws ValidationException;
+    abstract J decode(ByteBuffer buffer, byte[] unitBuffer) throws ABIException;
 
-    public abstract J parseArgument(String s) throws ValidationException;
+    public abstract J parseArgument(String s) throws ABIException;
 
-    void validateClass(Object value) throws ValidationException {
+    void validateClass(Object value) throws ABIException {
         // may throw NPE
         if(clazz != value.getClass() && !clazz.isAssignableFrom(value.getClass())) {
-            throw new ValidationException("class mismatch: "
+            throw new ABIException("class mismatch: "
                     + value.getClass().getName()
                     + " not assignable to "
                     + clazz.getName()

@@ -46,14 +46,14 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    public int validate(Object value) throws ValidationException {
+    public int validate(Object value) throws ABIException {
         validateClass(value);
         BigDecimal dec = (BigDecimal) value;
         validateBigIntBitLen(dec.unscaledValue());
         if(dec.scale() == scale) {
             return UNIT_LENGTH_BYTES;
         }
-        throw new ValidationException("big decimal scale mismatch: actual != expected: " + dec.scale() + " != " + scale);
+        throw new ABIException("big decimal scale mismatch: actual != expected: " + dec.scale() + " != " + scale);
     }
 
     @Override
@@ -62,7 +62,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) throws ValidationException {
+    BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigIntBitLen(bi);
@@ -70,7 +70,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    public BigDecimal parseArgument(String s) throws ValidationException {
+    public BigDecimal parseArgument(String s) throws ABIException {
         BigDecimal bigDec = new BigDecimal(new BigInteger(s), scale);
         validate(bigDec);
         return bigDec;

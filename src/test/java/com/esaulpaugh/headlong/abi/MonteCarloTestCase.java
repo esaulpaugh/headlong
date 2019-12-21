@@ -182,7 +182,7 @@ public class MonteCarloTestCase implements Serializable {
         this(new Params(seed));
     }
 
-    JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) throws ValidationException {
+    JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) throws ABIException {
 
         Function f = Function.parse(name + this.function.getParamTypes().canonicalType); // this.function;
 
@@ -285,15 +285,15 @@ public class MonteCarloTestCase implements Serializable {
         throw new RuntimeException("???");
     }
 
-    void run() throws ValidationException {
+    void run() throws ABIException {
         run(this.argsTuple);
     }
 
-    void runNewRandomArgs() throws ValidationException {
+    void runNewRandomArgs() throws ABIException {
         run(generateTuple(function.getParamTypes(), new Random(System.nanoTime())));
     }
 
-    void run(Tuple args) throws ValidationException {
+    void run(Tuple args) throws ABIException {
         Function function = this.function;
 
         ByteBuffer abi = function.encodeCall(args);

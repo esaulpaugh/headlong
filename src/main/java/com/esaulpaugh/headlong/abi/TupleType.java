@@ -100,7 +100,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    public int validate(final Object value) throws ValidationException {
+    public int validate(final Object value) throws ABIException {
         validateClass(value);
 
         final Tuple tuple = (Tuple) value;
@@ -123,7 +123,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                         : type.validate(elements[i]);
             }
         } catch (RuntimeException re) {
-            throw new ValidationException("illegal arg @ " + i + ": " + re.getMessage());
+            throw new ABIException("illegal arg @ " + i + ": " + re.getMessage());
         }
         return len;
     }
@@ -168,16 +168,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return headLengths;
     }
 
-    public Tuple decode(byte[] array) throws ValidationException {
+    public Tuple decode(byte[] array) throws ABIException {
         return decode(ByteBuffer.wrap(array));
     }
 
-    public Tuple decode(ByteBuffer bb) throws ValidationException {
+    public Tuple decode(ByteBuffer bb) throws ABIException {
         return decode(bb, newUnitBuffer());
     }
 
     @Override
-    Tuple decode(ByteBuffer bb, byte[] unitBuffer) throws ValidationException {
+    Tuple decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
 
 //        final int index = bb.position(); // TODO must pass index to decodeTails if you want to support lenient mode
 
@@ -195,7 +195,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return new Tuple(elements);
     }
 
-    private static void decodeHeads(ByteBuffer bb, ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, Object[] dest) throws ValidationException {
+    private static void decodeHeads(ByteBuffer bb, ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, Object[] dest) throws ABIException {
         final int tupleLen = offsets.length;
         ABIType<?> elementType;
         for (int i = 0; i < tupleLen; i++) {
@@ -208,14 +208,14 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
     }
 
-    private static void decodeTails(ByteBuffer bb, final ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, final Object[] dest) throws ValidationException {
+    private static void decodeTails(ByteBuffer bb, final ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, final Object[] dest) throws ABIException {
         final int tupleLen = offsets.length;
         for (int i = 0; i < tupleLen; i++) {
             final ABIType<?> type = elementTypes[i];
             final int offset = offsets[i];
             final boolean offsetExists = offset > 0;
             if(type.dynamic ^ offsetExists) { // if not matching
-                throw new ValidationException(type.dynamic ? "offset not found" : "offset found for static element");
+                throw new ABIException(type.dynamic ? "offset not found" : "offset found for static element");
             }
             if (offsetExists) {
                 /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
@@ -261,23 +261,23 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return parse('(' + rawElementsString + ')');
     }
 
-    public ByteBuffer encodeElements(Object... elements) throws ValidationException {
+    public ByteBuffer encodeElements(Object... elements) throws ABIException {
         return encode(new Tuple(elements));
     }
 
-    public ByteBuffer encode(Tuple values) throws ValidationException {
+    public ByteBuffer encode(Tuple values) throws ABIException {
         ByteBuffer dest = ByteBuffer.allocate(validate(values));
         encodeTail(values, dest);
         return dest;
     }
 
-    public TupleType encode(Tuple values, ByteBuffer dest) throws ValidationException {
+    public TupleType encode(Tuple values, ByteBuffer dest) throws ABIException {
         validate(values);
         encodeTail(values, dest);
         return this;
     }
 
-    public int measureEncodedLength(Tuple values) throws ValidationException {
+    public int measureEncodedLength(Tuple values) throws ABIException {
         return validate(values);
     }
 

@@ -27,7 +27,7 @@ import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
  */
 public final class PackedDecoder {
 
-    public static Tuple decode(TupleType tupleType, byte[] buffer) throws ValidationException {
+    public static Tuple decode(TupleType tupleType, byte[] buffer) throws ABIException {
         int numDynamic = 0;
         for (ABIType<?> type : tupleType) {
             if (type.dynamic) {
@@ -43,7 +43,7 @@ public final class PackedDecoder {
         throw new IllegalArgumentException("multiple dynamic elements");
     }
 
-    private static Tuple decodeTopTuple(TupleType tupleType, byte[] buffer, int end) throws ValidationException {
+    private static Tuple decodeTopTuple(TupleType tupleType, byte[] buffer, int end) throws ABIException {
 
         final ABIType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
@@ -82,7 +82,7 @@ public final class PackedDecoder {
         return new Tuple(elements);
     }
 
-    private static int decode(ABIType<?> type, byte[] buffer, int idx, int end, Object[] elements, int i) throws ValidationException {
+    private static int decode(ABIType<?> type, byte[] buffer, int idx, int end, Object[] elements, int i) throws ABIException {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: elements[i] = BooleanType.decodeBoolean(buffer[idx]); return type.byteLengthPacked(null);
         case TYPE_CODE_BYTE: elements[i] = buffer[idx]; return type.byteLengthPacked(null);
@@ -95,7 +95,7 @@ public final class PackedDecoder {
         throw new UnsupportedOperationException("nested tuple?"); // idx += decodeTupleDynamic((TupleType) type, buffer, idx, end, elements, i); break;
     }
 
-    private static Tuple decodeTupleStatic(TupleType tupleType, byte[] buffer) throws ValidationException {
+    private static Tuple decodeTupleStatic(TupleType tupleType, byte[] buffer) throws ABIException {
         final ABIType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
         final Object[] elements = new Object[len];
@@ -110,28 +110,28 @@ public final class PackedDecoder {
         return tuple;
     }
 
-    private static int decodeInt(int elementLen, IntType intType, byte[] buffer, int idx, Object[] dest, int destIdx) throws ValidationException {
+    private static int decodeInt(int elementLen, IntType intType, byte[] buffer, int idx, Object[] dest, int destIdx) throws ABIException {
         Integer val = getPackedInt(buffer, idx, elementLen);
         intType.validate(val);
         dest[destIdx] = val;
         return elementLen;
     }
 
-    private static int decodeLong(int elementLen, LongType longType, byte[] buffer, int idx, Object[] dest, int destIdx) throws ValidationException {
+    private static int decodeLong(int elementLen, LongType longType, byte[] buffer, int idx, Object[] dest, int destIdx) throws ABIException {
         Long val = getPackedLong(buffer, idx, elementLen);
         longType.validate(val);
         dest[destIdx] = val;
         return elementLen;
     }
 
-    private static int decodeBigInteger(int elementLen, BigIntegerType bigIntegerType, byte[] buffer, int idx, Object[] dest, int destIdx) throws ValidationException {
+    private static int decodeBigInteger(int elementLen, BigIntegerType bigIntegerType, byte[] buffer, int idx, Object[] dest, int destIdx) throws ABIException {
         BigInteger val = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
         bigIntegerType.validate(val);
         dest[destIdx] = val;
         return elementLen;
     }
 
-    private static int decodeBigDecimal(int elementLen, BigDecimalType bigDecimalType, byte[] buffer, int idx, Object[] dest, int destIdx) throws ValidationException {
+    private static int decodeBigDecimal(int elementLen, BigDecimalType bigDecimalType, byte[] buffer, int idx, Object[] dest, int destIdx) throws ABIException {
         BigInteger bigInteger = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
         BigDecimal val = new BigDecimal(bigInteger, bigDecimalType.scale);
         bigDecimalType.validate(val);
@@ -139,7 +139,7 @@ public final class PackedDecoder {
         return elementLen;
     }
 
-    private static int decodeArrayDynamic(ArrayType<? extends ABIType<?>, ?> arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) throws ValidationException {
+    private static int decodeArrayDynamic(ArrayType<? extends ABIType<?>, ?> arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) throws ABIException {
         final ABIType<?> elementType = arrayType.elementType;
         final int elementByteLen;
         try {
@@ -179,7 +179,7 @@ public final class PackedDecoder {
         return bytes;
     }
 
-    private static int[] decodeIntArray(int elementLen, ABIType<?> elementType, int arrayLen, byte[] buffer, int idx) throws ValidationException {
+    private static int[] decodeIntArray(int elementLen, ABIType<?> elementType, int arrayLen, byte[] buffer, int idx) throws ABIException {
         int[] ints = new int[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
             Integer val = getPackedInt(buffer, idx, elementLen);
@@ -190,7 +190,7 @@ public final class PackedDecoder {
         return ints;
     }
 
-    private static long[] decodeLongArray(int elementLen, ABIType<?> longType, int arrayLen, byte[] buffer, int idx) throws ValidationException {
+    private static long[] decodeLongArray(int elementLen, ABIType<?> longType, int arrayLen, byte[] buffer, int idx) throws ABIException {
         long[] longs = new long[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
             Long val = getPackedLong(buffer, idx, elementLen);
@@ -201,7 +201,7 @@ public final class PackedDecoder {
         return longs;
     }
 
-    private static BigInteger[] decodeBigIntegerArray(int elementLen, ABIType<?> elementType, int arrayLen, byte[] buffer, int idx) throws ValidationException {
+    private static BigInteger[] decodeBigIntegerArray(int elementLen, ABIType<?> elementType, int arrayLen, byte[] buffer, int idx) throws ABIException {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
             BigInteger val = com.esaulpaugh.headlong.util.Integers.getBigInt(buffer, idx, elementLen);
@@ -212,7 +212,7 @@ public final class PackedDecoder {
         return bigInts;
     }
 
-    private static BigDecimal[] decodeBigDecimalArray(int elementLen, BigDecimalType elementType, int arrayLen, byte[] buffer, int idx) throws ValidationException {
+    private static BigDecimal[] decodeBigDecimalArray(int elementLen, BigDecimalType elementType, int arrayLen, byte[] buffer, int idx) throws ABIException {
         BigDecimal[] bigDecimals = new BigDecimal[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
             BigDecimal val = new BigDecimal(com.esaulpaugh.headlong.util.Integers.getBigInt(buffer, idx, elementLen), elementType.scale);

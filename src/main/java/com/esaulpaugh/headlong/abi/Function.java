@@ -212,40 +212,40 @@ public final class Function implements ABIObject, Serializable {
         return stateMutability;
     }
 
-    public Tuple decodeReturn(byte[] returnVals) throws ValidationException { // TODO allow decoding of non-calls without a Function
+    public Tuple decodeReturn(byte[] returnVals) throws ABIException { // TODO allow decoding of non-calls without a Function
         return outputTypes.decode(returnVals);
     }
 
-    public Tuple decodeReturn(ByteBuffer returnVals) throws ValidationException {
+    public Tuple decodeReturn(ByteBuffer returnVals) throws ABIException {
         return outputTypes.decode(returnVals);
     }
 
-    public int measureCallLength(Tuple args) throws ValidationException {
+    public int measureCallLength(Tuple args) throws ABIException {
         return Function.SELECTOR_LEN + inputTypes.validate(args);
     }
 
-    public ByteBuffer encodeCallWithArgs(Object... args) throws ValidationException {
+    public ByteBuffer encodeCallWithArgs(Object... args) throws ABIException {
         return encodeCall(new Tuple(args));
     }
 
-    public ByteBuffer encodeCall(Tuple args) throws ValidationException {
+    public ByteBuffer encodeCall(Tuple args) throws ABIException {
         ByteBuffer dest = ByteBuffer.wrap(new byte[measureCallLength(args)]); // ByteOrder.BIG_ENDIAN by default
         encodeCall(args, dest);
         return dest;
     }
 
-    public Function encodeCall(Tuple args, ByteBuffer dest) throws ValidationException {
+    public Function encodeCall(Tuple args, ByteBuffer dest) throws ABIException {
         inputTypes.validate(args);
         dest.put(selector);
         inputTypes.encodeTail(args, dest);
         return this;
     }
 
-    public Tuple decodeCall(byte[] array) throws ValidationException {
+    public Tuple decodeCall(byte[] array) throws ABIException {
         return decodeCall(ByteBuffer.wrap(array));
     }
 
-    public Tuple decodeCall(ByteBuffer abiBuffer) throws ValidationException {
+    public Tuple decodeCall(ByteBuffer abiBuffer) throws ABIException {
         final byte[] unitBuffer = ABIType.newUnitBuffer();
         abiBuffer.get(unitBuffer, 0, SELECTOR_LEN);
         final byte[] selector = this.selector;

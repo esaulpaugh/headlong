@@ -264,7 +264,7 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testParseFunction() throws ParseException, ValidationException {
+    public void testParseFunction() throws ParseException, ABIException {
 
         Function f;
 

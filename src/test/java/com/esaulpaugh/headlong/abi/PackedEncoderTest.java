@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PackedEncoderTest {
 
     @Test
-    public void testPacked() throws ValidationException {
+    public void testPacked() throws ABIException {
 
         TupleType tupleType = TupleType.parse("(int16,bytes1,uint16,string)");
 
@@ -80,7 +80,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testTest() throws ValidationException {
+    public void testTest() throws ABIException {
 
         TupleType tupleType = TupleType.parse("(int24,bool,bool)");
 
@@ -102,7 +102,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testDecodeA() throws ValidationException {
+    public void testDecodeA() throws ABIException {
 
         TupleType tupleType = TupleType.parse("(uint64[],uint64[1],uint64,int72)");
 
@@ -124,7 +124,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testDecodeB() throws ValidationException {
+    public void testDecodeB() throws ABIException {
 
         TupleType tupleType = TupleType.parse("(uint64[],int)");
 
@@ -146,7 +146,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testDecodeC() throws ValidationException {
+    public void testDecodeC() throws ABIException {
         TupleType tupleType = TupleType.parse("(bool,bool[],bool[2])");
 
         Tuple values = new Tuple(true, new boolean[] { true, true, true },  new boolean[] { true, false });

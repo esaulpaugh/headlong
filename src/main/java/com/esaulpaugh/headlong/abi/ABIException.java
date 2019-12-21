@@ -15,17 +15,17 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-public class ValidationException extends Exception {
+public class ABIException extends Exception {
 
-    public ValidationException(String msg) {
+    public ABIException(String msg) {
         super(msg);
     }
 
-    public ValidationException(Throwable cause) {
+    public ABIException(Throwable cause) {
         super(cause);
     }
 
-    public ValidationException(String msg, Throwable cause) {
+    public ABIException(String msg, Throwable cause) {
         super(msg, cause);
     }
 }
