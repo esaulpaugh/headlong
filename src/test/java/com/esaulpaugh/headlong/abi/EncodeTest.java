@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -124,7 +123,7 @@ public class EncodeTest {
     }
 
     @Test
-    public void simpleFunctionTest() throws DecodeException, ValidationException {
+    public void simpleFunctionTest() throws ValidationException {
         Function f = new Function("baz(uint32,bool)"); // canonicalizes and parses any signature automatically
         Tuple args = new Tuple(69L, true);
 
@@ -145,7 +144,7 @@ public class EncodeTest {
     }
 
     @Test
-    public void uint8ArrayTest() throws DecodeException, ValidationException {
+    public void uint8ArrayTest() throws ValidationException {
         Function f = new Function("baz(uint8[])");
 
         Tuple args = Tuple.singleton(new int[] { 0xFF, -1, 1, 2, 0 });
@@ -216,7 +215,7 @@ public class EncodeTest {
     }
 
     @Test
-    public void complexFunctionTest() throws DecodeException, ValidationException {
+    public void complexFunctionTest() throws ValidationException {
         Function f = new Function("(function[2][][],bytes24,string[0][0],address[],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
 
         byte[] func = new byte[24];

@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -63,13 +62,13 @@ public class MonteCarloTest {
         return new Thread(() -> {
             try {
                 doMonteCarlo(seed, n);
-            } catch (ValidationException | DecodeException e) {
-                throw new RuntimeException(e);
+            } catch (ValidationException ve) {
+                throw new RuntimeException(ve);
             }
         });
     }
 
-    private static void doMonteCarlo(long masterSeed, int n) throws ValidationException, DecodeException {
+    private static void doMonteCarlo(long masterSeed, int n) throws ValidationException {
 
         final long[] seeds = generateSeeds(masterSeed, n);
 
@@ -134,8 +133,8 @@ public class MonteCarloTest {
                     for (int j = 0; j < n; j++) {
                         this.testCase.run();
                     }
-                } catch (ValidationException | DecodeException e) {
-                    throw new RuntimeException(e);
+                } catch (ValidationException ve) {
+                    throw new RuntimeException(ve);
                 }
 //                System.out.println(n + " " + (System.nanoTime() - startTime) / 1_000_000.0);
             } else {
@@ -185,8 +184,8 @@ public class MonteCarloTest {
                     for (int j = 0; j < 500; j++) {
                         two.run();
                     }
-                } catch (ValidationException | DecodeException e) {
-                    throw new RuntimeException(e);
+                } catch (ValidationException ve) {
+                    throw new RuntimeException(ve);
                 }
             });
         }

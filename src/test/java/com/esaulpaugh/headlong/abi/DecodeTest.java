@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
@@ -41,7 +40,7 @@ public class DecodeTest {
     private static final Tuple EXPECTED = new Tuple(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
 
     @Test
-    public void testDecode() throws DecodeException {
+    public void testDecode() throws ValidationException {
 
         Tuple decoded = FUNCTION.decodeReturn(RETURN_BYTES);
         assertEquals(EXPECTED, decoded);
@@ -74,10 +73,10 @@ public class DecodeTest {
         };
 
         for (String hex : tooBig) {
-            TestUtils.assertThrown(DecodeException.class, "exceeds bit limit", () -> tt.decode(Strings.decode(hex)));
+            TestUtils.assertThrown(ValidationException.class, "exceeds bit limit", () -> tt.decode(Strings.decode(hex)));
         }
         for (String hex : tooSmall) {
-            TestUtils.assertThrown(DecodeException.class, "signed value given for unsigned type", () -> tt.decode(Strings.decode(hex)));
+            TestUtils.assertThrown(ValidationException.class, "signed value given for unsigned type", () -> tt.decode(Strings.decode(hex)));
         }
         for (String hex : justRight) {
             tt.decode(Strings.decode(hex));

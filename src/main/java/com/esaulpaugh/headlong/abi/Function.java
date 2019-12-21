@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.abi.util.Utils;
 import com.google.gson.JsonObject;
@@ -213,11 +212,11 @@ public final class Function implements ABIObject, Serializable {
         return stateMutability;
     }
 
-    public Tuple decodeReturn(byte[] returnVals) throws DecodeException { // TODO allow decoding of non-calls without a Function
+    public Tuple decodeReturn(byte[] returnVals) throws ValidationException { // TODO allow decoding of non-calls without a Function
         return outputTypes.decode(returnVals);
     }
 
-    public Tuple decodeReturn(ByteBuffer returnVals) throws DecodeException {
+    public Tuple decodeReturn(ByteBuffer returnVals) throws ValidationException {
         return outputTypes.decode(returnVals);
     }
 
@@ -242,11 +241,11 @@ public final class Function implements ABIObject, Serializable {
         return this;
     }
 
-    public Tuple decodeCall(byte[] array) throws DecodeException {
+    public Tuple decodeCall(byte[] array) throws ValidationException {
         return decodeCall(ByteBuffer.wrap(array));
     }
 
-    public Tuple decodeCall(ByteBuffer abiBuffer) throws DecodeException {
+    public Tuple decodeCall(ByteBuffer abiBuffer) throws ValidationException {
         final byte[] unitBuffer = ABIType.newUnitBuffer();
         abiBuffer.get(unitBuffer, 0, SELECTOR_LEN);
         final byte[] selector = this.selector;

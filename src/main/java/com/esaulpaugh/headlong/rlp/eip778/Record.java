@@ -20,7 +20,7 @@ import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
 import com.esaulpaugh.headlong.rlp.RLPListIterator;
-import com.esaulpaugh.headlong.exception.DecodeException;
+import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.security.SignatureException;

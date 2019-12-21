@@ -15,15 +15,9 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Utils;
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.io.Serializable;
@@ -35,10 +29,10 @@ import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.*;
 
-import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.ABIType.*;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
-import static com.esaulpaugh.headlong.abi.ABIType.*;
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -291,15 +285,15 @@ public class MonteCarloTestCase implements Serializable {
         throw new RuntimeException("???");
     }
 
-    void run() throws ValidationException, DecodeException {
+    void run() throws ValidationException {
         run(this.argsTuple);
     }
 
-    void runNewRandomArgs() throws ValidationException, DecodeException {
+    void runNewRandomArgs() throws ValidationException {
         run(generateTuple(function.getParamTypes(), new Random(System.nanoTime())));
     }
 
-    void run(Tuple args) throws DecodeException, ValidationException {
+    void run(Tuple args) throws ValidationException {
         Function function = this.function;
 
         ByteBuffer abi = function.encodeCall(args);

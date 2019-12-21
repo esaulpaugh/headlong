@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.Utils;
-import com.esaulpaugh.headlong.exception.DecodeException;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
@@ -96,9 +95,9 @@ public abstract class ABIType<J> implements Serializable {
      * @param buffer        the buffer containing the encoded data
      * @param unitBuffer    a buffer of length {@link UnitType#UNIT_LENGTH_BYTES} in which to store intermediate values
      * @return              the decoded value
-     * @throws DecodeException  if the data is malformed
+     * @throws ValidationException  if the data is malformed
      */
-    abstract J decode(ByteBuffer buffer, byte[] unitBuffer) throws DecodeException;
+    abstract J decode(ByteBuffer buffer, byte[] unitBuffer) throws ValidationException;
 
     public abstract J parseArgument(String s) throws ValidationException;
 

@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
-import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
@@ -170,16 +168,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return headLengths;
     }
 
-    public Tuple decode(byte[] array) throws DecodeException {
+    public Tuple decode(byte[] array) throws ValidationException {
         return decode(ByteBuffer.wrap(array));
     }
 
-    public Tuple decode(ByteBuffer bb) throws DecodeException {
+    public Tuple decode(ByteBuffer bb) throws ValidationException {
         return decode(bb, newUnitBuffer());
     }
 
     @Override
-    Tuple decode(ByteBuffer bb, byte[] unitBuffer) throws DecodeException {
+    Tuple decode(ByteBuffer bb, byte[] unitBuffer) throws ValidationException {
 
 //        final int index = bb.position(); // TODO must pass index to decodeTails if you want to support lenient mode
 
@@ -197,7 +195,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return new Tuple(elements);
     }
 
-    private static void decodeHeads(ByteBuffer bb, ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, Object[] dest) throws DecodeException {
+    private static void decodeHeads(ByteBuffer bb, ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, Object[] dest) throws ValidationException {
         final int tupleLen = offsets.length;
         ABIType<?> elementType;
         for (int i = 0; i < tupleLen; i++) {
@@ -210,14 +208,14 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
     }
 
-    private static void decodeTails(ByteBuffer bb, final ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, final Object[] dest) throws DecodeException {
+    private static void decodeTails(ByteBuffer bb, final ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, final Object[] dest) throws ValidationException {
         final int tupleLen = offsets.length;
         for (int i = 0; i < tupleLen; i++) {
             final ABIType<?> type = elementTypes[i];
             final int offset = offsets[i];
             final boolean offsetExists = offset > 0;
             if(type.dynamic ^ offsetExists) { // if not matching
-                throw new UnrecoverableDecodeException(type.dynamic ? "offset not found" : "offset found for static element");
+                throw new ValidationException(type.dynamic ? "offset not found" : "offset found for static element");
             }
             if (offsetExists) {
                 /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */

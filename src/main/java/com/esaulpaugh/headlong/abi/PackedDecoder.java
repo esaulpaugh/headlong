@@ -15,9 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
-import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -30,25 +27,18 @@ import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
  */
 public final class PackedDecoder {
 
-    public static Tuple decode(TupleType tupleType, byte[] buffer) throws DecodeException {
-
+    public static Tuple decode(TupleType tupleType, byte[] buffer) throws ValidationException {
         int numDynamic = 0;
-
         for (ABIType<?> type : tupleType) {
             if (type.dynamic) {
                 numDynamic++;
             }
         }
-
-        try {
-            if (numDynamic == 0) {
-                return decodeTupleStatic(tupleType, buffer);
-            }
-            if (numDynamic == 1) {
-                return decodeTopTuple(tupleType, buffer, buffer.length);
-            }
-        } catch (ValidationException ve) {
-            throw new UnrecoverableDecodeException(ve);
+        if (numDynamic == 0) {
+            return decodeTupleStatic(tupleType, buffer);
+        }
+        if (numDynamic == 1) {
+            return decodeTopTuple(tupleType, buffer, buffer.length);
         }
         throw new IllegalArgumentException("multiple dynamic elements");
     }
