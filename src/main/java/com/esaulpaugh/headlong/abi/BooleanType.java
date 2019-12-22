@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
@@ -55,7 +53,7 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    public int validate(Object value) throws ValidationException {
+    public int validate(Object value) throws ABIException {
         validateClass(value);
         return UNIT_LENGTH_BYTES;
     }
@@ -66,7 +64,7 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    Boolean decode(ByteBuffer bb, byte[] unitBuffer) throws DecodeException {
+    Boolean decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigIntBitLen(bi);
@@ -78,7 +76,7 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    public Boolean parseArgument(String s) throws ValidationException {
+    public Boolean parseArgument(String s) throws ABIException {
         Boolean bool = Boolean.parseBoolean(s);
         validate(bool);
         return bool;

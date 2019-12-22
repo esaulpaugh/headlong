@@ -13,24 +13,20 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.exception;
+package com.esaulpaugh.headlong.rlp.exception;
 
 /**
- * Indicates a failure to decode an RLP item due to a short buffer, potentially because the item has not finished
- * streaming, i.e. it is a prefix of some hypothetical, valid longer item.
+ * Indicates a failure to decode illegal or otherwise undecodeable data.
  */
-public final class RecoverableDecodeException extends DecodeException {
+public abstract class DecodeException extends Exception {
 
-    public RecoverableDecodeException(String msg) {
+    DecodeException(String msg) {
         super(msg);
     }
 
-    public RecoverableDecodeException(Throwable cause) {
+    DecodeException(Throwable cause) {
         super(cause);
     }
 
-    @Override
-    public boolean isRecoverable() {
-        return true;
-    }
+    public abstract boolean isRecoverable();
 }

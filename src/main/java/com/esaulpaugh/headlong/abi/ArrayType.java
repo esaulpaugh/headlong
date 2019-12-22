@@ -16,8 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.Utils;
-import com.esaulpaugh.headlong.exception.DecodeException;
-import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.lang.reflect.Array;
@@ -103,7 +101,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL: len = ((Number[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: len = calcObjArrByteLen((Object[]) value, elementType); break;
+        case TYPE_CODE_TUPLE: len = calcObjArrByteLen((Object[]) value); break;
         default: throw new Error();
         }
         // arrays with variable number of elements get +32 for the array length
@@ -112,7 +110,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 : len;
     }
 
-    private static int calcObjArrByteLen(Object[] elements, ABIType<?> elementType) {
+    private int calcObjArrByteLen(Object[] elements) {
         int len = 0;
         for (Object element : elements) {
             len += elementType.byteLength(element);
@@ -133,20 +131,21 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE:
-            final Object[] elements = (Object[]) value;
-            int staticLen = 0;
-            final int len = elements.length;
-            for (int i = 0; i < len; i++) {
-                staticLen += elementType.byteLengthPacked(elements[i]);
-            }
-            return staticLen;
+        case TYPE_CODE_TUPLE: return calcObjArrPackedByteLen((Object[]) value);
         default: throw new Error();
         }
     }
 
+    private int calcObjArrPackedByteLen(Object[] elements) {
+        int packedLen = 0;
+        for (Object element : elements) {
+            packedLen += elementType.byteLengthPacked(element);
+        }
+        return packedLen;
+    }
+
     @Override
-    public int validate(final Object value) throws ValidationException {
+    public int validate(final Object value) throws ABIException {
         validateClass(value);
 
         final int staticLen;
@@ -170,7 +169,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 : staticLen;
     }
 
-    private int validateIntArray(int[] arr) throws ValidationException {
+    private int validateIntArray(int[] arr) throws ABIException {
         IntType intType = (IntType) elementType;
         final int len = arr.length;
         checkLength(len, arr);
@@ -179,13 +178,13 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
             for ( ; i < len; i++) {
                 intType.validatePrimitiveElement(arr[i]); // validate without boxing primitive
             }
-        } catch (DecodeException de) {
-            throw validationException(de, i);
+        } catch (ABIException ve) {
+            throw abiException(ve, i);
         }
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
     }
 
-    private int validateLongArray(long[] arr) throws ValidationException {
+    private int validateLongArray(long[] arr) throws ABIException {
         LongType longType = (LongType) elementType;
         final int len = arr.length;
         checkLength(len, arr);
@@ -194,13 +193,13 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
             for ( ; i < len; i++) {
                 longType.validatePrimitiveElement(arr[i]); // validate without boxing primitive
             }
-        } catch (DecodeException de) {
-            throw validationException(de, i);
+        } catch (ABIException ve) {
+            throw abiException(ve, i);
         }
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
     }
 
-    private int validateBigIntegerArray(BigInteger[] arr) throws ValidationException {
+    private int validateBigIntegerArray(BigInteger[] arr) throws ABIException {
         final int len = arr.length;
         checkLength(len, arr);
         BigIntegerType bigIntegerType = (BigIntegerType) elementType;
@@ -209,13 +208,13 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
             for ( ; i < len; i++) {
                 bigIntegerType.validateBigIntBitLen(arr[i]);
             }
-        } catch (DecodeException de) {
-            throw validationException(de, i);
+        } catch (ABIException ve) {
+            throw abiException(ve, i);
         }
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
     }
 
-    private int validateBigDecimalArray(BigDecimal[] arr) throws ValidationException {
+    private int validateBigDecimalArray(BigDecimal[] arr) throws ABIException {
         final int len = arr.length;
         checkLength(len, arr);
         BigDecimalType bigDecimalType = (BigDecimalType) elementType;
@@ -225,23 +224,23 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 BigDecimal element = arr[i];
                 bigDecimalType.validateBigIntBitLen(element.unscaledValue());
                 if(element.scale() != bigDecimalType.scale) {
-                    throw new ValidationException("unexpected scale: " + element.scale());
+                    throw new ABIException("unexpected scale: " + element.scale());
                 }
             }
-        } catch (DecodeException de) {
-            throw validationException(de, i);
+        } catch (ABIException ve) {
+            throw abiException(ve, i);
         }
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
     }
 
-    private static ValidationException validationException(DecodeException de, int i) {
-        return new ValidationException("index " + i + ": " + de.getMessage(), de);
+    private static ABIException abiException(ABIException ve, int i) {
+        return new ABIException("index " + i + ": " + ve.getMessage());
     }
 
     /**
      * For arrays of arrays or arrays of tuples only.
      */
-    private int validateObjectArray(Object[] arr) throws ValidationException {
+    private int validateObjectArray(Object[] arr) throws ABIException {
         final int len = arr.length;
         checkLength(len, arr);
         int byteLength = elementType.dynamic ? len << LOG_2_UNIT_LENGTH_BYTES : 0; // 32 bytes per offset
@@ -252,10 +251,10 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         return byteLength;
     }
 
-    private int checkLength(final int valueLength, Object value) throws ValidationException {
+    private int checkLength(final int valueLength, Object value) throws ABIException {
         final int expected = this.length;
         if(expected != DYNAMIC_LENGTH && valueLength != expected) {
-            throw new ValidationException(
+            throw new ABIException(
                     Utils.friendlyClassName(value.getClass(), valueLength)
                             + " not instanceof " + Utils.friendlyClassName(clazz, expected) + ", " +
                             valueLength + " != " + expected
@@ -361,7 +360,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
     @Override
     @SuppressWarnings("unchecked")
-    J decode(ByteBuffer bb, byte[] elementBuffer) throws DecodeException {
+    J decode(ByteBuffer bb, byte[] elementBuffer) throws ABIException {
         final int arrayLen = length == DYNAMIC_LENGTH
                 ? ARRAY_LENGTH_TYPE.decode(bb, elementBuffer)
                 : length;
@@ -379,20 +378,20 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         }
     }
 
-    private static boolean[] decodeBooleanArray(ByteBuffer bb, int arrayLen, byte[] elementBuffer) throws DecodeException {
+    private static boolean[] decodeBooleanArray(ByteBuffer bb, int arrayLen, byte[] elementBuffer) throws ABIException {
         boolean[] booleans = new boolean[arrayLen]; // elements are false by default
         final int booleanOffset = UNIT_LENGTH_BYTES - Byte.BYTES;
         for(int i = 0; i < arrayLen; i++) {
             bb.get(elementBuffer);
             for (int j = 0; j < booleanOffset; j++) {
                 if(elementBuffer[j] == 0) continue;
-                throw new UnrecoverableDecodeException("illegal boolean value @ " + (bb.position() - j));
+                throw new ABIException("illegal boolean value @ " + (bb.position() - j));
             }
             byte last = elementBuffer[booleanOffset];
             if(last == 1) {
                 booleans[i] = true;
             } else if(last != 0) {
-                throw new UnrecoverableDecodeException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
+                throw new ABIException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
             }
         }
         return booleans;
@@ -406,47 +405,47 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         return !isString ? out : Strings.encode(out, UTF_8);
     }
 
-    private static int[] decodeIntArray(IntType intType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) throws DecodeException {
+    private static int[] decodeIntArray(IntType intType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) throws ABIException {
         int[] ints = new int[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            ints[i] = getBigIntElement(intType, bb, elementBuffer).intValue();
+            ints[i] = decodeBigIntElement(intType, bb, elementBuffer).intValue();
         }
         return ints;
     }
 
-    private static long[] decodeLongArray(LongType longType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) throws DecodeException {
+    private static long[] decodeLongArray(LongType longType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) throws ABIException {
         long[] longs = new long[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            longs[i] = getBigIntElement(longType, bb, elementBuffer).longValue();
+            longs[i] = decodeBigIntElement(longType, bb, elementBuffer).longValue();
         }
         return longs;
     }
 
-    private static BigInteger[] decodeBigIntegerArray(BigIntegerType bigIntegerType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) throws DecodeException {
+    private static BigInteger[] decodeBigIntegerArray(BigIntegerType bigIntegerType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) throws ABIException {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            bigInts[i] = getBigIntElement(bigIntegerType, bb, elementBuffer);
+            bigInts[i] = decodeBigIntElement(bigIntegerType, bb, elementBuffer);
         }
         return bigInts;
     }
 
-    private static BigDecimal[] decodeBigDecimalArray(BigDecimalType bigDecimalType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) throws DecodeException {
+    private static BigDecimal[] decodeBigDecimalArray(BigDecimalType bigDecimalType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) throws ABIException {
         BigDecimal[] bigDecs = new BigDecimal[arrayLen];
         final int scale = bigDecimalType.scale;
         for (int i = 0; i < arrayLen; i++) {
-            bigDecs[i] = new BigDecimal(getBigIntElement(bigDecimalType, bb, elementBuffer), scale);
+            bigDecs[i] = new BigDecimal(decodeBigIntElement(bigDecimalType, bb, elementBuffer), scale);
         }
         return bigDecs;
     }
 
-    private static BigInteger getBigIntElement(UnitType<?> type, ByteBuffer bb, byte[] elementBuffer) throws DecodeException {
+    private static BigInteger decodeBigIntElement(UnitType<?> type, ByteBuffer bb, byte[] elementBuffer) throws ABIException {
         bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(elementBuffer);
         type.validateBigIntElement(bi);
         return bi;
     }
 
-    private Object[] decodeObjectArray(int arrayLen, ByteBuffer bb, byte[] elementBuffer) throws DecodeException {
+    private Object[] decodeObjectArray(int arrayLen, ByteBuffer bb, byte[] elementBuffer) throws ABIException {
 
 //        final int index = bb.position(); // TODO must pass index to decodeObjectArrayTails if you want to support lenient mode
 
@@ -462,7 +461,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         return dest;
     }
 
-    private static void decodeObjectArrayHeads(ABIType<?> elementType, ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) throws DecodeException {
+    private static void decodeObjectArrayHeads(ABIType<?> elementType, ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) throws ABIException {
         final int len = offsets.length;
         if(elementType.dynamic) {
             for (int i = 0; i < len; i++) {
@@ -475,7 +474,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         }
     }
 
-    private static void decodeObjectArrayTails(ABIType<?> elementType, ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) throws DecodeException {
+    private static void decodeObjectArrayTails(ABIType<?> elementType, ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) throws ABIException {
         final int len = offsets.length;
         for (int i = 0; i < len; i++) {
             int offset = offsets[i];

@@ -113,7 +113,7 @@ final class TypeFactory {
         throw new ParseException(UNRECOGNIZED_TYPE + ": " + type, 0);
     }
 
-    private static ABIType<?> resolveBaseType(String baseTypeStr, boolean isElement, boolean nameless) throws ParseException, ClassNotFoundException {
+    private static ABIType<?> resolveBaseType(String baseTypeStr, boolean isElement, boolean nameless) throws ParseException {
         if(baseTypeStr.charAt(0) == '(') {
             return parseTupleType(baseTypeStr);
         }
@@ -258,7 +258,7 @@ final class TypeFactory {
     static final String EMPTY_PARAMETER = "empty parameter";
     static final String ILLEGAL_TUPLE_TERMINATION = "illegal tuple termination";
 
-    private static TupleType parseTupleType(final String rawTypeStr) throws ParseException, ClassNotFoundException {
+    private static TupleType parseTupleType(final String rawTypeStr) throws ParseException {
         final int end = rawTypeStr.length();
         final ArrayList<ABIType<?>> elements = new ArrayList<>();
 

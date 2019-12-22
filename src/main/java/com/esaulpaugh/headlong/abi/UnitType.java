@@ -16,8 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
-import com.esaulpaugh.headlong.exception.DecodeException;
-import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Integers;
 
 import java.math.BigInteger;
@@ -59,13 +57,9 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
     }
 
     @Override
-    public int validate(Object value) throws ValidationException {
+    public int validate(Object value) throws ABIException {
         validateClass(value);
-        try {
-            validateLongBitLen(((Number) value).longValue());
-        } catch (DecodeException de) {
-            throw new ValidationException(de);
-        }
+        validateLongBitLen(((Number) value).longValue());
         return UNIT_LENGTH_BYTES;
     }
 
@@ -80,34 +74,34 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
     }
 
     // don't do unsigned check for array element
-    final void validatePrimitiveElement(long longVal) throws DecodeException {
+    final void validatePrimitiveElement(long longVal) throws ABIException {
         checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
     }
 
     // don't do unsigned check for array element
-    final void validateBigIntElement(final BigInteger bigIntVal) throws DecodeException {
+    final void validateBigIntElement(final BigInteger bigIntVal) throws ABIException {
         checkBitLen(bigIntVal.bitLength());
     }
 
     // --------------------------------
 
-    final void validateLongBitLen(long longVal) throws DecodeException {
+    final void validateLongBitLen(long longVal) throws ABIException {
         checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
         if (unsigned && longVal < 0) {
-            throw new UnrecoverableDecodeException("signed value given for unsigned type");
+            throw new ABIException("signed value given for unsigned type");
         }
     }
 
-    final void validateBigIntBitLen(final BigInteger bigIntVal) throws DecodeException {
+    final void validateBigIntBitLen(final BigInteger bigIntVal) throws ABIException {
         checkBitLen(bigIntVal.bitLength());
         if (unsigned && bigIntVal.signum() == -1) {
-            throw new UnrecoverableDecodeException("signed value given for unsigned type");
+            throw new ABIException("signed value given for unsigned type");
         }
     }
 
-    private void checkBitLen(int actual) throws DecodeException {
+    private void checkBitLen(int actual) throws ABIException {
         if (actual > bitLength) {
-            throw new UnrecoverableDecodeException("exceeds bit limit: " + actual + " > " + bitLength);
+            throw new ABIException("exceeds bit limit: " + actual + " > " + bitLength);
         }
     }
 }

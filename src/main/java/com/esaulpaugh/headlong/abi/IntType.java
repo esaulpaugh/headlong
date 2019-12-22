@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
@@ -40,7 +38,7 @@ public final class IntType extends UnitType<Integer> {
     }
 
     @Override
-    Integer decode(ByteBuffer bb, byte[] unitBuffer) throws DecodeException {
+    Integer decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
         bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigIntBitLen(bi);
@@ -48,7 +46,7 @@ public final class IntType extends UnitType<Integer> {
     }
 
     @Override
-    public Integer parseArgument(String s) throws ValidationException {
+    public Integer parseArgument(String s) throws ABIException {
         Integer in = Integer.parseInt(s);
         validate(in);
         return in;

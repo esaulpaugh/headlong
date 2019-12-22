@@ -104,7 +104,7 @@ public class ABIJsonCasesTest {
             return new ABITestCase(key, args, result, types, new Function("test" + tt.canonicalType));
         }
 
-        private void test(Object[] argsArray) throws ValidationException {
+        private void test(Object[] argsArray) throws ABIException {
 
             Tuple t = new Tuple(argsArray);
             ByteBuffer bb = function.encodeCall(t);
@@ -117,7 +117,7 @@ public class ABIJsonCasesTest {
     }
 
     @Test
-    public void testGithubWikiTest() throws ParseException, ValidationException {
+    public void testGithubWikiTest() throws ParseException, ABIException {
 
         ABITestCase testCase = ABITestCase.forKey("GithubWikiTest");
 
@@ -131,7 +131,7 @@ public class ABIJsonCasesTest {
     }
 
     @Test
-    public void testSingleInteger() throws ParseException, ValidationException {
+    public void testSingleInteger() throws ParseException, ABIException {
 
         ABITestCase testCase = ABITestCase.forKey("SingleInteger");
 
@@ -142,7 +142,7 @@ public class ABIJsonCasesTest {
     }
 
     @Test
-    public void testIntegerAndAddress() throws ParseException, ValidationException {
+    public void testIntegerAndAddress() throws ParseException, ABIException {
 
         ABITestCase testCase = ABITestCase.forKey("IntegerAndAddress");
 

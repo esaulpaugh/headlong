@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -124,7 +123,7 @@ public class EncodeTest {
     }
 
     @Test
-    public void simpleFunctionTest() throws DecodeException, ValidationException {
+    public void simpleFunctionTest() throws ABIException {
         Function f = new Function("baz(uint32,bool)"); // canonicalizes and parses any signature automatically
         Tuple args = new Tuple(69L, true);
 
@@ -145,7 +144,7 @@ public class EncodeTest {
     }
 
     @Test
-    public void uint8ArrayTest() throws DecodeException, ValidationException {
+    public void uint8ArrayTest() throws ABIException {
         Function f = new Function("baz(uint8[])");
 
         Tuple args = Tuple.singleton(new int[] { 0xFF, -1, 1, 2, 0 });
@@ -157,7 +156,7 @@ public class EncodeTest {
     }
 
     @Test
-    public void tupleArrayTest() throws ValidationException {
+    public void tupleArrayTest() throws ABIException {
         Function f = new Function("((int16)[2][][1])");
 
         Object[] argsIn = new Object[] {
@@ -189,7 +188,7 @@ public class EncodeTest {
         assertThrown(AssertionFailedError.class, msg, () -> testFixedLenDynamicArray("int[]", new BigInteger[0][], null));
     }
 
-    private static void testFixedLenDynamicArray(String baseType, Object[] args, Supplier<Object> supplier) throws ValidationException {
+    private static void testFixedLenDynamicArray(String baseType, Object[] args, Supplier<Object> supplier) throws ABIException {
         final int n = args.length;
         TupleType a = TupleType.of(baseType + "[" + n + "]");
 
@@ -216,7 +215,7 @@ public class EncodeTest {
     }
 
     @Test
-    public void complexFunctionTest() throws DecodeException, ValidationException {
+    public void complexFunctionTest() throws ABIException {
         Function f = new Function("(function[2][][],bytes24,string[0][0],address[],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
 
         byte[] func = new byte[24];
@@ -254,7 +253,7 @@ public class EncodeTest {
     }
 
     @Test
-    public void paddingTest() throws ValidationException {
+    public void paddingTest() throws ABIException {
         Function f = new Function("(bool,uint8,int64,address,ufixed,bytes2,(string),bytes,function)");
 
         StringBuilder sb = new StringBuilder();

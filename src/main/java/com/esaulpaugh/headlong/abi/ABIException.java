@@ -13,20 +13,19 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.exception;
+package com.esaulpaugh.headlong.abi;
 
-/**
- * Indicates a failure to decode illegal or otherwise undecodeable data.
- */
-public abstract class DecodeException extends Exception {
+public class ABIException extends Exception {
 
-    DecodeException(String msg) {
+    public ABIException(String msg) {
         super(msg);
     }
 
-    DecodeException(Throwable cause) {
+    public ABIException(Throwable cause) {
         super(cause);
     }
 
-    public abstract boolean isRecoverable();
+    public ABIException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 }

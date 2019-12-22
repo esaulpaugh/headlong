@@ -16,11 +16,9 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.exception.DecodeException;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
-import java.text.ParseException;
 import java.util.Random;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
@@ -29,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class EqualsTest {
 
     @Test
-    public void testEquals() throws ParseException {
+    public void testEquals() {
 
         Random r = new Random(TestUtils.getSeed(System.nanoTime()));
 
@@ -79,13 +77,13 @@ public class EqualsTest {
 
         array[array.length - 32] = (byte) 0x80;
         System.out.println(Function.formatCall(array));
-        assertThrown(DecodeException.class, "exceeds bit limit", () -> f.decodeCall(array));
+        assertThrown(ABIException.class, "exceeds bit limit", () -> f.decodeCall(array));
 
         for (int i = array.length - 32; i < array.length; i++) {
             array[i] = (byte) 0xFF;
         }
         array[array.length - 1] = (byte) 0xFE;
         System.out.println(Function.formatCall(array));
-        assertThrown(DecodeException.class, "signed value given for unsigned type", () -> f.decodeCall(array));
+        assertThrown(ABIException.class, "signed value given for unsigned type", () -> f.decodeCall(array));
     }
 }

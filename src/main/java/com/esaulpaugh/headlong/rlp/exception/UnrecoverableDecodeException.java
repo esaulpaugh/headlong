@@ -13,19 +13,23 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.abi;
+package com.esaulpaugh.headlong.rlp.exception;
 
-public class ValidationException extends Exception {
+/**
+ * Indicates a failure to decode an item that is unrecoverably malformed.
+ */
+public final class UnrecoverableDecodeException extends DecodeException {
 
-    public ValidationException(String msg) {
+    public UnrecoverableDecodeException(String msg) {
         super(msg);
     }
 
-    public ValidationException(Throwable cause) {
+    public UnrecoverableDecodeException(Throwable cause) {
         super(cause);
     }
 
-    public ValidationException(String msg, Throwable cause) {
-        super(msg, cause);
+    @Override
+    public boolean isRecoverable() {
+        return false;
     }
 }
