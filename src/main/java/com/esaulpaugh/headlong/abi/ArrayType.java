@@ -439,7 +439,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private static BigInteger decodeBigIntElement(UnitType<?> type, ByteBuffer bb, byte[] elementBuffer) throws ABIException {
-        bb.get(elementBuffer, 0, UNIT_LENGTH_BYTES);
+        bb.get(elementBuffer);
         BigInteger bi = new BigInteger(elementBuffer);
         type.validateBigIntElement(bi);
         return bi;

@@ -55,7 +55,7 @@ public final class ByteType extends UnitType<Byte> {
 
     @Override
     Byte decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
-        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
+        bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigIntBitLen(bi);
         return bi.byteValue();
