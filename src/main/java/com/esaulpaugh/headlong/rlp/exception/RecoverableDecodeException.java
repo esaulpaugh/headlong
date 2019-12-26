@@ -25,10 +25,6 @@ public final class RecoverableDecodeException extends DecodeException {
         super(msg);
     }
 
-    public RecoverableDecodeException(Throwable cause) {
-        super(cause);
-    }
-
     @Override
     public boolean isRecoverable() {
         return true;
