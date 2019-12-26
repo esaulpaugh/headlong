@@ -20,12 +20,4 @@ public class ABIException extends Exception {
     public ABIException(String msg) {
         super(msg);
     }
-
-    public ABIException(Throwable cause) {
-        super(cause);
-    }
-
-    public ABIException(String msg, Throwable cause) {
-        super(msg, cause);
-    }
 }

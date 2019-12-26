@@ -63,7 +63,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
 
     @Override
     BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
-        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
+        bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigIntBitLen(bi);
         return new BigDecimal(bi, scale);
