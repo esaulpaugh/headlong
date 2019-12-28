@@ -112,7 +112,7 @@ public final class ABIJSON {
         final String typeString = getString(function, TYPE);
         Function.Type type = Function.Type.get(typeString);
         if(type == null) {
-            throw unexpectedException(TYPE, typeString);
+            throw unexpectedTypeException(typeString);
         }
         return new Function(
                 type,
@@ -144,7 +144,7 @@ public final class ABIJSON {
     static Event parseEvent(JsonObject event) throws ParseException {
         final String type = getString(event, TYPE);
         if (!EVENT.equals(type)) {
-            throw unexpectedException(TYPE, type);
+            throw unexpectedTypeException(type);
         }
 
         final JsonArray inputs = getArray(event, INPUTS);
@@ -185,8 +185,8 @@ public final class ABIJSON {
         return TypeFactory.create(type, null, name);
     }
 
-    private static IllegalArgumentException unexpectedException(String key, String value) {
-        return new IllegalArgumentException("unexpected " + key + ": " + (value == null ? null : "\"" + value + "\""));
+    private static IllegalArgumentException unexpectedTypeException(String value) {
+        return new IllegalArgumentException("unexpected type: " + (value == null ? null : "\"" + value + "\""));
     }
 // -------------------------------------------
     static JsonObject buildFunctionJson(Function f) {
