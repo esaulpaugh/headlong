@@ -112,7 +112,7 @@ public final class ABIJSON {
         final String typeString = getString(function, TYPE);
         Function.Type type = Function.Type.get(typeString);
         if(type == null) {
-            throw unexpectedTypeException(typeString);
+            throw new IllegalArgumentException("unexpected type: " + (typeString == null ? null : "\"" + typeString + "\""));
         }
         return new Function(
                 type,
@@ -144,7 +144,7 @@ public final class ABIJSON {
     static Event parseEvent(JsonObject event) throws ParseException {
         final String type = getString(event, TYPE);
         if (!EVENT.equals(type)) {
-            throw unexpectedTypeException(type);
+            throw new IllegalArgumentException("unexpected type: " + (type == null ? null : "\"" + type + "\""));
         }
 
         final JsonArray inputs = getArray(event, INPUTS);
@@ -152,7 +152,7 @@ public final class ABIJSON {
             throw new IllegalArgumentException("array \"" + INPUTS + "\" null or not found");
         }
         final int inputsLen = inputs.size();
-        final ABIType<?>[] inputsArray = new ABIType[inputs.size()];
+        final ABIType<?>[] inputsArray = new ABIType[inputsLen];
         final boolean[] indexed = new boolean[inputsLen];
         for (int i = 0; i < inputsLen; i++) {
             JsonObject inputObj = inputs.get(i).getAsJsonObject();
@@ -183,10 +183,6 @@ public final class ABIJSON {
             return TypeFactory.createForTuple(base, suffix, name);
         }
         return TypeFactory.create(type, null, name);
-    }
-
-    private static IllegalArgumentException unexpectedTypeException(String value) {
-        return new IllegalArgumentException("unexpected type: " + (value == null ? null : "\"" + value + "\""));
     }
 // -------------------------------------------
     static JsonObject buildFunctionJson(Function f) {
