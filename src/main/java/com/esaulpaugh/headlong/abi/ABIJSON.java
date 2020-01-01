@@ -187,40 +187,32 @@ public final class ABIJSON {
     }
 // -------------------------------------------
     static JsonObject buildFunctionJson(Function f) {
-        JsonObject object = new JsonObject();
+        JsonObject function = new JsonObject();
         Function.Type type = f.getType();
-        object.add(TYPE, new JsonPrimitive(type.toString()));
+        function.add(TYPE, new JsonPrimitive(type.toString()));
         if(type != Function.Type.FALLBACK) {
-            String name = f.getName();
-            if(name != null) {
-                object.add(NAME, new JsonPrimitive(name));
-            }
+            addIfValueNotNull(NAME, f.getName(), function);
             if(type != Function.Type.RECEIVE) {
-                object.add(INPUTS, buildJsonArray(f.getParamTypes(), null));
+                function.add(INPUTS, buildJsonArray(f.getParamTypes(), null));
             }
         }
         if(type != Function.Type.FALLBACK
                 && type != Function.Type.CONSTRUCTOR
                 && type != Function.Type.RECEIVE) {
-            object.add(OUTPUTS, buildJsonArray(f.getOutputTypes(), null));
+            function.add(OUTPUTS, buildJsonArray(f.getOutputTypes(), null));
         }
         String stateMutability = f.getStateMutability();
-        if(stateMutability != null) {
-            object.add(STATE_MUTABILITY, new JsonPrimitive(stateMutability));
-        }
-        object.add(CONSTANT, new JsonPrimitive(VIEW.equals(stateMutability) || PURE.equals(stateMutability)));
-        return object;
+        addIfValueNotNull(STATE_MUTABILITY, stateMutability, function);
+        function.add(CONSTANT, new JsonPrimitive(VIEW.equals(stateMutability) || PURE.equals(stateMutability)));
+        return function;
     }
 
-    static JsonObject buildEventJson(Event event) {
-        JsonObject object = new JsonObject();
-        object.add(TYPE, new JsonPrimitive(EVENT));
-        String name = event.getName();
-        if(name != null) {
-            object.add(NAME, new JsonPrimitive(name));
-        }
-        object.add(INPUTS, buildJsonArray(event.getParams(), event.getIndexManifest()));
-        return object;
+    static JsonObject buildEventJson(Event e) {
+        JsonObject event = new JsonObject();
+        event.add(TYPE, new JsonPrimitive(EVENT));
+        addIfValueNotNull(NAME, e.getName(), event);
+        event.add(INPUTS, buildJsonArray(e.getParams(), e.getIndexManifest()));
+        return event;
     }
 
     private static JsonArray buildJsonArray(TupleType tupleType, boolean[] indexedManifest) {
@@ -249,5 +241,11 @@ public final class ABIJSON {
             }
         }
         return array;
+    }
+
+    private static void addIfValueNotNull(String key, String value, JsonObject object) {
+        if(value != null) {
+            object.add(key, new JsonPrimitive(value));
+        }
     }
 }
