@@ -59,10 +59,11 @@ public final class Function implements ABIObject, Serializable {
                 case ABIJSON.FALLBACK: return Type.FALLBACK;
                 case ABIJSON.CONSTRUCTOR: return Type.CONSTRUCTOR;
                 case ABIJSON.FUNCTION: return Type.FUNCTION;
-                case ABIJSON.RECEIVE: return RECEIVE;
+                case ABIJSON.RECEIVE: return Type.RECEIVE;
+                default: return null;
                 }
             }
-            return value == null ? Type.FUNCTION : null;
+            return Type.FUNCTION;
         }
     }
 
