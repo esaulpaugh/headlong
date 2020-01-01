@@ -155,23 +155,25 @@ public final class Function implements ABIObject, Serializable {
 
     private void validateFunction() {
         switch (type) {
-            case RECEIVE: /* falls through */
-                if(!ABIJSON.RECEIVE.equals(name)) {
-                    throw new IllegalArgumentException("functions of this type must be named \"" + ABIJSON.RECEIVE + "\"");
-                }
-                if(!ABIJSON.PAYABLE.equals(stateMutability)) {
-                    throw new IllegalArgumentException("functions of this type must be " + ABIJSON.PAYABLE);
-                }
-            case FALLBACK: /* falls through */
-                assertNoElements(inputTypes, "inputs");
-            case CONSTRUCTOR: /* falls through */
-                assertNoElements(outputTypes, "outputs");
-                if(type != Type.RECEIVE) {
-                    assertNameNullability(name, true);
-                }
-                break;
-            case FUNCTION:
-                assertNameNullability(name, false);
+        case FUNCTION:
+            assertNameNullability(name, false);
+            break;
+        case RECEIVE:
+            if (!ABIJSON.RECEIVE.equals(name)) {
+                throw new IllegalArgumentException("functions of this type must be named \"" + ABIJSON.RECEIVE + "\"");
+            }
+            if (!ABIJSON.PAYABLE.equals(stateMutability)) {
+                throw new IllegalArgumentException("functions of this type must be " + ABIJSON.PAYABLE);
+            }
+            /* falls through */
+        case FALLBACK:
+            assertNoElements(inputTypes, "inputs");
+            /* falls through */
+        case CONSTRUCTOR:
+            assertNoElements(outputTypes, "outputs");
+            if (type != Type.RECEIVE) {
+                assertNameNullability(name, true);
+            }
         }
     }
 
