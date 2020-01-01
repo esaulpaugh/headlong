@@ -80,8 +80,7 @@ public final class ABIJSON {
         for(JsonElement e : parseArray(json)) {
             if(e.isJsonObject()) {
                 JsonObject object = (JsonObject) e;
-                String type = getString(object, TYPE);
-                switch (type) {
+                switch (getString(object, TYPE)) {
                 case RECEIVE:
                 case FALLBACK:
                 case CONSTRUCTOR:
