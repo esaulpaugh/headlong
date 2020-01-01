@@ -194,12 +194,10 @@ public final class ABIJSON {
             addIfValueNotNull(NAME, f.getName(), function);
             if(type != Function.Type.RECEIVE) {
                 function.add(INPUTS, buildJsonArray(f.getParamTypes(), null));
+                if(type != Function.Type.CONSTRUCTOR) {
+                    function.add(OUTPUTS, buildJsonArray(f.getOutputTypes(), null));
+                }
             }
-        }
-        if(type != Function.Type.FALLBACK
-                && type != Function.Type.CONSTRUCTOR
-                && type != Function.Type.RECEIVE) {
-            function.add(OUTPUTS, buildJsonArray(f.getOutputTypes(), null));
         }
         String stateMutability = f.getStateMutability();
         addIfValueNotNull(STATE_MUTABILITY, stateMutability, function);
