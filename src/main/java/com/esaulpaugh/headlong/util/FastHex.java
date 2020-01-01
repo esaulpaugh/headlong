@@ -80,7 +80,7 @@ public final class FastHex {
 
     public static byte[] encodeToBytes(byte[] buffer, int off, final int len) {
         final int end = off + len;
-        byte[] bytes = new byte[len << 1];
+        byte[] bytes = new byte[len << 1]; // x2
         for (int j = 0; off < end; off++, j+=2) {
             int hexPair = ENCODE_TABLE[buffer[off] & 0xFF];
             bytes[j] = (byte) (hexPair >>> Byte.SIZE); // left

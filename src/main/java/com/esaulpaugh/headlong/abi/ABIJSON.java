@@ -39,6 +39,7 @@ public final class ABIJSON {
     static final String FUNCTION = "function";
     static final String CONSTRUCTOR = "constructor";
     static final String FALLBACK = "fallback";
+    static final String RECEIVE = "receive";
     private static final String INPUTS = "inputs";
     private static final String OUTPUTS = "outputs";
     private static final String TUPLE = "tuple";
@@ -49,7 +50,7 @@ public final class ABIJSON {
     private static final String STATE_MUTABILITY = "stateMutability";
     private static final String PURE = "pure";
     private static final String VIEW = "view";
-//    private static final String PAYABLE = "payable";
+    static final String PAYABLE = "payable";
 //    private static final String NONPAYABLE = "nonpayable";
     private static final String CONSTANT = "constant"; // deprecated
 
@@ -81,10 +82,11 @@ public final class ABIJSON {
                 JsonObject object = (JsonObject) e;
                 String type = getString(object, TYPE);
                 switch (type) {
+                case RECEIVE:
                 case FALLBACK:
                 case CONSTRUCTOR:
                 case FUNCTION:
-                    if(functions) {
+                    if (functions) {
                         list.add(classOfT.cast(parseFunction(object, defaultDigest.get())));
                     }
                     break;
@@ -194,9 +196,13 @@ public final class ABIJSON {
             if(name != null) {
                 object.add(NAME, new JsonPrimitive(name));
             }
-            object.add(INPUTS, buildJsonArray(f.getParamTypes(), null));
+            if(type != Function.Type.RECEIVE) {
+                object.add(INPUTS, buildJsonArray(f.getParamTypes(), null));
+            }
         }
-        if(type != Function.Type.FALLBACK && type != Function.Type.CONSTRUCTOR) {
+        if(type != Function.Type.FALLBACK
+                && type != Function.Type.CONSTRUCTOR
+                && type != Function.Type.RECEIVE) {
             object.add(OUTPUTS, buildJsonArray(f.getOutputTypes(), null));
         }
         String stateMutability = f.getStateMutability();

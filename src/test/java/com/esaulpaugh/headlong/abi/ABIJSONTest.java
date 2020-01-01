@@ -187,7 +187,7 @@ public class ABIJSONTest {
             "  }\n" +
             "]";
 
-    private static final String FALLBACK_AND_CONSTRUCTOR = "[\n" +
+    private static final String FALLBACK_CONSTRUCTOR_RECEIVE = "[\n" +
             "  {\n" +
             "    \"type\": \"fallback\",\n" +
             "    \"stateMutability\": \"pure\",\n" +
@@ -202,6 +202,12 @@ public class ABIJSONTest {
             "      }\n" +
             "    ],\n" +
             "    \"stateMutability\": \"nonpayable\",\n" +
+            "    \"constant\": false\n" +
+            "  },\n" +
+            "  {\n" +
+            "    \"type\": \"receive\",\n" +
+            "    \"name\": \"receive\",\n" +
+            "    \"stateMutability\": \"payable\",\n" +
             "    \"constant\": false\n" +
             "  }\n" +
             "]";
@@ -235,7 +241,7 @@ public class ABIJSONTest {
     @Test
     public void testToJson() throws ParseException {
 
-        String[] jsons = new String[6];
+        String[] jsons = new String[7];
 
         int i = 0;
         jsons[i++] = FUNCTION_A_JSON;
@@ -245,10 +251,10 @@ public class ABIJSONTest {
         for (int j = 0; j < n; j++) {
             jsons[i++] = JsonUtils.toPrettyPrint(contractArray.get(j).getAsJsonObject());
         }
-        JsonArray fallbackAndC = JsonUtils.parseArray(FALLBACK_AND_CONSTRUCTOR);
-        final int n2 = fallbackAndC.size();
+        JsonArray fallbackEtc = JsonUtils.parseArray(FALLBACK_CONSTRUCTOR_RECEIVE);
+        final int n2 = fallbackEtc.size();
         for (int j = 0; j < n2; j++) {
-            jsons[i++] = JsonUtils.toPrettyPrint(fallbackAndC.get(j).getAsJsonObject());
+            jsons[i++] = JsonUtils.toPrettyPrint(fallbackEtc.get(j).getAsJsonObject());
         }
 
         for (String originalJson : jsons) {
@@ -299,7 +305,7 @@ public class ABIJSONTest {
 
         TestUtils.CustomRunnable parse = () -> Function.fromJsonObject(function);
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "regular functions must be named", parse);
+        TestUtils.assertThrown(IllegalArgumentException.class, "functions of this type must be named", parse);
 
         function.add("type", new JsonPrimitive("event"));
 
@@ -307,7 +313,7 @@ public class ABIJSONTest {
 
         function.add("type", new JsonPrimitive("function"));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "regular functions must be named", parse);
+        TestUtils.assertThrown(IllegalArgumentException.class, "functions of this type must be named", parse);
 
         TestUtils.CustomRunnable[] updates = new TestUtils.CustomRunnable[] {
                 () -> function.add("type", new JsonPrimitive("fallback")),
@@ -370,13 +376,15 @@ public class ABIJSONTest {
         assertEquals("func", func.getName());
         assertNull(func.getStateMutability());
 
-        functions = ABIJSON.parseFunctions(FALLBACK_AND_CONSTRUCTOR);
+        functions = ABIJSON.parseFunctions(FALLBACK_CONSTRUCTOR_RECEIVE);
 
-        assertEquals(2, functions.size());
+        assertEquals(3, functions.size());
+
+        assertNull(functions.get(0).getName());
+        assertNull(functions.get(1).getName());
 
         for(Function x : functions) {
             printTupleType(x.getParamTypes());
-            assertNull(x.getName());
             assertEquals(TupleType.EMPTY, x.getOutputTypes());
         }
 

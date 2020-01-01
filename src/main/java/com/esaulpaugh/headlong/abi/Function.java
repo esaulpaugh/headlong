@@ -45,7 +45,8 @@ public final class Function implements ABIObject, Serializable {
 
         FALLBACK,
         CONSTRUCTOR,
-        FUNCTION;
+        FUNCTION,
+        RECEIVE;
 
         @Override
         public String toString() {
@@ -58,6 +59,7 @@ public final class Function implements ABIObject, Serializable {
                 case ABIJSON.FALLBACK: return Type.FALLBACK;
                 case ABIJSON.CONSTRUCTOR: return Type.CONSTRUCTOR;
                 case ABIJSON.FUNCTION: return Type.FUNCTION;
+                case ABIJSON.RECEIVE: return RECEIVE;
                 }
             }
             return value == null ? Type.FUNCTION : null;
@@ -153,23 +155,35 @@ public final class Function implements ABIObject, Serializable {
 
     private void validateFunction() {
         switch (type) {
-            case FALLBACK:
-                if(inputTypes.elementTypes.length > 0) {
-                    throw new IllegalArgumentException("this function type cannot have inputs");
+            case RECEIVE: /* falls through */
+                if(!ABIJSON.RECEIVE.equals(name)) {
+                    throw new IllegalArgumentException("functions of this type must be named \"" + ABIJSON.RECEIVE + "\"");
                 }
-                /* falls through */
-            case CONSTRUCTOR:
-                if(name != null) {
-                    throw new IllegalArgumentException("this function type must be unnamed");
+                if(!ABIJSON.PAYABLE.equals(stateMutability)) {
+                    throw new IllegalArgumentException("functions of this type must be " + ABIJSON.PAYABLE);
                 }
-                if(outputTypes.elementTypes.length > 0) {
-                    throw new IllegalArgumentException("this function type cannot have outputs");
+            case FALLBACK: /* falls through */
+                assertNoElements(inputTypes, "inputs");
+            case CONSTRUCTOR: /* falls through */
+                assertNoElements(outputTypes, "outputs");
+                if(type != Type.RECEIVE) {
+                    assertNameNullability(name, true);
                 }
                 break;
             case FUNCTION:
-                if(name == null) {
-                    throw new IllegalArgumentException("regular functions must be named");
-                }
+                assertNameNullability(name, false);
+        }
+    }
+
+    private static void assertNameNullability(String name, boolean _null) {
+        if(_null ^ (name == null)) { // if not matching
+            throw new IllegalArgumentException("functions of this type must be " + (_null ? "un" : "") + "named");
+        }
+    }
+
+    private static void assertNoElements(TupleType tupleType, String description) {
+        if(tupleType.elementTypes.length > 0) {
+            throw new IllegalArgumentException("functions of this type cannot have " + description);
         }
     }
 
