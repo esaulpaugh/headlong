@@ -54,20 +54,20 @@ public final class ABIJSON {
 //    private static final String NONPAYABLE = "nonpayable";
     private static final String CONSTANT = "constant"; // deprecated
 
-    public static ABIObject parseABIObject(String json) throws ParseException {
-        return parseABIObject(parseObject(json));
+    public static ABIObject parseABIObject(String objectJson) throws ParseException {
+        return parseABIObject(parseObject(objectJson));
     }
 
     public static ABIObject parseABIObject(JsonObject object) throws ParseException {
-        return EVENT.equals(getString(object, TYPE)) ? parseEvent(object) : parseFunction(object);
+        return EVENT.equals(getString(object, TYPE)) ? parseEvent(object) : parseFunction(object, Function.newDefaultDigest());
     }
 
-    public static List<Function> parseFunctions(String json) throws ParseException {
-        return parseObjects(json, true, false, Function.class);
+    public static List<Function> parseFunctions(String arrayJson) throws ParseException {
+        return parseObjects(arrayJson, true, false, Function.class);
     }
 
-    public static List<Event> parseEvents(String json) throws ParseException {
-        return parseObjects(json, false, true, Event.class);
+    public static List<Event> parseEvents(String arrayJson) throws ParseException {
+        return parseObjects(arrayJson, false, true, Event.class);
     }
 
     private static <T extends ABIObject> List<T> parseObjects(final String json,
@@ -81,10 +81,10 @@ public final class ABIJSON {
             if(e.isJsonObject()) {
                 JsonObject object = (JsonObject) e;
                 switch (getString(object, TYPE)) {
+                case FUNCTION:
                 case RECEIVE:
                 case FALLBACK:
                 case CONSTRUCTOR:
-                case FUNCTION:
                     if (functions) {
                         list.add(classOfT.cast(parseFunction(object, defaultDigest.get())));
                     }
@@ -101,45 +101,40 @@ public final class ABIJSON {
         return list;
     }
 
-    public static Function parseFunction(String json) throws ParseException {
-        return parseFunction(parseObject(json), Function.newDefaultDigest());
-    }
-
-    public static Function parseFunction(JsonObject function) throws ParseException {
-        return parseFunction(function, Function.newDefaultDigest());
-    }
-
     public static Function parseFunction(JsonObject function, MessageDigest messageDigest) throws ParseException {
-        final String typeString = getString(function, TYPE);
-        Function.Type type = Function.Type.get(typeString);
-        if(type == null) {
-            throw new IllegalArgumentException("unexpected type: " + (typeString == null ? null : "\"" + typeString + "\""));
-        }
         return new Function(
-                type,
+                parseFunctionType(function),
                 getString(function, NAME),
-                parseArrayForFunction(function, INPUTS),
-                parseArrayForFunction(function, OUTPUTS),
+                parseTypes(getArray(function, INPUTS)),
+                parseTypes(getArray(function, OUTPUTS)),
                 getString(function, STATE_MUTABILITY),
                 messageDigest
         );
     }
 
-    private static TupleType parseArrayForFunction(JsonObject function, String name) throws ParseException {
-        final JsonArray array = getArray(function, name);
+    private static Function.Type parseFunctionType(JsonObject function) {
+        String type = getString(function, TYPE);
+        if(type != null) {
+            switch (type) {
+            case FUNCTION: return Function.Type.FUNCTION;
+            case FALLBACK: return Function.Type.FALLBACK;
+            case CONSTRUCTOR: return Function.Type.CONSTRUCTOR;
+            case RECEIVE: return Function.Type.RECEIVE;
+            default: throw new IllegalArgumentException("unexpected type: \"" + type + "\"");
+            }
+        }
+        return Function.Type.FUNCTION;
+    }
+
+    private static TupleType parseTypes(JsonArray array) throws ParseException {
         if (array != null) {
-            final ABIType<?>[] elementsArray = new ABIType[array.size()];
-            int i = 0;
-            for (JsonElement e : array) {
-                elementsArray[i++] = parseType(e.getAsJsonObject());
+            ABIType<?>[] elementsArray = new ABIType[array.size()];
+            for (int i = 0; i < elementsArray.length; i++) {
+                elementsArray[i] = parseType(array.get(i).getAsJsonObject());
             }
             return TupleType.wrap(elementsArray);
         }
         return TupleType.EMPTY;
-    }
-
-    static Event parseEvent(String eventJson) throws ParseException {
-        return parseEvent(parseObject(eventJson));
     }
 
     static Event parseEvent(JsonObject event) throws ParseException {

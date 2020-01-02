@@ -43,27 +43,14 @@ public final class Function implements ABIObject, Serializable {
 
     public enum Type {
 
-        FALLBACK,
-        CONSTRUCTOR,
         FUNCTION,
-        RECEIVE;
+        RECEIVE,
+        FALLBACK,
+        CONSTRUCTOR;
 
         @Override
         public String toString() {
             return name().toLowerCase(Locale.ENGLISH);
-        }
-
-        static Type get(String value) {
-            if(value != null) {
-                switch (value) {
-                case ABIJSON.FALLBACK: return Type.FALLBACK;
-                case ABIJSON.CONSTRUCTOR: return Type.CONSTRUCTOR;
-                case ABIJSON.FUNCTION: return Type.FUNCTION;
-                case ABIJSON.RECEIVE: return Type.RECEIVE;
-                default: return null;
-                }
-            }
-            return Type.FUNCTION;
         }
     }
 
@@ -299,18 +286,6 @@ public final class Function implements ABIObject, Serializable {
                 Objects.equals(stateMutability, function.stateMutability);
     }
 
-    public static Function parse(String signature) {
-        return new Function(signature);
-    }
-
-    public static Function fromJson(String functionJson) throws ParseException {
-        return ABIJSON.parseFunction(functionJson);
-    }
-
-    public static Function fromJsonObject(JsonObject function) throws ParseException {
-        return ABIJSON.parseFunction(function);
-    }
-
     @Override
     public String toJson(boolean pretty) {
         JsonObject object = ABIJSON.buildFunctionJson(this);
@@ -322,6 +297,26 @@ public final class Function implements ABIObject, Serializable {
         return toJson(true);
     }
 // ---------------------------------------------------------------------------------------------------------------------
+    public static Function parse(String signature) {
+        return new Function(signature);
+    }
+
+    public static Function fromJson(String objectJson) throws ParseException {
+        return fromJsonObject(JsonUtils.parseObject(objectJson));
+    }
+
+    public static Function fromJson(String objectJson, MessageDigest messageDigest) throws ParseException {
+        return fromJsonObject(JsonUtils.parseObject(objectJson), messageDigest);
+    }
+
+    public static Function fromJsonObject(JsonObject function) throws ParseException {
+        return fromJsonObject(function, Function.newDefaultDigest());
+    }
+
+    public static Function fromJsonObject(JsonObject function, MessageDigest messageDigest) throws ParseException {
+        return ABIJSON.parseFunction(function, messageDigest);
+    }
+
     public static String hexOf(byte[] bytes) {
         return encode(bytes, HEX);
     }

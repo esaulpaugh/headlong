@@ -113,7 +113,7 @@ public final class Event implements ABIObject {
     }
 
     public static Event fromJson(String eventJson) throws ParseException {
-        return ABIJSON.parseEvent(eventJson);
+        return fromJsonObject(JsonUtils.parseObject(eventJson));
     }
 
     public static Event fromJsonObject(JsonObject event) throws ParseException {
