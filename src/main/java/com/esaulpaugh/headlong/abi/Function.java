@@ -97,7 +97,7 @@ public final class Function implements ABIObject, Serializable {
             }
             final TupleType tupleType;
             try {
-                tupleType = (TupleType) TypeFactory.create(signature.substring(split));
+                tupleType = (TupleType) TypeFactory.create(signature.substring(split), null);
             } catch (ClassCastException cce) {
                 throw new ParseException("illegal signature termination", signature.length()); // e.g. "foo()[]"
             }

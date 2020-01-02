@@ -48,23 +48,17 @@ final class TypeFactory {
 
     private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
 
-    static ABIType<?> createForTuple(TupleType baseTupleType, String suffix, String name) throws ParseException {
-        return create(baseTupleType.canonicalType + suffix, baseTupleType, name);
-    }
-
-    static ABIType<?> create(String type) throws ParseException {
-        return create(type, null, null);
-    }
-
-    static ABIType<?> create(String type, TupleType baseTupleType, String name) throws ParseException {
-        if(name == null) {
-            return buildType(type, false, baseTupleType, true);
-        }
-        return buildType(type, false, baseTupleType, false)
+    static ABIType<?> create(String type, String name) throws ParseException {
+        return buildType(type, false, null, false)
                 .setName(name);
     }
 
-    private static ABIType<?> buildType(String type, boolean isArrayElement, TupleType baseTupleType, boolean nameless) throws ParseException {
+    static ABIType<?> createFromBase(ABIType<?> baseType, String typeSuffix, String name) throws ParseException {
+        return buildType(baseType.canonicalType + typeSuffix, false, baseType, name == null)
+                .setName(name);
+    }
+
+    private static ABIType<?> buildType(String type, boolean isArrayElement, ABIType<?> baseType, boolean nameless) throws ParseException {
         try {
             final int idxOfLast = type.length() - 1;
             if (type.charAt(idxOfLast) == ']') { // array
@@ -90,19 +84,19 @@ final class TypeFactory {
                     }
                 }
 
-                final ABIType<?> elementType = buildType(type.substring(0, arrayOpenIndex), true, baseTupleType, nameless);
+                final ABIType<?> elementType = buildType(type.substring(0, arrayOpenIndex), true, baseType, nameless);
                 final String arrayClassName = elementType.arrayClassName();
                 @SuppressWarnings("unchecked")
                 final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
                 final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
                 return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, '[' + arrayClassName);
             } else {
-                if (baseTupleType != null) {
-                    return baseTupleType;
-                }
-                ABIType<?> baseType = resolveBaseType(type, isArrayElement, nameless);
                 if (baseType != null) {
                     return baseType;
+                }
+                ABIType<?> resolvedBaseType = resolveBaseType(type, isArrayElement, nameless);
+                if (resolvedBaseType != null) {
+                    return resolvedBaseType;
                 }
             }
         } catch (ClassNotFoundException e) {

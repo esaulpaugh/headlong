@@ -354,7 +354,7 @@ public class MonteCarloTestCase implements Serializable {
             }
         }
         try {
-            return TypeFactory.create(sb.toString());
+            return TypeFactory.create(sb.toString(), null);
         } catch (ParseException pe) {
             throw new IllegalArgumentException(pe);
         }

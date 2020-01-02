@@ -172,13 +172,13 @@ public final class ABIJSON {
             final ABIType<?>[] componentsArray = new ABIType[components.size()];
             int i = 0;
             for (JsonElement c : components) {
-                componentsArray[i++] = parseType(c.getAsJsonObject());
+                componentsArray[i++] = parseType(c.getAsJsonObject()); // parse component names as well as types
             }
             final TupleType base = TupleType.wrap(componentsArray);
             final String suffix = type.substring(TUPLE.length()); // suffix e.g. "[4][]"
-            return TypeFactory.createForTuple(base, suffix, name);
+            return TypeFactory.createFromBase(base, suffix, name);
         }
-        return TypeFactory.create(type, null, name);
+        return TypeFactory.create(type, name);
     }
 // -------------------------------------------
     static JsonObject buildFunctionJson(Function f) {

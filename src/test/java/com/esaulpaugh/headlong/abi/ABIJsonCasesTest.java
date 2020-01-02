@@ -93,7 +93,7 @@ public class ABIJsonCasesTest {
                 if (openIdx >= 0) {
                     array[i++] = Function.parse("(" + s + ")").getParamTypes().get(0);
                 } else {
-                    array[i++] = TypeFactory.create(s);
+                    array[i++] = TypeFactory.create(s, null);
                 }
             }
 
