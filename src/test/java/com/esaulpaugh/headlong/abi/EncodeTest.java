@@ -87,7 +87,7 @@ public class EncodeTest {
 
     @Test
     public void nonTerminatingTupleTest() throws Throwable {
-        assertThrown(PARSE_ERR, UNRECOGNIZED_TYPE, () -> TupleType.parse("aaaaaa"));
+        assertThrown(PARSE_ERR, "unrecognized type: aaaaaa", () -> TupleType.parse("aaaaaa"));
 
         assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("("));
 
