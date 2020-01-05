@@ -23,7 +23,6 @@ public enum DataType {
     LIST_SHORT(0xc0),
     LIST_LONG(0xf7);
 
-    static final byte SINGLE_BYTE_OFFSET = 0;
     static final byte STRING_SHORT_OFFSET = (byte) 0x80;
     static final byte STRING_LONG_OFFSET = (byte) 0xb7;
     static final byte LIST_SHORT_OFFSET = (byte) 0xc0;
