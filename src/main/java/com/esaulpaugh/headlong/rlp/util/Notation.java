@@ -82,7 +82,7 @@ public class Notation {
             throw new UnrecoverableDecodeException("index > end: " + index + " > " + end);
         }
         StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
-        buildLongList(sb, buffer, index, end, 0);
+        buildList(sb, buffer, index, end, 0, true);
         return new Notation(sb.append(END_NOTATION).toString());
     }
 
@@ -130,34 +130,17 @@ public class Notation {
         return to;
     }
 
-    private static int buildShortList(final StringBuilder sb, final byte[] data, final int dataIndex, final int end) throws DecodeException {
-        sb.append(BEGIN_LIST_SHORT);
-        for (int i = dataIndex; i < end; ) {
-            byte lead = data[i];
-            final DataType type = DataType.type(lead);
-            if(type != DataType.SINGLE_BYTE) {
-                int elementDataIndex = i + 1;
-                i = type.isString
-                        ? buildString(sb, data, elementDataIndex, getShortElementEnd(elementDataIndex, lead - type.offset, end))
-                        : buildShortList(sb, data, elementDataIndex, getShortElementEnd(elementDataIndex, lead - type.offset, end));
-                continue;
-            }
-            i = buildString(sb, data, i, i + 1);
-        }
-        if (/* hasElement */ dataIndex != end) {
-            stripFinalDelimiter(sb);
-        }
-        sb.append(LIST_SHORT_END_PLUS_DELIMITER);
-        return end;
-    }
-
-    private static int buildLongList(final StringBuilder sb, final byte[] data, final int dataIndex, int end, final int depth) throws DecodeException {
-        if(depth != 0) {
+    private static int buildList(final StringBuilder sb, final byte[] data, final int dataIndex, int end, final int depth, boolean _long) throws DecodeException {
+        if(!_long) {
+            sb.append(BEGIN_LIST_SHORT);
+        } else if(depth != 0) {
             sb.append(BEGIN_LIST);
         }
-        final String baseIndentation = getIndentation(depth);
+        final String baseIndentation = _long ? getIndentation(depth) : null;
         for (int i = dataIndex; i < end; ) {
-            sb.append('\n').append(baseIndentation).append(ELEMENT_INDENTATION);
+            if(_long) {
+                sb.append('\n').append(baseIndentation).append(ELEMENT_INDENTATION);
+            }
             final byte lead = data[i];
             final DataType type = DataType.type(lead);
             if(type != DataType.SINGLE_BYTE) {
@@ -166,11 +149,11 @@ public class Notation {
                     elementDataIdx += lead - type.offset; // lengthOfLength
                     i = type.isString
                             ? buildString(sb, data, elementDataIdx, getLongElementEnd(data, i, elementDataIdx, end))
-                            : buildLongList(sb, data, elementDataIdx, getLongElementEnd(data, i, elementDataIdx, end), depth + 1);
+                            : buildList(sb, data, elementDataIdx, getLongElementEnd(data, i, elementDataIdx, end), depth + 1, true);
                 } else {
                     i = type.isString
                             ? buildString(sb, data, elementDataIdx, getShortElementEnd(elementDataIdx, lead - type.offset, end))
-                            : buildShortList(sb, data, elementDataIdx, getShortElementEnd(elementDataIdx, lead - type.offset, end));
+                            : buildList(sb, data, elementDataIdx, getShortElementEnd(elementDataIdx, lead - type.offset, end), depth + 1, false);
                 }
                 continue;
             }
@@ -179,7 +162,9 @@ public class Notation {
         if (/* hasElement */ dataIndex != end) {
             stripFinalDelimiter(sb);
         }
-        if(depth != 0) {
+        if(!_long) {
+            sb.append(LIST_SHORT_END_PLUS_DELIMITER);
+        } else if(depth != 0) {
             sb.append('\n')
                     .append(baseIndentation).append(LIST_LONG_END_PLUS_DELIMITER);
         }
