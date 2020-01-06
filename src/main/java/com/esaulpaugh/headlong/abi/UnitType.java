@@ -82,9 +82,7 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
     final void validateBigIntElement(final BigInteger bigIntVal) throws ABIException {
         checkBitLen(bigIntVal.bitLength());
     }
-
     // --------------------------------
-
     final void validateLongBitLen(long longVal) throws ABIException {
         checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
         if (unsigned && longVal < 0) {

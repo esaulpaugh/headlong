@@ -50,16 +50,15 @@ public class NotationParser {
         int nextArrayEnd = -1;
 
         while (i < end) {
+            if(!findNextObject(notation, i, resultHolder)) {
+                return Integer.MAX_VALUE;
+            }
 
             if(i > nextArrayEnd) { // only update nextArrayEnd when i has passed it
                 nextArrayEnd = notation.indexOf(Notation.END_LIST, i);
-                if(nextArrayEnd == -1) {
+                if(nextArrayEnd < 0) {
                     nextArrayEnd = Integer.MAX_VALUE;
                 }
-            }
-
-            if(!findNextObject(notation, i, resultHolder)) {
-                return Integer.MAX_VALUE;
             }
 
             int nextObjectIndex = resultHolder[0];
@@ -74,13 +73,11 @@ public class NotationParser {
                 int datumEnd = notation.indexOf(Notation.END_STRING, datumStart);
                 parent.add(Strings.decode(notation.substring(datumStart, datumEnd)));
                 i = datumEnd + STRING_SUFFIX_LEN;
-                break;
+                continue;
             case LIST:
                 List<Object> childList = new ArrayList<>();
                 i = parse(notation, nextObjectIndex + LIST_PREFIX_LEN, end, childList, resultHolder);
                 parent.add(childList);
-                break;
-            default: /* continue */
             }
         }
 
@@ -88,9 +85,8 @@ public class NotationParser {
     }
 
     private static boolean findNextObject(String notation, int startIndex, int[] resultHolder) {
-        final int indexList = notation.indexOf(Notation.BEGIN_LIST, startIndex);
         final int indexString = notation.indexOf(Notation.BEGIN_STRING, startIndex);
-
+        final int indexList = notation.indexOf(Notation.BEGIN_LIST, startIndex);
         if(indexString == -1) {
             if(indexList == -1) {
                 return false;
