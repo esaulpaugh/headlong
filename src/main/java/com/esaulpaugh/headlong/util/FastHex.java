@@ -35,11 +35,7 @@ public final class FastHex {
     private static final byte NO_MAPPING = -1;
 
     static {
-        final int[] ints = new int[] {
-                '0', '1', '2', '3',
-                '4', '5', '6', '7',
-                '8', '9', 'a', 'b',
-                'c', 'd', 'e', 'f' };
+        final int[] ints = new int[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
         for (int i = 0; i < ENCODE_TABLE.length; i++) {
             ENCODE_TABLE[i] = (ints[(i & 0xF0) >>> NIBBLE_BITS] << Byte.SIZE) | ints[i & 0x0F];
         }

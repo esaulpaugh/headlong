@@ -132,8 +132,6 @@ public class Notation {
         final String baseIndentation = getIndentation(depth);
 
         int elementDataIndex = -1;
-        int lengthLen;
-        int elementDataLen;
         int elementEnd = -1;
         boolean hasELement = false;
         int i = dataIndex;
@@ -146,12 +144,12 @@ public class Notation {
             case STRING_SHORT:
             case LIST_SHORT:
                 elementDataIndex = i + 1;
-                elementDataLen = current - type.offset;
+                int elementDataLen = current - type.offset;
                 elementEnd = getShortElementEnd(elementDataIndex, elementDataLen, end);
                 break;
             case STRING_LONG:
             case LIST_LONG:
-                lengthLen = current - type.offset;
+                int lengthLen = current - type.offset;
                 elementDataIndex = i + 1 + lengthLen;
                 elementEnd = getLongElementEnd(data, i, elementDataIndex, end);
             }
@@ -179,9 +177,8 @@ public class Notation {
         sb.append(BEGIN_LIST_SHORT);
 
         boolean hasElement = false;
-        int i = dataIndex;
         LOOP:
-        for ( ; i < end; ) {
+        for (int i = dataIndex; i < end; ) {
             byte current = data[i];
             final DataType type = DataType.type(current);
             hasElement = true;
