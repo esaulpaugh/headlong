@@ -61,9 +61,7 @@ public final class RLPEncoder {
                 ? encodeLongListPrefix(dataLen, dest, destIndex)
                 : encodeShortListPrefix(dataLen, dest, destIndex);
     }
-
     // -----------------------------------------------------------------------------------------------------------------
-
     private static boolean isLong(long dataLen) {
         return dataLen >= MIN_LONG_DATA_LEN;
     }
