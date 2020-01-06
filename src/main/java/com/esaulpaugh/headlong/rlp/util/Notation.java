@@ -130,7 +130,7 @@ public class Notation {
         return to;
     }
 
-    private static int buildList(final StringBuilder sb, final byte[] data, final int dataIndex, int end, final int depth, boolean _long) throws DecodeException {
+    private static int buildList(final StringBuilder sb, final byte[] data, final int dataIndex, int end, final int depth, final boolean _long) throws DecodeException {
         if(!_long) {
             sb.append(BEGIN_LIST_SHORT);
         } else if(depth != 0) {
@@ -146,6 +146,9 @@ public class Notation {
             if(type != DataType.SINGLE_BYTE) {
                 int elementDataIdx = i + 1;
                 if(type.isLong) {
+                    if(!_long) {
+                        throw new UnrecoverableDecodeException("long element found in short list");
+                    }
                     elementDataIdx += lead - type.offset; // lengthOfLength
                     i = type.isString
                             ? buildString(sb, data, elementDataIdx, getLongElementEnd(data, i, elementDataIdx, end))
