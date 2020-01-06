@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.rlp.DataType;
+import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Integers;
@@ -86,6 +87,10 @@ public class Notation {
         StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
         buildLongList(sb, buffer, index, end, 0);
         return new Notation(sb.append(END_NOTATION).toString());
+    }
+
+    public static Notation forObjects(List<Object> objects) throws DecodeException {
+        return forEncoding(RLPEncoder.encodeSequentially(objects));
     }
 
     private static DecodeException exceedsContainer(int index, long end, int containerEnd) {

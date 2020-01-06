@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.util.Integers;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -149,5 +151,15 @@ public class RLPEncoderTest {
         assertEquals(iter.next().asFloat(), f, 0.0001d);
         assertEquals(iter.next().asDouble(), d, 0.0001d);
         assertEquals(iter.next().asBigDecimal(bd.scale()), bd);
+    }
+
+    @Test
+    public void testExceptions() throws Throwable {
+
+        TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.encodeSequentially(new byte[0], null, new byte[] { -1 }));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type: java.lang.String", () -> RLPEncoder.encodeSequentially((Object) new String[] { "00" }));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type: java.lang.String", () -> RLPEncoder.encodeSequentially(new Object[] { new ArrayList<>(), "00" }));
     }
 }
