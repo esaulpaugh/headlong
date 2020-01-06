@@ -240,22 +240,21 @@ public abstract class RLPItem {
         if(!(obj instanceof RLPItem)) {
             return false;
         }
-
         RLPItem other = (RLPItem) obj;
-
-//        // Java 9+ vectorizedMismatch
-//        return Arrays.equals(
+//        return Arrays.equals( // Java 9+ vectorizedMismatch
 //                this.buffer, this.index, this.endIndex,
 //                other.buffer, other.index, other.endIndex
 //        );
+        return equals(other.buffer, other.index, other.endIndex);
+    }
 
-        final int length = this.endIndex - this.index;
-        if(length != other.endIndex - other.index) {
+    private boolean equals(byte[] b, int bIdx, int bEnd) {
+        final int len = this.endIndex - this.index;
+        if(len != bEnd - bIdx) {
             return false;
         }
-
-        for (int i = 0; i < length; i++) {
-            if (this.buffer[this.index + i] != other.buffer[other.index + i])
+        for (int i = 0; i < len; i++) {
+            if (this.buffer[this.index + i] != b[bIdx + i])
                 return false;
         }
         return true;

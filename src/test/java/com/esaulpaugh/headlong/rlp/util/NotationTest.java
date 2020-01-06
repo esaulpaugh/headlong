@@ -57,7 +57,7 @@ public class NotationTest {
         Notation n = Notation.forEncoding(RLPEncoder.encodeSequentially(NotationParser.parse(NOTATION)));
         assertEquals(n.toString(), notation);
 
-        List<Object> objects = NotationParser.parse(notation);
+        List<Object> objects = n.parse();
 
         assertEquals(n, Notation.forObjects(objects));
 

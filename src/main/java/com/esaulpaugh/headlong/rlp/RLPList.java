@@ -20,8 +20,6 @@ import com.esaulpaugh.headlong.util.Integers;
 
 import java.util.*;
 
-import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
-
 /**
  * Created by Evo on 1/19/2017.
  */
@@ -66,7 +64,7 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         byte[] length = Integers.toBytes(dataLen);
         int destHeaderLen = 1 + length.length;
         byte[] dest = new byte[destHeaderLen + dataLen];
-        dest[0] = (byte) (LIST_LONG_OFFSET + length.length);
+        dest[0] = (byte) (DataType.LIST_LONG_OFFSET + length.length);
         System.arraycopy(length, 0, dest, 1, length.length);
         copyElements(elements, dest, destHeaderLen);
         return dest;
@@ -104,23 +102,6 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
 
     @Override
     public Iterator<RLPItem> iterator() {
-        return new Iterator<RLPItem>() {
-
-            private final RLPListIterator iter = iterator(RLPDecoder.RLP_STRICT);
-
-            @Override
-            public boolean hasNext() {
-                return iter.hasNext();
-            }
-
-            @Override
-            public RLPItem next() {
-                try {
-                    return iter.next();
-                } catch (DecodeException e) {
-                    throw new NoSuchElementException(e.getMessage()); // *** beware of RuntimeException ***
-                }
-            }
-        };
+        return iterator(RLPDecoder.RLP_STRICT);
     }
 }

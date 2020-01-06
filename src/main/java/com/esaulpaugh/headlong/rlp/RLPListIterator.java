@@ -17,9 +17,10 @@ package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public final class RLPListIterator {
+public final class RLPListIterator implements Iterator<RLPItem> {
 
     private final RLPList list;
     private final RLPDecoder decoder;
@@ -32,15 +33,21 @@ public final class RLPListIterator {
         this.nextElementIndex = list.dataIndex;
     }
 
+    @Override
     public boolean hasNext() {
         return this.nextElementIndex < list.endIndex;
     }
 
-    public RLPItem next() throws DecodeException {
+    @Override
+    public RLPItem next() {
         if (hasNext()) {
-            RLPItem element = decoder.wrap(list.buffer, this.nextElementIndex, list.endIndex);
-            this.nextElementIndex = element.endIndex;
-            return element;
+            try {
+                RLPItem element = decoder.wrap(list.buffer, this.nextElementIndex, list.endIndex);
+                this.nextElementIndex = element.endIndex;
+                return element;
+            } catch (DecodeException de) {
+                throw new NoSuchElementException(de.getMessage()); // *** beware of RuntimeException ***
+            }
         }
         throw new NoSuchElementException();
     }
