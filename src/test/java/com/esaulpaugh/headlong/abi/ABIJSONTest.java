@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.List;
 
@@ -133,7 +134,7 @@ public class ABIJSONTest {
             "  },\n" +
             "  {\n" +
             "    \"type\": \"function\",\n" +
-            "    \"name\": \"func\",\n" +
+            "    \"name\": \"\",\n" +
             "    \"inputs\": [\n" +
             "      {\n" +
             "        \"name\": \"aa\",\n" +
@@ -270,6 +271,30 @@ public class ABIJSONTest {
     }
 
     @Test
+    public void testFunctionValidation() throws Throwable {
+        final String errNamed = "functions of this type must be unnamed";
+        final String errNotNamed = "functions of this type must be named";
+        final String errHasOutputs = "functions of this type cannot have outputs";
+        final String errHasInputs = "functions of this type cannot have inputs";
+        final TupleType inputs = TupleType.of("int"), outputs = TupleType.of("bool");
+        final MessageDigest md = Function.newDefaultDigest();
+        TestUtils.assertThrown(IllegalArgumentException.class, errHasOutputs, () -> new Function(Function.Type.CONSTRUCTOR, "foo()","(bool)", md));
+        TestUtils.assertThrown(IllegalArgumentException.class, errHasOutputs, () -> new Function(Function.Type.FALLBACK, "foo()","(bool)", md));
+        TestUtils.assertThrown(IllegalArgumentException.class, errNamed, () -> new Function(Function.Type.CONSTRUCTOR, "foo()","()", md));
+        TestUtils.assertThrown(IllegalArgumentException.class, errNamed, () -> new Function(Function.Type.FALLBACK, "foo()","()", md));
+        new Function(Function.Type.CONSTRUCTOR, "()","()", md);
+        new Function(Function.Type.FALLBACK, "()","()", md);
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "functions of this type must be payable", () -> new Function(Function.Type.RECEIVE, "receive", inputs, outputs, null, md));
+        TestUtils.assertThrown(IllegalArgumentException.class, errHasInputs, () -> new Function(Function.Type.RECEIVE, "receive", inputs, outputs, "payable", md));
+        TestUtils.assertThrown(IllegalArgumentException.class, errHasOutputs, () -> new Function(Function.Type.RECEIVE, "receive", TupleType.EMPTY, outputs, "payable", md));
+        new Function(Function.Type.RECEIVE, "receive", TupleType.EMPTY, TupleType.EMPTY, "payable", md);
+
+        TestUtils.assertThrown(IllegalArgumentException.class, errNotNamed, () -> new Function(Function.Type.FUNCTION, null, TupleType.EMPTY, TupleType.EMPTY, null, md));
+        new Function(Function.Type.FUNCTION, "", TupleType.EMPTY, TupleType.EMPTY, null, md);
+    }
+
+    @Test
     public void testParseFunction() throws ParseException, ABIException {
 
         Function f;
@@ -373,7 +398,7 @@ public class ABIJSONTest {
         printTupleType(func.getParamTypes());
 
         assertEquals(Function.Type.FUNCTION, func.getType());
-        assertEquals("func", func.getName());
+        assertEquals("", func.getName());
         assertNull(func.getStateMutability());
 
         functions = ABIJSON.parseFunctions(FALLBACK_CONSTRUCTOR_RECEIVE);
