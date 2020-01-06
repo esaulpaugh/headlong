@@ -26,10 +26,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
-import static com.esaulpaugh.headlong.rlp.DataType.SINGLE_BYTE;
-import static com.esaulpaugh.headlong.util.Strings.HEX;
-
 /**
  * An object notation for RLP, not unlike JSON. Call {@link #parse()} to parse the notation into the original list of objects.
  */
@@ -118,11 +114,41 @@ public class Notation {
             throw exceedsContainer(leadByteIndex, end, containerEnd);
         }
         final int dataLen = (int) dataLenLong;
-        if (dataLen < MIN_LONG_DATA_LEN) {
-            throw new UnrecoverableDecodeException("long element data length must be " + MIN_LONG_DATA_LEN
+        if (dataLen < DataType.MIN_LONG_DATA_LEN) {
+            throw new UnrecoverableDecodeException("long element data length must be " + DataType.MIN_LONG_DATA_LEN
                     + " or greater; found: " + dataLen + " for element @ " + leadByteIndex);
         }
         return (int) end;
+    }
+
+    private static int buildString(StringBuilder sb, byte[] data, int from, int to) throws DecodeException {
+        final int len = to - from;
+        if(!LENIENT && len == 1 && data[from] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
+            throw new UnrecoverableDecodeException("invalid rlp for single byte @ " + (from - 1));
+        }
+        sb.append(BEGIN_STRING).append(Strings.encode(data, from, len, Strings.HEX)).append(STRING_END_PLUS_DELIMITER);
+        return to;
+    }
+
+    private static int buildShortList(final StringBuilder sb, final byte[] data, final int dataIndex, final int end) throws DecodeException {
+        sb.append(BEGIN_LIST_SHORT);
+        for (int i = dataIndex; i < end; ) {
+            byte lead = data[i];
+            final DataType type = DataType.type(lead);
+            if(type != DataType.SINGLE_BYTE) {
+                int elementDataIndex = i + 1;
+                i = type.isString
+                        ? buildString(sb, data, elementDataIndex, getShortElementEnd(elementDataIndex, lead - type.offset, end))
+                        : buildShortList(sb, data, elementDataIndex, getShortElementEnd(elementDataIndex, lead - type.offset, end));
+                continue;
+            }
+            i = buildString(sb, data, i, i + 1);
+        }
+        if (/* hasElement */ dataIndex != end) {
+            stripFinalDelimiter(sb);
+        }
+        sb.append(LIST_SHORT_END_PLUS_DELIMITER);
+        return end;
     }
 
     private static int buildLongList(final StringBuilder sb, final byte[] data, final int dataIndex, int end, final int depth) throws DecodeException {
@@ -134,21 +160,21 @@ public class Notation {
             sb.append('\n').append(baseIndentation).append(ELEMENT_INDENTATION);
             final byte lead = data[i];
             final DataType type = DataType.type(lead);
-            if(type == SINGLE_BYTE) {
-                i = buildByte(sb, data, i);
+            if(type != DataType.SINGLE_BYTE) {
+                int elementDataIdx = i + 1;
+                if(type.isLong) {
+                    elementDataIdx += lead - type.offset; // lengthOfLength
+                    i = type.isString
+                            ? buildString(sb, data, elementDataIdx, getLongElementEnd(data, i, elementDataIdx, end))
+                            : buildLongList(sb, data, elementDataIdx, getLongElementEnd(data, i, elementDataIdx, end), depth + 1);
+                } else {
+                    i = type.isString
+                            ? buildString(sb, data, elementDataIdx, getShortElementEnd(elementDataIdx, lead - type.offset, end))
+                            : buildShortList(sb, data, elementDataIdx, getShortElementEnd(elementDataIdx, lead - type.offset, end));
+                }
                 continue;
             }
-            int elementDataIdx = i + 1;
-            if(type.isLong) {
-                elementDataIdx += lead - type.offset; // lengthOfLength
-                i = type.isString
-                        ? buildString(sb, data, elementDataIdx, getLongElementEnd(data, i, elementDataIdx, end))
-                        : buildLongList(sb, data, elementDataIdx, getLongElementEnd(data, i, elementDataIdx, end), depth + 1);
-            } else {
-                i = type.isString
-                        ? buildString(sb, data, elementDataIdx, getShortElementEnd(elementDataIdx, lead - type.offset, end))
-                        : buildShortList(sb, data, elementDataIdx, getShortElementEnd(elementDataIdx, lead - type.offset, end));
-            }
+            i = buildString(sb, data, i, i + 1);
         }
         if (/* hasElement */ dataIndex != end) {
             stripFinalDelimiter(sb);
@@ -157,27 +183,6 @@ public class Notation {
             sb.append('\n')
                     .append(baseIndentation).append(LIST_LONG_END_PLUS_DELIMITER);
         }
-        return end;
-    }
-
-    private static int buildShortList(final StringBuilder sb, final byte[] data, final int dataIndex, final int end) throws DecodeException {
-        sb.append(BEGIN_LIST_SHORT);
-        for (int i = dataIndex; i < end; ) {
-            byte lead = data[i];
-            final DataType type = DataType.type(lead);
-            if(type == SINGLE_BYTE) {
-                i = buildByte(sb, data, i);
-                continue;
-            }
-            int elementDataIndex = i + 1;
-            i = type.isString
-                    ? buildString(sb, data, elementDataIndex, getShortElementEnd(elementDataIndex, lead - type.offset, end))
-                    : buildShortList(sb, data, elementDataIndex, getShortElementEnd(elementDataIndex, lead - type.offset, end));
-        }
-        if (/* hasElement */ dataIndex != end) {
-            stripFinalDelimiter(sb);
-        }
-        sb.append(LIST_SHORT_END_PLUS_DELIMITER);
         return end;
     }
 
@@ -194,20 +199,6 @@ public class Notation {
     private static void stripFinalDelimiter(StringBuilder sb) {
         final int n = sb.length();
         sb.replace(n - DELIMITER.length(), n, "");
-    }
-
-    private static int buildByte(StringBuilder sb, byte[] data, int i) {
-        sb.append(BEGIN_STRING).append(Strings.encode(data, i, 1, HEX)).append(STRING_END_PLUS_DELIMITER);
-        return i + 1;
-    }
-
-    private static int buildString(StringBuilder sb, byte[] data, int from, int to) throws DecodeException {
-        final int len = to - from;
-        if(!LENIENT && len == 1 && data[from] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
-            throw new UnrecoverableDecodeException("invalid rlp for single byte @ " + (from - 1));
-        }
-        sb.append(BEGIN_STRING).append(Strings.encode(data, from, len, HEX)).append(STRING_END_PLUS_DELIMITER);
-        return to;
     }
 
     @Override
