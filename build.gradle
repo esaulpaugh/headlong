@@ -4,21 +4,22 @@ plugins {
 }
 
 group 'com.esaulpaugh'
-version '2.0.0-SNAPSHOT'
+archivesBaseName = "headlong"
+version '2.0.1-SNAPSHOT'
 
 test {
     maxParallelForks = (int) Runtime.runtime.availableProcessors() ?: 1
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-//    classifier = 'javadoc' // deprecated
-    archiveClassifier.set('javadoc')
+    classifier = 'javadoc' // deprecated
+//    archiveClassifier.set('javadoc')
     from javadoc.destinationDir
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-//    classifier = 'sources' // deprecated
-    archiveClassifier.set('sources')
+    classifier = 'sources' // deprecated
+//    archiveClassifier.set('sources')
     from sourceSets.main.allSource
     finalizedBy(javadocJar)
 }
@@ -38,6 +39,10 @@ sourceSets {
         java.srcDirs = ['src/jmh/java']
         compileClasspath += sourceSets.main.runtimeClasspath
     }
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
 }
 
 publishing {
