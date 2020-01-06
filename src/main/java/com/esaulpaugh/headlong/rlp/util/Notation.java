@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
+import static com.esaulpaugh.headlong.rlp.DataType.SINGLE_BYTE;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 
 /**
@@ -46,10 +47,10 @@ public class Notation {
 
     private static final String BEGIN_LIST_SHORT = BEGIN_LIST + " ";
 
-    private static final String COMMA_SPACE = ", ";
-    private static final String LIST_LONG_END_COMMA_SPACE = END_LIST + COMMA_SPACE;
-    private static final String LIST_SHORT_END_COMMA_SPACE = " " + LIST_LONG_END_COMMA_SPACE;
-    private static final String STRING_END_COMMA_SPACE = END_STRING + COMMA_SPACE;
+    private static final String DELIMITER = ", ";
+    private static final String LIST_LONG_END_PLUS_DELIMITER = END_LIST + DELIMITER;
+    private static final String LIST_SHORT_END_PLUS_DELIMITER = " " + LIST_LONG_END_PLUS_DELIMITER;
+    private static final String STRING_END_PLUS_DELIMITER = END_STRING + DELIMITER;
 
     private static final String[] INDENTATION_CACHE;
 
@@ -128,82 +129,55 @@ public class Notation {
         if(depth != 0) {
             sb.append(BEGIN_LIST);
         }
-
         final String baseIndentation = getIndentation(depth);
-
-        int elementDataIndex = -1;
-        int elementEnd = -1;
-        boolean hasELement = false;
-        int i = dataIndex;
-        while (i < end) {
-            sb.append('\n').append(baseIndentation);
-            byte current = data[i];
-            final DataType type = DataType.type(current);
-            switch (type) {
-            case SINGLE_BYTE: break;
-            case STRING_SHORT:
-            case LIST_SHORT:
-                elementDataIndex = i + 1;
-                int elementDataLen = current - type.offset;
-                elementEnd = getShortElementEnd(elementDataIndex, elementDataLen, end);
-                break;
-            case STRING_LONG:
-            case LIST_LONG:
-                int lengthLen = current - type.offset;
-                elementDataIndex = i + 1 + lengthLen;
-                elementEnd = getLongElementEnd(data, i, elementDataIndex, end);
+        for (int i = dataIndex; i < end; ) {
+            sb.append('\n').append(baseIndentation).append(ELEMENT_INDENTATION);
+            final byte lead = data[i];
+            final DataType type = DataType.type(lead);
+            if(type == SINGLE_BYTE) {
+                i = buildByte(sb, data, i);
+                continue;
             }
-            hasELement = true;
-            sb.append(ELEMENT_INDENTATION);
-            switch (type) {
-            case SINGLE_BYTE: i = buildByte(sb, data, i); break;
-            case STRING_SHORT:
-            case STRING_LONG: i = buildString(sb, data, elementDataIndex, elementEnd); break;
-            case LIST_SHORT: i = buildShortList(sb, data, elementDataIndex, elementEnd); break;
-            case LIST_LONG: i = buildLongList(sb, data, elementDataIndex, elementEnd, depth + 1);
+            int elementDataIdx = i + 1;
+            if(type.isLong) {
+                elementDataIdx += lead - type.offset; // lengthOfLength
+                i = type.isString
+                        ? buildString(sb, data, elementDataIdx, getLongElementEnd(data, i, elementDataIdx, end))
+                        : buildLongList(sb, data, elementDataIdx, getLongElementEnd(data, i, elementDataIdx, end), depth + 1);
+            } else {
+                i = type.isString
+                        ? buildString(sb, data, elementDataIdx, getShortElementEnd(elementDataIdx, lead - type.offset, end))
+                        : buildShortList(sb, data, elementDataIdx, getShortElementEnd(elementDataIdx, lead - type.offset, end));
             }
         }
-        if (hasELement) {
-            stripFinalCommaAndSpace(sb);
+        if (/* hasElement */ dataIndex != end) {
+            stripFinalDelimiter(sb);
         }
         if(depth != 0) {
             sb.append('\n')
-                    .append(baseIndentation).append(LIST_LONG_END_COMMA_SPACE);
+                    .append(baseIndentation).append(LIST_LONG_END_PLUS_DELIMITER);
         }
         return end;
     }
 
     private static int buildShortList(final StringBuilder sb, final byte[] data, final int dataIndex, final int end) throws DecodeException {
         sb.append(BEGIN_LIST_SHORT);
-
-        boolean hasElement = false;
-        LOOP:
         for (int i = dataIndex; i < end; ) {
-            byte current = data[i];
-            final DataType type = DataType.type(current);
-            hasElement = true;
-            switch (type) {
-            case SINGLE_BYTE:
+            byte lead = data[i];
+            final DataType type = DataType.type(lead);
+            if(type == SINGLE_BYTE) {
                 i = buildByte(sb, data, i);
-                continue LOOP;
-            case STRING_SHORT:
-            case LIST_SHORT:
-                int elementDataIndex = i + 1;
-                int elementEnd = getShortElementEnd(elementDataIndex, current - type.offset, end);
-                i = type == DataType.STRING_SHORT
-                        ? buildString(sb, data, elementDataIndex, elementEnd)
-                        : buildShortList(sb, data, elementDataIndex, elementEnd);
-                break;
-            case STRING_LONG:
-            case LIST_LONG:
-            default:
-                throw new Error();
+                continue;
             }
+            int elementDataIndex = i + 1;
+            i = type.isString
+                    ? buildString(sb, data, elementDataIndex, getShortElementEnd(elementDataIndex, lead - type.offset, end))
+                    : buildShortList(sb, data, elementDataIndex, getShortElementEnd(elementDataIndex, lead - type.offset, end));
         }
-        if (hasElement) {
-            stripFinalCommaAndSpace(sb);
+        if (/* hasElement */ dataIndex != end) {
+            stripFinalDelimiter(sb);
         }
-        sb.append(LIST_SHORT_END_COMMA_SPACE);
+        sb.append(LIST_SHORT_END_PLUS_DELIMITER);
         return end;
     }
 
@@ -217,13 +191,13 @@ public class Notation {
         return n < INDENTATION_CACHE.length ? INDENTATION_CACHE[n] : newIndentation(n);
     }
 
-    private static void stripFinalCommaAndSpace(StringBuilder sb) {
+    private static void stripFinalDelimiter(StringBuilder sb) {
         final int n = sb.length();
-        sb.replace(n - COMMA_SPACE.length(), n, "");
+        sb.replace(n - DELIMITER.length(), n, "");
     }
 
     private static int buildByte(StringBuilder sb, byte[] data, int i) {
-        sb.append(BEGIN_STRING).append(Strings.encode(data, i, 1, HEX)).append(STRING_END_COMMA_SPACE);
+        sb.append(BEGIN_STRING).append(Strings.encode(data, i, 1, HEX)).append(STRING_END_PLUS_DELIMITER);
         return i + 1;
     }
 
@@ -232,7 +206,7 @@ public class Notation {
         if(!LENIENT && len == 1 && data[from] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
             throw new UnrecoverableDecodeException("invalid rlp for single byte @ " + (from - 1));
         }
-        sb.append(BEGIN_STRING).append(Strings.encode(data, from, len, HEX)).append(STRING_END_COMMA_SPACE);
+        sb.append(BEGIN_STRING).append(Strings.encode(data, from, len, HEX)).append(STRING_END_PLUS_DELIMITER);
         return to;
     }
 

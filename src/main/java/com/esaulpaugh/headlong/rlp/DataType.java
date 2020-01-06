@@ -17,11 +17,11 @@ package com.esaulpaugh.headlong.rlp;
 
 public enum DataType {
 
-    SINGLE_BYTE(0),
-    STRING_SHORT(0x80),
-    STRING_LONG(0xb7),
-    LIST_SHORT(0xc0),
-    LIST_LONG(0xf7);
+    SINGLE_BYTE(0, false, false),
+    STRING_SHORT(0x80, true, false),
+    STRING_LONG(0xb7, true, true),
+    LIST_SHORT(0xc0, false, false),
+    LIST_LONG(0xf7, false, true);
 
     static final byte STRING_SHORT_OFFSET = (byte) 0x80;
     static final byte STRING_LONG_OFFSET = (byte) 0xb7;
@@ -30,10 +30,14 @@ public enum DataType {
 
     public static final int MIN_LONG_DATA_LEN = 56;
 
+    public final boolean isString;
+    public final boolean isLong;
     public final byte offset;
 
-    DataType(int offset) {
+    DataType(int offset, boolean isString, boolean isLong) {
         this.offset = (byte) offset;
+        this.isString = isString;
+        this.isLong = isLong;
     }
 
     /**
