@@ -1,3 +1,11 @@
+buildscript {
+    repositories {
+        maven {
+            url 'https://repo1.maven.org/maven2'
+        }
+    }
+}
+
 plugins {
     id 'java-library'
     id 'maven-publish'
@@ -59,6 +67,9 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
+    maven {
+        setUrl("https://repo1.maven.org/maven2")
+    }
     mavenCentral()
 }
 
