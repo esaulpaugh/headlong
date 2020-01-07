@@ -30,9 +30,9 @@ public enum DataType {
 
     public static final int MIN_LONG_DATA_LEN = 56;
 
+    public final byte offset;
     public final boolean isString;
     public final boolean isLong;
-    public final byte offset;
 
     DataType(int offset, boolean isString, boolean isLong) {
         this.offset = (byte) offset;

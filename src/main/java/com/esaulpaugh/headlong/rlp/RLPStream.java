@@ -20,7 +20,6 @@ import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 public final class RLPStream implements Iterable<RLPItem>, AutoCloseable {
 
@@ -46,15 +45,10 @@ public final class RLPStream implements Iterable<RLPItem>, AutoCloseable {
         is.close();
     }
 
-    private final class RLPStreamIterator implements Iterator<RLPItem> {
-
-        private byte[] buffer;
-        private int index;
-
-        private RLPItem next;
+    private final class RLPStreamIterator extends RLPIterator implements Iterator<RLPItem> {
 
         RLPStreamIterator() {
-            this.buffer = new byte[this.index = 0]; // make sure index == buffer.length
+            super(RLPStream.this.decoder, new byte[0], /* make sure index == buffer.length */ 0, Integer.MAX_VALUE);
         }
 
         @Override
@@ -63,26 +57,26 @@ public final class RLPStream implements Iterable<RLPItem>, AutoCloseable {
                 return true;
             }
             try {
-                final int available = RLPStream.this.is.available();
+                final int available = is.available();
                 if (available > 0) {
                     int keptBytes = buffer.length - index;
                     byte[] newBuffer = new byte[keptBytes + available];
                     System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
                     buffer = newBuffer;
                     index = 0;
-                    int read = RLPStream.this.is.read(buffer, keptBytes, available);
+                    int read = is.read(buffer, keptBytes, available);
                     if (read != available) {
                         throw new IOException("read failed: " + read + " != " + available);
                     }
                 }
             } catch (IOException io) {
-                throw RLPIterator.noSuchElementException(io);
+                throw noSuchElementException(io);
             }
             if (index == buffer.length) {
                 return false;
             }
             try {
-                next = RLPStream.this.decoder.wrap(buffer, index);
+                next = decoder.wrap(buffer, index);
                 return true;
             } catch (DecodeException e) {
                 if (e.isRecoverable()) {
@@ -90,21 +84,6 @@ public final class RLPStream implements Iterable<RLPItem>, AutoCloseable {
                 }
                 throw RLPIterator.noSuchElementException(e);
             }
-        }
-
-        @Override
-        public RLPItem next() {
-            if(hasNext()) {
-                try {
-                    index = next.endIndex;
-                    RLPItem item = next;
-                    next = null;
-                    return item;
-                } catch (NullPointerException npe) {
-                    throw RLPIterator.noSuchElementException(npe);
-                }
-            }
-            throw new NoSuchElementException();
         }
     }
 }

@@ -23,35 +23,46 @@ import java.util.NoSuchElementException;
 /**
  * For iterating over sequentially encoded RLP items.
  */
-final class RLPIterator implements Iterator<RLPItem> {
+class RLPIterator implements Iterator<RLPItem> {
 
-    private final RLPDecoder decoder;
-    private final byte[] rlp;
-    private int index;
-    private final int end;
+    protected final RLPDecoder decoder;
+    protected byte[] buffer;
+    protected int index;
+    protected final int end;
 
-    RLPIterator(RLPDecoder decoder, byte[] rlp, int start, int end) {
+    protected RLPItem next;
+
+    RLPIterator(RLPDecoder decoder, byte[] buffer, int start, int end) {
         this.decoder = decoder;
-        this.rlp = rlp;
+        this.buffer = buffer;
         this.index = start;
         this.end = end;
     }
 
     @Override
     public boolean hasNext() {
-        return index < end;
+        if(next != null) {
+            return true;
+        }
+        if(index >= end) {
+            return false;
+        }
+        try {
+            next = decoder.wrap(buffer, index);
+            this.index = next.endIndex;
+            return true;
+        } catch (DecodeException de) {
+            throw noSuchElementException(de);
+        }
     }
 
     @Override
     public RLPItem next() {
         if(hasNext()) {
-            try {
-                RLPItem next = decoder.wrap(rlp, index);
-                this.index = next.endIndex;
-                return next;
-            } catch (DecodeException de) {
-                throw noSuchElementException(de);
-            }
+            RLPItem item = next;
+            next = null;
+            index = item.endIndex;
+            return item;
         }
         throw new NoSuchElementException();
     }
