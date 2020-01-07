@@ -19,13 +19,15 @@ import com.esaulpaugh.headlong.rlp.RLPDecoder;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
-import com.esaulpaugh.headlong.rlp.RLPListIterator;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.security.SignatureException;
 import java.text.ParseException;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
@@ -87,7 +89,11 @@ public final class Record {
     }
 
     public RLPItem getSignature() throws DecodeException {
-        return getRLP().iterator(RLP_STRICT).next();
+        try {
+            return getRLP().iterator(RLP_STRICT).next();
+        } catch (NoSuchElementException nsee) {
+            throw new UnrecoverableDecodeException(nsee);
+        }
     }
 
     public RLPList getContent() throws DecodeException {
@@ -95,7 +101,7 @@ public final class Record {
     }
 
     public long getSeq() throws DecodeException {
-        RLPListIterator iter = new RLPListIterator(getRLP(), RLP_STRICT);
+        Iterator<RLPItem> iter = getRLP().iterator();
         iter.next();
         return iter.next().asLong();
     }

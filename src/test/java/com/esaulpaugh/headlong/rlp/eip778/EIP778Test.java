@@ -17,8 +17,8 @@ package com.esaulpaugh.headlong.rlp.eip778;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.rlp.RLPDecoder;
+import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
-import com.esaulpaugh.headlong.rlp.RLPListIterator;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Test;
@@ -84,7 +84,7 @@ public class EIP778Test {
 
         RLPList content = record.decode((s,c) -> {});
         System.out.println("verified = " + content);
-        RLPListIterator iter = content.iterator(RLPDecoder.RLP_STRICT);
+        Iterator<RLPItem> iter = content.iterator(RLPDecoder.RLP_STRICT);
 
         assertEquals(VECTOR.getSeq(), record.getSeq());
 

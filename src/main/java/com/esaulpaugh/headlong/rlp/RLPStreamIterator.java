@@ -16,13 +16,13 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
-import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class RLPStreamIterator implements AutoCloseable {
+public final class RLPStreamIterator implements Iterator<RLPItem>, AutoCloseable {
 
     private final RLPDecoder decoder;
     private final InputStream rlpStream;
@@ -38,21 +38,26 @@ public class RLPStreamIterator implements AutoCloseable {
         this.buffer = new byte[this.index = 0]; // make sure index == buffer.length
     }
 
-    public boolean hasNext() throws IOException, UnrecoverableDecodeException {
+    @Override
+    public boolean hasNext() {
         if (rlpItem != null) {
             return true;
         }
-        final int available = rlpStream.available();
-        if (available > 0) {
-            int keptBytes = buffer.length - index;
-            byte[] newBuffer = new byte[keptBytes + available];
-            System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
-            buffer = newBuffer;
-            index = 0;
-            int read = rlpStream.read(buffer, keptBytes, available);
-            if (read != available) {
-                throw new IOException("read failed: " + read + " != " + available);
+        try {
+            final int available = rlpStream.available();
+            if (available > 0) {
+                int keptBytes = buffer.length - index;
+                byte[] newBuffer = new byte[keptBytes + available];
+                System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
+                buffer = newBuffer;
+                index = 0;
+                int read = rlpStream.read(buffer, keptBytes, available);
+                if (read != available) {
+                    throw new IOException("read failed: " + read + " != " + available);
+                }
             }
+        } catch (IOException io) {
+            throw RLPIterator.noSuchElementException(io);
         }
         if (index == buffer.length) {
             return false;
@@ -64,19 +69,23 @@ public class RLPStreamIterator implements AutoCloseable {
             if (e.isRecoverable()) {
                 return false;
             }
-            throw (UnrecoverableDecodeException) e;
+            throw RLPIterator.noSuchElementException(e);
         }
     }
 
+    @Override
     public RLPItem next() {
-        try {
-            index = rlpItem.endIndex;
-            RLPItem item = rlpItem;
-            rlpItem = null;
-            return item;
-        } catch (NullPointerException npe) {
-            throw new NoSuchElementException();
+        if(hasNext()) {
+            try {
+                index = rlpItem.endIndex;
+                RLPItem item = rlpItem;
+                rlpItem = null;
+                return item;
+            } catch (NullPointerException npe) {
+                throw RLPIterator.noSuchElementException(npe);
+            }
         }
+        throw new NoSuchElementException();
     }
 
     @Override

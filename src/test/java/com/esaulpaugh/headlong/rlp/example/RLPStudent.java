@@ -17,7 +17,6 @@ package com.esaulpaugh.headlong.rlp.example;
 
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
-import com.esaulpaugh.headlong.rlp.RLPIterator;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
@@ -26,6 +25,7 @@ import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Objects;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
@@ -46,7 +46,7 @@ public class RLPStudent implements RLPEncodeable {
     }
 
     public RLPStudent(byte[] rlp) throws DecodeException {
-        RLPIterator iter = RLP_STRICT.sequenceIterator(rlp);
+        Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(rlp);
 
         this.name = iter.next().asString(UTF_8);
         this.gpa = iter.next().asFloat();

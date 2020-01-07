@@ -20,6 +20,7 @@ import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiPredicate;
 
@@ -46,7 +47,7 @@ public final class RLPDecoder {
         return new RLPStreamIterator(RLPDecoder.this, rlpStream);
     }
 
-    public RLPIterator sequenceIterator(byte[] buffer) {
+    public Iterator<RLPItem> sequenceIterator(byte[] buffer) {
         return sequenceIterator(buffer, 0);
     }
 
@@ -57,11 +58,11 @@ public final class RLPDecoder {
      * @param index the index of the sequence
      * @return  an iterator over the items in the sequence
      */
-    public RLPIterator sequenceIterator(byte[] buffer, int index) {
+    public Iterator<RLPItem> sequenceIterator(byte[] buffer, int index) {
         return new RLPIterator(RLPDecoder.this, buffer, index, buffer.length);
     }
 
-    public RLPListIterator listIterator(byte[] buffer) throws DecodeException {
+    public Iterator<RLPItem> listIterator(byte[] buffer) throws DecodeException {
         return listIterator(buffer, 0);
     }
 
@@ -73,7 +74,7 @@ public final class RLPDecoder {
      * @return  the iterator over the elements in the list
      * @throws DecodeException  if the RLP list failed to decode
      */
-    public RLPListIterator listIterator(byte[] buffer, int index) throws DecodeException {
+    public Iterator<RLPItem> listIterator(byte[] buffer, int index) throws DecodeException {
         return wrapList(buffer, index).iterator(this);
     }
     

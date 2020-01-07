@@ -16,10 +16,11 @@
 package com.esaulpaugh.headlong.rlp.example;
 
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
-import com.esaulpaugh.headlong.rlp.RLPListIterator;
+import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 
 import java.math.BigDecimal;
+import java.util.Iterator;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
@@ -29,7 +30,7 @@ public class RLPStudentAdapter implements RLPAdapter<RLPStudent> {
     @Override
     public RLPStudent decode(byte[] rlp, int index) throws DecodeException {
 
-        RLPListIterator iter = RLP_STRICT.listIterator(rlp, index);
+        Iterator<RLPItem> iter = RLP_STRICT.listIterator(rlp, index);
 
         return new RLPStudent(iter.next().asString(UTF_8),
                 iter.next().asFloat(),

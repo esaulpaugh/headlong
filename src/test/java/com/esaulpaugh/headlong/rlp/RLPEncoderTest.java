@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -137,7 +138,7 @@ public class RLPEncoderTest {
                 bd.unscaledValue().toByteArray()
         );
 
-        RLPIterator iter = RLPDecoder.RLP_STRICT.sequenceIterator(rlp);
+        Iterator<RLPItem> iter = RLPDecoder.RLP_STRICT.sequenceIterator(rlp);
 
         assertEquals(iter.next().asChar(), c);
         assertEquals(iter.next().asString(Strings.UTF_8), str);

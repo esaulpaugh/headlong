@@ -96,12 +96,43 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         return decoder.wrapList(encoding(), 0);
     }
 
-    public RLPListIterator iterator(RLPDecoder decoder) {
-        return new RLPListIterator(this, decoder);
+    public Iterator<RLPItem> iterator(RLPDecoder decoder) {
+        return new RLPListIterator(decoder);
     }
 
     @Override
     public Iterator<RLPItem> iterator() {
         return iterator(RLPDecoder.RLP_STRICT);
+    }
+
+    private final class RLPListIterator implements Iterator<RLPItem> {
+
+        private final RLPDecoder decoder;
+
+        private int nextElementIndex;
+
+        public RLPListIterator(RLPDecoder decoder) {
+            this.decoder = decoder;
+            this.nextElementIndex = RLPList.this.dataIndex;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.nextElementIndex < RLPList.this.endIndex;
+        }
+
+        @Override
+        public RLPItem next() {
+            if (hasNext()) {
+                try {
+                    RLPItem element = decoder.wrap(RLPList.this.buffer, this.nextElementIndex, RLPList.this.endIndex);
+                    this.nextElementIndex = element.endIndex;
+                    return element;
+                } catch (DecodeException de) {
+                    throw RLPIterator.noSuchElementException(de);
+                }
+            }
+            throw new NoSuchElementException();
+        }
     }
 }

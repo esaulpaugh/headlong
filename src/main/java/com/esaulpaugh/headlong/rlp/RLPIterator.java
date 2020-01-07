@@ -17,12 +17,13 @@ package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
  * For iterating over sequentially encoded RLP items.
  */
-public final class RLPIterator {
+final class RLPIterator implements Iterator<RLPItem> {
 
     private final RLPDecoder decoder;
     private final byte[] rlp;
@@ -36,16 +37,26 @@ public final class RLPIterator {
         this.end = end;
     }
 
+    @Override
     public boolean hasNext() {
         return index < end;
     }
 
-    public RLPItem next() throws DecodeException {
+    @Override
+    public RLPItem next() {
         if(hasNext()) {
-            RLPItem item = decoder.wrap(rlp, index);
-            this.index = item.endIndex;
-            return item;
+            try {
+                RLPItem item = decoder.wrap(rlp, index);
+                this.index = item.endIndex;
+                return item;
+            } catch (DecodeException de) {
+                throw noSuchElementException(de);
+            }
         }
         throw new NoSuchElementException();
+    }
+
+    static NoSuchElementException noSuchElementException(Throwable cause) {
+        return (NoSuchElementException) new NoSuchElementException().initCause(cause);
     }
 }

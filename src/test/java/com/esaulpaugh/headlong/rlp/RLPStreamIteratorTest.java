@@ -78,20 +78,18 @@ public class RLPStreamIteratorTest {
 
     @Test
     public void testUnrecoverable() throws Throwable {
-        Class<? extends DecodeException> clazz = UnrecoverableDecodeException.class;
-
         try (PipedOutputStream pos = new PipedOutputStream();
              PipedInputStream pis = new PipedInputStream(pos, 512);
              RLPStreamIterator iter = RLP_STRICT.sequenceStreamIterator(pis)) {
             pos.write(0x81);
             pos.write(0x00);
-            TestUtils.assertThrown(clazz, "invalid rlp for single byte @ 0", iter::hasNext);
+            TestUtils.assertThrown(NoSuchElementException.class, "invalid rlp for single byte @ 0", iter::hasNext);
             try (RLPStreamIterator iter2 = RLP_STRICT.sequenceStreamIterator(pis)) {
                 pos.write(0xf8);
                 pos.write(0x37);
                 for (int i = 0; i < 3; i++) {
                     TestUtils.assertThrown(
-                            clazz,
+                            NoSuchElementException.class,
                             "long element data length must be 56 or greater; found: 55 for element @ 0",
                             iter2::hasNext
                     );
@@ -161,14 +159,12 @@ public class RLPStreamIteratorTest {
 
                 assertReadSuccess(iter);
                 assertTrue(iter.hasNext());
-                assertTrue(iter.hasNext());
                 assertEquals(TEST_STRING, iter.next().asString(UTF_8));
                 assertReadSuccess(iter);
                 assertTrue(iter.hasNext());
                 assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
                 TestUtils.assertThrown(NoSuchElementException.class, iter::next);
                 assertNoNext(iter);
-                assertFalse(iter.hasNext());
                 assertFalse(iter.hasNext());
                 TestUtils.assertThrown(NoSuchElementException.class, iter::next);
 

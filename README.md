@@ -51,7 +51,7 @@ System.out.println(decoded.equals(new Tuple(new BigDecimal(BigInteger.valueOf(69
 ```java
 // for an example class Student
 public Student(byte[] rlp) throws DecodeException {
-    RLPIterator iter = RLP_STRICT.sequenceIterator(rlp);
+    Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(rlp);
     
     this.name = iter.next().asString(UTF_8);
     this.gpa = iter.next().asFloat();
