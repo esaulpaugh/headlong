@@ -17,7 +17,6 @@ package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -36,15 +35,6 @@ public final class RLPDecoder {
 
     private RLPDecoder(boolean lenient) {
         this.lenient = lenient;
-    }
-
-    /**
-     * Returns an iterator over a stream of RLP items.
-     * @param rlpStream the stream of RLP items
-     * @return  an iterator over the items in the stream
-     */
-    public RLPStreamIterator sequenceStreamIterator(InputStream rlpStream) {
-        return new RLPStreamIterator(RLPDecoder.this, rlpStream);
     }
 
     public Iterator<RLPItem> sequenceIterator(byte[] buffer) {

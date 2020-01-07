@@ -363,6 +363,10 @@ public class RLPDecoderTest {
         byte[] list = RLPEncoder.encodeAsList(a, b, c);
         Iterator<RLPItem> listIter = RLP_STRICT.listIterator(list);
 
+        for (RLPItem item : RLP_STRICT.wrapList(list)) {
+            System.out.print(item);
+        }
+
         assertTrue(listIter.hasNext());
         assertArrayEquals(a, listIter.next().asBytes());
         assertTrue(listIter.hasNext());

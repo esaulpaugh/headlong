@@ -46,9 +46,9 @@ final class RLPIterator implements Iterator<RLPItem> {
     public RLPItem next() {
         if(hasNext()) {
             try {
-                RLPItem item = decoder.wrap(rlp, index);
-                this.index = item.endIndex;
-                return item;
+                RLPItem next = decoder.wrap(rlp, index);
+                this.index = next.endIndex;
+                return next;
             } catch (DecodeException de) {
                 throw noSuchElementException(de);
             }

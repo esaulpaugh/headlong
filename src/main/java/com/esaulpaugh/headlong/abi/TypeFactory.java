@@ -89,14 +89,14 @@ final class TypeFactory {
         throw new ParseException("unrecognized type: " + type, 0);
     }
 
-    private static ABIType<?> resolveBaseType(String baseTypeStr, boolean isElement, boolean nameless) throws ParseException {
+    private static ABIType<?> resolveBaseType(String baseTypeStr, boolean isArrayElement, boolean nameless) throws ParseException {
         if(baseTypeStr.charAt(0) == '(') {
             return parseTupleType(baseTypeStr);
         }
 
         BaseTypeInfo info = BaseTypeInfo.get(baseTypeStr);
         if(info != null) {
-            switch (baseTypeStr) { // baseTypeStr's hash code already cached due to BaseTypeInfo.get(baseTypeStr)
+            switch (baseTypeStr) {
             case "int8":
             case "int16":
             case "int24":
@@ -133,11 +133,11 @@ final class TypeFactory {
             case "uint8":
             case "uint16":
             case "uint24":  return new IntType(baseTypeStr, info.bitLen, true);
-            case "uint32":  return isElement ? new IntType(baseTypeStr, info.bitLen, true) : new LongType(baseTypeStr, info.bitLen, true);
+            case "uint32":  return isArrayElement ? new IntType(baseTypeStr, info.bitLen, true) : new LongType(baseTypeStr, info.bitLen, true);
             case "uint40":
             case "uint48":
             case "uint56":  return new LongType(baseTypeStr, info.bitLen, true);
-            case "uint64":  return isElement ? new LongType(baseTypeStr, info.bitLen, true) : new BigIntegerType(baseTypeStr, info.bitLen, true);
+            case "uint64":  return isArrayElement ? new LongType(baseTypeStr, info.bitLen, true) : new BigIntegerType(baseTypeStr, info.bitLen, true);
             case "uint72":
             case "uint80":
             case "uint88":

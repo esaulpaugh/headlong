@@ -125,9 +125,9 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         public RLPItem next() {
             if (hasNext()) {
                 try {
-                    RLPItem element = decoder.wrap(RLPList.this.buffer, this.nextElementIndex, RLPList.this.endIndex);
-                    this.nextElementIndex = element.endIndex;
-                    return element;
+                    RLPItem next = decoder.wrap(RLPList.this.buffer, this.nextElementIndex, RLPList.this.endIndex);
+                    this.nextElementIndex = next.endIndex;
+                    return next;
                 } catch (DecodeException de) {
                     throw RLPIterator.noSuchElementException(de);
                 }
