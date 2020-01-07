@@ -301,7 +301,7 @@ public class RLPDecoderTest {
             rlp[i] = (byte) i;
         }
         Set<RLPItem> hashSet = new HashSet<>();
-        int n = RLP_STRICT.collect(0, rlp, UNTIL_COUNT_FIVE, hashSet);
+        int n = RLP_STRICT.collect(rlp, 0, UNTIL_COUNT_FIVE, hashSet);
         assertEquals(5, n);
         assertEquals(5, hashSet.size());
         for (int i = 0; i < 5; i++) {
@@ -309,7 +309,7 @@ public class RLPDecoderTest {
         }
 
         hashSet = new HashSet<>();
-        n = RLP_STRICT.collect(0, rlp, UNTIL_INDEX_SEVEN, hashSet);
+        n = RLP_STRICT.collect(rlp, 0, UNTIL_INDEX_SEVEN, hashSet);
         assertEquals(7, n);
         assertEquals(7, hashSet.size());
         for (int i = 0; i < 7; i++) {
@@ -324,7 +324,7 @@ public class RLPDecoderTest {
         }
 
         hashSet = new HashSet<>();
-        n = RLP_STRICT.collectBefore(1, rlp, 6, hashSet);
+        n = RLP_STRICT.collectBefore(rlp, 1, 6, hashSet);
         assertEquals(5, n);
         assertEquals(5, hashSet.size());
         for (int i = 1; i < 6; i++) {
@@ -332,7 +332,7 @@ public class RLPDecoderTest {
         }
 
         hashSet = new HashSet<>();
-        n = RLP_STRICT.collectAll(0, rlp, hashSet);
+        n = RLP_STRICT.collectAll(rlp, 0, hashSet);
         assertEquals(9, n);
         for (int i = 0; i < 9; i++) {
             assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
