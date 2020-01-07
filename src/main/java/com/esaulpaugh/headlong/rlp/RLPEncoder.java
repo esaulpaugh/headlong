@@ -278,8 +278,6 @@ public final class RLPEncoder {
         return destIndex;
     }
 
-    // ---------------------------------------------------------------------
-
     /**
      * Returns the encoding of an RLP list item containing the given objects, encoded.
      *

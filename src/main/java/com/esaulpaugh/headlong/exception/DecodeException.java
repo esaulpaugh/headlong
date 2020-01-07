@@ -13,23 +13,18 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.rlp.exception;
+package com.esaulpaugh.headlong.exception;
 
 /**
- * Indicates a failure to decode an item that is unrecoverably malformed.
+ * Indicates a failure to decode illegal or otherwise undecodeable data.
  */
-public final class UnrecoverableDecodeException extends DecodeException {
+public abstract class DecodeException extends Exception {
 
-    public UnrecoverableDecodeException(String msg) {
+    DecodeException(String msg) {
         super(msg);
     }
 
-    public UnrecoverableDecodeException(Throwable cause) {
+    DecodeException(Throwable cause) {
         super(cause);
-    }
-
-    @Override
-    public boolean isRecoverable() {
-        return false;
     }
 }

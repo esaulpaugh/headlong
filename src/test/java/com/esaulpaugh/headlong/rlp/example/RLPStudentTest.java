@@ -16,7 +16,7 @@
 package com.esaulpaugh.headlong.rlp.example;
 
 import com.esaulpaugh.headlong.util.Strings;
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+import com.esaulpaugh.headlong.exception.DecodeException;
 import org.junit.jupiter.api.Test;
 
 import static com.esaulpaugh.headlong.util.Strings.HEX;

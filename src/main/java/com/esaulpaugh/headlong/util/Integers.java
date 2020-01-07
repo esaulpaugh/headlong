@@ -15,8 +15,8 @@
 */
 package com.esaulpaugh.headlong.util;
 
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
-import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
+import com.esaulpaugh.headlong.exception.DecodeException;
+import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;

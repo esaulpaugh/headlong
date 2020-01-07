@@ -15,7 +15,8 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+import com.esaulpaugh.headlong.exception.DecodeException;
+import com.esaulpaugh.headlong.exception.RecoverableDecodeException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,21 +69,16 @@ public final class RLPStream implements Iterable<RLPItem>, AutoCloseable {
                     if (read != available) {
                         throw new IOException("read failed: " + read + " != " + available);
                     }
-                }
-            } catch (IOException io) {
-                throw noSuchElementException(io);
-            }
-            if (index == buffer.length) {
-                return false;
-            }
-            try {
-                next = decoder.wrap(buffer, index);
-                return true;
-            } catch (DecodeException e) {
-                if (e.isRecoverable()) {
+                } else if (index == buffer.length) {
                     return false;
                 }
-                throw RLPIterator.noSuchElementException(e);
+                next = decoder.wrap(buffer, index);
+                return true;
+            } catch (IOException | DecodeException e) {
+                if (e instanceof RecoverableDecodeException) {
+                    return false;
+                }
+                throw noSuchElementException(e);
             }
         }
     }
