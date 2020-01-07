@@ -38,48 +38,42 @@ public final class RLPStream implements Iterable<RLPItem>, AutoCloseable {
 
     @Override
     public Iterator<RLPItem> iterator() {
-        return new RLPStreamIterator();
+        return new RLPIterator(decoder, new byte[0], /* make sure index == buffer.length */ 0, Integer.MAX_VALUE) {
+
+            @Override
+            public boolean hasNext() {
+                if (next != null) {
+                    return true;
+                }
+                try {
+                    final int available = is.available();
+                    if (available > 0) {
+                        int keptBytes = buffer.length - index;
+                        byte[] newBuffer = new byte[keptBytes + available];
+                        System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
+                        buffer = newBuffer;
+                        index = 0;
+                        int read = is.read(buffer, keptBytes, available);
+                        if (read != available) {
+                            throw new IOException("read failed: " + read + " != " + available);
+                        }
+                    } else if (index == buffer.length) {
+                        return false;
+                    }
+                    next = decoder.wrap(buffer, index);
+                    return true;
+                } catch (IOException | DecodeException e) {
+                    if (e instanceof RecoverableDecodeException) {
+                        return false;
+                    }
+                    throw noSuchElementException(e);
+                }
+            }
+        };
     }
 
     @Override
     public void close() throws IOException {
         is.close();
-    }
-
-    private final class RLPStreamIterator extends RLPIterator {
-
-        RLPStreamIterator() {
-            super(RLPStream.this.decoder, new byte[0], /* make sure index == buffer.length */ 0, Integer.MAX_VALUE);
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (next != null) {
-                return true;
-            }
-            try {
-                final int available = is.available();
-                if (available > 0) {
-                    int keptBytes = buffer.length - index;
-                    byte[] newBuffer = new byte[keptBytes + available];
-                    System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
-                    buffer = newBuffer;
-                    index = 0;
-                    int read = is.read(buffer, keptBytes, available);
-                    if (read != available) {
-                        throw new IOException("read failed: " + read + " != " + available);
-                    }
-                } else if (index == buffer.length) {
-                    return false;
-                }
-                next = decoder.wrap(buffer, index);
-                return true;
-            } catch (IOException | DecodeException e) {
-                if (e instanceof RecoverableDecodeException) {
-                    return false;
-                }
-                throw noSuchElementException(e);
-            }
-        }
     }
 }
