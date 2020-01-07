@@ -16,43 +16,56 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.exception.DecodeException;
+import com.esaulpaugh.headlong.exception.RecoverableDecodeException;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/**
- * For iterating over sequentially encoded RLP items.
- */
-class RLPIterator implements Iterator<RLPItem> {
+class RLPStreamIterator implements Iterator<RLPItem> {
 
+    protected final InputStream is;
     protected final RLPDecoder decoder;
     protected byte[] buffer;
     protected int index;
-    protected final int end;
 
     protected RLPItem next;
 
-    RLPIterator(RLPDecoder decoder, byte[] buffer, int start, int end) {
+    RLPStreamIterator(InputStream is, RLPDecoder decoder, byte[] buffer, int start) {
+        this.is = is;
         this.decoder = decoder;
         this.buffer = buffer;
         this.index = start;
-        this.end = end;
     }
 
     @Override
     public boolean hasNext() {
-        if(next != null) {
+        if (next != null) {
             return true;
-        }
-        if(index >= end) {
-            return false;
         }
         try {
+            final int available = is.available();
+            if (available > 0) {
+                int keptBytes = buffer.length - index;
+                byte[] newBuffer = new byte[keptBytes + available];
+                System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
+                buffer = newBuffer;
+                index = 0;
+                int read = is.read(buffer, keptBytes, available);
+                if (read != available) {
+                    throw new IOException("read failed: " + read + " != " + available);
+                }
+            } else if (index == buffer.length) {
+                return false;
+            }
             next = decoder.wrap(buffer, index);
-            this.index = next.endIndex;
             return true;
-        } catch (DecodeException de) {
-            throw noSuchElementException(de);
+        } catch (IOException | DecodeException e) {
+            if (e instanceof RecoverableDecodeException) {
+                return false;
+            }
+            throw noSuchElementException(e);
         }
     }
 
@@ -71,3 +84,4 @@ class RLPIterator implements Iterator<RLPItem> {
         return (NoSuchElementException) new NoSuchElementException().initCause(cause);
     }
 }
+
