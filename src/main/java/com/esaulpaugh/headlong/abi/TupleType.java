@@ -181,7 +181,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
 //        final int index = bb.position(); // TODO must pass index to decodeTails if you want to support lenient mode
 
-        final ABIType<?>[] elementTypes = this.elementTypes;
         final int tupleLen = elementTypes.length;
         Object[] elements = new Object[tupleLen];
 

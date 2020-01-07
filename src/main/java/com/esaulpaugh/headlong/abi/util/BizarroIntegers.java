@@ -143,7 +143,7 @@ public final class BizarroIntegers {
             } else o.put(h); return 1;
         } else return 0;
     }
-// *******************
+// ********* PRIVATE INTERNAL, NO RANGE CHECK **********
     private static int _getShortInt(byte[] buffer, int i) {
         return (buffer[i+1] & 0xFF) | ((buffer[i] & 0xFF) << Byte.SIZE);
     }
@@ -156,8 +156,7 @@ public final class BizarroIntegers {
         case 3: val |= (buffer[i+2] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 2: val |= (buffer[i+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1: val |= (buffer[i] & 0xFF) << shiftAmount;
-        case 0: return val;
-        default: throw outOfRangeException(len);
+        default: return val;
         }
     }
 
@@ -173,8 +172,7 @@ public final class BizarroIntegers {
         case 3: val |= (buffer[i+2] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 2: val |= (buffer[i+1] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1: val |= (buffer[i] & 0xFFL) << shiftAmount;
-        case 0: return val;
-        default: throw outOfRangeException(len);
+        default: return val;
         }
     }
 // *******************
