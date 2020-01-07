@@ -122,8 +122,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                         ? OFFSET_LENGTH_BYTES + type.validate(elements[i])
                         : type.validate(elements[i]);
             }
-        } catch (RuntimeException re) {
-            throw new ABIException("illegal arg @ " + i + ": " + re.getMessage());
+        } catch (NullPointerException npe) {
+            throw new ABIException("illegal arg @ " + i + ": " + npe.getMessage());
         }
         return len;
     }

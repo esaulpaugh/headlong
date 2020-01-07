@@ -381,7 +381,7 @@ public class MonteCarloTestCase implements Serializable {
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
         case TYPE_CODE_ARRAY: return generateArray((ArrayType<?, ?>) type, r);
         case TYPE_CODE_TUPLE: return generateTuple((TupleType) type, r);
-        default: throw new IllegalArgumentException("unexpected type: " + type.toString());
+        default: throw new Error();
         }
     }
 
@@ -451,7 +451,7 @@ public class MonteCarloTestCase implements Serializable {
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimalArray(len, (BigDecimalType) elementType, r);
         case TYPE_CODE_ARRAY: return generateObjectArray(arrayType, len, r);
         case TYPE_CODE_TUPLE: return generateTupleArray((TupleType) elementType, len, r);
-        default: throw new IllegalArgumentException("unexpected element type: " + elementType.toString());
+        default: throw new Error();
         }
     }
 

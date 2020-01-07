@@ -44,7 +44,7 @@ final class PackedEncoder {
         case TYPE_CODE_BIG_DECIMAL: insertInt(((BigDecimal) value).unscaledValue(), type.byteLengthPacked(null), dest); return;
         case TYPE_CODE_ARRAY: encodeArray((ArrayType<ABIType<?>, ?>) type, value, dest); return;
         case TYPE_CODE_TUPLE: insertTuple((TupleType) type, (Tuple) value, dest); return;
-        default: throw new IllegalArgumentException("unexpected array type: " + type.toString());
+        default: throw new Error();
         }
     }
 
@@ -63,7 +63,7 @@ final class PackedEncoder {
                 encode(elementType, e, dest);
             }
             return;
-        default: throw new IllegalArgumentException("unexpected array type: " + arrayType.toString());
+        default: throw new Error();
         }
     }
     // ------------------------

@@ -316,6 +316,8 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
             for (int i = 0; i < len; i++) {
                 elementType.encodeTail(objects[i], dest);
             }
+            return;
+        default: throw new Error();
         }
     }
 

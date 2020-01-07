@@ -91,8 +91,9 @@ public final class PackedDecoder {
         case TYPE_CODE_BIG_INTEGER: return decodeBigInteger(type.byteLengthPacked(null), (BigIntegerType) type, buffer, idx, elements, i);
         case TYPE_CODE_BIG_DECIMAL: return decodeBigDecimal(type.byteLengthPacked(null), (BigDecimalType) type, buffer, idx, elements, i);
         case TYPE_CODE_ARRAY: return decodeArrayDynamic((ArrayType<?, ?>) type, buffer, idx, end, elements, i);
+        case TYPE_CODE_TUPLE: throw new UnsupportedOperationException("nested tuple"); // idx += decodeTupleDynamic((TupleType) type, buffer, idx, end, elements, i); break;
+        default: throw new Error();
         }
-        throw new UnsupportedOperationException("nested tuple?"); // idx += decodeTupleDynamic((TupleType) type, buffer, idx, end, elements, i); break;
     }
 
     private static Tuple decodeTupleStatic(TupleType tupleType, byte[] buffer) throws ABIException {
@@ -159,7 +160,7 @@ public final class PackedDecoder {
         case TYPE_CODE_BIG_DECIMAL: array = decodeBigDecimalArray(elementByteLen, (BigDecimalType) elementType, arrayLen, buffer, idx); break;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: throw new UnsupportedOperationException();
-        default: throw new IllegalArgumentException("unexpected array type: " + arrayType.toString());
+        default: throw new Error();
         }
         dest[destIdx] = array;
         return arrayLen * elementByteLen;
