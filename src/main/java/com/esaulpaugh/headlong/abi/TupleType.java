@@ -103,8 +103,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     public int validate(final Object value) throws ABIException {
         validateClass(value);
 
-        final Tuple tuple = (Tuple) value;
-        final Object[] elements = tuple.elements;
+        final Object[] elements = ((Tuple) value).elements;
 
         final int numTypes = elementTypes.length;
 
@@ -130,10 +129,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     void encodeHead(Object value, ByteBuffer dest, int[] offset) {
-        if (dynamic) {
-            Encoding.insertOffset(offset, this, value, dest);
-        } else {
+        if (!dynamic) {
             encodeTail(value, dest);
+        } else {
+            Encoding.insertOffset(offset, this, value, dest);
         }
     }
 
@@ -143,12 +142,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         final int[] offset = new int[] { headLengthSum(values) };
 
         final int len = elementTypes.length;
-        int i;
-        for (i = 0; i < len; i++) {
+        for (int i = 0; i < len; i++) {
             elementTypes[i].encodeHead(values[i], dest, offset);
         }
         if(dynamic) {
-            for (i = 0; i < len; i++) {
+            for (int i = 0; i < len; i++) {
                 ABIType<?> type = elementTypes[i];
                 if (type.dynamic) {
                     type.encodeTail(values[i], dest);
