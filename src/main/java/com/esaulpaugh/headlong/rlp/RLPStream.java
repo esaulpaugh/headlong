@@ -45,7 +45,7 @@ public final class RLPStream implements Iterable<RLPItem>, AutoCloseable {
         is.close();
     }
 
-    private final class RLPStreamIterator extends RLPIterator implements Iterator<RLPItem> {
+    private final class RLPStreamIterator extends RLPIterator {
 
         RLPStreamIterator() {
             super(RLPStream.this.decoder, new byte[0], /* make sure index == buffer.length */ 0, Integer.MAX_VALUE);
