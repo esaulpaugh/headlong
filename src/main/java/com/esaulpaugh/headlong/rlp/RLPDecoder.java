@@ -53,19 +53,19 @@ public final class RLPDecoder {
 
             @Override
             public boolean hasNext() {
-                if(next != null) {
+                if (next != null) {
                     return true;
                 }
-                if(index >= buffer.length) {
-                    return false;
+                if (index < buffer.length) {
+                    try {
+                        next = decoder.wrap(buffer, index);
+                        this.index = next.endIndex;
+                        return true;
+                    } catch (DecodeException de) {
+                        throw noSuchElementException(de);
+                    }
                 }
-                try {
-                    next = decoder.wrap(buffer, index);
-                    this.index = next.endIndex;
-                    return true;
-                } catch (DecodeException de) {
-                    throw noSuchElementException(de);
-                }
+                return false;
             }
         };
     }
