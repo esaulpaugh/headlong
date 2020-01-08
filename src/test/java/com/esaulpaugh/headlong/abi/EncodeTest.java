@@ -88,23 +88,22 @@ public class EncodeTest {
     }
 
     @Test
-    public void testFormat() {
+    public void testFormat() throws Throwable {
         byte[] master = new byte[260];
         Arrays.fill(master, (byte) 0xff);
         for (int i = 0; i < 260; i++) {
             byte[] x = Arrays.copyOfRange(master, 0, i);
             int mod = i % UNIT_LENGTH_BYTES;
-            try {
+            if(mod == 4) {
                 String str = Function.formatCall(x);
-                assertEquals(4, mod);
                 assertEquals(i * 2, str.codePoints().filter(ch -> ch == 'f').count());
                 int div = (i - 4) / UNIT_LENGTH_BYTES;
                 if(div > 0) {
                     String q = (div - 1) + "\tffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
                     assertNotEquals(-1, str.indexOf(q));
                 }
-            } catch (IllegalArgumentException iae) {
-                assertNotEquals(4, mod);
+            } else {
+                TestUtils.assertThrown(IllegalArgumentException.class, "expected length mod 32 == 4, found: ", () -> Function.formatCall(x));
             }
         }
     }

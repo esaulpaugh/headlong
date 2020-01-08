@@ -339,12 +339,9 @@ public final class Function implements ABIObject, Serializable {
      * @throws  IllegalArgumentException    if the input length mod 32 != 4
      */
     public static String formatCall(byte[] buffer, int offset, final int length) {
-
-        if(length < 4 || ((length - 4) & 0b11111) != 0) {
-            int mod = length % UNIT_LENGTH_BYTES;
-            throw new IllegalArgumentException("expected length mod " + UNIT_LENGTH_BYTES + " == 4, found: " + mod);
+        if(length < 4 || ((length - 4) & (UNIT_LENGTH_BYTES - 1)) != 0) {
+            throw new IllegalArgumentException("expected length mod " + UNIT_LENGTH_BYTES + " == 4, found: " + (length % UNIT_LENGTH_BYTES));
         }
-
         StringBuilder sb = new StringBuilder("ID\t")
                 .append(encode(Arrays.copyOfRange(buffer, offset, SELECTOR_LEN), HEX))
                 .append('\n');
