@@ -31,7 +31,9 @@ import java.util.Random;
 import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.abi.TypeFactory.*;
+import static com.esaulpaugh.headlong.abi.TypeFactory.EMPTY_PARAMETER;
+import static com.esaulpaugh.headlong.abi.TypeFactory.ILLEGAL_TUPLE_TERMINATION;
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EncodeTest {
@@ -82,6 +84,28 @@ public class EncodeTest {
         runnable.run();
         for (Thread thread : threads) {
             thread.join();
+        }
+    }
+
+    @Test
+    public void testFormat() {
+        byte[] master = new byte[260];
+        Arrays.fill(master, (byte) 0xff);
+        for (int i = 0; i < 260; i++) {
+            byte[] x = Arrays.copyOfRange(master, 0, i);
+            int mod = i % UNIT_LENGTH_BYTES;
+            try {
+                String str = Function.formatCall(x);
+                assertEquals(4, mod);
+                assertEquals(i * 2, str.codePoints().filter(ch -> ch == 'f').count());
+                int div = (i - 4) / UNIT_LENGTH_BYTES;
+                if(div > 0) {
+                    String q = (div - 1) + "\tffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+                    assertNotEquals(-1, str.indexOf(q));
+                }
+            } catch (IllegalArgumentException iae) {
+                assertNotEquals(4, mod);
+            }
         }
     }
 

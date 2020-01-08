@@ -15,8 +15,8 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.abi.util.Utils;
+import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.JsonObject;
 import com.joemelsha.crypto.hash.Keccak;
 
@@ -340,7 +340,7 @@ public final class Function implements ABIObject, Serializable {
      */
     public static String formatCall(byte[] buffer, int offset, final int length) {
 
-        if(length < 4 || ((length - 4) & 0b111) != 0) {
+        if(length < 4 || ((length - 4) & 0b11111) != 0) {
             int mod = length % UNIT_LENGTH_BYTES;
             throw new IllegalArgumentException("expected length mod " + UNIT_LENGTH_BYTES + " == 4, found: " + mod);
         }
