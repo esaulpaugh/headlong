@@ -19,6 +19,7 @@ import com.esaulpaugh.headlong.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Random;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
@@ -46,7 +47,7 @@ public class EqualsTest {
 
 //            System.out.println(raw);
 
-            boolean equals = a.getParamTypes().recursiveEquals(b.getParamTypes());
+            boolean equals = recursiveEquals(a.getParamTypes(), b.getParamTypes());
 
 //            System.out.println(equals);
 
@@ -56,6 +57,14 @@ public class EqualsTest {
 
             n++;
         } while (n < 100);
+    }
+
+    private static boolean recursiveEquals(TupleType tt, Object o) {
+        if (tt == o) return true;
+        if (o == null || tt.getClass() != o.getClass()) return false;
+        if (!tt.equals(o)) return false;
+        TupleType tupleType = (TupleType) o;
+        return Arrays.equals(tt.elementTypes, tupleType.elementTypes);
     }
 
     @Test

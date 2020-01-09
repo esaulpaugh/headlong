@@ -230,14 +230,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         throw new UnsupportedOperationException();
     }
 
-    boolean recursiveEquals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        TupleType tupleType = (TupleType) o;
-        return Arrays.equals(elementTypes, tupleType.elementTypes);
-    }
-
     public static TupleType parse(String rawTupleTypeString) {
         try {
             return (TupleType) TypeFactory.create(rawTupleTypeString, null);
