@@ -50,7 +50,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
         }
-        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements);
+        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements); // TODO .intern() string?
     }
 
     public ABIType<?> get(int index) {

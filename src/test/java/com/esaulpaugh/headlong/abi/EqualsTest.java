@@ -53,10 +53,15 @@ public class EqualsTest {
 
             assertTrue(equals);
 
+            assertNotSame(a.getParamTypes().canonicalType, b.getParamTypes().canonicalType);
+
             assertEquals(a, b);
 
             n++;
         } while (n < 100);
+
+        assertSame(TupleType.parse("(uint)").elementTypes[0].canonicalType, TupleType.parse("(uint)").elementTypes[0].canonicalType);
+        assertNotSame(Function.parse("(uint)").getParamTypes().canonicalType, Function.parse("(uint)").getParamTypes().canonicalType);
     }
 
     private static boolean recursiveEquals(TupleType tt, Object o) {
