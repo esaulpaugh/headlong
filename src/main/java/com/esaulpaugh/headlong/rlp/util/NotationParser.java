@@ -78,6 +78,8 @@ public class NotationParser {
                 List<Object> childList = new ArrayList<>();
                 i = parse(notation, nextObjectIndex + LIST_PREFIX_LEN, end, childList, resultHolder);
                 parent.add(childList);
+                continue;
+            default:
             }
         }
 

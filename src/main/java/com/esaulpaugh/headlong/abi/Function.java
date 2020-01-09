@@ -162,6 +162,8 @@ public final class Function implements ABIObject, Serializable {
             if (type != Type.RECEIVE) {
                 assertNameNullability(name, true);
             }
+            /* falls through */
+        default:
         }
     }
 
