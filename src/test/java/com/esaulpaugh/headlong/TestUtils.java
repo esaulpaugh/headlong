@@ -15,10 +15,10 @@
 */
 package com.esaulpaugh.headlong;
 
-import com.esaulpaugh.headlong.util.Integers;
-import com.esaulpaugh.headlong.util.FastHex;
-import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.exception.DecodeException;
+import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Integers;
+import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
