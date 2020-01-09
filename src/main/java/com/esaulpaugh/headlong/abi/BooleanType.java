@@ -18,9 +18,7 @@ package com.esaulpaugh.headlong.abi;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-/**
- * Unsigned 0 or 1.
- */
+/** Unsigned 0 or 1. */
 public final class BooleanType extends UnitType<Boolean> {
 
     private static final Class<Boolean> CLASS = Boolean.class;

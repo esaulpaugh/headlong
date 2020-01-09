@@ -13,15 +13,15 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.abi.util;
+package com.esaulpaugh.headlong.abi;
 
 import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class Utils {
+final class Utils {
 
-    public static String validateChars(Pattern pattern, String string) throws ParseException {
+    static String validateChars(Pattern pattern, String string) throws ParseException {
         Matcher matcher = pattern.matcher(string);
         if (matcher.find()) {
             final char c = string.charAt(matcher.start());
@@ -33,7 +33,7 @@ public final class Utils {
         return string;
     }
 
-    public static String escapeChar(char c) {
+    static String escapeChar(char c) {
         String hex = Integer.toHexString(c);
         switch (hex.length()) {
         case 1: return "\\u000" + hex;
@@ -44,11 +44,11 @@ public final class Utils {
         }
     }
 
-    public static String friendlyClassName(Class<?> clazz) {
+    static String friendlyClassName(Class<?> clazz) {
         return friendlyClassName(clazz, null);
     }
 
-    public static String friendlyClassName(Class<?> clazz, Integer arrayLength) {
+    static String friendlyClassName(Class<?> clazz, Integer arrayLength) {
         final String className = clazz.getName();
 
         final int split = className.lastIndexOf('[') + 1;

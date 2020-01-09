@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+/** Thrown when ABI validation fails, on either encode or decode. */
 public class ABIException extends Exception {
 
     public ABIException(String msg) {

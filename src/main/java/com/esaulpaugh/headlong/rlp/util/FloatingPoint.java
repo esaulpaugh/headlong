@@ -20,9 +20,7 @@ import com.esaulpaugh.headlong.util.Integers;
 
 import java.math.BigDecimal;
 
-/**
- * Utility for reading and writing floating point numbers from and to RLP format.
- */
+/** Utility for reading and writing floating point numbers from and to RLP format. */
 public final class FloatingPoint {
 
     /* float */

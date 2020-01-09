@@ -21,9 +21,7 @@ import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-/**
- * Utility for reading and writing integers from and to RLP-compatible format.
- */
+/** Utility for reading and writing integers from and to RLP-compatible format. */
 public final class Integers {
 
     /**

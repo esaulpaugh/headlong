@@ -15,9 +15,7 @@
 */
 package com.esaulpaugh.headlong.exception;
 
-/**
- * Indicates a failure to decode illegal or otherwise undecodeable data.
- */
+/** Indicates a failure to decode illegal or otherwise undecodeable data. */
 public abstract class DecodeException extends Exception {
 
     DecodeException(String msg) {

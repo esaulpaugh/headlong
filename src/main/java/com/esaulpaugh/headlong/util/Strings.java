@@ -21,9 +21,7 @@ import java.nio.charset.StandardCharsets;
 
 import static com.migcomponents.migbase64.Base64.*;
 
-/**
- * Utility for encoding and decoding hexadecimal, Base64, and UTF-8-encoded {@code String}s.
- */
+/** Utility for encoding and decoding hexadecimal, Base64, and UTF-8-encoded {@code String}s. */
 public final class Strings {
 
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];

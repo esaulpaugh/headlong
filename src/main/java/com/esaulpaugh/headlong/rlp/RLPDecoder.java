@@ -23,9 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiPredicate;
 
-/**
- * Decodes RLP-formatted data.
- */
+/** Decodes RLP-formatted data. */
 public final class RLPDecoder {
 
     public static final RLPDecoder RLP_STRICT = new RLPDecoder(false);

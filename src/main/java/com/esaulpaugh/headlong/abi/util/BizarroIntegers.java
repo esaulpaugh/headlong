@@ -21,9 +21,9 @@ import com.esaulpaugh.headlong.util.Strings;
 import java.nio.ByteBuffer;
 
 /**
- * The mirror image of {@link Integers}. Not compatible with the RLP specification.
+ * <p>The mirror image of {@link Integers}. Not compatible with the RLP specification.
  *
- * Negative integers are stored in a minimal big-endian two's complement representation. Non-negative integers are
+ * <p>Negative integers are stored in a minimal big-endian two's complement representation. Non-negative integers are
  * stored full-length. Negative one is represented by the empty byte array. Numbers are sign-extended on decode.
  *
  * -256L ≡ 0x00
@@ -143,7 +143,7 @@ public final class BizarroIntegers {
             } else o.put(h); return 1;
         } else return 0;
     }
-// ********* PRIVATE INTERNAL, NO RANGE CHECK **********
+// ********* PRIVATE, INTERNAL -- NO RANGE CHECK **********
     private static int _getShortInt(byte[] buffer, int i) {
         return (buffer[i+1] & 0xFF) | ((buffer[i] & 0xFF) << Byte.SIZE);
     }

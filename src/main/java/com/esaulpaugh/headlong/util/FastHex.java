@@ -18,9 +18,7 @@ package com.esaulpaugh.headlong.util;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-/**
- * Uses a larger encoding table to speed up encoding.
- */
+/** Uses a larger encoding table to speed up encoding. */
 public final class FastHex {
 
     private static final int NIBBLE_BITS = Byte.SIZE / 2;

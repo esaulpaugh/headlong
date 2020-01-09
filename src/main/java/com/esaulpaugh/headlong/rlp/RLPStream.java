@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 
+/** An incoming stream of RLP-encoded data. */
 public final class RLPStream implements Iterable<RLPItem>, AutoCloseable {
 
     private final InputStream is;

@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.util;
 
 import com.google.gson.*;
 
+/** Utility methods related to JSON. */
 public final class JsonUtils {
 
     public static JsonElement parse(String json) {

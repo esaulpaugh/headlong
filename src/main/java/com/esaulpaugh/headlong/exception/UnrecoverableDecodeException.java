@@ -15,9 +15,7 @@
 */
 package com.esaulpaugh.headlong.exception;
 
-/**
- * Indicates a failure to decode an item that is unrecoverably malformed.
- */
+/** Indicates a failure to decode an item that is unrecoverably malformed. */
 public final class UnrecoverableDecodeException extends DecodeException {
 
     public UnrecoverableDecodeException(String msg) {

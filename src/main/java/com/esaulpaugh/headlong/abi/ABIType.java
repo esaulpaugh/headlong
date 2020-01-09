@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Utils;
-
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 

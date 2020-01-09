@@ -20,9 +20,7 @@ import com.esaulpaugh.headlong.util.Strings;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Decodes RLP object notation as defined by the {@link Notation} class.
- */
+/** Decodes RLP object notation as defined by the {@link Notation} class. */
 public class NotationParser {
 
     private static final int LIST = 0;

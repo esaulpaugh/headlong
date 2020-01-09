@@ -32,9 +32,7 @@ import java.util.NoSuchElementException;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
 
-/**
- * Implementation of EIP 778: Ethereum Node Records (ENR), https://eips.ethereum.org/EIPS/eip-778
- */
+/** Implementation of EIP-778: Ethereum Node Records (ENR), https://eips.ethereum.org/EIPS/eip-778 */
 public final class Record {
 
     private static final int MAX_RECORD_LEN = 300;

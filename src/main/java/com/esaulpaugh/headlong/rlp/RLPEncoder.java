@@ -27,9 +27,7 @@ import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_LONG_OFFSET;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
 
-/**
- * Encodes data to RLP format.
- */
+/** For encoding data to Recursive Length Prefix format. */
 public final class RLPEncoder {
 
     public static long encodedLen(long val) {

@@ -26,6 +26,7 @@ import java.util.Objects;
 
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
+/** Represents an event in Ethereum. */
 public final class Event implements ABIObject {
 
     private final String name;
