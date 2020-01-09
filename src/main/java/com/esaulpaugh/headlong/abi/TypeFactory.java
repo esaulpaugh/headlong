@@ -41,25 +41,25 @@ final class TypeFactory {
                 .setName(name);
     }
 
-    private static ABIType<?> buildType(String type, boolean isArrayElement, ABIType<?> baseType, boolean nameless) throws ParseException {
+    private static ABIType<?> buildType(final String type, final boolean isArrayElement, ABIType<?> baseType, final boolean nameless) throws ParseException {
         try {
-            final int idxOfLast = type.length() - 1;
-            if (type.charAt(idxOfLast) == ']') { // array
+            final int lastCharIndex = type.length() - 1;
+            if (type.charAt(lastCharIndex) == ']') { // array
 
-                final int fromIndex = idxOfLast - 1;
-                final int arrayOpenIndex = type.lastIndexOf('[', fromIndex);
+                final int secondToLastCharIndex = lastCharIndex - 1;
+                final int arrayOpenIndex = type.lastIndexOf('[', secondToLastCharIndex);
 
                 final int length;
-                if (arrayOpenIndex == fromIndex) { // i.e. []
+                if (arrayOpenIndex == secondToLastCharIndex) { // i.e. []
                     length = DYNAMIC_LENGTH;
                 } else { // e.g. [4]
                     final int startInt = arrayOpenIndex + 1;
                     try {
-                        length = Integer.parseInt(type.substring(startInt, idxOfLast));
+                        length = Integer.parseInt(type.substring(startInt, lastCharIndex));
                         if (length < 0) {
                             throw new ParseException("negative array size", startInt);
                         }
-                        if(idxOfLast - startInt > 1 && type.charAt(startInt) == '0') {
+                        if(lastCharIndex - startInt > 1 && type.charAt(startInt) == '0') {
                             throw new ParseException("leading zero in array length", startInt);
                         }
                     } catch (NumberFormatException nfe) {
@@ -73,13 +73,12 @@ final class TypeFactory {
                 final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
                 final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
                 return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, '[' + arrayClassName);
-            } else {
-                if(baseType == null) {
-                    baseType = resolveBaseType(type, isArrayElement, nameless);
-                }
-                if (baseType != null) {
-                    return baseType;
-                }
+            }
+            if(baseType == null) {
+                baseType = resolveBaseType(type, isArrayElement, nameless);
+            }
+            if (baseType != null) {
+                return baseType;
             }
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
