@@ -19,7 +19,27 @@ import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
+
 final class Utils {
+
+    /**
+     * Rounds a length up to the nearest multiple of {@link UnitType#UNIT_LENGTH_BYTES}. If {@code len} is already a
+     * multiple, method has no effect.
+     *
+     * @param len   the length, a non-negative integer
+     * @return  the rounded-up value
+     */
+    static int roundLengthUp(int len) {
+        int mod = len & (UNIT_LENGTH_BYTES - 1);
+        return mod != 0 ? len + (UNIT_LENGTH_BYTES - mod) : len;
+    }
+
+    static void checkIsMultiple(int len) {
+        if((len & (UNIT_LENGTH_BYTES - 1)) != 0) {
+            throw new IllegalArgumentException("expected length mod " + UNIT_LENGTH_BYTES + " == 0, found: " + (len % UNIT_LENGTH_BYTES));
+        }
+    }
 
     static String validateChars(Pattern pattern, String string) throws ParseException {
         Matcher matcher = pattern.matcher(string);

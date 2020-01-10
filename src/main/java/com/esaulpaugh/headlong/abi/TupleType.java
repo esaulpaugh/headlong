@@ -349,10 +349,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public static String format(byte[] abi) {
+        Utils.checkIsMultiple(abi.length);
         StringBuilder sb = new StringBuilder();
         int idx = 0;
         while(idx < abi.length) {
-            sb.append(Strings.encode(Arrays.copyOfRange(abi, idx, idx + UNIT_LENGTH_BYTES), HEX)).append('\n');
+            sb.append(Strings.encode(abi, idx, UNIT_LENGTH_BYTES, HEX)).append('\n');
             idx += UNIT_LENGTH_BYTES;
         }
         return sb.toString();

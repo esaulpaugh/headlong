@@ -92,21 +92,36 @@ public class EncodeTest {
 
     @Test
     public void testFormat() throws Throwable {
+        testFormat(true, Function::formatCall);
+    }
+
+    @Test
+    public void testTupleFormat() throws Throwable {
+        testFormat(false, TupleType::format);
+    }
+
+    private static void testFormat(boolean func, java.util.function.Function<byte[], String> format) throws Throwable {
+        final int expectedMod = func ? 4 : 0;
         byte[] master = new byte[260];
         Arrays.fill(master, (byte) 0xff);
         for (int i = 0; i < 260; i++) {
             byte[] x = Arrays.copyOfRange(master, 0, i);
             int mod = i % UNIT_LENGTH_BYTES;
-            if(mod == 4) {
-                String str = Function.formatCall(x);
+            if(mod == expectedMod) {
+                String str = format.apply(x);
                 assertEquals(i * 2, str.codePoints().filter(ch -> ch == 'f').count());
-                int div = (i - 4) / UNIT_LENGTH_BYTES;
+                int div = (i - expectedMod) / UNIT_LENGTH_BYTES;
                 if(div > 0) {
                     String q = (div - 1) + "\tffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-                    assertNotEquals(-1, str.indexOf(q));
+                    int idx = str.indexOf(q);
+                    if(func) {
+                        assertNotEquals(-1, idx);
+                    } else {
+                        assertEquals(-1, idx);
+                    }
                 }
             } else {
-                TestUtils.assertThrown(IllegalArgumentException.class, "expected length mod 32 == 4, found: ", () -> Function.formatCall(x));
+                TestUtils.assertThrown(IllegalArgumentException.class, "expected length mod 32 == 0, found: ", () -> format.apply(x));
             }
         }
     }
@@ -126,8 +141,6 @@ public class EncodeTest {
         assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("(()"));
 
         assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("(())..."));
-
-        assertThrown(PARSE_ERR, "illegal char", () -> Function.parse("œ()"));
     }
 
     @Test
@@ -143,6 +156,8 @@ public class EncodeTest {
 
     @Test
     public void illegalCharsTest() throws Throwable {
+        assertThrown(PARSE_ERR, "illegal char", () -> Function.parse("œ()"));
+
         assertThrown(PARSE_ERR, "illegal char \\u02a6 '\u02a6' @ index 2", () -> new Function("ba\u02a6z(uint32,bool)"));
 
         assertThrown(PARSE_ERR, "@ index 1, @ index 0, unrecognized type: bool\u02a6", () -> new Function("baz(int32,(bool\u02a6))"));

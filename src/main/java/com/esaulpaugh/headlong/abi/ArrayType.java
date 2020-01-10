@@ -94,7 +94,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         final int len;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: len = ((boolean[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
-        case TYPE_CODE_BYTE: len = roundLengthUp((!isString ? (byte[]) value : Strings.decode((String) value, UTF_8)).length); break;
+        case TYPE_CODE_BYTE: len = Utils.roundLengthUp((!isString ? (byte[]) value : Strings.decode((String) value, UTF_8)).length); break;
         case TYPE_CODE_INT: len = ((int[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_LONG: len = ((long[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BIG_INTEGER:
@@ -152,7 +152,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BOOLEAN: staticLen = checkLength(((boolean[]) value).length, value) << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BYTE:
             byte[] bytes = !isString ? (byte[]) value : Strings.decode((String) value, UTF_8);
-            staticLen = roundLengthUp(checkLength(bytes.length, value));
+            staticLen = Utils.roundLengthUp(checkLength(bytes.length, value));
             break;
         case TYPE_CODE_INT: staticLen = validateIntArray((int[]) value); break;
         case TYPE_CODE_LONG: staticLen = validateLongArray((long[]) value); break;
@@ -402,7 +402,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         final int mark = bb.position();
         byte[] out = new byte[arrayLen];
         bb.get(out);
-        bb.position(mark + roundLengthUp(arrayLen));
+        bb.position(mark + Utils.roundLengthUp(arrayLen));
         return !isString ? out : Strings.encode(out, UTF_8);
     }
 
@@ -493,15 +493,5 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     @Override
     public J parseArgument(String s) {
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Rounds a length up to the nearest multiple of 32. If {@code len} is already a multiple, method has no effect.
-     * @param len   the length, a non-negative integer
-     * @return  the rounded-up value
-     */
-    public static int roundLengthUp(int len) {
-        int mod = len & 31;
-        return mod != 0 ? len + (32 - mod) : len;
     }
 }
