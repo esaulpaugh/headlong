@@ -36,7 +36,7 @@ import static com.esaulpaugh.headlong.abi.TypeFactory.ILLEGAL_TUPLE_TERMINATION;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EncodeTest {
@@ -108,17 +108,12 @@ public class EncodeTest {
             byte[] x = Arrays.copyOfRange(master, 0, i);
             int mod = i % UNIT_LENGTH_BYTES;
             if(mod == expectedMod) {
-                String str = format.apply(x);
-                assertEquals(i * 2, str.codePoints().filter(ch -> ch == 'f').count());
+                String formatted = format.apply(x);
+                assertEquals(i * 2, formatted.codePoints().filter(ch -> ch == 'f').count());
                 int div = (i - expectedMod) / UNIT_LENGTH_BYTES;
                 if(div > 0) {
-                    String q = (div - 1) + "\tffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-                    int idx = str.indexOf(q);
-                    if(func) {
-                        assertNotEquals(-1, idx);
-                    } else {
-                        assertEquals(-1, idx);
-                    }
+                    String substr = (div - 1) + "\tffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+                    assertFalse(func ^ formatted.contains(substr)); // assert matching
                 }
             } else {
                 TestUtils.assertThrown(IllegalArgumentException.class, "expected length mod 32 == 0, found: ", () -> format.apply(x));
