@@ -21,6 +21,7 @@ import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import org.junit.jupiter.api.Assertions;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -164,6 +165,16 @@ public class TestUtils {
         String hex = "00" + in.getAsString().substring(2);
         byte[] bytes = FastHex.decode(hex);
         return new BigInteger(bytes);
+    }
+
+    /** Asserts that the arguments are either both true or both false. */
+    public static void assertMatching(boolean a, boolean b) {
+        Assertions.assertFalse(a ^ b);
+    }
+
+    /** Asserts that exactly one of the arguments is true. */
+    public static void assertNotMatching(boolean a, boolean b) {
+        Assertions.assertTrue(a ^ b);
     }
 
     public interface CustomRunnable {

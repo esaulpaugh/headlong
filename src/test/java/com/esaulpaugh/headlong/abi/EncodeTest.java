@@ -113,7 +113,7 @@ public class EncodeTest {
                 int div = (i - expectedMod) / UNIT_LENGTH_BYTES;
                 if(div > 0) {
                     String substr = (div - 1) + "\tffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-                    assertFalse(func ^ formatted.contains(substr)); // assert matching
+                    TestUtils.assertMatching(func, formatted.contains(substr));
                 }
             } else {
                 TestUtils.assertThrown(IllegalArgumentException.class, "expected length mod 32 == 0, found: ", () -> format.apply(x));
