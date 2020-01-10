@@ -20,7 +20,10 @@ import java.text.ParseException;
 import java.util.ArrayList;
 
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
-import static com.esaulpaugh.headlong.abi.BaseTypeInfo.*;
+import static com.esaulpaugh.headlong.abi.BaseTypeInfo.DECIMAL_BIT_LEN;
+import static com.esaulpaugh.headlong.abi.BaseTypeInfo.DECIMAL_SCALE;
+import static com.esaulpaugh.headlong.abi.BaseTypeInfo.FIXED_BIT_LEN;
+import static com.esaulpaugh.headlong.abi.BaseTypeInfo.FIXED_SCALE;
 
 /**
  * Creates the appropriate {@link ABIType} object for a given type string.

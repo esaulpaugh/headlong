@@ -16,9 +16,9 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.util.JsonUtils;
-import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Integers;
+import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 
-import static com.esaulpaugh.headlong.TestUtils.*;
+import static com.esaulpaugh.headlong.TestUtils.parseArrayToBytesHierarchy;
+import static com.esaulpaugh.headlong.TestUtils.parseBigIntegerStringPoundSign;
+import static com.esaulpaugh.headlong.TestUtils.parseLong;
+import static com.esaulpaugh.headlong.TestUtils.parseObject;
+import static com.esaulpaugh.headlong.TestUtils.parseString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RLPJsonEncodeTest {

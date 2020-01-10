@@ -19,7 +19,9 @@ import com.migcomponents.migbase64.Base64;
 
 import java.nio.charset.StandardCharsets;
 
-import static com.migcomponents.migbase64.Base64.*;
+import static com.migcomponents.migbase64.Base64.NO_LINE_SEP;
+import static com.migcomponents.migbase64.Base64.NO_PADDING;
+import static com.migcomponents.migbase64.Base64.URL_SAFE_CHARS;
 
 /** Utility for encoding and decoding hexadecimal, Base64, and UTF-8-encoded {@code String}s. */
 public final class Strings {

@@ -15,10 +15,10 @@
 */
 package com.esaulpaugh.headlong.rlp.util;
 
-import com.esaulpaugh.headlong.rlp.DataType;
-import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
+import com.esaulpaugh.headlong.rlp.DataType;
+import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 

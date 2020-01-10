@@ -17,7 +17,10 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.io.Serializable;
@@ -27,9 +30,23 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
 
-import static com.esaulpaugh.headlong.abi.ABIType.*;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_DECIMAL;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_INTEGER;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BOOLEAN;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BYTE;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;

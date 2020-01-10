@@ -15,7 +15,10 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * An object to hold metadata about a base type. Metadata objects are stored in {@link #TYPE_INFO_MAP}.

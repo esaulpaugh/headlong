@@ -16,18 +16,27 @@
 package com.esaulpaugh.headlong.rlp.eip778;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPDecoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Test;
 
 import java.security.SignatureException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
-import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.*;
+import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.ID;
+import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.IP;
+import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.PAIR_COMPARATOR;
+import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.SECP256K1;
+import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.UDP;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;

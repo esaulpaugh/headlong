@@ -15,12 +15,12 @@
 */
 package com.esaulpaugh.headlong.rlp.eip778;
 
+import com.esaulpaugh.headlong.exception.DecodeException;
+import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.rlp.RLPDecoder;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
-import com.esaulpaugh.headlong.exception.DecodeException;
-import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.security.SignatureException;
