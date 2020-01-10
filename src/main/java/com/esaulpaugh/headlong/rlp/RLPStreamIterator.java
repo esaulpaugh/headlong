@@ -84,4 +84,3 @@ class RLPStreamIterator implements Iterator<RLPItem> {
         return (NoSuchElementException) new NoSuchElementException().initCause(cause);
     }
 }
-

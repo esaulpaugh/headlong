@@ -22,5 +22,4 @@ public interface RLPEncodeable {
     byte[] toRLP();
 
     void toRLP(byte[] dest, int destIndex);
-
 }
