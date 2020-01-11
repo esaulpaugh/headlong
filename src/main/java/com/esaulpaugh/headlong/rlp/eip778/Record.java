@@ -53,11 +53,11 @@ public final class Record {
         }
 
         final int recordLen = (int) recordLenLong;
-        byte[] record = new byte[recordLen];
+        final byte[] record = new byte[recordLen];
         RLPEncoder.insertListPrefix((int) recordListPayloadLenLong, record, 0);
-        int contentListOffset = recordPrefixLen + signatureItemLen - RLPEncoder.prefixLength(payloadLenLong);
+        final int contentListOffset = recordPrefixLen + signatureItemLen - RLPEncoder.prefixLength(payloadLenLong);
         RLPEncoder.insertRecordContentList((int) payloadLenLong, seq, pairs, record, contentListOffset);
-        byte[] signature = signer.sign(record, contentListOffset, recordLen - contentListOffset);
+        final byte[] signature = signer.sign(record, contentListOffset, recordLen - contentListOffset);
         RLPEncoder.insertRecordSignature(signature, record, recordPrefixLen);
 
         try {

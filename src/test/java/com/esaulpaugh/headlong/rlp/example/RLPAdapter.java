@@ -27,5 +27,4 @@ public interface RLPAdapter<T> {
     T decode(byte[] rlp, int index) throws DecodeException;
 
     byte[] encode(T t);
-
 }
