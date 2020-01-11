@@ -26,7 +26,7 @@ public final class Uint {
 
     public final int numBits;
     public final BigInteger range;
-    public BigInteger halfRange;
+    public final BigInteger halfRange;
     public final Long rangeLong;
     public final Long maskLong;
     public final Long halfRangeLong;
@@ -56,7 +56,7 @@ public final class Uint {
             return toSigned(BigInteger.valueOf(unsigned)).longValueExact();
         }
         if(unsigned < 0) {
-            throwNegativeUnsignedVal(unsigned);
+            throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
         }
         final int bitLen = com.esaulpaugh.headlong.util.Integers.bitLen(unsigned);
         if(bitLen > numBits) {
@@ -82,7 +82,7 @@ public final class Uint {
 
     public BigInteger toSigned(BigInteger unsigned) {
         if(unsigned.compareTo(BigInteger.ZERO) < 0) {
-            throwNegativeUnsignedVal(unsigned);
+            throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
         }
         final int bitLen = unsigned.bitLength();
         if(bitLen > numBits) {
@@ -102,10 +102,6 @@ public final class Uint {
         return signed.compareTo(BigInteger.ZERO) >= 0
                 ? signed
                 : signed.add(range);
-    }
-
-    private static void throwNegativeUnsignedVal(Number unsigned) {
-        throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
     }
 
     private static void throwTooManyBitsException(int bitLen, int rangeNumBits, boolean forSigned) {
