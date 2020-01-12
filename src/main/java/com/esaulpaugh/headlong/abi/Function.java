@@ -54,7 +54,6 @@ public final class Function implements ABIObject, Serializable {
     }
 
     private static final Pattern NON_ASCII_CHAR = Pattern.compile("[^\\p{ASCII}]+");
-
     private static final Pattern ILLEGAL_NAME_CHAR = Pattern.compile("[^\\p{ASCII}&&[^(]]+");
 
     public static final int SELECTOR_LEN = 4;
@@ -63,11 +62,10 @@ public final class Function implements ABIObject, Serializable {
     private final String name;
     private final TupleType inputTypes;
     private final TupleType outputTypes;
+    private final String stateMutability;
 
     private final byte[] selector = new byte[SELECTOR_LEN];
     private final String hashAlgorithm;
-
-    private final String stateMutability;
 
     public Function(String signature) {
         this(signature, null);
