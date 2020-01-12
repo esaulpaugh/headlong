@@ -20,11 +20,15 @@ import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Test;
 import org.spongycastle.crypto.digests.KeccakDigest;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.DigestException;
 import java.util.Arrays;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class KeccakTest {
 
@@ -124,5 +128,48 @@ public class KeccakTest {
 
             assertArrayEquals(a, k_Output);
         }
+    }
+
+    @Test
+    public void testPartial() throws DigestException {
+        Keccak keccak = new Keccak(256);
+
+        byte[] x = new byte[7];
+        Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
+        rand.nextBytes(x);
+
+        byte[] end = Arrays.copyOfRange(x, 4, 7);
+
+        keccak.reset();
+        keccak.update(x);
+        keccak.digest(x, 0, 4);
+
+        assertArrayEquals(end, Arrays.copyOfRange(x, 4, 7));
+
+        Arrays.fill(x, (byte) 0);
+
+        ByteBuffer bb = ByteBuffer.wrap(x);
+
+        byte[] arr = Arrays.copyOf(bb.array(), bb.capacity());
+
+        keccak.reset();
+        keccak.digest(bb, 4);
+
+        byte[] arr2 = bb.array();
+
+        assertNotEquals(FastHex.encodeToString(arr), FastHex.encodeToString(arr2));
+        assertArrayEquals(Arrays.copyOfRange(arr, 4, 7), Arrays.copyOfRange(arr2, 4, 7));
+
+        assertEquals("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470", FastHex.encodeToString(keccak.digest(new byte[0])));
+
+        keccak.reset();
+
+        byte[] digest = new byte[32];
+        bb = ByteBuffer.wrap(digest);
+        Arrays.fill(digest, (byte) 0xff);
+
+        keccak.digest(bb);
+
+        assertEquals("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470", FastHex.encodeToString(bb.array()));
     }
 }
