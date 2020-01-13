@@ -31,8 +31,9 @@ public final class Tuple extends AbstractList<Object> implements RandomAccess, S
 
     final Object[] elements;
 
+    /** Elements array is not guarded from external/concurrent modification */
     public Tuple(Object... elements) {
-        this.elements = elements; // array not guarded from external modification
+        this.elements = elements;
     }
 
     public Tuple subtuple(int startIndex, int endIndex) {

@@ -133,6 +133,7 @@ public final class PackedDecoder {
     }
 
     private static int decodeBigInteger(int elementLen, BigIntegerType bigIntegerType, byte[] buffer, int idx, Object[] dest, int destIdx) throws ABIException {
+//        BigInteger val = new BigInteger(buffer, idx, elementLen); // Java 9+
         BigInteger val = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
         bigIntegerType.validate(val);
         dest[destIdx] = val;
@@ -140,8 +141,9 @@ public final class PackedDecoder {
     }
 
     private static int decodeBigDecimal(int elementLen, BigDecimalType bigDecimalType, byte[] buffer, int idx, Object[] dest, int destIdx) throws ABIException {
-        BigInteger bigInteger = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
-        BigDecimal val = new BigDecimal(bigInteger, bigDecimalType.scale);
+//        BigInteger unscaled = new BigInteger(buffer, idx, elementLen); // Java 9+
+        BigInteger unscaled = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
+        BigDecimal val = new BigDecimal(unscaled, bigDecimalType.scale);
         bigDecimalType.validate(val);
         dest[destIdx] = val;
         return elementLen;
