@@ -195,7 +195,7 @@ public final class RLPEncoder {
      * Returns the RLP encoding of the given byte.
      *
      * @param b the byte to be encoded
-     * @return  the encoding
+     * @return the encoding
      */
     public static byte[] encode(byte b) {
         return encode(new byte[] { b });
@@ -204,8 +204,8 @@ public final class RLPEncoder {
     /**
      * Returns the RLP encoding of the given byte string.
      *
-     * @param byteString    the byte string to be encoded
-     * @return  the encoding
+     * @param byteString the byte string to be encoded
+     * @return the encoding
      */
     public static byte[] encode(byte[] byteString) {
         byte[] dest = new byte[stringEncodedLen(byteString)];
@@ -216,8 +216,8 @@ public final class RLPEncoder {
     /**
      * Returns the concatenation of the encodings of the given objects in the given order.
      *
-     * @param objects   the raw objects to be encoded in sequence
-     * @return  the encoded sequence
+     * @param objects the raw objects to be encoded in sequence
+     * @return the encoded sequence
      */
     public static byte[] encodeSequentially(Object... objects) {
         byte[] dest = new byte[(int) totalEncodedLen(Arrays.asList(objects))];
@@ -229,8 +229,8 @@ public final class RLPEncoder {
      * Returns the concatenation of the encodings of the given objects in the given order. The {@link Iterable}
      * containing the objects is <i>not</i> encoded.
      *
-     * @param objects   the raw objects to be encoded
-     * @return  the encoded sequence
+     * @param objects the raw objects to be encoded
+     * @return the encoded sequence
      */
     public static byte[] encodeSequentially(Iterable<?> objects) {
         byte[] dest = new byte[(int) totalEncodedLen(objects)];
@@ -243,9 +243,9 @@ public final class RLPEncoder {
      * The array containing the objects is <i>not</i> encoded.
      *
      * @param objects   the raw objects to be encoded
-     * @param dest  the destination for the sequence of RLP encodings
+     * @param dest      the destination for the sequence of RLP encodings
      * @param destIndex the index into {@code dest} for the sequence
-     * @return  the index into {@code dest} marking the end of the sequence
+     * @return the index into {@code dest} marking the end of the sequence
      */
     public static int encodeSequentially(Object[] objects, byte[] dest, int destIndex) {
         if(objects instanceof KeyValuePair[]) {
@@ -265,9 +265,9 @@ public final class RLPEncoder {
      * The {@code Iterable} containing the objects is <i>not</i> encoded.
      *
      * @param objects   the raw objects to be encoded
-     * @param dest  the destination for the sequence of RLP encodings
+     * @param dest      the destination for the sequence of RLP encodings
      * @param destIndex the index into the destination for the sequence
-     * @return  the index marking the end of the sequence
+     * @return the index marking the end of the sequence
      */
     public static int encodeSequentially(Iterable<?> objects, byte[] dest, int destIndex) {
         for (Object obj : objects) {
@@ -279,8 +279,8 @@ public final class RLPEncoder {
     /**
      * Returns the encoding of an RLP list item containing the given objects, encoded.
      *
-     * @param elements  the raw elements to be encoded as an RLP list item
-     * @return  the encoded RLP list item
+     * @param elements the raw elements to be encoded as an RLP list item
+     * @return the encoded RLP list item
      */
     public static byte[] encodeAsList(Object... elements) {
         return encodeAsList(Arrays.asList(elements));
@@ -290,8 +290,8 @@ public final class RLPEncoder {
      * Returns the encoding of an RLP list item containing the encoded elements of the given {@link Iterable} in the
      * given order.
      *
-     * @param elements  the raw elements to be encoded as an RLP list item
-     * @return  the encoded RLP list item
+     * @param elements the raw elements to be encoded as an RLP list item
+     * @return the encoded RLP list item
      */
     public static byte[] encodeAsList(Iterable<?> elements) {
         long listDataLen = totalEncodedLen(elements);
@@ -305,7 +305,7 @@ public final class RLPEncoder {
      * the destination array.
      *
      * @param elements  the raw elements to be encoded as an RLP list item
-     * @param dest  the destination for the RLP encoding of the list
+     * @param dest      the destination for the RLP encoding of the list
      * @param destIndex the index into the destination for the list
      */
     public static void encodeAsList(Object[] elements, byte[] dest, int destIndex) {
@@ -317,7 +317,7 @@ public final class RLPEncoder {
      * order, into the destination array.
      *
      * @param elements  the raw elements to be encoded as an RLP list item
-     * @param dest  the destination for the RLP encoding of the list
+     * @param dest      the destination for the RLP encoding of the list
      * @param destIndex the index into the destination for the list
      */
     public static void encodeAsList(Iterable<?> elements, byte[] dest, int destIndex) {
@@ -329,7 +329,7 @@ public final class RLPEncoder {
      * Wraps n encodings in an RLPList.
      *
      * @param encodings the RLP-encoded elements of the new RLPList
-     * @return  the RLPList containing the given elements
+     * @return the RLPList containing the given elements
      */
     public static RLPList toList(RLPItem... encodings) {
         return toList(Arrays.asList(encodings));
@@ -339,7 +339,7 @@ public final class RLPEncoder {
      * Wraps n encodings in an RLPList.
      *
      * @param encodings the RLP-encoded elements of the new RLPList
-     * @return  the RLPList containing the given elements
+     * @return the RLPList containing the given elements
      */
     public static RLPList toList(Iterable<RLPItem> encodings) {
         return RLPList.withElements(encodings);

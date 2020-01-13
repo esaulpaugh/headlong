@@ -28,8 +28,8 @@ public final class Integers {
      * Returns an integer's minimal big-endian two's complement representation. The integer zero is represented by the
      * empty byte array.
      *
-     * @param val   the integer
-     * @return  the minimal representation
+     * @param val the integer
+     * @return the minimal representation
      */
     public static byte[] toBytes(byte val) {
         return val != 0 ? new byte[] { val } : Strings.EMPTY_BYTE_ARRAY;
@@ -39,8 +39,8 @@ public final class Integers {
      * Returns an integer's minimal big-endian two's complement representation. The integer zero is represented by the
      * empty byte array.
      *
-     * @param val   the integer
-     * @return  the minimal representation
+     * @param val the integer
+     * @return the minimal representation
      */
     public static byte[] toBytes(short val) {
         byte[] bytes = new byte[len(val)];
@@ -52,8 +52,8 @@ public final class Integers {
      * Returns an integer's minimal big-endian two's complement representation. The integer zero is represented by the
      * empty byte array.
      *
-     * @param val   the integer
-     * @return  the minimal representation
+     * @param val the integer
+     * @return the minimal representation
      */
     public static byte[] toBytes(int val) {
         byte[] bytes = new byte[len(val)];
@@ -65,8 +65,8 @@ public final class Integers {
      * Returns an integer's minimal big-endian two's complement representation. The integer zero is represented by the
      * empty byte array.
      *
-     * @param val   the integer
-     * @return  the minimal representation
+     * @param val the integer
+     * @return the minimal representation
      */
     public static byte[] toBytes(long val) {
         byte[] bytes = new byte[len(val)];
@@ -78,12 +78,12 @@ public final class Integers {
      * Inserts into a byte array an integer's minimal (without leading zeroes), big-endian two's complement representation,
      * up to one byte in length. The integer zero always has length zero.
      *
+     * @param val the integer to be inserted
+     * @param o   the output array
+     * @param i   the index into the output
+     * @return the number of bytes inserted
      * @see #toBytes(byte)
      * @see #getByte(byte[], int, int)
-     * @param val   the integer to be inserted
-     * @param o the output array
-     * @param i the index into the output
-     * @return  the number of bytes inserted
      */
     public static int putByte(byte val, byte[] o, int i) {
         if(val != 0) {
@@ -97,12 +97,12 @@ public final class Integers {
      * Inserts into a byte array an integer's minimal (without leading zeroes), big-endian two's complement representation,
      * up to two bytes in length. The integer zero always has length zero.
      *
+     * @param val the integer to be inserted
+     * @param o   the output array
+     * @param i   the index into the output
+     * @return the number of bytes inserted
      * @see #toBytes(short)
      * @see #getShort(byte[], int, int)
-     * @param val   the integer to be inserted
-     * @param o the output array
-     * @param i the index into the output
-     * @return  the number of bytes inserted
      */
     public static int putShort(short val, byte[] o, int i) {
         if(val != 0) {
@@ -119,12 +119,12 @@ public final class Integers {
      * Inserts into a byte array an integer's minimal (without leading zeroes), big-endian two's complement representation,
      * up to four bytes in length. The integer zero always has length zero.
      *
+     * @param val the integer to be inserted
+     * @param o   the output array
+     * @param i   the index into the output
+     * @return the number of bytes inserted
      * @see #toBytes(int)
      * @see #getInt(byte[], int, int)
-     * @param val   the integer to be inserted
-     * @param o the output array
-     * @param i the index into the output
-     * @return  the number of bytes inserted
      */
     public static int putInt(int val, byte[] o, int i) {
         if(val != 0) {
@@ -145,12 +145,12 @@ public final class Integers {
      * Inserts into a byte array an integer's minimal (without leading zeroes), big-endian two's complement representation,
      * up to eight bytes in length. The integer zero always has length zero.
      *
+     * @param val the integer to be inserted
+     * @param o   the output array
+     * @param i   the index into the output
+     * @return the number of bytes inserted
      * @see #toBytes(long)
      * @see #getLong(byte[], int, int)
-     * @param val   the integer to be inserted
-     * @param o the output array
-     * @param i the index into the output
-     * @return  the number of bytes inserted
      */
     public static int putLong(long val, byte[] o, int i) {
         if(val != 0) {
@@ -210,13 +210,13 @@ public final class Integers {
      * Retrieves an integer up to one byte in length. No leading zeroes allowed. The integer zero always has zero length.
      * Big-endian two's complement format.
      *
+     * @param buffer the array containing the integer
+     * @param i      the array index locating the integer
+     * @param len    the length in bytes of the integer's representation
+     * @return the integer
+     * @throws DecodeException if the integer's representation is found to have leading zeroes
      * @see #toBytes(byte)
      * @see #putByte(byte, byte[], int)
-     * @param buffer    the array containing the integer
-     * @param i the array index locating the integer
-     * @param len  the length in bytes of the integer's representation
-     * @return  the integer
-     * @throws DecodeException  if the integer's representation is found to have leading zeroes
      */
     public static byte getByte(byte[] buffer, int i, int len) throws DecodeException {
         switch (len) {
@@ -235,13 +235,13 @@ public final class Integers {
      * Retrieves an integer up to two bytes in length. No leading zeroes allowed. The integer zero always has zero length.
      * Big-endian two's complement format.
      *
+     * @param buffer the array containing the integer's representation
+     * @param i      the array index locating the integer
+     * @param len    the length in bytes of the integer's representation, without leading zeroes
+     * @return the integer
+     * @throws DecodeException if the integer's representation is found to have leading zeroes
      * @see #toBytes(short)
      * @see #putShort(short, byte[], int)
-     * @param buffer    the array containing the integer's representation
-     * @param i the array index locating the integer
-     * @param len  the length in bytes of the integer's representation, without leading zeroes
-     * @return  the integer
-     * @throws DecodeException  if the integer's representation is found to have leading zeroes
      */
     public static short getShort(byte[] buffer, int i, int len) throws DecodeException {
         int shiftAmount = 0;
@@ -263,13 +263,13 @@ public final class Integers {
      * Retrieves an integer up to four bytes in length. No leading zeroes allowed. The integer zero always has zero length.
      * Big-endian two's complement format.
      *
+     * @param buffer the array containing the integer's representation
+     * @param i      the array index locating the integer
+     * @param len    the length in bytes of the integer's representation, without leading zeroes
+     * @return the integer
+     * @throws DecodeException if the integer's representation is found to have leading zeroes
      * @see #toBytes(int)
      * @see #putInt(int, byte[], int)
-     * @param buffer    the array containing the integer's representation
-     * @param i the array index locating the integer
-     * @param len  the length in bytes of the integer's representation, without leading zeroes
-     * @return  the integer
-     * @throws DecodeException  if the integer's representation is found to have leading zeroes
      */
     public static int getInt(byte[] buffer, int i, int len) throws DecodeException {
         int shiftAmount = 0;
@@ -293,13 +293,13 @@ public final class Integers {
      * Retrieves an integer up to eight bytes in length. No leading zeroes allowed. The integer zero always has zero length.
      * Big-endian two's complement format.
      *
+     * @param buffer the array containing the integer's representation
+     * @param i      the array index locating the integer
+     * @param len    the length in bytes of the integer's representation, without leading zeroes
+     * @return the integer
+     * @throws DecodeException if the integer's representation is found to have leading zeroes
      * @see #toBytes(long)
      * @see #putLong(long, byte[], int)
-     * @param buffer    the array containing the integer's representation
-     * @param i the array index locating the integer
-     * @param len  the length in bytes of the integer's representation, without leading zeroes
-     * @return  the integer
-     * @throws DecodeException  if the integer's representation is found to have leading zeroes
      */
     public static long getLong(final byte[] buffer, final int i, final int len) throws DecodeException {
         int shiftAmount = 0;
@@ -335,8 +335,8 @@ public final class Integers {
      * Returns the byte length of an integer's minimal (without leading zeroes) two's complement representation. The
      * integer zero always has zero length.
      *
-     * @param val   the integer
-     * @return  the byte length
+     * @param val the integer
+     * @return the byte length
      */
     public static int len(byte val) {
         return val != 0 ? 1 : 0;
@@ -346,8 +346,8 @@ public final class Integers {
      * Returns the byte length of an integer's minimal (without leading zeroes) two's complement representation. The
      * integer zero always has zero length.
      *
-     * @param val   the integer
-     * @return  the byte length
+     * @param val the integer
+     * @return the byte length
      */
     public static int len(short val) {
         if(val != 0)
@@ -361,8 +361,8 @@ public final class Integers {
      * Returns the byte length of an integer's minimal (without leading zeroes) two's complement representation. The
      * integer zero always has zero length.
      *
-     * @param val   the integer
-     * @return  the byte length
+     * @param val the integer
+     * @return the byte length
      */
     public static int len(int val) {
         if (val != 0)
@@ -380,8 +380,8 @@ public final class Integers {
      * Returns the byte length of an integer's minimal (without leading zeroes) two's complement representation. The
      * integer zero always has zero length.
      *
-     * @param val   the integer
-     * @return  the byte length
+     * @param val the integer
+     * @return the byte length
      */
     public static int len(long val) {
         if (val != 0)
@@ -406,8 +406,8 @@ public final class Integers {
     /**
      * NOTE: will always return {@link Long#SIZE} for negative integers. See also abi.util.BizarroIntegers.bitLen(long).
      *
-     * @param val   the long value
-     * @return  the bit length of the input
+     * @param val the long value
+     * @return the bit length of the input
      */
     public static int bitLen(long val) {
         return Long.SIZE - Long.numberOfLeadingZeros(val);

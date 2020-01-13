@@ -23,7 +23,7 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 /**
  * Represents a Contract ABI type such as uint256 or decimal. Used to validate, encode, and decode data.
  *
- * @param <J>   this {@link ABIType}'s corresponding Java type
+ * @param <J> this {@link ABIType}'s corresponding Java type
  */
 public abstract class ABIType<J> implements Serializable {
 
@@ -90,10 +90,10 @@ public abstract class ABIType<J> implements Serializable {
     /**
      * Decodes the data at the buffer's current position according to this {@link ABIType}.
      *
-     * @param buffer        the buffer containing the encoded data
-     * @param unitBuffer    a buffer of length {@link UnitType#UNIT_LENGTH_BYTES} in which to store intermediate values
-     * @return              the decoded value
-     * @throws ABIException  if the data is malformed
+     * @param buffer     the buffer containing the encoded data
+     * @param unitBuffer a buffer of length {@link UnitType#UNIT_LENGTH_BYTES} in which to store intermediate values
+     * @return the decoded value
+     * @throws ABIException if the data is malformed
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer) throws ABIException;
 

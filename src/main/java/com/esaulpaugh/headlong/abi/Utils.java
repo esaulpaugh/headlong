@@ -27,8 +27,8 @@ final class Utils {
      * Rounds a length up to the nearest multiple of {@link UnitType#UNIT_LENGTH_BYTES}. If {@code len} is already a
      * multiple, method has no effect.
      *
-     * @param len   the length, a non-negative integer
-     * @return  the rounded-up value
+     * @param len the length, a non-negative integer
+     * @return the rounded-up value
      */
     static int roundLengthUp(int len) {
         int mod = len & (UNIT_LENGTH_BYTES - 1);

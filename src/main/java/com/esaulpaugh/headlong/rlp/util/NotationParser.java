@@ -34,8 +34,8 @@ public class NotationParser {
     /**
      * Returns the object hierarchy represented by the notation.
      *
-     * @param notation  the notation to be parsed
-     * @return  the hierarchy of objects
+     * @param notation the notation to be parsed
+     * @return the hierarchy of objects
      */
     public static List<Object> parse(String notation) {
         List<Object> topLevelObjects = new ArrayList<>(); // a sequence (as in encodeSequentially)

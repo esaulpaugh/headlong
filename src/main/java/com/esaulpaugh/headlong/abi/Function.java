@@ -80,11 +80,11 @@ public final class Function implements ABIObject, Serializable {
     }
 
     /**
-     * @param type  to denote function, constructor, or fallback
-     * @param signature the function signature
-     * @param outputs   the signature of the tuple containing the return types
+     * @param type          to denote function, constructor, or fallback
+     * @param signature     the function signature
+     * @param outputs       the signature of the tuple containing the return types
      * @param messageDigest the hash function with which to generate the 4-byte selector
-     * @throws IllegalArgumentException   if {@code signature} or {@code outputs} is malformed
+     * @throws IllegalArgumentException if {@code signature} or {@code outputs} is malformed
      */
     public Function(Type type, String signature, String outputs, MessageDigest messageDigest) {
         try {
@@ -331,11 +331,11 @@ public final class Function implements ABIObject, Serializable {
     /**
      * Returns a formatted string for a given ABI-encoded function call.
      *
-     * @param buffer   the buffer containing the ABI call
-     * @param offset    the offset into the input buffer of the ABI call
-     * @param length    the length of the ABI call
-     * @return  the formatted string
-     * @throws  IllegalArgumentException    if the input length mod 32 != 4
+     * @param buffer the buffer containing the ABI call
+     * @param offset the offset into the input buffer of the ABI call
+     * @param length the length of the ABI call
+     * @return the formatted string
+     * @throws IllegalArgumentException if the input length mod 32 != 4
      */
     public static String formatCall(byte[] buffer, int offset, final int length) {
         Utils.checkIsMultiple(length - SELECTOR_LEN);

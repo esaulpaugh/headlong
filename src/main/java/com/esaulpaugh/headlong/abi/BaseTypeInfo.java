@@ -22,7 +22,7 @@ import java.util.Objects;
 
 /**
  * An object to hold metadata about a base type. Metadata objects are stored in {@link #TYPE_INFO_MAP}.
- *
+ * <p>
  * fixed/ufixed types, which number in the thousands, are not included in the map (except for fixed, ufixed,
  * fixed128x18, and ufixed128x18).
  */
@@ -90,7 +90,7 @@ final class BaseTypeInfo {
      * Returns the canonical base type's metadata object if it exists.
      *
      * @param canonical the canonical type string for the base type
-     * @return  the metadata object
+     * @return the metadata object
      */
     static BaseTypeInfo get(String canonical) {
         return TYPE_INFO_MAP.get(canonical);

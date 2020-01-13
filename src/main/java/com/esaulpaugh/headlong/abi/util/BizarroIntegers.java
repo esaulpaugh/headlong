@@ -273,8 +273,8 @@ public final class BizarroIntegers {
     /**
      * NOTE: will always return {@link Long#SIZE} for non-negative integers. See also {@link Integers#bitLen(long)}.
      *
-     * @param val   the long value
-     * @return  the bit length of the input
+     * @param val the long value
+     * @return the bit length of the input
      */
     public static int bitLen(long val) {
         return Long.SIZE - Long.numberOfLeadingZeros(~val);

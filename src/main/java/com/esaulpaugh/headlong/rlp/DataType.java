@@ -42,8 +42,8 @@ public enum DataType {
     }
 
     /**
-     * @param leadByte  the first (zeroth) byte of an RLP encoding
-     * @return  one of the five enumerated RLP data types
+     * @param leadByte the first (zeroth) byte of an RLP encoding
+     * @return one of the five enumerated RLP data types
      */
     public static DataType type(final byte leadByte) {
         switch (leadByte) {

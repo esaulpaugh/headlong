@@ -31,8 +31,8 @@ import static com.esaulpaugh.headlong.util.Strings.UTF_8;
  * Represents static array types such as bytes3 or uint16[3][2] and dynamic array types such as decimal[5][] or
  * string[4].
  *
- * @param <T>   the {@link ABIType} for the elements of the array
- * @param <J>   this {@link ArrayType}'s corresponding Java type
+ * @param <T> the {@link ABIType} for the elements of the array
+ * @param <J> this {@link ArrayType}'s corresponding Java type
  */
 public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
@@ -86,8 +86,9 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     /**
      * LOG_2_UNIT_LENGTH_BYTES == 5
      * x << 5 == x * 32
+     *
      * @param value the value to measure
-     * @return  the length in bytes
+     * @return the length in bytes of this array when encoded
      */
     @Override
     int byteLength(Object value) {
@@ -236,9 +237,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         return new ABIException("index " + i + ": " + ve.getMessage());
     }
 
-    /**
-     * For arrays of arrays or arrays of tuples only.
-     */
+    /** For arrays of arrays or arrays of tuples only. */
     private int validateObjectArray(Object[] arr) throws ABIException {
         final int len = arr.length;
         checkLength(len, arr);

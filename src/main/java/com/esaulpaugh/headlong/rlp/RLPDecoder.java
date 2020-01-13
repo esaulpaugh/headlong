@@ -42,9 +42,9 @@ public final class RLPDecoder {
     /**
      * Returns an iterator over the sequence of RLP items starting at {@code index}.
      *
-     * @param buffer    the array containing the sequence
-     * @param index the index of the sequence
-     * @return  an iterator over the items in the sequence
+     * @param buffer the array containing the sequence
+     * @param index  the index of the sequence
+     * @return an iterator over the items in the sequence
      */
     public Iterator<RLPItem> sequenceIterator(byte[] buffer, int index) {
         return new RLPStreamIterator(null, RLPDecoder.this, buffer, index) {
@@ -77,7 +77,7 @@ public final class RLPDecoder {
      *
      * @param buffer    the array containing the list item
      * @param index the index of the RLP list item
-     * @return  the iterator over the elements in the list
+     * @return the iterator over the elements in the list
      * @throws DecodeException  if the RLP list failed to decode
      */
     public Iterator<RLPItem> listIterator(byte[] buffer, int index) throws DecodeException {
@@ -129,9 +129,9 @@ public final class RLPDecoder {
     /**
      * Returns an {@link RLPItem} for a length-one encoding (e.g. 0xc0)
      *
-     * @param lengthOneRLP  the encoding
-     * @return  the item
-     * @throws DecodeException  if the byte fails to decode
+     * @param lengthOneRLP the encoding
+     * @return the item
+     * @throws DecodeException if the byte fails to decode
      */
     public RLPItem wrap(byte lengthOneRLP) throws DecodeException {
         return wrap(new byte[] { lengthOneRLP }, 0);

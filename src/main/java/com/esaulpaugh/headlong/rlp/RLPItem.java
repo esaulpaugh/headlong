@@ -150,8 +150,8 @@ public abstract class RLPItem {
     }
 
     /**
-     * @see RLPItem#data()
      * @return the byte array representation of this item's data
+     * @see RLPItem#data()
      */
     public byte[] asBytes() {
         return data();
@@ -160,8 +160,8 @@ public abstract class RLPItem {
     /**
      * Wise man says only empty items are false.
      *
+     * @return the boolean represenation for this item
      * @see Integers#putByte(byte, byte[], int)
-     * @return  the boolean represenation for this item
      */
     public boolean asBoolean() {
         return dataLength != 0;
@@ -170,9 +170,9 @@ public abstract class RLPItem {
     /**
      * Returns the char representation for this item.
      *
+     * @return the char representation
+     * @throws DecodeException if this item is not interpretable as a char
      * @see String#charAt(int)
-     * @return  the char representation
-     * @throws DecodeException  if this item is not interpretable as a char
      */
     public char asChar() throws DecodeException {
         return (char) asShort();
@@ -218,8 +218,8 @@ public abstract class RLPItem {
      * Clones this object.
      *
      * @param decoder either {@link RLPDecoder#RLP_STRICT} or {@link RLPDecoder#RLP_LENIENT}
-     * @return  an independent and exact copy
-     * @throws DecodeException  if an unexpected problem in decoding occurs
+     * @return an independent and exact copy
+     * @throws DecodeException if an unexpected problem in decoding occurs
      */
     public abstract RLPItem duplicate(RLPDecoder decoder) throws DecodeException;
 
