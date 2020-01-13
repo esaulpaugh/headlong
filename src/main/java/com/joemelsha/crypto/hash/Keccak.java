@@ -303,7 +303,7 @@ public class Keccak extends MessageDigest {
             return;
 
         int rateBits = this.rateBits;
-        int rateBitsWord = rateBits & 0x3f;
+        int rateBitsWord = rateBits & 0x3f; // mod 64
         if (rateBitsWord > 0) {
             int c = 64 - rateBitsWord;
             if (c > inBits)

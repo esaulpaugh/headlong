@@ -180,8 +180,10 @@ public class KeccakTest {
     @Test
     public void testUpdateBits() throws DecodeException {
 
+        byte[] prefix = Strings.decode("Hello World", Strings.UTF_8);
+
         Keccak keccak = new Keccak(256);
-        keccak.update(Strings.decode("Hello World", Strings.UTF_8));
+        keccak.update(prefix);
 
         long asymmetricBits = 0x8002030405060708L;
         int bitLen = Integers.bitLen(asymmetricBits);
@@ -199,11 +201,19 @@ public class KeccakTest {
         keccak.updateBits(asymmetricBits, bitLen);
         byte[] specialDigest = keccak.digest(); // resets the state
 
-//        keccak.reset();
-        keccak.update(Strings.decode("Hello World", Strings.UTF_8));
+        keccak.update(prefix);
         byte[] normalDigest = keccak.digest(eight);
 
         assertArrayEquals(normalDigest, specialDigest);
         assertEquals("01fa9b8342e622a5d6314dcf2eb0786768d1e804e61af5feb27141ead708524f", Strings.encode(normalDigest));
+
+        KeccakDigest kd = new KeccakDigest(256);
+        kd.update(prefix, 0 , prefix.length);
+
+        kd.update(eight, 0, eight.length);
+
+        byte[] out = new byte[kd.getDigestSize()];
+        kd.doFinal(out, 0);
+        assertEquals("01fa9b8342e622a5d6314dcf2eb0786768d1e804e61af5feb27141ead708524f", Strings.encode(out));
     }
 }
