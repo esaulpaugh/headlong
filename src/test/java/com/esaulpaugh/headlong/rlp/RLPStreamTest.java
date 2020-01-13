@@ -17,8 +17,6 @@ package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.exception.DecodeException;
-import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
-import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +34,6 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
-import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -124,7 +121,6 @@ public class RLPStreamTest {
         private final PipedOutputStream pos;
         private final AtomicBoolean canReceive;
 
-        private int readNum = -1;
         private final SendStreamThread senderThread;
 
         private Throwable throwable;
@@ -153,15 +149,15 @@ public class RLPStreamTest {
 
                 waitForNotifiedSender();
 
-                assertReadSuccess(iter);
+                assertHasNext(iter);
                 assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
+                assertNoNext(iter);
                 assertNoNext(iter);
 
                 waitForNotifiedSender();
 
                 for (byte b : TEST_BYTES) {
-                    assertReadSuccess(iter);
-//                    timestamp(zero),
+                    assertHasNext(iter);
                     assertArrayEquals(new byte[] { b }, iter.next().asBytes());
                 }
                 assertNoNext(iter);
@@ -176,16 +172,14 @@ public class RLPStreamTest {
 
                 waitForNotifiedSender();
 
-                assertReadSuccess(iter);
+                assertHasNext(iter);
                 assertTrue(iter.hasNext());
                 assertEquals(TEST_STRING, iter.next().asString(UTF_8));
-                assertReadSuccess(iter);
+                assertHasNext(iter);
                 assertTrue(iter.hasNext());
                 assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
-                TestUtils.assertThrown(NoSuchElementException.class, iter::next);
                 assertNoNext(iter);
-                assertFalse(iter.hasNext());
-                TestUtils.assertThrown(NoSuchElementException.class, iter::next);
+                assertNoNext(iter);
 
                 senderThread.join();
 
@@ -212,12 +206,12 @@ public class RLPStreamTest {
             }
         }
 
-        private void assertNoNext(Iterator<RLPItem> iter) throws IOException, UnrecoverableDecodeException {
+        private void assertNoNext(Iterator<RLPItem> iter) throws Throwable {
             RLPStreamTest.assertNoNext(zero, iter);
         }
 
-        private void assertReadSuccess(Iterator<RLPItem> iter) throws IOException, UnrecoverableDecodeException {
-            RLPStreamTest.assertReadSuccess(zero, ++readNum, iter);
+        private void assertHasNext(Iterator<RLPItem> iter) {
+            RLPStreamTest.assertHasNext(zero, iter);
         }
     }
 
@@ -281,29 +275,29 @@ public class RLPStreamTest {
 
         private void write(byte b) throws IOException {
             os.write(b);
-            logWrite(zero, "'" + (char) b + "' (0x" + FastHex.encodeToString(b) +")");
+            logWrite(zero, "'" + (char) b + "' (0x" + Strings.encode(b) +")");
         }
     }
 
-    private static void assertReadSuccess(long zero, int readNum, Iterator<RLPItem> iter) throws IOException, UnrecoverableDecodeException {
+    private static void assertHasNext(long zero, Iterator<RLPItem> iter) {
 //        "no next() found, " + timestamp(zero)
         assertTrue(iter.hasNext());
-        logRead(zero, readNum, true);
+        logReceipt(zero, true);
     }
 
-    private static void assertNoNext(long zero, Iterator<RLPItem> iter) throws IOException, UnrecoverableDecodeException {
-        if(iter.hasNext()) {
-            throw new AssertionError("unexpected next(): " + iter.next().asString(HEX) + ", " + timestamp(zero));
-        }
-        logRead(zero, -1, false);
+    private static void assertNoNext(long zero, Iterator<RLPItem> iter) throws Throwable {
+        assertFalse(iter.hasNext());
+        TestUtils.assertThrown(NoSuchElementException.class, iter::next);
+        assertFalse(iter.hasNext());
+        logReceipt(zero, false);
     }
 
     private static void logWrite(long zero, String message) {
         System.out.println(timestamp(zero) + "\u0009write " + message);
     }
 
-    private static void logRead(long zero, int readNum, boolean success) {
-        System.out.println(timestamp(zero) + "\u0009read " + (success ? "success, #" + readNum : "failure"));
+    private static void logReceipt(long zero, boolean hasNext) {
+        System.out.println(timestamp(zero) + '\u0009' + (hasNext ? "hasNext" : "no next"));
     }
 
     private static String timestamp(long zero) {

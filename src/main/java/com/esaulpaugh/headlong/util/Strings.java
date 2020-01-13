@@ -35,6 +35,10 @@ public final class Strings {
 
     public static final int URL_SAFE_FLAGS = URL_SAFE_CHARS | NO_LINE_SEP | NO_PADDING;
 
+    public static String encode(byte b) {
+        return encode(new byte[] { b });
+    }
+
     public static String encode(byte[] bytes) {
         return encode(bytes, HEX);
     }
