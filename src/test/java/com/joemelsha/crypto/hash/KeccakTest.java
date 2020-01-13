@@ -184,27 +184,26 @@ public class KeccakTest {
         keccak.update(Strings.decode("Hello World", Strings.UTF_8));
 
         long asymmetricBits = 0x8002030405060708L;
-        System.out.println(Long.toHexString(asymmetricBits));
-        System.out.println(Long.toBinaryString(asymmetricBits));
+        int bitLen = Integers.bitLen(asymmetricBits);
+        assertEquals(Long.SIZE, bitLen);
+        String binary = Long.toBinaryString(asymmetricBits);
+        assertEquals(Long.SIZE, binary.length());
+        assertNotEquals(binary, new StringBuilder(binary).reverse().toString());
+
         byte[] eight = new byte[] { 8, 7, 6, 5, 4, 3, 2, (byte) 0x80 };
         long normal = Integers.getLong(eight, 0, eight.length);
         long bizarro = BizarroIntegers.getLong(eight, 0, eight.length);
         assertEquals(normal, bizarro);
         assertNotEquals(asymmetricBits, normal);
 
-        int bitLen = Integers.bitLen(asymmetricBits);
-        System.out.println(bitLen);
         keccak.updateBits(asymmetricBits, bitLen);
+        byte[] specialDigest = keccak.digest(); // resets the state
 
-        byte[] digest = keccak.digest();
-        System.out.println(FastHex.encodeToString(digest));
-
-        keccak.reset();
+//        keccak.reset();
         keccak.update(Strings.decode("Hello World", Strings.UTF_8));
+        byte[] normalDigest = keccak.digest(eight);
 
-        byte[] digest2 = keccak.digest(eight);
-        System.out.println(FastHex.encodeToString(digest2));
-
-        assertArrayEquals(digest, digest2);
+        assertArrayEquals(normalDigest, specialDigest);
+        assertEquals("01fa9b8342e622a5d6314dcf2eb0786768d1e804e61af5feb27141ead708524f", Strings.encode(normalDigest));
     }
 }

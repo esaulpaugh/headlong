@@ -294,7 +294,7 @@ public class Keccak extends MessageDigest {
         keccak(state);
     }
 
-    void updateBits(long in, int inBits) { // TODO test
+    void updateBits(long in, int inBits) {
 
         if (inBits < 0 || inBits > 64)
             throw new IllegalArgumentException("Invalid valueBits: " + 0 + " < " + inBits + " > " + 64);
