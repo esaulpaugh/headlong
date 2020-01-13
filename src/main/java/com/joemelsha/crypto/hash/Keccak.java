@@ -294,7 +294,7 @@ public class Keccak extends MessageDigest {
         keccak(state);
     }
 
-    private void updateBits(long in, int inBits) { // TODO test
+    void updateBits(long in, int inBits) { // TODO test
 
         if (inBits < 0 || inBits > 64)
             throw new IllegalArgumentException("Invalid valueBits: " + 0 + " < " + inBits + " > " + 64);
@@ -308,7 +308,6 @@ public class Keccak extends MessageDigest {
             int c = 64 - rateBitsWord;
             if (c > inBits)
                 c = inBits;
-//            state[rateBits >>> 6] ^= (in & (-1L >>> c)) << rateBitsWord;
 //            state[rateBits >>> 6] ^= (in & (-1L >>> -c)) << rateBitsWord;
             state[rateBits >>> 6] ^= (in & (-1L >>> (64 - c))) << rateBitsWord;
             rateBits += c;
@@ -325,7 +324,6 @@ public class Keccak extends MessageDigest {
             this.rateBits = inBits;
             return;
         }
-//        state[rateBits >>> 6] ^= in & (-1L >>> inBits);
 //        state[rateBits >>> 6] ^= in & (-1L >>> -inBits);
         state[rateBits >>> 6] ^= in & (-1L >>> (64 - inBits));
         this.rateBits = rateBits + inBits;
