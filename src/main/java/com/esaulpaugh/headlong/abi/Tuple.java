@@ -30,7 +30,7 @@ public final class Tuple extends AbstractList<Object> implements RandomAccess, S
     public static final Tuple EMPTY = new Tuple();
 
     final Object[] elements;
-    
+
     /**@param elements  elements array not guarded from external/concurrent modification */
     public Tuple(Object... elements) {
         this.elements = elements;
