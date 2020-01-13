@@ -57,6 +57,7 @@ public class RLPStreamTest {
                 (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
         };
         List<RLPItem> collected = RLP_STRICT.collectAll(rlpEncoded);
+
         try (RLPStream stream = new RLPStream(new ByteArrayInputStream(rlpEncoded))) {
             List<RLPItem> streamed = new ArrayList<>();
             for (RLPItem rlpItem : stream) {
@@ -280,7 +281,6 @@ public class RLPStreamTest {
     }
 
     private static void assertHasNext(long zero, Iterator<RLPItem> iter) {
-//        "no next() found, " + timestamp(zero)
         assertTrue(iter.hasNext());
         logReceipt(zero, true);
     }
