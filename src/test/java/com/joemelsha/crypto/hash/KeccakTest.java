@@ -16,7 +16,11 @@
 package com.joemelsha.crypto.hash;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
+import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Integers;
+import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 import org.spongycastle.crypto.digests.KeccakDigest;
 
@@ -171,5 +175,35 @@ public class KeccakTest {
         keccak.digest(bb);
 
         assertEquals("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470", FastHex.encodeToString(bb.array()));
+    }
+
+    @Test
+    public void testUpdateBits() throws DecodeException {
+
+        Keccak keccak = new Keccak(256);
+        keccak.update(Strings.decode("Hello World", Strings.UTF_8));
+
+        long asymmetricBits = 0x8002030405060708L;
+        int bitLen = Integers.bitLen(asymmetricBits);
+        assertEquals(Long.SIZE, bitLen);
+        String binary = Long.toBinaryString(asymmetricBits);
+        assertEquals(Long.SIZE, binary.length());
+        assertNotEquals(binary, new StringBuilder(binary).reverse().toString());
+
+        byte[] eight = new byte[] { 8, 7, 6, 5, 4, 3, 2, (byte) 0x80 };
+        long normal = Integers.getLong(eight, 0, eight.length);
+        long bizarro = BizarroIntegers.getLong(eight, 0, eight.length);
+        assertEquals(normal, bizarro);
+        assertNotEquals(asymmetricBits, normal);
+
+        keccak.updateBits(asymmetricBits, bitLen);
+        byte[] specialDigest = keccak.digest(); // resets the state
+
+//        keccak.reset();
+        keccak.update(Strings.decode("Hello World", Strings.UTF_8));
+        byte[] normalDigest = keccak.digest(eight);
+
+        assertArrayEquals(normalDigest, specialDigest);
+        assertEquals("01fa9b8342e622a5d6314dcf2eb0786768d1e804e61af5feb27141ead708524f", Strings.encode(normalDigest));
     }
 }
