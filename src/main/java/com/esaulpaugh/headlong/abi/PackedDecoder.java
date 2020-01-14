@@ -34,7 +34,11 @@ import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
  */
 public final class PackedDecoder {
 
-    public static Tuple decode(TupleType tupleType, byte[] buffer) throws ABIException {
+    public static Tuple decode(TupleType types, byte[] buffer) throws ABIException {
+        return decodeTupleDynamic(types, buffer, buffer.length);
+    }
+
+    private static Tuple decodeTupleDynamic(TupleType tupleType, byte[] buffer, int end) throws ABIException {
         int numDynamic = 0;
         for (ABIType<?> type : tupleType) {
             if (type.dynamic) {
@@ -43,7 +47,7 @@ public final class PackedDecoder {
         }
         if (numDynamic == 0) {
             Tuple[] elements = new Tuple[1];
-            int length = decodeTupleStatic(tupleType, buffer, 0, elements, 0);
+            int length = decodeTupleStatic(tupleType, buffer, 0, end, elements, 0);
             Tuple tuple = elements[0];
             tupleType.validate(tuple);
             return tuple;
@@ -77,9 +81,11 @@ public final class PackedDecoder {
             if(type.typeCode() == TYPE_CODE_ARRAY) {
                 final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<?, ?>) type;
                 end = idx -= (arrayType.elementType.byteLengthPacked(null) * arrayType.length);
-                idx -= decodeArrayDynamic(arrayType, buffer, idx, end, elements, i);
+                decodeArrayDynamic(arrayType, buffer, idx, end, elements, i);
             } else if(type.typeCode() == TYPE_CODE_TUPLE) {
-                throw new UnsupportedOperationException("nested tuple");
+                TupleType inner = (TupleType) type;
+                int innerLen = inner.byteLengthPacked(null);
+                end = idx -= decodeTupleStatic(inner, buffer, idx - innerLen, end, elements, i);
             } else {
                 end = idx -= decode(elementTypes[i], buffer, idx - type.byteLengthPacked(null), end, elements, i);
             }
@@ -109,16 +115,15 @@ public final class PackedDecoder {
             if (type.dynamic) {
                 throw new UnsupportedOperationException("not yet implemented");
             }
-            return decodeTupleStatic((TupleType) type, buffer, idx, elements, i);
+            return decodeTupleStatic((TupleType) type, buffer, idx, end, elements, i);
         default: throw new Error();
         }
     }
 
-    private static int decodeTupleStatic(TupleType tupleType, byte[] buffer, int idx, Object[] parentElements, int pei) throws ABIException {
+    private static int decodeTupleStatic(TupleType tupleType, byte[] buffer, int idx, int end, Object[] parentElements, int pei) throws ABIException {
         final ABIType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
         final Object[] elements = new Object[len];
-        final int end = buffer.length;
         for (int i = 0; i < len; i++) {
             idx += decode(elementTypes[i], buffer, idx, end, elements, i);
         }

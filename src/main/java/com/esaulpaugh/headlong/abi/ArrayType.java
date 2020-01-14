@@ -122,6 +122,12 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
     @Override
     int byteLengthPacked(Object value) {
+        if(value == null) {
+            if(length == DYNAMIC_LENGTH) {
+                throw new NullPointerException();
+            }
+            return length * elementType.byteLengthPacked(null);
+        }
         final ABIType<?> elementType = this.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return ((boolean[]) value).length; // * 1

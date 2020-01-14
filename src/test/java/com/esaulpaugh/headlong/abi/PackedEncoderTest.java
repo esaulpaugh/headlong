@@ -29,16 +29,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PackedEncoderTest {
 
     @Test
-    public void testNestedTuples() throws ABIException {
-        TupleType tupleType = TupleType.parse("((uint64[3],(bool)))");
+    public void testStaticTupleInsideDynamic() throws ABIException {
+        TupleType tupleType = TupleType.parse("(bytes,(uint64[3],(bool)))");
 
-        Tuple test = Tuple.of(new Tuple((Object) new long[] { 8, -1, 20 }, Tuple.of(true)));
+        Tuple test = Tuple.of(new byte[] { -15, -15 }, new Tuple((Object) new long[] { 8, -1, 20 }, Tuple.of(true)));
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
-        assertEquals("0000000000000008ffffffffffffffff000000000000001401", FastHex.encodeToString(bb.array()));
+        assertEquals("f1f10000000000000008ffffffffffffffff000000000000001401", FastHex.encodeToString(bb.array()));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, FastHex.decode("0000000000000008ffffffffffffffff000000000000001401"));
+        Tuple decoded = PackedDecoder.decode(tupleType, FastHex.decode("f1f10000000000000008ffffffffffffffff000000000000001401"));
 
         assertEquals(test, decoded);
     }
