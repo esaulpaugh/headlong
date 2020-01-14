@@ -461,23 +461,23 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private void decodeObjectArrayDynamic(int len, ByteBuffer bb, byte[] elementBuffer, final Object[] dest) throws ABIException {
-        int[] offsets = new int[len];
         if(elementType.dynamic) {
+            int[] offsets = new int[len];
             for (int i = 0; i < len; i++) {
                 offsets[i] = Encoding.OFFSET_TYPE.decode(bb, elementBuffer);
             }
+            for (int i = 0; i < len; i++) {
+                if (offsets[i] > 0) {
+                    /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
+//                    if (bb.position() != index + offset) {
+//                        System.err.println(ArrayType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
+//                        bb.position(index + offset); // lenient
+//                    }
+                    dest[i] = elementType.decode(bb, elementBuffer);
+                }
+            }
         } else {
             for (int i = 0; i < len; i++) {
-                dest[i] = elementType.decode(bb, elementBuffer);
-            }
-        }
-        for (int i = 0; i < len; i++) {
-            if (offsets[i] > 0) {
-                /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-//                if(bb.position() != index + offset) {
-//                    System.err.println(ArrayType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
-//                    bb.position(index + offset); // lenient
-//                }
                 dest[i] = elementType.decode(bb, elementBuffer);
             }
         }
