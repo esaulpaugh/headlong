@@ -445,24 +445,23 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         return bi;
     }
 
-    private Object[] decodeObjectArray(int arrayLen, ByteBuffer bb, byte[] elementBuffer) throws ABIException {
+    private Object[] decodeObjectArray(int len, ByteBuffer bb, byte[] elementBuffer) throws ABIException {
 
 //        final int index = bb.position(); // TODO must pass index to decodeObjectArrayTails if you want to support lenient mode
 
-        final ABIType<?> elementType = this.elementType;
-        int[] offsets = new int[arrayLen];
-        Object[] dest = (Object[]) Array.newInstance(elementType.clazz, arrayLen); // reflection ftw
-
-        decodeObjectArrayHeads(elementType, bb, offsets, elementBuffer, dest);
-
+        Object[] dest = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
         if(this.dynamic) {
-            decodeObjectArrayTails(elementType, bb, offsets, elementBuffer, dest);
+            decodeObjectArrayDynamic(len, bb, elementBuffer, dest);
+        } else {
+            for (int i = 0; i < len; i++) {
+                dest[i] = elementType.decode(bb, elementBuffer);
+            }
         }
         return dest;
     }
 
-    private static void decodeObjectArrayHeads(ABIType<?> elementType, ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) throws ABIException {
-        final int len = offsets.length;
+    private void decodeObjectArrayDynamic(int len, ByteBuffer bb, byte[] elementBuffer, final Object[] dest) throws ABIException {
+        int[] offsets = new int[len];
         if(elementType.dynamic) {
             for (int i = 0; i < len; i++) {
                 offsets[i] = Encoding.OFFSET_TYPE.decode(bb, elementBuffer);
@@ -472,17 +471,12 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 dest[i] = elementType.decode(bb, elementBuffer);
             }
         }
-    }
-
-    private static void decodeObjectArrayTails(ABIType<?> elementType, ByteBuffer bb, final int[] offsets, byte[] elementBuffer, final Object[] dest) throws ABIException {
-        final int len = offsets.length;
         for (int i = 0; i < len; i++) {
-            int offset = offsets[i];
-            if (offset > 0) {
+            if (offsets[i] > 0) {
                 /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
 //                if(bb.position() != index + offset) {
 //                    System.err.println(ArrayType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
-//                    bb.position(index + offset);
+//                    bb.position(index + offset); // lenient
 //                }
                 dest[i] = elementType.decode(bb, elementBuffer);
             }
