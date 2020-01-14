@@ -176,48 +176,37 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     Tuple decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
-
-//        final int index = bb.position(); // TODO must pass index to decodeTails if you want to support lenient mode
-
-        final int tupleLen = elementTypes.length;
-        Object[] elements = new Object[tupleLen];
-
-        int[] offsets = new int[tupleLen];
-        decodeHeads(bb, elementTypes, offsets, unitBuffer, elements);
-
+        Object[] elements = new Object[elementTypes.length];
         if(dynamic) {
-            decodeTails(bb, elementTypes, offsets, unitBuffer, elements);
+            decodeDynamic(bb, elementTypes, unitBuffer, elements);
+        } else {
+            for (int i = 0; i < elementTypes.length; i++) {
+                elements[i] = elementTypes[i].decode(bb, unitBuffer);
+            }
         }
-
         return new Tuple(elements);
     }
 
-    private static void decodeHeads(ByteBuffer bb, ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, Object[] dest) throws ABIException {
-        final int tupleLen = offsets.length;
-        ABIType<?> elementType;
-        for (int i = 0; i < tupleLen; i++) {
-            elementType = elementTypes[i];
+    private static void decodeDynamic(ByteBuffer bb, ABIType<?>[] elementTypes, byte[] elementBuffer, Object[] dest) throws ABIException {
+//        final int index = bb.position(); // TODO save this value here if you want to support lenient mode below
+        final int len = elementTypes.length;
+        int[] offsets = new int[len];
+        for (int i = 0; i < len; i++) {
+            ABIType<?> elementType = elementTypes[i];
             if (elementType.dynamic) {
                 offsets[i] = Encoding.OFFSET_TYPE.decode(bb, elementBuffer);
             } else {
                 dest[i] = elementType.decode(bb, elementBuffer);
             }
         }
-    }
-
-    private static void decodeTails(ByteBuffer bb, final ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, final Object[] dest) throws ABIException {
-        final int tupleLen = offsets.length;
-        for (int i = 0; i < tupleLen; i++) {
-            final ABIType<?> type = elementTypes[i];
-            final int offset = offsets[i];
-            final boolean offsetExists = offset > 0;
-            if (offsetExists) {
+        for (int i = 0; i < len; i++) {
+            if (offsets[i] > 0) {
                 /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
 //                if(bb.position() != index + offset) {
 //                    System.err.println(TupleType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
-//                    bb.position(index + offset);
+//                    bb.position(index + offset); // lenient
 //                }
-                dest[i] = type.decode(bb, elementBuffer);
+                dest[i] = elementTypes[i].decode(bb, elementBuffer);
             }
         }
     }
