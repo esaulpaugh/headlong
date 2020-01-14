@@ -53,14 +53,14 @@ public final class PackedDecoder {
             return tuple;
         }
         if (numDynamic == 1) {
-            Tuple tuple = decodeTopTuple(tupleType, buffer, from, to);
+            Tuple tuple = decodeTuple(tupleType, buffer, from, to);
             tupleType.validate(tuple);
             return tuple;
         }
         throw new IllegalArgumentException("multiple dynamic elements");
     }
 
-    private static Tuple decodeTopTuple(TupleType tupleType, byte[] buffer, int idx_, int end) throws ABIException {
+    private static Tuple decodeTuple(TupleType tupleType, byte[] buffer, int idx_, int end) throws ABIException {
 
         final ABIType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
@@ -80,7 +80,7 @@ public final class PackedDecoder {
             if(type.typeCode() == TYPE_CODE_ARRAY) {
                 final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<?, ?>) type;
                 end = idx -= (arrayType.elementType.byteLengthPacked(null) * arrayType.length);
-                decodeArrayDynamic(arrayType, buffer, idx, end, elements, i);
+                decodeArray(arrayType, buffer, idx, end, elements, i);
             } else if(type.typeCode() == TYPE_CODE_TUPLE) {
                 TupleType inner = (TupleType) type;
                 int innerLen = inner.byteLengthPacked(null);
@@ -109,10 +109,10 @@ public final class PackedDecoder {
         case TYPE_CODE_LONG: return decodeLong(type.byteLengthPacked(null), buffer, idx, elements, i);
         case TYPE_CODE_BIG_INTEGER: return decodeBigInteger(type.byteLengthPacked(null), buffer, idx, elements, i);
         case TYPE_CODE_BIG_DECIMAL: return decodeBigDecimal(type.byteLengthPacked(null), ((BigDecimalType) type).scale, buffer, idx, elements, i);
-        case TYPE_CODE_ARRAY: return decodeArrayDynamic((ArrayType<?, ?>) type, buffer, idx, end, elements, i);
+        case TYPE_CODE_ARRAY: return decodeArray((ArrayType<?, ?>) type, buffer, idx, end, elements, i);
         case TYPE_CODE_TUPLE:
             if (type.dynamic) {
-                elements[i] = decodeTopTuple((TupleType) type, buffer, idx, end);
+                elements[i] = decodeTuple((TupleType) type, buffer, idx, end);
                 return type.byteLengthPacked(elements[i]);
             }
             return decodeTupleStatic((TupleType) type, buffer, idx, end, elements, i);
@@ -155,16 +155,18 @@ public final class PackedDecoder {
         return elementLen;
     }
 
-    private static int decodeArrayDynamic(ArrayType<? extends ABIType<?>, ?> arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) {
+    private static int decodeArray(ArrayType<? extends ABIType<?>, ?> arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) {
         final ABIType<?> elementType = arrayType.elementType;
         final int elementByteLen;
         try {
             elementByteLen = elementType.byteLengthPacked(null);
         } catch (NullPointerException npe) {
-            throw new IllegalArgumentException("nested array");
+            throw new IllegalArgumentException("nested dynamic arrays");
         }
 
-        final int arrayLen = arrayType.length == DYNAMIC_LENGTH ? (end - idx) / elementByteLen : arrayType.length;
+        final int arrayLen = arrayType.length == DYNAMIC_LENGTH
+                ? elementByteLen == 0 ? 0 : (end - idx) / elementByteLen
+                : arrayType.length;
         final Object array;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: array = decodeBooleanArray(arrayLen, buffer, idx); break;
@@ -173,8 +175,8 @@ public final class PackedDecoder {
         case TYPE_CODE_LONG: array = decodeLongArray(elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_BIG_INTEGER: array = decodeBigIntegerArray(elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_BIG_DECIMAL: array = decodeBigDecimalArray(elementByteLen, ((BigDecimalType) elementType).scale, arrayLen, buffer, idx); break;
-        case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: throw new UnsupportedOperationException();
+        case TYPE_CODE_ARRAY: throw new UnsupportedOperationException("arrays of arrays not implemented");
+        case TYPE_CODE_TUPLE: throw new UnsupportedOperationException("arrays of tuples not implemented");
         default: throw new Error();
         }
         dest[destIdx] = array;
