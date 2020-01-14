@@ -87,6 +87,12 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return len;
     }
 
+    /**
+     * Must assume value is unvalidated.
+     *
+     * @param value
+     * @return
+     */
     @Override
     public int byteLengthPacked(Object value) {
         if(value == null) {
@@ -95,6 +101,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 len += elementType.byteLengthPacked(null);
             }
             return len;
+        }
+        try {
+            validate(value);
+        } catch (ABIException e) {
+            throw new IllegalArgumentException(e);
         }
         Tuple tuple = (Tuple) value;
         final Object[] elements = tuple.elements;

@@ -29,6 +29,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PackedEncoderTest {
 
     @Test
+    public void testRecursiveDynamicTuple() throws ABIException {
+        TupleType tupleType = TupleType.parse("(bool,((),((bytes))),bool)");
+
+        Tuple test = Tuple.of(true, Tuple.of(Tuple.EMPTY, Tuple.of(Tuple.of((Object) new byte[] { -15, -15 }))), false);
+
+        ByteBuffer bb = tupleType.encodePacked(test);
+
+        assertEquals("01f1f100", FastHex.encodeToString(bb.array()));
+
+        Tuple decoded = PackedDecoder.decode(tupleType, FastHex.decode("01f1f100"));
+
+        assertEquals(test, decoded);
+    }
+
+    @Test
     public void testStaticTupleInsideDynamic() throws ABIException {
         TupleType tupleType = TupleType.parse("(bytes,(uint64[3],(bool)))");
 

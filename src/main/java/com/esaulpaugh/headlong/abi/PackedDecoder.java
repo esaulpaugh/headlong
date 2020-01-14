@@ -53,20 +53,19 @@ public final class PackedDecoder {
             return tuple;
         }
         if (numDynamic == 1) {
-            Tuple tuple = decodeTopTuple(tupleType, buffer);
+            Tuple tuple = decodeTopTuple(tupleType, buffer, 0, buffer.length);
             tupleType.validate(tuple);
             return tuple;
         }
         throw new IllegalArgumentException("multiple dynamic elements");
     }
 
-    private static Tuple decodeTopTuple(TupleType tupleType, byte[] buffer) throws ABIException {
+    private static Tuple decodeTopTuple(TupleType tupleType, byte[] buffer, int idx_, int end) throws ABIException {
 
         final ABIType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
         final Object[] elements = new Object[len];
 
-        int end = buffer.length;
         int idx = end;
 
         Integer mark = null;
@@ -93,7 +92,7 @@ public final class PackedDecoder {
 
         if (mark != null) {
             final int m = mark;
-            idx = 0;
+            idx = idx_;
             for (int i = 0; i <= m; i++) {
                 idx += decode(elementTypes[i], buffer, idx, end, elements, i);
             }
@@ -113,7 +112,8 @@ public final class PackedDecoder {
         case TYPE_CODE_ARRAY: return decodeArrayDynamic((ArrayType<?, ?>) type, buffer, idx, end, elements, i);
         case TYPE_CODE_TUPLE:
             if (type.dynamic) {
-                throw new UnsupportedOperationException("not yet implemented");
+                elements[i] = decodeTopTuple((TupleType) type, buffer, idx, end);
+                return type.byteLengthPacked(elements[i]);
             }
             return decodeTupleStatic((TupleType) type, buffer, idx, end, elements, i);
         default: throw new Error();
