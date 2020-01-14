@@ -188,7 +188,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     private static void decodeDynamic(ByteBuffer bb, ABIType<?>[] elementTypes, byte[] elementBuffer, Object[] dest) throws ABIException {
-//        final int index = bb.position(); // TODO save this value here if you want to support lenient mode below
+//        final int index = bb.position(); // *** save this value here if you want to support lenient mode below
         final int len = elementTypes.length;
         int[] offsets = new int[len];
         for (int i = 0; i < len; i++) {

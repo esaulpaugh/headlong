@@ -446,9 +446,6 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private Object[] decodeObjectArray(int len, ByteBuffer bb, byte[] elementBuffer) throws ABIException {
-
-//        final int index = bb.position(); // TODO must pass index to decodeObjectArrayTails if you want to support lenient mode
-
         Object[] dest = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
         if(this.dynamic) {
             decodeObjectArrayDynamic(len, bb, elementBuffer, dest);
@@ -461,7 +458,12 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private void decodeObjectArrayDynamic(int len, ByteBuffer bb, byte[] elementBuffer, final Object[] dest) throws ABIException {
-        if(elementType.dynamic) {
+        if(!elementType.dynamic) {
+            for (int i = 0; i < len; i++) {
+                dest[i] = elementType.decode(bb, elementBuffer);
+            }
+        } else {
+//            final int index = bb.position(); // *** save this value here if you want to support lenient mode below
             int[] offsets = new int[len];
             for (int i = 0; i < len; i++) {
                 offsets[i] = Encoding.OFFSET_TYPE.decode(bb, elementBuffer);
@@ -475,10 +477,6 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 //                    }
                     dest[i] = elementType.decode(bb, elementBuffer);
                 }
-            }
-        } else {
-            for (int i = 0; i < len; i++) {
-                dest[i] = elementType.decode(bb, elementBuffer);
             }
         }
     }
