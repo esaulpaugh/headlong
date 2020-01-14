@@ -38,7 +38,14 @@ public class PackedEncoderTest {
 
         assertEquals("01f1f100", FastHex.encodeToString(bb.array()));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, FastHex.decode("01f1f100"));
+        byte[] packed = FastHex.decode("01f1f100");
+
+        ByteBuffer buf = ByteBuffer.allocate(100);
+        buf.put(new byte[17]);
+        buf.put(packed);
+        buf.put((byte) 0xff);
+
+        Tuple decoded = PackedDecoder.decode(tupleType, buf.array(), 17, 17 + packed.length);
 
         assertEquals(test, decoded);
     }

@@ -35,10 +35,10 @@ import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 public final class PackedDecoder {
 
     public static Tuple decode(TupleType types, byte[] buffer) throws ABIException {
-        return decodeTupleDynamic(types, buffer, buffer.length);
+        return decode(types, buffer, 0, buffer.length);
     }
 
-    private static Tuple decodeTupleDynamic(TupleType tupleType, byte[] buffer, int end) throws ABIException {
+    public static Tuple decode(TupleType tupleType, byte[] buffer, int from, int to) throws ABIException {
         int numDynamic = 0;
         for (ABIType<?> type : tupleType) {
             if (type.dynamic) {
@@ -47,13 +47,13 @@ public final class PackedDecoder {
         }
         if (numDynamic == 0) {
             Tuple[] elements = new Tuple[1];
-            int length = decodeTupleStatic(tupleType, buffer, 0, end, elements, 0);
+            int length = decodeTupleStatic(tupleType, buffer, from, to, elements, 0);
             Tuple tuple = elements[0];
             tupleType.validate(tuple);
             return tuple;
         }
         if (numDynamic == 1) {
-            Tuple tuple = decodeTopTuple(tupleType, buffer, 0, buffer.length);
+            Tuple tuple = decodeTopTuple(tupleType, buffer, from, to);
             tupleType.validate(tuple);
             return tuple;
         }
