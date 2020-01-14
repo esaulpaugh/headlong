@@ -35,8 +35,6 @@ public class PackedEncoderTest {
 
         Tuple test = new Tuple(-1, new byte[] { 0x42 }, 0x03, "Hello, world!");
 
-        tupleType.validate(test);
-
         int packedLen = tupleType.byteLengthPacked(test);
 
         assertEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421").length, packedLen);
@@ -88,8 +86,6 @@ public class PackedEncoderTest {
 
         Tuple values = new Tuple(-2, true, false);
 
-        tupleType.validate(values);
-
         ByteBuffer packed = tupleType.encodePacked(values);
         byte[] packedArray = packed.array();
         assertEquals(packedArray.length, packed.position());
@@ -109,8 +105,6 @@ public class PackedEncoderTest {
         TupleType tupleType = TupleType.parse("(uint64[],uint64[1],uint64,int72)");
 
         Tuple values = new Tuple( new long[] { 9L }, new long[] { 5L }, BigInteger.valueOf(6L), BigInteger.valueOf(-1L));
-
-        tupleType.validate(values);
 
         ByteBuffer packed = tupleType.encodePacked(values);
         byte[] packedArray = packed.array();
@@ -132,8 +126,6 @@ public class PackedEncoderTest {
 
         Tuple values = new Tuple(new long[] { 1L, 2L, 3L, 4L }, BigInteger.ONE);
 
-        tupleType.validate(values);
-
         ByteBuffer packed = tupleType.encodePacked(values);
         byte[] packedArray = packed.array();
         assertEquals(packedArray.length, packed.position());
@@ -152,8 +144,6 @@ public class PackedEncoderTest {
         TupleType tupleType = TupleType.parse("(bool,bool[],bool[2])");
 
         Tuple values = new Tuple(true, new boolean[] { true, true, true },  new boolean[] { true, false });
-
-        tupleType.validate(values);
 
         ByteBuffer packed = tupleType.encodePacked(values);
         byte[] packedArray = packed.array();
