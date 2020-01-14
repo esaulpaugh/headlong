@@ -211,9 +211,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             final ABIType<?> type = elementTypes[i];
             final int offset = offsets[i];
             final boolean offsetExists = offset > 0;
-            if(type.dynamic ^ offsetExists) { // if not matching
-                throw new ABIException(type.dynamic ? "offset not found" : "offset found for static element");
-            }
             if (offsetExists) {
                 /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
 //                if(bb.position() != index + offset) {
