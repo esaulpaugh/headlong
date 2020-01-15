@@ -90,12 +90,12 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     /**
      * Must assume value is unvalidated.
      *
-     * @param value
-     * @return
+     * @param value the Tuple being measured. {@code null} if not available
+     * @return the length in bytes of the non-standard packed encoding
      */
     @Override
     public int byteLengthPacked(Object value) {
-        if(value == null) {
+        if (value == null) {
             int len = 0;
             for (ABIType<?> elementType : elementTypes) {
                 len += elementType.byteLengthPacked(null);

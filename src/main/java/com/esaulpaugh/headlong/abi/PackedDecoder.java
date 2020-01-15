@@ -185,7 +185,7 @@ public final class PackedDecoder {
         case TYPE_CODE_BIG_INTEGER: array = decodeBigIntegerArray(elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_BIG_DECIMAL: array = decodeBigDecimalArray(elementByteLen, ((BigDecimalType) elementType).scale, arrayLen, buffer, idx); break;
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: array = decodeObjectArray(arrayLen, elementByteLen, elementType, buffer, idx, end); break;
+        case TYPE_CODE_TUPLE: array = decodeObjectArray(arrayLen, elementType, buffer, idx, end); break;
         default: throw new Error();
         }
         dest[destIdx] = array;
@@ -243,7 +243,7 @@ public final class PackedDecoder {
         return bigDecimals;
     }
 
-    private static Object[] decodeObjectArray(int arrayLen, int elementLen, ABIType<?> elementType, byte[] buffer, int idx, int end) {
+    private static Object[] decodeObjectArray(int arrayLen, ABIType<?> elementType, byte[] buffer, int idx, int end) {
         Object[] dest = (Object[]) Array.newInstance(elementType.clazz, arrayLen); // reflection ftw
         for (int i = 0; i < arrayLen; i++) {
             int len = decode(elementType, buffer, idx, end, dest, i);
