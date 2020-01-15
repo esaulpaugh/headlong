@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -60,7 +61,7 @@ public final class PackedDecoder {
         throw new IllegalArgumentException("multiple dynamic elements");
     }
 
-    private static Tuple decodeTuple(TupleType tupleType, byte[] buffer, int idx_, int end) throws ABIException {
+    private static Tuple decodeTuple(TupleType tupleType, byte[] buffer, int idx_, int end) {
 
         final ABIType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
@@ -101,7 +102,7 @@ public final class PackedDecoder {
         return new Tuple(elements);
     }
 
-    private static int decode(ABIType<?> type, byte[] buffer, int idx, int end, Object[] elements, int i) throws ABIException {
+    private static int decode(ABIType<?> type, byte[] buffer, int idx, int end, Object[] elements, int i) {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: elements[i] = BooleanType.decodeBoolean(buffer[idx]); return type.byteLengthPacked(null);
         case TYPE_CODE_BYTE: elements[i] = buffer[idx]; return type.byteLengthPacked(null);
@@ -120,7 +121,7 @@ public final class PackedDecoder {
         }
     }
 
-    private static int decodeTupleStatic(TupleType tupleType, byte[] buffer, int idx, int end, Object[] parentElements, int pei) throws ABIException {
+    private static int decodeTupleStatic(TupleType tupleType, byte[] buffer, int idx, int end, Object[] parentElements, int pei) {
         final ABIType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
         final Object[] elements = new Object[len];
@@ -161,12 +162,17 @@ public final class PackedDecoder {
         try {
             elementByteLen = elementType.byteLengthPacked(null);
         } catch (NullPointerException npe) {
-            throw new IllegalArgumentException("nested dynamic arrays");
+            throw new IllegalArgumentException("array of dynamic arrays");
         }
-
-        final int arrayLen = arrayType.length == DYNAMIC_LENGTH
-                ? elementByteLen == 0 ? 0 : (end - idx) / elementByteLen
-                : arrayType.length;
+        final int arrayLen;
+        if(arrayType.length == DYNAMIC_LENGTH) {
+            if (elementByteLen == 0) {
+                throw new IllegalArgumentException("can't decode dynamic number of zero-length items");
+            }
+            arrayLen = (end - idx) / elementByteLen;
+        } else {
+            arrayLen = arrayType.length;
+        }
         final Object array;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: array = decodeBooleanArray(arrayLen, buffer, idx); break;
@@ -175,8 +181,8 @@ public final class PackedDecoder {
         case TYPE_CODE_LONG: array = decodeLongArray(elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_BIG_INTEGER: array = decodeBigIntegerArray(elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_BIG_DECIMAL: array = decodeBigDecimalArray(elementByteLen, ((BigDecimalType) elementType).scale, arrayLen, buffer, idx); break;
-        case TYPE_CODE_ARRAY: throw new UnsupportedOperationException("arrays of arrays not implemented");
-        case TYPE_CODE_TUPLE: throw new UnsupportedOperationException("arrays of tuples not implemented");
+        case TYPE_CODE_ARRAY:
+        case TYPE_CODE_TUPLE: array = decodeObjectArray(arrayLen, elementByteLen, elementType, buffer, idx, end); break;
         default: throw new Error();
         }
         dest[destIdx] = array;
@@ -232,6 +238,14 @@ public final class PackedDecoder {
             idx += elementLen;
         }
         return bigDecimals;
+    }
+
+    private static Object[] decodeObjectArray(int arrayLen, int elementLen, ABIType<?> elementType, byte[] buffer, int idx, int end) {
+        Object[] dest = (Object[]) Array.newInstance(elementType.clazz, arrayLen); // reflection ftw
+        for (int i = 0; i < arrayLen; i++) {
+            idx += decode(elementType, buffer, idx, end, dest, i);
+        }
+        return dest;
     }
 
     static int getPackedInt(byte[] buffer, int i, int len) {

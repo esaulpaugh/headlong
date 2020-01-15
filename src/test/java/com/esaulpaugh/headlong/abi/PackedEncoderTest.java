@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Test;
@@ -29,16 +30,44 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PackedEncoderTest {
 
     @Test
-    public void testRecursiveDynamicTuple() throws ABIException {
-        TupleType tupleType = TupleType.parse("(bool,((),((bytes))),bool)");
+    public void testTupleArray() throws ABIException {
+        TupleType tupleType = TupleType.parse("((bool)[])");
 
-        Tuple test = Tuple.of(true, Tuple.of(Tuple.EMPTY, Tuple.of(Tuple.of((Object) new byte[] { -15, -15 }))), false);
+        Tuple test = Tuple.of(((Object) new Tuple[] { Tuple.of(true), Tuple.of(false), Tuple.of(true) }));
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
-        assertEquals("01f1f100", FastHex.encodeToString(bb.array()));
+        assertEquals("010001", FastHex.encodeToString(bb.array()));
 
-        byte[] packed = FastHex.decode("01f1f100");
+        Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
+
+        assertEquals(test, decoded);
+    }
+
+    @Test
+    public void testEmptyTupleArray() throws Throwable {
+        TupleType tupleType = TupleType.parse("(()[])");
+
+        Tuple test = Tuple.of(((Object) new Tuple[0]));
+
+        ByteBuffer bb = tupleType.encodePacked(test);
+
+        assertEquals("", FastHex.encodeToString(bb.array()));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "can't decode dynamic number of zero-length items", () -> PackedDecoder.decode(tupleType, bb.array()));
+    }
+
+    @Test
+    public void testHard() throws ABIException {
+        TupleType tupleType = TupleType.parse("(bool,((),((uint8[2][]))),bool)");
+
+        Tuple test = Tuple.of(true, Tuple.of(Tuple.EMPTY, Tuple.of(Tuple.of((Object) new int[][] { new int[] {1,2}, new int[] {3,4} }))), false);
+
+        ByteBuffer bb = tupleType.encodePacked(test);
+
+        assertEquals("010102030400", FastHex.encodeToString(bb.array()));
+
+        byte[] packed = FastHex.decode("010102030400");
 
         ByteBuffer buf = ByteBuffer.allocate(100);
         buf.put(new byte[17]);
