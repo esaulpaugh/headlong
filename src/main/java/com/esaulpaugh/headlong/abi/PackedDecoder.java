@@ -48,20 +48,22 @@ public final class PackedDecoder {
         }
         if (numDynamic == 0) {
             Tuple[] elements = new Tuple[1];
-            int length = decodeTupleStatic(tupleType, buffer, from, to, elements, 0);
+            decodeTupleStatic(tupleType, buffer, from, to, elements, 0);
             Tuple tuple = elements[0];
             tupleType.validate(tuple);
             return tuple;
         }
         if (numDynamic == 1) {
-            Tuple tuple = decodeTuple(tupleType, buffer, from, to);
+            Tuple[] elements = new Tuple[1];
+            decodeTuple(tupleType, buffer, from, to, elements, 0);
+            Tuple tuple = elements[0];
             tupleType.validate(tuple);
             return tuple;
         }
         throw new IllegalArgumentException("multiple dynamic elements");
     }
 
-    private static Tuple decodeTuple(TupleType tupleType, byte[] buffer, int idx_, int end) {
+    private static int decodeTuple(TupleType tupleType, byte[] buffer, final int idx_, int end, Object[] parentElements, int pei) {
 
         final ABIType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
@@ -85,7 +87,11 @@ public final class PackedDecoder {
             } else if(type.typeCode() == TYPE_CODE_TUPLE) {
                 TupleType inner = (TupleType) type;
                 int innerLen = inner.byteLengthPacked(null);
-                end = idx -= decodeTupleStatic(inner, buffer, idx - innerLen, end, elements, i);
+                if(inner.dynamic) {
+                    end = idx -= decodeTuple(inner, buffer, idx - innerLen, end, elements, i);
+                } else {
+                    end = idx -= decodeTupleStatic(inner, buffer, idx - innerLen, end, elements, i);
+                }
             } else {
                 end = idx -= decode(elementTypes[i], buffer, idx - type.byteLengthPacked(null), end, elements, i);
             }
@@ -99,7 +105,9 @@ public final class PackedDecoder {
             }
         }
 
-        return new Tuple(elements);
+        Tuple t = new Tuple(elements);
+        parentElements[pei] = t;
+        return tupleType.byteLengthPacked(t);
     }
 
     private static int decode(ABIType<?> type, byte[] buffer, int idx, int end, Object[] elements, int i) {
@@ -112,9 +120,8 @@ public final class PackedDecoder {
         case TYPE_CODE_BIG_DECIMAL: return decodeBigDecimal(type.byteLengthPacked(null), ((BigDecimalType) type).scale, buffer, idx, elements, i);
         case TYPE_CODE_ARRAY: return decodeArray((ArrayType<?, ?>) type, buffer, idx, end, elements, i);
         case TYPE_CODE_TUPLE:
-            if (type.dynamic) {
-                elements[i] = decodeTuple((TupleType) type, buffer, idx, end);
-                return type.byteLengthPacked(elements[i]);
+            if(type.dynamic) {
+                return decodeTuple((TupleType) type, buffer, idx, end, elements, i);
             }
             return decodeTupleStatic((TupleType) type, buffer, idx, end, elements, i);
         default: throw new Error();
@@ -243,7 +250,9 @@ public final class PackedDecoder {
     private static Object[] decodeObjectArray(int arrayLen, int elementLen, ABIType<?> elementType, byte[] buffer, int idx, int end) {
         Object[] dest = (Object[]) Array.newInstance(elementType.clazz, arrayLen); // reflection ftw
         for (int i = 0; i < arrayLen; i++) {
-            idx += decode(elementType, buffer, idx, end, dest, i);
+            int len = decode(elementType, buffer, idx, end, dest, i);
+            idx += len;
+            end -= len;
         }
         return dest;
     }

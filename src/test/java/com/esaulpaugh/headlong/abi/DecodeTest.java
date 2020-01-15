@@ -56,6 +56,17 @@ public class DecodeTest {
     }
 
     @Test
+    public void testDecodeDynamicArrayEmptyTuples() throws ABIException {
+        Tuple decoded = new Function("foo()", "(()[])").decodeReturn(
+                FastHex.decode(
+                "0000000000000000000000000000000000000000000000000000000000000020" +
+                "0000000000000000000000000000000000000000000000000000000000000001"
+                )
+        );
+        assertEquals(Tuple.of((Object) new Tuple[] { Tuple.EMPTY }), decoded);
+    }
+
+    @Test
     public void testBoolean() throws Throwable {
         TupleType tt = TupleType.parse("(bool)");
 

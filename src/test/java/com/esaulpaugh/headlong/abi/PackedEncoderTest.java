@@ -81,15 +81,15 @@ public class PackedEncoderTest {
 
     @Test
     public void testStaticTupleInsideDynamic() throws ABIException {
-        TupleType tupleType = TupleType.parse("(bytes,(uint64[3],(bool)))");
+        TupleType tupleType = TupleType.parse("((bytes3,uint8[1]),bytes)");
 
-        Tuple test = Tuple.of(new byte[] { -15, -15 }, new Tuple((Object) new long[] { 8, -1, 20 }, Tuple.of(true)));
+        Tuple test = Tuple.of(new Tuple(new byte[] { -100, 12, 120 }, new int[] { 8 }), new byte[] { -15, -15 });
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
-        assertEquals("f1f10000000000000008ffffffffffffffff000000000000001401", FastHex.encodeToString(bb.array()));
+        assertEquals("9c0c7808f1f1", FastHex.encodeToString(bb.array()));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, FastHex.decode("f1f10000000000000008ffffffffffffffff000000000000001401"));
+        Tuple decoded = PackedDecoder.decode(tupleType, FastHex.decode("9c0c7808f1f1"));
 
         assertEquals(test, decoded);
     }
@@ -168,11 +168,11 @@ public class PackedEncoderTest {
     @Test
     public void testDecodeA() throws ABIException {
 
-        TupleType tupleType = TupleType.parse("(uint64[],uint64[1],uint64,int72)");
+        TupleType tupleType = TupleType.parse("(bytes,uint64[1],uint64[1],uint64,int72)");
 
-        Tuple values = new Tuple( new long[] { 9L }, new long[] { 5L }, BigInteger.valueOf(6L), BigInteger.valueOf(-1L));
+        Tuple test = new Tuple(new byte[0], new long[] { 9L }, new long[] { 5L }, BigInteger.valueOf(6L), BigInteger.valueOf(-1L));
 
-        ByteBuffer packed = tupleType.encodePacked(values);
+        ByteBuffer packed = tupleType.encodePacked(test);
         byte[] packedArray = packed.array();
         assertEquals(packedArray.length, packed.position());
 
@@ -182,7 +182,7 @@ public class PackedEncoderTest {
 
         Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
 
-        assertEquals(values, decoded);
+        assertEquals(test, decoded);
     }
 
     @Test
