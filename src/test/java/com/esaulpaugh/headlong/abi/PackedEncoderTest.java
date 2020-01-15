@@ -59,15 +59,15 @@ public class PackedEncoderTest {
 
     @Test
     public void testHard() throws ABIException {
-        TupleType tupleType = TupleType.parse("(bool,((),((uint8[2][]))),bool)");
+        TupleType tupleType = TupleType.parse("((bytes,(uint8[2][2])))");
 
-        Tuple test = Tuple.of(true, Tuple.of(Tuple.EMPTY, Tuple.of(Tuple.of((Object) new int[][] { new int[] {1,2}, new int[] {3,4} }))), false);
+        Tuple test = Tuple.of(Tuple.of(new byte[0], Tuple.of((Object) new int[][] { new int[] {1,2}, new int[] {3,4} })));
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
-        assertEquals("010102030400", FastHex.encodeToString(bb.array()));
+        assertEquals("01020304", FastHex.encodeToString(bb.array()));
 
-        byte[] packed = FastHex.decode("010102030400");
+        byte[] packed = FastHex.decode("01020304");
 
         ByteBuffer buf = ByteBuffer.allocate(100);
         buf.put(new byte[17]);
@@ -81,15 +81,15 @@ public class PackedEncoderTest {
 
     @Test
     public void testStaticTupleInsideDynamic() throws ABIException {
-        TupleType tupleType = TupleType.parse("((bytes3,uint8[1]),bytes)");
+        TupleType tupleType = TupleType.parse("((bytes1),bytes)");
 
-        Tuple test = Tuple.of(new Tuple(new byte[] { -100, 12, 120 }, new int[] { 8 }), new byte[] { -15, -15 });
+        Tuple test = Tuple.of(new Tuple((Object) new byte[] { -1 }), new byte[] { -15, -15 });
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
-        assertEquals("9c0c7808f1f1", FastHex.encodeToString(bb.array()));
+        assertEquals("fff1f1", FastHex.encodeToString(bb.array()));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, FastHex.decode("9c0c7808f1f1"));
+        Tuple decoded = PackedDecoder.decode(tupleType, FastHex.decode("fff1f1"));
 
         assertEquals(test, decoded);
     }
@@ -168,9 +168,9 @@ public class PackedEncoderTest {
     @Test
     public void testDecodeA() throws ABIException {
 
-        TupleType tupleType = TupleType.parse("(bytes,uint64[1],uint64[1],uint64,int72)");
+        TupleType tupleType = TupleType.parse("(int16[2],int24[3],bytes,uint32[3],bool[3],uint64,int72)");
 
-        Tuple test = new Tuple(new byte[0], new long[] { 9L }, new long[] { 5L }, BigInteger.valueOf(6L), BigInteger.valueOf(-1L));
+        Tuple test = new Tuple(new int[] { 3, 5 }, new int[] { 7, 8, 9 }, new byte[0], new int[] { 9, 0, -1 }, new boolean[] { true, false, true }, BigInteger.valueOf(6L), BigInteger.valueOf(-1L));
 
         ByteBuffer packed = tupleType.encodePacked(test);
         byte[] packedArray = packed.array();
@@ -178,7 +178,7 @@ public class PackedEncoderTest {
 
         System.out.println(FastHex.encodeToString(packedArray));
 
-        assertArrayEquals(FastHex.decode("000000000000000900000000000000050000000000000006ffffffffffffffffff"), packedArray);
+        assertArrayEquals(FastHex.decode("000300050000070000080000090000000900000000ffffffff0100010000000000000006ffffffffffffffffff"), packedArray);
 
         Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
 
