@@ -58,8 +58,9 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    void encodeHead(Object value, ByteBuffer dest, int[] offset) {
+    int encodeHead(Object value, ByteBuffer dest, int offset) {
         Encoding.insertInt(((BigDecimal) value).unscaledValue(), dest);
+        return offset;
     }
 
     @Override

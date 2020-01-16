@@ -268,12 +268,12 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    void encodeHead(Object value, ByteBuffer dest, int[] offset) {
+    int encodeHead(Object value, ByteBuffer dest, int offset) {
         if (dynamic) { // includes String
-            Encoding.insertOffset(offset, this, value, dest);
-        } else {
-            encodeArrayTail(value, dest);
+            return Encoding.insertOffset(offset, this, value, dest);
         }
+        encodeArrayTail(value, dest);
+        return offset;
     }
 
     @Override
@@ -311,9 +311,9 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                     Encoding.insertInt(len, dest); // insertLength
                 }
                 if (elementType.dynamic) { // if elements are dynamic
-                    final int[] offset = new int[] { len << LOG_2_UNIT_LENGTH_BYTES }; // mul 32 (0x20)
+                    int offset = len << LOG_2_UNIT_LENGTH_BYTES; // mul 32 (0x20)
                     for (int i = 0; i < len; i++) {
-                        Encoding.insertOffset(offset, elementType, objects[i], dest);
+                        offset = Encoding.insertOffset(offset, elementType, objects[i], dest);
                     }
                 }
             }

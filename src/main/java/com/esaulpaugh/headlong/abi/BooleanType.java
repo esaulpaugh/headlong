@@ -57,8 +57,9 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    void encodeHead(Object value, ByteBuffer dest, int[] offset) {
+    int encodeHead(Object value, ByteBuffer dest, int offset) {
         dest.put((boolean) value ? BOOLEAN_TRUE : BOOLEAN_FALSE);
+        return offset;
     }
 
     @Override

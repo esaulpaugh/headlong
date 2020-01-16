@@ -83,7 +83,7 @@ public abstract class ABIType<J> implements Serializable {
 
     public abstract int validate(Object value) throws ABIException;
 
-    abstract void encodeHead(Object value, ByteBuffer dest, int[] offset);
+    abstract int encodeHead(Object value, ByteBuffer dest, int offset);
 
     abstract void encodeTail(Object value, ByteBuffer dest);
 
