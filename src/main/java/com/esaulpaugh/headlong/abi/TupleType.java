@@ -87,25 +87,22 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return len;
     }
 
+    private int staticByteLengthPacked() {
+        int len = 0;
+        for (ABIType<?> elementType : elementTypes) {
+            len += elementType.byteLengthPacked(null);
+        }
+        return len;
+    }
+
     /**
-     * Must assume value is unvalidated.
-     *
      * @param value the Tuple being measured. {@code null} if not available
      * @return the length in bytes of the non-standard packed encoding
      */
     @Override
     public int byteLengthPacked(Object value) {
         if (value == null) {
-            int len = 0;
-            for (ABIType<?> elementType : elementTypes) {
-                len += elementType.byteLengthPacked(null);
-            }
-            return len;
-        }
-        try {
-            validate(value);
-        } catch (ABIException e) {
-            throw new IllegalArgumentException(e);
+            return staticByteLengthPacked();
         }
         Tuple tuple = (Tuple) value;
         final Object[] elements = tuple.elements;
