@@ -116,10 +116,9 @@ public final class PackedDecoder {
         case TYPE_CODE_BIG_DECIMAL: return decodeBigDecimal(type.byteLengthPacked(null), ((BigDecimalType) type).scale, buffer, idx, elements, i);
         case TYPE_CODE_ARRAY: return decodeArray((ArrayType<?, ?>) type, buffer, idx, end, elements, i);
         case TYPE_CODE_TUPLE:
-            if(type.dynamic) {
-                return decodeTuple((TupleType) type, buffer, idx, end, elements, i);
-            }
-            return decodeTupleStatic((TupleType) type, buffer, idx, end, elements, i);
+            return type.dynamic
+                    ? decodeTuple((TupleType) type, buffer, idx, end, elements, i)
+                    : decodeTupleStatic((TupleType) type, buffer, idx, end, elements, i);
         default: throw new Error();
         }
     }
