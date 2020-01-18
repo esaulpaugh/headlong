@@ -188,16 +188,11 @@ public final class PackedDecoder {
 
     private static int decodeArray(ArrayType<? extends ABIType<?>, ?> arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) {
         final ABIType<?> elementType = arrayType.elementType;
-        final int elementByteLen;
-        try {
-            elementByteLen = elementType.byteLengthPacked(null);
-        } catch (NullPointerException npe) {
-            throw new IllegalArgumentException("array of dynamic arrays");
-        }
+        final int elementByteLen = elementType.byteLengthPacked(null);
         final int arrayLen;
         if(arrayType.length == DYNAMIC_LENGTH) {
             if (elementByteLen == 0) {
-                throw new IllegalArgumentException("can't decode dynamic number of zero-length items");
+                throw new IllegalArgumentException("can't decode dynamic number of zero-length elements");
             }
             arrayLen = (end - idx) / elementByteLen;
         } else {

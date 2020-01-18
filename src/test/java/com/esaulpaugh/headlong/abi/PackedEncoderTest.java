@@ -37,10 +37,11 @@ public class PackedEncoderTest {
         ByteBuffer bb = tupleType.encodePacked(test);
         TestUtils.assertThrown(IllegalArgumentException.class, "multiple dynamic elements", () -> PackedDecoder.decode(tupleType, bb.array()));
 
-        TupleType tupleType2 = TupleType.parse("(int40,(ufixed72x27[],bytes8,int64[][3][]))");
-        Tuple test2 = Tuple.of(123L, Tuple.of(new BigDecimal[] { new BigDecimal(BigInteger.TEN, 27) }, new byte[8], new long[][][] { }));
-        ByteBuffer bb2 = tupleType2.encodePacked(test2);
-        TestUtils.assertThrown(IllegalArgumentException.class, "multiple dynamic elements", () -> PackedDecoder.decode(tupleType2, bb2.array()));
+        TupleType _tt = TupleType.parse("(int144[][1])");
+        Tuple _test = Tuple.of((Object) new BigInteger[][] { new BigInteger[] { } });
+        _tt.validate(_test);
+        ByteBuffer _bb = _tt.encodePacked(_test);
+        TestUtils.assertThrown(IllegalArgumentException.class, "array of dynamic elements", () -> PackedDecoder.decode(_tt, _bb.array()));
     }
 
     @Test
@@ -68,7 +69,7 @@ public class PackedEncoderTest {
 
         assertEquals("", FastHex.encodeToString(bb.array()));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "can't decode dynamic number of zero-length items", () -> PackedDecoder.decode(tupleType, bb.array()));
+        TestUtils.assertThrown(IllegalArgumentException.class, "can't decode dynamic number of zero-length elements", () -> PackedDecoder.decode(tupleType, bb.array()));
     }
 
     @Test

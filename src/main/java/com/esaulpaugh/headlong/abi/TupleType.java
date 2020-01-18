@@ -270,8 +270,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public ByteBuffer encodePacked(Tuple values) throws ABIException {
+        validate(values);
         ByteBuffer dest = ByteBuffer.allocate(byteLengthPacked(values));
-        encodePacked(values, dest);
+        PackedEncoder.insertTuple(this, values, dest);
         return dest;
     }
 

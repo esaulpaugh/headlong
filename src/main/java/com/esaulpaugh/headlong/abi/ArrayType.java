@@ -120,13 +120,17 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
                 : len;
     }
 
+    private int staticByteLengthPacked() {
+        if(length == DYNAMIC_LENGTH) {
+            throw new IllegalArgumentException("array of dynamic elements");
+        }
+        return length * elementType.byteLengthPacked(null);
+    }
+
     @Override
     int byteLengthPacked(Object value) {
         if(value == null) {
-            if(length == DYNAMIC_LENGTH) {
-                throw new NullPointerException();
-            }
-            return length * elementType.byteLengthPacked(null);
+            return staticByteLengthPacked();
         }
         final ABIType<?> elementType = this.elementType;
         switch (elementType.typeCode()) {

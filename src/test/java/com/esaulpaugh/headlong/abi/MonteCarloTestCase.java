@@ -257,8 +257,8 @@ public class MonteCarloTestCase implements Serializable {
         } catch (IllegalArgumentException iae) {
             String msg = iae.getMessage();
             if(!"multiple dynamic elements".equals(msg)
-                    && !"array of dynamic arrays".equals(msg)
-                    && !"can't decode dynamic number of zero-length items".equals(msg)) {
+                    && !"array of dynamic elements".equals(msg)
+                    && !"can't decode dynamic number of zero-length elements".equals(msg)) {
                 throw new RuntimeException(tt.canonicalType + " " + msg, iae);
             }
         }
