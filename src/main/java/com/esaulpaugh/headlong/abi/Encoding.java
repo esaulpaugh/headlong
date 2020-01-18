@@ -49,7 +49,7 @@ final class Encoding {
 
     static void insertInt(BigInteger bigGuy, ByteBuffer dest) {
         final byte[] arr = bigGuy.toByteArray();
-        final byte paddingByte = bigGuy.signum() == -1 ? NEGATIVE_ONE_BYTE : ZERO_BYTE;
+        final byte paddingByte = bigGuy.signum() < 0 ? NEGATIVE_ONE_BYTE : ZERO_BYTE;
         final int lim = UNIT_LENGTH_BYTES - arr.length;
         for (int i = 0; i < lim; i++) {
             dest.put(paddingByte);

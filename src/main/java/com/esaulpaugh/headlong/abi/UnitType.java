@@ -91,7 +91,7 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
 
     final void validateBigIntBitLen(final BigInteger bigIntVal) throws ABIException {
         checkBitLen(bigIntVal.bitLength());
-        if (unsigned && bigIntVal.signum() == -1) {
+        if (unsigned && bigIntVal.signum() < 0) {
             throw new ABIException("signed value given for unsigned type");
         }
     }

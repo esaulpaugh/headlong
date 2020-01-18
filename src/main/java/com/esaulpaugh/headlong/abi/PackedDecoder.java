@@ -69,7 +69,7 @@ public final class PackedDecoder {
                     numDynamic += countDynamics((TupleType) e);
                 } else if(TYPE_CODE_ARRAY == e.typeCode()) {
                     do {
-                        ArrayType<?, ?> arrayType = (ArrayType<?, ?>) e;
+                        ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<?, ?>) e;
                         if(DYNAMIC_LENGTH == arrayType.length) {
                             numDynamic++;
                         }
@@ -137,7 +137,7 @@ public final class PackedDecoder {
         case TYPE_CODE_LONG: return decodeLong(type.byteLengthPacked(null), (LongType) type, buffer, idx, elements, i);
         case TYPE_CODE_BIG_INTEGER: return decodeBigInteger(type.byteLengthPacked(null), buffer, idx, elements, i);
         case TYPE_CODE_BIG_DECIMAL: return decodeBigDecimal(type.byteLengthPacked(null), ((BigDecimalType) type).scale, buffer, idx, elements, i);
-        case TYPE_CODE_ARRAY: return decodeArray((ArrayType<?, ?>) type, buffer, idx, end, elements, i);
+        case TYPE_CODE_ARRAY: return decodeArray((ArrayType<? extends ABIType<?>, ?>) type, buffer, idx, end, elements, i);
         case TYPE_CODE_TUPLE:
             return type.dynamic
                     ? decodeTuple((TupleType) type, buffer, idx, end, elements, i)

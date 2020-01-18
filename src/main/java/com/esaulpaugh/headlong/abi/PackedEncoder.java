@@ -128,7 +128,7 @@ final class PackedEncoder {
     private static void insertInt(BigInteger bigGuy, int byteLen, ByteBuffer dest) {
         byte[] arr = bigGuy.toByteArray();
         final int paddingBytes = byteLen - arr.length;
-        if(bigGuy.signum() == -1) {
+        if(bigGuy.signum() < 0) {
             for (int i = 0; i < paddingBytes; i++) {
                 dest.put(Encoding.NEGATIVE_ONE_BYTE);
             }
