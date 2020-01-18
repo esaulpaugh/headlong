@@ -59,22 +59,6 @@ public class Keccak extends MessageDigest {
         this.rateSizeWords = rateSizeBits >>> 6;
     }
 
-    public Keccak(Keccak other) {
-        super(other.getAlgorithm());
-        System.arraycopy(other.state, 0, state, 0, other.state.length);
-        this.digestSizeBits = other.digestSizeBits;
-        this.rateSizeBits = other.rateSizeBits;
-
-        this.digestSizeBytes = digestSizeBits >>> 3;
-        this.rateSizeWords = rateSizeBits >>> 6;
-
-        this.rateBits = other.rateBits;
-    }
-
-    public int rateSize() {
-        return rateSizeBits >>> 3;
-    }
-
     protected int rateSizeBitsFor(int digestSizeBits) {
         switch (digestSizeBits) {
         case 128: return 1344;
