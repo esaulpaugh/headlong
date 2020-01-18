@@ -43,7 +43,7 @@ public final class PackedDecoder {
     }
 
     public static Tuple decode(TupleType tupleType, byte[] buffer, int from, int to) throws ABIException {
-        int numDynamic = numDynamic(tupleType);
+        int numDynamic = countDynamics(tupleType);
         if (numDynamic == 0) {
             Tuple[] elements = new Tuple[1];
             decodeTupleStatic(tupleType, buffer, from, to, elements, 0);
@@ -61,23 +61,22 @@ public final class PackedDecoder {
         throw new IllegalArgumentException("multiple dynamic elements");
     }
 
-    private static int numDynamic(TupleType tupleType) {
+    private static int countDynamics(TupleType tupleType) {
         int numDynamic = 0;
         for (ABIType<?> e : tupleType) {
             if (e.dynamic) {
-                if(e.typeCode() == TYPE_CODE_TUPLE) {
-                    numDynamic += numDynamic((TupleType) e);
-                } else if(e.typeCode() == TYPE_CODE_ARRAY) {
-                    ABIType<?> temp = e;
-                    while (temp instanceof ArrayType<?, ?>) {
-                        ArrayType<?, ?> arr = (ArrayType<?, ?>) temp;
-                        if(arr.length == DYNAMIC_LENGTH) {
+                if(TYPE_CODE_TUPLE == e.typeCode()) {
+                    numDynamic += countDynamics((TupleType) e);
+                } else if(TYPE_CODE_ARRAY == e.typeCode()) {
+                    do {
+                        ArrayType<?, ?> arrayType = (ArrayType<?, ?>) e;
+                        if(DYNAMIC_LENGTH == arrayType.length) {
                             numDynamic++;
                         }
-                        temp = arr.elementType;
-                    }
-                    if(temp.typeCode() == TYPE_CODE_TUPLE) {
-                        numDynamic += numDynamic((TupleType) temp);
+                        e = arrayType.elementType;
+                    } while (TYPE_CODE_ARRAY == e.typeCode());
+                    if(TYPE_CODE_TUPLE == e.typeCode()) {
+                        numDynamic += countDynamics((TupleType) e);
                     }
                 } else {
                     numDynamic++;
