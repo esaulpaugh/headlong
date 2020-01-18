@@ -15,6 +15,9 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.util.Uint;
+import com.esaulpaugh.headlong.util.Strings;
+
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -40,12 +43,7 @@ public final class PackedDecoder {
     }
 
     public static Tuple decode(TupleType tupleType, byte[] buffer, int from, int to) throws ABIException {
-        int numDynamic = 0;
-        for (ABIType<?> type : tupleType) {
-            if (type.dynamic) {
-                numDynamic++;
-            }
-        }
+        int numDynamic = numDynamic(tupleType);
         if (numDynamic == 0) {
             Tuple[] elements = new Tuple[1];
             decodeTupleStatic(tupleType, buffer, from, to, elements, 0);
@@ -61,6 +59,32 @@ public final class PackedDecoder {
             return tuple;
         }
         throw new IllegalArgumentException("multiple dynamic elements");
+    }
+
+    private static int numDynamic(TupleType tupleType) {
+        int numDynamic = 0;
+        for (ABIType<?> e : tupleType) {
+            if (e.dynamic) {
+                if(e.typeCode() == TYPE_CODE_TUPLE) {
+                    numDynamic += numDynamic((TupleType) e);
+                } else if(e.typeCode() == TYPE_CODE_ARRAY) {
+                    ABIType<?> temp = e;
+                    while (temp instanceof ArrayType<?, ?>) {
+                        ArrayType<?, ?> arr = (ArrayType<?, ?>) temp;
+                        if(arr.length == DYNAMIC_LENGTH) {
+                            numDynamic++;
+                        }
+                        temp = arr.elementType;
+                    }
+                    if(temp.typeCode() == TYPE_CODE_TUPLE) {
+                        numDynamic += numDynamic((TupleType) temp);
+                    }
+                } else {
+                    numDynamic++;
+                }
+            }
+        }
+        return numDynamic;
     }
 
     private static int decodeTuple(TupleType tupleType, byte[] buffer, final int idx_, int end, Object[] parentElements, int pei) {
@@ -111,7 +135,7 @@ public final class PackedDecoder {
         case TYPE_CODE_BOOLEAN: elements[i] = BooleanType.decodeBoolean(buffer[idx]); return type.byteLengthPacked(null);
         case TYPE_CODE_BYTE: elements[i] = buffer[idx]; return type.byteLengthPacked(null);
         case TYPE_CODE_INT: return decodeInt(type.byteLengthPacked(null), buffer, idx, elements, i);
-        case TYPE_CODE_LONG: return decodeLong(type.byteLengthPacked(null), buffer, idx, elements, i);
+        case TYPE_CODE_LONG: return decodeLong(type.byteLengthPacked(null), (LongType) type, buffer, idx, elements, i);
         case TYPE_CODE_BIG_INTEGER: return decodeBigInteger(type.byteLengthPacked(null), buffer, idx, elements, i);
         case TYPE_CODE_BIG_DECIMAL: return decodeBigDecimal(type.byteLengthPacked(null), ((BigDecimalType) type).scale, buffer, idx, elements, i);
         case TYPE_CODE_ARRAY: return decodeArray((ArrayType<?, ?>) type, buffer, idx, end, elements, i);
@@ -140,8 +164,13 @@ public final class PackedDecoder {
         return elementLen;
     }
 
-    private static int decodeLong(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        dest[destIdx] = getPackedLong(buffer, idx, elementLen);
+    private static int decodeLong(int elementLen, LongType longType, byte[] buffer, int idx, Object[] dest, int destIdx) {
+        long signed = getPackedLong(buffer, idx, elementLen);
+        if(longType.isUnsigned()) {
+            dest[destIdx] = new Uint(longType.getBitLength()).toUnsigned(signed);
+        } else {
+            dest[destIdx] = signed;
+        }
         return elementLen;
     }
 
@@ -178,7 +207,10 @@ public final class PackedDecoder {
         final Object array;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: array = decodeBooleanArray(arrayLen, buffer, idx); break;
-        case TYPE_CODE_BYTE: array = decodeByteArray(arrayLen, buffer, idx); break;
+        case TYPE_CODE_BYTE:
+            byte[] bytes = decodeByteArray(arrayLen, buffer, idx);
+            array = arrayType.isString ? Strings.encode(bytes, Strings.UTF_8) : bytes;
+            break;
         case TYPE_CODE_INT: array = decodeIntArray(elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_LONG: array = decodeLongArray(elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_BIG_INTEGER: array = decodeBigIntegerArray(elementByteLen, arrayLen, buffer, idx); break;

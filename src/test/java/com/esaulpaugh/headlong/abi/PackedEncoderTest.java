@@ -20,6 +20,7 @@ import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
@@ -28,6 +29,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PackedEncoderTest {
+
+    @Test
+    public void multipleDynamic() throws Throwable {
+        TupleType tupleType = TupleType.parse("(int120[],(int96,ufixed256x47)[])");
+        Tuple test = Tuple.of(new BigInteger[] { BigInteger.TEN }, new Tuple[] { Tuple.of(BigInteger.TEN, new BigDecimal(BigInteger.TEN, 47)) });
+        ByteBuffer bb = tupleType.encodePacked(test);
+        TestUtils.assertThrown(IllegalArgumentException.class, "multiple dynamic elements", () -> PackedDecoder.decode(tupleType, bb.array()));
+
+        TupleType tupleType2 = TupleType.parse("(int40,(ufixed72x27[],bytes8,int64[][3][]))");
+        Tuple test2 = Tuple.of(123L, Tuple.of(new BigDecimal[] { new BigDecimal(BigInteger.TEN, 27) }, new byte[8], new long[][][] { }));
+        ByteBuffer bb2 = tupleType2.encodePacked(test2);
+        TestUtils.assertThrown(IllegalArgumentException.class, "multiple dynamic elements", () -> PackedDecoder.decode(tupleType2, bb2.array()));
+    }
 
     @Test
     public void testTupleArray() throws ABIException {
