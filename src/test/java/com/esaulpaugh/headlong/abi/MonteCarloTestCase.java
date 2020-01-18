@@ -244,6 +244,26 @@ public class MonteCarloTestCase implements Serializable {
         }
     }
 
+    void runForPacked() throws ABIException {
+        runForPacked(this.argsTuple);
+    }
+
+    void runForPacked(Tuple args) throws ABIException {
+        TupleType tt = this.function.getParamTypes();
+        try {
+            if (!PackedDecoder.decode(tt, tt.encodePacked(args).array()).equals(args)) {
+                throw new RuntimeException(tt.canonicalType);
+            }
+        } catch (IllegalArgumentException iae) {
+            String msg = iae.getMessage();
+            if(!"multiple dynamic elements".equals(msg)
+                    && !"array of dynamic arrays".equals(msg)
+                    && !"can't decode dynamic number of zero-length items".equals(msg)) {
+                throw new RuntimeException(tt.canonicalType + " " + msg, iae);
+            }
+        }
+    }
+
     private String generateTupleTypeString(Random r, int tupleDepth) {
 
         ABIType<?>[] types = new ABIType<?>[r.nextInt(1 + params.maxTupleLen)]; // 0 to max

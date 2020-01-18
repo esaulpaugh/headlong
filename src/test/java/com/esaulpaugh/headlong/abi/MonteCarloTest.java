@@ -92,6 +92,7 @@ public class MonteCarloTest {
                 testCase = new MonteCarloTestCase(params);
                 temp = testCase.function.getCanonicalSignature();
                 testCase.run();
+                testCase.runForPacked();
                 temp = null;
 //                log.append('#')
 //                        .append(i)
