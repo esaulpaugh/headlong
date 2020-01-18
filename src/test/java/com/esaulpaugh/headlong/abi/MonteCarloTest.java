@@ -51,9 +51,10 @@ public class MonteCarloTest {
         final int workPerProcessor = N / numProcessors;
         int i = 0;
         while (i < threads.length) {
-            (threads[i] = newThread(masterMasterSeed + i++, workPerProcessor)).start();
+            (threads[i] = newThread(masterMasterSeed + (i++), workPerProcessor))
+                    .start();
         }
-        newThread(masterMasterSeed + i++, workPerProcessor).run();
+        newRunnable(masterMasterSeed + (i++), workPerProcessor).run();
 
         for (Thread thread : threads) {
             thread.join();
@@ -63,13 +64,17 @@ public class MonteCarloTest {
     }
 
     private static Thread newThread(long seed, int n) {
-        return new Thread(() -> {
+        return new Thread(newRunnable(seed, n));
+    }
+
+    private static Runnable newRunnable(long seed, int n) {
+        return () -> {
             try {
                 doMonteCarlo(seed, n);
             } catch (ABIException ve) {
                 throw new RuntimeException(ve);
             }
-        });
+        };
     }
 
     private static void doMonteCarlo(long masterSeed, int n) throws ABIException {
