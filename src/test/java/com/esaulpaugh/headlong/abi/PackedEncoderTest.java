@@ -17,14 +17,13 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
-import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -52,7 +51,7 @@ public class PackedEncoderTest {
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
-        assertEquals("010001", FastHex.encodeToString(bb.array()));
+        assertEquals("010001", Function.hexOf(bb));
 
         Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
 
@@ -67,7 +66,7 @@ public class PackedEncoderTest {
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
-        assertEquals("", FastHex.encodeToString(bb.array()));
+        assertEquals("", Function.hexOf(bb));
 
         TestUtils.assertThrown(IllegalArgumentException.class, "can't decode dynamic number of zero-length elements", () -> PackedDecoder.decode(tupleType, bb.array()));
     }
@@ -80,9 +79,9 @@ public class PackedEncoderTest {
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
-        assertEquals("01020304", FastHex.encodeToString(bb.array()));
+        assertEquals("01020304", Function.hexOf(bb));
 
-        byte[] packed = FastHex.decode("01020304");
+        byte[] packed = Strings.decode("01020304");
 
         ByteBuffer buf = ByteBuffer.allocate(100);
         buf.put(new byte[17]);
@@ -102,45 +101,42 @@ public class PackedEncoderTest {
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
-        assertEquals("fff1f1", FastHex.encodeToString(bb.array()));
+        assertEquals("fff1f1", Function.hexOf(bb));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, FastHex.decode("fff1f1"));
+        Tuple decoded = PackedDecoder.decode(tupleType, Strings.decode("fff1f1"));
 
         assertEquals(test, decoded);
     }
 
     @Test
     public void testPacked() throws ABIException {
-
         TupleType tupleType = TupleType.parse("(int16,bytes1,uint16,string)");
 
         Tuple test = new Tuple(-1, new byte[] { 0x42 }, 0x03, "Hello, world!");
 
         int packedLen = tupleType.byteLengthPacked(test);
 
-        assertEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421").length, packedLen);
+        assertEquals(Strings.decode("ffff42000348656c6c6f2c20776f726c6421").length, packedLen);
 
-        ByteBuffer dest = ByteBuffer.allocate(packedLen);
+        ByteBuffer bb = ByteBuffer.allocate(packedLen);
 
-        tupleType.encodePacked(test, dest);
+        tupleType.encodePacked(test, bb);
 
-        assertEquals(packedLen, dest.position());
+        assertEquals(packedLen, bb.position());
 
-        byte[] destArray = dest.array();
+        System.out.println(Function.hexOf(bb));
 
-        System.out.println(FastHex.encodeToString(destArray));
-
-        assertArrayEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421"), destArray);
+        assertEquals("ffff42000348656c6c6f2c20776f726c6421", Function.hexOf(bb));
 
         // ---------------------------
 
         Function function = new Function(tupleType.canonicalType);
 
-        String hex = FastHex.encodeToString(function.getParamTypes().encode(test).array());
+        String hex = Function.hexOf(function.getParamTypes().encode(test));
 
         System.out.println(hex);
 
-        byte[] abi = FastHex.decode("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff420000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000d48656c6c6f2c20776f726c642100000000000000000000000000000000000000");
+        byte[] abi = Strings.decode("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff420000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000d48656c6c6f2c20776f726c642100000000000000000000000000000000000000");
 
         byte[] call = new byte[Function.SELECTOR_LEN + abi.length];
 
@@ -152,68 +148,62 @@ public class PackedEncoderTest {
         TupleType tt = TupleType.parse(tupleType.canonicalType);
 
         ByteBuffer dest2 = tt.encodePacked(args);
-        byte[] dest2Array = dest2.array();
 
-        System.out.println(FastHex.encodeToString(dest2Array));
+        System.out.println(Function.hexOf(dest2));
 
-        assertArrayEquals(FastHex.decode("ffff42000348656c6c6f2c20776f726c6421"), dest2Array);
+        assertEquals("ffff42000348656c6c6f2c20776f726c6421", Function.hexOf(dest2));
 
     }
 
     @Test
     public void testTest() throws ABIException {
-
         TupleType tupleType = TupleType.parse("(int24,bool,bool)");
 
         Tuple values = new Tuple(-2, true, false);
 
-        ByteBuffer packed = tupleType.encodePacked(values);
-        byte[] packedArray = packed.array();
-        assertEquals(packedArray.length, packed.position());
+        ByteBuffer bb = tupleType.encodePacked(values);
+        assertEquals(bb.capacity(), bb.position());
 
-        System.out.println(FastHex.encodeToString(packedArray));
+        System.out.println(Function.hexOf(bb));
 
-        assertArrayEquals(FastHex.decode("fffffe0100"), packedArray);
+        assertEquals("fffffe0100", Function.hexOf(bb));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
+        Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
 
         assertEquals(values, decoded);
     }
 
     @Test
     public void testDecodeA() throws ABIException {
-
         TupleType tupleType = TupleType.parse("(int16[2],int24[3],bytes,uint32[3],bool[3],uint64,int72)");
 
         Tuple test = new Tuple(new int[] { 3, 5 }, new int[] { 7, 8, 9 }, new byte[0], new int[] { 9, 0, -1 }, new boolean[] { true, false, true }, BigInteger.valueOf(6L), BigInteger.valueOf(-1L));
 
-        ByteBuffer packed = tupleType.encodePacked(test);
-        byte[] packedArray = packed.array();
-        assertEquals(packedArray.length, packed.position());
+        ByteBuffer bb = tupleType.encodePacked(test);
+        assertEquals(bb.capacity(), bb.position());
 
-        System.out.println(FastHex.encodeToString(packedArray));
+        System.out.println(Function.hexOf(bb));
 
-        assertArrayEquals(FastHex.decode("000300050000070000080000090000000900000000ffffffff0100010000000000000006ffffffffffffffffff"), packedArray);
+        assertEquals("000300050000070000080000090000000900000000ffffffff0100010000000000000006ffffffffffffffffff", Function.hexOf(bb));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
+        Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
 
         assertEquals(test, decoded);
     }
 
     @Test
     public void testDecodeB() throws ABIException {
-
         TupleType tupleType = TupleType.parse("(uint64[],int)");
 
         Tuple values = new Tuple(new long[] { 1L, 2L, 3L, 4L }, BigInteger.ONE);
 
-        ByteBuffer packed = tupleType.encodePacked(values);
-        byte[] packedArray = packed.array();
-        assertEquals(packedArray.length, packed.position());
+        ByteBuffer bb = tupleType.encodePacked(values);
+        byte[] packedArray = bb.array();
+        assertEquals(packedArray.length, bb.position());
 
-        System.out.println(FastHex.encodeToString(packedArray));
+        System.out.println(Function.hexOf(bb));
 
-        assertArrayEquals(FastHex.decode("00000000000000010000000000000002000000000000000300000000000000040000000000000000000000000000000000000000000000000000000000000001"), packedArray);
+        assertEquals("00000000000000010000000000000002000000000000000300000000000000040000000000000000000000000000000000000000000000000000000000000001", Function.hexOf(bb));
 
         Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
 
@@ -226,31 +216,30 @@ public class PackedEncoderTest {
 
         Tuple values = new Tuple(true, new boolean[] { true, true, true },  new boolean[] { true, false });
 
-        ByteBuffer packed = tupleType.encodePacked(values);
-        byte[] packedArray = packed.array();
-        assertEquals(packedArray.length, packed.position());
+        ByteBuffer bb = tupleType.encodePacked(values);
+        assertEquals(bb.capacity(), bb.position());
 
-        System.out.println(FastHex.encodeToString(packedArray));
+        System.out.println(Function.hexOf(bb));
 
-        assertArrayEquals(FastHex.decode("010101010100"), packedArray);
+        assertEquals("010101010100", Function.hexOf(bb));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
+        Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
 
         assertEquals(values, decoded);
     }
 
     @Test
     public void testSignExtendInt() {
-        int expected = BizarroIntegers.getInt(FastHex.decode("8FFFFF"), 0, 3);
-        int result = PackedDecoder.getPackedInt(FastHex.decode("8FFFFF"), 0, 3);
+        int expected = BizarroIntegers.getInt(Strings.decode("8FFFFF"), 0, 3);
+        int result = PackedDecoder.getPackedInt(Strings.decode("8FFFFF"), 0, 3);
         assertTrue(result < 0);
         assertEquals(expected, result);
     }
 
     @Test
     public void testSignExtendLong() {
-        long expectedL = BizarroIntegers.getLong(FastHex.decode("8FFFFFFFFF"), 0, 5);
-        long resultL = PackedDecoder.getPackedLong(FastHex.decode("8FFFFFFFFF"), 0, 5);
+        long expectedL = BizarroIntegers.getLong(Strings.decode("8FFFFFFFFF"), 0, 5);
+        long resultL = PackedDecoder.getPackedLong(Strings.decode("8FFFFFFFFF"), 0, 5);
         assertTrue(resultL < 0);
         assertEquals(expectedL, resultL);
     }
