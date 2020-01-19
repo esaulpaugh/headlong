@@ -190,11 +190,11 @@
   <import file="${basedir}/.idea/modules/module_headlong.test.xml"/>
 
   <target name = "build-jar">
-    <jar destfile = "${basedir}/build/lib/headlong-2.1.1-SNAPSHOT.jar"
+    <jar destfile = "${basedir}/build/lib/headlong-2.1.2-SNAPSHOT.jar"
          basedir = "${basedir}/build/classes/java/main">
       <manifest>
         <attribute name = "Implementation-Title" value = "headlong"/>
-        <attribute name = "Implementation-Version" value = "2.1.1-SNAPSHOT"/>
+        <attribute name = "Implementation-Version" value = "2.1.2-SNAPSHOT"/>
       </manifest>
     </jar>
   </target>
