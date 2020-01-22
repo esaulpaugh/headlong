@@ -211,10 +211,8 @@ public final class ABIJSON {
 
     private static JsonArray buildJsonArray(TupleType tupleType, boolean[] indexedManifest) {
         JsonArray array = new JsonArray();
-        ABIType<?>[] elements = tupleType.elementTypes;
-        boolean addIndexed = indexedManifest != null;
-        for (int i = 0; i < elements.length; i++) {
-            ABIType<?> e = elements[i];
+        for (int i = 0; i < tupleType.elementTypes.length; i++) {
+            ABIType<?> e = tupleType.elementTypes[i];
             JsonObject arrayElement = new JsonObject();
             String name = e.getName();
             arrayElement.add(NAME, name == null ? null : new JsonPrimitive(name));
@@ -230,7 +228,7 @@ public final class ABIJSON {
                 arrayElement.add(TYPE, new JsonPrimitive(type));
             }
             array.add(arrayElement);
-            if(addIndexed) {
+            if(indexedManifest != null) {
                 arrayElement.add(INDEXED, new JsonPrimitive(indexedManifest[i]));
             }
         }
