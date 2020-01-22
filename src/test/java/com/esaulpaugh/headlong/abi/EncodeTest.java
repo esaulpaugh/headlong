@@ -32,7 +32,6 @@ import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.abi.TypeFactory.EMPTY_PARAMETER;
-import static com.esaulpaugh.headlong.abi.TypeFactory.ILLEGAL_TUPLE_TERMINATION;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -124,17 +123,21 @@ public class EncodeTest {
     public void nonTerminatingTupleTest() throws Throwable {
         assertThrown(PARSE_ERR, "unrecognized type: aaaaaa", () -> TupleType.parse("aaaaaa"));
 
-        assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("("));
+        assertThrown(PARSE_ERR, "unrecognized type: (", () -> Function.parse("("));
 
-        assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("(["));
+        assertThrown(PARSE_ERR, "unrecognized type: ([", () -> Function.parse("(["));
 
-        assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("(int"));
+        assertThrown(PARSE_ERR, "unrecognized type: (int", () -> Function.parse("(int"));
 
-        assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("(bool[],"));
+        assertThrown(PARSE_ERR, "unrecognized type: (bool[],", () -> Function.parse("(bool[],"));
 
-        assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("(()"));
+        assertThrown(PARSE_ERR, "unrecognized type: (()", () -> Function.parse("(()"));
 
-        assertThrown(PARSE_ERR, ILLEGAL_TUPLE_TERMINATION, () -> Function.parse("(())..."));
+        assertThrown(PARSE_ERR, "unrecognized type: (())...", () -> Function.parse("(())..."));
+
+        assertThrown(PARSE_ERR, "unrecognized type: ((((()))", () -> Function.parse("((((()))"));
+
+        assertThrown(PARSE_ERR, "illegal signature termination", () -> Function.parse("f()[]"));
     }
 
     @Test

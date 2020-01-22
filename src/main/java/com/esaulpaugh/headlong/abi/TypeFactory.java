@@ -86,7 +86,7 @@ final class TypeFactory {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } catch (StringIndexOutOfBoundsException sioobe) { // e.g. type equals "" or "82]" or "[]" or "[1]"
-            /* fall through */
+            throw (ParseException) new ParseException("unrecognized type: " + type, 0).initCause(sioobe);
         }
         throw new ParseException("unrecognized type: " + type, 0);
     }
@@ -234,7 +234,6 @@ final class TypeFactory {
     }
 
     static final String EMPTY_PARAMETER = "empty parameter";
-    static final String ILLEGAL_TUPLE_TERMINATION = "illegal tuple termination";
 
     private static TupleType parseTupleType(final String rawTypeStr) throws ParseException {
         final ArrayList<ABIType<?>> elements = new ArrayList<>();
@@ -246,7 +245,7 @@ final class TypeFactory {
             while (argStart < end) {
                 switch (rawTypeStr.charAt(argStart)) {
                 case '(': // element is tuple or tuple array
-                    argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, end, argStart + 1));
+                    argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart + 1));
                     break;
                 case ')':
                     if(rawTypeStr.charAt(argEnd) != ',') {
@@ -274,27 +273,21 @@ final class TypeFactory {
                 return TupleType.wrap(elements.toArray(ABIType.EMPTY_TYPE_ARRAY));
             }
         } catch (ParseException pe) {
-            throw (ParseException) new ParseException("@ index " + elements.size() + ", " + pe.getMessage(), pe.getErrorOffset())
-                    .initCause(pe);
+            throw (ParseException) new ParseException("@ index " + elements.size() + ", " + pe.getMessage(), pe.getErrorOffset()).initCause(pe);
         }
-        throw new ParseException(ILLEGAL_TUPLE_TERMINATION, Math.max(0, argEnd));
+        throw new ParseException("unrecognized type: " + rawTypeStr, Math.max(0, argEnd));
     }
 
-    private static int findSubtupleEnd(String parentTypeString, final int end, int i) throws ParseException {
+    private static int findSubtupleEnd(String parentTypeString, int i) {
         int depth = 1;
         do {
-            if(i < end) {
-                char x = parentTypeString.charAt(i++);
-                if(x > ')') {
-                    continue;
-                }
-                if(x == ')') {
-                    depth--;
-                } else if(x == '(') {
-                    depth++;
-                }
-            } else {
-                throw new ParseException(ILLEGAL_TUPLE_TERMINATION, end);
+            char x = parentTypeString.charAt(i++);
+            if(x > ')') {
+                // continue;
+            } else if(x == ')') {
+                depth--;
+            } else if(x == '(') {
+                depth++;
             }
         } while(depth > 0);
         return i;
