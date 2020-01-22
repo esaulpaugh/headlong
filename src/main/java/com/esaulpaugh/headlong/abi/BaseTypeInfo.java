@@ -53,8 +53,8 @@ final class BaseTypeInfo {
         map.put("int", map.get("int256"));
         map.put("uint", map.get("uint256"));
 
-        for (int i = 1; i <= 32; i++) {
-            map.put("bytes" + i, new BaseTypeInfo(N_A, i));
+        for (int n = 1; n <= 32; n++) {
+            map.put("bytes" + n, new BaseTypeInfo(N_A, n));
         }
         map.put("function", map.get("bytes" + FUNCTION_BYTE_LEN));
 
