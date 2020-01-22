@@ -237,52 +237,47 @@ final class TypeFactory {
     static final String ILLEGAL_TUPLE_TERMINATION = "illegal tuple termination";
 
     private static TupleType parseTupleType(final String rawTypeStr) throws ParseException {
-        final int end = rawTypeStr.length();
         final ArrayList<ABIType<?>> elements = new ArrayList<>();
-
         int argEnd = 1; // this inital value is important for empty params case: "()"
         try {
             int argStart = 1; // after opening '('
-            WHILE:
+            final int end = rawTypeStr.length();
+            LOOP:
             while (argStart < end) {
-                int fromIndex;
-                char c = rawTypeStr.charAt(argStart);
-                switch (c) {
+                switch (rawTypeStr.charAt(argStart)) {
                 case '(': // element is tuple or tuple array
-                    fromIndex = findSubtupleEnd(rawTypeStr, end, argStart + 1);
+                    argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, end, argStart + 1));
                     break;
                 case ')':
-                    if(rawTypeStr.charAt(argEnd) == ',') {
-                        throw new ParseException(EMPTY_PARAMETER, argStart);
+                    if(rawTypeStr.charAt(argEnd) != ',') {
+                        break LOOP;
                     }
-                    break WHILE;
+                    throw new ParseException(EMPTY_PARAMETER, argStart);
                 case ',':
                     if (rawTypeStr.charAt(argStart - 1) == ')') {
-                        break WHILE;
+                        break LOOP;
                     }
                     throw new ParseException(EMPTY_PARAMETER, argStart);
                 default: // non-tuple element
-                    fromIndex = argStart + 1;
+                    argEnd = nextTerminator(rawTypeStr, argStart + 1);
                 }
-                argEnd = nextTerminator(rawTypeStr, fromIndex);
-                if(argEnd == -1) {
-                    break;
-                }
-                elements.add(buildType(rawTypeStr.substring(argStart, argEnd), false, null, true));
-                if(rawTypeStr.charAt(argEnd) == ',') {
-                    argStart = argEnd + 1; // jump over terminator
-                    continue;
+                if(argEnd >= 0) {
+                    elements.add(buildType(rawTypeStr.substring(argStart, argEnd), false, null, true));
+                    if(rawTypeStr.charAt(argEnd) == ',') {
+                        argStart = argEnd + 1; // jump over terminator
+                        continue;
+                    }
                 }
                 break;
+            }
+            if(argEnd >= 0 && argEnd == end - 1 && rawTypeStr.charAt(argEnd) == ')') {
+                return TupleType.wrap(elements.toArray(ABIType.EMPTY_TYPE_ARRAY));
             }
         } catch (ParseException pe) {
             throw (ParseException) new ParseException("@ index " + elements.size() + ", " + pe.getMessage(), pe.getErrorOffset())
                     .initCause(pe);
         }
-        if(argEnd < 0 || argEnd != end - 1 || rawTypeStr.charAt(argEnd) != ')') {
-            throw new ParseException(ILLEGAL_TUPLE_TERMINATION, Math.max(0, argEnd));
-        }
-        return TupleType.wrap(elements.toArray(ABIType.EMPTY_TYPE_ARRAY));
+        throw new ParseException(ILLEGAL_TUPLE_TERMINATION, Math.max(0, argEnd));
     }
 
     private static int findSubtupleEnd(String parentTypeString, final int end, int i) throws ParseException {
