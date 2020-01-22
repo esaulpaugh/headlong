@@ -131,9 +131,7 @@ public abstract class RLPItem {
     }
 
     public final int export(byte[] dest, int destIndex) {
-        final int len = encodingLength();
-        System.arraycopy(buffer, index, dest, destIndex, len);
-        return destIndex + len;
+        return exportRange(index, endIndex, dest, destIndex);
     }
 
     public final int exportData(byte[] dest, int destIndex) {
@@ -203,6 +201,7 @@ public abstract class RLPItem {
     }
 
     public BigInteger asBigInt() {
+//        return new BigInteger(buffer, dataIndex, dataLength); // Java 9+
         return new BigInteger(data());
     }
 
