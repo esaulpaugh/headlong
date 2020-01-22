@@ -99,8 +99,6 @@ public final class RLPDecoder {
         case SINGLE_BYTE:
         case STRING_SHORT:
         case STRING_LONG: return new RLPString(lead, type, buffer, index, Integer.MAX_VALUE, lenient);
-        case LIST_SHORT:
-        case LIST_LONG:
         default: throw new IllegalArgumentException("item is not a string");
         }
     }
@@ -115,9 +113,6 @@ public final class RLPDecoder {
         switch (type) {
         case LIST_SHORT:
         case LIST_LONG: return new RLPList(lead, type, buffer, index, Integer.MAX_VALUE, lenient);
-        case SINGLE_BYTE:
-        case STRING_SHORT:
-        case STRING_LONG:
         default: throw new IllegalArgumentException("item is not a list");
         }
     }

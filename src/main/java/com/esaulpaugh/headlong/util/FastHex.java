@@ -92,10 +92,10 @@ public final class FastHex {
     }
 
     public static byte[] decode(byte[] hexBytes, int off, final int len) {
-        if ((len & 0x01) != 0) {
+        if ((len & 0x01) != 0) { // mod 2
             throw new IllegalArgumentException("length must be a multiple of two");
         }
-        final int bytesLen = len >> 1;
+        final int bytesLen = len >> 1; // div 2
         byte[] bytes = new byte[bytesLen];
         for (int i = 0; i < bytesLen; i++, off+=2) {
             byte left = DECODE_TABLE[hexBytes[off]];
