@@ -32,11 +32,15 @@ class RLPStreamIterator implements Iterator<RLPItem> {
 
     protected RLPItem next;
 
-    RLPStreamIterator(InputStream is, RLPDecoder decoder, byte[] buffer, int start) {
+    RLPStreamIterator(InputStream is, RLPDecoder decoder) {
+        this(is, decoder, new byte[0], 0); // make sure index == buffer.length
+    }
+
+    RLPStreamIterator(InputStream is, RLPDecoder decoder, byte[] buffer, int index) {
         this.is = is;
         this.decoder = decoder;
         this.buffer = buffer;
-        this.index = start;
+        this.index = index;
     }
 
     @Override

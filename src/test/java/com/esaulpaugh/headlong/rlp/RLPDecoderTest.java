@@ -60,7 +60,7 @@ public class RLPDecoderTest {
     public void testListIterable() throws Throwable {
         RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
         for(RLPItem item : rlpList) {
-            System.out.println(item.asString(Strings.HEX));
+            System.out.println(item.type() + " " + item.dataLength + " " + item.asString(Strings.HEX));
         }
 
         byte[] copy = Arrays.copyOf(LONG_LIST_BYTES, LONG_LIST_BYTES.length);

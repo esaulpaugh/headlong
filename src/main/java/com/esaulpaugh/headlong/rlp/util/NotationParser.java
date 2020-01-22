@@ -65,19 +65,15 @@ public class NotationParser {
                 return nextArrayEnd + LIST_SUFFIX_LEN;
             }
 
-            switch (/* nextObjectType */ resultHolder[1]) {
-            case STRING:
+            if(STRING == resultHolder[1] /* nextObjectType */) {
                 int datumStart = nextObjectIndex + STRING_PREFIX_LEN;
                 int datumEnd = notation.indexOf(Notation.END_STRING, datumStart);
                 parent.add(Strings.decode(notation.substring(datumStart, datumEnd)));
                 i = datumEnd + STRING_SUFFIX_LEN;
-                continue;
-            case LIST:
+            } else {
                 List<Object> childList = new ArrayList<>();
                 i = parse(notation, nextObjectIndex + LIST_PREFIX_LEN, end, childList, resultHolder);
                 parent.add(childList);
-                continue;
-            default:
             }
         }
 

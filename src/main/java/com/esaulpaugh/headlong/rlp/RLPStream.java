@@ -36,7 +36,7 @@ public final class RLPStream implements Iterable<RLPItem>, AutoCloseable {
 
     @Override
     public Iterator<RLPItem> iterator() {
-        return new RLPStreamIterator(is, decoder, new byte[0], /* make sure index == buffer.length */ 0);
+        return new RLPStreamIterator(is, decoder);
     }
 
     @Override

@@ -104,10 +104,6 @@ public final class RLPDecoder {
         default: throw new IllegalArgumentException("item is not a string");
         }
     }
-    
-    public RLPList wrapList(byte lengthOneRlp) throws DecodeException {
-        return wrapList(new byte[] { lengthOneRlp }, 0);
-    }
 
     public RLPList wrapList(byte[] encoding) throws DecodeException {
         return wrapList(encoding, 0);
