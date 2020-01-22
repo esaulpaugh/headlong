@@ -17,17 +17,30 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
+import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PackedEncoderTest {
+
+    @Test
+    public void testOverwrite() throws ABIException {
+        byte[] bytes = new byte[6];
+        Arrays.fill(bytes, (byte) -1);
+        ByteBuffer bb = ByteBuffer.wrap(bytes);
+        TupleType tt = TupleType.parse("(uint40)");
+        tt.encodePacked(Tuple.of(63L), bb);
+
+        assertEquals("000000003fff", FastHex.encodeToString(bb.array()));
+    }
 
     @Test
     public void multipleDynamic() throws Throwable {

@@ -158,9 +158,9 @@ public class Notation {
                             ? buildString(sb, data, elementDataIdx, getShortElementEnd(elementDataIdx, lead - type.offset, end))
                             : buildList(sb, data, elementDataIdx, getShortElementEnd(elementDataIdx, lead - type.offset, end), depth + 1, false);
                 }
-                continue;
+            } else {
+                i = buildString(sb, data, i, i + 1);
             }
-            i = buildString(sb, data, i, i + 1);
         }
         if (/* hasElement */ dataIndex != end) {
             stripFinalDelimiter(sb);
@@ -196,8 +196,7 @@ public class Notation {
 
     @Override
     public boolean equals(Object other) {
-        return other instanceof Notation
-                && value.equals(((Notation) other).value);
+        return other instanceof Notation && value.equals(((Notation) other).value);
     }
 
     @Override

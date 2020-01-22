@@ -26,10 +26,10 @@ public final class Uint {
 
     public final int numBits;
     public final BigInteger range;
-    public final BigInteger halfRange;
     public final Long rangeLong;
-    public final Long maskLong;
+    public final BigInteger halfRange;
     public final Long halfRangeLong;
+    public final Long maskLong;
 
     public Uint(int numBits) {
         if(numBits < 0) {
@@ -37,7 +37,6 @@ public final class Uint {
         }
         this.numBits = numBits;
         this.range = TWO.shiftLeft(numBits - 1); // TWO.pow(numBits)
-        this.halfRange = range.shiftRight(1);
         Long rangeLong, halfRangeLong, maskLong;
         try {
             rangeLong = range.longValueExact();
@@ -47,6 +46,7 @@ public final class Uint {
             rangeLong = halfRangeLong = maskLong = null;
         }
         this.rangeLong = rangeLong;
+        this.halfRange = range.shiftRight(1);
         this.halfRangeLong = halfRangeLong;
         this.maskLong = maskLong;
     }
