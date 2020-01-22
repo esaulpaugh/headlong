@@ -114,21 +114,21 @@ final class PackedEncoder {
 
     private static void insertInt(long value, int byteLen, ByteBuffer dest) {
         if(value >= 0) {
-            pad(dest, Encoding.ZERO_BYTE, byteLen - Integers.len(value));
+            insertN(Encoding.ZERO_BYTE, byteLen - Integers.len(value), dest);
             Integers.putLong(value, dest);
         } else {
-            pad(dest, Encoding.NEGATIVE_ONE_BYTE, byteLen - BizarroIntegers.len(value));
+            insertN(Encoding.NEGATIVE_ONE_BYTE, byteLen - BizarroIntegers.len(value), dest);
             BizarroIntegers.putLong(value, dest);
         }
     }
 
     private static void insertInt(BigInteger bigGuy, int byteLen, ByteBuffer dest) {
         byte[] arr = bigGuy.toByteArray();
-        pad(dest, bigGuy.signum() >= 0 ? Encoding.ZERO_BYTE : Encoding.NEGATIVE_ONE_BYTE, byteLen - arr.length);
+        insertN(bigGuy.signum() >= 0 ? Encoding.ZERO_BYTE : Encoding.NEGATIVE_ONE_BYTE, byteLen - arr.length, dest);
         dest.put(arr);
     }
 
-    private static void pad(ByteBuffer dest, byte val, int n) {
+    private static void insertN(byte val, int n, ByteBuffer dest) {
         for (int i = 0; i < n; i++) {
             dest.put(val);
         }
