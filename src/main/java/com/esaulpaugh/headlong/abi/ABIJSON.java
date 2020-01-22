@@ -75,7 +75,7 @@ public final class ABIJSON {
                                                              final boolean functions,
                                                              final boolean events,
                                                              final Class<T> classOfT) throws ParseException {
-        final Supplier<MessageDigest> defaultDigest = functions ? Function::newDefaultDigest : null;
+        final MessageDigest defaultDigest = functions ? Function.newDefaultDigest() : null;
 
         final List<T> list = new ArrayList<>();
         for(JsonElement e : parseArray(json)) {
@@ -87,7 +87,7 @@ public final class ABIJSON {
                 case FALLBACK:
                 case CONSTRUCTOR:
                     if (functions) {
-                        list.add(classOfT.cast(parseFunction(object, defaultDigest.get())));
+                        list.add(classOfT.cast(parseFunction(object, defaultDigest)));
                     }
                     break;
                 case EVENT:
