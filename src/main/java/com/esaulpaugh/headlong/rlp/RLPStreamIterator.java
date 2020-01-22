@@ -56,7 +56,7 @@ class RLPStreamIterator implements Iterator<RLPItem> {
                 if (read != available) {
                     throw new IOException("read failed: " + read + " != " + available);
                 }
-            } else if (index == buffer.length) {
+            } else if (index >= buffer.length) {
                 return false;
             }
             next = decoder.wrap(buffer, index);
