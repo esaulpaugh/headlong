@@ -16,7 +16,6 @@
 package com.joemelsha.crypto.hash;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Integers;
@@ -194,8 +193,6 @@ public class KeccakTest {
 
         byte[] eight = new byte[] { 8, 7, 6, 5, 4, 3, 2, (byte) 0x80 };
         long normal = Integers.getLong(eight, 0, eight.length);
-        long bizarro = BizarroIntegers.getLong(eight, 0, eight.length);
-        assertEquals(normal, bizarro);
         assertNotEquals(asymmetricBits, normal);
 
         keccak.updateBits(asymmetricBits, bitLen);
