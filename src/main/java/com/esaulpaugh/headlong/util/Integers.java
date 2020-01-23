@@ -413,9 +413,10 @@ public final class Integers {
         return Long.SIZE - Long.numberOfLeadingZeros(val);
     }
 
-    public static BigInteger getBigInt(byte[] bytes, int i, final int len) {
+    public static BigInteger getBigInt(byte[] buffer, int i, int len) {
+//        return new BigInteger(buffer, i, len); // Java 9+
         byte[] dest = new byte[len];
-        System.arraycopy(bytes, i, dest, 0, len);
+        System.arraycopy(buffer, i, dest, 0, len);
         return new BigInteger(dest);
     }
 

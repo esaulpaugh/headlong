@@ -201,7 +201,6 @@ public abstract class RLPItem {
     }
 
     public BigInteger asBigInt() {
-//        return new BigInteger(buffer, dataIndex, dataLength); // Java 9+
         return Integers.getBigInt(buffer, dataIndex, dataLength); // new BigInteger(data());
     }
 
