@@ -24,7 +24,6 @@ import java.security.MessageDigest;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.util.JsonUtils.getArray;
 import static com.esaulpaugh.headlong.util.JsonUtils.getBoolean;
