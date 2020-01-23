@@ -202,7 +202,7 @@ public abstract class RLPItem {
 
     public BigInteger asBigInt() {
 //        return new BigInteger(buffer, dataIndex, dataLength); // Java 9+
-        return new BigInteger(data());
+        return Integers.getBigInt(buffer, dataIndex, dataLength); // new BigInteger(data());
     }
 
     public float asFloat() throws DecodeException {
