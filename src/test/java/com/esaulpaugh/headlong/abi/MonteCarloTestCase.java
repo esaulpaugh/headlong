@@ -66,20 +66,16 @@ public class MonteCarloTestCase implements Serializable {
         private static final int DEFAULT_MAX_ARRAY_DEPTH = 3;
         private static final int DEFAULT_MAX_ARRAY_LENGTH = 3; // does not apply to static base types e.g. bytes1-32
 
+        private final long seed;
+
         private final int maxTupleDepth;
         private final int maxTupleLen;
 
         private final int maxArrayDepth;
         private final int maxArrayLen;
 
-        private final long seed;
-
         Params(long seed) {
-            this.seed = seed;
-            this.maxTupleDepth = DEFAULT_MAX_TUPLE_DEPTH;
-            this.maxTupleLen = DEFAULT_MAX_TUPLE_LENGTH;
-            this.maxArrayDepth = DEFAULT_MAX_ARRAY_DEPTH;
-            this.maxArrayLen = DEFAULT_MAX_ARRAY_LENGTH;
+            this(seed, DEFAULT_MAX_TUPLE_DEPTH, DEFAULT_MAX_TUPLE_LENGTH, DEFAULT_MAX_ARRAY_DEPTH, DEFAULT_MAX_ARRAY_LENGTH);
         }
 
         Params(long seed, int maxTupleDepth, int maxTupleLen, int maxArrayDepth, int maxArrayLen) {

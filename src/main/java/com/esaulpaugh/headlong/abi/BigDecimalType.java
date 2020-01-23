@@ -50,7 +50,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     public int validate(Object value) throws ABIException {
         validateClass(value);
         BigDecimal dec = (BigDecimal) value;
-        validateBigIntBitLen(dec.unscaledValue());
+        validateBigInt(dec.unscaledValue());
         if(dec.scale() == scale) {
             return UNIT_LENGTH_BYTES;
         }
@@ -67,7 +67,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
         bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
-        validateBigIntBitLen(bi);
+        validateBigInt(bi);
         return new BigDecimal(bi, scale);
     }
 

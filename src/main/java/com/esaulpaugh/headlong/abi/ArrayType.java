@@ -216,7 +216,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         int i = 0;
         try {
             for ( ; i < len; i++) {
-                bigIntegerType.validateBigIntBitLen(arr[i]);
+                bigIntegerType.validateBigInt(arr[i]);
             }
         } catch (ABIException ve) {
             throw abiException(ve, i);
@@ -232,7 +232,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         try {
             for ( ; i < len; i++) {
                 BigDecimal element = arr[i];
-                bigDecimalType.validateBigIntBitLen(element.unscaledValue());
+                bigDecimalType.validateBigInt(element.unscaledValue());
                 if(element.scale() != bigDecimalType.scale) {
                     throw new ABIException("unexpected scale: " + element.scale());
                 }

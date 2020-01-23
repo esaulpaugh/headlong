@@ -41,7 +41,7 @@ public final class IntType extends UnitType<Integer> {
     Integer decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
         bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
-        validateBigIntBitLen(bi);
+        validateBigInt(bi);
         return bi.intValue();
     }
 

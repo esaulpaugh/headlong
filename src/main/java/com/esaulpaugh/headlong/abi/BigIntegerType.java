@@ -47,7 +47,7 @@ public final class BigIntegerType extends UnitType<BigInteger> {
     @Override
     public int validate(Object value) throws ABIException {
         validateClass(value);
-        validateBigIntBitLen((BigInteger) value);
+        validateBigInt((BigInteger) value);
         return UNIT_LENGTH_BYTES;
     }
 
@@ -61,7 +61,7 @@ public final class BigIntegerType extends UnitType<BigInteger> {
     BigInteger decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
         bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
-        validateBigIntBitLen(bi);
+        validateBigInt(bi);
         return bi;
     }
 }

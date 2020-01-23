@@ -41,7 +41,7 @@ public final class LongType extends UnitType<Long> {
     Long decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
         bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
-        validateBigIntBitLen(bi);
+        validateBigInt(bi);
         return bi.longValue();
     }
 
