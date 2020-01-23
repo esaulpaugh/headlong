@@ -155,7 +155,7 @@ public class EncodeTest {
     public void illegalCharsTest() throws Throwable {
         assertThrown(PARSE_ERR, "illegal char", () -> Function.parse("œ()"));
 
-        assertThrown(PARSE_ERR, "illegal char \\u02a6 '\u02a6' @ index 2", () -> new Function("ba\u02a6z(uint32,bool)"));
+        assertThrown(PARSE_ERR, "illegal char 0x2a6 '\u02a6' @ index 2", () -> new Function("ba\u02a6z(uint32,bool)"));
 
         assertThrown(PARSE_ERR, "@ index 1, @ index 0, unrecognized type: bool\u02a6", () -> new Function("baz(int32,(bool\u02a6))"));
     }
