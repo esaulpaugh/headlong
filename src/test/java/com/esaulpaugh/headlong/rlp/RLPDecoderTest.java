@@ -56,6 +56,37 @@ public class RLPDecoderTest {
             (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
     };
 
+    @Disabled("slow")
+    @Test
+    public void fuzz() {
+        byte[] four = new byte[4];
+        byte zero = 0, one = 0, two = 0, three = 0;
+        int valid = 0, invalid = 0;
+        while (true) {
+            try {
+                RLP_STRICT.wrap(four);
+                valid++;
+            } catch (DecodeException de) {
+                invalid++;
+            }
+            four[0] = ++zero;
+            if(zero == 0) {
+                four[1] = ++one;
+                if(one == 0) {
+                    four[2] = ++two;
+                    System.out.println(Strings.encode(four));
+                    if(two == 0) {
+                        four[3] = ++three;
+                        if(three == 0) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println(valid + " + " + invalid + " = " + (valid + invalid));
+    }
+
     @Test
     public void testListIterable() throws Throwable {
         RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
