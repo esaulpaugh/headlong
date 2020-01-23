@@ -121,10 +121,10 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private int staticByteLengthPacked() {
-        if(length == DYNAMIC_LENGTH) {
-            throw new IllegalArgumentException("array of dynamic elements");
+        if(length != DYNAMIC_LENGTH) {
+            return length * elementType.byteLengthPacked(null);
         }
-        return length * elementType.byteLengthPacked(null);
+        throw new IllegalArgumentException("array of dynamic elements");
     }
 
     @Override

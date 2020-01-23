@@ -66,6 +66,11 @@ public final class Tuple extends AbstractList<Object> implements RandomAccess, S
         return Arrays.deepEquals(this.elements, other.elements);
     }
 
+    @Override
+    public String toString() {
+        return Arrays.deepToString(elements);
+    }
+
     public static Tuple of(Object... elements) {
         return new Tuple(elements);
     }
