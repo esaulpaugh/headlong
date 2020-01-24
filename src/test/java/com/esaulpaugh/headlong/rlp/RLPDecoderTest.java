@@ -132,19 +132,25 @@ public class RLPDecoderTest {
                 RLPItem item = decoder.wrap(buffer);
                 valid++;
                 String first = Strings.encode(buffer[0]);
-                if(item.asBoolean()) {
+                if (item.asBoolean()) {
                     switch (first) {
                     case "c0":
                     case "80":
-                    case "00": throw new RuntimeException(Strings.encode(buffer));
+                    case "00":
+                        throw new RuntimeException(Strings.encode(buffer));
                     default:
                     }
                 } else {
                     switch (first) {
                     case "c0":
                     case "80":
-                    case "00": break;
-                    default: throw new RuntimeException(Strings.encode(buffer));
+                    case "00":
+                        break;
+                    default:
+                        throw new RuntimeException(Strings.encode(buffer));
+                    }
+                    if (item.asChar() != '\u0000') {
+                        throw new RuntimeException(Strings.encode(buffer));
                     }
                 }
             } catch (DecodeException de) {
