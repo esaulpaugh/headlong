@@ -31,10 +31,10 @@ import static com.esaulpaugh.headlong.util.Strings.UTF_8;
  * Represents static array types such as bytes3 or uint16[3][2] and dynamic array types such as decimal[5][] or
  * string[4].
  *
- * @param <T> the {@link ABIType} for the elements of the array
+ * @param <E> the {@link ABIType} for the elements of the array
  * @param <J> this {@link ArrayType}'s corresponding Java type
  */
-public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
+public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     static final Class<byte[]> BYTE_ARRAY_CLASS = byte[].class;
     static final String BYTE_ARRAY_ARRAY_CLASS_NAME = byte[][].class.getName();
@@ -47,13 +47,13 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
 
     static final int DYNAMIC_LENGTH = -1;
 
-    final T elementType;
+    final E elementType;
     final int length;
     final boolean isString;
 
     private final String arrayClassName;
 
-    ArrayType(String canonicalType, Class<J> clazz, boolean dynamic, T elementType, int length, String arrayClassName) {
+    ArrayType(String canonicalType, Class<J> clazz, boolean dynamic, E elementType, int length, String arrayClassName) {
         super(canonicalType, clazz, dynamic);
         this.elementType = elementType;
         this.length = length;
@@ -61,7 +61,7 @@ public final class ArrayType<T extends ABIType<?>, J> extends ABIType<J> {
         this.isString = String.class == clazz;
     }
 
-    public T getElementType() {
+    public E getElementType() {
         return elementType;
     }
 

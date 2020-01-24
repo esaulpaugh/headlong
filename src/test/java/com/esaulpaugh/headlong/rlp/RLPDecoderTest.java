@@ -23,8 +23,6 @@ import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -33,6 +31,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiPredicate;
 
 import static com.esaulpaugh.headlong.TestUtils.CustomRunnable;
@@ -60,19 +61,19 @@ public class RLPDecoderTest {
     @Disabled("slow")
     @Test
     public void exhaustiveFuzz() throws InterruptedException {
+        ExecutorService executorService = Executors.newWorkStealingPool();
         ExhaustiveFuzzTask[] tasks = new ExhaustiveFuzzTask[256];
-        Thread[] threads = new Thread[tasks.length];
         for (int i = 0; i < tasks.length; i++) {
             System.out.print(i + " -> ");
             tasks[i] = new ExhaustiveFuzzTask(new byte[] { (byte) i, 0, 0, 0 });
-            threads[i] = new Thread(tasks[i]);
-            threads[i].start();
+            executorService.submit(tasks[i]);
         }
         long valid = 0, invalid = 0;
-        for (int i = 0; i < tasks.length; i++) {
-            threads[i].join();
-            valid += tasks[i].valid;
-            invalid += tasks[i].invalid;
+        executorService.shutdown();
+        executorService.awaitTermination(12L, TimeUnit.MINUTES);
+        for (ExhaustiveFuzzTask task : tasks) {
+            valid += task.valid;
+            invalid += task.invalid;
         }
         System.out.println(valid + " / " + (valid + invalid) + " (" + invalid + " invalid)");
     }
@@ -235,10 +236,9 @@ public class RLPDecoderTest {
     @Test
     public void hugeListsHighMem() throws DecodeException {
 
-        System.out.println(Runtime.getRuntime().maxMemory());
-
-        MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-        System.out.println(memoryBean.getHeapMemoryUsage().getMax());
+//        System.out.println(Runtime.getRuntime().maxMemory());
+//        MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+//        System.out.println(memoryBean.getHeapMemoryUsage().getMax());
 
         int lol;
         byte[] buffer;
