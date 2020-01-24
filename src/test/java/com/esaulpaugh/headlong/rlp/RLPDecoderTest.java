@@ -374,24 +374,45 @@ public class RLPDecoderTest {
 
     @Test
     public void booleans() throws DecodeException {
-        byte[] burma17 = new byte[] { (byte) 0xc5, (byte) 0x82, (byte) 0x10, (byte) 0x10, (byte) 0xc0 };
+        assertFalse(RLP_STRICT.wrap((byte) 0xc0).asBoolean());
+        assertFalse(RLP_STRICT.wrap((byte) 0x80).asBoolean());
+        assertFalse(RLP_STRICT.wrap((byte) 0x00).asBoolean());
 
-        RLPItem nonEmpty = RLP_LENIENT.wrap( burma17, 1);
-        assertTrue(nonEmpty.asBoolean());
+        assertTrue(RLP_LENIENT.wrap(new byte[] { (byte) 0x81, (byte) 0x00 }).asBoolean());
+        assertTrue(RLP_LENIENT.wrap(new byte[] { (byte) 0x81, (byte) 0x01 }).asBoolean());
 
-        RLPItem empty = RLP_LENIENT.wrap( burma17, 4);
-        assertFalse(empty.asBoolean());
+        assertTrue(RLP_STRICT.wrap(new byte[] { (byte) 0x81, (byte) 0x80 }).asBoolean());
+
+        assertTrue(RLP_STRICT.wrap((byte) 0x01).asBoolean());
+
+        assertTrue(RLP_STRICT.wrap((byte) 0x79).asBoolean());
     }
 
     @Test
     public void chars() throws DecodeException {
-        byte[] burma17 = new byte[] { (byte) 0xc5, (byte) 0x82, (byte) 0x10, (byte) 0x10, (byte) 0xc0 };
+        byte[][] burma17 = new byte[256][];
+        for (int i = 0; i < burma17.length; i++) {
+            burma17[i] = RLPEncoder.encode((byte) i);
+        }
 
-        RLPItem nonEmpty = RLP_LENIENT.wrap( burma17, 1);
-        assertEquals(Character.valueOf('\u1010'), Character.valueOf(nonEmpty.asChar()));
+        HashSet<Character> chars = new HashSet<>(512);
+        HashSet<Character> sizeTwo = new HashSet<>(256);
+        for (byte[] bytes : burma17) {
+            RLPItem item = RLP_STRICT.wrap(bytes);
+            Character c = (char) item.asByte();
+            if (!chars.add(c)) {
+                throw new RuntimeException(item.toString());
+            }
+            if(bytes.length != 1) {
+                sizeTwo.add(c);
+            }
+        }
+        assertEquals(256, chars.size());
+        assertEquals(128, sizeTwo.size());
 
-        RLPItem empty = RLP_LENIENT.wrap( burma17, 4);
-        assertEquals(Character.valueOf('\0'), Character.valueOf(empty.asChar()));
+        assertEquals('\0', RLP_STRICT.wrap((byte) 0xc0).asChar());
+        assertEquals('\0', RLP_STRICT.wrap((byte) 0x80).asChar());
+        assertEquals('\0', RLP_STRICT.wrap((byte) 0x00).asChar());
     }
 
     private static final BiPredicate<Integer, Integer> UNTIL_COUNT_FIVE = (count, index) -> count < 5;

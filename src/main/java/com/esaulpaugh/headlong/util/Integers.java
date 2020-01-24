@@ -220,12 +220,7 @@ public final class Integers {
      */
     public static byte getByte(byte[] buffer, int i, int len) throws DecodeException {
         switch (len) {
-        case 1:
-            byte lead = buffer[i];
-            if(lead == 0) {
-                throw leadingZeroException(i, len);
-            }
-            return lead;
+        case 1: return buffer[i];
         case 0: return 0;
         default: throw outOfRangeException(len);
         }
@@ -250,7 +245,7 @@ public final class Integers {
         case 2: val = buffer[i+1] & 0xFF; shiftAmount = Byte.SIZE; // & 0xFF to promote to int before left shift
         case 1:
             byte lead = buffer[i];
-            if(lead == 0) {
+            if(lead == 0 && len > 1) {
                 throw leadingZeroException(i, len);
             }
             val |= (lead & 0xFFL) << shiftAmount;
@@ -280,7 +275,7 @@ public final class Integers {
         case 2: val |= (buffer[i+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1:
             byte lead = buffer[i];
-            if(lead == 0) {
+            if(lead == 0 && len > 1) {
                 throw leadingZeroException(i, len);
             }
             val |= (lead & 0xFFL) << shiftAmount;
@@ -314,7 +309,7 @@ public final class Integers {
         case 2: val |= (buffer[i+1] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1:
             byte lead = buffer[i];
-            if(lead == 0) {
+            if(lead == 0 && len > 1) {
                 throw leadingZeroException(i, len);
             }
             val |= (lead & 0xFFL) << shiftAmount;

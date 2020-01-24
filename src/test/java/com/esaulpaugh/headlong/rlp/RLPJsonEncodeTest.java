@@ -16,9 +16,9 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.JsonUtils;
+import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Test;
@@ -63,13 +63,9 @@ public class RLPJsonEncodeTest {
                             : parseString(in).getBytes(StandardCharsets.UTF_8));
                 }
             }
-            String expected = FastHex.encodeToString(getOutBytes(entry));
-            String actual = FastHex.encodeToString(actualBytes);
-            try {
-                assertEquals(expected, actual);
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
+            String expected = Strings.encode(getOutBytes(entry));
+            String actual = Strings.encode(actualBytes);
+            assertEquals(expected, actual);
         }
     }
 
@@ -88,6 +84,6 @@ public class RLPJsonEncodeTest {
 
         String outString = out.getAsString();
 
-        return FastHex.decode(outString.substring(outString.indexOf("0x") + "0x".length()));
+        return Strings.decode(outString.substring(outString.indexOf("0x") + "0x".length()));
     }
 }

@@ -166,7 +166,7 @@ public abstract class RLPItem {
      * @see Integers#putByte(byte, byte[], int)
      */
     public boolean asBoolean() {
-        return dataLength != 0;
+        return dataLength != 0 && buffer[index] != 0x00;
     }
 
     /**
