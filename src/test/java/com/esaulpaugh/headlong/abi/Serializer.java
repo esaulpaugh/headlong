@@ -15,7 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -58,7 +58,7 @@ public class Serializer {
         } else if(val instanceof BigInteger) {
             JsonObject object = new JsonObject();
             object.add("type", new JsonPrimitive("string"));
-            object.add("value", new JsonPrimitive("0x" + FastHex.encodeToString(((BigInteger) val).toByteArray())));
+            object.add("value", new JsonPrimitive("0x" + Strings.encode(((BigInteger) val).toByteArray())));
             return object;
         } else if(val instanceof BigDecimal) {
             JsonObject object = new JsonObject();
@@ -68,7 +68,7 @@ public class Serializer {
         } else if(val instanceof byte[]) {
             JsonObject object = new JsonObject();
             object.add("type", new JsonPrimitive("buffer"));
-            object.add("value", new JsonPrimitive("0x" + FastHex.encodeToString((byte[]) val)));
+            object.add("value", new JsonPrimitive("0x" + Strings.encode((byte[]) val)));
             return object;
         } else if(val instanceof String) {
             JsonObject object = new JsonObject();

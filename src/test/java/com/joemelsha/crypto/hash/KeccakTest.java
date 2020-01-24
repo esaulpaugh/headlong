@@ -90,7 +90,7 @@ public class KeccakTest {
         assertArrayEquals(b0, b1);
         assertArrayEquals(k0, b0);
 
-        System.out.println(FastHex.encodeToString(b0));
+        System.out.println(Strings.encode(b0));
     }
 
     @Test
@@ -119,7 +119,7 @@ public class KeccakTest {
                 final int end = r.nextInt(bound);
                 final int start = end == 0 ? 0 : r.nextInt(end);
                 final int len = end - start;
-//                System.out.println("[" + start + "-" + end + ")\t\t" + FastHex.encodeToString(buffer, start, len));
+//                System.out.println("[" + start + "-" + end + ")\t\t" + Strings.encode(buffer, start, len));
                 k.update(buffer, start, len);
                 k_.update(buffer, start, len);
             }
@@ -160,10 +160,10 @@ public class KeccakTest {
 
         byte[] arr2 = bb.array();
 
-        assertNotEquals(FastHex.encodeToString(arr), FastHex.encodeToString(arr2));
+        assertNotEquals(Strings.encode(arr), Strings.encode(arr2));
         assertArrayEquals(Arrays.copyOfRange(arr, 4, 7), Arrays.copyOfRange(arr2, 4, 7));
 
-        assertEquals("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470", FastHex.encodeToString(keccak.digest(new byte[0])));
+        assertEquals("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470", Strings.encode(keccak.digest(new byte[0])));
 
         keccak.reset();
 
@@ -173,7 +173,7 @@ public class KeccakTest {
 
         keccak.digest(bb);
 
-        assertEquals("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470", FastHex.encodeToString(bb.array()));
+        assertEquals("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470", Strings.encode(bb.array()));
     }
 
     @Test

@@ -207,7 +207,7 @@ public class MonteCarloTestCase implements Serializable {
         jsonObject.add("name", new JsonPrimitive(name));
         jsonObject.add("types", Serializer.serializeTypes(f.getParamTypes(), gson));
         jsonObject.add("values", Serializer.serializeValues(this.argsTuple, gson));
-        jsonObject.add("result", new JsonPrimitive("0x" + FastHex.encodeToString(abi.array())));
+        jsonObject.add("result", new JsonPrimitive("0x" + Strings.encode(abi.array())));
         jsonObject.add("version", version);
 
         return jsonObject;
