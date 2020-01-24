@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.BiPredicate;
 
@@ -58,17 +59,16 @@ public class RLPDecoderTest {
 
     @Disabled("slow")
     @Test
-    public void fuzz() throws InterruptedException {
-        FuzzTask[] tasks = new FuzzTask[256];
+    public void exhaustiveFuzz() throws InterruptedException {
+        ExhaustiveFuzzTask[] tasks = new ExhaustiveFuzzTask[256];
         Thread[] threads = new Thread[tasks.length];
         for (int i = 0; i < tasks.length; i++) {
             System.out.print(i + " -> ");
-            tasks[i] = new FuzzTask(new byte[] { (byte) i, 0, 0, 0 }, (byte) 0x00, (byte) 0x00);
+            tasks[i] = new ExhaustiveFuzzTask(new byte[] { (byte) i, 0, 0, 0 });
             threads[i] = new Thread(tasks[i]);
             threads[i].start();
         }
-        long valid = 0;
-        long invalid = 0;
+        long valid = 0, invalid = 0;
         for (int i = 0; i < tasks.length; i++) {
             threads[i].join();
             valid += tasks[i].valid;
@@ -77,26 +77,22 @@ public class RLPDecoderTest {
         System.out.println(valid + " / " + (valid + invalid) + " (" + invalid + " invalid)");
     }
 
-    private static class FuzzTask implements Runnable {
+    private static class ExhaustiveFuzzTask implements Runnable {
 
         private final byte[] four;
-        private final byte start;
-        private final byte end;
         private long valid, invalid;
         private final String tag;
 
-        private FuzzTask(byte[] four, byte start, byte end) {
+        private ExhaustiveFuzzTask(byte[] four) {
             this.four = four;
-            this.start = start;
-            this.end = end;
-            this.tag = "[" + start + "," + end + ") ";
+            this.tag = Arrays.toString(four);
             System.out.println(tag);
         }
 
         @Override
         public void run() {
             byte[] four = this.four;
-            byte one = 0, two = 0, three = start;
+            byte one = 0, two = 0, three = 0;
             int valid = 0, invalid = 0;
             boolean gogo = true;
             do {
@@ -105,13 +101,13 @@ public class RLPDecoderTest {
                     four[2] = two++;
                     if(two == 0) {
                         four[3] = three++;
-                        if(three == end) {
+                        if(three == 0) {
                             gogo = false;
                         }
                     }
                 }
                 try {
-                    RLP_LENIENT.wrap(four, 0, 4);
+                    RLP_STRICT.wrap(four, 0, 4);
                     valid++;
                 } catch (DecodeException de) {
                     invalid++;
@@ -121,6 +117,37 @@ public class RLPDecoderTest {
             this.valid = valid;
             this.invalid = invalid;
         }
+    }
+
+    @Test
+    public void randomFuzz() {
+        RLPDecoder decoder = RLP_STRICT;
+        Random r = new Random(TestUtils.getSeed(System.nanoTime()));
+        byte[] buffer = new byte[56];
+        int valid = 0, invalid = 0;
+        for (int i = 0; i < 800_000; i++) {
+            r.nextBytes(buffer);
+            try {
+                decoder.wrap(buffer);
+                valid++;
+            } catch (DecodeException de) {
+                invalid++;
+                String first = Strings.encode(buffer[0]);
+                switch (first) {
+                case "81":
+                    if(!decoder.lenient || buffer[1] >= 0x00) {
+                        break;
+                    }
+                    throw new RuntimeException(Strings.encode(buffer));
+                case "b8": case "b9": case "ba": case "bb": case "bc": case "bd": case "be": case "bf":
+                case "f8": case "f9": case "fa": case "fb": case "fc": case "fd": case "fe": case "ff":
+                    break;
+                default:
+                    throw new RuntimeException(Strings.encode(buffer));
+                }
+            }
+        }
+        System.out.println("valid: " + valid + " / " + (valid + invalid) + " (" + invalid + " invalid)");
     }
 
     @Test
