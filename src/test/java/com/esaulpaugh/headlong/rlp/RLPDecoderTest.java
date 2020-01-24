@@ -58,33 +58,69 @@ public class RLPDecoderTest {
 
     @Disabled("slow")
     @Test
-    public void fuzz() {
-        byte[] four = new byte[4];
-        byte zero = 0, one = 0, two = 0, three = 0;
-        int valid = 0, invalid = 0;
-        while (true) {
-            try {
-                RLP_STRICT.wrap(four);
-                valid++;
-            } catch (DecodeException de) {
-                invalid++;
-            }
-            four[0] = ++zero;
-            if(zero == 0) {
-                four[1] = ++one;
+    public void fuzz() throws InterruptedException {
+        FuzzTask[] tasks = new FuzzTask[256];
+        Thread[] threads = new Thread[tasks.length];
+        for (int i = 0; i < tasks.length; i++) {
+            System.out.print(i + " -> ");
+            tasks[i] = new FuzzTask(new byte[] { (byte) i, 0, 0, 0 }, (byte) 0x00, (byte) 0x00);
+            threads[i] = new Thread(tasks[i]);
+            threads[i].start();
+        }
+        long valid = 0;
+        long invalid = 0;
+        for (int i = 0; i < tasks.length; i++) {
+            threads[i].join();
+            valid += tasks[i].valid;
+            invalid += tasks[i].invalid;
+        }
+        System.out.println(valid + " / " + (valid + invalid) + " (" + invalid + " invalid)");
+    }
+
+    private static class FuzzTask implements Runnable {
+
+        private final byte[] four;
+        private final byte start;
+        private final byte end;
+        private long valid, invalid;
+        private final String tag;
+
+        private FuzzTask(byte[] four, byte start, byte end) {
+            this.four = four;
+            this.start = start;
+            this.end = end;
+            this.tag = "[" + start + "," + end + ") ";
+            System.out.println(tag);
+        }
+
+        @Override
+        public void run() {
+            byte[] four = this.four;
+            byte one = 0, two = 0, three = start;
+            int valid = 0, invalid = 0;
+            boolean gogo = true;
+            do {
+                four[1] = one++;
                 if(one == 0) {
-                    four[2] = ++two;
-                    System.out.println(Strings.encode(four));
+                    four[2] = two++;
                     if(two == 0) {
-                        four[3] = ++three;
-                        if(three == 0) {
-                            break;
+                        four[3] = three++;
+                        if(three == end) {
+                            gogo = false;
                         }
                     }
                 }
-            }
+                try {
+                    RLP_LENIENT.wrap(four, 0, 4);
+                    valid++;
+                } catch (DecodeException de) {
+                    invalid++;
+                }
+            } while(gogo);
+            System.out.println(tag + "END " + Strings.encode(four));
+            this.valid = valid;
+            this.invalid = invalid;
         }
-        System.out.println(valid + " + " + invalid + " = " + (valid + invalid));
     }
 
     @Test
