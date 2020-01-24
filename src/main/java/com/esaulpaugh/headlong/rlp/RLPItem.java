@@ -160,7 +160,7 @@ public abstract class RLPItem {
     }
 
     /**
-     * Wise man says only empty items are false.
+     * Only 0xc0, 0x80, and 0x00 are false. Everything else is true.
      *
      * @return the boolean represenation for this item
      * @see Integers#putByte(byte, byte[], int)

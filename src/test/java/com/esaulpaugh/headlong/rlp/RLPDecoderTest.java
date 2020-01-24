@@ -126,11 +126,27 @@ public class RLPDecoderTest {
         Random r = new Random(TestUtils.getSeed(System.nanoTime()));
         byte[] buffer = new byte[56];
         int valid = 0, invalid = 0;
-        for (int i = 0; i < 800_000; i++) {
+        for (int i = 0; i < 500_000; i++) {
             r.nextBytes(buffer);
             try {
-                decoder.wrap(buffer);
+                RLPItem item = decoder.wrap(buffer);
                 valid++;
+                String first = Strings.encode(buffer[0]);
+                if(item.asBoolean()) {
+                    switch (first) {
+                    case "c0":
+                    case "80":
+                    case "00": throw new RuntimeException(Strings.encode(buffer));
+                    default:
+                    }
+                } else {
+                    switch (first) {
+                    case "c0":
+                    case "80":
+                    case "00": break;
+                    default: throw new RuntimeException(Strings.encode(buffer));
+                    }
+                }
             } catch (DecodeException de) {
                 invalid++;
                 String first = Strings.encode(buffer[0]);
