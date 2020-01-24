@@ -272,13 +272,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     public ByteBuffer encodePacked(Tuple values) throws ABIException {
         validate(values);
         ByteBuffer dest = ByteBuffer.allocate(byteLengthPacked(values));
-        PackedEncoder.insertTuple(this, values, dest);
+        PackedEncoder.encodeTuple(this, values, dest);
         return dest;
     }
 
     public void encodePacked(Tuple values, ByteBuffer dest) throws ABIException {
         validate(values);
-        PackedEncoder.insertTuple(this, values, dest);
+        PackedEncoder.encodeTuple(this, values, dest);
     }
 
     @Override
