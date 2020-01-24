@@ -319,7 +319,7 @@ public final class Integers {
     }
 
     private static UnrecoverableDecodeException leadingZeroException(int idx, int len) {
-        return new UnrecoverableDecodeException("deserialised integers with leading zeroes are invalid; index: " + idx + ", len: " + len);
+        return new UnrecoverableDecodeException("deserialised positive integers with leading zeroes are invalid; index: " + idx + ", len: " + len);
     }
 
     private static UnrecoverableDecodeException outOfRangeException(int len) {
