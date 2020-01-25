@@ -89,25 +89,23 @@ public final class Function implements ABIObject, Serializable {
     public Function(Type type, String signature, String outputs, MessageDigest messageDigest) {
         try {
             final int split = signature.indexOf('(');
-            if (split < 0) {
+            if (split >= 0) {
+                try {
+                    this.inputTypes = (TupleType) TypeFactory.create(signature.substring(split), null);
+                } catch (ClassCastException cce) {
+                    throw new ParseException("illegal signature termination", signature.length()); // e.g. "foo()[]"
+                }
+                this.type = Objects.requireNonNull(type);
+                String name = Utils.validateChars(NON_ASCII_CHAR, signature.substring(0, split));
+                this.name = name.isEmpty() && (type == Type.FALLBACK || type == Type.CONSTRUCTOR) ? null : name;
+                this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
+                this.stateMutability = null;
+                this.hashAlgorithm = messageDigest.getAlgorithm();
+                validateFunction();
+                generateSelector(messageDigest);
+            } else {
                 throw new ParseException("params start not found", signature.length());
             }
-            final TupleType tupleType;
-            try {
-                tupleType = (TupleType) TypeFactory.create(signature.substring(split), null);
-            } catch (ClassCastException cce) {
-                throw new ParseException("illegal signature termination", signature.length()); // e.g. "foo()[]"
-            }
-
-            this.type = Objects.requireNonNull(type);
-            String name = Utils.validateChars(NON_ASCII_CHAR, signature.substring(0, split));
-            this.name = name.isEmpty() && (type == Type.FALLBACK || type == Type.CONSTRUCTOR) ? null : name;
-            this.inputTypes = tupleType;
-            this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
-            this.stateMutability = null;
-            this.hashAlgorithm = messageDigest.getAlgorithm();
-            validateFunction();
-            generateSelector(messageDigest);
         } catch (ParseException pe) {
             throw new IllegalArgumentException(pe);
         }
