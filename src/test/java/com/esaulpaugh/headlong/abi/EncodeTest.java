@@ -39,8 +39,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EncodeTest {
 
-    private static final Random RAND = TestUtils.seededRandom();
-
     private static final Class<IllegalArgumentException> PARSE_ERR = IllegalArgumentException.class;
 
     private static final char[] ALPHABET = "(),abcdefgilmnorstuxy0123456789[]".toCharArray(); // ")uint8,[]"
@@ -49,7 +47,7 @@ public class EncodeTest {
     @Disabled("takes minutes to run")
     @Test
     public void fuzzSignatures() throws InterruptedException {
-        final Random r = RAND;
+        final Random r = TestUtils.seededRandom();
         final Runnable runnable = () -> {
             for (int len = 6; len <= 9; len++) {
                 System.out.println(len + "(" + Thread.currentThread().getId() + ")");
@@ -209,15 +207,17 @@ public class EncodeTest {
     @Test
     public void fixedLengthDynamicArrayTest() throws Throwable {
 
-        Supplier<Object> bytesSupplier = () -> { byte[] v = new byte[RAND.nextInt(33)]; RAND.nextBytes(v); return v; };
-        Supplier<Object> stringSupplier = () -> { byte[] v = new byte[RAND.nextInt(33)]; RAND.nextBytes(v); return new String(v, StandardCharsets.UTF_8); };
-        Supplier<Object> booleanArraySupplier = () -> { boolean[] v = new boolean[RAND.nextInt(4)]; Arrays.fill(v, RAND.nextBoolean()); return v; };
-        Supplier<Object> intArraySupplier = () -> { BigInteger[] v = new BigInteger[RAND.nextInt(4)]; Arrays.fill(v, BigInteger.valueOf(RAND.nextInt())); return v; };
+        final Random rand = TestUtils.seededRandom();
 
-        testFixedLenDynamicArray("bytes", new byte[1 + RAND.nextInt(34)][], bytesSupplier);
-        testFixedLenDynamicArray("string", new String[1 + RAND.nextInt(34)], stringSupplier);
-        testFixedLenDynamicArray("bool[]", new boolean[1 + RAND.nextInt(34)][], booleanArraySupplier);
-        testFixedLenDynamicArray("int[]", new BigInteger[1 + RAND.nextInt(34)][], intArraySupplier);
+        Supplier<Object> bytesSupplier = () -> { byte[] v = new byte[rand.nextInt(33)]; rand.nextBytes(v); return v; };
+        Supplier<Object> stringSupplier = () -> { byte[] v = new byte[rand.nextInt(33)]; rand.nextBytes(v); return new String(v, StandardCharsets.UTF_8); };
+        Supplier<Object> booleanArraySupplier = () -> { boolean[] v = new boolean[rand.nextInt(4)]; Arrays.fill(v, rand.nextBoolean()); return v; };
+        Supplier<Object> intArraySupplier = () -> { BigInteger[] v = new BigInteger[rand.nextInt(4)]; Arrays.fill(v, BigInteger.valueOf(rand.nextInt())); return v; };
+
+        testFixedLenDynamicArray("bytes", new byte[1 + rand.nextInt(34)][], bytesSupplier);
+        testFixedLenDynamicArray("string", new String[1 + rand.nextInt(34)], stringSupplier);
+        testFixedLenDynamicArray("bool[]", new boolean[1 + rand.nextInt(34)][], booleanArraySupplier);
+        testFixedLenDynamicArray("int[]", new BigInteger[1 + rand.nextInt(34)][], intArraySupplier);
 
         final String msg = "array lengths differ, expected: <32> but was: <0>";
         assertThrown(AssertionFailedError.class, msg, () -> testFixedLenDynamicArray("bytes", new byte[0][], null));
@@ -257,7 +257,7 @@ public class EncodeTest {
         Function f = new Function("(function[2][][],bytes24,string[0][0],address[],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
 
         byte[] func = new byte[24];
-        RAND.nextBytes(func);
+        TestUtils.seededRandom().nextBytes(func);
 
         String oneSixty = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 //        String oneSixty = "10000000000000000000000000000000000000000";

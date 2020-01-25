@@ -77,32 +77,10 @@ public class BizarroIntegersTest {
 
     @Test
     public void putGetLong() {
-        final Random rand = TestUtils.seededRandom();
-        final byte[] eight = new byte[8];
-        final long _2_24 = (long) Math.pow(2.0, Short.SIZE + Byte.SIZE);
-        final long _2_16 = (long) Math.pow(2.0, Short.SIZE);
-        final long _2_8 = (long) Math.pow(2.0, Byte.SIZE);
-        testLongs((int) _2_8, new Supplier<Long>() {
-            private long i = Byte.MIN_VALUE;
-            @Override
-            public Long get() {
-                return i++;
-            }
-        }, eight);
-        testLongs(1000, () -> rand.nextInt() / _2_16, eight);
-        testLongs(1000, () -> rand.nextInt() / _2_8, eight);
-        testLongs(1000, () -> (long) rand.nextInt(), eight);
-        testLongs(1000, () -> rand.nextLong() / _2_24, eight);
-        testLongs(1000, () -> rand.nextLong() / _2_16, eight);
-        testLongs(1000, () -> rand.nextLong() / _2_8, eight);
-        testLongs(1000, rand::nextLong, eight);
-    }
-
-    private static void testLongs(int iterations, Supplier<Long> supplier, byte[] eight) {
-//        System.out.println(n);
-//        System.out.print(lo >= 0 ? Integers.len(lo) : BizarroIntegers.len(lo));
-        for (long i = 0; i < iterations; i++) {
-            long lo = supplier.get();
+        Random rand = TestUtils.seededRandom();
+        byte[] eight = new byte[8];
+        for (long i = 0; i < 20_000; i++) {
+            long lo = TestUtils.pickRandom(rand);
             int n = BizarroIntegers.putLong(lo, eight, 0);
             long r = BizarroIntegers.getLong(eight, 0, n);
             if(lo != r) {
@@ -141,10 +119,9 @@ public class BizarroIntegersTest {
 
     @Test
     public void lenLong() {
-        final Random rand = TestUtils.seededRandom();
-        final int lim = (int) Math.pow(2.0, 15) - 1;
-        for (int i = 0; i < lim; i++) {
-            long lo = rand.nextLong();
+        Random rand = TestUtils.seededRandom();
+        for (int i = 0; i < 30_000; i++) {
+            long lo = TestUtils.pickRandom(rand);
             int expectedLen = lo >= 0 || lo < -72_057_594_037_927_936L ? 8
                     : lo < -281_474_976_710_656L ? 7
                     : lo < -1_099_511_627_776L ? 6
