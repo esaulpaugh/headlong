@@ -77,9 +77,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         int len = 0;
         for (int i = 0; i < elementTypes.length; i++) {
             ABIType<?> type = elementTypes[i];
-            len += !type.dynamic
-                    ? type.byteLength(tuple.elements[i])
-                    : OFFSET_LENGTH_BYTES + type.byteLength(tuple.elements[i]);
+            int byteLen = type.byteLength(tuple.elements[i]);
+            len += !type.dynamic ? byteLen : OFFSET_LENGTH_BYTES + byteLen;
         }
         return len;
     }
@@ -125,9 +124,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             int len = 0;
             for ( ; i < elementTypes.length; i++) {
                 ABIType<?> type = elementTypes[i];
-                len += !type.dynamic
-                        ? type.validate(elements[i])
-                        : OFFSET_LENGTH_BYTES + type.validate(elements[i]);
+                int byteLen = type.validate(elements[i]);
+                len += !type.dynamic ? byteLen : OFFSET_LENGTH_BYTES + byteLen;
             }
             return len;
         } catch (NullPointerException npe) {
@@ -152,24 +150,23 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         for (int i = 0; i < len; i++) {
             offset = elementTypes[i].encodeHead(values[i], dest, offset);
         }
-        if(dynamic) {
-            for (int i = 0; i < len; i++) {
-                ABIType<?> type = elementTypes[i];
-                if(!type.dynamic) {
-                    continue;
-                }
-                type.encodeTail(values[i], dest);
+        if(!dynamic) {
+            return;
+        }
+        for (int i = 0; i < len; i++) {
+            ABIType<?> type = elementTypes[i];
+            if(!type.dynamic) {
+                continue;
             }
+            type.encodeTail(values[i], dest);
         }
     }
 
     private int headLengthSum(Object[] elements) {
         int headLengths = 0;
         for (int i = 0; i < elementTypes.length; i++) {
-            ABIType<?> et = elementTypes[i];
-            headLengths += et.dynamic
-                    ? OFFSET_LENGTH_BYTES
-                    : et.byteLength(elements[i]);
+            ABIType<?> type = elementTypes[i];
+            headLengths += !type.dynamic ? type.byteLength(elements[i]) : OFFSET_LENGTH_BYTES;
         }
         return headLengths;
     }
@@ -185,12 +182,12 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     Tuple decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
         Object[] elements = new Object[elementTypes.length];
-        if(dynamic) {
-            decodeDynamic(bb, elementTypes, unitBuffer, elements);
-        } else {
+        if(!dynamic) {
             for (int i = 0; i < elementTypes.length; i++) {
                 elements[i] = elementTypes[i].decode(bb, unitBuffer);
             }
+        } else {
+            decodeDynamic(bb, elementTypes, unitBuffer, elements);
         }
         return new Tuple(elements);
     }
@@ -201,10 +198,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         int[] offsets = new int[len];
         for (int i = 0; i < len; i++) {
             ABIType<?> elementType = elementTypes[i];
-            if (elementType.dynamic) {
-                offsets[i] = Encoding.OFFSET_TYPE.decode(bb, elementBuffer);
-            } else {
+            if (!elementType.dynamic) {
                 dest[i] = elementType.decode(bb, elementBuffer);
+            } else {
+                offsets[i] = Encoding.OFFSET_TYPE.decode(bb, elementBuffer);
             }
         }
         for (int i = 0; i < len; i++) {
