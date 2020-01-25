@@ -115,9 +115,9 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         for (Object element : elements) {
             len += elementType.byteLength(element);
         }
-        return elementType.dynamic
-                ? len + (elements.length << LOG_2_UNIT_LENGTH_BYTES) // 32 bytes per offset
-                : len;
+        return !elementType.dynamic
+                ? len
+                : len + (elements.length << LOG_2_UNIT_LENGTH_BYTES); // 32 bytes per offset
     }
 
     private int staticByteLengthPacked() {
@@ -251,33 +251,32 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private int validateObjectArray(Object[] arr) throws ABIException {
         final int len = arr.length;
         checkLength(len, arr);
-        int byteLength = elementType.dynamic ? len << LOG_2_UNIT_LENGTH_BYTES : 0; // 32 bytes per offset
-        int i = 0;
-        for ( ; i < len; i++) {
+        int byteLength = !elementType.dynamic ? 0 : len << LOG_2_UNIT_LENGTH_BYTES; // when dynamic, 32 bytes per offset
+        for (int i = 0; i < len; i++) {
             byteLength += elementType.validate(arr[i]);
         }
         return byteLength;
     }
 
     private int checkLength(final int valueLength, Object value) throws ABIException {
-        final int expected = this.length;
-        if(expected != DYNAMIC_LENGTH && valueLength != expected) {
-            throw new ABIException(
-                    Utils.friendlyClassName(value.getClass(), valueLength)
-                            + " not instanceof " + Utils.friendlyClassName(clazz, expected) + ", " +
-                            valueLength + " != " + expected
-            );
+        if(length == DYNAMIC_LENGTH || length == valueLength) {
+            return valueLength;
         }
-        return valueLength;
+        throw new ABIException(
+                Utils.friendlyClassName(value.getClass(), valueLength)
+                        + " not instanceof " + Utils.friendlyClassName(clazz, length) + ", " +
+                        valueLength + " != " + length
+        );
     }
 
     @Override
     int encodeHead(Object value, ByteBuffer dest, int offset) {
-        if (dynamic) { // includes String
-            return Encoding.insertOffset(offset, this, value, dest);
+        if (!dynamic) {
+            encodeArrayTail(value, dest);
+            return offset;
         }
-        encodeArrayTail(value, dest);
-        return offset;
+        // includes String
+        return Encoding.insertOffset(offset, this, value, dest);
     }
 
     @Override
@@ -457,12 +456,12 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private Object[] decodeObjectArray(int len, ByteBuffer bb, byte[] elementBuffer) throws ABIException {
         Object[] dest = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
-        if(this.dynamic) {
-            decodeObjectArrayDynamic(len, bb, elementBuffer, dest);
-        } else {
+        if(!this.dynamic) {
             for (int i = 0; i < len; i++) {
                 dest[i] = elementType.decode(bb, elementBuffer);
             }
+        } else {
+            decodeObjectArrayDynamic(len, bb, elementBuffer, dest);
         }
         return dest;
     }

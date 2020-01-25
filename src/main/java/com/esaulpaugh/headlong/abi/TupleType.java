@@ -114,23 +114,21 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
         final Object[] elements = ((Tuple) value).elements;
 
-        if(elements.length != elementTypes.length) {
-            throw new IllegalArgumentException("tuple length mismatch: actual != expected: " +
-                    elements.length + " != " + elementTypes.length);
-        }
-
-        int i = 0;
-        try {
-            int len = 0;
-            for ( ; i < elementTypes.length; i++) {
-                ABIType<?> type = elementTypes[i];
-                int byteLen = type.validate(elements[i]);
-                len += !type.dynamic ? byteLen : OFFSET_LENGTH_BYTES + byteLen;
+        if(elements.length == elementTypes.length) {
+            int i = 0;
+            try {
+                int len = 0;
+                for (; i < elementTypes.length; i++) {
+                    ABIType<?> type = elementTypes[i];
+                    int byteLen = type.validate(elements[i]);
+                    len += !type.dynamic ? byteLen : OFFSET_LENGTH_BYTES + byteLen;
+                }
+                return len;
+            } catch (NullPointerException npe) {
+                throw new ABIException("illegal arg @ " + i + ": " + npe.getMessage());
             }
-            return len;
-        } catch (NullPointerException npe) {
-            throw new ABIException("illegal arg @ " + i + ": " + npe.getMessage());
         }
+        throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + elements.length + " != " + elementTypes.length);
     }
 
     @Override
