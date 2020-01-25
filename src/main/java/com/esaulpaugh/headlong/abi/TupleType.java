@@ -43,10 +43,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         this.elementTypes = elementTypes;
     }
 
-    static <A extends ABIType<?>> TupleType wrap(A[] elements) {
-        final StringBuilder canonicalBuilder = new StringBuilder("(");
+    static <E extends ABIType<?>> TupleType wrap(E[] elements) {
+        StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
-        for (A e : elements) {
+        for (E e : elements) {
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
         }
@@ -74,15 +74,12 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     int byteLength(Object value) {
         Tuple tuple = (Tuple) value;
-        final Object[] elements = tuple.elements;
-
         int len = 0;
-        ABIType<?> type;
         for (int i = 0; i < elementTypes.length; i++) {
-            type = elementTypes[i];
-            len += type.dynamic
-                    ? OFFSET_LENGTH_BYTES + type.byteLength(elements[i])
-                    : type.byteLength(elements[i]);
+            ABIType<?> type = elementTypes[i];
+            len += !type.dynamic
+                    ? type.byteLength(tuple.elements[i])
+                    : OFFSET_LENGTH_BYTES + type.byteLength(tuple.elements[i]);
         }
         return len;
     }
@@ -305,10 +302,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     private static int checkLength(ABIType<?>[] elements, boolean[] manifest) {
         final int len = manifest.length;
-        if(len != elements.length) {
-            throw new IllegalArgumentException("manifest.length != elements.length: " + manifest.length + " != " + elements.length);
+        if(len == elements.length) {
+            return len;
         }
-        return len;
+        throw new IllegalArgumentException("manifest.length != elements.length: " + manifest.length + " != " + elements.length);
     }
 
     private static int getSelectionSize(boolean[] manifest, boolean negate) {
@@ -323,10 +320,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     private static String completeTupleTypeString(StringBuilder ttsb) {
         final int len = ttsb.length();
-        if(len == 1) {
-            return EMPTY_TUPLE_STRING;
+        if(len != 1) {
+            return ttsb.replace(len - 1, len, ")").toString(); // replace trailing comma
         }
-        return ttsb.replace(len - 1, len, ")").toString(); // replace trailing comma
+        return EMPTY_TUPLE_STRING;
     }
 
     public static TupleType parse(String rawTupleTypeString) {
