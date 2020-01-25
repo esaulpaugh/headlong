@@ -101,8 +101,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         if (value == null) {
             return staticByteLengthPacked();
         }
-        Tuple tuple = (Tuple) value;
-        final Object[] elements = tuple.elements;
+        Object[] elements = ((Tuple) value).elements;
         int len = 0;
         for (int i = 0; i < elementTypes.length; i++) {
             len += elementTypes[i].byteLengthPacked(elements[i]);
@@ -116,26 +115,24 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
         final Object[] elements = ((Tuple) value).elements;
 
-        final int numTypes = elementTypes.length;
-
-        if(elements.length != numTypes) {
+        if(elements.length != elementTypes.length) {
             throw new IllegalArgumentException("tuple length mismatch: actual != expected: " +
-                    elements.length + " != " + numTypes);
+                    elements.length + " != " + elementTypes.length);
         }
 
-        int len = 0;
         int i = 0;
         try {
-            for ( ; i < numTypes; i++) {
-                final ABIType<?> type = elementTypes[i];
-                len += type.dynamic
-                        ? OFFSET_LENGTH_BYTES + type.validate(elements[i])
-                        : type.validate(elements[i]);
+            int len = 0;
+            for ( ; i < elementTypes.length; i++) {
+                ABIType<?> type = elementTypes[i];
+                len += !type.dynamic
+                        ? type.validate(elements[i])
+                        : OFFSET_LENGTH_BYTES + type.validate(elements[i]);
             }
+            return len;
         } catch (NullPointerException npe) {
             throw new ABIException("illegal arg @ " + i + ": " + npe.getMessage());
         }
-        return len;
     }
 
     @Override
@@ -158,9 +155,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         if(dynamic) {
             for (int i = 0; i < len; i++) {
                 ABIType<?> type = elementTypes[i];
-                if (type.dynamic) {
-                    type.encodeTail(values[i], dest);
+                if(!type.dynamic) {
+                    continue;
                 }
+                type.encodeTail(values[i], dest);
             }
         }
     }
