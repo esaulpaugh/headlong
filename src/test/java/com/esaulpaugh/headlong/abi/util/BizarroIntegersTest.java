@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
-import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

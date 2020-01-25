@@ -25,7 +25,6 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
-import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.TestUtils.insertBytes;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
