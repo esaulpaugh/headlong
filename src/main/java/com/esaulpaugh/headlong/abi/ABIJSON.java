@@ -165,8 +165,6 @@ public final class ABIJSON {
 
     private static ABIType<?> parseType(JsonObject object) throws ParseException {
         final String type = getString(object, TYPE);
-        final String name = getString(object, NAME);
-
         if(type.startsWith(TUPLE)) {
             final JsonArray components = getArray(object, COMPONENTS);
             final ABIType<?>[] componentsArray = new ABIType[components.size()];
@@ -174,11 +172,13 @@ public final class ABIJSON {
             for (JsonElement c : components) {
                 componentsArray[i++] = parseType(c.getAsJsonObject()); // parse component names as well as types
             }
-            final TupleType base = TupleType.wrap(componentsArray);
-            final String suffix = type.substring(TUPLE.length()); // suffix e.g. "[4][]"
-            return TypeFactory.createFromBase(base, suffix, name);
+            return TypeFactory.createFromBase(
+                    TupleType.wrap(componentsArray),
+                    type.substring(TUPLE.length()), // suffix e.g. "[4][]"
+                    getString(object, NAME)
+            );
         }
-        return TypeFactory.create(type, name);
+        return TypeFactory.create(type, getString(object, NAME));
     }
 // -------------------------------------------
     static JsonObject buildFunctionJson(Function f) {
