@@ -77,7 +77,7 @@ public class BizarroIntegersTest {
 
     @Test
     public void putGetLong() {
-        final Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
+        final Random rand = TestUtils.seededRandom();
         final byte[] eight = new byte[8];
         final long _2_24 = (long) Math.pow(2.0, Short.SIZE + Byte.SIZE);
         final long _2_16 = (long) Math.pow(2.0, Short.SIZE);
@@ -141,7 +141,7 @@ public class BizarroIntegersTest {
 
     @Test
     public void lenLong() {
-        final Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
+        final Random rand = TestUtils.seededRandom();
         final int lim = (int) Math.pow(2.0, 15) - 1;
         for (int i = 0; i < lim; i++) {
             long lo = rand.nextLong();

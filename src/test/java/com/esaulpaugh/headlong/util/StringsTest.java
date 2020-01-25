@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StringsTest {
 
-    private static final Random RAND = new Random(TestUtils.getSeed(System.nanoTime()));
+    private static final Random RAND = TestUtils.seededRandom();
 
     private static final Supplier<byte[]> SUPPLY_RANDOM = () -> {
         byte[] x = new byte[RAND.nextInt(115)];
@@ -66,7 +66,7 @@ public class StringsTest {
 
     @Test
     public void base64NoOptions() {
-        Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
+        Random rand = TestUtils.seededRandom();
         java.util.Base64.Encoder mimeEncoder = java.util.Base64.getMimeEncoder();
         java.util.Base64.Decoder mimeDecoder = java.util.Base64.getMimeDecoder();
         for(int j = 0; j < 250; j++) {
@@ -82,7 +82,7 @@ public class StringsTest {
 
     @Test
     public void base64PaddedNoLineSep() {
-        Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
+        Random rand = TestUtils.seededRandom();
         java.util.Base64.Encoder encoder = java.util.Base64.getUrlEncoder();
         for (int j = 0; j < 250; j++) {
             byte[] x = new byte[j];
@@ -97,7 +97,7 @@ public class StringsTest {
 
     @Test
     public void base64Default() {
-        Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
+        Random rand = TestUtils.seededRandom();
         for(int j = 3; j < 250; j++) {
             byte[] x = new byte[j];
             rand.nextBytes(x);

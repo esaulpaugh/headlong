@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EncodeTest {
 
-    private static final Random RAND = new Random(TestUtils.getSeed(System.nanoTime()));
+    private static final Random RAND = TestUtils.seededRandom();
 
     private static final Class<IllegalArgumentException> PARSE_ERR = IllegalArgumentException.class;
 

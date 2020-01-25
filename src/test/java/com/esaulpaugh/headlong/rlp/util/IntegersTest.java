@@ -83,7 +83,7 @@ public class IntegersTest {
 
     @Test
     public void putGetLong() throws DecodeException {
-        final Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
+        final Random rand = TestUtils.seededRandom();
         final byte[] eight = new byte[8];
         final long _2_24 = (long) Math.pow(2.0, Short.SIZE + Byte.SIZE);
         final long _2_16 = (long) Math.pow(2.0, Short.SIZE);
@@ -121,7 +121,7 @@ public class IntegersTest {
     public void putGetBigInt() {
         byte[] dest = new byte[17];
         Arrays.fill(dest, (byte) -1);
-        Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
+        Random rand = TestUtils.seededRandom();
 
         final int lim = Short.MAX_VALUE * 10;
         for(int i = 0; i < lim; i++) {
@@ -164,7 +164,7 @@ public class IntegersTest {
 
     @Test
     public void lenLong() {
-        final Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
+        final Random rand = TestUtils.seededRandom();
         final int lim = (int) Math.pow(2.0, 15) - 1;
         for (int i = 0; i < lim; i++) {
             long lo = rand.nextLong();
@@ -229,7 +229,7 @@ public class IntegersTest {
 
         Arrays.fill(ten, (byte) 0);
         byte[] src = new byte[4];
-        Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
+        Random rand = TestUtils.seededRandom();
         rand.nextBytes(src);
         insertBytes(3, ten, ten.length - 3, (byte) 0, src[1], src[2], src[3]);
         assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, src[1], src[2], src[3] }, ten);

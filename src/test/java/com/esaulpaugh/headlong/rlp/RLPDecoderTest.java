@@ -123,7 +123,7 @@ public class RLPDecoderTest {
     @Test
     public void randomFuzz() {
         RLPDecoder decoder = RLP_STRICT;
-        Random r = new Random(TestUtils.getSeed(System.nanoTime()));
+        Random r = TestUtils.seededRandom();
         byte[] buffer = new byte[56];
         int valid = 0, invalid = 0;
         for (int i = 0; i < 500_000; i++) {

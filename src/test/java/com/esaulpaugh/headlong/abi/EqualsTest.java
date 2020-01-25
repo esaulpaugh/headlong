@@ -34,7 +34,7 @@ public class EqualsTest {
     @Test
     public void testEquals() {
 
-        Random r = new Random(TestUtils.getSeed(System.nanoTime()));
+        Random r = TestUtils.seededRandom();
 
         int n = 0;
         do {

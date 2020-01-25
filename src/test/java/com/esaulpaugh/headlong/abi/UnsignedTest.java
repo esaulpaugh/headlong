@@ -101,12 +101,12 @@ public class UnsignedTest {
 
     @Test
     public void testUintSymmetry() {
-        Random r = new Random(TestUtils.getSeed(System.nanoTime()));
+        final Random r = TestUtils.seededRandom();
         for (int i = 1; i < 64; i++) {
-            Uint type = new Uint(i);
+            final Uint type = new Uint(i);
             final long mask = (long) Math.pow(2, i - 1) - 1L;
             for (int j = 0; j < 25; j++) {
-                long x = pickRandom(r);
+                long x = TestUtils.pickRandom(r);
                 x &= mask;
                 Assertions.assertEquals(x, type.toSigned(type.toUnsigned(x)));
                 Assertions.assertEquals(x, type.toUnsigned(type.toSigned(x)));
@@ -116,29 +116,13 @@ public class UnsignedTest {
             }
         }
         for (int i = 64; i <= 256; i++) {
-            Uint type = new Uint(i);
+            final Uint type = new Uint(i);
             for (int j = 0; j < 25; j++) {
-                BigInteger x = BigInteger.valueOf(pickRandom(r));
+                BigInteger x = BigInteger.valueOf(TestUtils.pickRandom(r));
                 Assertions.assertEquals(x, type.toSigned(type.toUnsigned(x)));
                 x = x.abs();
                 Assertions.assertEquals(x, type.toUnsigned(type.toSigned(x)));
             }
         }
-    }
-
-    private static long pickRandom(Random r) {
-        long x;
-        switch (r.nextInt(Long.BYTES)) {
-            case 0: x = r.nextLong(); break;
-            case 1: x = r.nextLong() & 0x00FFFFFF_FFFFFFFFL; break;
-            case 2: x = r.nextLong() & 0x0000FFFF_FFFFFFFFL; break;
-            case 3: x = r.nextLong() & 0x000000FF_FFFFFFFFL; break;
-            case 4: x = r.nextLong() & 0x00000000_FFFFFFFFL; break;
-            case 5: x = r.nextLong() & 0x00000000_00FFFFFFL; break;
-            case 6: x = r.nextLong() & 0x00000000_0000FFFFL; break;
-            case 7: x = r.nextLong() & 0x00000000_000000FFL; break;
-            default: throw new Error();
-        }
-        return r.nextBoolean() ? -x : x;
     }
 }

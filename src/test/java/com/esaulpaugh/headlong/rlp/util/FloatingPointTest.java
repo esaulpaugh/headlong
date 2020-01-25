@@ -28,7 +28,7 @@ public class FloatingPointTest {
 
     @Test
     public void testFloat() throws DecodeException {
-        Random r = new Random(TestUtils.getSeed(System.nanoTime()));
+        Random r = TestUtils.seededRandom();
         for (int i = 0; i < 20; i++) {
             final float flo = r.nextFloat();
             byte[] floBytes = FloatingPoint.toBytes(flo);
@@ -43,7 +43,7 @@ public class FloatingPointTest {
 
     @Test
     public void testDouble() throws DecodeException {
-        Random r = new Random(TestUtils.getSeed(System.nanoTime()));
+        Random r = TestUtils.seededRandom();
         for (int i = 0; i < 20; i++) {
             final double dub = r.nextDouble();
             byte[] dubBytes = FloatingPoint.toBytes(dub);
@@ -58,7 +58,7 @@ public class FloatingPointTest {
 
     @Test
     public void testBigDecimal() {
-        Random r = new Random(TestUtils.getSeed(System.nanoTime()));
+        Random r = TestUtils.seededRandom();
         for (int i = 0; i < 20; i++) {
             byte[] random = new byte[1 + r.nextInt(20)];
             final BigDecimal bigDec = new BigDecimal(new BigInteger(random), r.nextInt(20));

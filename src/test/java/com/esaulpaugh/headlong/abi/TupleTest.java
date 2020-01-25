@@ -48,7 +48,7 @@ public class TupleTest {
     @Test
     public void testTypeSafety() throws Throwable {
 
-        Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
+        Random rand = TestUtils.seededRandom();
 
         for (int i = 0; i < 1000; i++) {
 
@@ -80,7 +80,7 @@ public class TupleTest {
 
     @Test
     public void fuzzNulls() throws Throwable {
-        Random r = new Random(TestUtils.getSeed(System.nanoTime()));
+        Random r = TestUtils.seededRandom();
         for (int i = 0; i < 1000; i++) {
             MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong());
             Tuple args = mctc.argsTuple;
@@ -133,7 +133,7 @@ public class TupleTest {
 
         final int len = master.length;
 
-        Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
+        Random rand = TestUtils.seededRandom();
 
         shuffle(master, rand);
 

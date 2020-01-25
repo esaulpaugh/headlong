@@ -106,7 +106,7 @@ public class KeccakTest {
         Keccak k = new Keccak(bitLen);
         KeccakDigest k_ = new KeccakDigest(bitLen);
 
-        Random r = new Random(TestUtils.getSeed(System.nanoTime()));
+        Random r = TestUtils.seededRandom();
 
         byte[] buffer = new byte[65];
         final int bound = buffer.length + 1;
@@ -137,7 +137,7 @@ public class KeccakTest {
         Keccak keccak = new Keccak(256);
 
         byte[] x = new byte[7];
-        Random rand = new Random(TestUtils.getSeed(System.nanoTime()));
+        Random rand = TestUtils.seededRandom();
         rand.nextBytes(x);
 
         byte[] end = Arrays.copyOfRange(x, 4, 7);

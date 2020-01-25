@@ -31,14 +31,35 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.RecursiveAction;
 
 public class TestUtils {
+
+    public static Random seededRandom() {
+        return new Random(TestUtils.getSeed(System.nanoTime()));
+    }
 
     public static long getSeed(final long protoseed) {
         long c = protoseed * (System.nanoTime() << 1) * -System.nanoTime();
         c ^= c << 32;
         return c ^ (c >> 32);
+    }
+
+    public static long pickRandom(Random r) {
+        long x = r.nextLong();
+        switch (r.nextInt(Long.BYTES)) {
+        case 0: break;
+        case 1: x &= 0x00FFFFFF_FFFFFFFFL; break;
+        case 2: x &= 0x0000FFFF_FFFFFFFFL; break;
+        case 3: x &= 0x000000FF_FFFFFFFFL; break;
+        case 4: x &= 0x00000000_FFFFFFFFL; break;
+        case 5: x &= 0x00000000_00FFFFFFL; break;
+        case 6: x &= 0x00000000_0000FFFFL; break;
+        case 7: x &= 0x00000000_000000FFL; break;
+        default: throw new Error();
+        }
+        return r.nextBoolean() ? -x : x;
     }
 
     public static void printAndReset(StringBuilder sb) {
