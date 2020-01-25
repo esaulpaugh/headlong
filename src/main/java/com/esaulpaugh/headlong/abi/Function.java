@@ -128,13 +128,6 @@ public final class Function implements ABIObject, Serializable {
         }
     }
 
-    public String getCanonicalSignature() {
-        if(name == null) {
-            return inputTypes.canonicalType;
-        }
-        return name + inputTypes.canonicalType;
-    }
-
     public Type getType() {
         return type;
     }
@@ -151,6 +144,10 @@ public final class Function implements ABIObject, Serializable {
         return outputTypes;
     }
 
+    public String getStateMutability() {
+        return stateMutability;
+    }
+
     public byte[] selector() {
         return Arrays.copyOf(selector, selector.length);
     }
@@ -163,8 +160,59 @@ public final class Function implements ABIObject, Serializable {
         return hashAlgorithm;
     }
 
-    public String getStateMutability() {
-        return stateMutability;
+    public String getCanonicalSignature() {
+        if(name == null) {
+            return inputTypes.canonicalType;
+        }
+        return name + inputTypes.canonicalType;
+    }
+
+    private void validateFunction() {
+        switch (type) {
+        case FUNCTION:
+            assertNameNullability(name, false);
+            break;
+        case RECEIVE:
+            if (!ABIJSON.RECEIVE.equals(name)) {
+                throw new IllegalArgumentException("functions of this type must be named \"" + ABIJSON.RECEIVE + "\"");
+            }
+            if (!ABIJSON.PAYABLE.equals(stateMutability)) {
+                throw new IllegalArgumentException("functions of this type must be " + ABIJSON.PAYABLE);
+            }
+            /* falls through */
+        case FALLBACK:
+            assertNoElements(inputTypes, "inputs");
+            /* falls through */
+        case CONSTRUCTOR:
+            assertNoElements(outputTypes, "outputs");
+            if (type != Type.RECEIVE) {
+                assertNameNullability(name, true);
+            }
+            /* falls through */
+        default:
+        }
+    }
+
+    private static void assertNameNullability(String name, boolean _null) {
+        if(_null ^ (name == null)) { // if not matching
+            throw new IllegalArgumentException("functions of this type must be " + (_null ? "un" : "") + "named");
+        }
+    }
+
+    private static void assertNoElements(TupleType tupleType, String description) {
+        if(tupleType.elementTypes.length > 0) {
+            throw new IllegalArgumentException("functions of this type cannot have " + description);
+        }
+    }
+
+    private void generateSelector(MessageDigest messageDigest) {
+        try {
+            messageDigest.reset();
+            messageDigest.update(getCanonicalSignature().getBytes(StandardCharsets.UTF_8));
+            messageDigest.digest(selector, 0, SELECTOR_LEN);
+        } catch (DigestException de) {
+            throw new RuntimeException(de);
+        }
     }
 
     public int measureCallLength(Tuple args) throws ABIException {
@@ -234,62 +282,14 @@ public final class Function implements ABIObject, Serializable {
     }
 
     @Override
-    public String toJson(boolean pretty) {
-        JsonObject object = ABIJSON.buildFunctionJson(this);
-        return pretty ? JsonUtils.toPrettyPrint(object) : object.toString();
-    }
-
-    @Override
     public String toString() {
         return toJson(true);
     }
 
-    private void validateFunction() {
-        switch (type) {
-        case FUNCTION:
-            assertNameNullability(name, false);
-            break;
-        case RECEIVE:
-            if (!ABIJSON.RECEIVE.equals(name)) {
-                throw new IllegalArgumentException("functions of this type must be named \"" + ABIJSON.RECEIVE + "\"");
-            }
-            if (!ABIJSON.PAYABLE.equals(stateMutability)) {
-                throw new IllegalArgumentException("functions of this type must be " + ABIJSON.PAYABLE);
-            }
-            /* falls through */
-        case FALLBACK:
-            assertNoElements(inputTypes, "inputs");
-            /* falls through */
-        case CONSTRUCTOR:
-            assertNoElements(outputTypes, "outputs");
-            if (type != Type.RECEIVE) {
-                assertNameNullability(name, true);
-            }
-            /* falls through */
-        default:
-        }
-    }
-
-    private static void assertNameNullability(String name, boolean _null) {
-        if(_null ^ (name == null)) { // if not matching
-            throw new IllegalArgumentException("functions of this type must be " + (_null ? "un" : "") + "named");
-        }
-    }
-
-    private static void assertNoElements(TupleType tupleType, String description) {
-        if(tupleType.elementTypes.length > 0) {
-            throw new IllegalArgumentException("functions of this type cannot have " + description);
-        }
-    }
-
-    private void generateSelector(MessageDigest messageDigest) {
-        try {
-            messageDigest.reset();
-            messageDigest.update(getCanonicalSignature().getBytes(StandardCharsets.UTF_8));
-            messageDigest.digest(selector, 0, SELECTOR_LEN);
-        } catch (DigestException de) {
-            throw new RuntimeException(de);
-        }
+    @Override
+    public String toJson(boolean pretty) {
+        JsonObject object = ABIJSON.buildFunctionJson(this);
+        return pretty ? JsonUtils.toPrettyPrint(object) : object.toString();
     }
 // ---------------------------------------------------------------------------------------------------------------------
     public static Function parse(String signature) {

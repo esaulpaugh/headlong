@@ -55,10 +55,6 @@ public final class Event implements ABIObject {
         this.anonymous = anonymous;
     }
 
-    public String signature() {
-        return name + inputs.canonicalType;
-    }
-
     public String getName() {
         return name;
     }
@@ -73,6 +69,10 @@ public final class Event implements ABIObject {
 
     public boolean isAnonymous() {
         return anonymous;
+    }
+
+    public String signature() {
+        return name + inputs.canonicalType;
     }
 
     public TupleType getIndexedParams() {

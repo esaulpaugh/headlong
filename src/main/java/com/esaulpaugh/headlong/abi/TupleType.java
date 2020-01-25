@@ -229,26 +229,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         throw new UnsupportedOperationException();
     }
 
-    public static TupleType parse(String rawTupleTypeString) {
-        try {
-            return (TupleType) TypeFactory.create(rawTupleTypeString, null);
-        } catch (ParseException pe) {
-            throw new IllegalArgumentException(pe);
-        }
-    }
-
-    public static TupleType of(String... typeStrings) {
-        StringBuilder sb = new StringBuilder("(");
-        for (String str : typeStrings) {
-            sb.append(str).append(',');
-        }
-        return parse(completeTupleTypeString(sb));
-    }
-
-    public static TupleType parseElements(String rawElementsString) {
-        return parse('(' + rawElementsString + ')');
-    }
-
     public ByteBuffer encodeElements(Object... elements) throws ABIException {
         return encode(new Tuple(elements));
     }
@@ -347,6 +327,26 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             return EMPTY_TUPLE_STRING;
         }
         return ttsb.replace(len - 1, len, ")").toString(); // replace trailing comma
+    }
+
+    public static TupleType parse(String rawTupleTypeString) {
+        try {
+            return (TupleType) TypeFactory.create(rawTupleTypeString, null);
+        } catch (ParseException pe) {
+            throw new IllegalArgumentException(pe);
+        }
+    }
+
+    public static TupleType of(String... typeStrings) {
+        StringBuilder sb = new StringBuilder("(");
+        for (String str : typeStrings) {
+            sb.append(str).append(',');
+        }
+        return parse(completeTupleTypeString(sb));
+    }
+
+    public static TupleType parseElements(String rawElementsString) {
+        return parse('(' + rawElementsString + ')');
     }
 
     public static String format(byte[] abi) {
