@@ -22,7 +22,6 @@ import com.joemelsha.crypto.hash.Keccak;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.text.ParseException;
