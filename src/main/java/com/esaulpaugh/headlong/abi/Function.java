@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.JsonUtils;
+import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonObject;
 import com.joemelsha.crypto.hash.Keccak;
 
@@ -159,10 +160,10 @@ public final class Function implements ABIObject, Serializable {
     }
 
     public String getCanonicalSignature() {
-        if(name == null) {
-            return inputTypes.canonicalType;
+        if(name != null) {
+            return name + inputTypes.canonicalType;
         }
-        return name + inputTypes.canonicalType;
+        return inputTypes.canonicalType;
     }
 
     private void validateFunction() {
@@ -204,9 +205,11 @@ public final class Function implements ABIObject, Serializable {
     }
 
     private void generateSelector(MessageDigest messageDigest) {
+        messageDigest.reset();
+        messageDigest.update(Strings.decode(getCanonicalSignature(), Strings.UTF_8));
+//        byte[] digest = messageDigest.digest();
+//        System.arraycopy(digest, 0, selector, 0, SELECTOR_LEN);
         try {
-            messageDigest.reset();
-            messageDigest.update(getCanonicalSignature().getBytes(StandardCharsets.UTF_8));
             messageDigest.digest(selector, 0, SELECTOR_LEN);
         } catch (DigestException de) {
             throw new RuntimeException(de);
@@ -292,6 +295,10 @@ public final class Function implements ABIObject, Serializable {
 // ---------------------------------------------------------------------------------------------------------------------
     public static Function parse(String signature) {
         return new Function(signature);
+    }
+
+    public static Function parse(String signature, MessageDigest messageDigest) {
+        return new Function(signature, null, messageDigest);
     }
 
     public static Function fromJson(String objectJson) throws ParseException {

@@ -64,6 +64,8 @@ public class EqualsTest {
             n++;
         } while (n < 100);
 
+//        assertEquals(Function.parse("(uint)", MessageDigest.getInstance("SHA3-256")), Function.parse("(uint)", MessageDigest.getInstance("SHA3-256")));
+
         assertSame(TupleType.parse("(uint)").elementTypes[0].canonicalType, TupleType.parse("(uint)").elementTypes[0].canonicalType);
         assertNotSame(Function.parse("(uint)").getParamTypes().canonicalType, Function.parse("(uint)").getParamTypes().canonicalType);
     }
