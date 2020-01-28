@@ -16,6 +16,8 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
+import com.joemelsha.crypto.hash.Keccak;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -64,10 +66,13 @@ public class EqualsTest {
             n++;
         } while (n < 100);
 
-//        assertEquals(Function.parse("(uint)", MessageDigest.getInstance("SHA3-256")), Function.parse("(uint)", MessageDigest.getInstance("SHA3-256")));
-
         assertSame(TupleType.parse("(uint)").elementTypes[0].canonicalType, TupleType.parse("(uint)").elementTypes[0].canonicalType);
         assertNotSame(Function.parse("(uint)").getParamTypes().canonicalType, Function.parse("(uint)").getParamTypes().canonicalType);
+
+        assertEquals(
+                Function.parse("(bool)", new WrappedKeccak(256)),
+                Function.parse("(bool)", new Keccak(256))
+        );
     }
 
     private static boolean recursiveEquals(TupleType tt, Object o) {
