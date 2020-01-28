@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonObject;
@@ -206,8 +207,6 @@ public final class Function implements ABIObject, Serializable {
     private void generateSelector(MessageDigest messageDigest) {
         messageDigest.reset();
         messageDigest.update(Strings.decode(getCanonicalSignature(), Strings.UTF_8));
-//        byte[] digest = messageDigest.digest();
-//        System.arraycopy(digest, 0, selector, 0, SELECTOR_LEN);
         try {
             messageDigest.digest(selector, 0, SELECTOR_LEN);
         } catch (DigestException de) {
@@ -316,6 +315,10 @@ public final class Function implements ABIObject, Serializable {
         return ABIJSON.parseFunction(function, messageDigest);
     }
 
+    /**
+     * @return a {@link MessageDigest}
+     * @see WrappedKeccak
+     */
     public static MessageDigest newDefaultDigest() {
         return new Keccak(256); // replace this with your preferred impl
     }
