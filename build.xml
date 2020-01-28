@@ -144,21 +144,25 @@
   <path id="library.gradle:_org.apiguardian:apiguardian-api:1.1.0.classpath">
     <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.apiguardian/apiguardian-api/1.1.0/fc9dff4bb36d627bdc553de77e1f17efd790876c/apiguardian-api-1.1.0.jar"/>
   </path>
-  
-  <path id="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.5.2.classpath">
-    <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-api/5.5.2/6393db7e4c0265152d8fc4ff146633d1a7d36c47/junit-jupiter-api-5.5.2.jar"/>
+
+  <path id="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath">
+    <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.bouncycastle/bcprov-jdk15on/1.64/1467dac1b787b5ad2a18201c0c281df69882259e/bcprov-jdk15on-1.64.jar"/>
   </path>
-  
-  <path id="library.gradle:_org.junit.jupiter:junit-jupiter-engine:5.5.2.classpath">
-    <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-engine/5.5.2/f597408bde45371548f9e9791da7981a1134328d/junit-jupiter-engine-5.5.2.jar"/>
+
+  <path id="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.0.classpath">
+    <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-api/5.6.0/f29e6318333d2303ce4965c9819cfad08de7d1e5/junit-jupiter-api-5.6.0.jar"/>
   </path>
-  
-  <path id="library.gradle:_org.junit.platform:junit-platform-commons:1.5.2.classpath">
-    <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-commons/1.5.2/9703df63b65d415b2a027d43ce908c625b3aedce/junit-platform-commons-1.5.2.jar"/>
+
+  <path id="library.gradle:_org.junit.jupiter:junit-jupiter-engine:5.6.0.classpath">
+    <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-engine/5.6.0/83c9e737f6015d9e00029b9b1d51e952a884b8f9/junit-jupiter-engine-5.6.0.jar"/>
   </path>
-  
-  <path id="library.gradle:_org.junit.platform:junit-platform-engine:1.5.2.classpath">
-    <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-engine/1.5.2/d5697f6ebe0b4d08c0210b5b98b4e1a40f40dfc6/junit-platform-engine-1.5.2.jar"/>
+
+  <path id="library.gradle:_org.junit.platform:junit-platform-commons:1.6.0.classpath">
+    <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-commons/1.6.0/b0a75795cf03841d4f9cc54099557baffc11c727/junit-platform-commons-1.6.0.jar"/>
+  </path>
+
+  <path id="library.gradle:_org.junit.platform:junit-platform-engine:1.6.0.classpath">
+    <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-engine/1.6.0/a3a6ec96c010875444b3ca31828108093758ec00/junit-platform-engine-1.6.0.jar"/>
   </path>
   
   <path id="library.gradle:_org.opentest4j:opentest4j:1.2.0.classpath">
