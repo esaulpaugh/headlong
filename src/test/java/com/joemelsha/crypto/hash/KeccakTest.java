@@ -20,6 +20,7 @@ import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.spongycastle.crypto.digests.KeccakDigest;
 
@@ -30,6 +31,7 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Random;
 
+import static com.esaulpaugh.headlong.abi.Function.SELECTOR_LEN;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -220,5 +222,49 @@ public class KeccakTest {
 
             assertArrayEquals(a, b);
         }
+    }
+
+    @Disabled("slow")
+    @Test
+    public void benchmark() {
+        Random r = TestUtils.seededRandom();
+        byte[] bytes = new byte[50];
+        r.nextBytes(bytes);
+
+        WrappedKeccak wrapped = new WrappedKeccak(256);
+
+        long start, elapsed0, elapsed1;
+
+        run(wrapped, bytes); // warmup
+        start = System.nanoTime();
+        run(wrapped, bytes);
+        elapsed0 = endRun(WrappedKeccak.class.getSimpleName() + ":\t", start);
+
+        Keccak keccak = new Keccak(256);
+
+        run(keccak, bytes); // warmup
+        start = System.nanoTime();
+        run(keccak, bytes);
+        elapsed1 = endRun(Keccak.class.getSimpleName() + ":\t\t\t", start);
+
+        System.out.println("ratio: " + elapsed0 / (double) elapsed1 + "\n");
+    }
+
+    private static void run(MessageDigest md, byte[] bytes) {
+        for (int i = 0; i < 7_000_000; i++) {
+            md.update(bytes);
+            try {
+                md.digest(bytes, 0, SELECTOR_LEN);
+            } catch (DigestException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static long endRun(String label, long start) {
+        long end = System.nanoTime();
+        long elapsed = end - start;
+        System.out.println(label + elapsed / 1_000_000.0 + "ms");
+        return elapsed;
     }
 }

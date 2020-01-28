@@ -14,15 +14,14 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.util.Deserializer;
-import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -112,7 +111,7 @@ public class ABIJsonCasesTest2 {
     }
 
     @Test
-    public void testAbiV2Cases() throws ParseException, IOException, ABIException {
+    public void testAbiV2Cases() throws IOException, ABIException {
         final JsonArray testCases = JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonCasesTest.class, ABI_V2_CASES_PATH));
         for (JsonElement e : testCases) {
             new TestCase(e.getAsJsonObject(), false).test(false);
@@ -121,7 +120,7 @@ public class ABIJsonCasesTest2 {
     }
 
     @Test
-    public void testHeadlongCases() throws ParseException, IOException, ABIException {
+    public void testHeadlongCases() throws IOException, ABIException {
         final JsonArray testCases = JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonCasesTest.class, HEADLONG_CASES_PATH));
         for (JsonElement e : testCases) {
             new TestCase(e.getAsJsonObject(), true).test(true);
