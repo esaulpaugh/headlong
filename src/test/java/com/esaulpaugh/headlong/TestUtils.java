@@ -62,6 +62,15 @@ public class TestUtils {
         return r.nextBoolean() ? -x : x;
     }
 
+    public static void shuffle(Object[] arr, Random rand) {
+        for (int i = arr.length; i > 0; ) {
+            int o = rand.nextInt(i);
+            Object x = arr[o];
+            arr[o] = arr[--i];
+            arr[i] = x;
+        }
+    }
+
     public static void printAndReset(StringBuilder sb) {
         System.out.println(sb.toString());
         sb.delete(0, sb.length());

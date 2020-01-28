@@ -259,12 +259,12 @@ public class EncodeTest {
         byte[] func = new byte[24];
         TestUtils.seededRandom().nextBytes(func);
 
-        String oneSixty = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-//        String oneSixty = "10000000000000000000000000000000000000000";
-        System.out.println(oneSixty + " " + oneSixty.length() * 4);
-        BigInteger addr = new BigInteger(oneSixty, 16);
-        System.out.println(addr);
-
+//                       10000000000000000000000000000000000000000
+//                        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        String uint160 = "ff00ee01dd02cc03cafebabe9906880777086609";
+        BigInteger addr = new BigInteger(uint160, 16);
+        assertEquals(160, uint160.length() * 4);
+        assertEquals(uint160, addr.toString(16));
         Object[] argsIn = new Object[] {
                 new byte[][][][] { new byte[][][] { new byte[][] { func, func } } },
                 func,
@@ -282,12 +282,11 @@ public class EncodeTest {
 
         ByteBuffer abi = f.encodeCallWithArgs(argsIn);
 
-        Function.formatCall(abi.array());
+        assertTrue(Function.formatCall(abi.array()).contains("18\t000000000000000000000000" + uint160));
 
         Tuple tupleOut = f.decodeCall((ByteBuffer) abi.flip());
-        Object[] argsOut = tupleOut.elements;
 
-        assertTrue(Arrays.deepEquals(argsIn, argsOut));
+        assertTrue(Arrays.deepEquals(argsIn, tupleOut.elements));
     }
 
     @Test

@@ -127,7 +127,7 @@ public class TupleTest {
                 0b0,
                 1,
                 10L,
-                BigInteger.valueOf(100L),
+                BigInteger.valueOf(3405691582L),
                 BigDecimal.valueOf(120.997)
         };
 
@@ -135,7 +135,7 @@ public class TupleTest {
 
         Random rand = TestUtils.seededRandom();
 
-        shuffle(master, rand);
+        TestUtils.shuffle(master, rand);
 
         Tuple tuple = new Tuple(master);
 
@@ -154,15 +154,6 @@ public class TupleTest {
 //                }
 //                System.out.println();
             }
-        }
-    }
-
-    private static void shuffle(Object[] arr, Random rand) {
-        for (int i = arr.length; i > 0; ) {
-            int o = rand.nextInt(i);
-            Object x = arr[o];
-            arr[o] = arr[--i];
-            arr[i] = x;
         }
     }
 }
