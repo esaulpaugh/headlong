@@ -227,13 +227,13 @@ public class KeccakTest {
     @Disabled("slow")
     @Test
     public void benchmark() {
-        Random r = TestUtils.seededRandom();
         byte[] bytes = new byte[50];
-        r.nextBytes(bytes);
+        TestUtils.seededRandom().nextBytes(bytes);
+
+        long start;
+        final long elapsed0, elapsed1;
 
         WrappedKeccak wrapped = new WrappedKeccak(256);
-
-        long start, elapsed0, elapsed1;
 
         run(wrapped, bytes); // warmup
         start = System.nanoTime();
