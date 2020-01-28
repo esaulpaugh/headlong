@@ -16,6 +16,7 @@
 package com.joemelsha.crypto.hash;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
@@ -25,6 +26,7 @@ import org.spongycastle.crypto.digests.KeccakDigest;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
+import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -90,46 +92,6 @@ public class KeccakTest {
         assertArrayEquals(k0, b0);
 
         System.out.println(Strings.encode(b0));
-    }
-
-    @Test
-    public void testRandom() {
-        testRandom(128, 100);
-        testRandom(224, 100);
-        testRandom(256, 200);
-        testRandom(288, 100);
-        testRandom(384, 100);
-        testRandom(512, 100);
-    }
-
-    private static void testRandom(final int bitLen, final int n) {
-        Keccak k = new Keccak(bitLen);
-        KeccakDigest k_ = new KeccakDigest(bitLen);
-
-        Random r = TestUtils.seededRandom();
-
-        byte[] buffer = new byte[65];
-        final int bound = buffer.length + 1;
-
-        for (int i = 0; i < n; i++) {
-            r.nextBytes(buffer);
-            final int numUpdates = r.nextInt(20);
-            for (int j = 0; j < numUpdates; j++) {
-                final int end = r.nextInt(bound);
-                final int start = end == 0 ? 0 : r.nextInt(end);
-                final int len = end - start;
-//                System.out.println("[" + start + "-" + end + ")\t\t" + Strings.encode(buffer, start, len));
-                k.update(buffer, start, len);
-                k_.update(buffer, start, len);
-            }
-
-            byte[] a = k.digest();
-
-            byte[] k_Output = new byte[k_.getDigestSize()];
-            k_.doFinal(k_Output, 0);
-
-            assertArrayEquals(a, k_Output);
-        }
     }
 
     @Test
@@ -201,15 +163,62 @@ public class KeccakTest {
         byte[] normalDigest = keccak.digest(eight);
 
         assertArrayEquals(normalDigest, specialDigest);
-        assertEquals("01fa9b8342e622a5d6314dcf2eb0786768d1e804e61af5feb27141ead708524f", Strings.encode(normalDigest));
 
-        KeccakDigest kd = new KeccakDigest(256);
-        kd.update(prefix, 0 , prefix.length);
+        final String expected = "01fa9b8342e622a5d6314dcf2eb0786768d1e804e61af5feb27141ead708524f";
 
-        kd.update(eight, 0, eight.length);
+        assertEquals(expected, Strings.encode(normalDigest));
 
-        byte[] out = new byte[kd.getDigestSize()];
-        kd.doFinal(out, 0);
-        assertEquals("01fa9b8342e622a5d6314dcf2eb0786768d1e804e61af5feb27141ead708524f", Strings.encode(out));
+        WrappedKeccak wk = new WrappedKeccak(256);
+        wk.update(prefix, 0, prefix.length);
+        wk.update(eight, 0, eight.length);
+        assertEquals(expected, Strings.encode(wk.digest()));
+
+        WrappedSponge ws = new WrappedSponge(256);
+        ws.update(prefix, 0, prefix.length);
+        ws.update(eight, 0, eight.length);
+        assertEquals(expected, Strings.encode(ws.digest()));
+    }
+
+    @Test
+    public void testRandom() {
+        testRandom(new Keccak(128), new WrappedKeccak(128), 100);
+        testRandom(new Keccak(224), new WrappedKeccak(224), 100);
+        testRandom(new Keccak(256), new WrappedKeccak(256), 200);
+        testRandom(new Keccak(288), new WrappedKeccak(288), 100);
+        testRandom(new Keccak(384), new WrappedKeccak(384), 100);
+        testRandom(new Keccak(512), new WrappedKeccak(512), 100);
+
+        testRandom(new Keccak(128), new WrappedSponge(128), 100);
+        testRandom(new Keccak(224), new WrappedSponge(224), 100);
+        testRandom(new Keccak(256), new WrappedSponge(256), 200);
+        testRandom(new Keccak(288), new WrappedSponge(288), 100);
+        testRandom(new Keccak(384), new WrappedSponge(384), 100);
+        testRandom(new Keccak(512), new WrappedSponge(512), 100);
+    }
+
+    private static void testRandom(MessageDigest md_a, MessageDigest md_b, final int n) {
+
+        Random r = TestUtils.seededRandom();
+
+        byte[] buffer = new byte[65];
+        final int bound = buffer.length + 1;
+
+        for (int i = 0; i < n; i++) {
+            r.nextBytes(buffer);
+            final int numUpdates = r.nextInt(20);
+            for (int j = 0; j < numUpdates; j++) {
+                final int end = r.nextInt(bound);
+                final int start = end == 0 ? 0 : r.nextInt(end);
+                final int len = end - start;
+//                System.out.println("[" + start + "-" + end + ")\t\t" + Strings.encode(buffer, start, len, Strings.HEX));
+                md_a.update(buffer, start, len);
+                md_b.update(buffer, start, len);
+            }
+
+            byte[] a = md_a.digest();
+            byte[] b = md_b.digest();
+
+            assertArrayEquals(a, b);
+        }
     }
 }

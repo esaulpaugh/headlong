@@ -44,7 +44,7 @@ public class ABIJsonCasesTest2 {
         private final Tuple values;
         private final byte[] result;
 
-        public TestCase(JsonObject object, boolean function) throws ParseException {
+        public TestCase(JsonObject object, boolean function) {
             this.name = object.get("name").getAsString();
             String typesStr = object.get("types").getAsString();
             String valuesStr = object.get("values").getAsString();
