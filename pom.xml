@@ -13,6 +13,7 @@
     <inceptionYear>2018</inceptionYear>
 
     <properties>
+        <argLine>-Dfile.encoding=UTF-8</argLine>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
