@@ -93,11 +93,9 @@ public class EqualsTest {
 
         System.out.println(Function.formatCall(array));
 
-        Tuple decoded;
-
         array[array.length - 1] = 0;
         System.out.println(Function.formatCall(array));
-        decoded = f.decodeCall(array);
+        Tuple decoded = f.decodeCall(array);
         assertNotEquals(decoded, argsTuple);
 
         array[array.length - 32] = (byte) 0x80;
