@@ -54,4 +54,9 @@ public class WrappedKeccak extends MessageDigest {
         System.arraycopy(digest, 0, buf, offset, len);
         return len;
     }
+
+    @Override
+    protected int engineGetDigestLength() {
+        return impl.getDigestLength();
+    }
 }

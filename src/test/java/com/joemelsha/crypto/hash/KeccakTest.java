@@ -49,6 +49,19 @@ public class KeccakTest {
     }
 
     @Test
+    public void testGetDigestLength() {
+        assertEquals(new Keccak(256).getDigestLength(), 32);
+        assertEquals(new WrappedKeccak(256).getDigestLength(), 32);
+        assertEquals(new WrappedSponge(256).getDigestLength(), 32);
+
+        assertEquals(new Keccak(288).getDigestLength(), 36);
+        assertEquals(new WrappedKeccak(288).getDigestLength(), 36);
+        assertEquals(new WrappedSponge(288).getDigestLength(), 36);
+
+        assertEquals(new Keccak(512).digestSizeBytes, 64);
+    }
+
+    @Test
     public void testMultiUpdate() {
         testMultiUpdate(128);
         testMultiUpdate(224);
