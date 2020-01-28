@@ -238,14 +238,14 @@ public class KeccakTest {
         run(wrapped, bytes); // warmup
         start = System.nanoTime();
         run(wrapped, bytes);
-        elapsed0 = endRun(WrappedKeccak.class.getSimpleName() + ":\t", start);
+        elapsed0 = stop(WrappedKeccak.class.getSimpleName() + ":\t", start);
 
         Keccak keccak = new Keccak(256);
 
         run(keccak, bytes); // warmup
         start = System.nanoTime();
         run(keccak, bytes);
-        elapsed1 = endRun(Keccak.class.getSimpleName() + ":\t\t\t", start);
+        elapsed1 = stop(Keccak.class.getSimpleName() + ":\t\t\t", start);
 
         System.out.println("ratio: " + elapsed0 / (double) elapsed1 + "\n");
     }
@@ -261,10 +261,9 @@ public class KeccakTest {
         }
     }
 
-    private static long endRun(String label, long start) {
-        long end = System.nanoTime();
-        long elapsed = end - start;
-        System.out.println(label + elapsed / 1_000_000.0 + "ms");
+    private static long stop(String label, long start) {
+        long elapsed = System.nanoTime() - start;
+        System.out.println(label + (elapsed / 1_000_000.0) + "ms");
         return elapsed;
     }
 }
