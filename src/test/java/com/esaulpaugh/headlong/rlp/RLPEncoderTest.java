@@ -35,6 +35,59 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 public class RLPEncoderTest {
 
+//    @Test
+//    public void testSerial() throws ABIException, DecodeException {
+//
+//        TupleType tt = TupleType.parse("(function[2][][],bytes24,string[0][0],address[],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
+//
+//        byte[] func = new byte[24];
+//        TestUtils.seededRandom().nextBytes(func);
+//
+////                       10000000000000000000000000000000000000000
+////                        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+//        String uint160 = "ff00ee01dd02cc03cafebabe9906880777086609";
+//        BigInteger addr = new BigInteger(uint160, 16);
+//        assertEquals(160, uint160.length() * 4);
+//        assertEquals(uint160, addr.toString(16));
+//        Object[] argsIn = new Object[] {
+//                new byte[][][][] { new byte[][][] { new byte[][] { func, func } } },
+//                func,
+//                new String[0][],
+//                new BigInteger[] { addr },
+//                BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(Byte.MAX_VALUE << 2)),
+//                new Tuple(7),
+//                new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple(9), new Tuple(-11) } } },
+//                new Tuple[] { new Tuple(13), new Tuple(-15) },
+//                new Tuple[] { new Tuple(17), new Tuple(-19) },
+//                Long.MAX_VALUE / 8_500_000,
+//                new Tuple[] { new Tuple((long) 0x7e), new Tuple((long) -0x7e) },
+//                new Tuple(BigInteger.TEN)
+//        };
+//
+//        Tuple tuple = new Tuple(argsIn);
+//
+//        String str = SuperSerial.serializeForMachine(tt, tuple);
+//
+//        Tuple deserial = SuperSerial.deserializeFromMachine(tt, str);
+//
+//        assertEquals(tuple, deserial);
+//    }
+
+    @Test
+    public void testBigInteger() {
+        long x = Long.MAX_VALUE;
+        byte[] xBytes = Integers.toBytes(x);
+
+        assertEquals("7fffffffffffffff", Strings.encode(xBytes));
+
+        BigInteger b = BigInteger.valueOf(x).add(BigInteger.ONE);
+
+        assertEquals(b, new BigInteger("8000000000000000", 16));
+
+        byte[] bBytes = b.toByteArray();
+        assertEquals(b, Integers.getBigInt(bBytes, 0, bBytes.length));
+    }
+
     @Test
     public void encodeSequentially() {
         Object[] objects = new Object[] {
