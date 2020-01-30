@@ -8,7 +8,6 @@ import com.esaulpaugh.headlong.abi.TupleType;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
-import com.esaulpaugh.headlong.util.Strings;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -36,44 +35,7 @@ public class SuperSerial {
         List<Object> list = new ArrayList<>(tuple.size());
         final int len = tupleType.elements().length;
         for(int i = 0; i < len; i++) {
-            ABIType<?> type = tupleType.get(i);
-            Object obj = tuple.get(i);
-            Object temp;
-            switch (type.typeCode()) {
-            case TYPE_CODE_BOOLEAN:
-                Boolean boo = (Boolean) obj;
-                temp = boo ? TRUE : FALSE;
-                break;
-            case TYPE_CODE_BYTE:
-                Byte b = (Byte) obj;
-                temp = Integers.toBytes(b);
-                break;
-            case TYPE_CODE_INT:
-                Integer integer = (Integer) obj;
-                temp = Integers.toBytes(integer);
-                break;
-            case TYPE_CODE_LONG:
-                Long looong = (Long) obj;
-                temp = Integers.toBytes(looong);
-                break;
-            case TYPE_CODE_BIG_INTEGER:
-                BigInteger bigInt = (BigInteger) obj;
-                temp = bigInt.toByteArray();
-                break;
-            case TYPE_CODE_BIG_DECIMAL:
-                BigDecimal bigDec = (BigDecimal) obj;
-                temp = bigDec.unscaledValue().toByteArray();
-                break;
-            case TYPE_CODE_ARRAY:
-                temp = null; // TODO
-                break;
-            case TYPE_CODE_TUPLE:
-                Tuple t = (Tuple) obj;
-                temp = SuperSerial.serializeForMachine((TupleType) type, t);
-                break;
-            default: throw new Error();
-            }
-            list.add(temp);
+            list.add(serialize(tupleType.get(i), tuple.get(i)));
         }
         byte[] encoded = RLPEncoder.encodeSequentially(list);
         return Strings.encode(encoded, Strings.BASE_64_URL_SAFE);
@@ -85,39 +47,36 @@ public class SuperSerial {
         List<Object> elements = new ArrayList<>();
         final int len = tupleType.elements().length;
         for(int i = 0; i < len; i++) {
-            ABIType<?> type = tupleType.get(i);
-            RLPItem item = sequenceIterator.next();
-            Object temp;
-            switch (type.typeCode()) {
-            case TYPE_CODE_BOOLEAN:
-                temp = item.asBoolean();
-                break;
-            case TYPE_CODE_BYTE:
-                temp = item.asByte();
-                break;
-            case TYPE_CODE_INT:
-                temp = item.asInt();
-                break;
-            case TYPE_CODE_LONG:
-                temp = item.asLong();
-                break;
-            case TYPE_CODE_BIG_INTEGER:
-                temp = item.asBigInt();
-                break;
-            case TYPE_CODE_BIG_DECIMAL:
-                temp = item.asBigDecimal(((BigDecimalType) type).getScale());
-                break;
-            case TYPE_CODE_ARRAY:
-                temp = null; // TODO
-                break;
-            case TYPE_CODE_TUPLE:
-                temp = SuperSerial.deserializeFromMachine((TupleType) type, item.asString(Strings.BASE_64_URL_SAFE));
-                break;
-            default:
-                throw new Error();
-            }
-            elements.add(temp);
+            elements.add(deserialize(tupleType.get(i), sequenceIterator.next()));
         }
         return new Tuple(elements.toArray());
+    }
+
+    private static Object serialize(ABIType<?> type, Object obj) throws ABIException {
+        switch (type.typeCode()) {
+        case TYPE_CODE_BOOLEAN: return (Boolean) obj ? TRUE : FALSE;
+        case TYPE_CODE_BYTE: return Integers.toBytes((byte) obj);
+        case TYPE_CODE_INT: return Integers.toBytes((int) obj);
+        case TYPE_CODE_LONG: return Integers.toBytes((long) obj);
+        case TYPE_CODE_BIG_INTEGER: return ((BigInteger) obj).toByteArray();
+        case TYPE_CODE_BIG_DECIMAL: return ((BigDecimal) obj).unscaledValue().toByteArray();
+        case TYPE_CODE_ARRAY: return null; // TODO
+        case TYPE_CODE_TUPLE: return SuperSerial.serializeForMachine((TupleType) type, (Tuple) obj);
+        default: throw new Error();
+        }
+    }
+
+    private static Object deserialize(ABIType<?> type, RLPItem item) throws DecodeException {
+        switch (type.typeCode()) {
+        case TYPE_CODE_BOOLEAN: return item.asBoolean();
+        case TYPE_CODE_BYTE: return item.asByte();
+        case TYPE_CODE_INT: return item.asInt();
+        case TYPE_CODE_LONG: return item.asLong();
+        case TYPE_CODE_BIG_INTEGER: return item.asBigInt();
+        case TYPE_CODE_BIG_DECIMAL: return item.asBigDecimal(((BigDecimalType) type).getScale());
+        case TYPE_CODE_ARRAY: return null; // TODO
+        case TYPE_CODE_TUPLE: return SuperSerial.deserializeFromMachine((TupleType) type, item.asString(Strings.BASE_64_URL_SAFE));
+        default: throw new Error();
+        }
     }
 }
