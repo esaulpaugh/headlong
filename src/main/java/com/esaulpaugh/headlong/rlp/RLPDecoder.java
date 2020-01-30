@@ -17,6 +17,8 @@ package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.exception.DecodeException;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -66,6 +68,14 @@ public final class RLPDecoder {
                 return false;
             }
         };
+    }
+
+    public RLPStream stream(byte[] bytes) {
+        return stream(new ByteArrayInputStream(bytes));
+    }
+
+    public RLPStream stream(InputStream is) {
+        return new RLPStream(is, this);
     }
 
     public Iterator<RLPItem> listIterator(byte[] buffer) throws DecodeException {
