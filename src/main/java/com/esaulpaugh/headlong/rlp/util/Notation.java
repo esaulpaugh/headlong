@@ -38,8 +38,8 @@ public class Notation {
 
     static final String BEGIN_LIST = "{";
     static final String END_LIST = "}";
-    static final String BEGIN_STRING = "\"";
-    static final String END_STRING = "\"";
+    static final String BEGIN_STRING = "'";
+    static final String END_STRING = "'";
 
     private static final String BEGIN_LIST_SHORT = BEGIN_LIST + " ";
 
