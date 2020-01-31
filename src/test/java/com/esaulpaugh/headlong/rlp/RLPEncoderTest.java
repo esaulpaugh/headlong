@@ -76,6 +76,7 @@ public class RLPEncoderTest {
 
         assertEquals(tuple, deserial);
     }
+    
     @Test
     public void testBigInteger() {
         long x = Long.MAX_VALUE;

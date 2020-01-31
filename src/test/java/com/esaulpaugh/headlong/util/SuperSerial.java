@@ -68,37 +68,6 @@ public class SuperSerial {
         }
     }
 
-    private static Object serializeByteArray(ArrayType<? extends ABIType<?>,?> arrayType, Object obj) {
-        return arrayType.isString() ? Strings.decode((String) obj, Strings.UTF_8) : obj;
-    }
-
-    private static Object serializeBooleanArray(Object obj) {
-        boolean[] booleans = (boolean[]) obj;
-        List<byte[]> list = new ArrayList<>(booleans.length);
-        for (boolean aBoolean : booleans) {
-            list.add(Integers.toBytes(aBoolean ? 1 : 0));
-        }
-        return list;
-    }
-
-    private static Object serializeIntArray(Object obj) {
-        int[] ints = (int[]) obj;
-        List<byte[]> list = new ArrayList<>(ints.length);
-        for (int anInt : ints) {
-            list.add(Integers.toBytes(anInt));
-        }
-        return list;
-    }
-
-    private static Object serializeLongArray(Object obj) {
-        long[] longs = (long[]) obj;
-        List<byte[]> list = new ArrayList<>(longs.length);
-        for (long aLong : longs) {
-            list.add(Integers.toBytes(aLong));
-        }
-        return list;
-    }
-
     private static Object deserialize(ABIType<?> type, RLPItem item) throws DecodeException {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return item.asBoolean();
@@ -123,14 +92,7 @@ public class SuperSerial {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE:
-            final Object[] array = (Object[]) obj;
-            final int len = array.length;
-            List<Object> objects = new ArrayList<>(len);
-            for (Object e : array) {
-                objects.add(serialize(elementType, e));
-            }
-            return objects;
+        case TYPE_CODE_TUPLE: return serializeObjectArray((Object[]) obj, elementType);
         default: throw new Error();
         }
     }
@@ -150,8 +112,21 @@ public class SuperSerial {
         }
     }
 
+    private static Object serializeByteArray(ArrayType<? extends ABIType<?>,?> arrayType, Object obj) {
+        return arrayType.isString() ? Strings.decode((String) obj, Strings.UTF_8) : obj;
+    }
+
     private static Object deserializeByteArray(ArrayType<? extends ABIType<?>,?> arrayType, RLPString string) {
         return arrayType.isString() ? string.asString(Strings.UTF_8) : string.asBytes();
+    }
+
+    private static Object serializeBooleanArray(Object obj) {
+        boolean[] booleans = (boolean[]) obj;
+        List<byte[]> list = new ArrayList<>(booleans.length);
+        for (boolean aBoolean : booleans) {
+            list.add(Integers.toBytes(aBoolean ? 1 : 0));
+        }
+        return list;
     }
 
     private static boolean[] deserializeBooleanArray(RLPList list) throws DecodeException {
@@ -164,6 +139,15 @@ public class SuperSerial {
         return booleans;
     }
 
+    private static Object serializeIntArray(Object obj) {
+        int[] ints = (int[]) obj;
+        List<byte[]> list = new ArrayList<>(ints.length);
+        for (int anInt : ints) {
+            list.add(Integers.toBytes(anInt));
+        }
+        return list;
+    }
+
     private static int[] deserializeIntArray(RLPList list) throws DecodeException {
         List<RLPItem> elements = list.elements(RLP_STRICT);
         int[] ints = new int[elements.size()];
@@ -174,6 +158,15 @@ public class SuperSerial {
         return ints;
     }
 
+    private static Object serializeLongArray(Object obj) {
+        long[] longs = (long[]) obj;
+        List<byte[]> list = new ArrayList<>(longs.length);
+        for (long aLong : longs) {
+            list.add(Integers.toBytes(aLong));
+        }
+        return list;
+    }
+
     private static long[] deserializeLongArray(RLPList list) throws DecodeException {
         List<RLPItem> elements = list.elements(RLP_STRICT);
         long[] longs = new long[elements.size()];
@@ -182,6 +175,15 @@ public class SuperSerial {
             longs[i++] = e.asLong();
         }
         return longs;
+    }
+
+    private static Object serializeObjectArray(Object[] obj, ABIType<?> elementType) throws ABIException {
+        final int len = obj.length;
+        List<Object> objects = new ArrayList<>(len);
+        for (Object e : obj) {
+            objects.add(serialize(elementType, e));
+        }
+        return objects;
     }
 
     private static Object[] deserializeObjectArray(ABIType<?> elementType, RLPList list) throws DecodeException {
