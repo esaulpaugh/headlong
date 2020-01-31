@@ -153,7 +153,7 @@ public class SuperSerial {
         return arrayType.isString() ? string.asString(Strings.UTF_8) : string.asBytes();
     }
 
-    private static Object serializeBooleanArray(Object obj) {
+    private static List<byte[]> serializeBooleanArray(Object obj) {
         boolean[] booleans = (boolean[]) obj;
         List<byte[]> list = new ArrayList<>(booleans.length);
         for (boolean aBoolean : booleans) {
@@ -172,7 +172,7 @@ public class SuperSerial {
         return booleans;
     }
 
-    private static Object serializeIntArray(Object obj) {
+    private static List<byte[]> serializeIntArray(Object obj) {
         int[] ints = (int[]) obj;
         List<byte[]> list = new ArrayList<>(ints.length);
         for (int anInt : ints) {
@@ -191,7 +191,7 @@ public class SuperSerial {
         return ints;
     }
 
-    private static Object serializeLongArray(Object obj) {
+    private static List<byte[]> serializeLongArray(Object obj) {
         long[] longs = (long[]) obj;
         List<byte[]> list = new ArrayList<>(longs.length);
         for (long aLong : longs) {
@@ -210,7 +210,7 @@ public class SuperSerial {
         return longs;
     }
 
-    private static Object serializeObjectArray(Object[] obj, ABIType<?> elementType) throws ABIException {
+    private static List<Object> serializeObjectArray(Object[] obj, ABIType<?> elementType) throws ABIException {
         final int len = obj.length;
         List<Object> objects = new ArrayList<>(len);
         for (Object e : obj) {
