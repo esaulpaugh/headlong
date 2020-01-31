@@ -16,10 +16,14 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.ABIException;
+import com.esaulpaugh.headlong.abi.Tuple;
+import com.esaulpaugh.headlong.abi.TupleType;
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
+import com.esaulpaugh.headlong.util.SuperSerial;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -35,44 +39,43 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 public class RLPEncoderTest {
 
-//    @Test
-//    public void testSerial() throws ABIException, DecodeException {
-//
-//        TupleType tt = TupleType.parse("(function[2][][],bytes24,string[0][0],address[],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
-//
-//        byte[] func = new byte[24];
-//        TestUtils.seededRandom().nextBytes(func);
-//
-////                       10000000000000000000000000000000000000000
-////                        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-//        String uint160 = "ff00ee01dd02cc03cafebabe9906880777086609";
-//        BigInteger addr = new BigInteger(uint160, 16);
-//        assertEquals(160, uint160.length() * 4);
-//        assertEquals(uint160, addr.toString(16));
-//        Object[] argsIn = new Object[] {
-//                new byte[][][][] { new byte[][][] { new byte[][] { func, func } } },
-//                func,
-//                new String[0][],
-//                new BigInteger[] { addr },
-//                BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(Byte.MAX_VALUE << 2)),
-//                new Tuple(7),
-//                new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple(9), new Tuple(-11) } } },
-//                new Tuple[] { new Tuple(13), new Tuple(-15) },
-//                new Tuple[] { new Tuple(17), new Tuple(-19) },
-//                Long.MAX_VALUE / 8_500_000,
-//                new Tuple[] { new Tuple((long) 0x7e), new Tuple((long) -0x7e) },
-//                new Tuple(BigInteger.TEN)
-//        };
-//
-//        Tuple tuple = new Tuple(argsIn);
-//
-//        String str = SuperSerial.serializeForMachine(tt, tuple);
-//
-//        Tuple deserial = SuperSerial.deserializeFromMachine(tt, str);
-//
-//        assertEquals(tuple, deserial);
-//    }
+    @Test
+    public void testSerial() throws ABIException, DecodeException {
 
+        TupleType tt = TupleType.parse("(function[2][][],bytes24,string[1][1],address[],uint72,(uint8),(int16)[2][][1],(int32)[],uint40,(int48)[],(uint),bool,string,bool[2],int24[],uint40[1])");
+
+        byte[] func = new byte[24];
+        TestUtils.seededRandom().nextBytes(func);
+
+        Object[] argsIn = new Object[] {
+                new byte[][][][] { new byte[][][] { new byte[][] { func, func } } },
+                func,
+                new String[][] { new String[] { "z" } },
+                new BigInteger[] { new BigInteger("ff00ee01dd02cc03cafebabe9906880777086609", 16) },
+                BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(Byte.MAX_VALUE << 2)),
+                new Tuple(7),
+                new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple(9), new Tuple(-11) } } },
+                new Tuple[] { new Tuple(17), new Tuple(-19) },
+                Long.MAX_VALUE / 8_500_000,
+                new Tuple[] { new Tuple((long) 0x7e), new Tuple((long) -0x7e) },
+                new Tuple(BigInteger.TEN),
+                true,
+                "farout",
+                new boolean[] { true, true },
+                new int[] { 3, 20, -6 },
+                new long[] { Integer.MAX_VALUE * 2L }
+        };
+
+        Tuple tuple = new Tuple(argsIn);
+
+        byte[] encoded = SuperSerial.serializeForMachine(tt, tuple);
+
+        String str = Strings.encode(encoded, Strings.BASE_64_URL_SAFE);
+
+        Tuple deserial = SuperSerial.deserializeFromMachine(tt, str);
+
+        assertEquals(tuple, deserial);
+    }
     @Test
     public void testBigInteger() {
         long x = Long.MAX_VALUE;
