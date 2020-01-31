@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -41,7 +42,7 @@ public class MonteCarloTest {
     private static final int N = 400_000;
 
     @Test
-    public void fuzzTest() throws InterruptedException {
+    public void gambleGamble() throws InterruptedException {
 
         final long masterMasterSeed = TestUtils.getSeed(System.nanoTime()); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
@@ -71,13 +72,13 @@ public class MonteCarloTest {
         return () -> {
             try {
                 doMonteCarlo(seed, n);
-            } catch (ABIException ve) {
-                throw new RuntimeException(ve);
+            } catch (ABIException | DecodeException e) {
+                throw new RuntimeException(e);
             }
         };
     }
 
-    private static void doMonteCarlo(long masterSeed, int n) throws ABIException {
+    private static void doMonteCarlo(long masterSeed, int n) throws ABIException, DecodeException {
 
         final long[] seeds = generateSeeds(masterSeed, n);
 
@@ -93,6 +94,7 @@ public class MonteCarloTest {
                 temp = testCase.function.getCanonicalSignature();
                 testCase.run();
                 testCase.runForPacked();
+                testCase.runSuperSerial();
                 temp = null;
 //                log.append('#')
 //                        .append(i)
