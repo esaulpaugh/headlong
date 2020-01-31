@@ -139,28 +139,27 @@ public final class ABIJSON {
 
     static Event parseEvent(JsonObject event) throws ParseException {
         final String type = getString(event, TYPE);
-        if (!EVENT.equals(type)) {
-            throw new IllegalArgumentException("unexpected type: " + (type == null ? null : "\"" + type + "\""));
-        }
-
-        final JsonArray inputs = getArray(event, INPUTS);
-        if(inputs == null) {
+        if (EVENT.equals(type)) {
+            final JsonArray inputs = getArray(event, INPUTS);
+            if (inputs != null) {
+                final int inputsLen = inputs.size();
+                final ABIType<?>[] inputsArray = new ABIType[inputsLen];
+                final boolean[] indexed = new boolean[inputsLen];
+                for (int i = 0; i < inputsLen; i++) {
+                    JsonObject inputObj = inputs.get(i).getAsJsonObject();
+                    inputsArray[i] = parseType(inputObj);
+                    indexed[i] = getBoolean(inputObj, INDEXED);
+                }
+                return new Event(
+                        getString(event, NAME),
+                        TupleType.wrap(inputsArray),
+                        indexed,
+                        getBoolean(event, ANONYMOUS, false)
+                );
+            }
             throw new IllegalArgumentException("array \"" + INPUTS + "\" null or not found");
         }
-        final int inputsLen = inputs.size();
-        final ABIType<?>[] inputsArray = new ABIType[inputsLen];
-        final boolean[] indexed = new boolean[inputsLen];
-        for (int i = 0; i < inputsLen; i++) {
-            JsonObject inputObj = inputs.get(i).getAsJsonObject();
-            inputsArray[i] = parseType(inputObj);
-            indexed[i] = getBoolean(inputObj, INDEXED);
-        }
-        return new Event(
-                getString(event, NAME),
-                TupleType.wrap(inputsArray),
-                indexed,
-                getBoolean(event, ANONYMOUS, false)
-        );
+        throw new IllegalArgumentException("unexpected type: " + (type == null ? null : "\"" + type + "\""));
     }
 
     private static ABIType<?> parseType(JsonObject object) throws ParseException {
