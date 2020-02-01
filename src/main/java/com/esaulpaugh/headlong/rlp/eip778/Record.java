@@ -23,6 +23,7 @@ import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
 import com.esaulpaugh.headlong.util.Strings;
 
+import java.nio.ByteBuffer;
 import java.security.SignatureException;
 import java.text.ParseException;
 import java.util.Iterator;
@@ -53,15 +54,17 @@ public final class Record {
         }
 
         final int recordLen = (int) recordLenLong;
-        final byte[] record = new byte[recordLen];
-        RLPEncoder.insertListPrefix((int) recordListPayloadLenLong, record, 0);
+        ByteBuffer bb = ByteBuffer.allocate(recordLen);
+        RLPEncoder.insertListPrefix((int) recordListPayloadLenLong, bb);
         final int contentListOffset = recordPrefixLen + signatureItemLen - RLPEncoder.prefixLength(payloadLenLong);
-        RLPEncoder.insertRecordContentList((int) payloadLenLong, seq, pairs, record, contentListOffset);
-        final byte[] signature = signer.sign(record, contentListOffset, recordLen - contentListOffset);
-        RLPEncoder.insertRecordSignature(signature, record, recordPrefixLen);
+        bb.position(contentListOffset);
+        RLPEncoder.insertRecordContentList((int) payloadLenLong, seq, pairs, bb);
+        final byte[] signature = signer.sign(bb.array(), contentListOffset, recordLen - contentListOffset);
+        bb.position(recordPrefixLen);
+        RLPEncoder.insertRecordSignature(signature, bb);
 
         try {
-            this.rlp = RLP_STRICT.wrapList(record);
+            this.rlp = RLP_STRICT.wrapList(bb.array());
         } catch (DecodeException e) { // shouldn't happen if above code is correct
             throw new Error(e);
         }
@@ -106,10 +109,10 @@ public final class Record {
 
     private byte[] getContentBytes(int index) {
         int contentDataLen = rlp.encodingLength() - index;
-        byte[] content = new byte[RLPEncoder.prefixLength(contentDataLen) + contentDataLen];
-        int prefixLen = RLPEncoder.insertListPrefix(contentDataLen, content, 0);
-        rlp.exportRange(index, index + contentDataLen, content, prefixLen);
-        return content;
+        ByteBuffer bb = ByteBuffer.allocate(RLPEncoder.prefixLength(contentDataLen) + contentDataLen);
+        RLPEncoder.insertListPrefix(contentDataLen, bb);
+        rlp.exportRange(index, index + contentDataLen, bb.array(), bb.position());
+        return bb.array();
     }
 
     public RLPList decode(Verifier verifier) throws DecodeException, SignatureException {

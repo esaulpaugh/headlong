@@ -18,6 +18,7 @@ package com.esaulpaugh.headlong.rlp;
 import com.esaulpaugh.headlong.rlp.eip778.KeyValuePair;
 import com.esaulpaugh.headlong.util.Integers;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,20 +31,20 @@ import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
 /** For encoding data to Recursive Length Prefix format. */
 public final class RLPEncoder {
 // -------------- MADE VISIBLE TO rlp.eip778 package --------------
-    public static int insertRecordContentList(int dataLen, long seq, List<KeyValuePair> pairs, byte[] record, int offset) {
+    public static void insertRecordContentList(int dataLen, long seq, List<KeyValuePair> pairs, ByteBuffer bb) {
         if (seq < 0) {
             throw new IllegalArgumentException("negative seq");
         }
         pairs.sort(KeyValuePair.PAIR_COMPARATOR);
-        offset = encodeString(seq, record, insertListPrefix(dataLen, record, offset));
+        insertListPrefix(dataLen, bb);
+        encodeString(seq, bb);
         for (KeyValuePair pair : pairs) {
-            offset = encodeKeyValuePair(pair, record, offset);
+            encodeKeyValuePair(pair, bb);
         }
-        return offset;
     }
 
-    public static int insertRecordSignature(byte[] signature, byte[] record, int offset) {
-        return encodeItem(signature, record, offset);
+    public static void insertRecordSignature(byte[] signature, ByteBuffer bb) {
+        encodeItem(signature, bb);
     }
 
     public static long encodedLen(long val) {
@@ -55,11 +56,11 @@ public final class RLPEncoder {
     }
 
     public static long dataLen(List<KeyValuePair> pairs) {
-        long total = 0;
-        for (KeyValuePair kvp : pairs) {
-            total += stringEncodedLen(kvp.getKey()) + stringEncodedLen(kvp.getValue());
+        long sum = 0;
+        for (KeyValuePair pair : pairs) {
+            sum += stringEncodedLen(pair.getKey()) + stringEncodedLen(pair.getValue());
         }
-        return total;
+        return sum;
     }
 
     public static int prefixLength(long dataLen) {
@@ -70,10 +71,13 @@ public final class RLPEncoder {
         }
     }
 
-    public static int insertListPrefix(long dataLen, byte[] dest, int destIndex) {
-        return isLong(dataLen)
-                ? encodeLongListPrefix(dataLen, dest, destIndex)
-                : encodeShortListPrefix(dataLen, dest, destIndex);
+    public static void insertListPrefix(long dataLen, ByteBuffer bb) {
+        if(isLong(dataLen)) {
+            bb.put((byte) (LIST_LONG_OFFSET + (byte)  Integers.len(dataLen)));
+            Integers.putLong(dataLen, bb);
+        } else {
+            bb.put((byte) (LIST_SHORT_OFFSET + (byte) dataLen));
+        }
     }
 // ----------------------------------------------------------------
     private static boolean isLong(long dataLen) {
@@ -123,82 +127,66 @@ public final class RLPEncoder {
         return 1 + listDataLen;
     }
 
-    private static int encodeKeyValuePair(KeyValuePair pair, byte[] dest, int destIndex) {
-        return encodeString(pair.getValue(), dest, encodeString(pair.getKey(), dest, destIndex));
+    private static void encodeKeyValuePair(KeyValuePair pair, ByteBuffer bb) {
+        encodeString(pair.getKey(), bb);
+        encodeString(pair.getValue(), bb);
     }
 
-    private static int encodeItem(Object raw, byte[] dest, int destIndex) {
+    private static void encodeItem(Object raw, ByteBuffer bb) {
         if (raw instanceof byte[]) {
-            return encodeString((byte[]) raw, dest, destIndex);
-        }
-        if (raw instanceof Iterable<?>) {
+            encodeString((byte[]) raw, bb);
+        } else if (raw instanceof Iterable<?>) {
             Iterable<?> elements = (Iterable<?>) raw;
-            return encodeList(sumEncodedLen(elements), elements, dest, destIndex);
-        }
-        if(raw instanceof Object[]) {
+            encodeList(sumEncodedLen(elements), elements, bb);
+        } else if(raw instanceof Object[]) {
             Iterable<Object> elements = Arrays.asList((Object[]) raw);
-            return encodeList(sumEncodedLen(elements), elements, dest, destIndex);
-        }
-        if(raw == null) {
+            encodeList(sumEncodedLen(elements), elements, bb);
+        } else if(raw == null) {
             throw new NullPointerException(); // TODO correct behavior?
+        } else {
+            throw new IllegalArgumentException("unsupported object type: " + raw.getClass().getName());
         }
-        throw new IllegalArgumentException("unsupported object type: " + raw.getClass().getName());
     }
 
-    private static int encodeString(long val, byte[] dest, int destIndex) {
+    private static void encodeString(long val, ByteBuffer bb) {
         final int dataLen = Integers.len(val);
-        // short string
         if (dataLen == 1) {
-            return encodeLen1String((byte) val, dest, destIndex);
+            encodeLen1String((byte) val, bb);
+            return;
         }
         // dataLen is 0 or 2-8
-        dest[destIndex++] = (byte) (STRING_SHORT_OFFSET + dataLen);
-        Integers.putLong(val, dest, destIndex);
-        return destIndex + dataLen;
+        bb.put((byte) (STRING_SHORT_OFFSET + dataLen));
+        Integers.putLong(val, bb);
     }
 
-    private static int encodeString(byte[] data, byte[] dest, int destIndex) {
+    private static void encodeString(byte[] data, ByteBuffer bb) {
         final int dataLen = data.length;
-        // short string
-        if (dataLen == 1) {
-            return encodeLen1String(data[0], dest, destIndex);
+        if (dataLen == 1) { // short string
+            encodeLen1String(data[0], bb);
+            return;
         }
         if (isLong(dataLen)) { // long string
-            int lengthOfLength = Integers.putLong(dataLen, dest, destIndex + 1);
-            dest[destIndex] = (byte) (STRING_LONG_OFFSET + lengthOfLength);
-            destIndex += 1 + lengthOfLength;
+            int lengthOfLength = Integers.len(dataLen);
+            bb.put((byte) (STRING_LONG_OFFSET + lengthOfLength));
+            Integers.putLong(dataLen, bb);
         } else {
-            dest[destIndex++] = (byte) (STRING_SHORT_OFFSET + dataLen); // dataLen is 0 or 2-55
+            bb.put((byte) (STRING_SHORT_OFFSET + dataLen)); // dataLen is 0 or 2-55
         }
-        System.arraycopy(data, 0, dest, destIndex, dataLen);
-        return destIndex + dataLen;
+        bb.put(data);
     }
 
-    private static int encodeLen1String(byte first, byte[] dest, int destIndex) {
+    private static void encodeLen1String(byte first, ByteBuffer bb) {
         if (first < 0x00) { // same as (first & 0xFF) >= 0x80
-            dest[destIndex++] = (byte) (STRING_SHORT_OFFSET + 1);
+            bb.put((byte) (STRING_SHORT_OFFSET + 1));
         }
-        dest[destIndex++] = first;
-        return destIndex;
+        bb.put(first);
     }
 
-    private static int encodeList(long dataLen, Iterable<?> elements, byte[] dest, int destIndex) {
-        destIndex = insertListPrefix(dataLen, dest, destIndex);
-        return encodeSequentially(elements, dest, destIndex);
+    private static void encodeList(long dataLen, Iterable<?> elements, ByteBuffer bb) {
+        insertListPrefix(dataLen, bb);
+        encodeSequentiallyBB(elements, bb);
     }
-
-    private static int encodeLongListPrefix(final long dataLen, byte[] dest, final int destIndex) {
-        final int lengthIndex = destIndex + 1;
-        final int n = Integers.putLong(dataLen, dest, lengthIndex);
-        dest[destIndex] = (byte) (LIST_LONG_OFFSET + (byte) n);
-        return lengthIndex + n;
-    }
-
-    private static int encodeShortListPrefix(final long dataLen, byte[] dest, final int destIndex) {
-        dest[destIndex] = (byte) (LIST_SHORT_OFFSET + (byte) dataLen);
-        return destIndex + 1;
-    }
-    // -----------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
     /**
      * Returns the RLP encoding of the given byte.
      *
@@ -216,9 +204,9 @@ public final class RLPEncoder {
      * @return the encoding
      */
     public static byte[] encode(byte[] byteString) {
-        byte[] dest = new byte[stringEncodedLen(byteString)];
-        encodeString(byteString, dest, 0);
-        return dest;
+        ByteBuffer bb = ByteBuffer.allocate(stringEncodedLen(byteString));
+        encodeString(byteString, bb);
+        return bb.array();
     }
 
     /**
@@ -228,9 +216,9 @@ public final class RLPEncoder {
      * @return the encoded sequence
      */
     public static byte[] encodeSequentially(Object... objects) {
-        byte[] dest = new byte[(int) sumEncodedLen(Arrays.asList(objects))];
-        encodeSequentially(objects, dest, 0);
-        return dest;
+        ByteBuffer bb = ByteBuffer.allocate((int) sumEncodedLen(Arrays.asList(objects)));
+        encodeSequentiallyBB(objects, bb);
+        return bb.array();
     }
 
     /**
@@ -256,16 +244,11 @@ public final class RLPEncoder {
      * @return the index into {@code dest} marking the end of the sequence
      */
     public static int encodeSequentially(Object[] objects, byte[] dest, int destIndex) {
-        if(objects instanceof KeyValuePair[]) {
-            for (KeyValuePair kvp : (KeyValuePair[]) objects) {
-                destIndex = encodeKeyValuePair(kvp, dest, destIndex);
-            }
-        } else {
-            for (Object item : objects) {
-                destIndex = encodeItem(item, dest, destIndex);
-            }
+        ByteBuffer bb = ByteBuffer.wrap(dest, destIndex, dest.length - destIndex);
+        for (Object item : objects) {
+            encodeItem(item, bb);
         }
-        return destIndex;
+        return bb.position();
     }
 
     /**
@@ -275,13 +258,21 @@ public final class RLPEncoder {
      * @param objects   the raw objects to be encoded
      * @param dest      the destination for the sequence of RLP encodings
      * @param destIndex the index into the destination for the sequence
-     * @return the index marking the end of the sequence
      */
-    public static int encodeSequentially(Iterable<?> objects, byte[] dest, int destIndex) {
-        for (Object obj : objects) {
-            destIndex = encodeItem(obj, dest, destIndex);
+    public static void encodeSequentially(Iterable<?> objects, byte[] dest, int destIndex) {
+        encodeSequentiallyBB(objects, ByteBuffer.wrap(dest, destIndex, dest.length - destIndex));
+    }
+
+    public static void encodeSequentiallyBB(Object[] objects, ByteBuffer bb) {
+        for (Object raw : objects) {
+            encodeItem(raw, bb);
         }
-        return destIndex;
+    }
+
+    public static void encodeSequentiallyBB(Iterable<?> objects, ByteBuffer bb) {
+        for (Object raw : objects) {
+            encodeItem(raw, bb);
+        }
     }
 
     /**
@@ -303,9 +294,9 @@ public final class RLPEncoder {
      */
     public static byte[] encodeAsList(Iterable<?> elements) {
         long listDataLen = sumEncodedLen(elements);
-        byte[] dest = new byte[prefixLength(listDataLen) + (int) listDataLen];
-        encodeList(listDataLen, elements, dest, 0);
-        return dest;
+        ByteBuffer bb = ByteBuffer.allocate(prefixLength(listDataLen) + (int) listDataLen);
+        encodeList(listDataLen, elements, bb);
+        return bb.array();
     }
 
     /**
@@ -330,7 +321,7 @@ public final class RLPEncoder {
      */
     public static void encodeAsList(Iterable<?> elements, byte[] dest, int destIndex) {
         long listDataLen = sumEncodedLen(elements);
-        encodeList(listDataLen, elements, dest, destIndex);
+        encodeList(listDataLen, elements, ByteBuffer.wrap(dest, destIndex, dest.length - destIndex));
     }
 
     /**
