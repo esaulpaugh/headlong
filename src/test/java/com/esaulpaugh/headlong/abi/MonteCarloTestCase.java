@@ -52,7 +52,6 @@ import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MonteCarloTestCase implements Serializable {
@@ -200,8 +199,6 @@ public class MonteCarloTestCase implements Serializable {
 
         Function f = Function.parse(name + this.function.getParamTypes().canonicalType); // this.function;
 
-//        System.out.println(f.getCanonicalSignature());
-
         ByteBuffer abi = f.encodeCall(this.argsTuple);
 
         JsonObject jsonObject = new JsonObject();
@@ -223,21 +220,8 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     void run(Tuple args) throws ABIException {
-        Function function = this.function;
-
-        ByteBuffer abi = function.encodeCall(args);
-
-        final Tuple out = function.decodeCall((ByteBuffer) abi.flip());
-
-        boolean equal = args.equals(out);
-
-        if(!equal) {
-            try {
-                findInequality(function.getParamTypes(), args, out);
-                throw new RuntimeException(function.getCanonicalSignature());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        if(!args.equals(function.decodeCall((ByteBuffer) function.encodeCall(args).flip()))) {
+            throw new ABIException(params.seed + " " + function.getCanonicalSignature() + " " + args);
         }
     }
 
@@ -246,7 +230,7 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     void runForPacked(Tuple args) throws ABIException {
-        TupleType tt = this.function.getParamTypes();
+        final TupleType tt = this.function.getParamTypes();
         try {
             if (!PackedDecoder.decode(tt, tt.encodePacked(args).array()).equals(args)) {
                 throw new RuntimeException(tt.canonicalType);
@@ -262,8 +246,8 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     void runSuperSerial() throws ABIException, DecodeException {
-        TupleType tt = this.function.getParamTypes();
-        Tuple tuple = this.argsTuple;
+        final TupleType tt = this.function.getParamTypes();
+        final Tuple tuple = this.argsTuple;
 
         String str = SuperSerial.serialize(tt, tuple, false);
         Tuple deserial = SuperSerial.deserialize(tt, str, false);
@@ -497,71 +481,7 @@ public class MonteCarloTestCase implements Serializable {
         }
         return dest;
     }
-
     // ------------------------------------------------------------------------
-
-    private static void findInequality(TupleType tupleType, Tuple in, Tuple out) throws Exception {
-        final int len = tupleType.elementTypes.length;
-        for (int i = 0; i < len; i++) {
-            ABIType<?> type = tupleType.elementTypes[i];
-            findInequality(type, in.elements[i], out.elements[i]);
-        }
-    }
-
-    private static void findInequality(ABIType<?> elementType, Object in, Object out) throws Exception {
-        System.out.println("findInequality(" + elementType.getClass().getName() + ')');
-        if(elementType instanceof UnitType<?>) {
-            findInequality((UnitType<?>) elementType, in, out);
-        } else if(elementType instanceof TupleType) {
-            findInequality((TupleType) elementType, (Tuple) in, (Tuple) out);
-        } else if(elementType instanceof ArrayType<?, ?>) {
-            ArrayType<?, ?> arrayType = (ArrayType<?, ?>) elementType;
-            if(arrayType.isString) {
-                assertArrayEquals(Strings.decode((String) in, Strings.UTF_8), Strings.decode((String) out, Strings.UTF_8));
-                assertEquals(in, out);
-            } else {
-                final Class<?> inClass = in.getClass();
-                if(Object[].class.isAssignableFrom(inClass)) {
-                    findInequalityInArray(arrayType, (Object[]) in, (Object[]) out);
-                } else if(byte[].class.isAssignableFrom(inClass)) {
-                    assertArrayEquals((byte[]) in, (byte[]) out);
-                } else if(int[].class.isAssignableFrom(inClass)) {
-                    assertArrayEquals((int[]) in, (int[]) out);
-                } else if(long[].class.isAssignableFrom(inClass)) {
-                    assertArrayEquals((long[]) in, (long[]) out);
-                } else {
-                    throw new RuntimeException("??");
-                }
-            }
-        } else {
-            throw new IllegalArgumentException("unrecognized type: " + elementType.toString());
-        }
-    }
-
-    private static void findInequality(UnitType<?> unitType, Object in, Object out) throws Exception {
-        if(!in.equals(out)) {
-            if(in instanceof BigInteger && out instanceof BigInteger) {
-                System.err.println("bitLen: " + ((BigInteger) in).bitLength() + " =? " + ((BigInteger) out).bitLength());
-            }
-            System.err.println(in + " != " + out + " " + unitType.bitLength);
-            throw new Exception();
-        }
-    }
-
-    private static void findInequalityInArray(ArrayType<?, ?> arrayType, Object[] in, Object[] out) throws Exception {
-        final ABIType<?> elementType = arrayType.elementType;
-        if (in.length != out.length) {
-            throw new AssertionError(elementType.toString() + " len " + in.length + " != " + out.length);
-        }
-        for (int i = 0; i < in.length; i++) {
-            Object ie = in[i];
-            Object oe = out[i];
-            if (!ie.equals(oe)) {
-                findInequality(elementType, ie, oe);
-            }
-        }
-    }
-
     @Override
     public int hashCode() {
         return Objects.hash(params, function, argsTuple);
