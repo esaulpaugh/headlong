@@ -20,11 +20,10 @@ import java.nio.ByteBuffer;
 
 public final class BigIntegerType extends UnitType<BigInteger> {
 
-    private static final Class<BigInteger> CLASS = BigInteger.class;
     private static final String ARRAY_CLASS_NAME = BigInteger[].class.getName();
 
     BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {
-        super(canonicalType, CLASS, bitLength, unsigned);
+        super(canonicalType, BigInteger.class, bitLength, unsigned);
     }
 
     @Override

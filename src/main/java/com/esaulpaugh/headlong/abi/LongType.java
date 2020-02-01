@@ -20,11 +20,10 @@ import java.nio.ByteBuffer;
 
 public final class LongType extends UnitType<Long> {
 
-    private static final Class<Long> CLASS = Long.class;
     private static final String ARRAY_CLASS_NAME = long[].class.getName();
 
     LongType(String canonicalType, int bitLength, boolean unsigned) {
-        super(canonicalType, CLASS, bitLength, unsigned);
+        super(canonicalType, Long.class, bitLength, unsigned);
     }
 
     @Override

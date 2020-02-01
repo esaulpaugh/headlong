@@ -20,16 +20,13 @@ import java.nio.ByteBuffer;
 
 public final class ByteType extends UnitType<Byte> {
 
-    private static final Class<Byte> CLASS = Byte.class;
     private static final String ARRAY_CLASS_NAME = byte[].class.getName();
-
-    private static final int MAX_BIT_LEN = 8;
 
 //    static final ByteType SIGNED = new ByteType("int8", false);
     static final ByteType UNSIGNED = new ByteType("uint8", true);
 
     private ByteType(String canonicalType, boolean unsigned) {
-        super(canonicalType, CLASS, MAX_BIT_LEN, unsigned);
+        super(canonicalType, Byte.class, Byte.SIZE, unsigned);
     }
 
     @Override

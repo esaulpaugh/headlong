@@ -29,7 +29,6 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 
 public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
-    private static final Class<Tuple> CLASS = Tuple.class;
     private static final String ARRAY_CLASS_NAME = Tuple[].class.getName();
 
     private static final String EMPTY_TUPLE_STRING = "()";
@@ -39,7 +38,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     final ABIType<?>[] elementTypes;
 
     private TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes) {
-        super(canonicalType, CLASS, dynamic);
+        super(canonicalType, Tuple.class, dynamic);
         this.elementTypes = elementTypes;
     }
 

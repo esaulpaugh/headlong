@@ -20,11 +20,10 @@ import java.nio.ByteBuffer;
 
 public final class IntType extends UnitType<Integer> {
 
-    private static final Class<Integer> CLASS = Integer.class;
     private static final String ARRAY_CLASS_NAME = int[].class.getName();
 
     IntType(String canonicalType, int bitLength, boolean unsigned) {
-        super(canonicalType, CLASS, bitLength, unsigned);
+        super(canonicalType, Integer.class, bitLength, unsigned);
     }
 
     @Override

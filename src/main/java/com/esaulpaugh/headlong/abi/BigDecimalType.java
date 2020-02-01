@@ -22,13 +22,12 @@ import java.nio.ByteBuffer;
 /** For decimal types such as fixed, ufixed, and decimal. */
 public final class BigDecimalType extends UnitType<BigDecimal> {
 
-    private static final Class<BigDecimal> CLASS = BigDecimal.class;
     private static final String ARRAY_CLASS_NAME = BigDecimal[].class.getName();
 
     final int scale;
 
     BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean unsigned) {
-        super(canonicalTypeString, CLASS, bitLength, unsigned);
+        super(canonicalTypeString, BigDecimal.class, bitLength, unsigned);
         this.scale = scale;
     }
 

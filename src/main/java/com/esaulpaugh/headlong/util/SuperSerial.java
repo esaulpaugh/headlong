@@ -90,7 +90,7 @@ public class SuperSerial {
     private static Object serialize(ABIType<?> type, Object obj) throws ABIException {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return (boolean) obj ? TRUE : FALSE;
-        case TYPE_CODE_BYTE: return Integers.toBytes((byte) obj);
+        case TYPE_CODE_BYTE: return Integers.toBytes((byte) obj); // case currently goes unused
         case TYPE_CODE_INT: return Integers.toBytes((int) obj);
         case TYPE_CODE_LONG: return Integers.toBytes((long) obj);
         case TYPE_CODE_BIG_INTEGER: return ((BigInteger) obj).toByteArray();
@@ -104,7 +104,7 @@ public class SuperSerial {
     private static Object deserialize(ABIType<?> type, RLPItem item) throws DecodeException {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return item.asBoolean();
-        case TYPE_CODE_BYTE: return item.asByte();
+        case TYPE_CODE_BYTE: return item.asByte(); // case currently goes unused
         case TYPE_CODE_INT: return item.asInt();
         case TYPE_CODE_LONG: return item.asLong();
         case TYPE_CODE_BIG_INTEGER: return item.asBigInt();
@@ -145,14 +145,6 @@ public class SuperSerial {
         }
     }
 
-    private static Object serializeByteArray(ArrayType<? extends ABIType<?>,?> arrayType, Object obj) {
-        return arrayType.isString() ? Strings.decode((String) obj, Strings.UTF_8) : obj;
-    }
-
-    private static Object deserializeByteArray(ArrayType<? extends ABIType<?>,?> arrayType, RLPString string) {
-        return arrayType.isString() ? string.asString(Strings.UTF_8) : string.asBytes();
-    }
-
     private static List<byte[]> serializeBooleanArray(Object obj) {
         boolean[] booleans = (boolean[]) obj;
         List<byte[]> list = new ArrayList<>(booleans.length);
@@ -170,6 +162,14 @@ public class SuperSerial {
             booleans[i++] = e.asBoolean();
         }
         return booleans;
+    }
+
+    private static Object serializeByteArray(ArrayType<? extends ABIType<?>,?> arrayType, Object obj) {
+        return arrayType.isString() ? Strings.decode((String) obj, Strings.UTF_8) : obj;
+    }
+
+    private static Object deserializeByteArray(ArrayType<? extends ABIType<?>,?> arrayType, RLPString string) {
+        return arrayType.isString() ? string.asString(Strings.UTF_8) : string.asBytes();
     }
 
     private static List<byte[]> serializeIntArray(Object obj) {
