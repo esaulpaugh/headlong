@@ -86,7 +86,11 @@ public class Notation {
         return new Notation(sb.append(END_NOTATION).toString());
     }
 
-    public static Notation forObjects(List<Object> objects) throws DecodeException {
+    public static Notation forObjects(Object... objects) throws DecodeException {
+        return forEncoding(RLPEncoder.encodeSequentially(objects));
+    }
+
+    public static Notation forObjects(Iterable<Object> objects) throws DecodeException {
         return forEncoding(RLPEncoder.encodeSequentially(objects));
     }
 

@@ -52,6 +52,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements); // TODO .intern() string?
     }
 
+    public int size() {
+        return elementTypes.length;
+    }
+
     public ABIType<?> get(int index) {
         return elementTypes[index];
     }

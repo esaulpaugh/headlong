@@ -52,12 +52,11 @@ public class Deserializer {
     }
 
     public static Tuple parseTupleValue(TupleType tupleType, JsonArray valuesArray) {
-        ABIType<?>[] abiTypes = tupleType.elements();
-        final int len = abiTypes.length;
+        final int len = tupleType.size();
         Object[] elements = new Object[len];
         int i = 0;
         for (Iterator<JsonElement> iter = valuesArray.iterator(); i < len; i++) {
-            elements[i] = parseValue(abiTypes[i], iter.next());
+            elements[i] = parseValue(tupleType.get(i), iter.next());
         }
         return new Tuple(elements);
     }
