@@ -89,7 +89,7 @@ public class SuperSerial {
 
     private static Object serialize(ABIType<?> type, Object obj) throws ABIException {
         switch (type.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return (Boolean) obj ? TRUE : FALSE;
+        case TYPE_CODE_BOOLEAN: return (boolean) obj ? TRUE : FALSE;
         case TYPE_CODE_BYTE: return Integers.toBytes((byte) obj);
         case TYPE_CODE_INT: return Integers.toBytes((int) obj);
         case TYPE_CODE_LONG: return Integers.toBytes((long) obj);
@@ -156,8 +156,8 @@ public class SuperSerial {
     private static List<byte[]> serializeBooleanArray(Object obj) {
         boolean[] booleans = (boolean[]) obj;
         List<byte[]> list = new ArrayList<>(booleans.length);
-        for (boolean aBoolean : booleans) {
-            list.add(Integers.toBytes(aBoolean ? 1 : 0));
+        for (boolean e : booleans) {
+            list.add(Integers.toBytes(e ? 1 : 0));
         }
         return list;
     }
@@ -175,8 +175,8 @@ public class SuperSerial {
     private static List<byte[]> serializeIntArray(Object obj) {
         int[] ints = (int[]) obj;
         List<byte[]> list = new ArrayList<>(ints.length);
-        for (int anInt : ints) {
-            list.add(Integers.toBytes(anInt));
+        for (int e : ints) {
+            list.add(Integers.toBytes(e));
         }
         return list;
     }
@@ -194,8 +194,8 @@ public class SuperSerial {
     private static List<byte[]> serializeLongArray(Object obj) {
         long[] longs = (long[]) obj;
         List<byte[]> list = new ArrayList<>(longs.length);
-        for (long aLong : longs) {
-            list.add(Integers.toBytes(aLong));
+        for (long e : longs) {
+            list.add(Integers.toBytes(e));
         }
         return list;
     }
