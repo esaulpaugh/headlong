@@ -36,8 +36,8 @@ public class Notation {
     private static final String BEGIN_NOTATION = "(";
     private static final String END_NOTATION = "\n)";
 
-    static final String BEGIN_LIST = "{";
-    static final String END_LIST = "}";
+    static final String BEGIN_LIST = "[";
+    static final String END_LIST = "]";
     static final String BEGIN_STRING = "'";
     static final String END_STRING = "'";
 

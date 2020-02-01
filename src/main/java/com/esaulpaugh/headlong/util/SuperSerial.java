@@ -59,14 +59,14 @@ public class SuperSerial {
     }
 
     public static Tuple deserialize(TupleType tupleType, String str, boolean machine) throws DecodeException, ABIException {
-        Tuple tuple = deserializeTuple(
+        Tuple in = deserializeTuple(
                 tupleType,
                 machine
                         ? Strings.decode(str)
                         : RLPEncoder.encodeSequentially(NotationParser.parse(str))
         );
-        tupleType.validate(tuple);
-        return tuple;
+        tupleType.validate(in);
+        return in;
     }
 
     private static Object[] serializeTuple(TupleType tupleType, Object obj) throws ABIException {
