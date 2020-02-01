@@ -60,10 +60,10 @@ public class DecodeTest {
         Tuple decoded = new Function("foo()", "(()[])").decodeReturn(
                 FastHex.decode(
                 "0000000000000000000000000000000000000000000000000000000000000020" +
-                "0000000000000000000000000000000000000000000000000000000000000001"
+                "0000000000000000000000000000000000000000000000000000000000000002"
                 )
         );
-        assertEquals(Tuple.of((Object) new Tuple[] { Tuple.EMPTY }), decoded);
+        assertEquals(Tuple.of((Object) new Tuple[] { Tuple.EMPTY, Tuple.EMPTY }), decoded);
     }
 
     @Test

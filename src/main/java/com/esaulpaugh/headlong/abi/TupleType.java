@@ -170,7 +170,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public Tuple decode(byte[] array) throws ABIException {
-        return decode(ByteBuffer.wrap(array));
+        ByteBuffer bb = ByteBuffer.wrap(array);
+        Tuple decoded = decode(bb);
+        final int remaining = bb.remaining();
+        if(remaining == 0) {
+            return decoded;
+        }
+        throw new IllegalArgumentException("unconsumed bytes: " + remaining + " remaining");
     }
 
     public Tuple decode(ByteBuffer bb) throws ABIException {
