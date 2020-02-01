@@ -37,7 +37,8 @@ public class RLPStudentTest {
         RLPStudent plato = new RLPStudent(studentRlp);
         assertEquals(STUDENT_TO_STRING, plato.toString());
 
-        byte[] rlp = plato.toRLP();
+        byte[] rlp = new byte[205];
+        plato.toRLP(rlp, 0);
         assertArrayEquals(studentRlp, rlp);
     }
 

@@ -216,9 +216,7 @@ public final class RLPEncoder {
      * @return the encoded sequence
      */
     public static byte[] encodeSequentially(Object... objects) {
-        ByteBuffer bb = ByteBuffer.allocate((int) sumEncodedLen(Arrays.asList(objects)));
-        encodeSequentiallyBB(objects, bb);
-        return bb.array();
+        return encodeSequentially(Arrays.asList(objects));
     }
 
     /**
@@ -244,11 +242,7 @@ public final class RLPEncoder {
      * @return the index into {@code dest} marking the end of the sequence
      */
     public static int encodeSequentially(Object[] objects, byte[] dest, int destIndex) {
-        ByteBuffer bb = ByteBuffer.wrap(dest, destIndex, dest.length - destIndex);
-        for (Object item : objects) {
-            encodeItem(item, bb);
-        }
-        return bb.position();
+        return encodeSequentially(Arrays.asList(objects), dest, destIndex);
     }
 
     /**
@@ -258,15 +252,18 @@ public final class RLPEncoder {
      * @param objects   the raw objects to be encoded
      * @param dest      the destination for the sequence of RLP encodings
      * @param destIndex the index into the destination for the sequence
+     * @return the index into {@code dest} marking the end of the sequence
      */
-    public static void encodeSequentially(Iterable<?> objects, byte[] dest, int destIndex) {
-        encodeSequentiallyBB(objects, ByteBuffer.wrap(dest, destIndex, dest.length - destIndex));
+    public static int encodeSequentially(Iterable<?> objects, byte[] dest, int destIndex) {
+        ByteBuffer bb = ByteBuffer.wrap(dest, destIndex, dest.length - destIndex);
+        for (Object item : objects) {
+            encodeItem(item, bb);
+        }
+        return bb.position();
     }
 
     public static void encodeSequentiallyBB(Object[] objects, ByteBuffer bb) {
-        for (Object raw : objects) {
-            encodeItem(raw, bb);
-        }
+        encodeSequentiallyBB(Arrays.asList(objects), bb);
     }
 
     public static void encodeSequentiallyBB(Iterable<?> objects, ByteBuffer bb) {
