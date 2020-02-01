@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.eip778.KeyValuePair;
 import com.esaulpaugh.headlong.util.Integers;
 
 import java.nio.ByteBuffer;
@@ -30,8 +29,8 @@ import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
 
 /** For encoding data to Recursive Length Prefix format. */
 public final class RLPEncoder {
-// -------------- MADE VISIBLE TO rlp.eip778 package --------------
-    public static void insertRecordContentList(int dataLen, long seq, List<KeyValuePair> pairs, ByteBuffer bb) {
+// -------------- MADE VISIBLE TO rlp.eip778 package -------------------------------------------------------------------
+    static void insertRecordContentList(int dataLen, long seq, List<KeyValuePair> pairs, ByteBuffer bb) {
         if (seq < 0) {
             throw new IllegalArgumentException("negative seq");
         }
@@ -43,19 +42,11 @@ public final class RLPEncoder {
         }
     }
 
-    public static void insertRecordSignature(byte[] signature, ByteBuffer bb) {
+    static void insertRecordSignature(byte[] signature, ByteBuffer bb) {
         encodeItem(signature, bb);
     }
 
-    public static long encodedLen(long val) {
-        int dataLen = Integers.len(val);
-        if (dataLen == 1) {
-            return (byte) val >= 0x00 ? 1 : 2;
-        }
-        return 1 + dataLen;
-    }
-
-    public static long dataLen(List<KeyValuePair> pairs) {
+    static long dataLen(List<KeyValuePair> pairs) {
         long sum = 0;
         for (KeyValuePair pair : pairs) {
             sum += stringEncodedLen(pair.getKey()) + stringEncodedLen(pair.getValue());
@@ -63,7 +54,7 @@ public final class RLPEncoder {
         return sum;
     }
 
-    public static int prefixLength(long dataLen) {
+    static int prefixLength(long dataLen) {
         if (isLong(dataLen)) {
             return 1 + Integers.len(dataLen);
         } else {
@@ -71,7 +62,7 @@ public final class RLPEncoder {
         }
     }
 
-    public static void insertListPrefix(long dataLen, ByteBuffer bb) {
+    static void insertListPrefix(long dataLen, ByteBuffer bb) {
         if(isLong(dataLen)) {
             bb.put((byte) (LIST_LONG_OFFSET + (byte)  Integers.len(dataLen)));
             Integers.putLong(dataLen, bb);
@@ -79,7 +70,12 @@ public final class RLPEncoder {
             bb.put((byte) (LIST_SHORT_OFFSET + (byte) dataLen));
         }
     }
-// ----------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
+    private static void encodeKeyValuePair(KeyValuePair pair, ByteBuffer bb) {
+        encodeString(pair.getKey(), bb);
+        encodeString(pair.getValue(), bb);
+    }
+
     private static boolean isLong(long dataLen) {
         return dataLen >= MIN_LONG_DATA_LEN;
     }
@@ -125,11 +121,6 @@ public final class RLPEncoder {
             return 1 + Integers.len(listDataLen) + listDataLen;
         }
         return 1 + listDataLen;
-    }
-
-    private static void encodeKeyValuePair(KeyValuePair pair, ByteBuffer bb) {
-        encodeString(pair.getKey(), bb);
-        encodeString(pair.getValue(), bb);
     }
 
     private static void encodeItem(Object raw, ByteBuffer bb) {

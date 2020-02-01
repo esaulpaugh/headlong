@@ -13,13 +13,15 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.rlp.eip778;
+package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.exception.DecodeException;
+import com.esaulpaugh.headlong.rlp.KeyValuePair;
 import com.esaulpaugh.headlong.rlp.RLPDecoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
+import com.esaulpaugh.headlong.rlp.Record;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Test;
 
@@ -32,11 +34,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.ID;
-import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.IP;
-import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.PAIR_COMPARATOR;
-import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.SECP256K1;
-import static com.esaulpaugh.headlong.rlp.eip778.KeyValuePair.UDP;
+import static com.esaulpaugh.headlong.rlp.KeyValuePair.ID;
+import static com.esaulpaugh.headlong.rlp.KeyValuePair.IP;
+import static com.esaulpaugh.headlong.rlp.KeyValuePair.PAIR_COMPARATOR;
+import static com.esaulpaugh.headlong.rlp.KeyValuePair.SECP256K1;
+import static com.esaulpaugh.headlong.rlp.KeyValuePair.UDP;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;

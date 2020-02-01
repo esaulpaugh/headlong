@@ -13,14 +13,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.rlp.eip778;
+package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
-import com.esaulpaugh.headlong.rlp.RLPDecoder;
-import com.esaulpaugh.headlong.rlp.RLPEncoder;
-import com.esaulpaugh.headlong.rlp.RLPItem;
-import com.esaulpaugh.headlong.rlp.RLPList;
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
@@ -45,7 +42,7 @@ public final class Record {
     public Record(long seq, List<KeyValuePair> pairs, Signer signer) {
         final int signatureLen = signer.signatureLength();
         final int signatureItemLen = RLPEncoder.prefixLength(signatureLen) + signatureLen;
-        final long payloadLenLong = RLPEncoder.encodedLen(seq) + RLPEncoder.dataLen(pairs);
+        final long payloadLenLong = rlpEncodedLen(seq) + RLPEncoder.dataLen(pairs);
         final long recordListPayloadLenLong = signatureItemLen + payloadLenLong;
         final int recordPrefixLen = RLPEncoder.prefixLength(recordListPayloadLenLong);
         final long recordLenLong = recordPrefixLen + recordListPayloadLenLong;
@@ -146,5 +143,13 @@ public final class Record {
     @Override
     public String toString() {
         return ENR_PREFIX + rlp.toString(BASE_64_URL_SAFE);
+    }
+
+    private static long rlpEncodedLen(long val) {
+        int dataLen = Integers.len(val);
+        if (dataLen == 1) {
+            return (byte) val >= 0x00 ? 1 : 2;
+        }
+        return 1 + dataLen;
     }
 }

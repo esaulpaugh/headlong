@@ -53,7 +53,6 @@ public class RLPStudentTest {
         assertEquals(STUDENT_TO_STRING, plato.toString());
 
         byte[] rlp = adapter.encode(plato);
-//        System.out.println(Hex.toHexString(rlp));
 
         assertArrayEquals(studentRlp, rlp);
     }
