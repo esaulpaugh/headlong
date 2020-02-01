@@ -55,14 +55,14 @@ public class SuperSerial {
         tupleType.validate(tuple);
         List<Object> list = serializeTuple(tupleType, tuple);
         return machine
-                ? Strings.encode(RLPEncoder.encodeSequentially(list), Strings.BASE_64_URL_SAFE)
+                ? Strings.encode(RLPEncoder.encodeSequentially(list))
                 : Notation.forObjects(list).toString();
     }
 
     public static Tuple deserialize(TupleType tupleType, String str, boolean machine) throws DecodeException, ABIException {
         Tuple tuple = deserializeTuple(
                 tupleType,
-                machine ? Strings.decode(str, Strings.BASE_64_URL_SAFE) : RLPEncoder.encodeSequentially(NotationParser.parse(str))
+                machine ? Strings.decode(str) : RLPEncoder.encodeSequentially(NotationParser.parse(str))
         );
         tupleType.validate(tuple);
         return tuple;
