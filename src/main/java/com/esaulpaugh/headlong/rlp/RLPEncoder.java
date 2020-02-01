@@ -29,10 +29,26 @@ import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
 
 /** For encoding data to Recursive Length Prefix format. */
 public final class RLPEncoder {
+// -------------- MADE VISIBLE TO rlp.eip778 package --------------
+    public static int insertRecordContentList(int dataLen, long seq, List<KeyValuePair> pairs, byte[] record, int offset) {
+        if (seq < 0) {
+            throw new IllegalArgumentException("negative seq");
+        }
+        pairs.sort(KeyValuePair.PAIR_COMPARATOR);
+        offset = encodeString(seq, record, insertListPrefix(dataLen, record, offset));
+        for (KeyValuePair pair : pairs) {
+            offset = encodeKeyValuePair(pair, record, offset);
+        }
+        return offset;
+    }
+
+    public static int insertRecordSignature(byte[] signature, byte[] record, int offset) {
+        return encodeItem(signature, record, offset);
+    }
 
     public static long encodedLen(long val) {
         int dataLen = Integers.len(val);
-        if(dataLen == 1) {
+        if (dataLen == 1) {
             return (byte) val >= 0x00 ? 1 : 2;
         }
         return 1 + dataLen;
@@ -41,7 +57,7 @@ public final class RLPEncoder {
     public static long dataLen(List<KeyValuePair> pairs) {
         long total = 0;
         for (KeyValuePair kvp : pairs) {
-            total += itemEncodedLen(kvp.getKey()) + itemEncodedLen(kvp.getValue());
+            total += stringEncodedLen(kvp.getKey()) + stringEncodedLen(kvp.getValue());
         }
         return total;
     }
@@ -59,33 +75,33 @@ public final class RLPEncoder {
                 ? encodeLongListPrefix(dataLen, dest, destIndex)
                 : encodeShortListPrefix(dataLen, dest, destIndex);
     }
-    // -----------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------
     private static boolean isLong(long dataLen) {
         return dataLen >= MIN_LONG_DATA_LEN;
     }
 
-    private static long totalEncodedLen(Iterable<?> objects) {
-        long total = 0;
-        for (Object obj : objects) {
-            total += itemEncodedLen(obj);
+    private static long sumEncodedLen(Iterable<?> rawItems) {
+        long sum = 0;
+        for (Object raw : rawItems) {
+            sum += encodedLen(raw);
         }
-        return total;
+        return sum;
     }
 
-    private static long itemEncodedLen(Object obj) {
-        if (obj instanceof byte[]) {
-            return stringEncodedLen((byte[]) obj);
+    private static long encodedLen(Object raw) {
+        if (raw instanceof byte[]) {
+            return stringEncodedLen((byte[]) raw);
         }
-        if (obj instanceof Iterable<?>) {
-            return listEncodedLen((Iterable<?>) obj);
+        if (raw instanceof Iterable<?>) {
+            return listEncodedLen((Iterable<?>) raw);
         }
-        if(obj instanceof Object[]) {
-            return listEncodedLen(Arrays.asList((Object[]) obj));
+        if(raw instanceof Object[]) {
+            return listEncodedLen(Arrays.asList((Object[]) raw));
         }
-        if(obj == null) {
+        if(raw == null) {
             throw new NullPointerException();
         }
-        throw new IllegalArgumentException("unsupported object type: " + obj.getClass().getName());
+        throw new IllegalArgumentException("unsupported object type: " + raw.getClass().getName());
     }
 
     private static int stringEncodedLen(byte[] byteString) {
@@ -99,8 +115,8 @@ public final class RLPEncoder {
         return 1 + dataLen;
     }
 
-    private static long listEncodedLen(Iterable<?> elements) {
-        final long listDataLen = totalEncodedLen(elements);
+    private static long listEncodedLen(Iterable<?> items) {
+        final long listDataLen = sumEncodedLen(items);
         if (isLong(listDataLen)) {
             return 1 + Integers.len(listDataLen) + listDataLen;
         }
@@ -111,30 +127,22 @@ public final class RLPEncoder {
         return encodeString(pair.getValue(), dest, encodeString(pair.getKey(), dest, destIndex));
     }
 
-    private static int encodeList(long dataLen, long seq, List<KeyValuePair> pairs, byte[] dest, int destIndex) {
-        destIndex = encodeString(seq, dest, insertListPrefix(dataLen, dest, destIndex));
-        for (KeyValuePair pair : pairs) {
-            destIndex = encodeKeyValuePair(pair, dest, destIndex);
+    private static int encodeItem(Object raw, byte[] dest, int destIndex) {
+        if (raw instanceof byte[]) {
+            return encodeString((byte[]) raw, dest, destIndex);
         }
-        return destIndex;
-    }
-
-    private static int encodeItem(Object item, byte[] dest, int destIndex) {
-        if (item instanceof byte[]) {
-            return encodeString((byte[]) item, dest, destIndex);
+        if (raw instanceof Iterable<?>) {
+            Iterable<?> elements = (Iterable<?>) raw;
+            return encodeList(sumEncodedLen(elements), elements, dest, destIndex);
         }
-        if (item instanceof Iterable<?>) {
-            Iterable<?> elements = (Iterable<?>) item;
-            return encodeList(totalEncodedLen(elements), elements, dest, destIndex);
+        if(raw instanceof Object[]) {
+            Iterable<Object> elements = Arrays.asList((Object[]) raw);
+            return encodeList(sumEncodedLen(elements), elements, dest, destIndex);
         }
-        if(item instanceof Object[]) {
-            Iterable<Object> elements = Arrays.asList((Object[]) item);
-            return encodeList(totalEncodedLen(elements), elements, dest, destIndex);
-        }
-        if(item == null) {
+        if(raw == null) {
             throw new NullPointerException(); // TODO correct behavior?
         }
-        throw new IllegalArgumentException("unsupported object type: " + item.getClass().getName());
+        throw new IllegalArgumentException("unsupported object type: " + raw.getClass().getName());
     }
 
     private static int encodeString(long val, byte[] dest, int destIndex) {
@@ -220,7 +228,7 @@ public final class RLPEncoder {
      * @return the encoded sequence
      */
     public static byte[] encodeSequentially(Object... objects) {
-        byte[] dest = new byte[(int) totalEncodedLen(Arrays.asList(objects))];
+        byte[] dest = new byte[(int) sumEncodedLen(Arrays.asList(objects))];
         encodeSequentially(objects, dest, 0);
         return dest;
     }
@@ -233,7 +241,7 @@ public final class RLPEncoder {
      * @return the encoded sequence
      */
     public static byte[] encodeSequentially(Iterable<?> objects) {
-        byte[] dest = new byte[(int) totalEncodedLen(objects)];
+        byte[] dest = new byte[(int) sumEncodedLen(objects)];
         encodeSequentially(objects, dest, 0);
         return dest;
     }
@@ -294,7 +302,7 @@ public final class RLPEncoder {
      * @return the encoded RLP list item
      */
     public static byte[] encodeAsList(Iterable<?> elements) {
-        long listDataLen = totalEncodedLen(elements);
+        long listDataLen = sumEncodedLen(elements);
         byte[] dest = new byte[prefixLength(listDataLen) + (int) listDataLen];
         encodeList(listDataLen, elements, dest, 0);
         return dest;
@@ -321,7 +329,7 @@ public final class RLPEncoder {
      * @param destIndex the index into the destination for the list
      */
     public static void encodeAsList(Iterable<?> elements, byte[] dest, int destIndex) {
-        long listDataLen = totalEncodedLen(elements);
+        long listDataLen = sumEncodedLen(elements);
         encodeList(listDataLen, elements, dest, destIndex);
     }
 
@@ -343,17 +351,5 @@ public final class RLPEncoder {
      */
     public static RLPList toList(Iterable<RLPItem> encodings) {
         return RLPList.withElements(encodings);
-    }
-
-    public static int insertRecordContentList(int dataLen, long seq, List<KeyValuePair> pairs, byte[] record, int offset) {
-        if(seq < 0) {
-            throw new IllegalArgumentException("negative seq");
-        }
-        pairs.sort(KeyValuePair.PAIR_COMPARATOR);
-        return encodeList(dataLen, seq, pairs, record, offset);
-    }
-
-    public static int insertRecordSignature(byte[] signature, byte[] record, int offset) {
-        return encodeItem(signature, record, offset);
     }
 }
