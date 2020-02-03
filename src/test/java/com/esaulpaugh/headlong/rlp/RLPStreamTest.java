@@ -178,13 +178,10 @@ public class RLPStreamTest {
                 assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
                 assertNoNext(iter);
                 assertNoNext(iter);
-
                 senderThread.join();
-
             } catch (Throwable io) {
                 throwable = io;
-            } finally {
-                canReceive.set(false);
+                senderThread.interrupt();
             }
         }
 
