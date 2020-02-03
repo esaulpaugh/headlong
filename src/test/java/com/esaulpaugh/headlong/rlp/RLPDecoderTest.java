@@ -247,7 +247,7 @@ public class RLPDecoderTest {
             buffer = new byte[1 + lol + (int) dataLen];
             buffer[0] = (byte) (0xb7 + lol);
             Integers.putLong(dataLen, buffer, 1);
-            huge = (RLPString) RLP_STRICT.wrap(buffer);
+            huge = RLP_STRICT.wrapString(buffer);
             data = huge.asString(UTF_8);
             System.out.println(dataLen);
             assertEquals(dataLen, data.length());
