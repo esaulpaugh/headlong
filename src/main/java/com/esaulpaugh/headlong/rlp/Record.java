@@ -33,7 +33,7 @@ import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
 /** Implementation of EIP-778: Ethereum Node Records (ENR), https://eips.ethereum.org/EIPS/eip-778 */
 public final class Record {
 
-    private static final int MAX_RECORD_LEN = 300;
+    private static final long MAX_RECORD_LEN = 300;
 
     private static final String ENR_PREFIX = "enr:";
 
@@ -41,23 +41,24 @@ public final class Record {
 
     public Record(long seq, List<KeyValuePair> pairs, Signer signer) {
         final int signatureLen = signer.signatureLength();
-        final int signatureItemLen = RLPEncoder.prefixLength(signatureLen) + signatureLen;
         final long payloadLenLong = rlpEncodedLen(seq) + RLPEncoder.dataLen(pairs);
-        final long recordListPayloadLenLong = signatureItemLen + payloadLenLong;
-        final int recordPrefixLen = RLPEncoder.prefixLength(recordListPayloadLenLong);
-        final long recordLenLong = recordPrefixLen + recordListPayloadLenLong;
+        final long recordListDataLenLong = RLPEncoder.prefixLength(signatureLen) + signatureLen + payloadLenLong;
+        final int recordListPrefixLen = RLPEncoder.prefixLength(recordListDataLenLong);
+        final long recordLenLong = recordListPrefixLen + recordListDataLenLong;
         if(recordLenLong > MAX_RECORD_LEN) {
             throw new IllegalArgumentException("record length exceeds maximum: " + recordLenLong + " > " + MAX_RECORD_LEN);
         }
 
         final int recordLen = (int) recordLenLong;
         ByteBuffer bb = ByteBuffer.allocate(recordLen);
-        RLPEncoder.insertListPrefix((int) recordListPayloadLenLong, bb);
-        final int contentListOffset = recordPrefixLen + signatureItemLen - RLPEncoder.prefixLength(payloadLenLong);
+        RLPEncoder.insertListPrefix(recordListDataLenLong, bb);
+
+        final int contentListOffset = recordLen - (RLPEncoder.prefixLength(payloadLenLong) + (int) payloadLenLong);
         bb.position(contentListOffset);
-        RLPEncoder.insertRecordContentList((int) payloadLenLong, seq, pairs, bb);
+        RLPEncoder.insertRecordContentList(payloadLenLong, seq, pairs, bb);
+
         final byte[] signature = signer.sign(bb.array(), contentListOffset, recordLen - contentListOffset);
-        bb.position(recordPrefixLen);
+        bb.position(recordListPrefixLen);
         RLPEncoder.insertRecordSignature(signature, bb);
 
         try {
@@ -148,8 +149,8 @@ public final class Record {
     private static long rlpEncodedLen(long val) {
         int dataLen = Integers.len(val);
         if (dataLen == 1) {
-            return (byte) val >= 0x00 ? 1 : 2;
+            return (byte) val >= 0x00 ? 1L : 2L;
         }
-        return 1 + dataLen;
+        return 1L + dataLen;
     }
 }

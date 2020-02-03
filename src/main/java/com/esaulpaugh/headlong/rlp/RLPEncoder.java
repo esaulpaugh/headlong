@@ -30,7 +30,7 @@ import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
 /** For encoding data to Recursive Length Prefix format. */
 public final class RLPEncoder {
 // -------------- MADE VISIBLE TO rlp.eip778 package -------------------------------------------------------------------
-    static void insertRecordContentList(int dataLen, long seq, List<KeyValuePair> pairs, ByteBuffer bb) {
+    static void insertRecordContentList(long dataLen, long seq, List<KeyValuePair> pairs, ByteBuffer bb) {
         if(seq >= 0) {
             pairs.sort(KeyValuePair.PAIR_COMPARATOR);
             insertListPrefix(dataLen, bb);
