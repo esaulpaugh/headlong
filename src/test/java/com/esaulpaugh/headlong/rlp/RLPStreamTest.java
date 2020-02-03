@@ -116,12 +116,10 @@ public class RLPStreamTest {
     private static class ReceiveStreamThread extends Thread {
 
         private final Object receiver = new Object();
-        private final Object sender;
 
         private final long zero;
         private final PipedOutputStream pos;
         private final AtomicBoolean canReceive;
-
         private final SendStreamThread senderThread;
 
         private Throwable throwable;
@@ -131,7 +129,6 @@ public class RLPStreamTest {
             this.pos = new PipedOutputStream();
             this.canReceive = new AtomicBoolean(false);
             this.senderThread = new SendStreamThread(zero, pos, receiver, canReceive);
-            this.sender = senderThread.sender;
         }
 
         @Override
@@ -201,9 +198,9 @@ public class RLPStreamTest {
         }
 
         private void notifySender() {
-            synchronized (sender) {
+            synchronized (senderThread) {
                 canReceive.set(false);
-                sender.notify();
+                senderThread.notify();
             }
         }
 
@@ -217,8 +214,6 @@ public class RLPStreamTest {
     }
 
     private static class SendStreamThread extends Thread {
-
-        private final Object sender = new Object();
 
         private final long zero;
         private final OutputStream os;
@@ -235,19 +230,19 @@ public class RLPStreamTest {
         @Override
         public void run() {
             try {
-                waitForReceiver();
+                waitForNotifiedReceiver();
                 write(TEST_BYTE);
-                waitForReceiver();
+                waitForNotifiedReceiver();
                 for (byte b : TEST_BYTES) {
                     write(b);
                 }
-                waitForReceiver();
+                waitForNotifiedReceiver();
                 byte[] rlpString = RLPEncoder.encode(Strings.decode(TEST_STRING, UTF_8));
                 int i = 0;
                 write(rlpString[i++]);
-                waitForReceiver();
+                waitForNotifiedReceiver();
                 write(rlpString[i++]);
-                waitForReceiver();
+                waitForNotifiedReceiver();
                 while(i < rlpString.length) {
                     write(rlpString[i++]);
                 }
@@ -258,11 +253,11 @@ public class RLPStreamTest {
             }
         }
 
-        private void waitForReceiver() throws InterruptedException {
+        private void waitForNotifiedReceiver() throws InterruptedException {
             notifyReceiver();
-            synchronized (sender) {
+            synchronized (SendStreamThread.this) {
                 while(canReceive.get()) {
-                    sender.wait();
+                    this.wait();
                 }
             }
         }
