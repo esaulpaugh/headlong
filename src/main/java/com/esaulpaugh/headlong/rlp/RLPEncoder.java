@@ -31,14 +31,15 @@ import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
 public final class RLPEncoder {
 // -------------- MADE VISIBLE TO rlp.eip778 package -------------------------------------------------------------------
     static void insertRecordContentList(int dataLen, long seq, List<KeyValuePair> pairs, ByteBuffer bb) {
-        if (seq < 0) {
+        if(seq >= 0) {
+            pairs.sort(KeyValuePair.PAIR_COMPARATOR);
+            insertListPrefix(dataLen, bb);
+            encodeString(seq, bb);
+            for (KeyValuePair pair : pairs) {
+                encodeKeyValuePair(pair, bb);
+            }
+        } else {
             throw new IllegalArgumentException("negative seq");
-        }
-        pairs.sort(KeyValuePair.PAIR_COMPARATOR);
-        insertListPrefix(dataLen, bb);
-        encodeString(seq, bb);
-        for (KeyValuePair pair : pairs) {
-            encodeKeyValuePair(pair, bb);
         }
     }
 
@@ -55,19 +56,15 @@ public final class RLPEncoder {
     }
 
     static int prefixLength(long dataLen) {
-        if (isLong(dataLen)) {
-            return 1 + Integers.len(dataLen);
-        } else {
-            return 1;
-        }
+        return isShort(dataLen) ? 1 : 1 + Integers.len(dataLen);
     }
 
     static void insertListPrefix(long dataLen, ByteBuffer bb) {
-        if(isLong(dataLen)) {
-            bb.put((byte) (LIST_LONG_OFFSET + (byte)  Integers.len(dataLen)));
-            Integers.putLong(dataLen, bb);
+        if(isShort(dataLen)) {
+            bb.put((byte) (LIST_SHORT_OFFSET + dataLen));
         } else {
-            bb.put((byte) (LIST_SHORT_OFFSET + (byte) dataLen));
+            bb.put((byte) (LIST_LONG_OFFSET + Integers.len(dataLen)));
+            Integers.putLong(dataLen, bb);
         }
     }
 // ---------------------------------------------------------------------------------------------------------------------
@@ -76,8 +73,8 @@ public final class RLPEncoder {
         encodeString(pair.getValue(), bb);
     }
 
-    private static boolean isLong(long dataLen) {
-        return dataLen >= MIN_LONG_DATA_LEN;
+    private static boolean isShort(long dataLen) {
+        return dataLen < MIN_LONG_DATA_LEN;
     }
 
     private static long sumEncodedLen(Iterable<?> rawItems) {
@@ -106,21 +103,19 @@ public final class RLPEncoder {
 
     private static int stringEncodedLen(byte[] byteString) {
         final int dataLen = byteString.length;
-        if (isLong(dataLen)) {
-            return 1 + Integers.len(dataLen) + dataLen;
-        }
-        if (dataLen == 1 && byteString[0] >= 0x00) { // same as (bytes[0] & 0xFF) < 0x80
-            return 1;
-        }
-        return 1 + dataLen;
+        return isShort(dataLen)
+                ? dataLen == 1 && byteString[0] >= 0x00 // same as (byteString[0] & 0xFF) < 0x80
+                    ? 1
+                    : 1 + dataLen
+                : 1 + Integers.len(dataLen) + dataLen;
     }
 
     private static long listEncodedLen(Iterable<?> items) {
-        final long listDataLen = sumEncodedLen(items);
-        if (isLong(listDataLen)) {
-            return 1 + Integers.len(listDataLen) + listDataLen;
+        final long dataLen = sumEncodedLen(items);
+        if(isShort(dataLen)) {
+            return 1 + dataLen;
         }
-        return 1 + listDataLen;
+        return 1 + Integers.len(dataLen) + dataLen;
     }
 
     private static void encodeItem(Object raw, ByteBuffer bb) {
@@ -156,12 +151,11 @@ public final class RLPEncoder {
             encodeLen1String(data[0], bb);
             return;
         }
-        if (isLong(dataLen)) { // long string
-            int lengthOfLength = Integers.len(dataLen);
-            bb.put((byte) (STRING_LONG_OFFSET + lengthOfLength));
-            Integers.putLong(dataLen, bb);
-        } else {
+        if (isShort(dataLen)) {
             bb.put((byte) (STRING_SHORT_OFFSET + dataLen)); // dataLen is 0 or 2-55
+        } else { // long string
+            bb.put((byte) (STRING_LONG_OFFSET + Integers.len(dataLen)));
+            Integers.putLong(dataLen, bb);
         }
         bb.put(data);
     }
@@ -281,9 +275,9 @@ public final class RLPEncoder {
      * @return the encoded RLP list item
      */
     public static byte[] encodeAsList(Iterable<?> elements) {
-        long listDataLen = sumEncodedLen(elements);
-        ByteBuffer bb = ByteBuffer.allocate(prefixLength(listDataLen) + (int) listDataLen);
-        encodeList(listDataLen, elements, bb);
+        long dataLen = sumEncodedLen(elements);
+        ByteBuffer bb = ByteBuffer.allocate(prefixLength(dataLen) + (int) dataLen);
+        encodeList(dataLen, elements, bb);
         return bb.array();
     }
 
@@ -308,8 +302,7 @@ public final class RLPEncoder {
      * @param destIndex the index into the destination for the list
      */
     public static void encodeAsList(Iterable<?> elements, byte[] dest, int destIndex) {
-        long listDataLen = sumEncodedLen(elements);
-        encodeList(listDataLen, elements, ByteBuffer.wrap(dest, destIndex, dest.length - destIndex));
+        encodeList(sumEncodedLen(elements), elements, ByteBuffer.wrap(dest, destIndex, dest.length - destIndex));
     }
 
     /**
