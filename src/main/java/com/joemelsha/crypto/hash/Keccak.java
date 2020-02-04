@@ -25,7 +25,7 @@ import java.security.MessageDigest;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class Keccak extends MessageDigest {
+public final class Keccak extends MessageDigest {
 
     private static final int MAX_STATE_SIZE = 1600;
     private static final int MAX_STATE_SIZE_WORDS = MAX_STATE_SIZE / Long.SIZE;

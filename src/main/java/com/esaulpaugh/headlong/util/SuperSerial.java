@@ -45,7 +45,7 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 
-public class SuperSerial {
+public final class SuperSerial {
 
     private static final byte[] TRUE = new byte[] { 0x01 };
     private static final byte[] FALSE = new byte[0];

@@ -29,7 +29,7 @@ import java.util.Objects;
 /**
  * An object notation for RLP, not unlike JSON. Call {@link #parse()} to parse the notation into the original list of objects.
  */
-public class Notation {
+public final class Notation {
 
     private static final boolean LENIENT = true; // keep lenient so RLPItem.toString() doesn't throw, and to help with debugging
 

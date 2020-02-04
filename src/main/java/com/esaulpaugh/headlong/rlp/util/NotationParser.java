@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Decodes RLP object notation as defined by the {@link Notation} class. */
-public class NotationParser {
+public final class NotationParser {
 
     private static final int LIST = 0;
     private static final int STRING = 1;
