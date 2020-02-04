@@ -59,70 +59,77 @@
   <property name="jdk.bin.11" value="${jdk.home.11}/bin"/>
   <path id="jdk.classpath.11">
     <fileset dir="${jdk.home.11}">
-      <include name="../jbr!/java.base"/>
-      <include name="../jbr!/java.compiler"/>
-      <include name="../jbr!/java.datatransfer"/>
-      <include name="../jbr!/java.desktop"/>
-      <include name="../jbr!/java.instrument"/>
-      <include name="../jbr!/java.logging"/>
-      <include name="../jbr!/java.management"/>
-      <include name="../jbr!/java.management.rmi"/>
-      <include name="../jbr!/java.naming"/>
-      <include name="../jbr!/java.net.http"/>
-      <include name="../jbr!/java.prefs"/>
-      <include name="../jbr!/java.rmi"/>
-      <include name="../jbr!/java.scripting"/>
-      <include name="../jbr!/java.se"/>
-      <include name="../jbr!/java.security.jgss"/>
-      <include name="../jbr!/java.security.sasl"/>
-      <include name="../jbr!/java.smartcardio"/>
-      <include name="../jbr!/java.sql"/>
-      <include name="../jbr!/java.sql.rowset"/>
-      <include name="../jbr!/java.transaction.xa"/>
-      <include name="../jbr!/java.xml"/>
-      <include name="../jbr!/java.xml.crypto"/>
-      <include name="../jbr!/javafx.base"/>
-      <include name="../jbr!/javafx.controls"/>
-      <include name="../jbr!/javafx.fxml"/>
-      <include name="../jbr!/javafx.graphics"/>
-      <include name="../jbr!/javafx.media"/>
-      <include name="../jbr!/javafx.swing"/>
-      <include name="../jbr!/javafx.web"/>
-      <include name="../jbr!/jdk.accessibility"/>
-      <include name="../jbr!/jdk.aot"/>
-      <include name="../jbr!/jdk.attach"/>
-      <include name="../jbr!/jdk.charsets"/>
-      <include name="../jbr!/jdk.compiler"/>
-      <include name="../jbr!/jdk.crypto.cryptoki"/>
-      <include name="../jbr!/jdk.crypto.ec"/>
-      <include name="../jbr!/jdk.dynalink"/>
-      <include name="../jbr!/jdk.httpserver"/>
-      <include name="../jbr!/jdk.internal.ed"/>
-      <include name="../jbr!/jdk.internal.jvmstat"/>
-      <include name="../jbr!/jdk.internal.le"/>
-      <include name="../jbr!/jdk.internal.vm.ci"/>
-      <include name="../jbr!/jdk.internal.vm.compiler"/>
-      <include name="../jbr!/jdk.internal.vm.compiler.management"/>
-      <include name="../jbr!/jdk.jdi"/>
-      <include name="../jbr!/jdk.jdwp.agent"/>
-      <include name="../jbr!/jdk.jfr"/>
-      <include name="../jbr!/jdk.jsobject"/>
-      <include name="../jbr!/jdk.localedata"/>
-      <include name="../jbr!/jdk.management"/>
-      <include name="../jbr!/jdk.management.agent"/>
-      <include name="../jbr!/jdk.management.jfr"/>
-      <include name="../jbr!/jdk.naming.dns"/>
-      <include name="../jbr!/jdk.naming.rmi"/>
-      <include name="../jbr!/jdk.net"/>
-      <include name="../jbr!/jdk.pack"/>
-      <include name="../jbr!/jdk.scripting.nashorn"/>
-      <include name="../jbr!/jdk.scripting.nashorn.shell"/>
-      <include name="../jbr!/jdk.sctp"/>
-      <include name="../jbr!/jdk.security.auth"/>
-      <include name="../jbr!/jdk.security.jgss"/>
-      <include name="../jbr!/jdk.unsupported"/>
-      <include name="../jbr!/jdk.xml.dom"/>
-      <include name="../jbr!/jdk.zipfs"/>
+      <include name="../jdk-11.0.4!/java.base"/>
+      <include name="../jdk-11.0.4!/java.compiler"/>
+      <include name="../jdk-11.0.4!/java.datatransfer"/>
+      <include name="../jdk-11.0.4!/java.desktop"/>
+      <include name="../jdk-11.0.4!/java.instrument"/>
+      <include name="../jdk-11.0.4!/java.logging"/>
+      <include name="../jdk-11.0.4!/java.management"/>
+      <include name="../jdk-11.0.4!/java.management.rmi"/>
+      <include name="../jdk-11.0.4!/java.naming"/>
+      <include name="../jdk-11.0.4!/java.net.http"/>
+      <include name="../jdk-11.0.4!/java.prefs"/>
+      <include name="../jdk-11.0.4!/java.rmi"/>
+      <include name="../jdk-11.0.4!/java.scripting"/>
+      <include name="../jdk-11.0.4!/java.se"/>
+      <include name="../jdk-11.0.4!/java.security.jgss"/>
+      <include name="../jdk-11.0.4!/java.security.sasl"/>
+      <include name="../jdk-11.0.4!/java.smartcardio"/>
+      <include name="../jdk-11.0.4!/java.sql"/>
+      <include name="../jdk-11.0.4!/java.sql.rowset"/>
+      <include name="../jdk-11.0.4!/java.transaction.xa"/>
+      <include name="../jdk-11.0.4!/java.xml"/>
+      <include name="../jdk-11.0.4!/java.xml.crypto"/>
+      <include name="../jdk-11.0.4!/jdk.accessibility"/>
+      <include name="../jdk-11.0.4!/jdk.aot"/>
+      <include name="../jdk-11.0.4!/jdk.attach"/>
+      <include name="../jdk-11.0.4!/jdk.charsets"/>
+      <include name="../jdk-11.0.4!/jdk.compiler"/>
+      <include name="../jdk-11.0.4!/jdk.crypto.cryptoki"/>
+      <include name="../jdk-11.0.4!/jdk.crypto.ec"/>
+      <include name="../jdk-11.0.4!/jdk.crypto.mscapi"/>
+      <include name="../jdk-11.0.4!/jdk.dynalink"/>
+      <include name="../jdk-11.0.4!/jdk.editpad"/>
+      <include name="../jdk-11.0.4!/jdk.hotspot.agent"/>
+      <include name="../jdk-11.0.4!/jdk.httpserver"/>
+      <include name="../jdk-11.0.4!/jdk.internal.ed"/>
+      <include name="../jdk-11.0.4!/jdk.internal.jvmstat"/>
+      <include name="../jdk-11.0.4!/jdk.internal.le"/>
+      <include name="../jdk-11.0.4!/jdk.internal.opt"/>
+      <include name="../jdk-11.0.4!/jdk.internal.vm.ci"/>
+      <include name="../jdk-11.0.4!/jdk.internal.vm.compiler"/>
+      <include name="../jdk-11.0.4!/jdk.internal.vm.compiler.management"/>
+      <include name="../jdk-11.0.4!/jdk.jartool"/>
+      <include name="../jdk-11.0.4!/jdk.javadoc"/>
+      <include name="../jdk-11.0.4!/jdk.jcmd"/>
+      <include name="../jdk-11.0.4!/jdk.jconsole"/>
+      <include name="../jdk-11.0.4!/jdk.jdeps"/>
+      <include name="../jdk-11.0.4!/jdk.jdi"/>
+      <include name="../jdk-11.0.4!/jdk.jdwp.agent"/>
+      <include name="../jdk-11.0.4!/jdk.jfr"/>
+      <include name="../jdk-11.0.4!/jdk.jlink"/>
+      <include name="../jdk-11.0.4!/jdk.jshell"/>
+      <include name="../jdk-11.0.4!/jdk.jsobject"/>
+      <include name="../jdk-11.0.4!/jdk.jstatd"/>
+      <include name="../jdk-11.0.4!/jdk.localedata"/>
+      <include name="../jdk-11.0.4!/jdk.management"/>
+      <include name="../jdk-11.0.4!/jdk.management.agent"/>
+      <include name="../jdk-11.0.4!/jdk.management.jfr"/>
+      <include name="../jdk-11.0.4!/jdk.naming.dns"/>
+      <include name="../jdk-11.0.4!/jdk.naming.rmi"/>
+      <include name="../jdk-11.0.4!/jdk.net"/>
+      <include name="../jdk-11.0.4!/jdk.pack"/>
+      <include name="../jdk-11.0.4!/jdk.rmic"/>
+      <include name="../jdk-11.0.4!/jdk.scripting.nashorn"/>
+      <include name="../jdk-11.0.4!/jdk.scripting.nashorn.shell"/>
+      <include name="../jdk-11.0.4!/jdk.sctp"/>
+      <include name="../jdk-11.0.4!/jdk.security.auth"/>
+      <include name="../jdk-11.0.4!/jdk.security.jgss"/>
+      <include name="../jdk-11.0.4!/jdk.unsupported"/>
+      <include name="../jdk-11.0.4!/jdk.unsupported.desktop"/>
+      <include name="../jdk-11.0.4!/jdk.xml.dom"/>
+      <include name="../jdk-11.0.4!/jdk.zipfs"/>
     </fileset>
   </path>
   
@@ -144,23 +151,23 @@
   <path id="library.gradle:_org.apiguardian:apiguardian-api:1.1.0.classpath">
     <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.apiguardian/apiguardian-api/1.1.0/fc9dff4bb36d627bdc553de77e1f17efd790876c/apiguardian-api-1.1.0.jar"/>
   </path>
-
+  
   <path id="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath">
     <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.bouncycastle/bcprov-jdk15on/1.64/1467dac1b787b5ad2a18201c0c281df69882259e/bcprov-jdk15on-1.64.jar"/>
   </path>
-
+  
   <path id="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.0.classpath">
     <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-api/5.6.0/f29e6318333d2303ce4965c9819cfad08de7d1e5/junit-jupiter-api-5.6.0.jar"/>
   </path>
-
+  
   <path id="library.gradle:_org.junit.jupiter:junit-jupiter-engine:5.6.0.classpath">
     <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-engine/5.6.0/83c9e737f6015d9e00029b9b1d51e952a884b8f9/junit-jupiter-engine-5.6.0.jar"/>
   </path>
-
+  
   <path id="library.gradle:_org.junit.platform:junit-platform-commons:1.6.0.classpath">
     <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-commons/1.6.0/b0a75795cf03841d4f9cc54099557baffc11c727/junit-platform-commons-1.6.0.jar"/>
   </path>
-
+  
   <path id="library.gradle:_org.junit.platform:junit-platform-engine:1.6.0.classpath">
     <pathelement location="${basedir}/../../../.gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-engine/1.6.0/a3a6ec96c010875444b3ca31828108093758ec00/junit-platform-engine-1.6.0.jar"/>
   </path>
@@ -185,13 +192,339 @@
   
   <!-- Modules -->
   
-  <import file="${basedir}/.idea/modules/module_headlong.xml"/>
   
-  <import file="${basedir}/.idea/modules/module_headlong.main.xml"/>
+  <!-- Module headlong -->
   
-  <import file="${basedir}/.idea/modules/module_headlong.jmh.xml"/>
+  <dirname property="module.headlong.basedir" file="${ant.file}"/>
   
-  <import file="${basedir}/.idea/modules/module_headlong.test.xml"/>
+  
+  <property name="module.jdk.home.headlong" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.headlong" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.headlong" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.headlong" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="headlong.output.dir" value="${module.headlong.basedir}/classes/production/headlong"/>
+  <property name="headlong.testoutput.dir" value="${module.headlong.basedir}/classes/test/headlong"/>
+  
+  <path id="headlong.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="headlong.module.production.classpath">
+    <path refid="${module.jdk.classpath.headlong}"/>
+  </path>
+  
+  <path id="headlong.runtime.production.module.classpath">
+    <pathelement location="${headlong.output.dir}"/>
+  </path>
+  
+  <path id="headlong.module.classpath">
+    <path refid="${module.jdk.classpath.headlong}"/>
+    <pathelement location="${headlong.output.dir}"/>
+  </path>
+  
+  <path id="headlong.runtime.module.classpath">
+    <pathelement location="${headlong.testoutput.dir}"/>
+    <pathelement location="${headlong.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.headlong">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.headlong">
+    <patternset refid="excluded.from.module.headlong"/>
+  </patternset>
+  
+  
+  <target name="compile.module.headlong" depends="compile.module.headlong.production,compile.module.headlong.tests" description="Compile module headlong"/>
+  
+  <target name="compile.module.headlong.production" depends="register.custom.compilers" description="Compile module headlong; production classes"/>
+  
+  <target name="compile.module.headlong.tests" depends="register.custom.compilers,compile.module.headlong.production" description="compile module headlong; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.headlong" description="cleanup module">
+    <delete dir="${headlong.output.dir}"/>
+    <delete dir="${headlong.testoutput.dir}"/>
+  </target>
+  
+  
+  <!-- Module headlong.main -->
+  
+  <dirname property="module.headlong.main.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.headlong.main" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.headlong.main" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.headlong.main" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.headlong.main" value="-encoding UTF-8 -source 8 -target 1.8 ${compiler.args}"/>
+  
+  <property name="headlong.main.output.dir" value="${module.headlong.main.basedir}/build/classes/java/main"/>
+  <property name="headlong.main.testoutput.dir" value="${module.headlong.main.basedir}/build/classes/java/main"/>
+  
+  <path id="headlong.main.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="headlong.main.module.production.classpath">
+    <path refid="${module.jdk.classpath.headlong.main}"/>
+    <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+  </path>
+  
+  <path id="headlong.main.runtime.production.module.classpath">
+    <pathelement location="${headlong.main.output.dir}"/>
+    <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+  </path>
+  
+  <path id="headlong.main.module.classpath">
+    <path refid="${module.jdk.classpath.headlong.main}"/>
+    <pathelement location="${headlong.main.output.dir}"/>
+    <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+  </path>
+  
+  <path id="headlong.main.runtime.module.classpath">
+    <pathelement location="${headlong.main.output.dir}"/>
+    <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.headlong.main">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.headlong.main">
+    <patternset refid="excluded.from.module.headlong.main"/>
+  </patternset>
+  
+  <path id="headlong.main.module.sourcepath">
+    <dirset dir="${module.headlong.main.basedir}/src/main">
+      <include name="java"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.headlong.main" depends="compile.module.headlong.main.production,compile.module.headlong.main.tests" description="Compile module headlong.main"/>
+  
+  <target name="compile.module.headlong.main.production" depends="register.custom.compilers" description="Compile module headlong.main; production classes">
+    <mkdir dir="${headlong.main.output.dir}"/>
+    <javac2 destdir="${headlong.main.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.headlong.main}/javac">
+      <compilerarg line="${compiler.args.headlong.main}"/>
+      <bootclasspath refid="headlong.main.module.bootclasspath"/>
+      <classpath refid="headlong.main.module.production.classpath"/>
+      <src refid="headlong.main.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.headlong.main"/>
+    </javac2>
+    
+    <copy todir="${headlong.main.output.dir}">
+      <fileset dir="${module.headlong.main.basedir}/src/main/java">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.headlong.main.tests" depends="register.custom.compilers,compile.module.headlong.main.production" description="compile module headlong.main; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.headlong.main" description="cleanup module">
+    <delete dir="${headlong.main.output.dir}"/>
+    <delete dir="${headlong.main.testoutput.dir}"/>
+  </target>
+  
+  
+  <!-- Module headlong.jmh -->
+  
+  <dirname property="module.headlong.jmh.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.headlong.jmh" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.headlong.jmh" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.headlong.jmh" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.headlong.jmh" value="-encoding UTF-8 -source 8 -target 1.8 ${compiler.args}"/>
+  
+  <property name="headlong.jmh.output.dir" value="${module.headlong.jmh.basedir}/build/classes/java/jmh"/>
+  <property name="headlong.jmh.testoutput.dir" value="${module.headlong.jmh.basedir}/build/classes/java/jmh"/>
+  
+  <path id="headlong.jmh.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="headlong.jmh.module.production.classpath">
+    <path refid="${module.jdk.classpath.headlong.jmh}"/>
+    <pathelement location="${headlong.main.output.dir}"/>
+    <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+  </path>
+  
+  <path id="headlong.jmh.runtime.production.module.classpath">
+    <pathelement location="${headlong.jmh.output.dir}"/>
+    <path refid="headlong.main.runtime.production.module.classpath"/>
+    <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+  </path>
+  
+  <path id="headlong.jmh.module.classpath">
+    <path refid="${module.jdk.classpath.headlong.jmh}"/>
+    <pathelement location="${headlong.jmh.output.dir}"/>
+    <pathelement location="${headlong.main.output.dir}"/>
+    <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+  </path>
+  
+  <path id="headlong.jmh.runtime.module.classpath">
+    <pathelement location="${headlong.jmh.output.dir}"/>
+    <path refid="headlong.main.runtime.module.classpath"/>
+    <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.headlong.jmh">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.headlong.jmh">
+    <patternset refid="excluded.from.module.headlong.jmh"/>
+  </patternset>
+  
+  
+  <target name="compile.module.headlong.jmh" depends="compile.module.headlong.jmh.production,compile.module.headlong.jmh.tests" description="Compile module headlong.jmh"/>
+  
+  <target name="compile.module.headlong.jmh.production" depends="register.custom.compilers,compile.module.headlong.main" description="Compile module headlong.jmh; production classes"/>
+  
+  <target name="compile.module.headlong.jmh.tests" depends="register.custom.compilers,compile.module.headlong.jmh.production" description="compile module headlong.jmh; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.headlong.jmh" description="cleanup module">
+    <delete dir="${headlong.jmh.output.dir}"/>
+    <delete dir="${headlong.jmh.testoutput.dir}"/>
+  </target>
+  
+  
+  <!-- Module headlong.test -->
+  
+  <dirname property="module.headlong.test.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.headlong.test" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.headlong.test" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.headlong.test" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.headlong.test" value="-encoding UTF-8 -source 8 -target 1.8 ${compiler.args}"/>
+  
+  <property name="headlong.test.output.dir" value="undefined"/>
+  <property name="headlong.test.testoutput.dir" value="${module.headlong.test.basedir}/build/classes/java/test"/>
+  
+  <path id="headlong.test.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="headlong.test.module.production.classpath">
+    <path refid="${module.jdk.classpath.headlong.test}"/>
+    <pathelement location="${headlong.main.output.dir}"/>
+    <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.junit.platform:junit-platform-commons:1.6.0.classpath"/>
+    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.0.classpath"/>
+    <path refid="library.gradle:_com.madgag.spongycastle:core:1.58.0.0.classpath"/>
+    <path refid="library.gradle:_org.apiguardian:apiguardian-api:1.1.0.classpath"/>
+    <path refid="library.gradle:_org.opentest4j:opentest4j:1.2.0.classpath"/>
+  </path>
+  
+  <path id="headlong.test.runtime.production.module.classpath">
+    <path refid="headlong.main.runtime.production.module.classpath"/>
+    <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.junit.platform:junit-platform-commons:1.6.0.classpath"/>
+    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.0.classpath"/>
+    <path refid="library.gradle:_org.junit.platform:junit-platform-engine:1.6.0.classpath"/>
+    <path refid="library.gradle:_com.madgag.spongycastle:core:1.58.0.0.classpath"/>
+    <path refid="library.gradle:_org.apiguardian:apiguardian-api:1.1.0.classpath"/>
+    <path refid="library.gradle:_org.opentest4j:opentest4j:1.2.0.classpath"/>
+    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-engine:5.6.0.classpath"/>
+  </path>
+  
+  <path id="headlong.test.module.classpath">
+    <path refid="${module.jdk.classpath.headlong.test}"/>
+    <pathelement location="${headlong.main.output.dir}"/>
+    <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.junit.platform:junit-platform-commons:1.6.0.classpath"/>
+    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.0.classpath"/>
+    <path refid="library.gradle:_org.junit.platform:junit-platform-engine:1.6.0.classpath"/>
+    <path refid="library.gradle:_com.madgag.spongycastle:core:1.58.0.0.classpath"/>
+    <path refid="library.gradle:_org.apiguardian:apiguardian-api:1.1.0.classpath"/>
+    <path refid="library.gradle:_org.opentest4j:opentest4j:1.2.0.classpath"/>
+    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-engine:5.6.0.classpath"/>
+  </path>
+  
+  <path id="headlong.test.runtime.module.classpath">
+    <pathelement location="${headlong.test.testoutput.dir}"/>
+    <path refid="headlong.main.runtime.module.classpath"/>
+    <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.junit.platform:junit-platform-commons:1.6.0.classpath"/>
+    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.0.classpath"/>
+    <path refid="library.gradle:_org.junit.platform:junit-platform-engine:1.6.0.classpath"/>
+    <path refid="library.gradle:_com.madgag.spongycastle:core:1.58.0.0.classpath"/>
+    <path refid="library.gradle:_org.apiguardian:apiguardian-api:1.1.0.classpath"/>
+    <path refid="library.gradle:_org.opentest4j:opentest4j:1.2.0.classpath"/>
+    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-engine:5.6.0.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.headlong.test">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.headlong.test">
+    <patternset refid="excluded.from.module.headlong.test"/>
+  </patternset>
+  
+  <path id="headlong.test.module.test.sourcepath">
+    <dirset dir="${module.headlong.test.basedir}/src/test">
+      <include name="java"/>
+      <include name="resources"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.headlong.test" depends="compile.module.headlong.test.production,compile.module.headlong.test.tests" description="Compile module headlong.test"/>
+  
+  <target name="compile.module.headlong.test.production" depends="register.custom.compilers,compile.module.headlong.main" description="Compile module headlong.test; production classes"/>
+  
+  <target name="compile.module.headlong.test.tests" depends="register.custom.compilers,compile.module.headlong.test.production" description="compile module headlong.test; test classes" unless="skip.tests">
+    <mkdir dir="${headlong.test.testoutput.dir}"/>
+    <javac2 destdir="${headlong.test.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.headlong.test}/javac">
+      <compilerarg line="${compiler.args.headlong.test}"/>
+      <bootclasspath refid="headlong.test.module.bootclasspath"/>
+      <classpath refid="headlong.test.module.classpath"/>
+      <src refid="headlong.test.module.test.sourcepath"/>
+      <patternset refid="excluded.from.compilation.headlong.test"/>
+    </javac2>
+    
+    <copy todir="${headlong.test.testoutput.dir}">
+      <fileset dir="${module.headlong.test.basedir}/src/test/java">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+      <fileset dir="${module.headlong.test.basedir}/src/test/resources">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="clean.module.headlong.test" description="cleanup module">
+    <delete dir="${headlong.test.output.dir}"/>
+    <delete dir="${headlong.test.testoutput.dir}"/>
+  </target>
 
   <target name = "build-jar">
     <jar destfile = "${basedir}/build/lib/headlong-2.2.1-SNAPSHOT.jar"
