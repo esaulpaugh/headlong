@@ -37,22 +37,21 @@ public final class Record {
 
     public Record(long seq, List<KeyValuePair> pairs, Signer signer) {
         final int signatureLen = signer.signatureLength();
-        final long payloadLenLong = rlpEncodedLen(seq) + RLPEncoder.dataLen(pairs);
-        final long recordListDataLenLong = RLPEncoder.prefixLength(signatureLen) + signatureLen + payloadLenLong;
-        final int recordListPrefixLen = RLPEncoder.prefixLength(recordListDataLenLong);
-        final long recordLenLong = recordListPrefixLen + recordListDataLenLong;
-        if(recordLenLong > MAX_RECORD_LEN) {
-            throw new IllegalArgumentException("record length exceeds maximum: " + recordLenLong + " > " + MAX_RECORD_LEN);
+        final int payloadLen = rlpEncodedLen(seq) + RLPEncoder.dataLen(pairs);
+        final int recordListDataLen = RLPEncoder.prefixLength(signatureLen) + signatureLen + payloadLen;
+        final int recordListPrefixLen = RLPEncoder.prefixLength(recordListDataLen);
+        final int recordLen = recordListPrefixLen + recordListDataLen;
+        if(recordLen > MAX_RECORD_LEN) {
+            throw new IllegalArgumentException("record length exceeds maximum: " + recordLen + " > " + MAX_RECORD_LEN);
         }
 
-        final int recordLen = (int) recordLenLong;
         ByteBuffer bb = ByteBuffer.allocate(recordLen);
-        RLPEncoder.insertListPrefix(recordListDataLenLong, bb);
+        RLPEncoder.insertListPrefix(recordListDataLen, bb);
 
-        final int contentListLen = RLPEncoder.prefixLength(payloadLenLong) + (int) payloadLenLong;
+        final int contentListLen = RLPEncoder.prefixLength(payloadLen) + payloadLen;
         final int contentListOffset = recordLen - contentListLen;
         bb.position(contentListOffset);
-        RLPEncoder.insertRecordContentList(payloadLenLong, seq, pairs, bb);
+        RLPEncoder.insertRecordContentList(payloadLen, seq, pairs, bb);
 
         final byte[] signature = signer.sign(bb.array(), contentListOffset, contentListLen);
         bb.position(recordListPrefixLen);
@@ -135,11 +134,11 @@ public final class Record {
         return ENR_PREFIX + rlp.toString(BASE_64_URL_SAFE);
     }
 
-    private static long rlpEncodedLen(long val) {
+    private static int rlpEncodedLen(long val) {
         int dataLen = Integers.len(val);
         if (dataLen == 1) {
-            return (byte) val >= 0x00 ? 1L : 2L;
+            return (byte) val >= 0x00 ? 1 : 2;
         }
-        return 1L + dataLen;
+        return 1 + dataLen;
     }
 }
