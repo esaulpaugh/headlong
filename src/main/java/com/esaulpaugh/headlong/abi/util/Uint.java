@@ -24,12 +24,14 @@ public final class Uint {
 
     private static final BigInteger TWO = BigInteger.valueOf(2L);
 
+    private static final long ZERO = 0L;
+
     public final int numBits;
     public final BigInteger range;
-    public final Long rangeLong;
+    public final long rangeLong;
     public final BigInteger halfRange;
-    public final Long halfRangeLong;
-    public final Long maskLong;
+    public final long halfRangeLong;
+    public final long maskLong;
 
     public Uint(int numBits) {
         if(numBits < 0) {
@@ -37,13 +39,13 @@ public final class Uint {
         }
         this.numBits = numBits;
         this.range = TWO.shiftLeft(numBits - 1); // TWO.pow(numBits)
-        Long rangeLong, halfRangeLong, maskLong;
+        long rangeLong, halfRangeLong, maskLong;
         try {
             rangeLong = range.longValueExact();
             halfRangeLong = rangeLong >> 1;
             maskLong = range.subtract(BigInteger.ONE).longValueExact();
         } catch (ArithmeticException ae) {
-            rangeLong = halfRangeLong = maskLong = null;
+            rangeLong = halfRangeLong = maskLong = ZERO;
         }
         this.rangeLong = rangeLong;
         this.halfRange = range.shiftRight(1);
@@ -52,7 +54,7 @@ public final class Uint {
     }
 
     public long toSigned(long unsigned) {
-        if(rangeLong != null) {
+        if(rangeLong != ZERO) {
             if(unsigned < 0) {
                 throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
             }
@@ -69,7 +71,7 @@ public final class Uint {
     }
 
     public long toUnsigned(long signed) {
-        if(maskLong != null) {
+        if(maskLong != ZERO) {
             final int bitLen = signed < 0 ? BizarroIntegers.bitLen(signed) : com.esaulpaugh.headlong.util.Integers.bitLen(signed);
             if(bitLen < numBits) {
                 return signed & maskLong;
