@@ -26,6 +26,23 @@ import java.util.Random;
 public class UnsignedTest {
 
     @Test
+    public void testExceptions() throws Throwable {
+        Uint uint64 = new Uint(64);
+        uint64.toSigned(Long.MAX_VALUE);
+        uint64.toUnsigned(Long.MAX_VALUE);
+        TestUtils.assertThrown(
+                IllegalArgumentException.class,
+                "unsigned value is negative: -9223372036854775808",
+                () -> uint64.toSigned(Long.MIN_VALUE)
+        );
+        TestUtils.assertThrown(
+                ArithmeticException.class,
+                "BigInteger out of long range",
+                () -> uint64.toUnsigned(Long.MIN_VALUE)
+        );
+    }
+
+    @Test
     public void testInvalidUnsigned() throws Throwable {
         TestUtils.assertThrown(
                 IllegalArgumentException.class,

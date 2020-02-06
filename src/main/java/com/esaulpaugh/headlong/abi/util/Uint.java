@@ -52,32 +52,32 @@ public final class Uint {
     }
 
     public long toSigned(long unsigned) {
-        if(rangeLong == null) {
-            return toSigned(BigInteger.valueOf(unsigned)).longValueExact();
+        if(rangeLong != null) {
+            if(unsigned < 0) {
+                throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
+            }
+            final int bitLen = com.esaulpaugh.headlong.util.Integers.bitLen(unsigned);
+            if(bitLen > numBits) {
+                throwTooManyBitsException(bitLen, numBits, false);
+            }
+            // if in upper half of range, subtract range
+            return unsigned >= halfRangeLong
+                    ? unsigned - rangeLong
+                    : unsigned;
         }
-        if(unsigned < 0) {
-            throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
-        }
-        final int bitLen = com.esaulpaugh.headlong.util.Integers.bitLen(unsigned);
-        if(bitLen > numBits) {
-            throwTooManyBitsException(bitLen, numBits, false);
-        }
-        // if in upper half of range, subtract range
-        return unsigned >= halfRangeLong
-                ? unsigned - rangeLong
-                : unsigned;
+        return toSigned(BigInteger.valueOf(unsigned)).longValueExact();
     }
 
     public long toUnsigned(long signed) {
-        if(maskLong == null) {
-            // beware of ArithmeticException
-            return toUnsigned(BigInteger.valueOf(signed)).longValueExact();
+        if(maskLong != null) {
+            final int bitLen = signed < 0 ? BizarroIntegers.bitLen(signed) : com.esaulpaugh.headlong.util.Integers.bitLen(signed);
+            if(bitLen >= numBits) {
+                throwTooManyBitsException(bitLen, numBits, true);
+            }
+            return signed & maskLong;
         }
-        final int bitLen = signed < 0 ? BizarroIntegers.bitLen(signed) : com.esaulpaugh.headlong.util.Integers.bitLen(signed);
-        if(bitLen >= numBits) {
-            throwTooManyBitsException(bitLen, numBits, true);
-        }
-        return signed & maskLong;
+        return toUnsigned(BigInteger.valueOf(signed))
+                .longValueExact(); // beware of ArithmeticException
     }
 
     public BigInteger toSigned(BigInteger unsigned) {
