@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
@@ -54,7 +53,7 @@ public class IntegersTest {
     }
 
     @Test
-    public void putGetByte() throws DecodeException {
+    public void putGetByte() {
         byte[] one = new byte[1];
         for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
             byte b = (byte) i;
@@ -65,7 +64,7 @@ public class IntegersTest {
     }
 
     @Test
-    public void putGetShort() throws DecodeException {
+    public void putGetShort() {
         byte[] two = new byte[2];
         for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
             short s = (short) i;
@@ -81,7 +80,7 @@ public class IntegersTest {
     }
 
     @Test
-    public void putGetLong() throws DecodeException {
+    public void putGetLong() {
         Random rand = TestUtils.seededRandom();
         byte[] eight = new byte[8];
         for (long i = 0; i < 20_000; i++) {

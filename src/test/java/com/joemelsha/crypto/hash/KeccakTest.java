@@ -17,7 +17,6 @@ package com.joemelsha.crypto.hash;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Disabled;
@@ -153,7 +152,7 @@ public class KeccakTest {
     }
 
     @Test
-    public void testUpdateBits() throws DecodeException {
+    public void testUpdateBits() {
 
         byte[] prefix = Strings.decode("Hello World", Strings.UTF_8);
 

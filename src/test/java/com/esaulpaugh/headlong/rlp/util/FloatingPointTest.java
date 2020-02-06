@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.exception.DecodeException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +26,7 @@ import java.util.Random;
 public class FloatingPointTest {
 
     @Test
-    public void testFloat() throws DecodeException {
+    public void testFloat() {
         Random r = TestUtils.seededRandom();
         for (int i = 0; i < 20; i++) {
             final float flo = r.nextFloat();
@@ -42,7 +41,7 @@ public class FloatingPointTest {
     }
 
     @Test
-    public void testDouble() throws DecodeException {
+    public void testDouble() {
         Random r = TestUtils.seededRandom();
         for (int i = 0; i < 20; i++) {
             final double dub = r.nextDouble();

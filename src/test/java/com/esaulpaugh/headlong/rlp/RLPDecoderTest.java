@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.exception.DecodeException;
+import com.esaulpaugh.headlong.exception.RecoverableDecodeException;
 import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
@@ -186,7 +187,7 @@ public class RLPDecoderTest {
 
         RLPList brokenList = RLP_STRICT.wrapList(copy);
 
-        assertThrown(NoSuchElementException.class, "element @ index 139 exceeds its container: 151 > 150", () -> {
+        assertThrown(RecoverableDecodeException.class, "element @ index 139 exceeds its container: 151 > 150", () -> {
             for(RLPItem item : brokenList) {
                 System.out.println(item.asString(Strings.HEX));
             }
@@ -194,7 +195,7 @@ public class RLPDecoderTest {
     }
 
     @Test
-    public void duplicate() throws DecodeException {
+    public void duplicate() {
         RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
         assertEquals(rlpList, rlpList.duplicate(RLP_STRICT));
         RLPString rlpString = RLP_STRICT.wrapString((byte) 0x00);
@@ -218,7 +219,7 @@ public class RLPDecoderTest {
     }
 
     @Test
-    public void list() throws DecodeException {
+    public void list() {
         RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
         List<RLPItem> actualList = rlpList.elements(RLP_STRICT);
 
@@ -229,7 +230,7 @@ public class RLPDecoderTest {
 
     @Disabled("can cause OutOfMemoryError")
     @Test
-    public void hugeStrings() throws DecodeException {
+    public void hugeStrings() {
         int lol;
         byte[] buffer;
         RLPString huge;
@@ -256,7 +257,7 @@ public class RLPDecoderTest {
 
     @Disabled("can cause OutOfMemoryError")
     @Test
-    public void hugeListsHighMem() throws DecodeException {
+    public void hugeListsHighMem() {
 
 //        System.out.println(Runtime.getRuntime().maxMemory());
 //        MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
@@ -306,7 +307,7 @@ public class RLPDecoderTest {
     }
 
     @Test
-    public void hugeListsLowMem() throws DecodeException {
+    public void hugeListsLowMem() {
         int lol;
         byte[] buffer;
         RLPList huge;
@@ -395,7 +396,7 @@ public class RLPDecoderTest {
     }
 
     @Test
-    public void booleans() throws DecodeException {
+    public void booleans() {
         assertFalse(RLP_STRICT.wrap((byte) 0xc0).asBoolean());
         assertFalse(RLP_STRICT.wrap((byte) 0x80).asBoolean());
         assertFalse(RLP_STRICT.wrap((byte) 0x00).asBoolean());
@@ -411,7 +412,7 @@ public class RLPDecoderTest {
     }
 
     @Test
-    public void chars() throws DecodeException {
+    public void chars() {
         byte[][] burma17 = new byte[256][];
         for (int i = 0; i < burma17.length; i++) {
             burma17[i] = RLPEncoder.encode((byte) i);
@@ -441,7 +442,7 @@ public class RLPDecoderTest {
     private static final BiPredicate<Integer, Integer> UNTIL_INDEX_SEVEN = (count, index) -> index < 7;
 
     @Test
-    public void collect() throws DecodeException {
+    public void collect() {
         byte[] rlp = new byte[9];
         for (int i = 0; i < rlp.length; i++) {
             rlp[i] = (byte) i;

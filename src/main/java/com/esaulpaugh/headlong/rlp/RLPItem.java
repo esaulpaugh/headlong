@@ -48,7 +48,7 @@ public abstract class RLPItem {
     public final transient int dataLength;
     public final transient int endIndex;
 
-    RLPItem(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) throws DecodeException {
+    RLPItem(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) {
         containerEnd = Math.min(buffer.length, containerEnd);
 
         final int _dataIndex;
@@ -176,7 +176,7 @@ public abstract class RLPItem {
      * @throws DecodeException if this item is not interpretable as a char
      * @see String#charAt(int)
      */
-    public char asChar() throws DecodeException {
+    public char asChar() {
         return (char) asShort();
     }
 
@@ -184,19 +184,19 @@ public abstract class RLPItem {
         return Strings.encode(buffer, dataIndex, dataLength, encoding);
     }
 
-    public byte asByte() throws DecodeException {
+    public byte asByte() {
         return Integers.getByte(buffer, dataIndex, dataLength);
     }
 
-    public short asShort() throws DecodeException {
+    public short asShort() {
         return Integers.getShort(buffer, dataIndex, dataLength);
     }
 
-    public int asInt() throws DecodeException {
+    public int asInt() {
         return Integers.getInt(buffer, dataIndex, dataLength);
     }
 
-    public long asLong() throws DecodeException {
+    public long asLong() {
         return Integers.getLong(buffer, dataIndex, dataLength);
     }
 
@@ -204,11 +204,11 @@ public abstract class RLPItem {
         return Integers.getBigInt(buffer, dataIndex, dataLength); // new BigInteger(data());
     }
 
-    public float asFloat() throws DecodeException {
+    public float asFloat() {
         return FloatingPoint.getFloat(buffer, dataIndex, dataLength);
     }
 
-    public double asDouble() throws DecodeException {
+    public double asDouble() {
         return FloatingPoint.getDouble(buffer, dataIndex, dataLength);
     }
 
@@ -223,7 +223,7 @@ public abstract class RLPItem {
      * @return an independent and exact copy
      * @throws DecodeException if an unexpected problem in decoding occurs
      */
-    public abstract RLPItem duplicate(RLPDecoder decoder) throws DecodeException;
+    public abstract RLPItem duplicate(RLPDecoder decoder);
 
     /**
      * @see Arrays#hashCode(byte[])
@@ -264,11 +264,7 @@ public abstract class RLPItem {
 
     @Override
     public String toString() {
-        try {
-            return Notation.forEncoding(buffer, index, endIndex).toString();
-        } catch (DecodeException e) {
-            throw new RuntimeException(e);
-        }
+        return Notation.forEncoding(buffer, index, endIndex).toString();
     }
 
     public String toString(int encoding) {

@@ -57,13 +57,9 @@ public final class RLPDecoder {
                     return true;
                 }
                 if (index < buffer.length) {
-                    try {
-                        next = decoder.wrap(buffer, index);
-                        this.index = next.endIndex;
-                        return true;
-                    } catch (DecodeException de) {
-                        throw noSuchElementException(de);
-                    }
+                    next = decoder.wrap(buffer, index);
+                    this.index = next.endIndex;
+                    return true;
                 }
                 return false;
             }
@@ -78,7 +74,7 @@ public final class RLPDecoder {
         return new RLPStream(is, this);
     }
 
-    public Iterator<RLPItem> listIterator(byte[] buffer) throws DecodeException {
+    public Iterator<RLPItem> listIterator(byte[] buffer) {
         return listIterator(buffer, 0);
     }
 
@@ -90,19 +86,19 @@ public final class RLPDecoder {
      * @return the iterator over the elements in the list
      * @throws DecodeException  if the RLP list failed to decode
      */
-    public Iterator<RLPItem> listIterator(byte[] buffer, int index) throws DecodeException {
+    public Iterator<RLPItem> listIterator(byte[] buffer, int index) {
         return wrapList(buffer, index).iterator(this);
     }
     
-    public RLPString wrapString(byte lengthOneRlp) throws DecodeException {
+    public RLPString wrapString(byte lengthOneRlp) {
         return wrapString(new byte[] { lengthOneRlp }, 0);
     }
     
-    public RLPString wrapString(byte[] encoding) throws DecodeException {
+    public RLPString wrapString(byte[] encoding) {
         return wrapString(encoding, 0);
     }
     
-    public RLPString wrapString(byte[] buffer, int index) throws DecodeException {
+    public RLPString wrapString(byte[] buffer, int index) {
         byte lead = buffer[index];
         DataType type = DataType.type(lead);
         switch (type) {
@@ -113,11 +109,11 @@ public final class RLPDecoder {
         }
     }
 
-    public RLPList wrapList(byte[] encoding) throws DecodeException {
+    public RLPList wrapList(byte[] encoding) {
         return wrapList(encoding, 0);
     }
 
-    public RLPList wrapList(byte[] buffer, int index) throws DecodeException {
+    public RLPList wrapList(byte[] buffer, int index) {
         byte lead = buffer[index];
         DataType type = DataType.type(lead);
         switch (type) {
@@ -134,19 +130,19 @@ public final class RLPDecoder {
      * @return the item
      * @throws DecodeException if the byte fails to decode
      */
-    public RLPItem wrap(byte lengthOneRLP) throws DecodeException {
+    public RLPItem wrap(byte lengthOneRLP) {
         return wrap(new byte[] { lengthOneRLP }, 0);
     }
 
-    public RLPItem wrap(byte[] encoding) throws DecodeException {
+    public RLPItem wrap(byte[] encoding) {
         return wrap(encoding, 0);
     }
 
-    public RLPItem wrap(byte[] buffer, int index) throws DecodeException {
+    public RLPItem wrap(byte[] buffer, int index) {
         return wrap(buffer, index, Integer.MAX_VALUE);
     }
 
-    RLPItem wrap(byte[] buffer, int index, int containerEnd) throws DecodeException {
+    RLPItem wrap(byte[] buffer, int index, int containerEnd) {
         byte lead = buffer[index];
         DataType type = DataType.type(lead);
         switch (type) {
@@ -163,47 +159,47 @@ public final class RLPDecoder {
      *  Methods for gathering sequential items into a collection
      */
 
-    public List<RLPItem> collectAll(byte[] encodings) throws DecodeException {
+    public List<RLPItem> collectAll(byte[] encodings) {
         return collectAll(encodings, 0);
     }
 
-    public List<RLPItem> collectAll(byte[] encodings, int index) throws DecodeException {
+    public List<RLPItem> collectAll(byte[] encodings, int index) {
         return collectBefore(encodings, index, encodings.length);
     }
 
-    public List<RLPItem> collectBefore(byte[] encodings, int endIndex) throws DecodeException {
+    public List<RLPItem> collectBefore(byte[] encodings, int endIndex) {
         return collectBefore(encodings, 0, endIndex);
     }
 
-    public List<RLPItem> collectBefore(byte[] encodings, int index, int endIndex) throws DecodeException {
+    public List<RLPItem> collectBefore(byte[] encodings, int index, int endIndex) {
         ArrayList<RLPItem> dest = new ArrayList<>();
         collectBefore(encodings, index, endIndex, dest);
         return dest;
     }
 
-    public List<RLPItem> collectN(byte[] encodings, int n) throws DecodeException {
+    public List<RLPItem> collectN(byte[] encodings, int n) {
         return collectN(encodings, 0, n);
     }
 
-    public List<RLPItem> collectN(byte[] encodings, int index, int n) throws DecodeException {
+    public List<RLPItem> collectN(byte[] encodings, int index, int n) {
         ArrayList<RLPItem> dest = new ArrayList<>(n);
         collect(encodings, index, (count, idx) -> count < n, dest);
         return dest;
     }
     // --------
-    public int collectAll(byte[] encodings, int index, Collection<RLPItem> dest) throws DecodeException {
+    public int collectAll(byte[] encodings, int index, Collection<RLPItem> dest) {
         return collectBefore(encodings, index, encodings.length, dest);
     }
 
-    public int collectBefore(byte[] encodings, int index, int endIndex, Collection<RLPItem> dest) throws DecodeException {
+    public int collectBefore(byte[] encodings, int index, int endIndex, Collection<RLPItem> dest) {
         return collect(encodings, index, (count, idx) -> idx < endIndex, dest);
     }
 
-    public void collectN(byte[] encodings, int index, int n, Collection<RLPItem> dest) throws DecodeException {
+    public void collectN(byte[] encodings, int index, int n, Collection<RLPItem> dest) {
         collect(encodings, index, (count, idx) -> count < n, dest);
     }
     // -------
-    public int collect(byte[] encodings, int index, BiPredicate<Integer, Integer> predicate, Collection<RLPItem> collection) throws DecodeException {
+    public int collect(byte[] encodings, int index, BiPredicate<Integer, Integer> predicate, Collection<RLPItem> collection) {
         int count = 0;
         while (predicate.test(count, index)) {
             RLPItem item = wrap(encodings, index);

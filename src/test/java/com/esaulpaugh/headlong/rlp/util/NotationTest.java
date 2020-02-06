@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp.util;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
@@ -48,7 +47,7 @@ public class NotationTest {
             ")";
 
     @Test
-    public void test() throws DecodeException {
+    public void test() {
 
         String notation = Notation.forEncoding(ENCODING).toString(); // Arrays.copyOfRange(rlp, 10, rlp.length)
 

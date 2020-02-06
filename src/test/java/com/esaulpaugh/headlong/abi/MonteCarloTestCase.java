@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.util.SuperSerial;
 import com.google.gson.Gson;
@@ -245,7 +244,7 @@ public class MonteCarloTestCase implements Serializable {
         }
     }
 
-    void runSuperSerial() throws ABIException, DecodeException {
+    void runSuperSerial() throws ABIException {
         final TupleType tt = this.function.getParamTypes();
         final Tuple tuple = this.argsTuple;
 

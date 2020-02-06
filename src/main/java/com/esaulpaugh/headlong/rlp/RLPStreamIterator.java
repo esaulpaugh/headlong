@@ -65,11 +65,13 @@ class RLPStreamIterator implements Iterator<RLPItem> {
             }
             next = decoder.wrap(buffer, index);
             return true;
-        } catch (IOException | DecodeException e) {
+        } catch (DecodeException e) {
             if (e instanceof RecoverableDecodeException) {
                 return false;
             }
-            throw noSuchElementException(e);
+            throw e;
+        } catch (IOException io) {
+            throw new RuntimeException(io);
         }
     }
 
@@ -82,9 +84,5 @@ class RLPStreamIterator implements Iterator<RLPItem> {
             return item;
         }
         throw new NoSuchElementException();
-    }
-
-    static NoSuchElementException noSuchElementException(Throwable cause) {
-        return (NoSuchElementException) new NoSuchElementException().initCause(cause);
     }
 }

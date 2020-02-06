@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp.util;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Integers;
 
 import java.math.BigDecimal;
@@ -25,7 +24,7 @@ public final class FloatingPoint {
 
     /* float */
 
-    public static float getFloat(byte[] bytes, int i, int numBytes) throws DecodeException {
+    public static float getFloat(byte[] bytes, int i, int numBytes) {
         return Float.intBitsToFloat(Integers.getInt(bytes, i, numBytes));
     }
 
@@ -39,7 +38,7 @@ public final class FloatingPoint {
 
     /* double */
 
-    public static double getDouble(byte[] bytes, int i, int numBytes) throws DecodeException {
+    public static double getDouble(byte[] bytes, int i, int numBytes) {
         return Double.longBitsToDouble(Integers.getLong(bytes, i, numBytes));
     }
 

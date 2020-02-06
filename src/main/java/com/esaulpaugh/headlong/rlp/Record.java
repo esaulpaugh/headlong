@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
@@ -62,25 +61,21 @@ public final class Record {
         bb.position(recordListPrefixLen);
         RLPEncoder.insertRecordSignature(signature, bb);
 
-        try {
-            this.rlp = RLP_STRICT.wrapList(bb.array());
-        } catch (DecodeException e) { // shouldn't happen if above code is correct
-            throw new Error(e);
-        }
+        this.rlp = RLP_STRICT.wrapList(bb.array());
     }
 
     private Record(RLPList recordRLP) {
         this.rlp = recordRLP;
     }
 
-    public static Record parse(String enrString) throws DecodeException, ParseException {
+    public static Record parse(String enrString) {
         if(enrString.startsWith(ENR_PREFIX)) {
             return decode(Strings.decode(enrString.substring(ENR_PREFIX.length()), BASE_64_URL_SAFE));
         }
-        throw new ParseException("prefix \"" + ENR_PREFIX + "\" not found", 0);
+        throw new RuntimeException(new ParseException("prefix \"" + ENR_PREFIX + "\" not found", 0));
     }
 
-    public static Record decode(byte[] record) throws DecodeException {
+    public static Record decode(byte[] record) {
         return new Record(RLP_STRICT.wrapList(record));
     }
 
@@ -88,7 +83,7 @@ public final class Record {
         return rlp;
     }
 
-    public RLPItem getSignature() throws DecodeException {
+    public RLPItem getSignature() {
         try {
             return getRLP().iterator(RLP_STRICT).next();
         } catch (NoSuchElementException nsee) {
@@ -96,11 +91,11 @@ public final class Record {
         }
     }
 
-    public RLPList getContent() throws DecodeException {
+    public RLPList getContent() {
         return RLP_STRICT.wrapList(getContentBytes(getSignature().endIndex));
     }
 
-    public long getSeq() throws DecodeException {
+    public long getSeq() {
         Iterator<RLPItem> iter = getRLP().iterator();
         iter.next();
         return iter.next().asLong();
@@ -114,7 +109,7 @@ public final class Record {
         return bb.array();
     }
 
-    public RLPList decode(Verifier verifier) throws DecodeException, SignatureException {
+    public RLPList decode(Verifier verifier) throws SignatureException {
         RLPItem signatureItem = getSignature();
         byte[] content = getContentBytes(signatureItem.endIndex);
         verifier.verify(signatureItem.asBytes(), content); // verify content

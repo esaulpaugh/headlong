@@ -218,7 +218,7 @@ public final class Integers {
      * @see #toBytes(byte)
      * @see #putByte(byte, byte[], int)
      */
-    public static byte getByte(byte[] buffer, int i, int len) throws DecodeException {
+    public static byte getByte(byte[] buffer, int i, int len) {
         switch (len) {
         case 1: return buffer[i];
         case 0: return 0;
@@ -238,7 +238,7 @@ public final class Integers {
      * @see #toBytes(short)
      * @see #putShort(short, byte[], int)
      */
-    public static short getShort(byte[] buffer, int i, int len) throws DecodeException {
+    public static short getShort(byte[] buffer, int i, int len) {
         int shiftAmount = 0;
         int val = 0;
         switch (len) { /* cases 2 through 1 fall through */
@@ -266,7 +266,7 @@ public final class Integers {
      * @see #toBytes(int)
      * @see #putInt(int, byte[], int)
      */
-    public static int getInt(byte[] buffer, int i, int len) throws DecodeException {
+    public static int getInt(byte[] buffer, int i, int len) {
         int shiftAmount = 0;
         int val = 0;
         switch (len) { /* cases 4 through 1 fall through */
@@ -296,7 +296,7 @@ public final class Integers {
      * @see #toBytes(long)
      * @see #putLong(long, byte[], int)
      */
-    public static long getLong(final byte[] buffer, final int i, final int len) throws DecodeException {
+    public static long getLong(final byte[] buffer, final int i, final int len) {
         int shiftAmount = 0;
         long val = 0L;
         switch (len) { /* cases 8 through 1 fall through */
@@ -323,7 +323,7 @@ public final class Integers {
     }
 
     private static UnrecoverableDecodeException outOfRangeException(int len) {
-        return new UnrecoverableDecodeException(new IllegalArgumentException("len is out of range: " + len));
+        return new UnrecoverableDecodeException("len is out of range: " + len);
     }
 
     /**

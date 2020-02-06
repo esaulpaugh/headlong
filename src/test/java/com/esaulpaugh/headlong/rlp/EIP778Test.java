@@ -16,17 +16,10 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.exception.DecodeException;
-import com.esaulpaugh.headlong.rlp.KeyValuePair;
-import com.esaulpaugh.headlong.rlp.RLPDecoder;
-import com.esaulpaugh.headlong.rlp.RLPItem;
-import com.esaulpaugh.headlong.rlp.RLPList;
-import com.esaulpaugh.headlong.rlp.Record;
 import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Test;
 
 import java.security.SignatureException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -65,18 +58,10 @@ public class EIP778Test {
         }
     };
 
-    private static final Record VECTOR;
-
-    static {
-        try {
-            VECTOR = Record.parse(ENR_STRING);
-        } catch (ParseException | DecodeException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private static final Record VECTOR = Record.parse(ENR_STRING);
 
     @Test
-    public void testEip778() throws DecodeException, SignatureException {
+    public void testEip778() throws SignatureException {
         final List<KeyValuePair> pairs = Arrays.asList(
                 new KeyValuePair(IP, "7f000001", HEX),
                 new KeyValuePair(UDP, "765f", HEX),

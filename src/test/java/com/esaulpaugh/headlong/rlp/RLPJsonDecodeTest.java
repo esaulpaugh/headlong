@@ -31,7 +31,7 @@ import java.util.Map;
 public class RLPJsonDecodeTest {
 
     @Test
-    public void testValid() throws IOException, DecodeException {
+    public void testValid() throws IOException {
         String exampleJson = TestUtils.readResourceAsString(RLPJsonEncodeTest.class, "tests/ethereum/RLPTests/RandomRLPTests/example.json");
 
         for (Map.Entry<String, JsonElement> e : RLPJsonEncodeTest.parseEntrySet(exampleJson)) {
@@ -40,7 +40,7 @@ public class RLPJsonDecodeTest {
     }
 
     @Test
-    public void testInvalid() throws IOException, DecodeException {
+    public void testInvalid() throws IOException {
 
         String testCasesJson = TestUtils.readResourceAsString(RLPJsonEncodeTest.class, "tests/ethereum/RLPTests/invalidRLPTest.json");
 
@@ -61,7 +61,7 @@ public class RLPJsonDecodeTest {
         }
     }
 
-    static void decodeRecursively(byte[] rlp) throws DecodeException {
+    static void decodeRecursively(byte[] rlp) {
         RLPItem item = RLPDecoder.RLP_STRICT.wrap(rlp);
         if(item instanceof RLPString) {
             item.asString(Strings.HEX);
@@ -71,7 +71,7 @@ public class RLPJsonDecodeTest {
         }
     }
 
-    private static void elementsRecursive(RLPList list, Collection<Object> results, RLPDecoder decoder) throws DecodeException {
+    private static void elementsRecursive(RLPList list, Collection<Object> results, RLPDecoder decoder) {
         List<RLPItem> actualList = list.elements(decoder);
         for (RLPItem element : actualList) {
             if(element instanceof RLPList) {

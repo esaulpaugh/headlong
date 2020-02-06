@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
@@ -263,18 +262,14 @@ public class TestUtils {
 
         protected void doWork() {
             byte[] four = new byte[4];
-            try {
-                final long end = this.end;
-                for (long lo = this.start; lo <= end; lo++) {
-                    int i = (int) lo;
-                    int len = Integers.putInt(i, four, 0);
-                    int r = Integers.getInt(four, 0, len);
-                    if(i != r) {
-                        throw new AssertionError(i + " !=" + r);
-                    }
+            final long end = this.end;
+            for (long lo = this.start; lo <= end; lo++) {
+                int i = (int) lo;
+                int len = Integers.putInt(i, four, 0);
+                int r = Integers.getInt(four, 0, len);
+                if(i != r) {
+                    throw new AssertionError(i + " !=" + r);
                 }
-            } catch (DecodeException e) {
-                throw new RuntimeException(e);
             }
         }
     }

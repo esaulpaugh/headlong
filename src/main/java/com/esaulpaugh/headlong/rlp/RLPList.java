@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Integers;
 
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ import java.util.NoSuchElementException;
  */
 public final class RLPList extends RLPItem implements Iterable<RLPItem> {
 
-    RLPList(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) throws DecodeException {
+    RLPList(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) {
         super(lead, type, buffer, index, containerEnd, lenient);
     }
 
@@ -46,15 +45,11 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         for (RLPItem e : elements) {
             dataLen += e.encodingLength();
         }
-        try {
-            return RLPDecoder.RLP_STRICT.wrapList(
-                    dataLen < DataType.MIN_LONG_DATA_LEN
-                            ? encodeListShort(dataLen, elements)
-                            : encodeListLong(dataLen, elements)
-            );
-        } catch (DecodeException de) {
-            throw new RuntimeException(de);
-        }
+        return RLPDecoder.RLP_STRICT.wrapList(
+                dataLen < DataType.MIN_LONG_DATA_LEN
+                        ? encodeListShort(dataLen, elements)
+                        : encodeListLong(dataLen, elements)
+        );
     }
 
     private static byte[] encodeListShort(final int dataLen, final Iterable<RLPItem> elements) {
@@ -80,13 +75,13 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         }
     }
 
-    public List<RLPItem> elements(RLPDecoder decoder) throws DecodeException {
+    public List<RLPItem> elements(RLPDecoder decoder) {
         ArrayList<RLPItem> arrayList = new ArrayList<>();
         elements(decoder, arrayList);
         return arrayList;
     }
 
-    public void elements(RLPDecoder decoder, Collection<RLPItem> collection) throws DecodeException {
+    public void elements(RLPDecoder decoder, Collection<RLPItem> collection) {
         int i = dataIndex;
         while (i < this.endIndex) {
             RLPItem item = decoder.wrap(buffer, i, this.endIndex);
@@ -96,7 +91,7 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
     }
     
     @Override
-    public RLPList duplicate(RLPDecoder decoder) throws DecodeException {
+    public RLPList duplicate(RLPDecoder decoder) {
         return decoder.wrapList(encoding(), 0);
     }
 
@@ -128,13 +123,9 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         @Override
         public RLPItem next() {
             if (hasNext()) {
-                try {
-                    RLPItem next = decoder.wrap(RLPList.this.buffer, this.nextElementIndex, RLPList.this.endIndex);
-                    this.nextElementIndex = next.endIndex;
-                    return next;
-                } catch (DecodeException de) {
-                    throw RLPStreamIterator.noSuchElementException(de);
-                }
+                RLPItem next = decoder.wrap(RLPList.this.buffer, this.nextElementIndex, RLPList.this.endIndex);
+                this.nextElementIndex = next.endIndex;
+                return next;
             }
             throw new NoSuchElementException();
         }

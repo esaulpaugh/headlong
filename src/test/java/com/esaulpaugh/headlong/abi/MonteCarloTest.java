@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -72,13 +71,13 @@ public class MonteCarloTest {
         return () -> {
             try {
                 doMonteCarlo(seed, n);
-            } catch (ABIException | DecodeException e) {
+            } catch (ABIException e) {
                 throw new RuntimeException(e);
             }
         };
     }
 
-    private static void doMonteCarlo(long masterSeed, int n) throws ABIException, DecodeException {
+    private static void doMonteCarlo(long masterSeed, int n) throws ABIException {
 
         final long[] seeds = generateSeeds(masterSeed, n);
 

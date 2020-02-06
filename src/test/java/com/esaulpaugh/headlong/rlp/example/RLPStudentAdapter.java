@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp.example;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 
@@ -28,7 +27,7 @@ import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 public class RLPStudentAdapter implements RLPAdapter<RLPStudent> {
 
     @Override
-    public RLPStudent decode(byte[] rlp, int index) throws DecodeException {
+    public RLPStudent decode(byte[] rlp, int index) {
 
         Iterator<RLPItem> iter = RLP_STRICT.listIterator(rlp, index);
 

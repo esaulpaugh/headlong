@@ -17,6 +17,8 @@ package com.esaulpaugh.headlong.rlp;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 
 /** An incoming stream of RLP-encoded data. */
@@ -32,6 +34,17 @@ public final class RLPStream implements Iterable<RLPItem>, AutoCloseable {
     public RLPStream(InputStream is, RLPDecoder decoder) {
         this.is = is;
         this.decoder = decoder;
+    }
+
+    public ArrayList<RLPItem> collect() {
+        return collect(new ArrayList<>());
+    }
+
+    public <T extends Collection<RLPItem>> T collect(T collection) {
+        for (RLPItem item : this) {
+            collection.add(item);
+        }
+        return collection;
     }
 
     @Override

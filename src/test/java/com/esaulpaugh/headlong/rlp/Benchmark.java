@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.example.RLPStudent;
 import com.esaulpaugh.headlong.rlp.example.RLPStudentTest;
 import com.esaulpaugh.headlong.rlp.util.Notation;
@@ -32,7 +31,7 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 public class Benchmark {
 
     @Test
-    public void decodeMicroBenchmark() throws DecodeException {
+    public void decodeMicroBenchmark() {
         RLPStudent plato = null;
 //        StudentRLPAdapter adapter = new StudentRLPAdapter();
 
@@ -68,7 +67,7 @@ public class Benchmark {
     }
 
     @Test
-    public void microBenchmark() throws DecodeException {
+    public void microBenchmark() {
         byte[] rlp = Strings.decode("f8cbf8c7a00000000000000000000000000000000000000000000000000000000000000000a01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347940000000000000000000000000000000000000000a02f4399b08efe68945c1cf90ffe85bbe3ce978959da753f9e649f034015b8817da00000000000000000000000000000000000000000000000000000000000000000834000008080830f4240808080a004994f67dc55b09e814ab7ffc8df3686b4afb2bb53e60eae97ef043fe03fb829c0c0", HEX);
 
         final int n = 10_000_000;

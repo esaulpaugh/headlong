@@ -15,16 +15,14 @@
 */
 package com.esaulpaugh.headlong.rlp.example;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
-
 public interface RLPAdapter<T> {
 
     // default interface methods not supported on Android except Android N+
-//    default T decode(byte[] rlp) throws DecodeException {
+//    default T decode(byte[] rlp) {
 //        return decode(rlp, 0);
 //    }
 
-    T decode(byte[] rlp, int index) throws DecodeException;
+    T decode(byte[] rlp, int index);
 
     byte[] encode(T t);
 }

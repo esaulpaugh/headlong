@@ -15,14 +15,12 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
-
 /**
  * Created by Evo on 1/19/2017.
  */
 public final class RLPString extends RLPItem {
 
-    RLPString(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) throws DecodeException {
+    RLPString(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) {
         super(lead, type, buffer, index, containerEnd, lenient);
     }
 
@@ -32,7 +30,7 @@ public final class RLPString extends RLPItem {
     }
     
     @Override
-    public RLPString duplicate(RLPDecoder decoder) throws DecodeException {
+    public RLPString duplicate(RLPDecoder decoder) {
         return decoder.wrapString(encoding(), 0);
     }
 }

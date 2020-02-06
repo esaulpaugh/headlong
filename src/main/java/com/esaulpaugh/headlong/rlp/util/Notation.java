@@ -69,11 +69,11 @@ public final class Notation {
         return NotationParser.parse(value);
     }
 
-    public static Notation forEncoding(byte[] encoding) throws DecodeException {
+    public static Notation forEncoding(byte[] encoding) {
         return forEncoding(encoding, 0, encoding.length);
     }
 
-    public static Notation forEncoding(final byte[] buffer, final int index, int end) throws DecodeException {
+    public static Notation forEncoding(final byte[] buffer, final int index, int end) {
         if(index < 0) {
             throw new ArrayIndexOutOfBoundsException(index);
         }
@@ -86,11 +86,11 @@ public final class Notation {
         return new Notation(sb.append(END_NOTATION).toString());
     }
 
-    public static Notation forObjects(Object... objects) throws DecodeException {
+    public static Notation forObjects(Object... objects) {
         return forEncoding(RLPEncoder.encodeSequentially(objects));
     }
 
-    public static Notation forObjects(Iterable<Object> objects) throws DecodeException {
+    public static Notation forObjects(Iterable<Object> objects) {
         return forEncoding(RLPEncoder.encodeSequentially(objects));
     }
 
@@ -98,7 +98,7 @@ public final class Notation {
         return new UnrecoverableDecodeException("element @ index " + index + " exceeds its container: " + end + " > " + containerEnd);
     }
 
-    private static int getShortElementEnd(int elementDataIndex, final int elementDataLen, final int containerEnd) throws DecodeException {
+    private static int getShortElementEnd(int elementDataIndex, final int elementDataLen, final int containerEnd) {
         final int end = elementDataIndex + elementDataLen;
         if (end > containerEnd) {
             throw exceedsContainer(elementDataIndex - 1, end, containerEnd);
@@ -106,7 +106,7 @@ public final class Notation {
         return end;
     }
 
-    private static int getLongElementEnd(byte[] data, final int leadByteIndex, final int dataIndex, final int containerEnd) throws DecodeException {
+    private static int getLongElementEnd(byte[] data, final int leadByteIndex, final int dataIndex, final int containerEnd) {
         if (dataIndex > containerEnd) {
             throw exceedsContainer(leadByteIndex, dataIndex, containerEnd);
         }
@@ -125,7 +125,7 @@ public final class Notation {
         return (int) end;
     }
 
-    private static int buildString(StringBuilder sb, byte[] data, int from, int to) throws DecodeException {
+    private static int buildString(StringBuilder sb, byte[] data, int from, int to) {
         final int len = to - from;
         if(!LENIENT && len == 1 && data[from] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
             throw new UnrecoverableDecodeException("invalid rlp for single byte @ " + (from - 1));
@@ -134,7 +134,7 @@ public final class Notation {
         return to;
     }
 
-    private static int buildList(final StringBuilder sb, final byte[] data, final int dataIndex, int end, final int depth, final boolean _long) throws DecodeException {
+    private static int buildList(final StringBuilder sb, final byte[] data, final int dataIndex, int end, final int depth, final boolean _long) {
         if(!_long) {
             sb.append(BEGIN_LIST_SHORT);
         } else if(depth != 0) {

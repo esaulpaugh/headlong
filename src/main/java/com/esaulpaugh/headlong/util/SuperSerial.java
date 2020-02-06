@@ -21,7 +21,6 @@ import com.esaulpaugh.headlong.abi.ArrayType;
 import com.esaulpaugh.headlong.abi.BigDecimalType;
 import com.esaulpaugh.headlong.abi.Tuple;
 import com.esaulpaugh.headlong.abi.TupleType;
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
@@ -50,7 +49,7 @@ public final class SuperSerial {
     private static final byte[] TRUE = new byte[] { 0x01 };
     private static final byte[] FALSE = new byte[0];
 
-    public static String serialize(TupleType tupleType, Tuple tuple, boolean machine) throws ABIException, DecodeException {
+    public static String serialize(TupleType tupleType, Tuple tuple, boolean machine) throws ABIException {
         tupleType.validate(tuple);
         Object[] objects = serializeTuple(tupleType, tuple);
         return machine
@@ -58,7 +57,7 @@ public final class SuperSerial {
                 : Notation.forObjects(objects).toString();
     }
 
-    public static Tuple deserialize(TupleType tupleType, String str, boolean machine) throws DecodeException, ABIException {
+    public static Tuple deserialize(TupleType tupleType, String str, boolean machine) throws ABIException {
         Tuple in = deserializeTuple(
                 tupleType,
                 machine
@@ -79,7 +78,7 @@ public final class SuperSerial {
         return out;
     }
 
-    private static Tuple deserializeTuple(TupleType tupleType, byte[] sequence) throws DecodeException {
+    private static Tuple deserializeTuple(TupleType tupleType, byte[] sequence) {
         Iterator<RLPItem> sequenceIterator = RLP_STRICT.sequenceIterator(sequence);
         final int len = tupleType.size();
         Object[] elements = new Object[len];
@@ -103,7 +102,7 @@ public final class SuperSerial {
         }
     }
 
-    private static Object deserialize(ABIType<?> type, RLPItem item) throws DecodeException {
+    private static Object deserialize(ABIType<?> type, RLPItem item) {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return item.asBoolean();
         case TYPE_CODE_BYTE: return item.asByte(); // case currently goes unused
@@ -132,7 +131,7 @@ public final class SuperSerial {
         }
     }
 
-    private static Object deserializeArray(ArrayType<? extends ABIType<?>,?> arrayType, RLPItem item) throws DecodeException {
+    private static Object deserializeArray(ArrayType<? extends ABIType<?>,?> arrayType, RLPItem item) {
         ABIType<?> elementType = arrayType.getElementType();
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return deserializeBooleanArray((RLPList) item);
@@ -157,7 +156,7 @@ public final class SuperSerial {
         return out;
     }
 
-    private static boolean[] deserializeBooleanArray(RLPList list) throws DecodeException {
+    private static boolean[] deserializeBooleanArray(RLPList list) {
         List<RLPItem> elements = list.elements(RLP_STRICT);
         boolean[] in = new boolean[elements.size()];
         int i = 0;
@@ -185,7 +184,7 @@ public final class SuperSerial {
         return out;
     }
 
-    private static int[] deserializeIntArray(RLPList list) throws DecodeException {
+    private static int[] deserializeIntArray(RLPList list) {
         List<RLPItem> elements = list.elements(RLP_STRICT);
         int[] in = new int[elements.size()];
         int i = 0;
@@ -205,7 +204,7 @@ public final class SuperSerial {
         return out;
     }
 
-    private static long[] deserializeLongArray(RLPList list) throws DecodeException {
+    private static long[] deserializeLongArray(RLPList list) {
         List<RLPItem> elements = list.elements(RLP_STRICT);
         long[] in = new long[elements.size()];
         int i = 0;
@@ -225,7 +224,7 @@ public final class SuperSerial {
         return out;
     }
 
-    private static Object[] deserializeObjectArray(ABIType<?> elementType, RLPList list) throws DecodeException {
+    private static Object[] deserializeObjectArray(ABIType<?> elementType, RLPList list) {
         List<RLPItem> elements = list.elements(RLP_STRICT);
         Object[] in = (Object[]) Array.newInstance(elementType.clazz(), elements.size()); // reflection ftw
         int i = 0;

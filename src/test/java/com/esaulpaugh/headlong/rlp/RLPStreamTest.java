@@ -16,7 +16,7 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.exception.DecodeException;
+import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +47,7 @@ public class RLPStreamTest {
     private static final String TEST_STRING = "2401";
 
     @Test
-    public void testStreamEasy() throws IOException, DecodeException {
+    public void testStreamEasy() throws Throwable {
         byte[] rlpEncoded = new byte[] {
                 (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0xFF, (byte) 0x81, (byte) 0x90, (byte) 0x81, (byte) 0xb6, (byte) '\u230A',
                 (byte) 0xb8, 56, 0x09,(byte)0x80,-1,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, -3, -2, 0, 0,
@@ -56,15 +56,20 @@ public class RLPStreamTest {
                 (byte) 0x84, 'd', 'o', 'g', 's',
                 (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
         };
-        List<RLPItem> collected = RLP_STRICT.collectAll(rlpEncoded);
+        RLPItem[] collected = RLP_STRICT.collectAll(rlpEncoded).toArray(RLPItem.EMPTY_ARRAY);
+        RLPItem[] streamed = RLP_STRICT.stream(rlpEncoded).collect().toArray(RLPItem.EMPTY_ARRAY);
 
-        try (RLPStream stream = new RLPStream(new ByteArrayInputStream(rlpEncoded))) {
-            List<RLPItem> streamed = new ArrayList<>();
-            for (RLPItem rlpItem : stream) {
-                streamed.add(rlpItem);
-            }
-            assertTrue(Arrays.deepEquals(collected.toArray(RLPItem.EMPTY_ARRAY), streamed.toArray(RLPItem.EMPTY_ARRAY)));
+        assertTrue(Arrays.deepEquals(collected, streamed));
+
+        List<byte[]> encodings = new ArrayList<>(collected.length);
+        for (RLPItem item : collected) {
+            encodings.add(item.encoding());
         }
+
+        TestUtils.assertThrown(UnrecoverableDecodeException.class, "len is out of range: 10", () -> encodings.stream()
+                .map(RLP_STRICT::wrap)
+                .mapToInt(RLPItem::asInt)
+                .sum());
     }
 
     @Test
@@ -86,14 +91,14 @@ public class RLPStreamTest {
             pos.write(0x81);
             pos.write(0x00);
             Iterator<RLPItem> iter = stream.iterator();
-            TestUtils.assertThrown(NoSuchElementException.class, "invalid rlp for single byte @ 0", iter::hasNext);
+            TestUtils.assertThrown(UnrecoverableDecodeException.class, "invalid rlp for single byte @ 0", iter::hasNext);
             try (RLPStream stream2 = new RLPStream(pis)) {
                 pos.write(0xf8);
                 pos.write(0x37);
                 Iterator<RLPItem> iter2 = stream2.iterator();
                 for (int i = 0; i < 3; i++) {
                     TestUtils.assertThrown(
-                            NoSuchElementException.class,
+                            UnrecoverableDecodeException.class,
                             "long element data length must be 56 or greater; found: 55 for element @ 0",
                             iter2::hasNext
                     );

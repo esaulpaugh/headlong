@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
@@ -75,7 +74,7 @@ public class RLPEncoderTest {
     }
 
     @Test
-    public void toList() throws DecodeException {
+    public void toList() {
 
         RLPString item0 = RLPDecoder.RLP_STRICT.wrapString(new byte[] {(byte) 0x81, (byte) 0x80 });
         RLPString item1 = RLPDecoder.RLP_STRICT.wrapString(new byte[] {(byte) 0x7e });
@@ -96,7 +95,7 @@ public class RLPEncoderTest {
     }
 
     @Test
-    public void testLongList() throws DecodeException {
+    public void testLongList() {
 
         final byte[] bytes = new byte[] {
                 (byte) 0xf9, (byte) 1,
@@ -127,7 +126,7 @@ public class RLPEncoderTest {
     }
 
     @Test
-    public void testDatatypes() throws DecodeException {
+    public void testDatatypes() {
 
         char c = '\u0009';
         String str = "7 =IIii$%&#*~\t\n\b";

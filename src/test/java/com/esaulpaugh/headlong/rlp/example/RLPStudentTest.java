@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp.example;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +31,7 @@ public class RLPStudentTest {
     public static final String STUDENT_TO_STRING = "Plato, 9000.01, 42614923710474099051865073204632262589579065351888983454633476946624606237920155844117624881925308800846339143726224240899171443679555954603453329411015471777430813363275539775856672253880435777567715200132619026358726307537867398362020608423752638708533909946520930698520947692165070514401896564444792357016643365814597705551067712, $2552.7185792349726775956284153005464480874316939890710382513661202185792349726775956284153005464480874316939890710382513661202";
 
     @Test
-    public void rlpDecodeEncode() throws DecodeException {
+    public void rlpDecodeEncode() {
         final byte[] studentRlp = Strings.decode(STUDENT_RLP_SEQUENTIAL, HEX);
         RLPStudent plato = new RLPStudent(studentRlp);
         assertEquals(STUDENT_TO_STRING, plato.toString());
@@ -43,7 +42,7 @@ public class RLPStudentTest {
     }
 
     @Test
-    public void adapterDecodeEncode() throws DecodeException {
+    public void adapterDecodeEncode() {
 
         RLPStudentAdapter adapter = new RLPStudentAdapter();
 
