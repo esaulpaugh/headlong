@@ -266,7 +266,7 @@ public class TestUtils {
             for (long lo = this.start; lo <= end; lo++) {
                 int i = (int) lo;
                 int len = Integers.putInt(i, four, 0);
-                int r = Integers.getInt(four, 0, len);
+                int r = Integers.getInt(four, 0, len, false);
                 if(i != r) {
                     throw new AssertionError(i + " !=" + r);
                 }

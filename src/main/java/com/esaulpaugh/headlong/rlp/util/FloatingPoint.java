@@ -25,7 +25,7 @@ public final class FloatingPoint {
     /* float */
 
     public static float getFloat(byte[] bytes, int i, int numBytes) {
-        return Float.intBitsToFloat(Integers.getInt(bytes, i, numBytes));
+        return Float.intBitsToFloat(Integers.getInt(bytes, i, numBytes, true));
     }
 
     public static int putFloat(float val, byte[] bytes, int i) {
@@ -39,7 +39,7 @@ public final class FloatingPoint {
     /* double */
 
     public static double getDouble(byte[] bytes, int i, int numBytes) {
-        return Double.longBitsToDouble(Integers.getLong(bytes, i, numBytes));
+        return Double.longBitsToDouble(Integers.getLong(bytes, i, numBytes, true));
     }
 
     public static int putDouble(double val, byte[] bytes, int i) {
@@ -53,6 +53,6 @@ public final class FloatingPoint {
     /* BigDecimal */
 
     public static BigDecimal getBigDecimal(byte[] bytes, int i, int unscaledNumBytes, int scale) {
-        return new BigDecimal(Integers.getBigInt(bytes, i, unscaledNumBytes), scale);
+        return new BigDecimal(Integers.getSignedBigInt(bytes, i, unscaledNumBytes), scale);
     }
 }

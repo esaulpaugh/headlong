@@ -13,11 +13,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.rlp.util;
+package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.util.Integers;
-import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -69,7 +67,7 @@ public class IntegersTest {
         for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
             short s = (short) i;
             int n = Integers.putShort(s, two, 0);
-            short r = Integers.getShort(two, 0, n);
+            short r = Integers.getShort(two, 0, n, false);
             assertEquals(s, r);
         }
     }
@@ -86,7 +84,7 @@ public class IntegersTest {
         for (long i = 0; i < 20_000; i++) {
             long lo = TestUtils.pickRandom(rand);
             int n = Integers.putLong(lo, eight, 0);
-            long r = Integers.getLong(eight, 0, n);
+            long r = Integers.getLong(eight, 0, n, false);
             if(lo != r) {
                 throw new AssertionError(lo + "!= " + r);
             }
@@ -101,8 +99,11 @@ public class IntegersTest {
         for(int i = 0; i < 30_000; i++) {
             BigInteger big = BigInteger.valueOf(TestUtils.pickRandom(rand))
                     .multiply(BigInteger.valueOf(TestUtils.pickRandom(rand)));
-            int n = Integers.putBigInt(big, dest, 0);
-            BigInteger r = Integers.getBigInt(dest, 0, n);
+            if(big.signum() < 0) {
+                big = big.negate();
+            }
+            int n = Integers.putUnsignedBigInt(big, dest, 0);
+            BigInteger r = Integers.getUnsignedBigInt(dest, 0, n, false);
             assertEquals(big, r);
         }
     }
@@ -207,5 +208,23 @@ public class IntegersTest {
         rand.nextBytes(src);
         insertBytes(3, ten, ten.length - 3, (byte) 0, src[1], src[2], src[3]);
         assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, src[1], src[2], src[3] }, ten);
+    }
+
+    @Test
+    public void testBigInteger() throws Throwable {
+        long x = Long.MAX_VALUE;
+        byte[] xBytes = Integers.toBytes(x);
+
+        assertEquals("7fffffffffffffff", Strings.encode(xBytes));
+
+        BigInteger b = BigInteger.valueOf(x).add(BigInteger.ONE);
+
+        assertEquals(b, new BigInteger("8000000000000000", 16));
+
+        byte[] bBytes = b.toByteArray();
+
+        TestUtils.assertThrown(IllegalArgumentException.class, () -> Integers.getUnsignedBigInt(bBytes, 0, bBytes.length, false));
+
+        assertEquals(b, Integers.getUnsignedBigInt(bBytes, 0, bBytes.length, true));
     }
 }

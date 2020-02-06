@@ -33,21 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 public class RLPEncoderTest {
-    
-    @Test
-    public void testBigInteger() {
-        long x = Long.MAX_VALUE;
-        byte[] xBytes = Integers.toBytes(x);
-
-        assertEquals("7fffffffffffffff", Strings.encode(xBytes));
-
-        BigInteger b = BigInteger.valueOf(x).add(BigInteger.ONE);
-
-        assertEquals(b, new BigInteger("8000000000000000", 16));
-
-        byte[] bBytes = b.toByteArray();
-        assertEquals(b, Integers.getBigInt(bBytes, 0, bBytes.length));
-    }
 
     @Test
     public void encodeSequentially() {
@@ -135,7 +120,8 @@ public class RLPEncoderTest {
 
         int i = 95223;
         long l = 9864568923852L;
-        BigInteger bi = BigInteger.valueOf(l * -1001);
+        BigInteger unsigned = BigInteger.valueOf(l * 1003);
+        BigInteger signed = BigInteger.valueOf(l * -1001);
 
         float f = 0.91254f;
         double d = 133.9185523d;
@@ -148,7 +134,8 @@ public class RLPEncoderTest {
                 Integers.toBytes(sh),
                 Integers.toBytes(i),
                 Integers.toBytes(l),
-                bi.toByteArray(),
+                Integers.toBytes(unsigned),
+                signed.toByteArray(),
                 FloatingPoint.toBytes(f),
                 FloatingPoint.toBytes(d),
                 bd.unscaledValue().toByteArray()
@@ -163,7 +150,8 @@ public class RLPEncoderTest {
 
         assertEquals(iter.next().asInt(), i);
         assertEquals(iter.next().asLong(), l);
-        assertEquals(iter.next().asBigInt(), bi);
+        assertEquals(iter.next().asUnsignedBigInt(), unsigned);
+        assertEquals(iter.next().asSignedBigInt(), signed);
 
         assertEquals(iter.next().asFloat(), f, 0.0001d);
         assertEquals(iter.next().asDouble(), d, 0.0001d);

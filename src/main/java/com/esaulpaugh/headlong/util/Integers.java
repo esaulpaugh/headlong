@@ -72,6 +72,19 @@ public final class Integers {
     }
 
     /**
+     * Returns an integer's minimal big-endian two's complement representation. The integer zero is represented by the
+     * empty byte array.
+     *
+     * @param val the integer
+     * @return the minimal representation
+     */
+    public static byte[] toBytes(BigInteger val) {
+        byte[] bytes = new byte[len(val)];
+        putUnsignedBigInt(val, bytes, 0);
+        return bytes;
+    }
+
+    /**
      * Inserts into a byte array an integer's minimal (without leading zeroes), big-endian two's complement representation,
      * up to one byte in length. The integer zero always has length zero.
      *
@@ -99,7 +112,7 @@ public final class Integers {
      * @param i   the index into the output
      * @return the number of bytes inserted
      * @see #toBytes(short)
-     * @see #getShort(byte[], int, int)
+     * @see #getShort(byte[], int, int, boolean)
      */
     public static int putShort(short val, byte[] o, int i) {
         if(val != 0) {
@@ -121,7 +134,7 @@ public final class Integers {
      * @param i   the index into the output
      * @return the number of bytes inserted
      * @see #toBytes(int)
-     * @see #getInt(byte[], int, int)
+     * @see #getInt(byte[], int, int, boolean)
      */
     public static int putInt(int val, byte[] o, int i) {
         if(val != 0) {
@@ -147,7 +160,7 @@ public final class Integers {
      * @param i   the index into the output
      * @return the number of bytes inserted
      * @see #toBytes(long)
-     * @see #getLong(byte[], int, int)
+     * @see #getLong(byte[], int, int, boolean)
      */
     public static int putLong(long val, byte[] o, int i) {
         if(val != 0) {
@@ -235,14 +248,14 @@ public final class Integers {
      * @see #toBytes(short)
      * @see #putShort(short, byte[], int)
      */
-    public static short getShort(byte[] buffer, int i, int len) {
+    public static short getShort(byte[] buffer, int i, int len, boolean lenient) {
         int shiftAmount = 0;
         int val = 0;
         switch (len) { /* cases 2 through 1 fall through */
         case 2: val = buffer[i+1] & 0xFF; shiftAmount = Byte.SIZE; // & 0xFF to promote to int before left shift
         case 1:
             byte lead = buffer[i];
-            if(lead == 0 && len > 1) {
+            if(!lenient && lead == 0 && len > 1) {
                 throw leadingZeroException(i, len);
             }
             val |= (lead & 0xFFL) << shiftAmount;
@@ -263,7 +276,7 @@ public final class Integers {
      * @see #toBytes(int)
      * @see #putInt(int, byte[], int)
      */
-    public static int getInt(byte[] buffer, int i, int len) {
+    public static int getInt(byte[] buffer, int i, int len, boolean lenient) {
         int shiftAmount = 0;
         int val = 0;
         switch (len) { /* cases 4 through 1 fall through */
@@ -272,7 +285,7 @@ public final class Integers {
         case 2: val |= (buffer[i+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1:
             byte lead = buffer[i];
-            if(lead == 0 && len > 1) {
+            if(!lenient && lead == 0 && len > 1) {
                 throw leadingZeroException(i, len);
             }
             val |= (lead & 0xFFL) << shiftAmount;
@@ -293,7 +306,7 @@ public final class Integers {
      * @see #toBytes(long)
      * @see #putLong(long, byte[], int)
      */
-    public static long getLong(final byte[] buffer, final int i, final int len) {
+    public static long getLong(final byte[] buffer, final int i, final int len, boolean lenient) {
         int shiftAmount = 0;
         long val = 0L;
         switch (len) { /* cases 8 through 1 fall through */
@@ -306,7 +319,7 @@ public final class Integers {
         case 2: val |= (buffer[i+1] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1:
             byte lead = buffer[i];
-            if(lead == 0 && len > 1) {
+            if(!lenient && lead == 0 && len > 1) {
                 throw leadingZeroException(i, len);
             }
             val |= (lead & 0xFFL) << shiftAmount;
@@ -395,6 +408,10 @@ public final class Integers {
         return 0;
     }
 
+    public static int len(BigInteger val) {
+        return roundLengthUp(val.bitLength(), Byte.SIZE) >> 3; // div 8
+    }
+
     /**
      * NOTE: will always return {@link Long#SIZE} for negative integers. See also abi.util.BizarroIntegers.bitLen(long).
      *
@@ -405,17 +422,59 @@ public final class Integers {
         return Long.SIZE - Long.numberOfLeadingZeros(val);
     }
 
-    public static BigInteger getBigInt(byte[] buffer, int i, int len) {
-//        return new BigInteger(buffer, i, len); // Java 9+
-        byte[] dest = new byte[len];
-        System.arraycopy(buffer, i, dest, 0, len);
+    public static BigInteger getUnsignedBigIntLenient(byte[] buffer, int i, int len) {
+        byte[] dest = new byte[len + 1];
+        System.arraycopy(buffer, i, dest, 1, len);
         return new BigInteger(dest);
     }
 
-    public static int putBigInt(BigInteger val, byte[] o, int i) {
+    public static BigInteger getUnsignedBigInt(byte[] buffer, int i, int len, boolean lenient) {
+        BigInteger val = getUnsignedBigIntLenient(buffer, i, len);
+        if(!lenient && len > 0 && buffer[i] == 0x00) {
+            throw leadingZeroException(i, len);
+        }
+        return val;
+    }
+
+    public static BigInteger getSignedBigInt(byte[] buffer, int i, int len) {
+        byte[] bytes = new byte[len];
+        System.arraycopy(buffer, i, bytes, 0, len);
+        return new BigInteger(bytes);
+    }
+
+    public static int putUnsignedBigInt(BigInteger val, byte[] o, int i) {
+        if(val.signum() < 0) {
+            throw new IllegalArgumentException("negative unsigned int");
+        }
         byte[] bytes = val.toByteArray();
-        final int len = bytes.length;
-        System.arraycopy(bytes, 0, o, i, len);
+        final int len, srcPos;
+        if(bytes[0] == 0x00) {
+            len = bytes.length - 1;
+            srcPos = 1;
+        } else {
+            len = bytes.length;
+            srcPos = 0;
+        }
+        System.arraycopy(bytes, srcPos, o, i, len);
         return len;
+    }
+
+    /**
+     * Rounds a length up to the nearest multiple of {@code powerOfTwo}. If {@code len} is already a multiple, method has
+     * no effect.
+     *
+     * @param len the length, a non-negative integer
+     * @param powerOfTwo a power of two of which the result will be a multiple
+     * @return the rounded-up value
+     */
+    public static int roundLengthUp(int len, int powerOfTwo) {
+        int mod = len & (powerOfTwo - 1);
+        return mod != 0 ? len + (powerOfTwo - mod) : len;
+    }
+
+    public static void checkIsMultiple(int len, int powerOfTwo) {
+        if((len & (powerOfTwo - 1)) != 0) {
+            throw new IllegalArgumentException("expected length mod " + powerOfTwo + " == 0, found: " + (len % powerOfTwo));
+        }
     }
 }

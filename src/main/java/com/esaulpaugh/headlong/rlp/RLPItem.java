@@ -38,6 +38,8 @@ public abstract class RLPItem {
 
     public static final RLPItem[] EMPTY_ARRAY = new RLPItem[0];
 
+    public final boolean lenient;
+
     protected final byte[] buffer;
     protected final int index;
 
@@ -45,7 +47,7 @@ public abstract class RLPItem {
     public final transient int dataLength;
     public final transient int endIndex;
 
-    RLPItem(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) {
+    RLPItem(final byte lead, final DataType type, final byte[] buffer, final int index, int containerEnd, final boolean lenient) {
         containerEnd = Math.min(buffer.length, containerEnd);
 
         final int _dataIndex;
@@ -69,7 +71,7 @@ public abstract class RLPItem {
             if (_dataIndex > containerEnd) {
                 throw exceedsContainer(index, _dataIndex, containerEnd, containerEnd == buffer.length);
             }
-            _dataLength = Integers.getLong(buffer, lengthIndex, diff);
+            _dataLength = Integers.getLong(buffer, lengthIndex, diff, lenient);
             if(_dataLength < MIN_LONG_DATA_LEN) {
                 throw new IllegalArgumentException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
             }
@@ -86,6 +88,7 @@ public abstract class RLPItem {
             throw new IllegalArgumentException("invalid rlp for single byte @ " + index);
         }
 
+        this.lenient = lenient;
         this.buffer = buffer;
         this.index = index;
         this.dataIndex = _dataIndex;
@@ -186,19 +189,23 @@ public abstract class RLPItem {
     }
 
     public short asShort() {
-        return Integers.getShort(buffer, dataIndex, dataLength);
+        return Integers.getShort(buffer, dataIndex, dataLength, lenient);
     }
 
     public int asInt() {
-        return Integers.getInt(buffer, dataIndex, dataLength);
+        return Integers.getInt(buffer, dataIndex, dataLength, lenient);
     }
 
     public long asLong() {
-        return Integers.getLong(buffer, dataIndex, dataLength);
+        return Integers.getLong(buffer, dataIndex, dataLength, lenient);
     }
 
-    public BigInteger asBigInt() {
-        return Integers.getBigInt(buffer, dataIndex, dataLength); // new BigInteger(data());
+    public BigInteger asUnsignedBigInt() {
+        return Integers.getUnsignedBigInt(buffer, dataIndex, dataLength, lenient);
+    }
+
+    public BigInteger asSignedBigInt() {
+        return new BigInteger(data());
     }
 
     public float asFloat() {

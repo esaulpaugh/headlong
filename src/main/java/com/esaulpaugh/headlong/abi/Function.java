@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonObject;
@@ -336,7 +337,7 @@ public final class Function implements ABIObject, Serializable {
      * @throws IllegalArgumentException if the input length mod 32 != 4
      */
     public static String formatCall(byte[] buffer, int offset, final int length) {
-        Utils.checkIsMultiple(length - SELECTOR_LEN);
+        Integers.checkIsMultiple(length - SELECTOR_LEN, UNIT_LENGTH_BYTES);
         StringBuilder sb = new StringBuilder("ID\t")
                 .append(encode(Arrays.copyOfRange(buffer, offset, SELECTOR_LEN), HEX))
                 .append('\n');

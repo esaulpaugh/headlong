@@ -21,6 +21,7 @@ import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -55,6 +56,41 @@ public class RLPDecoderTest {
             (byte) 0x84, 'd', 'o', 'g', 's',
             (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
     };
+
+//    @Test
+//    public void testLenient() throws Throwable {
+//
+//        byte[] bigIntBytes = new byte[] { 0, 0, 127, 1, 90, 45, 0, 3, -1, -10 };
+//
+//        System.out.println(new BigInteger(bigIntBytes));
+//
+//        TestUtils.assertThrown(
+//                IllegalArgumentException.class,
+//                "deserialised positive integers with leading zeroes are invalid; index: 0, len: 10",
+//                () -> Integers.getBigInt(bigIntBytes, 0, bigIntBytes.length, false)
+//        );
+//
+//        TestUtils.assertThrown(
+//                IllegalArgumentException.class,
+//                "deserialised positive integers with leading zeroes are invalid; index: 1, len: 9",
+//                () -> Integers.getBigInt(bigIntBytes, 1, bigIntBytes.length - 1, false)
+//        );
+//
+//        Integers.getBigInt(bigIntBytes, 0, bigIntBytes.length, true);
+//        Integers.getBigInt(bigIntBytes, 1, bigIntBytes.length - 1, true);
+//
+//        Integers.getBigInt(bigIntBytes, 2, bigIntBytes.length - 2, false);
+//
+//        System.out.println(Arrays.toString(new BigInteger(bigIntBytes).toByteArray()));
+//
+//        byte[] rlp = RLPEncoder.encode(bigIntBytes);
+//
+//        TestUtils.assertThrown(
+//                IllegalArgumentException.class,
+//                "deserialised positive integers with leading zeroes are invalid; index: 1, len: 10",
+//                () -> RLP_STRICT.wrapString(rlp).asBigInt()
+//        );
+//    }
 
     @Disabled("slow")
     @Test

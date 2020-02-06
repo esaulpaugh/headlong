@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.Uint;
+import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.lang.reflect.Array;
@@ -252,7 +253,7 @@ public final class PackedDecoder {
     private static BigInteger[] decodeBigIntegerArray(int elementLen, int arrayLen, byte[] buffer, int idx) {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            BigInteger val = com.esaulpaugh.headlong.util.Integers.getBigInt(buffer, idx, elementLen);
+            BigInteger val = com.esaulpaugh.headlong.util.Integers.getSignedBigInt(buffer, idx, elementLen);
             bigInts[i] = val;
             idx += elementLen;
         }
@@ -262,7 +263,7 @@ public final class PackedDecoder {
     private static BigDecimal[] decodeBigDecimalArray(int elementLen, int scale, int arrayLen, byte[] buffer, int idx) {
         BigDecimal[] bigDecimals = new BigDecimal[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            bigDecimals[i] = new BigDecimal(com.esaulpaugh.headlong.util.Integers.getBigInt(buffer, idx, elementLen), scale);
+            bigDecimals[i] = FloatingPoint.getBigDecimal(buffer, idx, elementLen, scale);
             idx += elementLen;
         }
         return bigDecimals;

@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.lang.reflect.Array;
@@ -95,7 +96,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         final int len;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: len = ((boolean[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
-        case TYPE_CODE_BYTE: len = Utils.roundLengthUp((!isString ? (byte[]) value : Strings.decode((String) value, UTF_8)).length); break;
+        case TYPE_CODE_BYTE: len = Integers.roundLengthUp((!isString ? (byte[]) value : Strings.decode((String) value, UTF_8)).length, UNIT_LENGTH_BYTES); break;
         case TYPE_CODE_INT: len = ((int[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_LONG: len = ((long[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BIG_INTEGER:
@@ -163,7 +164,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BOOLEAN: staticLen = checkLength(((boolean[]) value).length, value) << LOG_2_UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BYTE:
             byte[] bytes = !isString ? (byte[]) value : Strings.decode((String) value, UTF_8);
-            staticLen = Utils.roundLengthUp(checkLength(bytes.length, value));
+            staticLen = Integers.roundLengthUp(checkLength(bytes.length, value), UNIT_LENGTH_BYTES);
             break;
         case TYPE_CODE_INT: staticLen = validateIntArray((int[]) value); break;
         case TYPE_CODE_LONG: staticLen = validateLongArray((long[]) value); break;
@@ -410,7 +411,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         final int mark = bb.position();
         byte[] out = new byte[arrayLen];
         bb.get(out);
-        bb.position(mark + Utils.roundLengthUp(arrayLen));
+        bb.position(mark + Integers.roundLengthUp(arrayLen, UNIT_LENGTH_BYTES));
         return !isString ? out : Strings.encode(out, UTF_8);
     }
 

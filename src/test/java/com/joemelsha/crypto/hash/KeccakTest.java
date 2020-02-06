@@ -167,7 +167,7 @@ public class KeccakTest {
         assertNotEquals(binary, new StringBuilder(binary).reverse().toString());
 
         byte[] eight = new byte[] { 8, 7, 6, 5, 4, 3, 2, (byte) 0x80 };
-        long normal = Integers.getLong(eight, 0, eight.length);
+        long normal = Integers.getLong(eight, 0, eight.length, false);
         assertNotEquals(asymmetricBits, normal);
 
         keccak.updateBits(asymmetricBits, bitLen);

@@ -110,7 +110,7 @@ public final class Notation {
         }
         final int lengthIndex = leadByteIndex + 1;
         final int lengthLen = dataIndex - lengthIndex;
-        final long dataLenLong = Integers.getLong(data, leadByteIndex + 1, lengthLen);
+        final long dataLenLong = Integers.getLong(data, leadByteIndex + 1, lengthLen, LENIENT);
         final long end = lengthIndex + lengthLen + dataLenLong;
         if (end > containerEnd) {
             throw exceedsContainer(leadByteIndex, end, containerEnd);
