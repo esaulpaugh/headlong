@@ -20,7 +20,6 @@ import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonObject;
 
 import java.security.MessageDigest;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -113,11 +112,11 @@ public final class Event implements ABIObject {
         return Arrays.equals(indexManifest, event.indexManifest);
     }
 
-    public static Event fromJson(String eventJson) throws ParseException {
+    public static Event fromJson(String eventJson) {
         return fromJsonObject(JsonUtils.parseObject(eventJson));
     }
 
-    public static Event fromJsonObject(JsonObject event) throws ParseException {
+    public static Event fromJsonObject(JsonObject event) {
         return ABIJSON.parseEvent(event);
     }
 

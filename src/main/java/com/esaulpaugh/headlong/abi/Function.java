@@ -299,19 +299,19 @@ public final class Function implements ABIObject, Serializable {
         return new Function(signature, null, messageDigest);
     }
 
-    public static Function fromJson(String objectJson) throws ParseException {
+    public static Function fromJson(String objectJson) {
         return fromJsonObject(JsonUtils.parseObject(objectJson));
     }
 
-    public static Function fromJson(String objectJson, MessageDigest messageDigest) throws ParseException {
+    public static Function fromJson(String objectJson, MessageDigest messageDigest) {
         return fromJsonObject(JsonUtils.parseObject(objectJson), messageDigest);
     }
 
-    public static Function fromJsonObject(JsonObject function) throws ParseException {
+    public static Function fromJsonObject(JsonObject function) {
         return fromJsonObject(function, Function.newDefaultDigest());
     }
 
-    public static Function fromJsonObject(JsonObject function, MessageDigest messageDigest) throws ParseException {
+    public static Function fromJsonObject(JsonObject function, MessageDigest messageDigest) {
         return ABIJSON.parseFunction(function, messageDigest);
     }
 

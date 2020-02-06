@@ -54,31 +54,31 @@ public final class ABIJSON {
 //    private static final String NONPAYABLE = "nonpayable";
     private static final String CONSTANT = "constant"; // deprecated
 
-    public static ABIObject parseABIObject(String objectJson) throws ParseException {
+    public static ABIObject parseABIObject(String objectJson) {
         return parseABIObject(parseObject(objectJson));
     }
 
-    public static ABIObject parseABIObject(JsonObject object) throws ParseException {
+    public static ABIObject parseABIObject(JsonObject object) {
         return EVENT.equals(getString(object, TYPE)) ? parseEvent(object) : parseFunction(object, Function.newDefaultDigest());
     }
 
-    public static List<Function> parseFunctions(String arrayJson) throws ParseException {
+    public static List<Function> parseFunctions(String arrayJson) {
         return parseObjects(arrayJson, true, false, Function.class);
     }
 
-    public static List<Event> parseEvents(String arrayJson) throws ParseException {
+    public static List<Event> parseEvents(String arrayJson) {
         return parseObjects(arrayJson, false, true, Event.class);
     }
 
     private static <T extends ABIObject> List<T> parseObjects(final String json,
                                                              final boolean functions,
                                                              final boolean events,
-                                                             final Class<T> classOfT) throws ParseException {
+                                                             final Class<T> classOfT) {
         final MessageDigest defaultDigest = functions ? Function.newDefaultDigest() : null;
 
-        final List<T> list = new ArrayList<>();
-        for(JsonElement e : parseArray(json)) {
-            if(e.isJsonObject()) {
+        final List<T> abiObjects = new ArrayList<>();
+        for (JsonElement e : parseArray(json)) {
+            if (e.isJsonObject()) {
                 JsonObject object = (JsonObject) e;
                 switch (getString(object, TYPE)) {
                 case FUNCTION:
@@ -86,22 +86,22 @@ public final class ABIJSON {
                 case FALLBACK:
                 case CONSTRUCTOR:
                     if (functions) {
-                        list.add(classOfT.cast(parseFunction(object, defaultDigest)));
+                        abiObjects.add(classOfT.cast(parseFunction(object, defaultDigest)));
                     }
                     break;
                 case EVENT:
                     if (events) {
-                        list.add(classOfT.cast(parseEvent(object)));
+                        abiObjects.add(classOfT.cast(parseEvent(object)));
                     }
                     break;
                 default: /* skip */
                 }
             }
         }
-        return list;
+        return abiObjects;
     }
 
-    public static Function parseFunction(JsonObject function, MessageDigest messageDigest) throws ParseException {
+    public static Function parseFunction(JsonObject function, MessageDigest messageDigest) {
         return new Function(
                 parseFunctionType(function),
                 getString(function, NAME),
@@ -111,7 +111,7 @@ public final class ABIJSON {
                 messageDigest
         );
     }
-
+// ---------------------------------------------------------------------------------------------------------------------
     private static Function.Type parseFunctionType(JsonObject function) {
         String type = getString(function, TYPE);
         if(type != null) {
@@ -126,18 +126,22 @@ public final class ABIJSON {
         return Function.Type.FUNCTION;
     }
 
-    private static TupleType parseTypes(JsonArray array) throws ParseException {
+    private static TupleType parseTypes(JsonArray array) {
         if (array != null) {
             ABIType<?>[] elementsArray = new ABIType[array.size()];
-            for (int i = 0; i < elementsArray.length; i++) {
-                elementsArray[i] = parseType(array.get(i).getAsJsonObject());
+            try {
+                for (int i = 0; i < elementsArray.length; i++) {
+                    elementsArray[i] = parseType(array.get(i).getAsJsonObject());
+                }
+            } catch (ParseException pe) {
+                throw new IllegalArgumentException(pe);
             }
             return TupleType.wrap(elementsArray);
         }
         return TupleType.EMPTY;
     }
 
-    static Event parseEvent(JsonObject event) throws ParseException {
+    static Event parseEvent(JsonObject event) {
         final String type = getString(event, TYPE);
         if (EVENT.equals(type)) {
             final JsonArray inputs = getArray(event, INPUTS);
@@ -145,10 +149,14 @@ public final class ABIJSON {
                 final int inputsLen = inputs.size();
                 final ABIType<?>[] inputsArray = new ABIType[inputsLen];
                 final boolean[] indexed = new boolean[inputsLen];
-                for (int i = 0; i < inputsLen; i++) {
-                    JsonObject inputObj = inputs.get(i).getAsJsonObject();
-                    inputsArray[i] = parseType(inputObj);
-                    indexed[i] = getBoolean(inputObj, INDEXED);
+                try {
+                    for (int i = 0; i < inputsLen; i++) {
+                        JsonObject inputObj = inputs.get(i).getAsJsonObject();
+                        inputsArray[i] = parseType(inputObj);
+                        indexed[i] = getBoolean(inputObj, INDEXED);
+                    }
+                } catch (ParseException pe) {
+                    throw new IllegalArgumentException(pe);
                 }
                 return new Event(
                         getString(event, NAME),

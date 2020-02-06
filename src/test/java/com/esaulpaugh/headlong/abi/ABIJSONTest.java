@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.MessageDigest;
-import java.text.ParseException;
 import java.util.List;
 
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
@@ -244,7 +243,7 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testToJson() throws ParseException {
+    public void testToJson() {
 
         String[] jsons = new String[7];
 
@@ -299,7 +298,7 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testParseFunction() throws ParseException {
+    public void testParseFunction() {
 
         Function f;
 
@@ -389,7 +388,7 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testGetFunctions() throws ParseException {
+    public void testGetFunctions() {
 
         List<Function> functions;
 
@@ -432,7 +431,7 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testGetEvents() throws ParseException {
+    public void testGetEvents() {
         List<Event> events = ABIJSON.parseEvents(CONTRACT_JSON);
 
         assertEquals(1, events.size());
