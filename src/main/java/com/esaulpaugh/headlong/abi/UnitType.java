@@ -55,7 +55,7 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
     }
 
     @Override
-    public int validate(Object value) throws ABIException {
+    public int validate(Object value) {
         validateClass(value);
         validatePrimitive(((Number) value).longValue());
         return UNIT_LENGTH_BYTES;
@@ -72,14 +72,14 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
         throw new UnsupportedOperationException();
     }
 
-    private void validatePrimitive(long longVal) throws ABIException {
+    private void validatePrimitive(long longVal) {
         checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
         if (unsigned && longVal < 0) {
             throw new ABIException("signed value given for unsigned type");
         }
     }
 
-    final void validateBigInt(BigInteger bigIntVal) throws ABIException {
+    final void validateBigInt(BigInteger bigIntVal) {
         checkBitLen(bigIntVal.bitLength());
         if (unsigned && bigIntVal.signum() < 0) {
             throw new ABIException("signed value given for unsigned type");
@@ -87,16 +87,16 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
     }
 
     // don't do unsigned check for array element
-    final void validatePrimitiveElement(long longVal) throws ABIException {
+    final void validatePrimitiveElement(long longVal) {
         checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
     }
 
     // don't do unsigned check for array element
-    final void validateBigIntElement(BigInteger bigIntVal) throws ABIException {
+    final void validateBigIntElement(BigInteger bigIntVal) {
         checkBitLen(bigIntVal.bitLength());
     }
 
-    private void checkBitLen(int actual) throws ABIException {
+    private void checkBitLen(int actual) {
         if (actual > bitLength) {
             throw new ABIException("exceeds bit limit: " + actual + " > " + bitLength);
         }

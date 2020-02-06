@@ -112,7 +112,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    public int validate(final Object value) throws ABIException {
+    public int validate(final Object value) {
         validateClass(value);
 
         final Object[] elements = ((Tuple) value).elements;
@@ -172,7 +172,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return headLengths;
     }
 
-    public Tuple decode(byte[] array) throws ABIException {
+    public Tuple decode(byte[] array) {
         ByteBuffer bb = ByteBuffer.wrap(array);
         Tuple decoded = decode(bb);
         final int remaining = bb.remaining();
@@ -182,12 +182,12 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         throw new IllegalArgumentException("unconsumed bytes: " + remaining + " remaining");
     }
 
-    public Tuple decode(ByteBuffer bb) throws ABIException {
+    public Tuple decode(ByteBuffer bb) {
         return decode(bb, newUnitBuffer());
     }
 
     @Override
-    Tuple decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
+    Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
         Object[] elements = new Object[elementTypes.length];
         if(!dynamic) {
             for (int i = 0; i < elementTypes.length; i++) {
@@ -199,7 +199,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return new Tuple(elements);
     }
 
-    private static void decodeDynamic(ByteBuffer bb, ABIType<?>[] elementTypes, byte[] elementBuffer, Object[] dest) throws ABIException {
+    private static void decodeDynamic(ByteBuffer bb, ABIType<?>[] elementTypes, byte[] elementBuffer, Object[] dest) {
 //        final int index = bb.position(); // *** save this value here if you want to support lenient mode below
         final int len = elementTypes.length;
         int[] offsets = new int[len];
@@ -228,34 +228,34 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         throw new UnsupportedOperationException();
     }
 
-    public ByteBuffer encodeElements(Object... elements) throws ABIException {
+    public ByteBuffer encodeElements(Object... elements) {
         return encode(new Tuple(elements));
     }
 
-    public ByteBuffer encode(Tuple values) throws ABIException {
+    public ByteBuffer encode(Tuple values) {
         ByteBuffer dest = ByteBuffer.allocate(validate(values));
         encodeTail(values, dest);
         return dest;
     }
 
-    public TupleType encode(Tuple values, ByteBuffer dest) throws ABIException {
+    public TupleType encode(Tuple values, ByteBuffer dest) {
         validate(values);
         encodeTail(values, dest);
         return this;
     }
 
-    public int measureEncodedLength(Tuple values) throws ABIException {
+    public int measureEncodedLength(Tuple values) {
         return validate(values);
     }
 
-    public ByteBuffer encodePacked(Tuple values) throws ABIException {
+    public ByteBuffer encodePacked(Tuple values) {
         validate(values);
         ByteBuffer dest = ByteBuffer.allocate(byteLengthPacked(values));
         PackedEncoder.encodeTuple(this, values, dest);
         return dest;
     }
 
-    public void encodePacked(Tuple values, ByteBuffer dest) throws ABIException {
+    public void encodePacked(Tuple values, ByteBuffer dest) {
         validate(values);
         PackedEncoder.encodeTuple(this, values, dest);
     }

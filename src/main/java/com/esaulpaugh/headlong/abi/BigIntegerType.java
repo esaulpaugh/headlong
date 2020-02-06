@@ -37,14 +37,14 @@ public final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
-    public BigInteger parseArgument(String s) throws ABIException {
+    public BigInteger parseArgument(String s) {
         BigInteger bigInt = new BigInteger(s);
         validate(bigInt);
         return bigInt;
     }
 
     @Override
-    public int validate(Object value) throws ABIException {
+    public int validate(Object value) {
         validateClass(value);
         validateBigInt((BigInteger) value);
         return UNIT_LENGTH_BYTES;
@@ -57,7 +57,7 @@ public final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
-    BigInteger decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
+    BigInteger decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigInt(bi);

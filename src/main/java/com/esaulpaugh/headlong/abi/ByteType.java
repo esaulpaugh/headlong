@@ -45,13 +45,13 @@ public final class ByteType extends UnitType<Byte> {
     }
 
     @Override
-    public int validate(Object value) throws ABIException {
+    public int validate(Object value) {
         validateClass(value);
         return UNIT_LENGTH_BYTES;
     }
 
     @Override
-    Byte decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
+    Byte decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigInt(bi);
@@ -59,7 +59,7 @@ public final class ByteType extends UnitType<Byte> {
     }
 
     @Override
-    public Byte parseArgument(String s) throws ABIException {
+    public Byte parseArgument(String s) {
         Byte b = Byte.parseByte(s);
         validate(b);
         return b;

@@ -40,7 +40,7 @@ public class DecodeTest {
     private static final Tuple EXPECTED = new Tuple(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
 
     @Test
-    public void testDecode() throws ABIException {
+    public void testDecode() {
 
         Tuple decoded = FUNCTION.decodeReturn(RETURN_BYTES);
         assertEquals(EXPECTED, decoded);
@@ -56,7 +56,7 @@ public class DecodeTest {
     }
 
     @Test
-    public void testDecodeDynamicArrayEmptyTuples() throws ABIException {
+    public void testDecodeDynamicArrayEmptyTuples() {
         Tuple decoded = new Function("foo()", "(()[])").decodeReturn(
                 FastHex.decode(
                 "0000000000000000000000000000000000000000000000000000000000000020" +

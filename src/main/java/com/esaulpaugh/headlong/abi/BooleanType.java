@@ -50,7 +50,7 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    public int validate(Object value) throws ABIException {
+    public int validate(Object value) {
         validateClass(value);
         return UNIT_LENGTH_BYTES;
     }
@@ -62,7 +62,7 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    Boolean decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
+    Boolean decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigInt(bi);
@@ -74,7 +74,7 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    public Boolean parseArgument(String s) throws ABIException {
+    public Boolean parseArgument(String s) {
         Boolean bool = Boolean.parseBoolean(s);
         validate(bool);
         return bool;

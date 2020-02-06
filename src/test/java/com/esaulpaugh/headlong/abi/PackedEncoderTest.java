@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PackedEncoderTest {
 
     @Test
-    public void testOverwrite() throws ABIException {
+    public void testOverwrite() {
         byte[] bytes = new byte[6];
         Arrays.fill(bytes, (byte) -1);
         ByteBuffer bb = ByteBuffer.wrap(bytes);
@@ -56,7 +56,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testTupleArray() throws ABIException {
+    public void testTupleArray() {
         TupleType tupleType = TupleType.parse("((bool)[])");
 
         Tuple test = Tuple.of(((Object) new Tuple[] { Tuple.of(true), Tuple.of(false), Tuple.of(true) }));
@@ -84,7 +84,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testHard() throws ABIException {
+    public void testHard() {
         TupleType tupleType = TupleType.parse("((bytes,(uint8[2][2])))");
 
         Tuple test = Tuple.of(Tuple.of(new byte[0], Tuple.of((Object) new int[][] { new int[] {1,2}, new int[] {3,4} })));
@@ -106,7 +106,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testStaticTupleInsideDynamic() throws ABIException {
+    public void testStaticTupleInsideDynamic() {
         TupleType tupleType = TupleType.parse("((bytes1),bytes)");
 
         Tuple test = Tuple.of(new Tuple((Object) new byte[] { -1 }), new byte[] { -15, -15 });
@@ -121,7 +121,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testPacked() throws ABIException {
+    public void testPacked() {
         TupleType tupleType = TupleType.parse("(int16,bytes1,uint16,string)");
 
         Tuple test = new Tuple(-1, new byte[] { 0x42 }, 0x03, "Hello, world!");
@@ -168,7 +168,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testTest() throws ABIException {
+    public void testTest() {
         TupleType tupleType = TupleType.parse("(int24,bool,bool)");
 
         Tuple values = new Tuple(-2, true, false);
@@ -186,7 +186,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testDecodeA() throws ABIException {
+    public void testDecodeA() {
         TupleType tupleType = TupleType.parse("(int16[2],int24[3],bytes,uint32[3],bool[3],uint64,int72)");
 
         Tuple test = new Tuple(new int[] { 3, 5 }, new int[] { 7, 8, 9 }, new byte[0], new int[] { 9, 0, -1 }, new boolean[] { true, false, true }, BigInteger.valueOf(6L), BigInteger.valueOf(-1L));
@@ -204,7 +204,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testDecodeB() throws ABIException {
+    public void testDecodeB() {
         TupleType tupleType = TupleType.parse("(uint64[],int)");
 
         Tuple values = new Tuple(new long[] { 1L, 2L, 3L, 4L }, BigInteger.ONE);
@@ -223,7 +223,7 @@ public class PackedEncoderTest {
     }
 
     @Test
-    public void testDecodeC() throws ABIException {
+    public void testDecodeC() {
         TupleType tupleType = TupleType.parse("(bool,bool[],bool[2])");
 
         Tuple values = new Tuple(true, new boolean[] { true, true, true },  new boolean[] { true, false });

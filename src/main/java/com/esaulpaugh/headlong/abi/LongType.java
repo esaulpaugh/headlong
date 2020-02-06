@@ -37,7 +37,7 @@ public final class LongType extends UnitType<Long> {
     }
 
     @Override
-    Long decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
+    Long decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigInt(bi);
@@ -45,7 +45,7 @@ public final class LongType extends UnitType<Long> {
     }
 
     @Override
-    public Long parseArgument(String s) throws ABIException {
+    public Long parseArgument(String s) {
         Long lo = Long.parseLong(s);
         validate(lo);
         return lo;

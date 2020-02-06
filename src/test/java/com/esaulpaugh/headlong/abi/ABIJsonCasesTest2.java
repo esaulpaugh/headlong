@@ -60,7 +60,7 @@ public class ABIJsonCasesTest2 {
             }
         }
 
-        private boolean test(boolean function) throws ABIException {
+        private boolean test(boolean function) {
             byte[] encoding = function ? this.function.encodeCall(values).array() : types.encode(values).array();
             try {
                 assertArrayEquals(result, encoding);
@@ -111,7 +111,7 @@ public class ABIJsonCasesTest2 {
     }
 
     @Test
-    public void testAbiV2Cases() throws IOException, ABIException {
+    public void testAbiV2Cases() throws IOException {
         final JsonArray testCases = JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonCasesTest.class, ABI_V2_CASES_PATH));
         for (JsonElement e : testCases) {
             new TestCase(e.getAsJsonObject(), false).test(false);
@@ -120,7 +120,7 @@ public class ABIJsonCasesTest2 {
     }
 
     @Test
-    public void testHeadlongCases() throws IOException, ABIException {
+    public void testHeadlongCases() throws IOException {
         final JsonArray testCases = JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonCasesTest.class, HEADLONG_CASES_PATH));
         for (JsonElement e : testCases) {
             new TestCase(e.getAsJsonObject(), true).test(true);

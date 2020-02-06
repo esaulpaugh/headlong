@@ -214,32 +214,32 @@ public final class Function implements ABIObject, Serializable {
         }
     }
 
-    public int measureCallLength(Tuple args) throws ABIException {
+    public int measureCallLength(Tuple args) {
         return Function.SELECTOR_LEN + inputTypes.validate(args);
     }
 
-    public ByteBuffer encodeCallWithArgs(Object... args) throws ABIException {
+    public ByteBuffer encodeCallWithArgs(Object... args) {
         return encodeCall(new Tuple(args));
     }
 
-    public ByteBuffer encodeCall(Tuple args) throws ABIException {
+    public ByteBuffer encodeCall(Tuple args) {
         ByteBuffer dest = ByteBuffer.wrap(new byte[measureCallLength(args)]); // ByteOrder.BIG_ENDIAN by default
         encodeCall(args, dest);
         return dest;
     }
 
-    public Function encodeCall(Tuple args, ByteBuffer dest) throws ABIException {
+    public Function encodeCall(Tuple args, ByteBuffer dest) {
         inputTypes.validate(args);
         dest.put(selector);
         inputTypes.encodeTail(args, dest);
         return this;
     }
 
-    public Tuple decodeCall(byte[] array) throws ABIException {
+    public Tuple decodeCall(byte[] array) {
         return decodeCall(ByteBuffer.wrap(array));
     }
 
-    public Tuple decodeCall(ByteBuffer abiBuffer) throws ABIException {
+    public Tuple decodeCall(ByteBuffer abiBuffer) {
         final byte[] unitBuffer = ABIType.newUnitBuffer();
         abiBuffer.get(unitBuffer, 0, SELECTOR_LEN);
         final byte[] selector = this.selector;
@@ -252,11 +252,11 @@ public final class Function implements ABIObject, Serializable {
         return inputTypes.decode(abiBuffer, unitBuffer);
     }
 
-    public Tuple decodeReturn(byte[] returnVals) throws ABIException {
+    public Tuple decodeReturn(byte[] returnVals) {
         return outputTypes.decode(returnVals);
     }
 
-    public Tuple decodeReturn(ByteBuffer returnVals) throws ABIException {
+    public Tuple decodeReturn(ByteBuffer returnVals) {
         return outputTypes.decode(returnVals);
     }
 

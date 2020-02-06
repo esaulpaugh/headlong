@@ -38,11 +38,11 @@ import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
  */
 public final class PackedDecoder {
 
-    public static Tuple decode(TupleType types, byte[] buffer) throws ABIException {
+    public static Tuple decode(TupleType types, byte[] buffer) {
         return decode(types, buffer, 0, buffer.length);
     }
 
-    public static Tuple decode(TupleType tupleType, byte[] buffer, int from, int to) throws ABIException {
+    public static Tuple decode(TupleType tupleType, byte[] buffer, int from, int to) {
         int numDynamic = countDynamics(tupleType);
         if (numDynamic == 0) {
             Tuple[] elements = new Tuple[1];

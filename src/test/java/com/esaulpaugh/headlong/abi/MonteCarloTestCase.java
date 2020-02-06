@@ -194,7 +194,7 @@ public class MonteCarloTestCase implements Serializable {
         this(new Params(seed));
     }
 
-    JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) throws ABIException {
+    JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) {
 
         Function f = Function.parse(name + this.function.getParamTypes().canonicalType); // this.function;
 
@@ -210,25 +210,25 @@ public class MonteCarloTestCase implements Serializable {
         return jsonObject;
     }
 
-    void run() throws ABIException {
+    void run() {
         run(this.argsTuple);
     }
 
-    void runNewRandomArgs() throws ABIException {
+    void runNewRandomArgs() {
         run(generateTuple(function.getParamTypes(), new Random(System.nanoTime())));
     }
 
-    void run(Tuple args) throws ABIException {
+    void run(Tuple args) {
         if(!args.equals(function.decodeCall((ByteBuffer) function.encodeCall(args).flip()))) {
             throw new ABIException(params.seed + " " + function.getCanonicalSignature() + " " + args);
         }
     }
 
-    void runForPacked() throws ABIException {
+    void runForPacked() {
         runForPacked(this.argsTuple);
     }
 
-    void runForPacked(Tuple args) throws ABIException {
+    void runForPacked(Tuple args) {
         final TupleType tt = this.function.getParamTypes();
         try {
             if (!PackedDecoder.decode(tt, tt.encodePacked(args).array()).equals(args)) {
@@ -244,7 +244,7 @@ public class MonteCarloTestCase implements Serializable {
         }
     }
 
-    void runSuperSerial() throws ABIException {
+    void runSuperSerial() {
         final TupleType tt = this.function.getParamTypes();
         final Tuple tuple = this.argsTuple;
 

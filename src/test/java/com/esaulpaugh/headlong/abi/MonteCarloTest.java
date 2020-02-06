@@ -68,16 +68,10 @@ public class MonteCarloTest {
     }
 
     private static Runnable newRunnable(long seed, int n) {
-        return () -> {
-            try {
-                doMonteCarlo(seed, n);
-            } catch (ABIException e) {
-                throw new RuntimeException(e);
-            }
-        };
+        return () -> doMonteCarlo(seed, n);
     }
 
-    private static void doMonteCarlo(long masterSeed, int n) throws ABIException {
+    private static void doMonteCarlo(long masterSeed, int n) {
 
         final long[] seeds = generateSeeds(masterSeed, n);
 
@@ -140,12 +134,8 @@ public class MonteCarloTest {
             final int n = end - start;
             if(n < THRESHOLD) {
 //                long startTime = System.nanoTime();
-                try {
-                    for (int j = 0; j < n; j++) {
-                        this.testCase.run();
-                    }
-                } catch (ABIException ve) {
-                    throw new RuntimeException(ve);
+                for (int j = 0; j < n; j++) {
+                    this.testCase.run();
                 }
 //                System.out.println(n + " " + (System.nanoTime() - startTime) / 1_000_000.0);
             } else {
@@ -191,12 +181,8 @@ public class MonteCarloTest {
         final int threadsLen = threads.length;
         for (int i = 0; i < threadsLen; i++) {
             threads[i] = new Thread(() -> {
-                try {
-                    for (int j = 0; j < 500; j++) {
-                        two.run();
-                    }
-                } catch (ABIException ve) {
-                    throw new RuntimeException(ve);
+                for (int j = 0; j < 500; j++) {
+                    two.run();
                 }
             });
         }
@@ -276,7 +262,7 @@ public class MonteCarloTest {
 
     @Disabled("run if you need to generate random test cases")
     @Test
-    public void printNewTestCases() throws ABIException {
+    public void printNewTestCases() {
         final Gson ugly = new GsonBuilder().create();
         final JsonPrimitive version = new JsonPrimitive("1.4.4+commit.3ad2258");
         JsonArray array = new JsonArray();

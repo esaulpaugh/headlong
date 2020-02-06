@@ -299,7 +299,7 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testParseFunction() throws ParseException, ABIException {
+    public void testParseFunction() throws ParseException {
 
         Function f;
 

@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.util;
 
-import com.esaulpaugh.headlong.abi.ABIException;
 import com.esaulpaugh.headlong.abi.ABIType;
 import com.esaulpaugh.headlong.abi.ArrayType;
 import com.esaulpaugh.headlong.abi.BigDecimalType;
@@ -49,7 +48,7 @@ public final class SuperSerial {
     private static final byte[] TRUE = new byte[] { 0x01 };
     private static final byte[] FALSE = new byte[0];
 
-    public static String serialize(TupleType tupleType, Tuple tuple, boolean machine) throws ABIException {
+    public static String serialize(TupleType tupleType, Tuple tuple, boolean machine) {
         tupleType.validate(tuple);
         Object[] objects = serializeTuple(tupleType, tuple);
         return machine
@@ -57,7 +56,7 @@ public final class SuperSerial {
                 : Notation.forObjects(objects).toString();
     }
 
-    public static Tuple deserialize(TupleType tupleType, String str, boolean machine) throws ABIException {
+    public static Tuple deserialize(TupleType tupleType, String str, boolean machine) {
         Tuple in = deserializeTuple(
                 tupleType,
                 machine
@@ -68,7 +67,7 @@ public final class SuperSerial {
         return in;
     }
 
-    private static Object[] serializeTuple(TupleType tupleType, Object obj) throws ABIException {
+    private static Object[] serializeTuple(TupleType tupleType, Object obj) {
         Tuple tuple = (Tuple) obj;
         final int len = tupleType.size();
         Object[] out = new Object[len];
@@ -88,7 +87,7 @@ public final class SuperSerial {
         return new Tuple(elements);
     }
 
-    private static Object serialize(ABIType<?> type, Object obj) throws ABIException {
+    private static Object serialize(ABIType<?> type, Object obj) {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return (boolean) obj ? TRUE : FALSE;
         case TYPE_CODE_BYTE: return Integers.toBytes((byte) obj); // case currently goes unused
@@ -116,7 +115,7 @@ public final class SuperSerial {
         }
     }
 
-    private static Object serializeArray(ArrayType<? extends ABIType<?>, ?> arrayType, Object arr) throws ABIException {
+    private static Object serializeArray(ArrayType<? extends ABIType<?>, ?> arrayType, Object arr) {
         ABIType<?> elementType = arrayType.getElementType();
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return serializeBooleanArray(arr);
@@ -214,7 +213,7 @@ public final class SuperSerial {
         return in;
     }
 
-    private static Object[] serializeObjectArray(Object arr, ABIType<?> elementType) throws ABIException {
+    private static Object[] serializeObjectArray(Object arr, ABIType<?> elementType) {
         Object[] objects = (Object[]) arr;
         final int len = objects.length;
         Object[] out = new Object[len];

@@ -46,7 +46,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    public int validate(Object value) throws ABIException {
+    public int validate(Object value) {
         validateClass(value);
         BigDecimal dec = (BigDecimal) value;
         validateBigInt(dec.unscaledValue());
@@ -63,7 +63,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
+    BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigInt(bi);
@@ -71,7 +71,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    public BigDecimal parseArgument(String s) throws ABIException {
+    public BigDecimal parseArgument(String s) {
         BigDecimal bigDec = new BigDecimal(new BigInteger(s), scale);
         validate(bigDec);
         return bigDec;

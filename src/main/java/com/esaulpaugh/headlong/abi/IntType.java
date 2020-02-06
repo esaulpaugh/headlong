@@ -37,7 +37,7 @@ public final class IntType extends UnitType<Integer> {
     }
 
     @Override
-    Integer decode(ByteBuffer bb, byte[] unitBuffer) throws ABIException {
+    Integer decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigInt(bi);
@@ -45,7 +45,7 @@ public final class IntType extends UnitType<Integer> {
     }
 
     @Override
-    public Integer parseArgument(String s) throws ABIException {
+    public Integer parseArgument(String s) {
         Integer in = Integer.parseInt(s);
         validate(in);
         return in;
