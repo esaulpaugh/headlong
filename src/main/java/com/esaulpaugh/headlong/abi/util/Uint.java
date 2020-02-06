@@ -57,13 +57,13 @@ public final class Uint {
                 throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
             }
             final int bitLen = com.esaulpaugh.headlong.util.Integers.bitLen(unsigned);
-            if(bitLen > numBits) {
-                throwTooManyBitsException(bitLen, numBits, false);
+            if(bitLen <= numBits) {
+                // if in upper half of range, subtract range
+                return unsigned >= halfRangeLong
+                        ? unsigned - rangeLong
+                        : unsigned;
             }
-            // if in upper half of range, subtract range
-            return unsigned >= halfRangeLong
-                    ? unsigned - rangeLong
-                    : unsigned;
+            throw tooManyBitsException(bitLen, numBits, false);
         }
         return toSigned(BigInteger.valueOf(unsigned)).longValueExact();
     }
@@ -71,10 +71,10 @@ public final class Uint {
     public long toUnsigned(long signed) {
         if(maskLong != null) {
             final int bitLen = signed < 0 ? BizarroIntegers.bitLen(signed) : com.esaulpaugh.headlong.util.Integers.bitLen(signed);
-            if(bitLen >= numBits) {
-                throwTooManyBitsException(bitLen, numBits, true);
+            if(bitLen < numBits) {
+                return signed & maskLong;
             }
-            return signed & maskLong;
+            throw tooManyBitsException(bitLen, numBits, true);
         }
         return toUnsigned(BigInteger.valueOf(signed))
                 .longValueExact(); // beware of ArithmeticException
@@ -85,28 +85,28 @@ public final class Uint {
             throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
         }
         final int bitLen = unsigned.bitLength();
-        if(bitLen > numBits) {
-            throwTooManyBitsException(bitLen, numBits, false);
+        if(bitLen <= numBits) {
+            // if in upper half of range, subtract range
+            return unsigned.compareTo(halfRange) >= 0
+                    ? unsigned.subtract(range)
+                    : unsigned;
         }
-        // if in upper half of range, subtract range
-        return unsigned.compareTo(halfRange) >= 0
-                ? unsigned.subtract(range)
-                : unsigned;
+        throw tooManyBitsException(bitLen, numBits, false);
     }
 
     public BigInteger toUnsigned(BigInteger signed) {
         final int bitLen = signed.bitLength();
-        if(bitLen >= numBits) {
-            throwTooManyBitsException(bitLen, numBits, true);
+        if(bitLen < numBits) {
+            return signed.compareTo(BigInteger.ZERO) >= 0
+                    ? signed
+                    : signed.add(range);
         }
-        return signed.compareTo(BigInteger.ZERO) >= 0
-                ? signed
-                : signed.add(range);
+        throw tooManyBitsException(bitLen, numBits, true);
     }
 
-    private static void throwTooManyBitsException(int bitLen, int rangeNumBits, boolean forSigned) {
-        throw forSigned
-                ? new IllegalArgumentException("signed has too many bits: " + bitLen + " is not < " + rangeNumBits)
+    private static IllegalArgumentException tooManyBitsException(int bitLen, int rangeNumBits, boolean signed) {
+        return signed
+                ? new IllegalArgumentException("signed has too many bits: " + bitLen + " is not less than " + rangeNumBits)
                 : new IllegalArgumentException("unsigned has too many bits: " + bitLen + " > " + rangeNumBits);
     }
 }

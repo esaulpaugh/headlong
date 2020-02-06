@@ -40,6 +40,28 @@ public class UnsignedTest {
                 "BigInteger out of long range",
                 () -> uint64.toUnsigned(Long.MIN_VALUE)
         );
+
+        TestUtils.assertThrown(
+                IllegalArgumentException.class,
+                "signed has too many bits: 8 is not less than 8",
+                () -> new Uint(8).toUnsigned(128)
+        );
+        TestUtils.assertThrown(
+                IllegalArgumentException.class,
+                "signed has too many bits: 8 is not less than 8",
+                () -> new Uint(8).toUnsigned(BigInteger.valueOf(128))
+        );
+
+        TestUtils.assertThrown(
+                IllegalArgumentException.class,
+                "unsigned has too many bits: 9 > 8",
+                () -> new Uint(8).toSigned(256)
+        );
+        TestUtils.assertThrown(
+                IllegalArgumentException.class,
+                "unsigned has too many bits: 9 > 8",
+                () -> new Uint(8).toSigned(BigInteger.valueOf(256))
+        );
     }
 
     @Test
