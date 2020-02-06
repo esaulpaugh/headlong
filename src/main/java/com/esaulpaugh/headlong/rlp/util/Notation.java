@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp.util;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
-import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.rlp.DataType;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.util.Integers;
@@ -79,7 +77,7 @@ public final class Notation {
         }
         end = Math.min(buffer.length, end);
         if(index > end) {
-            throw new UnrecoverableDecodeException("index > end: " + index + " > " + end);
+            throw new IllegalArgumentException("index > end: " + index + " > " + end);
         }
         StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
         buildList(sb, buffer, index, end, 0, true);
@@ -94,8 +92,8 @@ public final class Notation {
         return forEncoding(RLPEncoder.encodeSequentially(objects));
     }
 
-    private static DecodeException exceedsContainer(int index, long end, int containerEnd) {
-        return new UnrecoverableDecodeException("element @ index " + index + " exceeds its container: " + end + " > " + containerEnd);
+    private static RuntimeException exceedsContainer(int index, long end, int containerEnd) {
+        return new IllegalArgumentException("element @ index " + index + " exceeds its container: " + end + " > " + containerEnd);
     }
 
     private static int getShortElementEnd(int elementDataIndex, final int elementDataLen, final int containerEnd) {
@@ -119,7 +117,7 @@ public final class Notation {
         }
         final int dataLen = (int) dataLenLong;
         if (dataLen < DataType.MIN_LONG_DATA_LEN) {
-            throw new UnrecoverableDecodeException("long element data length must be " + DataType.MIN_LONG_DATA_LEN
+            throw new IllegalArgumentException("long element data length must be " + DataType.MIN_LONG_DATA_LEN
                     + " or greater; found: " + dataLen + " for element @ " + leadByteIndex);
         }
         return (int) end;
@@ -128,7 +126,7 @@ public final class Notation {
     private static int buildString(StringBuilder sb, byte[] data, int from, int to) {
         final int len = to - from;
         if(!LENIENT && len == 1 && data[from] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
-            throw new UnrecoverableDecodeException("invalid rlp for single byte @ " + (from - 1));
+            throw new IllegalArgumentException("invalid rlp for single byte @ " + (from - 1));
         }
         sb.append(BEGIN_STRING).append(Strings.encode(data, from, len, Strings.HEX)).append(STRING_END_PLUS_DELIMITER);
         return to;
@@ -151,7 +149,7 @@ public final class Notation {
                 int elementDataIdx = i + 1;
                 if(type.isLong) {
                     if(!_long) {
-                        throw new UnrecoverableDecodeException("long element found in short list");
+                        throw new IllegalArgumentException("long element found in short list");
                     }
                     elementDataIdx += lead - type.offset; // lengthOfLength
                     i = type.isString

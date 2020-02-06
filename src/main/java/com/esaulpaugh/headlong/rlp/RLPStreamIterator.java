@@ -15,9 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
-import com.esaulpaugh.headlong.exception.RecoverableDecodeException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
@@ -65,11 +62,8 @@ class RLPStreamIterator implements Iterator<RLPItem> {
             }
             next = decoder.wrap(buffer, index);
             return true;
-        } catch (DecodeException e) {
-            if (e instanceof RecoverableDecodeException) {
-                return false;
-            }
-            throw e;
+        } catch (RecoverableDecodeException e) {
+            return false;
         } catch (IOException io) {
             throw new RuntimeException(io);
         }

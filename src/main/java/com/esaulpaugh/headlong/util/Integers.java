@@ -15,9 +15,6 @@
 */
 package com.esaulpaugh.headlong.util;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
-import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
@@ -214,7 +211,7 @@ public final class Integers {
      * @param i      the array index locating the integer
      * @param len    the length in bytes of the integer's representation
      * @return the integer
-     * @throws DecodeException if the integer's representation is found to have leading zeroes
+     * @throws IllegalArgumentException if the integer's representation is found to have leading zeroes
      * @see #toBytes(byte)
      * @see #putByte(byte, byte[], int)
      */
@@ -234,7 +231,7 @@ public final class Integers {
      * @param i      the array index locating the integer
      * @param len    the length in bytes of the integer's representation, without leading zeroes
      * @return the integer
-     * @throws DecodeException if the integer's representation is found to have leading zeroes
+     * @throws IllegalArgumentException if the integer's representation is found to have leading zeroes
      * @see #toBytes(short)
      * @see #putShort(short, byte[], int)
      */
@@ -262,7 +259,7 @@ public final class Integers {
      * @param i      the array index locating the integer
      * @param len    the length in bytes of the integer's representation, without leading zeroes
      * @return the integer
-     * @throws DecodeException if the integer's representation is found to have leading zeroes
+     * @throws IllegalArgumentException if the integer's representation is found to have leading zeroes
      * @see #toBytes(int)
      * @see #putInt(int, byte[], int)
      */
@@ -292,7 +289,7 @@ public final class Integers {
      * @param i      the array index locating the integer
      * @param len    the length in bytes of the integer's representation, without leading zeroes
      * @return the integer
-     * @throws DecodeException if the integer's representation is found to have leading zeroes
+     * @throws IllegalArgumentException if the integer's representation is found to have leading zeroes
      * @see #toBytes(long)
      * @see #putLong(long, byte[], int)
      */
@@ -318,12 +315,12 @@ public final class Integers {
         }
     }
 
-    private static UnrecoverableDecodeException leadingZeroException(int idx, int len) {
-        return new UnrecoverableDecodeException("deserialised positive integers with leading zeroes are invalid; index: " + idx + ", len: " + len);
+    private static IllegalArgumentException leadingZeroException(int idx, int len) {
+        return new IllegalArgumentException("deserialised positive integers with leading zeroes are invalid; index: " + idx + ", len: " + len);
     }
 
-    private static UnrecoverableDecodeException outOfRangeException(int len) {
-        return new UnrecoverableDecodeException("len is out of range: " + len);
+    private static IllegalArgumentException outOfRangeException(int len) {
+        return new IllegalArgumentException("len is out of range: " + len);
     }
 
     /**

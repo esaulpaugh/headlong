@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
@@ -24,7 +23,6 @@ import java.security.SignatureException;
 import java.text.ParseException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
@@ -84,11 +82,7 @@ public final class Record {
     }
 
     public RLPItem getSignature() {
-        try {
-            return getRLP().iterator(RLP_STRICT).next();
-        } catch (NoSuchElementException nsee) {
-            throw new UnrecoverableDecodeException(nsee);
-        }
+        return getRLP().iterator(RLP_STRICT).next();
     }
 
     public RLPList getContent() {

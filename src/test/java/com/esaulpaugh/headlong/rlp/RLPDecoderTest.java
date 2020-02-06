@@ -16,9 +16,6 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.exception.DecodeException;
-import com.esaulpaugh.headlong.exception.RecoverableDecodeException;
-import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Disabled;
@@ -111,7 +108,7 @@ public class RLPDecoderTest {
                 try {
                     RLP_STRICT.wrap(four, 0, 4);
                     valid++;
-                } catch (DecodeException de) {
+                } catch (IllegalArgumentException iae) {
                     invalid++;
                 }
             } while(gogo);
@@ -154,7 +151,7 @@ public class RLPDecoderTest {
                         throw new RuntimeException(Strings.encode(buffer));
                     }
                 }
-            } catch (DecodeException de) {
+            } catch (IllegalArgumentException iae) {
                 invalid++;
                 String first = Strings.encode(buffer[0]);
                 switch (first) {
@@ -210,7 +207,7 @@ public class RLPDecoderTest {
         RLPList list = RLP_STRICT.wrapList(invalidAf);
 
         TestUtils.assertThrown(
-                UnrecoverableDecodeException.class,
+                IllegalArgumentException.class,
                 "invalid rlp for single byte @ 7",
                 () -> list.elements(RLP_STRICT)
         );
@@ -350,49 +347,45 @@ public class RLPDecoderTest {
     @Test
     public void exceedsContainerShort() throws Throwable {
 
-        final Class<? extends Throwable> clazz = DecodeException.class;
-
         byte[] a0 = new byte[] { (byte) 0x81 };
         byte[] a1 = new byte[] { (byte) 0xc1 };
 
-        assertThrown(clazz, "@ index 0", wrapLenient(a0));
-        assertThrown(clazz, "@ index 0", wrapLenient(a1));
+        assertThrown(RecoverableDecodeException.class, "@ index 0", wrapLenient(a0));
+        assertThrown(RecoverableDecodeException.class, "@ index 0", wrapLenient(a1));
 
         byte[] b0 = new byte[] { (byte) 0xc1, (byte) 0x81 };
         byte[] b1 = new byte[] { (byte) 0xc1, (byte) 0xc1 };
 
-        assertThrown(clazz, "@ index 1", decodeList(b0));
-        assertThrown(clazz, "@ index 1", decodeList(b1));
+        assertThrown(RecoverableDecodeException.class, "@ index 1", decodeList(b0));
+        assertThrown(RecoverableDecodeException.class, "@ index 1", decodeList(b1));
 
         byte[] c0 = new byte[] { (byte) 0xc1, (byte) 0x81, (byte) 0x00 };
         byte[] c1 = new byte[] { (byte) 0xc1, (byte) 0xc1, (byte) 0x00 };
 
-        assertThrown(clazz, "@ index 1", decodeList(c0));
-        assertThrown(clazz, "@ index 1", decodeList(c1));
+        assertThrown(IllegalArgumentException.class, "@ index 1", decodeList(c0));
+        assertThrown(IllegalArgumentException.class, "@ index 1", decodeList(c1));
     }
 
     @Test
     public void exceedsContainerLong() throws Throwable {
 
-        final Class<? extends Throwable> clazz = DecodeException.class;
-
         byte[] a0 = new byte[57]; a0[0] = (byte) 0xb8; a0[1] = 56;
         byte[] a1 = new byte[57]; a1[0] = (byte) 0xf8; a1[1] = 56;
 
-        assertThrown(clazz, "@ index 0", wrapLenient(a0));
-        assertThrown(clazz, "@ index 0", wrapLenient(a1));
+        assertThrown(RecoverableDecodeException.class, "@ index 0", wrapLenient(a0));
+        assertThrown(RecoverableDecodeException.class, "@ index 0", wrapLenient(a1));
 
         byte[] b0 = new byte[58]; b0[0] = (byte) 0xf8; b0[1] = 56; b0[57] = (byte) 0x81;
         byte[] b1 = new byte[58]; b1[0] = (byte) 0xf8; b1[1] = 56; b1[56] = (byte) 0xc2;
 
-        assertThrown(clazz, "@ index 57", decodeList(b0));
-        assertThrown(clazz, "@ index 56", decodeList(b1));
+        assertThrown(RecoverableDecodeException.class, "@ index 57", decodeList(b0));
+        assertThrown(RecoverableDecodeException.class, "@ index 56", decodeList(b1));
 
         byte[] c0 = new byte[59]; c0[0] = (byte) 0xf8; c0[1] = 56; c0[57] = (byte) 0x81;
         byte[] c1 = new byte[59]; c1[0] = (byte) 0xf8; c1[1] = 56; c1[56] = (byte) 0xc2;
 
-        assertThrown(clazz, "@ index 57", decodeList(c0));
-        assertThrown(clazz, "@ index 56", decodeList(c1));
+        assertThrown(IllegalArgumentException.class, "@ index 57", decodeList(c0));
+        assertThrown(IllegalArgumentException.class, "@ index 56", decodeList(c1));
     }
 
     @Test
@@ -492,13 +485,13 @@ public class RLPDecoderTest {
                 (byte) 0xbf,
                 (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF };
 
-        assertThrown(DecodeException.class, "found: -1", wrapLenient(alpha));
+        assertThrown(IllegalArgumentException.class, "found: -1", wrapLenient(alpha));
 
         byte[] beta = new byte[] {
                 (byte) 0xbf,
                 (byte) 0x80, 0, 0, 0, 0, 0, 0, 0 };
 
-        assertThrown(DecodeException.class, "found: -9223372036854775808", wrapLenient(beta));
+        assertThrown(IllegalArgumentException.class, "found: -9223372036854775808", wrapLenient(beta));
     }
 
     @Test

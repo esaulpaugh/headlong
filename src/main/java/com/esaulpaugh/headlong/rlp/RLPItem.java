@@ -15,9 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.exception.DecodeException;
-import com.esaulpaugh.headlong.exception.RecoverableDecodeException;
-import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Integers;
@@ -74,7 +71,7 @@ public abstract class RLPItem {
             }
             _dataLength = Integers.getLong(buffer, lengthIndex, diff);
             if(_dataLength < MIN_LONG_DATA_LEN) {
-                throw new UnrecoverableDecodeException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
+                throw new IllegalArgumentException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
             }
             break;
         default: throw new Error();
@@ -86,7 +83,7 @@ public abstract class RLPItem {
             throw exceedsContainer(index, _endIndex, containerEnd, containerEnd == buffer.length);
         }
         if(!lenient && _dataLength == 1 && type == STRING_SHORT && buffer[_dataIndex] >= 0x00) { // same as (buffer[_dataIndex] & 0xFF) < 0x80
-            throw new UnrecoverableDecodeException("invalid rlp for single byte @ " + index);
+            throw new IllegalArgumentException("invalid rlp for single byte @ " + index);
         }
 
         this.buffer = buffer;
@@ -96,9 +93,9 @@ public abstract class RLPItem {
         this.endIndex = (int) _endIndex;
     }
 
-    static DecodeException exceedsContainer(int index, long end, int containerEnd, boolean recoverable) {
+    static RuntimeException exceedsContainer(int index, long end, int containerEnd, boolean recoverable) {
         String msg = "element @ index " + index + " exceeds its container: " + end + " > " + containerEnd;
-        return recoverable ? new RecoverableDecodeException(msg) : new UnrecoverableDecodeException(msg);
+        return recoverable ? new RecoverableDecodeException(msg) : new IllegalArgumentException(msg);
     }
 
     public final DataType type() {
@@ -173,7 +170,7 @@ public abstract class RLPItem {
      * Returns the char representation for this item.
      *
      * @return the char representation
-     * @throws DecodeException if this item is not interpretable as a char
+     * @throws IllegalArgumentException if this item is not interpretable as a char
      * @see String#charAt(int)
      */
     public char asChar() {
@@ -221,7 +218,7 @@ public abstract class RLPItem {
      *
      * @param decoder either {@link RLPDecoder#RLP_STRICT} or {@link RLPDecoder#RLP_LENIENT}
      * @return an independent and exact copy
-     * @throws DecodeException if an unexpected problem in decoding occurs
+     * @throws IllegalArgumentException if an unexpected problem in decoding occurs
      */
     public abstract RLPItem duplicate(RLPDecoder decoder);
 

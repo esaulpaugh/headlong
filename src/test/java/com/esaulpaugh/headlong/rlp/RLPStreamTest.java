@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
@@ -66,7 +65,7 @@ public class RLPStreamTest {
             encodings.add(item.encoding());
         }
 
-        TestUtils.assertThrown(UnrecoverableDecodeException.class, "len is out of range: 10", () -> encodings.stream()
+        TestUtils.assertThrown(IllegalArgumentException.class, "len is out of range: 10", () -> encodings.stream()
                 .map(RLP_STRICT::wrap)
                 .mapToInt(RLPItem::asInt)
                 .sum());
@@ -91,14 +90,14 @@ public class RLPStreamTest {
             pos.write(0x81);
             pos.write(0x00);
             Iterator<RLPItem> iter = stream.iterator();
-            TestUtils.assertThrown(UnrecoverableDecodeException.class, "invalid rlp for single byte @ 0", iter::hasNext);
+            TestUtils.assertThrown(IllegalArgumentException.class, "invalid rlp for single byte @ 0", iter::hasNext);
             try (RLPStream stream2 = new RLPStream(pis)) {
                 pos.write(0xf8);
                 pos.write(0x37);
                 Iterator<RLPItem> iter2 = stream2.iterator();
                 for (int i = 0; i < 3; i++) {
                     TestUtils.assertThrown(
-                            UnrecoverableDecodeException.class,
+                            IllegalArgumentException.class,
                             "long element data length must be 56 or greater; found: 55 for element @ 0",
                             iter2::hasNext
                     );
