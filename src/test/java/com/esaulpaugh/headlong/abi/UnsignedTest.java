@@ -28,13 +28,13 @@ public class UnsignedTest {
     @Test
     public void testInvalidUnsigned() throws Throwable {
         TestUtils.assertThrown(
-                ABIException.class,
+                IllegalArgumentException.class,
                 "signed value given for unsigned type",
                 () -> TupleType.parse("(uint)").validate(Tuple.singleton(BigInteger.valueOf(-1)))
         );
 
         TestUtils.assertThrown(
-                ABIException.class,
+                IllegalArgumentException.class,
                 "signed value given for unsigned type",
                 () -> TupleType.parse("(uint48)").validate(Tuple.singleton(-1L))
         );

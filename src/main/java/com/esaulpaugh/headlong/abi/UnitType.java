@@ -75,14 +75,14 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
     private void validatePrimitive(long longVal) {
         checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
         if (unsigned && longVal < 0) {
-            throw new ABIException("signed value given for unsigned type");
+            throw new IllegalArgumentException("signed value given for unsigned type");
         }
     }
 
     final void validateBigInt(BigInteger bigIntVal) {
         checkBitLen(bigIntVal.bitLength());
         if (unsigned && bigIntVal.signum() < 0) {
-            throw new ABIException("signed value given for unsigned type");
+            throw new IllegalArgumentException("signed value given for unsigned type");
         }
     }
 
@@ -98,7 +98,7 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
 
     private void checkBitLen(int actual) {
         if (actual > bitLength) {
-            throw new ABIException("exceeds bit limit: " + actual + " > " + bitLength);
+            throw new IllegalArgumentException("exceeds bit limit: " + actual + " > " + bitLength);
         }
     }
 }

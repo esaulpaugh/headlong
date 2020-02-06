@@ -84,10 +84,10 @@ public class DecodeTest {
         };
 
         for (String hex : tooBig) {
-            TestUtils.assertThrown(ABIException.class, "exceeds bit limit", () -> tt.decode(Strings.decode(hex)));
+            TestUtils.assertThrown(IllegalArgumentException.class, "exceeds bit limit", () -> tt.decode(Strings.decode(hex)));
         }
         for (String hex : tooSmall) {
-            TestUtils.assertThrown(ABIException.class, "signed value given for unsigned type", () -> tt.decode(Strings.decode(hex)));
+            TestUtils.assertThrown(IllegalArgumentException.class, "signed value given for unsigned type", () -> tt.decode(Strings.decode(hex)));
         }
         for (String hex : justRight) {
             tt.decode(Strings.decode(hex));

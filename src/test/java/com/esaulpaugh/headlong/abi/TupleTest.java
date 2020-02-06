@@ -68,7 +68,7 @@ public class TupleTest {
                     elements[idx] = new Object();
                 }
                 try {
-                    TestUtils.assertThrown(ABIException.class, "not assignable to", () -> testCase.function.encodeCall(Tuple.of(elements)));
+                    TestUtils.assertThrown(IllegalArgumentException.class, "not assignable to", () -> testCase.function.encodeCall(Tuple.of(elements)));
                 } catch (AssertionError ae) {
                     System.err.println(i);
                     ae.printStackTrace();
@@ -87,7 +87,7 @@ public class TupleTest {
             if(args.elements.length > 0) {
                 int idx = r.nextInt(args.elements.length);
                 replace(args.elements, idx);
-                TestUtils.assertThrown(ABIException.class, "null", () -> mctc.function.encodeCall(args));
+                TestUtils.assertThrown(IllegalArgumentException.class, "null", () -> mctc.function.encodeCall(args));
             }
         }
     }

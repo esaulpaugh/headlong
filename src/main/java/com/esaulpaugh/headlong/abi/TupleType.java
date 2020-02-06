@@ -128,7 +128,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 }
                 return len;
             } catch (NullPointerException npe) {
-                throw new ABIException("illegal arg @ " + i + ": " + npe.getMessage());
+                throw new IllegalArgumentException("illegal arg @ " + i + ": " + npe.getMessage());
             }
         }
         throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + elements.length + " != " + elementTypes.length);

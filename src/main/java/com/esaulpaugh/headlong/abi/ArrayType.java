@@ -188,8 +188,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
             for ( ; i < len; i++) {
                 intType.validatePrimitiveElement(arr[i]); // validate without boxing primitive
             }
-        } catch (ABIException ve) {
-            throw abiException(ve, i);
+        } catch (IllegalArgumentException iae) {
+            throw abiException(iae, i);
         }
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
     }
@@ -203,8 +203,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
             for ( ; i < len; i++) {
                 longType.validatePrimitiveElement(arr[i]); // validate without boxing primitive
             }
-        } catch (ABIException ve) {
-            throw abiException(ve, i);
+        } catch (IllegalArgumentException iae) {
+            throw abiException(iae, i);
         }
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
     }
@@ -218,8 +218,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
             for ( ; i < len; i++) {
                 bigIntegerType.validateBigInt(arr[i]);
             }
-        } catch (ABIException ve) {
-            throw abiException(ve, i);
+        } catch (IllegalArgumentException iae) {
+            throw abiException(iae, i);
         }
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
     }
@@ -234,17 +234,17 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                 BigDecimal element = arr[i];
                 bigDecimalType.validateBigInt(element.unscaledValue());
                 if(element.scale() != bigDecimalType.scale) {
-                    throw new ABIException("unexpected scale: " + element.scale());
+                    throw new IllegalArgumentException("unexpected scale: " + element.scale());
                 }
             }
-        } catch (ABIException ve) {
-            throw abiException(ve, i);
+        } catch (IllegalArgumentException iae) {
+            throw abiException(iae, i);
         }
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
     }
 
-    private static ABIException abiException(ABIException ve, int i) {
-        return new ABIException("index " + i + ": " + ve.getMessage());
+    private static IllegalArgumentException abiException(IllegalArgumentException iae, int i) {
+        return new IllegalArgumentException("index " + i + ": " + iae.getMessage());
     }
 
     /** For arrays of arrays or arrays of tuples only. */
@@ -262,7 +262,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         if(length == DYNAMIC_LENGTH || length == valueLength) {
             return valueLength;
         }
-        throw new ABIException(
+        throw new IllegalArgumentException(
                 Utils.friendlyClassName(value.getClass(), valueLength)
                         + " not instanceof " + Utils.friendlyClassName(clazz, length) + ", " +
                         valueLength + " != " + length
@@ -394,13 +394,13 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
             bb.get(elementBuffer);
             for (int j = 0; j < booleanOffset; j++) {
                 if(elementBuffer[j] == 0) continue;
-                throw new ABIException("illegal boolean value @ " + (bb.position() - j));
+                throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - j));
             }
             byte last = elementBuffer[booleanOffset];
             if(last == 1) {
                 booleans[i] = true;
             } else if(last != 0) {
-                throw new ABIException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
+                throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
             }
         }
         return booleans;

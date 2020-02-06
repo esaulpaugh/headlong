@@ -53,7 +53,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
         if(dec.scale() == scale) {
             return UNIT_LENGTH_BYTES;
         }
-        throw new ABIException("big decimal scale mismatch: actual != expected: " + dec.scale() + " != " + scale);
+        throw new IllegalArgumentException("big decimal scale mismatch: actual != expected: " + dec.scale() + " != " + scale);
     }
 
     @Override

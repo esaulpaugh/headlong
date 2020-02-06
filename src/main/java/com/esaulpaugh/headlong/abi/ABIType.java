@@ -93,7 +93,7 @@ public abstract class ABIType<J> implements Serializable {
      * @param buffer     the buffer containing the encoded data
      * @param unitBuffer a buffer of length {@link UnitType#UNIT_LENGTH_BYTES} in which to store intermediate values
      * @return the decoded value
-     * @throws ABIException if the data is malformed
+     * @throws IllegalArgumentException if the data is malformed
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
 
@@ -102,7 +102,7 @@ public abstract class ABIType<J> implements Serializable {
     void validateClass(Object value) {
         // may throw NPE
         if(clazz != value.getClass() && !clazz.isAssignableFrom(value.getClass())) {
-            throw new ABIException("class mismatch: "
+            throw new IllegalArgumentException("class mismatch: "
                     + value.getClass().getName()
                     + " not assignable to "
                     + clazz.getName()

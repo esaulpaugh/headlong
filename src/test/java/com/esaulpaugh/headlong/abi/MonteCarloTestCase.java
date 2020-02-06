@@ -220,7 +220,7 @@ public class MonteCarloTestCase implements Serializable {
 
     void run(Tuple args) {
         if(!args.equals(function.decodeCall((ByteBuffer) function.encodeCall(args).flip()))) {
-            throw new ABIException(params.seed + " " + function.getCanonicalSignature() + " " + args);
+            throw new IllegalArgumentException(params.seed + " " + function.getCanonicalSignature() + " " + args);
         }
     }
 
