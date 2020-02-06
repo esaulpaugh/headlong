@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.abi.util.Uint;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Integers;
@@ -35,6 +36,11 @@ import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT;
  * Created by Evo on 1/19/2017.
  */
 public abstract class RLPItem {
+
+    private static final Uint UINT_8 = new Uint(8);
+    private static final Uint UINT_16 = new Uint(16);
+    private static final Uint UINT_32 = new Uint(32);
+    private static final Uint UINT_64 = new Uint(64);
 
     public static final RLPItem[] EMPTY_ARRAY = new RLPItem[0];
 
@@ -200,12 +206,28 @@ public abstract class RLPItem {
         return Integers.getLong(buffer, dataIndex, dataLength, lenient);
     }
 
-    public BigInteger asUnsignedBigInt() {
-        return Integers.getUnsignedBigInt(buffer, dataIndex, dataLength, lenient);
+    public BigInteger asBigInt() {
+        return new BigInteger(data());
     }
 
-    public BigInteger asSignedBigInt() {
-        return new BigInteger(data());
+    public long asByteUnsigned() {
+        return UINT_8.toUnsigned(asByte());
+    }
+
+    public long asShortUnsigned() {
+        return UINT_16.toUnsigned(asShort());
+    }
+
+    public long asIntUnsigned() {
+        return UINT_32.toUnsigned(asInt());
+    }
+
+    public long asLongUnsigned() {
+        return UINT_64.toUnsigned(asLong());
+    }
+
+    public BigInteger asBigIntUnsigned() {
+        return Integers.getUnsignedBigInt(buffer, dataIndex, dataLength, lenient);
     }
 
     public float asFloat() {

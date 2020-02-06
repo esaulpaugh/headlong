@@ -107,7 +107,7 @@ public final class SuperSerial {
         case TYPE_CODE_BYTE: return item.asByte(); // case currently goes unused
         case TYPE_CODE_INT: return item.asInt();
         case TYPE_CODE_LONG: return item.asLong();
-        case TYPE_CODE_BIG_INTEGER: return item.asSignedBigInt();
+        case TYPE_CODE_BIG_INTEGER: return item.asBigInt();
         case TYPE_CODE_BIG_DECIMAL: return item.asBigDecimal(((BigDecimalType) type).getScale());
         case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<? extends ABIType<?>, ?>) type, item);
         case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());

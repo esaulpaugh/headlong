@@ -150,8 +150,8 @@ public class RLPEncoderTest {
 
         assertEquals(iter.next().asInt(), i);
         assertEquals(iter.next().asLong(), l);
-        assertEquals(iter.next().asUnsignedBigInt(), unsigned);
-        assertEquals(iter.next().asSignedBigInt(), signed);
+        assertEquals(iter.next().asBigIntUnsigned(), unsigned);
+        assertEquals(iter.next().asBigInt(), signed);
 
         assertEquals(iter.next().asFloat(), f, 0.0001d);
         assertEquals(iter.next().asDouble(), d, 0.0001d);
