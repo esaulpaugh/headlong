@@ -93,9 +93,9 @@ public abstract class RLPItem {
         this.endIndex = (int) _endIndex;
     }
 
-    static RuntimeException exceedsContainer(int index, long end, int containerEnd, boolean recoverable) {
+    static RuntimeException exceedsContainer(int index, long end, int containerEnd, boolean shortInput) {
         String msg = "element @ index " + index + " exceeds its container: " + end + " > " + containerEnd;
-        return recoverable ? new RecoverableDecodeException(msg) : new IllegalArgumentException(msg);
+        return shortInput ? new ShortInputException(msg) : new IllegalArgumentException(msg);
     }
 
     public final DataType type() {

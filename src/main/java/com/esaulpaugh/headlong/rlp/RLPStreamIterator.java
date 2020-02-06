@@ -62,7 +62,7 @@ class RLPStreamIterator implements Iterator<RLPItem> {
             }
             next = decoder.wrap(buffer, index);
             return true;
-        } catch (RecoverableDecodeException e) {
+        } catch (ShortInputException e) {
             return false;
         } catch (IOException io) {
             throw new RuntimeException(io);

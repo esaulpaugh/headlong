@@ -184,7 +184,7 @@ public class RLPDecoderTest {
 
         RLPList brokenList = RLP_STRICT.wrapList(copy);
 
-        assertThrown(RecoverableDecodeException.class, "element @ index 139 exceeds its container: 151 > 150", () -> {
+        assertThrown(ShortInputException.class, "element @ index 139 exceeds its container: 151 > 150", () -> {
             for(RLPItem item : brokenList) {
                 System.out.println(item.asString(Strings.HEX));
             }
@@ -350,14 +350,14 @@ public class RLPDecoderTest {
         byte[] a0 = new byte[] { (byte) 0x81 };
         byte[] a1 = new byte[] { (byte) 0xc1 };
 
-        assertThrown(RecoverableDecodeException.class, "@ index 0", wrapLenient(a0));
-        assertThrown(RecoverableDecodeException.class, "@ index 0", wrapLenient(a1));
+        assertThrown(ShortInputException.class, "@ index 0", wrapLenient(a0));
+        assertThrown(ShortInputException.class, "@ index 0", wrapLenient(a1));
 
         byte[] b0 = new byte[] { (byte) 0xc1, (byte) 0x81 };
         byte[] b1 = new byte[] { (byte) 0xc1, (byte) 0xc1 };
 
-        assertThrown(RecoverableDecodeException.class, "@ index 1", decodeList(b0));
-        assertThrown(RecoverableDecodeException.class, "@ index 1", decodeList(b1));
+        assertThrown(ShortInputException.class, "@ index 1", decodeList(b0));
+        assertThrown(ShortInputException.class, "@ index 1", decodeList(b1));
 
         byte[] c0 = new byte[] { (byte) 0xc1, (byte) 0x81, (byte) 0x00 };
         byte[] c1 = new byte[] { (byte) 0xc1, (byte) 0xc1, (byte) 0x00 };
@@ -372,14 +372,14 @@ public class RLPDecoderTest {
         byte[] a0 = new byte[57]; a0[0] = (byte) 0xb8; a0[1] = 56;
         byte[] a1 = new byte[57]; a1[0] = (byte) 0xf8; a1[1] = 56;
 
-        assertThrown(RecoverableDecodeException.class, "@ index 0", wrapLenient(a0));
-        assertThrown(RecoverableDecodeException.class, "@ index 0", wrapLenient(a1));
+        assertThrown(ShortInputException.class, "@ index 0", wrapLenient(a0));
+        assertThrown(ShortInputException.class, "@ index 0", wrapLenient(a1));
 
         byte[] b0 = new byte[58]; b0[0] = (byte) 0xf8; b0[1] = 56; b0[57] = (byte) 0x81;
         byte[] b1 = new byte[58]; b1[0] = (byte) 0xf8; b1[1] = 56; b1[56] = (byte) 0xc2;
 
-        assertThrown(RecoverableDecodeException.class, "@ index 57", decodeList(b0));
-        assertThrown(RecoverableDecodeException.class, "@ index 56", decodeList(b1));
+        assertThrown(ShortInputException.class, "@ index 57", decodeList(b0));
+        assertThrown(ShortInputException.class, "@ index 56", decodeList(b1));
 
         byte[] c0 = new byte[59]; c0[0] = (byte) 0xf8; c0[1] = 56; c0[57] = (byte) 0x81;
         byte[] c1 = new byte[59]; c1[0] = (byte) 0xf8; c1[1] = 56; c1[56] = (byte) 0xc2;

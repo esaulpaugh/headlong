@@ -19,9 +19,9 @@ package com.esaulpaugh.headlong.rlp;
  * Indicates a failure to decode an RLP item due to a short buffer, potentially because the item has not finished
  * streaming, i.e. it is a proper prefix of some hypothetical longer item that is valid.
  */
-final class RecoverableDecodeException extends IllegalArgumentException {
+final class ShortInputException extends IllegalArgumentException {
 
-    RecoverableDecodeException(String msg) {
+    ShortInputException(String msg) {
         super(msg);
     }
 }
