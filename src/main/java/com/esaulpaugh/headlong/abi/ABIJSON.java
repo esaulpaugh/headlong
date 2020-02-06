@@ -21,7 +21,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import java.security.MessageDigest;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -129,12 +128,8 @@ public final class ABIJSON {
     private static TupleType parseTypes(JsonArray array) {
         if (array != null) {
             ABIType<?>[] elementsArray = new ABIType[array.size()];
-            try {
-                for (int i = 0; i < elementsArray.length; i++) {
-                    elementsArray[i] = parseType(array.get(i).getAsJsonObject());
-                }
-            } catch (ParseException pe) {
-                throw new IllegalArgumentException(pe);
+            for (int i = 0; i < elementsArray.length; i++) {
+                elementsArray[i] = parseType(array.get(i).getAsJsonObject());
             }
             return TupleType.wrap(elementsArray);
         }
@@ -149,14 +144,10 @@ public final class ABIJSON {
                 final int inputsLen = inputs.size();
                 final ABIType<?>[] inputsArray = new ABIType[inputsLen];
                 final boolean[] indexed = new boolean[inputsLen];
-                try {
-                    for (int i = 0; i < inputsLen; i++) {
-                        JsonObject inputObj = inputs.get(i).getAsJsonObject();
-                        inputsArray[i] = parseType(inputObj);
-                        indexed[i] = getBoolean(inputObj, INDEXED);
-                    }
-                } catch (ParseException pe) {
-                    throw new IllegalArgumentException(pe);
+                for (int i = 0; i < inputsLen; i++) {
+                    JsonObject inputObj = inputs.get(i).getAsJsonObject();
+                    inputsArray[i] = parseType(inputObj);
+                    indexed[i] = getBoolean(inputObj, INDEXED);
                 }
                 return new Event(
                         getString(event, NAME),
@@ -170,7 +161,7 @@ public final class ABIJSON {
         throw new IllegalArgumentException("unexpected type: " + (type == null ? null : "\"" + type + "\""));
     }
 
-    private static ABIType<?> parseType(JsonObject object) throws ParseException {
+    private static ABIType<?> parseType(JsonObject object) {
         final String type = getString(object, TYPE);
         if(type.startsWith(TUPLE)) {
             final JsonArray components = getArray(object, COMPONENTS);

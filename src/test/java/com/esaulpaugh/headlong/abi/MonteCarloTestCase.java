@@ -29,7 +29,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -298,11 +297,7 @@ public class MonteCarloTestCase implements Serializable {
                 sb.append(']');
             }
         }
-        try {
-            return TypeFactory.create(sb.toString(), null);
-        } catch (ParseException pe) {
-            throw new IllegalArgumentException(pe);
-        }
+        return TypeFactory.create(sb.toString(), null);
     }
 
     private Tuple generateTuple(TupleType tupleType, Random r) {

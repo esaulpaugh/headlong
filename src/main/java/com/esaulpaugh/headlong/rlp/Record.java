@@ -20,7 +20,6 @@ import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
 import java.security.SignatureException;
-import java.text.ParseException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -70,7 +69,7 @@ public final class Record {
         if(enrString.startsWith(ENR_PREFIX)) {
             return decode(Strings.decode(enrString.substring(ENR_PREFIX.length()), BASE_64_URL_SAFE));
         }
-        throw new RuntimeException(new ParseException("prefix \"" + ENR_PREFIX + "\" not found", 0));
+        throw new IllegalArgumentException("prefix \"" + ENR_PREFIX + "\" not found");
     }
 
     public static Record decode(byte[] record) {

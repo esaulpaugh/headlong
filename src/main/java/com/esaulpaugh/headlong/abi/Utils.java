@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,13 +40,12 @@ final class Utils {
         }
     }
 
-    static String validateChars(Pattern pattern, String string) throws ParseException {
+    static String validateChars(Pattern pattern, String string) {
         Matcher matcher = pattern.matcher(string);
         if (matcher.find()) {
             final char c = string.charAt(matcher.start());
-            throw new ParseException(
-                    "illegal char 0x" + Integer.toHexString(c) + " '" + c + "' @ index " + matcher.start(),
-                    matcher.start()
+            throw new IllegalArgumentException(
+                    "illegal char 0x" + Integer.toHexString(c) + " '" + c + "' @ index " + matcher.start()
             );
         }
         return string;

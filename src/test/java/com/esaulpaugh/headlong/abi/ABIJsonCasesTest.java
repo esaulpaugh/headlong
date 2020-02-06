@@ -16,8 +16,8 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +62,7 @@ public class ABIJsonCasesTest {
             this.function = function;
         }
 
-        private static ABITestCase forKey(String key) throws ParseException {
+        private static ABITestCase forKey(String key) {
 
             JsonObject tests = JsonUtils.parseObject(TEST_CASES);
             Set<Map.Entry<String, JsonElement>> entries = tests.entrySet();
@@ -117,7 +116,7 @@ public class ABIJsonCasesTest {
     }
 
     @Test
-    public void testGithubWikiTest() throws ParseException {
+    public void testGithubWikiTest() {
 
         ABITestCase testCase = ABITestCase.forKey("GithubWikiTest");
 
@@ -131,7 +130,7 @@ public class ABIJsonCasesTest {
     }
 
     @Test
-    public void testSingleInteger() throws ParseException {
+    public void testSingleInteger() {
 
         ABITestCase testCase = ABITestCase.forKey("SingleInteger");
 
@@ -142,7 +141,7 @@ public class ABIJsonCasesTest {
     }
 
     @Test
-    public void testIntegerAndAddress() throws ParseException {
+    public void testIntegerAndAddress() {
 
         ABITestCase testCase = ABITestCase.forKey("IntegerAndAddress");
 

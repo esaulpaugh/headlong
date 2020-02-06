@@ -64,7 +64,7 @@ public class EncodeTest {
                     try {
                         TupleType tt = TupleType.parse(sig);
                         System.out.println("\t\t\t" + len + ' ' + sig);
-                    } catch (IllegalArgumentException parseException) {
+                    } catch (IllegalArgumentException iae) {
                         /* do nothing */
                     } catch (Throwable t) {
                         System.err.println(sig);

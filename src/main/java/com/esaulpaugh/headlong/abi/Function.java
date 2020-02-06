@@ -25,7 +25,6 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.security.DigestException;
 import java.security.MessageDigest;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
@@ -88,43 +87,35 @@ public final class Function implements ABIObject, Serializable {
      * @throws IllegalArgumentException if {@code signature} or {@code outputs} is malformed
      */
     public Function(Type type, String signature, String outputs, MessageDigest messageDigest) {
-        try {
-            final int split = signature.indexOf('(');
-            if (split >= 0) {
-                try {
-                    this.inputTypes = (TupleType) TypeFactory.create(signature.substring(split), null);
-                } catch (ClassCastException cce) {
-                    throw new ParseException("illegal signature termination", signature.length()); // e.g. "foo()[]"
-                }
-                this.type = Objects.requireNonNull(type);
-                String name = Utils.validateChars(NON_ASCII_CHAR, signature.substring(0, split));
-                this.name = name.isEmpty() && (type == Type.FALLBACK || type == Type.CONSTRUCTOR) ? null : name;
-                this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
-                this.stateMutability = null;
-                this.hashAlgorithm = messageDigest.getAlgorithm();
-                validateFunction();
-                generateSelector(messageDigest);
-            } else {
-                throw new ParseException("params start not found", signature.length());
+        final int split = signature.indexOf('(');
+        if (split >= 0) {
+            try {
+                this.inputTypes = (TupleType) TypeFactory.create(signature.substring(split), null);
+            } catch (ClassCastException cce) {
+                throw new IllegalArgumentException("illegal signature termination"); // e.g. "foo()[]"
             }
-        } catch (ParseException pe) {
-            throw new IllegalArgumentException(pe);
+            this.type = Objects.requireNonNull(type);
+            String name = Utils.validateChars(NON_ASCII_CHAR, signature.substring(0, split));
+            this.name = name.isEmpty() && (type == Type.FALLBACK || type == Type.CONSTRUCTOR) ? null : name;
+            this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
+            this.stateMutability = null;
+            this.hashAlgorithm = messageDigest.getAlgorithm();
+            validateFunction();
+            generateSelector(messageDigest);
+        } else {
+            throw new IllegalArgumentException("params start not found");
         }
     }
 
     public Function(Type type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) {
-        try {
-            this.type = Objects.requireNonNull(type);
-            this.name = name != null ? Utils.validateChars(ILLEGAL_NAME_CHAR, name) : null;
-            this.inputTypes = Objects.requireNonNull(inputTypes);
-            this.outputTypes = Objects.requireNonNull(outputTypes);
-            this.stateMutability = stateMutability;
-            this.hashAlgorithm = messageDigest.getAlgorithm();
-            validateFunction();
-            generateSelector(messageDigest);
-        } catch (ParseException pe) {
-            throw new IllegalArgumentException(pe);
-        }
+        this.type = Objects.requireNonNull(type);
+        this.name = name != null ? Utils.validateChars(ILLEGAL_NAME_CHAR, name) : null;
+        this.inputTypes = Objects.requireNonNull(inputTypes);
+        this.outputTypes = Objects.requireNonNull(outputTypes);
+        this.stateMutability = stateMutability;
+        this.hashAlgorithm = messageDigest.getAlgorithm();
+        validateFunction();
+        generateSelector(messageDigest);
     }
 
     public Type getType() {

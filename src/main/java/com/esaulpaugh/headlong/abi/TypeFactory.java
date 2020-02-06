@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import java.math.BigInteger;
-import java.text.ParseException;
 import java.util.ArrayList;
 
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
@@ -34,17 +33,17 @@ final class TypeFactory {
 
     private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
 
-    static ABIType<?> create(String type, String name) throws ParseException {
+    static ABIType<?> create(String type, String name) {
         return buildType(type, false, null, name == null)
                 .setName(name);
     }
 
-    static ABIType<?> createFromBase(TupleType baseType, String typeSuffix, String name) throws ParseException {
+    static ABIType<?> createFromBase(TupleType baseType, String typeSuffix, String name) {
         return buildType(baseType.canonicalType + typeSuffix, false, baseType, name == null)
                 .setName(name);
     }
 
-    private static ABIType<?> buildType(final String type, final boolean isArrayElement, ABIType<?> baseType, final boolean nameless) throws ParseException {
+    private static ABIType<?> buildType(final String type, final boolean isArrayElement, ABIType<?> baseType, final boolean nameless) {
         try {
             final int lastCharIndex = type.length() - 1;
             if (type.charAt(lastCharIndex) == ']') { // array
@@ -60,13 +59,13 @@ final class TypeFactory {
                     try {
                         length = Integer.parseInt(type.substring(startInt, lastCharIndex));
                         if (length < 0) {
-                            throw new ParseException("negative array size", startInt);
+                            throw new IllegalArgumentException("negative array size");
                         }
                         if(lastCharIndex - startInt > 1 && type.charAt(startInt) == '0') {
-                            throw new ParseException("leading zero in array length", startInt);
+                            throw new IllegalArgumentException("leading zero in array length");
                         }
                     } catch (NumberFormatException nfe) {
-                        throw (ParseException) new ParseException("illegal number format", startInt).initCause(nfe);
+                        throw new IllegalArgumentException("illegal number format", nfe);
                     }
                 }
 
@@ -86,12 +85,12 @@ final class TypeFactory {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } catch (StringIndexOutOfBoundsException sioobe) { // e.g. type equals "" or "82]" or "[]" or "[1]"
-            throw (ParseException) new ParseException("unrecognized type: " + type, 0).initCause(sioobe);
+            throw new IllegalArgumentException("unrecognized type: " + type, sioobe);
         }
-        throw new ParseException("unrecognized type: " + type, 0);
+        throw new IllegalArgumentException("unrecognized type: " + type);
     }
 
-    private static ABIType<?> resolveBaseType(String baseTypeStr, boolean isArrayElement, boolean nameless) throws ParseException {
+    private static ABIType<?> resolveBaseType(String baseTypeStr, boolean isArrayElement, boolean nameless) {
         if(baseTypeStr.charAt(0) == '(') {
             return parseTupleType(baseTypeStr);
         }
@@ -235,7 +234,7 @@ final class TypeFactory {
 
     static final String EMPTY_PARAMETER = "empty parameter";
 
-    private static TupleType parseTupleType(final String rawTypeStr) throws ParseException {
+    private static TupleType parseTupleType(final String rawTypeStr) {
         final ArrayList<ABIType<?>> elements = new ArrayList<>();
         int argEnd = 1; // this inital value is important for empty params case: "()"
         try {
@@ -251,12 +250,12 @@ final class TypeFactory {
                     if(rawTypeStr.charAt(argEnd) != ',') {
                         break LOOP;
                     }
-                    throw new ParseException(EMPTY_PARAMETER, argStart);
+                    throw new IllegalArgumentException(EMPTY_PARAMETER);
                 case ',':
                     if (rawTypeStr.charAt(argStart - 1) == ')') {
                         break LOOP;
                     }
-                    throw new ParseException(EMPTY_PARAMETER, argStart);
+                    throw new IllegalArgumentException(EMPTY_PARAMETER);
                 default: // non-tuple element
                     argEnd = nextTerminator(rawTypeStr, argStart + 1);
                 }
@@ -272,10 +271,10 @@ final class TypeFactory {
             if(argEnd >= 0 && argEnd == end - 1 && rawTypeStr.charAt(argEnd) == ')') {
                 return TupleType.wrap(elements.toArray(ABIType.EMPTY_TYPE_ARRAY));
             }
-        } catch (ParseException pe) {
-            throw (ParseException) new ParseException("@ index " + elements.size() + ", " + pe.getMessage(), pe.getErrorOffset()).initCause(pe);
+        } catch (IllegalArgumentException iae) {
+            throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);
         }
-        throw new ParseException("unrecognized type: " + rawTypeStr, Math.max(0, argEnd));
+        throw new IllegalArgumentException("unrecognized type: " + rawTypeStr);
     }
 
     private static int findSubtupleEnd(String parentTypeString, int i) {

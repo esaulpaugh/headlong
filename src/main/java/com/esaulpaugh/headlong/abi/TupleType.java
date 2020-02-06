@@ -18,7 +18,6 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -329,11 +328,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public static TupleType parse(String rawTupleTypeString) {
-        try {
-            return (TupleType) TypeFactory.create(rawTupleTypeString, null);
-        } catch (ParseException pe) {
-            throw new IllegalArgumentException(pe);
-        }
+        return (TupleType) TypeFactory.create(rawTupleTypeString, null);
     }
 
     public static TupleType of(String... typeStrings) {
