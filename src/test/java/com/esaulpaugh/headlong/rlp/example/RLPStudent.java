@@ -48,7 +48,7 @@ public class RLPStudent implements RLPEncodeable {
         Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(rlp);
 
         this.name = iter.next().asString(UTF_8);
-        this.gpa = iter.next().asFloat();
+        this.gpa = iter.next().asFloat(false);
         this.publicKey = iter.next().asBytes();
         this.balance = new BigDecimal(iter.next().asBigInt(false), iter.next().asInt(false));
     }
@@ -56,7 +56,7 @@ public class RLPStudent implements RLPEncodeable {
     public RLPStudent(byte[] rlp, int index) {
         RLPItem item = RLP_STRICT.wrap(rlp, index);
         this.name = item.asString(UTF_8);
-        this.gpa = (item = RLP_STRICT.wrap(rlp, item.endIndex)).asFloat();
+        this.gpa = (item = RLP_STRICT.wrap(rlp, item.endIndex)).asFloat(false);
         this.publicKey = (item = RLP_STRICT.wrap(rlp, item.endIndex)).asBytes();
         BigInteger intVal = (item = RLP_STRICT.wrap(rlp, item.endIndex)).asBigInt(false);
         this.balance = new BigDecimal(intVal, RLP_STRICT.wrap(rlp, item.endIndex).asInt(false));

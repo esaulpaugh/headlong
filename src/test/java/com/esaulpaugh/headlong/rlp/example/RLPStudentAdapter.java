@@ -32,7 +32,7 @@ public class RLPStudentAdapter implements RLPAdapter<RLPStudent> {
         Iterator<RLPItem> iter = RLP_STRICT.listIterator(rlp, index);
 
         return new RLPStudent(iter.next().asString(UTF_8),
-                iter.next().asFloat(),
+                iter.next().asFloat(false),
                 iter.next().asBytes(),
                 new BigDecimal(iter.next().asBigInt(false), iter.next().asInt(false))
         );

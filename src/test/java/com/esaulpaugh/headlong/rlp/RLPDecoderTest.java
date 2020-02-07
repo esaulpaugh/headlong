@@ -159,22 +159,11 @@ public class RLPDecoderTest {
         TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 8", () -> RLP_STRICT.wrap(vectors[3]).asLong(false));
         TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 10", () -> RLP_STRICT.wrapString(vectors[4]).asBigInt(false));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "0, len: 1", () -> RLP_STRICT.wrap(vectors[0]).asByteSigned(false));
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 2", () -> RLP_STRICT.wrap(vectors[1]).asShortSigned(false));
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 4", () -> RLP_STRICT.wrap(vectors[2]).asIntSigned(false));
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 8", () -> RLP_STRICT.wrap(vectors[3]).asLongSigned(false));
-
         assertEquals(0, RLP_STRICT.wrap(vectors[0]).asByte(true));
         assertEquals(99, RLP_STRICT.wrap(vectors[1]).asShort(true));
         assertEquals(8389121, RLP_STRICT.wrap(vectors[2]).asInt(true));
         assertEquals(0xff060504030201L, RLP_STRICT.wrap(vectors[3]).asLong(true));
         assertEquals(new BigInteger("00ce5a0c040d155988", 16), RLP_STRICT.wrapString(vectors[4]).asBigInt(true));
-
-        assertEquals(0, RLP_STRICT.wrap(vectors[0]).asByteSigned(true));
-        assertEquals(99, RLP_STRICT.wrap(vectors[1]).asShortSigned(true));
-        assertEquals(8389121, RLP_STRICT.wrap(vectors[2]).asIntSigned(true));
-        assertEquals(0xff060504030201L, RLP_STRICT.wrap(vectors[3]).asLongSigned(true));
-        assertEquals(new BigInteger("00ce5a0c040d155988", 16), RLP_STRICT.wrapString(vectors[4]).asBigIntSigned());
     }
 
     @Disabled("slow")

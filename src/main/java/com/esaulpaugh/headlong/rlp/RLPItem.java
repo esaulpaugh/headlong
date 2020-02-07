@@ -37,11 +37,6 @@ import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT;
  */
 public abstract class RLPItem {
 
-    private static final Uint UINT_8 = new Uint(8);
-    private static final Uint UINT_16 = new Uint(16);
-    private static final Uint UINT_32 = new Uint(32);
-    private static final Uint UINT_64 = new Uint(64);
-
     public static final RLPItem[] EMPTY_ARRAY = new RLPItem[0];
 
     protected final byte[] buffer;
@@ -207,32 +202,16 @@ public abstract class RLPItem {
         return Integers.getBigInt(buffer, dataIndex, dataLength, lenient);
     }
 
-    public byte asByteSigned(boolean lenient) {
-        return (byte) UINT_8.toUnsignedLong(asByte(lenient));
+    public float asFloat(boolean lenient) {
+        return FloatingPoint.getFloat(buffer, dataIndex, dataLength, lenient);
     }
 
-    public short asShortSigned(boolean lenient) {
-        return (short) UINT_16.toUnsignedLong(asShort(lenient));
-    }
-
-    public int asIntSigned(boolean lenient) {
-        return (int) UINT_32.toUnsignedLong(asInt(lenient));
-    }
-
-    public long asLongSigned(boolean lenient) {
-        return UINT_64.toUnsignedLong(asLong(lenient));
+    public double asDouble(boolean lenient) {
+        return FloatingPoint.getDouble(buffer, dataIndex, dataLength, lenient);
     }
 
     public BigInteger asBigIntSigned() {
         return new BigInteger(data());
-    }
-
-    public float asFloat() {
-        return FloatingPoint.getFloat(buffer, dataIndex, dataLength);
-    }
-
-    public double asDouble() {
-        return FloatingPoint.getDouble(buffer, dataIndex, dataLength);
     }
 
     public BigDecimal asBigDecimal(int scale) {
