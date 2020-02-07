@@ -78,7 +78,7 @@ public final class Integers {
      * @param val the integer
      * @return the minimal representation
      */
-    public static byte[] toBytesUnsigned(BigInteger val) { // TODO TEST
+    public static byte[] toBytesUnsigned(BigInteger val) {
         byte[] bytes = new byte[len(val)];
         putBigInt(val, bytes, 0);
         return bytes;
@@ -220,7 +220,7 @@ public final class Integers {
      * Retrieves an integer up to one byte in length. Big-endian two's complement format.
      *
      * @param buffer  the array containing the integer
-     * @param i       the array index locating the integer
+     * @param offset  the array index locating the integer
      * @param len     the length in bytes of the integer's representation
      * @param lenient whether to allow leading zeroes
      * @return the integer
@@ -228,12 +228,12 @@ public final class Integers {
      * @see #toBytes(byte)
      * @see #putByte(byte, byte[], int)
      */
-    public static byte getByte(byte[] buffer, int i, int len, boolean lenient) {
+    public static byte getByte(byte[] buffer, int offset, int len, boolean lenient) {
         switch (len) {
         case 1:
-            byte lead = buffer[i];
+            byte lead = buffer[offset];
             if(!lenient && lead == 0) {
-                throw leadingZeroException(i, len);
+                throw leadingZeroException(offset, len);
             }
             return lead;
         case 0: return 0;
@@ -245,7 +245,7 @@ public final class Integers {
      * Retrieves an integer up to two bytes in length. Big-endian two's complement format.
      *
      * @param buffer the array containing the integer's representation
-     * @param i      the array index locating the integer
+     * @param offset      the array index locating the integer
      * @param len    the length in bytes of the integer's representation
      * @param lenient whether to allow leading zeroes
      * @return the integer
@@ -253,17 +253,17 @@ public final class Integers {
      * @see #toBytes(short)
      * @see #putShort(short, byte[], int)
      */
-    public static short getShort(byte[] buffer, int i, int len, boolean lenient) {
+    public static short getShort(byte[] buffer, int offset, int len, boolean lenient) {
         int shiftAmount = 0;
         int val = 0;
-        switch (len) { /* cases 2 through 1 fall through */
-        case 2: val = buffer[i+1] & 0xFF; shiftAmount = Byte.SIZE; // & 0xFF to promote to int before left shift
+        switch (len) { /* cases 2 and 1 fall through */
+        case 2: val = buffer[offset+1] & 0xFF; shiftAmount = Byte.SIZE;
         case 1:
-            byte lead = buffer[i];
+            byte lead = buffer[offset];
             if(!lenient && lead == 0 && len > 1) {
-                throw leadingZeroException(i, len);
+                throw leadingZeroException(offset, len);
             }
-            val |= (lead & 0xFFL) << shiftAmount;
+            val |= (lead & 0xFF) << shiftAmount;
         case 0: return (short) val;
         default: throw outOfRangeException(len);
         }
@@ -272,28 +272,28 @@ public final class Integers {
     /**
      * Retrieves an integer up to four bytes in length. Big-endian two's complement format.
      *
-     * @param buffer the array containing the integer's representation
-     * @param i      the array index locating the integer
-     * @param len    the length in bytes of the integer's representation
+     * @param buffer  the array containing the integer's representation
+     * @param offset  the array index locating the integer
+     * @param len     the length in bytes of the integer's representation
      * @param lenient whether to allow leading zeroes
      * @return the integer
      * @throws IllegalArgumentException if {@code lenient} is false and the integer's representation is found to have leading zeroes
      * @see #toBytes(int)
      * @see #putInt(int, byte[], int)
      */
-    public static int getInt(byte[] buffer, int i, int len, boolean lenient) {
+    public static int getInt(byte[] buffer, int offset, int len, boolean lenient) {
         int shiftAmount = 0;
         int val = 0;
         switch (len) { /* cases 4 through 1 fall through */
-        case 4: val = buffer[i+3] & 0xFF; shiftAmount = Byte.SIZE;
-        case 3: val |= (buffer[i+2] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 2: val |= (buffer[i+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 4: val  =  buffer[offset+3] & 0xFF;                 shiftAmount  = Byte.SIZE;
+        case 3: val |= (buffer[offset+2] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 2: val |= (buffer[offset+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1:
-            byte lead = buffer[i];
-            if(!lenient && lead == 0 && len > 1) {
-                throw leadingZeroException(i, len);
+            byte lead = buffer[offset];
+            if (!lenient && lead == 0 && len > 1) {
+                throw leadingZeroException(offset, len);
             }
-            val |= (lead & 0xFFL) << shiftAmount;
+            val |= (lead & 0xFF) << shiftAmount;
         case 0: return val;
         default: throw outOfRangeException(len);
         }
@@ -302,30 +302,30 @@ public final class Integers {
     /**
      * Retrieves an integer up to eight bytes in length. Big-endian two's complement format.
      *
-     * @param buffer the array containing the integer's representation
-     * @param i      the array index locating the integer
-     * @param len    the length in bytes of the integer's representation, without leading zeroes
+     * @param buffer  the array containing the integer's representation
+     * @param offset  the array index locating the integer
+     * @param len     the length in bytes of the integer's representation, without leading zeroes
      * @param lenient whether to allow leading zeroes
      * @return the integer
      * @throws IllegalArgumentException if the integer's representation is found to have leading zeroes
      * @see #toBytes(long)
      * @see #putLong(long, byte[], int)
      */
-    public static long getLong(final byte[] buffer, final int i, final int len, boolean lenient) {
+    public static long getLong(final byte[] buffer, final int offset, final int len, boolean lenient) {
         int shiftAmount = 0;
         long val = 0L;
         switch (len) { /* cases 8 through 1 fall through */
-        case 8: val = buffer[i+7] & 0xFFL; shiftAmount = Byte.SIZE;
-        case 7: val |= (buffer[i+6] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 6: val |= (buffer[i+5] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 5: val |= (buffer[i+4] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 4: val |= (buffer[i+3] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 3: val |= (buffer[i+2] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 2: val |= (buffer[i+1] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 8: val  =  buffer[offset+7] & 0xFFL;                 shiftAmount  = Byte.SIZE;
+        case 7: val |= (buffer[offset+6] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 6: val |= (buffer[offset+5] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 5: val |= (buffer[offset+4] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 4: val |= (buffer[offset+3] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 3: val |= (buffer[offset+2] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 2: val |= (buffer[offset+1] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1:
-            byte lead = buffer[i];
-            if(!lenient && lead == 0 && len > 1) {
-                throw leadingZeroException(i, len);
+            byte lead = buffer[offset];
+            if (!lenient && lead == 0 && len > 1) {
+                throw leadingZeroException(offset, len);
             }
             val |= (lead & 0xFFL) << shiftAmount;
         case 0: return val;
@@ -427,42 +427,22 @@ public final class Integers {
         return Long.SIZE - Long.numberOfLeadingZeros(val);
     }
 
-    public static BigInteger getBigInt(byte[] buffer, int i, int len, boolean lenient) {
-        if(!lenient && len > 0 && buffer[i] == 0x00) {
-            throw leadingZeroException(i, len);
+    public static BigInteger getBigInt(byte[] buffer, int offset, int len, boolean lenient) {
+        if(!lenient && len > 0 && buffer[offset] == 0x00) {
+            throw leadingZeroException(offset, len);
         }
-        return new BigInteger("00" + Strings.encode(buffer, i, len, Strings.HEX), 16);
+        return new BigInteger("00" + Strings.encode(buffer, offset, len, Strings.HEX), 16);
     }
 
-    public static BigInteger getBigInt(ByteBuffer bb, int len) {
-        return new BigInteger("00" + Strings.encode(bb.array(), bb.position(), len, Strings.HEX), 16);
-    }
-
-    public static int putBigInt(BigInteger val, byte[] o, int i) {
+    public static int putBigInt(BigInteger val, byte[] dest, int destIdx) {
         byte[] bytes = val.toByteArray();
-        final int len, srcPos;
+        int srcPos = 0;
+        int len = bytes.length;
         if(bytes[0] == 0x00) {
-            len = bytes.length - 1;
-            srcPos = 1;
-        } else {
-            len = bytes.length;
-            srcPos = 0;
+            srcPos++;
+            len--;
         }
-        System.arraycopy(bytes, srcPos, o, i, len);
-        return len;
-    }
-
-    public static int putBigInt(BigInteger val, ByteBuffer bb) {
-        byte[] bytes = val.toByteArray();
-        final int len, srcPos;
-        if(bytes[0] == 0x00) {
-            len = bytes.length - 1;
-            srcPos = 1;
-        } else {
-            len = bytes.length;
-            srcPos = 0;
-        }
-        bb.put(bytes, srcPos, len);
+        System.arraycopy(bytes, srcPos, dest, destIdx, len);
         return len;
     }
 

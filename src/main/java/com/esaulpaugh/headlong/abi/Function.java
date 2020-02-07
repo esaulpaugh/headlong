@@ -170,16 +170,16 @@ public final class Function implements ABIObject, Serializable {
             if (!ABIJSON.PAYABLE.equals(stateMutability)) {
                 throw new IllegalArgumentException("functions of this type must be " + ABIJSON.PAYABLE);
             }
-            /* falls through */
+            /* fall through */
         case FALLBACK:
             assertNoElements(inputTypes, "inputs");
-            /* falls through */
+            /* fall through */
         case CONSTRUCTOR:
             assertNoElements(outputTypes, "outputs");
             if (type != Type.RECEIVE) {
                 assertNameNullability(name, true);
             }
-            /* falls through */
+            /* fall through */
         default:
         }
     }

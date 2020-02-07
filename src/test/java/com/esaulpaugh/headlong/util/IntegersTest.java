@@ -19,7 +19,6 @@ import com.esaulpaugh.headlong.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
@@ -94,9 +93,8 @@ public class IntegersTest {
 
     @Test
     public void putGetBigInt() {
-        byte[] destArray = new byte[17];
-        Arrays.fill(destArray, (byte) -1);
-        ByteBuffer dest = ByteBuffer.wrap(destArray);
+        byte[] dest = new byte[17];
+        Arrays.fill(dest, (byte) -1);
         Random rand = TestUtils.seededRandom();
         for(int i = 0; i < 30_000; i++) {
             BigInteger big = BigInteger.valueOf(TestUtils.pickRandom(rand))
@@ -104,13 +102,9 @@ public class IntegersTest {
             if(big.signum() < 0) {
                 big = big.negate();
             }
-//            System.out.println(big.toString(16));
-            int n = Integers.putBigInt(big, dest);
-            ((java.nio.Buffer) dest).flip();
-            BigInteger r = Integers.getBigInt(dest, n);
-//            System.out.println(r.toString(16));
+            int n = Integers.putBigInt(big, dest, 0);
+            BigInteger r = Integers.getBigInt(dest, 0, n, false);
             assertEquals(big, r);
-            ((java.nio.Buffer) dest).clear();
         }
     }
 

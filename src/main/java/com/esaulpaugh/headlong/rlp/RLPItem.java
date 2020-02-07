@@ -156,6 +156,10 @@ public abstract class RLPItem {
         return data();
     }
 
+    public String asString(int encoding) {
+        return Strings.encode(buffer, dataIndex, dataLength, encoding);
+    }
+
     /**
      * Only 0xc0, 0x80, and 0x00 are false. Everything else is true.
      *
@@ -176,10 +180,6 @@ public abstract class RLPItem {
      */
     public char asChar(boolean lenient) {
         return (char) asShort(lenient);
-    }
-
-    public String asString(int encoding) {
-        return Strings.encode(buffer, dataIndex, dataLength, encoding);
     }
 
     public byte asByte(boolean lenient) {
@@ -208,6 +208,22 @@ public abstract class RLPItem {
 
     public double asDouble(boolean lenient) {
         return FloatingPoint.getDouble(buffer, dataIndex, dataLength, lenient);
+    }
+
+    public byte asByte() {
+        return asByte(false);
+    }
+
+    public int asInt() {
+        return asInt(false);
+    }
+
+    public long asLong() {
+        return asLong(false);
+    }
+
+    public BigInteger asBigInt() {
+        return asBigInt(false);
     }
 
     public BigInteger asBigIntSigned() {

@@ -153,11 +153,11 @@ public class RLPDecoderTest {
                 RLPEncoder.encode(new byte[] { 0, 0, -50, 90, 12, 4, 13, 21, 89, -120 })
         };
 
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "0, len: 1", () -> RLP_STRICT.wrap(vectors[0]).asByte(false));
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "0, len: 1", RLP_STRICT.wrap(vectors[0])::asByte);
         TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 2", () -> RLP_STRICT.wrap(vectors[1]).asShort(false));
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 4", () -> RLP_STRICT.wrap(vectors[2]).asInt(false));
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 8", () -> RLP_STRICT.wrap(vectors[3]).asLong(false));
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 10", () -> RLP_STRICT.wrapString(vectors[4]).asBigInt(false));
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 4", RLP_STRICT.wrap(vectors[2])::asInt);
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 8", RLP_STRICT.wrap(vectors[3])::asLong);
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 10", RLP_STRICT.wrapString(vectors[4])::asBigInt);
 
         assertEquals(0, RLP_STRICT.wrap(vectors[0]).asByte(true));
         assertEquals(99, RLP_STRICT.wrap(vectors[1]).asShort(true));
