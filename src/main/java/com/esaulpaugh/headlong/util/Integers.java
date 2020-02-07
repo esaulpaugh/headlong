@@ -78,9 +78,9 @@ public final class Integers {
      * @param val the integer
      * @return the minimal representation
      */
-    public static byte[] toBytes(BigInteger val) {
+    public static byte[] toBytesUnsigned(BigInteger val) { // TODO TEST
         byte[] bytes = new byte[len(val)];
-        putBigIntUnsigned(val, bytes, 0);
+        putBigInt(val, bytes, 0);
         return bytes;
     }
 
@@ -427,30 +427,18 @@ public final class Integers {
         return Long.SIZE - Long.numberOfLeadingZeros(val);
     }
 
-    public static BigInteger getBigIntUnsignedLenient(byte[] buffer, int i, int len) {
-        byte[] dest = new byte[len + 1]; // add a leading zero
-        System.arraycopy(buffer, i, dest, 1, len);
-        return new BigInteger(dest);
-    }
-
-    public static BigInteger getBigIntUnsigned(byte[] buffer, int i, int len, boolean lenient) {
-        BigInteger val = getBigIntUnsignedLenient(buffer, i, len);
+    public static BigInteger getBigInt(byte[] buffer, int i, int len, boolean lenient) {
         if(!lenient && len > 0 && buffer[i] == 0x00) {
             throw leadingZeroException(i, len);
         }
-        return val;
+        return new BigInteger("00" + Strings.encode(buffer, i, len, Strings.HEX), 16);
     }
 
-    public static BigInteger getBigIntSigned(byte[] buffer, int i, int len) {
-        byte[] bytes = new byte[len];
-        System.arraycopy(buffer, i, bytes, 0, len);
-        return new BigInteger(bytes);
+    public static BigInteger getBigInt(ByteBuffer bb, int len) {
+        return new BigInteger("00" + Strings.encode(bb.array(), bb.position(), len, Strings.HEX), 16);
     }
 
-    public static int putBigIntUnsigned(BigInteger val, byte[] o, int i) {
-        if(val.signum() < 0) {
-            throw new IllegalArgumentException("negative unsigned int");
-        }
+    public static int putBigInt(BigInteger val, byte[] o, int i) {
         byte[] bytes = val.toByteArray();
         final int len, srcPos;
         if(bytes[0] == 0x00) {
@@ -461,6 +449,20 @@ public final class Integers {
             srcPos = 0;
         }
         System.arraycopy(bytes, srcPos, o, i, len);
+        return len;
+    }
+
+    public static int putBigInt(BigInteger val, ByteBuffer bb) {
+        byte[] bytes = val.toByteArray();
+        final int len, srcPos;
+        if(bytes[0] == 0x00) {
+            len = bytes.length - 1;
+            srcPos = 1;
+        } else {
+            len = bytes.length;
+            srcPos = 0;
+        }
+        bb.put(bytes, srcPos, len);
         return len;
     }
 
@@ -480,6 +482,12 @@ public final class Integers {
     public static void checkIsMultiple(int len, int powerOfTwo) {
         if((len & (powerOfTwo - 1)) != 0) {
             throw new IllegalArgumentException("expected length mod " + powerOfTwo + " == 0, found: " + (len % powerOfTwo));
+        }
+    }
+
+    public static void putN(byte val, int n, ByteBuffer dest) {
+        for (int i = 0; i < n; i++) {
+            dest.put(val);
         }
     }
 }

@@ -134,7 +134,7 @@ public class RLPEncoderTest {
                 Integers.toBytes(sh),
                 Integers.toBytes(i),
                 Integers.toBytes(l),
-                Integers.toBytes(unsigned),
+                Integers.toBytesUnsigned(unsigned),
                 signed.toByteArray(),
                 FloatingPoint.toBytes(f),
                 FloatingPoint.toBytes(d),
@@ -143,15 +143,15 @@ public class RLPEncoderTest {
 
         Iterator<RLPItem> iter = RLPDecoder.RLP_STRICT.sequenceIterator(rlp);
 
-        assertEquals(c, iter.next().asChar());
+        assertEquals(c, iter.next().asChar(false));
         assertEquals(str, iter.next().asString(Strings.UTF_8), str);
-        assertEquals(by, iter.next().asByte());
-        assertEquals(sh, iter.next().asShort());
+        assertEquals(by, iter.next().asByte(false));
+        assertEquals(sh, iter.next().asShort(false));
 
-        assertEquals(i, iter.next().asInt());
-        assertEquals(l, iter.next().asLong());
-        assertEquals(unsigned, iter.next().asBigIntUnsigned());
-        assertEquals(signed, iter.next().asBigInt());
+        assertEquals(i, iter.next().asInt(false));
+        assertEquals(l, iter.next().asLong(false));
+        assertEquals(unsigned, iter.next().asBigInt(false));
+        assertEquals(signed, iter.next().asBigIntSigned());
 
         assertEquals(f, iter.next().asFloat(), 0.0001d);
         assertEquals(d, iter.next().asDouble(), 0.0001d);

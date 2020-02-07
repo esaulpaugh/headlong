@@ -183,8 +183,9 @@ public final class PackedDecoder {
 
     private static int decodeBigInteger(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
 //        BigInteger val = new BigInteger(buffer, idx, elementLen); // Java 9+
-        dest[destIdx] = Integers.getBigIntSigned(buffer, idx, elementLen);
-//        dest[destIdx] = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
+//        dest[destIdx] = Integers.getBigInt(buffer, idx, elementLen, true);
+        BigInteger val = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
+        dest[destIdx] = val;
         return elementLen;
     }
 
@@ -261,7 +262,7 @@ public final class PackedDecoder {
     private static BigInteger[] decodeBigIntegerArray(int elementLen, int arrayLen, byte[] buffer, int idx) {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            BigInteger val = com.esaulpaugh.headlong.util.Integers.getBigIntSigned(buffer, idx, elementLen);
+            BigInteger val = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
             bigInts[i] = val;
             idx += elementLen;
         }
@@ -271,7 +272,8 @@ public final class PackedDecoder {
     private static BigDecimal[] decodeBigDecimalArray(int elementLen, int scale, int arrayLen, byte[] buffer, int idx) {
         BigDecimal[] bigDecimals = new BigDecimal[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            bigDecimals[i] = FloatingPoint.getBigDecimal(buffer, idx, elementLen, scale);
+            BigInteger val = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
+            bigDecimals[i] = new BigDecimal(val, scale);
             idx += elementLen;
         }
         return bigDecimals;

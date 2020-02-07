@@ -262,6 +262,26 @@ public class PackedEncoderTest {
     }
 
     @Test
+    public void testBigDecimalArr() {
+        TupleType tupleType = TupleType.parse("(ufixed48x21[])");
+
+        int signed = Integer.MIN_VALUE / 256;
+
+        Tuple values = new Tuple((Object) new BigDecimal[] { new BigDecimal(new Uint(24).toUnsigned(signed), 21), new BigDecimal(new Uint(24).toUnsigned(signed), 21) });
+
+        ByteBuffer bb = tupleType.encodePacked(values);
+        assertEquals(bb.capacity(), bb.position());
+
+        System.out.println(Function.hexOf(bb));
+
+        assertEquals("000000800000000000800000", Function.hexOf(bb));
+
+        Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
+
+        assertEquals(values, decoded);
+    }
+
+    @Test
     public void testSignExtendInt() {
         int expected = BizarroIntegers.getInt(Strings.decode("8FFFFF"), 0, 3);
         int result = PackedDecoder.getPackedInt(Strings.decode("8FFFFF"), 0, 3);

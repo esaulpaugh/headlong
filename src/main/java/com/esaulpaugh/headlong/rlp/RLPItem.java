@@ -44,8 +44,6 @@ public abstract class RLPItem {
 
     public static final RLPItem[] EMPTY_ARRAY = new RLPItem[0];
 
-    public final boolean lenient;
-
     protected final byte[] buffer;
     protected final int index;
 
@@ -94,7 +92,6 @@ public abstract class RLPItem {
             throw new IllegalArgumentException("invalid rlp for single byte @ " + index);
         }
 
-        this.lenient = lenient;
         this.buffer = buffer;
         this.index = index;
         this.dataIndex = _dataIndex;
@@ -182,52 +179,52 @@ public abstract class RLPItem {
      * @throws IllegalArgumentException if this item is not interpretable as a char
      * @see String#charAt(int)
      */
-    public char asChar() {
-        return (char) asShort();
+    public char asChar(boolean lenient) {
+        return (char) asShort(lenient);
     }
 
     public String asString(int encoding) {
         return Strings.encode(buffer, dataIndex, dataLength, encoding);
     }
 
-    public byte asByte() {
+    public byte asByte(boolean lenient) {
         return Integers.getByte(buffer, dataIndex, dataLength, lenient);
     }
 
-    public short asShort() {
+    public short asShort(boolean lenient) {
         return Integers.getShort(buffer, dataIndex, dataLength, lenient);
     }
 
-    public int asInt() {
+    public int asInt(boolean lenient) {
         return Integers.getInt(buffer, dataIndex, dataLength, lenient);
     }
 
-    public long asLong() {
+    public long asLong(boolean lenient) {
         return Integers.getLong(buffer, dataIndex, dataLength, lenient);
     }
 
-    public BigInteger asBigInt() {
+    public BigInteger asBigInt(boolean lenient) {
+        return Integers.getBigInt(buffer, dataIndex, dataLength, lenient);
+    }
+
+    public byte asByteSigned(boolean lenient) {
+        return (byte) UINT_8.toUnsignedLong(asByte(lenient));
+    }
+
+    public short asShortSigned(boolean lenient) {
+        return (short) UINT_16.toUnsignedLong(asShort(lenient));
+    }
+
+    public int asIntSigned(boolean lenient) {
+        return (int) UINT_32.toUnsignedLong(asInt(lenient));
+    }
+
+    public long asLongSigned(boolean lenient) {
+        return UINT_64.toUnsignedLong(asLong(lenient));
+    }
+
+    public BigInteger asBigIntSigned() {
         return new BigInteger(data());
-    }
-
-    public byte asByteUnsigned() {
-        return (byte) UINT_8.toUnsignedLong(asByte());
-    }
-
-    public short asShortUnsigned() {
-        return (short) UINT_16.toUnsignedLong(asShort());
-    }
-
-    public int asIntUnsigned() {
-        return (int) UINT_32.toUnsignedLong(asInt());
-    }
-
-    public long asLongUnsigned() {
-        return UINT_64.toUnsignedLong(asLong());
-    }
-
-    public BigInteger asBigIntUnsigned() {
-        return Integers.getBigIntUnsigned(buffer, dataIndex, dataLength, lenient);
     }
 
     public float asFloat() {
@@ -239,7 +236,7 @@ public abstract class RLPItem {
     }
 
     public BigDecimal asBigDecimal(int scale) {
-        return FloatingPoint.getBigDecimal(buffer, dataIndex, dataLength, scale);
+        return new BigDecimal(asBigIntSigned(), scale);
     }
 
     /**

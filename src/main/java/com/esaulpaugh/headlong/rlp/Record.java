@@ -91,7 +91,7 @@ public final class Record {
     public long getSeq() {
         Iterator<RLPItem> iter = getRLP().iterator();
         iter.next();
-        return iter.next().asLong();
+        return iter.next().asLong(false);
     }
 
     private byte[] getContentBytes(int index) {

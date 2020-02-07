@@ -136,14 +136,14 @@ public class RLPDecoderTest {
 
         bytes[0] = bytes[1] = 0;
 
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "0, len: 10", () -> Integers.getBigIntUnsigned(bytes, 0, bytes.length, false));
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "0, len: 10", () -> Integers.getBigInt(bytes, 0, bytes.length, false));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 9", () -> Integers.getBigIntUnsigned(bytes, 1, bytes.length - 1, false));
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 9", () -> Integers.getBigInt(bytes, 1, bytes.length - 1, false));
 
-        Integers.getBigIntUnsigned(bytes, 0, bytes.length, true);
-        Integers.getBigIntUnsigned(bytes, 1, bytes.length - 1, true);
+        Integers.getBigInt(bytes, 0, bytes.length, true);
+        Integers.getBigInt(bytes, 1, bytes.length - 1, true);
 
-        Integers.getBigIntUnsigned(bytes, 2, bytes.length - 2, false);
+        Integers.getBigInt(bytes, 2, bytes.length - 2, false);
 
         byte[][] vectors = new byte[][] {
                 new byte[] { 0 },
@@ -153,19 +153,28 @@ public class RLPDecoderTest {
                 RLPEncoder.encode(new byte[] { 0, 0, -50, 90, 12, 4, 13, 21, 89, -120 })
         };
 
-        System.out.println(Strings.encode(vectors[3]));
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "0, len: 1", () -> RLP_STRICT.wrap(vectors[0]).asByte(false));
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 2", () -> RLP_STRICT.wrap(vectors[1]).asShort(false));
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 4", () -> RLP_STRICT.wrap(vectors[2]).asInt(false));
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 8", () -> RLP_STRICT.wrap(vectors[3]).asLong(false));
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 10", () -> RLP_STRICT.wrapString(vectors[4]).asBigInt(false));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "0, len: 1", RLP_STRICT.wrap(vectors[0])::asByteUnsigned);
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 2", RLP_STRICT.wrap(vectors[1])::asShortUnsigned);
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 4", RLP_STRICT.wrap(vectors[2])::asIntUnsigned);
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 8", RLP_STRICT.wrap(vectors[3])::asLongUnsigned);
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 10", RLP_STRICT.wrapString(vectors[4])::asBigIntUnsigned);
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "0, len: 1", () -> RLP_STRICT.wrap(vectors[0]).asByteSigned(false));
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 2", () -> RLP_STRICT.wrap(vectors[1]).asShortSigned(false));
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 4", () -> RLP_STRICT.wrap(vectors[2]).asIntSigned(false));
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 8", () -> RLP_STRICT.wrap(vectors[3]).asLongSigned(false));
 
-        assertEquals(0, RLP_LENIENT.wrap(vectors[0]).asByteUnsigned());
-        assertEquals(99, RLP_LENIENT.wrap(vectors[1]).asShortUnsigned());
-        assertEquals(8389121, RLP_LENIENT.wrap(vectors[2]).asIntUnsigned());
-        assertEquals(0xff060504030201L, RLP_LENIENT.wrap(vectors[3]).asLongUnsigned());
-        assertEquals(new BigInteger("00ce5a0c040d155988", 16), RLP_LENIENT.wrapString(vectors[4]).asBigIntUnsigned());
+        assertEquals(0, RLP_STRICT.wrap(vectors[0]).asByte(true));
+        assertEquals(99, RLP_STRICT.wrap(vectors[1]).asShort(true));
+        assertEquals(8389121, RLP_STRICT.wrap(vectors[2]).asInt(true));
+        assertEquals(0xff060504030201L, RLP_STRICT.wrap(vectors[3]).asLong(true));
+        assertEquals(new BigInteger("00ce5a0c040d155988", 16), RLP_STRICT.wrapString(vectors[4]).asBigInt(true));
+
+        assertEquals(0, RLP_STRICT.wrap(vectors[0]).asByteSigned(true));
+        assertEquals(99, RLP_STRICT.wrap(vectors[1]).asShortSigned(true));
+        assertEquals(8389121, RLP_STRICT.wrap(vectors[2]).asIntSigned(true));
+        assertEquals(0xff060504030201L, RLP_STRICT.wrap(vectors[3]).asLongSigned(true));
+        assertEquals(new BigInteger("00ce5a0c040d155988", 16), RLP_STRICT.wrapString(vectors[4]).asBigIntSigned());
     }
 
     @Disabled("slow")
@@ -259,7 +268,7 @@ public class RLPDecoderTest {
                     default:
                         throw new RuntimeException(Strings.encode(buffer));
                     }
-                    if (item.asChar() != '\u0000') {
+                    if (item.asChar(false) != '\u0000') {
                         throw new RuntimeException(Strings.encode(buffer));
                     }
                 }
@@ -526,8 +535,8 @@ public class RLPDecoderTest {
         HashSet<Character> chars = new HashSet<>(512);
         HashSet<Character> sizeTwo = new HashSet<>(256);
         for (byte[] bytes : burma17) {
-            RLPItem item = RLP_LENIENT.wrap(bytes);
-            Character c = (char) item.asByte();
+            RLPItem item = RLP_STRICT.wrap(bytes);
+            Character c = (char) item.asByte(true);
             if (!chars.add(c)) {
                 throw new RuntimeException(item.toString());
             }
@@ -538,9 +547,9 @@ public class RLPDecoderTest {
         assertEquals(256, chars.size());
         assertEquals(128, sizeTwo.size());
 
-        assertEquals('\0', RLP_STRICT.wrap((byte) 0xc0).asChar());
-        assertEquals('\0', RLP_STRICT.wrap((byte) 0x80).asChar());
-        assertEquals('\0', RLP_STRICT.wrap((byte) 0x00).asChar());
+        assertEquals('\0', RLP_STRICT.wrap((byte) 0xc0).asChar(false));
+        assertEquals('\0', RLP_STRICT.wrap((byte) 0x80).asChar(false));
+        assertEquals('\0', RLP_STRICT.wrap((byte) 0x00).asChar(false));
     }
 
     private static final BiPredicate<Integer, Integer> UNTIL_COUNT_FIVE = (count, index) -> count < 5;
