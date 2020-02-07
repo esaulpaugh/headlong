@@ -16,12 +16,16 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.Function;
+import com.esaulpaugh.headlong.abi.Tuple;
+import com.esaulpaugh.headlong.abi.util.Uint;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -57,40 +61,108 @@ public class RLPDecoderTest {
             (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
     };
 
-//    @Test
-//    public void testLenient() throws Throwable {
-//
-//        byte[] bigIntBytes = new byte[] { 0, 0, 127, 1, 90, 45, 0, 3, -1, -10 };
-//
-//        System.out.println(new BigInteger(bigIntBytes));
-//
-//        TestUtils.assertThrown(
-//                IllegalArgumentException.class,
-//                "deserialised positive integers with leading zeroes are invalid; index: 0, len: 10",
-//                () -> Integers.getBigInt(bigIntBytes, 0, bigIntBytes.length, false)
-//        );
-//
-//        TestUtils.assertThrown(
-//                IllegalArgumentException.class,
-//                "deserialised positive integers with leading zeroes are invalid; index: 1, len: 9",
-//                () -> Integers.getBigInt(bigIntBytes, 1, bigIntBytes.length - 1, false)
-//        );
-//
-//        Integers.getBigInt(bigIntBytes, 0, bigIntBytes.length, true);
-//        Integers.getBigInt(bigIntBytes, 1, bigIntBytes.length - 1, true);
-//
-//        Integers.getBigInt(bigIntBytes, 2, bigIntBytes.length - 2, false);
-//
-//        System.out.println(Arrays.toString(new BigInteger(bigIntBytes).toByteArray()));
-//
-//        byte[] rlp = RLPEncoder.encode(bigIntBytes);
-//
-//        TestUtils.assertThrown(
-//                IllegalArgumentException.class,
-//                "deserialised positive integers with leading zeroes are invalid; index: 1, len: 10",
-//                () -> RLP_STRICT.wrapString(rlp).asBigInt()
-//        );
-//    }
+    @Test
+    public void testUint32Array() {
+
+        long[] unsigneds = new long[] {
+                0x00000004L,
+                0xFFFFFFF7L,
+                0x11111111L,
+                0xFF00FF00L,
+                0x80808080L,
+                0xFF00FF00L
+        };
+
+        Uint uint32 = new Uint(32);
+
+        int[] ints = new int[unsigneds.length];
+
+        for (int i = 0; i < unsigneds.length; i++) {
+            ints[i] = (int) unsigneds[i];
+        }
+
+        Function foo = Function.parse("foo(uint32[6])");
+
+        ByteBuffer bb = foo.encodeCall(Tuple.singleton(ints));
+
+        Tuple dec = foo.decodeCall((ByteBuffer) bb.flip());
+
+        long[] decoded = uint32.toUnsigned((int[]) dec.get(0));
+
+        assertArrayEquals(unsigneds, decoded);
+    }
+
+    @Test
+    public void testUint64Array() {
+
+        BigInteger[] unsigneds = new BigInteger[] {
+                new BigInteger("0000000000000004", 16),
+                new BigInteger("000000FFFFFFFFF7", 16),
+                new BigInteger("1111111111111111", 16),
+                new BigInteger("7F00FF00FF00FF00", 16),
+                new BigInteger("8080808080808080", 16),
+                new BigInteger("FF00FF00FF00FF00", 16),
+        };
+
+        Uint uint64 = new Uint(64);
+
+        long[] longs = new long[unsigneds.length];
+
+        for (int i = 0; i < unsigneds.length; i++) {
+            longs[i] = unsigneds[i].longValue();
+        }
+
+        Function foo = Function.parse("foo(uint64[6])");
+
+        ByteBuffer bb = foo.encodeCall(Tuple.singleton(longs));
+
+        Tuple dec = foo.decodeCall((ByteBuffer) bb.flip());
+
+        BigInteger[] decoded = uint64.toUnsigned((long[]) dec.get(0));
+
+        assertArrayEquals(unsigneds, decoded);
+    }
+
+    @Test
+    public void testLenient() throws Throwable {
+
+        final String errPrefix = "deserialised positive integers with leading zeroes are invalid; index: ";
+
+        Random r = TestUtils.seededRandom();
+
+        byte[] bytes = new byte[10];
+
+        r.nextBytes(bytes);
+
+        bytes[0] = bytes[1] = 0;
+
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "0, len: 10", () -> Integers.getBigIntUnsigned(bytes, 0, bytes.length, false));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 9", () -> Integers.getBigIntUnsigned(bytes, 1, bytes.length - 1, false));
+
+        Integers.getBigIntUnsigned(bytes, 0, bytes.length, true);
+        Integers.getBigIntUnsigned(bytes, 1, bytes.length - 1, true);
+
+        Integers.getBigIntUnsigned(bytes, 2, bytes.length - 2, false);
+
+        byte[][] vectors = new byte[][] {
+                new byte[] { 0 },
+                new byte[] { (byte) 0x82, 0, 99 },
+                new byte[] { (byte) 0x84, 0, -128, 2, 1 },
+                new byte[] { (byte) 0x88, 0, -1, 6, 5, 4, 3, 2, 1 },
+                RLPEncoder.encode(bytes)
+        };
+
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "0, len: 1", RLP_STRICT.wrap(vectors[0])::asByteUnsigned);
+
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 2", RLP_STRICT.wrap(vectors[1])::asShortUnsigned);
+
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 4", RLP_STRICT.wrap(vectors[2])::asIntUnsigned);
+
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 8", RLP_STRICT.wrap(vectors[3])::asLongUnsigned);
+
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 10", () -> RLP_STRICT.wrapString(vectors[4]).asBigIntUnsigned());
+    }
 
     @Disabled("slow")
     @Test
@@ -450,7 +522,7 @@ public class RLPDecoderTest {
         HashSet<Character> chars = new HashSet<>(512);
         HashSet<Character> sizeTwo = new HashSet<>(256);
         for (byte[] bytes : burma17) {
-            RLPItem item = RLP_STRICT.wrap(bytes);
+            RLPItem item = RLP_LENIENT.wrap(bytes);
             Character c = (char) item.asByte();
             if (!chars.add(c)) {
                 throw new RuntimeException(item.toString());

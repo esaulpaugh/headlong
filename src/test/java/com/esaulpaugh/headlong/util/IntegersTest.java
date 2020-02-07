@@ -56,7 +56,7 @@ public class IntegersTest {
         for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
             byte b = (byte) i;
             int n = Integers.putByte(b, one, 0);
-            byte r = Integers.getByte(one, 0, n);
+            byte r = Integers.getByte(one, 0, n, false);
             assertEquals(b, r);
         }
     }
@@ -102,8 +102,8 @@ public class IntegersTest {
             if(big.signum() < 0) {
                 big = big.negate();
             }
-            int n = Integers.putUnsignedBigInt(big, dest, 0);
-            BigInteger r = Integers.getUnsignedBigInt(dest, 0, n, false);
+            int n = Integers.putBigIntUnsigned(big, dest, 0);
+            BigInteger r = Integers.getBigIntUnsigned(dest, 0, n, false);
             assertEquals(big, r);
         }
     }
@@ -223,8 +223,8 @@ public class IntegersTest {
 
         byte[] bBytes = b.toByteArray();
 
-        TestUtils.assertThrown(IllegalArgumentException.class, () -> Integers.getUnsignedBigInt(bBytes, 0, bBytes.length, false));
+        TestUtils.assertThrown(IllegalArgumentException.class, () -> Integers.getBigIntUnsigned(bBytes, 0, bBytes.length, false));
 
-        assertEquals(b, Integers.getUnsignedBigInt(bBytes, 0, bBytes.length, true));
+        assertEquals(b, Integers.getBigIntUnsigned(bBytes, 0, bBytes.length, true));
     }
 }

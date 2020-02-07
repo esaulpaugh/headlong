@@ -191,7 +191,7 @@ public abstract class RLPItem {
     }
 
     public byte asByte() {
-        return Integers.getByte(buffer, dataIndex, dataLength);
+        return Integers.getByte(buffer, dataIndex, dataLength, lenient);
     }
 
     public short asShort() {
@@ -210,24 +210,24 @@ public abstract class RLPItem {
         return new BigInteger(data());
     }
 
-    public long asByteUnsigned() {
-        return UINT_8.toUnsigned(asByte());
+    public byte asByteUnsigned() {
+        return (byte) UINT_8.toUnsignedLong(asByte());
     }
 
-    public long asShortUnsigned() {
-        return UINT_16.toUnsigned(asShort());
+    public short asShortUnsigned() {
+        return (short) UINT_16.toUnsignedLong(asShort());
     }
 
-    public long asIntUnsigned() {
-        return UINT_32.toUnsigned(asInt());
+    public int asIntUnsigned() {
+        return (int) UINT_32.toUnsignedLong(asInt());
     }
 
     public long asLongUnsigned() {
-        return UINT_64.toUnsigned(asLong());
+        return UINT_64.toUnsignedLong(asLong());
     }
 
     public BigInteger asBigIntUnsigned() {
-        return Integers.getUnsignedBigInt(buffer, dataIndex, dataLength, lenient);
+        return Integers.getBigIntUnsigned(buffer, dataIndex, dataLength, lenient);
     }
 
     public float asFloat() {

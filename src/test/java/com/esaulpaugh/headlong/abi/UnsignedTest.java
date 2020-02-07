@@ -38,13 +38,13 @@ public class UnsignedTest {
         TestUtils.assertThrown(
                 ArithmeticException.class,
                 "BigInteger out of long range",
-                () -> uint64.toUnsigned(Long.MIN_VALUE)
+                () -> uint64.toUnsignedLong(Long.MIN_VALUE)
         );
 
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
                 "signed has too many bits: 8 is not less than 8",
-                () -> new Uint(8).toUnsigned(128)
+                () -> new Uint(8).toUnsignedLong(128)
         );
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
@@ -90,9 +90,9 @@ public class UnsignedTest {
             }
             final long power = (long) Math.pow(2.0, i);
             for (long j = 0; j < 2; j++)
-                Assertions.assertEquals(j, type.toUnsigned(j));
+                Assertions.assertEquals(j, type.toUnsignedLong(j));
             for (long j = -2; j < 0; j++)
-                Assertions.assertEquals(power + j, type.toUnsigned(j));
+                Assertions.assertEquals(power + j, type.toUnsignedLong(j));
         }
         for (int i = 2; i < 384; i++) {
             final Uint type = new Uint(i);
@@ -152,8 +152,8 @@ public class UnsignedTest {
             for (int j = 0; j < 25; j++) {
                 long x = TestUtils.pickRandom(r);
                 x &= mask;
-                Assertions.assertEquals(x, type.toSigned(type.toUnsigned(x)));
-                Assertions.assertEquals(x, type.toUnsigned(type.toSigned(x)));
+                Assertions.assertEquals(x, type.toSigned(type.toUnsignedLong(x)));
+                Assertions.assertEquals(x, type.toUnsignedLong(type.toSigned(x)));
                 BigInteger bigIntX = BigInteger.valueOf(x);
                 Assertions.assertEquals(bigIntX, type.toUnsigned(type.toSigned(bigIntX)));
                 Assertions.assertEquals(bigIntX, type.toSigned(type.toUnsigned(bigIntX)));

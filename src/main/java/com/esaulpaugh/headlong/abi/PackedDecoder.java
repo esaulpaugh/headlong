@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.Uint;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.lang.reflect.Array;
@@ -167,7 +168,7 @@ public final class PackedDecoder {
     private static int decodeLong(int elementLen, LongType longType, byte[] buffer, int idx, Object[] dest, int destIdx) {
         long signed = getPackedLong(buffer, idx, elementLen);
         if(longType.isUnsigned()) {
-            dest[destIdx] = new Uint(longType.getBitLength()).toUnsigned(signed);
+            dest[destIdx] = new Uint(longType.getBitLength()).toUnsignedLong(signed);
         } else {
             dest[destIdx] = signed;
         }
@@ -176,7 +177,8 @@ public final class PackedDecoder {
 
     private static int decodeBigInteger(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
 //        BigInteger val = new BigInteger(buffer, idx, elementLen); // Java 9+
-        dest[destIdx] = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
+        dest[destIdx] = Integers.getBigIntSigned(buffer, idx, elementLen);
+//        dest[destIdx] = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
         return elementLen;
     }
 
@@ -253,7 +255,7 @@ public final class PackedDecoder {
     private static BigInteger[] decodeBigIntegerArray(int elementLen, int arrayLen, byte[] buffer, int idx) {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            BigInteger val = com.esaulpaugh.headlong.util.Integers.getSignedBigInt(buffer, idx, elementLen);
+            BigInteger val = com.esaulpaugh.headlong.util.Integers.getBigIntSigned(buffer, idx, elementLen);
             bigInts[i] = val;
             idx += elementLen;
         }

@@ -80,7 +80,7 @@ public final class Integers {
      */
     public static byte[] toBytes(BigInteger val) {
         byte[] bytes = new byte[len(val)];
-        putUnsignedBigInt(val, bytes, 0);
+        putBigIntUnsigned(val, bytes, 0);
         return bytes;
     }
 
@@ -93,7 +93,7 @@ public final class Integers {
      * @param i   the index into the output
      * @return the number of bytes inserted
      * @see #toBytes(byte)
-     * @see #getByte(byte[], int, int)
+     * @see #getByte(byte[], int, int, boolean)
      */
     public static int putByte(byte val, byte[] o, int i) {
         if(val != 0) {
@@ -217,34 +217,39 @@ public final class Integers {
     }
 
     /**
-     * Retrieves an integer up to one byte in length. No leading zeroes allowed. The integer zero always has zero length.
-     * Big-endian two's complement format.
+     * Retrieves an integer up to one byte in length. Big-endian two's complement format.
      *
-     * @param buffer the array containing the integer
-     * @param i      the array index locating the integer
-     * @param len    the length in bytes of the integer's representation
+     * @param buffer  the array containing the integer
+     * @param i       the array index locating the integer
+     * @param len     the length in bytes of the integer's representation
+     * @param lenient whether to allow leading zeroes
      * @return the integer
-     * @throws IllegalArgumentException if the integer's representation is found to have leading zeroes
+     * @throws IllegalArgumentException if {@code lenient} is false and the integer's representation is found to have leading zeroes
      * @see #toBytes(byte)
      * @see #putByte(byte, byte[], int)
      */
-    public static byte getByte(byte[] buffer, int i, int len) {
+    public static byte getByte(byte[] buffer, int i, int len, boolean lenient) {
         switch (len) {
-        case 1: return buffer[i];
+        case 1:
+            byte lead = buffer[i];
+            if(!lenient && lead == 0) {
+                throw leadingZeroException(i, len);
+            }
+            return lead;
         case 0: return 0;
         default: throw outOfRangeException(len);
         }
     }
 
     /**
-     * Retrieves an integer up to two bytes in length. No leading zeroes allowed. The integer zero always has zero length.
-     * Big-endian two's complement format.
+     * Retrieves an integer up to two bytes in length. Big-endian two's complement format.
      *
      * @param buffer the array containing the integer's representation
      * @param i      the array index locating the integer
-     * @param len    the length in bytes of the integer's representation, without leading zeroes
+     * @param len    the length in bytes of the integer's representation
+     * @param lenient whether to allow leading zeroes
      * @return the integer
-     * @throws IllegalArgumentException if the integer's representation is found to have leading zeroes
+     * @throws IllegalArgumentException if {@code lenient} is false and the integer's representation is found to have leading zeroes
      * @see #toBytes(short)
      * @see #putShort(short, byte[], int)
      */
@@ -265,14 +270,14 @@ public final class Integers {
     }
 
     /**
-     * Retrieves an integer up to four bytes in length. No leading zeroes allowed. The integer zero always has zero length.
-     * Big-endian two's complement format.
+     * Retrieves an integer up to four bytes in length. Big-endian two's complement format.
      *
      * @param buffer the array containing the integer's representation
      * @param i      the array index locating the integer
-     * @param len    the length in bytes of the integer's representation, without leading zeroes
+     * @param len    the length in bytes of the integer's representation
+     * @param lenient whether to allow leading zeroes
      * @return the integer
-     * @throws IllegalArgumentException if the integer's representation is found to have leading zeroes
+     * @throws IllegalArgumentException if {@code lenient} is false and the integer's representation is found to have leading zeroes
      * @see #toBytes(int)
      * @see #putInt(int, byte[], int)
      */
@@ -295,12 +300,12 @@ public final class Integers {
     }
 
     /**
-     * Retrieves an integer up to eight bytes in length. No leading zeroes allowed. The integer zero always has zero length.
-     * Big-endian two's complement format.
+     * Retrieves an integer up to eight bytes in length. Big-endian two's complement format.
      *
      * @param buffer the array containing the integer's representation
      * @param i      the array index locating the integer
      * @param len    the length in bytes of the integer's representation, without leading zeroes
+     * @param lenient whether to allow leading zeroes
      * @return the integer
      * @throws IllegalArgumentException if the integer's representation is found to have leading zeroes
      * @see #toBytes(long)
@@ -422,27 +427,27 @@ public final class Integers {
         return Long.SIZE - Long.numberOfLeadingZeros(val);
     }
 
-    public static BigInteger getUnsignedBigIntLenient(byte[] buffer, int i, int len) {
-        byte[] dest = new byte[len + 1];
+    public static BigInteger getBigIntUnsignedLenient(byte[] buffer, int i, int len) {
+        byte[] dest = new byte[len + 1]; // add a leading zero
         System.arraycopy(buffer, i, dest, 1, len);
         return new BigInteger(dest);
     }
 
-    public static BigInteger getUnsignedBigInt(byte[] buffer, int i, int len, boolean lenient) {
-        BigInteger val = getUnsignedBigIntLenient(buffer, i, len);
+    public static BigInteger getBigIntUnsigned(byte[] buffer, int i, int len, boolean lenient) {
+        BigInteger val = getBigIntUnsignedLenient(buffer, i, len);
         if(!lenient && len > 0 && buffer[i] == 0x00) {
             throw leadingZeroException(i, len);
         }
         return val;
     }
 
-    public static BigInteger getSignedBigInt(byte[] buffer, int i, int len) {
+    public static BigInteger getBigIntSigned(byte[] buffer, int i, int len) {
         byte[] bytes = new byte[len];
         System.arraycopy(buffer, i, bytes, 0, len);
         return new BigInteger(bytes);
     }
 
-    public static int putUnsignedBigInt(BigInteger val, byte[] o, int i) {
+    public static int putBigIntUnsigned(BigInteger val, byte[] o, int i) {
         if(val.signum() < 0) {
             throw new IllegalArgumentException("negative unsigned int");
         }
