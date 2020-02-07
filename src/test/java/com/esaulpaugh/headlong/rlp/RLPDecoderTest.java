@@ -150,18 +150,22 @@ public class RLPDecoderTest {
                 new byte[] { (byte) 0x82, 0, 99 },
                 new byte[] { (byte) 0x84, 0, -128, 2, 1 },
                 new byte[] { (byte) 0x88, 0, -1, 6, 5, 4, 3, 2, 1 },
-                RLPEncoder.encode(bytes)
+                RLPEncoder.encode(new byte[] { 0, 0, -50, 90, 12, 4, 13, 21, 89, -120 })
         };
 
+        System.out.println(Strings.encode(vectors[3]));
+
         TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "0, len: 1", RLP_STRICT.wrap(vectors[0])::asByteUnsigned);
-
         TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 2", RLP_STRICT.wrap(vectors[1])::asShortUnsigned);
-
         TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 4", RLP_STRICT.wrap(vectors[2])::asIntUnsigned);
-
         TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 8", RLP_STRICT.wrap(vectors[3])::asLongUnsigned);
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 10", RLP_STRICT.wrapString(vectors[4])::asBigIntUnsigned);
 
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 10", () -> RLP_STRICT.wrapString(vectors[4]).asBigIntUnsigned());
+        assertEquals(0, RLP_LENIENT.wrap(vectors[0]).asByteUnsigned());
+        assertEquals(99, RLP_LENIENT.wrap(vectors[1]).asShortUnsigned());
+        assertEquals(8389121, RLP_LENIENT.wrap(vectors[2]).asIntUnsigned());
+        assertEquals(0xff060504030201L, RLP_LENIENT.wrap(vectors[3]).asLongUnsigned());
+        assertEquals(new BigInteger("00ce5a0c040d155988", 16), RLP_LENIENT.wrapString(vectors[4]).asBigIntUnsigned());
     }
 
     @Disabled("slow")
