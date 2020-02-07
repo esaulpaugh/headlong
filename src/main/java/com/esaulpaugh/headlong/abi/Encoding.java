@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.Integers;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -49,11 +51,7 @@ final class Encoding {
 
     static void insertInt(BigInteger bigGuy, ByteBuffer dest) {
         final byte[] arr = bigGuy.toByteArray();
-        final byte paddingByte = bigGuy.signum() < 0 ? NEGATIVE_ONE_BYTE : ZERO_BYTE;
-        final int lim = UNIT_LENGTH_BYTES - arr.length;
-        for (int i = 0; i < lim; i++) {
-            dest.put(paddingByte);
-        }
+        Integers.putN(bigGuy.signum() < 0 ? NEGATIVE_ONE_BYTE : ZERO_BYTE, UNIT_LENGTH_BYTES - arr.length, dest);
         dest.put(arr);
     }
 }

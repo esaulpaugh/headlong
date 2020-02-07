@@ -133,7 +133,7 @@ public final class PackedDecoder {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: elements[i] = BooleanType.decodeBoolean(buffer[idx]); return type.byteLengthPacked(null);
         case TYPE_CODE_BYTE: elements[i] = buffer[idx]; return type.byteLengthPacked(null);
-        case TYPE_CODE_INT: return decodeInt(type.byteLengthPacked(null), buffer, idx, elements, i);
+        case TYPE_CODE_INT: return decodeInt(type.byteLengthPacked(null), (IntType) type, buffer, idx, elements, i);
         case TYPE_CODE_LONG: return decodeLong(type.byteLengthPacked(null), (LongType) type, buffer, idx, elements, i);
         case TYPE_CODE_BIG_INTEGER: return decodeBigInteger(type.byteLengthPacked(null), buffer, idx, elements, i);
         case TYPE_CODE_BIG_DECIMAL: return decodeBigDecimal(type.byteLengthPacked(null), ((BigDecimalType) type).scale, buffer, idx, elements, i);
@@ -158,15 +158,20 @@ public final class PackedDecoder {
         return tupleType.byteLengthPacked(tuple);
     }
 
-    private static int decodeInt(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        dest[destIdx] = getPackedInt(buffer, idx, elementLen);
+    private static int decodeInt(int elementLen, IntType intType, byte[] buffer, int idx, Object[] dest, int destIdx) {
+        int signed = getPackedInt(buffer, idx, elementLen);
+        if(intType.isUnsigned()) {
+            dest[destIdx] = (int) new Uint(intType.getBitLength()).toUnsignedLong(signed);
+        } else {
+            dest[destIdx] = signed;
+        }
         return elementLen;
     }
 
     private static int decodeLong(int elementLen, LongType longType, byte[] buffer, int idx, Object[] dest, int destIdx) {
         long signed = getPackedLong(buffer, idx, elementLen);
         if(longType.isUnsigned()) {
-            dest[destIdx] = new Uint(longType.getBitLength()).toUnsigned(signed);
+            dest[destIdx] = new Uint(longType.getBitLength()).toUnsignedLong(signed);
         } else {
             dest[destIdx] = signed;
         }
@@ -175,7 +180,8 @@ public final class PackedDecoder {
 
     private static int decodeBigInteger(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
 //        BigInteger val = new BigInteger(buffer, idx, elementLen); // Java 9+
-        dest[destIdx] = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
+        BigInteger val = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
+        dest[destIdx] = val;
         return elementLen;
     }
 
@@ -252,7 +258,7 @@ public final class PackedDecoder {
     private static BigInteger[] decodeBigIntegerArray(int elementLen, int arrayLen, byte[] buffer, int idx) {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            BigInteger val = com.esaulpaugh.headlong.util.Integers.getBigInt(buffer, idx, elementLen);
+            BigInteger val = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
             bigInts[i] = val;
             idx += elementLen;
         }
@@ -262,7 +268,8 @@ public final class PackedDecoder {
     private static BigDecimal[] decodeBigDecimalArray(int elementLen, int scale, int arrayLen, byte[] buffer, int idx) {
         BigDecimal[] bigDecimals = new BigDecimal[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            bigDecimals[i] = new BigDecimal(com.esaulpaugh.headlong.util.Integers.getBigInt(buffer, idx, elementLen), scale);
+            BigInteger val = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
+            bigDecimals[i] = new BigDecimal(val, scale);
             idx += elementLen;
         }
         return bigDecimals;

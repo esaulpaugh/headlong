@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
@@ -344,7 +345,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public static String format(byte[] abi) {
-        Utils.checkIsMultiple(abi.length);
+        Integers.checkIsMultiple(abi.length, UNIT_LENGTH_BYTES);
         StringBuilder sb = new StringBuilder();
         int idx = 0;
         while(idx < abi.length) {

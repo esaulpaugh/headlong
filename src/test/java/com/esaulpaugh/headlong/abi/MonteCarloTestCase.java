@@ -231,7 +231,7 @@ public class MonteCarloTestCase implements Serializable {
         final TupleType tt = this.function.getParamTypes();
         try {
             if (!PackedDecoder.decode(tt, tt.encodePacked(args).array()).equals(args)) {
-                throw new RuntimeException(tt.canonicalType);
+                throw new RuntimeException("not equal: " + tt.canonicalType);
             }
         } catch (IllegalArgumentException iae) {
             String msg = iae.getMessage();

@@ -45,7 +45,7 @@ public abstract class RLPItem {
     public final transient int dataLength;
     public final transient int endIndex;
 
-    RLPItem(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) {
+    RLPItem(final byte lead, final DataType type, final byte[] buffer, final int index, int containerEnd, final boolean lenient) {
         containerEnd = Math.min(buffer.length, containerEnd);
 
         final int _dataIndex;
@@ -69,7 +69,7 @@ public abstract class RLPItem {
             if (_dataIndex > containerEnd) {
                 throw exceedsContainer(index, _dataIndex, containerEnd, containerEnd == buffer.length);
             }
-            _dataLength = Integers.getLong(buffer, lengthIndex, diff);
+            _dataLength = Integers.getLong(buffer, lengthIndex, diff, lenient);
             if(_dataLength < MIN_LONG_DATA_LEN) {
                 throw new IllegalArgumentException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
             }
@@ -169,48 +169,53 @@ public abstract class RLPItem {
     /**
      * Returns the char representation for this item.
      *
+     * @param lenient whether to allow leading zeroes in the raw data
      * @return the char representation
      * @throws IllegalArgumentException if this item is not interpretable as a char
      * @see String#charAt(int)
      */
-    public char asChar() {
-        return (char) asShort();
+    public char asChar(boolean lenient) {
+        return (char) asShort(lenient);
     }
 
     public String asString(int encoding) {
         return Strings.encode(buffer, dataIndex, dataLength, encoding);
     }
 
-    public byte asByte() {
-        return Integers.getByte(buffer, dataIndex, dataLength);
+    public byte asByte(boolean lenient) {
+        return Integers.getByte(buffer, dataIndex, dataLength, lenient);
     }
 
-    public short asShort() {
-        return Integers.getShort(buffer, dataIndex, dataLength);
+    public short asShort(boolean lenient) {
+        return Integers.getShort(buffer, dataIndex, dataLength, lenient);
     }
 
-    public int asInt() {
-        return Integers.getInt(buffer, dataIndex, dataLength);
+    public int asInt(boolean lenient) {
+        return Integers.getInt(buffer, dataIndex, dataLength, lenient);
     }
 
-    public long asLong() {
-        return Integers.getLong(buffer, dataIndex, dataLength);
+    public long asLong(boolean lenient) {
+        return Integers.getLong(buffer, dataIndex, dataLength, lenient);
     }
 
-    public BigInteger asBigInt() {
-        return Integers.getBigInt(buffer, dataIndex, dataLength); // new BigInteger(data());
+    public BigInteger asBigInt(boolean lenient) {
+        return Integers.getBigInt(buffer, dataIndex, dataLength, lenient);
     }
 
-    public float asFloat() {
-        return FloatingPoint.getFloat(buffer, dataIndex, dataLength);
+    public float asFloat(boolean lenient) {
+        return FloatingPoint.getFloat(buffer, dataIndex, dataLength, lenient);
     }
 
-    public double asDouble() {
-        return FloatingPoint.getDouble(buffer, dataIndex, dataLength);
+    public double asDouble(boolean lenient) {
+        return FloatingPoint.getDouble(buffer, dataIndex, dataLength, lenient);
+    }
+
+    public BigInteger asBigIntSigned() {
+        return new BigInteger(data());
     }
 
     public BigDecimal asBigDecimal(int scale) {
-        return FloatingPoint.getBigDecimal(buffer, dataIndex, dataLength, scale);
+        return new BigDecimal(asBigIntSigned(), scale);
     }
 
     /**

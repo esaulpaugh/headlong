@@ -24,8 +24,8 @@ public final class FloatingPoint {
 
     /* float */
 
-    public static float getFloat(byte[] bytes, int i, int numBytes) {
-        return Float.intBitsToFloat(Integers.getInt(bytes, i, numBytes));
+    public static float getFloat(byte[] bytes, int i, int numBytes, boolean lenient) {
+        return Float.intBitsToFloat(Integers.getInt(bytes, i, numBytes, lenient));
     }
 
     public static int putFloat(float val, byte[] bytes, int i) {
@@ -38,8 +38,8 @@ public final class FloatingPoint {
 
     /* double */
 
-    public static double getDouble(byte[] bytes, int i, int numBytes) {
-        return Double.longBitsToDouble(Integers.getLong(bytes, i, numBytes));
+    public static double getDouble(byte[] bytes, int i, int numBytes, boolean lenient) {
+        return Double.longBitsToDouble(Integers.getLong(bytes, i, numBytes, lenient));
     }
 
     public static int putDouble(double val, byte[] bytes, int i) {
@@ -52,7 +52,7 @@ public final class FloatingPoint {
 
     /* BigDecimal */
 
-    public static BigDecimal getBigDecimal(byte[] bytes, int i, int unscaledNumBytes, int scale) {
-        return new BigDecimal(Integers.getBigInt(bytes, i, unscaledNumBytes), scale);
+    public static BigDecimal getBigDecimal(byte[] bytes, int i, int unscaledNumBytes, int scale, boolean lenient) {
+        return new BigDecimal(Integers.getBigInt(bytes, i, unscaledNumBytes, lenient), scale);
     }
 }

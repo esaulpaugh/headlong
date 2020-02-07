@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.abi.util;
 
+import com.esaulpaugh.headlong.util.Integers;
+
 import java.math.BigInteger;
 
 /**
@@ -53,12 +55,28 @@ public final class Uint {
         this.maskLong = maskLong;
     }
 
+    public long[] toUnsigned(int... ints) {
+        long[] out = new long[ints.length];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = toUnsignedLong(ints[i]);
+        }
+        return out;
+    }
+
+    public BigInteger[] toUnsigned(long... longs) {
+        BigInteger[] out = new BigInteger[longs.length];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = toUnsigned(longs[i]);
+        }
+        return out;
+    }
+
     public long toSigned(long unsigned) {
         if(rangeLong != ZERO) {
             if(unsigned < 0) {
                 throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
             }
-            final int bitLen = com.esaulpaugh.headlong.util.Integers.bitLen(unsigned);
+            final int bitLen = Integers.bitLen(unsigned);
             if(bitLen <= numBits) {
                 // if in upper half of range, subtract range
                 return unsigned >= halfRangeLong
@@ -68,18 +86,6 @@ public final class Uint {
             throw tooManyBitsException(bitLen, numBits, false);
         }
         return toSigned(BigInteger.valueOf(unsigned)).longValueExact();
-    }
-
-    public long toUnsigned(long signed) {
-        if(maskLong != ZERO) {
-            final int bitLen = signed < 0 ? BizarroIntegers.bitLen(signed) : com.esaulpaugh.headlong.util.Integers.bitLen(signed);
-            if(bitLen < numBits) {
-                return signed & maskLong;
-            }
-            throw tooManyBitsException(bitLen, numBits, true);
-        }
-        return toUnsigned(BigInteger.valueOf(signed))
-                .longValueExact(); // beware of ArithmeticException
     }
 
     public BigInteger toSigned(BigInteger unsigned) {
@@ -94,6 +100,21 @@ public final class Uint {
                     : unsigned;
         }
         throw tooManyBitsException(bitLen, numBits, false);
+    }
+
+    public long toUnsignedLong(long signed) {
+        if(maskLong != ZERO) {
+            final int bitLen = signed < 0 ? BizarroIntegers.bitLen(signed) : Integers.bitLen(signed);
+            if(bitLen < numBits) {
+                return signed & maskLong;
+            }
+            throw tooManyBitsException(bitLen, numBits, true);
+        }
+        return toUnsigned(signed).longValueExact(); // beware of ArithmeticException
+    }
+
+    public BigInteger toUnsigned(long signed) {
+        return toUnsigned(BigInteger.valueOf(signed));
     }
 
     public BigInteger toUnsigned(BigInteger signed) {

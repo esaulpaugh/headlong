@@ -13,14 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.rlp.util;
+package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.util.Integers;
-import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
@@ -58,7 +57,7 @@ public class IntegersTest {
         for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
             byte b = (byte) i;
             int n = Integers.putByte(b, one, 0);
-            byte r = Integers.getByte(one, 0, n);
+            byte r = Integers.getByte(one, 0, n, false);
             assertEquals(b, r);
         }
     }
@@ -69,7 +68,7 @@ public class IntegersTest {
         for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
             short s = (short) i;
             int n = Integers.putShort(s, two, 0);
-            short r = Integers.getShort(two, 0, n);
+            short r = Integers.getShort(two, 0, n, false);
             assertEquals(s, r);
         }
     }
@@ -86,7 +85,7 @@ public class IntegersTest {
         for (long i = 0; i < 20_000; i++) {
             long lo = TestUtils.pickRandom(rand);
             int n = Integers.putLong(lo, eight, 0);
-            long r = Integers.getLong(eight, 0, n);
+            long r = Integers.getLong(eight, 0, n, false);
             if(lo != r) {
                 throw new AssertionError(lo + "!= " + r);
             }
@@ -95,15 +94,23 @@ public class IntegersTest {
 
     @Test
     public void putGetBigInt() {
-        byte[] dest = new byte[17];
-        Arrays.fill(dest, (byte) -1);
+        byte[] destArray = new byte[17];
+        Arrays.fill(destArray, (byte) -1);
+        ByteBuffer dest = ByteBuffer.wrap(destArray);
         Random rand = TestUtils.seededRandom();
         for(int i = 0; i < 30_000; i++) {
             BigInteger big = BigInteger.valueOf(TestUtils.pickRandom(rand))
                     .multiply(BigInteger.valueOf(TestUtils.pickRandom(rand)));
-            int n = Integers.putBigInt(big, dest, 0);
-            BigInteger r = Integers.getBigInt(dest, 0, n);
+            if(big.signum() < 0) {
+                big = big.negate();
+            }
+//            System.out.println(big.toString(16));
+            int n = Integers.putBigInt(big, dest);
+            ((java.nio.Buffer) dest).flip();
+            BigInteger r = Integers.getBigInt(dest, n);
+//            System.out.println(r.toString(16));
             assertEquals(big, r);
+            ((java.nio.Buffer) dest).clear();
         }
     }
 
@@ -207,5 +214,24 @@ public class IntegersTest {
         rand.nextBytes(src);
         insertBytes(3, ten, ten.length - 3, (byte) 0, src[1], src[2], src[3]);
         assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, src[1], src[2], src[3] }, ten);
+    }
+
+    @Test
+    public void testBigInteger() throws Throwable {
+        long x = Long.MAX_VALUE;
+        byte[] xBytes = Integers.toBytes(x);
+
+        assertEquals("7fffffffffffffff", Strings.encode(xBytes));
+
+        BigInteger positive = BigInteger.valueOf(x).add(BigInteger.ONE);
+
+        assertEquals(positive, new BigInteger("8000000000000000", 16));
+
+        byte[] bBytes = positive.toByteArray();
+
+        TestUtils.assertThrown(IllegalArgumentException.class, () -> Integers.getBigInt(bBytes, 0, bBytes.length, false));
+
+        assertEquals(positive, Integers.getBigInt(bBytes, 0, bBytes.length, true));
+        assertEquals(positive, new BigInteger(Strings.encode(Integers.toBytesUnsigned(positive)), 16));
     }
 }
