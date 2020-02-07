@@ -256,14 +256,14 @@ public final class Integers {
     public static short getShort(byte[] buffer, int offset, int len, boolean lenient) {
         int shiftAmount = 0;
         int val = 0;
-        switch (len) { /* cases 2 through 1 fall through */
-        case 2: val = buffer[offset+1] & 0xFF; shiftAmount = Byte.SIZE; // & 0xFF to promote to int before left shift
+        switch (len) { /* cases 2 and 1 fall through */
+        case 2: val = buffer[offset+1] & 0xFF; shiftAmount = Byte.SIZE;
         case 1:
             byte lead = buffer[offset];
             if(!lenient && lead == 0 && len > 1) {
                 throw leadingZeroException(offset, len);
             }
-            val |= (lead & 0xFFL) << shiftAmount;
+            val |= (lead & 0xFF) << shiftAmount;
         case 0: return (short) val;
         default: throw outOfRangeException(len);
         }
@@ -293,7 +293,7 @@ public final class Integers {
             if (!lenient && lead == 0 && len > 1) {
                 throw leadingZeroException(offset, len);
             }
-            val |= (lead & 0xFFL) << shiftAmount;
+            val |= (lead & 0xFF) << shiftAmount;
         case 0: return val;
         default: throw outOfRangeException(len);
         }
