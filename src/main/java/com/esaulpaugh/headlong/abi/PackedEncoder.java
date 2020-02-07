@@ -40,7 +40,6 @@ final class PackedEncoder {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private static void encode(ABIType<?> type, Object value, ByteBuffer dest) {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: encodeBoolean((boolean) value, dest); return;
@@ -49,13 +48,13 @@ final class PackedEncoder {
         case TYPE_CODE_LONG: encodeInt(((Number) value).longValue(), type.byteLengthPacked(null), dest); return;
         case TYPE_CODE_BIG_INTEGER: encodeInt(((BigInteger) value), type.byteLengthPacked(null), dest); return;
         case TYPE_CODE_BIG_DECIMAL: encodeInt(((BigDecimal) value).unscaledValue(), type.byteLengthPacked(null), dest); return;
-        case TYPE_CODE_ARRAY: encodeArray((ArrayType<ABIType<?>, ?>) type, value, dest); return;
+        case TYPE_CODE_ARRAY: encodeArray((ArrayType<?, ?>) type, value, dest); return;
         case TYPE_CODE_TUPLE: encodeTuple((TupleType) type, (Tuple) value, dest); return;
         default: throw new Error();
         }
     }
 
-    private static void encodeArray(ArrayType<ABIType<?>,?> arrayType, Object value, ByteBuffer dest) {
+    private static void encodeArray(ArrayType<?, ?> arrayType, Object value, ByteBuffer dest) {
         final ABIType<?> elementType = arrayType.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: encodeBooleans((boolean[]) value, dest); return;
@@ -73,7 +72,7 @@ final class PackedEncoder {
         default: throw new Error();
         }
     }
-    // ------------------------
+
     private static void encodeBooleans(boolean[] arr, ByteBuffer dest) {
         for (boolean bool : arr) {
             encodeBoolean(bool, dest);
@@ -107,7 +106,7 @@ final class PackedEncoder {
             encodeInt(e.unscaledValue(), byteLen, dest);
         }
     }
-    // ---------------------------
+// ---------------------------------------------------------------------------------------------------------------------
     private static void encodeBoolean(boolean value, ByteBuffer dest) {
         dest.put(value ? Encoding.ONE_BYTE : Encoding.ZERO_BYTE);
     }

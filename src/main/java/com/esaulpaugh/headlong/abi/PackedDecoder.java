@@ -158,7 +158,6 @@ public final class PackedDecoder {
         return tupleType.byteLengthPacked(tuple);
     }
 
-    // TODO test? unsigned?
     private static int decodeInt(int elementLen, IntType intType, byte[] buffer, int idx, Object[] dest, int destIdx) {
         int signed = getPackedInt(buffer, idx, elementLen);
         if(intType.isUnsigned()) {
@@ -181,7 +180,6 @@ public final class PackedDecoder {
 
     private static int decodeBigInteger(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
 //        BigInteger val = new BigInteger(buffer, idx, elementLen); // Java 9+
-//        dest[destIdx] = Integers.getBigInt(buffer, idx, elementLen, true);
         BigInteger val = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
         dest[destIdx] = val;
         return elementLen;
