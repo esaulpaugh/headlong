@@ -135,7 +135,7 @@ public final class PackedDecoder {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: elements[i] = BooleanType.decodeBoolean(buffer[idx]); return type.byteLengthPacked(null);
         case TYPE_CODE_BYTE: elements[i] = buffer[idx]; return type.byteLengthPacked(null);
-        case TYPE_CODE_INT: return decodeInt(type.byteLengthPacked(null), buffer, idx, elements, i);
+        case TYPE_CODE_INT: return decodeInt(type.byteLengthPacked(null), (IntType) type, buffer, idx, elements, i);
         case TYPE_CODE_LONG: return decodeLong(type.byteLengthPacked(null), (LongType) type, buffer, idx, elements, i);
         case TYPE_CODE_BIG_INTEGER: return decodeBigInteger(type.byteLengthPacked(null), buffer, idx, elements, i);
         case TYPE_CODE_BIG_DECIMAL: return decodeBigDecimal(type.byteLengthPacked(null), ((BigDecimalType) type).scale, buffer, idx, elements, i);
@@ -160,8 +160,14 @@ public final class PackedDecoder {
         return tupleType.byteLengthPacked(tuple);
     }
 
-    private static int decodeInt(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        dest[destIdx] = getPackedInt(buffer, idx, elementLen);
+    // TODO test? unsigned?
+    private static int decodeInt(int elementLen, IntType intType, byte[] buffer, int idx, Object[] dest, int destIdx) {
+        int signed = getPackedInt(buffer, idx, elementLen);
+        if(intType.isUnsigned()) {
+            dest[destIdx] = (int) new Uint(intType.getBitLength()).toUnsignedLong(signed);
+        } else {
+            dest[destIdx] = signed;
+        }
         return elementLen;
     }
 

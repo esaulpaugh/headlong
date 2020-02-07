@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
+import com.esaulpaugh.headlong.abi.util.Uint;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
@@ -234,6 +235,26 @@ public class PackedEncoderTest {
         System.out.println(Function.hexOf(bb));
 
         assertEquals("010101010100", Function.hexOf(bb));
+
+        Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
+
+        assertEquals(values, decoded);
+    }
+
+    @Test
+    public void testUint24() {
+        TupleType tupleType = TupleType.parse("(uint24)");
+
+        int signed = Integer.MIN_VALUE / 256;
+
+        Tuple values = new Tuple((int) new Uint(24).toUnsignedLong(signed));
+
+        ByteBuffer bb = tupleType.encodePacked(values);
+        assertEquals(bb.capacity(), bb.position());
+
+        System.out.println(Function.hexOf(bb));
+
+        assertEquals("800000", Function.hexOf(bb));
 
         Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
 
