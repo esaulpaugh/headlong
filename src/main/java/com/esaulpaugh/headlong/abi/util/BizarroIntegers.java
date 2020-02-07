@@ -148,76 +148,76 @@ public final class BizarroIntegers {
         return (buffer[i+1] & 0xFF) | ((buffer[i] & 0xFF) << Byte.SIZE);
     }
 
-    private static int _getInt(byte[] buffer, int i, int len) {
+    private static int _getInt(byte[] buffer, int offset, int len) {
         int shiftAmount = 0;
         int val = 0;
         switch (len) { /* cases 4 through 1 fall through */
-        case 4: val = buffer[i+3] & 0xFF; shiftAmount = Byte.SIZE;
-        case 3: val |= (buffer[i+2] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 2: val |= (buffer[i+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 1: val |= (buffer[i] & 0xFF) << shiftAmount;
+        case 4: val  =  buffer[offset+3] & 0xFF;                 shiftAmount  = Byte.SIZE;
+        case 3: val |= (buffer[offset+2] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 2: val |= (buffer[offset+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 1: val |= (buffer[offset  ] & 0xFF) << shiftAmount;
         default: return val;
         }
     }
 
-    private static long _getLong(final byte[] buffer, final int i, final int len) {
+    private static long _getLong(final byte[] buffer, final int offset, final int len) {
         int shiftAmount = 0;
         long val = 0L;
         switch (len) { /* cases 8 through 1 fall through */
-        case 8: val = buffer[i+7] & 0xFF; shiftAmount = Byte.SIZE;
-        case 7: val |= (buffer[i+6] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 6: val |= (buffer[i+5] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 5: val |= (buffer[i+4] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 4: val |= (buffer[i+3] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 3: val |= (buffer[i+2] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 2: val |= (buffer[i+1] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 1: val |= (buffer[i] & 0xFFL) << shiftAmount;
+        case 8: val  =  buffer[offset+7] & 0xFF;                  shiftAmount  = Byte.SIZE;
+        case 7: val |= (buffer[offset+6] & 0xFF)  << shiftAmount; shiftAmount += Byte.SIZE;
+        case 6: val |= (buffer[offset+5] & 0xFF)  << shiftAmount; shiftAmount += Byte.SIZE;
+        case 5: val |= (buffer[offset+4] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 4: val |= (buffer[offset+3] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 3: val |= (buffer[offset+2] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 2: val |= (buffer[offset+1] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 1: val |= (buffer[offset  ] & 0xFFL) << shiftAmount;
         default: return val;
         }
     }
 // *******************
-    public static byte getByte(byte[] buffer, int index, int len) {
+    public static byte getByte(byte[] buffer, int offset, int len) {
         switch (len) {
         case 0: return (byte) 0xFF;
-        case 1: return buffer[index];
+        case 1: return buffer[offset];
         default: throw outOfRangeException(len);
         }
     }
 
-    public static short getShort(byte[] buffer, int index, int len) {
+    public static short getShort(byte[] buffer, int offset, int len) {
         // do sign extension for negative shorts, i.e. len < 2
         switch (len) {
         case 0: return (short) 0xFFFF;
-        case 1: return (short) (0xFFFFFF00 | buffer[index]);
-        case 2: return (short) _getShortInt(buffer, index);
+        case 1: return (short) (0xFFFFFF00 | buffer[offset]);
+        case 2: return (short) _getShortInt(buffer, offset);
         default: throw outOfRangeException(len);
         }
     }
 
-    public static int getInt(byte[] buffer, int index, int len) {
+    public static int getInt(byte[] buffer, int offset, int len) {
         // do sign extension for negative ints, i.e. len < 4
         switch (len) {
         case 0: return 0xFFFFFFFF;
-        case 1: return 0xFFFFFF00 | buffer[index];
-        case 2: return 0xFFFF0000 | _getShortInt(buffer, index);
-        case 3: return 0xFF000000 | _getInt(buffer, index, 3);
-        case 4: return _getInt(buffer, index, 4);
+        case 1: return 0xFFFFFF00 | buffer[offset];
+        case 2: return 0xFFFF0000 | _getShortInt(buffer, offset);
+        case 3: return 0xFF000000 | _getInt(buffer, offset, 3);
+        case 4: return _getInt(buffer, offset, 4);
         default: throw outOfRangeException(len);
         }
     }
 
-    public static long getLong(final byte[] buffer, final int index, final int len) {
+    public static long getLong(final byte[] buffer, final int offset, final int len) {
         // do sign extension for negative longs, i.e. len < 8
         switch (len) {
         case 0: return 0xFFFFFFFF_FFFFFFFFL;
-        case 1: return 0xFFFFFFFF_FFFFFF00L | buffer[index];
-        case 2: return 0xFFFFFFFF_FFFF0000L | _getShortInt(buffer, index);
-        case 3: return 0xFFFFFFFF_FF000000L | _getInt(buffer, index, 3);
-        case 4: return 0xFFFFFFFF_00000000L | _getInt(buffer, index, 4);
-        case 5: return 0xFFFFFF00_00000000L | _getLong(buffer, index, 5);
-        case 6: return 0xFFFF0000_00000000L | _getLong(buffer, index, 6);
-        case 7: return 0xFF000000_00000000L | _getLong(buffer, index, 7);
-        case 8: return _getLong(buffer, index, 8);
+        case 1: return 0xFFFFFFFF_FFFFFF00L | buffer[offset];
+        case 2: return 0xFFFFFFFF_FFFF0000L | _getShortInt(buffer, offset);
+        case 3: return 0xFFFFFFFF_FF000000L | _getInt(buffer, offset, 3);
+        case 4: return 0xFFFFFFFF_00000000L | _getInt(buffer, offset, 4);
+        case 5: return 0xFFFFFF00_00000000L | _getLong(buffer, offset, 5);
+        case 6: return 0xFFFF0000_00000000L | _getLong(buffer, offset, 6);
+        case 7: return 0xFF000000_00000000L | _getLong(buffer, offset, 7);
+        case 8: return _getLong(buffer, offset, 8);
         default: throw outOfRangeException(len);
         }
     }

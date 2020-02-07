@@ -126,7 +126,7 @@ public final class Notation {
     private static int buildString(StringBuilder sb, byte[] data, int from, int to) {
         final int len = to - from;
         if(!LENIENT && len == 1 && data[from] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
-            throw new IllegalArgumentException("invalid rlp for single byte @ " + (from - 1));
+            throw new IllegalArgumentException("invalid rlp for single byte @ " + (from - 1)); // item prefix is 1 byte
         }
         sb.append(BEGIN_STRING).append(Strings.encode(data, from, len, Strings.HEX)).append(STRING_END_PLUS_DELIMITER);
         return to;

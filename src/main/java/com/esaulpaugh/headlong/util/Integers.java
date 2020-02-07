@@ -304,7 +304,7 @@ public final class Integers {
      *
      * @param buffer  the array containing the integer's representation
      * @param offset  the array index locating the integer
-     * @param len     the length in bytes of the integer's representation, without leading zeroes
+     * @param len     the length in bytes of the integer's representation
      * @param lenient whether to allow leading zeroes
      * @return the integer
      * @throws IllegalArgumentException if the integer's representation is found to have leading zeroes
