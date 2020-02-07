@@ -16,8 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.Uint;
-import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
-import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.lang.reflect.Array;

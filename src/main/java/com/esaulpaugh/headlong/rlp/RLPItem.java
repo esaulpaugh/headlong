@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.abi.util.Uint;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
 import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Integers;
@@ -170,6 +169,7 @@ public abstract class RLPItem {
     /**
      * Returns the char representation for this item.
      *
+     * @param lenient whether to allow leading zeroes in the raw data
      * @return the char representation
      * @throws IllegalArgumentException if this item is not interpretable as a char
      * @see String#charAt(int)
