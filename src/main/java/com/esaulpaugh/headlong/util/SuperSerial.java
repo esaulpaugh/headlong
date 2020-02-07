@@ -43,6 +43,7 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 
+/** Serializes and deserializes {@link Tuple}s through the use of RLP encoding. */
 public final class SuperSerial {
 
     private static final byte[] TRUE = new byte[] { 0x01 };
@@ -51,18 +52,15 @@ public final class SuperSerial {
     public static String serialize(TupleType tupleType, Tuple tuple, boolean machine) {
         tupleType.validate(tuple);
         Object[] objects = serializeTuple(tupleType, tuple);
-        return machine
-                ? Strings.encode(RLPEncoder.encodeSequentially(objects))
-                : Notation.forObjects(objects).toString();
+        return machine ? Strings.encode(RLPEncoder.encodeSequentially(objects))
+                       : Notation.forObjects(objects).toString();
     }
 
     public static Tuple deserialize(TupleType tupleType, String str, boolean machine) {
         Tuple in = deserializeTuple(
                 tupleType,
-                machine
-                        ? Strings.decode(str)
-                        : RLPEncoder.encodeSequentially(NotationParser.parse(str))
-        );
+                machine ? Strings.decode(str)
+                        : RLPEncoder.encodeSequentially(NotationParser.parse(str)));
         tupleType.validate(in);
         return in;
     }

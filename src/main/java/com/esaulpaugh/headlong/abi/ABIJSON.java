@@ -178,7 +178,7 @@ public final class ABIJSON {
         }
         return TypeFactory.create(type, getString(object, NAME));
     }
-// -------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
     static JsonObject buildFunctionJson(Function f) {
         JsonObject function = new JsonObject();
         Function.Type type = f.getType();
