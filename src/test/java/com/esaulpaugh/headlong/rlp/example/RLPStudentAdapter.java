@@ -34,7 +34,7 @@ public class RLPStudentAdapter implements RLPAdapter<RLPStudent> {
         return new RLPStudent(iter.next().asString(UTF_8),
                 iter.next().asFloat(false),
                 iter.next().asBytes(),
-                new BigDecimal(iter.next().asBigInt(false), iter.next().asInt(false))
+                new BigDecimal(iter.next().asBigInt(false), iter.next().asInt())
         );
 
 //        RLPList rlpList = RLP_STRICT.wrapList(rlp, index);

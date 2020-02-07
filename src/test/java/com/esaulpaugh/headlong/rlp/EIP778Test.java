@@ -84,7 +84,7 @@ public class EIP778Test {
 
         assertEquals(VECTOR.getSeq(), record.getSeq());
 
-        long seq = iter.next().asLong(false);
+        long seq = iter.next().asLong();
 
         assertEquals(1L, seq);
 

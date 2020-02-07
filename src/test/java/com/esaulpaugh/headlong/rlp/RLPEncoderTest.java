@@ -145,11 +145,11 @@ public class RLPEncoderTest {
 
         assertEquals(c, iter.next().asChar(false));
         assertEquals(str, iter.next().asString(Strings.UTF_8), str);
-        assertEquals(by, iter.next().asByte(false));
+        assertEquals(by, iter.next().asByte());
         assertEquals(sh, iter.next().asShort(false));
 
         assertEquals(i, iter.next().asInt(false));
-        assertEquals(l, iter.next().asLong(false));
+        assertEquals(l, iter.next().asLong());
         assertEquals(unsigned, iter.next().asBigInt(false));
         assertEquals(signed, iter.next().asBigIntSigned());
 

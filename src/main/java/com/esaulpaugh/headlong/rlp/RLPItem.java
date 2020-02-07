@@ -210,6 +210,22 @@ public abstract class RLPItem {
         return FloatingPoint.getDouble(buffer, dataIndex, dataLength, lenient);
     }
 
+    public byte asByte() {
+        return asByte(false);
+    }
+
+    public int asInt() {
+        return asInt(false);
+    }
+
+    public long asLong() {
+        return asLong(false);
+    }
+
+    public BigInteger asBigInt() {
+        return asBigInt(false);
+    }
+
     public BigInteger asBigIntSigned() {
         return new BigInteger(data());
     }
