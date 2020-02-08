@@ -77,13 +77,6 @@
                     <release>8</release>
 <!--                    <source>8</source>-->
 <!--                    <target>8</target>-->
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.openjdk.jmh</groupId>
-                            <artifactId>jmh-generator-annprocess</artifactId>
-                            <version>${jmh.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
@@ -94,7 +87,7 @@
                     <execution>
                         <phase>generate-sources</phase>
                         <goals>
-                            <goal>add-source</goal>
+                            <goal>add-test-source</goal>
                         </goals>
                         <configuration>
                             <sources>
@@ -148,7 +141,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version>
                 <configuration>
-<!--                    <skipTests>true</skipTests>-->
+                    <skipTests>false</skipTests>
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <parallel>all</parallel>
                     <threadCount>8</threadCount>
