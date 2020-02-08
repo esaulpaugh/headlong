@@ -160,7 +160,7 @@
                 <version>3.2.1</version>
                 <executions>
                     <execution>
-                        <!-- generates jmh benchmarks during mvn package (run with java -jar ./target/benchmarks.jar) -->
+                        <!-- generates jmh benchmarks during package phase; (run them w/ `java -jar ./target/benchmarks.jar`) -->
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
@@ -184,7 +184,7 @@
                 <executions>
                     <execution>
                         <id>run-benchmarks</id>
-                        <!-- enable this to have jmh benchmarks run during mvn package -->
+                        <!-- enable this to have jmh benchmarks run automatically during package phase -->
 <!--                        <phase>package</phase>-->
                         <goals>
                             <goal>exec</goal>
