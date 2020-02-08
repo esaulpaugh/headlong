@@ -58,11 +58,13 @@
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
             <version>${jmh.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
             <version>${jmh.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -78,24 +80,6 @@
 <!--                    <source>8</source>-->
 <!--                    <target>8</target>-->
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-test-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>src/jmh/java</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -128,31 +112,53 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version>
                 <configuration>
-                    <skipTests>false</skipTests>
+<!--                    <skipTests>true</skipTests>-->
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <parallel>all</parallel>
                     <threadCount>8</threadCount>
                 </configuration>
             </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-shade-plugin</artifactId>-->
+<!--                <version>3.2.1</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        &lt;!&ndash; when enabled, generates jmh benchmarks jar during package phase; (run w/ `java -jar ./target/benchmarks.jar`) &ndash;&gt;-->
+<!--                        &lt;!&ndash; To enable: &ndash;&gt;-->
+<!--                        &lt;!&ndash; 1. Change build-helper-maven-plugin goal from "add-test-source" to "add-source" &ndash;&gt;-->
+<!--                        &lt;!&ndash; 2. Change jmh-core and jmh-generator-annprocess dependency scope from "test" to "compile" &ndash;&gt;-->
+<!--                        &lt;!&ndash; 3. Uncomment package phase here vv &ndash;&gt;-->
+<!--&lt;!&ndash;                        <phase>package</phase>&ndash;&gt;-->
+<!--                        <goals>-->
+<!--                            <goal>shade</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <finalName>benchmarks</finalName>-->
+<!--                            <transformers>-->
+<!--                                <transformer-->
+<!--                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+<!--                                    <mainClass>org.openjdk.jmh.Main</mainClass>-->
+<!--                                </transformer>-->
+<!--                            </transformers>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.1</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
-                        <!-- generates jmh benchmarks during package phase; (run them w/ `java -jar ./target/benchmarks.jar`) -->
-                        <phase>package</phase>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>add-test-source</goal>
                         </goals>
                         <configuration>
-                            <finalName>benchmarks</finalName>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.openjdk.jmh.Main</mainClass>
-                                </transformer>
-                            </transformers>
+                            <sources>
+                                <source>src/jmh/java</source>
+                            </sources>
                         </configuration>
                     </execution>
                 </executions>
