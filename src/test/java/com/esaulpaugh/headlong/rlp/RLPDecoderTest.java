@@ -265,6 +265,10 @@ public class RLPDecoderTest {
                 invalid++;
                 String first = Strings.encode(buffer[0]);
                 switch (first) {
+                case "00":
+                    if(!decoder.lenient) {
+                        break;
+                    }
                 case "81":
                     if(!decoder.lenient || buffer[1] >= 0x00) {
                         break;
@@ -538,7 +542,7 @@ public class RLPDecoderTest {
 
         assertEquals('\0', RLP_STRICT.wrap((byte) 0xc0).asChar(false));
         assertEquals('\0', RLP_STRICT.wrap((byte) 0x80).asChar(false));
-        assertEquals('\0', RLP_STRICT.wrap((byte) 0x00).asChar(false));
+        assertEquals('\0', RLP_STRICT.wrap((byte) 0x00).asChar(true));
     }
 
     private static final BiPredicate<Integer, Integer> UNTIL_COUNT_FIVE = (count, index) -> count < 5;

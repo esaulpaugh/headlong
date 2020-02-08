@@ -260,7 +260,7 @@ public final class Integers {
         case 2: val = buffer[offset+1] & 0xFF; shiftAmount = Byte.SIZE;
         case 1:
             byte lead = buffer[offset];
-            if(!lenient && lead == 0 && len > 1) {
+            if(!lenient && lead == 0) {
                 throw leadingZeroException(offset, len);
             }
             val |= (lead & 0xFF) << shiftAmount;
@@ -290,7 +290,7 @@ public final class Integers {
         case 2: val |= (buffer[offset+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1:
             byte lead = buffer[offset];
-            if (!lenient && lead == 0 && len > 1) {
+            if (!lenient && lead == 0) {
                 throw leadingZeroException(offset, len);
             }
             val |= (lead & 0xFF) << shiftAmount;
@@ -324,7 +324,7 @@ public final class Integers {
         case 2: val |= (buffer[offset+1] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1:
             byte lead = buffer[offset];
-            if (!lenient && lead == 0 && len > 1) {
+            if (!lenient && lead == 0) {
                 throw leadingZeroException(offset, len);
             }
             val |= (lead & 0xFFL) << shiftAmount;
