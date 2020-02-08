@@ -160,21 +160,13 @@ public final class PackedDecoder {
 
     private static int decodeInt(int elementLen, IntType intType, byte[] buffer, int idx, Object[] dest, int destIdx) {
         int signed = getPackedInt(buffer, idx, elementLen);
-        if(intType.isUnsigned()) {
-            dest[destIdx] = (int) new Uint(intType.getBitLength()).toUnsignedLong(signed);
-        } else {
-            dest[destIdx] = signed;
-        }
+        dest[destIdx] = intType.unsigned ? (int) new Uint(intType.getBitLength()).toUnsignedLong(signed) : signed;
         return elementLen;
     }
 
     private static int decodeLong(int elementLen, LongType longType, byte[] buffer, int idx, Object[] dest, int destIdx) {
         long signed = getPackedLong(buffer, idx, elementLen);
-        if(longType.isUnsigned()) {
-            dest[destIdx] = new Uint(longType.getBitLength()).toUnsignedLong(signed);
-        } else {
-            dest[destIdx] = signed;
-        }
+        dest[destIdx] = longType.unsigned ? new Uint(longType.getBitLength()).toUnsignedLong(signed) : signed;
         return elementLen;
     }
 
@@ -211,8 +203,8 @@ public final class PackedDecoder {
             byte[] bytes = decodeByteArray(arrayLen, buffer, idx);
             array = arrayType.isString ? Strings.encode(bytes, Strings.UTF_8) : bytes;
             break;
-        case TYPE_CODE_INT: array = decodeIntArray(elementByteLen, arrayLen, buffer, idx); break;
-        case TYPE_CODE_LONG: array = decodeLongArray(elementByteLen, arrayLen, buffer, idx); break;
+        case TYPE_CODE_INT: array = decodeIntArray((IntType) elementType, elementByteLen, arrayLen, buffer, idx); break;
+        case TYPE_CODE_LONG: array = decodeLongArray((LongType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_BIG_INTEGER: array = decodeBigIntegerArray(elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_BIG_DECIMAL: array = decodeBigDecimalArray(elementByteLen, ((BigDecimalType) elementType).scale, arrayLen, buffer, idx); break;
         case TYPE_CODE_ARRAY:
@@ -237,19 +229,23 @@ public final class PackedDecoder {
         return bytes;
     }
 
-    private static int[] decodeIntArray(int elementLen, int arrayLen, byte[] buffer, int idx) {
+    private static int[] decodeIntArray(IntType intType, int elementLen, int arrayLen, byte[] buffer, int idx) {
         int[] ints = new int[arrayLen];
+        Uint uint = new Uint(intType.bitLength);
         for (int i = 0; i < arrayLen; i++) {
-            ints[i] = getPackedInt(buffer, idx, elementLen);
+            int signed = getPackedInt(buffer, idx, elementLen);
+            ints[i] = intType.unsigned ? (int) uint.toUnsignedLong(signed) : signed;
             idx += elementLen;
         }
         return ints;
     }
 
-    private static long[] decodeLongArray(int elementLen, int arrayLen, byte[] buffer, int idx) {
+    private static long[] decodeLongArray(LongType longType, int elementLen, int arrayLen, byte[] buffer, int idx) {
         long[] longs = new long[arrayLen];
+        Uint uint = new Uint(longType.bitLength);
         for (int i = 0; i < arrayLen; i++) {
-            longs[i] = getPackedLong(buffer, idx, elementLen);
+            long signed = getPackedLong(buffer, idx, elementLen);
+            longs[i] = longType.unsigned ? uint.toUnsignedLong(signed) : signed;
             idx += elementLen;
         }
         return longs;

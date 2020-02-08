@@ -72,7 +72,7 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
         throw new UnsupportedOperationException();
     }
 
-    private void validatePrimitive(long longVal) {
+    void validatePrimitive(long longVal) {
         checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
         if (unsigned && longVal < 0) {
             throw new IllegalArgumentException("signed value given for unsigned type");
@@ -86,17 +86,17 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
         }
     }
 
-    // don't do unsigned check for array element
-    final void validatePrimitiveElement(long longVal) {
-        checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
-    }
+//    // don't do unsigned check for array element
+//    final void validatePrimitiveElement(long longVal) {
+//        checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
+//    }
+//
+//    // don't do unsigned check for array element
+//    final void validateBigIntElement(BigInteger bigIntVal) {
+//        checkBitLen(bigIntVal.bitLength());
+//    }
 
-    // don't do unsigned check for array element
-    final void validateBigIntElement(BigInteger bigIntVal) {
-        checkBitLen(bigIntVal.bitLength());
-    }
-
-    private void checkBitLen(int actual) {
+    final void checkBitLen(int actual) {
         if (actual > bitLength) {
             throw new IllegalArgumentException("exceeds bit limit: " + actual + " > " + bitLength);
         }

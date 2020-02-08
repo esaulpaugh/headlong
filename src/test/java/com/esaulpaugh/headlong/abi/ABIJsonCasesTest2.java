@@ -112,19 +112,22 @@ public class ABIJsonCasesTest2 {
 
     @Test
     public void testAbiV2Cases() throws IOException {
-        final JsonArray testCases = JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonCasesTest.class, ABI_V2_CASES_PATH));
-        for (JsonElement e : testCases) {
-            new TestCase(e.getAsJsonObject(), false).test(false);
-        }
-        System.out.println(testCases.size() + " cases passed");
+        runCases(JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonCasesTest.class, ABI_V2_CASES_PATH)), false);
     }
 
     @Test
     public void testHeadlongCases() throws IOException {
-        final JsonArray testCases = JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonCasesTest.class, HEADLONG_CASES_PATH));
-        for (JsonElement e : testCases) {
-            new TestCase(e.getAsJsonObject(), true).test(true);
+        runCases(JsonUtils.parseArray(TestUtils.readResourceAsString(ABIJsonCasesTest.class, HEADLONG_CASES_PATH)), true);
+    }
+
+    private static void runCases(final JsonArray cases, final boolean function) {
+        int i = 0;
+        for (JsonElement e : cases) {
+            TestCase tc = new TestCase(e.getAsJsonObject(), function);
+//            System.out.println(i + ", " + tc.name);
+            tc.test(function);
+            i++;
         }
-        System.out.println(testCases.size() + " cases passed");
+        System.out.println(i + "/" + cases.size() + " cases passed");
     }
 }

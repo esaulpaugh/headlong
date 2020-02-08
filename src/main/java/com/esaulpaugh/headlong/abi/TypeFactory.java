@@ -34,16 +34,16 @@ final class TypeFactory {
     private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
 
     static ABIType<?> create(String type, String name) {
-        return buildType(type, false, null, name == null)
+        return buildType(type, null, name == null)
                 .setName(name);
     }
 
     static ABIType<?> createFromBase(TupleType baseType, String typeSuffix, String name) {
-        return buildType(baseType.canonicalType + typeSuffix, false, baseType, name == null)
+        return buildType(baseType.canonicalType + typeSuffix, baseType, name == null)
                 .setName(name);
     }
 
-    private static ABIType<?> buildType(final String type, final boolean isArrayElement, ABIType<?> baseType, final boolean nameless) {
+    private static ABIType<?> buildType(final String type, ABIType<?> baseType, final boolean nameless) {
         try {
             final int lastCharIndex = type.length() - 1;
             if (type.charAt(lastCharIndex) == ']') { // array
@@ -69,7 +69,7 @@ final class TypeFactory {
                     }
                 }
 
-                final ABIType<?> elementType = buildType(type.substring(0, arrayOpenIndex), true, baseType, nameless);
+                final ABIType<?> elementType = buildType(type.substring(0, arrayOpenIndex), baseType, nameless);
                 final String arrayClassName = elementType.arrayClassName();
                 @SuppressWarnings("unchecked")
                 final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
@@ -77,7 +77,7 @@ final class TypeFactory {
                 return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, '[' + arrayClassName);
             }
             if(baseType == null) {
-                baseType = resolveBaseType(type, isArrayElement, nameless);
+                baseType = resolveBaseType(type, nameless);
             }
             if (baseType != null) {
                 return baseType;
@@ -90,7 +90,7 @@ final class TypeFactory {
         throw new IllegalArgumentException("unrecognized type: " + type);
     }
 
-    private static ABIType<?> resolveBaseType(String baseTypeStr, boolean isArrayElement, boolean nameless) {
+    private static ABIType<?> resolveBaseType(String baseTypeStr, boolean nameless) {
         if(baseTypeStr.charAt(0) == '(') {
             return parseTupleType(baseTypeStr);
         }
@@ -134,11 +134,11 @@ final class TypeFactory {
             case "uint8":
             case "uint16":
             case "uint24":  return new IntType(baseTypeStr, info.bitLen, true);
-            case "uint32":  return isArrayElement ? new IntType(baseTypeStr, info.bitLen, true) : new LongType(baseTypeStr, info.bitLen, true);
+            case "uint32":
             case "uint40":
             case "uint48":
             case "uint56":  return new LongType(baseTypeStr, info.bitLen, true);
-            case "uint64":  return isArrayElement ? new LongType(baseTypeStr, info.bitLen, true) : new BigIntegerType(baseTypeStr, info.bitLen, true);
+            case "uint64":
             case "uint72":
             case "uint80":
             case "uint88":
@@ -260,7 +260,7 @@ final class TypeFactory {
                     argEnd = nextTerminator(rawTypeStr, argStart + 1);
                 }
                 if(argEnd >= 0) {
-                    elements.add(buildType(rawTypeStr.substring(argStart, argEnd), false, null, true));
+                    elements.add(buildType(rawTypeStr.substring(argStart, argEnd), null, true));
                     if(rawTypeStr.charAt(argEnd) == ',') {
                         argStart = argEnd + 1; // jump over terminator
                         continue;

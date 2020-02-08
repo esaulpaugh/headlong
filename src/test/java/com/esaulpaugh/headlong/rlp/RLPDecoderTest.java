@@ -75,19 +75,13 @@ public class RLPDecoderTest {
 
         Uint uint32 = new Uint(32);
 
-        int[] ints = new int[unsigneds.length];
-
-        for (int i = 0; i < unsigneds.length; i++) {
-            ints[i] = (int) unsigneds[i];
-        }
-
         Function foo = Function.parse("foo(uint32[6])");
 
-        ByteBuffer bb = foo.encodeCall(Tuple.singleton(ints));
+        ByteBuffer bb = foo.encodeCall(Tuple.singleton(unsigneds));
 
         Tuple dec = foo.decodeCall((ByteBuffer) bb.flip());
 
-        long[] decoded = uint32.toUnsigned((int[]) dec.get(0));
+        long[] decoded = (long[]) dec.get(0);
 
         assertArrayEquals(unsigneds, decoded);
     }
@@ -104,21 +98,13 @@ public class RLPDecoderTest {
                 new BigInteger("FF00FF00FF00FF00", 16),
         };
 
-        Uint uint64 = new Uint(64);
-
-        long[] longs = new long[unsigneds.length];
-
-        for (int i = 0; i < unsigneds.length; i++) {
-            longs[i] = unsigneds[i].longValue();
-        }
-
         Function foo = Function.parse("foo(uint64[6])");
 
-        ByteBuffer bb = foo.encodeCall(Tuple.singleton(longs));
+        ByteBuffer bb = foo.encodeCall(Tuple.singleton(unsigneds));
 
         Tuple dec = foo.decodeCall((ByteBuffer) bb.flip());
 
-        BigInteger[] decoded = uint64.toUnsigned((long[]) dec.get(0));
+        BigInteger[] decoded = (BigInteger[]) dec.get(0);
 
         assertArrayEquals(unsigneds, decoded);
     }
