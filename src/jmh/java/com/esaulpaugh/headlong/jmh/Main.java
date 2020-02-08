@@ -9,7 +9,8 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Options opt = new OptionsBuilder()
-                .include(Benchmarky.class.getSimpleName())
+                .include(KeyValuePairSort.class.getSimpleName())
+                .include(FunctionEncode.class.getSimpleName())
                 .warmupForks(1)
                 .warmupIterations(1)
                 .forks(1)

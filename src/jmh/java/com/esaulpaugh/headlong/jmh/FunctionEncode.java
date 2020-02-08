@@ -32,7 +32,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 @State(Scope.Benchmark)
-public class Benchmarky {
+public class FunctionEncode {
 
     private Function f;
     private Tuple args;
@@ -49,7 +49,7 @@ public class Benchmarky {
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
     public ByteBuffer headlong_encode_function_call() {
         return f.encodeCall(args);

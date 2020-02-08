@@ -81,7 +81,7 @@ dependencies {
     jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.23'
 }
 
-task jmh(type: JavaExec, dependsOn: jmhClasses) {
+task jmh(type: JavaExec, dependsOn: jmhClasses) { // run benchmarks with `gradle jmh`
     main = 'org.openjdk.jmh.Main'
     classpath = sourceSets.jmh.compileClasspath + sourceSets.jmh.runtimeClasspath
 }

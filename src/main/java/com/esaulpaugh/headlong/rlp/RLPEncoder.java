@@ -19,6 +19,7 @@ import com.esaulpaugh.headlong.util.Integers;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
@@ -30,9 +31,14 @@ import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
 /** For encoding data to Recursive Length Prefix format. */
 public final class RLPEncoder {
 // -------------- MADE VISIBLE TO rlp.eip778 package -------------------------------------------------------------------
+
+    /**
+     * @see java.util.ArrayList#sort(Comparator)
+     * @see java.util.Arrays.ArrayList#sort(Comparator)
+     */
     static void insertRecordContentList(int dataLen, long seq, List<KeyValuePair> pairs, ByteBuffer bb) {
         if(seq >= 0) {
-            pairs.sort(KeyValuePair.PAIR_COMPARATOR);
+            pairs.sort(KeyValuePair.PAIR_COMPARATOR); // note that ArrayList overrides List default sort
             insertListPrefix(dataLen, bb);
             encodeString(seq, bb);
             for (KeyValuePair pair : pairs) {
