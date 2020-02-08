@@ -15,8 +15,7 @@ public class Main {
                 .warmupIterations(1)
                 .forks(1)
                 .measurementIterations(5)
-                .forks(1)
-                .mode(Mode.Throughput)
+                .mode(Mode.SingleShotTime)
                 .build();
 
         new Runner(opt).run();
