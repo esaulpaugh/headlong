@@ -193,34 +193,33 @@ public class MonteCarloTest {
 
         final int numProcessors = Runtime.getRuntime().availableProcessors();
 
-        Thread[] threads = new Thread[numProcessors];
+        Thread[] threads = new Thread[numProcessors - 1];
         final int threadsLen = threads.length;
         for (int i = 0; i < threadsLen; i++) {
             threads[i] = new Thread(() -> {
-                for (int j = 0; j < 500; j++) {
+                for (int j = 0; j < 500; j++)
                     two.run();
-                }
             });
         }
 
         ForkJoinPool pool = new ForkJoinPool();
 
-        final int len2 = threadsLen - 1;
-        for (int i = 0; i < len2; i++) {
-            threads[i].start();
+        for (Thread thread : threads) {
+            thread.start();
         }
 
         pool.invoke(task);
 
-        threads[len2].run();
+        for (int j = 0; j < 500; j++)
+            two.run();
 
         pool.shutdown();
         if(!pool.awaitTermination(10, TimeUnit.SECONDS)) {
-            throw new TimeoutException("timeout");
+            throw new TimeoutException("not very Timely!!");
         }
 
-        for (int i = 0; i < len2; i++) {
-            threads[i].join();
+        for (Thread thread : threads) {
+            thread.join();
         }
     }
 
@@ -245,10 +244,6 @@ public class MonteCarloTest {
         final long time = System.nanoTime();
         long seed = TestUtils.getSeed(time);
         final long origSeed = seed;
-        final long seed2 = TestUtils.getSeed(time + 1);
-        System.out.println("orig =  " + seed);
-        System.out.println("seed2 = " + seed2);
-        System.out.println("xor = " + Long.toHexString(seed ^ seed2));
 
         MonteCarloTestCase testCase;
         String sig;

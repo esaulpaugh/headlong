@@ -18,7 +18,6 @@ package com.esaulpaugh.headlong.rlp;
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.Function;
 import com.esaulpaugh.headlong.abi.Tuple;
-import com.esaulpaugh.headlong.abi.util.Uint;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Disabled;
@@ -72,8 +71,6 @@ public class RLPDecoderTest {
                 0x80808080L,
                 0xFF00FF00L
         };
-
-        Uint uint32 = new Uint(32);
 
         Function foo = Function.parse("foo(uint32[6])");
 
