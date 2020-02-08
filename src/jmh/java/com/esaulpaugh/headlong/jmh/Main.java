@@ -1,0 +1,23 @@
+package com.esaulpaugh.headlong.jmh;
+
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
+
+public class Main {
+
+    public static void main(String[] args) throws Exception {
+        Options opt = new OptionsBuilder()
+                .include(Benchmarky.class.getSimpleName())
+                .warmupForks(1)
+                .warmupIterations(1)
+                .forks(1)
+                .measurementIterations(5)
+                .forks(1)
+                .mode(Mode.Throughput)
+                .build();
+
+        new Runner(opt).run();
+    }
+}

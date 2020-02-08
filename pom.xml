@@ -9,12 +9,18 @@
     <version>3.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
+    <name>headlong</name>
     <url>https://github.com/esaulpaugh/headlong</url>
+    <organization>
+        <name>Evan Saulpaugh</name>
+        <url>http://esaulpaugh.com</url>
+    </organization>
     <inceptionYear>2018</inceptionYear>
 
     <properties>
         <argLine>-Dfile.encoding=UTF-8</argLine>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jmh.version>1.23</jmh.version>
     </properties>
 
     <dependencies>
@@ -22,6 +28,7 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.8.6</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
@@ -47,20 +54,56 @@
             <version>1.58.0.0</version>
             <scope>test</scope>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.openjdk.jmh</groupId>-->
-<!--            <artifactId>jmh-core</artifactId>-->
-<!--            <version>1.23</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.openjdk.jmh</groupId>-->
-<!--            <artifactId>jmh-generator-annprocess</artifactId>-->
-<!--            <version>1.23</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>${jmh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>${jmh.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <!-- when building with Java 8 or 9, disable release and enable source and target -->
+                    <release>8</release>
+<!--                    <source>8</source>-->
+<!--                    <target>8</target>-->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.openjdk.jmh</groupId>
+                            <artifactId>jmh-generator-annprocess</artifactId>
+                            <version>${jmh.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/jmh/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -113,13 +156,53 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <!-- generates jmh benchmarks during mvn package (run with java -jar ./target/benchmarks.jar) -->
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>benchmarks</finalName>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.openjdk.jmh.Main</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>run-benchmarks</id>
+                        <!-- enable this to have jmh benchmarks run during mvn package -->
+<!--                        <phase>package</phase>-->
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <classpathScope>test</classpathScope>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>-classpath</argument>
+                                <classpath />
+                                <argument>com.esaulpaugh.headlong.jmh.Main</argument>
+                                <argument>.*</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
                 <configuration>
-                    <release>8</release>
-                    <!-- for building with Java 8 or 9 -->
-<!--                    <source>8</source>-->
-<!--                    <target>8</target>-->
+                    <mainClass>org.openjdk.jmh.Main</mainClass>
                 </configuration>
             </plugin>
         </plugins>
