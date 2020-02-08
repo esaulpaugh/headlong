@@ -77,9 +77,6 @@
                 <configuration>
                     <!-- when building with Java 8 or 9, disable release and enable source and target -->
                     <release>8</release>
-                    <annotationProcessors>
-                        <annotationProcessor>org.openjdk.jmh.generators.BenchmarkProcessor</annotationProcessor>
-                    </annotationProcessors>
 <!--                    <source>8</source>-->
 <!--                    <target>8</target>-->
                 </configuration>
