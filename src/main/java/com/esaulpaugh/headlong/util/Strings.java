@@ -28,8 +28,7 @@ public final class Strings {
 
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
-    public static final int BASE_64_URL_SAFE = 3; // 64
-    public static final int DECIMAL = 2; // 10
+    public static final int BASE_64_URL_SAFE = 2; // 64
     public static final int UTF_8 = 1; // 256
     public static final int HEX = 0; // 16
 
@@ -50,10 +49,9 @@ public final class Strings {
     public static String encode(byte[] buffer, int from, int len, int encoding) {
         switch (encoding) {
         case BASE_64_URL_SAFE: return Base64.encodeToString(buffer, from, len, URL_SAFE_FLAGS);
-        case DECIMAL: throw new UnsupportedOperationException();
         case UTF_8: return new String(buffer, from, len, StandardCharsets.UTF_8);
-        case HEX:
-        default: return FastHex.encodeToString(buffer, from, len);
+        case HEX: return FastHex.encodeToString(buffer, from, len);
+        default: throw new UnsupportedOperationException();
         }
     }
 
@@ -67,10 +65,9 @@ public final class Strings {
         }
         switch (encoding) {
         case BASE_64_URL_SAFE: return java.util.Base64.getUrlDecoder().decode(string);
-        case DECIMAL: throw new UnsupportedOperationException();
         case UTF_8: return string.getBytes(StandardCharsets.UTF_8);
-        case HEX:
-        default: return FastHex.decode(string, 0 ,string.length());
+        case HEX: return FastHex.decode(string, 0 ,string.length());
+        default: throw new UnsupportedOperationException();
         }
     }
 }

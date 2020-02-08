@@ -7,6 +7,9 @@ group 'com.esaulpaugh'
 archivesBaseName = "headlong"
 version '3.0.0-SNAPSHOT'
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 test {
     maxParallelForks = (int) Runtime.runtime.availableProcessors() ?: 1
 }
@@ -38,13 +41,6 @@ jar {
     finalizedBy(sourcesJar)
 }
 
-sourceSets {
-    jmh {
-        java.srcDirs = ['src/jmh/java']
-        compileClasspath += sourceSets.main.runtimeClasspath
-    }
-}
-
 artifacts {
     archives javadocJar, sourcesJar
 }
@@ -59,8 +55,12 @@ publishing {
     }
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceSets {
+    jmh {
+        java.srcDirs = ['src/jmh/java']
+        compileClasspath += sourceSets.main.runtimeClasspath
+    }
+}
 
 repositories {
     mavenCentral()
@@ -77,6 +77,13 @@ dependencies {
 
     testImplementation 'com.madgag.spongycastle:core:1.58.0.0'
 
-//    implementation 'org.openjdk.jmh:jmh-core:1.23'
-//    implementation 'org.openjdk.jmh:jmh-generator-annprocess:1.23'
+    jmhImplementation 'org.openjdk.jmh:jmh-core:1.23'
+    jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.23'
 }
+
+task jmh(type: JavaExec, dependsOn: jmhClasses) {
+    main = 'org.openjdk.jmh.Main'
+    classpath = sourceSets.jmh.compileClasspath + sourceSets.jmh.runtimeClasspath
+}
+
+classes.finalizedBy(jmhClasses)

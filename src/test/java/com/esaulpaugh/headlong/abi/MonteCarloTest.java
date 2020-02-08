@@ -41,39 +41,33 @@ public class MonteCarloTest {
     private static final int N = 400_000;
 
     @Test
-    public void gambleGamble() throws InterruptedException {
+    public void gambleGamble() throws InterruptedException, AssertionError {
 
-        final long masterMasterSeed = TestUtils.getSeed(System.nanoTime()); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
+        final long masterSeed = TestUtils.getSeed(System.nanoTime()); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
+
+        System.out.println("MASTER SEED: " + masterSeed + "L");
 
         final int numProcessors = Runtime.getRuntime().availableProcessors();
-        final int threadsLen = numProcessors - 1;
-        final Thread[] threads = new Thread[threadsLen];
+        final GambleGambleThread[] threads = new GambleGambleThread[numProcessors];
         final int workPerProcessor = N / numProcessors;
         int i = 0;
         while (i < threads.length) {
-            (threads[i] = newThread(masterMasterSeed + (i++), workPerProcessor))
+            (threads[i] = new GambleGambleThread(masterSeed + (i++), workPerProcessor))
                     .start();
         }
-        newRunnable(masterMasterSeed + (i++), workPerProcessor).run();
-
-        for (Thread thread : threads) {
+        for (GambleGambleThread thread : threads) {
             thread.join();
+            if(thread.thrown != null) {
+                throw new AssertionError(thread.thrown);
+            }
         }
 
-        System.out.println((workPerProcessor * i) + " done, MASTER_MASTER_SEED = " + masterMasterSeed);
+        System.out.println((workPerProcessor * i) + " done");
     }
 
-    private static Thread newThread(long seed, int n) {
-        return new Thread(newRunnable(seed, n));
-    }
+    private static void doMonteCarlo(long threadSeed, int n) {
 
-    private static Runnable newRunnable(long seed, int n) {
-        return () -> doMonteCarlo(seed, n);
-    }
-
-    private static void doMonteCarlo(long masterSeed, int n) {
-
-        final long[] seeds = generateSeeds(masterSeed, n);
+        final long[] seeds = generateSeeds(threadSeed, n);
 
         StringBuilder log = new StringBuilder();
 
@@ -97,17 +91,39 @@ public class MonteCarloTest {
 //                        .append(testCase.function.getCanonicalSignature().substring(testCase.function.getCanonicalSignature().indexOf('('))) // print function params
 //                        .append('\n');
                 i++;
+//                if(System.nanoTime() % 100_000_000 == 0) throw new Error("simulated random error");
             } catch (Throwable t) {
                 System.out.println(log.toString());
                 sleep();
                 System.err.println("#" + i + " failed for " + params.toString() + "\t\t" + temp);
-                System.err.println("MASTER_SEED = " + masterSeed);
+                System.err.println("thread " + Thread.currentThread().getId() + " seed: " + threadSeed + "L");
                 throw t;
             }
         }
 
         System.out.println(log.toString());
-        System.out.println("MASTER_SEED = " + masterSeed);
+        System.out.println("thread " + Thread.currentThread().getId() + " seed: " + threadSeed + "L");
+    }
+
+    private static class GambleGambleThread extends Thread {
+
+        private GambleGambleThread(long seed, int n) {
+            this.seed = seed;
+            this.n = n;
+        }
+
+        private final long seed;
+        private final int n;
+        private Throwable thrown = null;
+
+        @Override
+        public void run() {
+            try {
+                doMonteCarlo(seed, n);
+            } catch (Throwable t) {
+                thrown = t;
+            }
+        }
     }
 
     private static class MonteCarloTask extends RecursiveAction {
