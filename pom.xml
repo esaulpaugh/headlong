@@ -58,13 +58,13 @@
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
             <version>${jmh.version}</version>
-            <scope>test</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
             <version>${jmh.version}</version>
-            <scope>test</scope>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -77,6 +77,9 @@
                 <configuration>
                     <!-- when building with Java 8 or 9, disable release and enable source and target -->
                     <release>8</release>
+                    <annotationProcessors>
+                        <annotationProcessor>org.openjdk.jmh.generators.BenchmarkProcessor</annotationProcessor>
+                    </annotationProcessors>
 <!--                    <source>8</source>-->
 <!--                    <target>8</target>-->
                 </configuration>
@@ -112,45 +115,19 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version>
                 <configuration>
-<!--                    <skipTests>true</skipTests>-->
+<!--                    <skipTests>true</skipTests>&lt;!&ndash; ///////////////////////////// &ndash;&gt;-->
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <parallel>all</parallel>
                     <threadCount>8</threadCount>
                 </configuration>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-shade-plugin</artifactId>-->
-<!--                <version>3.2.1</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        &lt;!&ndash; when enabled, generates jmh benchmarks jar during package phase; (run w/ `java -jar ./target/benchmarks.jar`) &ndash;&gt;-->
-<!--                        &lt;!&ndash; To enable: &ndash;&gt;-->
-<!--                        &lt;!&ndash; 1. Change build-helper-maven-plugin goal from "add-test-source" to "add-source" &ndash;&gt;-->
-<!--                        &lt;!&ndash; 2. Change jmh-core and jmh-generator-annprocess dependency scope from "test" to "compile" &ndash;&gt;-->
-<!--                        &lt;!&ndash; 3. Uncomment package phase here vv &ndash;&gt;-->
-<!--&lt;!&ndash;                        <phase>package</phase>&ndash;&gt;-->
-<!--                        <goals>-->
-<!--                            <goal>shade</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <finalName>benchmarks</finalName>-->
-<!--                            <transformers>-->
-<!--                                <transformer-->
-<!--                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
-<!--                                    <mainClass>org.openjdk.jmh.Main</mainClass>-->
-<!--                                </transformer>-->
-<!--                            </transformers>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <executions>
                     <execution>
+                        <id>add-jmh-test</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>add-test-source</goal>
@@ -159,6 +136,33 @@
                             <sources>
                                 <source>src/jmh/java</source>
                             </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/jmh/assembly/assembly.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <addClasspath>true</addClasspath>
+                                    <mainClass>org.openjdk.jmh.Main</mainClass>
+                                </manifest>
+                            </archive>
                         </configuration>
                     </execution>
                 </executions>
