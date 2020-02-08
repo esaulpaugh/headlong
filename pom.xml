@@ -58,13 +58,13 @@
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
             <version>${jmh.version}</version>
-            <scope>compile</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
             <version>${jmh.version}</version>
-            <scope>compile</scope>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -127,7 +127,6 @@
                 <version>3.0.0</version>
                 <executions>
                     <execution>
-                        <id>add-jmh-test</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>add-test-source</goal>
