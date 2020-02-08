@@ -183,7 +183,7 @@ public class EncodeTest {
     public void uint8ArrayTest() {
         Function f = new Function("baz(uint8[])");
 
-        Tuple args = Tuple.singleton(new int[] { 0xFF, -1, 1, 2, 0 });
+        Tuple args = Tuple.singleton(new int[] { 0xFF, 1, 1, 2, 0 });
         ByteBuffer two = f.encodeCall(args);
 
         Tuple decoded = f.decodeCall((ByteBuffer) two.flip());

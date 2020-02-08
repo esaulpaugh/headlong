@@ -316,7 +316,7 @@ public class MonteCarloTestCase implements Serializable {
         case TYPE_CODE_BOOLEAN: return r.nextBoolean();
         case TYPE_CODE_BYTE: return generateByte(r);
         case TYPE_CODE_INT: return generateInt(r, (IntType) type);
-        case TYPE_CODE_LONG: return generateLong(r, (LongType) type, false);
+        case TYPE_CODE_LONG: return generateLong(r, (LongType) type);
         case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (UnitType<?>) type);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
         case TYPE_CODE_ARRAY: return generateArray((ArrayType<?, ?>) type, r);
@@ -333,18 +333,21 @@ public class MonteCarloTestCase implements Serializable {
         byte[] buffer = new byte[1 + r.nextInt(intType.bitLength >>> 3)]; // 1-4
         int x = new BigInteger(buffer).intValue();
         if(intType.unsigned && x < 0) {
-            return (-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0);
+            int val = (-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0);
+            if(val < 0) throw new Error();
+            return val;
         }
         return x;
     }
 
-    private static long generateLong(Random r, LongType longType, boolean isElement) {
+    private static long generateLong(Random r, LongType longType) {
         byte[] random = new byte[1 + r.nextInt(longType.bitLength >>> 3)]; // 1-8
         r.nextBytes(random);
         long x = new BigInteger(random).longValue();
-        boolean unsigned = longType.unsigned && !isElement;
-        if(unsigned && x < 0) {
-            return ((-(x + 1)) << 1) + (r.nextBoolean() ? 1 : 0);
+        if(longType.unsigned && x < 0) {
+            long val = ((-(x + 1)) << 1) + (r.nextBoolean() ? 1 : 0);
+            if(val < 0) throw new Error();
+            return val;
         }
         return x;
     }
@@ -429,7 +432,7 @@ public class MonteCarloTestCase implements Serializable {
     private static long[] generateLongArray(final int len, LongType longType, Random r) {
         long[] longs = new long[len];
         for (int i = 0; i < len; i++) {
-            longs[i] = generateLong(r, longType, true);
+            longs[i] = generateLong(r, longType);
         }
         return longs;
     }

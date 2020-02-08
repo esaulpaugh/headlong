@@ -122,7 +122,7 @@ public class ABIJsonCasesTest {
 
         Object[] argsArray = new Object[testCase.args.size()];
         argsArray[0] = TestUtils.parseBigInteger(testCase.args.get(0));
-        argsArray[1] = TestUtils.parseIntArray(testCase.args.get(1).getAsJsonArray());
+        argsArray[1] = TestUtils.parseLongArray(testCase.args.get(1).getAsJsonArray());
         argsArray[2] = TestUtils.parseBytesX(testCase.args.get(2).getAsString(), 10);
         argsArray[3] = TestUtils.parseBytes(testCase.args.get(3).getAsString());
 

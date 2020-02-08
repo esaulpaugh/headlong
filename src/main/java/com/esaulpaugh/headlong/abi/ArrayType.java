@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
@@ -180,14 +181,14 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                 : staticLen;
     }
 
-    private int validateIntArray(int[] arr) {
-        IntType intType = (IntType) elementType;
+    private int validateIntArray(final int[] arr) {
+        final IntType intType = (IntType) elementType;
         final int len = arr.length;
         checkLength(len, arr);
         int i = 0;
         try {
             for ( ; i < len; i++) {
-                intType.validatePrimitiveElement(arr[i]); // validate without boxing primitive
+                intType.validatePrimitive(arr[i]); // validate without boxing primitive
             }
         } catch (IllegalArgumentException iae) {
             throw abiException(iae, i);
@@ -195,14 +196,14 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
     }
 
-    private int validateLongArray(long[] arr) {
-        LongType longType = (LongType) elementType;
+    private int validateLongArray(final long[] arr) {
+        final LongType longType = (LongType) elementType;
         final int len = arr.length;
         checkLength(len, arr);
         int i = 0;
         try {
             for ( ; i < len; i++) {
-                longType.validatePrimitiveElement(arr[i]); // validate without boxing primitive
+                longType.validatePrimitive(arr[i]); // validate without boxing primitive
             }
         } catch (IllegalArgumentException iae) {
             throw abiException(iae, i);
@@ -451,7 +452,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private static BigInteger decodeBigIntElement(UnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
         bb.get(elementBuffer);
         BigInteger bi = new BigInteger(elementBuffer);
-        type.validateBigIntElement(bi);
+        type.validateBigInt(bi);
         return bi;
     }
 

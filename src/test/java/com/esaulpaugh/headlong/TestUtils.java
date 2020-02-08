@@ -132,24 +132,20 @@ public class TestUtils {
         return arrayList;
     }
 
-    public static Integer parseInteger(JsonElement in) {
-        return in.getAsInt();
-    }
-
-    public static int[] parseIntArray(final JsonArray array) {
+    public static long[] parseLongArray(final JsonArray array) {
         final int size = array.size();
-        int[] ints = new int[size];
+        long[] longs = new long[size];
         for (int i = 0; i < size; i++) {
             JsonElement element = array.get(i);
             if(element.isJsonPrimitive()) {
-                ints[i] = parseInteger(element);
+                longs[i] = parseLong(element);
             } else if(element.isJsonNull()) {
                 throw new RuntimeException("null??");
             } else {
                 throw new RuntimeException("?????");
             }
         }
-        return ints;
+        return longs;
     }
 
     public static byte[] parseBytes(String utf8) {
