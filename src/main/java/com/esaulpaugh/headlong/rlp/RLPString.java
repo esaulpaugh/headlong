@@ -28,7 +28,8 @@ public final class RLPString extends RLPItem {
     public boolean isList() {
         return false;
     }
-    
+
+    /** @see RLPItem#duplicate(RLPDecoder) */
     @Override
     public RLPString duplicate(RLPDecoder decoder) {
         return decoder.wrapString(encoding(), 0);

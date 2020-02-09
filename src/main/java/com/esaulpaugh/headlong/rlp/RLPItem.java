@@ -158,7 +158,7 @@ public abstract class RLPItem {
 
     /**
      * @param encoding one of { {@link Strings#BASE_64_URL_SAFE}, {@link Strings#UTF_8}, {@link Strings#HEX} }.
-     * @return  this item's payload bytes, encoded to your liking
+     * @return  this item's payload (data) bytes, encoded to your liking
      */
     public String asString(int encoding) {
         return Strings.encode(buffer, dataIndex, dataLength, encoding);
@@ -243,7 +243,7 @@ public abstract class RLPItem {
      *
      * @param decoder either {@link RLPDecoder#RLP_STRICT} or {@link RLPDecoder#RLP_LENIENT}
      * @return an independent and exact copy
-     * @throws IllegalArgumentException if an unexpected problem in decoding occurs
+     * @throws IllegalArgumentException if a problem in re-decoding the item occurs
      */
     public abstract RLPItem duplicate(RLPDecoder decoder);
 

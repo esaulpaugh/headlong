@@ -89,7 +89,8 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
             i = item.endIndex;
         }
     }
-    
+
+    /** @see RLPItem#duplicate(RLPDecoder) */
     @Override
     public RLPList duplicate(RLPDecoder decoder) {
         return decoder.wrapList(encoding(), 0);
