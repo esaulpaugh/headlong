@@ -60,12 +60,12 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
     }
 
     private static byte[] encodeListLong(final int dataLen, final Iterable<RLPItem> elements) {
-        byte[] length = Integers.toBytes(dataLen);
-        int destHeaderLen = 1 + length.length;
-        byte[] dest = new byte[destHeaderLen + dataLen];
-        dest[0] = (byte) (DataType.LIST_LONG_OFFSET + length.length);
-        System.arraycopy(length, 0, dest, 1, length.length);
-        copyElements(elements, dest, destHeaderLen);
+        final int lengthOfLength = Integers.len(dataLen);
+        final int prefixLen = 1 + lengthOfLength;
+        byte[] dest = new byte[prefixLen + dataLen];
+        dest[0] = (byte) (DataType.LIST_LONG_OFFSET + lengthOfLength);
+        Integers.putLong(dataLen, dest, 1);
+        copyElements(elements, dest, prefixLen);
         return dest;
     }
 
