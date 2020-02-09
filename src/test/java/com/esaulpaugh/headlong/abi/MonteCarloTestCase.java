@@ -303,11 +303,9 @@ public class MonteCarloTestCase implements Serializable {
     private Tuple generateTuple(TupleType tupleType, Random r) {
         final ABIType<?>[] types = tupleType.elementTypes;
         Object[] args = new Object[types.length];
-
         for (int i = 0; i < types.length; i++) {
             args[i] = generateValue(types[i], r);
         }
-
         return new Tuple(args);
     }
 
@@ -333,9 +331,7 @@ public class MonteCarloTestCase implements Serializable {
         byte[] buffer = new byte[1 + r.nextInt(intType.bitLength >>> 3)]; // 1-4
         int x = new BigInteger(buffer).intValue();
         if(intType.unsigned && x < 0) {
-            int val = (-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0);
-            if(val < 0) throw new Error();
-            return val;
+            return (-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0);
         }
         return x;
     }
@@ -345,9 +341,7 @@ public class MonteCarloTestCase implements Serializable {
         r.nextBytes(random);
         long x = new BigInteger(random).longValue();
         if(longType.unsigned && x < 0) {
-            long val = ((-(x + 1)) << 1) + (r.nextBoolean() ? 1 : 0);
-            if(val < 0) throw new Error();
-            return val;
+            return ((-(x + 1)) << 1) + (r.nextBoolean() ? 1 : 0);
         }
         return x;
     }
@@ -460,6 +454,7 @@ public class MonteCarloTestCase implements Serializable {
         }
         return booleans;
     }
+
     private Tuple[] generateTupleArray(TupleType tupleType, final int len, Random r) {
         Tuple[] tuples = new Tuple[len];
         for (int i = 0; i < len; i++) {
