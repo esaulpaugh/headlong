@@ -156,6 +156,10 @@ public abstract class RLPItem {
         return data();
     }
 
+    /**
+     * @param encoding one of { {@link Strings#BASE_64_URL_SAFE}, {@link Strings#UTF_8}, {@link Strings#HEX} }.
+     * @return  this item's payload bytes, encoded to your liking
+     */
     public String asString(int encoding) {
         return Strings.encode(buffer, dataIndex, dataLength, encoding);
     }
