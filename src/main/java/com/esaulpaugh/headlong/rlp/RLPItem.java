@@ -285,6 +285,10 @@ public abstract class RLPItem {
         return Notation.forEncoding(buffer, index, endIndex).toString();
     }
 
+    /**
+     * @param encoding one of { {@link Strings#BASE_64_URL_SAFE}, {@link Strings#UTF_8}, {@link Strings#HEX} }.
+     * @return  this item's bytes, including RLP prefix, encoded to your liking
+     */
     public String toString(int encoding) {
         return Strings.encode(buffer, index, encodingLength(), encoding);
     }
