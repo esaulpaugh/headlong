@@ -72,16 +72,16 @@ public final class Notation {
     }
 
     public static Notation forEncoding(final byte[] buffer, final int index, int end) {
-        if(index < 0) {
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
-        end = Math.min(buffer.length, end);
-        if(index > end) {
+        if(index >= 0) {
+            end = Math.min(buffer.length, end);
+            if (index <= end) {
+                StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
+                buildList(sb, buffer, index, end, 0, true);
+                return new Notation(sb.append(END_NOTATION).toString());
+            }
             throw new IllegalArgumentException("index > end: " + index + " > " + end);
         }
-        StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
-        buildList(sb, buffer, index, end, 0, true);
-        return new Notation(sb.append(END_NOTATION).toString());
+        throw new ArrayIndexOutOfBoundsException(index);
     }
 
     public static Notation forObjects(Object... objects) {
@@ -98,29 +98,29 @@ public final class Notation {
 
     private static int getShortElementEnd(int elementDataIndex, final int elementDataLen, final int containerEnd) {
         final int end = elementDataIndex + elementDataLen;
-        if (end > containerEnd) {
-            throw exceedsContainer(elementDataIndex - 1, end, containerEnd);
+        if (end <= containerEnd) {
+            return end;
         }
-        return end;
+        throw exceedsContainer(elementDataIndex - 1, end, containerEnd);
     }
 
     private static int getLongElementEnd(byte[] data, final int leadByteIndex, final int dataIndex, final int containerEnd) {
-        if (dataIndex > containerEnd) {
-            throw exceedsContainer(leadByteIndex, dataIndex, containerEnd);
-        }
-        final int lengthIndex = leadByteIndex + 1;
-        final int lengthLen = dataIndex - lengthIndex;
-        final long dataLenLong = Integers.getLong(data, leadByteIndex + 1, lengthLen, LENIENT);
-        final long end = lengthIndex + lengthLen + dataLenLong;
-        if (end > containerEnd) {
-            throw exceedsContainer(leadByteIndex, end, containerEnd);
-        }
-        final int dataLen = (int) dataLenLong;
-        if (dataLen < DataType.MIN_LONG_DATA_LEN) {
+        if (dataIndex <= containerEnd) {
+            final int lengthIndex = leadByteIndex + 1;
+            final int lengthLen = dataIndex - lengthIndex;
+            final long dataLenLong = Integers.getLong(data, leadByteIndex + 1, lengthLen, LENIENT);
+            final long end = lengthIndex + lengthLen + dataLenLong;
+            if (end > containerEnd) {
+                throw exceedsContainer(leadByteIndex, end, containerEnd);
+            }
+            final int dataLen = (int) dataLenLong;
+            if (dataLen >= DataType.MIN_LONG_DATA_LEN) {
+                return (int) end;
+            }
             throw new IllegalArgumentException("long element data length must be " + DataType.MIN_LONG_DATA_LEN
                     + " or greater; found: " + dataLen + " for element @ " + leadByteIndex);
         }
-        return (int) end;
+        throw exceedsContainer(leadByteIndex, dataIndex, containerEnd);
     }
 
     private static int buildString(StringBuilder sb, byte[] data, int from, int to) {
@@ -132,15 +132,15 @@ public final class Notation {
         return to;
     }
 
-    private static int buildList(final StringBuilder sb, final byte[] data, final int dataIndex, int end, final int depth, final boolean _long) {
-        if(!_long) {
+    private static int buildList(final StringBuilder sb, final byte[] data, final int dataIndex, int end, final int depth, final boolean longList) {
+        if(!longList) {
             sb.append(BEGIN_LIST_SHORT);
         } else if(depth != 0) {
             sb.append(BEGIN_LIST);
         }
-        final String baseIndentation = _long ? getIndentation(depth) : null;
+        final String baseIndentation = longList ? getIndentation(depth) : null;
         for (int i = dataIndex; i < end; ) {
-            if(_long) {
+            if(longList) {
                 sb.append('\n').append(baseIndentation).append(ELEMENT_INDENTATION);
             }
             final byte lead = data[i];
@@ -148,13 +148,14 @@ public final class Notation {
             if(type != DataType.SINGLE_BYTE) {
                 int elementDataIdx = i + 1;
                 if(type.isLong) {
-                    if(!_long) {
+                    if(longList) {
+                        elementDataIdx += lead - type.offset; // lengthOfLength
+                        i = type.isString
+                                ? buildString(sb, data, elementDataIdx, getLongElementEnd(data, i, elementDataIdx, end))
+                                : buildList(sb, data, elementDataIdx, getLongElementEnd(data, i, elementDataIdx, end), depth + 1, true);
+                    } else {
                         throw new IllegalArgumentException("long element found in short list");
                     }
-                    elementDataIdx += lead - type.offset; // lengthOfLength
-                    i = type.isString
-                            ? buildString(sb, data, elementDataIdx, getLongElementEnd(data, i, elementDataIdx, end))
-                            : buildList(sb, data, elementDataIdx, getLongElementEnd(data, i, elementDataIdx, end), depth + 1, true);
                 } else {
                     i = type.isString
                             ? buildString(sb, data, elementDataIdx, getShortElementEnd(elementDataIdx, lead - type.offset, end))
@@ -167,7 +168,7 @@ public final class Notation {
         if (/* hasElement */ dataIndex != end) {
             stripFinalDelimiter(sb);
         }
-        if(!_long) {
+        if(!longList) {
             sb.append(LIST_SHORT_END_PLUS_DELIMITER);
         } else if(depth != 0) {
             sb.append('\n')
