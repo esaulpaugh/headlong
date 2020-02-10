@@ -32,6 +32,6 @@ public final class RLPString extends RLPItem {
     /** @see RLPItem#duplicate(RLPDecoder) */
     @Override
     public RLPString duplicate(RLPDecoder decoder) {
-        return decoder.wrapString(encoding(), 0);
+        return decoder.wrapString(encoding());
     }
 }

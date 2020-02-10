@@ -22,14 +22,15 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.infra.Blackhole;
 
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 
 @State(Scope.Benchmark)
 public class FunctionEncode {
@@ -51,7 +52,8 @@ public class FunctionEncode {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
-    public ByteBuffer headlong_encode_function_call() {
-        return f.encodeCall(args);
+    @Measurement(iterations = 5)
+    public void headlong_encode_function_call(Blackhole blackhole) {
+        blackhole.consume(f.encodeCall(args));
     }
 }

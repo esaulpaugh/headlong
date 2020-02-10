@@ -20,6 +20,7 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -67,6 +68,7 @@ public class KeyValuePairSort {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
+    @Measurement(iterations = 5)
     public void sortArray() {
         Arrays.sort(array, KeyValuePair.PAIR_COMPARATOR);
     }
@@ -75,6 +77,7 @@ public class KeyValuePairSort {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
+    @Measurement(iterations = 5)
     public void sortArrayList() {
         arrayList.sort(KeyValuePair.PAIR_COMPARATOR);
     }
@@ -83,6 +86,7 @@ public class KeyValuePairSort {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
+    @Measurement(iterations = 5)
     public void sortArraysArrayList() {
         arraysArrayList.sort(KeyValuePair.PAIR_COMPARATOR);
     }

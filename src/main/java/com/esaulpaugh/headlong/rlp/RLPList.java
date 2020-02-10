@@ -93,7 +93,7 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
     /** @see RLPItem#duplicate(RLPDecoder) */
     @Override
     public RLPList duplicate(RLPDecoder decoder) {
-        return decoder.wrapList(encoding(), 0);
+        return decoder.wrapList(encoding());
     }
 
     public Iterator<RLPItem> iterator(RLPDecoder decoder) {
