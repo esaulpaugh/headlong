@@ -79,6 +79,9 @@ public class MonteCarloTest {
             try {
                 testCase = new MonteCarloTestCase(params);
                 temp = testCase.function.getCanonicalSignature();
+                if(temp.contains("int[")) {
+                    throw new AssertionError("failed canonicalization!");
+                }
                 testCase.run();
                 testCase.runForPacked();
                 testCase.runSuperSerial();

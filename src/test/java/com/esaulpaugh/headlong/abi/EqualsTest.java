@@ -109,4 +109,32 @@ public class EqualsTest {
         System.out.println(Function.formatCall(array));
         assertThrown(IllegalArgumentException.class, "signed value given for unsigned type", () -> f.decodeCall(array));
     }
+
+    @Test
+    public void testNonCanonicalEquals() {
+
+        testNonCanonicalEquals("foo(int256)",           "foo(int)");
+        testNonCanonicalEquals("foo(int256[])",         "foo(int[])");
+        testNonCanonicalEquals("foo(int256[31])",       "foo(int[31])");
+        testNonCanonicalEquals("foo(int256[][])",       "foo(int[][])");
+        testNonCanonicalEquals("foo(int256[][7])",      "foo(int[][7])");
+        testNonCanonicalEquals("foo(int256[5][])",      "foo(int[5][])");
+        testNonCanonicalEquals("foo(int256[100][100])", "foo(int[100][100])");
+
+        testNonCanonicalEquals("foo(uint256)",          "foo(uint)");
+        testNonCanonicalEquals("foo(uint256[])",        "foo(uint[])");
+        testNonCanonicalEquals("foo(uint256[31])",      "foo(uint[31])");
+        testNonCanonicalEquals("foo(uint256[][])",      "foo(uint[][])");
+        testNonCanonicalEquals("foo(uint256[][7])",     "foo(uint[][7])");
+        testNonCanonicalEquals("foo(uint256[5][])",     "foo(uint[5][])");
+        testNonCanonicalEquals("foo(uint256[100][100])","foo(uint[100][100])");
+    }
+
+    private static void testNonCanonicalEquals(String canonical, String nonCanonical) {
+        assertNotEquals(canonical, nonCanonical);
+        Function canon = Function.parse(canonical);
+        Function nonCanon = Function.parse(nonCanonical);
+        assertEquals(canon, nonCanon);
+        assertEquals(canon.getCanonicalSignature(), nonCanon.getCanonicalSignature());
+    }
 }
