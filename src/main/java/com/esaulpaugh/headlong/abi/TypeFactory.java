@@ -282,12 +282,12 @@ final class TypeFactory {
         int depth = 1;
         do {
             char x = parentTypeString.charAt(i++);
-            if(x > ')') {
-                // continue;
-            } else if(x == ')') {
-                depth--;
-            } else if(x == '(') {
-                depth++;
+            if(x <= ')') {
+                if(x == ')') {
+                    depth--;
+                } else if(x == '(') {
+                    depth++;
+                }
             }
         } while(depth > 0);
         return i;
