@@ -62,9 +62,9 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
     }
 
     @Override
-    int encodeHead(Object value, ByteBuffer dest, int offset) {
+    int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
         Encoding.insertInt(((Number) value).longValue(), dest);
-        return offset;
+        return nextOffset;
     }
 
     @Override

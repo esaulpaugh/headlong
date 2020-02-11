@@ -51,9 +51,9 @@ public final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
-    int encodeHead(Object value, ByteBuffer dest, int offset) {
+    int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
         Encoding.insertInt((BigInteger) value, dest);
-        return offset;
+        return nextOffset;
     }
 
     @Override

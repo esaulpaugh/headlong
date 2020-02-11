@@ -83,7 +83,13 @@ public abstract class ABIType<J> implements Serializable {
 
     public abstract int validate(Object value);
 
-    abstract int encodeHead(Object value, ByteBuffer dest, int offset);
+    int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
+        if (!dynamic) {
+            encodeTail(value, dest);
+            return nextOffset;
+        }
+        return Encoding.insertOffset(nextOffset, dest, byteLength(value));
+    }
 
     abstract void encodeTail(Object value, ByteBuffer dest);
 

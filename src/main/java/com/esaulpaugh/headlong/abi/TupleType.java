@@ -135,41 +135,35 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    int encodeHead(Object value, ByteBuffer dest, int offset) {
-        if (!dynamic) {
-            encodeTail(value, dest);
-            return offset;
-        }
-        return Encoding.insertOffset(offset, this, value, dest);
-    }
-
-    @Override
     void encodeTail(Object value, ByteBuffer dest) {
         final Object[] values = ((Tuple) value).elements;
-        final int len = elementTypes.length;
-        int offset = headLengthSum(values);
-        for (int i = 0; i < len; i++) {
-            offset = elementTypes[i].encodeHead(values[i], dest, offset);
-        }
+        final ABIType<?>[] types = elementTypes;
         if(!dynamic) {
+            encodeHeads(types, values, dest, -1);
             return;
         }
-        for (int i = 0; i < len; i++) {
-            ABIType<?> type = elementTypes[i];
-            if(!type.dynamic) {
-                continue;
+        encodeHeads(types, values, dest, headLengthSum(types, values));
+        for (int i = 0; i < types.length; i++) {
+            ABIType<?> type = types[i];
+            if(type.dynamic) {
+                type.encodeTail(values[i], dest);
             }
-            type.encodeTail(values[i], dest);
         }
     }
 
-    private int headLengthSum(Object[] elements) {
-        int headLengths = 0;
-        for (int i = 0; i < elementTypes.length; i++) {
-            ABIType<?> type = elementTypes[i];
-            headLengths += !type.dynamic ? type.byteLength(elements[i]) : OFFSET_LENGTH_BYTES;
+    private static void encodeHeads(ABIType<?>[] types, Object[] values, ByteBuffer dest, int nextOffset) {
+        for (int i = 0; i < types.length; i++) {
+            nextOffset = types[i].encodeHead(values[i], dest, nextOffset);
         }
-        return headLengths;
+    }
+
+    private static int headLengthSum(ABIType<?>[] types, Object[] elements) {
+        int sum = 0;
+        for (int i = 0; i < types.length; i++) {
+            ABIType<?> type = types[i];
+            sum += !type.dynamic ? type.byteLength(elements[i]) : OFFSET_LENGTH_BYTES;
+        }
+        return sum;
     }
 
     public Tuple decode(byte[] array) {
@@ -188,39 +182,35 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
-        Object[] elements = new Object[elementTypes.length];
-        if(!dynamic) {
-            for (int i = 0; i < elementTypes.length; i++) {
+        final int len = elementTypes.length;
+        final Object[] elements = new Object[len];
+        if (!dynamic) {
+            for (int i = 0; i < len; i++) {
                 elements[i] = elementTypes[i].decode(bb, unitBuffer);
             }
         } else {
-            decodeDynamic(bb, elementTypes, unitBuffer, elements);
-        }
-        return new Tuple(elements);
-    }
-
-    private static void decodeDynamic(ByteBuffer bb, ABIType<?>[] elementTypes, byte[] elementBuffer, Object[] dest) {
 //        final int index = bb.position(); // *** save this value here if you want to support lenient mode below
-        final int len = elementTypes.length;
-        int[] offsets = new int[len];
-        for (int i = 0; i < len; i++) {
-            ABIType<?> elementType = elementTypes[i];
-            if (!elementType.dynamic) {
-                dest[i] = elementType.decode(bb, elementBuffer);
-            } else {
-                offsets[i] = Encoding.OFFSET_TYPE.decode(bb, elementBuffer);
+            final int[] offsets = new int[len];
+            for (int i = 0; i < len; i++) {
+                ABIType<?> elementType = elementTypes[i];
+                if (!elementType.dynamic) {
+                    elements[i] = elementType.decode(bb, unitBuffer);
+                } else {
+                    offsets[i] = Encoding.OFFSET_TYPE.decode(bb, unitBuffer);
+                }
             }
-        }
-        for (int i = 0; i < len; i++) {
-            if (offsets[i] > 0) {
-                /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
+            for (int i = 0; i < len; i++) {
+                if (offsets[i] > 0) {
+                    /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
 //                if(bb.position() != index + offset) {
 //                    System.err.println(TupleType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
 //                    bb.position(index + offset); // lenient
 //                }
-                dest[i] = elementTypes[i].decode(bb, elementBuffer);
+                    elements[i] = elementTypes[i].decode(bb, unitBuffer);
+                }
             }
         }
+        return new Tuple(elements);
     }
 
     @Override

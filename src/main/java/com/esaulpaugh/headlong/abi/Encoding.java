@@ -39,9 +39,9 @@ final class Encoding {
         Arrays.fill(NEGATIVE_INT_PADDING, NEGATIVE_ONE_BYTE);
     }
 
-    static int insertOffset(final int offset, ABIType<?> paramType, Object object, ByteBuffer dest) {
+    static int insertOffset(final int offset, ByteBuffer dest, int tailByteLen) {
         insertInt(offset, dest);
-        return offset + paramType.byteLength(object);
+        return offset + tailByteLen; // return next offset
     }
 
     static void insertInt(long val, ByteBuffer dest) {

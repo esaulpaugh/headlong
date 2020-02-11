@@ -271,24 +271,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    int encodeHead(Object value, ByteBuffer dest, int offset) {
-        if (!dynamic) {
-            encodeArrayTail(value, dest);
-            return offset;
-        }
-        // includes String
-        return Encoding.insertOffset(offset, this, value, dest);
-    }
-
-    @Override
     void encodeTail(Object value, ByteBuffer dest) {
-        if(!isString) {
-            encodeArrayTail(value, dest);
-        } else {
-            byte[] bytes = Strings.decode((String) value, UTF_8);
-            Encoding.insertInt(bytes.length, dest); // insertLength
-            insertBytes(bytes, dest);
-        }
+        encodeArrayTail(!isString ? value : Strings.decode((String) value, UTF_8), dest);
     }
 
     private void insert(Supplier<Integer> supplyLength, Runnable insert, ByteBuffer dest) {
@@ -312,12 +296,12 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
             final int len = objects.length;
             if(dynamic) {
                 if(length == DYNAMIC_LENGTH) {
-                    Encoding.insertInt(len, dest); // insertLength
+                    Encoding.insertInt(len, dest); // insert array length
                 }
                 if (elementType.dynamic) { // if elements are dynamic
-                    int offset = len << LOG_2_UNIT_LENGTH_BYTES; // mul 32 (0x20)
+                    int nextOffset = len << LOG_2_UNIT_LENGTH_BYTES; // mul 32 (0x20)
                     for (int i = 0; i < len; i++) {
-                        offset = Encoding.insertOffset(offset, elementType, objects[i], dest);
+                        nextOffset = Encoding.insertOffset(nextOffset, dest, elementType.byteLength(objects[i]));
                     }
                 }
             }
