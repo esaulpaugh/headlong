@@ -67,8 +67,8 @@ public final class FastHex {
     }
 
     @SuppressWarnings("deprecation")
-    public static String encodeToString(byte[] buffer, int off, final int len) {
-        byte[] enc = encodeToBytes(buffer, off, len);
+    public static String encodeToString(byte[] buffer, int offset, final int len) {
+        byte[] enc = encodeToBytes(buffer, offset, len);
         return new String(enc, 0, 0, enc.length);
     }
 
@@ -87,24 +87,24 @@ public final class FastHex {
         return decode(hex, 0, hex.length());
     }
 
-    public static byte[] decode(String hex, int offset, int length) {
-        return decode(hex.getBytes(StandardCharsets.US_ASCII), offset, length);
+    public static byte[] decode(String hex, int offset, int len) {
+        return decode(hex.getBytes(StandardCharsets.US_ASCII), offset, len);
     }
 
-    public static byte[] decode(byte[] hexBytes, int off, final int len) {
+    public static byte[] decode(byte[] hexBytes, int offset, final int len) {
         if ((len & 0x01) != 0) { // mod 2
-            throw new IllegalArgumentException("length must be a multiple of two");
+            throw new IllegalArgumentException("len must be a multiple of two");
         }
         final int bytesLen = len >> 1; // div 2
         byte[] bytes = new byte[bytesLen];
-        for (int i = 0; i < bytesLen; i++, off+=2) {
-            byte left = DECODE_TABLE[hexBytes[off]];
+        for (int i = 0; i < bytesLen; i++, offset+=2) {
+            byte left = DECODE_TABLE[hexBytes[offset]];
             if (left == NO_MAPPING) {
-                throw new IllegalArgumentException("illegal val @ " + off);
+                throw new IllegalArgumentException("illegal val @ " + offset);
             }
-            byte right = DECODE_TABLE[hexBytes[off+1]];
+            byte right = DECODE_TABLE[hexBytes[offset+1]];
             if (right == NO_MAPPING) {
-                throw new IllegalArgumentException("illegal val @ " + (off + 1));
+                throw new IllegalArgumentException("illegal val @ " + (offset + 1));
             }
             bytes[i] = (byte) ((left << NIBBLE_BITS) | right);
         }

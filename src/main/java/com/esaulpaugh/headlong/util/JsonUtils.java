@@ -22,7 +22,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 
-/** Utility methods related to JSON. */
 public final class JsonUtils {
 
     public static JsonElement parse(String json) {

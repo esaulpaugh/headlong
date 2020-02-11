@@ -23,7 +23,7 @@ import static com.migcomponents.migbase64.Base64.NO_LINE_SEP;
 import static com.migcomponents.migbase64.Base64.NO_PADDING;
 import static com.migcomponents.migbase64.Base64.URL_SAFE_CHARS;
 
-/** Utility for encoding and decoding hexadecimal, Base64, and UTF-8-encoded {@code String}s. */
+/** Utility for encoding and decoding hexadecimal, Base64, and UTF-8-encoded {@link String}s. */
 public final class Strings {
 
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];

@@ -28,12 +28,12 @@ public class UnsignedTest {
     @Test
     public void testExceptions() throws Throwable {
         Uint uint64 = new Uint(64);
-        uint64.toSigned(Long.MAX_VALUE);
+        uint64.toSignedLong(Long.MAX_VALUE);
         uint64.toUnsigned(Long.MAX_VALUE);
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
                 "unsigned value is negative: -9223372036854775808",
-                () -> uint64.toSigned(Long.MIN_VALUE)
+                () -> uint64.toSignedLong(Long.MIN_VALUE)
         );
         TestUtils.assertThrown(
                 ArithmeticException.class,
@@ -55,7 +55,7 @@ public class UnsignedTest {
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
                 "unsigned has too many bits: 9 > 8",
-                () -> new Uint(8).toSigned(256)
+                () -> new Uint(8).toSignedLong(256)
         );
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
@@ -116,12 +116,12 @@ public class UnsignedTest {
             final Uint type = new Uint(i);
             final long power = (long) Math.pow(2.0, i - 1);
             for (long j = power - 2; j < power; j++) {
-                Assertions.assertEquals(j, type.toSigned(j));
+                Assertions.assertEquals(j, type.toSignedLong(j));
             }
             final long negativePower = -power;
             for (long j = power; j < power + 2; j++) {
                 long expected = negativePower + (j - power);
-                long actual = type.toSigned(j);
+                long actual = type.toSignedLong(j);
                 Assertions.assertEquals(expected, actual);
             }
         }
@@ -152,8 +152,8 @@ public class UnsignedTest {
             for (int j = 0; j < 25; j++) {
                 long x = TestUtils.pickRandom(r);
                 x &= mask;
-                Assertions.assertEquals(x, type.toSigned(type.toUnsignedLong(x)));
-                Assertions.assertEquals(x, type.toUnsignedLong(type.toSigned(x)));
+                Assertions.assertEquals(x, type.toSignedLong(type.toUnsignedLong(x)));
+                Assertions.assertEquals(x, type.toUnsignedLong(type.toSignedLong(x)));
                 BigInteger bigIntX = BigInteger.valueOf(x);
                 Assertions.assertEquals(bigIntX, type.toUnsigned(type.toSigned(bigIntX)));
                 Assertions.assertEquals(bigIntX, type.toSigned(type.toUnsigned(bigIntX)));

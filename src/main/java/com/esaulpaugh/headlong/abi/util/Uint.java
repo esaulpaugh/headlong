@@ -55,23 +55,7 @@ public final class Uint {
         this.maskLong = maskLong;
     }
 
-    public long[] toUnsigned(int... ints) {
-        long[] out = new long[ints.length];
-        for (int i = 0; i < out.length; i++) {
-            out[i] = toUnsignedLong(ints[i]);
-        }
-        return out;
-    }
-
-    public BigInteger[] toUnsigned(long... longs) {
-        BigInteger[] out = new BigInteger[longs.length];
-        for (int i = 0; i < out.length; i++) {
-            out[i] = toUnsigned(longs[i]);
-        }
-        return out;
-    }
-
-    public long toSigned(long unsigned) {
+    public long toSignedLong(long unsigned) {
         if(rangeLong != ZERO) {
             if(unsigned < 0) {
                 throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
@@ -125,6 +109,30 @@ public final class Uint {
                     : signed.add(range);
         }
         throw tooManyBitsException(bitLen, numBits, true);
+    }
+
+    public long[] toUnsignedLongAll(int... signeds) {
+        long[] out = new long[signeds.length];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = toUnsignedLong(signeds[i]);
+        }
+        return out;
+    }
+
+    public BigInteger[] toUnsignedAll(long... signeds) {
+        BigInteger[] out = new BigInteger[signeds.length];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = toUnsigned(signeds[i]);
+        }
+        return out;
+    }
+
+    public BigInteger[] toUnsignedAll(BigInteger... signeds) {
+        BigInteger[] out = new BigInteger[signeds.length];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = toUnsigned(signeds[i]);
+        }
+        return out;
     }
 
     private static IllegalArgumentException tooManyBitsException(int bitLen, int rangeNumBits, boolean signed) {
