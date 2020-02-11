@@ -74,7 +74,7 @@ final class TypeFactory {
                 @SuppressWarnings("unchecked")
                 final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
                 final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
-                return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, '[' + arrayClassName);
+                return new ArrayType<ABIType<?>, Object>(elementType.canonicalType + type.substring(arrayOpenIndex), arrayClass, dynamic, elementType, length, '[' + arrayClassName);
             }
             if(baseType == null) {
                 baseType = resolveBaseType(type, nameless);
