@@ -234,10 +234,6 @@ public abstract class RLPItem {
         return new BigInteger(data());
     }
 
-    public BigDecimal asBigDecimal(int scale) {
-        return new BigDecimal(asBigIntSigned(), scale);
-    }
-
     /**
      * Clones this object.
      *

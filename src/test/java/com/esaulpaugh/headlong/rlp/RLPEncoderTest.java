@@ -155,7 +155,7 @@ public class RLPEncoderTest {
 
         assertEquals(f, iter.next().asFloat(false), 0.0001d);
         assertEquals(d, iter.next().asDouble(false), 0.0001d);
-        assertEquals(bd, iter.next().asBigDecimal(bd.scale()));
+        assertEquals(bd, new BigDecimal(iter.next().asBigIntSigned(), bd.scale()));
     }
 
     @Test

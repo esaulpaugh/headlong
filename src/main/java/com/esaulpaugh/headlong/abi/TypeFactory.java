@@ -33,8 +33,8 @@ final class TypeFactory {
 
     private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
 
-    static ABIType<?> create(String type, String name) {
-        return buildType(type, null, name == null)
+    static ABIType<?> create(String rawType, String name) {
+        return buildType(rawType, null, name == null)
                 .setName(name);
     }
 
@@ -43,25 +43,26 @@ final class TypeFactory {
                 .setName(name);
     }
 
-    private static ABIType<?> buildType(final String type, ABIType<?> baseType, final boolean nameless) {
+    private static ABIType<?> buildType(final String rawType, ABIType<?> baseType, final boolean nameless) {
         try {
-            final int lastCharIndex = type.length() - 1;
-            if (type.charAt(lastCharIndex) == ']') { // array
+            final int lastCharIndex = rawType.length() - 1;
+            if (rawType.charAt(lastCharIndex) == ']') { // array
 
                 final int secondToLastCharIndex = lastCharIndex - 1;
-                final int arrayOpenIndex = type.lastIndexOf('[', secondToLastCharIndex);
+                final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIndex);
 
                 final int length;
                 if (arrayOpenIndex == secondToLastCharIndex) { // i.e. []
                     length = DYNAMIC_LENGTH;
                 } else { // e.g. [4]
-                    final int startInt = arrayOpenIndex + 1;
+                    final int startLen = arrayOpenIndex + 1;
                     try {
-                        length = Integer.parseInt(type.substring(startInt, lastCharIndex));
+                        String lengthStr = rawType.substring(startLen, lastCharIndex);
+                        length = Integer.parseInt(lengthStr);
                         if (length < 0) {
-                            throw new IllegalArgumentException("negative array size");
+                            throw new IllegalArgumentException("negative array length");
                         }
-                        if(lastCharIndex - startInt > 1 && type.charAt(startInt) == '0') {
+                        if(lengthStr.length() > 1 && rawType.charAt(startLen) == '0') {
                             throw new IllegalArgumentException("leading zero in array length");
                         }
                     } catch (NumberFormatException nfe) {
@@ -69,15 +70,15 @@ final class TypeFactory {
                     }
                 }
 
-                final ABIType<?> elementType = buildType(type.substring(0, arrayOpenIndex), baseType, nameless);
+                final ABIType<?> elementType = buildType(rawType.substring(0, arrayOpenIndex), baseType, nameless);
                 final String arrayClassName = elementType.arrayClassName();
                 @SuppressWarnings("unchecked")
                 final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
                 final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
-                return new ArrayType<ABIType<?>, Object>(elementType.canonicalType + type.substring(arrayOpenIndex), arrayClass, dynamic, elementType, length, '[' + arrayClassName);
+                return new ArrayType<ABIType<?>, Object>(elementType.canonicalType + rawType.substring(arrayOpenIndex), arrayClass, dynamic, elementType, length, '[' + arrayClassName);
             }
             if(baseType == null) {
-                baseType = resolveBaseType(type, nameless);
+                baseType = resolveBaseType(rawType, nameless);
             }
             if (baseType != null) {
                 return baseType;
@@ -85,9 +86,9 @@ final class TypeFactory {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } catch (StringIndexOutOfBoundsException sioobe) { // e.g. type equals "" or "82]" or "[]" or "[1]"
-            throw new IllegalArgumentException("unrecognized type: " + type, sioobe);
+            throw new IllegalArgumentException("unrecognized type: " + rawType, sioobe);
         }
-        throw new IllegalArgumentException("unrecognized type: " + type);
+        throw new IllegalArgumentException("unrecognized type: " + rawType);
     }
 
     private static ABIType<?> resolveBaseType(String baseTypeStr, boolean nameless) {

@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EncodeTest {
 
-    private static final Class<IllegalArgumentException> PARSE_ERR = IllegalArgumentException.class;
+    private static final Class<IllegalArgumentException> ILLEGAL = IllegalArgumentException.class;
 
     private static final char[] ALPHABET = "(),abcdefgilmnorstuxy0123456789[]".toCharArray(); // ")uint8,[]"
     private static final int ALPHABET_LEN = ALPHABET.length;
@@ -119,43 +119,43 @@ public class EncodeTest {
 
     @Test
     public void nonTerminatingTupleTest() throws Throwable {
-        assertThrown(PARSE_ERR, "unrecognized type: aaaaaa", () -> TupleType.parse("aaaaaa"));
+        assertThrown(ILLEGAL, "unrecognized type: aaaaaa", () -> TupleType.parse("aaaaaa"));
 
-        assertThrown(PARSE_ERR, "unrecognized type: (", () -> Function.parse("("));
+        assertThrown(ILLEGAL, "unrecognized type: (", () -> Function.parse("("));
 
-        assertThrown(PARSE_ERR, "unrecognized type: ([", () -> Function.parse("(["));
+        assertThrown(ILLEGAL, "unrecognized type: ([", () -> Function.parse("(["));
 
-        assertThrown(PARSE_ERR, "unrecognized type: (int", () -> Function.parse("(int"));
+        assertThrown(ILLEGAL, "unrecognized type: (int", () -> Function.parse("(int"));
 
-        assertThrown(PARSE_ERR, "unrecognized type: (bool[],", () -> Function.parse("(bool[],"));
+        assertThrown(ILLEGAL, "unrecognized type: (bool[],", () -> Function.parse("(bool[],"));
 
-        assertThrown(PARSE_ERR, "unrecognized type: (()", () -> Function.parse("(()"));
+        assertThrown(ILLEGAL, "unrecognized type: (()", () -> Function.parse("(()"));
 
-        assertThrown(PARSE_ERR, "unrecognized type: (())...", () -> Function.parse("(())..."));
+        assertThrown(ILLEGAL, "unrecognized type: (())...", () -> Function.parse("(())..."));
 
-        assertThrown(PARSE_ERR, "unrecognized type: ((((()))", () -> Function.parse("((((()))"));
+        assertThrown(ILLEGAL, "unrecognized type: ((((()))", () -> Function.parse("((((()))"));
 
-        assertThrown(PARSE_ERR, "illegal signature termination", () -> Function.parse("f()[]"));
+        assertThrown(ILLEGAL, "illegal signature termination", () -> Function.parse("f()[]"));
     }
 
     @Test
     public void emptyParamTest() throws Throwable {
-        assertThrown(PARSE_ERR, EMPTY_PARAMETER, () -> Function.parse("(,"));
+        assertThrown(ILLEGAL, EMPTY_PARAMETER, () -> Function.parse("(,"));
 
-        assertThrown(PARSE_ERR, "@ index 0, " + EMPTY_PARAMETER, () -> new Function("baz(,)"));
+        assertThrown(ILLEGAL, "@ index 0, " + EMPTY_PARAMETER, () -> new Function("baz(,)"));
 
-        assertThrown(PARSE_ERR, "@ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,)"));
+        assertThrown(ILLEGAL, "@ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,)"));
 
-        assertThrown(PARSE_ERR, "@ index 1, @ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,(int,,))"));
+        assertThrown(ILLEGAL, "@ index 1, @ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,(int,,))"));
     }
 
     @Test
     public void illegalCharsTest() throws Throwable {
-        assertThrown(PARSE_ERR, "illegal char", () -> Function.parse("œ()"));
+        assertThrown(ILLEGAL, "illegal char", () -> Function.parse("œ()"));
 
-        assertThrown(PARSE_ERR, "illegal char 0x2a6 '\u02a6' @ index 2", () -> new Function("ba\u02a6z(uint32,bool)"));
+        assertThrown(ILLEGAL, "illegal char 0x2a6 '\u02a6' @ index 2", () -> new Function("ba\u02a6z(uint32,bool)"));
 
-        assertThrown(PARSE_ERR, "@ index 1, @ index 0, unrecognized type: bool\u02a6", () -> new Function("baz(int32,(bool\u02a6))"));
+        assertThrown(ILLEGAL, "@ index 1, @ index 0, unrecognized type: bool\u02a6", () -> new Function("baz(int32,(bool\u02a6))"));
     }
 
     @Test
@@ -174,9 +174,15 @@ public class EncodeTest {
         assertEquals(decoded, args);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    public void leadingZeroArrayLenTest() throws Throwable {
-        assertThrown(PARSE_ERR, "leading zero in array length", () -> Function.parse("zzz(()[04])"));
+    public void testArrayLen() throws Throwable {
+
+        assertThrown(ILLEGAL, "@ index 0, negative array length", () -> Function.parse("abba(()[-04])"));
+
+        assertThrown(ILLEGAL, "@ index 0, leading zero in array length", () -> Function.parse("zaba(()[04])"));
+
+        assertEquals(4, ((ArrayType<TupleType, Tuple[]>) Function.parse("yaba(()[4])").getParamTypes().get(0)).getLength());
     }
 
     @Test
