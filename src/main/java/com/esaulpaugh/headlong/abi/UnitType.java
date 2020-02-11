@@ -67,11 +67,6 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
         return nextOffset;
     }
 
-    @Override
-    void encodeTail(Object value, ByteBuffer dest) {
-        throw new UnsupportedOperationException();
-    }
-
     void validatePrimitive(long longVal) {
         checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
         if (unsigned && longVal < 0) {
@@ -85,16 +80,6 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
             throw new IllegalArgumentException("signed value given for unsigned type");
         }
     }
-
-//    // don't do unsigned check for array element
-//    final void validatePrimitiveElement(long longVal) {
-//        checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
-//    }
-//
-//    // don't do unsigned check for array element
-//    final void validateBigIntElement(BigInteger bigIntVal) {
-//        checkBitLen(bigIntVal.bitLength());
-//    }
 
     final void checkBitLen(int actual) {
         if (actual > bitLength) {

@@ -91,7 +91,9 @@ public abstract class ABIType<J> implements Serializable {
         return Encoding.insertOffset(nextOffset, dest, byteLength(value));
     }
 
-    abstract void encodeTail(Object value, ByteBuffer dest);
+    void encodeTail(Object value, ByteBuffer dest) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Decodes the data at the buffer's current position according to this {@link ABIType}.

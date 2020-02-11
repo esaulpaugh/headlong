@@ -37,13 +37,6 @@ public final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
-    public BigInteger parseArgument(String s) {
-        BigInteger bigInt = new BigInteger(s);
-        validate(bigInt);
-        return bigInt;
-    }
-
-    @Override
     public int validate(Object value) {
         validateClass(value);
         validateBigInt((BigInteger) value);
@@ -62,5 +55,12 @@ public final class BigIntegerType extends UnitType<BigInteger> {
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigInt(bi);
         return bi;
+    }
+
+    @Override
+    public BigInteger parseArgument(String s) {
+        BigInteger bigInt = new BigInteger(s);
+        validate(bigInt);
+        return bigInt;
     }
 }
