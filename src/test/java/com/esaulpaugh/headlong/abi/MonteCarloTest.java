@@ -279,7 +279,7 @@ public class MonteCarloTest {
     public void printNewTestCases() {
         final Gson ugly = new GsonBuilder().create();
         final JsonPrimitive version = new JsonPrimitive("1.4.4+commit.3ad2258");
-        JsonArray array = new JsonArray();
+        final JsonArray array = new JsonArray();
         int i = 0;
         for(final long seed : generateSeeds(TestUtils.getSeed(System.nanoTime()), 250)) {
             final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed);

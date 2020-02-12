@@ -46,8 +46,8 @@ final class PackedEncoder {
         case TYPE_CODE_BYTE:
         case TYPE_CODE_INT:
         case TYPE_CODE_LONG: encodeInt(((Number) value).longValue(), type.byteLengthPacked(null), dest); return;
-        case TYPE_CODE_BIG_INTEGER: encodeInt(((BigInteger) value), type.byteLengthPacked(null), dest); return;
-        case TYPE_CODE_BIG_DECIMAL: encodeInt(((BigDecimal) value).unscaledValue(), type.byteLengthPacked(null), dest); return;
+        case TYPE_CODE_BIG_INTEGER: Encoding.insertInt(((BigInteger) value), type.byteLengthPacked(null), dest); return;
+        case TYPE_CODE_BIG_DECIMAL: Encoding.insertInt(((BigDecimal) value).unscaledValue(), type.byteLengthPacked(null), dest); return;
         case TYPE_CODE_ARRAY: encodeArray((ArrayType<?, ?>) type, value, dest); return;
         case TYPE_CODE_TUPLE: encodeTuple((TupleType) type, (Tuple) value, dest); return;
         default: throw new Error();
@@ -97,13 +97,13 @@ final class PackedEncoder {
 
     private static void encodeBigIntegers(BigInteger[] arr, int byteLen, ByteBuffer dest) {
         for (BigInteger e : arr) {
-            encodeInt(e, byteLen, dest);
+            Encoding.insertInt(e, byteLen, dest);
         }
     }
 
     private static void encodeBigDecimals(BigDecimal[] arr, int byteLen, ByteBuffer dest) {
         for (BigDecimal e : arr) {
-            encodeInt(e.unscaledValue(), byteLen, dest);
+            Encoding.insertInt(e.unscaledValue(), byteLen, dest);
         }
     }
 // ---------------------------------------------------------------------------------------------------------------------
@@ -119,11 +119,5 @@ final class PackedEncoder {
             Integers.putN(Encoding.NEGATIVE_ONE_BYTE, byteLen - BizarroIntegers.len(value), dest);
             BizarroIntegers.putLong(value, dest);
         }
-    }
-
-    private static void encodeInt(BigInteger signed, int byteLen, ByteBuffer dest) {
-        byte[] arr = signed.toByteArray();
-        Integers.putN(signed.signum() >= 0 ? Encoding.ZERO_BYTE : Encoding.NEGATIVE_ONE_BYTE, byteLen - arr.length, dest);
-        dest.put(arr);
     }
 }

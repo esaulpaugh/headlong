@@ -16,14 +16,10 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.JsonUtils;
-import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonObject;
 
-import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Objects;
-
-import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 /** Represents an event in Ethereum. */
 public final class Event implements ABIObject {
@@ -80,14 +76,6 @@ public final class Event implements ABIObject {
 
     public TupleType getNonIndexedParams() {
         return inputs.subTupleType(indexManifest, true);
-    }
-
-    public byte[] topics0() {
-        return topics0(Function.newDefaultDigest());
-    }
-
-    public byte[] topics0(MessageDigest md) {
-        return anonymous ? null : md.digest(Strings.decode(signature(), UTF_8));
     }
 
     @Override

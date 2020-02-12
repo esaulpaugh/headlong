@@ -49,9 +49,13 @@ final class Encoding {
         dest.putLong(val);
     }
 
-    static void insertInt(BigInteger bigGuy, ByteBuffer dest) {
-        final byte[] arr = bigGuy.toByteArray();
-        Integers.putN(bigGuy.signum() < 0 ? NEGATIVE_ONE_BYTE : ZERO_BYTE, UNIT_LENGTH_BYTES - arr.length, dest);
+    static void insertInt(BigInteger signed, ByteBuffer dest) {
+        insertInt(signed, UNIT_LENGTH_BYTES, dest);
+    }
+
+    static void insertInt(BigInteger signed, int byteLen, ByteBuffer dest) {
+        byte[] arr = signed.toByteArray();
+        Integers.putN(signed.signum() >= 0 ? ZERO_BYTE : NEGATIVE_ONE_BYTE, byteLen - arr.length, dest);
         dest.put(arr);
     }
 }
