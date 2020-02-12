@@ -163,34 +163,34 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
-                <executions>
-                    <execution>
-                        <id>run-benchmarks</id>
-                        <!-- enable this to have jmh benchmarks run automatically during package phase -->
+            <!-- enable this to have jmh benchmarks run automatically during package phase -->
+<!--            <plugin>-->
+<!--                <groupId>org.codehaus.mojo</groupId>-->
+<!--                <artifactId>exec-maven-plugin</artifactId>-->
+<!--                <version>1.6.0</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>run-benchmarks</id>-->
 <!--                        <phase>package</phase>-->
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <classpathScope>test</classpathScope>
-                            <executable>java</executable>
-                            <arguments>
-                                <argument>-classpath</argument>
-                                <classpath />
-                                <argument>com.esaulpaugh.headlong.jmh.Main</argument>
-                                <argument>.*</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <mainClass>org.openjdk.jmh.Main</mainClass>
-                </configuration>
-            </plugin>
+<!--                        <goals>-->
+<!--                            <goal>exec</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <classpathScope>test</classpathScope>-->
+<!--                            <executable>java</executable>-->
+<!--                            <arguments>-->
+<!--                                <argument>-classpath</argument>-->
+<!--                                <classpath />-->
+<!--                                <argument>com.esaulpaugh.headlong.jmh.Main</argument>-->
+<!--                                <argument>.*</argument>-->
+<!--                            </arguments>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--                <configuration>-->
+<!--                    <mainClass>org.openjdk.jmh.Main</mainClass>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 </project>
