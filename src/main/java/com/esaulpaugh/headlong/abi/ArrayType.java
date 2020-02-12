@@ -395,7 +395,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         final int mark = bb.position();
         byte[] out = new byte[arrayLen];
         bb.get(out);
-        ((java.nio.Buffer) bb).position(mark + Integers.roundLengthUp(arrayLen, UNIT_LENGTH_BYTES));
+        bb.position(mark + Integers.roundLengthUp(arrayLen, UNIT_LENGTH_BYTES));
         return !isString ? out : Strings.encode(out, UTF_8);
     }
 

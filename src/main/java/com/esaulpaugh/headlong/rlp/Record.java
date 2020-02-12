@@ -50,12 +50,11 @@ public final class Record {
 
         final int contentListLen = RLPEncoder.prefixLength(payloadLen) + payloadLen;
         final int contentListOffset = recordLen - contentListLen;
-        java.nio.Buffer buf = (java.nio.Buffer) bb;
-        buf.position(contentListOffset);
+        bb.position(contentListOffset);
         RLPEncoder.insertRecordContentList(payloadLen, seq, pairs, bb);
 
         final byte[] signature = signer.sign(bb.array(), contentListOffset, contentListLen);
-        buf.position(recordListPrefixLen);
+        bb.position(recordListPrefixLen);
         RLPEncoder.insertRecordSignature(signature, bb);
 
         this.rlp = RLP_STRICT.wrapList(bb.array());
