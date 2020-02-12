@@ -108,16 +108,11 @@ public abstract class RLPItem {
     }
 
     public final byte[] encoding() {
-        final int len = encodingLength();
-        byte[] copy = new byte[len];
-        System.arraycopy(buffer, index, copy, 0, len);
-        return copy;
+        return copyOfRange(index, endIndex);
     }
 
     public final byte[] data() {
-        byte[] copy = new byte[dataLength];
-        System.arraycopy(buffer, dataIndex, copy, 0, dataLength);
-        return copy;
+        return copyOfRange(dataIndex, endIndex);
     }
 
     public final byte[] copyOfRange(int from, int to) {
@@ -131,20 +126,29 @@ public abstract class RLPItem {
     }
 
     public final int exportData(byte[] dest, int destIndex) {
-        System.arraycopy(buffer, dataIndex, dest, destIndex, dataLength);
-        return destIndex + dataLength;
+        return exportRange(dataIndex, endIndex, dest, destIndex);
     }
 
+    /**
+     * Copies the specified range of bytes from this item's underlying buffer into the specified destination array.
+     *
+     * @param from      the initial index of the range to be copied, inclusive
+     * @param to        the final index of the range to be copied, exclusive
+     * @param dest      the destination array into which the bytes will be copied
+     * @param destIndex the index into the destination array at which to place the bytes
+     * @return the next index into {@code dest}
+     * @throws IndexOutOfBoundsException if {@code from < index} or {@code to > endIndex}
+     */
     public final int exportRange(int from, int to, byte[] dest, int destIndex) {
-        if(from < index) {
-            throw new IndexOutOfBoundsException(from + " < " + index);
-        }
-        if(to > endIndex) {
+        if(from >= index) {
+            if(to <= endIndex) {
+                int len = to - from;
+                System.arraycopy(buffer, from, dest, destIndex, len);
+                return destIndex + len;
+            }
             throw new IndexOutOfBoundsException(to + " > " + endIndex);
         }
-        int len = to - from;
-        System.arraycopy(buffer, from, dest, destIndex, len);
-        return destIndex + len;
+        throw new IndexOutOfBoundsException(from + " < " + index);
     }
 
     /**
@@ -164,7 +168,7 @@ public abstract class RLPItem {
     }
 
     /**
-     * Only 0xc0, 0x80, and 0x00 are false. Everything else is true.
+     * Only {@code 0xc0}, {@code 0x80}, and {@code 0x00} are false. Everything else is true.
      *
      * @return the boolean represenation for this item
      * @see Integers#putByte(byte, byte[], int)
