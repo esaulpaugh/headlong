@@ -86,7 +86,7 @@ public class UnsignedTest {
             if (type.rangeLong <= 0
                     || type.halfRangeLong <= 0
                     || type.maskLong <= 0) {
-                throw new Error("" + type.numBits);
+                throw new Error(String.valueOf(type.numBits));
             }
             final long power = (long) Math.pow(2.0, i);
             for (long j = 0; j < 2; j++)
