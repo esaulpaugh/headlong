@@ -202,7 +202,7 @@
   <property name="module.jdk.bin.headlong" value="${project.jdk.bin}"/>
   <property name="module.jdk.classpath.headlong" value="${project.jdk.classpath}"/>
   
-  <property name="compiler.args.headlong" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  <property name="compiler.args.headlong" value="-encoding UTF-8 --release 8 ${compiler.args}"/> <!-- -source 8 -target 8 -->
   
   <property name="headlong.output.dir" value="${module.headlong.basedir}/classes/production/headlong"/>
   <property name="headlong.testoutput.dir" value="${module.headlong.basedir}/classes/test/headlong"/>
@@ -260,7 +260,7 @@
   <property name="module.jdk.bin.headlong.main" value="${project.jdk.bin}"/>
   <property name="module.jdk.classpath.headlong.main" value="${project.jdk.classpath}"/>
   
-  <property name="compiler.args.headlong.main" value="-encoding UTF-8 -source 8 -target 1.8 ${compiler.args}"/>
+  <property name="compiler.args.headlong.main" value="-encoding UTF-8 --release 8 ${compiler.args}"/> <!-- -source 8 -target 8 -->
   
   <property name="headlong.main.output.dir" value="${module.headlong.main.basedir}/build/classes/java/main"/>
   <property name="headlong.main.testoutput.dir" value="${module.headlong.main.basedir}/build/classes/java/main"/>
@@ -347,7 +347,7 @@
   <property name="module.jdk.bin.headlong.jmh" value="${project.jdk.bin}"/>
   <property name="module.jdk.classpath.headlong.jmh" value="${project.jdk.classpath}"/>
   
-  <property name="compiler.args.headlong.jmh" value="-encoding UTF-8 -source 8 -target 1.8 ${compiler.args}"/>
+  <property name="compiler.args.headlong.jmh" value="-encoding UTF-8 --release 8 ${compiler.args}"/> <!-- -source 8 -target 8 -->
   
   <property name="headlong.jmh.output.dir" value="${module.headlong.jmh.basedir}/build/classes/java/jmh"/>
   <property name="headlong.jmh.testoutput.dir" value="${module.headlong.jmh.basedir}/build/classes/java/jmh"/>
@@ -416,7 +416,7 @@
   <property name="module.jdk.bin.headlong.test" value="${project.jdk.bin}"/>
   <property name="module.jdk.classpath.headlong.test" value="${project.jdk.classpath}"/>
   
-  <property name="compiler.args.headlong.test" value="-encoding UTF-8 -source 8 -target 1.8 ${compiler.args}"/>
+  <property name="compiler.args.headlong.test" value="-encoding UTF-8 --release 8 ${compiler.args}"/> <!-- -source 8 -target 8 -->
   
   <property name="headlong.test.output.dir" value="undefined"/>
   <property name="headlong.test.testoutput.dir" value="${module.headlong.test.basedir}/build/classes/java/test"/>
