@@ -67,7 +67,7 @@ abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or
         return nextOffset;
     }
 
-    void validatePrimitive(long longVal) {
+    final void validatePrimitive(long longVal) {
         checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
         if (unsigned && longVal < 0) {
             throw new IllegalArgumentException("signed value given for unsigned type");
