@@ -354,34 +354,34 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     @Override
     @SuppressWarnings("unchecked")
-    J decode(ByteBuffer bb, byte[] elementBuffer) {
+    J decode(ByteBuffer bb, byte[] unitBuffer) {
         final int arrayLen = length == DYNAMIC_LENGTH
-                ? ARRAY_LENGTH_TYPE.decode(bb, elementBuffer)
+                ? ARRAY_LENGTH_TYPE.decode(bb, unitBuffer)
                 : length;
 
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return (J) decodeBooleanArray(bb, arrayLen, elementBuffer);
+        case TYPE_CODE_BOOLEAN: return (J) decodeBooleanArray(bb, arrayLen, unitBuffer);
         case TYPE_CODE_BYTE: return (J) decodeByteArray(bb, arrayLen);
-        case TYPE_CODE_INT: return (J) decodeIntArray((IntType) elementType, bb, arrayLen, elementBuffer);
-        case TYPE_CODE_LONG: return (J) decodeLongArray((LongType) elementType, bb, arrayLen, elementBuffer);
-        case TYPE_CODE_BIG_INTEGER: return (J) decodeBigIntegerArray((BigIntegerType) elementType, bb, arrayLen, elementBuffer);
-        case TYPE_CODE_BIG_DECIMAL: return (J) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, elementBuffer);
+        case TYPE_CODE_INT: return (J) decodeIntArray((IntType) elementType, bb, arrayLen, unitBuffer);
+        case TYPE_CODE_LONG: return (J) decodeLongArray((LongType) elementType, bb, arrayLen, unitBuffer);
+        case TYPE_CODE_BIG_INTEGER: return (J) decodeBigIntegerArray((BigIntegerType) elementType, bb, arrayLen, unitBuffer);
+        case TYPE_CODE_BIG_DECIMAL: return (J) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, unitBuffer);
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return (J) decodeObjectArray(arrayLen, bb, elementBuffer);
+        case TYPE_CODE_TUPLE: return (J) decodeObjectArray(arrayLen, bb, unitBuffer);
         default: throw new Error();
         }
     }
 
-    private static boolean[] decodeBooleanArray(ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
+    private static boolean[] decodeBooleanArray(ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
         boolean[] booleans = new boolean[arrayLen]; // elements are false by default
         final int booleanOffset = UNIT_LENGTH_BYTES - Byte.BYTES;
         for(int i = 0; i < arrayLen; i++) {
-            bb.get(elementBuffer);
+            bb.get(unitBuffer);
             for (int j = 0; j < booleanOffset; j++) {
-                if(elementBuffer[j] == 0) continue;
+                if(unitBuffer[j] == 0) continue;
                 throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - j));
             }
-            byte last = elementBuffer[booleanOffset];
+            byte last = unitBuffer[booleanOffset];
             if(last == 1) {
                 booleans[i] = true;
             } else if(last != 0) {
@@ -399,80 +399,70 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return !isString ? out : Strings.encode(out, UTF_8);
     }
 
-    private static int[] decodeIntArray(IntType intType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
+    private static int[] decodeIntArray(IntType intType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
         int[] ints = new int[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            ints[i] = decodeBigIntElement(intType, bb, elementBuffer).intValue();
+            ints[i] = decodeBigIntElement(intType, bb, unitBuffer).intValue();
         }
         return ints;
     }
 
-    private static long[] decodeLongArray(LongType longType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
+    private static long[] decodeLongArray(LongType longType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
         long[] longs = new long[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            longs[i] = decodeBigIntElement(longType, bb, elementBuffer).longValue();
+            longs[i] = decodeBigIntElement(longType, bb, unitBuffer).longValue();
         }
         return longs;
     }
 
-    private static BigInteger[] decodeBigIntegerArray(BigIntegerType bigIntegerType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
+    private static BigInteger[] decodeBigIntegerArray(BigIntegerType bigIntegerType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            bigInts[i] = decodeBigIntElement(bigIntegerType, bb, elementBuffer);
+            bigInts[i] = decodeBigIntElement(bigIntegerType, bb, unitBuffer);
         }
         return bigInts;
     }
 
-    private static BigDecimal[] decodeBigDecimalArray(BigDecimalType bigDecimalType, ByteBuffer bb, int arrayLen, byte[] elementBuffer) {
+    private static BigDecimal[] decodeBigDecimalArray(BigDecimalType bigDecimalType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
         BigDecimal[] bigDecs = new BigDecimal[arrayLen];
         final int scale = bigDecimalType.scale;
         for (int i = 0; i < arrayLen; i++) {
-            bigDecs[i] = new BigDecimal(decodeBigIntElement(bigDecimalType, bb, elementBuffer), scale);
+            bigDecs[i] = new BigDecimal(decodeBigIntElement(bigDecimalType, bb, unitBuffer), scale);
         }
         return bigDecs;
     }
 
-    private static BigInteger decodeBigIntElement(UnitType<?> type, ByteBuffer bb, byte[] elementBuffer) {
-        bb.get(elementBuffer);
-        BigInteger bi = new BigInteger(elementBuffer);
+    private static BigInteger decodeBigIntElement(UnitType<?> type, ByteBuffer bb, byte[] unitBuffer) {
+        bb.get(unitBuffer);
+        BigInteger bi = new BigInteger(unitBuffer);
         type.validateBigInt(bi);
         return bi;
     }
 
-    private Object[] decodeObjectArray(int len, ByteBuffer bb, byte[] elementBuffer) {
+    private Object[] decodeObjectArray(int len, ByteBuffer bb, byte[] unitBuffer) {
         Object[] dest = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
-        if(!this.dynamic) {
+        if(!this.dynamic || !elementType.dynamic) {
             for (int i = 0; i < len; i++) {
-                dest[i] = elementType.decode(bb, elementBuffer);
-            }
-        } else {
-            decodeObjectArrayDynamic(len, bb, elementBuffer, dest);
-        }
-        return dest;
-    }
-
-    private void decodeObjectArrayDynamic(int len, ByteBuffer bb, byte[] elementBuffer, final Object[] dest) {
-        if(!elementType.dynamic) {
-            for (int i = 0; i < len; i++) {
-                dest[i] = elementType.decode(bb, elementBuffer);
+                dest[i] = elementType.decode(bb, unitBuffer);
             }
         } else {
 //            final int index = bb.position(); // *** save this value here if you want to support lenient mode below
             int[] offsets = new int[len];
             for (int i = 0; i < len; i++) {
-                offsets[i] = Encoding.OFFSET_TYPE.decode(bb, elementBuffer);
+                offsets[i] = Encoding.OFFSET_TYPE.decode(bb, unitBuffer);
             }
             for (int i = 0; i < len; i++) {
                 if (offsets[i] > 0) {
-                    /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
+                    /* OPERATES IN STRICT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
 //                    if (bb.position() != index + offset) {
 //                        System.err.println(ArrayType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
 //                        bb.position(index + offset); // lenient
 //                    }
-                    dest[i] = elementType.decode(bb, elementBuffer);
+                    dest[i] = elementType.decode(bb, unitBuffer);
                 }
             }
         }
+        return dest;
     }
 
     @Override
