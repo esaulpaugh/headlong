@@ -58,11 +58,11 @@ final class PackedEncoder {
         final ABIType<?> elementType = arrayType.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: encodeBooleans((boolean[]) value, dest); return;
-        case TYPE_CODE_BYTE: encodeBytes(!arrayType.isString ? (byte[]) value : Strings.decode((String) value, Strings.UTF_8), dest); return;
+        case TYPE_CODE_BYTE: dest.put(!arrayType.isString ? (byte[]) value : Strings.decode((String) value, Strings.UTF_8)); return;
         case TYPE_CODE_INT: encodeInts((int[]) value, elementType.byteLengthPacked(null), dest); return;
         case TYPE_CODE_LONG: encodeLongs((long[]) value, elementType.byteLengthPacked(null), dest); return;
-        case TYPE_CODE_BIG_INTEGER: encodeBigIntegers((BigInteger[]) value, elementType.byteLengthPacked(null), dest); return;
-        case TYPE_CODE_BIG_DECIMAL: encodeBigDecimals((BigDecimal[]) value, elementType.byteLengthPacked(null), dest); return;
+        case TYPE_CODE_BIG_INTEGER: Encoding.insertBigIntegers((BigInteger[]) value, elementType.byteLengthPacked(null), dest); return;
+        case TYPE_CODE_BIG_DECIMAL: Encoding.insertBigDecimals((BigDecimal[]) value, elementType.byteLengthPacked(null), dest); return;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
             for(Object e : (Object[]) value) {
@@ -79,10 +79,6 @@ final class PackedEncoder {
         }
     }
 
-    private static void encodeBytes(byte[] arr, ByteBuffer dest) {
-        dest.put(arr);
-    }
-
     private static void encodeInts(int[] arr, int byteLen, ByteBuffer dest) {
         for (int e : arr) {
             encodeInt(e, byteLen, dest);
@@ -94,18 +90,6 @@ final class PackedEncoder {
             encodeInt(e, byteLen, dest);
         }
     }
-
-    private static void encodeBigIntegers(BigInteger[] arr, int byteLen, ByteBuffer dest) {
-        for (BigInteger e : arr) {
-            Encoding.insertInt(e, byteLen, dest);
-        }
-    }
-
-    private static void encodeBigDecimals(BigDecimal[] arr, int byteLen, ByteBuffer dest) {
-        for (BigDecimal e : arr) {
-            Encoding.insertInt(e.unscaledValue(), byteLen, dest);
-        }
-    }
 // ---------------------------------------------------------------------------------------------------------------------
     private static void encodeBoolean(boolean value, ByteBuffer dest) {
         dest.put(value ? Encoding.ONE_BYTE : Encoding.ZERO_BYTE);
@@ -113,10 +97,10 @@ final class PackedEncoder {
 
     private static void encodeInt(long value, int byteLen, ByteBuffer dest) {
         if(value >= 0) {
-            Integers.putN(Encoding.ZERO_BYTE, byteLen - Integers.len(value), dest);
+            Encoding.putN(Encoding.ZERO_BYTE, byteLen - Integers.len(value), dest);
             Integers.putLong(value, dest);
         } else {
-            Integers.putN(Encoding.NEGATIVE_ONE_BYTE, byteLen - BizarroIntegers.len(value), dest);
+            Encoding.putN(Encoding.NEGATIVE_ONE_BYTE, byteLen - BizarroIntegers.len(value), dest);
             BizarroIntegers.putLong(value, dest);
         }
     }

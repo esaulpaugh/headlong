@@ -464,10 +464,4 @@ public final class Integers {
             throw new IllegalArgumentException("expected length mod " + powerOfTwo + " == 0, found: " + (len % powerOfTwo));
         }
     }
-
-    public static void putN(byte val, int n, ByteBuffer dest) {
-        for (int i = 0; i < n; i++) {
-            dest.put(val);
-        }
-    }
 }

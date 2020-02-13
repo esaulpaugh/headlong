@@ -288,9 +288,9 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BYTE: insert(() -> ((byte[]) value).length, () -> insertBytes((byte[]) value, dest), dest); return;
         case TYPE_CODE_INT: insert(() -> ((int[]) value).length, () -> insertInts((int[]) value, dest), dest); return;
         case TYPE_CODE_LONG: insert(() -> ((long[]) value).length, () -> insertLongs((long[]) value, dest), dest); return;
-        case TYPE_CODE_BIG_INTEGER: insert(() -> ((BigInteger[]) value).length, () -> insertBigIntegers((BigInteger[]) value, dest), dest); return;
-        case TYPE_CODE_BIG_DECIMAL: insert(() -> ((BigDecimal[]) value).length, () -> insertBigDecimals((BigDecimal[]) value, dest), dest); return;
-        case TYPE_CODE_ARRAY:  // type for String[] has elementType.typeCode() == TYPE_CODE_ARRAY
+        case TYPE_CODE_BIG_INTEGER: insert(() -> ((BigInteger[]) value).length, () -> Encoding.insertBigIntegers((BigInteger[]) value, UNIT_LENGTH_BYTES, dest), dest); return;
+        case TYPE_CODE_BIG_DECIMAL: insert(() -> ((BigDecimal[]) value).length, () -> Encoding.insertBigDecimals((BigDecimal[]) value, UNIT_LENGTH_BYTES, dest), dest); return;
+        case TYPE_CODE_ARRAY:  // note that type for String[] has elementType.typeCode() == TYPE_CODE_ARRAY
         case TYPE_CODE_TUPLE:
             final Object[] objects = (Object[]) value;
             final int len = objects.length;
@@ -321,11 +321,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private static void insertBytes(byte[] bytes, ByteBuffer dest) {
         dest.put(bytes);
-        final int remainder = bytes.length & (UNIT_LENGTH_BYTES - 1);
-        final int paddingLength = remainder != 0 ? UNIT_LENGTH_BYTES - remainder : 0;
-        for (int i = 0; i < paddingLength; i++) {
-            dest.put(Encoding.ZERO_BYTE);
-        }
+        final int rem = bytes.length & (UNIT_LENGTH_BYTES - 1);
+        Encoding.putN(Encoding.ZERO_BYTE, rem != 0 ? UNIT_LENGTH_BYTES - rem : 0, dest);
     }
 
     private static void insertInts(int[] ints, ByteBuffer dest) {
@@ -337,18 +334,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private static void insertLongs(long[] longs, ByteBuffer dest) {
         for (long e : longs) {
             Encoding.insertInt(e, dest);
-        }
-    }
-
-    private static void insertBigIntegers(BigInteger[] bigInts, ByteBuffer dest) {
-        for (BigInteger e : bigInts) {
-            Encoding.insertInt(e, dest);
-        }
-    }
-
-    private static void insertBigDecimals(BigDecimal[] bigDecs, ByteBuffer dest) {
-        for (BigDecimal e : bigDecs) {
-            Encoding.insertInt(e.unscaledValue(), dest);
         }
     }
 

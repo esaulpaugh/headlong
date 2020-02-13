@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.Integers;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -49,13 +50,27 @@ final class Encoding {
         dest.putLong(val);
     }
 
-    static void insertInt(BigInteger signed, ByteBuffer dest) {
-        insertInt(signed, UNIT_LENGTH_BYTES, dest);
-    }
-
     static void insertInt(BigInteger signed, int byteLen, ByteBuffer dest) {
         byte[] arr = signed.toByteArray();
-        Integers.putN(signed.signum() >= 0 ? ZERO_BYTE : NEGATIVE_ONE_BYTE, byteLen - arr.length, dest);
+        putN(signed.signum() >= 0 ? ZERO_BYTE : NEGATIVE_ONE_BYTE, byteLen - arr.length, dest);
         dest.put(arr);
+    }
+
+    static void insertBigIntegers(BigInteger[] arr, int byteLen, ByteBuffer dest) {
+        for (BigInteger e : arr) {
+            insertInt(e, byteLen, dest);
+        }
+    }
+
+    static void insertBigDecimals(BigDecimal[] arr, int byteLen, ByteBuffer dest) {
+        for (BigDecimal e : arr) {
+            insertInt(e.unscaledValue(), byteLen, dest);
+        }
+    }
+
+    static void putN(byte val, int n, ByteBuffer dest) {
+        for (int i = 0; i < n; i++) {
+            dest.put(val);
+        }
     }
 }
