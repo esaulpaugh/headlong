@@ -16,44 +16,49 @@
 package com.esaulpaugh.headlong.jmh;
 
 import com.esaulpaugh.headlong.abi.Function;
-import com.esaulpaugh.headlong.abi.Tuple;
-import com.esaulpaugh.headlong.util.Strings;
+import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
+import com.joemelsha.crypto.hash.Keccak;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
-import java.math.BigInteger;
-
 @State(Scope.Benchmark)
-public class FunctionEncode {
+public class MeasureFunction {
 
-    private Function f;
-    private Tuple args;
+//    private Function f;
+//    private Tuple args;
+//
+//    @Setup(Level.Trial)
+//    public void setUp() {
+//        f = new Function("sam(bytes,bool,uint256[])");
+//        args = Tuple.of(
+//                Strings.decode("dave", Strings.UTF_8),
+//                true,
+//                new BigInteger[] { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3) }
+//        );
+//    }
 
-    @Setup(Level.Trial)
-    public void setUp() {
-        f = new Function("sam(bytes,bool,uint256[])");
-        args = Tuple.of(
-                Strings.decode("dave", Strings.UTF_8),
-                true,
-                new BigInteger[] { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3) }
-        );
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.Throughput)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = 5)
+    public void init_with_keccak(Blackhole blackhole) {
+        blackhole.consume(Function.parse("sam(bytes,bool,uint256[])", new Keccak(256)));
     }
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.SingleShotTime)
+    @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
     @Measurement(iterations = 5)
-    public void headlong_encode_function_call(Blackhole blackhole) {
-        blackhole.consume(f.encodeCall(args));
+    public void init_with_wrapped_bouncy_keccak(Blackhole blackhole) {
+        blackhole.consume(Function.parse("sam(bytes,bool,uint256[])", new WrappedKeccak(256)));
     }
 }

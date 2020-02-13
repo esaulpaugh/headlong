@@ -31,7 +31,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 @State(Scope.Thread)
-public class Padding {
+public class MeasurePadding {
 
     private static final int UNIT_LENGTH_BYTES = 32;
 

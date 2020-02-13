@@ -10,8 +10,9 @@ public class Main {
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(KeyValuePairSort.class.getSimpleName())
-                .include(FunctionEncode.class.getSimpleName())
+                .include(MeasureFunction.class.getSimpleName())
+                .include(MeasureKeyValuePairSort.class.getSimpleName())
+                .include(MeasurePadding.class.getSimpleName())
                 .warmupForks(1)
                 .warmupIterations(1)
                 .forks(1)

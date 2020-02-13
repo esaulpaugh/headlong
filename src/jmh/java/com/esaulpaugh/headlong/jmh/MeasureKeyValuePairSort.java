@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Random;
 
 @State(Scope.Thread)
-public class KeyValuePairSort {
+public class MeasureKeyValuePairSort {
 
     private static final int SIZE = 20;
     private static final int KEY_LEN_BOUND = 20;
