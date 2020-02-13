@@ -77,16 +77,13 @@ final class TypeFactory {
                 final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
                 return new ArrayType<ABIType<?>, Object>(elementType.canonicalType + rawType.substring(arrayOpenIndex), arrayClass, dynamic, elementType, length, '[' + arrayClassName);
             }
-            if(baseType == null) {
-                baseType = resolveBaseType(rawType, nameless);
-            }
-            if (baseType != null) {
+            if(baseType != null || (baseType = resolveBaseType(rawType, nameless)) != null) {
                 return baseType;
             }
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } catch (StringIndexOutOfBoundsException sioobe) { // e.g. type equals "" or "82]" or "[]" or "[1]"
-            throw new IllegalArgumentException("unrecognized type: " + rawType, sioobe);
+            /* fall through */
         }
         throw new IllegalArgumentException("unrecognized type: " + rawType);
     }
