@@ -101,16 +101,23 @@ public final class SuperSerial {
 
     private static Object deserialize(ABIType<?> type, RLPItem item) {
         switch (type.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return item.asBoolean();
-        case TYPE_CODE_BYTE: return item.asByte(); // case currently goes unused
-        case TYPE_CODE_INT: return item.asInt(false);
-        case TYPE_CODE_LONG: return item.asLong();
-        case TYPE_CODE_BIG_INTEGER: return item.dataLength != 0 ? item.asBigIntSigned() : BigInteger.ZERO;
-        case TYPE_CODE_BIG_DECIMAL: return new BigDecimal(item.dataLength != 0 ? item.asBigIntSigned() : BigInteger.ZERO, ((BigDecimalType) type).getScale());
+        case TYPE_CODE_BOOLEAN: return requireNotList(type, item, item.asBoolean());
+        case TYPE_CODE_BYTE: return requireNotList(type, item, item.asByte()); // case currently goes unused
+        case TYPE_CODE_INT: return requireNotList(type, item, item.asInt(false));
+        case TYPE_CODE_LONG: return requireNotList(type, item, item.asLong());
+        case TYPE_CODE_BIG_INTEGER: return requireNotList(type, item, item.dataLength != 0 ? item.asBigIntSigned() : BigInteger.ZERO);
+        case TYPE_CODE_BIG_DECIMAL: return requireNotList(type, item, new BigDecimal(item.dataLength != 0 ? item.asBigIntSigned() : BigInteger.ZERO, ((BigDecimalType) type).getScale()));
         case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<? extends ABIType<?>, ?>) type, item);
         case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());
         default: throw new Error();
         }
+    }
+
+    private static Object requireNotList(ABIType<?> type, RLPItem item, Object result) {
+        if(!item.isList()) {
+            return result;
+        }
+        throw new IllegalArgumentException("RLP list items not allowed for this type: " + type + "\n" + item);
     }
 
     private static Object serializeArray(ArrayType<? extends ABIType<?>, ?> arrayType, Object arr) {
