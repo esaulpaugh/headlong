@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.Integers;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -31,12 +33,15 @@ final class Encoding {
     static final byte ZERO_BYTE = (byte) 0x00;
     static final byte ONE_BYTE = (byte) 0x01;
 
-    private static final byte[] NON_NEGATIVE_INT_PADDING = new byte[UNIT_LENGTH_BYTES - Long.BYTES];
-    private static final byte[] NEGATIVE_INT_PADDING = new byte[UNIT_LENGTH_BYTES - Long.BYTES];
+    private static final byte[] CACHED_ZERO_PADDING = new byte[UNIT_LENGTH_BYTES];
+    private static final byte[] CACHED_NEG1_PADDING = new byte[UNIT_LENGTH_BYTES];
 
     static {
-        Arrays.fill(NEGATIVE_INT_PADDING, NEGATIVE_ONE_BYTE);
+        Arrays.fill(CACHED_NEG1_PADDING, NEGATIVE_ONE_BYTE);
     }
+
+    private static final byte[] NON_NEGATIVE_INT_PADDING = new byte[UNIT_LENGTH_BYTES - Long.BYTES];
+    private static final byte[] NEGATIVE_INT_PADDING = Arrays.copyOfRange(CACHED_NEG1_PADDING, 0, UNIT_LENGTH_BYTES - Long.BYTES);
 
     static int insertOffset(final int offset, ByteBuffer dest, int tailByteLen) {
         insertInt(offset, dest);
@@ -50,8 +55,14 @@ final class Encoding {
 
     static void insertInt(BigInteger signed, int byteLen, ByteBuffer dest) {
         byte[] arr = signed.toByteArray();
-        putN(signed.signum() >= 0 ? ZERO_BYTE : NEGATIVE_ONE_BYTE, byteLen - arr.length, dest);
+        insertPadding(byteLen - arr.length, signed.signum() < 0, dest);
         dest.put(arr);
+    }
+
+    static void insertBytesPadded(byte[] bytes, ByteBuffer dest) {
+        dest.put(bytes);
+        int rem = Integers.mod(bytes.length, UNIT_LENGTH_BYTES);
+        Encoding.insertPadding(rem != 0 ? UNIT_LENGTH_BYTES - rem : 0, false, dest);
     }
 
     static void insertBigIntegers(BigInteger[] arr, int byteLen, ByteBuffer dest) {
@@ -66,9 +77,7 @@ final class Encoding {
         }
     }
 
-    static void putN(byte val, int n, ByteBuffer dest) {
-        for (int i = 0; i < n; i++) {
-            dest.put(val);
-        }
+    static void insertPadding(int n, boolean negativeOnes, ByteBuffer dest) {
+        dest.put(!negativeOnes ? CACHED_ZERO_PADDING : CACHED_NEG1_PADDING, 0, n);
     }
 }

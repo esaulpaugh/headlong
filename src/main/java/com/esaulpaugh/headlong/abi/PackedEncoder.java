@@ -97,10 +97,10 @@ final class PackedEncoder {
 
     private static void encodeInt(long value, int byteLen, ByteBuffer dest) {
         if(value >= 0) {
-            Encoding.putN(Encoding.ZERO_BYTE, byteLen - Integers.len(value), dest);
+            Encoding.insertPadding(byteLen - Integers.len(value), false, dest);
             Integers.putLong(value, dest);
         } else {
-            Encoding.putN(Encoding.NEGATIVE_ONE_BYTE, byteLen - BizarroIntegers.len(value), dest);
+            Encoding.insertPadding(byteLen - BizarroIntegers.len(value), true, dest);
             BizarroIntegers.putLong(value, dest);
         }
     }

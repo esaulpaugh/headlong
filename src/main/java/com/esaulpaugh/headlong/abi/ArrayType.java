@@ -285,7 +285,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private void encodeArrayTail(Object value, ByteBuffer dest) {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: insert(() -> ((boolean[]) value).length, () -> insertBooleans((boolean[]) value, dest), dest); return;
-        case TYPE_CODE_BYTE: insert(() -> ((byte[]) value).length, () -> insertBytes((byte[]) value, dest), dest); return;
+        case TYPE_CODE_BYTE: insert(() -> ((byte[]) value).length, () -> Encoding.insertBytesPadded((byte[]) value, dest), dest); return;
         case TYPE_CODE_INT: insert(() -> ((int[]) value).length, () -> insertInts((int[]) value, dest), dest); return;
         case TYPE_CODE_LONG: insert(() -> ((long[]) value).length, () -> insertLongs((long[]) value, dest), dest); return;
         case TYPE_CODE_BIG_INTEGER: insert(() -> ((BigInteger[]) value).length, () -> Encoding.insertBigIntegers((BigInteger[]) value, UNIT_LENGTH_BYTES, dest), dest); return;
@@ -317,12 +317,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         for (boolean e : bools) {
             dest.put(e ? BooleanType.BOOLEAN_TRUE : BooleanType.BOOLEAN_FALSE);
         }
-    }
-
-    private static void insertBytes(byte[] bytes, ByteBuffer dest) {
-        dest.put(bytes);
-        final int rem = bytes.length & (UNIT_LENGTH_BYTES - 1);
-        Encoding.putN(Encoding.ZERO_BYTE, rem != 0 ? UNIT_LENGTH_BYTES - rem : 0, dest);
     }
 
     private static void insertInts(int[] ints, ByteBuffer dest) {

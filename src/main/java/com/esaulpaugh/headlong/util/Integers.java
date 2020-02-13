@@ -446,6 +446,10 @@ public final class Integers {
         return len;
     }
 
+    public static int mod(int val, int powerOfTwo) {
+        return val & (powerOfTwo - 1);
+    }
+
     /**
      * Rounds a length up to the nearest multiple of {@code powerOfTwo}. If {@code len} is already a multiple, method has
      * no effect.
@@ -455,12 +459,12 @@ public final class Integers {
      * @return the rounded-up value
      */
     public static int roundLengthUp(int len, int powerOfTwo) {
-        int mod = len & (powerOfTwo - 1);
+        int mod = mod(len, powerOfTwo);
         return mod != 0 ? len + (powerOfTwo - mod) : len;
     }
 
     public static void checkIsMultiple(int len, int powerOfTwo) {
-        if((len & (powerOfTwo - 1)) != 0) {
+        if(mod(len, powerOfTwo) != 0) {
             throw new IllegalArgumentException("expected length mod " + powerOfTwo + " == 0, found: " + (len % powerOfTwo));
         }
     }
