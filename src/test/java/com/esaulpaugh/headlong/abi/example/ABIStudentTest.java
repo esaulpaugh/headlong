@@ -38,8 +38,8 @@ public class ABIStudentTest {
 
         ByteBuffer reencoded = tt.encode(plato.toTuple());
 
-        System.out.println(Function.hexOf(reencoded));
-        System.out.println(Function.hexOf(tt.encodePacked(plato.toTuple())));
+        System.out.println(Strings.encode(reencoded));
+        System.out.println(Strings.encode(tt.encodePacked(plato.toTuple())));
         System.out.println(plato);
 
         assertArrayEquals(studentAbi.array(), reencoded.array());

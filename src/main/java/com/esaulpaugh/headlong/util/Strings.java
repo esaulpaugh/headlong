@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.util;
 
 import com.migcomponents.migbase64.Base64;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import static com.migcomponents.migbase64.Base64.NO_LINE_SEP;
@@ -36,6 +37,10 @@ public final class Strings {
 
     public static String encode(byte b) {
         return encode(new byte[] { b });
+    }
+
+    public static String encode(ByteBuffer buffer) {
+        return encode(buffer.array());
     }
 
     public static String encode(byte[] bytes) {

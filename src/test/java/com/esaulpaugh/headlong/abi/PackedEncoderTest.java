@@ -64,7 +64,7 @@ public class PackedEncoderTest {
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
-        assertEquals("010001", Function.hexOf(bb));
+        assertEquals("010001", Strings.encode(bb));
 
         Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
 
@@ -79,7 +79,7 @@ public class PackedEncoderTest {
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
-        assertEquals("", Function.hexOf(bb));
+        assertEquals("", Strings.encode(bb));
 
         TestUtils.assertThrown(IllegalArgumentException.class, "can't decode dynamic number of zero-length elements", () -> PackedDecoder.decode(tupleType, bb.array()));
     }
@@ -92,7 +92,7 @@ public class PackedEncoderTest {
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
-        assertEquals("01020304", Function.hexOf(bb));
+        assertEquals("01020304", Strings.encode(bb));
 
         byte[] packed = Strings.decode("01020304");
 
@@ -114,7 +114,7 @@ public class PackedEncoderTest {
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
-        assertEquals("fff1f1", Function.hexOf(bb));
+        assertEquals("fff1f1", Strings.encode(bb));
 
         Tuple decoded = PackedDecoder.decode(tupleType, Strings.decode("fff1f1"));
 
@@ -137,15 +137,15 @@ public class PackedEncoderTest {
 
         assertEquals(packedLen, bb.position());
 
-        System.out.println(Function.hexOf(bb));
+        System.out.println(Strings.encode(bb));
 
-        assertEquals("ffff42000348656c6c6f2c20776f726c6421", Function.hexOf(bb));
+        assertEquals("ffff42000348656c6c6f2c20776f726c6421", Strings.encode(bb));
 
         // ---------------------------
 
         Function function = new Function(tupleType.canonicalType);
 
-        String hex = Function.hexOf(function.getParamTypes().encode(test));
+        String hex = Strings.encode(function.getParamTypes().encode(test));
 
         System.out.println(hex);
 
@@ -162,9 +162,9 @@ public class PackedEncoderTest {
 
         ByteBuffer dest2 = tt.encodePacked(args);
 
-        System.out.println(Function.hexOf(dest2));
+        System.out.println(Strings.encode(dest2));
 
-        assertEquals("ffff42000348656c6c6f2c20776f726c6421", Function.hexOf(dest2));
+        assertEquals("ffff42000348656c6c6f2c20776f726c6421", Strings.encode(dest2));
 
     }
 
@@ -177,9 +177,9 @@ public class PackedEncoderTest {
         ByteBuffer bb = tupleType.encodePacked(values);
         assertEquals(bb.capacity(), bb.position());
 
-        System.out.println(Function.hexOf(bb));
+        System.out.println(Strings.encode(bb));
 
-        assertEquals("fffffe0100", Function.hexOf(bb));
+        assertEquals("fffffe0100", Strings.encode(bb));
 
         Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
 
@@ -195,9 +195,9 @@ public class PackedEncoderTest {
         ByteBuffer bb = tupleType.encodePacked(test);
         assertEquals(bb.capacity(), bb.position());
 
-        System.out.println(Function.hexOf(bb));
+        System.out.println(Strings.encode(bb));
 
-        assertEquals("000300050000070000080000090000000900000000ffffffff0100010000000000000006ffffffffffffffffff", Function.hexOf(bb));
+        assertEquals("000300050000070000080000090000000900000000ffffffff0100010000000000000006ffffffffffffffffff", Strings.encode(bb));
 
         Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
 
@@ -214,9 +214,9 @@ public class PackedEncoderTest {
         byte[] packedArray = bb.array();
         assertEquals(packedArray.length, bb.position());
 
-        System.out.println(Function.hexOf(bb));
+        System.out.println(Strings.encode(bb));
 
-        assertEquals("00000000000000010000000000000002000000000000000300000000000000040000000000000000000000000000000000000000000000000000000000000001", Function.hexOf(bb));
+        assertEquals("00000000000000010000000000000002000000000000000300000000000000040000000000000000000000000000000000000000000000000000000000000001", Strings.encode(bb));
 
         Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
 
@@ -232,9 +232,9 @@ public class PackedEncoderTest {
         ByteBuffer bb = tupleType.encodePacked(values);
         assertEquals(bb.capacity(), bb.position());
 
-        System.out.println(Function.hexOf(bb));
+        System.out.println(Strings.encode(bb));
 
-        assertEquals("010101010100", Function.hexOf(bb));
+        assertEquals("010101010100", Strings.encode(bb));
 
         Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
 
@@ -252,9 +252,9 @@ public class PackedEncoderTest {
         ByteBuffer bb = tupleType.encodePacked(values);
         assertEquals(bb.capacity(), bb.position());
 
-        System.out.println(Function.hexOf(bb));
+        System.out.println(Strings.encode(bb));
 
-        assertEquals("800000", Function.hexOf(bb));
+        assertEquals("800000", Strings.encode(bb));
 
         Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
 
@@ -272,9 +272,9 @@ public class PackedEncoderTest {
         ByteBuffer bb = tupleType.encodePacked(values);
         assertEquals(bb.capacity(), bb.position());
 
-        System.out.println(Function.hexOf(bb));
+        System.out.println(Strings.encode(bb));
 
-        assertEquals("000000800000000000800000", Function.hexOf(bb));
+        assertEquals("000000800000000000800000", Strings.encode(bb));
 
         Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
 
