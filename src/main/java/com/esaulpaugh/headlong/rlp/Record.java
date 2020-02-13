@@ -45,7 +45,7 @@ public final class Record {
             throw new IllegalArgumentException("record length exceeds maximum: " + recordLen + " > " + MAX_RECORD_LEN);
         }
 
-        ByteBuffer bb = ByteBuffer.allocate(recordLen);
+        final ByteBuffer bb = ByteBuffer.allocate(recordLen);
         RLPEncoder.insertListPrefix(recordListDataLen, bb);
 
         final int contentListLen = RLPEncoder.prefixLength(payloadLen) + payloadLen;
@@ -55,7 +55,7 @@ public final class Record {
 
         final byte[] signature = signer.sign(bb.array(), contentListOffset, contentListLen);
         bb.position(recordListPrefixLen);
-        RLPEncoder.insertRecordSignature(signature, bb);
+        RLPEncoder.encodeItem(signature, bb);
 
         this.rlp = RLP_STRICT.wrapList(bb.array());
     }

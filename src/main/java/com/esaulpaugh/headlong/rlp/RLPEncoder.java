@@ -30,29 +30,7 @@ import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
 
 /** For encoding data to Recursive Length Prefix format. */
 public final class RLPEncoder {
-// -------------- MADE VISIBLE TO rlp.eip778 package -------------------------------------------------------------------
-
-    /**
-     * @see java.util.ArrayList#sort(Comparator)
-     * @see java.util.Arrays.ArrayList#sort(Comparator)
-     */
-    static void insertRecordContentList(int dataLen, long seq, List<KeyValuePair> pairs, ByteBuffer bb) {
-        if(seq >= 0) {
-            pairs.sort(KeyValuePair.PAIR_COMPARATOR); // note that ArrayList overrides List default sort
-            insertListPrefix(dataLen, bb);
-            encodeString(seq, bb);
-            for (KeyValuePair pair : pairs) {
-                encodeKeyValuePair(pair, bb);
-            }
-        } else {
-            throw new IllegalArgumentException("negative seq");
-        }
-    }
-
-    static void insertRecordSignature(byte[] signature, ByteBuffer bb) {
-        encodeItem(signature, bb);
-    }
-
+// -------------- made visibile to Record -------------------------------------------------------------------------------
     static int dataLen(List<KeyValuePair> pairs) {
         long sum = 0;
         for (KeyValuePair pair : pairs) {
@@ -75,17 +53,44 @@ public final class RLPEncoder {
             Integers.putLong(dataLen, bb);
         }
     }
-// ---------------------------------------------------------------------------------------------------------------------
-    private static int requireNoOverflow(long val) {
-        if(val <= Integer.MAX_VALUE) {
-            return (int) val;
+
+    /**
+     * @see java.util.ArrayList#sort(Comparator)
+     * @see java.util.Arrays.ArrayList#sort(Comparator)
+     */
+    static void insertRecordContentList(int dataLen, long seq, List<KeyValuePair> pairs, ByteBuffer bb) {
+        if(seq >= 0) {
+            pairs.sort(KeyValuePair.PAIR_COMPARATOR); // note that ArrayList overrides List.sort
+            insertListPrefix(dataLen, bb);
+            encodeString(seq, bb);
+            for (KeyValuePair pair : pairs) {
+                encodeKeyValuePair(pair, bb);
+            }
+        } else {
+            throw new IllegalArgumentException("negative seq");
         }
-        throw new IllegalArgumentException("integer overflow");
+    }
+// ---------------------------------------------------------------------------------------------------------------------
+    private static void encodeString(long val, ByteBuffer bb) {
+        final int dataLen = Integers.len(val);
+        if (dataLen == Byte.BYTES) {
+            encodeLen1String((byte) val, bb);
+            return;
+        }
+        bb.put((byte) (STRING_SHORT_OFFSET + dataLen)); // dataLen is 0 or 2-8
+        Integers.putLong(val, bb);
     }
 
     private static void encodeKeyValuePair(KeyValuePair pair, ByteBuffer bb) {
         encodeString(pair.getKey(), bb);
         encodeString(pair.getValue(), bb);
+    }
+
+    private static int requireNoOverflow(long val) {
+        if (val <= Integer.MAX_VALUE) {
+            return (int) val;
+        }
+        throw new IllegalArgumentException("integer overflow");
     }
 
     private static boolean isShort(int dataLen) {
@@ -131,7 +136,8 @@ public final class RLPEncoder {
         return Byte.BYTES + (isShort(dataLen) ? dataLen : Integers.len(dataLen) + dataLen);
     }
 
-    private static void encodeItem(Object raw, ByteBuffer bb) {
+    // visible to Record
+    static void encodeItem(Object raw, ByteBuffer bb) {
         if (raw instanceof byte[]) {
             encodeString((byte[]) raw, bb);
         } else if (raw instanceof Iterable<?>) {
@@ -145,16 +151,6 @@ public final class RLPEncoder {
         } else {
             throw new IllegalArgumentException("unsupported object type: " + raw.getClass().getName());
         }
-    }
-
-    private static void encodeString(long val, ByteBuffer bb) {
-        final int dataLen = Integers.len(val);
-        if (dataLen == Byte.BYTES) {
-            encodeLen1String((byte) val, bb);
-            return;
-        }
-        bb.put((byte) (STRING_SHORT_OFFSET + dataLen)); // dataLen is 0 or 2-8
-        Integers.putLong(val, bb);
     }
 
     private static void encodeString(byte[] data, ByteBuffer bb) {
