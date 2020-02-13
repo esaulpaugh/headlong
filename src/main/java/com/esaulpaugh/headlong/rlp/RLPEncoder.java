@@ -213,8 +213,8 @@ public final class RLPEncoder {
     }
 
     /**
-     * Inserts the concatenation of the encodings of the given objects in the given order into the destination array.
-     * The array containing the objects is <i>not</i> itself encoded.
+     * Inserts into the destination array at the given index the concatenation of the encodings of the given objects in
+     * the given order. The array containing the objects is not itself encoded.
      *
      * @param objects   the raw objects to be encoded
      * @param dest      the destination for the sequence of RLP encodings
@@ -250,7 +250,7 @@ public final class RLPEncoder {
     }
 
     /**
-     * Inserts into the destination array the concatenation of the encodings of the given objects in the given order.
+     * Inserts into the destination array at the given index the concatenation of the encodings of the given objects in the given order.
      * The {@link Iterable} containing the objects is not itself encoded.
      *
      * @param objects   the raw objects to be encoded
@@ -288,8 +288,8 @@ public final class RLPEncoder {
     }
 
     /**
-     * Inserts into the destination array the encoding of an RLP list item containing the elements of the array encoded
-     * in the given order.
+     * Inserts into the destination array at the given index the encoding of an RLP list item containing the given
+     * elements encoded in the given order.
      *
      * @param elements  the raw elements to be encoded as an RLP list item
      * @param dest      the destination for the encoded RLP list
@@ -300,8 +300,8 @@ public final class RLPEncoder {
     }
 
     /**
-     * Puts into the destination buffer the encoding of an RLP list item containing the elements of the array encoded in
-     * the given order.
+     * Puts into the destination buffer the encoding of an RLP list item containing the given elements encoded in the
+     * given order.
      *
      * @param elements the raw elements to be encoded as an RLP list item
      * @param dest     the destination for the encoded RLP list
@@ -311,7 +311,7 @@ public final class RLPEncoder {
     }
 //----------------------------------------------------------------------------------------------------------------------
     /**
-     * Returns the encoding of an RLP list item containing the elements of the {@link Iterable} encoded in the given order.
+     * Returns the encoding of an RLP list item containing the given elements encoded in the given order.
      *
      * @param elements the raw elements to be encoded as an RLP list item
      * @return the encoded RLP list item
@@ -324,8 +324,8 @@ public final class RLPEncoder {
     }
 
     /**
-     * Inserts into the destination array the encoding of an RLP list item, containing the elements of the {@link Iterable}
-     * encoded in the given order.
+     * Inserts into the destination array at the given index the encoding of an RLP list item containing the given
+     * elements encoded in the given order.
      *
      * @param elements  the raw elements to be encoded as an RLP list item
      * @param dest      the destination for the encoded RLP list
@@ -336,8 +336,8 @@ public final class RLPEncoder {
     }
 
     /**
-     * Puts into the destination buffer at its current position the encoding of an RLP list item containing the elements
-     * of the given {@link Iterable} encoded in the given order.
+     * Puts into the destination buffer at its current position the encoding of an RLP list item containing the given
+     * elements encoded in the given order.
      *
      * @param elements the raw elements to be encoded as an RLP list item
      * @param dest     the destination for the encoded RLP list
