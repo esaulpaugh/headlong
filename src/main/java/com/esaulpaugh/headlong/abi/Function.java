@@ -32,8 +32,6 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.util.Strings.HEX;
-import static com.esaulpaugh.headlong.util.Strings.encode;
 
 /**
  * Represents a function in an Ethereum contract. Can encode and decode calls matching this function's signature.
@@ -93,7 +91,7 @@ public final class Function implements ABIObject, Serializable {
             try {
                 this.inputTypes = (TupleType) TypeFactory.create(signature.substring(split), null);
             } catch (ClassCastException cce) {
-                throw new IllegalArgumentException("illegal signature termination"); // e.g. "foo()[]"
+                throw new IllegalArgumentException("illegal signature termination", cce); // e.g. "foo()[]"
             }
             this.type = Objects.requireNonNull(type);
             String name = Utils.validateChars(NON_ASCII_CHAR, signature.substring(0, split));
@@ -144,7 +142,7 @@ public final class Function implements ABIObject, Serializable {
     }
 
     public String selectorHex() {
-        return encode(selector, HEX);
+        return Strings.encode(selector);
     }
 
     public String getHashAlgorithm() {
@@ -238,7 +236,7 @@ public final class Function implements ABIObject, Serializable {
         for(int i = 0; i < SELECTOR_LEN; i++) {
             if(unitBuffer[i] != selector[i]) {
                 throw new IllegalArgumentException("given selector does not match: expected: " + this.selectorHex()
-                        + ", found: " + encode(unitBuffer, 0, SELECTOR_LEN, HEX));
+                        + ", found: " + Strings.encode(unitBuffer, 0, SELECTOR_LEN, Strings.HEX));
             }
         }
         return inputTypes.decode(abiBuffer, unitBuffer);
@@ -315,14 +313,6 @@ public final class Function implements ABIObject, Serializable {
         return new Keccak(256); // replace this with your preferred impl
     }
 
-    public static String hexOf(byte[] bytes) {
-        return encode(bytes, HEX);
-    }
-
-    public static String hexOf(ByteBuffer buffer) {
-        return encode(buffer.array(), HEX);
-    }
-
     public static String formatCall(byte[] abiCall) {
         return formatCall(abiCall, 0, abiCall.length);
     }
@@ -339,13 +329,13 @@ public final class Function implements ABIObject, Serializable {
     public static String formatCall(byte[] buffer, int offset, final int length) {
         Integers.checkIsMultiple(length - SELECTOR_LEN, UNIT_LENGTH_BYTES);
         StringBuilder sb = new StringBuilder("ID\t")
-                .append(encode(Arrays.copyOfRange(buffer, offset, SELECTOR_LEN), HEX))
+                .append(Strings.encode(Arrays.copyOfRange(buffer, offset, SELECTOR_LEN)))
                 .append('\n');
         int idx = offset + SELECTOR_LEN;
         while(idx < length) {
             sb.append(idx / UNIT_LENGTH_BYTES)
                     .append('\t')
-                    .append(encode(Arrays.copyOfRange(buffer, idx, idx + UNIT_LENGTH_BYTES), HEX))
+                    .append(Strings.encode(Arrays.copyOfRange(buffer, idx, idx + UNIT_LENGTH_BYTES)))
                     .append('\n');
             idx += UNIT_LENGTH_BYTES;
         }
