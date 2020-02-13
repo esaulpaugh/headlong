@@ -35,9 +35,9 @@ public class MeasurePadding {
 
     private static final int UNIT_LENGTH_BYTES = 32;
 
-    Random r = new Random(System.nanoTime());
+    final Random r = new Random(System.nanoTime());
 
-    ByteBuffer bb = ByteBuffer.allocate(96);
+    final ByteBuffer bb = ByteBuffer.allocate(96);
 
     int paddingLen;
     boolean negativeOnes;

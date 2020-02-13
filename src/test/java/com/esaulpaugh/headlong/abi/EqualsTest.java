@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
+import com.esaulpaugh.headlong.util.Strings;
 import com.joemelsha.crypto.hash.Keccak;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +26,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -85,6 +87,10 @@ public class EqualsTest {
     @Test
     public void complexFunctionTest() {
         Function f = new Function("(function[2][][],bytes24,string[0][0],address[],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
+
+        WrappedKeccak wk = new WrappedKeccak(256);
+        byte[] digest = wk.digest(Strings.decode(f.getCanonicalSignature(), Strings.UTF_8));
+        assertArrayEquals(Arrays.copyOfRange(digest, 0, 4), f.selector());
 
         byte[] func = new byte[24];
         TestUtils.seededRandom().nextBytes(func);
