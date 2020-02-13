@@ -20,13 +20,12 @@ import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
 import com.joemelsha.crypto.hash.Keccak;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 
-import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -84,57 +83,39 @@ public class EqualsTest {
     }
 
     @Test
-    public void testBooleanNotEquals() throws Throwable {
-        Function f = new Function("baz(uint32,bool)");
-        Tuple argsTuple = new Tuple(69L, true);
-        ByteBuffer one = f.encodeCall(argsTuple);
+    public void complexFunctionTest() {
+        Function f = new Function("(function[2][][],bytes24,string[0][0],address[],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
 
-        final byte[] array = one.array();
+        byte[] func = new byte[24];
+        TestUtils.seededRandom().nextBytes(func);
 
-        System.out.println(Function.formatCall(array));
+//                       10000000000000000000000000000000000000000
+//                        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        String uint160 = "ff00ee01dd02cc03cafebabe9906880777086609";
+        BigInteger addr = new BigInteger(uint160, 16);
+        assertEquals(160, uint160.length() * 4);
+        assertEquals(uint160, addr.toString(16));
+        Object[] argsIn = new Object[] {
+                new byte[][][][] { new byte[][][] { new byte[][] { func, func } } },
+                func,
+                new String[0][],
+                new BigInteger[] { addr },
+                BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(Byte.MAX_VALUE << 2)),
+                new Tuple(7),
+                new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple(9), new Tuple(-11) } } },
+                new Tuple[] { new Tuple(13), new Tuple(-15) },
+                new Tuple[] { new Tuple(17), new Tuple(-19) },
+                Long.MAX_VALUE / 8_500_000,
+                new Tuple[] { new Tuple((long) 0x7e), new Tuple((long) -0x7e) },
+                new Tuple(BigInteger.TEN)
+        };
 
-        array[array.length - 1] = 0;
-        System.out.println(Function.formatCall(array));
-        Tuple decoded = f.decodeCall(array);
-        assertNotEquals(decoded, argsTuple);
+        ByteBuffer abi = f.encodeCallWithArgs(argsIn);
 
-        array[array.length - 32] = (byte) 0x80;
-        System.out.println(Function.formatCall(array));
-        assertThrown(IllegalArgumentException.class, "exceeds bit limit", () -> f.decodeCall(array));
+        assertTrue(Function.formatCall(abi.array()).contains("18\t000000000000000000000000" + uint160));
 
-        for (int i = array.length - 32; i < array.length; i++) {
-            array[i] = (byte) 0xFF;
-        }
-        array[array.length - 1] = (byte) 0xFE;
-        System.out.println(Function.formatCall(array));
-        assertThrown(IllegalArgumentException.class, "signed value given for unsigned type", () -> f.decodeCall(array));
-    }
+        Tuple tupleOut = f.decodeCall((ByteBuffer) abi.flip());
 
-    @Test
-    public void testNonCanonicalEquals() {
-
-        testNonCanonicalEquals("foo(int256)",           "foo(int)");
-        testNonCanonicalEquals("foo(int256[])",         "foo(int[])");
-        testNonCanonicalEquals("foo(int256[31])",       "foo(int[31])");
-        testNonCanonicalEquals("foo(int256[][])",       "foo(int[][])");
-        testNonCanonicalEquals("foo(int256[][7])",      "foo(int[][7])");
-        testNonCanonicalEquals("foo(int256[5][])",      "foo(int[5][])");
-        testNonCanonicalEquals("foo(int256[100][100])", "foo(int[100][100])");
-
-        testNonCanonicalEquals("foo(uint256)",          "foo(uint)");
-        testNonCanonicalEquals("foo(uint256[])",        "foo(uint[])");
-        testNonCanonicalEquals("foo(uint256[31])",      "foo(uint[31])");
-        testNonCanonicalEquals("foo(uint256[][])",      "foo(uint[][])");
-        testNonCanonicalEquals("foo(uint256[][7])",     "foo(uint[][7])");
-        testNonCanonicalEquals("foo(uint256[5][])",     "foo(uint[5][])");
-        testNonCanonicalEquals("foo(uint256[100][100])","foo(uint[100][100])");
-    }
-
-    private static void testNonCanonicalEquals(String canonical, String nonCanonical) {
-        assertNotEquals(canonical, nonCanonical);
-        Function canon = Function.parse(canonical);
-        Function nonCanon = Function.parse(nonCanonical);
-        assertEquals(canon, nonCanon);
-        assertEquals(canon.getCanonicalSignature(), nonCanon.getCanonicalSignature());
+        assertTrue(Arrays.deepEquals(argsIn, tupleOut.elements));
     }
 }

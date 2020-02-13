@@ -81,9 +81,9 @@ public final class Function implements ABIObject, Serializable {
     }
 
     /**
-     * @param type          to denote function, constructor, or fallback
-     * @param signature     the function signature
-     * @param outputs       the signature of the tuple containing the return types
+     * @param type          to denote function, receive, fallback, or constructor
+     * @param signature     the function's signature e.g. "foo(int,bool)"
+     * @param outputs       the signature of the tuple containing this function's return types
      * @param messageDigest the hash function with which to generate the 4-byte selector
      * @throws IllegalArgumentException if {@code signature} or {@code outputs} is malformed
      */

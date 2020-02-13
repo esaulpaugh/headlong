@@ -24,7 +24,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
+import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class DecodeTest {
 
@@ -56,7 +58,7 @@ public class DecodeTest {
     }
 
     @Test
-    public void testDecodeDynamicArrayEmptyTuples() {
+    public void testDynamicArrayEmptyTuples() {
         Tuple decoded = new Function("foo()", "(()[])").decodeReturn(
                 FastHex.decode(
                 "0000000000000000000000000000000000000000000000000000000000000020" +
@@ -92,5 +94,32 @@ public class DecodeTest {
         for (String hex : justRight) {
             tt.decode(Strings.decode(hex));
         }
+    }
+
+    @Test
+    public void testCorruptBoolean() throws Throwable {
+        Function f = new Function("baz(uint32,bool)");
+        Tuple argsTuple = new Tuple(69L, true);
+        ByteBuffer one = f.encodeCall(argsTuple);
+
+        final byte[] array = one.array();
+
+        System.out.println(Function.formatCall(array));
+
+        array[array.length - 1] = 0;
+        System.out.println(Function.formatCall(array));
+        Tuple decoded = f.decodeCall(array);
+        assertNotEquals(decoded, argsTuple);
+
+        array[array.length - 32] = (byte) 0x80;
+        System.out.println(Function.formatCall(array));
+        assertThrown(IllegalArgumentException.class, "exceeds bit limit", () -> f.decodeCall(array));
+
+        for (int i = array.length - 32; i < array.length; i++) {
+            array[i] = (byte) 0xFF;
+        }
+        array[array.length - 1] = (byte) 0xFE;
+        System.out.println(Function.formatCall(array));
+        assertThrown(IllegalArgumentException.class, "signed value given for unsigned type", () -> f.decodeCall(array));
     }
 }
