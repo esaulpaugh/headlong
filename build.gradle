@@ -72,7 +72,7 @@ repositories {
 
 dependencies {
 
-    api 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'org.bouncycastle:bcprov-jdk15on:1.64'
 
     test.useJUnitPlatform()
