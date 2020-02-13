@@ -79,12 +79,7 @@ public class MonteCarloTest {
             try {
                 testCase = new MonteCarloTestCase(params);
                 temp = testCase.function.getCanonicalSignature();
-                if(temp.contains("int[")) {
-                    throw new AssertionError("failed canonicalization!");
-                }
-                testCase.run();
-                testCase.runForPacked();
-                testCase.runSuperSerial();
+                testCase.runAll();
                 temp = null;
 //                log.append('#')
 //                        .append(i)
@@ -154,7 +149,7 @@ public class MonteCarloTest {
             if(n < THRESHOLD) {
 //                long startTime = System.nanoTime();
                 for (int j = 0; j < n; j++) {
-                    this.testCase.run();
+                    this.testCase.runStandard();
                 }
 //                System.out.println(n + " " + (System.nanoTime() - startTime) / 1_000_000.0);
             } else {
@@ -201,7 +196,7 @@ public class MonteCarloTest {
         for (int i = 0; i < threadsLen; i++) {
             threads[i] = new Thread(() -> {
                 for (int j = 0; j < 500; j++)
-                    two.run();
+                    two.runStandard();
             });
         }
 
@@ -214,7 +209,7 @@ public class MonteCarloTest {
         pool.invoke(task);
 
         for (int j = 0; j < 500; j++)
-            two.run();
+            two.runStandard();
 
         pool.shutdown();
         if(!pool.awaitTermination(10, TimeUnit.SECONDS)) {

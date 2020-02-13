@@ -24,7 +24,6 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.function.Supplier;
 
-import static com.esaulpaugh.headlong.abi.UnitType.LOG_2_UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
@@ -95,12 +94,12 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     int byteLength(Object value) {
         final int len;
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: len = ((boolean[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
+        case TYPE_CODE_BOOLEAN: len = ((boolean[]) value).length * UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BYTE: len = Integers.roundLengthUp((!isString ? (byte[]) value : Strings.decode((String) value, UTF_8)).length, UNIT_LENGTH_BYTES); break;
-        case TYPE_CODE_INT: len = ((int[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
-        case TYPE_CODE_LONG: len = ((long[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
+        case TYPE_CODE_INT: len = ((int[]) value).length * UNIT_LENGTH_BYTES; break;
+        case TYPE_CODE_LONG: len = ((long[]) value).length * UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BIG_INTEGER:
-        case TYPE_CODE_BIG_DECIMAL: len = ((Number[]) value).length << LOG_2_UNIT_LENGTH_BYTES; break;
+        case TYPE_CODE_BIG_DECIMAL: len = ((Number[]) value).length * UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: len = calcObjArrByteLen((Object[]) value); break;
         default: throw new Error();
@@ -118,7 +117,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         }
         return !elementType.dynamic
                 ? len
-                : len + (elements.length << LOG_2_UNIT_LENGTH_BYTES); // 32 bytes per offset
+                : len + (elements.length * UNIT_LENGTH_BYTES); // 32 bytes per offset
     }
 
     private int staticByteLengthPacked() {
@@ -161,7 +160,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
         final int staticLen;
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: staticLen = checkLength(((boolean[]) value).length, value) << LOG_2_UNIT_LENGTH_BYTES; break;
+        case TYPE_CODE_BOOLEAN: staticLen = checkLength(((boolean[]) value).length, value) * UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BYTE:
             byte[] bytes = !isString ? (byte[]) value : Strings.decode((String) value, UTF_8);
             staticLen = Integers.roundLengthUp(checkLength(bytes.length, value), UNIT_LENGTH_BYTES);
@@ -192,7 +191,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         } catch (IllegalArgumentException iae) {
             throw abiException(iae, i);
         }
-        return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
+        return len * UNIT_LENGTH_BYTES;
     }
 
     private int validateLongArray(final long[] arr) {
@@ -207,7 +206,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         } catch (IllegalArgumentException iae) {
             throw abiException(iae, i);
         }
-        return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
+        return len * UNIT_LENGTH_BYTES;
     }
 
     private int validateBigIntegerArray(BigInteger[] arr) {
@@ -222,7 +221,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         } catch (IllegalArgumentException iae) {
             throw abiException(iae, i);
         }
-        return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
+        return len * UNIT_LENGTH_BYTES;
     }
 
     private int validateBigDecimalArray(BigDecimal[] arr) {
@@ -241,7 +240,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         } catch (IllegalArgumentException iae) {
             throw abiException(iae, i);
         }
-        return len << LOG_2_UNIT_LENGTH_BYTES; // mul 32
+        return len * UNIT_LENGTH_BYTES;
     }
 
     private static IllegalArgumentException abiException(IllegalArgumentException iae, int i) {
@@ -252,7 +251,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private int validateObjectArray(Object[] arr) {
         final int len = arr.length;
         checkLength(len, arr);
-        int byteLength = !elementType.dynamic ? 0 : len << LOG_2_UNIT_LENGTH_BYTES; // when dynamic, 32 bytes per offset
+        int byteLength = !elementType.dynamic ? 0 : len * UNIT_LENGTH_BYTES; // when dynamic, 32 bytes per offset
         for (int i = 0; i < len; i++) {
             byteLength += elementType.validate(arr[i]);
         }
@@ -299,7 +298,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                     Encoding.insertInt(len, dest); // insert array length
                 }
                 if (elementType.dynamic) { // if elements are dynamic
-                    int nextOffset = len << LOG_2_UNIT_LENGTH_BYTES; // mul 32 (0x20)
+                    int nextOffset = len * UNIT_LENGTH_BYTES;
                     for (int i = 0; i < len; i++) {
                         nextOffset = Encoding.insertOffset(nextOffset, dest, elementType.byteLength(objects[i]));
                     }

@@ -18,9 +18,11 @@ package com.esaulpaugh.headlong.jmh;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 
@@ -37,24 +39,32 @@ public class Padding {
 
     ByteBuffer bb = ByteBuffer.allocate(96);
 
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = 2)
-    public void cached() {
+    int paddingLen;
+    boolean negativeOnes;
+
+    @Setup(Level.Invocation)
+    public void setUp() {
         bb.position(32);
-        insertPadding(r.nextInt(UNIT_LENGTH_BYTES), r.nextBoolean(), bb);
+        paddingLen = r.nextInt(UNIT_LENGTH_BYTES);
+        negativeOnes = r.nextBoolean();
     }
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.SingleShotTime)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = 2)
+    public void cached() {
+        insertPadding(paddingLen, negativeOnes, bb);
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
     @Measurement(iterations = 2)
     public void uncached() {
-        bb.position(32);
-        putN(r.nextBoolean() ? (byte) -1 : (byte) 0, r.nextInt(UNIT_LENGTH_BYTES), bb);
+        putN(negativeOnes ? (byte) -1 : (byte) 0, paddingLen, bb);
     }
 
     private static final byte[] CACHED_ZERO_PADDING = new byte[UNIT_LENGTH_BYTES];

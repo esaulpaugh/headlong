@@ -99,7 +99,7 @@ public class ABIJsonCasesTest2 {
             while(idx < min) {
                 byte[] expectedRow = Arrays.copyOfRange(expected, idx, idx + UNIT_LENGTH_BYTES);
                 byte[] actualRow = Arrays.copyOfRange(actual, idx, idx + UNIT_LENGTH_BYTES);
-                sb.append(idx >>> UnitType.LOG_2_UNIT_LENGTH_BYTES)
+                sb.append(idx / UNIT_LENGTH_BYTES)
                         .append('\t')
                         .append(encode(expectedRow, HEX)).append(' ')
                         .append(encode(actualRow, HEX)).append(Arrays.equals(expectedRow, actualRow) ? "" : " ****")

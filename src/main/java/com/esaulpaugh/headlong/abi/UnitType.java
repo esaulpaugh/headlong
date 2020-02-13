@@ -25,7 +25,6 @@ import java.nio.ByteBuffer;
 abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or is Boolean
 
     static final int UNIT_LENGTH_BYTES = 32;
-    static final int LOG_2_UNIT_LENGTH_BYTES = 5;
 
     final int bitLength;
     final boolean unsigned;

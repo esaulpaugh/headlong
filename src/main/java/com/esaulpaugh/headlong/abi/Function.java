@@ -343,7 +343,7 @@ public final class Function implements ABIObject, Serializable {
                 .append('\n');
         int idx = offset + SELECTOR_LEN;
         while(idx < length) {
-            sb.append(idx >>> UnitType.LOG_2_UNIT_LENGTH_BYTES)
+            sb.append(idx / UNIT_LENGTH_BYTES)
                     .append('\t')
                     .append(encode(Arrays.copyOfRange(buffer, idx, idx + UNIT_LENGTH_BYTES), HEX))
                     .append('\n');

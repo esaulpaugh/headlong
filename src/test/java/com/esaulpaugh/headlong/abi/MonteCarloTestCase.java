@@ -209,26 +209,31 @@ public class MonteCarloTestCase implements Serializable {
         return jsonObject;
     }
 
-    void run() {
-        run(this.argsTuple);
+    void runAll() {
+        runStandard(this.argsTuple);
+        runForPacked(this.argsTuple);
+        runSuperSerial(this.argsTuple);
     }
 
-    void runNewRandomArgs() {
-        run(generateTuple(function.getParamTypes(), new Random(System.nanoTime())));
+    Tuple newRandomArgs() {
+        return generateTuple(function.getParamTypes(), new Random(System.nanoTime()));
     }
 
-    void run(Tuple args) {
+    void runStandard() {
+        runStandard(this.argsTuple);
+    }
+
+    void runStandard(Tuple args) {
         if(!args.equals(function.decodeCall((ByteBuffer) function.encodeCall(args).flip()))) {
             throw new IllegalArgumentException(params.seed + " " + function.getCanonicalSignature() + " " + args);
         }
     }
 
-    void runForPacked() {
-        runForPacked(this.argsTuple);
-    }
-
     void runForPacked(Tuple args) {
         final TupleType tt = this.function.getParamTypes();
+        if(tt.canonicalType.contains("int[")) {
+            throw new AssertionError("failed canonicalization!");
+        }
         try {
             if (!PackedDecoder.decode(tt, tt.encodePacked(args).array()).equals(args)) {
                 throw new RuntimeException("not equal: " + tt.canonicalType);
@@ -243,17 +248,16 @@ public class MonteCarloTestCase implements Serializable {
         }
     }
 
-    void runSuperSerial() {
+    void runSuperSerial(Tuple args) {
         final TupleType tt = this.function.getParamTypes();
-        final Tuple tuple = this.argsTuple;
 
-        String str = SuperSerial.serialize(tt, tuple, false);
+        String str = SuperSerial.serialize(tt, args, false);
         Tuple deserial = SuperSerial.deserialize(tt, str, false);
-        assertEquals(tuple, deserial);
+        assertEquals(args, deserial);
 
-        str = SuperSerial.serialize(tt, tuple, true);
+        str = SuperSerial.serialize(tt, args, true);
         deserial = SuperSerial.deserialize(tt, str, true);
-        assertEquals(tuple, deserial);
+        assertEquals(args, deserial);
     }
 
     private String generateTupleTypeString(Random r, int tupleDepth) {
