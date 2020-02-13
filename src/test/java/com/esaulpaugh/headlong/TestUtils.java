@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong;
 
-import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonArray;
@@ -160,7 +159,7 @@ public class TestUtils {
             }
             return bytesX;
         } else {
-            return FastHex.decode(string);
+            return Strings.decode(string);
         }
     }
 
@@ -188,7 +187,7 @@ public class TestUtils {
 
     public static BigInteger parseAddress(JsonElement in) { // uint160
         String hex = "00" + in.getAsString().substring(2);
-        byte[] bytes = FastHex.decode(hex);
+        byte[] bytes = Strings.decode(hex);
         return new BigInteger(bytes);
     }
 

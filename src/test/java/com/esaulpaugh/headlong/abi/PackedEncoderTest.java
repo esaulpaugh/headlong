@@ -39,7 +39,7 @@ public class PackedEncoderTest {
         TupleType tt = TupleType.parse("(uint40)");
         tt.encodePacked(Tuple.of(63L), bb);
 
-        assertEquals("000000003fff", Strings.encode(bb.array()));
+        assertEquals("000000003fff", Strings.encode(bb));
     }
 
     @Test

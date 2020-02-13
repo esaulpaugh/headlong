@@ -32,7 +32,7 @@ public class DecodeTest {
 
     private static final Function FUNCTION = new Function("gogo((fixed[],int8)[1][][5])", "(ufixed,string)");
 
-    private static final byte[] RETURN_BYTES = FastHex.decode(
+    private static final byte[] RETURN_BYTES = Strings.decode(
               "0000000000000000000000000000000000000000000000000000000000000045"
             + "0000000000000000000000000000000000000000000000000000000000000020"
             + "0000000000000000000000000000000000000000000000000000000000000004"

@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi.example;
 
-import com.esaulpaugh.headlong.abi.Function;
 import com.esaulpaugh.headlong.abi.TupleType;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
