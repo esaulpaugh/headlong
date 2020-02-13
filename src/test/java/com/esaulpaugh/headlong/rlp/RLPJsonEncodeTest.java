@@ -58,9 +58,11 @@ public class RLPJsonEncodeTest {
                 try {
                     actualBytes = RLPEncoder.encode(Integers.toBytes(parseLong(in)));
                 } catch (NumberFormatException nfe) {
-                    actualBytes = RLPEncoder.encode(in.getAsString().startsWith("#")
-                            ? parseBigIntegerStringPoundSign(in).toByteArray()
-                            : parseString(in).getBytes(StandardCharsets.UTF_8));
+                    actualBytes = RLPEncoder.encode(
+                            in.getAsString().startsWith("#")
+                                    ? parseBigIntegerStringPoundSign(in).toByteArray()
+                                    : Strings.decode(parseString(in), Strings.UTF_8)
+                    );
                 }
             }
             String expected = Strings.encode(getOutBytes(entry));

@@ -109,7 +109,7 @@ public class TestUtils {
             if(inString.startsWith("#")) {
                 return parseBigInteger(in).toByteArray();
             } else {
-                return inString.getBytes(StandardCharsets.UTF_8);
+                return parseBytes(inString);
             }
         }
     }

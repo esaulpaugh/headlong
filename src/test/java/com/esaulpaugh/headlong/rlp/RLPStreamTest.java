@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -42,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class RLPStreamTest {
 
     private static final byte TEST_BYTE = 0x79;
-    private static final byte[] TEST_BYTES = "'wort'X3".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] TEST_BYTES = Strings.decode("'wort'X3", UTF_8);
     private static final String TEST_STRING = "2401";
 
     @Test
