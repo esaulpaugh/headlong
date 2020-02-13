@@ -225,6 +225,13 @@ public final class RLPEncoder {
         return encodeSequentially(Arrays.asList(objects), dest, destIndex);
     }
 
+    /**
+     * Puts into the destination buffer at its current position the concatenation of the encodings of the given objects
+     * in the given order. The array containing the objects is not itself encoded.
+     *
+     * @param objects the raw objects to be encoded
+     * @param dest    the destination for the sequence of RLP encodings
+     */
     public static void encodeSequentially(Object[] objects, ByteBuffer dest) {
         encodeSequentially(Arrays.asList(objects), dest);
     }
@@ -243,7 +250,7 @@ public final class RLPEncoder {
     }
 
     /**
-     * Inserts the concatenation of the encodings of the given objects in the given order into the destination array.
+     * Inserts into the destination array the concatenation of the encodings of the given objects in the given order.
      * The {@link Iterable} containing the objects is not itself encoded.
      *
      * @param objects   the raw objects to be encoded
@@ -258,8 +265,8 @@ public final class RLPEncoder {
     }
 
     /**
-     * Inserts the concatenation of the encodings of the given objects in the given order into the destination buffer.
-     * The {@link Iterable} containing the objects is not itself encoded.
+     * Puts into the destination buffer at its current position the concatenation of the encodings of the given objects
+     * in the given order. The {@link Iterable} containing the objects is not itself encoded.
      *
      * @param objects the raw objects to be encoded
      * @param dest    the destination for the sequence of RLP encodings
@@ -293,8 +300,8 @@ public final class RLPEncoder {
     }
 
     /**
-     * Inserts into the destination buffer the encoding of an RLP list item containing the elements of the array encoded
-     * in the given order.
+     * Puts into the destination buffer the encoding of an RLP list item containing the elements of the array encoded in
+     * the given order.
      *
      * @param elements the raw elements to be encoded as an RLP list item
      * @param dest     the destination for the encoded RLP list
@@ -329,8 +336,8 @@ public final class RLPEncoder {
     }
 
     /**
-     * Returns the encoding of an RLP list item containing the encoded elements of the given {@link Iterable} in the given
-     * order.
+     * Puts into the destination buffer at its current position the encoding of an RLP list item containing the elements
+     * of the given {@link Iterable} encoded in the given order.
      *
      * @param elements the raw elements to be encoded as an RLP list item
      * @param dest     the destination for the encoded RLP list
