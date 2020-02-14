@@ -205,7 +205,7 @@ public final class Function implements ABIObject, Serializable {
     }
 
     public int measureCallLength(Tuple args) {
-        return Function.SELECTOR_LEN + inputTypes.validate(args);
+        return Function.SELECTOR_LEN + inputTypes.measureEncodedLength(args);
     }
 
     public ByteBuffer encodeCallWithArgs(Object... args) {

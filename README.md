@@ -116,7 +116,7 @@ https://github.com/esaulpaugh/headlong-cli
 
 ### Misc
 
-headlong depends on gson and bouncycastle. Test suite should take less than one minute to run. Test packages require junit and spongycastle. Jar size is ~119 KiB as of 02/04/20. Java 8+.
+headlong (optionally) depends on gson and bouncycastle. Test suite should take less than one minute to run. Test packages require junit and spongycastle. Jar size is ~116 KiB as of 02/14/20. Java 8+.
 
 See the wiki for more, such as TupleTypes, packed encoding (and decoding), RLPList, and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
