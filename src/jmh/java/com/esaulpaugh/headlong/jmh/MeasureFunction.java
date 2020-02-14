@@ -40,7 +40,7 @@ public class MeasureFunction {
 //        args = Tuple.of(
 //                Strings.decode("dave", Strings.UTF_8),
 //                true,
-//                new BigInteger[] { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3) }
+//                new BigInteger[] { BigInteger.ONE, BigInteger.valueOf(2), BigInteger.valueOf(3) }
 //        );
 //    }
 

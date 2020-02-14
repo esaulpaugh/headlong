@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.util;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /** Utility for reading and writing integers from and to RLP-compatible format. */
 public final class Integers {
@@ -428,10 +429,15 @@ public final class Integers {
     }
 
     public static BigInteger getBigInt(byte[] buffer, int offset, int len, boolean lenient) {
-        if(!lenient && len > 0 && buffer[offset] == 0x00) {
-            throw leadingZeroException(offset, len);
+        if(len != 0) {
+            if(!lenient && buffer[offset] == 0x00) {
+                throw leadingZeroException(offset, len);
+            }
+            byte[] arr = new byte[Byte.BYTES + len]; // a leading zero byte
+            System.arraycopy(buffer, offset, arr, Byte.BYTES, len);
+            return new BigInteger(arr);
         }
-        return new BigInteger("00" + Strings.encode(buffer, offset, len, Strings.HEX), 16);
+        return BigInteger.ZERO;
     }
 
     public static int putBigInt(BigInteger val, byte[] dest, int destIdx) {

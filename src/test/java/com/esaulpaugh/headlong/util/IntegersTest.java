@@ -26,6 +26,8 @@ import java.util.concurrent.ForkJoinPool;
 import static com.esaulpaugh.headlong.TestUtils.insertBytes;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IntegersTest {
 
@@ -227,5 +229,57 @@ public class IntegersTest {
 
         assertEquals(positive, Integers.getBigInt(bBytes, 0, bBytes.length, true));
         assertEquals(positive, new BigInteger(Strings.encode(Integers.toBytesUnsigned(positive)), 16));
+
+        String[] errs = new String[3 * 3 * 3];
+        int e = 0;
+        for (byte i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                for (int k = -1; k <= 1; k++) {
+                    try {
+                        Integers.getBigInt(new byte[]{i}, j, k, false);
+                    } catch (Throwable thr) {
+                        errs[e] = thr.getClass().getSimpleName() + "|" + thr.getMessage();
+                    }
+                    e++;
+                }
+            }
+        }
+
+        final String aioobe = "ArrayIndexOutOfBoundsException|";
+        final String illegal = "IllegalArgumentException|deserialised positive integers with leading zeroes are invalid; index: 0, len: ";
+
+        int i = 0;
+        assertTrue(errs[i++].contains(aioobe));
+        assertNull(errs[i++]);
+        assertTrue(errs[i++].contains(aioobe));
+        assertTrue(errs[i++].contains(aioobe));
+        assertNull(errs[i++]);
+        assertNull(errs[i++]);
+
+        assertTrue(errs[i++].contains(aioobe));
+        assertNull(errs[i++]);
+        assertTrue(errs[i++].contains(aioobe));
+        assertTrue(errs[i++].contains(aioobe));
+        assertNull(errs[i++]); // 10++
+        assertTrue(errs[i++].contains(aioobe));
+
+        assertEquals(illegal + "-1", errs[i++]);
+        assertNull(errs[i++]);
+        assertEquals(illegal + "1", errs[i++]);
+        assertTrue(errs[i++].contains(aioobe));
+        assertNull(errs[i++]);
+
+        assertTrue(errs[i++].contains(aioobe)); // 17++
+        assertTrue(errs[i++].contains(aioobe));
+        assertNull(errs[i++]);
+        assertTrue(errs[i++].contains(aioobe));
+        assertTrue(errs[i++].contains(aioobe));
+        assertNull(errs[i++]);
+        assertNull(errs[i++]);
+        assertTrue(errs[i++].contains(aioobe));
+        assertNull(errs[i++]);
+        assertTrue(errs[i++].contains(aioobe));
+
+        System.out.println(i + " / " + errs.length + " passed");
     }
 }
