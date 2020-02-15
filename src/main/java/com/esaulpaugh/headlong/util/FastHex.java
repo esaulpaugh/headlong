@@ -21,7 +21,9 @@ import java.util.Arrays;
 /** Uses a larger encoding table to speed up encoding. */
 public final class FastHex {
 
-    private static final int NIBBLE_BITS = Byte.SIZE / 2;
+    private static final int CHARS_PER_BYTE = 2;
+
+    private static final int BITS_PER_CHAR = Byte.SIZE / CHARS_PER_BYTE;
 
     // Byte values index directly into the encoding table (size 256) whose elements contain two char values each,
     // encoded together as an int.
@@ -35,7 +37,7 @@ public final class FastHex {
     static {
         final int[] ints = new int[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
         for (int i = 0; i < ENCODE_TABLE.length; i++) {
-            ENCODE_TABLE[i] = (ints[(i & 0xF0) >>> NIBBLE_BITS] << Byte.SIZE) | ints[i & 0x0F];
+            ENCODE_TABLE[i] = (ints[(i & 0xF0) >>> BITS_PER_CHAR] << Byte.SIZE) | ints[i & 0x0F];
         }
 
         Arrays.fill(DECODE_TABLE, NO_MAPPING);
@@ -74,8 +76,8 @@ public final class FastHex {
 
     public static byte[] encodeToBytes(byte[] buffer, int off, final int len) {
         final int end = off + len;
-        byte[] bytes = new byte[len << 1]; // x2
-        for (int j = 0; off < end; off++, j+=2) {
+        byte[] bytes = new byte[len * CHARS_PER_BYTE];
+        for (int j = 0; off < end; off++, j += CHARS_PER_BYTE) {
             int hexPair = ENCODE_TABLE[buffer[off] & 0xFF];
             bytes[j] = (byte) (hexPair >>> Byte.SIZE); // left
             bytes[j+1] = (byte) (hexPair & 0xFF); // right
@@ -91,23 +93,20 @@ public final class FastHex {
         return decode(hex.getBytes(StandardCharsets.US_ASCII), offset, len);
     }
 
-    public static byte[] decode(byte[] hexBytes, int offset, final int len) {
-        if ((len & 0x01) != 0) { // mod 2
-            throw new IllegalArgumentException("len must be a multiple of two");
-        }
-        final int bytesLen = len >> 1; // div 2
-        byte[] bytes = new byte[bytesLen];
-        for (int i = 0; i < bytesLen; i++, offset+=2) {
-            byte left = DECODE_TABLE[hexBytes[offset]];
-            if (left == NO_MAPPING) {
-                throw new IllegalArgumentException("illegal hex val @ " + offset);
+    public static byte[] decode(final byte[] hexBytes, int offset, final int len) {
+        if (Integers.mod(len, CHARS_PER_BYTE) == 0) {
+            final int bytesLen = len / CHARS_PER_BYTE;
+            final byte[] bytes = new byte[bytesLen];
+            for (int i = 0; i < bytesLen; i++, offset += CHARS_PER_BYTE) {
+                byte left = DECODE_TABLE[hexBytes[offset]];
+                byte right = DECODE_TABLE[hexBytes[offset+1]];
+                if (left == NO_MAPPING || right == NO_MAPPING) {
+                    throw new IllegalArgumentException("illegal hex val @ " + (left == NO_MAPPING ? offset : offset + 1));
+                }
+                bytes[i] = (byte) ((left << BITS_PER_CHAR) | right);
             }
-            byte right = DECODE_TABLE[hexBytes[offset+1]];
-            if (right == NO_MAPPING) {
-                throw new IllegalArgumentException("illegal hex val @ " + (offset + 1));
-            }
-            bytes[i] = (byte) ((left << NIBBLE_BITS) | right);
+            return bytes;
         }
-        return bytes;
+        throw new IllegalArgumentException("len must be a multiple of two");
     }
 }

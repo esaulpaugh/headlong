@@ -131,4 +131,13 @@ public class StringsTest {
         }
         return estimated + 3;
     }
+
+    @Test
+    public void testHexExceptions() throws Throwable {
+        TestUtils.assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode("0"));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "illegal hex val @ 0", () -> FastHex.decode("(0"));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "illegal hex val @ 1", () -> FastHex.decode("0'"));
+    }
 }
