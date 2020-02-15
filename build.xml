@@ -175,24 +175,9 @@
   <path id="library.gradle:_org.opentest4j:opentest4j:1.2.0.classpath">
     <pathelement location="${path.variable.maven_repository}/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar"/>
   </path>
-  <!-- Register Custom Compiler Taskdefs -->
-  <property name="javac2.home" value="${idea.home}/lib"/>
-  <path id="javac2.classpath">
-    <fileset dir="${javac2.home}">
-      <include name="javac2.jar"/>
-      <include name="jdom.jar"/>
-      <include name="asm-all*.jar"/>
-      <include name="forms-*.jar"/>
-    </fileset>
-  </path>
-  <target name="register.custom.compilers">
-    <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath"/>
-    <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions" classpathref="javac2.classpath"/>
-  </target>
-  
+
   <!-- Modules -->
-  
-  
+
   <!-- Module headlong -->
   
   <dirname property="module.headlong.basedir" file="${ant.file}"/>
@@ -241,9 +226,9 @@
   
   <target name="compile.module.headlong" depends="compile.module.headlong.production,compile.module.headlong.tests" description="Compile module headlong"/>
   
-  <target name="compile.module.headlong.production" depends="register.custom.compilers" description="Compile module headlong; production classes"/>
+  <target name="compile.module.headlong.production" description="Compile module headlong; production classes"/>
   
-  <target name="compile.module.headlong.tests" depends="register.custom.compilers,compile.module.headlong.production" description="compile module headlong; test classes" unless="skip.tests"/>
+  <target name="compile.module.headlong.tests" depends="compile.module.headlong.production" description="compile module headlong; test classes" unless="skip.tests"/>
   
   <target name="clean.module.headlong" description="cleanup module">
     <delete dir="${headlong.output.dir}"/>
@@ -312,15 +297,15 @@
   
   <target name="compile.module.headlong.main" depends="compile.module.headlong.main.production,compile.module.headlong.main.tests" description="Compile module headlong.main"/>
   
-  <target name="compile.module.headlong.main.production" depends="register.custom.compilers" description="Compile module headlong.main; production classes">
+  <target name="compile.module.headlong.main.production" description="Compile module headlong.main; production classes">
     <mkdir dir="${headlong.main.output.dir}"/>
-    <javac2 destdir="${headlong.main.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.headlong.main}/javac">
+    <javac destdir="${headlong.main.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.headlong.main}/javac">
       <compilerarg line="${compiler.args.headlong.main}"/>
       <bootclasspath refid="headlong.main.module.bootclasspath"/>
       <classpath refid="headlong.main.module.production.classpath"/>
       <src refid="headlong.main.module.sourcepath"/>
       <patternset refid="excluded.from.compilation.headlong.main"/>
-    </javac2>
+    </javac>
     
     <copy todir="${headlong.main.output.dir}">
       <fileset dir="${module.headlong.main.basedir}/src/main/java">
@@ -330,7 +315,7 @@
     </copy>
   </target>
   
-  <target name="compile.module.headlong.main.tests" depends="register.custom.compilers,compile.module.headlong.main.production" description="compile module headlong.main; test classes" unless="skip.tests"/>
+  <target name="compile.module.headlong.main.tests" depends="compile.module.headlong.main.production" description="compile module headlong.main; test classes" unless="skip.tests"/>
   
   <target name="clean.module.headlong.main" description="cleanup module">
     <delete dir="${headlong.main.output.dir}"/>
@@ -397,9 +382,9 @@
   
   <target name="compile.module.headlong.jmh" depends="compile.module.headlong.jmh.production,compile.module.headlong.jmh.tests" description="Compile module headlong.jmh"/>
   
-  <target name="compile.module.headlong.jmh.production" depends="register.custom.compilers,compile.module.headlong.main" description="Compile module headlong.jmh; production classes"/>
+  <target name="compile.module.headlong.jmh.production" depends="compile.module.headlong.main" description="Compile module headlong.jmh; production classes"/>
   
-  <target name="compile.module.headlong.jmh.tests" depends="register.custom.compilers,compile.module.headlong.jmh.production" description="compile module headlong.jmh; test classes" unless="skip.tests"/>
+  <target name="compile.module.headlong.jmh.tests" depends="compile.module.headlong.jmh.production" description="compile module headlong.jmh; test classes" unless="skip.tests"/>
   
   <target name="clean.module.headlong.jmh" description="cleanup module">
     <delete dir="${headlong.jmh.output.dir}"/>
@@ -497,17 +482,17 @@
   
   <target name="compile.module.headlong.test" depends="compile.module.headlong.test.production,compile.module.headlong.test.tests" description="Compile module headlong.test"/>
   
-  <target name="compile.module.headlong.test.production" depends="register.custom.compilers,compile.module.headlong.main" description="Compile module headlong.test; production classes"/>
+  <target name="compile.module.headlong.test.production" depends="compile.module.headlong.main" description="Compile module headlong.test; production classes"/>
   
-  <target name="compile.module.headlong.test.tests" depends="register.custom.compilers,compile.module.headlong.test.production" description="compile module headlong.test; test classes" unless="skip.tests">
+  <target name="compile.module.headlong.test.tests" depends="compile.module.headlong.test.production" description="compile module headlong.test; test classes" unless="skip.tests">
     <mkdir dir="${headlong.test.testoutput.dir}"/>
-    <javac2 destdir="${headlong.test.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.headlong.test}/javac">
+    <javac destdir="${headlong.test.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.headlong.test}/javac">
       <compilerarg line="${compiler.args.headlong.test}"/>
       <bootclasspath refid="headlong.test.module.bootclasspath"/>
       <classpath refid="headlong.test.module.classpath"/>
       <src refid="headlong.test.module.test.sourcepath"/>
       <patternset refid="excluded.from.compilation.headlong.test"/>
-    </javac2>
+    </javac>
     
     <copy todir="${headlong.test.testoutput.dir}">
       <fileset dir="${module.headlong.test.basedir}/src/test/java">
