@@ -161,15 +161,15 @@
   </path>
 
   <path id="library.gradle:_org.junit.jupiter:junit-jupiter-engine:5.6.0.classpath">
-    <pathelement location="${path.variable.maven_repository}/org/juinit/jupiter/junit-jupiter-engine/5.6.0/junit-jupiter-engine-5.6.0.jar"/>
+    <pathelement location="${path.variable.maven_repository}/org/junit/jupiter/junit-jupiter-engine/5.6.0/junit-jupiter-engine-5.6.0.jar"/>
   </path>
 
   <path id="library.gradle:_org.junit.platform:junit-platform-commons:1.6.0.classpath">
-    <pathelement location="${path.variable.maven_repository}/org/juinit/platform/junit-platform-commons/1.6.0/junit-platform-commons-1.6.0.jar"/>
+    <pathelement location="${path.variable.maven_repository}/org/junit/platform/junit-platform-commons/1.6.0/junit-platform-commons-1.6.0.jar"/>
   </path>
 
   <path id="library.gradle:_org.junit.platform:junit-platform-engine:1.6.0.classpath">
-    <pathelement location="${path.variable.maven_repository}/org/juinit/platform/junit-platform-engine/1.6.0/junit-platform-engine-1.6.0.jar"/>
+    <pathelement location="${path.variable.maven_repository}/org/junit/platform/junit-platform-engine/1.6.0/junit-platform-engine-1.6.0.jar"/>
   </path>
 
   <path id="library.gradle:_org.opentest4j:opentest4j:1.2.0.classpath">
