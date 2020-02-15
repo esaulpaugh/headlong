@@ -68,6 +68,9 @@ public final class NotationParser {
             if(STRING == resultHolder[1] /* nextObjectType */) {
                 int datumStart = nextObjectIndex + STRING_PREFIX_LEN;
                 int datumEnd = notation.indexOf(Notation.END_STRING, datumStart);
+                if(datumEnd < 0) {
+                    throw new IllegalArgumentException("unterminated string @ " + datumStart);
+                }
                 parent.add(Strings.decode(notation.substring(datumStart, datumEnd)));
                 i = datumEnd + STRING_SUFFIX_LEN;
             } else {

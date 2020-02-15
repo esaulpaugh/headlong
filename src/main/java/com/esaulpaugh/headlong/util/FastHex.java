@@ -100,11 +100,11 @@ public final class FastHex {
         for (int i = 0; i < bytesLen; i++, offset+=2) {
             byte left = DECODE_TABLE[hexBytes[offset]];
             if (left == NO_MAPPING) {
-                throw new IllegalArgumentException("illegal val @ " + offset);
+                throw new IllegalArgumentException("illegal hex val @ " + offset);
             }
             byte right = DECODE_TABLE[hexBytes[offset+1]];
             if (right == NO_MAPPING) {
-                throw new IllegalArgumentException("illegal val @ " + (offset + 1));
+                throw new IllegalArgumentException("illegal hex val @ " + (offset + 1));
             }
             bytes[i] = (byte) ((left << NIBBLE_BITS) | right);
         }
