@@ -109,13 +109,16 @@ public class RLPDecoderTest {
     @Test
     public void testLenient() throws Throwable {
 
-        final String errPrefix = "deserialised positive integers with leading zeroes are invalid; index: ";
+        final String errPrefix = "deserialized integers with leading zeroes are invalid; index: ";
 
         Random r = TestUtils.seededRandom();
 
         byte[] bytes = new byte[10];
 
         r.nextBytes(bytes);
+        while(bytes[2] == 0) {
+            bytes[2] = (byte) r.nextInt();
+        }
 
         bytes[0] = bytes[1] = 0;
 
@@ -123,10 +126,10 @@ public class RLPDecoderTest {
 
         TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 9", () -> Integers.getBigInt(bytes, 1, bytes.length - 1, false));
 
+        Integers.getBigInt(bytes, 2, bytes.length - 2, false);
+
         Integers.getBigInt(bytes, 0, bytes.length, true);
         Integers.getBigInt(bytes, 1, bytes.length - 1, true);
-
-        Integers.getBigInt(bytes, 2, bytes.length - 2, false);
 
         byte[][] vectors = new byte[][] {
                 new byte[] { 0 },

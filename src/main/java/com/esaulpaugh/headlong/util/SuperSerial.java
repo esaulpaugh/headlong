@@ -18,6 +18,7 @@ package com.esaulpaugh.headlong.util;
 import com.esaulpaugh.headlong.abi.ABIType;
 import com.esaulpaugh.headlong.abi.ArrayType;
 import com.esaulpaugh.headlong.abi.BigDecimalType;
+import com.esaulpaugh.headlong.abi.BigIntegerType;
 import com.esaulpaugh.headlong.abi.Tuple;
 import com.esaulpaugh.headlong.abi.TupleType;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
@@ -32,6 +33,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_DECIMAL;
@@ -91,8 +93,14 @@ public final class SuperSerial {
         case TYPE_CODE_BYTE: return Integers.toBytes((byte) obj); // case currently goes unused
         case TYPE_CODE_INT: return Integers.toBytes((int) obj);
         case TYPE_CODE_LONG: return Integers.toBytes((long) obj);
-        case TYPE_CODE_BIG_INTEGER: return ((BigInteger) obj).toByteArray();
-        case TYPE_CODE_BIG_DECIMAL: return ((BigDecimal) obj).unscaledValue().toByteArray();
+        case TYPE_CODE_BIG_INTEGER:
+            final BigIntegerType bigIntegerType = (BigIntegerType) type;
+            final BigInteger bigInteger = (BigInteger) obj;
+            return bigIntegerType.isUnsigned() ? Integers.toBytesUnsigned(bigInteger) : toSigned(bigInteger);
+        case TYPE_CODE_BIG_DECIMAL:
+            final BigDecimalType bigDecimalType = (BigDecimalType) type;
+            final BigInteger unscaled = ((BigDecimal) obj).unscaledValue();
+            return bigDecimalType.isUnsigned() ? Integers.toBytesUnsigned(unscaled) : toSigned(unscaled);
         case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?>) type, obj);
         case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, obj);
         default: throw new Error();
@@ -101,21 +109,44 @@ public final class SuperSerial {
 
     private static Object deserialize(ABIType<?> type, RLPItem item) {
         switch (type.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return requireNotList(type, item, item.asBoolean());
-        case TYPE_CODE_BYTE: return requireNotList(type, item, item.asByte()); // case currently goes unused
-        case TYPE_CODE_INT: return requireNotList(type, item, item.asInt(false));
-        case TYPE_CODE_LONG: return requireNotList(type, item, item.asLong());
-        case TYPE_CODE_BIG_INTEGER: return requireNotList(type, item, item.dataLength != 0 ? item.asBigIntSigned() : BigInteger.ZERO);
-        case TYPE_CODE_BIG_DECIMAL: return requireNotList(type, item, new BigDecimal(item.dataLength != 0 ? item.asBigIntSigned() : BigInteger.ZERO, ((BigDecimalType) type).getScale()));
+        case TYPE_CODE_BOOLEAN: return requireNotList(type, item, item::asBoolean);
+        case TYPE_CODE_BYTE: return requireNotList(type, item, () -> item.asByte(false)); // case currently goes unused
+        case TYPE_CODE_INT: return requireNotList(type, item, () -> item.asInt(false));
+        case TYPE_CODE_LONG: return requireNotList(type, item, () -> item.asLong(false));
+        case TYPE_CODE_BIG_INTEGER: return requireNotList(type, item, ((BigIntegerType) type).isUnsigned()
+                ? () -> item.asBigInt(false)
+                : () -> asSigned(item)
+        );
+        case TYPE_CODE_BIG_DECIMAL:
+            final BigDecimalType bigDecimalType = (BigDecimalType) type;
+            return requireNotList(type, item, bigDecimalType.isUnsigned()
+                ? () -> new BigDecimal(item.asBigInt(false), bigDecimalType.getScale())
+                : () -> new BigDecimal(asSigned(item),bigDecimalType.getScale()));
         case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<? extends ABIType<?>, ?>) type, item);
         case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());
         default: throw new Error();
         }
     }
 
-    private static Object requireNotList(ABIType<?> type, RLPItem item, Object result) {
+    private static byte[] toSigned(BigInteger bigInteger) {
+        return bigInteger.signum() != 0 ? bigInteger.toByteArray() : Strings.EMPTY_BYTE_ARRAY;
+    }
+
+    private static BigInteger asSigned(RLPItem item) {
+        final int dataLen = item.dataLength;
+        if(dataLen != 0) {
+            final int maxBytes = 32;
+            if(dataLen > maxBytes) {
+                throw new IllegalArgumentException("integer data cannot exceed " + maxBytes + " bytes");
+            }
+            return item.asBigIntSigned();
+        }
+        return BigInteger.ZERO;
+    }
+
+    private static Object requireNotList(ABIType<?> type, RLPItem item, Supplier<Object> result) {
         if(!item.isList()) {
-            return result;
+            return result.get();
         }
         throw new IllegalArgumentException("RLP list items not allowed for this type: " + type + "\n" + item);
     }

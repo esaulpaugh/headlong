@@ -335,7 +335,7 @@ public final class Integers {
     }
 
     private static IllegalArgumentException leadingZeroException(int idx, int len) {
-        return new IllegalArgumentException("deserialised positive integers with leading zeroes are invalid; index: " + idx + ", len: " + len);
+        return new IllegalArgumentException("deserialized integers with leading zeroes are invalid; index: " + idx + ", len: " + len);
     }
 
     private static IllegalArgumentException outOfRangeException(int len) {

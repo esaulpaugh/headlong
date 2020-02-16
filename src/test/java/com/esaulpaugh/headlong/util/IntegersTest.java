@@ -246,7 +246,7 @@ public class IntegersTest {
         }
 
         final String aioobe = "ArrayIndexOutOfBoundsException|";
-        final String illegal = "IllegalArgumentException|deserialised positive integers with leading zeroes are invalid; index: 0, len: ";
+        final String illegal = "IllegalArgumentException|deserialized integers with leading zeroes are invalid; index: 0, len: ";
 
         int i = 0;
         assertTrue(errs[i++].contains(aioobe));
