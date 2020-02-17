@@ -17,7 +17,6 @@ package com.esaulpaugh.headlong.util;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 /** Utility for reading and writing integers from and to RLP-compatible format. */
 public final class Integers {
