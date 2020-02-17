@@ -33,8 +33,23 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
     }
 
     @Override
+    public boolean isString() {
+        return false;
+    }
+
+    @Override
     public boolean isList() {
         return true;
+    }
+
+    @Override
+    public RLPString asRLPString() {
+        throw new ClassCastException("not an " + RLPString.class.getSimpleName());
+    }
+
+    @Override
+    public RLPList asRLPList() {
+        return this;
     }
 
     /**
@@ -73,6 +88,10 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         for (RLPItem e : elements) {
             destIndex = e.export(dest, destIndex);
         }
+    }
+
+    public List<RLPItem> elements() {
+        return elements(RLPDecoder.RLP_STRICT);
     }
 
     public List<RLPItem> elements(RLPDecoder decoder) {

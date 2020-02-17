@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
@@ -44,18 +45,41 @@ public class RLPStreamTest {
     private static final byte[] TEST_BYTES = Strings.decode("'wort'X3", UTF_8);
     private static final String TEST_STRING = "2401";
 
+    private static final byte[] RLP_BYTES = new byte[] {
+            (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0xFF, (byte) 0x81, (byte) 0x90, (byte) 0x81, (byte) 0xb6, (byte) '\u230A',
+            (byte) 0xb8, 56, 0x09,(byte)0x80,-1,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, -3, -2, 0, 0,
+            (byte) 0xf8, 0x38, 0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 36, 74, 0, 0,
+            (byte) 0x84, 'c', 'a', 't', 's',
+            (byte) 0x84, 'd', 'o', 'g', 's',
+            (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
+    };
+
+    @Test
+    public void testStreaming() {
+        ArrayList<RLPItem> collection = RLP_STRICT.stream(RLP_BYTES) // accepts byte[] or InputStream
+                .collect();
+
+        String joined = collection.stream()
+                .filter(RLPItem::isList)
+                .peek(System.out::println)
+                .map(RLPItem::asRLPList)
+                .map(RLPList::elements)
+                .flatMap(List::stream)
+                .filter(item -> item.dataLength <= Long.BYTES)
+//                .map(RLPItem::asLong)
+                .map(item -> item.asLong(true))
+                .filter(item -> item > 0)
+                .map(Math::sqrt)
+                .map(String::valueOf)
+                .collect(Collectors.joining("\n"));
+
+        System.out.println(joined);
+    }
+
     @Test
     public void testStreamEasy() throws Throwable {
-        byte[] rlpEncoded = new byte[] {
-                (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0xFF, (byte) 0x81, (byte) 0x90, (byte) 0x81, (byte) 0xb6, (byte) '\u230A',
-                (byte) 0xb8, 56, 0x09,(byte)0x80,-1,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, -3, -2, 0, 0,
-                (byte) 0xf8, 0x38, 0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 36, 74, 0, 0,
-                (byte) 0x84, 'c', 'a', 't', 's',
-                (byte) 0x84, 'd', 'o', 'g', 's',
-                (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
-        };
-        RLPItem[] collected = RLP_STRICT.collectAll(rlpEncoded).toArray(RLPItem.EMPTY_ARRAY);
-        RLPItem[] streamed = RLP_STRICT.stream(rlpEncoded).collect().toArray(RLPItem.EMPTY_ARRAY);
+        RLPItem[] collected = RLP_STRICT.collectAll(RLP_BYTES).toArray(RLPItem.EMPTY_ARRAY);
+        RLPItem[] streamed = RLP_STRICT.stream(RLP_BYTES).collect().toArray(RLPItem.EMPTY_ARRAY);
 
         assertTrue(Arrays.deepEquals(collected, streamed));
 

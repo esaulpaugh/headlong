@@ -25,8 +25,23 @@ public final class RLPString extends RLPItem {
     }
 
     @Override
+    public boolean isString() {
+        return true;
+    }
+
+    @Override
     public boolean isList() {
         return false;
+    }
+
+    @Override
+    public RLPString asRLPString() {
+        return this;
+    }
+
+    @Override
+    public RLPList asRLPList() {
+        throw new ClassCastException("not an " + RLPList.class.getSimpleName());
     }
 
     /** @see RLPItem#duplicate(RLPDecoder) */

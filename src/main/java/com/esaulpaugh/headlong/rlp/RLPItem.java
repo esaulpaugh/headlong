@@ -101,7 +101,13 @@ public abstract class RLPItem {
         return DataType.type(buffer[index]);
     }
 
+    public abstract boolean isString();
+
     public abstract boolean isList();
+
+    public abstract RLPString asRLPString();
+
+    public abstract RLPList asRLPList();
 
     public final int encodingLength() {
         return endIndex - index;
