@@ -210,7 +210,7 @@ public class TestUtils {
         try {
             r.run();
         } catch (Throwable t) {
-            if (clazz.isAssignableFrom(t.getClass())) {
+            if (clazz.isInstance(t)) {
                 return;
             }
             throw t;
@@ -222,7 +222,7 @@ public class TestUtils {
         try {
             r.run();
         } catch (Throwable t) {
-            if(clazz.isAssignableFrom(t.getClass())
+            if(clazz.isInstance(t)
                     && (t.getMessage() == null || t.getMessage().contains(substr))) {
                 return;
             }
