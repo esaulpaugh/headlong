@@ -14,7 +14,6 @@
             <useProjectArtifact>true</useProjectArtifact>
             <scope>test</scope>
             <excludes>
-                <exclude>org.bouncycastle:bcprov-jdk15on</exclude>
                 <exclude>com.madgag.spongycastle:core</exclude>
                 <exclude>org.junit.jupiter:junit-jupiter-api</exclude>
                 <exclude>org.junit.jupiter:junit-jupiter-engine</exclude>
@@ -99,6 +98,15 @@
                     <include>org/apache/commons/math3/util/Precision.class</include>
 
                     <include>org/openjdk/jmh/**</include>
+
+                    <include>org/bouncycastle/crypto/Digest.class</include>
+                    <include>org/bouncycastle/crypto/ExtendedDigest.class</include>
+                    <include>org/bouncycastle/crypto/digests/KeccakDigest.class</include>
+                    <include>org/bouncycastle/jcajce/provider/digest/BCMessageDigest.class</include>
+                    <include>org/bouncycastle/jcajce/provider/digest/Keccak.class</include>
+                    <include>org/bouncycastle/jcajce/provider/digest/Keccak$DigestKeccak.class</include>
+                    <include>org/bouncycastle/util/Arrays.class</include>
+                    <include>org/bouncycastle/util/Pack.class</include>
                 </includes>
                 <excludes>
                     <exclude>org/openjdk/jmh/PerfAsm.class</exclude>
@@ -117,9 +125,10 @@
             <directory>${project.build.directory}/test-classes</directory>
             <outputDirectory>${file.separator}</outputDirectory>
             <includes>
-                <include>com/esaulpaugh/headlong/jmh/FunctionEncode.class</include>
-                <include>com/esaulpaugh/headlong/jmh/KeyValuePairSort.class</include>
-                <include>com/esaulpaugh/headlong/jmh/generated/*.class</include>
+                <include>com/esaulpaugh/headlong/jmh/abi/*.class</include>
+                <include>com/esaulpaugh/headlong/jmh/rlp/*.class</include>
+                <include>com/esaulpaugh/headlong/jmh/abi/generated/*.class</include>
+                <include>com/esaulpaugh/headlong/jmh/rlp/generated/*.class</include>
                 <include>org/openjdk/jmh/*.class</include>
                 <include>META-INF/BenchmarkList</include>
                 <include>META-INF/CompilerHints</include>

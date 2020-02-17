@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.jmh;
+package com.esaulpaugh.headlong.jmh.abi;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -51,7 +51,7 @@ public class MeasurePadding {
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.SingleShotTime)
+    @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
     @Measurement(iterations = 2)
     public void cached() {
@@ -60,7 +60,7 @@ public class MeasurePadding {
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.SingleShotTime)
+    @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
     @Measurement(iterations = 2)
     public void uncached() {

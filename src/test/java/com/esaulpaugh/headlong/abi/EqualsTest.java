@@ -124,4 +124,50 @@ public class EqualsTest {
 
         assertTrue(Arrays.deepEquals(argsIn, tupleOut.elements));
     }
+
+    @Test
+    public void testUint32Array() {
+
+        long[] unsigneds = new long[] {
+                0x00000004L,
+                0xFFFFFFF7L,
+                0x11111111L,
+                0xFF00FF00L,
+                0x80808080L,
+                0xFF00FF00L
+        };
+
+        Function foo = Function.parse("foo(uint32[6])");
+
+        ByteBuffer bb = foo.encodeCall(Tuple.singleton(unsigneds));
+
+        Tuple dec = foo.decodeCall((ByteBuffer) bb.flip());
+
+        long[] decoded = (long[]) dec.get(0);
+
+        assertArrayEquals(unsigneds, decoded);
+    }
+
+    @Test
+    public void testUint64Array() {
+
+        BigInteger[] unsigneds = new BigInteger[] {
+                new BigInteger("0000000000000004", 16),
+                new BigInteger("000000FFFFFFFFF7", 16),
+                new BigInteger("1111111111111111", 16),
+                new BigInteger("7F00FF00FF00FF00", 16),
+                new BigInteger("8080808080808080", 16),
+                new BigInteger("FF00FF00FF00FF00", 16),
+        };
+
+        Function foo = Function.parse("foo(uint64[6])");
+
+        ByteBuffer bb = foo.encodeCall(Tuple.singleton(unsigneds));
+
+        Tuple dec = foo.decodeCall((ByteBuffer) bb.flip());
+
+        BigInteger[] decoded = (BigInteger[]) dec.get(0);
+
+        assertArrayEquals(unsigneds, decoded);
+    }
 }

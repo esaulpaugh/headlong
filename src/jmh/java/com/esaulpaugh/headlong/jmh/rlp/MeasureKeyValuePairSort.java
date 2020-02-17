@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.jmh;
+package com.esaulpaugh.headlong.jmh.rlp;
 
 import com.esaulpaugh.headlong.rlp.KeyValuePair;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -75,7 +75,7 @@ public class MeasureKeyValuePairSort {
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.SingleShotTime)
+    @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
     @Measurement(iterations = 5)
     public void sortArrayList() {
@@ -84,7 +84,7 @@ public class MeasureKeyValuePairSort {
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.SingleShotTime)
+    @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
     @Measurement(iterations = 5)
     public void sortArraysArrayList() {
