@@ -66,9 +66,9 @@ public class MeasureKeyValuePairSort {
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.SingleShotTime)
+    @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 5)
+    @Measurement(iterations = 2)
     public void sortArray() {
         Arrays.sort(array, KeyValuePair.PAIR_COMPARATOR);
     }
@@ -77,7 +77,7 @@ public class MeasureKeyValuePairSort {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 5)
+    @Measurement(iterations = 2)
     public void sortArrayList() {
         arrayList.sort(KeyValuePair.PAIR_COMPARATOR);
     }
@@ -86,7 +86,7 @@ public class MeasureKeyValuePairSort {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 5)
+    @Measurement(iterations = 2)
     public void sortArraysArrayList() {
         arraysArrayList.sort(KeyValuePair.PAIR_COMPARATOR);
     }
