@@ -13,10 +13,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.abi;
+package com.esaulpaugh.headlong.abi.util;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.abi.util.Uint;
+import com.esaulpaugh.headlong.abi.Tuple;
+import com.esaulpaugh.headlong.abi.TupleType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,7 @@ public class UnsignedTest {
         Uint uint64 = new Uint(64);
         uint64.toSignedLong(Long.MAX_VALUE);
         uint64.toUnsigned(Long.MAX_VALUE);
+
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
                 "unsigned value is negative: -9223372036854775808",

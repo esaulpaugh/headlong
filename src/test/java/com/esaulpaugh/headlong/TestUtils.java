@@ -201,6 +201,7 @@ public class TestUtils {
         Assertions.assertTrue(a ^ b);
     }
 
+    @FunctionalInterface
     public interface CustomRunnable {
         void run() throws Throwable;
     }
