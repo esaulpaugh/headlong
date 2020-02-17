@@ -8,7 +8,7 @@ ABI spec: https://solidity.readthedocs.io/en/latest/abi-spec.html
 
 RLP spec: https://github.com/ethereum/wiki/wiki/RLP
 
-SHA-256 (headlong-2.3.0.jar): 54911021447e580337d2b04aa8fcbb1e2abe076e8da77677392ee0307fb5f15b
+SHA-256 (headlong-3.0.0.jar): a88579bf1fb4bf34d30f3e450ce87fab1efef732521317973f977eeed0a359c7
 
 ## Usage
 
@@ -93,14 +93,14 @@ Or build locally:
 Clone the project and install to your local maven repository using `gradle publishToMavenLocal` or `mvn install`. Then you can use one of these:
 
 ```groovy
-implementation 'com.esaulpaugh:headlong:3.0.0-SNAPSHOT'
+implementation 'com.esaulpaugh:headlong:3.0.1-SNAPSHOT'
 ```
 
 ```xml
 <dependency>
     <groupId>com.esaulpaugh</groupId>
     <artifactId>headlong</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.0.1-SNAPSHOT</version>
 </dependency>
 ```
 Alternatively:
@@ -116,7 +116,7 @@ https://github.com/esaulpaugh/headlong-cli
 
 ### Misc
 
-headlong (optionally) depends on gson and bouncycastle. Test suite should take less than one minute to run. Test packages require junit and spongycastle. Jar size is ~116 KiB as of 02/14/20. Java 8+.
+headlong (optionally) depends on gson and bouncycastle. Test suite should take less than one minute to run. Test packages require junit and spongycastle. Jar size is ~117 KiB as of 02/16/20. Java 8+.
 
 See the wiki for more, such as TupleTypes, packed encoding (and decoding), RLPList, and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
