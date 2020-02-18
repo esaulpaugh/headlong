@@ -232,10 +232,9 @@ public final class Function implements ABIObject, Serializable {
     public Tuple decodeCall(ByteBuffer abiBuffer) {
         final byte[] unitBuffer = ABIType.newUnitBuffer();
         abiBuffer.get(unitBuffer, 0, SELECTOR_LEN);
-        final byte[] selector = this.selector;
         for(int i = 0; i < SELECTOR_LEN; i++) {
             if(unitBuffer[i] != selector[i]) {
-                throw new IllegalArgumentException("given selector does not match: expected: " + this.selectorHex()
+                throw new IllegalArgumentException("given selector does not match: expected: " + selectorHex()
                         + ", found: " + Strings.encode(unitBuffer, 0, SELECTOR_LEN, Strings.HEX));
             }
         }
