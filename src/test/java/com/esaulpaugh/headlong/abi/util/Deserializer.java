@@ -99,52 +99,50 @@ public class Deserializer {
     private static Object parseArrayValue(ArrayType<? extends ABIType<?>, ?> arrayType, JsonElement value) {
         if (arrayType.isString()) {
             return value.getAsJsonObject().get("value").getAsString();
-        } else if (value.isJsonArray()) {
+        }
+        if (value.isJsonArray()) {
             JsonArray valueValue = value.getAsJsonArray();
             final int len = valueValue.size();
             final ABIType<?> elementType = arrayType.getElementType();
             int i = 0;
-            if (Boolean.class == elementType.clazz()) {
-                boolean[] array = new boolean[len];
-                for (Iterator<JsonElement> iter = valueValue.iterator(); i < len; i++) {
-                    array[i] = (Boolean) parseValue(elementType, iter.next());
+            final Object arrayObj;
+            final Class<?> clazz = elementType.clazz();
+            final Iterator<JsonElement> iter = valueValue.iterator();
+            if (Boolean.class == clazz) {
+                boolean[] array = (boolean[]) (arrayObj = new boolean[len]);
+                for (; i < len; i++) {
+                    array[i] = (boolean) parseValue(elementType, iter.next());
                 }
-                return array;
-            } else if (Byte.class == elementType.clazz()) {
-                byte[] array = new byte[len];
-                for (Iterator<JsonElement> iter = valueValue.iterator(); i < len; i++) {
-                    array[i] = (Byte) parseValue(elementType, iter.next());
+            } else if (Byte.class == clazz) {
+                byte[] array = (byte[]) (arrayObj = new byte[len]);
+                for (; i < len; i++) {
+                    array[i] = (byte) parseValue(elementType, iter.next());
                 }
-                return array;
-            }
-            if (Integer.class == elementType.clazz()) {
-                int[] array = new int[len];
-                for (Iterator<JsonElement> iter = valueValue.iterator(); i < len; i++) {
-                    array[i] = (Integer) parseValue(elementType, iter.next());
+            } else if (Integer.class == clazz) {
+                int[] array = (int[]) (arrayObj = new int[len]);
+                for (; i < len; i++) {
+                    array[i] = (int) parseValue(elementType, iter.next());
                 }
-                return array;
-            } else if (Long.class == elementType.clazz()) {
-                long[] array = new long[len];
-                for (Iterator<JsonElement> iter = valueValue.iterator(); i < len; i++) {
-                    array[i] = (Long) parseValue(elementType, iter.next());
+            } else if (Long.class == clazz) {
+                long[] array = (long[]) (arrayObj = new long[len]);
+                for (; i < len; i++) {
+                    array[i] = (long) parseValue(elementType, iter.next());
                 }
-                return array;
             } else {
-                Object[] array = (Object[]) Array.newInstance(elementType.clazz(), len);
-                for (Iterator<JsonElement> iter = valueValue.iterator(); i < len; i++) {
+                Object[] array = (Object[]) (arrayObj = Array.newInstance(clazz, len));
+                for (; i < len; i++) {
                     array[i] = parseValue(elementType, iter.next());
                 }
-                return array;
             }
-        } else {
-            JsonObject valueObj = value.getAsJsonObject();
-            String valueType = valueObj.get("type").getAsString();
+            return arrayObj;
+        }
+        JsonObject valueObj = value.getAsJsonObject();
+        String valueType = valueObj.get("type").getAsString();
+        if ("buffer".equals(valueType)) {
             String valueValue = valueObj.get("value").getAsString();
-            if ("buffer".equals(valueType)) {
-                return FastHex.decode(valueValue, 2, valueValue.length() - 2);
-            } else {
-                throw new RuntimeException("????");
-            }
+            return FastHex.decode(valueValue, 2, valueValue.length() - 2);
+        } else {
+            throw new RuntimeException("????");
         }
     }
 }
