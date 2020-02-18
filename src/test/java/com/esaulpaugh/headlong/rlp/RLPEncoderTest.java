@@ -26,6 +26,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -112,49 +113,65 @@ public class RLPEncoderTest {
     @Test
     public void testDatatypes() {
 
-        char c = '\u0009';
-        String str = "7 =IIii$%&#*~\t\n\b";
-        byte by = -1;
-        short sh = Short.MIN_VALUE;
+        final Random rando = TestUtils.seededRandom();
 
-        int i = 95223;
-        long l = 9864568923852L;
-        BigInteger unsigned = BigInteger.valueOf(l * 1003);
-        BigInteger signed = BigInteger.valueOf(l * -1001);
+        for (int k = 0; k < 100; k++) {
 
-        float f = 0.91254f;
-        double d = 133.9185523d;
-        BigDecimal bd = new BigDecimal(BigInteger.ONE, 18);
+            final char c = (char) rando.nextInt(128);
 
-        byte[] rlp = RLPEncoder.encodeSequentially(
-                Integers.toBytes((short) c),
-                Strings.decode(str, Strings.UTF_8),
-                Integers.toBytes(by),
-                Integers.toBytes(sh),
-                Integers.toBytes(i),
-                Integers.toBytes(l),
-                Integers.toBytesUnsigned(unsigned),
-                signed.toByteArray(),
-                FloatingPoint.toBytes(f),
-                FloatingPoint.toBytes(d),
-                bd.unscaledValue().toByteArray()
-        );
+            final byte[] buffer = new byte[1 + rando.nextInt(90)];
+            rando.nextBytes(buffer);
 
-        Iterator<RLPItem> iter = RLPDecoder.RLP_STRICT.sequenceIterator(rlp);
+            final String str = Strings.encode(buffer, Strings.UTF_8);
+            final byte by = (byte) rando.nextInt();
+            final short sh = (short) rando.nextInt();
 
-        assertEquals(c, iter.next().asChar(false));
-        assertEquals(str, iter.next().asString(Strings.UTF_8), str);
-        assertEquals(by, iter.next().asByte());
-        assertEquals(sh, iter.next().asShort(false));
+            final int i = rando.nextInt();
+            final long l = rando.nextLong();
 
-        assertEquals(i, iter.next().asInt(false));
-        assertEquals(l, iter.next().asLong());
-        assertEquals(unsigned, iter.next().asBigInt(false));
-        assertEquals(signed, iter.next().asBigIntSigned());
+            rando.nextBytes(buffer);
 
-        assertEquals(f, iter.next().asFloat(false), 0.0001d);
-        assertEquals(d, iter.next().asDouble(false), 0.0001d);
-        assertEquals(bd, new BigDecimal(iter.next().asBigIntSigned(), bd.scale()));
+            final BigInteger signed = new BigInteger(buffer);
+            final BigInteger unsigned = BigInteger.valueOf(i < 0 ? i * -1001L : i * 999L);
+
+            final float f = rando.nextFloat();
+            final double d = rando.nextDouble();
+            final BigDecimal bd = new BigDecimal(BigInteger.ONE, 18);
+
+            final byte[] rlp = RLPEncoder.encodeSequentially(
+                    Integers.toBytes((short) c),
+                    Strings.decode(str, Strings.UTF_8),
+                    Integers.toBytes(by),
+                    Integers.toBytes(sh),
+                    Integers.toBytes(i),
+                    Integers.toBytes(l),
+                    signed.toByteArray(),
+                    Integers.toBytesUnsigned(unsigned),
+                    FloatingPoint.toBytes(f),
+                    FloatingPoint.toBytes(d),
+                    bd.unscaledValue().toByteArray()
+            );
+
+            final Iterator<RLPItem> iter = RLPDecoder.RLP_STRICT.sequenceIterator(rlp);
+
+            final RLPItem charItem = iter.next();
+            assertEquals(c, charItem.asChar(false));
+            if (charItem.dataLength > 0) {
+                assertEquals(c, charItem.asString(Strings.UTF_8).charAt(0));
+            }
+            assertEquals(str, iter.next().asString(Strings.UTF_8), str);
+            assertEquals(by, iter.next().asByte());
+            assertEquals(sh, iter.next().asShort(false));
+
+            assertEquals(i, iter.next().asInt(false));
+            assertEquals(l, iter.next().asLong());
+            assertEquals(signed, iter.next().asBigIntSigned());
+            assertEquals(unsigned, iter.next().asBigInt(false));
+
+            assertEquals(f, iter.next().asFloat(false), Double.MIN_NORMAL);
+            assertEquals(d, iter.next().asDouble(false), Double.MIN_NORMAL);
+            assertEquals(bd, new BigDecimal(iter.next().asBigIntSigned(), bd.scale()));
+        }
     }
 
     @Test
