@@ -58,7 +58,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         this.elementType = elementType;
         this.length = length;
         this.arrayClassName = arrayClassName;
-        this.isString = String.class == clazz;
+        this.isString = clazz == STRING_CLASS;
     }
 
     public E getElementType() {

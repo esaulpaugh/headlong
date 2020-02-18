@@ -47,7 +47,6 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
-import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -382,7 +381,7 @@ public class MonteCarloTestCase implements Serializable {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return generateBooleanArray(len, r);
         case TYPE_CODE_BYTE:
-            if (arrayType.clazz() == STRING_CLASS) {
+            if (arrayType.isString()) {
                 return generateString(len, r);
             }
             return generateByteArray(len, r);
