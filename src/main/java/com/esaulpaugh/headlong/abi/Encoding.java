@@ -67,7 +67,11 @@ final class Encoding {
     static void insertBytesPadded(byte[] bytes, ByteBuffer dest) {
         dest.put(bytes);
         int rem = Integers.mod(bytes.length, UNIT_LENGTH_BYTES);
-        Encoding.insertPadding(rem != 0 ? UNIT_LENGTH_BYTES - rem : 0, false, dest);
+        insertPadding(rem != 0 ? UNIT_LENGTH_BYTES - rem : 0, false, dest);
+    }
+
+    static void insertPadding(int n, boolean negativeOnes, ByteBuffer dest) {
+        dest.put(!negativeOnes ? CACHED_ZERO_PADDING : CACHED_NEG1_PADDING, 0, n);
     }
 
     static void insertBigIntegers(BigInteger[] arr, int byteLen, ByteBuffer dest) {
@@ -80,9 +84,5 @@ final class Encoding {
         for (BigDecimal e : arr) {
             insertInt(e.unscaledValue(), byteLen, dest);
         }
-    }
-
-    static void insertPadding(int n, boolean negativeOnes, ByteBuffer dest) {
-        dest.put(!negativeOnes ? CACHED_ZERO_PADDING : CACHED_NEG1_PADDING, 0, n);
     }
 }
