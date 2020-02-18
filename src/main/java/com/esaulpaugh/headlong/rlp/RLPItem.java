@@ -64,7 +64,7 @@ public abstract class RLPItem {
         case STRING_LONG:
         case LIST_LONG:
             int lengthIndex = index + 1;
-            _dataIndex = lengthIndex + diff; // DataType dictates that diff guaranteed to be in [1,8]
+            _dataIndex = lengthIndex + diff; // type dictates that diff guaranteed to be in [1,8]
             if (_dataIndex > containerEnd) {
                 throw exceedsContainer(index, _dataIndex, containerEnd, containerEnd == buffer.length);
             }
@@ -92,7 +92,7 @@ public abstract class RLPItem {
         this.endIndex = (int) _endIndex;
     }
 
-    static RuntimeException exceedsContainer(int index, long end, int containerEnd, boolean shortInput) {
+    static IllegalArgumentException exceedsContainer(int index, long end, int containerEnd, boolean shortInput) {
         String msg = "element @ index " + index + " exceeds its container: " + end + " > " + containerEnd;
         return shortInput ? new ShortInputException(msg) : new IllegalArgumentException(msg);
     }
