@@ -219,7 +219,7 @@ public class ABIJSONTest {
         switch (type.typeCode()) {
         case TYPE_CODE_ARRAY:
             sb.append('[');
-            toString(((ArrayType<?, ?>) type).elementType, sb);
+            toString(((ArrayType<? extends ABIType<?>, ?>) type).elementType, sb);
             sb.append(']');
             break;
         case TYPE_CODE_TUPLE:

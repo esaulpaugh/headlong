@@ -90,13 +90,13 @@ public class Deserializer {
                 String valueValue = value.getAsJsonObject().get("value").getAsString();
                 return new BigDecimal(new BigInteger(valueValue), ((BigDecimalType) type).getScale());
             }
-            case ABIType.TYPE_CODE_ARRAY: return parseArrayValue((ArrayType<?, ?>) type, value);
+            case ABIType.TYPE_CODE_ARRAY: return parseArrayValue((ArrayType<? extends ABIType<?>, ?>) type, value);
             case ABIType.TYPE_CODE_TUPLE: return parseTupleValue((TupleType) type, value.getAsJsonObject().get("value").getAsJsonArray());
             default: throw new Error();
         }
     }
 
-    private static Object parseArrayValue(ArrayType<?, ?> arrayType, JsonElement value) {
+    private static Object parseArrayValue(ArrayType<? extends ABIType<?>, ?> arrayType, JsonElement value) {
         if (arrayType.isString()) {
             return value.getAsJsonObject().get("value").getAsString();
         } else if (value.isJsonArray()) {

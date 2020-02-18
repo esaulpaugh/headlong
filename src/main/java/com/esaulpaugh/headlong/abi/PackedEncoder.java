@@ -48,13 +48,13 @@ final class PackedEncoder {
         case TYPE_CODE_LONG: encodeInt(((Number) value).longValue(), type.byteLengthPacked(null), dest); return;
         case TYPE_CODE_BIG_INTEGER: Encoding.insertInt(((BigInteger) value), type.byteLengthPacked(null), dest); return;
         case TYPE_CODE_BIG_DECIMAL: Encoding.insertInt(((BigDecimal) value).unscaledValue(), type.byteLengthPacked(null), dest); return;
-        case TYPE_CODE_ARRAY: encodeArray((ArrayType<?, ?>) type, value, dest); return;
+        case TYPE_CODE_ARRAY: encodeArray((ArrayType<? extends ABIType<?>, ?>) type, value, dest); return;
         case TYPE_CODE_TUPLE: encodeTuple((TupleType) type, (Tuple) value, dest); return;
         default: throw new Error();
         }
     }
 
-    private static void encodeArray(ArrayType<?, ?> arrayType, Object value, ByteBuffer dest) {
+    private static void encodeArray(ArrayType<? extends ABIType<?>, ?> arrayType, Object value, ByteBuffer dest) {
         final ABIType<?> elementType = arrayType.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: encodeBooleans((boolean[]) value, dest); return;

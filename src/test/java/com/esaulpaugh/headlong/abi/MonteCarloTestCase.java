@@ -321,7 +321,7 @@ public class MonteCarloTestCase implements Serializable {
         case TYPE_CODE_LONG: return generateLong(r, (LongType) type);
         case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (UnitType<?>) type);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
-        case TYPE_CODE_ARRAY: return generateArray((ArrayType<?, ?>) type, r);
+        case TYPE_CODE_ARRAY: return generateArray((ArrayType<? extends ABIType<?>, ?>) type, r);
         case TYPE_CODE_TUPLE: return generateTuple((TupleType) type, r);
         default: throw new Error();
         }
@@ -373,7 +373,7 @@ public class MonteCarloTestCase implements Serializable {
         return new BigDecimal(generateBigInteger(r, type), type.scale);
     }
 
-    private Object generateArray(ArrayType<?, ?> arrayType, Random r) {
+    private Object generateArray(ArrayType<? extends ABIType<?>, ?> arrayType, Random r) {
         ABIType<?> elementType = arrayType.elementType;
         final int len = arrayType.length == DYNAMIC_LENGTH
                 ? r.nextInt(params.maxArrayLen + 1) // 0 to max
@@ -467,11 +467,11 @@ public class MonteCarloTestCase implements Serializable {
         return tuples;
     }
 
-    private Object[] generateObjectArray(ArrayType<?, ?> arrayType, final int len, Random r) {
+    private Object[] generateObjectArray(ArrayType<? extends ABIType<?>, ?> arrayType, final int len, Random r) {
 
         Object[] dest = (Object[]) Array.newInstance(arrayType.elementType.clazz, len);
 
-        final ArrayType<?, ?> elementType = (ArrayType<?, ?>) arrayType.elementType;
+        final ArrayType<? extends ABIType<?>, ?> elementType = (ArrayType<? extends ABIType<?>, ?>) arrayType.elementType;
         for (int i = 0; i < len; i++) {
             dest[i] = generateArray(elementType, r);
         }

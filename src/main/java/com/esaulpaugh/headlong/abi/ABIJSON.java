@@ -217,8 +217,8 @@ public final class ABIJSON {
             if(type.startsWith("(")) { // tuple
                 arrayElement.add(TYPE, new JsonPrimitive(type.replace(type.substring(0, type.lastIndexOf(')') + 1), TUPLE)));
                 ABIType<?> base = e;
-                while (base instanceof ArrayType<?, ?>) {
-                    base = ((ArrayType<?, ?>) base).elementType;
+                while (base instanceof ArrayType) {
+                    base = ((ArrayType<? extends ABIType<?>, ?>) base).elementType;
                 }
                 arrayElement.add(COMPONENTS, buildJsonArray((TupleType) base, null));
             } else {
