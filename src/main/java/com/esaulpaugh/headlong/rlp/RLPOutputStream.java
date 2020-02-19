@@ -69,7 +69,7 @@ public class RLPOutputStream extends OutputStream {
         writeOut(RLPEncoder.encodeSequentially(rawObjects));
     }
 
-    public void writeAll(Iterable<Object> rawObjects) throws IOException {
+    public void writeAll(Iterable<?> rawObjects) throws IOException {
         writeOut(RLPEncoder.encodeSequentially(rawObjects));
     }
 
@@ -77,7 +77,7 @@ public class RLPOutputStream extends OutputStream {
         writeOut(RLPEncoder.encodeAsList(rawElements));
     }
 
-    public void writeList(Iterable<Object> rawElements) throws IOException {
+    public void writeList(Iterable<?> rawElements) throws IOException {
         writeOut(RLPEncoder.encodeAsList(rawElements));
     }
 
