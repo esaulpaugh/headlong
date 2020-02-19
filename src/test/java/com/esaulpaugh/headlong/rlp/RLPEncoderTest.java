@@ -23,9 +23,13 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -177,10 +181,40 @@ public class RLPEncoderTest {
     @Test
     public void testExceptions() throws Throwable {
 
-        TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.encodeSequentially(new byte[0], null, new byte[] { -1 }));
+        TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.encodeSequentially(new byte[0], null, new byte[]{-1}));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type: java.lang.String", () -> RLPEncoder.encodeSequentially((Object) new String[] { "00" }));
+        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type: java.lang.String", () -> RLPEncoder.encodeSequentially((Object) new String[]{"00"}));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type: java.lang.String", () -> RLPEncoder.encodeSequentially(new Object[] { new ArrayList<>(), "00" }));
+        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type: java.lang.String", () -> RLPEncoder.encodeSequentially(new Object[]{new ArrayList<>(), "00"}));
+    }
+
+    @Test
+    public void testEncodeToByteBuffer() throws Throwable {
+        RLPEncoder.encodeSequentially(new HashSet<>(), ByteBuffer.allocate(0));
+        RLPEncoder.encodeSequentially(new ArrayList<>(), ByteBuffer.allocate(0));
+        RLPEncoder.encodeSequentially(new Object[0], ByteBuffer.allocate(0));
+        TestUtils.assertThrown(
+                IllegalArgumentException.class,
+                "unsupported object type: java.util.HashMap",
+                () -> RLPEncoder.encodeSequentially(new HashMap<>(), ByteBuffer.allocate(0))
+        );
+        TestUtils.assertThrown(
+                IllegalArgumentException.class,
+                "unsupported object type: java.nio.HeapByteBuffer",
+                () -> RLPEncoder.encodeSequentially(new byte[0], ByteBuffer.allocate(0))
+        );
+        RLPEncoder.encodeSequentially(() -> new Iterator<Object>() {
+            @Override
+            public boolean hasNext() {
+                return false;
+            }
+
+            @Override
+            public Object next() {
+                throw new NoSuchElementException();
+            }
+        }, ByteBuffer.allocate(0));
+
+        TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.encodeSequentially(() -> null, ByteBuffer.allocate(0)));
     }
 }
