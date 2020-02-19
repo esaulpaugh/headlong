@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +27,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -74,6 +76,33 @@ public class RLPStreamTest {
                 .collect(Collectors.joining("\n"));
 
         System.out.println(joined);
+    }
+
+    @Test
+    public void testOutputStream() throws IOException {
+        RLPOutputStream ros = new RLPOutputStream();
+        ros.write(0x00);
+        ros.write(new byte[] { (byte) 0x7f, (byte) 0x20 });
+        ros.writeAll(new byte[] { 0x01 }, new byte[] { 0x02 }, new byte[] { 0x03 });
+        ros.writeList(new byte[] { 0x04 }, new byte[] { 0x05 }, new byte[] { 0x06 });
+        byte[] bytes = ros.getByteArrayOutputStream().toByteArray();
+        assertEquals("00827f20010203c3040506", Strings.encode(bytes));
+        ros = new RLPOutputStream();
+        Object[] objects = new Object[] {
+                Strings.decode("0573490923738490"),
+                new HashSet<byte[]>(),
+                new Object[] { new byte[] { 0x77, 0x61 } }
+        };
+        Notation notation = Notation.forObjects(objects);
+        ros.writeAll(objects);
+        bytes = ros.getByteArrayOutputStream().toByteArray();
+        assertEquals(notation, Notation.forEncoding(bytes));
+        ros = new RLPOutputStream();
+        notation = Notation.forObjects(new Object[] { objects });
+        ros.writeList(objects);
+        bytes = ros.getByteArrayOutputStream().toByteArray();
+        assertEquals(notation, Notation.forEncoding(bytes));
+        assertEquals("ce880573490923738490c0c3827761", ros.getOutputStream().toString());
     }
 
     @Test

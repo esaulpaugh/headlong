@@ -166,6 +166,8 @@ public abstract class RLPItem {
     }
 
     /**
+     * Returns the {@link String}, of the given encoding, representing this item.
+     *
      * @param encoding one of { {@link Strings#BASE_64_URL_SAFE}, {@link Strings#UTF_8}, {@link Strings#HEX} }.
      * @return  this item's payload (data) bytes, encoded to your liking
      */
@@ -174,22 +176,22 @@ public abstract class RLPItem {
     }
 
     /**
-     * Only {@code 0xc0}, {@code 0x80}, and {@code 0x00} are false. Everything else is true.
+     * Returns the {@code boolean} representation for this item. False for {@code 0xc0}, {@code 0x80}, and {@code 0x00};
+     * true for everything else.
      *
-     * @return the boolean represenation for this item
-     * @see Integers#putByte(byte, byte[], int)
+     * @return the {@code boolean}
      */
     public boolean asBoolean() {
         return dataLength != 0 && buffer[index] != 0x00;
     }
 
     /**
-     * Returns the char representation for this item.
+     * Returns the {@code char} representation for this item.
      *
      * @param lenient whether to allow leading zeroes in the raw data
-     * @return the char representation
+     * @return the {@code char}
      * @throws IllegalArgumentException if this item is not interpretable as a char
-     * @see String#charAt(int)
+     * @see #asShort(boolean)
      */
     public char asChar(boolean lenient) {
         return (char) asShort(lenient);

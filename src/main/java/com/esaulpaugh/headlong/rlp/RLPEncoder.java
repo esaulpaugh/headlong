@@ -144,7 +144,7 @@ public final class RLPEncoder {
             Iterable<?> elements = (Iterable<?>) raw;
             encodeList(sumEncodedLen(elements), elements, bb);
         } else if(raw instanceof Object[]) {
-            Iterable<Object> elements = Arrays.asList((Object[]) raw);
+            Iterable<?> elements = Arrays.asList((Object[]) raw);
             encodeList(sumEncodedLen(elements), elements, bb);
         } else if(raw == null) {
             throw new NullPointerException();
