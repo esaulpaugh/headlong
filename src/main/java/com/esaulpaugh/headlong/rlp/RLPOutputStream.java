@@ -27,10 +27,10 @@ import java.util.Arrays;
  */
 public class RLPOutputStream extends OutputStream {
 
-    private final OutputStream os;
+    private final OutputStream out;
 
     public RLPOutputStream() {
-        this.os = new ByteArrayOutputStream() {
+        this.out = new ByteArrayOutputStream() {
             @Override
             public String toString() {
                 return Strings.encode(buf, 0, count, Strings.HEX);
@@ -38,50 +38,50 @@ public class RLPOutputStream extends OutputStream {
         };
     }
 
-    public RLPOutputStream(OutputStream os) {
-        this.os = os;
+    public RLPOutputStream(OutputStream out) {
+        this.out = out;
     }
 
     public ByteArrayOutputStream getByteArrayOutputStream() {
-        return (ByteArrayOutputStream) os;
+        return (ByteArrayOutputStream) out;
     }
 
     public OutputStream getOutputStream() {
-        return os;
+        return out;
     }
 
     @Override
     public void write(int b) throws IOException {
-        write(RLPEncoder.encode((byte) b));
+        writeOut(RLPEncoder.encode((byte) b));
     }
 
     @Override
     public void write(byte[] b) throws IOException {
-        write(b, 0, b.length);
+        writeOut(RLPEncoder.encode(b));
     }
 
     @Override
     public void write(byte[] buffer, int off, int len) throws IOException {
-        writeInternal(RLPEncoder.encode(Arrays.copyOfRange(buffer, off, off + len)));
+        writeOut(RLPEncoder.encode(Arrays.copyOfRange(buffer, off, off + len)));
     }
 
     public void writeAll(Object... rawObjects) throws IOException {
-        writeInternal(RLPEncoder.encodeSequentially(rawObjects));
+        writeOut(RLPEncoder.encodeSequentially(rawObjects));
     }
 
     public void writeAll(Iterable<Object> rawObjects) throws IOException {
-        writeInternal(RLPEncoder.encodeSequentially(rawObjects));
+        writeOut(RLPEncoder.encodeSequentially(rawObjects));
     }
 
     public void writeList(Object... rawElements) throws IOException {
-        writeInternal(RLPEncoder.encodeAsList(rawElements));
+        writeOut(RLPEncoder.encodeAsList(rawElements));
     }
 
     public void writeList(Iterable<Object> rawElements) throws IOException {
-        writeInternal(RLPEncoder.encodeAsList(rawElements));
+        writeOut(RLPEncoder.encodeAsList(rawElements));
     }
 
-    private void writeInternal(byte[] rlp) throws IOException {
-        os.write(rlp, 0, rlp.length);
+    private void writeOut(byte[] rlp) throws IOException {
+        out.write(rlp, 0, rlp.length);
     }
 }

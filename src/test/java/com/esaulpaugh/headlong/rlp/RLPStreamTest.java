@@ -81,12 +81,12 @@ public class RLPStreamTest {
     @Test
     public void testOutputStream() throws IOException {
         RLPOutputStream ros = new RLPOutputStream();
-        ros.write(0x00);
+        ros.write(0xc0);
         ros.write(new byte[] { (byte) 0x7f, (byte) 0x20 });
         ros.writeAll(new byte[] { 0x01 }, new byte[] { 0x02 }, new byte[] { 0x03 });
         ros.writeList(new byte[] { 0x04 }, new byte[] { 0x05 }, new byte[] { 0x06 });
         byte[] bytes = ros.getByteArrayOutputStream().toByteArray();
-        assertEquals("00827f20010203c3040506", Strings.encode(bytes));
+        assertEquals("81c0827f20010203c3040506", Strings.encode(bytes));
         ros = new RLPOutputStream();
         Object[] objects = new Object[] {
                 Strings.decode("0573490923738490"),
