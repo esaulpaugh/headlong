@@ -135,7 +135,7 @@ public abstract class RLPItem {
 
     public final int exportData(byte[] dest, int destIndex) {
         return exportRange(dataIndex, endIndex, dest, destIndex);
-}
+    }
 
     public final void exportData(OutputStream os) throws IOException {
         os.write(buffer, dataIndex, dataLength);
