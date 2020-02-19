@@ -54,17 +54,17 @@ public class RLPOutputStream extends OutputStream {
 
     @Override
     public void write(int b) throws IOException {
-        writeOut(RLPEncoder.encode((byte) b));
+        writeOut(RLPEncoder.encodeString((byte) b));
     }
 
     @Override
     public void write(byte[] b) throws IOException {
-        writeOut(RLPEncoder.encode(b));
+        writeOut(RLPEncoder.encodeString(b));
     }
 
     @Override
     public void write(byte[] buffer, int off, int len) throws IOException {
-        writeOut(RLPEncoder.encode(Arrays.copyOfRange(buffer, off, off + len)));
+        writeOut(RLPEncoder.encodeString(Arrays.copyOfRange(buffer, off, off + len)));
     }
 
     public void writeAll(Object... rawObjects) throws IOException {

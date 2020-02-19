@@ -186,8 +186,8 @@ public final class RLPEncoder {
      * @param b the byte to be encoded
      * @return the encoding
      */
-    public static byte[] encode(byte b) {
-        return encode(new byte[] { b });
+    public static byte[] encodeString(byte b) {
+        return encodeString(new byte[] { b });
     }
 
     /**
@@ -196,7 +196,7 @@ public final class RLPEncoder {
      * @param byteString the byte string to be encoded
      * @return the encoding
      */
-    public static byte[] encode(byte[] byteString) {
+    public static byte[] encodeString(byte[] byteString) {
         ByteBuffer bb = ByteBuffer.allocate(stringEncodedLen(byteString));
         encodeString(byteString, bb);
         return bb.array();

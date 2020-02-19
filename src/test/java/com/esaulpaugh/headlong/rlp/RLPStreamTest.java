@@ -302,7 +302,7 @@ public class RLPStreamTest {
                     write(b);
                 }
                 waitForNotifiedReceiver();
-                byte[] rlpString = RLPEncoder.encode(Strings.decode(TEST_STRING, UTF_8));
+                byte[] rlpString = RLPEncoder.encodeString(Strings.decode(TEST_STRING, UTF_8));
                 int i = 0;
                 write(rlpString[i++]);
                 waitForNotifiedReceiver();
