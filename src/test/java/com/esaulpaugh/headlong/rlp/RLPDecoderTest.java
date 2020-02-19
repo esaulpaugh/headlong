@@ -34,6 +34,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 
 import static com.esaulpaugh.headlong.TestUtils.CustomRunnable;
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
@@ -253,7 +254,8 @@ public class RLPDecoderTest {
     @Test
     public void strictAndLenient() throws Throwable {
         byte[] invalidAf = new byte[] {
-                (byte)0xc8, (byte)0x80, 0, (byte)0x81, (byte) 0xAA, (byte)0x81, (byte)'\u0080', (byte)0x81, '\u007f', (byte)'\u230A' };
+                (byte)0xc8, (byte)0x80, 0, (byte)0x81, (byte) 0xAA, (byte)0x81, (byte)'\u0080', (byte)0x81, '\u007f', (byte)'\u230A'
+        };
 
         RLPList list = RLP_STRICT.wrapList(invalidAf);
 
@@ -545,6 +547,14 @@ public class RLPDecoderTest {
         assertThrown(IllegalArgumentException.class, "found: -9223372036854775808", wrapLenient(beta));
     }
 
+    private static CustomRunnable wrapLenient(final byte[] rlp) {
+        return () -> RLP_LENIENT.wrap(rlp, 0);
+    }
+
+    private static CustomRunnable decodeList(final byte[] rlp) {
+        return () -> RLP_LENIENT.wrapList(rlp, 0).elements(RLP_STRICT);
+    }
+
     @Test
     public void iterators() throws Throwable {
         byte[] a = new byte[] { 1 };
@@ -582,11 +592,25 @@ public class RLPDecoderTest {
         assertThrown(NoSuchElementException.class, seqIter::next);
     }
 
-    private static CustomRunnable wrapLenient(final byte[] rlp) {
-        return () -> RLP_LENIENT.wrap(rlp, 0);
-    }
+    @Test
+    public void testStreaming() {
+        ArrayList<RLPItem> collection = RLP_STRICT.stream(RLPStreamTest.RLP_BYTES)
+                .collect();
 
-    private static CustomRunnable decodeList(final byte[] rlp) {
-        return () -> RLP_LENIENT.wrapList(rlp, 0).elements(RLP_STRICT);
+        String joined = collection.stream()
+                .filter(RLPItem::isList)
+                .peek(System.out::println)
+                .map(RLPItem::asRLPList)
+                .map(RLPList::elements)
+                .flatMap(List::stream)
+                .filter(item -> item.dataLength <= Long.BYTES)
+//                .map(RLPItem::asLong)
+                .map(item -> item.asLong(true))
+                .filter(item -> item > 0)
+                .map(Math::sqrt)
+                .map(String::valueOf)
+                .collect(Collectors.joining("\n"));
+
+        System.out.println(joined);
     }
 }
