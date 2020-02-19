@@ -20,6 +20,8 @@ import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -133,6 +135,10 @@ public abstract class RLPItem {
 
     public final int exportData(byte[] dest, int destIndex) {
         return exportRange(dataIndex, endIndex, dest, destIndex);
+}
+
+    public final void exportData(OutputStream os) throws IOException {
+        os.write(buffer, dataIndex, dataLength);
     }
 
     /**

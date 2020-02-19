@@ -16,12 +16,16 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.Tuple;
 import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -80,6 +84,37 @@ public class RLPStreamTest {
         bytes = ros.getByteArrayOutputStream().toByteArray();
         assertEquals(notation, Notation.forEncoding(bytes));
         assertEquals("ce880573490923738490c0c3827761", ros.getOutputStream().toString());
+    }
+
+    @Test
+    public void testObjectRLPStream() throws IOException, ClassNotFoundException {
+
+        // write RLP
+        RLPOutputStream ros = new RLPOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(ros);
+        oos.writeUTF("hello");
+//        oos.flush();
+        oos.writeChar('Z');
+        oos.writeObject(new Tuple("jinro", new byte[] { (byte) 0xc0 }, new Boolean[] { false, true }));
+        oos.flush();
+
+        // decode RLP
+        RLPStream stream = new RLPStream(new ByteArrayInputStream(ros.getByteArrayOutputStream().toByteArray()));
+        ByteArrayOutputStream decoded = new ByteArrayOutputStream();
+        int count = 0;
+        for (RLPItem item : stream) {
+            item.exportData(decoded);
+            count++;
+        }
+
+        System.out.println("count = " + count);
+        System.out.println("decoded len = " + decoded.toByteArray().length);
+
+        // read objects
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(decoded.toByteArray()));
+        assertEquals("hello", ois.readUTF());
+        assertEquals('Z', ois.readChar());
+        assertEquals(new Tuple("jinro", new byte[] { (byte) 0xc0 }, new Boolean[] { false, true }), ois.readObject());
     }
 
     @Test
