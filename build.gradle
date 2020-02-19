@@ -18,10 +18,6 @@ test {
     maxParallelForks = (int) Runtime.runtime.availableProcessors() ?: 1
 }
 
-javadoc {
-//    options.addBooleanOption('html5', true)
-}
-
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc' // deprecated
 //    archiveClassifier.set('javadoc')
