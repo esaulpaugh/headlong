@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
+import com.joemelsha.crypto.hash.Keccak;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -71,16 +72,16 @@ public class MonteCarloTest {
 
         StringBuilder log = new StringBuilder();
 
+        final Random r = new Random();
+        final Keccak k = new Keccak(256);
+
         int i = 0;
-        String temp = null;
-        MonteCarloTestCase testCase;
+        MonteCarloTestCase testCase = null;
         for(final long seed : seeds) {
-            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed);
             try {
-                testCase = new MonteCarloTestCase(params);
-                temp = testCase.function.getCanonicalSignature();
+                testCase = new MonteCarloTestCase(seed, 3, 3, 3, 3, r, k);
+//                if(testCase.function.getCanonicalSignature().contains("int[")) throw new Error("canonicalization failed!");
                 testCase.runAll();
-                temp = null;
 //                log.append('#')
 //                        .append(i)
 //                        .append(" PASSED: ")
@@ -89,11 +90,11 @@ public class MonteCarloTest {
 //                        .append(testCase.function.getCanonicalSignature().substring(testCase.function.getCanonicalSignature().indexOf('('))) // print function params
 //                        .append('\n');
                 i++;
-//                if(System.nanoTime() % 100_000_000 == 0) throw new Error("simulated random error");
+//                if(System.nanoTime() % 50_000_000 == 0) throw new Error("simulated random error");
             } catch (Throwable t) {
                 System.out.println(log.toString());
                 sleep();
-                System.err.println("#" + i + " failed for " + params.toString() + "\t\t" + temp);
+                System.err.println("#" + i + " failed for " + testCase);
                 System.err.println("thread " + Thread.currentThread().getId() + " seed: " + threadSeed + "L");
                 throw t;
             }
@@ -180,13 +181,13 @@ public class MonteCarloTest {
     @Test
     public void testThreadSafety() throws InterruptedException, TimeoutException {
 
-        final MonteCarloTestCase one = newComplexTestCase();
-        final MonteCarloTestCase two = newComplexTestCase();
+        final Random r = new Random();
+        final Keccak k = new Keccak(256);
+        final MonteCarloTestCase one = newComplexTestCase(r, k);
+        final MonteCarloTestCase two = newComplexTestCase(r, k);
 
-        System.out.println(one.function.getCanonicalSignature());
-        System.out.println(one.params);
-        System.out.println(two.function.getCanonicalSignature());
-        System.out.println(two.params);
+        System.out.println(one);
+        System.out.println(two);
         final MonteCarloTask task = new MonteCarloTask(one, 0, 308_011);
 
         final int numProcessors = Runtime.getRuntime().availableProcessors();
@@ -223,7 +224,9 @@ public class MonteCarloTest {
 
     @Test
     public void testSerialization() throws IOException, ClassNotFoundException {
-        final MonteCarloTask original = new MonteCarloTask(newComplexTestCase(), 0, 1);
+        final Random r = new Random();
+        final Keccak k = new Keccak(256);
+        final MonteCarloTask original = new MonteCarloTask(newComplexTestCase(r, k), 0, 1);
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         new ObjectOutputStream(baos)
@@ -238,7 +241,7 @@ public class MonteCarloTest {
         System.out.println("successful deserialization");
     }
 
-    private static MonteCarloTestCase newComplexTestCase() {
+    private static MonteCarloTestCase newComplexTestCase(Random r, Keccak k) {
         final long time = System.nanoTime();
         long seed = TestUtils.getSeed(time);
         final long origSeed = seed;
@@ -247,7 +250,7 @@ public class MonteCarloTest {
         String sig;
         do {
             seed++;
-            testCase = new MonteCarloTestCase(new MonteCarloTestCase.Params(seed, 4, 4, 2, 2));
+            testCase = new MonteCarloTestCase(seed, 4, 4, 2, 2, r, k);
             sig = testCase.function.getCanonicalSignature();
         } while (
                 sig.endsWith("()")
@@ -273,13 +276,14 @@ public class MonteCarloTest {
     @Disabled("run if you need to generate random test cases")
     @Test
     public void printNewTestCases() {
+        final Random r = new Random();
+        final Keccak k = new Keccak(256);
         final Gson ugly = new GsonBuilder().create();
         final JsonPrimitive version = new JsonPrimitive("1.4.4+commit.3ad2258");
         final JsonArray array = new JsonArray();
         int i = 0;
         for(final long seed : generateSeeds(TestUtils.getSeed(System.nanoTime()), 250)) {
-            final MonteCarloTestCase.Params params = new MonteCarloTestCase.Params(seed);
-            MonteCarloTestCase testCase = new MonteCarloTestCase(params);
+            MonteCarloTestCase testCase = new MonteCarloTestCase(seed, 3, 3, 3, 3, r, k);
             array.add(testCase.toJsonElement(ugly, "headlong_" + i++, version));
         }
         System.out.println(JsonUtils.toPrettyPrint(array));

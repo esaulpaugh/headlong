@@ -37,17 +37,25 @@ public class EqualsTest {
     @Test
     public void testEquals() {
 
-        Random r = TestUtils.seededRandom();
+        final Random r = new Random();
+        final Keccak k = new Keccak(256);
 
+        int maxIters = -1;
+        int i = 0;
         int n = 0;
         do {
 
-            MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong());
+            MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
 
             String canonical = mctc.function.getCanonicalSignature();
             if(mctc.rawSignature.equals(canonical)) {
+                i++;
                 continue;
             }
+            if(i > maxIters) {
+                maxIters = i;
+            }
+            i = 0;
 
             Function a = mctc.function;
             Function b = new Function(canonical);
@@ -66,6 +74,8 @@ public class EqualsTest {
 
             n++;
         } while (n < 100);
+
+        System.out.println("n = " + n + ", maxIters = " + maxIters);
 
         assertSame(TupleType.parse("(uint)").elementTypes[0].canonicalType, TupleType.parse("(uint)").elementTypes[0].canonicalType);
         assertNotSame(Function.parse("(uint)").getParamTypes().canonicalType, Function.parse("(uint)").getParamTypes().canonicalType);

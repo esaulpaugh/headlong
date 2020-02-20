@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.joemelsha.crypto.hash.Keccak;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -48,20 +49,21 @@ public class TupleTest {
     @Test
     public void testTypeSafety() throws Throwable {
 
-        Random rand = TestUtils.seededRandom();
+        final Random r = TestUtils.seededRandom();
+        final Keccak k = new Keccak(256);
 
         for (int i = 0; i < 1000; i++) {
 
-            rand.setSeed(i);
+            r.setSeed(i);
 
-            MonteCarloTestCase testCase = new MonteCarloTestCase(i);
+            MonteCarloTestCase testCase = new MonteCarloTestCase(i, 3, 3, 3, 3, r, k);
 
             Object[] elements = testCase.argsTuple.elements;
 
             final int idx = 0;
             if(elements.length > idx) {
                 Object e = elements[idx];
-                Object replacement = OBJECTS[rand.nextInt(OBJECTS.length)];
+                Object replacement = OBJECTS[r.nextInt(OBJECTS.length)];
                 if(e.getClass() != replacement.getClass()) {
                     elements[idx] = replacement;
                 } else {
@@ -80,9 +82,10 @@ public class TupleTest {
 
     @Test
     public void fuzzNulls() throws Throwable {
-        Random r = TestUtils.seededRandom();
+        final Random r = TestUtils.seededRandom();
+        final Keccak k = new Keccak(256);
         for (int i = 0; i < 1000; i++) {
-            MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong());
+            MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
             Tuple args = mctc.argsTuple;
             if(args.elements.length > 0) {
                 int idx = r.nextInt(args.elements.length);
