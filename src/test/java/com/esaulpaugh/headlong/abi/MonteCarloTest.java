@@ -99,7 +99,7 @@ public class MonteCarloTest {
             }
         }
 
-        System.out.println(log.toString());
+        if(log.length() > 0) System.out.println(log.toString());
         System.out.println("thread " + Thread.currentThread().getId() + " seed: " + threadSeed + "L");
     }
 
@@ -247,14 +247,15 @@ public class MonteCarloTest {
         String sig;
         do {
             seed++;
-            testCase = new MonteCarloTestCase(new MonteCarloTestCase.Params(seed));
+            testCase = new MonteCarloTestCase(new MonteCarloTestCase.Params(seed, 4, 4, 2, 2));
             sig = testCase.function.getCanonicalSignature();
-        } while (!sig.contains("string")
-                || (!sig.contains("fixed") && !sig.contains("decimal"))
-                || (!sig.contains("int") && !sig.contains("address"))
-                || (!sig.contains("bytes") && !sig.contains("function"))
-                || sig.indexOf('[') < 0
-                || sig.indexOf(')') == sig.length() - 1
+        } while (
+                sig.endsWith("()")
+                        || sig.indexOf('[') < 0
+                        || (!sig.contains("int") && !sig.contains("address"))
+                        || (!sig.contains("fixed") && !sig.contains("decimal"))
+                        || (!sig.contains("bytes1") && !sig.contains("bytes2") && !sig.contains("bytes3") && !sig.contains("function"))
+                        || (!sig.contains("string") && !sig.contains("bytes,") && !sig.contains("bytes)"))
         );
         System.out.println("n = " + (seed - origSeed));
         return testCase;
