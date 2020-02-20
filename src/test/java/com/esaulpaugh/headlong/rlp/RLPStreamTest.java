@@ -60,7 +60,8 @@ public class RLPStreamTest {
     };
 
     @Test
-    public void testOutputStream() throws IOException {
+    public void testRLPOutputStream() throws Throwable {
+        TestUtils.assertThrown(NullPointerException.class, () -> new RLPOutputStream(null));
         RLPOutputStream ros = new RLPOutputStream();
         ros.write(0xc0);
         ros.write(new byte[] { (byte) 0x7f, (byte) 0x20 });
@@ -83,7 +84,9 @@ public class RLPStreamTest {
         ros.writeList(objects);
         bytes = ros.getByteArrayOutputStream().toByteArray();
         assertEquals(notation, Notation.forEncoding(bytes));
+        assertEquals("ce880573490923738490c0c3827761", ros.getByteArrayOutputStream().toString());
         assertEquals("ce880573490923738490c0c3827761", ros.getOutputStream().toString());
+        assertEquals("ce880573490923738490c0c3827761", ros.toString());
     }
 
     @Test

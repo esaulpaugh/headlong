@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * An {@link OutputStream} in which the data is encoded to RLP format before writing to the underlying {@link OutputStream}.
@@ -41,7 +42,7 @@ public class RLPOutputStream extends OutputStream {
     }
 
     public RLPOutputStream(OutputStream out) {
-        this.out = out;
+        this.out = Objects.requireNonNull(out);
     }
 
     public ByteArrayOutputStream getByteArrayOutputStream() {
@@ -85,5 +86,10 @@ public class RLPOutputStream extends OutputStream {
 
     private void writeOut(byte[] rlp) throws IOException {
         out.write(rlp, 0, rlp.length);
+    }
+
+    @Override
+    public String toString() {
+        return out.toString();
     }
 }
