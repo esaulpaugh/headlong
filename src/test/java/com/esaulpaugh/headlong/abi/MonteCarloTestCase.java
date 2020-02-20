@@ -137,7 +137,7 @@ public class MonteCarloTestCase implements Serializable {
                 .replace("fixed128x18[", "fixed[")
                 .replace("fixed128x18)", "fixed)");
 
-        if(sig.contains("int256") || sig.contains("fixed128x18")) throw new Error(sig);
+//        if(sig.contains("int256") || sig.contains("fixed128x18")) throw new Error(sig);
 
         this.rawSignature = sig;
         this.function = new Function(sig, null, md);

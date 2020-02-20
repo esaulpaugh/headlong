@@ -68,20 +68,19 @@ public class MonteCarloTest {
 
     private static void doMonteCarlo(long threadSeed, int n) {
 
-        final long[] seeds = generateSeeds(threadSeed, n);
-
         StringBuilder log = new StringBuilder();
 
-        final Random r = new Random();
+        final Random r = new Random(threadSeed);
         final Keccak k = new Keccak(256);
 
         int i = 0;
         MonteCarloTestCase testCase = null;
-        for(final long seed : seeds) {
+        for(; i < n; i++) {
             try {
-                testCase = new MonteCarloTestCase(seed, 3, 3, 3, 3, r, k);
+                testCase = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
 //                if(testCase.function.getCanonicalSignature().contains("int[")) throw new Error("canonicalization failed!");
                 testCase.runAll();
+//                if(System.nanoTime() % 50_000_000 == 0) throw new Error("simulated random error");
 //                log.append('#')
 //                        .append(i)
 //                        .append(" PASSED: ")
@@ -90,7 +89,6 @@ public class MonteCarloTest {
 //                        .append(testCase.function.getCanonicalSignature().substring(testCase.function.getCanonicalSignature().indexOf('('))) // print function params
 //                        .append('\n');
                 i++;
-//                if(System.nanoTime() % 50_000_000 == 0) throw new Error("simulated random error");
             } catch (Throwable t) {
                 System.out.println(log.toString());
                 sleep();
@@ -264,15 +262,6 @@ public class MonteCarloTest {
         return testCase;
     }
 
-    private static long[] generateSeeds(long masterSeed, int n) {
-        Random r = new Random(masterSeed);
-        long[] seeds = new long[n];
-        for (int i = 0; i < seeds.length; i++) {
-            seeds[i] = r.nextLong();
-        }
-        return seeds;
-    }
-
     @Disabled("run if you need to generate random test cases")
     @Test
     public void printNewTestCases() {
@@ -281,9 +270,8 @@ public class MonteCarloTest {
         final Gson ugly = new GsonBuilder().create();
         final JsonPrimitive version = new JsonPrimitive("1.4.4+commit.3ad2258");
         final JsonArray array = new JsonArray();
-        int i = 0;
-        for(final long seed : generateSeeds(TestUtils.getSeed(System.nanoTime()), 250)) {
-            MonteCarloTestCase testCase = new MonteCarloTestCase(seed, 3, 3, 3, 3, r, k);
+        for(int i = 0; i < 250; i++) {
+            MonteCarloTestCase testCase = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
             array.add(testCase.toJsonElement(ugly, "headlong_" + i++, version));
         }
         System.out.println(JsonUtils.toPrettyPrint(array));
