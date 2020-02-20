@@ -40,29 +40,51 @@ public class EncodeTest {
 
     private static final Class<IllegalArgumentException> ILLEGAL = IllegalArgumentException.class;
 
-    private static final char[] ALPHABET = "(),abcdefgilmnorstuxy0123456789[]".toCharArray(); // ")uint8,[]"
-    private static final int ALPHABET_LEN = ALPHABET.length;
-
-    @Disabled("takes minutes to run")
+    @Disabled("may take minutes to run")
     @Test
     public void fuzzSignatures() throws InterruptedException {
+
+        final int alphabetLen = 128;
+        final char[] alphabet = new char[alphabetLen]; // "(),abcdefgilmnorstuxy0123456789[]".toCharArray(); // ")uint8,[]"
+        for (int i = 0; i < alphabetLen; i++) {
+            alphabet[i] = (char) i;
+        }
+
+        final int[] iterations = new int[] {
+                128,
+                128,
+                128,
+                128,
+                4_096,
+                524_288,
+                1_000_000,
+                1_000_000,
+                1_000_000,
+                1_000_000,
+                1_000_000,
+                1_000_000,
+                1_000_000,
+                1_000_000,
+                1_000_000
+        };
+
         final Random r = TestUtils.seededRandom();
         final Runnable runnable = () -> {
-            for (int len = 6; len <= 9; len++) {
+            for (int len = 3; len <= 12; len++) {
                 System.out.println(len + "(" + Thread.currentThread().getId() + ")");
                 final char[] temp = new char[len];
                 temp[0] = '(';
                 temp[len - 1] = ')';
                 final int lim = temp.length - 1;
-                final int num = 4_000_000 + (int) Math.pow(3.7, len);
+                final int num = iterations[len]; // 1_000_000 + (int) Math.pow(3.7, len);
                 for (int j = 0; j < num; j++) {
                     for (int i = 1; i < lim; i++) {
-                        temp[i] = ALPHABET[r.nextInt(ALPHABET_LEN)];
+                        temp[i] = alphabet[r.nextInt(alphabetLen)];
                     }
                     String sig = new String(temp);
                     try {
                         TupleType tt = TupleType.parse(sig);
-                        System.out.println("\t\t\t" + len + ' ' + sig);
+                        if(!"(())".equals(sig)) System.out.println("\t\t\t" + len + ' ' + sig);
                     } catch (IllegalArgumentException iae) {
                         /* do nothing */
                     } catch (Throwable t) {
