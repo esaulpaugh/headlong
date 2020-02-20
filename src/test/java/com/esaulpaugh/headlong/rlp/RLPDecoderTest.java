@@ -114,12 +114,14 @@ public class RLPDecoderTest {
             tasks[i] = new ExhaustiveFuzzTask(new byte[] { (byte) i, 0, 0, 0 });
             executorService.submit(tasks[i]);
         }
-        long valid = 0, invalid = 0;
         executorService.shutdown();
-        executorService.awaitTermination(12L, TimeUnit.MINUTES);
+        executorService.awaitTermination(35L, TimeUnit.MINUTES);
+        long valid = 0, invalid = 0;
         for (ExhaustiveFuzzTask task : tasks) {
-            valid += task.valid;
-            invalid += task.invalid;
+            if(task != null) {
+                valid += task.valid;
+                invalid += task.invalid;
+            }
         }
         System.out.println(valid + " / " + (valid + invalid) + " (" + invalid + " invalid)");
     }
