@@ -2,7 +2,7 @@
 [![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/apache/maven.svg?label=License)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Gitter](https://badges.gitter.im/esaulpaugh-headlong/community.svg)](https://gitter.im/esaulpaugh-headlong/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-Contract ABI (v2) and Recursive Length Prefix made easy for the JVM. Everything heavily optimized for maximum throughput (ABI function call encoding up to 500x faster than a popular competitor. One function init plus one encode up to 50x faster (tested w/ `"sam(bytes,bool,uint256[])"`, openjdk 12.0.1)).
+Contract ABI (v2) and Recursive Length Prefix made easy for the JVM. Everything heavily optimized for maximum throughput (ABI function call encoding up to 500x faster than a popular competitor. One function init plus one encode up to 50x faster (run benchmarks with `gradle jmh` or run the maven-generated benchmarks jar).
 
 ABI spec: https://solidity.readthedocs.io/en/latest/abi-spec.html
 
@@ -116,7 +116,7 @@ https://github.com/esaulpaugh/headlong-cli
 
 ### Misc
 
-headlong (optionally) depends on gson and bouncycastle. Test suite should take less than one minute to run. Test packages require junit and spongycastle. Jar size is ~117 KiB as of 02/16/20. Java 8+.
+headlong (optionally) depends on gson and bouncycastle. Test suite should take less than one minute to run. Test packages require junit and spongycastle. Jar size is ~120 KiB as of 02/20/20. Java 8+.
 
 See the wiki for more, such as TupleTypes, packed encoding (and decoding), RLPList, and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
