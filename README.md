@@ -14,10 +14,10 @@ SHA-256 (headlong-3.1.0.jar): a833f33c8b98dc95f98c2529d4f6e8185e7703901e3b38493c
 
 ### ABI codec
 
-#### Encoding
+#### Encoding Function Calls
 
 ```java
-Function f = new Function("baz(uint32,bool)"); // canonicalizes and parses any signature automatically
+Function f = new Function("baz(uint32,bool)"); // canonicalizes and parses any signature
 // or
 Function f2 = Function.fromJson("{\"type\":\"function\",\"name\":\"foo\",\"inputs\":[{\"name\":\"complex_nums\",\"type\":\"tuple[]\",\"components\":[{\"name\":\"real\",\"type\":\"decimal\"},{\"name\":\"imaginary\",\"type\":\"decimal\"}]}]}");
 
@@ -31,12 +31,13 @@ System.out.println(Function.formatCall(one.array())); // a multi-line hex repres
 System.out.println(f.decodeCall((ByteBuffer) two.flip()).equals(args));
 ```
 
-#### Decoding
+#### Decoding Return Values
 
 ```java
-Function getUfixedAndString = new Function("gogo((fixed[],int8)[1][][5])", "(ufixed,string)");
+Function foo = new Function("foo((fixed[],int8)[1][][5])", "(ufixed,string)");
 
-Tuple decoded = getUfixedAndString.decodeReturn(
+// decode return type (ufixed,string)
+Tuple decoded = foo.decodeReturn(
         FastHex.decode(
                 "0000000000000000000000000000000000000000000000000000000000000045"
               + "0000000000000000000000000000000000000000000000000000000000000020"
@@ -64,11 +65,13 @@ public Student(byte[] rlp) {
 @Override
 public Object[] toObjectArray() {
     return new Object[] {
+            // instances of byte[]
             Strings.decode(name, UTF_8),
             FloatingPoint.toBytes(gpa),
             publicKey,
             balance.unscaledValue().toByteArray(),
             Integers.toBytes(balance.scale())
+            // include an Object[] or Iterable and its elements will be encoded as an RLP list (which may include other lists)
     };
 }
 
@@ -90,7 +93,7 @@ Now available in Maven Central Repository.
 
 Or build locally:
 
-Clone the project and install to your local maven repository using `gradle publishToMavenLocal` or `mvn install`. Then you can use one of these:
+Clone the project and install to your local maven repository using `gradle publishToMavenLocal` or `mvn install`, then declare it as a dependency:
 
 ```groovy
 implementation 'com.esaulpaugh:headlong:3.1.1-SNAPSHOT'
@@ -105,9 +108,9 @@ implementation 'com.esaulpaugh:headlong:3.1.1-SNAPSHOT'
 ```
 Alternatively:
 
-* Run `gradle build` or `gradle jar` which output to `/build/libs`
-* Use `mvn package` which outputs to `/target`
-* Execute `ant all build-jar` which outputs to `/build/lib`
+* Run `gradle build` or `gradle jar` which output to `build/libs`
+* Use `mvn package` which outputs to `target`
+* Execute `ant all build-jar` which outputs to `build/lib`
 * Add headlong as a project dependency
 
 ### Command line interface
@@ -118,6 +121,6 @@ https://github.com/esaulpaugh/headlong-cli
 
 headlong (optionally) depends on gson and bouncycastle. Test suite should take less than one minute to run. Test packages require junit and spongycastle. Jar size is ~120 KiB as of 02/20/20. Java 8+.
 
-See the wiki for more, such as TupleTypes, packed encoding (and decoding), RLPList, and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
+See the wiki for more, such as TupleTypes, packed encoding (and decoding), and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
 Licensed under Apache 2.0 terms
