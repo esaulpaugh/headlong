@@ -24,9 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * An object notation for RLP, not unlike JSON. Call {@link #parse()} to parse the notation into the original list of objects.
- */
+/** A JSON-like notation for RLP items. Call {@link #parse()} get back the raw object hierarchy. */
 public final class Notation {
 
     private static final boolean LENIENT = true; // keep lenient so RLPItem.toString() doesn't throw, and to help with debugging

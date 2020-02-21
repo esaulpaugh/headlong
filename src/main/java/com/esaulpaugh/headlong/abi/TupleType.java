@@ -27,6 +27,7 @@ import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 
+/** @see ABIType */
 public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
     private static final String ARRAY_CLASS_NAME = Tuple[].class.getName();

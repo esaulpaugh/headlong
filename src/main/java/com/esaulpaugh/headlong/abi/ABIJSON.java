@@ -30,7 +30,7 @@ import static com.esaulpaugh.headlong.util.JsonUtils.getString;
 import static com.esaulpaugh.headlong.util.JsonUtils.parseArray;
 import static com.esaulpaugh.headlong.util.JsonUtils.parseObject;
 
-/** For parsing {@link ABIObject}s according to the ABI specification. */
+/** For parsing JSON representations of {@link ABIObject}s according to the ABI specification. */
 public final class ABIJSON {
 
     private static final String NAME = "name";

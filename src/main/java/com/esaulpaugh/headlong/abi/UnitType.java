@@ -21,7 +21,7 @@ import com.esaulpaugh.headlong.util.Integers;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-/** Superclass for any 256-bit ("unit") Contract ABI type. Usually numbers or boolean. Not for arrays such as string. */
+/** Superclass for any 256-bit ("unit") Contract ABI type. Usually numbers or boolean. Not for arrays. */
 abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or is Boolean
 
     static final int UNIT_LENGTH_BYTES = 32;

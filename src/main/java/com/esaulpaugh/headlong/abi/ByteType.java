@@ -18,6 +18,7 @@ package com.esaulpaugh.headlong.abi;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
+/** Currently used only as the element type for some {@link ArrayType}s. */
 public final class ByteType extends UnitType<Byte> {
 
     private static final String ARRAY_CLASS_NAME = byte[].class.getName();

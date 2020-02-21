@@ -22,6 +22,11 @@ import java.util.Comparator;
 
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
+/**
+ * As per EIP-778.
+ *
+ * @see Record
+ */
 public final class KeyValuePair implements Comparable<KeyValuePair> {
 
     public static final Comparator<KeyValuePair> PAIR_COMPARATOR = (pa, pb) -> {
