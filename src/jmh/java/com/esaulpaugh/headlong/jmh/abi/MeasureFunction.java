@@ -54,7 +54,6 @@ public class MeasureFunction {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 2)
     public void init_with_keccak(Blackhole blackhole) {
         blackhole.consume(Function.parse("sam(bytes,bool,uint256[])", new Keccak(256)));
     }
@@ -63,7 +62,6 @@ public class MeasureFunction {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 2)
     public void init_with_wrapped_bouncy_keccak(Blackhole blackhole) {
         blackhole.consume(Function.parse("sam(bytes,bool,uint256[])", new WrappedKeccak(256)));
     }
@@ -72,7 +70,6 @@ public class MeasureFunction {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 2)
     public void encode_call(Blackhole blackhole) {
         blackhole.consume(f.encodeCall(args));
     }

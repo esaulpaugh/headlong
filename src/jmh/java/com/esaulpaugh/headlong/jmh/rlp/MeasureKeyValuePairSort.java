@@ -66,7 +66,7 @@ public class MeasureKeyValuePairSort {
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
     @Measurement(iterations = 2)
     public void sortArray() {
@@ -75,7 +75,7 @@ public class MeasureKeyValuePairSort {
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
     @Measurement(iterations = 2)
     public void sortArrayList() {
@@ -84,7 +84,7 @@ public class MeasureKeyValuePairSort {
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
     @Measurement(iterations = 2)
     public void sortArraysArrayList() {
