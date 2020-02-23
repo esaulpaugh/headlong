@@ -563,7 +563,8 @@ public class RLPDecoderTest {
         byte[] b = new byte[] { 2 };
         byte[] c = new byte[0];
 
-        byte[] list = RLPEncoder.encodeAsList(a, b, c);
+        byte[] list = new byte[4];
+        assertEquals(list.length, RLPEncoder.encodeAsList(new Object[] { a, b, c }, list, 0));
         Iterator<RLPItem> listIter = RLP_STRICT.listIterator(list);
 
         for (RLPItem item : RLP_STRICT.wrapList(list)) {

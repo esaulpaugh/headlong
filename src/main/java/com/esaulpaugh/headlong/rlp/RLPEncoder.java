@@ -294,9 +294,10 @@ public final class RLPEncoder {
      * @param elements  the raw elements to be encoded as an RLP list item
      * @param dest      the destination for the encoded RLP list
      * @param destIndex the index into the destination for the list
+     * @return the index into {@code dest} marking the end of the sequence
      */
-    public static void encodeAsList(Object[] elements, byte[] dest, int destIndex) {
-        encodeAsList(Arrays.asList(elements), dest, destIndex);
+    public static int encodeAsList(Object[] elements, byte[] dest, int destIndex) {
+        return encodeAsList(Arrays.asList(elements), dest, destIndex);
     }
 
     /**
@@ -330,9 +331,12 @@ public final class RLPEncoder {
      * @param elements  the raw elements to be encoded as an RLP list item
      * @param dest      the destination for the encoded RLP list
      * @param destIndex the index into the destination for the list
+     * @return the index into {@code dest} marking the end of the sequence
      */
-    public static void encodeAsList(Iterable<?> elements, byte[] dest, int destIndex) {
-        encodeAsList(elements, ByteBuffer.wrap(dest, destIndex, dest.length - destIndex));
+    public static int encodeAsList(Iterable<?> elements, byte[] dest, int destIndex) {
+        ByteBuffer bb = ByteBuffer.wrap(dest, destIndex, dest.length - destIndex);
+        encodeAsList(elements, bb);
+        return bb.position();
     }
 
     /**
@@ -343,7 +347,7 @@ public final class RLPEncoder {
      * @param dest     the destination for the encoded RLP list
      */
     public static void encodeAsList(Iterable<?> elements, ByteBuffer dest) {
-        encodeItem(elements, dest);
+        encodeList(sumEncodedLen(elements), elements, dest);
     }
 //----------------------------------------------------------------------------------------------------------------------
     /**
