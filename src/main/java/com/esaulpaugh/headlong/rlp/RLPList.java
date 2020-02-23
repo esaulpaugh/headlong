@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-/** Extends {@link RLPItem}. Implements {@link Iterable<RLPItem>} Created by Evo on 1/19/2017. */
+/** Extends {@link RLPItem}. Implements {@link Iterable}. Created by Evo on 1/19/2017. */
 public final class RLPList extends RLPItem implements Iterable<RLPItem> {
 
     RLPList(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) {
