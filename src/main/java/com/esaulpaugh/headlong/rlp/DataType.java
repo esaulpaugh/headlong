@@ -15,7 +15,7 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-/** Enumeration of the five valid RLP data types. */
+/** Enumeration of the five RLP data types. */
 public enum DataType {
 
     SINGLE_BYTE(0, true, false),

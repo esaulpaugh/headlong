@@ -18,7 +18,7 @@ package com.esaulpaugh.headlong.abi;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-/** e.g. uint256 */
+/** Represents integer types from uint64 to int256. */
 public final class BigIntegerType extends UnitType<BigInteger> {
 
     private static final String ARRAY_CLASS_NAME = BigInteger[].class.getName();

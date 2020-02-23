@@ -19,7 +19,7 @@ import org.bouncycastle.jcajce.provider.digest.Keccak.DigestKeccak;
 
 import java.security.MessageDigest;
 
-/** A wrapper class for the bouncycastle implementation of Keccak */
+/** A wrapper class for the bouncycastle implementation of Keccak. */
 public final class WrappedKeccak extends MessageDigest {
 
     private final DigestKeccak impl;

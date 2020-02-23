@@ -39,6 +39,7 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
  */
 public final class Function implements ABIObject, Serializable {
 
+    /** The various variants of {@link Function}. */
     public enum Type {
 
         FUNCTION,
