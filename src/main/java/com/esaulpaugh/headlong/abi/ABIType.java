@@ -75,12 +75,19 @@ public abstract class ABIType<J> implements Serializable {
 
     abstract String arrayClassName();
 
+    /** Returns an integer code specific to this instance's class, which is a subclass of {@link ABIType}. */
     public abstract int typeCode();
 
     abstract int byteLength(Object value);
 
     abstract int byteLengthPacked(Object value);
 
+    /**
+     * Checks whether the given object is a valid argument for this {@link ABIType}. Requires an instance of type {@link J}.
+     *
+     * @param value an object of type {@link J}
+     * @return the byte length of the ABI encoding of {@code value}
+     */
     public abstract int validate(Object value);
 
     int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
@@ -105,6 +112,7 @@ public abstract class ABIType<J> implements Serializable {
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
 
+    /** Parses and validates a string representation of {@link J}. Not supported by {@link ArrayType}, {@link TupleType}. */
     public abstract J parseArgument(String s);
 
     void validateClass(Object value) {

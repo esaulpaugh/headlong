@@ -239,6 +239,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return validate(values);
     }
 
+    /** non-standard packed encoding */
     public ByteBuffer encodePacked(Tuple values) {
         validate(values);
         ByteBuffer dest = ByteBuffer.allocate(byteLengthPacked(values));
@@ -246,6 +247,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return dest;
     }
 
+    /** non-standard packed encoding */
     public void encodePacked(Tuple values, ByteBuffer dest) {
         validate(values);
         PackedEncoder.encodeTuple(this, values, dest);

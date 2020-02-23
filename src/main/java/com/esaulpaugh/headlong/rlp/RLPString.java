@@ -15,9 +15,7 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-/**
- * Created by Evo on 1/19/2017.
- */
+/** Extends {@link RLPItem}. Created by Evo on 1/19/2017. */
 public final class RLPString extends RLPItem {
 
     RLPString(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) {

@@ -24,9 +24,7 @@ import static com.esaulpaugh.headlong.abi.BaseTypeInfo.DECIMAL_SCALE;
 import static com.esaulpaugh.headlong.abi.BaseTypeInfo.FIXED_BIT_LEN;
 import static com.esaulpaugh.headlong.abi.BaseTypeInfo.FIXED_SCALE;
 
-/**
- * Creates the appropriate {@link ABIType} object for a given type string.
- */
+/** Creates the appropriate {@link ABIType} object for a given type string. */
 final class TypeFactory {
 
     private static final ABIType<BigInteger> CACHED_UINT_TYPE = new BigIntegerType("uint256", 256, true);
