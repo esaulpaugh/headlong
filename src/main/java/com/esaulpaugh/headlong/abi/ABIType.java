@@ -87,9 +87,9 @@ public abstract class ABIType<J> implements Serializable {
     abstract int byteLengthPacked(Object value);
 
     /**
-     * Checks whether the given object is a valid argument for this {@link ABIType}. Requires an instance of type {@link J}.
+     * Checks whether the given object is a valid argument for this {@link ABIType}. Requires an instance of type J.
      *
-     * @param value an object of type {@link J}
+     * @param value an object of type J
      * @return the byte length of the ABI encoding of {@code value}
      */
     public abstract int validate(Object value);
@@ -117,7 +117,7 @@ public abstract class ABIType<J> implements Serializable {
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
 
     /**
-     * Parses and validates a string representation of {@link J}. Not supported by {@link ArrayType}, {@link TupleType}.
+     * Parses and validates a string representation of J. Not supported by {@link ArrayType}, {@link TupleType}.
      *
      * @param s the object's string representation
      * @return  the object
