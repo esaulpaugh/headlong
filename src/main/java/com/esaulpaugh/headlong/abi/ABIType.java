@@ -126,7 +126,7 @@ public abstract class ABIType<J> implements Serializable {
 
     void validateClass(Object value) {
         // may throw NPE
-        if(clazz != value.getClass() && !clazz.isAssignableFrom(value.getClass())) {
+        if(!clazz.isInstance(value)) {
             throw new IllegalArgumentException("class mismatch: "
                     + value.getClass().getName()
                     + " not assignable to "
