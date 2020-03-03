@@ -125,8 +125,10 @@ public abstract class ABIType<J> implements Serializable {
     public abstract J parseArgument(String s);
 
     void validateClass(Object value) {
-        // may throw NPE
         if(!clazz.isInstance(value)) {
+            if(value == null) {
+                throw new NullPointerException();
+            }
             throw new IllegalArgumentException("class mismatch: "
                     + value.getClass().getName()
                     + " not assignable to "
