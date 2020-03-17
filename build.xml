@@ -56,14 +56,14 @@
   
   <!-- JDK definitions -->
 
-  <property name="jdk.bin.11" value="${jdk.home.11}/bin"/>
-  <path id="jdk.classpath.11">
-    <fileset dir="${jdk.home.11}"/>
+  <property name="jdk.bin" value="${jdk.home}/bin"/>
+  <path id="jdk.classpath">
+    <fileset dir="${jdk.home}"/>
   </path>
   
-  <property name="project.jdk.home" value="${jdk.home.11}"/>
-  <property name="project.jdk.bin" value="${jdk.bin.11}"/>
-  <property name="project.jdk.classpath" value="jdk.classpath.11"/>
+  <property name="project.jdk.home" value="${jdk.home}"/>
+  <property name="project.jdk.bin" value="${jdk.bin}"/>
+  <property name="project.jdk.classpath" value="jdk.classpath"/>
   
   
   <!-- Project Libraries -->
