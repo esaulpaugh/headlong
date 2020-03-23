@@ -26,7 +26,7 @@ import java.util.Objects;
 /**
  * An {@link OutputStream} in which the data is encoded to RLP format before writing to the underlying {@link OutputStream}.
  * Each call to {@link #write(int)}, {@link #write(byte[])}, or {@link #write(byte[], int, int)} will write one RLP string item.
- * Buffered or otherwise unpredictably-sized writes to a {@link RLPOutputStream} will result in an unpredictable RLP structure.
+ * Buffered or otherwise unpredictably-sized writes to an {@link RLPOutputStream} will result in an unpredictable RLP structure.
  */
 public class RLPOutputStream extends OutputStream {
 
