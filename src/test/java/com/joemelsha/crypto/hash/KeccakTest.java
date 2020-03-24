@@ -57,7 +57,7 @@ public class KeccakTest {
         assertEquals(new WrappedKeccak(288).getDigestLength(), 36);
         assertEquals(new WrappedSponge(288).getDigestLength(), 36);
 
-        assertEquals(new Keccak(512).digestSizeBytes, 64);
+        assertEquals(new Keccak(512).getDigestLength(), 64);
     }
 
     @Test

@@ -268,7 +268,7 @@ public class RLPStreamTest {
         private void notifySender() {
             synchronized (senderThread) {
                 canReceive.set(false);
-                senderThread.notify();
+                senderThread.notifyAll();
             }
         }
 
@@ -333,7 +333,7 @@ public class RLPStreamTest {
         private void notifyReceiver() {
             synchronized (receiver) {
                 canReceive.set(true);
-                receiver.notify();
+                receiver.notifyAll();
             }
         }
 

@@ -33,12 +33,7 @@ public class RLPOutputStream extends OutputStream {
     private final OutputStream out;
 
     public RLPOutputStream() {
-        this.out = new ByteArrayOutputStream() {
-            @Override
-            public String toString() {
-                return Strings.encode(buf, 0, count, Strings.HEX);
-            }
-        };
+        this.out = new Baos();
     }
 
     public RLPOutputStream(OutputStream out) {
@@ -91,5 +86,13 @@ public class RLPOutputStream extends OutputStream {
     @Override
     public String toString() {
         return out.toString();
+    }
+    
+    private static class Baos extends ByteArrayOutputStream {
+    	
+    	@Override
+        public String toString() {
+            return Strings.encode(buf, 0, count, Strings.HEX);
+        }
     }
 }

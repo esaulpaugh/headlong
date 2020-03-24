@@ -30,9 +30,8 @@ public final class Keccak extends MessageDigest {
     private static final int MAX_STATE_SIZE = 1600;
     private static final int MAX_STATE_SIZE_WORDS = MAX_STATE_SIZE / Long.SIZE;
 
-    protected final int digestSizeBits;
-    protected final transient int digestSizeBytes;
-    protected final transient int rateSizeBits;
+    private final transient int digestSizeBytes;
+    private final transient int rateSizeBits;
     private final transient int rateSizeWords;
 
     private final long[] state = new long[MAX_STATE_SIZE_WORDS];
@@ -52,7 +51,6 @@ public final class Keccak extends MessageDigest {
         if (rateSizeBits <= 0 || (rateSizeBits & 0x3f) != 0)
             throw new IllegalArgumentException("Invalid rateSizeBits: " + rateSizeBits);
 
-        this.digestSizeBits = digestSizeBits;
         this.digestSizeBytes = digestSizeBits >>> 3;
 
         this.rateSizeBits = rateSizeBits;
