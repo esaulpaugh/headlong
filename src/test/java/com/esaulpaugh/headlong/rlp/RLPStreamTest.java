@@ -59,47 +59,51 @@ public class RLPStreamTest {
             (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
     };
 
-    @Test
-    public void testRLPOutputStream() throws Throwable {
-        TestUtils.assertThrown(NullPointerException.class, () -> new RLPOutputStream(null));
-        RLPOutputStream ros = new RLPOutputStream();
-        ros.write(0xc0);
-        ros.write(new byte[] { (byte) 0x7f, (byte) 0x20 });
-        ros.writeAll(new byte[] { 0x01 }, new byte[] { 0x02 }, new byte[] { 0x03 });
-        ros.writeList(new byte[] { 0x04 }, new byte[] { 0x05 }, new byte[] { 0x06 });
-        byte[] bytes = ros.getByteArrayOutputStream().toByteArray();
-        assertEquals("81c0827f20010203c3040506", Strings.encode(bytes));
-        ros = new RLPOutputStream();
-        Object[] objects = new Object[] {
-                Strings.decode("0573490923738490"),
-                new HashSet<byte[]>(),
-                new Object[] { new byte[] { 0x77, 0x61 } }
-        };
-        Notation notation = Notation.forObjects(objects);
-        ros.writeAll(objects);
-        bytes = ros.getByteArrayOutputStream().toByteArray();
-        assertEquals(notation, Notation.forEncoding(bytes));
-        ros = new RLPOutputStream();
-        notation = Notation.forObjects(new Object[] { objects });
-        ros.writeList(objects);
-        bytes = ros.getByteArrayOutputStream().toByteArray();
-        assertEquals(notation, Notation.forEncoding(bytes));
-        assertEquals("ce880573490923738490c0c3827761", ros.getByteArrayOutputStream().toString());
-        assertEquals("ce880573490923738490c0c3827761", ros.getOutputStream().toString());
-        assertEquals("ce880573490923738490c0c3827761", ros.toString());
-    }
+	@Test
+	public void testRLPOutputStream() throws Throwable {
+		Object[] objects = new Object[] {
+				Strings.decode("0573490923738490"),
+				new HashSet<byte[]>(),
+				new Object[] { new byte[] { 0x77, 0x61 } }
+		};
+		TestUtils.assertThrown(NullPointerException.class, () -> {try(RLPOutputStream ros = new RLPOutputStream(null)){}});
+		try (RLPOutputStream ros = new RLPOutputStream()) {
+			ros.write(0xc0);
+			ros.write(new byte[] { (byte) 0x7f, (byte) 0x20 });
+			ros.writeAll(new byte[] { 0x01 }, new byte[] { 0x02 }, new byte[] { 0x03 });
+			ros.writeList(new byte[] { 0x04 }, new byte[] { 0x05 }, new byte[] { 0x06 });
+			byte[] bytes = ros.getByteArrayOutputStream().toByteArray();
+			assertEquals("81c0827f20010203c3040506", Strings.encode(bytes));
+		}
+		try (RLPOutputStream ros = new RLPOutputStream()) {
+			Notation notation = Notation.forObjects(objects);
+			ros.writeAll(objects);
+			byte[] bytes = ros.getByteArrayOutputStream().toByteArray();
+			assertEquals(notation, Notation.forEncoding(bytes));
+		}
+		try (RLPOutputStream ros = new RLPOutputStream()) {
+			Notation notation = Notation.forObjects(new Object[] { objects });
+			ros.writeList(objects);
+			byte[] bytes = ros.getByteArrayOutputStream().toByteArray();
+			assertEquals(notation, Notation.forEncoding(bytes));
+			assertEquals("ce880573490923738490c0c3827761", ros.getByteArrayOutputStream().toString());
+			assertEquals("ce880573490923738490c0c3827761", ros.getOutputStream().toString());
+			assertEquals("ce880573490923738490c0c3827761", ros.toString());
+		}
+	}
 
     @Test
     public void testObjectRLPStream() throws IOException, ClassNotFoundException {
 
         // write RLP
         RLPOutputStream ros = new RLPOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(ros);
-        oos.writeUTF("hello");
+		try (ObjectOutputStream oos = new ObjectOutputStream(ros)) {
+			oos.writeUTF("hello");
 //        oos.flush();
-        oos.writeChar('Z');
-        oos.writeObject(new Tuple("jinro", new byte[] { (byte) 0xc0 }, new Boolean[] { false, true }));
-        oos.flush();
+			oos.writeChar('Z');
+			oos.writeObject(new Tuple("jinro", new byte[] { (byte) 0xc0 }, new Boolean[] { false, true }));
+			oos.flush();
+		}
 
         // decode RLP
         RLPStream stream = new RLPStream(new ByteArrayInputStream(ros.getByteArrayOutputStream().toByteArray()));

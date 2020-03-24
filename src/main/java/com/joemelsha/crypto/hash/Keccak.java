@@ -37,7 +37,7 @@ public final class Keccak extends MessageDigest {
     private final long[] state = new long[MAX_STATE_SIZE_WORDS];
     private int rateBits; // = 0
 
-    protected transient ByteBuffer out;
+    private transient ByteBuffer out;
 
     public Keccak(int digestSizeBits) {
         this("Keccak-", digestSizeBits);
