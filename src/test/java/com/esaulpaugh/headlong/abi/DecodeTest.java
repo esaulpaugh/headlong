@@ -122,4 +122,31 @@ public class DecodeTest {
         System.out.println(Function.formatCall(array));
         assertThrown(IllegalArgumentException.class, "signed value given for unsigned type", () -> f.decodeCall(array));
     }
+
+    @Test
+    public void testCorruptBooleanArray() throws Throwable {
+        Function f = new Function("baz(bool[])");
+        Tuple argsTuple = new Tuple((Object) new boolean[] { true });
+        ByteBuffer one = f.encodeCall(argsTuple);
+
+        final byte[] array = one.array();
+
+//        System.out.println(Function.formatCall(array));
+
+        array[array.length - 1] = 0;
+
+        Tuple decoded = f.decodeCall(array);
+        assertNotEquals(decoded, argsTuple);
+
+        array[array.length - 32] = (byte) 0x80;
+
+        assertThrown(IllegalArgumentException.class, "illegal boolean value @ 100", () -> f.decodeCall(array));
+
+        for (int i = array.length - 32; i < array.length; i++) {
+            array[i] = (byte) 0xFF;
+        }
+        array[array.length - 1] = (byte) 0xFE;
+
+        assertThrown(IllegalArgumentException.class, "illegal boolean value @ 100", () -> f.decodeCall(array));
+    }
 }
