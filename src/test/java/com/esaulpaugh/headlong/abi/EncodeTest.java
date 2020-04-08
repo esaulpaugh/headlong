@@ -70,11 +70,15 @@ public class EncodeTest {
 
         final Random r = TestUtils.seededRandom();
         final Runnable runnable = () -> {
-            for (int len = 3; len <= 12; len++) {
+            for (int len = 0; len <= 12; len++) {
                 System.out.println(len + "(" + Thread.currentThread().getId() + ")");
                 final char[] temp = new char[len];
-                temp[0] = '(';
-                temp[len - 1] = ')';
+                if(len > 0) {
+                    temp[0] = '(';
+                }
+                if(len > 1) {
+                    temp[len - 1] = ')';
+                }
                 final int lim = temp.length - 1;
                 final int num = iterations[len]; // 1_000_000 + (int) Math.pow(3.7, len);
                 for (int j = 0; j < num; j++) {
@@ -84,7 +88,7 @@ public class EncodeTest {
                     String sig = new String(temp);
                     try {
                         TupleType tt = TupleType.parse(sig);
-                        if(!"(())".equals(sig)) System.out.println("\t\t\t" + len + ' ' + sig);
+                        if(!"()".equals(sig) && !"(())".equals(sig)) System.out.println("\t\t\t" + len + ' ' + sig);
                     } catch (IllegalArgumentException iae) {
                         /* do nothing */
                     } catch (Throwable t) {
@@ -105,6 +109,18 @@ public class EncodeTest {
         for (Thread thread : threads) {
             thread.join();
         }
+    }
+
+    @Test
+    public void testCases() throws Throwable {
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "unrecognized type: ", () -> TupleType.parse(""));
+        TestUtils.assertThrown(IllegalArgumentException.class, "unrecognized type: (", () -> TupleType.parse("("));
+        TestUtils.assertThrown(IllegalArgumentException.class, "unrecognized type: )", () -> TupleType.parse(")"));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "params start not found", () -> Function.parse(""));
+        TestUtils.assertThrown(IllegalArgumentException.class, "unrecognized type: (", () -> Function.parse("("));
+        TestUtils.assertThrown(IllegalArgumentException.class, "params start not found", () -> Function.parse(")"));
     }
 
     @Test

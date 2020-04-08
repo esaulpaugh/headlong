@@ -230,12 +230,12 @@ final class TypeFactory {
 
     static final String EMPTY_PARAMETER = "empty parameter";
 
-    private static TupleType parseTupleType(final String rawTypeStr) {
+    private static TupleType parseTupleType(final String rawTypeStr) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final ArrayList<ABIType<?>> elements = new ArrayList<>();
         int argEnd = 1; // this inital value is important for empty params case: "()"
         try {
             int argStart = 1; // after opening '('
-            final int end = rawTypeStr.length();
+            final int end = rawTypeStr.length(); // must be >= 1
             LOOP:
             while (argStart < end) {
                 switch (rawTypeStr.charAt(argStart)) {
@@ -264,7 +264,7 @@ final class TypeFactory {
                 }
                 break;
             }
-            if(argEnd >= 0 && argEnd == end - 1 && rawTypeStr.charAt(argEnd) == ')') {
+            if(argEnd == end - 1 && rawTypeStr.charAt(argEnd) == ')') {
                 return TupleType.wrap(elements.toArray(ABIType.EMPTY_TYPE_ARRAY));
             }
         } catch (IllegalArgumentException iae) {

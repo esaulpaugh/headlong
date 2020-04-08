@@ -62,10 +62,10 @@ public class TestUtils {
 
     public static void shuffle(Object[] arr, Random rand) {
         for (int i = arr.length; i > 0; ) {
-            int o = rand.nextInt(i);
-            Object x = arr[o];
-            arr[o] = arr[--i];
-            arr[i] = x;
+            int idx = rand.nextInt(i);
+            Object e = arr[idx];
+            arr[idx] = arr[--i];
+            arr[i] = e;
         }
     }
 
