@@ -117,6 +117,10 @@ Alternatively:
 
 https://github.com/esaulpaugh/headlong-cli
 
+### Demo app
+
+https://github.com/esaulpaugh/headlong-android
+
 ### Misc
 
 headlong (optionally) depends on gson and bouncycastle. Test suite should take less than one minute to run. Test packages require junit and spongycastle. Jar size is ~120 KiB as of 02/20/20. Java 8+.
