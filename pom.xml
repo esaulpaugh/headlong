@@ -91,7 +91,7 @@
                     <archive>
                         <addMavenDescriptor>false</addMavenDescriptor>
                         <manifestEntries>
-                            <Automatic-Module-Name>headlong</Automatic-Module-Name>
+                            <Automatic-Module-Name>${project.name}</Automatic-Module-Name>
                         </manifestEntries>
                     </archive>
                 </configuration>
