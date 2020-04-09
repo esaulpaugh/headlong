@@ -289,14 +289,12 @@ final class TypeFactory {
     }
 
     private static int nextTerminator(String signature, int i) {
-        int comma = signature.indexOf(',', i);
-        int close = signature.indexOf(')', i);
-        if(comma == -1) {
-            return close;
-        }
-        if(close == -1) {
-            return comma;
-        }
-        return Math.min(comma, close);
+        final int comma = signature.indexOf(',', i);
+        final int close = signature.indexOf(')', i);
+        return comma == -1
+                ? close
+                : close == -1
+                    ? comma
+                    : Math.min(comma, close);
     }
 }
