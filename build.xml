@@ -443,8 +443,9 @@
     <jar destfile = "${basedir}/build/lib/headlong-${project.version}.jar"
          basedir = "${basedir}/build/classes/java/main">
       <manifest>
-        <attribute name = "Implementation-Title" value = "headlong"/>
+        <attribute name = "Implementation-Title" value = "${project.name}"/>
         <attribute name = "Implementation-Version" value = "${project.version}"/>
+        <attribute name= "Automatic-Module-Name" value="${project.name}"/>
       </manifest>
     </jar>
   </target>
