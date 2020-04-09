@@ -112,18 +112,6 @@ public class EncodeTest {
     }
 
     @Test
-    public void testCases() throws Throwable {
-
-        TestUtils.assertThrown(IllegalArgumentException.class, "unrecognized type: ", () -> TupleType.parse(""));
-        TestUtils.assertThrown(IllegalArgumentException.class, "unrecognized type: (", () -> TupleType.parse("("));
-        TestUtils.assertThrown(IllegalArgumentException.class, "unrecognized type: )", () -> TupleType.parse(")"));
-
-        TestUtils.assertThrown(IllegalArgumentException.class, "params start not found", () -> Function.parse(""));
-        TestUtils.assertThrown(IllegalArgumentException.class, "unrecognized type: (", () -> Function.parse("("));
-        TestUtils.assertThrown(IllegalArgumentException.class, "params start not found", () -> Function.parse(")"));
-    }
-
-    @Test
     public void testFormat() throws Throwable {
         testFormat(true, Function::formatCall);
     }
@@ -149,16 +137,23 @@ public class EncodeTest {
                     TestUtils.assertMatching(func, formatted.contains(substr));
                 }
             } else {
-                TestUtils.assertThrown(IllegalArgumentException.class, "expected length mod 32 == 0, found: ", () -> format.apply(x));
+                assertThrown(ILLEGAL, "expected length mod 32 == 0, found: ", () -> format.apply(x));
             }
         }
     }
 
     @Test
-    public void nonTerminatingTupleTest() throws Throwable {
-        assertThrown(ILLEGAL, "unrecognized type: aaaaaa", () -> TupleType.parse("aaaaaa"));
+    public void testIllegalSignatures() throws Throwable {
 
+        assertThrown(ILLEGAL, "unrecognized type: ", () -> TupleType.parse(""));
+        assertThrown(ILLEGAL, "unrecognized type: (", () -> TupleType.parse("("));
+        assertThrown(ILLEGAL, "unrecognized type: )", () -> TupleType.parse(")"));
+
+        assertThrown(ILLEGAL, "params start not found", () -> Function.parse(""));
         assertThrown(ILLEGAL, "unrecognized type: (", () -> Function.parse("("));
+        assertThrown(ILLEGAL, "params start not found", () -> Function.parse(")"));
+
+        assertThrown(ILLEGAL, "unrecognized type: aaaaaa", () -> TupleType.parse("aaaaaa"));
 
         assertThrown(ILLEGAL, "unrecognized type: ([", () -> Function.parse("(["));
 
