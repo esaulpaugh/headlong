@@ -15,12 +15,8 @@
 */
 package com.esaulpaugh.headlong.util;
 
-import com.esaulpaugh.headlong.abi.ABIType;
-import com.esaulpaugh.headlong.abi.ArrayType;
-import com.esaulpaugh.headlong.abi.BigDecimalType;
-import com.esaulpaugh.headlong.abi.BigIntegerType;
-import com.esaulpaugh.headlong.abi.Tuple;
-import com.esaulpaugh.headlong.abi.TupleType;
+import com.esaulpaugh.headlong.abi.*;
+import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
@@ -114,14 +110,28 @@ public final class SuperSerial {
         switch (typeCode) {
         case TYPE_CODE_BOOLEAN: return item.asBoolean();
         case TYPE_CODE_BYTE: return item.asByte(false); // case currently goes unused
-        case TYPE_CODE_INT: return item.asInt(false);
-        case TYPE_CODE_LONG: return item.asLong(false);
-        case TYPE_CODE_BIG_INTEGER: return ((BigIntegerType) type).isUnsigned() ? item.asBigInt(false) : asSigned(item);
+        case TYPE_CODE_INT:
+            IntType it = (IntType) type;
+            if(it.isUnsigned() || item.dataLength * Byte.SIZE < it.getBitLength()) {
+                return item.asInt(false);
+            }
+            return BizarroIntegers.getInt(item.data(), 0, item.dataLength);
+        case TYPE_CODE_LONG:
+            LongType lt = (LongType) type;
+            if(lt.isUnsigned() || item.dataLength * Byte.SIZE < lt.getBitLength()) {
+                return item.asLong(false);
+            }
+            return BizarroIntegers.getLong(item.data(), 0, item.dataLength);
+        case TYPE_CODE_BIG_INTEGER:
+            BigIntegerType bi = (BigIntegerType) type;
+            return bi.isUnsigned()
+                    ? item.asBigInt(false)
+                    : asSigned(bi.getBitLength(), item);
         case TYPE_CODE_BIG_DECIMAL:
             BigDecimalType t = (BigDecimalType) type;
             return t.isUnsigned()
                     ? new BigDecimal(item.asBigInt(false), t.getScale())
-                    : new BigDecimal(asSigned(item),t.getScale());
+                    : new BigDecimal(asSigned(t.getBitLength(), item), t.getScale());
         case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<? extends ABIType<?>, ?>) type, item);
         case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());
         default: throw new Error();
@@ -132,14 +142,16 @@ public final class SuperSerial {
         return bigInteger.signum() != 0 ? bigInteger.toByteArray() : Strings.EMPTY_BYTE_ARRAY;
     }
 
-    private static BigInteger asSigned(RLPItem item) {
+    private static BigInteger asSigned(int bitLen, RLPItem item) {
         final int dataLen = item.dataLength;
         if(dataLen != 0) {
             final int maxBytes = 32;
             if(dataLen > maxBytes) {
                 throw new IllegalArgumentException("integer data cannot exceed " + maxBytes + " bytes");
             }
-            return item.asBigIntSigned();
+            return (dataLen * Byte.SIZE) < bitLen
+                    ? new BigInteger(item.asString(Strings.HEX), 16)
+                    : new BigInteger(item.data());
         }
         return BigInteger.ZERO;
     }
