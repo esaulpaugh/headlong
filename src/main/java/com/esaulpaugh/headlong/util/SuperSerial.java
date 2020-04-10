@@ -27,6 +27,7 @@ import com.esaulpaugh.headlong.rlp.util.NotationParser;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -82,20 +83,20 @@ public final class SuperSerial {
         return new Tuple(elements);
     }
 
-    private static Object serialize(ABIType<?> type, Object obj) {
+    private static Object serialize(ABIType<?> type, Object obj) { // TODO match deserializer
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return (boolean) obj ? TRUE : FALSE;
         case TYPE_CODE_BYTE: return Integers.toBytes((byte) obj); // case currently goes unused
-        case TYPE_CODE_INT: return Integers.toBytes((int) obj);
-        case TYPE_CODE_LONG: return Integers.toBytes((long) obj);
+        case TYPE_CODE_INT: return toSigned(((IntType) type).getBitLength(), BigInteger.valueOf((int) obj));
+        case TYPE_CODE_LONG: return toSigned(((LongType) type).getBitLength(), BigInteger.valueOf((long) obj));
         case TYPE_CODE_BIG_INTEGER:
             final BigIntegerType bigIntegerType = (BigIntegerType) type;
             final BigInteger bigInteger = (BigInteger) obj;
-            return bigIntegerType.isUnsigned() ? Integers.toBytesUnsigned(bigInteger) : toSigned(bigInteger);
+            return bigIntegerType.isUnsigned() ? Integers.toBytesUnsigned(bigInteger) : toSigned(bigIntegerType.getBitLength(), bigInteger);
         case TYPE_CODE_BIG_DECIMAL:
             final BigDecimalType bigDecimalType = (BigDecimalType) type;
             final BigInteger unscaled = ((BigDecimal) obj).unscaledValue();
-            return bigDecimalType.isUnsigned() ? Integers.toBytesUnsigned(unscaled) : toSigned(unscaled);
+            return bigDecimalType.isUnsigned() ? Integers.toBytesUnsigned(unscaled) : toSigned(bigDecimalType.getBitLength(), unscaled);
         case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?>) type, obj);
         case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, obj);
         default: throw new Error();
@@ -111,17 +112,26 @@ public final class SuperSerial {
         case TYPE_CODE_BOOLEAN: return item.asBoolean();
         case TYPE_CODE_BYTE: return item.asByte(false); // case currently goes unused
         case TYPE_CODE_INT:
+//            return item.asInt(false);
             IntType it = (IntType) type;
             if(it.isUnsigned() || item.dataLength * Byte.SIZE < it.getBitLength()) {
                 return item.asInt(false);
             }
+//            if(item.dataLength * Byte.SIZE > it.getBitLength()) {
+//                return Integers.getInt(item.data(), 0, item.dataLength, false);
+//            }
             return BizarroIntegers.getInt(item.data(), 0, item.dataLength);
         case TYPE_CODE_LONG:
             LongType lt = (LongType) type;
             if(lt.isUnsigned() || item.dataLength * Byte.SIZE < lt.getBitLength()) {
                 return item.asLong(false);
             }
-            return BizarroIntegers.getLong(item.data(), 0, item.dataLength);
+            byte[] data = item.data();
+            final int len = data.length;
+            if(len > 0 && (data[0] & 0x80) > 0) {
+                return BizarroIntegers.getLong(data, 0, len);
+            }
+            return Integers.getLong(data, 0, len, false);
         case TYPE_CODE_BIG_INTEGER:
             BigIntegerType bi = (BigIntegerType) type;
             return bi.isUnsigned()
@@ -138,18 +148,68 @@ public final class SuperSerial {
         }
     }
 
-    private static byte[] toSigned(BigInteger bigInteger) {
-        return bigInteger.signum() != 0 ? bigInteger.toByteArray() : Strings.EMPTY_BYTE_ARRAY;
+//    private static byte[] toSignedInt(int typeBits, int val) {
+//        if(val == 0) {
+//            return Strings.EMPTY_BYTE_ARRAY;
+//        }
+//        if(val < 0) {
+//            return signExtend(BizarroIntegers.toBytes(val), typeBits / Byte.SIZE);
+//        }
+//        return Integers.toBytes(val);
+//    }
+//
+//    private static byte[] toSignedLong(int typeBits, long val) {
+//        if(val == 0) {
+//            return Strings.EMPTY_BYTE_ARRAY;
+//        }
+//        if(val < 0) {
+//            return signExtend(BizarroIntegers.toBytes(val), typeBits / Byte.SIZE);
+//        }
+//        return Integers.toBytes(val);
+//    }
+
+    private static byte[] toSigned(int typeBits, BigInteger val) {
+        final int signum = val.signum();
+        if(signum == 0) {
+            return Strings.EMPTY_BYTE_ARRAY;
+        }
+        final int width = typeBits / Byte.SIZE;
+        final byte[] bytes = val.toByteArray();
+        if(signum < 0) {
+            return signExtend(bytes, width);
+        }
+        if(bytes.length > 0 && bytes[0] == 0) {
+            return Arrays.copyOfRange(bytes, 1, bytes.length);
+        }
+//        if(bytes.length == width) {
+//            byte[] padded = new byte[width + 1];
+//            System.arraycopy(bytes, 0, padded, 1, width);
+//            return padded;
+//        }
+//        System.out.println(val + " --> " + Strings.encode(bytes) + " width=" + width);
+//        if(bytes.length == width && bytes[0] != 0) {
+//            throw new Error();WW
+//        }
+        return bytes;
     }
 
-    private static BigInteger asSigned(int bitLen, RLPItem item) {
+    private static byte[] signExtend(byte[] bytes, int width) {
+//        System.out.println(Strings.encode(bytes));
+//        System.out.println("width = " + width);
+        byte[] full = new byte[width];
+        Arrays.fill(full, (byte) 0xff);
+        System.arraycopy(bytes, 0, full, full.length - bytes.length, bytes.length);
+        return full;
+    }
+
+    private static BigInteger asSigned(int typeBits, RLPItem item) {
         final int dataLen = item.dataLength;
         if(dataLen != 0) {
             final int maxBytes = 32;
             if(dataLen > maxBytes) {
                 throw new IllegalArgumentException("integer data cannot exceed " + maxBytes + " bytes");
             }
-            return (dataLen * Byte.SIZE) < bitLen
+            return (dataLen * Byte.SIZE) < typeBits
                     ? new BigInteger(item.asString(Strings.HEX), 16)
                     : new BigInteger(item.data());
         }
