@@ -111,29 +111,25 @@ public final class SuperSerial {
         switch (typeCode) {
         case TYPE_CODE_BOOLEAN: return item.asBoolean();
         case TYPE_CODE_BYTE: return item.asByte(false); // case currently goes unused
-        case TYPE_CODE_INT: {
-            IntType it = (IntType) type;
-            if (it.isUnsigned() || item.dataLength * Byte.SIZE < it.getBitLength()) {
-                return item.asInt(false);
-            }
-            byte[] data = item.data();
-            final int len = data.length;
-            if (len > 0 && (data[0] & 0x80) > 0) {
-                return BizarroIntegers.getInt(data, 0, len);
-            }
-            return Integers.getInt(data, 0, len, false);
-        }
+        case TYPE_CODE_INT:
         case TYPE_CODE_LONG:
-            LongType lt = (LongType) type;
-            if(lt.isUnsigned() || item.dataLength * Byte.SIZE < lt.getBitLength()) {
-                return item.asLong(false);
+            final UnitType<?> ut = (UnitType<?>) type;
+            final boolean isInt = typeCode != TYPE_CODE_LONG;
+            if(ut.isUnsigned() || (item.dataLength * Byte.SIZE) < ut.getBitLength()) {
+                return isInt
+                        ? (Object) item.asInt(false)
+                        : (Object) item.asLong(false);
             }
             byte[] data = item.data();
             final int len = data.length;
             if(len > 0 && (data[0] & 0x80) > 0) {
-                return BizarroIntegers.getLong(data, 0, len);
+                return isInt
+                        ? (Object) BizarroIntegers.getInt(data, 0, len)
+                        : (Object) BizarroIntegers.getLong(data, 0, len);
             }
-            return Integers.getLong(data, 0, len, false);
+            return isInt
+                    ? (Object) Integers.getInt(data, 0, len, false)
+                    : (Object) Integers.getLong(data, 0, len, false);
         case TYPE_CODE_BIG_INTEGER:
             BigIntegerType bi = (BigIntegerType) type;
             return bi.isUnsigned()
@@ -155,18 +151,15 @@ public final class SuperSerial {
         if(signum == 0) {
             return Strings.EMPTY_BYTE_ARRAY;
         }
-        final int width = typeBits / Byte.SIZE;
         final byte[] bytes = val.toByteArray();
-        if(signum < 0) {
-            return signExtend(bytes, width);
-        }
-        if(bytes.length > 0 && bytes[0] == 0) {
-            return Arrays.copyOfRange(bytes, 1, bytes.length);
-        }
-        return bytes;
+        return signum < 0
+                ? signExtendNegative(bytes, typeBits / Byte.SIZE)
+                : bytes[0] != 0
+                    ? bytes
+                    : Arrays.copyOfRange(bytes, 1, bytes.length);
     }
 
-    private static byte[] signExtend(byte[] bytes, int width) {
+    private static byte[] signExtendNegative(byte[] bytes, int width) {
         byte[] full = new byte[width];
         Arrays.fill(full, (byte) 0xff);
         System.arraycopy(bytes, 0, full, full.length - bytes.length, bytes.length);
