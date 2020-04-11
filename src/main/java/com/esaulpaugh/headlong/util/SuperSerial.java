@@ -111,16 +111,18 @@ public final class SuperSerial {
         switch (typeCode) {
         case TYPE_CODE_BOOLEAN: return item.asBoolean();
         case TYPE_CODE_BYTE: return item.asByte(false); // case currently goes unused
-        case TYPE_CODE_INT:
-//            return item.asInt(false);
+        case TYPE_CODE_INT: {
             IntType it = (IntType) type;
-            if(it.isUnsigned() || item.dataLength * Byte.SIZE < it.getBitLength()) {
+            if (it.isUnsigned() || item.dataLength * Byte.SIZE < it.getBitLength()) {
                 return item.asInt(false);
             }
-//            if(item.dataLength * Byte.SIZE > it.getBitLength()) {
-//                return Integers.getInt(item.data(), 0, item.dataLength, false);
-//            }
-            return BizarroIntegers.getInt(item.data(), 0, item.dataLength);
+            byte[] data = item.data();
+            final int len = data.length;
+            if (len > 0 && (data[0] & 0x80) > 0) {
+                return BizarroIntegers.getInt(data, 0, len);
+            }
+            return Integers.getInt(data, 0, len, false);
+        }
         case TYPE_CODE_LONG:
             LongType lt = (LongType) type;
             if(lt.isUnsigned() || item.dataLength * Byte.SIZE < lt.getBitLength()) {
@@ -148,26 +150,6 @@ public final class SuperSerial {
         }
     }
 
-//    private static byte[] toSignedInt(int typeBits, int val) {
-//        if(val == 0) {
-//            return Strings.EMPTY_BYTE_ARRAY;
-//        }
-//        if(val < 0) {
-//            return signExtend(BizarroIntegers.toBytes(val), typeBits / Byte.SIZE);
-//        }
-//        return Integers.toBytes(val);
-//    }
-//
-//    private static byte[] toSignedLong(int typeBits, long val) {
-//        if(val == 0) {
-//            return Strings.EMPTY_BYTE_ARRAY;
-//        }
-//        if(val < 0) {
-//            return signExtend(BizarroIntegers.toBytes(val), typeBits / Byte.SIZE);
-//        }
-//        return Integers.toBytes(val);
-//    }
-
     private static byte[] toSigned(int typeBits, BigInteger val) {
         final int signum = val.signum();
         if(signum == 0) {
@@ -181,21 +163,10 @@ public final class SuperSerial {
         if(bytes.length > 0 && bytes[0] == 0) {
             return Arrays.copyOfRange(bytes, 1, bytes.length);
         }
-//        if(bytes.length == width) {
-//            byte[] padded = new byte[width + 1];
-//            System.arraycopy(bytes, 0, padded, 1, width);
-//            return padded;
-//        }
-//        System.out.println(val + " --> " + Strings.encode(bytes) + " width=" + width);
-//        if(bytes.length == width && bytes[0] != 0) {
-//            throw new Error();WW
-//        }
         return bytes;
     }
 
     private static byte[] signExtend(byte[] bytes, int width) {
-//        System.out.println(Strings.encode(bytes));
-//        System.out.println("width = " + width);
         byte[] full = new byte[width];
         Arrays.fill(full, (byte) 0xff);
         System.arraycopy(bytes, 0, full, full.length - bytes.length, bytes.length);
