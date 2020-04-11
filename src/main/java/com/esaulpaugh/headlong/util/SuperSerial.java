@@ -84,20 +84,18 @@ public final class SuperSerial {
         return new Tuple(elements);
     }
 
-    private static Object serialize(ABIType<?> type, Object obj) { // TODO match deserializer
-        switch (type.typeCode()) {
+    private static Object serialize(ABIType<?> type, Object obj) {
+        final int typeCode = type.typeCode();
+        switch (typeCode) {
         case TYPE_CODE_BOOLEAN: return (boolean) obj ? TRUE : FALSE;
         case TYPE_CODE_BYTE: return Integers.toBytes((byte) obj); // case currently goes unused
         case TYPE_CODE_INT: return toSigned(((IntType) type).getBitLength(), BigInteger.valueOf((int) obj));
         case TYPE_CODE_LONG: return toSigned(((LongType) type).getBitLength(), BigInteger.valueOf((long) obj));
         case TYPE_CODE_BIG_INTEGER:
-            final BigIntegerType bigIntegerType = (BigIntegerType) type;
-            final BigInteger bigInteger = (BigInteger) obj;
-            return bigIntegerType.isUnsigned() ? Integers.toBytesUnsigned(bigInteger) : toSigned(bigIntegerType.getBitLength(), bigInteger);
         case TYPE_CODE_BIG_DECIMAL:
-            final BigDecimalType bigDecimalType = (BigDecimalType) type;
-            final BigInteger unscaled = ((BigDecimal) obj).unscaledValue();
-            return bigDecimalType.isUnsigned() ? Integers.toBytesUnsigned(unscaled) : toSigned(bigDecimalType.getBitLength(), unscaled);
+            final UnitType<?> ut = (UnitType<?>) type;
+            final BigInteger bigInt = typeCode == TYPE_CODE_BIG_INTEGER ? (BigInteger) obj : ((BigDecimal) obj).unscaledValue();
+            return ut.isUnsigned() ? Integers.toBytesUnsigned(bigInt) : toSigned(ut.getBitLength(), bigInt);
         case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?>) type, obj);
         case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, obj);
         default: throw new Error();
