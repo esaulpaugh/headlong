@@ -133,7 +133,7 @@ public final class SuperSerial {
                     ? (Object) item.asInt(false)
                     : (Object) item.asLong(false);
         }
-        byte[] data = item.data();
+        final byte[] data = item.data();
         final int len = data.length;
         if(len > 0 && (data[0] & 0x80) > 0) {
             return isInt
@@ -158,11 +158,11 @@ public final class SuperSerial {
                     : Arrays.copyOfRange(bytes, 1, bytes.length);
     }
 
-    private static byte[] signExtendNegative(byte[] bytes, int width) {
-        byte[] full = new byte[width];
-        Arrays.fill(full, (byte) 0xff);
-        System.arraycopy(bytes, 0, full, full.length - bytes.length, bytes.length);
-        return full;
+    private static byte[] signExtendNegative(final byte[] negative, final int newWidth) {
+        final byte[] extended = new byte[newWidth];
+        Arrays.fill(extended, (byte) 0xff);
+        System.arraycopy(negative, 0, extended, newWidth - negative.length, negative.length);
+        return extended;
     }
 
     private static BigInteger asSigned(int typeBits, RLPItem item) {
@@ -182,7 +182,7 @@ public final class SuperSerial {
     }
 
     private static Object serializeArray(ArrayType<? extends ABIType<?>, ?> arrayType, Object arr) {
-        ABIType<?> elementType = arrayType.getElementType();
+        final ABIType<?> elementType = arrayType.getElementType();
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return serializeBooleanArray(arr);
         case TYPE_CODE_BYTE: return serializeByteArray(arrayType, arr);
