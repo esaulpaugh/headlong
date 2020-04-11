@@ -240,8 +240,7 @@ public class MonteCarloTest {
     }
 
     private static MonteCarloTestCase newComplexTestCase(Random r, Keccak k) {
-        final long time = System.nanoTime();
-        long seed = TestUtils.getSeed(time);
+        long seed = TestUtils.getSeed(System.nanoTime());
         final long origSeed = seed;
 
         MonteCarloTestCase testCase;
