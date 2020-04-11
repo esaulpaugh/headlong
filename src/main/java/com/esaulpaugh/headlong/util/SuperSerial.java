@@ -113,15 +113,14 @@ public final class SuperSerial {
         case TYPE_CODE_INT:
         case TYPE_CODE_LONG: return deserializePrimitive((UnitType<?>) type, item, typeCode == TYPE_CODE_INT);
         case TYPE_CODE_BIG_INTEGER:
-            BigIntegerType bi = (BigIntegerType) type;
-            return bi.isUnsigned()
-                    ? item.asBigInt(false)
-                    : asSigned(bi.getBitLength(), item);
         case TYPE_CODE_BIG_DECIMAL:
-            BigDecimalType t = (BigDecimalType) type;
-            return t.isUnsigned()
-                    ? new BigDecimal(item.asBigInt(false), t.getScale())
-                    : new BigDecimal(asSigned(t.getBitLength(), item), t.getScale());
+            UnitType<?> ut = (UnitType<?>) type;
+            BigInteger bigInt = ut.isUnsigned()
+                        ? item.asBigInt(false)
+                        : asSigned(ut.getBitLength(), item);
+            return typeCode == TYPE_CODE_BIG_INTEGER
+                    ? bigInt
+                    : new BigDecimal(bigInt, ((BigDecimalType) ut).getScale());
         case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<? extends ABIType<?>, ?>) type, item);
         case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());
         default: throw new Error();
