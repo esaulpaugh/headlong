@@ -39,6 +39,7 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BYTE;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 
 /** Serializes and deserializes {@link Tuple}s through the use of RLP encoding. */
@@ -112,24 +113,7 @@ public final class SuperSerial {
         case TYPE_CODE_BOOLEAN: return item.asBoolean();
         case TYPE_CODE_BYTE: return item.asByte(false); // case currently goes unused
         case TYPE_CODE_INT:
-        case TYPE_CODE_LONG:
-            final UnitType<?> ut = (UnitType<?>) type;
-            final boolean isInt = typeCode != TYPE_CODE_LONG;
-            if(ut.isUnsigned() || (item.dataLength * Byte.SIZE) < ut.getBitLength()) {
-                return isInt
-                        ? (Object) item.asInt(false)
-                        : (Object) item.asLong(false);
-            }
-            byte[] data = item.data();
-            final int len = data.length;
-            if(len > 0 && (data[0] & 0x80) > 0) {
-                return isInt
-                        ? (Object) BizarroIntegers.getInt(data, 0, len)
-                        : (Object) BizarroIntegers.getLong(data, 0, len);
-            }
-            return isInt
-                    ? (Object) Integers.getInt(data, 0, len, false)
-                    : (Object) Integers.getLong(data, 0, len, false);
+        case TYPE_CODE_LONG: return deserializePrimitive((UnitType<?>) type, item, typeCode == TYPE_CODE_INT);
         case TYPE_CODE_BIG_INTEGER:
             BigIntegerType bi = (BigIntegerType) type;
             return bi.isUnsigned()
@@ -144,6 +128,24 @@ public final class SuperSerial {
         case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());
         default: throw new Error();
         }
+    }
+
+    private static Object deserializePrimitive(UnitType<?> ut, RLPItem item, boolean isInt) {
+        if(ut.isUnsigned() || (item.dataLength * Byte.SIZE) < ut.getBitLength()) {
+            return isInt
+                    ? (Object) item.asInt(false)
+                    : (Object) item.asLong(false);
+        }
+        byte[] data = item.data();
+        final int len = data.length;
+        if(len > 0 && (data[0] & 0x80) > 0) {
+            return isInt
+                    ? (Object) BizarroIntegers.getInt(data, 0, len)
+                    : (Object) BizarroIntegers.getLong(data, 0, len);
+        }
+        return isInt
+                ? (Object) Integers.getInt(data, 0, len, false)
+                : (Object) Integers.getLong(data, 0, len, false);
     }
 
     private static byte[] toSigned(int typeBits, BigInteger val) {
@@ -169,13 +171,15 @@ public final class SuperSerial {
     private static BigInteger asSigned(int typeBits, RLPItem item) {
         final int dataLen = item.dataLength;
         if(dataLen != 0) {
-            final int maxBytes = 32;
-            if(dataLen > maxBytes) {
-                throw new IllegalArgumentException("integer data cannot exceed " + maxBytes + " bytes");
+            if (dataLen * Byte.SIZE < typeBits) {
+                byte[] padded = new byte[dataLen + 1];
+                item.exportData(padded, 1);
+                return new BigInteger(padded);
             }
-            return (dataLen * Byte.SIZE) < typeBits
-                    ? new BigInteger(item.asString(Strings.HEX), 16)
-                    : new BigInteger(item.data());
+            if(dataLen > UNIT_LENGTH_BYTES) {
+                throw new IllegalArgumentException("integer data cannot exceed " + UNIT_LENGTH_BYTES + " bytes");
+            }
+            return item.asBigIntSigned();
         }
         return BigInteger.ZERO;
     }
