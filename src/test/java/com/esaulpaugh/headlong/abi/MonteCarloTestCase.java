@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.util.SuperSerial;
 import com.google.gson.Gson;
@@ -164,10 +163,6 @@ public class MonteCarloTestCase implements Serializable {
         runStandard(this.argsTuple);
         runForPacked(this.argsTuple);
         runSuperSerial(this.argsTuple);
-    }
-
-    Tuple newRandomArgs() {
-        return generateTuple(function.getParamTypes(), TestUtils.seededRandom());
     }
 
     void runStandard() {
