@@ -48,6 +48,11 @@ public final class SuperSerial {
     private static final byte[] TRUE = new byte[] { 0x01 };
     private static final byte[] FALSE = new byte[0];
 
+    /**
+     * Bit mask to select the sign bit of a {@code byte}.
+     */
+    private static final int SIGN_BIT_MASK = 0x80;
+
     public static String serialize(TupleType tupleType, Tuple tuple, boolean machine) {
         tupleType.validate(tuple);
         Object[] objects = serializeTuple(tupleType, tuple);
@@ -135,7 +140,7 @@ public final class SuperSerial {
         }
         final byte[] data = item.data();
         final int len = data.length;
-        if(len > 0 && (data[0] & 0x80) > 0) {
+        if(len > 0 && (data[0] & SIGN_BIT_MASK) != 0) {
             return isInt
                     ? (Object) BizarroIntegers.getInt(data, 0, len)
                     : (Object) BizarroIntegers.getLong(data, 0, len);

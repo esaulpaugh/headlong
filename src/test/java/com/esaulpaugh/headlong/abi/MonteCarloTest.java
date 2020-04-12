@@ -68,10 +68,12 @@ public class MonteCarloTest {
 
     private static void doMonteCarlo(long threadSeed, int n) {
 
-        StringBuilder log = new StringBuilder();
+        final StringBuilder log = new StringBuilder();
 
         final Random r = new Random(threadSeed);
         final Keccak k = new Keccak(256);
+
+        final String desc = "thread-" + Thread.currentThread().getId() + " seed: " + threadSeed + "L";
 
         int i = 0;
         MonteCarloTestCase testCase = null;
@@ -93,13 +95,13 @@ public class MonteCarloTest {
                 System.out.println(log.toString());
                 sleep();
                 System.err.println("#" + i + " failed for " + testCase);
-                System.err.println("thread " + Thread.currentThread().getId() + " seed: " + threadSeed + "L");
+                System.err.println(desc);
                 throw t;
             }
         }
 
         if(log.length() > 0) System.out.println(log.toString());
-        System.out.println("thread " + Thread.currentThread().getId() + " seed: " + threadSeed + "L");
+        System.out.println(desc);
     }
 
     private static class GambleGambleThread extends Thread {
