@@ -36,8 +36,12 @@ public final class FastHex {
 
     static {
         final int[] ints = new int[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+        final int leftNibbleMask = 0xF0;
+        final int rightNibbleMask = 0x0F;
         for (int i = 0; i < ENCODE_TABLE.length; i++) {
-            ENCODE_TABLE[i] = (ints[(i & 0xF0) >>> BITS_PER_CHAR] << Byte.SIZE) | ints[i & 0x0F];
+            int leftChar = ints[(i & leftNibbleMask) >>> BITS_PER_CHAR];
+            int rightChar = ints[i & rightNibbleMask];
+            ENCODE_TABLE[i] = (leftChar << Byte.SIZE) | rightChar;
         }
 
         Arrays.fill(DECODE_TABLE, NO_MAPPING);
