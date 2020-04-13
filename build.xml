@@ -76,16 +76,16 @@
     <pathelement location="${path.variable.maven_repository}/org/apiguardian/apiguardian-api/1.1.0/apiguardian-api-1.1.0.jar"/>
   </path>
   
-  <path id="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath">
-    <pathelement location="${path.variable.maven_repository}/org/bouncycastle/bcprov-jdk15on/1.64/bcprov-jdk15on-1.64.jar"/>
+  <path id="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.65.classpath">
+    <pathelement location="${path.variable.maven_repository}/org/bouncycastle/bcprov-jdk15on/1.65/bcprov-jdk15on-1.65.jar"/>
   </path>
 
-  <path id="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.0.classpath">
-    <pathelement location="${path.variable.maven_repository}/org/junit/jupiter/junit-jupiter-api/5.6.0/junit-jupiter-api-5.6.0.jar"/>
+  <path id="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.2.classpath">
+    <pathelement location="${path.variable.maven_repository}/org/junit/jupiter/junit-jupiter-api/5.6.2/junit-jupiter-api-5.6.2.jar"/>
   </path>
 
-  <path id="library.gradle:_org.junit.jupiter:junit-jupiter-engine:5.6.0.classpath">
-    <pathelement location="${path.variable.maven_repository}/org/junit/jupiter/junit-jupiter-engine/5.6.0/junit-jupiter-engine-5.6.0.jar"/>
+  <path id="library.gradle:_org.junit.jupiter:junit-jupiter-engine:5.6.2.classpath">
+    <pathelement location="${path.variable.maven_repository}/org/junit/jupiter/junit-jupiter-engine/5.6.2/junit-jupiter-engine-5.6.2.jar"/>
   </path>
 
   <path id="library.gradle:_org.junit.platform:junit-platform-commons:1.6.0.classpath">
@@ -181,26 +181,26 @@
   <path id="headlong.main.module.production.classpath">
     <path refid="${module.jdk.classpath.headlong.main}"/>
     <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
-    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
   </path>
   
   <path id="headlong.main.runtime.production.module.classpath">
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
-    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
   </path>
   
   <path id="headlong.main.module.classpath">
     <path refid="${module.jdk.classpath.headlong.main}"/>
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
-    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
   </path>
   
   <path id="headlong.main.runtime.module.classpath">
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
-    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
   </path>
   
   
@@ -269,14 +269,14 @@
     <path refid="${module.jdk.classpath.headlong.jmh}"/>
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
-    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
   </path>
   
   <path id="headlong.jmh.runtime.production.module.classpath">
     <pathelement location="${headlong.jmh.output.dir}"/>
     <path refid="headlong.main.runtime.production.module.classpath"/>
     <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
-    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
   </path>
   
   <path id="headlong.jmh.module.classpath">
@@ -284,14 +284,14 @@
     <pathelement location="${headlong.jmh.output.dir}"/>
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
-    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
   </path>
   
   <path id="headlong.jmh.runtime.module.classpath">
     <pathelement location="${headlong.jmh.output.dir}"/>
     <path refid="headlong.main.runtime.module.classpath"/>
     <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
-    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
   </path>
   
   
@@ -338,9 +338,9 @@
     <path refid="${module.jdk.classpath.headlong.test}"/>
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
-    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
     <path refid="library.gradle:_org.junit.platform:junit-platform-commons:1.6.0.classpath"/>
-    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.0.classpath"/>
+    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.2.classpath"/>
     <path refid="library.gradle:_org.apiguardian:apiguardian-api:1.1.0.classpath"/>
     <path refid="library.gradle:_org.opentest4j:opentest4j:1.2.0.classpath"/>
   </path>
@@ -348,39 +348,39 @@
   <path id="headlong.test.runtime.production.module.classpath">
     <path refid="headlong.main.runtime.production.module.classpath"/>
     <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
-    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
     <path refid="library.gradle:_org.junit.platform:junit-platform-commons:1.6.0.classpath"/>
-    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.0.classpath"/>
+    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.2.classpath"/>
     <path refid="library.gradle:_org.junit.platform:junit-platform-engine:1.6.0.classpath"/>
     <path refid="library.gradle:_org.apiguardian:apiguardian-api:1.1.0.classpath"/>
     <path refid="library.gradle:_org.opentest4j:opentest4j:1.2.0.classpath"/>
-    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-engine:5.6.0.classpath"/>
+    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-engine:5.6.2.classpath"/>
   </path>
   
   <path id="headlong.test.module.classpath">
     <path refid="${module.jdk.classpath.headlong.test}"/>
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
-    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
     <path refid="library.gradle:_org.junit.platform:junit-platform-commons:1.6.0.classpath"/>
-    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.0.classpath"/>
+    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.2.classpath"/>
     <path refid="library.gradle:_org.junit.platform:junit-platform-engine:1.6.0.classpath"/>
     <path refid="library.gradle:_org.apiguardian:apiguardian-api:1.1.0.classpath"/>
     <path refid="library.gradle:_org.opentest4j:opentest4j:1.2.0.classpath"/>
-    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-engine:5.6.0.classpath"/>
+    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-engine:5.6.2.classpath"/>
   </path>
   
   <path id="headlong.test.runtime.module.classpath">
     <pathelement location="${headlong.test.testoutput.dir}"/>
     <path refid="headlong.main.runtime.module.classpath"/>
     <path refid="library.gradle:_com.google.code.gson:gson:2.8.6.classpath"/>
-    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.64.classpath"/>
+    <path refid="library.gradle:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
     <path refid="library.gradle:_org.junit.platform:junit-platform-commons:1.6.0.classpath"/>
-    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.0.classpath"/>
+    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-api:5.6.2.classpath"/>
     <path refid="library.gradle:_org.junit.platform:junit-platform-engine:1.6.0.classpath"/>
     <path refid="library.gradle:_org.apiguardian:apiguardian-api:1.1.0.classpath"/>
     <path refid="library.gradle:_org.opentest4j:opentest4j:1.2.0.classpath"/>
-    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-engine:5.6.0.classpath"/>
+    <path refid="library.gradle:_org.junit.jupiter:junit-jupiter-engine:5.6.2.classpath"/>
   </path>
   
   
