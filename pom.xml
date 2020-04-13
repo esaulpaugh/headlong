@@ -51,12 +51,6 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>com.madgag.spongycastle</groupId>
-            <artifactId>core</artifactId>
-            <version>1.58.0.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
             <version>${jmh.version}</version>

@@ -21,7 +21,6 @@ import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.spongycastle.crypto.digests.KeccakDigest;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -51,11 +50,9 @@ public class KeccakTest {
     public void testGetDigestLength() {
         assertEquals(new Keccak(256).getDigestLength(), 32);
         assertEquals(new WrappedKeccak(256).getDigestLength(), 32);
-        assertEquals(new WrappedSponge(256).getDigestLength(), 32);
 
         assertEquals(new Keccak(288).getDigestLength(), 36);
         assertEquals(new WrappedKeccak(288).getDigestLength(), 36);
-        assertEquals(new WrappedSponge(288).getDigestLength(), 36);
 
         assertEquals(new Keccak(512).getDigestLength(), 64);
     }
@@ -87,25 +84,6 @@ public class KeccakTest {
         byte[] k1 = k.digest();
 
         assertArrayEquals(k0, k1);
-
-        KeccakDigest k_ = new KeccakDigest(bitLen);
-
-        k_.reset();
-        k_.update(PART_A, 0, PART_A.length);
-        k_.update(PART_B, 0, PART_B.length);
-        byte[] output = new byte[k_.getDigestSize()];
-        k_.doFinal(output, 0);
-        byte[] b0 = Arrays.copyOf(output, output.length);
-
-        k_.reset();
-        k_.update(WHOLE, 0, WHOLE.length);
-        k_.doFinal(output, 0);
-        byte[] b1 = Arrays.copyOf(output, output.length);
-
-        assertArrayEquals(b0, b1);
-        assertArrayEquals(k0, b0);
-
-        System.out.println(Strings.encode(b0));
     }
 
     @Test
@@ -186,11 +164,6 @@ public class KeccakTest {
         wk.update(prefix, 0, prefix.length);
         wk.update(eight, 0, eight.length);
         assertEquals(expected, Strings.encode(wk.digest()));
-
-        WrappedSponge ws = new WrappedSponge(256);
-        ws.update(prefix, 0, prefix.length);
-        ws.update(eight, 0, eight.length);
-        assertEquals(expected, Strings.encode(ws.digest()));
     }
 
     @Test
@@ -201,13 +174,6 @@ public class KeccakTest {
         testRandom(new Keccak(288), new WrappedKeccak(288), 100);
         testRandom(new Keccak(384), new WrappedKeccak(384), 100);
         testRandom(new Keccak(512), new WrappedKeccak(512), 100);
-
-        testRandom(new Keccak(128), new WrappedSponge(128), 100);
-        testRandom(new Keccak(224), new WrappedSponge(224), 100);
-        testRandom(new Keccak(256), new WrappedSponge(256), 200);
-        testRandom(new Keccak(288), new WrappedSponge(288), 100);
-        testRandom(new Keccak(384), new WrappedSponge(384), 100);
-        testRandom(new Keccak(512), new WrappedSponge(512), 100);
     }
 
     private static void testRandom(MessageDigest md_a, MessageDigest md_b, final int n) {

@@ -14,7 +14,6 @@
             <useProjectArtifact>true</useProjectArtifact>
             <scope>test</scope>
             <excludes>
-                <exclude>com.madgag.spongycastle:core</exclude>
                 <exclude>org.junit.jupiter:junit-jupiter-api</exclude>
                 <exclude>org.junit.jupiter:junit-jupiter-engine</exclude>
                 <exclude>org.junit.platform:junit-platform-commons</exclude>
