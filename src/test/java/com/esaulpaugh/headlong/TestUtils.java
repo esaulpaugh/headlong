@@ -69,6 +69,12 @@ public class TestUtils {
         }
     }
 
+    public static byte[] randomBytes(int n, Random r) {
+        byte[] random = new byte[n];
+        r.nextBytes(random);
+        return random;
+    }
+
     public static void printAndReset(StringBuilder sb) {
         System.out.println(sb.toString());
         sb.delete(0, sb.length());
