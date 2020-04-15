@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.util.SuperSerial;
 import com.google.gson.Gson;
@@ -48,7 +49,6 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MonteCarloTestCase implements Serializable {
@@ -328,9 +328,9 @@ public class MonteCarloTestCase implements Serializable {
         case TYPE_CODE_BOOLEAN: return generateBooleanArray(len, r);
         case TYPE_CODE_BYTE:
             if (arrayType.isString()) {
-                return generateString(len, r);
+                return generateUtf8String(len, r);
             }
-            return generateByteArray(len, r);
+            return TestUtils.randomBytes(len, r);
         case TYPE_CODE_INT: return generateIntArray(len, (IntType) elementType, r);
         case TYPE_CODE_LONG: return generateLongArray(len, (LongType) elementType, r);
         case TYPE_CODE_BIG_INTEGER: return generateBigIntegerArray(len, (BigIntegerType) elementType, r);
@@ -341,22 +341,15 @@ public class MonteCarloTestCase implements Serializable {
         }
     }
 
-    private static byte[] generateByteArray(int len, Random r) {
-        byte[] random = new byte[len];
-        r.nextBytes(random);
-        return random;
-    }
-
-    private static String generateString(int len, Random r) {
-        byte[] bytes = generateByteArray(len, r);
-        return new String(bytes, UTF_8);
-    }
-
     private static String generateFunctionName(Random r) {
         return generateASCIIString(r.nextInt(34), r).replace('(', '_');
     }
 
-    static String generateASCIIString(final int len, Random r) {
+    private static String generateUtf8String(int len, Random r) {
+        return Strings.encode(TestUtils.randomBytes(len, r), Strings.UTF_8);
+    }
+
+    private static String generateASCIIString(final int len, Random r) {
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < len; i++) {
             sb.append((char) (r.nextInt(95) + 32));

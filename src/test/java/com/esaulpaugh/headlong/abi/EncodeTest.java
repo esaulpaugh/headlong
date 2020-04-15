@@ -25,7 +25,6 @@ import org.opentest4j.AssertionFailedError;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.function.Supplier;
@@ -247,8 +246,8 @@ public class EncodeTest {
 
         final Random rand = TestUtils.seededRandom();
 
-        Supplier<Object> bytesSupplier = () -> { byte[] v = new byte[rand.nextInt(33)]; rand.nextBytes(v); return v; };
-        Supplier<Object> stringSupplier = () -> { byte[] v = new byte[rand.nextInt(33)]; rand.nextBytes(v); return new String(v, StandardCharsets.UTF_8); };
+        Supplier<Object> bytesSupplier = () -> TestUtils.randomBytes(rand.nextInt(33), rand);
+        Supplier<Object> stringSupplier = () -> { byte[] v = TestUtils.randomBytes(rand.nextInt(33), rand); return Strings.encode(v, Strings.UTF_8); };
         Supplier<Object> booleanArraySupplier = () -> { boolean[] v = new boolean[rand.nextInt(4)]; Arrays.fill(v, rand.nextBoolean()); return v; };
         Supplier<Object> intArraySupplier = () -> { BigInteger[] v = new BigInteger[rand.nextInt(4)]; Arrays.fill(v, BigInteger.valueOf(rand.nextInt())); return v; };
 
