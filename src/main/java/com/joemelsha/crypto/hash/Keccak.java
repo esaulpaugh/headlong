@@ -102,86 +102,90 @@ public final class Keccak extends MessageDigest {
         }
 
         int rateBits = this.rateBits;
-        if ((rateBits & 0b111) != 0) {
-            throw new IllegalStateException("Cannot update while in bit mode");
-        }
-
-        long[] state = this.state;
-        int rateBytes = rateBits >>> 3;
-
-        int rateBytesWord = rateBytes & 0b111;
-        if (rateBytesWord > 0) {
-            int c = 8 - rateBytesWord;
-            if (c > remaining)
-                c = remaining;
-            int i = rateBytes >>> 3;
-            long w = state[i];
-            rateBytes += c;
-            remaining -= c;
-            rateBytesWord <<= 3;
-            c = rateBytesWord + (c << 3);
-
-            do {
-                w ^= (in.get() & 0xFFL) << rateBytesWord;
-                rateBytesWord += 8;
-            } while (rateBytesWord < c);
-
-            state[i] = w;
-            this.rateBits = rateBytes << 3;
-            if (remaining <= 0) {
-                return;
+        try {
+            if ((rateBits & 0b111) != 0) {
+                throw new IllegalStateException("Cannot update while in bit mode");
             }
-        }
 
-        int rateWords = rateBytes >>> 3;
-        int inWords = remaining >>> 3;
-        if (inWords > 0) {
-            ByteOrder order = in.order();
-            try {
-                in.order(ByteOrder.LITTLE_ENDIAN);
+            final long[] state = this.state;
+            int rateBytes = rateBits >>> 3;
+
+            int rateBytesWord = rateBytes & 0b111;
+            if (rateBytesWord > 0) {
+                int c = 8 - rateBytesWord;
+                if (c > remaining)
+                    c = remaining;
+                int i = rateBytes >>> 3;
+                long w = state[i];
+                rateBytes += c;
+                remaining -= c;
+                rateBytesWord <<= 3;
+                c = rateBytesWord + (c << 3);
+
                 do {
-                    if (rateWords >= rateSizeWords) {
-                        keccak(state);
-                        rateWords = 0;
-                    }
-                    int c = rateSizeWords - rateWords;
-                    if (c > inWords)
-                        c = inWords;
-                    inWords -= c;
-                    c += rateWords;
+                    w ^= (in.get() & 0xFFL) << rateBytesWord;
+                    rateBytesWord += 8;
+                } while (rateBytesWord < c);
+
+                state[i] = w;
+                rateBits = rateBytes << 3;
+                if (remaining <= 0) {
+                    return;
+                }
+            }
+
+            int rateWords = rateBytes >>> 3;
+            int inWords = remaining >>> 3;
+            if (inWords > 0) {
+                ByteOrder order = in.order();
+                try {
+                    in.order(ByteOrder.LITTLE_ENDIAN);
                     do {
-                        state[rateWords++] ^= in.getLong();
-                    } while (rateWords < c);
-                } while (inWords > 0);
-            } finally {
-                in.order(order);
-            }
-            this.rateBits = rateWords << 6;
-            remaining &= 0b111;
-        }
-
-        if (rateWords >= rateSizeWords) {
-            keccak(state);
-            this.rateBits = 0;
-            rateWords = 0;
-        }
-
-        if (remaining > 0) {
-            // remaining in [1, 7]
-            long w = state[rateWords];
-            int shiftAmount = 0;
-            switch (remaining) {
-            case 7: w ^= in.get() & 0xFFL; shiftAmount = Byte.SIZE;
-            case 6: w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-            case 5: w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-            case 4: w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-            case 3: w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-            case 2: w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-            case 1: w ^= (in.get() & 0xFFL) << shiftAmount;
+                        if (rateWords >= rateSizeWords) {
+                            keccak(state);
+                            rateWords = 0;
+                        }
+                        int c = rateSizeWords - rateWords;
+                        if (c > inWords)
+                            c = inWords;
+                        inWords -= c;
+                        c += rateWords;
+                        do {
+                            state[rateWords++] ^= in.getLong();
+                        } while (rateWords < c);
+                    } while (inWords > 0);
+                } finally {
+                    in.order(order);
+                }
+                rateBits = rateWords << 6;
+                remaining &= 0b111;
             }
 
-            state[rateWords] = w;
-            this.rateBits += remaining << 3;
+            if (rateWords >= rateSizeWords) {
+                keccak(state);
+                rateBits = 0;
+                rateWords = 0;
+            }
+
+            if (remaining > 0) {
+                // remaining in [1, 7]
+                long w = state[rateWords];
+                int shiftAmount = 0;
+                switch (remaining) {
+                case 7: w ^= in.get() & 0xFFL; shiftAmount = Byte.SIZE;
+                case 6: w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+                case 5: w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+                case 4: w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+                case 3: w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+                case 2: w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+                case 1: w ^= (in.get() & 0xFFL) << shiftAmount;
+                }
+
+                state[rateWords] = w;
+                rateBits += remaining << 3;
+            }
+        } finally {
+            this.rateBits = rateBits;
         }
     }
 
@@ -217,6 +221,7 @@ public final class Keccak extends MessageDigest {
             remaining = digestSizeBytes;
         }
 
+        final long[] state = this.state;
         int rateWords = 0;
         int outWords = remaining >>> 3;
         if (outWords > 0) {
