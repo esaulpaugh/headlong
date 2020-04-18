@@ -327,18 +327,27 @@ public final class Function implements ABIObject, Serializable {
      * @throws IllegalArgumentException if the input length mod 32 != 4
      */
     public static String formatCall(byte[] buffer, int offset, final int length) {
-        Integers.checkIsMultiple(length - SELECTOR_LEN, UNIT_LENGTH_BYTES);
-        StringBuilder sb = new StringBuilder("ID\t")
-                .append(Strings.encode(Arrays.copyOfRange(buffer, offset, SELECTOR_LEN)))
+        Integers.checkIsMultiple(length - 4, 32);
+        StringBuilder sb = new StringBuilder();
+        appendPaddedLabel("ID", sb);
+        sb.append(Strings.encode(Arrays.copyOfRange(buffer, offset, SELECTOR_LEN), Strings.HEX))
                 .append('\n');
         int idx = offset + SELECTOR_LEN;
-        while(idx < length) {
-            sb.append(idx / UNIT_LENGTH_BYTES)
-                    .append('\t')
-                    .append(Strings.encode(Arrays.copyOfRange(buffer, idx, idx + UNIT_LENGTH_BYTES)))
+        while (idx < length) {
+            int row = idx / UNIT_LENGTH_BYTES;
+            appendPaddedLabel(String.valueOf(row), sb);
+            sb.append(Strings.encode(Arrays.copyOfRange(buffer, idx, idx + UNIT_LENGTH_BYTES), Strings.HEX))
                     .append('\n');
             idx += UNIT_LENGTH_BYTES;
         }
         return sb.toString();
+    }
+
+    private static void appendPaddedLabel(String rowStr, StringBuilder sb) {
+        sb.append(rowStr);
+        int n = 9 - rowStr.length();
+        for (int i = 0; i < n; i++) {
+            sb.append(' ');
+        }
     }
 }

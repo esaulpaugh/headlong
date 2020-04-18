@@ -132,13 +132,27 @@ public class EncodeTest {
                 assertEquals(i * 2, formatted.codePoints().filter(ch -> ch == 'f').count());
                 int div = (i - expectedMod) / UNIT_LENGTH_BYTES;
                 if(div > 0) {
-                    String substr = (div - 1) + "\tffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-                    TestUtils.assertMatching(func, formatted.contains(substr));
+                    String ffff = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\n";
+                    boolean containsFfff = formatted.contains(ffff);
+                    Assertions.assertTrue(containsFfff);
+                    String labeled = paddedLabel(String.valueOf(div - 1)) + ffff;
+                    boolean containsLabeled = formatted.contains(labeled);
+                    TestUtils.assertMatching(func, containsLabeled);
                 }
             } else {
                 assertThrown(ILLEGAL, "expected length mod 32 == 0, found: ", () -> format.apply(x));
             }
         }
+    }
+
+    private static String paddedLabel(String label) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(label);
+        int n = 9 - sb.length();
+        for (int i = 0; i < n; i++) {
+            sb.append(' ');
+        }
+        return sb.toString();
     }
 
     @Test
