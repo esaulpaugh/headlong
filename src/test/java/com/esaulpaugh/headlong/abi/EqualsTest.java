@@ -128,7 +128,7 @@ public class EqualsTest {
 
         ByteBuffer abi = f.encodeCallWithArgs(argsIn);
 
-        assertTrue(Function.formatCall(abi.array()).contains("18\t000000000000000000000000" + uint160));
+        assertTrue(Function.formatCall(abi.array()).contains("18       000000000000000000000000" + uint160));
 
         Tuple tupleOut = f.decodeCall((ByteBuffer) abi.flip());
 
