@@ -95,7 +95,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         final int len;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: len = ((boolean[]) value).length * UNIT_LENGTH_BYTES; break;
-        case TYPE_CODE_BYTE: len = Integers.roundLengthUp((!isString ? (byte[]) value : Strings.decode((String) value, UTF_8)).length, UNIT_LENGTH_BYTES); break;
+        case TYPE_CODE_BYTE: len = Integers.roundLengthUp(byteCount(value), UNIT_LENGTH_BYTES); break;
         case TYPE_CODE_INT: len = ((int[]) value).length * UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_LONG: len = ((long[]) value).length * UNIT_LENGTH_BYTES; break;
         case TYPE_CODE_BIG_INTEGER:
@@ -135,7 +135,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         final ABIType<?> elementType = this.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return ((boolean[]) value).length; // * 1
-        case TYPE_CODE_BYTE: return (!isString ? (byte[]) value : Strings.decode((String) value, UTF_8)).length; // * 1
+        case TYPE_CODE_BYTE: return byteCount(value); // * 1
         case TYPE_CODE_INT: return ((int[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_LONG: return ((long[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_BIG_INTEGER:
@@ -154,6 +154,10 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return packedLen;
     }
 
+    private int byteCount(Object value) {
+        return (!isString ? (byte[]) value : Strings.decode((String) value, UTF_8)).length;
+    }
+
     @Override
     public int validate(final Object value) {
         validateClass(value);
@@ -161,10 +165,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         final int staticLen;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: staticLen = checkLength(((boolean[]) value).length, value) * UNIT_LENGTH_BYTES; break;
-        case TYPE_CODE_BYTE:
-            byte[] bytes = !isString ? (byte[]) value : Strings.decode((String) value, UTF_8);
-            staticLen = Integers.roundLengthUp(checkLength(bytes.length, value), UNIT_LENGTH_BYTES);
-            break;
+        case TYPE_CODE_BYTE: staticLen = Integers.roundLengthUp(checkLength(byteCount(value), value), UNIT_LENGTH_BYTES); break;
         case TYPE_CODE_INT: staticLen = validateIntArray((int[]) value); break;
         case TYPE_CODE_LONG: staticLen = validateLongArray((long[]) value); break;
         case TYPE_CODE_BIG_INTEGER: staticLen = validateBigIntegerArray((BigInteger[]) value); break;
