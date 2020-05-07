@@ -58,7 +58,9 @@ public final class ABIJSON {
     }
 
     public static ABIObject parseABIObject(JsonObject object) {
-        return EVENT.equals(getString(object, TYPE)) ? parseEvent(object) : parseFunction(object, Function.newDefaultDigest());
+        return EVENT.equals(getString(object, TYPE))
+                ? parseEvent(object)
+                : parseFunction(object, Function.newDefaultDigest());
     }
 
     public static List<Function> parseFunctions(String arrayJson) {
@@ -69,28 +71,28 @@ public final class ABIJSON {
         return parseObjects(arrayJson, false, true, Event.class);
     }
 
-    private static <T extends ABIObject> List<T> parseObjects(final String json,
+    private static <T extends ABIObject> List<T> parseObjects(final String jsonArrStr,
                                                              final boolean functions,
                                                              final boolean events,
                                                              final Class<T> classOfT) {
         final MessageDigest defaultDigest = functions ? Function.newDefaultDigest() : null;
 
         final List<T> abiObjects = new ArrayList<>();
-        for (JsonElement e : parseArray(json)) {
+        for (JsonElement e : parseArray(jsonArrStr)) {
             if (e.isJsonObject()) {
-                JsonObject object = (JsonObject) e;
-                switch (getString(object, TYPE)) {
+                JsonObject jsonObj = (JsonObject) e;
+                switch (getString(jsonObj, TYPE)) {
                 case FUNCTION:
                 case RECEIVE:
                 case FALLBACK:
                 case CONSTRUCTOR:
                     if (functions) {
-                        abiObjects.add(classOfT.cast(parseFunction(object, defaultDigest)));
+                        abiObjects.add(classOfT.cast(parseFunction(jsonObj, defaultDigest)));
                     }
                     break;
                 case EVENT:
                     if (events) {
-                        abiObjects.add(classOfT.cast(parseEvent(object)));
+                        abiObjects.add(classOfT.cast(parseEvent(jsonObj)));
                     }
                     break;
                 default: /* skip */
@@ -112,7 +114,7 @@ public final class ABIJSON {
     }
 // ---------------------------------------------------------------------------------------------------------------------
     private static Function.Type parseFunctionType(JsonObject function) {
-        String type = getString(function, TYPE);
+        final String type = getString(function, TYPE);
         if(type != null) {
             switch (type) {
             case FUNCTION: return Function.Type.FUNCTION;
@@ -127,7 +129,7 @@ public final class ABIJSON {
 
     private static TupleType parseTypes(JsonArray array) {
         if (array != null) {
-            ABIType<?>[] elementsArray = new ABIType[array.size()];
+            final ABIType<?>[] elementsArray = new ABIType[array.size()];
             for (int i = 0; i < elementsArray.length; i++) {
                 elementsArray[i] = parseType(array.get(i).getAsJsonObject());
             }
@@ -162,8 +164,8 @@ public final class ABIJSON {
     }
 
     private static ABIType<?> parseType(JsonObject object) {
-        final String type = getString(object, TYPE);
-        if(type.startsWith(TUPLE)) {
+        final String typeStr = getString(object, TYPE);
+        if(typeStr.startsWith(TUPLE)) {
             final JsonArray components = getArray(object, COMPONENTS);
             final ABIType<?>[] componentsArray = new ABIType[components.size()];
             int i = 0;
@@ -172,48 +174,48 @@ public final class ABIJSON {
             }
             return TypeFactory.createFromBase(
                     TupleType.wrap(componentsArray),
-                    type.substring(TUPLE.length()), // suffix e.g. "[4][]"
+                    typeStr.substring(TUPLE.length()), // suffix e.g. "[4][]"
                     getString(object, NAME)
             );
         }
-        return TypeFactory.create(type, getString(object, NAME));
+        return TypeFactory.create(typeStr, getString(object, NAME));
     }
 // ---------------------------------------------------------------------------------------------------------------------
     static JsonObject buildFunctionJson(Function f) {
-        JsonObject function = new JsonObject();
-        Function.Type type = f.getType();
-        function.add(TYPE, new JsonPrimitive(type.toString()));
+        final JsonObject json = new JsonObject();
+        final Function.Type type = f.getType();
+        json.add(TYPE, new JsonPrimitive(type.toString()));
         if(type != Function.Type.FALLBACK) {
-            addIfValueNotNull(NAME, f.getName(), function);
+            addIfValueNotNull(NAME, f.getName(), json);
             if(type != Function.Type.RECEIVE) {
-                function.add(INPUTS, buildJsonArray(f.getParamTypes(), null));
+                json.add(INPUTS, buildJsonArray(f.getParamTypes(), null));
                 if(type != Function.Type.CONSTRUCTOR) {
-                    function.add(OUTPUTS, buildJsonArray(f.getOutputTypes(), null));
+                    json.add(OUTPUTS, buildJsonArray(f.getOutputTypes(), null));
                 }
             }
         }
-        String stateMutability = f.getStateMutability();
-        addIfValueNotNull(STATE_MUTABILITY, stateMutability, function);
-        function.add(CONSTANT, new JsonPrimitive(VIEW.equals(stateMutability) || PURE.equals(stateMutability)));
-        return function;
+        final String stateMutability = f.getStateMutability();
+        addIfValueNotNull(STATE_MUTABILITY, stateMutability, json);
+        json.add(CONSTANT, new JsonPrimitive(VIEW.equals(stateMutability) || PURE.equals(stateMutability)));
+        return json;
     }
 
     static JsonObject buildEventJson(Event e) {
-        JsonObject event = new JsonObject();
-        event.add(TYPE, new JsonPrimitive(EVENT));
-        addIfValueNotNull(NAME, e.getName(), event);
-        event.add(INPUTS, buildJsonArray(e.getParams(), e.getIndexManifest()));
-        return event;
+        final JsonObject json = new JsonObject();
+        json.add(TYPE, new JsonPrimitive(EVENT));
+        addIfValueNotNull(NAME, e.getName(), json);
+        json.add(INPUTS, buildJsonArray(e.getParams(), e.getIndexManifest()));
+        return json;
     }
 
     private static JsonArray buildJsonArray(TupleType tupleType, boolean[] indexedManifest) {
-        JsonArray array = new JsonArray();
+        final JsonArray array = new JsonArray();
         for (int i = 0; i < tupleType.elementTypes.length; i++) {
-            ABIType<?> e = tupleType.elementTypes[i];
-            JsonObject arrayElement = new JsonObject();
-            String name = e.getName();
+            final ABIType<?> e = tupleType.elementTypes[i];
+            final JsonObject arrayElement = new JsonObject();
+            final String name = e.getName();
             arrayElement.add(NAME, name == null ? null : new JsonPrimitive(name));
-            String type = e.canonicalType;
+            final String type = e.canonicalType;
             if(type.startsWith("(")) { // tuple
                 arrayElement.add(TYPE, new JsonPrimitive(type.replace(type.substring(0, type.lastIndexOf(')') + 1), TUPLE)));
                 ABIType<?> base = e;
