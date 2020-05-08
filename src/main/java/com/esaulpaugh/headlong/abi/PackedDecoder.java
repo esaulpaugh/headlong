@@ -94,9 +94,7 @@ public final class PackedDecoder {
         final int len = elementTypes.length;
         final Object[] elements = new Object[len];
 
-        int idx = end;
-
-        Integer mark = null;
+        int mark = -1;
 
         for (int i = len - 1; i >= 0; i--) {
             final ABIType<?> type = elementTypes[i];
@@ -105,23 +103,23 @@ public final class PackedDecoder {
                 break;
             }
             // static types only
-            if(type.typeCode() == TYPE_CODE_ARRAY) {
+            final int typeCode = type.typeCode();
+            if(TYPE_CODE_ARRAY == typeCode) {
                 final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<? extends ABIType<?>, ?>) type;
-                end = idx -= (arrayType.elementType.byteLengthPacked(null) * arrayType.length);
-                decodeArray(arrayType, buffer, idx, end, elements, i);
-            } else if(type.typeCode() == TYPE_CODE_TUPLE) {
+                end -= (arrayType.elementType.byteLengthPacked(null) * arrayType.length);
+                decodeArray(arrayType, buffer, end, end, elements, i);
+            } else if(TYPE_CODE_TUPLE == typeCode) {
                 TupleType inner = (TupleType) type;
                 int innerLen = inner.byteLengthPacked(null);
-                end = idx -= decodeTupleStatic(inner, buffer, idx - innerLen, end, elements, i);
+                end -= decodeTupleStatic(inner, buffer, end - innerLen, end, elements, i);
             } else {
-                end = idx -= decode(elementTypes[i], buffer, idx - type.byteLengthPacked(null), end, elements, i);
+                end -= decode(elementTypes[i], buffer, end - type.byteLengthPacked(null), end, elements, i);
             }
         }
 
-        if (mark != null) {
-            final int m = mark;
-            idx = idx_;
-            for (int i = 0; i <= m; i++) {
+        if (mark > -1) {
+            int idx = idx_;
+            for (int i = 0; i <= mark; i++) {
                 idx += decode(elementTypes[i], buffer, idx, end, elements, i);
             }
         }
