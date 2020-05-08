@@ -110,7 +110,7 @@ public class PackedEncoderTest {
     public void testStaticTupleInsideDynamic() {
         TupleType tupleType = TupleType.parse("((bytes1),bytes)");
 
-        Tuple test = Tuple.of(new Tuple((Object) new byte[] { -1 }), new byte[] { -15, -15 });
+        Tuple test = Tuple.of(new Tuple((Object) new byte[] { -1 }), new byte[] { -2, -3 });
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
