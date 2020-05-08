@@ -114,9 +114,9 @@ public class PackedEncoderTest {
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
-        assertEquals("fff1f1", Strings.encode(bb));
+        assertEquals("fffefd", Strings.encode(bb));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, Strings.decode("fff1f1"));
+        Tuple decoded = PackedDecoder.decode(tupleType, Strings.decode("fffefd"));
 
         assertEquals(test, decoded);
     }
