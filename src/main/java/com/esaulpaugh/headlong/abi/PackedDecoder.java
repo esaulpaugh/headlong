@@ -43,17 +43,9 @@ public final class PackedDecoder {
     }
 
     public static Tuple decode(TupleType tupleType, byte[] buffer, int from, int to) {
-        int numDynamic = countDynamicsTupleType(tupleType);
-        if (numDynamic == 0) {
+        if (countDynamicsTupleType(tupleType) <= 1) {
             final Tuple[] elements = new Tuple[1];
-            decodeTupleStatic(tupleType, buffer, from, to, elements, 0);
-            final Tuple tuple = elements[0];
-            tupleType.validate(tuple);
-            return tuple;
-        }
-        if (numDynamic == 1) {
-            final Tuple[] elements = new Tuple[1];
-            decodeTuple(tupleType, buffer, from, to, elements, 0);
+            decodeTuple(tupleType, buffer, from, to, elements, 0); // can also call decodeTupleStatic if numDynamic == 0
             final Tuple tuple = elements[0];
             tupleType.validate(tuple);
             return tuple;
@@ -152,9 +144,7 @@ public final class PackedDecoder {
         for (int i = 0; i < len; i++) {
             idx += decode(elementTypes[i], buffer, idx, end, elements, i);
         }
-        Tuple tuple = new Tuple(elements);
-        parentElements[pei] = tuple;
-        return tupleType.byteLengthPacked(tuple);
+        return tupleType.byteLengthPacked(parentElements[pei] = new Tuple(elements));
     }
 
     private static int decodeInt(int elementLen, IntType intType, byte[] buffer, int idx, Object[] dest, int destIdx) {
