@@ -43,51 +43,53 @@ public final class PackedDecoder {
     }
 
     public static Tuple decode(TupleType tupleType, byte[] buffer, int from, int to) {
-        int numDynamic = countDynamics(tupleType);
+        int numDynamic = countDynamicsTupleType(tupleType);
         if (numDynamic == 0) {
-            Tuple[] elements = new Tuple[1];
+            final Tuple[] elements = new Tuple[1];
             decodeTupleStatic(tupleType, buffer, from, to, elements, 0);
-            Tuple tuple = elements[0];
+            final Tuple tuple = elements[0];
             tupleType.validate(tuple);
             return tuple;
         }
         if (numDynamic == 1) {
-            Tuple[] elements = new Tuple[1];
+            final Tuple[] elements = new Tuple[1];
             decodeTuple(tupleType, buffer, from, to, elements, 0);
-            Tuple tuple = elements[0];
+            final Tuple tuple = elements[0];
             tupleType.validate(tuple);
             return tuple;
         }
         throw new IllegalArgumentException("multiple dynamic elements");
     }
 
-    private static int countDynamics(TupleType tupleType) {
+    private static int countDynamicsTupleType(TupleType tupleType) {
         int numDynamic = 0;
         for (ABIType<?> e : tupleType) {
-            if (e.dynamic) {
-                if(TYPE_CODE_TUPLE == e.typeCode()) {
-                    numDynamic += countDynamics((TupleType) e);
-                } else if(TYPE_CODE_ARRAY == e.typeCode()) {
-                    do {
-                        ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<? extends ABIType<?>, ?>) e;
-                        if(DYNAMIC_LENGTH == arrayType.length) {
-                            numDynamic++;
-                        }
-                        e = arrayType.elementType;
-                    } while (TYPE_CODE_ARRAY == e.typeCode());
-                    if(TYPE_CODE_TUPLE == e.typeCode()) {
-                        numDynamic += countDynamics((TupleType) e);
-                    }
-                } else {
-                    numDynamic++;
-                }
+            numDynamic += !e.dynamic
+                    ? 0
+                    : TYPE_CODE_TUPLE == e.typeCode()
+                        ? countDynamicsTupleType((TupleType) e)
+                        : countDynamicsArrayType(e); // assume ArrayType bc currently only TupleType and ArrayType can be dynamic
+        }
+        return numDynamic;
+    }
+
+    private static int countDynamicsArrayType(ABIType<?> type) {
+        int numDynamic = 0;
+        ABIType<?> temp = type;
+        do {
+            final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<? extends ABIType<?>, ?>) temp;
+            if(DYNAMIC_LENGTH == arrayType.length) {
+                numDynamic++;
             }
+            temp = arrayType.elementType;
+        } while (TYPE_CODE_ARRAY == temp.typeCode()); // loop until temp is type's base type
+        if(TYPE_CODE_TUPLE == temp.typeCode()) {
+            numDynamic += countDynamicsTupleType((TupleType) temp);
         }
         return numDynamic;
     }
 
     private static int decodeTuple(TupleType tupleType, byte[] buffer, final int idx_, int end, Object[] parentElements, int pei) {
-
         final ABIType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
         final Object[] elements = new Object[len];
