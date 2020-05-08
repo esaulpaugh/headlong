@@ -114,10 +114,7 @@ public final class PackedDecoder {
                 start += decode(elementTypes[i], buffer, start, end, elements, i);
             }
         }
-
-        Tuple t = new Tuple(elements);
-        parentElements[pei] = t;
-        return tupleType.byteLengthPacked(t);
+        return tupleType.byteLengthPacked(parentElements[pei] = new Tuple(elements));
     }
 
     private static int decode(ABIType<?> type, byte[] buffer, int idx, int end, Object[] elements, int i) {
