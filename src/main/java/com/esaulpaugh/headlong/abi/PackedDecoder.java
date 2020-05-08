@@ -89,7 +89,7 @@ public final class PackedDecoder {
         return numDynamic;
     }
 
-    private static int decodeTuple(TupleType tupleType, byte[] buffer, final int idx_, int end, Object[] parentElements, int pei) {
+    private static int decodeTuple(TupleType tupleType, byte[] buffer, int start, int end, Object[] parentElements, int pei) {
         final ABIType<?>[] elementTypes = tupleType.elementTypes;
         final int len = elementTypes.length;
         final Object[] elements = new Object[len];
@@ -118,9 +118,8 @@ public final class PackedDecoder {
         }
 
         if (mark > -1) {
-            int idx = idx_;
             for (int i = 0; i <= mark; i++) {
-                idx += decode(elementTypes[i], buffer, idx, end, elements, i);
+                start += decode(elementTypes[i], buffer, start, end, elements, i);
             }
         }
 
