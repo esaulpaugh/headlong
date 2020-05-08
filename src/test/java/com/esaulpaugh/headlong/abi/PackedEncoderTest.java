@@ -122,6 +122,21 @@ public class PackedEncoderTest {
     }
 
     @Test
+    public void testDynamicInnerTuple() {
+        TupleType tupleType = TupleType.parse("((bytes1,bytes,bytes1),bytes1)");
+
+        Tuple test = Tuple.of(new Tuple(new byte[] { 0 }, new byte[] { -1, -2 }, new byte[] { 1 }), new byte[] { -3 });
+
+        ByteBuffer bb = tupleType.encodePacked(test);
+
+        assertEquals("00fffe01fd", Strings.encode(bb));
+
+        Tuple decoded = PackedDecoder.decode(tupleType, Strings.decode("00fffe01fd"));
+
+        assertEquals(test, decoded);
+    }
+
+    @Test
     public void testPacked() {
         TupleType tupleType = TupleType.parse("(int16,bytes1,uint16,string)");
 
