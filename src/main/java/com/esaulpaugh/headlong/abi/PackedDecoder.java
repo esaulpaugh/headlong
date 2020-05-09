@@ -185,10 +185,9 @@ public final class PackedDecoder {
         final Object array;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: array = decodeBooleanArray(arrayLen, buffer, idx); break;
-        case TYPE_CODE_BYTE:
-            byte[] bytes = decodeByteArray(arrayLen, buffer, idx);
-            array = arrayType.isString ? Strings.encode(bytes, Strings.UTF_8) : bytes;
-            break;
+        case TYPE_CODE_BYTE: array = !arrayType.isString
+                ? decodeByteArray(arrayLen, buffer, idx)
+                : Strings.encode(decodeByteArray(arrayLen, buffer, idx), Strings.UTF_8); break;
         case TYPE_CODE_INT: array = decodeIntArray((IntType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_LONG: array = decodeLongArray((LongType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_BIG_INTEGER: array = decodeBigIntegerArray(elementByteLen, arrayLen, buffer, idx); break;
@@ -258,13 +257,13 @@ public final class PackedDecoder {
     }
 
     private static Object[] decodeObjectArray(int arrayLen, ABIType<?> elementType, byte[] buffer, int idx, int end) {
-        Object[] dest = (Object[]) Array.newInstance(elementType.clazz, arrayLen); // reflection ftw
+        Object[] objects = (Object[]) Array.newInstance(elementType.clazz, arrayLen); // reflection ftw
         for (int i = 0; i < arrayLen; i++) {
-            int len = decode(elementType, buffer, idx, end, dest, i);
+            int len = decode(elementType, buffer, idx, end, objects, i);
             idx += len;
             end -= len;
         }
-        return dest;
+        return objects;
     }
 
     static int getPackedInt(byte[] buffer, int i, int len) {
@@ -304,7 +303,7 @@ public final class PackedDecoder {
         case 1: val |= ((leftmost = buffer[i]) & 0xFFL) << shiftAmount; break;
         default: throw new IllegalArgumentException("len out of range: " + len);
         }
-        if(leftmost < 0) {
+        if(leftmost < 0) { // if negative
             // sign extend
             switch (len) { /* cases fall through */
             case 1: return val | 0xFFFFFFFFFFFFFF00L;
