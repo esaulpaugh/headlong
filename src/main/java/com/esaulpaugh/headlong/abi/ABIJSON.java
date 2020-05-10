@@ -50,7 +50,7 @@ public final class ABIJSON {
     private static final String PURE = "pure";
     private static final String VIEW = "view";
     static final String PAYABLE = "payable";
-//    private static final String NONPAYABLE = "nonpayable";
+//    private static final String NONPAYABLE = "nonpayable";// to mark as nonpayable, do not specify any stateMutability
     private static final String CONSTANT = "constant"; // deprecated
 
     public static ABIObject parseABIObject(String objectJson) {
