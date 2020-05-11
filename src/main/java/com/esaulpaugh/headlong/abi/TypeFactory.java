@@ -49,31 +49,14 @@ final class TypeFactory {
                 final int secondToLastCharIndex = lastCharIndex - 1;
                 final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIndex);
 
-                final int length;
-                if (arrayOpenIndex == secondToLastCharIndex) { // i.e. []
-                    length = DYNAMIC_LENGTH;
-                } else { // e.g. [4]
-                    final int startLen = arrayOpenIndex + 1;
-                    try {
-                        String lengthStr = rawType.substring(startLen, lastCharIndex);
-                        length = Integer.parseInt(lengthStr);
-                        if (length < 0) {
-                            throw new IllegalArgumentException("negative array length");
-                        }
-                        if(lengthStr.length() > 1 && rawType.charAt(startLen) == '0') {
-                            throw new IllegalArgumentException("leading zero in array length");
-                        }
-                    } catch (NumberFormatException nfe) {
-                        throw new IllegalArgumentException("illegal number format", nfe);
-                    }
-                }
-
                 final ABIType<?> elementType = buildType(rawType.substring(0, arrayOpenIndex), baseType, nameless);
+                final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
+                final int length = arrayOpenIndex == secondToLastCharIndex ? DYNAMIC_LENGTH : parseLen(rawType, arrayOpenIndex + 1, lastCharIndex);
+                final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
                 final String arrayClassName = elementType.arrayClassName();
                 @SuppressWarnings("unchecked")
                 final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
-                final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
-                return new ArrayType<ABIType<?>, Object>(elementType.canonicalType + rawType.substring(arrayOpenIndex), arrayClass, dynamic, elementType, length, '[' + arrayClassName);
+                return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, '[' + arrayClassName);
             }
             if(baseType != null || (baseType = resolveBaseType(rawType, nameless)) != null) {
                 return baseType;
@@ -84,6 +67,22 @@ final class TypeFactory {
             /* fall through */
         }
         throw new IllegalArgumentException("unrecognized type: " + rawType);
+    }
+
+    private static int parseLen(String rawType, int startLen, int lastCharIndex) {
+        try {
+            String lengthStr = rawType.substring(startLen, lastCharIndex);
+            if(lengthStr.length() > 1 && rawType.charAt(startLen) == '0') {
+                throw new IllegalArgumentException("leading zero in array length");
+            }
+            int length = Integer.parseInt(lengthStr);
+            if (length >= 0) {
+                return length;
+            }
+            throw new IllegalArgumentException("negative array length");
+        } catch (NumberFormatException nfe) {
+            throw new IllegalArgumentException("illegal number format", nfe);
+        }
     }
 
     private static ABIType<?> resolveBaseType(String baseTypeStr, boolean nameless) {
