@@ -22,6 +22,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
 import com.joemelsha.crypto.hash.Keccak;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
@@ -284,5 +286,75 @@ public class MonteCarloTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void testSignatureCollision() {
+        String a = "O()";
+        String b = "QChn()";
+
+        Assertions.assertNotEquals(a, b);
+
+        Function fa = Function.parse(a);
+        Function fb = Function.parse(b);
+
+//        System.out.println(fa.selectorHex() + " == " + fb.selectorHex());
+
+        Assertions.assertEquals("a0ea32de", fa.selectorHex());
+
+        Assertions.assertEquals(fa.selectorHex(), fb.selectorHex());
+        Assertions.assertNotEquals(fa, fb);
+    }
+
+    private static String generateASCIIString(final int len, Random r) {
+        char[] chars = new char[len];
+        for(int i = 0; i < len; i++) {
+            char c;
+            do {
+                c = (char) (r.nextInt(160)); // 95) + 32
+            } while (Character.isISOControl(c));
+            if(c == '(') c = '_';
+            chars[i] = c;
+        }
+        return new String(chars);
+    }
+
+    @Disabled("search for colliding signatures")
+    @Test
+    public void findSelectorCollision() {
+
+        String smallestPrev = "O()";
+        String smallestNew = "QChn()";
+
+        final int threshold = 9; // smallestPrev.length() + smallestNew.length();
+
+        final int n = 12_000_000;
+
+        final HashMap<String, String> selectorHexes = new HashMap<>(8192, 0.75f);
+
+        final Random r = TestUtils.seededRandom();
+
+        for(int i = 0; i < n; i++) {
+            String str = (
+                    r.nextBoolean()
+                            ? generateASCIIString(4, r)
+                            : r.nextBoolean() ? generateASCIIString(3, r)
+                            : r.nextBoolean() ? generateASCIIString(2, r)
+                            : r.nextBoolean() ? generateASCIIString(1, r) : ""
+            ) + "()";
+            final Function foo = Function.parse(str);
+            final String newKey = foo.selectorHex();
+            final String newSig = foo.getCanonicalSignature();
+            final String prevSig = selectorHexes.put(newKey, newSig);
+            if(prevSig != null && !prevSig.equals(newSig)) {
+                if(prevSig.length() + newSig.length() <= threshold) {
+                    smallestPrev = prevSig;
+                    smallestNew = newSig;
+                    System.err.println(i + ", " + newKey + "\t\t" + newSig + " != " + prevSig);
+                }
+            }
+            i++;
+        }
+        System.out.println(smallestPrev + " ============ " + smallestNew);
     }
 }
