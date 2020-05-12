@@ -69,6 +69,18 @@ public class TestUtils {
         }
     }
 
+    public static void sort(int[] arr) {
+        int j = 1;
+        while(j < arr.length) {
+            int i = j - 1, v = arr[j], v2;
+            while(i >= 0 && v < (v2 = arr[i])) {
+                arr[i-- + 1] = v2;
+            }
+            arr[i + 1] = v;
+            j++;
+        }
+    }
+
     public static byte[] randomBytes(int n, Random r) {
         byte[] random = new byte[n];
         r.nextBytes(random);
