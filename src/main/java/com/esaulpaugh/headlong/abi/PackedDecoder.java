@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.Uint;
-import com.esaulpaugh.headlong.util.Strings;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -185,9 +184,7 @@ public final class PackedDecoder {
         final Object array;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: array = decodeBooleanArray(arrayLen, buffer, idx); break;
-        case TYPE_CODE_BYTE: array = !arrayType.isString
-                ? decodeByteArray(arrayLen, buffer, idx)
-                : Strings.encode(decodeByteArray(arrayLen, buffer, idx), Strings.UTF_8); break;
+        case TYPE_CODE_BYTE: array = arrayType.encodeIfString(decodeByteArray(arrayLen, buffer, idx)); break;
         case TYPE_CODE_INT: array = decodeIntArray((IntType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_LONG: array = decodeLongArray((LongType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_BIG_INTEGER: array = decodeBigIntegerArray(elementByteLen, arrayLen, buffer, idx); break;

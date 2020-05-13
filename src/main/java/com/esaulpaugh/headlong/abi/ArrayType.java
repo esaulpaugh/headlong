@@ -49,7 +49,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     final E elementType;
     final int length;
-    final boolean isString;
+    private final boolean isString;
 
     private final String arrayClassName;
 
@@ -154,8 +154,16 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return packedLen;
     }
 
-    private int byteCount(Object value) {
-        return (!isString ? (byte[]) value : Strings.decode((String) value, UTF_8)).length;
+    int byteCount(Object value) {
+        return ((byte[]) decodeIfString(value)).length;
+    }
+
+    Object decodeIfString(Object value) {
+        return !isString ? value : Strings.decode((String) value, UTF_8);
+    }
+
+    Object encodeIfString(byte[] bytes) {
+        return !isString ? bytes : Strings.encode(bytes, UTF_8);
     }
 
     @Override
@@ -272,7 +280,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     @Override
     void encodeTail(Object value, ByteBuffer dest) {
-        encodeArrayTail(!isString ? value : Strings.decode((String) value, UTF_8), dest);
+        encodeArrayTail(decodeIfString(value), dest);
     }
 
     private void insert(Supplier<Integer> supplyLength, Runnable insert, ByteBuffer dest) {
@@ -375,7 +383,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         byte[] out = new byte[arrayLen];
         bb.get(out);
         bb.position(mark + Integers.roundLengthUp(arrayLen, UNIT_LENGTH_BYTES));
-        return !isString ? out : Strings.encode(out, UTF_8);
+        return encodeIfString(out);
     }
 
     private static int[] decodeIntArray(IntType intType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {

@@ -17,7 +17,6 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.util.Integers;
-import com.esaulpaugh.headlong.util.Strings;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -58,7 +57,7 @@ final class PackedEncoder {
         final ABIType<?> elementType = arrayType.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: encodeBooleans((boolean[]) value, dest); return;
-        case TYPE_CODE_BYTE: dest.put(!arrayType.isString ? (byte[]) value : Strings.decode((String) value, Strings.UTF_8)); return;
+        case TYPE_CODE_BYTE: dest.put((byte[]) arrayType.decodeIfString(value)); return;
         case TYPE_CODE_INT: encodeInts((int[]) value, elementType.byteLengthPacked(null), dest); return;
         case TYPE_CODE_LONG: encodeLongs((long[]) value, elementType.byteLengthPacked(null), dest); return;
         case TYPE_CODE_BIG_INTEGER: Encoding.insertBigIntegers((BigInteger[]) value, elementType.byteLengthPacked(null), dest); return;
