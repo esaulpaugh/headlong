@@ -160,7 +160,9 @@ public final class Function implements ABIObject, Serializable {
     private void validateFunction() {
         switch (type) {
         case FUNCTION:
-            assertNameNullability(name, false);
+            if(name == null) {
+                throw nameNullabilityException(false);
+            }
             break;
         case RECEIVE:
             if (!ABIJSON.RECEIVE.equals(name)) {
@@ -175,18 +177,16 @@ public final class Function implements ABIObject, Serializable {
             /* fall through */
         case CONSTRUCTOR:
             assertNoElements(outputTypes, "outputs");
-            if (type != Type.RECEIVE) {
-                assertNameNullability(name, true);
+            if (type != Type.RECEIVE && name != null) {
+                throw nameNullabilityException(true);
             }
             /* fall through */
         default:
         }
     }
 
-    private static void assertNameNullability(String name, boolean _null) {
-        if(_null ^ (name == null)) { // if not matching
-            throw new IllegalArgumentException("functions of this type must be " + (_null ? "un" : "") + "named");
-        }
+    private static IllegalArgumentException nameNullabilityException(boolean mustBeNull) {
+        return new IllegalArgumentException("functions of this type must be " + (mustBeNull ? "un" : "") + "named");
     }
 
     private static void assertNoElements(TupleType tupleType, String description) {
