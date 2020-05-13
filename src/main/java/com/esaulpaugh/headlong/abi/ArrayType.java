@@ -282,17 +282,17 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         insert.run();
     }
 
-    private void encodeArrayTail(Object value, ByteBuffer dest) {
+    private void encodeArrayTail(Object v, ByteBuffer dest) {
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: insert(() -> ((boolean[]) value).length, () -> insertBooleans((boolean[]) value, dest), dest); return;
-        case TYPE_CODE_BYTE: insert(() -> ((byte[]) value).length, () -> Encoding.insertBytesPadded((byte[]) value, dest), dest); return;
-        case TYPE_CODE_INT: insert(() -> ((int[]) value).length, () -> insertInts((int[]) value, dest), dest); return;
-        case TYPE_CODE_LONG: insert(() -> ((long[]) value).length, () -> insertLongs((long[]) value, dest), dest); return;
-        case TYPE_CODE_BIG_INTEGER: insert(() -> ((BigInteger[]) value).length, () -> Encoding.insertBigIntegers((BigInteger[]) value, UNIT_LENGTH_BYTES, dest), dest); return;
-        case TYPE_CODE_BIG_DECIMAL: insert(() -> ((BigDecimal[]) value).length, () -> Encoding.insertBigDecimals((BigDecimal[]) value, UNIT_LENGTH_BYTES, dest), dest); return;
+        case TYPE_CODE_BOOLEAN: boolean[] z = (boolean[])v; insert(() -> z.length, () -> insertBooleans(z, dest), dest); return;
+        case TYPE_CODE_BYTE: byte[] b = (byte[])v; insert(() -> b.length, () -> Encoding.insertBytesPadded(b, dest), dest); return;
+        case TYPE_CODE_INT: int[] i = (int[])v; insert(() -> i.length, () -> insertInts(i, dest), dest); return;
+        case TYPE_CODE_LONG: long[] j = (long[])v; insert(() -> j.length, () -> insertLongs(j, dest), dest); return;
+        case TYPE_CODE_BIG_INTEGER: BigInteger[] bi = (BigInteger[])v; insert(() -> bi.length, () -> Encoding.insertBigIntegers(bi, UNIT_LENGTH_BYTES, dest), dest); return;
+        case TYPE_CODE_BIG_DECIMAL: BigDecimal[] bd = (BigDecimal[])v; insert(() -> bd.length, () -> Encoding.insertBigDecimals(bd, UNIT_LENGTH_BYTES, dest), dest); return;
         case TYPE_CODE_ARRAY:  // note that type for String[] has elementType.typeCode() == TYPE_CODE_ARRAY
         case TYPE_CODE_TUPLE:
-            final Object[] objects = (Object[]) value;
+            final Object[] objects = (Object[]) v;
             if(dynamic) {
                 insert(() -> objects.length, () -> insertOffsets(objects, dest), dest);
             }
