@@ -293,23 +293,23 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_ARRAY:  // note that type for String[] has elementType.typeCode() == TYPE_CODE_ARRAY
         case TYPE_CODE_TUPLE:
             final Object[] objects = (Object[]) value;
-            final int len = objects.length;
             if(dynamic) {
-                if(length == DYNAMIC_LENGTH) {
-                    Encoding.insertInt(len, dest); // insert array length
-                }
-                if (elementType.dynamic) { // if elements are dynamic
-                    int nextOffset = len * UNIT_LENGTH_BYTES;
-                    for (int i = 0; i < len; i++) {
-                        nextOffset = Encoding.insertOffset(nextOffset, dest, elementType.byteLength(objects[i]));
-                    }
-                }
+                insert(() -> objects.length, () -> insertOffsets(objects, dest), dest);
             }
-            for (int i = 0; i < len; i++) {
-                elementType.encodeTail(objects[i], dest);
+            for (Object object : objects) {
+                elementType.encodeTail(object, dest);
             }
             return;
         default: throw new Error();
+        }
+    }
+
+    private void insertOffsets(final Object[] objects, ByteBuffer dest) {
+        if (elementType.dynamic) {
+            int nextOffset = objects.length * Encoding.OFFSET_LENGTH_BYTES;
+            for (Object object : objects) {
+                nextOffset = Encoding.insertOffset(nextOffset, dest, elementType.byteLength(object));
+            }
         }
     }
 
