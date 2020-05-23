@@ -151,10 +151,9 @@ public final class Function implements ABIObject, Serializable {
     }
 
     public String getCanonicalSignature() {
-        if(name != null) {
-            return name + inputTypes.canonicalType;
-        }
-        return inputTypes.canonicalType;
+        return name != null
+                ? name + inputTypes.canonicalType
+                : inputTypes.canonicalType;
     }
 
     private void validateFunction() {

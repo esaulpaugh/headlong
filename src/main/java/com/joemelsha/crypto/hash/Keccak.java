@@ -75,7 +75,7 @@ public final class Keccak extends MessageDigest {
             state[i] = 0L;
         }
         rateBits = 0;
-        out = null;
+        out = null; // very important to avoid leaking memory
     }
 
     @Override
