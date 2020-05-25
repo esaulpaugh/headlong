@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.RandomAccess;
@@ -25,7 +24,7 @@ import java.util.RandomAccess;
  * {@link Tuple}s containing arguments satisfying its parameters/return type. {@link Tuple}s can contain other tuples.
  * Elements array is not safe from external/concurrent modification.
  */
-public final class Tuple extends AbstractList<Object> implements RandomAccess, Serializable {
+public final class Tuple extends AbstractList<Object> implements RandomAccess {
 
     public static final Tuple EMPTY = new Tuple();
 

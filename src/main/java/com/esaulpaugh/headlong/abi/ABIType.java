@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import java.io.Serializable;
 import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -25,7 +24,7 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
  *
  * @param <J> this {@link ABIType}'s corresponding Java type
  */
-public abstract class ABIType<J> implements Serializable {
+public abstract class ABIType<J> {
 
     public static final int TYPE_CODE_BOOLEAN = 0;
     public static final int TYPE_CODE_BYTE = 1;

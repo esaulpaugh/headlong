@@ -22,7 +22,6 @@ import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonObject;
 import com.joemelsha.crypto.hash.Keccak;
 
-import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.security.DigestException;
 import java.security.MessageDigest;
@@ -37,7 +36,7 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
  * Represents a function in an Ethereum contract. Can encode and decode calls matching this function's signature.
  * Can decode the function's return values.
  */
-public final class Function implements ABIObject, Serializable {
+public final class Function implements ABIObject {
 
     /** The various variants of {@link Function}. */
     public enum Type {
