@@ -26,6 +26,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.WriteAbortedException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Random;
@@ -219,24 +225,22 @@ public class MonteCarloTest {
         }
     }
 
-//    @Test
-//    public void testSerialization() throws IOException, ClassNotFoundException {
-//        final Random r = new Random();
-//        final Keccak k = new Keccak(256);
-//        final MonteCarloTask original = new MonteCarloTask(newComplexTestCase(r, k), 0, 1);
-//        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//
-//        new ObjectOutputStream(baos)
-//                .writeObject(original);
-//
-//        final MonteCarloTask deserialized = (MonteCarloTask) new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()))
-//                .readObject();
-//
-//        if(!deserialized.equals(original)) {
-//            throw new AssertionError("deserialization failure");
-//        }
-//        System.out.println("successful deserialization");
-//    }
+    @Test
+    public void testNotSerializable() throws Throwable {
+        final Random r = new Random();
+        final Keccak k = new Keccak(256);
+        final MonteCarloTask original = new MonteCarloTask(newComplexTestCase(r, k), 0, 1);
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        TestUtils.assertThrown(NotSerializableException.class, "com.esaulpaugh.headlong.abi.MonteCarloTestCase", () -> new ObjectOutputStream(baos)
+                .writeObject(original));
+
+        TestUtils.assertThrown(WriteAbortedException.class,
+                "writing aborted; java.io.NotSerializableException: com.esaulpaugh.headlong.abi.MonteCarloTestCase",
+                () -> new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()))
+                .readObject()
+        );
+    }
 
     private static MonteCarloTestCase newComplexTestCase(Random r, Keccak k) {
         long seed = TestUtils.getSeed(System.nanoTime());
