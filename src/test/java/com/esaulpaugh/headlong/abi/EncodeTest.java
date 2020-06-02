@@ -366,4 +366,21 @@ public class EncodeTest {
                 xor
         );
     }
+
+    @Test
+    public void testEncodeElements() {
+        TupleType tt = TupleType.parse("(uint64,uint32,bool[])");
+
+        Object a = BigInteger.valueOf(7L);
+        Object b = 9L;
+        Object c = new boolean[0];
+
+        ByteBuffer ee = tt.encodeElements(a, b, c);
+
+        assertArrayEquals(tt.encode(Tuple.of(a, b, c)).array(), ee.array());
+        assertEquals(
+                "0000000000000000000000000000000000000000000000000000000000000007000000000000000000000000000000000000000000000000000000000000000900000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
+                Strings.encode(ee)
+        );
+    }
 }
