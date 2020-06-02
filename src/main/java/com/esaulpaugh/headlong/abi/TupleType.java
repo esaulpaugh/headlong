@@ -219,6 +219,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Gives the ABI encoding of the input values according to this {@link TupleType}'s element types.
+     *
+     * @param elements  values corresponding to this {@link TupleType}'s element types
+     * @return  the encoding
+     * @see #encode(Tuple)
+     */
     public ByteBuffer encodeElements(Object... elements) {
         return encode(new Tuple(elements));
     }
