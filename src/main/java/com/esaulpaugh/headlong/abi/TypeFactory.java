@@ -123,9 +123,9 @@ final class TypeFactory {
             case "int224":
             case "int232":
             case "int240":
-            case "int248":  return new BigIntegerType(baseTypeStr, info.bitLen, false);
-            case "int256":
-            case "int":     return new BigIntegerType("int256", info.bitLen, false);
+            case "int248":
+            case "int256":  return new BigIntegerType(baseTypeStr, info.bitLen, false);
+            case "int":     return new BigIntegerType("int256", 256, false);
             case "uint8":
             case "uint16":
             case "uint24":  return new IntType(baseTypeStr, info.bitLen, true);
@@ -159,7 +159,7 @@ final class TypeFactory {
             case "uint240":
             case "uint248": return new BigIntegerType(baseTypeStr, info.bitLen, true);
             case "uint256":
-            case "uint":    return nameless ? CACHED_UINT_TYPE : new BigIntegerType("uint256", info.bitLen, true);
+            case "uint":    return nameless ? CACHED_UINT_TYPE : new BigIntegerType("uint256", 256, true);
             case "bytes1":
             case "bytes2":
             case "bytes3":
