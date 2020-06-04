@@ -64,30 +64,33 @@ public final class ABIJSON {
     }
 
     public static List<Function> parseFunctions(String arrayJson) {
-        return parseObjects(arrayJson, true, false, Function.class);
+        return parseFunctions(arrayJson, Function.newDefaultDigest());
+    }
+
+    public static List<Function> parseFunctions(String arrayJson, MessageDigest digest) {
+        return parseObjects(arrayJson, true, false, digest, Function.class);
     }
 
     public static List<Event> parseEvents(String arrayJson) {
-        return parseObjects(arrayJson, false, true, Event.class);
+        return parseObjects(arrayJson, false, true, null, Event.class);
     }
 
-    private static <T extends ABIObject> List<T> parseObjects(final String jsonArrStr,
+    public static <T extends ABIObject> List<T> parseObjects(final String arrayJson,
                                                              final boolean functions,
                                                              final boolean events,
-                                                             final Class<T> classOfT) {
-        final MessageDigest defaultDigest = functions ? Function.newDefaultDigest() : null;
-
+                                                             final MessageDigest digest,
+                                                             final Class<T> classOfT) { // e.g. ABIObject.class
         final List<T> abiObjects = new ArrayList<>();
-        for (JsonElement e : parseArray(jsonArrStr)) {
+        for (JsonElement e : parseArray(arrayJson)) {
             if (e.isJsonObject()) {
                 JsonObject jsonObj = (JsonObject) e;
-                switch (getString(jsonObj, TYPE)) {
+                switch (getString(jsonObj, TYPE, FUNCTION)) {
                 case FUNCTION:
                 case RECEIVE:
                 case FALLBACK:
                 case CONSTRUCTOR:
                     if (functions) {
-                        abiObjects.add(classOfT.cast(parseFunction(jsonObj, defaultDigest)));
+                        abiObjects.add(classOfT.cast(parseFunction(jsonObj, digest)));
                     }
                     break;
                 case EVENT:
@@ -118,9 +121,9 @@ public final class ABIJSON {
         if(type != null) {
             switch (type) {
             case FUNCTION: return Function.Type.FUNCTION;
+            case RECEIVE: return Function.Type.RECEIVE;
             case FALLBACK: return Function.Type.FALLBACK;
             case CONSTRUCTOR: return Function.Type.CONSTRUCTOR;
-            case RECEIVE: return Function.Type.RECEIVE;
             default: throw new IllegalArgumentException("unexpected type: \"" + type + "\"");
             }
         }
