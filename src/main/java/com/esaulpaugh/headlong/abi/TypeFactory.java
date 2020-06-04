@@ -123,8 +123,8 @@ final class TypeFactory {
             case "int224":
             case "int232":
             case "int240":
-            case "int248":
-            case "int256":  return new BigIntegerType(baseTypeStr, info.bitLen, false);
+            case "int248":  return new BigIntegerType(baseTypeStr, info.bitLen, false);
+            case "int256":
             case "int":     return new BigIntegerType("int256", 256, false);
             case "uint8":
             case "uint16":
