@@ -20,14 +20,15 @@ import java.util.regex.Pattern;
 
 final class Utils {
 
-    static String regexValidate(Pattern validString, Pattern invalidChar, String string) {
-        if(validString.matcher(string).matches()) {
-            return string;
+    static String regexValidate(Pattern validString, Pattern illegalChar, String input) {
+        if(validString.matcher(input).matches()) {
+            return input;
         }
-        Matcher m = invalidChar.matcher(string);
-        if (m.find()) {
-            char c = string.charAt(m.start());
-            throw new IllegalArgumentException("illegal char 0x" + Integer.toHexString(c) + " '" + c + "' @ index " + m.start());
+        Matcher badChar = illegalChar.matcher(input);
+        if (badChar.find()) {
+            int idx = badChar.start();
+            char c = input.charAt(idx);
+            throw new IllegalArgumentException("illegal char 0x" + Integer.toHexString(c) + " '" + c + "' @ index " + idx);
         }
         throw new Error("regex mismatch");
     }
