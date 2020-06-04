@@ -383,4 +383,22 @@ public class EncodeTest {
                 Strings.encode(ee)
         );
     }
+
+    @Test
+    public void testScaleErr() throws Throwable {
+        assertThrown(
+                IllegalArgumentException.class,
+                "big decimal scale mismatch: actual != expected: 1 != 9",
+                () -> Function.parse("(fixed56x9)").encodeCall(Tuple.of(new BigDecimal("0.2")))
+        );
+    }
+
+    @Test
+    public void testNesterErrMessage() throws Throwable {
+        assertThrown(
+                IllegalArgumentException.class,
+                "tuple index 0: array index 1: exceeds bit limit: 9 > 8",
+                () -> Function.parse("(int8[])").encodeCall(Tuple.of((Object) new int[] { 120, 256 }))
+        );
+    }
 }

@@ -243,7 +243,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                 BigDecimal element = arr[i];
                 bigDecimalType.validateBigInt(element.unscaledValue());
                 if(element.scale() != bigDecimalType.scale) {
-                    throw new IllegalArgumentException("unexpected scale: " + element.scale());
+                    throw new IllegalArgumentException(String.format(BigDecimalType.ERR_SCALE_MISMATCH, element.scale(), bigDecimalType.scale));
                 }
             }
         } catch (IllegalArgumentException iae) {
@@ -253,7 +253,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private static IllegalArgumentException abiException(IllegalArgumentException iae, int i) {
-        return new IllegalArgumentException("index " + i + ": " + iae.getMessage());
+        return new IllegalArgumentException("array index " + i + ": " + iae.getMessage());
     }
 
     /** For arrays of arrays or arrays of tuples only. */

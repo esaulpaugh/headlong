@@ -128,8 +128,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     len += !type.dynamic ? byteLen : OFFSET_LENGTH_BYTES + byteLen;
                 }
                 return len;
-            } catch (NullPointerException npe) {
-                throw new IllegalArgumentException("illegal arg @ " + i + ": " + npe.getMessage());
+            } catch (NullPointerException | IllegalArgumentException e) {
+                throw new IllegalArgumentException("tuple index " + i + ": " + e.getMessage());
             }
         }
         throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + elements.length + " != " + elementTypes.length);

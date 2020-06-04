@@ -24,6 +24,8 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
 
     private static final String ARRAY_CLASS_NAME = BigDecimal[].class.getName();
 
+    static final String ERR_SCALE_MISMATCH = "big decimal scale mismatch: actual != expected: %d != %d";
+
     final int scale;
 
     BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean unsigned) {
@@ -53,7 +55,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
         if(dec.scale() == scale) {
             return UNIT_LENGTH_BYTES;
         }
-        throw new IllegalArgumentException("big decimal scale mismatch: actual != expected: " + dec.scale() + " != " + scale);
+        throw new IllegalArgumentException(String.format(ERR_SCALE_MISMATCH, dec.scale(), scale));
     }
 
     @Override
@@ -72,7 +74,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
 
     @Override
     public BigDecimal parseArgument(String s) {
-        BigDecimal bigDec = new BigDecimal(new BigInteger(s), scale);
+        BigDecimal bigDec = new BigDecimal(new BigInteger(s, 10), scale);
         validate(bigDec);
         return bigDec;
     }
