@@ -20,15 +20,16 @@ import java.util.regex.Pattern;
 
 final class Utils {
 
-    static String validateChars(Pattern pattern, String string) {
-        Matcher matcher = pattern.matcher(string);
-        if (matcher.find()) {
-            final char c = string.charAt(matcher.start());
-            throw new IllegalArgumentException(
-                    "illegal char 0x" + Integer.toHexString(c) + " '" + c + "' @ index " + matcher.start()
-            );
+    static String regexValidate(Pattern validString, Pattern invalidChar, String string) {
+        if(validString.matcher(string).matches()) {
+            return string;
         }
-        return string;
+        Matcher m = invalidChar.matcher(string);
+        if (m.find()) {
+            char c = string.charAt(m.start());
+            throw new IllegalArgumentException("illegal char 0x" + Integer.toHexString(c) + " '" + c + "' @ index " + m.start());
+        }
+        throw new Error("regex mismatch");
     }
 
     static String friendlyClassName(Class<?> clazz) {
