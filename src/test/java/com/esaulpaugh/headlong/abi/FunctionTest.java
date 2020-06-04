@@ -45,6 +45,14 @@ public class FunctionTest {
         f = new Function(Function.Type.FUNCTION, "", TupleType.EMPTY, TupleType.EMPTY, null, md);
         assertEquals("", f.getName());
         assertNull(f.getStateMutability());
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "illegal char 0x28 '(' @ index 0", () -> new Function(Function.Type.FUNCTION, "(", inputs, outputs, null, md));
+        TestUtils.assertThrown(IllegalArgumentException.class, "illegal char 0x28 '(' @ index 1", () -> new Function(Function.Type.FUNCTION, "a(", inputs, outputs, null, md));
+        TestUtils.assertThrown(IllegalArgumentException.class, "illegal char 0x28 '(' @ index 0", () -> new Function(Function.Type.FUNCTION, "(b", inputs, outputs, null, md));
+        TestUtils.assertThrown(IllegalArgumentException.class, "illegal char 0x28 '(' @ index 1", () -> new Function(Function.Type.FUNCTION, "c(d", inputs, outputs, null, md));
+        TestUtils.assertThrown(IllegalArgumentException.class, "illegal char 0x256 '\u0256' @ index 0", () -> new Function(Function.Type.FUNCTION, "\u0256", inputs, outputs, null, md));
+        new Function(Function.Type.FUNCTION, "z", inputs, outputs, null, md);
+        new Function(Function.Type.FUNCTION, "", inputs, outputs, null, md);
     }
 
     @Test
