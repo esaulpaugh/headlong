@@ -154,7 +154,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return packedLen;
     }
 
-    int byteCount(Object value) {
+    private int byteCount(Object value) {
         return ((byte[]) decodeIfString(value)).length;
     }
 
