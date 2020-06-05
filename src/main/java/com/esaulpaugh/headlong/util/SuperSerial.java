@@ -86,6 +86,9 @@ public final class SuperSerial {
         for(int i = 0; i < len; i++) {
             elements[i] = deserialize(tupleType.get(i), sequenceIterator.next());
         }
+        if(sequenceIterator.hasNext()) {
+            throw new IllegalArgumentException("trailing unconsumed items");
+        }
         return new Tuple(elements);
     }
 
@@ -202,7 +205,7 @@ public final class SuperSerial {
     }
 
     private static Object deserializeArray(ArrayType<? extends ABIType<?>,?> arrayType, RLPItem item) {
-        ABIType<?> elementType = arrayType.getElementType();
+        final ABIType<?> elementType = arrayType.getElementType();
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return deserializeBooleanArray((RLPList) item);
         case TYPE_CODE_BYTE: return deserializeByteArray(arrayType, (RLPString) item);
