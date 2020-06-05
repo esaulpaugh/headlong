@@ -358,7 +358,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         StringBuilder sb = new StringBuilder();
         int idx = 0;
         while(idx < abi.length) {
-            sb.append(Strings.encode(abi, idx, UNIT_LENGTH_BYTES, HEX)).append('\n');
+            if(idx > 0) {
+                sb.append('\n');
+            }
+            sb.append(Strings.encode(abi, idx, UNIT_LENGTH_BYTES, HEX));
             idx += UNIT_LENGTH_BYTES;
         }
         return sb.toString();

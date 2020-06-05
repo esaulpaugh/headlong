@@ -331,14 +331,13 @@ public final class Function implements ABIObject {
         Integers.checkIsMultiple(length - 4, 32);
         StringBuilder sb = new StringBuilder();
         appendPaddedLabel("ID", sb);
-        sb.append(Strings.encode(Arrays.copyOfRange(buffer, offset, SELECTOR_LEN), Strings.HEX))
-                .append('\n');
+        sb.append(Strings.encode(buffer, offset, SELECTOR_LEN, Strings.HEX));
         int idx = offset + SELECTOR_LEN;
         while (idx < length) {
             int row = idx / UNIT_LENGTH_BYTES;
+            sb.append('\n');
             appendPaddedLabel(String.valueOf(row), sb);
-            sb.append(Strings.encode(Arrays.copyOfRange(buffer, idx, idx + UNIT_LENGTH_BYTES), Strings.HEX))
-                    .append('\n');
+            sb.append(Strings.encode(buffer, idx, UNIT_LENGTH_BYTES, Strings.HEX));
             idx += UNIT_LENGTH_BYTES;
         }
         return sb.toString();
@@ -346,7 +345,7 @@ public final class Function implements ABIObject {
 
     private static void appendPaddedLabel(String rowStr, StringBuilder sb) {
         sb.append(rowStr);
-        int n = 9 - rowStr.length();
+        int n = 9 /* arbitrary magic number */ - rowStr.length();
         for (int i = 0; i < n; i++) {
             sb.append(' ');
         }

@@ -82,4 +82,20 @@ public class FunctionTest {
         assertEquals(canon, nonCanon);
         assertEquals(canon.getCanonicalSignature(), nonCanon.getCanonicalSignature());
     }
+
+    @Test
+    public void testFormatTupleType() {
+        String f = Function.formatCall(new byte[] { 1, 1, 1, 1, 0x45, 0x13, 0x79, 0x03,
+                34, 33, 32, 31,
+                34, 33, 32, 31,
+                34, 33, 32, 31,
+                34, 33, 32, 31,
+                34, 33, 32, 31,
+                34, 33, 32, 31,
+                34, 33, 32, 31,
+                34, 33, 32, 31,
+        }, 4, 36);
+        System.out.println(f);
+        assertEquals("ID       45137903\n0        2221201f2221201f2221201f2221201f2221201f2221201f2221201f2221201f", f);
+    }
 }

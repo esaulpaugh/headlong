@@ -116,13 +116,13 @@ public class EncodeTest {
     @Test
     public void testFunctionFormat() throws Throwable {
         testFormat(true, Function::formatCall);
-        testFormatHash(Function::formatCall, "d6dde9ab5b185e89acdee632efcf0a2b63bd117772c8092a414efd887be51fb6", "1663cedd" + ABI);
+        testFormatHash(Function::formatCall, "137fe81220baa4ad0300a7a31ac26b0b07549af69af96d436ca3b2a0ebd1b949", "1663cedd" + ABI);
     }
 
     @Test
     public void testTupleFormat() throws Throwable {
         testFormat(false, TupleType::format);
-        testFormatHash(TupleType::format, "69062734985ca80f7d8fdbeab8ddd285e10df56623f6394ef67a719dde772769", ABI);
+        testFormatHash(TupleType::format, "f10983ffe9e60e2ef2d23c5f81176389994473e9622ede9dd201461db0ffc29b", ABI);
 
     }
 
@@ -144,7 +144,7 @@ public class EncodeTest {
                 assertEquals(i * 2, formatted.codePoints().filter(ch -> ch == 'f').count());
                 int div = (i - expectedMod) / UNIT_LENGTH_BYTES;
                 if(div > 0) {
-                    String ffff = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\n";
+                    String ffff = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
                     boolean containsFfff = formatted.contains(ffff);
                     Assertions.assertTrue(containsFfff);
                     String labeled = paddedLabel(String.valueOf(div - 1)) + ffff;
