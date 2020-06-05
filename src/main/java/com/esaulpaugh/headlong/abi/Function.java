@@ -55,7 +55,7 @@ public final class Function implements ABIObject {
     private static final String ASCII = "\\p{ASCII}";
 
     private static final Pattern NON_ASCII_CHAR =    Pattern.compile("[^" + ASCII + "]");
-    private static final Pattern ILLEGAL_NAME_CHAR = Pattern.compile("[([^" + ASCII + "]]");
+    private static final Pattern ILLEGAL_NAME_CHAR = Pattern.compile("[(" + NON_ASCII_CHAR + "]");
 
     private static final Pattern PATTERN_ASCII =      Pattern.compile("^" + ASCII + "*$");
     private static final Pattern PATTERN_NAME = Pattern.compile("^[^" + ILLEGAL_NAME_CHAR + "]*$");
