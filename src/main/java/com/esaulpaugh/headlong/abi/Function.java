@@ -52,11 +52,11 @@ public final class Function implements ABIObject {
         }
     }
 
-    private static final Pattern ALL_ASCII = Pattern.compile("[\\p{ASCII}]*");
-    private static final Pattern NON_ASCII_CHAR = Pattern.compile("[^\\p{ASCII}]+");
+    private static final Pattern ASCII =      Pattern.compile("^[\\p{ASCII}]*$");
+    private static final Pattern VALID_NAME = Pattern.compile("^[\\p{ASCII}&&[^(]]*$");
 
-    private static final Pattern VALID_NAME = Pattern.compile("[\\p{ASCII}&&[^(]]*");
-    private static final Pattern ILLEGAL_NAME_CHAR = Pattern.compile("[^\\p{ASCII}&&[^(]]+");
+    private static final Pattern NON_ASCII_CHAR = Pattern.compile("[^\\p{ASCII}]");
+    private static final Pattern ILLEGAL_NAME_CHAR = Pattern.compile("[^\\p{ASCII}&&[^(]]");
 
     public static final int SELECTOR_LEN = 4;
 
@@ -97,7 +97,7 @@ public final class Function implements ABIObject {
                 throw new IllegalArgumentException("illegal signature termination", cce); // e.g. "foo()[]"
             }
             this.type = Objects.requireNonNull(type);
-            String name = Utils.regexValidate(ALL_ASCII, NON_ASCII_CHAR, signature.substring(0, split));
+            String name = Utils.regexValidate(ASCII, NON_ASCII_CHAR, signature.substring(0, split));
             this.name = name.isEmpty() && (type == Type.FALLBACK || type == Type.CONSTRUCTOR) ? null : name;
             this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
             this.stateMutability = null;
