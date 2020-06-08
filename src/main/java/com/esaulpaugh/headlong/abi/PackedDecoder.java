@@ -66,16 +66,15 @@ public final class PackedDecoder {
 
     private static int countDynamicsArrayType(ABIType<?> type) {
         int numDynamic = 0;
-        ABIType<?> temp = type;
         do {
-            final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<? extends ABIType<?>, ?>) temp;
+            final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<? extends ABIType<?>, ?>) type;
             if(DYNAMIC_LENGTH == arrayType.length) {
                 numDynamic++;
             }
-            temp = arrayType.elementType;
-        } while (TYPE_CODE_ARRAY == temp.typeCode()); // loop until temp is type's base type
-        if(TYPE_CODE_TUPLE == temp.typeCode()) {
-            numDynamic += countDynamicsTupleType((TupleType) temp);
+            type = arrayType.elementType;
+        } while (TYPE_CODE_ARRAY == type.typeCode()); // loop until temp is type's base type
+        if(TYPE_CODE_TUPLE == type.typeCode()) {
+            numDynamic += countDynamicsTupleType((TupleType) type);
         }
         return numDynamic;
     }
@@ -97,7 +96,7 @@ public final class PackedDecoder {
             final int typeCode = type.typeCode();
             if(TYPE_CODE_ARRAY == typeCode) {
                 final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<? extends ABIType<?>, ?>) type;
-                end -= (arrayType.elementType.byteLengthPacked(null) * arrayType.length);
+                end -= arrayType.elementType.byteLengthPacked(null) * arrayType.length;
                 decodeArray(arrayType, buffer, end, end, elements, i);
             } else if(TYPE_CODE_TUPLE == typeCode) {
                 TupleType inner = (TupleType) type;
