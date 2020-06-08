@@ -72,7 +72,7 @@ public final class PackedDecoder {
                 numDynamic++;
             }
             type = arrayType.elementType;
-        } while (TYPE_CODE_ARRAY == type.typeCode()); // loop until temp is type's base type
+        } while (TYPE_CODE_ARRAY == type.typeCode()); // loop until type is the base type
         if(TYPE_CODE_TUPLE == type.typeCode()) {
             numDynamic += countDynamicsTupleType((TupleType) type);
         }
@@ -235,8 +235,7 @@ public final class PackedDecoder {
     private static BigInteger[] decodeBigIntegerArray(int elementLen, int arrayLen, byte[] buffer, int idx) {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            BigInteger val = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
-            bigInts[i] = val;
+            bigInts[i] = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
             idx += elementLen;
         }
         return bigInts;
@@ -245,8 +244,7 @@ public final class PackedDecoder {
     private static BigDecimal[] decodeBigDecimalArray(int elementLen, int scale, int arrayLen, byte[] buffer, int idx) {
         BigDecimal[] bigDecimals = new BigDecimal[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            BigInteger val = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
-            bigDecimals[i] = new BigDecimal(val, scale);
+            bigDecimals[i] = new BigDecimal(new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen)), scale);
             idx += elementLen;
         }
         return bigDecimals;
