@@ -101,13 +101,18 @@ public final class SuperSerial {
         case TYPE_CODE_LONG: return toSigned(((LongType) type).getBitLength(), BigInteger.valueOf((long) obj));
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
-            final UnitType<?> ut = (UnitType<?>) type;
-            final BigInteger bigInt = typeCode == TYPE_CODE_BIG_INTEGER ? (BigInteger) obj : ((BigDecimal) obj).unscaledValue();
-            return ut.isUnsigned() ? Integers.toBytesUnsigned(bigInt) : toSigned(ut.getBitLength(), bigInt);
+            return serializeBigInteger(
+                    (UnitType<?>) type,
+                    typeCode == TYPE_CODE_BIG_INTEGER ? (BigInteger) obj : ((BigDecimal) obj).unscaledValue()
+            );
         case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?>) type, obj);
         case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, obj);
         default: throw new Error();
         }
+    }
+
+    private static Object serializeBigInteger(UnitType<?> ut, BigInteger bigInt) {
+        return ut.isUnsigned() ? Integers.toBytesUnsigned(bigInt) : toSigned(ut.getBitLength(), bigInt);
     }
 
     private static Object deserialize(ABIType<?> type, RLPItem item) {
@@ -122,13 +127,9 @@ public final class SuperSerial {
         case TYPE_CODE_LONG: return deserializePrimitive((UnitType<?>) type, item, typeCode == TYPE_CODE_INT);
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
-            UnitType<?> ut = (UnitType<?>) type;
-            BigInteger bigInt = ut.isUnsigned()
-                        ? item.asBigInt(false)
-                        : asSigned(ut.getBitLength(), item);
-            return typeCode == TYPE_CODE_BIG_INTEGER
-                    ? bigInt
-                    : new BigDecimal(bigInt, ((BigDecimalType) ut).getScale());
+            final UnitType<?> ut = (UnitType<?>) type;
+            final BigInteger bigInt = deserializeBigInteger(ut, item);
+            return typeCode == TYPE_CODE_BIG_INTEGER ? bigInt : new BigDecimal(bigInt, ((BigDecimalType) ut).getScale());
         case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<? extends ABIType<?>, ?>) type, item);
         case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());
         default: throw new Error();
@@ -151,6 +152,12 @@ public final class SuperSerial {
         return isInt
                 ? (Object) Integers.getInt(data, 0, len, false)
                 : (Object) Integers.getLong(data, 0, len, false);
+    }
+
+    private static BigInteger deserializeBigInteger(UnitType<?> ut, RLPItem item) {
+        return ut.isUnsigned()
+                ? item.asBigInt(false)
+                : asSigned(ut.getBitLength(), item);
     }
 
     private static byte[] toSigned(int typeBits, BigInteger val) {
