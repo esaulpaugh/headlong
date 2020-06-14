@@ -280,8 +280,7 @@ public final class Function implements ABIObject {
 
     @Override
     public String toJson(boolean pretty) {
-        JsonObject object = ABIJSON.buildFunctionJson(this);
-        return pretty ? JsonUtils.toPrettyPrint(object) : object.toString();
+        return ABIJSON.toJsonNew(this, pretty);
     }
 // ---------------------------------------------------------------------------------------------------------------------
     public static Function parse(String signature) {

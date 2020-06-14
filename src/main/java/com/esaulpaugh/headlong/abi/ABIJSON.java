@@ -15,11 +15,16 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +57,20 @@ public final class ABIJSON {
     static final String PAYABLE = "payable";
 //    private static final String NONPAYABLE = "nonpayable";// to mark as nonpayable, do not specify any stateMutability
     private static final String CONSTANT = "constant"; // deprecated
+
+    private static final Gson GSON;
+    private static final Gson GSON_PRETTY;
+
+    static {
+        GsonBuilder builder = new GsonBuilder();
+        GSON = builder
+                .registerTypeAdapter(Function.class, new FunctionAdapter())
+                .registerTypeAdapter(Event.class, new EventAdapter())
+                .create();
+        GSON_PRETTY = builder
+                .setPrettyPrinting()
+                .create();
+    }
 
     public static ABIObject parseABIObject(String objectJson) {
         return parseABIObject(parseObject(objectJson));
@@ -184,62 +203,85 @@ public final class ABIJSON {
         return TypeFactory.create(typeStr, getString(object, NAME));
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    static JsonObject buildFunctionJson(Function f) {
-        final JsonObject json = new JsonObject();
-        final Function.Type type = f.getType();
-        json.add(TYPE, new JsonPrimitive(type.toString()));
-        if(type != Function.Type.FALLBACK) {
-            addIfValueNotNull(NAME, f.getName(), json);
-            if(type != Function.Type.RECEIVE) {
-                json.add(INPUTS, buildJsonArray(f.getParamTypes(), null));
-                if(type != Function.Type.CONSTRUCTOR) {
-                    json.add(OUTPUTS, buildJsonArray(f.getOutputTypes(), null));
-                }
-            }
-        }
-        final String stateMutability = f.getStateMutability();
-        addIfValueNotNull(STATE_MUTABILITY, stateMutability, json);
-        json.add(CONSTANT, new JsonPrimitive(VIEW.equals(stateMutability) || PURE.equals(stateMutability)));
-        return json;
+    public static String toJsonNew(Object abiObj, boolean pretty) {
+        return (pretty ? GSON_PRETTY : GSON).toJson(abiObj);
     }
 
-    static JsonObject buildEventJson(Event e) {
-        final JsonObject json = new JsonObject();
-        json.add(TYPE, new JsonPrimitive(EVENT));
-        addIfValueNotNull(NAME, e.getName(), json);
-        json.add(INPUTS, buildJsonArray(e.getParams(), e.getIndexManifest()));
-        return json;
-    }
-
-    private static JsonArray buildJsonArray(TupleType tupleType, boolean[] indexedManifest) {
-        final JsonArray array = new JsonArray();
+    private static void writeJsonArray(JsonWriter out, String name, TupleType tupleType, boolean[] indexedManifest) throws IOException {
+        out.name(name).beginArray();
         for (int i = 0; i < tupleType.elementTypes.length; i++) {
             final ABIType<?> e = tupleType.elementTypes[i];
-            final JsonObject arrayElement = new JsonObject();
-            final String name = e.getName();
-            arrayElement.add(NAME, name == null ? null : new JsonPrimitive(name));
+            out.beginObject();
+            final String objName = e.getName();
+            out.name(NAME).value(objName);
+            out.name(TYPE);
             final String type = e.canonicalType;
             if(type.startsWith("(")) { // tuple
-                arrayElement.add(TYPE, new JsonPrimitive(type.replace(type.substring(0, type.lastIndexOf(')') + 1), TUPLE)));
+                out.value(type.replace(type.substring(0, type.lastIndexOf(')') + 1), TUPLE));
                 ABIType<?> base = e;
                 while (base instanceof ArrayType) {
                     base = ((ArrayType<? extends ABIType<?>, ?>) base).elementType;
                 }
-                arrayElement.add(COMPONENTS, buildJsonArray((TupleType) base, null));
+                writeJsonArray(out, COMPONENTS, (TupleType) base, null);
             } else {
-                arrayElement.add(TYPE, new JsonPrimitive(type));
+                out.value(type);
             }
-            array.add(arrayElement);
             if(indexedManifest != null) {
-                arrayElement.add(INDEXED, new JsonPrimitive(indexedManifest[i]));
+                out.name(INDEXED).value(indexedManifest[i]);
             }
+            out.endObject();
         }
-        return array;
+        out.endArray();
     }
 
-    private static void addIfValueNotNull(String key, String value, JsonObject object) {
+    private static void addIfValueNotNull(JsonWriter out, String key, String value) throws IOException {
         if(value != null) {
-            object.add(key, new JsonPrimitive(value));
+            out.name(key).value(value);
+        }
+    }
+
+    static class FunctionAdapter extends TypeAdapter<Function> {
+
+        @Override
+        public void write(JsonWriter out, Function f) throws IOException {
+            out.beginObject();
+            final Function.Type type = f.getType();
+            out.name(TYPE).value(type.toString());
+            if(type != Function.Type.FALLBACK) {
+                addIfValueNotNull(out, NAME, f.getName());
+                if(type != Function.Type.RECEIVE) {
+                    writeJsonArray(out, INPUTS, f.getParamTypes(), null);
+                    if(type != Function.Type.CONSTRUCTOR) {
+                        writeJsonArray(out, OUTPUTS, f.getOutputTypes(), null);
+                    }
+                }
+            }
+            final String stateMutability = f.getStateMutability();
+            addIfValueNotNull(out, STATE_MUTABILITY, stateMutability);
+            out.name(CONSTANT).value(VIEW.equals(stateMutability) || PURE.equals(stateMutability));
+            out.endObject();
+        }
+
+        @Override
+        public Function read(JsonReader in) throws IOException {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    static class EventAdapter extends TypeAdapter<Event> {
+
+        @Override
+        public void write(JsonWriter out, Event e) throws IOException {
+            out.beginObject();
+            out.name(TYPE).value(EVENT);
+            addIfValueNotNull(out, NAME, e.getName());
+            writeJsonArray(out, INPUTS, e.getParams(), e.getIndexManifest());
+            out.endObject();
+        }
+
+        @Override
+        public Event read(JsonReader in) throws IOException {
+            throw new UnsupportedOperationException();
         }
     }
 }
