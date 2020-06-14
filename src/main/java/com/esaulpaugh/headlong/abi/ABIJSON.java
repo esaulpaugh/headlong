@@ -126,7 +126,7 @@ public final class ABIJSON {
 
     public static Function parseFunction(JsonObject function, MessageDigest messageDigest) {
         return new Function(
-                parseFunctionType(function),
+                parseFunctionType(getString(function, TYPE)),
                 getString(function, NAME),
                 parseTypes(getArray(function, INPUTS)),
                 parseTypes(getArray(function, OUTPUTS)),
@@ -135,8 +135,7 @@ public final class ABIJSON {
         );
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    private static Function.Type parseFunctionType(JsonObject function) {
-        final String type = getString(function, TYPE);
+    private static Function.Type parseFunctionType(String type) {
         if(type != null) {
             switch (type) {
             case FUNCTION: return Function.Type.FUNCTION;
@@ -188,14 +187,8 @@ public final class ABIJSON {
     private static ABIType<?> parseType(JsonObject object) {
         final String typeStr = getString(object, TYPE);
         if(typeStr.startsWith(TUPLE)) {
-            final JsonArray components = getArray(object, COMPONENTS);
-            final ABIType<?>[] componentsArray = new ABIType[components.size()];
-            int i = 0;
-            for (JsonElement c : components) {
-                componentsArray[i++] = parseType(c.getAsJsonObject()); // parse component names as well as types
-            }
             return TypeFactory.createFromBase(
-                    TupleType.wrap(componentsArray),
+                    parseTypes(getArray(object, COMPONENTS)),
                     typeStr.substring(TUPLE.length()), // suffix e.g. "[4][]"
                     getString(object, NAME)
             );
