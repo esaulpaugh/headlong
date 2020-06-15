@@ -205,8 +205,7 @@ public final class ABIJSON {
         for (int i = 0; i < tupleType.elementTypes.length; i++) {
             final ABIType<?> e = tupleType.elementTypes[i];
             out.beginObject();
-            final String objName = e.getName();
-            out.name(NAME).value(objName);
+            addIfValueNotNull(out, NAME, e.getName());
             out.name(TYPE);
             final String type = e.canonicalType;
             if(type.startsWith("(")) { // tuple

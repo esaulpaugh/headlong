@@ -427,5 +427,8 @@ public class ABIJSONTest {
 
         assertEquals("a", event.getParams().get(0).getName());
         assertEquals("b", event.getParams().get(1).getName());
+
+        assertEquals("a", event.getIndexedParams().get(0).getName());
+        assertEquals("b", event.getNonIndexedParams().get(0).getName());
     }
 }
