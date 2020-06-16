@@ -196,7 +196,7 @@ public final class ABIJSON {
         return TypeFactory.create(typeStr, getString(object, NAME));
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    public static String toJsonNew(Object abiObj, boolean pretty) {
+    public static String toJson(Object abiObj, boolean pretty) {
         return (pretty ? GSON_PRETTY : GSON).toJson(abiObj);
     }
 
@@ -255,7 +255,7 @@ public final class ABIJSON {
         }
 
         @Override
-        public Function read(JsonReader in) throws IOException {
+        public Function read(JsonReader in) {
             throw new UnsupportedOperationException();
         }
     }
@@ -272,7 +272,7 @@ public final class ABIJSON {
         }
 
         @Override
-        public Event read(JsonReader in) throws IOException {
+        public Event read(JsonReader in) {
             throw new UnsupportedOperationException();
         }
     }
