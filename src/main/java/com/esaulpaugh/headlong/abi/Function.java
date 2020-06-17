@@ -48,7 +48,17 @@ public final class Function implements ABIObject {
 
         @Override
         public String toString() {
-            return name().toLowerCase(Locale.ENGLISH);
+            return toString(this);
+        }
+
+        public static String toString(Function.Type type) {
+            switch (type) {
+            case FUNCTION: return ABIJSON.FUNCTION;
+            case RECEIVE: return ABIJSON.RECEIVE;
+            case FALLBACK: return ABIJSON.FALLBACK;
+            case CONSTRUCTOR: return ABIJSON.CONSTRUCTOR;
+            default: throw new Error();
+            }
         }
     }
 
