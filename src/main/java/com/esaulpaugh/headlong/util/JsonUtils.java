@@ -65,7 +65,7 @@ public final class JsonUtils {
             return defaultVal;
         }
         if(!element.isJsonPrimitive() || !((JsonPrimitive) element).isBoolean()) {
-            throw new IllegalArgumentException(key + " is not a primitive");
+            throw new IllegalArgumentException(key + " is not a boolean");
         }
         return element.getAsBoolean();
     }
@@ -74,9 +74,6 @@ public final class JsonUtils {
         JsonElement element = object.get(key);
         if (element == null || element.isJsonNull()) {
             return defaultVal;
-        }
-        if (!element.isJsonArray()) {
-            throw new IllegalArgumentException(key + " is not an array");
         }
         return element.getAsJsonArray();
     }
