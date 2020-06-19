@@ -44,10 +44,12 @@ public class EncodeTest {
     @Test
     public void fuzzSignatures() throws InterruptedException {
 
-        final int alphabetLen = 128;
-        final char[] alphabet = new char[alphabetLen]; // "(),abcdefgilmnorstuxy0123456789[]".toCharArray(); // ")uint8,[]"
-        for (int i = 0; i < alphabetLen; i++) {
-            alphabet[i] = (char) i;
+        final char[] alphabet = "(),abcdefgilmnorstuxy0123456789[]".toCharArray(); // "()uint8,[]".toCharArray(); // new char[128];
+        final int alphabetLen = alphabet.length;
+        if (alphabetLen == 128) {
+            for (int i = 0; i < alphabetLen; i++) {
+                alphabet[i] = (char) i;
+            }
         }
 
         final int[] iterations = new int[] {
