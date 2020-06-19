@@ -247,7 +247,7 @@ final class TypeFactory {
                     }
                     throw new IllegalArgumentException(EMPTY_PARAMETER);
                 case ',':
-                    if (rawTypeStr.charAt(argStart - 1) == ')') {
+                    if (rawTypeStr.charAt(argEnd) == ')') {
                         break LOOP;
                     }
                     throw new IllegalArgumentException(EMPTY_PARAMETER);
