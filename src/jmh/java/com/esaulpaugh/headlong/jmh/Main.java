@@ -3,7 +3,6 @@ package com.esaulpaugh.headlong.jmh;
 import com.esaulpaugh.headlong.jmh.abi.MeasureFunction;
 import com.esaulpaugh.headlong.jmh.abi.MeasurePadding;
 import com.esaulpaugh.headlong.jmh.rlp.MeasureKeyValuePairSort;
-import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -20,7 +19,7 @@ public class Main {
                 .warmupIterations(1)
                 .forks(1)
                 .measurementIterations(5)
-                .mode(Mode.SingleShotTime)
+//                .mode(Mode.SingleShotTime)
                 .build();
 
         new Runner(opt).run();
