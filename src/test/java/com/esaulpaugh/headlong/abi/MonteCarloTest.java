@@ -89,7 +89,6 @@ public class MonteCarloTest {
 //                log.append('#')
 //                        .append(i)
 //                        .append(" PASSED: ")
-//                        .append(params.toString())
 //                        .append("\t\t")
 //                        .append(testCase.function.getCanonicalSignature().substring(testCase.function.getCanonicalSignature().indexOf('('))) // print function params
 //                        .append('\n');
