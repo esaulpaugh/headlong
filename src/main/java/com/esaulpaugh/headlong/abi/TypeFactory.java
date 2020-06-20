@@ -90,7 +90,7 @@ final class TypeFactory {
             return parseTupleType(baseTypeStr);
         }
 
-        BaseTypeInfo info = BaseTypeInfo.get(baseTypeStr);
+        final BaseTypeInfo info = BaseTypeInfo.get(baseTypeStr);
         if(info != null) {
             switch (baseTypeStr) {
             case "int8":

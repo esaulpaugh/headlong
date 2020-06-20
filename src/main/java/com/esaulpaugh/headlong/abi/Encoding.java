@@ -29,7 +29,7 @@ final class Encoding {
     static final int OFFSET_LENGTH_BYTES = UNIT_LENGTH_BYTES;
     static final IntType OFFSET_TYPE = new IntType("int32", Integer.SIZE, false); // uint256
 
-    static final byte NEGATIVE_ONE_BYTE = (byte) 0xFF;
+    private static final byte NEGATIVE_ONE_BYTE = (byte) 0xFF;
     static final byte ZERO_BYTE = (byte) 0x00;
     static final byte ONE_BYTE = (byte) 0x01;
 
