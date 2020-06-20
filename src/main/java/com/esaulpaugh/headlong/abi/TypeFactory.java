@@ -231,10 +231,11 @@ final class TypeFactory {
 
     private static TupleType parseTupleType(final String rawTypeStr) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final ArrayList<ABIType<?>> elements = new ArrayList<>();
-        int argEnd = 1; // this inital value is important for empty params case: "()"
         try {
             int argStart = 1; // after opening '('
+            int argEnd = 1; // this inital value is important for empty params case: "()"
             final int end = rawTypeStr.length(); // must be >= 1
+            char prevEndChar = ')';
             LOOP:
             while (argStart < end) {
                 switch (rawTypeStr.charAt(argStart)) {
@@ -242,7 +243,7 @@ final class TypeFactory {
                     argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart + 1));
                     break;
                 case ')':
-                    if(rawTypeStr.charAt(argEnd) != ',') {
+                    if(prevEndChar != ',') {
                         break LOOP;
                     }
                     throw new IllegalArgumentException(EMPTY_PARAMETER);
@@ -254,16 +255,13 @@ final class TypeFactory {
                 default: // non-tuple element
                     argEnd = nextTerminator(rawTypeStr, argStart + 1);
                 }
-                if(argEnd >= 0) {
-                    elements.add(buildType(rawTypeStr.substring(argStart, argEnd), null, true));
-                    if(rawTypeStr.charAt(argEnd) == ',') {
-                        argStart = argEnd + 1; // jump over terminator
-                        continue;
-                    }
+                elements.add(buildType(rawTypeStr.substring(argStart, argEnd), null, true));
+                if((prevEndChar = rawTypeStr.charAt(argEnd)) != ',') {
+                    break/*LOOP*/;
                 }
-                break;
+                argStart = argEnd + 1; // jump over terminator
             }
-            if(argEnd == end - 1 && rawTypeStr.charAt(argEnd) == ')') {
+            if(argEnd == end - 1 && prevEndChar == ')') {
                 return TupleType.wrap(elements.toArray(ABIType.EMPTY_TYPE_ARRAY));
             }
         } catch (IllegalArgumentException iae) {
