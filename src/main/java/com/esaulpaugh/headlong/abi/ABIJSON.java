@@ -232,7 +232,7 @@ public final class ABIJSON {
         }
     }
 
-    static class FunctionAdapter extends TypeAdapter<Function> {
+    private static class FunctionAdapter extends TypeAdapter<Function> {
 
         @Override
         public void write(JsonWriter out, Function f) throws IOException {
@@ -260,7 +260,7 @@ public final class ABIJSON {
         }
     }
 
-    static class EventAdapter extends TypeAdapter<Event> {
+    private static class EventAdapter extends TypeAdapter<Event> {
 
         @Override
         public void write(JsonWriter out, Event e) throws IOException {
