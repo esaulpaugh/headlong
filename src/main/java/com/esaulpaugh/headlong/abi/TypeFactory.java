@@ -233,9 +233,9 @@ final class TypeFactory {
         final ArrayList<ABIType<?>> elements = new ArrayList<>();
         try {
             int argStart = 1; // after opening '('
-            int argEnd = 1; // this inital value is important for empty params case: "()"
+            int argEnd = 1; // inital value important for empty params case: "()"
+            char prevEndChar = ')'; // inital value important for empty params case
             final int end = rawTypeStr.length(); // must be >= 1
-            char prevEndChar = ')';
             LOOP:
             while (argStart < end) {
                 switch (rawTypeStr.charAt(argStart)) {
