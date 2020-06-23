@@ -36,6 +36,7 @@ import java.util.Random;
 public class MeasureKeyValuePairSort {
 
     private static final int SIZE = 20;
+    private static final int MIN_KEY_LEN = 10; // 10-byte min to avoid duplicate keys
     private static final int KEY_LEN_BOUND = 20;
     private static final int VALUE_LEN_BOUND = 10;
 
@@ -53,7 +54,7 @@ public class MeasureKeyValuePairSort {
 
         byte[] key, value;
         for (int i = 0; i < SIZE; i++) {
-            key = new byte[10 + rand.nextInt(KEY_LEN_BOUND - 10)]; // 10-byte min to avoid duplicate keys
+            key = new byte[MIN_KEY_LEN + rand.nextInt(KEY_LEN_BOUND - MIN_KEY_LEN)];
             value = new byte[rand.nextInt(VALUE_LEN_BOUND)];
             rand.nextBytes(key);
             rand.nextBytes(value);
@@ -68,7 +69,7 @@ public class MeasureKeyValuePairSort {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 2)
+    @Measurement(iterations = 5)
     public void sortArray() {
         Arrays.sort(array, KeyValuePair.PAIR_COMPARATOR);
     }
@@ -77,7 +78,7 @@ public class MeasureKeyValuePairSort {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 2)
+    @Measurement(iterations = 5)
     public void sortArrayList() {
         arrayList.sort(KeyValuePair.PAIR_COMPARATOR);
     }
@@ -86,7 +87,7 @@ public class MeasureKeyValuePairSort {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 2)
+    @Measurement(iterations = 5)
     public void sortArraysArrayList() {
         arraysArrayList.sort(KeyValuePair.PAIR_COMPARATOR);
     }
