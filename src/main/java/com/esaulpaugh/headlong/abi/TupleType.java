@@ -354,6 +354,23 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public static String format(byte[] abi) {
+        return format(abi, new LabelMaker() {
+            @Override
+            public String make(int offset) {
+                StringBuilder sb = new StringBuilder();
+                String labelStr = Long.toHexString(offset);
+                int zeroes = 6 - labelStr.length();
+                for (int i = 0; i < zeroes; i++) {
+                    sb.append(' ');
+                }
+                sb.append(labelStr);
+                pad(sb, ' ');
+                return sb.toString();
+            }
+        });
+    }
+
+    public static String format(byte[] abi, LabelMaker labelMaker) {
         Integers.checkIsMultiple(abi.length, UNIT_LENGTH_BYTES);
         StringBuilder sb = new StringBuilder();
         int idx = 0;
@@ -361,9 +378,27 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             if(idx > 0) {
                 sb.append('\n');
             }
+            sb.append(labelMaker.make(idx));
             sb.append(Strings.encode(abi, idx, UNIT_LENGTH_BYTES, HEX));
             idx += UNIT_LENGTH_BYTES;
         }
         return sb.toString();
+    }
+
+    public static class LabelMaker {
+
+        public String make(int offset) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(offset / UNIT_LENGTH_BYTES);
+            pad(sb, ' ');
+            return sb.toString();
+        }
+
+        public void pad( StringBuilder sb, char ch) {
+            int n = 9 - sb.length();
+            for (int i = 0; i < n; i++) {
+                sb.append(ch);
+            }
+        }
     }
 }

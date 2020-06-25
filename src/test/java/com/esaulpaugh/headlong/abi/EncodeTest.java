@@ -124,7 +124,7 @@ public class EncodeTest {
     @Test
     public void testTupleFormat() throws Throwable {
         testFormat(false, TupleType::format);
-        testFormatHash(TupleType::format, "f10983ffe9e60e2ef2d23c5f81176389994473e9622ede9dd201461db0ffc29b", ABI);
+        testFormatHash(TupleType::format, "c16f9cf84bd8229553d38586ad15784cfd1dc05b45ec307cd074f3be04968777", ABI);
 
     }
 
@@ -149,9 +149,20 @@ public class EncodeTest {
                     String ffff = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
                     boolean containsFfff = formatted.contains(ffff);
                     Assertions.assertTrue(containsFfff);
-                    String labeled = paddedLabel(String.valueOf(div - 1)) + ffff;
-                    boolean containsLabeled = formatted.contains(labeled);
-                    TestUtils.assertMatching(func, containsLabeled);
+                    final String labeled;
+                    if(func) {
+                        labeled = paddedLabel(String.valueOf(div - 1)) + ffff;
+                    } else {
+                        String hex = Long.toHexString((div - 1) * UNIT_LENGTH_BYTES);
+                        StringBuilder label = new StringBuilder();
+                        int zeroes = 6 - hex.length();
+                        for (int j = 0; j < zeroes; j++) {
+                            label.append(' ');
+                        }
+                        label.append(hex);
+                        labeled = paddedLabel(label.toString()) + ffff;
+                    }
+                    Assertions.assertTrue(formatted.contains(labeled));
                 }
             } else {
                 assertThrown(ILLEGAL, "expected length mod 32 == 0, found: ", () -> format.apply(x));

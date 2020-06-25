@@ -328,6 +328,10 @@ public final class Function implements ABIObject {
         return formatCall(abiCall, 0, abiCall.length);
     }
 
+    public static String formatCall(byte[] buffer, int offset, final int length) {
+        return formatCall(buffer, offset, length, new TupleType.LabelMaker());
+    }
+
     /**
      * Returns a formatted string for a given ABI-encoded function call.
      *
@@ -337,27 +341,22 @@ public final class Function implements ABIObject {
      * @return the formatted string
      * @throws IllegalArgumentException if the input length mod 32 != 4
      */
-    public static String formatCall(byte[] buffer, int offset, final int length) {
+    public static String formatCall(byte[] buffer, int offset, final int length, TupleType.LabelMaker labelMaker) {
         Integers.checkIsMultiple(length - 4, 32);
         StringBuilder sb = new StringBuilder();
-        appendPaddedLabel("ID", sb);
+        sb.append("ID");
+        int n = 9 /* arbitrary magic number */ - "ID".length();
+        for (int i = 0; i < n; i++) {
+            sb.append(' ');
+        }
         sb.append(Strings.encode(buffer, offset, SELECTOR_LEN, Strings.HEX));
         int idx = offset + SELECTOR_LEN;
         while (idx < length) {
-            int row = idx / UNIT_LENGTH_BYTES;
             sb.append('\n');
-            appendPaddedLabel(String.valueOf(row), sb);
+            sb.append(labelMaker.make(idx));
             sb.append(Strings.encode(buffer, idx, UNIT_LENGTH_BYTES, Strings.HEX));
             idx += UNIT_LENGTH_BYTES;
         }
         return sb.toString();
-    }
-
-    private static void appendPaddedLabel(String rowStr, StringBuilder sb) {
-        sb.append(rowStr);
-        int n = 9 /* arbitrary magic number */ - rowStr.length();
-        for (int i = 0; i < n; i++) {
-            sb.append(' ');
-        }
     }
 }
