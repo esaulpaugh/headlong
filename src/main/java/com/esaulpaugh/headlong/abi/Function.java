@@ -61,13 +61,8 @@ public final class Function implements ABIObject {
         }
     }
 
-    private static final String ASCII = "\\p{ASCII}";
-
-    private static final Pattern NON_ASCII_CHAR =    Pattern.compile("[^" + ASCII + "]");
-    private static final Pattern ILLEGAL_NAME_CHAR = Pattern.compile("[(" + NON_ASCII_CHAR + "]");
-
-    private static final Pattern PATTERN_ASCII =      Pattern.compile("^" + ASCII + "*$");
-    private static final Pattern PATTERN_NAME = Pattern.compile("^[^" + ILLEGAL_NAME_CHAR + "]*$");
+    private static final Pattern ALL_ASCII_NO_OPEN_PAREN = Pattern.compile("^[[^(]&&\\p{ASCII}]*$");
+    private static final Pattern OPEN_PAREN_OR_NON_ASCII = Pattern.compile("[([^\\p{ASCII}]]");
 
     public static final int SELECTOR_LEN = 4;
 
@@ -108,7 +103,7 @@ public final class Function implements ABIObject {
                 throw new IllegalArgumentException("illegal signature termination", cce); // e.g. "foo()[]"
             }
             this.type = Objects.requireNonNull(type);
-            String name = Utils.regexValidate(PATTERN_ASCII, NON_ASCII_CHAR, signature.substring(0, split));
+            String name = Utils.regexValidate(ALL_ASCII_NO_OPEN_PAREN, OPEN_PAREN_OR_NON_ASCII, signature.substring(0, split)); // guaranteed not to contain '(' bc of split
             this.name = name.isEmpty() && (type == Type.FALLBACK || type == Type.CONSTRUCTOR) ? null : name;
             this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
             this.stateMutability = null;
@@ -122,7 +117,7 @@ public final class Function implements ABIObject {
 
     public Function(Type type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) {
         this.type = Objects.requireNonNull(type);
-        this.name = name != null ? Utils.regexValidate(PATTERN_NAME, ILLEGAL_NAME_CHAR, name) : null;
+        this.name = name != null ? Utils.regexValidate(ALL_ASCII_NO_OPEN_PAREN, OPEN_PAREN_OR_NON_ASCII, name) : null;
         this.inputTypes = Objects.requireNonNull(inputTypes);
         this.outputTypes = Objects.requireNonNull(outputTypes);
         this.stateMutability = stateMutability;
