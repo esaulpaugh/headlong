@@ -338,6 +338,7 @@ public final class Function implements ABIObject {
      * @param buffer the buffer containing the ABI call
      * @param offset the offset into the input buffer of the ABI call
      * @param length the length of the ABI call
+     * @param labelMaker code to generate the row labels
      * @return the formatted string
      * @throws IllegalArgumentException if the input length mod 32 != 4
      */
