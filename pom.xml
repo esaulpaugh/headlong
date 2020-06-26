@@ -115,7 +115,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable> <!-- if command not found due to looking in jre (e.g. "jdk1.8.0_241/jre/bin/javadoc"), try disabling this line -->
+<!--                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable> &lt;!&ndash; if command not found due to looking in jre (e.g. "jdk1.8.0_241/jre/bin/javadoc"), try disabling this line &ndash;&gt;-->
                 </configuration>
             </plugin>
             <plugin>
