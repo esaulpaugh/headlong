@@ -72,7 +72,7 @@
                 <version>3.8.1</version>
                 <configuration>
                     <!-- when building with Java 8 or 9, disable <release> and enable <source> and <target> -->
-                    <release>8</release>
+<!--                    <release>8</release>-->
 <!--                    <source>8</source>-->
 <!--                    <target>8</target>-->
                 </configuration>
