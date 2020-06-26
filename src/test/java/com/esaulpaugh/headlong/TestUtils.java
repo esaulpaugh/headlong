@@ -21,13 +21,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import org.junit.jupiter.api.Assertions;
 
-import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.RecursiveAction;
@@ -92,30 +91,25 @@ public class TestUtils {
         sb.delete(0, sb.length());
     }
 
-    public static byte[] readFile(File file) throws IOException {
-
-        byte[] data = new byte[(int) file.length()];
-
-        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
-            int available;
-            int offset = 0;
-            while ((available = bis.available()) > 0) {
-                offset += bis.read(data, offset, available);
-            }
-        }
-
-        System.out.println("READ " + file.getName());
-
-        return data;
-    }
-
-    public static String readResourceAsString(Class<?> clazz, String name) throws IOException {
+    public static String readFileResourceAsString(Class<?> clazz, String name) throws IOException {
         URL url = clazz.getClassLoader().getResource(name);
         if(url == null) {
             throw new IOException("url null");
         }
-        byte[] bytes = readFile(new File(url.getFile()));
-        return new String(bytes, StandardCharsets.UTF_8);
+        return readFile(url.getFile()).toString("UTF-8");
+    }
+
+    private static ByteArrayOutputStream readFile(String filepath) throws IOException {
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        try (FileInputStream fis = new FileInputStream(new File(filepath));) {
+            byte[] buffer = new byte[2048];
+            int len;
+            while ((len = fis.read(buffer)) >= 0) {
+                result.write(buffer, 0, len);
+            }
+        }
+        System.out.println("READ " + filepath);
+        return result;
     }
 
     public static byte[] parsePrimitiveToBytes(JsonElement in) {

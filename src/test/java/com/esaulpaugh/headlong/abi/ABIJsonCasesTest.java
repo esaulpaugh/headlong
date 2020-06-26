@@ -39,7 +39,7 @@ public class ABIJsonCasesTest {
 
     static {
         try {
-            TEST_CASES = TestUtils.readResourceAsString(ABIJsonCasesTest.class, RESOURCE);
+            TEST_CASES = TestUtils.readFileResourceAsString(ABIJsonCasesTest.class, RESOURCE);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

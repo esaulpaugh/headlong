@@ -18,7 +18,8 @@ public class FunctionTest {
         final String errNotNamed = "functions of this type must be named";
         final String errHasOutputs = "functions of this type cannot have outputs";
         final String errHasInputs = "functions of this type cannot have inputs";
-        final TupleType inputs = TupleType.of("int"), outputs = TupleType.of("bool");
+        final TupleType inputs = TupleType.of("int");
+        final TupleType outputs = TupleType.of("bool");
         final MessageDigest md = Function.newDefaultDigest();
         TestUtils.assertThrown(IllegalArgumentException.class, errHasOutputs, () -> new Function(Function.Type.CONSTRUCTOR, "foo()","(bool)", md));
         TestUtils.assertThrown(IllegalArgumentException.class, errHasOutputs, () -> new Function(Function.Type.FALLBACK, "foo()","(bool)", md));
