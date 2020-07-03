@@ -90,123 +90,119 @@ final class TypeFactory {
             return parseTupleType(baseTypeStr);
         }
 
-        final BaseTypeInfo info = BaseTypeInfo.get(baseTypeStr);
-        if(info != null) {
-            switch (baseTypeStr) {
-            case "int8":
-            case "int16":
-            case "int24":
-            case "int32":   return new IntType(baseTypeStr, info.bitLen, false);
-            case "int40":
-            case "int48":
-            case "int56":
-            case "int64":   return new LongType(baseTypeStr, info.bitLen, false);
-            case "int72":
-            case "int80":
-            case "int88":
-            case "int96":
-            case "int104":
-            case "int112":
-            case "int120":
-            case "int128":
-            case "int136":
-            case "int144":
-            case "int152":
-            case "int160":
-            case "int168":
-            case "int176":
-            case "int184":
-            case "int192":
-            case "int200":
-            case "int208":
-            case "int216":
-            case "int224":
-            case "int232":
-            case "int240":
-            case "int248":  return new BigIntegerType(baseTypeStr, info.bitLen, false);
-            case "int256":
-            case "int":     return new BigIntegerType("int256", 256, false);
-            case "uint8":
-            case "uint16":
-            case "uint24":  return new IntType(baseTypeStr, info.bitLen, true);
-            case "uint32":
-            case "uint40":
-            case "uint48":
-            case "uint56":  return new LongType(baseTypeStr, info.bitLen, true);
-            case "uint64":
-            case "uint72":
-            case "uint80":
-            case "uint88":
-            case "uint96":
-            case "uint104":
-            case "uint112":
-            case "uint120":
-            case "uint128":
-            case "uint136":
-            case "uint144":
-            case "uint152":
-            case "uint160":
-            case "address":
-            case "uint168":
-            case "uint176":
-            case "uint184":
-            case "uint192":
-            case "uint200":
-            case "uint208":
-            case "uint216":
-            case "uint224":
-            case "uint232":
-            case "uint240":
-            case "uint248": return new BigIntegerType(baseTypeStr, info.bitLen, true);
-            case "uint256":
-            case "uint":    return nameless ? CACHED_UINT_TYPE : new BigIntegerType("uint256", 256, true);
-            case "bytes1":
-            case "bytes2":
-            case "bytes3":
-            case "bytes4":
-            case "bytes5":
-            case "bytes6":
-            case "bytes7":
-            case "bytes8":
-            case "bytes9":
-            case "bytes10":
-            case "bytes11":
-            case "bytes12":
-            case "bytes13":
-            case "bytes14":
-            case "bytes15":
-            case "bytes16":
-            case "bytes17":
-            case "bytes18":
-            case "bytes19":
-            case "bytes20":
-            case "bytes21":
-            case "bytes22":
-            case "bytes23":
-            case "bytes24":
-            case "function":
-            case "bytes25":
-            case "bytes26":
-            case "bytes27":
-            case "bytes28":
-            case "bytes29":
-            case "bytes30":
-            case "bytes31":
-            case "bytes32": return new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, info.arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME);
-            case "bool":    return new BooleanType();
-            case "bytes":   return new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME);
-            case "string":  return new ArrayType<>(baseTypeStr, ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME);
-            case "decimal": return new BigDecimalType(baseTypeStr, DECIMAL_BIT_LEN, DECIMAL_SCALE, false);
-            case "fixed":
-            case "fixed128x18":
-                            return new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false);
-            case "ufixed":
-            case "ufixed128x18":
-                            return new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true);
-            default:        return null;
-            }
+        switch (baseTypeStr) {
+        case "int8":
+        case "int16":
+        case "int24":
+        case "int32":   return new IntType(baseTypeStr, BaseTypeInfo.get(baseTypeStr).bitLen, false);
+        case "int40":
+        case "int48":
+        case "int56":
+        case "int64":   return new LongType(baseTypeStr, BaseTypeInfo.get(baseTypeStr).bitLen, false);
+        case "int72":
+        case "int80":
+        case "int88":
+        case "int96":
+        case "int104":
+        case "int112":
+        case "int120":
+        case "int128":
+        case "int136":
+        case "int144":
+        case "int152":
+        case "int160":
+        case "int168":
+        case "int176":
+        case "int184":
+        case "int192":
+        case "int200":
+        case "int208":
+        case "int216":
+        case "int224":
+        case "int232":
+        case "int240":
+        case "int248":  return new BigIntegerType(baseTypeStr, BaseTypeInfo.get(baseTypeStr).bitLen, false);
+        case "int256":
+        case "int":     return new BigIntegerType("int256", 256, false);
+        case "uint8":
+        case "uint16":
+        case "uint24":  return new IntType(baseTypeStr, BaseTypeInfo.get(baseTypeStr).bitLen, true);
+        case "uint32":
+        case "uint40":
+        case "uint48":
+        case "uint56":  return new LongType(baseTypeStr, BaseTypeInfo.get(baseTypeStr).bitLen, true);
+        case "uint64":
+        case "uint72":
+        case "uint80":
+        case "uint88":
+        case "uint96":
+        case "uint104":
+        case "uint112":
+        case "uint120":
+        case "uint128":
+        case "uint136":
+        case "uint144":
+        case "uint152":
+        case "uint160":
+        case "address":
+        case "uint168":
+        case "uint176":
+        case "uint184":
+        case "uint192":
+        case "uint200":
+        case "uint208":
+        case "uint216":
+        case "uint224":
+        case "uint232":
+        case "uint240":
+        case "uint248": return new BigIntegerType(baseTypeStr, BaseTypeInfo.get(baseTypeStr).bitLen, true);
+        case "uint256":
+        case "uint":    return nameless ? CACHED_UINT_TYPE : new BigIntegerType("uint256", 256, true);
+        case "bytes1":
+        case "bytes2":
+        case "bytes3":
+        case "bytes4":
+        case "bytes5":
+        case "bytes6":
+        case "bytes7":
+        case "bytes8":
+        case "bytes9":
+        case "bytes10":
+        case "bytes11":
+        case "bytes12":
+        case "bytes13":
+        case "bytes14":
+        case "bytes15":
+        case "bytes16":
+        case "bytes17":
+        case "bytes18":
+        case "bytes19":
+        case "bytes20":
+        case "bytes21":
+        case "bytes22":
+        case "bytes23":
+        case "bytes24":
+        case "function":
+        case "bytes25":
+        case "bytes26":
+        case "bytes27":
+        case "bytes28":
+        case "bytes29":
+        case "bytes30":
+        case "bytes31":
+        case "bytes32": return new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, BaseTypeInfo.get(baseTypeStr).arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME);
+        case "bool":    return new BooleanType();
+        case "bytes":   return new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME);
+        case "string":  return new ArrayType<>(baseTypeStr, ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME);
+        case "decimal": return new BigDecimalType(baseTypeStr, DECIMAL_BIT_LEN, DECIMAL_SCALE, false);
+        case "fixed":
+        case "fixed128x18":
+            return new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false);
+        case "ufixed":
+        case "ufixed128x18":
+            return new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true);
+        default:        return tryParseFixed(baseTypeStr);
         }
-        return tryParseFixed(baseTypeStr);
     }
 
     private static BigDecimalType tryParseFixed(final String type) {
