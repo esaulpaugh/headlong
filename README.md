@@ -83,12 +83,6 @@ public byte[] toRLP() {
 }
 ```
 
-Also includes optimized implementations of:
-
-* EIP-778 Ethereum Node Records
-* hexadecimal
-* Keccak
-
 ## Build
 
 Now available in Maven Central Repository.
@@ -124,6 +118,12 @@ https://github.com/esaulpaugh/headlong-cli
 https://github.com/esaulpaugh/headlong-android
 
 ## Misc
+
+Also includes optimized implementations of:
+
+* EIP-778 Ethereum Node Records
+* hexadecimal
+* Keccak
 
 headlong (optionally) depends on gson and bouncycastle. Test suite should take less than one minute to run. Test packages require junit. Jar size is ~127 KiB as of 07/01/20. Java 8+.
 
