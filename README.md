@@ -89,7 +89,7 @@ Also includes optimized implementations of:
 * hexadecimal
 * Keccak
 
-### Build
+## Build
 
 Now available in Maven Central Repository.
 
@@ -115,15 +115,15 @@ Alternatively:
 * Execute `ant all build-jar` which outputs to `build/lib`
 * Add headlong as a project dependency
 
-### Command line interface
+## Command line interface
 
 https://github.com/esaulpaugh/headlong-cli
 
-### Demo app
+## Demo app
 
 https://github.com/esaulpaugh/headlong-android
 
-### Misc
+## Misc
 
 headlong (optionally) depends on gson and bouncycastle. Test suite should take less than one minute to run. Test packages require junit. Jar size is ~127 KiB as of 07/01/20. Java 8+.
 
