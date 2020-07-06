@@ -101,7 +101,7 @@ public class TestUtils {
 
     private static ByteArrayOutputStream readFile(String filepath) throws IOException {
         ByteArrayOutputStream result = new ByteArrayOutputStream();
-        try (FileInputStream fis = new FileInputStream(new File(filepath));) {
+        try (FileInputStream fis = new FileInputStream(new File(filepath))) {
             byte[] buffer = new byte[2048];
             int len;
             while ((len = fis.read(buffer)) >= 0) {
