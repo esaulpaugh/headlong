@@ -74,9 +74,22 @@ public final class FastHex {
 
     @SuppressWarnings("deprecation")
     public static String encodeToString(byte[] buffer, int offset, final int len) {
+//        char[] enc = encodeToChars(buffer, offset, len);
+//        return new String(enc); // faster on Java 8 (i.e. no compact strings)
         byte[] enc = encodeToBytes(buffer, offset, len);
-        return new String(enc, 0, 0, enc.length);
+        return new String(enc, 0, 0, enc.length); // faster on Java 9+ (compact strings on by default)
     }
+
+//    public static char[] encodeToChars(byte[] buffer, int off, final int len) {
+//        final int end = off + len;
+//        char[] chars = new char[len * CHARS_PER_BYTE];
+//        for (int j = 0; off < end; off++, j += CHARS_PER_BYTE) {
+//            int hexPair = ENCODE_TABLE[buffer[off] & 0xFF];
+//            chars[j] = (char) (hexPair >>> Byte.SIZE); // left
+//            chars[j+1] = (char) (hexPair & 0xFF); // right
+//        }
+//        return chars;
+//    }
 
     public static byte[] encodeToBytes(byte[] buffer, int off, final int len) {
         final int end = off + len;
