@@ -59,9 +59,8 @@ public final class Record {
         this.rlp = RLP_STRICT.wrapList(bb.array());
     }
 
-    private Record(RLPList recordRLP) {
-        this.rlp = recordRLP.duplicate(RLP_STRICT);
-        checkRecordLen(this.rlp.encodingLength());
+    private Record(RLPList recordRLP) { // validate before calling
+        this.rlp = recordRLP;
     }
 
     private static void checkRecordLen(int recordLen) {
@@ -79,7 +78,9 @@ public final class Record {
     }
 
     public static Record decode(byte[] bytes, Verifier verifier) throws SignatureException {
-        RLPList rlpList = RLP_STRICT.wrapList(bytes);
+        checkRecordLen(bytes.length);
+        RLPList rlpList = RLP_STRICT.wrapList(bytes)
+                .duplicate(RLP_STRICT); // defensive copy
         if(rlpList.encodingLength() != bytes.length) {
             throw new IllegalArgumentException("unconsumed trailing bytes");
         }
