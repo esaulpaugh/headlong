@@ -41,9 +41,8 @@ public final class Record {
         final int recordListDataLen = RLPEncoder.prefixLength(signatureLen) + signatureLen + payloadLen;
         final int recordListPrefixLen = RLPEncoder.prefixLength(recordListDataLen);
         final int recordLen = recordListPrefixLen + recordListDataLen;
-        if(recordLen > MAX_RECORD_LEN) {
-            throw new IllegalArgumentException("record length exceeds maximum: " + recordLen + " > " + MAX_RECORD_LEN);
-        }
+
+        checkRecordLen(recordLen);
 
         final ByteBuffer bb = ByteBuffer.allocate(recordLen);
         RLPEncoder.insertListPrefix(recordListDataLen, bb);
@@ -61,7 +60,14 @@ public final class Record {
     }
 
     private Record(RLPList recordRLP) {
+        checkRecordLen(recordRLP.encodingLength());
         this.rlp = recordRLP;
+    }
+
+    private static void checkRecordLen(int recordLen) {
+        if(recordLen > MAX_RECORD_LEN) {
+            throw new IllegalArgumentException("record length exceeds maximum: " + recordLen + " > " + MAX_RECORD_LEN);
+        }
     }
 
     public static Record parse(String enrString) {

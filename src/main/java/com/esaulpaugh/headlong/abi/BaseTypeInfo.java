@@ -43,7 +43,7 @@ final class BaseTypeInfo {
     private static final Map<String, BaseTypeInfo> TYPE_INFO_MAP;
 
     static {
-        Map<String, BaseTypeInfo> map = new HashMap<>(256);
+        final Map<String, BaseTypeInfo> map = new HashMap<>(256);
 
         for(int n = 8; n <= 256; n += 8) {
             BaseTypeInfo info = new BaseTypeInfo(n);
