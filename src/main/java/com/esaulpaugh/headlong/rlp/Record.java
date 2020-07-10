@@ -60,8 +60,8 @@ public final class Record {
     }
 
     private Record(RLPList recordRLP) {
-        checkRecordLen(recordRLP.encodingLength());
-        this.rlp = recordRLP;
+        this.rlp = recordRLP.duplicate(RLP_STRICT);
+        checkRecordLen(this.rlp.encodingLength());
     }
 
     private static void checkRecordLen(int recordLen) {
@@ -70,15 +70,24 @@ public final class Record {
         }
     }
 
-    public static Record parse(String enrString) {
+    public static Record parse(String enrString, Verifier verifier) throws SignatureException {
         if(enrString.startsWith(ENR_PREFIX)) {
-            return decode(Strings.decode(enrString.substring(ENR_PREFIX.length()), BASE_64_URL_SAFE));
+            byte[] bytes = Strings.decode(enrString.substring(ENR_PREFIX.length()), BASE_64_URL_SAFE);
+            return decode(bytes, verifier);
         }
         throw new IllegalArgumentException("prefix \"" + ENR_PREFIX + "\" not found");
     }
 
-    public static Record decode(byte[] record) {
-        return new Record(RLP_STRICT.wrapList(record));
+    public static Record decode(byte[] bytes, Verifier verifier) throws SignatureException {
+        RLPList rlpList = RLP_STRICT.wrapList(bytes);
+        if(rlpList.encodingLength() != bytes.length) {
+            throw new IllegalArgumentException("unconsumed trailing bytes");
+        }
+        Record record = new Record(rlpList);
+        RLPItem signatureItem = record.getSignature();
+        byte[] content = record.getContentBytes(signatureItem.endIndex);
+        verifier.verify(signatureItem.asBytes(), content); // verify signature
+        return record;
     }
 
     public RLPList getRLP() {
@@ -105,13 +114,6 @@ public final class Record {
         RLPEncoder.insertListPrefix(contentDataLen, bb);
         rlp.exportRange(index, index + contentDataLen, bb.array(), bb.position());
         return bb.array();
-    }
-
-    public RLPList decode(Verifier verifier) throws SignatureException {
-        RLPItem signatureItem = getSignature();
-        byte[] content = getContentBytes(signatureItem.endIndex);
-        verifier.verify(signatureItem.asBytes(), content); // verify content
-        return RLPDecoder.RLP_STRICT.wrapList(content);
     }
 
     public interface Signer {
