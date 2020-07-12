@@ -36,10 +36,10 @@ public final class Notation {
     static final String END_LIST = "]";
     static final String BEGIN_STRING = "'";
     static final String END_STRING = "'";
-
-    private static final String BEGIN_LIST_SHORT = BEGIN_LIST + " ";
-
     private static final String DELIMITER = ",";
+
+    private static final String SHORT_LIST_START = BEGIN_LIST + ' ';
+
     private static final String DELIMITER_SPACE = DELIMITER + ' ';
     private static final String STRING_DELIMIT_SPACE = END_STRING + DELIMITER_SPACE;
     private static final String STRING_DELIMIT = END_STRING + DELIMITER;
@@ -137,7 +137,7 @@ public final class Notation {
 
     private static int buildList(final StringBuilder sb, final byte[] data, final int dataIndex, final int end, final int depth, final boolean longList, final boolean addSpace) {
         if(!longList) {
-            sb.append(BEGIN_LIST_SHORT);
+            sb.append(SHORT_LIST_START);
         } else if(depth != 0) {
             sb.append(BEGIN_LIST);
         }
