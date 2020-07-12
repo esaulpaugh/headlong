@@ -29,21 +29,30 @@ public class NotationTest {
     private static final byte[] ENCODING = Strings.decode("c0c1808180f8507f3bcec00080860030ffcc00090102c1700001f83bb8390102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738390005");
 
     private static final String NOTATION = "(\n" +
-            "  [  ], \n" +
-            "  [ '' ], \n" +
-            "  '80', \n" +
+            "  [  ],\n" +
+            "  [ '' ],\n" +
+            "  '80',\n" +
             "  [\n" +
-            "    '7f', \n" +
-            "    '3b', \n" +
-            "    [ [  ], '00', '', '0030ffcc0009', '01', '02', [ '70' ] ], \n" +
-            "    '00', \n" +
-            "    '01', \n" +
+            "    '7f',\n" +
+            "    '3b',\n" +
+            "    [ [  ], '00', '', '0030ffcc0009', '01', '02', [ '70' ] ],\n" +
+            "    '00',\n" +
+            "    '01',\n" +
             "    [\n" +
             "      '0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f30313233343536373839'\n" +
             "    ]\n" +
-            "  ], \n" +
-            "  '00', \n" +
+            "  ],\n" +
+            "  '00',\n" +
             "  '05'\n" +
+            ")";
+
+    private static final byte[] LONG_LIST_ENDING_IN_SHORT_LIST = Strings.decode("f83cb8390102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f30313233343536373839c0");
+
+    private static final String NOTATION_2 = "(\n" +
+            "  [\n" +
+            "    '0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f30313233343536373839',\n" +
+            "    [  ]\n" +
+            "  ]\n" +
             ")";
 
     @Test
@@ -55,6 +64,7 @@ public class NotationTest {
 
         Notation n = Notation.forEncoding(RLPEncoder.encodeSequentially(NotationParser.parse(NOTATION)));
         assertEquals(notation, n.toString());
+        assertEquals(NOTATION, n.toString());
 
         List<Object> objects = n.parse();
 
@@ -64,5 +74,10 @@ public class NotationTest {
         System.out.println(Strings.encode(rlp2));
 
         assertArrayEquals(ENCODING, rlp2);
+    }
+
+    @Test
+    public void testLongListEndingInShortList() {
+        assertEquals(NOTATION_2, Notation.forEncoding(LONG_LIST_ENDING_IN_SHORT_LIST).toString());
     }
 }
