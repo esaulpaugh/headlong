@@ -182,14 +182,15 @@ public final class Notation {
         }
     }
 
-    private static String getIndentation(int n) {
-        return n < INDENTATION_CACHE.length ? INDENTATION_CACHE[n] : newIndentation(n);
+    private static String getIndentation(int depth) {
+        return depth < INDENTATION_CACHE.length ? INDENTATION_CACHE[depth] : newIndentation(depth);
     }
 
-    private static String newIndentation(int n) {
-        char[] spaces = new char[n << 1]; // 2 spaces per
-        Arrays.fill(spaces, ' ');
-        return String.valueOf(spaces);
+    @SuppressWarnings("deprecation")
+    private static String newIndentation(int depth) {
+        byte[] spaces = new byte[depth * 2]; // 2 spaces per level
+        Arrays.fill(spaces, (byte) ' ');
+        return new String(spaces, 0, 0, spaces.length);
     }
 
     @Override
