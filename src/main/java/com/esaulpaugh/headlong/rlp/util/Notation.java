@@ -178,13 +178,8 @@ public final class Notation {
             }
         }
         if (/* hasElement */ dataIndex != end) {
-            trimEnd(sb, (shortList ? DELIMITER_SPACE : DELIMITER).length());
+            sb.replace(sb.length() - (shortList ? DELIMITER_SPACE : DELIMITER).length(), sb.length(), ""); // trim
         }
-    }
-
-    private static void trimEnd(StringBuilder sb, int n) {
-        final int len = sb.length();
-        sb.replace(len - n, len, "");
     }
 
     private static String getIndentation(int n) {
