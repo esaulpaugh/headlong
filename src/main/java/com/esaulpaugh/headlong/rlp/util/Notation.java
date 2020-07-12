@@ -166,11 +166,7 @@ public final class Notation {
             }
         }
         if (/* hasElement */ dataIndex != end) {
-            if(doSpaces) {
-                stripDelimiterSpace(sb);
-            } else {
-                stripDelimiter(sb);
-            }
+            trimEnd(sb, (doSpaces ? DELIMITER_SPACE : DELIMITER).length());
         }
         if(!longList) {
             sb.append(addSpace ? SHORT_LIST_END : SHORT_LIST_END_NO_SPACE);
@@ -181,24 +177,19 @@ public final class Notation {
         return end;
     }
 
-    private static String newIndentation(int n) {
-        char[] spaces = new char[n << 1]; // 2 spaces per
-        Arrays.fill(spaces, ' ');
-        return String.valueOf(spaces);
+    private static void trimEnd(StringBuilder sb, int n) {
+        final int len = sb.length();
+        sb.replace(len - n, len, "");
     }
 
     private static String getIndentation(int n) {
         return n < INDENTATION_CACHE.length ? INDENTATION_CACHE[n] : newIndentation(n);
     }
 
-    private static void stripDelimiter(StringBuilder sb) {
-        final int n = sb.length();
-        sb.replace(n - DELIMITER.length(), n, "");
-    }
-
-    private static void stripDelimiterSpace(StringBuilder sb) {
-        final int n = sb.length();
-        sb.replace(n - DELIMITER_SPACE.length(), n, "");
+    private static String newIndentation(int n) {
+        char[] spaces = new char[n << 1]; // 2 spaces per
+        Arrays.fill(spaces, ' ');
+        return String.valueOf(spaces);
     }
 
     @Override
