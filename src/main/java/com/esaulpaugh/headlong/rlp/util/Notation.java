@@ -50,8 +50,6 @@ public final class Notation {
 
     private static final String[] INDENTATION_CACHE;
 
-    private static final String ELEMENT_INDENTATION = newIndentation(1);
-
     static {
         INDENTATION_CACHE = new String[8];
         for (int i = 0; i < INDENTATION_CACHE.length; i++) {
@@ -78,7 +76,7 @@ public final class Notation {
             end = Math.min(buffer.length, end);
             if (index <= end) {
                 StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
-                buildList(sb, buffer, index, end, 0, true, false);
+                buildLongList(sb, buffer, index, end, 0);
                 return new Notation(sb.append(END_NOTATION).toString());
             }
             throw new IllegalArgumentException("index > end: " + index + " > " + end);
@@ -135,24 +133,36 @@ public final class Notation {
         return to;
     }
 
-    private static int buildList(final StringBuilder sb, final byte[] data, final int dataIndex, final int end, final int depth, final boolean longList, final boolean addSpace) {
-        if(!longList) {
-            sb.append(SHORT_LIST_START);
-        } else if(depth != 0) {
+    private static int buildLongList(StringBuilder sb, byte[] data, int dataIndex, int end, int depth) {
+        if(depth != 0) {
             sb.append(BEGIN_LIST);
         }
-        final String baseIndentation = longList ? getIndentation(depth) : null;
-        final boolean doSpaces = !longList;
+        buildListContent(sb, dataIndex, end, data, false, depth + 1);
+        if(depth != 0) {
+            sb.append('\n').append(getIndentation(depth)).append(LONG_LIST_END);
+        }
+        return end;
+    }
+
+    private static int buildShortList(StringBuilder sb, byte[] data, int dataIndex, int end, int depth, boolean addSpace) {
+        sb.append(SHORT_LIST_START);
+        buildListContent(sb, dataIndex, end, data, true, depth + 1);
+        sb.append(addSpace ? SHORT_LIST_END : SHORT_LIST_END_NO_SPACE);
+        return end;
+    }
+
+    private static void buildListContent(StringBuilder sb, final int dataIndex, final int end, byte[] data, boolean shortList, final int elementDepth) {
+        final String elementPrefix = shortList ? null : '\n' + getIndentation(elementDepth);
         for (int i = dataIndex; i < end; ) {
-            if(longList) {
-                sb.append('\n').append(baseIndentation).append(ELEMENT_INDENTATION);
+            if(!shortList) {
+                sb.append(elementPrefix);
             }
             final byte lead = data[i];
             final DataType type = DataType.type(lead);
             if(type == DataType.SINGLE_BYTE) {
-                i = buildString(sb, data, i, i + 1, doSpaces);
+                i = buildString(sb, data, i, i + 1, shortList);
             } else {
-                if(type.isLong && !longList) {
+                if(type.isLong && shortList) {
                     throw new IllegalArgumentException("long element found in short list");
                 }
                 final int diff = lead - type.offset;
@@ -161,20 +171,15 @@ public final class Notation {
                         ? getLongElementEnd(data, i, elementDataIdx, end)
                         : getShortElementEnd(elementDataIdx, diff, end);
                 i = type.isString
-                        ? buildString(sb, data, elementDataIdx, elementEnd, doSpaces)
-                        : buildList(sb, data, elementDataIdx, elementEnd, depth + 1, type.isLong, doSpaces);
+                        ? buildString(sb, data, elementDataIdx, elementEnd, shortList)
+                        : type.isLong
+                            ? buildLongList(sb, data, elementDataIdx, elementEnd, elementDepth)
+                            : buildShortList(sb, data, elementDataIdx, elementEnd, elementDepth, shortList);
             }
         }
         if (/* hasElement */ dataIndex != end) {
-            trimEnd(sb, (doSpaces ? DELIMITER_SPACE : DELIMITER).length());
+            trimEnd(sb, (shortList ? DELIMITER_SPACE : DELIMITER).length());
         }
-        if(!longList) {
-            sb.append(addSpace ? SHORT_LIST_END : SHORT_LIST_END_NO_SPACE);
-        } else if(depth != 0) {
-            sb.append('\n')
-                    .append(baseIndentation).append(LONG_LIST_END);
-        }
-        return end;
     }
 
     private static void trimEnd(StringBuilder sb, int n) {
