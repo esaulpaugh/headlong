@@ -216,7 +216,6 @@ public final class Function implements ABIObject {
         return Function.SELECTOR_LEN + inputTypes.measureEncodedLength(args);
     }
 
-    /**@param args  {@link Tuple#Tuple(Object...)} does not make a defensive copy */
     public ByteBuffer encodeCallWithArgs(Object... args) {
         return encodeCall(new Tuple(args));
     }
