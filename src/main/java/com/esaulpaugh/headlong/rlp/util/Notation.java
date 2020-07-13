@@ -48,12 +48,12 @@ public final class Notation {
     private static final String SHORT_LIST_END_NO_SPACE = ' ' + END_LIST + DELIMITER;
     private static final String LONG_LIST_END = END_LIST + DELIMITER;
 
-    private static final String[] INDENTATION_CACHE;
+    private static final String[] LINE_PADDING_CACHE;
 
     static {
-        INDENTATION_CACHE = new String[8];
-        for (int i = 0; i < INDENTATION_CACHE.length; i++) {
-            INDENTATION_CACHE[i] = newIndentation(i);
+        LINE_PADDING_CACHE = new String[8]; // pick any cache size
+        for (int i = 0; i < LINE_PADDING_CACHE.length; i++) {
+            LINE_PADDING_CACHE[i] = newLinePadding(i);
         }
     }
 
@@ -139,7 +139,7 @@ public final class Notation {
         }
         buildListContent(sb, dataIndex, end, data, false, depth + 1);
         if(depth != 0) {
-            sb.append('\n').append(getIndentation(depth)).append(LONG_LIST_END);
+            sb.append(getLinePadding(depth)).append(LONG_LIST_END);
         }
         return end;
     }
@@ -152,7 +152,7 @@ public final class Notation {
     }
 
     private static void buildListContent(StringBuilder sb, final int dataIndex, final int end, byte[] data, boolean shortList, final int elementDepth) {
-        final String elementPrefix = shortList ? null : '\n' + getIndentation(elementDepth);
+        final String elementPrefix = shortList ? null : getLinePadding(elementDepth);
         for (int i = dataIndex; i < end; ) {
             if(!shortList) {
                 sb.append(elementPrefix);
@@ -182,15 +182,16 @@ public final class Notation {
         }
     }
 
-    private static String getIndentation(int depth) {
-        return depth < INDENTATION_CACHE.length ? INDENTATION_CACHE[depth] : newIndentation(depth);
+    private static String getLinePadding(int depth) {
+        return depth < LINE_PADDING_CACHE.length ? LINE_PADDING_CACHE[depth] : newLinePadding(depth);
     }
 
     @SuppressWarnings("deprecation")
-    private static String newIndentation(int depth) {
-        byte[] spaces = new byte[depth * 2]; // 2 spaces per level
-        Arrays.fill(spaces, (byte) ' ');
-        return new String(spaces, 0, 0, spaces.length);
+    private static String newLinePadding(int depth) {
+        byte[] prefix = new byte[1 + (depth * 2)]; // 2 spaces per level
+        Arrays.fill(prefix, (byte) ' ');
+        prefix[0] = (byte) '\n';
+        return new String(prefix, 0, 0, prefix.length);
     }
 
     @Override
