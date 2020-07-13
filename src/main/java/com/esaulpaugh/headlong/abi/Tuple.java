@@ -22,7 +22,7 @@ import java.util.RandomAccess;
 /**
  * An ordered list of objects whose types should correspond to some {@link TupleType}. {@link Function}s encode/decode
  * {@link Tuple}s containing arguments satisfying its parameters/return type. {@link Tuple}s can contain other tuples.
- * This class does not attempt to guard the elements array from external/concurrent modification.
+ * This class does not attempt to guard the elements array from external modification.
  */
 public final class Tuple extends AbstractList<Object> implements RandomAccess {
 
@@ -30,7 +30,7 @@ public final class Tuple extends AbstractList<Object> implements RandomAccess {
 
     final Object[] elements;
 
-    /**@param elements  does not make a defensive copy */
+    /**@param elements  this constructor does not make a defensive copy */
     public Tuple(Object... elements) {
         this.elements = elements;
     }
@@ -70,6 +70,7 @@ public final class Tuple extends AbstractList<Object> implements RandomAccess {
         return new Tuple(copy);
     }
 
+    /**@param elements  {@link #Tuple(Object...)} does not make a defensive copy */
     public static Tuple of(Object... elements) {
         return new Tuple(elements);
     }
