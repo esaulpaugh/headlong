@@ -33,7 +33,7 @@ public class TupleTest {
             new short[0],
             new long[0],
             new boolean[0],
-            new Throwable(),
+            new Throwable() {},
             new BigInteger[0],
             new BigDecimal[0],
             true,
