@@ -15,33 +15,100 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
-import static com.esaulpaugh.headlong.abi.BaseTypeInfo.DECIMAL_BIT_LEN;
-import static com.esaulpaugh.headlong.abi.BaseTypeInfo.DECIMAL_SCALE;
-import static com.esaulpaugh.headlong.abi.BaseTypeInfo.FIXED_BIT_LEN;
-import static com.esaulpaugh.headlong.abi.BaseTypeInfo.FIXED_SCALE;
 
 /** Creates the appropriate {@link ABIType} object for a given type string. */
 final class TypeFactory {
 
-    private static final ABIType<BigInteger> CACHED_UINT_TYPE = new BigIntegerType("uint256", 256, true);
-
     private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
 
+    private static final int ADDRESS_BIT_LEN = 160;
+
+    private static final int DECIMAL_BIT_LEN = 128;
+    private static final int DECIMAL_SCALE = 10;
+
+    private static final int FIXED_BIT_LEN = 128;
+    private static final int FIXED_SCALE = 18;
+
+    private static final int FUNCTION_BYTE_LEN = 24;
+
+    private static final Map<String, Supplier<ABIType<?>>> SUPPLIER_MAP;
+
+    static {
+        final Map<String, Supplier<ABIType<?>>> lambdaMap = new HashMap<>(256);
+
+        for(int n = 8; n <= 32; n += 8) {
+            final int bitLen = n;
+            final String type = "int" + bitLen;
+            lambdaMap.put(type, () -> new IntType(type, bitLen, false));
+        }
+        for(int n = 40; n <= 64; n += 8) {
+            final int bitLen = n;
+            final String type = "int" + bitLen;
+            lambdaMap.put(type, () -> new LongType(type, bitLen, false));
+        }
+        for(int n = 72; n <= 256; n += 8) {
+            final int bitLen = n;
+            final String type = "int" + bitLen;
+            lambdaMap.put(type, () -> new BigIntegerType(type, bitLen, false));
+        }
+        lambdaMap.put("int", lambdaMap.get("int256"));
+
+        for(int n = 8; n <= 24; n += 8) {
+            final int bitLen = n;
+            final String type = "uint" + bitLen;
+            lambdaMap.put(type, () -> new IntType(type, bitLen, true));
+        }
+        for(int n = 32; n <= 56; n += 8) {
+            final int bitLen = n;
+            final String type = "uint" + bitLen;
+            lambdaMap.put(type, () -> new LongType(type, bitLen, true));
+        }
+        for(int n = 64; n <= 256; n += 8) {
+            final int bitLen = n;
+            final String type = "uint" + bitLen;
+            lambdaMap.put(type, () -> new BigIntegerType(type, bitLen, true));
+        }
+        lambdaMap.put("uint", lambdaMap.get("uint256"));
+
+        for (int n = 1; n <= 32; n++) {
+            final int arrayLen = n;
+            final String type = "bytes" + arrayLen;
+            lambdaMap.put(type, () -> new ArrayType<>(type, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME));
+        }
+        lambdaMap.put("function", () -> new ArrayType<>("function", ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, FUNCTION_BYTE_LEN, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME));
+
+        lambdaMap.put("bytes", () -> new ArrayType<>("bytes", ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME));
+        lambdaMap.put("string", () -> new ArrayType<>("string", ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME));
+        lambdaMap.put("address", () -> new BigIntegerType("address", ADDRESS_BIT_LEN, true));
+        lambdaMap.put("decimal", () -> new BigDecimalType("decimal", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
+        lambdaMap.put("bool", BooleanType::new);
+
+        lambdaMap.put("fixed128x18", () -> new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
+        lambdaMap.put("ufixed128x18", () -> new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
+        lambdaMap.put("fixed", lambdaMap.get("fixed128x18"));
+        lambdaMap.put("ufixed", lambdaMap.get("ufixed128x18"));
+
+        SUPPLIER_MAP = Collections.unmodifiableMap(lambdaMap);
+    }
+
     static ABIType<?> create(String rawType, String name) {
-        return buildType(rawType, null, name == null)
+        return buildType(rawType, null)
                 .setName(name);
     }
 
     static ABIType<?> createFromBase(TupleType baseType, String typeSuffix, String name) {
-        return buildType(baseType.canonicalType + typeSuffix, baseType, name == null)
+        return buildType(baseType.canonicalType + typeSuffix, baseType)
                 .setName(name);
     }
 
-    private static ABIType<?> buildType(final String rawType, ABIType<?> baseType, final boolean nameless) {
+    private static ABIType<?> buildType(final String rawType, ABIType<?> baseType) {
         try {
             final int lastCharIndex = rawType.length() - 1;
             if (rawType.charAt(lastCharIndex) == ']') { // array
@@ -49,7 +116,7 @@ final class TypeFactory {
                 final int secondToLastCharIndex = lastCharIndex - 1;
                 final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIndex);
 
-                final ABIType<?> elementType = buildType(rawType.substring(0, arrayOpenIndex), baseType, nameless);
+                final ABIType<?> elementType = buildType(rawType.substring(0, arrayOpenIndex), baseType);
                 final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
                 final int length = arrayOpenIndex == secondToLastCharIndex ? DYNAMIC_LENGTH : parseLen(rawType, arrayOpenIndex + 1, lastCharIndex);
                 final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
@@ -58,7 +125,7 @@ final class TypeFactory {
                 final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
                 return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, '[' + arrayClassName);
             }
-            if(baseType != null || (baseType = resolveBaseType(rawType, nameless)) != null) {
+            if(baseType != null || (baseType = resolveBaseType(rawType)) != null) {
                 return baseType;
             }
         } catch (ClassNotFoundException e) {
@@ -85,124 +152,12 @@ final class TypeFactory {
         }
     }
 
-    private static ABIType<?> resolveBaseType(String baseTypeStr, boolean nameless) {
+    private static ABIType<?> resolveBaseType(String baseTypeStr) {
         if(baseTypeStr.charAt(0) == '(') {
             return parseTupleType(baseTypeStr);
         }
-
-        switch (baseTypeStr) {
-        case "int8":
-        case "int16":
-        case "int24":
-        case "int32":   return new IntType(baseTypeStr, BaseTypeInfo.get(baseTypeStr).bitLen, false);
-        case "int40":
-        case "int48":
-        case "int56":
-        case "int64":   return new LongType(baseTypeStr, BaseTypeInfo.get(baseTypeStr).bitLen, false);
-        case "int72":
-        case "int80":
-        case "int88":
-        case "int96":
-        case "int104":
-        case "int112":
-        case "int120":
-        case "int128":
-        case "int136":
-        case "int144":
-        case "int152":
-        case "int160":
-        case "int168":
-        case "int176":
-        case "int184":
-        case "int192":
-        case "int200":
-        case "int208":
-        case "int216":
-        case "int224":
-        case "int232":
-        case "int240":
-        case "int248":  return new BigIntegerType(baseTypeStr, BaseTypeInfo.get(baseTypeStr).bitLen, false);
-        case "int256":
-        case "int":     return new BigIntegerType("int256", 256, false);
-        case "uint8":
-        case "uint16":
-        case "uint24":  return new IntType(baseTypeStr, BaseTypeInfo.get(baseTypeStr).bitLen, true);
-        case "uint32":
-        case "uint40":
-        case "uint48":
-        case "uint56":  return new LongType(baseTypeStr, BaseTypeInfo.get(baseTypeStr).bitLen, true);
-        case "uint64":
-        case "uint72":
-        case "uint80":
-        case "uint88":
-        case "uint96":
-        case "uint104":
-        case "uint112":
-        case "uint120":
-        case "uint128":
-        case "uint136":
-        case "uint144":
-        case "uint152":
-        case "uint160":
-        case "address":
-        case "uint168":
-        case "uint176":
-        case "uint184":
-        case "uint192":
-        case "uint200":
-        case "uint208":
-        case "uint216":
-        case "uint224":
-        case "uint232":
-        case "uint240":
-        case "uint248": return new BigIntegerType(baseTypeStr, BaseTypeInfo.get(baseTypeStr).bitLen, true);
-        case "uint256":
-        case "uint":    return nameless ? CACHED_UINT_TYPE : new BigIntegerType("uint256", 256, true);
-        case "bytes1":
-        case "bytes2":
-        case "bytes3":
-        case "bytes4":
-        case "bytes5":
-        case "bytes6":
-        case "bytes7":
-        case "bytes8":
-        case "bytes9":
-        case "bytes10":
-        case "bytes11":
-        case "bytes12":
-        case "bytes13":
-        case "bytes14":
-        case "bytes15":
-        case "bytes16":
-        case "bytes17":
-        case "bytes18":
-        case "bytes19":
-        case "bytes20":
-        case "bytes21":
-        case "bytes22":
-        case "bytes23":
-        case "bytes24":
-        case "function":
-        case "bytes25":
-        case "bytes26":
-        case "bytes27":
-        case "bytes28":
-        case "bytes29":
-        case "bytes30":
-        case "bytes31":
-        case "bytes32": return new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, BaseTypeInfo.get(baseTypeStr).arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME);
-        case "bool":    return new BooleanType();
-        case "bytes":   return new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME);
-        case "string":  return new ArrayType<>(baseTypeStr, ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME);
-        case "decimal": return new BigDecimalType(baseTypeStr, DECIMAL_BIT_LEN, DECIMAL_SCALE, false);
-        case "fixed":
-        case "fixed128x18":
-            return new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false);
-        case "ufixed":
-        case "ufixed128x18":
-            return new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true);
-        default:        return tryParseFixed(baseTypeStr);
-        }
+        Supplier<ABIType<?>> supplier = SUPPLIER_MAP.get(baseTypeStr);
+        return supplier != null ? supplier.get() : tryParseFixed(baseTypeStr);
     }
 
     private static BigDecimalType tryParseFixed(final String type) {
@@ -251,7 +206,7 @@ final class TypeFactory {
                 default: // non-tuple element
                     argEnd = nextTerminator(rawTypeStr, argStart + 1);
                 }
-                elements.add(buildType(rawTypeStr.substring(argStart, argEnd), null, true));
+                elements.add(buildType(rawTypeStr.substring(argStart, argEnd), null));
                 if((prevEndChar = rawTypeStr.charAt(argEnd)) != ',') {
                     break/*LOOP*/;
                 }
