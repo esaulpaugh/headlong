@@ -1,6 +1,8 @@
 package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.ABIType;
+import com.esaulpaugh.headlong.abi.ArrayType;
 import com.esaulpaugh.headlong.abi.Function;
 import com.esaulpaugh.headlong.abi.Tuple;
 import com.esaulpaugh.headlong.abi.TupleType;
@@ -8,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SuperSerialTest {
@@ -39,5 +42,23 @@ public class SuperSerialTest {
         Tuple dd = f.getParamTypes().decode((ByteBuffer) bb.flip());
 
         assertEquals(decoded, dd);
+    }
+
+    @Test
+    public void testParseArgs() {
+
+        String boolArrStr = "['00', '01', '01']";
+
+        TupleType tt = TupleType.parse("(bool[])");
+
+        Tuple tuple = tt.parseArgument("(" + boolArrStr + ")");
+
+        boolean[] arr0 = (boolean[]) tuple.get(0);
+
+        assertArrayEquals(new boolean[] { false, true, true}, arr0);
+
+        boolean[] arr1 = (boolean[]) ((ArrayType<? extends ABIType<?>, ?>) tt.get(0)).parseArgument(boolArrStr);
+
+        assertArrayEquals(arr0, arr1);
     }
 }

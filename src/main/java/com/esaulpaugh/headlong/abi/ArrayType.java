@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
+import com.esaulpaugh.headlong.util.SuperSerial;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -452,8 +453,15 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return dest;
     }
 
+    /**
+     * Parses RLP Object {@link com.esaulpaugh.headlong.rlp.util.Notation} as a {@link J}.
+     *
+     * @param s the array's RLP object notation
+     * @return  the parsed array
+     * @see com.esaulpaugh.headlong.rlp.util.Notation
+     */
     @Override
-    public J parseArgument(String s) {
-        throw new UnsupportedOperationException();
+    public J parseArgument(String s) { // expects RLP object notation such as "['00', '01', '01']"
+        return SuperSerial.deserializeArray(this, s, false, clazz);
     }
 }

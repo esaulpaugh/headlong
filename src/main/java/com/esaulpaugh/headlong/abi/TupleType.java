@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
+import com.esaulpaugh.headlong.util.SuperSerial;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -214,9 +215,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return new Tuple(elements);
     }
 
+    /**
+     * Parses RLP Object {@link com.esaulpaugh.headlong.rlp.util.Notation} as a {@link Tuple}.
+     *
+     * @param s the tuple's RLP object notation
+     * @return  the parsed tuple
+     * @see com.esaulpaugh.headlong.rlp.util.Notation
+     */
     @Override
-    public Tuple parseArgument(String s) {
-        throw new UnsupportedOperationException();
+    public Tuple parseArgument(String s) { // expects RLP object notation
+        return SuperSerial.deserialize(this, s, false);
     }
 
     /**
