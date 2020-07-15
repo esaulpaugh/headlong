@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 /**
  * An object to hold metadata about a base type. Metadata objects are stored in {@link #TYPE_INFO_MAP}.
