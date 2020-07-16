@@ -21,8 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
-
 /** Creates the appropriate {@link ABIType} object for a given type string. */
 final class TypeFactory {
 
@@ -44,58 +42,60 @@ final class TypeFactory {
         final Map<String, Supplier<ABIType<?>>> lambdaMap = new HashMap<>(256);
 
         for(int n = 8; n <= 32; n += 8) {
-            final int bitLen = n;
-            final String type = "int" + bitLen;
-            lambdaMap.put(type, () -> new IntType(type, bitLen, false));
+            mapInt(lambdaMap, "int" + n, n, false);
         }
         for(int n = 40; n <= 64; n += 8) {
-            final int bitLen = n;
-            final String type = "int" + bitLen;
-            lambdaMap.put(type, () -> new LongType(type, bitLen, false));
+            mapLong(lambdaMap, "int" + n, n, false);
         }
         for(int n = 72; n <= 256; n += 8) {
-            final int bitLen = n;
-            final String type = "int" + bitLen;
-            lambdaMap.put(type, () -> new BigIntegerType(type, bitLen, false));
+            mapBigInteger(lambdaMap, "int" + n, n, false);
         }
         lambdaMap.put("int", lambdaMap.get("int256"));
 
         for(int n = 8; n <= 24; n += 8) {
-            final int bitLen = n;
-            final String type = "uint" + bitLen;
-            lambdaMap.put(type, () -> new IntType(type, bitLen, true));
+            mapInt(lambdaMap, "uint" + n, n, true);
         }
         for(int n = 32; n <= 56; n += 8) {
-            final int bitLen = n;
-            final String type = "uint" + bitLen;
-            lambdaMap.put(type, () -> new LongType(type, bitLen, true));
+            mapLong(lambdaMap, "uint" + n, n, true);
         }
         for(int n = 64; n <= 256; n += 8) {
-            final int bitLen = n;
-            final String type = "uint" + bitLen;
-            lambdaMap.put(type, () -> new BigIntegerType(type, bitLen, true));
+            mapBigInteger(lambdaMap, "uint" + n, n, true);
         }
         lambdaMap.put("uint", lambdaMap.get("uint256"));
+        mapBigInteger(lambdaMap, "address", ADDRESS_BIT_LEN, true);
 
         for (int n = 1; n <= 32; n++) {
-            final int arrayLen = n;
-            final String type = "bytes" + arrayLen;
-            lambdaMap.put(type, () -> new ArrayType<>(type, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME));
+            mapStaticByteArray(lambdaMap, "bytes" + n, n);
         }
-        lambdaMap.put("function", () -> new ArrayType<>("function", ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, FUNCTION_BYTE_LEN, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME));
-
-        lambdaMap.put("bytes", () -> new ArrayType<>("bytes", ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME));
-        lambdaMap.put("string", () -> new ArrayType<>("string", ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME));
-        lambdaMap.put("address", () -> new BigIntegerType("address", ADDRESS_BIT_LEN, true));
-        lambdaMap.put("decimal", () -> new BigDecimalType("decimal", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
-        lambdaMap.put("bool", BooleanType::new);
+        mapStaticByteArray(lambdaMap, "function", FUNCTION_BYTE_LEN);
+        lambdaMap.put("bytes", () -> new ArrayType<>("bytes", ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, ArrayType.DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME));
+        lambdaMap.put("string", () -> new ArrayType<>("string", ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, ArrayType.DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME));
 
         lambdaMap.put("fixed128x18", () -> new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
         lambdaMap.put("ufixed128x18", () -> new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
         lambdaMap.put("fixed", lambdaMap.get("fixed128x18"));
         lambdaMap.put("ufixed", lambdaMap.get("ufixed128x18"));
+        lambdaMap.put("decimal", () -> new BigDecimalType("decimal", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
+
+        lambdaMap.put("bool", BooleanType::new);
 
         SUPPLIER_MAP = Collections.unmodifiableMap(lambdaMap);
+    }
+
+    private static void mapInt(Map<String, Supplier<ABIType<?>>> map, String type, int bitLen, boolean unsigned) {
+        map.put(type, () -> new IntType(type, bitLen, unsigned));
+    }
+
+    private static void mapLong(Map<String, Supplier<ABIType<?>>> map, String type, int bitLen, boolean unsigned) {
+        map.put(type, () -> new LongType(type, bitLen, unsigned));
+    }
+
+    private static void mapBigInteger(Map<String, Supplier<ABIType<?>>> map, String type, int bitLen, boolean unsigned) {
+        map.put(type, () -> new BigIntegerType(type, bitLen, unsigned));
+    }
+
+    private static void mapStaticByteArray(Map<String, Supplier<ABIType<?>>> map, String type, int arrayLen) {
+        map.put(type, () -> new ArrayType<>(type, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME));
     }
 
     static ABIType<?> create(String rawType, String name) {
@@ -118,8 +118,8 @@ final class TypeFactory {
 
                 final ABIType<?> elementType = buildType(rawType.substring(0, arrayOpenIndex), baseType);
                 final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
-                final int length = arrayOpenIndex == secondToLastCharIndex ? DYNAMIC_LENGTH : parseLen(rawType, arrayOpenIndex + 1, lastCharIndex);
-                final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
+                final int length = arrayOpenIndex == secondToLastCharIndex ? ArrayType.DYNAMIC_LENGTH : parseLen(rawType, arrayOpenIndex + 1, lastCharIndex);
+                final boolean dynamic = length == ArrayType.DYNAMIC_LENGTH || elementType.dynamic;
                 final String arrayClassName = elementType.arrayClassName();
                 @SuppressWarnings("unchecked")
                 final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
