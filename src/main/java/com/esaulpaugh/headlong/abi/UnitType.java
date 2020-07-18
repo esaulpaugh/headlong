@@ -66,6 +66,11 @@ public abstract class UnitType<V> extends ABIType<V> { // V generally extends Nu
         return nextOffset;
     }
 
+    @Override
+    void encodeTail(Object value, ByteBuffer dest) {
+        throw new UnsupportedOperationException();
+    }
+
     final void validatePrimitive(long longVal) {
         checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
         if (unsigned && longVal < 0) {

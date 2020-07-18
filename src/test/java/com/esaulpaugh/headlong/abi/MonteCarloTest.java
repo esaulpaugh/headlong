@@ -129,8 +129,6 @@ public class MonteCarloTest {
 
     private static class MonteCarloTask extends RecursiveAction {
 
-        private static final long serialVersionUID = -4228469691073264266L;
-
         private static final int THRESHOLD = 10_000;
 
         final MonteCarloTestCase testCase;
