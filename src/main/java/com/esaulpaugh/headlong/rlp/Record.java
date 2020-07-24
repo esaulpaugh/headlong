@@ -85,7 +85,7 @@ public final class Record {
             throw new IllegalArgumentException("unconsumed trailing bytes");
         }
         Record record = new Record(rlpList);
-        RLPItem signatureItem = record.getSignature();
+        RLPString signatureItem = record.getSignature();
         byte[] content = record.getContentBytes(signatureItem.endIndex);
         verifier.verify(signatureItem.asBytes(), content); // verify signature
         return record;
@@ -95,8 +95,8 @@ public final class Record {
         return rlp;
     }
 
-    public RLPItem getSignature() {
-        return getRLP().iterator(RLP_STRICT).next();
+    public RLPString getSignature() {
+        return getRLP().iterator(RLP_STRICT).next().asRLPString();
     }
 
     public RLPList getContent() {
