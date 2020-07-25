@@ -158,6 +158,7 @@ public final class Function implements ABIObject {
         return hashAlgorithm;
     }
 
+    @Override
     public String getCanonicalSignature() {
         return name != null
                 ? name + inputTypes.canonicalType

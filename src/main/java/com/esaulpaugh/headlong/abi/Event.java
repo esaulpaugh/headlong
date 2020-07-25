@@ -66,7 +66,8 @@ public final class Event implements ABIObject {
         return anonymous;
     }
 
-    public String signature() {
+    @Override
+    public String getCanonicalSignature() {
         return name + inputs.canonicalType;
     }
 
