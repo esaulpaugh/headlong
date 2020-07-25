@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -70,6 +71,14 @@ public final class ABIJSON {
         GSON_PRETTY = builder
                 .setPrettyPrinting()
                 .create();
+    }
+
+    public static Function parseFunction(String objectJson) {
+        return (Function) parseABIObject(objectJson);
+    }
+
+    public static Event parseEvent(String objectJson) {
+        return (Event) parseABIObject(objectJson);
     }
 
     public static ABIObject parseABIObject(String objectJson) {
