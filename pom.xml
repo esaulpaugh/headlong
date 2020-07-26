@@ -84,8 +84,17 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
+                            <Implementation-Title>${project.name}</Implementation-Title>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Created-By>${project.groupId}</Created-By>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <Build-Tool>${maven.build.version}</Build-Tool>
+                            <Build-Time>${maven.build.timestamp}</Build-Time>
                             <Automatic-Module-Name>${project.name}</Automatic-Module-Name>
                         </manifestEntries>
+                        <manifest>
+                            <addDefaultEntries>false</addDefaultEntries>
+                        </manifest>
                     </archive>
                 </configuration>
             </plugin>

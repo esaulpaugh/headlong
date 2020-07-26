@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+
 plugins {
     id 'java-library'
     id 'maven-publish'
@@ -11,7 +13,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 compileJava {
-    options.compilerArgs.addAll(['--release', '8'])
+//    options.compilerArgs.addAll(['--release', '8'])
 }
 
 test {
@@ -31,12 +33,19 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     finalizedBy(javadocJar)
 }
 
+def getDateTime() {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
+    sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
+    return sdf.format(new Date()) + "T00:00:00Z"
+}
+
 jar {
     manifest {
         attributes(
                 'Implementation-Title': project.name,
                 'Implementation-Version': project.version,
-                'Automatic-Module-Name': project.name
+                'Automatic-Module-Name': project.name,
+                'Build-Time': getDateTime()
         )
     }
     finalizedBy(sourcesJar)
