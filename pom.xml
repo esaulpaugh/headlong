@@ -21,6 +21,7 @@
         <argLine>-Dfile.encoding=UTF-8</argLine>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jmh.version>1.23</jmh.version>
+        <maven.build.timestamp.format>MMMMM d yyyy</maven.build.timestamp.format>
     </properties>
 
     <dependencies>
@@ -83,9 +84,19 @@
                 <version>3.2.0</version>
                 <configuration>
                     <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
                         <manifestEntries>
+                            <Implementation-Title>${project.name}</Implementation-Title>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Created-By>${project.groupId}</Created-By>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <Build-Tool>${maven.build.version}</Build-Tool>
+                            <Build-Date>${maven.build.timestamp}</Build-Date>
                             <Automatic-Module-Name>${project.name}</Automatic-Module-Name>
                         </manifestEntries>
+                        <manifest>
+                            <addDefaultEntries>false</addDefaultEntries>
+                        </manifest>
                     </archive>
                 </configuration>
             </plugin>
