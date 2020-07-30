@@ -380,15 +380,13 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private Object decodeByteArray(ByteBuffer bb, int arrayLen) {
-        final int mark = bb.position();
         byte[] data = new byte[arrayLen];
-        bb.get(data);
         byte[] padding = new byte[Integers.roundLengthUp(arrayLen, UNIT_LENGTH_BYTES) - arrayLen];
+        bb.get(data);
         bb.get(padding);
         for (byte b : padding) {
             if(b != Encoding.ZERO_BYTE) throw new IllegalArgumentException("malformed array: non-zero padding byte");
         }
-        bb.position(mark + Integers.roundLengthUp(arrayLen, UNIT_LENGTH_BYTES));
         return encodeIfString(data);
     }
 
