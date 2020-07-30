@@ -39,10 +39,31 @@ public class DecodeTest {
             + "7730307400000000000000000000000000000000000000000000000000000000"
     );
 
+    private static final byte[] BAD_PADDING_A = Strings.decode(
+            "0000000000000000000000000000000000000000000000000000000000000045"
+                    + "0000000000000000000000000000000000000000000000000000000000000020"
+                    + "0000000000000000000000000000000000000000000000000000000000000004"
+                    + "7730307480000000000000000000000000000000000000000000000000000000"
+    );
+
+    private static final byte[] BAD_PADDING_B = Strings.decode(
+            "0000000000000000000000000000000000000000000000000000000000000045"
+                    + "0000000000000000000000000000000000000000000000000000000000000020"
+                    + "0000000000000000000000000000000000000000000000000000000000000004"
+                    + "7730307400000000000000000000000200000000000000000000000000000000"
+    );
+
+    private static final byte[] BAD_PADDING_C = Strings.decode(
+            "0000000000000000000000000000000000000000000000000000000000000045"
+                    + "0000000000000000000000000000000000000000000000000000000000000020"
+                    + "0000000000000000000000000000000000000000000000000000000000000004"
+                    + "7730307400000000000000000000000000000000000000000000000000000001"
+    );
+
     private static final Tuple EXPECTED = new Tuple(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
 
     @Test
-    public void testDecode() {
+    public void testDecode() throws Throwable {
 
         Tuple decoded = FUNCTION.decodeReturn(RETURN_BYTES);
         assertEquals(EXPECTED, decoded);
@@ -55,6 +76,10 @@ public class DecodeTest {
 
         decoded = TupleType.parseElements("ufixed,string").decode(ByteBuffer.wrap(RETURN_BYTES));
         assertEquals(EXPECTED, decoded);
+
+        assertThrown(IllegalArgumentException.class, "malformed array: non-zero padding byte", () -> FUNCTION.decodeReturn(BAD_PADDING_A));
+        assertThrown(IllegalArgumentException.class, "malformed array: non-zero padding byte", () -> FUNCTION.decodeReturn(BAD_PADDING_B));
+        assertThrown(IllegalArgumentException.class, "malformed array: non-zero padding byte", () -> FUNCTION.decodeReturn(BAD_PADDING_C));
     }
 
     @Test
