@@ -3,6 +3,7 @@ package com.esaulpaugh.headlong.jmh;
 import com.esaulpaugh.headlong.jmh.abi.MeasureFunction;
 import com.esaulpaugh.headlong.jmh.abi.MeasurePadding;
 import com.esaulpaugh.headlong.jmh.rlp.MeasureKeyValuePairSort;
+import com.esaulpaugh.headlong.jmh.util.MeasureBase64;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -15,6 +16,7 @@ public class Main {
                 .include(MeasureFunction.class.getSimpleName())
                 .include(MeasureKeyValuePairSort.class.getSimpleName())
                 .include(MeasurePadding.class.getSimpleName())
+                .include(MeasureBase64.class.getSimpleName())
                 .warmupForks(1)
                 .warmupIterations(1)
                 .forks(1)

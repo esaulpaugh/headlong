@@ -25,6 +25,7 @@
                     <include>com/esaulpaugh/headlong/**</include>
                     <include>com/google/gson/**</include>
                     <include>com/joemelsha/crypto/hash/Keccak.class</include>
+                    <include>com/migcomponents/migbase64/Base64.class</include>
 
                     <include>joptsimple/*.class</include>
                     <include>joptsimple/internal/*.class</include>
@@ -126,8 +127,10 @@
             <includes>
                 <include>com/esaulpaugh/headlong/jmh/abi/*.class</include>
                 <include>com/esaulpaugh/headlong/jmh/rlp/*.class</include>
+                <include>com/esaulpaugh/headlong/jmh/util/*.class</include>
                 <include>com/esaulpaugh/headlong/jmh/abi/generated/*.class</include>
                 <include>com/esaulpaugh/headlong/jmh/rlp/generated/*.class</include>
+                <include>com/esaulpaugh/headlong/jmh/util/generated/*.class</include>
                 <include>org/openjdk/jmh/*.class</include>
                 <include>META-INF/BenchmarkList</include>
                 <include>META-INF/CompilerHints</include>
