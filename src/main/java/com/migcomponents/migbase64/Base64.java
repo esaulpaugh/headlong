@@ -72,42 +72,52 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
      * @return          a Base64-encoded array. Never <code>null</code>.
      */
     public static byte[] encodeToBytes(final byte[] buffer, final int bytesOff, final int bytesLen, final int flags) {
-        final boolean noPad = (flags & NO_PADDING) != 0;
-        final boolean noLineSep = (flags & NO_LINE_SEP) != 0;
-        final char[] table = (flags & URL_SAFE_CHARS) != 0 ? TABLE_URL_SAFE : TABLE_STANDARD;
-
         final int bytesChunks = bytesLen / 3;
         final int bytesEvenLen = bytesChunks * 3;
         final int bytesRemainder = bytesLen - bytesEvenLen; // bytesLen % 3; // [0,2]
-        final int charsRemainder = bytesRemainder == 1 ? 2 : bytesRemainder == 2 ? 3 : 0;
-
-        final int rawLen = (bytesChunks << 2) + (noPad ? charsRemainder : (charsRemainder != 0) ? 4 : 0);
-        final int outLen = noLineSep ? rawLen : rawLen + (((rawLen - 1) / 76) << 1);
-        final byte[] out = new byte[outLen];
-
-        final int lineSepLim = outLen - 2;
+        int charsLeft = 0;
+        int rawLen = bytesChunks * 4;
+        if ((flags & NO_PADDING) != 0) {
+            switch (bytesRemainder) {
+            case 2: charsLeft = 3; break;
+            case 1: charsLeft = 2;
+            }
+            rawLen += charsLeft;
+        } else if (bytesRemainder > 0) {
+            rawLen += charsLeft = 4;
+        }
+        final boolean lineSep = (flags & NO_LINE_SEP) == 0;
+        final char[] table = (flags & URL_SAFE_CHARS) != 0 ? TABLE_URL_SAFE : TABLE_STANDARD;
         final int endEvenBytes = bytesOff + bytesEvenLen; // End of even 24-bits chunks
-        for (int i = bytesOff, o = 0, chungus = 0; i < endEvenBytes; ) {
+        byte[] out = new byte[lineSep ? rawLen + (((rawLen - 1) / 76) * 2) : rawLen];
+        encodeChunks(buffer, bytesOff, lineSep, table, endEvenBytes, out);
+        return encodeRemainder(buffer, bytesRemainder, charsLeft, table, endEvenBytes, out);
+    }
+
+    private static void encodeChunks(byte[] buffer, int i, boolean lineSep, char[] table, int end, byte[] out) {
+        final int lineSepLim = out.length - 2;
+        for (int o = 0, chungus = 0; i < end; ) {
             final int v = (buffer[i++] & 0xff) << 16 | (buffer[i++] & 0xff) << 8 | (buffer[i++] & 0xff);
             out[o++] = (byte) table[v >>> 18]; // (v >>> 18) & 0x3f
             out[o++] = (byte) table[(v >>> 12) & 0x3f];
             out[o++] = (byte) table[(v >>> 6) & 0x3f];
             out[o++] = (byte) table[v & 0x3f];
-            if (!noLineSep && ++chungus == 19 /* big */ && o < lineSepLim) {
+            if (lineSep && ++chungus == 19 /* big */ && o < lineSepLim) {
                 out[o++] = '\r';
                 out[o++] = '\n';
                 chungus = 0;
             }
         }
-        // Encode remaining bytes (if any)
+    }
+
+    private static byte[] encodeRemainder(byte[] buffer, int numBytes, int numChars, char[] table, int endEvenBytes, byte[] out) {
         int v = 0;
         char thirdChar = '=';
-        switch (bytesRemainder) { /* cases fall through */
-        case 2: v |= (buffer[endEvenBytes + 1] & 0xff) << 2; thirdChar = table[v & 0x3f];
+        switch (numBytes) { /* cases fall through */
+        case 2: v = (buffer[endEvenBytes + 1] & 0xff) << 2; thirdChar = table[v & 0x3f];
         case 1: v |= (buffer[endEvenBytes] & 0xff) << 10;
-            final int charsLeft = noPad ? charsRemainder : charsRemainder + (3 - bytesRemainder); // plus equals signs
-            final int charsIdx = outLen - charsLeft;
-            switch (charsLeft) { /* cases fall through */
+            final int charsIdx = out.length - numChars;
+            switch (numChars) { /* cases fall through */
             case 4: out[charsIdx + 3] = (byte) '=';
             case 3: out[charsIdx + 2] = (byte) thirdChar;
             case 2: out[charsIdx + 1] = (byte) table[(v >> 6) & 0x3f];
