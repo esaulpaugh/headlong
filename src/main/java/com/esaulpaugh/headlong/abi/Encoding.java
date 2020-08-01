@@ -27,7 +27,7 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 final class Encoding {
 
     static final int OFFSET_LENGTH_BYTES = UNIT_LENGTH_BYTES;
-    static final IntType OFFSET_TYPE = new IntType("uint256", Integer.SIZE, true);
+    static final IntType OFFSET_TYPE = new IntType("uint31", Integer.SIZE - 1, true);
 
     private static final byte NEGATIVE_ONE_BYTE = (byte) 0xFF;
     static final byte ZERO_BYTE = (byte) 0x00;
