@@ -379,7 +379,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public static String format(byte[] abi, LabelMaker labelMaker) {
-        Integers.checkIsMultiple(abi.length, UNIT_LENGTH_BYTES);
+        Integers.checkIsMultiple(abi.length, UNIT_LENGTH_BYTES); // TODO remove check to support leniently sized encodings
         StringBuilder sb = new StringBuilder();
         int idx = 0;
         while(idx < abi.length) {
