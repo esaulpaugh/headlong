@@ -446,7 +446,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                 offsets[i] = Encoding.OFFSET_TYPE.decode(bb, unitBuffer);
             }
             for (int i = 0; i < len; i++) {
-                if (offsets[i] > 0) {
+                if (offsets[i] != 0) {
                     /* OPERATES IN STRICT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
 //                    if (bb.position() != index + offset) {
 //                        System.err.println(ArrayType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
