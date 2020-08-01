@@ -100,8 +100,8 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
             }
         }
         // Encode remaining bytes (if any)
-        char thirdChar = '=';
         int v = 0;
+        char thirdChar = '=';
         switch (bytesRemainder) { /* cases fall through */
         case 2: v |= (buffer[endEvenBytes + 1] & 0xff) << 2; thirdChar = table[v & 0x3f];
         case 1: v |= (buffer[endEvenBytes] & 0xff) << 10;
@@ -111,9 +111,9 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
             case 4: out[charsIdx + 3] = (byte) '=';
             case 3: out[charsIdx + 2] = (byte) thirdChar;
             case 2: out[charsIdx + 1] = (byte) table[(v >> 6) & 0x3f];
-            default: out[charsIdx] = (byte) table[v >> 12]; // (v >> 12) & 0x3f
+            default:out[charsIdx]     = (byte) table[v >> 12]; // (v >> 12) & 0x3f
             }
+        default: return out;
         }
-        return out;
     }
 }
