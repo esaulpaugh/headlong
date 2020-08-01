@@ -61,13 +61,28 @@ public class DecodeTest {
                     + "7730307400000000000000000000000000000000000000000000000000000001"
     );
 
+    private static final Tuple RETURN_ARGS = Tuple.of(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
+
     private static final Tuple EXPECTED = new Tuple(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
+
+    @Test
+    public void testLenient() {
+        final byte[] lenientBytes = Strings.decode(
+                  "0000000000000000000000000000000000000000000000000000000000000045"
+                + "00000000000000000000000000000000000000000000000000000000000000a0"
+                + "0000000000000000000000000000000000000000000000000000000000000000"
+                + "0000000000000000000000000000000000000000000000000000000000000000"
+                + "0000000000000000000000000000000000000000000000000000000000000000"
+                + "0000000000000000000000000000000000000000000000000000000000000004"
+                + "7730307400000000000000000000000000000000000000000000000000000000");
+
+        assertEquals(RETURN_ARGS, FUNCTION.decodeReturn(lenientBytes));
+    }
 
     @Test
     public void testDecode() throws Throwable {
 
-        ByteBuffer bb = FUNCTION.getOutputTypes().encode(Tuple.of(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t"));
-        assertArrayEquals(bb.array(), RETURN_BYTES);
+        assertArrayEquals(FUNCTION.getOutputTypes().encode(RETURN_ARGS).array(), RETURN_BYTES);
 
         Tuple decoded = FUNCTION.decodeReturn(RETURN_BYTES);
         assertEquals(EXPECTED, decoded);

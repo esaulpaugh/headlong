@@ -191,7 +191,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 elements[i] = elementTypes[i].decode(bb, unitBuffer);
             }
         } else {
-//        final int index = bb.position(); // *** save this value here if you want to support lenient mode below
+            final int index = bb.position(); // save this value for later
             final int[] offsets = new int[len];
             for (int i = 0; i < len; i++) {
                 ABIType<?> elementType = elementTypes[i];
@@ -202,12 +202,12 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 }
             }
             for (int i = 0; i < len; i++) {
-                if (offsets[i] > 0) {
-                    /* OPERATES IN STRICT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-//                if(bb.position() != index + offset) {
-//                    System.err.println(TupleType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
-//                    bb.position(index + offset); // lenient
-//                }
+                final int offset = offsets[i];
+                if (offset != 0) {
+                    /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
+                    if(bb.position() != index + offset) {
+                        bb.position(index + offset); // lenient
+                    }
                     elements[i] = elementTypes[i].decode(bb, unitBuffer);
                 }
             }
