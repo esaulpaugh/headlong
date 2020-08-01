@@ -89,12 +89,24 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
         final boolean lineSep = (flags & NO_LINE_SEP) == 0;
         final char[] table = (flags & URL_SAFE_CHARS) != 0 ? TABLE_URL_SAFE : TABLE_STANDARD;
         final int endEvenBytes = bytesOff + bytesEvenLen; // End of even 24-bits chunks
-        byte[] out = new byte[lineSep ? rawLen + (((rawLen - 1) / 76) * 2) : rawLen];
-        encodeChunks(buffer, bytesOff, lineSep, table, endEvenBytes, out);
+        byte[] out = lineSep
+                ? encodeChunksLineSep(buffer, bytesOff, table, endEvenBytes, new byte[rawLen + (((rawLen - 1) / 76) * 2)])
+                : encodeChunks(buffer, bytesOff, table, endEvenBytes, new byte[rawLen]);
         return encodeRemainder(buffer, bytesRemainder, charsLeft, table, endEvenBytes, out);
     }
 
-    private static void encodeChunks(byte[] buffer, int i, boolean lineSep, char[] table, int end, byte[] out) {
+    private static byte[] encodeChunks(byte[] buffer, int i, char[] table, int end, byte[] out) {
+        for (int o = 0; i < end; ) {
+            final int v = (buffer[i++] & 0xff) << 16 | (buffer[i++] & 0xff) << 8 | (buffer[i++] & 0xff);
+            out[o++] = (byte) table[v >>> 18]; // (v >>> 18) & 0x3f
+            out[o++] = (byte) table[(v >>> 12) & 0x3f];
+            out[o++] = (byte) table[(v >>> 6) & 0x3f];
+            out[o++] = (byte) table[v & 0x3f];
+        }
+        return out;
+    }
+
+    private static byte[] encodeChunksLineSep(byte[] buffer, int i, char[] table, int end, byte[] out) {
         final int lineSepLim = out.length - 2;
         for (int o = 0, chungus = 0; i < end; ) {
             final int v = (buffer[i++] & 0xff) << 16 | (buffer[i++] & 0xff) << 8 | (buffer[i++] & 0xff);
@@ -102,12 +114,13 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
             out[o++] = (byte) table[(v >>> 12) & 0x3f];
             out[o++] = (byte) table[(v >>> 6) & 0x3f];
             out[o++] = (byte) table[v & 0x3f];
-            if (lineSep && ++chungus == 19 /* big */ && o < lineSepLim) {
+            if (++chungus == 19 /* big */ && o < lineSepLim) {
                 out[o++] = '\r';
                 out[o++] = '\n';
                 chungus = 0;
             }
         }
+        return out;
     }
 
     private static byte[] encodeRemainder(byte[] buffer, int numBytes, int numChars, char[] table, int endEvenBytes, byte[] out) {
