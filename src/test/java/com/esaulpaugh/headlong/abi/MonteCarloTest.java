@@ -35,6 +35,8 @@ import java.io.WriteAbortedException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.TimeUnit;
@@ -52,17 +54,18 @@ public class MonteCarloTest {
         System.out.println("MASTER SEED: " + masterSeed + "L");
 
         final int numProcessors = Runtime.getRuntime().availableProcessors();
-        final GambleGambleThread[] threads = new GambleGambleThread[numProcessors];
+        final GambleGambleRunnable[] runnables = new GambleGambleRunnable[numProcessors];
         final int workPerProcessor = N / numProcessors;
+        final ExecutorService pool = Executors.newFixedThreadPool(numProcessors);
         int i = 0;
-        while (i < threads.length) {
-            (threads[i] = new GambleGambleThread(masterSeed + (i++), workPerProcessor))
-                    .start();
+        while (i < runnables.length) {
+            pool.submit(runnables[i] = new GambleGambleRunnable(masterSeed + (i++), workPerProcessor));
         }
-        for (GambleGambleThread thread : threads) {
-            thread.join();
-            if(thread.thrown != null) {
-                throw new AssertionError(thread.thrown);
+        pool.shutdown();
+        pool.awaitTermination(300L, TimeUnit.SECONDS);
+        for (GambleGambleRunnable runnable : runnables) {
+            if(runnable.thrown != null) {
+                throw new AssertionError(runnable.thrown);
             }
         }
 
@@ -106,9 +109,9 @@ public class MonteCarloTest {
         System.out.println(desc);
     }
 
-    private static class GambleGambleThread extends Thread {
+    private static class GambleGambleRunnable implements Runnable {
 
-        private GambleGambleThread(long seed, int n) {
+        private GambleGambleRunnable(long seed, int n) {
             this.seed = seed;
             this.n = n;
         }
@@ -190,36 +193,29 @@ public class MonteCarloTest {
         System.out.println(two);
         final MonteCarloTask task = new MonteCarloTask(one, 0, 308_011);
 
-        final int numProcessors = Runtime.getRuntime().availableProcessors();
-
-        Thread[] threads = new Thread[numProcessors - 1];
-        final int threadsLen = threads.length;
-        for (int i = 0; i < threadsLen; i++) {
-            threads[i] = new Thread(() -> {
+        final int parallelism = Runtime.getRuntime().availableProcessors();
+        final ExecutorService threadPool = Executors.newFixedThreadPool(parallelism);
+        for (int i = 0; i < parallelism; i++) {
+            threadPool.submit(() -> {
                 for (int j = 0; j < 500; j++)
                     two.runStandard();
             });
         }
 
-        ForkJoinPool pool = new ForkJoinPool();
+        ForkJoinPool fjPool = new ForkJoinPool();
 
-        for (Thread thread : threads) {
-            thread.start();
-        }
-
-        pool.invoke(task);
+        fjPool.invoke(task);
 
         for (int j = 0; j < 500; j++)
             two.runStandard();
 
-        pool.shutdown();
-        if(!pool.awaitTermination(10, TimeUnit.SECONDS)) {
+        fjPool.shutdown();
+        if(!fjPool.awaitTermination(10, TimeUnit.SECONDS)) {
             throw new TimeoutException("not very Timely!!");
         }
 
-        for (Thread thread : threads) {
-            thread.join();
-        }
+        threadPool.shutdown();
+        threadPool.awaitTermination(20L, TimeUnit.SECONDS);
     }
 
     @Test

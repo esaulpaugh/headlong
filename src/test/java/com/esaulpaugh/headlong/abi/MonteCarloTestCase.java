@@ -26,6 +26,7 @@ import com.google.gson.JsonPrimitive;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -169,8 +170,34 @@ public class MonteCarloTestCase {
     }
 
     void runStandard(Tuple args) {
-        if(!args.equals(function.decodeCall((ByteBuffer) function.encodeCall(args).flip()))) {
+        ByteBuffer bb = function.encodeCall(args);
+        if (!args.equals(function.decodeCall((ByteBuffer) bb.flip()))) {
             throw new IllegalArgumentException(seed + " " + function.getCanonicalSignature() + " " + args);
+        }
+//        fuzzDecode(args, bb);
+    }
+
+    private void fuzzDecode(Tuple args, ByteBuffer bb) {
+        byte[] babar = bb.array();
+        int idx = new Random(seed + 1).nextInt(babar.length);
+        babar[idx]++;
+        boolean equal = false;
+        try {
+            equal = args.equals(function.decodeCall(babar));
+        } catch (BufferUnderflowException | IllegalArgumentException e) {
+            /* do nothing */
+        } catch (Throwable t) {
+            t.printStackTrace();
+            throw new Error(t);
+        }
+        if (equal) {
+            try {
+                Thread.sleep(new Random(seed + 2).nextInt(50)); // deconflict timing of writes to System.err below
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.err.println(function.getParamTypes() + "\n" + Function.formatCall(babar) + "\nidx=" + idx);
+            throw new IllegalArgumentException("idx=" + idx + " " + seed + " " + function.getCanonicalSignature() + " " + args);
         }
     }
 
