@@ -346,17 +346,20 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         final int arrayLen = length == DYNAMIC_LENGTH
                 ? ARRAY_LENGTH_TYPE.decode(bb, unitBuffer)
                 : length;
-
-        switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return (J) decodeBooleanArray(bb, arrayLen, unitBuffer);
-        case TYPE_CODE_BYTE: return (J) decodeByteArray(bb, arrayLen);
-        case TYPE_CODE_INT: return (J) decodeIntArray((IntType) elementType, bb, arrayLen, unitBuffer);
-        case TYPE_CODE_LONG: return (J) decodeLongArray((LongType) elementType, bb, arrayLen, unitBuffer);
-        case TYPE_CODE_BIG_INTEGER: return (J) decodeBigIntegerArray((BigIntegerType) elementType, bb, arrayLen, unitBuffer);
-        case TYPE_CODE_BIG_DECIMAL: return (J) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, unitBuffer);
-        case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return (J) decodeObjectArray(arrayLen, bb, unitBuffer);
-        default: throw new Error();
+        try {
+            switch (elementType.typeCode()) {
+            case TYPE_CODE_BOOLEAN: return (J) decodeBooleanArray(bb, arrayLen, unitBuffer);
+            case TYPE_CODE_BYTE: return (J) decodeByteArray(bb, arrayLen);
+            case TYPE_CODE_INT: return (J) decodeIntArray((IntType) elementType, bb, arrayLen, unitBuffer);
+            case TYPE_CODE_LONG: return (J) decodeLongArray((LongType) elementType, bb, arrayLen, unitBuffer);
+            case TYPE_CODE_BIG_INTEGER: return (J) decodeBigIntegerArray((BigIntegerType) elementType, bb, arrayLen, unitBuffer);
+            case TYPE_CODE_BIG_DECIMAL: return (J) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, unitBuffer);
+            case TYPE_CODE_ARRAY:
+            case TYPE_CODE_TUPLE: return (J) decodeObjectArray(arrayLen, bb, unitBuffer);
+            default: throw new Error();
+            }
+        } catch(NegativeArraySizeException nase) {
+            throw new IllegalArgumentException(nase);
         }
     }
 
