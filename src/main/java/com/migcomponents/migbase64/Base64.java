@@ -90,9 +90,9 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
         }
         final byte[] table = (flags & URL_SAFE_CHARS) != 0 ? TABLE_URL_SAFE : TABLE_STANDARD;
         final int endEvenBytes = bytesOff + bytesEvenLen; // End of even 24-bits chunks
-        byte[] out = (flags & NO_LINE_SEP) == 0
-                ? encodeChunksLineSep(buffer, bytesOff, table, endEvenBytes, new byte[rawLen + (((rawLen - 1) / 76) * 2)])
-                : encodeChunks(buffer, bytesOff, table, endEvenBytes, new byte[rawLen]);
+        byte[] out = (flags & NO_LINE_SEP) != 0
+                ? encodeChunks(buffer, bytesOff, table, endEvenBytes, new byte[rawLen])
+                : encodeChunksLineSep(buffer, bytesOff, table, endEvenBytes, new byte[rawLen + (((rawLen - 1) / 76) * 2)]);
         return encodeRemainder(buffer, bytesRemainder, charsLeft, table, endEvenBytes, out);
     }
 

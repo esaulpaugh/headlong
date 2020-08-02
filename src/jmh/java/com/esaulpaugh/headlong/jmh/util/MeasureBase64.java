@@ -19,26 +19,28 @@ import com.esaulpaugh.headlong.util.Strings;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 
 import java.util.Base64;
+import java.util.Random;
 
 @State(Scope.Thread)
 public class MeasureBase64 {
 
-    private static final byte[] BASE_64 = Base64.getUrlDecoder().decode("-IS4QHCYrYZbAKWCBRlAy5zzaDZXJBGkcnh4MHcBFZntXNFrdvJjX04jRzjzCBOonrkTfj499SZuOh8R33Ls8RRcy5wBgmlkgnY0gmlwhH8AAAGJc2VjcDI1NmsxoQPKY0yuDUmstAHYpMa2_oxVtw0RW_QAdpzBQA8yWM0xOIN1ZHCCdl8");
+    private static final byte[] SMALL = Base64.getUrlDecoder().decode("-IS4QHCYrYZbAKWCBRlAy5zzaDZXJBGkcnh4MHcBFZntXNFrdvJjX04jRzjzCBOonrkTfj499SZuOh8R33Ls8RRcy5wBgmlkgnY0gmlwhH8AAAGJc2VjcDI1NmsxoQPKY0yuDUmstAHYpMa2_oxVtw0RW_QAdpzBQA8yWM0xOIN1ZHCCdl8");
 
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = 5)
-    public void javaUtilBase64() {
-        Base64.getUrlEncoder().encode(BASE_64);
+    private static final byte[] LARGE = new byte[500_000];
+
+    @Setup(Level.Trial)
+    public void setUp() {
+        new Random(System.currentTimeMillis() + System.nanoTime())
+                .nextBytes(LARGE);
     }
 
     @Benchmark
@@ -46,7 +48,34 @@ public class MeasureBase64 {
     @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
     @Measurement(iterations = 5)
-    public void myBase64() {
-        com.migcomponents.migbase64.Base64.encodeToBytes(BASE_64, 0, BASE_64.length, Strings.URL_SAFE_FLAGS);
+    public void javaUtilSmall() {
+        Base64.getUrlEncoder().encode(SMALL);
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.Throughput)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = 5)
+    public void headlongSmall() {
+        com.migcomponents.migbase64.Base64.encodeToBytes(SMALL, 0, SMALL.length, Strings.URL_SAFE_FLAGS);
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.Throughput)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = 5)
+    public void javaUtilLarge() {
+        Base64.getUrlEncoder().encode(LARGE);
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.Throughput)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = 5)
+    public void headlongLarge() {
+        com.migcomponents.migbase64.Base64.encodeToBytes(LARGE, 0, LARGE.length, Strings.URL_SAFE_FLAGS);
     }
 }
