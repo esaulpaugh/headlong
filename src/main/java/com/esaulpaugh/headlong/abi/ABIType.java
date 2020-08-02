@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import java.nio.ByteBuffer;
+import java.util.function.Consumer;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
@@ -112,6 +113,19 @@ public abstract class ABIType<J> {
      * @throws IllegalArgumentException if the data is malformed
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
+
+    static void decodeTail(ByteBuffer bb, int[] offsets, int tailStart, Consumer<Integer> elementDecoder) {
+        for (int i = 0; i < offsets.length; i++) {
+            final int offset = offsets[i];
+            if (offset >= 0x20) {
+                /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
+                if (tailStart + offset > bb.position()) {
+                    bb.position(tailStart + offset); // leniently jump to specified offset
+                }
+                elementDecoder.accept(i);
+            }
+        }
+    }
 
     /**
      * Parses and validates a string representation of J. Not supported by {@link ArrayType}, {@link TupleType}.

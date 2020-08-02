@@ -201,16 +201,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     offsets[i] = Encoding.OFFSET_TYPE.decode(bb, unitBuffer);
                 }
             }
-            for (int i = 0; i < len; i++) {
-                final int offset = offsets[i];
-                if (offset != 0) {
-                    /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-                    if(bb.position() != tailStart + offset) {
-                        bb.position(tailStart + offset); // leniently jump to specified offset
-                    }
-                    elements[i] = elementTypes[i].decode(bb, unitBuffer);
-                }
-            }
+            decodeTail(bb, offsets, tailStart, (i) -> elements[i] = elementTypes[i].decode(bb, unitBuffer));
         }
         return new Tuple(elements);
     }

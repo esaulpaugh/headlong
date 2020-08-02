@@ -434,10 +434,10 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private Object[] decodeObjectArray(int len, ByteBuffer bb, byte[] unitBuffer) {
-        final Object[] dest = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
+        final Object[] elements = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
         if(!this.dynamic || !elementType.dynamic) {
             for (int i = 0; i < len; i++) {
-                dest[i] = elementType.decode(bb, unitBuffer);
+                elements[i] = elementType.decode(bb, unitBuffer);
             }
         } else {
             final int tailStart = bb.position(); // save this value for later
@@ -445,18 +445,9 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
             for (int i = 0; i < len; i++) {
                 offsets[i] = Encoding.OFFSET_TYPE.decode(bb, unitBuffer);
             }
-            for (int i = 0; i < len; i++) {
-                final int offset = offsets[i];
-                if (offset != 0) {
-                    /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-                    if (bb.position() != tailStart + offset) {
-                        bb.position(tailStart + offset); // leniently jump to specified offset
-                    }
-                    dest[i] = elementType.decode(bb, unitBuffer);
-                }
-            }
+            decodeTail(bb, offsets, tailStart, (i) -> elements[i] = elementType.decode(bb, unitBuffer));
         }
-        return dest;
+        return elements;
     }
 
     /**
