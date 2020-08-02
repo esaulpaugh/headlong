@@ -30,8 +30,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class TestUtils {
+
+    public static ThreadLocalRandom threadLocalRandom() {
+        return ThreadLocalRandom.current();
+    }
 
     public static Random seededRandom() {
         return new Random(TestUtils.getSeed(System.nanoTime()));

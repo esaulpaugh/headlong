@@ -184,7 +184,7 @@ public class MonteCarloTest {
     @Test
     public void testThreadSafety() throws InterruptedException, TimeoutException {
 
-        final Random r = new Random();
+        final Random r = TestUtils.seededRandom();
         final Keccak k = new Keccak(256);
         final MonteCarloTestCase one = newComplexTestCase(r, k);
         final MonteCarloTestCase two = newComplexTestCase(r, k);
@@ -220,7 +220,7 @@ public class MonteCarloTest {
 
     @Test
     public void testNotSerializable() throws Throwable {
-        final Random r = new Random();
+        final Random r = TestUtils.seededRandom();
         final Keccak k = new Keccak(256);
         final MonteCarloTask original = new MonteCarloTask(newComplexTestCase(r, k), 0, 1);
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -260,7 +260,7 @@ public class MonteCarloTest {
     @Disabled("run if you need to generate random test cases")
     @Test
     public void printNewTestCases() {
-        final Random r = new Random();
+        final Random r = TestUtils.seededRandom();
         final Keccak k = new Keccak(256);
         final Gson ugly = new GsonBuilder().create();
         final JsonPrimitive version = new JsonPrimitive("1.4.4+commit.3ad2258");
