@@ -434,13 +434,13 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private Object[] decodeObjectArray(int len, ByteBuffer bb, byte[] unitBuffer) {
-        Object[] dest = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
+        final Object[] dest = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
         if(!this.dynamic || !elementType.dynamic) {
             for (int i = 0; i < len; i++) {
                 dest[i] = elementType.decode(bb, unitBuffer);
             }
         } else {
-            final int index = bb.position(); // *** save this value here if you want to support lenient mode below
+            final int tailStart = bb.position(); // save this value for later
             int[] offsets = new int[len];
             for (int i = 0; i < len; i++) {
                 offsets[i] = Encoding.OFFSET_TYPE.decode(bb, unitBuffer);
@@ -449,8 +449,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                 final int offset = offsets[i];
                 if (offset != 0) {
                     /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-                    if (bb.position() != index + offset) {
-                        bb.position(index + offset); // lenient
+                    if (bb.position() != tailStart + offset) {
+                        bb.position(tailStart + offset); // leniently jump to specified offset
                     }
                     dest[i] = elementType.decode(bb, unitBuffer);
                 }

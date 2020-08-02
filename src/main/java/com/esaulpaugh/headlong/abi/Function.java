@@ -339,10 +339,10 @@ public final class Function implements ABIObject {
      * @throws IllegalArgumentException if the input length mod 32 != 4
      */
     public static String formatCall(byte[] buffer, int offset, final int length, TupleType.LabelMaker labelMaker) {
-        Integers.checkIsMultiple(length - 4, UNIT_LENGTH_BYTES);
+        Integers.checkIsMultiple(length - SELECTOR_LEN, UNIT_LENGTH_BYTES);
         StringBuilder sb = new StringBuilder();
         sb.append("ID");
-        int n = 9 /* arbitrary magic number */ - "ID".length();
+        final int n = TupleType.LabelMaker.INDENT_WIDTH - "ID".length();
         for (int i = 0; i < n; i++) {
             sb.append(' ');
         }
