@@ -15,8 +15,10 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-/**
- * Supertype of {@link Function} and {@link Event}.
- */
-interface ABIObject {
+/** Supertype of {@link Function} and {@link Event}. */
+public interface ABIObject {
+
+    String getCanonicalSignature();
+
+    String toJson(boolean pretty);
 }

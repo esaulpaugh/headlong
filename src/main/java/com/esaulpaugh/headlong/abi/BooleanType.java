@@ -18,12 +18,9 @@ package com.esaulpaugh.headlong.abi;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-/**
- * Unsigned 0 or 1.
- */
-final class BooleanType extends UnitType<Boolean> {
+/** Unsigned 0 or 1. */
+public final class BooleanType extends UnitType<Boolean> {
 
-    private static final Class<Boolean> CLASS = Boolean.class;
     private static final String ARRAY_CLASS_NAME = boolean[].class.getName();
 
     static final byte[] BOOLEAN_FALSE = new byte[UNIT_LENGTH_BYTES];
@@ -34,7 +31,7 @@ final class BooleanType extends UnitType<Boolean> {
     }
 
     BooleanType() {
-        super("bool", CLASS, 1, true);
+        super("bool", Boolean.class, 1, true);
     }
 
     @Override
@@ -43,30 +40,37 @@ final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    int typeCode() {
+    public int typeCode() {
         return TYPE_CODE_BOOLEAN;
     }
 
     @Override
-    int byteLengthPacked(Boolean value) {
+    int byteLengthPacked(Object value) {
         return 1;
     }
 
     @Override
-    void encodeHead(Boolean value, ByteBuffer dest, int[] offset) {
-        dest.put(value ? BOOLEAN_TRUE : BOOLEAN_FALSE);
+    public int validate(Object value) {
+        validateClass(value);
+        return UNIT_LENGTH_BYTES;
+    }
+
+    @Override
+    int encodeHead(Object value, ByteBuffer dest, int offset) {
+        dest.put((boolean) value ? BOOLEAN_TRUE : BOOLEAN_FALSE);
+        return offset;
     }
 
     @Override
     Boolean decode(ByteBuffer bb, byte[] unitBuffer) {
-        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
+        bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
-        validateBigIntBitLen(bi);
-        switch (bi.byteValue()) {
-        case 0: return Boolean.FALSE;
-        case 1: return Boolean.TRUE;
-        default: throw new IllegalArgumentException("negative value given for boolean type");
-        }
+        validateBigInt(bi);
+        return decodeBoolean(bi.byteValue());
+    }
+
+    static Boolean decodeBoolean(byte b) {
+        return b == Encoding.ZERO_BYTE ? Boolean.FALSE : Boolean.TRUE;
     }
 
     @Override
@@ -74,10 +78,5 @@ final class BooleanType extends UnitType<Boolean> {
         Boolean bool = Boolean.parseBoolean(s);
         validate(bool);
         return bool;
-    }
-
-    @Override
-    public void encodePacked(Boolean value, ByteBuffer dest) {
-        dest.put(value ? (byte) 1 : (byte) 0);
     }
 }

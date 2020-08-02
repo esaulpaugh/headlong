@@ -15,15 +15,13 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
-import com.esaulpaugh.headlong.rlp.exception.RecoverableDecodeException;
-import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
-import com.esaulpaugh.headlong.rlp.util.Integers;
 import com.esaulpaugh.headlong.rlp.util.Notation;
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
-import java.math.BigDecimal;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -48,7 +46,7 @@ public abstract class RLPItem {
     public final transient int dataLength;
     public final transient int endIndex;
 
-    RLPItem(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) throws DecodeException {
+    RLPItem(final byte lead, final DataType type, final byte[] buffer, final int index, int containerEnd, final boolean lenient) {
         containerEnd = Math.min(buffer.length, containerEnd);
 
         final int _dataIndex;
@@ -56,33 +54,37 @@ public abstract class RLPItem {
         
         final int diff = lead - type.offset;
         switch (type) {
-        case SINGLE_BYTE: _dataIndex = index; _dataLength = 1; break;
+        case SINGLE_BYTE:
+            _dataIndex = index;
+            _dataLength = 1;
+            break;
         case STRING_SHORT:
         case LIST_SHORT:
-            _dataIndex = index + 1; _dataLength = diff;
+            _dataIndex = index + 1;
+            _dataLength = diff;
             break;
         case STRING_LONG:
         case LIST_LONG:
             int lengthIndex = index + 1;
-            _dataIndex = lengthIndex + diff; // DataType dictates that lengthOfLength guaranteed to be in [1,8]
+            _dataIndex = lengthIndex + diff; // type dictates that diff guaranteed to be in [1,8]
             if (_dataIndex > containerEnd) {
                 throw exceedsContainer(index, _dataIndex, containerEnd, containerEnd == buffer.length);
             }
-            _dataLength = Integers.getLong(buffer, lengthIndex, diff);
+            _dataLength = Integers.getLong(buffer, lengthIndex, diff, lenient);
             if(_dataLength < MIN_LONG_DATA_LEN) {
-                throw new UnrecoverableDecodeException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
+                throw new IllegalArgumentException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
             }
             break;
-        default: throw new RuntimeException();
+        default: throw new Error();
         }
 
         final long _endIndex = _dataIndex + _dataLength;
 
         if(_endIndex > containerEnd) {
-            throw exceedsContainer(index, _dataIndex, containerEnd, containerEnd == buffer.length);
+            throw exceedsContainer(index, _endIndex, containerEnd, containerEnd == buffer.length);
         }
-        if(!lenient && _dataLength == 1 && type == STRING_SHORT && buffer[_dataIndex] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
-            throw new UnrecoverableDecodeException("invalid rlp for single byte @ " + index);
+        if(!lenient && _dataLength == 1 && type == STRING_SHORT && buffer[_dataIndex] >= 0x00) { // same as (buffer[_dataIndex] & 0xFF) < 0x80
+            throw new IllegalArgumentException("invalid rlp for single byte @ " + index);
         }
 
         this.buffer = buffer;
@@ -92,39 +94,38 @@ public abstract class RLPItem {
         this.endIndex = (int) _endIndex;
     }
 
-    static DecodeException exceedsContainer(int index, int end, int containerEnd, boolean recoverable) {
+    static IllegalArgumentException exceedsContainer(int index, long end, int containerEnd, boolean shortInput) {
         String msg = "element @ index " + index + " exceeds its container: " + end + " > " + containerEnd;
-        return recoverable ? new RecoverableDecodeException(msg) : new UnrecoverableDecodeException(msg);
+        return shortInput ? new ShortInputException(msg) : new IllegalArgumentException(msg);
     }
 
     public final DataType type() {
         return DataType.type(buffer[index]);
     }
 
+    public abstract boolean isString();
+
     public abstract boolean isList();
+
+    public abstract RLPString asRLPString();
+
+    public abstract RLPList asRLPList();
 
     public final int encodingLength() {
         return endIndex - index;
     }
 
     public final byte[] encoding() {
-        final int len = encodingLength();
-        byte[] copy = new byte[len];
-        System.arraycopy(buffer, index, copy, 0, len);
-        return copy;
+        return copyOfRange(index, endIndex);
     }
 
     public final byte[] data() {
-        byte[] copy = new byte[dataLength];
-        System.arraycopy(buffer, dataIndex, copy, 0, dataLength);
-        return copy;
+        return copyOfRange(dataIndex, endIndex);
     }
 
     public final byte[] copyOfRange(int from, int to) {
-        checkRangeBounds(from, to);
-        final int len = to - from;
-        byte[] range = new byte[len];
-        System.arraycopy(buffer, from, range, 0, len);
+        byte[] range = new byte[to - from];
+        exportRange(from, to, range, 0);
         return range;
     }
 
@@ -136,95 +137,128 @@ public abstract class RLPItem {
         return exportRange(dataIndex, endIndex, dest, destIndex);
     }
 
-    public final int exportRange(int from, int to, byte[] dest, int destIndex) {
-        checkRangeBounds(from, to);
-        int len = to - from;
-        System.arraycopy(buffer, from, dest, destIndex, len);
-        return destIndex + len;
-    }
-
-    private void checkRangeBounds(int from, int to) {
-        if(from < dataIndex) {
-            throw new IndexOutOfBoundsException(from + " < " + dataIndex);
-        }
-        if(to > endIndex) {
-            throw new IndexOutOfBoundsException(to + " > " + endIndex);
-        }
+    public final void exportData(OutputStream os) throws IOException {
+        os.write(buffer, dataIndex, dataLength);
     }
 
     /**
-     * @see RLPItem#data()
+     * Copies the specified range of bytes from this item's underlying buffer into the specified destination array.
+     *
+     * @param from      the initial index of the range to be copied, inclusive
+     * @param to        the final index of the range to be copied, exclusive
+     * @param dest      the destination array into which the bytes will be copied
+     * @param destIndex the index into the destination array at which to place the bytes
+     * @return the next index into {@code dest}
+     * @throws IndexOutOfBoundsException if {@code from < index} or {@code to > endIndex}
+     */
+    public final int exportRange(int from, int to, byte[] dest, int destIndex) {
+        if(from >= index) {
+            if(to <= endIndex) {
+                int len = to - from;
+                System.arraycopy(buffer, from, dest, destIndex, len);
+                return destIndex + len;
+            }
+            throw new IndexOutOfBoundsException(to + " > " + endIndex);
+        }
+        throw new IndexOutOfBoundsException(from + " < " + index);
+    }
+
+    /**
      * @return the byte array representation of this item's data
+     * @see RLPItem#data()
      */
     public byte[] asBytes() {
         return data();
     }
 
     /**
-     * Wise man says only empty items are false.
+     * Returns the {@link String}, of the given encoding, representing this item.
      *
-     * @see Integers#putByte(byte, byte[], int)
-     * @return  the boolean represenation for this item
+     * @param encoding one of { {@link Strings#BASE_64_URL_SAFE}, {@link Strings#UTF_8}, {@link Strings#HEX} }.
+     * @return  this item's payload (data) bytes, encoded to your liking
      */
-    public boolean asBoolean() {
-        return dataLength != 0;
-    }
-
-    /**
-     * Returns the char representation for this item.
-     *
-     * @see String#charAt(int)
-     * @return  the char representation
-     * @throws DecodeException  if this item is not interpretable as a char
-     */
-    public char asChar() throws DecodeException {
-        return (char) asShort();
-    }
-
     public String asString(int encoding) {
         return Strings.encode(buffer, dataIndex, dataLength, encoding);
     }
 
-    public byte asByte() throws DecodeException {
-        return Integers.getByte(buffer, dataIndex, dataLength);
+    /**
+     * Returns the {@code boolean} representation for this item. False for {@code 0xc0}, {@code 0x80}, and {@code 0x00};
+     * true for everything else.
+     *
+     * @return the {@code boolean}
+     */
+    public boolean asBoolean() {
+        return dataLength != 0 && buffer[index] != 0x00;
     }
 
-    public short asShort() throws DecodeException {
-        return Integers.getShort(buffer, dataIndex, dataLength);
+    /**
+     * Returns the {@code char} representation for this item.
+     *
+     * @param lenient whether to allow leading zeroes in the raw data
+     * @return the {@code char}
+     * @throws IllegalArgumentException if this item is not interpretable as a char
+     * @see #asShort(boolean)
+     */
+    public char asChar(boolean lenient) {
+        return (char) asShort(lenient);
     }
 
-    public int asInt() throws DecodeException {
-        return Integers.getInt(buffer, dataIndex, dataLength);
+    public byte asByte(boolean lenient) {
+        return Integers.getByte(buffer, dataIndex, dataLength, lenient);
     }
 
-    public long asLong() throws DecodeException {
-        return Integers.getLong(buffer, dataIndex, dataLength);
+    public short asShort(boolean lenient) {
+        return Integers.getShort(buffer, dataIndex, dataLength, lenient);
+    }
+
+    public int asInt(boolean lenient) {
+        return Integers.getInt(buffer, dataIndex, dataLength, lenient);
+    }
+
+    public long asLong(boolean lenient) {
+        return Integers.getLong(buffer, dataIndex, dataLength, lenient);
+    }
+
+    public BigInteger asBigInt(boolean lenient) {
+        return Integers.getBigInt(buffer, dataIndex, dataLength, lenient);
+    }
+
+    public float asFloat(boolean lenient) {
+        return FloatingPoint.getFloat(buffer, dataIndex, dataLength, lenient);
+    }
+
+    public double asDouble(boolean lenient) {
+        return FloatingPoint.getDouble(buffer, dataIndex, dataLength, lenient);
+    }
+
+    public byte asByte() {
+        return asByte(false);
+    }
+
+    public int asInt() {
+        return asInt(false);
+    }
+
+    public long asLong() {
+        return asLong(false);
     }
 
     public BigInteger asBigInt() {
+        return asBigInt(false);
+    }
+
+    public BigInteger asBigIntSigned() {
         return new BigInteger(data());
-    }
-
-    public float asFloat() throws DecodeException {
-        return FloatingPoint.getFloat(buffer, dataIndex, dataLength);
-    }
-
-    public double asDouble() throws DecodeException {
-        return FloatingPoint.getDouble(buffer, dataIndex, dataLength);
-    }
-
-    public BigDecimal asBigDecimal(int scale) {
-        return FloatingPoint.getBigDecimal(buffer, dataIndex, dataLength, scale);
     }
 
     /**
      * Clones this object.
      *
      * @param decoder either {@link RLPDecoder#RLP_STRICT} or {@link RLPDecoder#RLP_LENIENT}
-     * @return  an independent and exact copy
-     * @throws DecodeException  if an unexpected problem in decoding occurs
+     * @return an independent and exact copy
+     * @throws IllegalArgumentException if a problem in re-decoding the item occurs
      */
-    public abstract RLPItem duplicate(RLPDecoder decoder) throws DecodeException;
+    public abstract RLPItem duplicate(RLPDecoder decoder);
 
     /**
      * @see Arrays#hashCode(byte[])
@@ -232,10 +266,8 @@ public abstract class RLPItem {
     @Override
     public final int hashCode() {
         int result = 1;
-        final byte[] buf = buffer;
-        final int end = endIndex;
-        for (int i = index; i < end; i++) {
-            result = 31 * result + buf[i];
+        for (int i = index; i < endIndex; i++) {
+            result = 31 * result + buffer[i];
         }
         return result;
     }
@@ -245,22 +277,21 @@ public abstract class RLPItem {
         if(!(obj instanceof RLPItem)) {
             return false;
         }
-
         RLPItem other = (RLPItem) obj;
-
-//        // Java 9+ vectorizedMismatch
-//        return Arrays.equals(
+//        return Arrays.equals( // Java 9+ vectorizedMismatch
 //                this.buffer, this.index, this.endIndex,
 //                other.buffer, other.index, other.endIndex
 //        );
+        return equals(other.buffer, other.index, other.endIndex);
+    }
 
-        final int length = this.endIndex - this.index;
-        if(length != other.endIndex - other.index) {
+    private boolean equals(byte[] b, int bIdx, int bEnd) {
+        final int len = this.endIndex - this.index;
+        if(len != bEnd - bIdx) {
             return false;
         }
-
-        for (int i = 0; i < length; i++) {
-            if (this.buffer[this.index + i] != other.buffer[other.index + i])
+        for (int i = 0; i < len; i++) {
+            if (this.buffer[this.index + i] != b[bIdx + i])
                 return false;
         }
         return true;
@@ -268,13 +299,13 @@ public abstract class RLPItem {
 
     @Override
     public String toString() {
-        try {
-            return Notation.forEncoding(buffer, index, endIndex).toString();
-        } catch (DecodeException e) {
-            throw new RuntimeException(e);
-        }
+        return Notation.forEncoding(buffer, index, endIndex).toString();
     }
 
+    /**
+     * @param encoding one of { {@link Strings#BASE_64_URL_SAFE}, {@link Strings#UTF_8}, {@link Strings#HEX} }.
+     * @return  this item's bytes, including RLP prefix, encoded to your liking
+     */
     public String toString(int encoding) {
         return Strings.encode(buffer, index, encodingLength(), encoding);
     }

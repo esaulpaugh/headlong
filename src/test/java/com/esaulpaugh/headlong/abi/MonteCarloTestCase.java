@@ -15,106 +15,56 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.Strings;
+import com.esaulpaugh.headlong.util.SuperSerial;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.joemelsha.crypto.hash.Keccak;
-import org.junit.Assert;
 
-import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
-import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
 
-import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_DECIMAL;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_INTEGER;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BOOLEAN;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BYTE;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
-import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
-import static com.esaulpaugh.headlong.abi.ABIType.*;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MonteCarloTestCase implements Serializable {
+public class MonteCarloTestCase {
 
-    private static final ThreadLocal<MessageDigest> KECCAK_THREAD_LOCAL = ThreadLocal.withInitial(() -> new Keccak(256));
+    private static final int DEFAULT_MAX_TUPLE_DEPTH = 3;
+    private static final int DEFAULT_MAX_TUPLE_LENGTH = 3;
 
-    static class Params implements Serializable {
+    private static final int DEFAULT_MAX_ARRAY_DEPTH = 3;
+    private static final int DEFAULT_MAX_ARRAY_LENGTH = 3; // does not apply to static base types e.g. bytes1-32
 
-        private static final int DEFAULT_MAX_TUPLE_DEPTH = 3;
-        private static final int DEFAULT_MAX_TUPLE_LENGTH = 3;
-
-        private static final int DEFAULT_MAX_ARRAY_DEPTH = 3;
-        private static final int DEFAULT_MAX_ARRAY_LENGTH = 3; // does not apply to static base types e.g. bytes1-32
-
-        private final int maxTupleDepth;
-        private final int maxTupleLen;
-
-        private final int maxArrayDepth;
-        private final int maxArrayLen;
-
-        private final long seed;
-
-        Params(long seed) {
-            this.seed = seed;
-            this.maxTupleDepth = DEFAULT_MAX_TUPLE_DEPTH;
-            this.maxTupleLen = DEFAULT_MAX_TUPLE_LENGTH;
-            this.maxArrayDepth = DEFAULT_MAX_ARRAY_DEPTH;
-            this.maxArrayLen = DEFAULT_MAX_ARRAY_LENGTH;
-        }
-
-        Params(long seed, int maxTupleDepth, int maxTupleLen, int maxArrayDepth, int maxArrayLen) {
-            this.seed = seed;
-            this.maxTupleDepth = maxTupleDepth;
-            this.maxTupleLen = maxTupleLen;
-            this.maxArrayDepth = maxArrayDepth;
-            this.maxArrayLen = maxArrayLen;
-        }
-
-        Params(String paramsString) {
-            String[] tokens = paramsString.substring(1, paramsString.length() - 1).split("[,]");
-            this.seed = Long.parseLong(tokens[0]);
-            this.maxTupleDepth = Integer.parseInt(tokens[1]);
-            this.maxTupleLen = Integer.parseInt(tokens[2]);
-            this.maxArrayDepth = Integer.parseInt(tokens[3]);
-            this.maxArrayLen = Integer.parseInt(tokens[4]);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(maxTupleDepth, maxTupleLen, maxArrayLen, maxArrayDepth, seed);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Params params = (Params) o;
-            return maxTupleDepth == params.maxTupleDepth &&
-                    maxTupleLen == params.maxTupleLen &&
-                    maxArrayLen == params.maxArrayLen &&
-                    maxArrayDepth == params.maxArrayDepth &&
-                    seed == params.seed;
-        }
-
-        @Override
-        public String toString() {
-            // (seed,mtd,mtl,mad,mal)
-            return "(" + seed + ',' + maxTupleDepth + ',' + maxTupleLen + ',' + maxArrayDepth + ',' + maxArrayLen + ')';
-        }
-    }
-
-    private static final int NUM_TUPLES_ADDED = 17; // 17
-    private static final int NUM_FIXED_ADDED = 50;
+    private static final int NUM_TUPLES_ADDED = 15; // 17
+    private static final int NUM_FIXED_ADDED = 40;
 
     private static final List<String> FIXED_LIST;
 
-    private static final String[] CANONICAL_BASE_TYPE_STRINGS;
+    private static final ThreadLocal<String[]> BASE_TYPES;
 
     private static final String TUPLE_KEY = "(...)";
 
@@ -122,14 +72,14 @@ public class MonteCarloTestCase implements Serializable {
 
     static {
 
-        Map<String, BaseTypeInfo> baseInfoTypeMap = new HashMap<>(BaseTypeInfo.getBaseTypeInfoMap());
+        final Map<String, BaseTypeInfo> baseInfoTypeMap = new HashMap<>(BaseTypeInfo.getBaseTypeInfoMap());
 
-        final Set<String> keySet = baseInfoTypeMap.keySet();
-        ArrayList<String> ordered = new ArrayList<>(keySet);
+        final Set<String> keys = baseInfoTypeMap.keySet();
+        final ArrayList<String> ordered = new ArrayList<>(keys);
         Collections.sort(ordered);
         final int numKeys = ordered.size();
 
-        String[] arr = new String[numKeys + NUM_TUPLES_ADDED + NUM_FIXED_ADDED];
+        final String[] arr = new String[numKeys + NUM_TUPLES_ADDED + NUM_FIXED_ADDED];
         int i = 0;
         for (String canonical : ordered) {
             arr[i++] = canonical;
@@ -137,189 +87,156 @@ public class MonteCarloTestCase implements Serializable {
         for (int j = 0; j < NUM_TUPLES_ADDED; j++) {
             arr[i++] = TUPLE_KEY;
         }
-        CANONICAL_BASE_TYPE_STRINGS = arr;
+        BASE_TYPES = ThreadLocal.withInitial(() -> Arrays.copyOf(arr, arr.length));
 
         FIXED_START_INDEX = numKeys + NUM_TUPLES_ADDED;
-        FIXED_LIST = Collections.unmodifiableList(BaseTypeInfo.getOrderedFixedKeys());
+
+        FIXED_LIST = Collections.unmodifiableList(genOrderedFixedKeys());
     }
 
-    final Params params;
+    private final long seed;
+
+    private final int maxTupleDepth;
+    private final int maxTupleLen;
+
+    private final int maxArrayDepth;
+    private final int maxArrayLen;
+
     final String rawSignature;
     final Function function;
     final Tuple argsTuple;
 
-    MonteCarloTestCase(Params params) throws ParseException {
-        this.params = params;
+    MonteCarloTestCase(long seed) {
+        this(seed, DEFAULT_MAX_TUPLE_DEPTH, DEFAULT_MAX_TUPLE_LENGTH, DEFAULT_MAX_ARRAY_DEPTH, DEFAULT_MAX_ARRAY_LENGTH, new Random(), Function.newDefaultDigest());
+    }
 
-        final Random rng = new Random(params.seed);
+    MonteCarloTestCase(long seed, int maxTupleDepth, int maxTupleLen, int maxArrayDepth, int maxArrayLen, Random rng, MessageDigest md) {
+        this.seed = seed;
+        this.maxTupleDepth = maxTupleDepth;
+        this.maxTupleLen = maxTupleLen;
+        this.maxArrayDepth = maxArrayDepth;
+        this.maxArrayLen = maxArrayLen;
+
+        rng.setSeed(seed);
+
+        final String[] canonicalBaseTypes = BASE_TYPES.get();
 
         // insert random elements from FIXED_LIST
         final int size = FIXED_LIST.size();
         for (int i = 0; i < NUM_FIXED_ADDED; i++) {
-            CANONICAL_BASE_TYPE_STRINGS[FIXED_START_INDEX + i] = FIXED_LIST.get(rng.nextInt(size));
+            canonicalBaseTypes[FIXED_START_INDEX + i] = FIXED_LIST.get(rng.nextInt(size));
         }
 
-        String sig = generateFunctionName(rng) + generateTupleTypeString(rng, 0);
-
         // decanonicalize
-        sig = sig
+        final String sig = (generateFunctionName(rng) + generateTupleTypeString(canonicalBaseTypes, rng, 0))
                 .replace("int256,", "int,")
                 .replace("int256[", "int[")
                 .replace("int256)", "int)")
-                .replace("uint256,", "uint,")
-                .replace("uint256[", "uint[")
-                .replace("uint256)", "uint)")
                 .replace("fixed128x18,", "fixed,")
                 .replace("fixed128x18[", "fixed[")
-                .replace("fixed128x18)", "fixed)")
-                .replace("ufixed128x18,", "ufixed,")
-                .replace("ufixed128x18[", "ufixed[")
-                .replace("ufixed128x18)", "ufixed)");
+                .replace("fixed128x18)", "fixed)");
+
+//        if(sig.contains("int256") || sig.contains("fixed128x18")) throw new Error(sig);
 
         this.rawSignature = sig;
-        this.function = new Function(sig, null, KECCAK_THREAD_LOCAL.get());
+        this.function = new Function(sig, null, md);
         this.argsTuple = generateTuple(function.getParamTypes(), rng);
     }
 
-    MonteCarloTestCase(long seed) throws ParseException {
-        this(new Params(seed));
-    }
-
-    JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) throws ParseException {
+    JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) {
 
         Function f = Function.parse(name + this.function.getParamTypes().canonicalType); // this.function;
-
-//        System.out.println(f.getCanonicalSignature());
 
         ByteBuffer abi = f.encodeCall(this.argsTuple);
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.add("name", new JsonPrimitive(name));
-        jsonObject.add("types", serializeTypes(f.getParamTypes(), gson));
-        jsonObject.add("values", serializeValues(this.argsTuple, gson));
-        jsonObject.add("result", new JsonPrimitive("0x" + FastHex.encodeToString(abi.array())));
+        jsonObject.add("types", Serializer.serializeTypes(f.getParamTypes(), gson));
+        jsonObject.add("values", Serializer.serializeValues(this.argsTuple, gson));
+        jsonObject.add("result", new JsonPrimitive("0x" + Strings.encode(abi)));
         jsonObject.add("version", version);
 
         return jsonObject;
     }
 
-    private static JsonPrimitive serializeTypes(TupleType tupleType, Gson gson) {
-        JsonArray array = new JsonArray();
+    void runAll() {
+        runStandard(this.argsTuple);
+        runForPacked(this.argsTuple);
+        runSuperSerial(this.argsTuple);
+    }
 
-        for(ABIType<?> type : tupleType) {
-            array.add(new JsonPrimitive(type.canonicalType.replace("(", "tuple(")));
+    void runStandard() {
+        runStandard(this.argsTuple);
+    }
+
+    void runStandard(Tuple args) {
+        ByteBuffer bb = function.encodeCall(args);
+        if (!args.equals(function.decodeCall((ByteBuffer) bb.flip()))) {
+            throw new IllegalArgumentException(seed + " " + function.getCanonicalSignature() + " " + args);
         }
-        return new JsonPrimitive(gson.toJson(array));
+//        fuzzDecode(args, bb);
     }
 
-    private static JsonPrimitive serializeValues(Tuple tuple, Gson gson) {
-        JsonArray valuesArray = new JsonArray();
-        for(Object val : tuple) {
-            valuesArray.add(toJsonElement(val));
+    private void fuzzDecode(Tuple args, ByteBuffer bb) {
+        byte[] babar = bb.array();
+        int idx = new Random(seed + 1).nextInt(babar.length);
+        babar[idx]++;
+        boolean equal = false;
+        try {
+            equal = args.equals(function.decodeCall(babar));
+        } catch (BufferUnderflowException | IllegalArgumentException e) {
+            /* do nothing */
+        } catch (Throwable t) {
+            t.printStackTrace();
+            throw new Error(t);
         }
-        return new JsonPrimitive(gson.toJson(valuesArray));
-    }
-
-    private static JsonElement toJsonElement(Object val) {
-        if(val instanceof Boolean) {
-            JsonObject object = new JsonObject();
-            object.add("type", new JsonPrimitive("bool"));
-            object.add("value", new JsonPrimitive(val.toString()));
-            return object;
-        } else if(val instanceof Integer || val instanceof Long) {
-            JsonObject object = new JsonObject();
-            object.add("type", new JsonPrimitive("number"));
-            object.add("value", new JsonPrimitive(val.toString()));
-            return object;
-        } else if(val instanceof BigInteger) {
-            JsonObject object = new JsonObject();
-            object.add("type", new JsonPrimitive("string"));
-            object.add("value", new JsonPrimitive("0x" + FastHex.encodeToString(((BigInteger) val).toByteArray())));
-            return object;
-        } else if(val instanceof BigDecimal) {
-            JsonObject object = new JsonObject();
-            object.add("type", new JsonPrimitive("number"));
-            object.add("value", new JsonPrimitive(((BigDecimal) val).unscaledValue().toString()));
-            return object;
-        } else if(val instanceof byte[]) {
-            JsonObject object = new JsonObject();
-            object.add("type", new JsonPrimitive("buffer"));
-            object.add("value", new JsonPrimitive("0x" + FastHex.encodeToString((byte[]) val)));
-            return object;
-        } else if(val instanceof String) {
-            JsonObject object = new JsonObject();
-            object.add("type", new JsonPrimitive("buffer"));
-            object.add("value", new JsonPrimitive((String) val));
-            return object;
-        } else if(val instanceof boolean[]) {
-            JsonArray array = new JsonArray();
-            for(boolean e : (boolean[]) val) {
-                array.add(toJsonElement(e));
-            }
-            return array;
-        } else if(val instanceof int[]) {
-            JsonArray array = new JsonArray();
-            for(int e : (int[]) val) {
-                array.add(toJsonElement(e));
-            }
-            return array;
-        } else if(val instanceof long[]) {
-            JsonArray array = new JsonArray();
-            for(long e : (long[]) val) {
-                array.add(toJsonElement(e));
-            }
-            return array;
-        } else if(val instanceof Object[]) {
-            JsonArray array = new JsonArray();
-            for(Object e : (Object[]) val) {
-                array.add(toJsonElement(e));
-            }
-            return array;
-        } else if(val instanceof Tuple) {
-            JsonObject object = new JsonObject();
-            object.add("type", new JsonPrimitive("tuple"));
-            JsonArray array = new JsonArray();
-            for(Object e : (Tuple) val) {
-                array.add(toJsonElement(e));
-            }
-            object.add("value", array);
-            return object;
-        }
-        throw new RuntimeException("???");
-    }
-
-    void run() {
-        run(this.argsTuple);
-    }
-
-    void runNewRandomArgs() {
-        run(generateTuple(function.getParamTypes(), new Random(System.nanoTime())));
-    }
-
-    void run(Tuple args) {
-        Function function = this.function;
-
-        ByteBuffer abi = function.encodeCall(args);
-
-        final Tuple out = function.decodeCall((ByteBuffer) abi.flip());
-
-        boolean equal = args.equals(out);
-
-        if(!equal) {
+        if (equal) {
             try {
-                findInequality(function.getParamTypes(), args, out);
-                throw new RuntimeException(function.getCanonicalSignature());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+                Thread.sleep(new Random(seed + 2).nextInt(50)); // deconflict timing of writes to System.err below
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.err.println(function.getParamTypes() + "\n" + Function.formatCall(babar) + "\nidx=" + idx);
+            throw new IllegalArgumentException("idx=" + idx + " " + seed + " " + function.getCanonicalSignature() + " " + args);
+        }
+    }
+
+    void runForPacked(Tuple args) {
+        final TupleType tt = this.function.getParamTypes();
+        if(tt.canonicalType.contains("int[")) {
+            throw new AssertionError("failed canonicalization!");
+        }
+        try {
+            if (!PackedDecoder.decode(tt, tt.encodePacked(args).array()).equals(args)) {
+                throw new RuntimeException("not equal: " + tt.canonicalType);
+            }
+        } catch (IllegalArgumentException iae) {
+            String msg = iae.getMessage();
+            if(!"multiple dynamic elements".equals(msg)
+                    && !"array of dynamic elements".equals(msg)
+                    && !"can't decode dynamic number of zero-length elements".equals(msg)) {
+                throw new RuntimeException(tt.canonicalType + " " + msg, iae);
             }
         }
     }
 
-    private String generateTupleTypeString(Random r, int tupleDepth) throws ParseException {
+    void runSuperSerial(Tuple args) {
+        final TupleType tt = this.function.getParamTypes();
 
-        ABIType<?>[] types = new ABIType<?>[r.nextInt(1 + params.maxTupleLen)]; // 0 to max
+        String str = SuperSerial.serialize(tt, args, false);
+        Tuple deserial = SuperSerial.deserialize(tt, str, false);
+        assertEquals(args, deserial);
+
+        str = SuperSerial.serialize(tt, args, true);
+        deserial = SuperSerial.deserialize(tt, str, true);
+        assertEquals(args, deserial);
+    }
+
+    private String generateTupleTypeString(String[] canonicalBaseTypes, Random r, int tupleDepth) {
+
+        ABIType<?>[] types = new ABIType<?>[r.nextInt(1 + maxTupleLen)]; // 0 to max
         for (int i = 0; i < types.length; i++) {
-            types[i] = generateType(r, tupleDepth);
+            types[i] = generateType(canonicalBaseTypes, r, tupleDepth);
         }
 
         StringBuilder signature = new StringBuilder("(");
@@ -334,40 +251,36 @@ public class MonteCarloTestCase implements Serializable {
         return signature.toString();
     }
 
-    private ABIType<?> generateType(Random r, final int tupleDepth) throws ParseException {
-        int index = r.nextInt(CANONICAL_BASE_TYPE_STRINGS.length);
-        String baseTypeString = CANONICAL_BASE_TYPE_STRINGS[index];
+    private ABIType<?> generateType(String[] canonicalBaseTypes, Random r, final int tupleDepth) {
+        String baseTypeString = canonicalBaseTypes[r.nextInt(canonicalBaseTypes.length)];
 
         if(baseTypeString.equals(TUPLE_KEY)) {
-            baseTypeString = tupleDepth < params.maxTupleDepth
-                    ? generateTupleTypeString(r, tupleDepth + 1)
+            baseTypeString = tupleDepth < maxTupleDepth
+                    ? generateTupleTypeString(canonicalBaseTypes, r, tupleDepth + 1)
                     : "uint256";
         }
 
         StringBuilder sb = new StringBuilder(baseTypeString);
         boolean isElement = r.nextBoolean() && r.nextBoolean();
         if(isElement) {
-            int arrayDepth = 1 + r.nextInt(params.maxArrayDepth);
+            int arrayDepth = 1 + r.nextInt(maxArrayDepth);
             for (int i = 0; i < arrayDepth; i++) {
                 sb.append('[');
                 if(r.nextBoolean()) {
-                    sb.append(r.nextInt(params.maxArrayLen + 1));
+                    sb.append(r.nextInt(maxArrayLen + 1));
                 }
                 sb.append(']');
             }
         }
-
-        return TypeFactory.create(sb.toString());
+        return TypeFactory.create(sb.toString(), null);
     }
 
     private Tuple generateTuple(TupleType tupleType, Random r) {
         final ABIType<?>[] types = tupleType.elementTypes;
         Object[] args = new Object[types.length];
-
         for (int i = 0; i < types.length; i++) {
             args[i] = generateValue(types[i], r);
         }
-
         return new Tuple(args);
     }
 
@@ -376,12 +289,12 @@ public class MonteCarloTestCase implements Serializable {
         case TYPE_CODE_BOOLEAN: return r.nextBoolean();
         case TYPE_CODE_BYTE: return generateByte(r);
         case TYPE_CODE_INT: return generateInt(r, (IntType) type);
-        case TYPE_CODE_LONG: return generateLong(r, (LongType) type, false);
+        case TYPE_CODE_LONG: return generateLong(r, (LongType) type);
         case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (UnitType<?>) type);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
-        case TYPE_CODE_ARRAY: return generateArray((ArrayType<?, ?>) type, r);
+        case TYPE_CODE_ARRAY: return generateArray((ArrayType<? extends ABIType<?>, ?>) type, r);
         case TYPE_CODE_TUPLE: return generateTuple((TupleType) type, r);
-        default: throw new IllegalArgumentException("unexpected type: " + type.toString());
+        default: throw new Error();
         }
     }
 
@@ -398,12 +311,11 @@ public class MonteCarloTestCase implements Serializable {
         return x;
     }
 
-    private static long generateLong(Random r, LongType longType, boolean isElement) {
+    private static long generateLong(Random r, LongType longType) {
         byte[] random = new byte[1 + r.nextInt(longType.bitLength >>> 3)]; // 1-8
         r.nextBytes(random);
         long x = new BigInteger(random).longValue();
-        boolean unsigned = longType.unsigned && !isElement;
-        if(unsigned && x < 0) {
+        if(longType.unsigned && x < 0) {
             return ((-(x + 1)) << 1) + (r.nextBoolean() ? 1 : 0);
         }
         return x;
@@ -432,45 +344,38 @@ public class MonteCarloTestCase implements Serializable {
         return new BigDecimal(generateBigInteger(r, type), type.scale);
     }
 
-    private Object generateArray(ArrayType<?, ?> arrayType, Random r) {
+    private Object generateArray(ArrayType<? extends ABIType<?>, ?> arrayType, Random r) {
         ABIType<?> elementType = arrayType.elementType;
         final int len = arrayType.length == DYNAMIC_LENGTH
-                ? r.nextInt(params.maxArrayLen + 1) // 0 to max
+                ? r.nextInt(maxArrayLen + 1) // 0 to max
                 : arrayType.length;
 
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return generateBooleanArray(len, r);
         case TYPE_CODE_BYTE:
-            if (arrayType.clazz() == STRING_CLASS) {
-                return generateString(len, r);
+            if (arrayType.isString()) {
+                return generateUtf8String(len, r);
             }
-            return generateByteArray(len, r);
+            return TestUtils.randomBytes(len, r);
         case TYPE_CODE_INT: return generateIntArray(len, (IntType) elementType, r);
         case TYPE_CODE_LONG: return generateLongArray(len, (LongType) elementType, r);
         case TYPE_CODE_BIG_INTEGER: return generateBigIntegerArray(len, (BigIntegerType) elementType, r);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimalArray(len, (BigDecimalType) elementType, r);
         case TYPE_CODE_ARRAY: return generateObjectArray(arrayType, len, r);
         case TYPE_CODE_TUPLE: return generateTupleArray((TupleType) elementType, len, r);
-        default: throw new IllegalArgumentException("unexpected element type: " + elementType.toString());
+        default: throw new Error();
         }
-    }
-
-    private static byte[] generateByteArray(int len, Random r) {
-        byte[] random = new byte[len];
-        r.nextBytes(random);
-        return random;
-    }
-
-    private static String generateString(int len, Random r) {
-        byte[] bytes = generateByteArray(len, r);
-        return new String(bytes, UTF_8);
     }
 
     private static String generateFunctionName(Random r) {
         return generateASCIIString(r.nextInt(34), r).replace('(', '_');
     }
 
-    static String generateASCIIString(final int len, Random r) {
+    private static String generateUtf8String(int len, Random r) {
+        return Strings.encode(TestUtils.randomBytes(len, r), Strings.UTF_8);
+    }
+
+    private static String generateASCIIString(final int len, Random r) {
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < len; i++) {
             sb.append((char) (r.nextInt(95) + 32));
@@ -489,7 +394,7 @@ public class MonteCarloTestCase implements Serializable {
     private static long[] generateLongArray(final int len, LongType longType, Random r) {
         long[] longs = new long[len];
         for (int i = 0; i < len; i++) {
-            longs[i] = generateLong(r, longType, true);
+            longs[i] = generateLong(r, longType);
         }
         return longs;
     }
@@ -517,6 +422,7 @@ public class MonteCarloTestCase implements Serializable {
         }
         return booleans;
     }
+
     private Tuple[] generateTupleArray(TupleType tupleType, final int len, Random r) {
         Tuple[] tuples = new Tuple[len];
         for (int i = 0; i < len; i++) {
@@ -525,84 +431,20 @@ public class MonteCarloTestCase implements Serializable {
         return tuples;
     }
 
-    private Object[] generateObjectArray(ArrayType<?, ?> arrayType, final int len, Random r) {
+    private Object[] generateObjectArray(ArrayType<? extends ABIType<?>, ?> arrayType, final int len, Random r) {
 
         Object[] dest = (Object[]) Array.newInstance(arrayType.elementType.clazz, len);
 
-        final ArrayType<?, ?> elementType = (ArrayType<?, ?>) arrayType.elementType;
+        final ArrayType<? extends ABIType<?>, ?> elementType = (ArrayType<? extends ABIType<?>, ?>) arrayType.elementType;
         for (int i = 0; i < len; i++) {
             dest[i] = generateArray(elementType, r);
         }
         return dest;
     }
-
     // ------------------------------------------------------------------------
-
-    private static void findInequality(TupleType tupleType, Tuple in, Tuple out) throws Exception {
-        final int len = tupleType.elementTypes.length;
-        for (int i = 0; i < len; i++) {
-            ABIType<?> type = tupleType.elementTypes[i];
-            findInequality(type, in.elements[i], out.elements[i]);
-        }
-    }
-
-    private static void findInequality(ABIType<?> elementType, Object in, Object out) throws Exception {
-        System.out.println("findInequality(" + elementType.getClass().getName() + ')');
-        if(elementType instanceof UnitType<?>) {
-            findInequality((UnitType<?>) elementType, in, out);
-        } else if(elementType instanceof TupleType) {
-            findInequality((TupleType) elementType, (Tuple) in, (Tuple) out);
-        } else if(elementType instanceof ArrayType<?, ?>) {
-            ArrayType<?, ?> arrayType = (ArrayType<?, ?>) elementType;
-            if(arrayType.isString) {
-                Assert.assertArrayEquals(Strings.decode((String) in, Strings.UTF_8), Strings.decode((String) out, Strings.UTF_8));
-                Assert.assertEquals(in, out);
-            } else {
-                final Class<?> inClass = in.getClass();
-                if(Object[].class.isAssignableFrom(inClass)) {
-                    findInequalityInArray(arrayType, (Object[]) in, (Object[]) out);
-                } else if(byte[].class.isAssignableFrom(inClass)) {
-                    Assert.assertArrayEquals((byte[]) in, (byte[]) out);
-                } else if(int[].class.isAssignableFrom(inClass)) {
-                    Assert.assertArrayEquals((int[]) in, (int[]) out);
-                } else if(long[].class.isAssignableFrom(inClass)) {
-                    Assert.assertArrayEquals((long[]) in, (long[]) out);
-                } else {
-                    throw new RuntimeException("??");
-                }
-            }
-        } else {
-            throw new IllegalArgumentException("unrecognized type: " + elementType.toString());
-        }
-    }
-
-    private static void findInequality(UnitType<?> unitType, Object in, Object out) throws Exception {
-        if(!in.equals(out)) {
-            if(in instanceof BigInteger && out instanceof BigInteger) {
-                System.err.println("bitLen: " + ((BigInteger) in).bitLength() + " =? " + ((BigInteger) out).bitLength());
-            }
-            System.err.println(in + " != " + out + " " + unitType.bitLength);
-            throw new Exception();
-        }
-    }
-
-    private static void findInequalityInArray(ArrayType<?, ?> arrayType, Object[] in, Object[] out) throws Exception {
-        final ABIType<?> elementType = arrayType.elementType;
-        if (in.length != out.length) {
-            throw new AssertionError(elementType.toString() + " len " + in.length + " != " + out.length);
-        }
-        for (int i = 0; i < in.length; i++) {
-            Object ie = in[i];
-            Object oe = out[i];
-            if (!ie.equals(oe)) {
-                findInequality(elementType, ie, oe);
-            }
-        }
-    }
-
     @Override
     public int hashCode() {
-        return Objects.hash(params, function, argsTuple);
+        return Objects.hash(seed, maxTupleDepth, maxTupleLen, maxArrayDepth, maxArrayLen, function, argsTuple);
     }
 
     @Override
@@ -610,8 +452,32 @@ public class MonteCarloTestCase implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MonteCarloTestCase that = (MonteCarloTestCase) o;
-        return Objects.equals(params, that.params) &&
-                Objects.equals(function, that.function) &&
-                Objects.equals(argsTuple, that.argsTuple);
+        return seed == that.seed
+                && maxTupleDepth == that.maxTupleDepth
+                && maxTupleLen == that.maxTupleLen
+                && maxArrayDepth == that.maxArrayDepth
+                && maxArrayLen == that.maxArrayLen
+                && Objects.equals(function, that.function)
+                && Objects.equals(argsTuple, that.argsTuple);
+    }
+
+    @Override
+    public String toString() {
+        return "(" + seed + ',' + maxTupleDepth + ',' + maxTupleLen + ',' + maxArrayDepth + ',' + maxArrayLen + ") --> " + function.getCanonicalSignature();
+    }
+
+    private static List<String> genOrderedFixedKeys() {
+        final ArrayList<String> ordered = new ArrayList<>();
+        final String signedStub = "fixed";
+        final String unsignedStub = "ufixed";
+        for(int M = 8; M <= 256; M += 8) {
+            for (int N = 1; N <= 80; N++) {
+                final String suffix = Integer.toString(M) + 'x' + N;
+                ordered.add(signedStub + suffix);
+                ordered.add(unsignedStub + suffix);
+            }
+        }
+        Collections.sort(ordered);
+        return ordered;
     }
 }

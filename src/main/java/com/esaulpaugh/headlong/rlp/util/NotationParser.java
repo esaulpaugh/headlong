@@ -20,12 +20,8 @@ import com.esaulpaugh.headlong.util.Strings;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.esaulpaugh.headlong.util.Strings.HEX;
-
-/**
- * Decodes RLP object notation as defined by the {@link Notation} class.
- */
-public class NotationParser {
+/** Decodes RLP object notation as defined by the {@link Notation} class. */
+public final class NotationParser {
 
     private static final int LIST = 0;
     private static final int STRING = 1;
@@ -38,13 +34,12 @@ public class NotationParser {
     /**
      * Returns the object hierarchy represented by the notation.
      *
-     * @param notation  the notation to be parsed
-     * @return  the hierarchy of objects
+     * @param notation the notation to be parsed
+     * @return the hierarchy of objects
      */
     public static List<Object> parse(String notation) {
         List<Object> topLevelObjects = new ArrayList<>(); // a sequence (as in encodeSequentially)
-        int[] resultHolder = new int[2];
-        parse(notation, 0, notation.length(), topLevelObjects, resultHolder);
+        parse(notation, 0, notation.length(), topLevelObjects, new int[2]);
         return topLevelObjects;
     }
 
@@ -53,16 +48,15 @@ public class NotationParser {
         int nextArrayEnd = -1;
 
         while (i < end) {
+            if(!findNextObject(notation, i, resultHolder)) {
+                return Integer.MAX_VALUE;
+            }
 
             if(i > nextArrayEnd) { // only update nextArrayEnd when i has passed it
                 nextArrayEnd = notation.indexOf(Notation.END_LIST, i);
-                if(nextArrayEnd == -1) {
+                if(nextArrayEnd < 0) {
                     nextArrayEnd = Integer.MAX_VALUE;
                 }
-            }
-
-            if(!findNextObject(notation, i, resultHolder)) {
-                return Integer.MAX_VALUE;
             }
 
             int nextObjectIndex = resultHolder[0];
@@ -71,19 +65,18 @@ public class NotationParser {
                 return nextArrayEnd + LIST_SUFFIX_LEN;
             }
 
-            switch (/* nextObjectType */ resultHolder[1]) {
-            case STRING:
+            if(STRING == resultHolder[1] /* nextObjectType */) {
                 int datumStart = nextObjectIndex + STRING_PREFIX_LEN;
                 int datumEnd = notation.indexOf(Notation.END_STRING, datumStart);
-                parent.add(Strings.decode(notation.substring(datumStart, datumEnd), HEX));
+                if(datumEnd < 0) {
+                    throw new IllegalArgumentException("unterminated string @ " + datumStart);
+                }
+                parent.add(Strings.decode(notation.substring(datumStart, datumEnd)));
                 i = datumEnd + STRING_SUFFIX_LEN;
-                break;
-            case LIST:
+            } else {
                 List<Object> childList = new ArrayList<>();
                 i = parse(notation, nextObjectIndex + LIST_PREFIX_LEN, end, childList, resultHolder);
                 parent.add(childList);
-                break;
-            default: /* continue */
             }
         }
 
@@ -91,9 +84,8 @@ public class NotationParser {
     }
 
     private static boolean findNextObject(String notation, int startIndex, int[] resultHolder) {
-        final int indexList = notation.indexOf(Notation.BEGIN_LIST, startIndex);
         final int indexString = notation.indexOf(Notation.BEGIN_STRING, startIndex);
-
+        final int indexList = notation.indexOf(Notation.BEGIN_LIST, startIndex);
         if(indexString == -1) {
             if(indexList == -1) {
                 return false;

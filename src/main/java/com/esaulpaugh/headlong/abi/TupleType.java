@@ -15,11 +15,11 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Utils;
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
+import com.esaulpaugh.headlong.util.SuperSerial;
 
 import java.nio.ByteBuffer;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -28,9 +28,9 @@ import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 
+/** @see ABIType */
 public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
-    private static final Class<Tuple> CLASS = Tuple.class;
     private static final String ARRAY_CLASS_NAME = Tuple[].class.getName();
 
     private static final String EMPTY_TUPLE_STRING = "()";
@@ -40,18 +40,22 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     final ABIType<?>[] elementTypes;
 
     private TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes) {
-        super(canonicalType, CLASS, dynamic);
+        super(canonicalType, Tuple.class, dynamic);
         this.elementTypes = elementTypes;
     }
 
-    static <A extends ABIType<?>> TupleType wrap(A[] elements) {
-        final StringBuilder canonicalBuilder = new StringBuilder("(");
+    static <E extends ABIType<?>> TupleType wrap(E[] elements) {
+        StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
-        for (A e : elements) {
+        for (E e : elements) {
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
         }
-        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements);
+        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements); // TODO .intern() string?
+    }
+
+    public int size() {
+        return elementTypes.length;
     }
 
     public ABIType<?> get(int index) {
@@ -68,136 +72,110 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    int typeCode() {
+    public int typeCode() {
         return TYPE_CODE_TUPLE;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    int byteLength(Tuple value) {
-        final Object[] elements = value.elements;
-
-        final ABIType<?>[] types = this.elementTypes;
-        final int numTypes = types.length;
-
+    int byteLength(Object value) {
+        final Object[] elements = ((Tuple) value).elements;
         int len = 0;
-        ABIType type;
-        for (int i = 0; i < numTypes; i++) {
-            type = types[i];
-            len += type.dynamic
-                    ? OFFSET_LENGTH_BYTES + type.byteLength(elements[i])
-                    : type.byteLength(elements[i]);
-        }
-
-        return len;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public int byteLengthPacked(Tuple value) {
-        final Object[] elements = value.elements;
-
-        final ABIType[] types = this.elementTypes;
-        final int numTypes = types.length;
-
-        int len = 0;
-        for (int i = 0; i < numTypes; i++) {
-            len += types[i].byteLengthPacked(elements[i]);
-        }
-
-        return len;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public int validate(Tuple value) {
-        final Object[] values = value.elements;
-
-        final ABIType<?>[] elementTypes = this.elementTypes;
-
-        final int numTypes = elementTypes.length;
-
-        if(values.length != numTypes) {
-            throw new IllegalArgumentException("tuple length mismatch: actual != expected: " +
-                    values.length + " != " + numTypes);
-        }
-
-        int byteLength = 0;
-        int i = 0;
-        try {
-            for ( ; i < numTypes; i++) {
-                final ABIType type = elementTypes[i];
-                try {
-                    byteLength += type.dynamic
-                            ? OFFSET_LENGTH_BYTES + type.validate(values[i])
-                            : type.validate(values[i]);
-                } catch (ClassCastException cce) {
-                    throw unexpectedTypeException(type, values[i]);
-                }
-            }
-        } catch (RuntimeException re) {
-            throw new IllegalArgumentException("illegal arg @ " + i + ": " + re.getMessage(), re);
-        }
-
-        return byteLength;
-    }
-
-    @Override
-    void encodeHead(Tuple value, ByteBuffer dest, int[] offset) {
-        if (dynamic) {
-            Encoding.insertOffset(offset, this, value, dest);
-        } else {
-            encodeTail(value, dest);
-        }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    void encodeTail(Tuple value, ByteBuffer dest) {
-        final Object[] values = value.elements;
-        final int[] offset = new int[]{headLengthSum(values)};
-
-        final int len = elementTypes.length;
-        int i;
-        for (i = 0; i < len; i++) {
-            try {
-                ((ABIType) elementTypes[i]).encodeHead(values[i], dest, offset);
-            } catch (ClassCastException cce) {
-                throw unexpectedTypeException(elementTypes[i], values[i]);
-            }
-        }
-        if (dynamic) {
-            for (i = 0; i < len; i++) {
-                ABIType type = elementTypes[i];
-                try {
-                    if (type.dynamic) {
-                        type.encodeTail(values[i], dest);
-                    }
-                } catch (ClassCastException cce) {
-                    throw unexpectedTypeException(type, values[i]);
-                }
-            }
-        }
-    }
-
-    static IllegalArgumentException unexpectedTypeException(ABIType type, Object value) {
-        return new IllegalArgumentException("unexpected class for " + type.canonicalType + ": expected " + type.clazz.getName() + " but found " + value.getClass().getName());
-    }
-
-    @SuppressWarnings("unchecked")
-    private int headLengthSum(Object[] elements) {
-        int headLengths = 0;
         for (int i = 0; i < elementTypes.length; i++) {
-            ABIType et = elementTypes[i];
-            headLengths += et.dynamic
-                    ? OFFSET_LENGTH_BYTES
-                    : et.byteLength(elements[i]);
+            ABIType<?> type = elementTypes[i];
+            int byteLen = type.byteLength(elements[i]);
+            len += !type.dynamic ? byteLen : OFFSET_LENGTH_BYTES + byteLen;
         }
-        return headLengths;
+        return len;
+    }
+
+    private int staticByteLengthPacked() {
+        int len = 0;
+        for (ABIType<?> elementType : elementTypes) {
+            len += elementType.byteLengthPacked(null);
+        }
+        return len;
+    }
+
+    /**
+     * @param value the Tuple being measured. {@code null} if not available
+     * @return the length in bytes of the non-standard packed encoding
+     */
+    @Override
+    public int byteLengthPacked(Object value) {
+        if (value == null) {
+            return staticByteLengthPacked();
+        }
+        final Object[] elements = ((Tuple) value).elements;
+        int len = 0;
+        for (int i = 0; i < elementTypes.length; i++) {
+            len += elementTypes[i].byteLengthPacked(elements[i]);
+        }
+        return len;
+    }
+
+    @Override
+    public int validate(final Object value) {
+        validateClass(value);
+
+        final Object[] elements = ((Tuple) value).elements;
+
+        if(elements.length == elementTypes.length) {
+            int i = 0;
+            try {
+                int len = 0;
+                for (; i < elementTypes.length; i++) {
+                    ABIType<?> type = elementTypes[i];
+                    int byteLen = type.validate(elements[i]);
+                    len += !type.dynamic ? byteLen : OFFSET_LENGTH_BYTES + byteLen;
+                }
+                return len;
+            } catch (NullPointerException | IllegalArgumentException e) {
+                throw new IllegalArgumentException("tuple index " + i + ": " + e.getMessage());
+            }
+        }
+        throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + elements.length + " != " + elementTypes.length);
+    }
+
+    @Override
+    void encodeTail(Object value, ByteBuffer dest) {
+        final Object[] values = ((Tuple) value).elements;
+        if(!dynamic) {
+            encodeHeads(elementTypes, values, dest, -1);
+            return;
+        }
+        final ABIType<?>[] types = elementTypes;
+        encodeHeads(types, values, dest, headLengthSum(types, values));
+        for (int i = 0; i < types.length; i++) {
+            ABIType<?> t = types[i];
+            if(t.dynamic) {
+                t.encodeTail(values[i], dest);
+            }
+        }
+    }
+
+    private static void encodeHeads(ABIType<?>[] types, Object[] values, ByteBuffer dest, int nextOffset) {
+        for (int i = 0; i < types.length; i++) {
+            nextOffset = types[i].encodeHead(values[i], dest, nextOffset);
+        }
+    }
+
+    private static int headLengthSum(ABIType<?>[] types, Object[] elements) {
+        int sum = 0;
+        for (int i = 0; i < types.length; i++) {
+            ABIType<?> type = types[i];
+            sum += !type.dynamic ? type.byteLength(elements[i]) : OFFSET_LENGTH_BYTES;
+        }
+        return sum;
     }
 
     public Tuple decode(byte[] array) {
-        return decode(ByteBuffer.wrap(array));
+        ByteBuffer bb = ByteBuffer.wrap(array);
+        Tuple decoded = decode(bb);
+        final int remaining = bb.remaining();
+        if(remaining == 0) {
+            return decoded;
+        }
+        throw new IllegalArgumentException("unconsumed bytes: " + remaining + " remaining");
     }
 
     public Tuple decode(ByteBuffer bb) {
@@ -206,85 +184,56 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
-
-//        final int index = bb.position(); // TODO must pass index to decodeTails if you want to support lenient mode
-
-        final ABIType<?>[] elementTypes = this.elementTypes;
-        final int tupleLen = elementTypes.length;
-        Object[] elements = new Object[tupleLen];
-
-        int[] offsets = new int[tupleLen];
-        decodeHeads(bb, elementTypes, offsets, unitBuffer, elements);
-
-        if(dynamic) {
-            decodeTails(bb, elementTypes, offsets, unitBuffer, elements);
+        final int len = elementTypes.length;
+        final Object[] elements = new Object[len];
+        if (!dynamic) {
+            for (int i = 0; i < len; i++) {
+                elements[i] = elementTypes[i].decode(bb, unitBuffer);
+            }
+        } else {
+//        final int index = bb.position(); // *** save this value here if you want to support lenient mode below
+            final int[] offsets = new int[len];
+            for (int i = 0; i < len; i++) {
+                ABIType<?> elementType = elementTypes[i];
+                if (!elementType.dynamic) {
+                    elements[i] = elementType.decode(bb, unitBuffer);
+                } else {
+                    offsets[i] = Encoding.OFFSET_TYPE.decode(bb, unitBuffer);
+                }
+            }
+            for (int i = 0; i < len; i++) {
+                if (offsets[i] > 0) {
+                    /* OPERATES IN STRICT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
+//                if(bb.position() != index + offset) {
+//                    System.err.println(TupleType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
+//                    bb.position(index + offset); // lenient
+//                }
+                    elements[i] = elementTypes[i].decode(bb, unitBuffer);
+                }
+            }
         }
-
         return new Tuple(elements);
     }
 
-    private static void decodeHeads(ByteBuffer bb, ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, Object[] dest) {
-        final int tupleLen = offsets.length;
-        ABIType<?> elementType;
-        for (int i = 0; i < tupleLen; i++) {
-            elementType = elementTypes[i];
-            if (elementType.dynamic) {
-                offsets[i] = Encoding.OFFSET_TYPE.decode(bb, elementBuffer);
-            } else {
-                dest[i] = elementType.decode(bb, elementBuffer);
-            }
-        }
-    }
-
-    private static void decodeTails(ByteBuffer bb, final ABIType<?>[] elementTypes, int[] offsets, byte[] elementBuffer, final Object[] dest) {
-        final int tupleLen = offsets.length;
-        for (int i = 0; i < tupleLen; i++) {
-            final ABIType<?> type = elementTypes[i];
-            final int offset = offsets[i];
-            final boolean offsetExists = offset > 0;
-            if(type.dynamic ^ offsetExists) { // if not matching
-                throw new IllegalArgumentException(type.dynamic ? "offset not found" : "offset found for static element");
-            }
-            if (offsetExists) {
-                /* OPERATES IN STRICT MODE see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-//                if(bb.position() != index + offset) {
-//                    System.err.println(TupleType.class.getName() + " setting " + bb.position() + " to " + (index + offset) + ", offset=" + offset);
-//                    bb.position(index + offset);
-//                }
-                dest[i] = type.decode(bb, elementBuffer);
-            }
-        }
-    }
-
+    /**
+     * Parses RLP Object {@link com.esaulpaugh.headlong.rlp.util.Notation} as a {@link Tuple}.
+     *
+     * @param s the tuple's RLP object notation
+     * @return  the parsed tuple
+     * @see com.esaulpaugh.headlong.rlp.util.Notation
+     */
     @Override
-    public Tuple parseArgument(String s) {
-        throw new UnsupportedOperationException();
+    public Tuple parseArgument(String s) { // expects RLP object notation
+        return SuperSerial.deserialize(this, s, false);
     }
 
-    boolean recursiveEquals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        TupleType tupleType = (TupleType) o;
-        return Arrays.equals(elementTypes, tupleType.elementTypes);
-    }
-
-    public static TupleType parse(String rawTupleTypeString) throws ParseException {
-        return (TupleType) TypeFactory.create(rawTupleTypeString);
-    }
-
-    public static TupleType of(String... typeStrings) throws ParseException {
-        StringBuilder sb = new StringBuilder("(");
-        for (String str : typeStrings) {
-            sb.append(str).append(',');
-        }
-        return parse(completeTupleTypeString(sb));
-    }
-
-    public static TupleType parseElements(String rawElementsString) throws ParseException {
-        return parse('(' + rawElementsString + ')');
-    }
-
+    /**
+     * Gives the ABI encoding of the input values according to this {@link TupleType}'s element types.
+     *
+     * @param elements  values corresponding to this {@link TupleType}'s element types
+     * @return  the encoding
+     * @see #encode(Tuple)
+     */
     public ByteBuffer encodeElements(Object... elements) {
         return encode(new Tuple(elements));
     }
@@ -295,39 +244,38 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return dest;
     }
 
-    public TupleType encode(Tuple values, ByteBuffer dest, boolean validate) {
-        if(validate) {
-            validate(values);
-        }
+    public TupleType encode(Tuple values, ByteBuffer dest) {
+        validate(values);
         encodeTail(values, dest);
         return this;
     }
 
-    public int encodedLen(Tuple values) {
+    public int measureEncodedLength(Tuple values) {
         return validate(values);
     }
 
-    public int encodedLen(Tuple values, boolean validate) {
-        return validate ? validate(values) : byteLength(values);
-    }
-
+    /**
+     * Returns the non-standard-packed encoding of {@code values}.
+     *
+     * @param values the argument to be encoded
+     * @return the encoding
+     */
     public ByteBuffer encodePacked(Tuple values) {
+        validate(values);
         ByteBuffer dest = ByteBuffer.allocate(byteLengthPacked(values));
-        encodePacked(values, dest);
+        PackedEncoder.encodeTuple(this, values, dest);
         return dest;
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public void encodePacked(Tuple value, ByteBuffer dest) {
-        final ABIType[] types = elementTypes;
-        final Object[] values = value.elements;
-
-        final int len = types.length;
-        int i;
-        for (i = 0; i < len; i++) {
-            types[i].encodePacked(values[i], dest);
-        }
+    /**
+     * Puts into the {@link ByteBuffer} at its current position the non-standard packed encoding of {@code values}.
+     *
+     * @param values the argument to be encoded
+     * @param dest   the destination buffer
+     */
+    public void encodePacked(Tuple values, ByteBuffer dest) {
+        validate(values);
+        PackedEncoder.encodeTuple(this, values, dest);
     }
 
     @Override
@@ -361,9 +309,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         final StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
         final ABIType<?>[] selected = new ABIType<?>[getSelectionSize(manifest, negate)];
-        for (int m = 0, s = 0; m < len; m++) {
-            if(negate ^ manifest[m]) {
-                ABIType<?> e = elementTypes[m];
+        for (int i = 0, s = 0; i < len; i++) {
+            if(negate ^ manifest[i]) {
+                ABIType<?> e = elementTypes[i];
                 canonicalBuilder.append(e.canonicalType).append(',');
                 dynamic |= e.dynamic;
                 selected[s++] = e;
@@ -374,10 +322,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     private static int checkLength(ABIType<?>[] elements, boolean[] manifest) {
         final int len = manifest.length;
-        if(len != elements.length) {
-            throw new IllegalArgumentException("manifest.length != elements.length: " + manifest.length + " != " + elements.length);
+        if(len == elements.length) {
+            return len;
         }
-        return len;
+        throw new IllegalArgumentException("manifest.length != elements.length: " + manifest.length + " != " + elements.length);
     }
 
     private static int getSelectionSize(boolean[] manifest, boolean negate) {
@@ -390,21 +338,75 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return negate ? manifest.length - count : count;
     }
 
-    private static String completeTupleTypeString(StringBuilder ttsb) {
-        final int len = ttsb.length();
-        if(len == 1) {
-            return EMPTY_TUPLE_STRING;
+    private static String completeTupleTypeString(StringBuilder sb) {
+        final int len = sb.length();
+        return len != 1
+                ? sb.replace(len - 1, len, ")").toString() // replace trailing comma
+                : EMPTY_TUPLE_STRING;
+    }
+
+    public static TupleType parse(String rawTupleTypeString) {
+        return (TupleType) TypeFactory.create(rawTupleTypeString, null);
+    }
+
+    public static TupleType of(String... typeStrings) {
+        StringBuilder sb = new StringBuilder("(");
+        for (String str : typeStrings) {
+            sb.append(str).append(',');
         }
-        return ttsb.replace(len - 1, len, ")").toString(); // replace trailing comma
+        return parse(completeTupleTypeString(sb));
+    }
+
+    public static TupleType parseElements(String rawElementsString) {
+        return parse('(' + rawElementsString + ')');
     }
 
     public static String format(byte[] abi) {
+        return format(abi, new LabelMaker() {
+            @Override
+            public String make(int offset) {
+                StringBuilder sb = new StringBuilder();
+                String labelStr = Long.toHexString(offset);
+                int zeroes = 6 - labelStr.length();
+                for (int i = 0; i < zeroes; i++) {
+                    sb.append(' ');
+                }
+                sb.append(labelStr);
+                pad(sb, ' ');
+                return sb.toString();
+            }
+        });
+    }
+
+    public static String format(byte[] abi, LabelMaker labelMaker) {
+        Integers.checkIsMultiple(abi.length, UNIT_LENGTH_BYTES);
         StringBuilder sb = new StringBuilder();
         int idx = 0;
         while(idx < abi.length) {
-            sb.append(Strings.encode(Arrays.copyOfRange(abi, idx, idx + UNIT_LENGTH_BYTES), HEX)).append('\n');
+            if(idx > 0) {
+                sb.append('\n');
+            }
+            sb.append(labelMaker.make(idx));
+            sb.append(Strings.encode(abi, idx, UNIT_LENGTH_BYTES, HEX));
             idx += UNIT_LENGTH_BYTES;
         }
         return sb.toString();
+    }
+
+    public static class LabelMaker {
+
+        public String make(int offset) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(offset / UNIT_LENGTH_BYTES);
+            pad(sb, ' ');
+            return sb.toString();
+        }
+
+        public void pad( StringBuilder sb, char ch) {
+            int n = 9 - sb.length();
+            for (int i = 0; i < n; i++) {
+                sb.append(ch);
+            }
+        }
     }
 }

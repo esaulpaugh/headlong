@@ -18,18 +18,16 @@ package com.esaulpaugh.headlong.abi;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-final class ByteType extends UnitType<Byte> {
+/** Currently used only as the element type for some {@link ArrayType}s. */
+public final class ByteType extends UnitType<Byte> {
 
-    private static final Class<Byte> CLASS = Byte.class;
     private static final String ARRAY_CLASS_NAME = byte[].class.getName();
-
-    private static final int MAX_BIT_LEN = 8;
 
 //    static final ByteType SIGNED = new ByteType("int8", false);
     static final ByteType UNSIGNED = new ByteType("uint8", true);
 
     private ByteType(String canonicalType, boolean unsigned) {
-        super(canonicalType, CLASS, MAX_BIT_LEN, unsigned);
+        super(canonicalType, Byte.class, Byte.SIZE, unsigned);
     }
 
     @Override
@@ -38,20 +36,26 @@ final class ByteType extends UnitType<Byte> {
     }
 
     @Override
-    int typeCode() {
+    public int typeCode() {
         return TYPE_CODE_BYTE;
     }
 
     @Override
-    int byteLengthPacked(Byte value) {
-        return 1;
+    int byteLengthPacked(Object value) {
+        return Byte.BYTES;
+    }
+
+    @Override
+    public int validate(Object value) {
+        validateClass(value);
+        return UNIT_LENGTH_BYTES;
     }
 
     @Override
     Byte decode(ByteBuffer bb, byte[] unitBuffer) {
-        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
+        bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
-        validateBigIntBitLen(bi);
+        validateBigInt(bi);
         return bi.byteValue();
     }
 

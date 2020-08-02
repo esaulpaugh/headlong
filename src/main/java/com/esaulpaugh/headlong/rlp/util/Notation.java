@@ -16,262 +16,182 @@
 package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.rlp.DataType;
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
-import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
+import com.esaulpaugh.headlong.rlp.RLPEncoder;
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
-import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
-import static com.esaulpaugh.headlong.util.Strings.HEX;
-
-/**
- * An object notation for RLP, not unlike JSON. Call {@link #parse()} to parse the notation into the original list of objects.
- */
-public class Notation {
+/** A JSON-like notation for RLP items. Call {@link #parse()} get back the raw object hierarchy. */
+public final class Notation {
 
     private static final boolean LENIENT = true; // keep lenient so RLPItem.toString() doesn't throw, and to help with debugging
 
     private static final String BEGIN_NOTATION = "(";
     private static final String END_NOTATION = "\n)";
 
-    static final String BEGIN_LIST = "{";
-    static final String END_LIST = "}";
-    static final String BEGIN_STRING = "\"";
-    static final String END_STRING = "\"";
+    static final String BEGIN_LIST = "[";
+    static final String END_LIST = "]";
+    static final String BEGIN_STRING = "'";
+    static final String END_STRING = "'";
+    private static final String DELIMITER = ",";
 
-    private static final String BEGIN_LIST_SHORT = BEGIN_LIST + " ";
+    private static final String SHORT_LIST_START = BEGIN_LIST + ' ';
 
-    private static final String COMMA_SPACE = ", ";
-    private static final String LIST_LONG_END_COMMA_SPACE = END_LIST + COMMA_SPACE;
-    private static final String LIST_SHORT_END_COMMA_SPACE = " " + LIST_LONG_END_COMMA_SPACE;
-    private static final String STRING_END_COMMA_SPACE = END_STRING + COMMA_SPACE;
+    private static final String DELIMITER_SPACE = DELIMITER + ' ';
+    private static final String STRING_DELIMIT_SPACE = END_STRING + DELIMITER_SPACE;
+    private static final String STRING_DELIMIT = END_STRING + DELIMITER;
+
+    private static final String SHORT_LIST_END = ' ' + END_LIST + DELIMITER_SPACE;
+    private static final String SHORT_LIST_END_NO_SPACE = ' ' + END_LIST + DELIMITER;
+    private static final String LONG_LIST_END = END_LIST + DELIMITER;
+
+    private static final String[] LINE_PADDING_CACHE;
+
+    static {
+        LINE_PADDING_CACHE = new String[8]; // pick any cache size
+        for (int i = 0; i < LINE_PADDING_CACHE.length; i++) {
+            LINE_PADDING_CACHE[i] = newLinePadding(i);
+        }
+    }
 
     private final String value;
 
     private Notation(String value) {
-        if(value == null) {
-            throw new IllegalArgumentException("value cannot be null");
-        }
-        this.value = value;
+        this.value = Objects.requireNonNull(value);
     }
 
     public List<Object> parse() {
         return NotationParser.parse(value);
     }
 
-    private static final String[] INDENTATIONS;
-
-    private static final int INDENTATION_CACHE_SIZE = 16;
-
-    private static final String ELEMENT_INDENTATION = newIndentation(1);
-
-    static {
-        INDENTATIONS = new String[INDENTATION_CACHE_SIZE];
-        for (int i = 0; i < INDENTATIONS.length; i++) {
-            INDENTATIONS[i] = newIndentation(i);
-        }
-    }
-
-    private static DecodeException exceedsContainer(int index, long end, int containerEnd) {
-        String msg = "element @ index " + index + " exceeds its container: " + end + " > " + containerEnd;
-        return new UnrecoverableDecodeException(msg);
-    }
-
-    private static int getShortElementEnd(int elementDataIndex, final int elementDataLen, final int containerEnd) throws DecodeException {
-        final int end = elementDataIndex + elementDataLen;
-        if (end > containerEnd) {
-            throw exceedsContainer(elementDataIndex - 1, end, containerEnd);
-        }
-
-        return end;
-    }
-
-    private static int getLongElementEnd(byte[] data, final int leadByteIndex, final int dataIndex, final int containerEnd) throws DecodeException {
-        if (dataIndex > containerEnd) {
-            throw exceedsContainer(leadByteIndex, dataIndex, containerEnd);
-        }
-        final int lengthIndex = leadByteIndex + 1;
-        final int lengthLen = dataIndex - lengthIndex;
-        final long dataLenLong = Integers.getLong(data, leadByteIndex + 1, lengthLen);
-//        if (dataLenLong > MAX_ARRAY_LENGTH) {
-//            throw new DecodeException("too much data: " + dataLenLong + " > " + MAX_ARRAY_LENGTH);
-//        }
-        final long end = lengthIndex + lengthLen + dataLenLong;
-        if (end > containerEnd) {
-            throw exceedsContainer(leadByteIndex, end, containerEnd);
-        }
-        final int dataLen = (int) dataLenLong;
-        if (dataLen < MIN_LONG_DATA_LEN) {
-            throw new UnrecoverableDecodeException("long element data length must be " + MIN_LONG_DATA_LEN
-                    + " or greater; found: " + dataLen + " for element @ " + leadByteIndex);
-        }
-
-        return (int) end;
-    }
-
-    public static Notation forEncoding(byte[] encoding) throws DecodeException {
+    public static Notation forEncoding(byte[] encoding) {
         return forEncoding(encoding, 0, encoding.length);
     }
 
-    public static Notation forEncoding(final byte[] buffer, final int index, int end) throws DecodeException {
-        if(index < 0) {
-            throw new ArrayIndexOutOfBoundsException(index);
+    public static Notation forEncoding(final byte[] buffer, final int index, int end) {
+        if(index >= 0) {
+            end = Math.min(buffer.length, end);
+            if (index <= end) {
+                StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
+                buildLongList(sb, buffer, index, end, 0);
+                return new Notation(sb.append(END_NOTATION).toString());
+            }
+            throw new IllegalArgumentException("index > end: " + index + " > " + end);
         }
-        end = Math.min(buffer.length, end);
-        if(index > end) {
-            throw new UnrecoverableDecodeException("index > end: " + index + " > " + end);
-        }
-
-        StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
-        buildLongList(
-                sb,
-                buffer,
-                index,
-                end,
-                0
-        );
-        return new Notation(sb.append(END_NOTATION).toString());
+        throw new ArrayIndexOutOfBoundsException(index);
     }
 
-    private static int buildLongList(final StringBuilder sb, final byte[] data, final int dataIndex, int end, final int depth) throws DecodeException {
+    public static Notation forObjects(Object... objects) {
+        return forEncoding(RLPEncoder.encodeSequentially(objects));
+    }
 
-        final String baseIndentation = getIndentation(depth);
+    public static Notation forObjects(Iterable<Object> objects) {
+        return forEncoding(RLPEncoder.encodeSequentially(objects));
+    }
 
+    private static RuntimeException exceedsContainer(int index, long end, int containerEnd) {
+        return new IllegalArgumentException("element @ index " + index + " exceeds its container: " + end + " > " + containerEnd);
+    }
+
+    private static int getShortElementEnd(int elementDataIndex, final int elementDataLen, final int containerEnd) {
+        final int end = elementDataIndex + elementDataLen;
+        if (end <= containerEnd) {
+            return end;
+        }
+        throw exceedsContainer(elementDataIndex - 1, end, containerEnd);
+    }
+
+    private static int getLongElementEnd(byte[] data, final int leadByteIndex, final int dataIndex, final int containerEnd) {
+        if (dataIndex <= containerEnd) {
+            final int lengthIndex = leadByteIndex + 1;
+            final int lengthLen = dataIndex - lengthIndex;
+            final long dataLenLong = Integers.getLong(data, leadByteIndex + 1, lengthLen, LENIENT);
+            final long end = lengthIndex + lengthLen + dataLenLong;
+            if (end > containerEnd) {
+                throw exceedsContainer(leadByteIndex, end, containerEnd);
+            }
+            final int dataLen = (int) dataLenLong;
+            if (dataLen >= DataType.MIN_LONG_DATA_LEN) {
+                return (int) end;
+            }
+            throw new IllegalArgumentException("long element data length must be " + DataType.MIN_LONG_DATA_LEN
+                    + " or greater; found: " + dataLen + " for element @ " + leadByteIndex);
+        }
+        throw exceedsContainer(leadByteIndex, dataIndex, containerEnd);
+    }
+
+    private static int buildString(StringBuilder sb, byte[] data, int from, int to, boolean addSpace) {
+        final int len = to - from;
+        if(!LENIENT && len == 1 && data[from] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
+            throw new IllegalArgumentException("invalid rlp for single byte @ " + (from - 1)); // item prefix is 1 byte
+        }
+        sb.append(BEGIN_STRING).append(Strings.encode(data, from, len, Strings.HEX))
+                .append(addSpace ? STRING_DELIMIT_SPACE : STRING_DELIMIT);
+        return to;
+    }
+
+    private static int buildLongList(StringBuilder sb, byte[] data, int dataIndex, int end, int depth) {
         if(depth != 0) {
             sb.append(BEGIN_LIST);
         }
-
-        final int nextDepth = depth + 1;
-
-        int elementDataIndex = -1;
-        int lengthLen;
-        int elementDataLen;
-        int elementEnd = -1;
-        boolean hasELement = false;
-        int i = dataIndex;
-        while (i < end) {
-            sb.append('\n').append(baseIndentation);
-            byte current = data[i];
-            final DataType type = DataType.type(current);
-            switch (type) {
-            case SINGLE_BYTE:
-                break;
-            case STRING_SHORT:
-            case LIST_SHORT:
-                elementDataIndex = i + 1;
-                elementDataLen = current - type.offset;
-                elementEnd = getShortElementEnd(elementDataIndex, elementDataLen, end);
-                break;
-            case STRING_LONG:
-            case LIST_LONG:
-                lengthLen = current - type.offset;
-                elementDataIndex = i + 1 + lengthLen;
-                elementEnd = getLongElementEnd(data, i, elementDataIndex, end);
-                break;
-            default:
-                throw new RuntimeException();
-            }
-            hasELement = true;
-            sb.append(ELEMENT_INDENTATION);
-            switch (type) {
-            case SINGLE_BYTE:
-                i = buildByte(sb, data, i);
-                break;
-            case STRING_SHORT:
-            case STRING_LONG:
-                i = buildString(sb, data, elementDataIndex, elementEnd);
-                break;
-            case LIST_SHORT:
-                i = buildShortList(sb, data, elementDataIndex, elementEnd);
-                break;
-            case LIST_LONG:
-                i = buildLongList(sb, data, elementDataIndex, elementEnd, nextDepth);
-//            default:
-            }
-        }
-        if (hasELement) {
-            stripFinalCommaAndSpace(sb);
-        }
+        buildListContent(sb, dataIndex, end, data, false, depth + 1);
         if(depth != 0) {
-            sb.append('\n')
-                    .append(baseIndentation).append(LIST_LONG_END_COMMA_SPACE);
+            sb.append(getLinePadding(depth)).append(LONG_LIST_END);
         }
         return end;
     }
 
-    private static int buildShortList(final StringBuilder sb, final byte[] data, final int dataIndex, final int end) throws DecodeException {
-        sb.append(BEGIN_LIST_SHORT);
+    private static int buildShortList(StringBuilder sb, byte[] data, int dataIndex, int end, int depth, boolean addSpace) {
+        sb.append(SHORT_LIST_START);
+        buildListContent(sb, dataIndex, end, data, true, depth + 1);
+        sb.append(addSpace ? SHORT_LIST_END : SHORT_LIST_END_NO_SPACE);
+        return end;
+    }
 
-        boolean hasElement = false;
-        int i = dataIndex;
-        LOOP:
-        for ( ; i < end; ) {
-            byte current = data[i];
-            final DataType type = DataType.type(current);
-            hasElement = true;
-            switch (type) {
-            case SINGLE_BYTE:
-                i = buildByte(sb, data, i);
-                continue LOOP;
-            case STRING_SHORT:
-            case LIST_SHORT:
-                int elementDataIndex = i + 1;
-                int elementEnd = getShortElementEnd(elementDataIndex, current - type.offset, end);
-                i = type == DataType.STRING_SHORT
-                        ? buildString(sb, data, elementDataIndex, elementEnd)
-                        : buildShortList(sb, data, elementDataIndex, elementEnd);
-                break;
-            case STRING_LONG:
-            case LIST_LONG:
-                throw new UnrecoverableDecodeException("surely, it cannot possibly fit. index: " + i);
-            default:
-                throw new RuntimeException();
+    private static void buildListContent(StringBuilder sb, final int dataIndex, final int end, byte[] data, boolean shortList, final int elementDepth) {
+        final String elementPrefix = shortList ? null : getLinePadding(elementDepth);
+        for (int i = dataIndex; i < end; ) {
+            if(!shortList) {
+                sb.append(elementPrefix);
+            }
+            final byte lead = data[i];
+            final DataType type = DataType.type(lead);
+            if(type == DataType.SINGLE_BYTE) {
+                i = buildString(sb, data, i, i + 1, shortList);
+            } else {
+                if(type.isLong && shortList) {
+                    throw new IllegalArgumentException("long element found in short list");
+                }
+                final int diff = lead - type.offset;
+                final int elementDataIdx = i + 1 + /* lengthOfLength */ (type.isLong ? diff : 0);
+                final int elementEnd = type.isLong
+                        ? getLongElementEnd(data, i, elementDataIdx, end)
+                        : getShortElementEnd(elementDataIdx, diff, end);
+                i = type.isString
+                        ? buildString(sb, data, elementDataIdx, elementEnd, shortList)
+                        : type.isLong
+                            ? buildLongList(sb, data, elementDataIdx, elementEnd, elementDepth)
+                            : buildShortList(sb, data, elementDataIdx, elementEnd, elementDepth, shortList);
             }
         }
-        if (hasElement) {
-            stripFinalCommaAndSpace(sb);
+        if (/* hasElement */ dataIndex != end) {
+            sb.replace(sb.length() - (shortList ? DELIMITER_SPACE : DELIMITER).length(), sb.length(), ""); // trim
         }
-        sb.append(LIST_SHORT_END_COMMA_SPACE);
-        return end;
     }
 
-    private static String newIndentation(int n) {
-        char[] spaces = new char[n << 1]; // 2 spaces per
-        Arrays.fill(spaces, ' ');
-        return String.valueOf(spaces);
+    private static String getLinePadding(int depth) {
+        return depth < LINE_PADDING_CACHE.length ? LINE_PADDING_CACHE[depth] : newLinePadding(depth);
     }
 
-    private static String getIndentation(int n) {
-        return n >= INDENTATIONS.length ? newIndentation(n) : INDENTATIONS[n];
-    }
-
-    private static void stripFinalCommaAndSpace(StringBuilder sb) {
-        final int n = sb.length();
-        sb.replace(n - 2, n, "");
-    }
-
-    private static int buildByte(StringBuilder sb, byte[] data, int i) {
-        String string = Strings.encode(data, i, 1, HEX);
-
-        sb.append(BEGIN_STRING).append(string).append(STRING_END_COMMA_SPACE);
-
-        return i + 1;
-    }
-
-    private static int buildString(StringBuilder sb, byte[] data, int from, int to) throws DecodeException {
-
-        final int len = to - from;
-        if(!LENIENT && len == 1 && data[from] >= 0x00) { // same as (data[from] & 0xFF) < 0x80
-            throw new UnrecoverableDecodeException("invalid rlp for single byte @ " + (from - 1));
-        }
-
-        String string = Strings.encode(data, from, len, HEX);
-
-        sb.append(BEGIN_STRING).append(string).append(STRING_END_COMMA_SPACE);
-
-        return to;
+    @SuppressWarnings("deprecation")
+    private static String newLinePadding(int depth) {
+        byte[] prefix = new byte[1 + (depth * 2)]; // 2 spaces per level
+        Arrays.fill(prefix, (byte) ' ');
+        prefix[0] = (byte) '\n';
+        return new String(prefix, 0, 0, prefix.length);
     }
 
     @Override
@@ -281,8 +201,7 @@ public class Notation {
 
     @Override
     public boolean equals(Object other) {
-        return other instanceof Notation
-                && value.equals(((Notation) other).value);
+        return other instanceof Notation && value.equals(((Notation) other).value);
     }
 
     @Override

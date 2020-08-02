@@ -15,16 +15,13 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.util.Strings;
+import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.JsonObject;
 
-import java.security.MessageDigest;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static com.esaulpaugh.headlong.util.Strings.UTF_8;
-
+/** Represents an event in Ethereum. */
 public final class Event implements ABIObject {
 
     private final String name;
@@ -35,11 +32,11 @@ public final class Event implements ABIObject {
 
     private final boolean anonymous;
 
-    public Event(String name, String paramsString, boolean[] indexed) throws ParseException {
+    public Event(String name, String paramsString, boolean[] indexed) {
         this(name, paramsString, indexed, false);
     }
 
-    public Event(String name, String paramsString, boolean[] indexed, boolean anonymous) throws ParseException {
+    public Event(String name, String paramsString, boolean[] indexed, boolean anonymous) {
         this(name, TupleType.parse(paramsString), indexed, anonymous);
     }
 
@@ -51,10 +48,6 @@ public final class Event implements ABIObject {
         }
         this.indexManifest = Arrays.copyOf(indexed, indexed.length);
         this.anonymous = anonymous;
-    }
-
-    public String signature() {
-        return name + inputs.canonicalType;
     }
 
     public String getName() {
@@ -73,6 +66,11 @@ public final class Event implements ABIObject {
         return anonymous;
     }
 
+    @Override
+    public String getCanonicalSignature() {
+        return name + inputs.canonicalType;
+    }
+
     public TupleType getIndexedParams() {
         return inputs.subTupleType(indexManifest);
     }
@@ -81,12 +79,13 @@ public final class Event implements ABIObject {
         return inputs.subTupleType(indexManifest, true);
     }
 
-    public byte[] topics0() {
-        return topics0(Function.newDefaultDigest());
-    }
-
-    public byte[] topics0(MessageDigest md) {
-        return anonymous ? null : md.digest(Strings.decode(signature(), UTF_8));
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + inputs.hashCode();
+        result = 31 * result + Arrays.hashCode(indexManifest);
+        result = 31 * result + (anonymous ? 1 : 0);
+        return result;
     }
 
     @Override
@@ -102,20 +101,21 @@ public final class Event implements ABIObject {
         return Arrays.equals(indexManifest, event.indexManifest);
     }
 
+    public static Event fromJson(String eventJson) {
+        return fromJsonObject(JsonUtils.parseObject(eventJson));
+    }
+
+    public static Event fromJsonObject(JsonObject event) {
+        return ABIJSON.parseEvent(event);
+    }
+
     @Override
-    public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + inputs.hashCode();
-        result = 31 * result + Arrays.hashCode(indexManifest);
-        result = 31 * result + (anonymous ? 1 : 0);
-        return result;
+    public String toJson(boolean pretty) {
+        return ABIJSON.toJson(this, pretty);
     }
 
-    public static Event fromJson(String eventJson) throws ParseException {
-        return ContractJSONParser.parseEvent(eventJson);
-    }
-
-    public static Event fromJsonObject(JsonObject event) throws ParseException {
-        return ContractJSONParser.parseEvent(event);
+    @Override
+    public String toString() {
+        return toJson(true);
     }
 }

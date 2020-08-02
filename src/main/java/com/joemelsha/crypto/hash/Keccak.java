@@ -25,20 +25,19 @@ import java.security.MessageDigest;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class Keccak extends MessageDigest {
+public final class Keccak extends MessageDigest {
 
     private static final int MAX_STATE_SIZE = 1600;
     private static final int MAX_STATE_SIZE_WORDS = MAX_STATE_SIZE / Long.SIZE;
 
-    protected final int digestSizeBits;
-    protected final transient int digestSizeBytes;
-    protected final transient int rateSizeBits;
+    private final transient int digestSizeBytes;
+    private final transient int rateSizeBits;
     private final transient int rateSizeWords;
 
     private final long[] state = new long[MAX_STATE_SIZE_WORDS];
     private int rateBits; // = 0
 
-    protected transient ByteBuffer out;
+    private transient ByteBuffer out;
 
     public Keccak(int digestSizeBits) {
         this("Keccak-", digestSizeBits);
@@ -52,27 +51,10 @@ public class Keccak extends MessageDigest {
         if (rateSizeBits <= 0 || (rateSizeBits & 0x3f) != 0)
             throw new IllegalArgumentException("Invalid rateSizeBits: " + rateSizeBits);
 
-        this.digestSizeBits = digestSizeBits;
         this.digestSizeBytes = digestSizeBits >>> 3;
 
         this.rateSizeBits = rateSizeBits;
         this.rateSizeWords = rateSizeBits >>> 6;
-    }
-
-    public Keccak(Keccak other) {
-        super(other.getAlgorithm());
-        System.arraycopy(other.state, 0, state, 0, other.state.length);
-        this.digestSizeBits = other.digestSizeBits;
-        this.rateSizeBits = other.rateSizeBits;
-
-        this.digestSizeBytes = digestSizeBits >>> 3;
-        this.rateSizeWords = rateSizeBits >>> 6;
-
-        this.rateBits = other.rateBits;
-    }
-
-    public int rateSize() {
-        return rateSizeBits >>> 3;
     }
 
     protected int rateSizeBitsFor(int digestSizeBits) {
@@ -93,7 +75,7 @@ public class Keccak extends MessageDigest {
             state[i] = 0L;
         }
         rateBits = 0;
-        out = null;
+        out = null; // very important to avoid leaking memory
     }
 
     @Override
@@ -294,7 +276,7 @@ public class Keccak extends MessageDigest {
         keccak(state);
     }
 
-    protected void updateBits(long in, int inBits) {
+    void updateBits(long in, int inBits) {
 
         if (inBits < 0 || inBits > 64)
             throw new IllegalArgumentException("Invalid valueBits: " + 0 + " < " + inBits + " > " + 64);
@@ -303,12 +285,13 @@ public class Keccak extends MessageDigest {
             return;
 
         int rateBits = this.rateBits;
-        int rateBitsWord = rateBits & 0x3f;
+        int rateBitsWord = rateBits & 0x3f; // mod 64
         if (rateBitsWord > 0) {
             int c = 64 - rateBitsWord;
             if (c > inBits)
                 c = inBits;
-            state[rateBits >>> 6] ^= (in & (-1L >>> c)) << rateBitsWord;
+//            state[rateBits >>> 6] ^= (in & (-1L >>> -c)) << rateBitsWord;
+            state[rateBits >>> 6] ^= (in & (-1L >>> (64 - c))) << rateBitsWord;
             rateBits += c;
             inBits -= c;
             if (inBits <= 0) {
@@ -323,7 +306,8 @@ public class Keccak extends MessageDigest {
             this.rateBits = inBits;
             return;
         }
-        state[rateBits >>> 6] ^= in & (-1L >>> inBits);
+//        state[rateBits >>> 6] ^= in & (-1L >>> -inBits);
+        state[rateBits >>> 6] ^= in & (-1L >>> (64 - inBits));
         this.rateBits = rateBits + inBits;
     }
 

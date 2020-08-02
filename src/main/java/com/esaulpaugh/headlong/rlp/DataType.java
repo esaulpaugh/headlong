@@ -15,15 +15,15 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
+/** Enumeration of the five RLP data types. */
 public enum DataType {
 
-    SINGLE_BYTE(0),
-    STRING_SHORT(0x80),
-    STRING_LONG(0xb7),
-    LIST_SHORT(0xc0),
-    LIST_LONG(0xf7);
+    SINGLE_BYTE(0, true, false),
+    STRING_SHORT(0x80, true, false),
+    STRING_LONG(0xb7, true, true),
+    LIST_SHORT(0xc0, false, false),
+    LIST_LONG(0xf7, false, true);
 
-    static final byte SINGLE_BYTE_OFFSET = 0;
     static final byte STRING_SHORT_OFFSET = (byte) 0x80;
     static final byte STRING_LONG_OFFSET = (byte) 0xb7;
     static final byte LIST_SHORT_OFFSET = (byte) 0xc0;
@@ -32,21 +32,21 @@ public enum DataType {
     public static final int MIN_LONG_DATA_LEN = 56;
 
     public final byte offset;
+    public final boolean isString;
+    public final boolean isLong;
 
-    DataType(int offset) {
+    DataType(int offset, boolean isString, boolean isLong) {
         this.offset = (byte) offset;
+        this.isString = isString;
+        this.isLong = isLong;
     }
 
     /**
-     * The first byte of an RLP encoding.
-     *
-     * @param leadByte  the first (zeroth) byte of an RLP encoding
-     * @return  one of the five enumerated RLP data types
+     * @param leadByte the first (zeroth) byte of an RLP encoding
+     * @return one of the five enumerated RLP data types
      */
     public static DataType type(final byte leadByte) {
-
         switch (leadByte) {
-
         case (byte) 0x80: case (byte) 0x81: case (byte) 0x82: case (byte) 0x83: case (byte) 0x84: case (byte) 0x85: case (byte) 0x86: case (byte) 0x87:
         case (byte) 0x88: case (byte) 0x89: case (byte) 0x8A: case (byte) 0x8B: case (byte) 0x8C: case (byte) 0x8D: case (byte) 0x8E: case (byte) 0x8F:
         case (byte) 0x90: case (byte) 0x91: case (byte) 0x92: case (byte) 0x93: case (byte) 0x94: case (byte) 0x95: case (byte) 0x96: case (byte) 0x97:
@@ -67,23 +67,7 @@ public enum DataType {
 
         case (byte) 0xF8: case (byte) 0xF9: case (byte) 0xFA: case (byte) 0xFB: case (byte) 0xFC: case (byte) 0xFD: case (byte) 0xFE: case (byte) 0xFF: return LIST_LONG;
 
-//        case (byte) 0x00: case (byte) 0x01: case (byte) 0x02: case (byte) 0x03: case (byte) 0x04: case (byte) 0x05: case (byte) 0x06: case (byte) 0x07:
-//        case (byte) 0x08: case (byte) 0x09: case (byte) 0x0A: case (byte) 0x0B: case (byte) 0x0C: case (byte) 0x0D: case (byte) 0x0E: case (byte) 0x0F:
-//        case (byte) 0x10: case (byte) 0x11: case (byte) 0x12: case (byte) 0x13: case (byte) 0x14: case (byte) 0x15: case (byte) 0x16: case (byte) 0x17:
-//        case (byte) 0x18: case (byte) 0x19: case (byte) 0x1A: case (byte) 0x1B: case (byte) 0x1C: case (byte) 0x1D: case (byte) 0x1E: case (byte) 0x1F:
-//        case (byte) 0x20: case (byte) 0x21: case (byte) 0x22: case (byte) 0x23: case (byte) 0x24: case (byte) 0x25: case (byte) 0x26: case (byte) 0x27:
-//        case (byte) 0x28: case (byte) 0x29: case (byte) 0x2A: case (byte) 0x2B: case (byte) 0x2C: case (byte) 0x2D: case (byte) 0x2E: case (byte) 0x2F:
-//        case (byte) 0x30: case (byte) 0x31: case (byte) 0x32: case (byte) 0x33: case (byte) 0x34: case (byte) 0x35: case (byte) 0x36: case (byte) 0x37:
-//        case (byte) 0x38: case (byte) 0x39: case (byte) 0x3A: case (byte) 0x3B: case (byte) 0x3C: case (byte) 0x3D: case (byte) 0x3E: case (byte) 0x3F:
-//        case (byte) 0x40: case (byte) 0x41: case (byte) 0x42: case (byte) 0x43: case (byte) 0x44: case (byte) 0x45: case (byte) 0x46: case (byte) 0x47:
-//        case (byte) 0x48: case (byte) 0x49: case (byte) 0x4A: case (byte) 0x4B: case (byte) 0x4C: case (byte) 0x4D: case (byte) 0x4E: case (byte) 0x4F:
-//        case (byte) 0x50: case (byte) 0x51: case (byte) 0x52: case (byte) 0x53: case (byte) 0x54: case (byte) 0x55: case (byte) 0x56: case (byte) 0x57:
-//        case (byte) 0x58: case (byte) 0x59: case (byte) 0x5A: case (byte) 0x5B: case (byte) 0x5C: case (byte) 0x5D: case (byte) 0x5E: case (byte) 0x5F:
-//        case (byte) 0x60: case (byte) 0x61: case (byte) 0x62: case (byte) 0x63: case (byte) 0x64: case (byte) 0x65: case (byte) 0x66: case (byte) 0x67:
-//        case (byte) 0x68: case (byte) 0x69: case (byte) 0x6A: case (byte) 0x6B: case (byte) 0x6C: case (byte) 0x6D: case (byte) 0x6E: case (byte) 0x6F:
-//        case (byte) 0x70: case (byte) 0x71: case (byte) 0x72: case (byte) 0x73: case (byte) 0x74: case (byte) 0x75: case (byte) 0x76: case (byte) 0x77:
-//        case (byte) 0x78: case (byte) 0x79: case (byte) 0x7A: case (byte) 0x7B: case (byte) 0x7C: case (byte) 0x7D: case (byte) 0x7E: case (byte) 0x7F:
-        default:
+        default: // 0x00 - 0x7F
             return SINGLE_BYTE;
         }
     }

@@ -16,11 +16,10 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
 import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonElement;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,8 +30,8 @@ import java.util.Map;
 public class RLPJsonDecodeTest {
 
     @Test
-    public void testValid() throws IOException, DecodeException {
-        String exampleJson = TestUtils.readResourceAsString(RLPJsonEncodeTest.class, "tests/ethereum/RLPTests/RandomRLPTests/example.json");
+    public void testValid() throws IOException {
+        String exampleJson = TestUtils.readFileResourceAsString(RLPJsonEncodeTest.class, "tests/ethereum/RLPTests/RandomRLPTests/example.json");
 
         for (Map.Entry<String, JsonElement> e : RLPJsonEncodeTest.parseEntrySet(exampleJson)) {
             decodeRecursively(RLPJsonEncodeTest.getOutBytes(e));
@@ -40,9 +39,9 @@ public class RLPJsonDecodeTest {
     }
 
     @Test
-    public void testInvalid() throws IOException, DecodeException {
+    public void testInvalid() throws IOException {
 
-        String testCasesJson = TestUtils.readResourceAsString(RLPJsonEncodeTest.class, "tests/ethereum/RLPTests/invalidRLPTest.json");
+        String testCasesJson = TestUtils.readFileResourceAsString(RLPJsonEncodeTest.class, "tests/ethereum/RLPTests/invalidRLPTest.json");
 
         for (Map.Entry<String, JsonElement> e : RLPJsonEncodeTest.parseEntrySet(testCasesJson)) {
 
@@ -54,14 +53,14 @@ public class RLPJsonDecodeTest {
             } catch (Throwable t) {
                 throwable = t;
             }
-            if(!(throwable instanceof DecodeException)) {
+            if(!(throwable instanceof IllegalArgumentException)) {
                 System.err.println(Notation.forEncoding(invalidRLP).toString());
                 throw new RuntimeException("no decode exception! " + e.getKey() + " " + e.getValue());
             }
         }
     }
 
-    static void decodeRecursively(byte[] rlp) throws DecodeException {
+    static void decodeRecursively(byte[] rlp) {
         RLPItem item = RLPDecoder.RLP_STRICT.wrap(rlp);
         if(item instanceof RLPString) {
             item.asString(Strings.HEX);
@@ -71,7 +70,7 @@ public class RLPJsonDecodeTest {
         }
     }
 
-    private static void elementsRecursive(RLPList list, Collection<Object> results, RLPDecoder decoder) throws DecodeException {
+    private static void elementsRecursive(RLPList list, Collection<Object> results, RLPDecoder decoder) {
         List<RLPItem> actualList = list.elements(decoder);
         for (RLPItem element : actualList) {
             if(element instanceof RLPList) {

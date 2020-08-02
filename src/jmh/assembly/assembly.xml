@@ -1,0 +1,141 @@
+<assembly
+        xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
+    <id>fat-benchmarks</id>
+    <formats>
+        <format>jar</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <unpack>true</unpack>
+            <outputDirectory>${file.separator}</outputDirectory>
+            <useProjectArtifact>true</useProjectArtifact>
+            <scope>test</scope>
+            <excludes>
+                <exclude>org.junit.jupiter:junit-jupiter-api</exclude>
+                <exclude>org.junit.jupiter:junit-jupiter-engine</exclude>
+                <exclude>org.junit.platform:junit-platform-commons</exclude>
+                <exclude>org.junit.platform:junit-platform-engine</exclude>
+                <exclude>org.opentest4j:opentest4j</exclude>
+            </excludes>
+            <unpackOptions>
+                <includes>
+                    <include>com/esaulpaugh/headlong/**</include>
+                    <include>com/google/gson/**</include>
+                    <include>com/joemelsha/crypto/hash/Keccak.class</include>
+                    <include>com/migcomponents/migbase64/Base64.class</include>
+
+                    <include>joptsimple/*.class</include>
+                    <include>joptsimple/internal/*.class</include>
+
+                    <include>org/apache/commons/math3/analysis/UnivariateFunction.class</include>
+                    <include>org/apache/commons/math3/analysis/solvers/AbstractUnivariateSolver.class</include>
+                    <include>org/apache/commons/math3/analysis/solvers/BaseAbstractUnivariateSolver.class</include>
+                    <include>org/apache/commons/math3/analysis/solvers/BaseUnivariateSolver.class</include>
+                    <include>org/apache/commons/math3/analysis/solvers/BrentSolver.class</include>
+                    <include>org/apache/commons/math3/analysis/solvers/UnivariateSolver.class</include>
+                    <include>org/apache/commons/math3/analysis/solvers/UnivariateSolverUtils.class</include>
+
+                    <include>org/apache/commons/math3/stat/descriptive/UnivariateStatistic.class</include>
+
+                    <include>org/apache/commons/math3/distribution/AbstractRealDistribution.class</include>
+                    <include>org/apache/commons/math3/distribution/AbstractRealDistribution$1.class</include>
+                    <include>org/apache/commons/math3/distribution/RealDistribution.class</include>
+                    <include>org/apache/commons/math3/distribution/TDistribution.class</include>
+
+                    <include>org/apache/commons/math3/exception/ConvergenceException.class</include>
+                    <include>org/apache/commons/math3/exception/DimensionMismatchException.class</include>
+                    <include>org/apache/commons/math3/exception/NoBracketingException.class</include>
+                    <include>org/apache/commons/math3/exception/NotANumberException.class</include>
+                    <include>org/apache/commons/math3/exception/NotFiniteNumberException.class</include>
+                    <include>org/apache/commons/math3/exception/NotPositiveException.class</include>
+                    <include>org/apache/commons/math3/exception/NotStrictlyPositiveException.class</include>
+                    <include>org/apache/commons/math3/exception/NullArgumentException.class</include>
+                    <include>org/apache/commons/math3/exception/NumberIsTooLargeException.class</include>
+                    <include>org/apache/commons/math3/exception/NumberIsTooSmallException.class</include>
+                    <include>org/apache/commons/math3/exception/MathArithmeticException.class</include>
+                    <include>org/apache/commons/math3/exception/MathIllegalArgumentException.class</include>
+                    <include>org/apache/commons/math3/exception/MathIllegalNumberException.class</include>
+                    <include>org/apache/commons/math3/exception/MathIllegalStateException.class</include>
+                    <include>org/apache/commons/math3/exception/MathInternalError.class</include>
+                    <include>org/apache/commons/math3/exception/MaxCountExceededException.class</include>
+                    <include>org/apache/commons/math3/exception/OutOfRangeException.class</include>
+                    <include>org/apache/commons/math3/exception/TooManyEvaluationsException.class</include>
+                    <include>org/apache/commons/math3/exception/util/ExceptionContextProvider.class</include>
+                    <include>org/apache/commons/math3/exception/util/Localizable.class</include>
+
+                    <include>org/apache/commons/math3/random/AbstractWell.class</include>
+                    <include>org/apache/commons/math3/random/BitsStreamGenerator.class</include>
+                    <include>org/apache/commons/math3/random/RandomData.class</include>
+                    <include>org/apache/commons/math3/random/RandomDataGenerator.class</include>
+                    <include>org/apache/commons/math3/random/RandomDataImpl.class</include>
+                    <include>org/apache/commons/math3/random/RandomGenerator.class</include>
+                    <include>org/apache/commons/math3/random/Well19937c.class</include>
+
+                    <include>org/apache/commons/math3/special/Beta.class</include>
+                    <include>org/apache/commons/math3/special/Beta$1.class</include>
+                    <include>org/apache/commons/math3/special/Gamma.class</include>
+                    <include>org/apache/commons/math3/special/Gamma$1.class</include>
+
+                    <include>org/apache/commons/math3/stat/descriptive/AbstractUnivariateStatistic.class</include>
+                    <include>org/apache/commons/math3/stat/descriptive/StatisticalSummary.class</include>
+                    <include>org/apache/commons/math3/stat/descriptive/rank/Percentile.class</include>
+
+                    <include>org/apache/commons/math3/util/ContinuedFraction.class</include>
+                    <include>org/apache/commons/math3/util/FastMath.class</include>
+                    <include>org/apache/commons/math3/util/FastMath$ExpFracTable.class</include>
+                    <include>org/apache/commons/math3/util/FastMath$ExpIntTable.class</include>
+                    <include>org/apache/commons/math3/util/FastMath$lnMant.class</include>
+                    <include>org/apache/commons/math3/util/FastMathLiteralArrays.class</include>
+                    <include>org/apache/commons/math3/util/Incrementor.class</include>
+                    <include>org/apache/commons/math3/util/Incrementor$1.class</include>
+                    <include>org/apache/commons/math3/util/Incrementor$MaxCountExceededCallback.class</include>
+                    <include>org/apache/commons/math3/util/MathArrays$Function.class</include>
+                    <include>org/apache/commons/math3/util/MathUtils.class</include>
+
+                    <include>org/apache/commons/math3/util/Precision.class</include>
+
+                    <include>org/openjdk/jmh/**</include>
+
+                    <include>org/bouncycastle/crypto/Digest.class</include>
+                    <include>org/bouncycastle/crypto/ExtendedDigest.class</include>
+                    <include>org/bouncycastle/crypto/digests/KeccakDigest.class</include>
+                    <include>org/bouncycastle/jcajce/provider/digest/BCMessageDigest.class</include>
+                    <include>org/bouncycastle/jcajce/provider/digest/Keccak.class</include>
+                    <include>org/bouncycastle/jcajce/provider/digest/Keccak$DigestKeccak.class</include>
+                    <include>org/bouncycastle/util/Arrays.class</include>
+                    <include>org/bouncycastle/util/Pack.class</include>
+                </includes>
+                <excludes>
+                    <exclude>org/openjdk/jmh/PerfAsm.class</exclude>
+                    <exclude>org/openjdk/jmh/generators/**</exclude>
+                    <exclude>org/openjdk/jmh/results/format/JSONResultFormat$1.class</exclude>
+                    <exclude>org/openjdk/jmh/results/format/JSONResultFormat.class</exclude>
+                    <exclude>org/openjdk/jmh/results/format/LaTeXResultFormat.class</exclude>
+                    <exclude>org/openjdk/jmh/results/format/XSVResultFormat.class</exclude>
+                    <exclude>org/openjdk/jmh/runner/format/SilentFormat.class</exclude>
+                </excludes>
+            </unpackOptions>
+        </dependencySet>
+    </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>${project.build.directory}/test-classes</directory>
+            <outputDirectory>${file.separator}</outputDirectory>
+            <includes>
+                <include>com/esaulpaugh/headlong/jmh/abi/*.class</include>
+                <include>com/esaulpaugh/headlong/jmh/rlp/*.class</include>
+                <include>com/esaulpaugh/headlong/jmh/util/*.class</include>
+                <include>com/esaulpaugh/headlong/jmh/abi/generated/*.class</include>
+                <include>com/esaulpaugh/headlong/jmh/rlp/generated/*.class</include>
+                <include>com/esaulpaugh/headlong/jmh/util/generated/*.class</include>
+                <include>org/openjdk/jmh/*.class</include>
+                <include>META-INF/BenchmarkList</include>
+                <include>META-INF/CompilerHints</include>
+            </includes>
+            <useDefaultExcludes>false</useDefaultExcludes>
+        </fileSet>
+    </fileSets>
+</assembly>

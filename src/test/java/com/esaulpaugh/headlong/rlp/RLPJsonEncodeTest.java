@@ -16,77 +16,57 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.abi.util.JsonUtils;
-import com.esaulpaugh.headlong.rlp.util.Integers;
-import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Integers;
+import com.esaulpaugh.headlong.util.JsonUtils;
+import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
-import static com.esaulpaugh.headlong.TestUtils.*;
+import static com.esaulpaugh.headlong.TestUtils.parseArrayToBytesHierarchy;
+import static com.esaulpaugh.headlong.TestUtils.parseBigIntegerStringPoundSign;
+import static com.esaulpaugh.headlong.TestUtils.parseLong;
+import static com.esaulpaugh.headlong.TestUtils.parseObject;
+import static com.esaulpaugh.headlong.TestUtils.parseString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RLPJsonEncodeTest {
 
     @Test
     public void testCases() throws IOException {
 
-        String testCasesJson = TestUtils.readResourceAsString(RLPJsonEncodeTest.class, "tests/ethereum/RLPTests/rlptest.json");
+        String testCasesJson = TestUtils.readFileResourceAsString(RLPJsonEncodeTest.class, "tests/ethereum/RLPTests/rlptest.json");
 
         for (Map.Entry<String, JsonElement> entry : parseEntrySet(testCasesJson)) {
 
             JsonObject jsonObject = entry.getValue().getAsJsonObject();
             JsonElement in = jsonObject.get("in");
 
-            byte[] expected = getOutBytes(entry);
-            byte[] actual;
+            byte[] actualBytes;
             if(in.isJsonArray()) {
-
-                ArrayList<Object> arrayList = parseArrayToBytesHierarchy(in.getAsJsonArray());
-
-                actual = RLPEncoder.encodeAsList(arrayList);
-
-
+                actualBytes = RLPEncoder.encodeAsList(parseArrayToBytesHierarchy(in.getAsJsonArray()));
             } else if(in.isJsonObject()) {
                 System.err.println("json object");
                 parseObject(in);
-                actual = null;
+                actualBytes = null;
             } else {
-
                 try {
-                    long lo = parseLong(in);
-                    actual = RLPEncoder.encode(Integers.toBytes(lo));
+                    actualBytes = RLPEncoder.encodeString(Integers.toBytes(parseLong(in)));
                 } catch (NumberFormatException nfe) {
-
-                    String inString = in.getAsString();
-
-                    byte[] inBytes;
-                    if(inString.startsWith("#")) {
-                        BigInteger inBigInt = parseBigIntegerStringPoundSign(in);
-                        inBytes = inBigInt.toByteArray();
-                        actual = RLPEncoder.encode(inBytes);
-                    } else {
-                        String string = parseString(in);
-                        inBytes = string.getBytes(StandardCharsets.UTF_8);
-                        actual = RLPEncoder.encode(inBytes);
-                    }
+                    actualBytes = RLPEncoder.encodeString(
+                            in.getAsString().startsWith("#")
+                                    ? parseBigIntegerStringPoundSign(in).toByteArray()
+                                    : Strings.decode(parseString(in), Strings.UTF_8)
+                    );
                 }
             }
-
-            String e = FastHex.encodeToString(expected);
-            String a = FastHex.encodeToString(actual);
-            try {
-                Assert.assertEquals(e, a);
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
+            String expected = Strings.encode(getOutBytes(entry));
+            String actual = Strings.encode(actualBytes);
+            assertEquals(expected, actual);
         }
     }
 
@@ -105,6 +85,6 @@ public class RLPJsonEncodeTest {
 
         String outString = out.getAsString();
 
-        return FastHex.decode(outString.substring(outString.indexOf("0x") + "0x".length()));
+        return Strings.decode(outString.substring(outString.indexOf("0x") + "0x".length()));
     }
 }

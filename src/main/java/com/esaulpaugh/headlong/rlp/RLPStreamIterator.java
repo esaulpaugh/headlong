@@ -15,71 +15,68 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
-import com.esaulpaugh.headlong.rlp.exception.UnrecoverableDecodeException;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class RLPStreamIterator implements AutoCloseable {
+class RLPStreamIterator implements Iterator<RLPItem> {
 
-    private final RLPDecoder decoder;
-    private final InputStream rlpStream;
+    protected final InputStream is;
+    protected final RLPDecoder decoder;
+    protected byte[] buffer;
+    protected int index;
 
-    private byte[] buffer;
-    private int index;
+    protected RLPItem next;
 
-    private RLPItem rlpItem;
+    RLPStreamIterator(InputStream is, RLPDecoder decoder) {
+        this(is, decoder, new byte[0], 0); // make sure index == buffer.length
+    }
 
-    RLPStreamIterator(RLPDecoder decoder, InputStream rlpStream) {
+    RLPStreamIterator(InputStream is, RLPDecoder decoder, byte[] buffer, int index) {
+        this.is = is;
         this.decoder = decoder;
-        this.rlpStream = rlpStream;
-        this.buffer = new byte[this.index = 0]; // make sure index == buffer.length
-    }
-
-    public boolean hasNext() throws IOException, UnrecoverableDecodeException {
-        if (rlpItem != null) {
-            return true;
-        }
-        final int available = rlpStream.available();
-        if (available > 0) {
-            int keptBytes = buffer.length - index;
-            byte[] newBuffer = new byte[keptBytes + available];
-            System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
-            buffer = newBuffer;
-            index = 0;
-            int read = rlpStream.read(buffer, keptBytes, available);
-            if (read != available) {
-                throw new IOException("read failed: " + read + " != " + available);
-            }
-        }
-        if (index == buffer.length) {
-            return false;
-        }
-        try {
-            rlpItem = decoder.wrap(buffer, index);
-            return true;
-        } catch (DecodeException e) {
-            if (e.isRecoverable()) {
-                return false;
-            }
-            throw (UnrecoverableDecodeException) e;
-        }
-    }
-
-    public RLPItem next() throws IOException, UnrecoverableDecodeException {
-        if(hasNext()) {
-            index = rlpItem.endIndex;
-            RLPItem item = rlpItem;
-            rlpItem = null;
-            return item;
-        }
-        throw new NoSuchElementException();
+        this.buffer = buffer;
+        this.index = index;
     }
 
     @Override
-    public void close() throws IOException {
-        rlpStream.close();
+    public boolean hasNext() {
+        if (next != null) {
+            return true;
+        }
+        try {
+            final int available = is.available();
+            if (available > 0) {
+                int keptBytes = buffer.length - index;
+                byte[] newBuffer = new byte[keptBytes + available];
+                System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
+                buffer = newBuffer;
+                index = 0;
+                int read = is.read(buffer, keptBytes, available);
+                if (read != available) {
+                    throw new IOException("read failed: " + read + " != " + available);
+                }
+            } else if (index >= buffer.length) {
+                return false;
+            }
+            next = decoder.wrap(buffer, index);
+            return true;
+        } catch (ShortInputException e) {
+            return false;
+        } catch (IOException io) {
+            throw new RuntimeException(io);
+        }
+    }
+
+    @Override
+    public RLPItem next() {
+        if(hasNext()) {
+            RLPItem item = next;
+            next = null;
+            index = item.endIndex;
+            return item;
+        }
+        throw new NoSuchElementException();
     }
 }

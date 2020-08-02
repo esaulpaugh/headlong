@@ -18,13 +18,12 @@ package com.esaulpaugh.headlong.abi;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-final class IntType extends UnitType<Integer> {
+public final class IntType extends UnitType<Integer> {
 
-    private static final Class<Integer> CLASS = Integer.class;
     private static final String ARRAY_CLASS_NAME = int[].class.getName();
 
     IntType(String canonicalType, int bitLength, boolean unsigned) {
-        super(canonicalType, CLASS, bitLength, unsigned);
+        super(canonicalType, Integer.class, bitLength, unsigned);
     }
 
     @Override
@@ -33,27 +32,15 @@ final class IntType extends UnitType<Integer> {
     }
 
     @Override
-    int typeCode() {
+    public int typeCode() {
         return TYPE_CODE_INT;
     }
 
     @Override
-    int byteLengthPacked(Integer value) {
-        return bitLength >> 3; // div 8
-    }
-
-    @Override
-    public int validate(Integer value) {
-        final long longVal = value.longValue();
-        validateLongBitLen(longVal);
-        return UNIT_LENGTH_BYTES;
-    }
-
-    @Override
     Integer decode(ByteBuffer bb, byte[] unitBuffer) {
-        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
+        bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
-        validateBigIntBitLen(bi);
+        validateBigInt(bi);
         return bi.intValue();
     }
 

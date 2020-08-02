@@ -15,17 +15,26 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
-import com.esaulpaugh.headlong.rlp.util.Integers;
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 public class RLPEncoderTest {
 
@@ -35,7 +44,7 @@ public class RLPEncoderTest {
                 new Object[0],
                 new byte[0]
         };
-        Assert.assertArrayEquals(
+        assertArrayEquals(
                 new byte[] { (byte)0xc0, (byte)0x80 },
                 RLPEncoder.encodeSequentially(objects)
         );
@@ -47,75 +56,165 @@ public class RLPEncoderTest {
                 new Object[0],
                 new byte[0]
         };
-        Assert.assertArrayEquals(
+        assertArrayEquals(
                 new byte[] { (byte)0xc2, (byte)0xc0, (byte)0x80 },
                 RLPEncoder.encodeAsList(objects)
         );
     }
 
     @Test
-    public void toList() throws DecodeException {
+    public void toList() {
 
-        RLPItem item0 = RLPDecoder.RLP_STRICT.wrap(new byte[] {(byte) 0x81, (byte) 0x80 });
-        RLPItem item1 = RLPDecoder.RLP_STRICT.wrap(new byte[] {(byte) 0x7e });
-        RLPItem item2 = RLPDecoder.RLP_STRICT.wrap(new byte[] {(byte) 0xc1, (byte) 0x80 });
+        RLPString item0 = RLPDecoder.RLP_STRICT.wrapString(new byte[] {(byte) 0x81, (byte) 0x80 });
+        RLPString item1 = RLPDecoder.RLP_STRICT.wrapString(new byte[] {(byte) 0x7e });
+        RLPList item2 = RLPDecoder.RLP_STRICT.wrapList(new byte[] {(byte) 0xc1, (byte) 0x80 });
 
         RLPList rlpList = RLPEncoder.toList(item0, item1, item2);
         List<RLPItem> elements = rlpList.elements(RLPDecoder.RLP_STRICT);
 
-        Assert.assertEquals(3, elements.size());
+        assertEquals(3, elements.size());
 
-        Assert.assertNotSame(elements.get(0), item0);
-        Assert.assertNotSame(elements.get(1), item1);
-        Assert.assertNotSame(elements.get(2), item2);
+        assertNotSame(elements.get(0), item0);
+        assertNotSame(elements.get(1), item1);
+        assertNotSame(elements.get(2), item2);
 
-        Assert.assertEquals(elements.get(0), item0);
-        Assert.assertEquals(elements.get(1), item1);
-        Assert.assertEquals(elements.get(2), item2);
+        assertEquals(elements.get(0), item0);
+        assertEquals(elements.get(1), item1);
+        assertEquals(elements.get(2), item2);
     }
 
     @Test
-    public void testDatatypes() throws DecodeException {
+    public void testLongList() {
 
-        char c = '\u0009';
-        String str = "7 =IIii$%&#*~\t\n\b";
-        byte by = -1;
-        short sh = Short.MIN_VALUE;
+        final byte[] bytes = new byte[] {
+                (byte) 0xf9, (byte) 1,
+                (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0xFF, (byte) 0x81, (byte) 0x90, (byte) 0x81, (byte) 0xb6, (byte) '\u230A',
+                (byte) 0xb8, 56, 0x09,(byte)0x80,-1,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, -3, -2, 0, 0,
+                (byte) 0xf8, 0x38, 0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 36, 74, 0, 0,
+                (byte) 0x84, 'c', 'a', 't', 's',
+                (byte) 0x84, 'd', 'o', 'g', 's',
+                (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
+                0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,
+        };
 
-        int i = 95223;
-        long l = 9864568923852L;
-        BigInteger bi = BigInteger.valueOf(l * -1001);
+        RLPList longList = RLPDecoder.RLP_STRICT.wrapList(bytes);
 
-        float f = 0.91254f;
-        double d = 133.9185523d;
-        BigDecimal bd = new BigDecimal(BigInteger.ONE, 18);
+        List<RLPItem> elements = longList.elements(RLPDecoder.RLP_STRICT);
 
-        byte[] rlp = RLPEncoder.encodeSequentially(
-                Integers.toBytes((short) c),
-                str.getBytes(StandardCharsets.UTF_8),
-                Integers.toBytes(by),
-                Integers.toBytes(sh),
-                Integers.toBytes(i),
-                Integers.toBytes(l),
-                bi.toByteArray(),
-                FloatingPoint.toBytes(f),
-                FloatingPoint.toBytes(d),
-                bd.unscaledValue().toByteArray()
+        RLPList rebuilt = RLPEncoder.toList(elements);
+
+//        System.out.println(longList.toString(Strings.HEX));
+//        System.out.println(rebuilt.toString(Strings.HEX));
+
+        assertEquals(longList, rebuilt);
+    }
+
+    @Test
+    public void testDatatypes() {
+
+        final Random rando = TestUtils.seededRandom();
+
+        for (int k = 0; k < 100; k++) {
+
+            final char c = (char) rando.nextInt(128);
+
+            final byte[] buffer = new byte[1 + rando.nextInt(90)];
+            rando.nextBytes(buffer);
+
+            final String str = Strings.encode(buffer, Strings.UTF_8);
+            final byte by = (byte) rando.nextInt();
+            final short sh = (short) rando.nextInt();
+
+            final int i = rando.nextInt();
+            final long l = rando.nextLong();
+
+            rando.nextBytes(buffer);
+
+            final BigInteger signed = new BigInteger(buffer);
+            final BigInteger unsigned = BigInteger.valueOf(i < 0 ? i * -1001L : i * 999L);
+
+            final float f = rando.nextFloat();
+            final double d = rando.nextDouble();
+            final BigDecimal bd = new BigDecimal(BigInteger.ONE, 18);
+
+            final byte[] rlp = RLPEncoder.encodeSequentially(
+                    Integers.toBytes((short) c),
+                    Strings.decode(str, Strings.UTF_8),
+                    Integers.toBytes(by),
+                    Integers.toBytes(sh),
+                    Integers.toBytes(i),
+                    Integers.toBytes(l),
+                    signed.toByteArray(),
+                    Integers.toBytesUnsigned(unsigned),
+                    FloatingPoint.toBytes(f),
+                    FloatingPoint.toBytes(d),
+                    bd.unscaledValue().toByteArray()
+            );
+
+            final Iterator<RLPItem> iter = RLPDecoder.RLP_STRICT.sequenceIterator(rlp);
+
+            final RLPItem charItem = iter.next();
+            assertEquals(c, charItem.asChar(false));
+            if (charItem.dataLength > 0) {
+                assertEquals(c, charItem.asString(Strings.UTF_8).charAt(0));
+            }
+            assertEquals(str, iter.next().asString(Strings.UTF_8), str);
+            assertEquals(by, iter.next().asByte());
+            assertEquals(sh, iter.next().asShort(false));
+
+            assertEquals(i, iter.next().asInt(false));
+            assertEquals(l, iter.next().asLong());
+            assertEquals(signed, iter.next().asBigIntSigned());
+            assertEquals(unsigned, iter.next().asBigInt(false));
+
+            assertEquals(f, iter.next().asFloat(false), Double.MIN_NORMAL);
+            assertEquals(d, iter.next().asDouble(false), Double.MIN_NORMAL);
+            assertEquals(bd, new BigDecimal(iter.next().asBigIntSigned(), bd.scale()));
+        }
+    }
+
+    @Test
+    public void testExceptions() throws Throwable {
+
+        TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.encodeSequentially(new byte[0], null, new byte[]{-1}));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type: java.lang.String", () -> RLPEncoder.encodeSequentially((Object) new String[]{"00"}));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type: java.lang.String", () -> RLPEncoder.encodeSequentially(new Object[]{new ArrayList<>(), "00"}));
+    }
+
+    @Test
+    public void testEncodeToByteBuffer() throws Throwable {
+        RLPEncoder.encodeSequentially(new HashSet<>(), ByteBuffer.allocate(0));
+        RLPEncoder.encodeSequentially(new ArrayList<>(), ByteBuffer.allocate(0));
+        RLPEncoder.encodeSequentially(new Object[0], ByteBuffer.allocate(0));
+        TestUtils.assertThrown(
+                IllegalArgumentException.class,
+                "unsupported object type: java.util.HashMap",
+                () -> RLPEncoder.encodeSequentially(new HashMap<>(), ByteBuffer.allocate(0))
         );
+        TestUtils.assertThrown(
+                IllegalArgumentException.class,
+                "unsupported object type: java.nio.HeapByteBuffer",
+                () -> RLPEncoder.encodeSequentially(new byte[0], ByteBuffer.allocate(0))
+        );
+        RLPEncoder.encodeSequentially(() -> new Iterator<Object>() {
+            @Override
+            public boolean hasNext() {
+                return false;
+            }
 
-        RLPIterator iter = RLPDecoder.RLP_STRICT.sequenceIterator(rlp);
+            @Override
+            public Object next() {
+                throw new NoSuchElementException();
+            }
+        }, ByteBuffer.allocate(0));
 
-        Assert.assertEquals(iter.next().asChar(), c);
-        Assert.assertEquals(iter.next().asString(Strings.UTF_8), str);
-        Assert.assertEquals(iter.next().asByte(), by);
-        Assert.assertEquals(iter.next().asShort(), sh);
-
-        Assert.assertEquals(iter.next().asInt(), i);
-        Assert.assertEquals(iter.next().asLong(), l);
-        Assert.assertEquals(iter.next().asBigInt(), bi);
-
-        Assert.assertEquals(iter.next().asFloat(), f, 0.0d);
-        Assert.assertEquals(iter.next().asDouble(), d, 0.0d);
-        Assert.assertEquals(iter.next().asBigDecimal(bd.scale()), bd);
+        TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.encodeSequentially(() -> null, ByteBuffer.allocate(0)));
     }
 }

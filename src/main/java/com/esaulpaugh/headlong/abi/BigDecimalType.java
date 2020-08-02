@@ -19,16 +19,22 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-final class BigDecimalType extends UnitType<BigDecimal> {
+/** For decimal types such as fixed, ufixed, and decimal. */
+public final class BigDecimalType extends UnitType<BigDecimal> {
 
-    private static final Class<BigDecimal> CLASS = BigDecimal.class;
     private static final String ARRAY_CLASS_NAME = BigDecimal[].class.getName();
+
+    static final String ERR_SCALE_MISMATCH = "big decimal scale mismatch: actual != expected: %d != %d";
 
     final int scale;
 
     BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean unsigned) {
-        super(canonicalTypeString, CLASS, bitLength, unsigned);
+        super(canonicalTypeString, BigDecimal.class, bitLength, unsigned);
         this.scale = scale;
+    }
+
+    public int getScale() {
+        return scale;
     }
 
     @Override
@@ -37,41 +43,38 @@ final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    int typeCode() {
+    public int typeCode() {
         return TYPE_CODE_BIG_DECIMAL;
     }
 
     @Override
-    int byteLengthPacked(BigDecimal value) {
-        return bitLength >> 3; // div 8
-    }
-
-    @Override
-    public int validate(BigDecimal value) {
-        validateBigIntBitLen(value.unscaledValue());
-        if(value.scale() != scale) {
-            throw new IllegalArgumentException("big decimal scale mismatch: actual != expected: " + value.scale() + " != " + scale);
+    public int validate(Object value) {
+        validateClass(value);
+        BigDecimal dec = (BigDecimal) value;
+        validateBigInt(dec.unscaledValue());
+        if(dec.scale() == scale) {
+            return UNIT_LENGTH_BYTES;
         }
-        return UNIT_LENGTH_BYTES;
+        throw new IllegalArgumentException(String.format(ERR_SCALE_MISMATCH, dec.scale(), scale));
     }
 
     @Override
-    void encodeHead(BigDecimal value, ByteBuffer dest, int[] offset) {
-        Encoding.insertInt(value.unscaledValue(), dest);
+    int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
+        Encoding.insertInt(((BigDecimal) value).unscaledValue(), UNIT_LENGTH_BYTES, dest);
+        return nextOffset;
     }
 
     @Override
     BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) {
-        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
+        bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
-        BigDecimal dec = new BigDecimal(bi, scale);
-        validateBigIntBitLen(bi);
-        return dec;
+        validateBigInt(bi);
+        return new BigDecimal(bi, scale);
     }
 
     @Override
     public BigDecimal parseArgument(String s) {
-        BigDecimal bigDec = new BigDecimal(new BigInteger(s), scale);
+        BigDecimal bigDec = new BigDecimal(new BigInteger(s, 10), scale);
         validate(bigDec);
         return bigDec;
     }

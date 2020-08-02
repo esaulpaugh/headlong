@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.RandomAccess;
@@ -24,21 +23,14 @@ import java.util.RandomAccess;
  * An ordered list of objects whose types should correspond to some {@link TupleType}. {@link Function}s encode/decode
  * {@link Tuple}s containing arguments satisfying its parameters/return type. {@link Tuple}s can contain other tuples.
  */
-public final class Tuple extends AbstractList<Object> implements RandomAccess, Serializable {
+public final class Tuple extends AbstractList<Object> implements RandomAccess {
 
     public static final Tuple EMPTY = new Tuple();
 
     final Object[] elements;
 
     public Tuple(Object... elements) {
-        this.elements = elements; // array not guarded from external modification
-    }
-
-    public Tuple subtuple(int startIndex, int endIndex) {
-        final int len = endIndex - startIndex;
-        Object[] copy = new Object[len];
-        System.arraycopy(elements, startIndex, copy, 0, len);
-        return new Tuple(copy);
+        this.elements = Arrays.copyOf(elements, elements.length); // shallow copy
     }
 
     @Override
@@ -62,6 +54,18 @@ public final class Tuple extends AbstractList<Object> implements RandomAccess, S
         if (o == null || getClass() != o.getClass()) return false;
         Tuple other = (Tuple) o;
         return Arrays.deepEquals(this.elements, other.elements);
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.deepToString(elements);
+    }
+
+    public Tuple subtuple(int startIndex, int endIndex) {
+        final int len = endIndex - startIndex;
+        Object[] copy = new Object[len];
+        System.arraycopy(elements, startIndex, copy, 0, len);
+        return new Tuple(copy);
     }
 
     public static Tuple of(Object... elements) {

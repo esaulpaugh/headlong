@@ -17,22 +17,31 @@ package com.esaulpaugh.headlong.util;
 
 import com.migcomponents.migbase64.Base64;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import static com.esaulpaugh.headlong.abi.util.Utils.EMPTY_BYTE_ARRAY;
-import static com.migcomponents.migbase64.Base64.*;
+import static com.migcomponents.migbase64.Base64.NO_LINE_SEP;
+import static com.migcomponents.migbase64.Base64.NO_PADDING;
+import static com.migcomponents.migbase64.Base64.URL_SAFE_CHARS;
 
-/**
- * Utility for encoding and decoding hexadecimal, Base64, and UTF-8-encoded {@code String}s.
- */
+/** Utility for encoding and decoding hexadecimal, Base64, and UTF-8-encoded {@link String}s. */
 public final class Strings {
 
-    public static final int BASE_64_URL_SAFE = 3; // 64
-//    public static final int DECIMAL = 2; // 10
+    public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
+
+    public static final int BASE_64_URL_SAFE = 2; // 64
     public static final int UTF_8 = 1; // 256
     public static final int HEX = 0; // 16
 
     public static final int URL_SAFE_FLAGS = URL_SAFE_CHARS | NO_LINE_SEP | NO_PADDING;
+
+    public static String encode(byte b) {
+        return encode(new byte[] { b });
+    }
+
+    public static String encode(ByteBuffer buffer) {
+        return encode(buffer.array());
+    }
 
     public static String encode(byte[] bytes) {
         return encode(bytes, HEX);
@@ -46,8 +55,8 @@ public final class Strings {
         switch (encoding) {
         case BASE_64_URL_SAFE: return Base64.encodeToString(buffer, from, len, URL_SAFE_FLAGS);
         case UTF_8: return new String(buffer, from, len, StandardCharsets.UTF_8);
-        case HEX:
-        default: return FastHex.encodeToString(buffer, from, len);
+        case HEX: return FastHex.encodeToString(buffer, from, len);
+        default: throw new UnsupportedOperationException();
         }
     }
 
@@ -62,8 +71,8 @@ public final class Strings {
         switch (encoding) {
         case BASE_64_URL_SAFE: return java.util.Base64.getUrlDecoder().decode(string);
         case UTF_8: return string.getBytes(StandardCharsets.UTF_8);
-        case HEX:
-        default: return FastHex.decode(string, 0 ,string.length());
+        case HEX: return FastHex.decode(string, 0 ,string.length());
+        default: throw new UnsupportedOperationException();
         }
     }
 }

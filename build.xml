@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="headlong" default="all">
+  
+  
+  <property file="headlong.properties"/>
+  <!-- Uncomment the following property if no tests compilation is needed -->
+  <!-- 
+  <property name="skip.tests" value="true"/>
+   -->
+  
+  <!-- Compiler options -->
+  
+  <property name="compiler.debug" value="on"/>
+  <property name="compiler.generate.no.warnings" value="off"/>
+  <property name="compiler.args" value=""/><!--release 8 -source 8 -target 8 -->
+  <property name="compiler.max.memory" value="700m"/>
+  <patternset id="ignored.files">
+    <exclude name="**/*.hprof/**"/>
+    <exclude name="**/*.pyc/**"/>
+    <exclude name="**/*.pyo/**"/>
+    <exclude name="**/*.rbc/**"/>
+    <exclude name="**/*.yarb/**"/>
+    <exclude name="**/*~/**"/>
+    <exclude name="**/.DS_Store/**"/>
+    <exclude name="**/.git/**"/>
+    <exclude name="**/.hg/**"/>
+    <exclude name="**/.svn/**"/>
+    <exclude name="**/CVS/**"/>
+    <exclude name="**/__pycache__/**"/>
+    <exclude name="**/_svn/**"/>
+    <exclude name="**/vssver.scc/**"/>
+    <exclude name="**/vssver2.scc/**"/>
+  </patternset>
+  <patternset id="library.patterns">
+    <include name="*.war"/>
+    <include name="*.swc"/>
+    <include name="*.apk"/>
+    <include name="*.zip"/>
+    <include name="*.egg"/>
+    <include name="*.ear"/>
+    <include name="*.ane"/>
+    <include name="*.jar"/>
+    <include name="*.klib"/>
+  </patternset>
+  <patternset id="compiler.resources">
+    <exclude name="**/?*.java"/>
+    <exclude name="**/?*.form"/>
+    <exclude name="**/?*.class"/>
+    <exclude name="**/?*.groovy"/>
+    <exclude name="**/?*.scala"/>
+    <exclude name="**/?*.flex"/>
+    <exclude name="**/?*.kt"/>
+    <exclude name="**/?*.clj"/>
+    <exclude name="**/?*.aj"/>
+  </patternset>
+  
+  <!-- JDK definitions -->
+
+  <property name="jdk.bin" value="${jdk.home}/bin"/>
+  <path id="jdk.classpath">
+    <fileset dir="${jdk.home}"/>
+  </path>
+  
+  <property name="project.jdk.home" value="${jdk.home}"/>
+  <property name="project.jdk.bin" value="${jdk.bin}"/>
+  <property name="project.jdk.classpath" value="jdk.classpath"/>
+  
+  
+  <!-- Project Libraries -->
+  
+  <path id="lib.mvn:_com.google.code.gson:gson:2.8.6.classpath">
+    <pathelement location="${path.variable.maven_repository}/com/google/code/gson/gson/2.8.6/gson-2.8.6.jar"/>
+  </path>
+
+  <path id="lib.mvn:_org.apiguardian:apiguardian-api:1.1.0.classpath">
+    <pathelement location="${path.variable.maven_repository}/org/apiguardian/apiguardian-api/1.1.0/apiguardian-api-1.1.0.jar"/>
+  </path>
+  
+  <path id="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.65.classpath">
+    <pathelement location="${path.variable.maven_repository}/org/bouncycastle/bcprov-jdk15on/1.65/bcprov-jdk15on-1.65.jar"/>
+  </path>
+
+  <path id="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.6.2.classpath">
+    <pathelement location="${path.variable.maven_repository}/org/junit/jupiter/junit-jupiter-api/5.6.2/junit-jupiter-api-5.6.2.jar"/>
+  </path>
+
+  <path id="lib.mvn:_org.junit.jupiter:junit-jupiter-engine:5.6.2.classpath">
+    <pathelement location="${path.variable.maven_repository}/org/junit/jupiter/junit-jupiter-engine/5.6.2/junit-jupiter-engine-5.6.2.jar"/>
+  </path>
+
+  <path id="lib.mvn:_org.junit.platform:junit-platform-commons:1.6.2.classpath">
+    <pathelement location="${path.variable.maven_repository}/org/junit/platform/junit-platform-commons/1.6.2/junit-platform-commons-1.6.2.jar"/>
+  </path>
+
+  <path id="lib.mvn:_org.junit.platform:junit-platform-engine:1.6.2.classpath">
+    <pathelement location="${path.variable.maven_repository}/org/junit/platform/junit-platform-engine/1.6.2/junit-platform-engine-1.6.2.jar"/>
+  </path>
+
+  <path id="lib.mvn:_org.opentest4j:opentest4j:1.2.0.classpath">
+    <pathelement location="${path.variable.maven_repository}/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar"/>
+  </path>
+
+  <!-- Modules -->
+
+  <!-- Module headlong -->
+  
+  <dirname property="module.headlong.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.headlong" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.headlong" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.headlong" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.headlong" value="-encoding UTF-8 ${compiler.args}"/>
+  
+  <property name="headlong.output.dir" value="${module.headlong.basedir}/classes/production/headlong"/>
+  <property name="headlong.testoutput.dir" value="${module.headlong.basedir}/classes/test/headlong"/>
+  
+  <path id="headlong.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="headlong.module.production.classpath">
+    <path refid="${module.jdk.classpath.headlong}"/>
+  </path>
+  
+  <path id="headlong.runtime.production.module.classpath">
+    <pathelement location="${headlong.output.dir}"/>
+  </path>
+  
+  <path id="headlong.module.classpath">
+    <path refid="${module.jdk.classpath.headlong}"/>
+    <pathelement location="${headlong.output.dir}"/>
+  </path>
+  
+  <path id="headlong.runtime.module.classpath">
+    <pathelement location="${headlong.testoutput.dir}"/>
+    <pathelement location="${headlong.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.headlong">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.headlong">
+    <patternset refid="excluded.from.module.headlong"/>
+  </patternset>
+  
+  
+  <target name="compile.module.headlong" depends="compile.module.headlong.production,compile.module.headlong.tests" description="Compile module headlong"/>
+  
+  <target name="compile.module.headlong.production" description="Compile module headlong; production classes"/>
+  
+  <target name="compile.module.headlong.tests" depends="compile.module.headlong.production" description="compile module headlong; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.headlong" description="cleanup module">
+    <delete dir="${headlong.output.dir}"/>
+    <delete dir="${headlong.testoutput.dir}"/>
+  </target>
+  
+  
+  <!-- Module headlong.main -->
+  
+  <dirname property="module.headlong.main.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.headlong.main" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.headlong.main" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.headlong.main" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.headlong.main" value="-encoding UTF-8 ${compiler.args}"/>
+  
+  <property name="headlong.main.output.dir" value="${module.headlong.main.basedir}/build/classes/java/main"/>
+  <property name="headlong.main.testoutput.dir" value="${module.headlong.main.basedir}/build/classes/java/main"/>
+  
+  <path id="headlong.main.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="headlong.main.module.production.classpath">
+    <path refid="${module.jdk.classpath.headlong.main}"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
+  </path>
+  
+  <path id="headlong.main.runtime.production.module.classpath">
+    <pathelement location="${headlong.main.output.dir}"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
+  </path>
+  
+  <path id="headlong.main.module.classpath">
+    <path refid="${module.jdk.classpath.headlong.main}"/>
+    <pathelement location="${headlong.main.output.dir}"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
+  </path>
+  
+  <path id="headlong.main.runtime.module.classpath">
+    <pathelement location="${headlong.main.output.dir}"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.headlong.main">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.headlong.main">
+    <patternset refid="excluded.from.module.headlong.main"/>
+  </patternset>
+  
+  <path id="headlong.main.module.sourcepath">
+    <dirset dir="${module.headlong.main.basedir}/src/main">
+      <include name="java"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.headlong.main" depends="compile.module.headlong.main.production,compile.module.headlong.main.tests" description="Compile module headlong.main"/>
+  
+  <target name="compile.module.headlong.main.production" description="Compile module headlong.main; production classes">
+    <mkdir dir="${headlong.main.output.dir}"/>
+    <javac destdir="${headlong.main.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.headlong.main}/javac">
+      <compilerarg line="${compiler.args.headlong.main}"/>
+      <bootclasspath refid="headlong.main.module.bootclasspath"/>
+      <classpath refid="headlong.main.module.production.classpath"/>
+      <src refid="headlong.main.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.headlong.main"/>
+    </javac>
+    
+    <copy todir="${headlong.main.output.dir}">
+      <fileset dir="${module.headlong.main.basedir}/src/main/java">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.headlong.main.tests" depends="compile.module.headlong.main.production" description="compile module headlong.main; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.headlong.main" description="cleanup module">
+    <delete dir="${headlong.main.output.dir}"/>
+    <delete dir="${headlong.main.testoutput.dir}"/>
+  </target>
+  
+  
+  <!-- Module headlong.jmh -->
+  
+  <dirname property="module.headlong.jmh.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.headlong.jmh" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.headlong.jmh" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.headlong.jmh" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.headlong.jmh" value="-encoding UTF-8 ${compiler.args}"/>
+  
+  <property name="headlong.jmh.output.dir" value="${module.headlong.jmh.basedir}/build/classes/java/jmh"/>
+  <property name="headlong.jmh.testoutput.dir" value="${module.headlong.jmh.basedir}/build/classes/java/jmh"/>
+  
+  <path id="headlong.jmh.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="headlong.jmh.module.production.classpath">
+    <path refid="${module.jdk.classpath.headlong.jmh}"/>
+    <pathelement location="${headlong.main.output.dir}"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
+  </path>
+  
+  <path id="headlong.jmh.runtime.production.module.classpath">
+    <pathelement location="${headlong.jmh.output.dir}"/>
+    <path refid="headlong.main.runtime.production.module.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
+  </path>
+  
+  <path id="headlong.jmh.module.classpath">
+    <path refid="${module.jdk.classpath.headlong.jmh}"/>
+    <pathelement location="${headlong.jmh.output.dir}"/>
+    <pathelement location="${headlong.main.output.dir}"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
+  </path>
+  
+  <path id="headlong.jmh.runtime.module.classpath">
+    <pathelement location="${headlong.jmh.output.dir}"/>
+    <path refid="headlong.main.runtime.module.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.headlong.jmh">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.headlong.jmh">
+    <patternset refid="excluded.from.module.headlong.jmh"/>
+  </patternset>
+  
+  
+  <target name="compile.module.headlong.jmh" depends="compile.module.headlong.jmh.production,compile.module.headlong.jmh.tests" description="Compile module headlong.jmh"/>
+  
+  <target name="compile.module.headlong.jmh.production" depends="compile.module.headlong.main" description="Compile module headlong.jmh; production classes"/>
+  
+  <target name="compile.module.headlong.jmh.tests" depends="compile.module.headlong.jmh.production" description="compile module headlong.jmh; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.headlong.jmh" description="cleanup module">
+    <delete dir="${headlong.jmh.output.dir}"/>
+    <delete dir="${headlong.jmh.testoutput.dir}"/>
+  </target>
+  
+  
+  <!-- Module headlong.test -->
+  
+  <dirname property="module.headlong.test.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.headlong.test" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.headlong.test" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.headlong.test" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.headlong.test" value="-encoding UTF-8 ${compiler.args}"/>
+  
+  <property name="headlong.test.output.dir" value="undefined"/>
+  <property name="headlong.test.testoutput.dir" value="${module.headlong.test.basedir}/build/classes/java/test"/>
+  
+  <path id="headlong.test.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="headlong.test.module.production.classpath">
+    <path refid="${module.jdk.classpath.headlong.test}"/>
+    <pathelement location="${headlong.main.output.dir}"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
+    <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.6.2.classpath"/>
+    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.6.2.classpath"/>
+    <path refid="lib.mvn:_org.apiguardian:apiguardian-api:1.1.0.classpath"/>
+    <path refid="lib.mvn:_org.opentest4j:opentest4j:1.2.0.classpath"/>
+  </path>
+  
+  <path id="headlong.test.runtime.production.module.classpath">
+    <path refid="headlong.main.runtime.production.module.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
+    <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.6.2.classpath"/>
+    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.6.2.classpath"/>
+    <path refid="lib.mvn:_org.junit.platform:junit-platform-engine:1.6.2.classpath"/>
+    <path refid="lib.mvn:_org.apiguardian:apiguardian-api:1.1.0.classpath"/>
+    <path refid="lib.mvn:_org.opentest4j:opentest4j:1.2.0.classpath"/>
+    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-engine:5.6.2.classpath"/>
+  </path>
+  
+  <path id="headlong.test.module.classpath">
+    <path refid="${module.jdk.classpath.headlong.test}"/>
+    <pathelement location="${headlong.main.output.dir}"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
+    <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.6.2.classpath"/>
+    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.6.2.classpath"/>
+    <path refid="lib.mvn:_org.junit.platform:junit-platform-engine:1.6.2.classpath"/>
+    <path refid="lib.mvn:_org.apiguardian:apiguardian-api:1.1.0.classpath"/>
+    <path refid="lib.mvn:_org.opentest4j:opentest4j:1.2.0.classpath"/>
+    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-engine:5.6.2.classpath"/>
+  </path>
+  
+  <path id="headlong.test.runtime.module.classpath">
+    <pathelement location="${headlong.test.testoutput.dir}"/>
+    <path refid="headlong.main.runtime.module.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.8.6.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.65.classpath"/>
+    <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.6.2.classpath"/>
+    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.6.2.classpath"/>
+    <path refid="lib.mvn:_org.junit.platform:junit-platform-engine:1.6.2.classpath"/>
+    <path refid="lib.mvn:_org.apiguardian:apiguardian-api:1.1.0.classpath"/>
+    <path refid="lib.mvn:_org.opentest4j:opentest4j:1.2.0.classpath"/>
+    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-engine:5.6.2.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.headlong.test">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.headlong.test">
+    <patternset refid="excluded.from.module.headlong.test"/>
+  </patternset>
+  
+  <path id="headlong.test.module.test.sourcepath">
+    <dirset dir="${module.headlong.test.basedir}/src/test">
+      <include name="java"/>
+      <include name="resources"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.headlong.test" depends="compile.module.headlong.test.production,compile.module.headlong.test.tests" description="Compile module headlong.test"/>
+  
+  <target name="compile.module.headlong.test.production" depends="compile.module.headlong.main" description="Compile module headlong.test; production classes"/>
+  
+  <target name="compile.module.headlong.test.tests" depends="compile.module.headlong.test.production" description="compile module headlong.test; test classes" unless="skip.tests">
+    <mkdir dir="${headlong.test.testoutput.dir}"/>
+    <javac destdir="${headlong.test.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.headlong.test}/javac">
+      <compilerarg line="${compiler.args.headlong.test}"/>
+      <bootclasspath refid="headlong.test.module.bootclasspath"/>
+      <classpath refid="headlong.test.module.classpath"/>
+      <src refid="headlong.test.module.test.sourcepath"/>
+      <patternset refid="excluded.from.compilation.headlong.test"/>
+    </javac>
+    
+    <copy todir="${headlong.test.testoutput.dir}">
+      <fileset dir="${module.headlong.test.basedir}/src/test/java">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+      <fileset dir="${module.headlong.test.basedir}/src/test/resources">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="clean.module.headlong.test" description="cleanup module">
+    <delete dir="${headlong.test.output.dir}"/>
+    <delete dir="${headlong.test.testoutput.dir}"/>
+  </target>
+
+  <target name = "build-jar">
+    <jar destfile = "${basedir}/build/lib/headlong-${project.version}.jar"
+         basedir = "${basedir}/build/classes/java/main">
+      <manifest>
+        <attribute name = "Implementation-Title" value = "${project.name}"/>
+        <attribute name = "Implementation-Version" value = "${project.version}"/>
+        <attribute name= "Automatic-Module-Name" value="${project.name}"/>
+      </manifest>
+    </jar>
+  </target>
+  
+  <target name="init" description="Build initialization">
+    <!-- Perform any build initialization in this target -->
+  </target>
+  
+  <target name="clean" depends="clean.module.headlong, clean.module.headlong.main, clean.module.headlong.jmh, clean.module.headlong.test" description="cleanup all"/>
+  
+  <target name="build.modules" depends="init, clean, compile.module.headlong, compile.module.headlong.main, compile.module.headlong.jmh, compile.module.headlong.test" description="build all modules"/>
+  
+  <target name="all" depends="build.modules" description="build all"/>
+</project>

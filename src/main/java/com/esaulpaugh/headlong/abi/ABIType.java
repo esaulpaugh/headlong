@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import java.io.Serializable;
 import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -23,19 +22,19 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 /**
  * Represents a Contract ABI type such as uint256 or decimal. Used to validate, encode, and decode data.
  *
- * @param <J>   this {@link ABIType}'s corresponding Java type
+ * @param <J> this {@link ABIType}'s corresponding Java type
  */
-public abstract class ABIType<J> implements Serializable {
+public abstract class ABIType<J> {
 
-    static final int TYPE_CODE_BOOLEAN = 0;
-    static final int TYPE_CODE_BYTE = 1;
-    static final int TYPE_CODE_INT = 2;
-    static final int TYPE_CODE_LONG = 3;
-    static final int TYPE_CODE_BIG_INTEGER = 4;
-    static final int TYPE_CODE_BIG_DECIMAL = 5;
+    public static final int TYPE_CODE_BOOLEAN = 0;
+    public static final int TYPE_CODE_BYTE = 1;
+    public static final int TYPE_CODE_INT = 2;
+    public static final int TYPE_CODE_LONG = 3;
+    public static final int TYPE_CODE_BIG_INTEGER = 4;
+    public static final int TYPE_CODE_BIG_DECIMAL = 5;
 
-    static final int TYPE_CODE_ARRAY = 6;
-    static final int TYPE_CODE_TUPLE = 7;
+    public static final int TYPE_CODE_ARRAY = 6;
+    public static final int TYPE_CODE_TUPLE = 7;
 
     public static final ABIType<?>[] EMPTY_TYPE_ARRAY = new ABIType<?>[0];
 
@@ -75,30 +74,65 @@ public abstract class ABIType<J> implements Serializable {
 
     abstract String arrayClassName();
 
-    abstract int typeCode();
+    /**
+     * Returns an integer code specific to this instance's class, which is a subclass of {@link ABIType}.
+     *
+     * @return the code
+     */
+    public abstract int typeCode();
 
-    abstract int byteLength(J value);
+    abstract int byteLength(Object value);
 
-    abstract int byteLengthPacked(J value);
+    abstract int byteLengthPacked(Object value);
 
-    public abstract int validate(J value);
+    /**
+     * Checks whether the given object is a valid argument for this {@link ABIType}. Requires an instance of type J.
+     *
+     * @param value an object of type J
+     * @return the byte length of the ABI encoding of {@code value}
+     */
+    public abstract int validate(Object value);
 
-    abstract void encodeHead(J value, ByteBuffer dest, int[] offset);
+    int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
+        if (!dynamic) {
+            encodeTail(value, dest);
+            return nextOffset;
+        }
+        return Encoding.insertOffset(nextOffset, dest, byteLength(value));
+    }
 
-    abstract void encodeTail(J value, ByteBuffer dest);
+    abstract void encodeTail(Object value, ByteBuffer dest);
 
     /**
      * Decodes the data at the buffer's current position according to this {@link ABIType}.
      *
-     * @param buffer    the buffer containing the encoded data
+     * @param buffer     the buffer containing the encoded data
      * @param unitBuffer a buffer of length {@link UnitType#UNIT_LENGTH_BYTES} in which to store intermediate values
-     * @return  the decoded value
+     * @return the decoded value
+     * @throws IllegalArgumentException if the data is malformed
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
 
+    /**
+     * Parses and validates a string representation of J. Not supported by {@link ArrayType}, {@link TupleType}.
+     *
+     * @param s the object's string representation
+     * @return  the object
+     */
     public abstract J parseArgument(String s);
 
-    public abstract void encodePacked(J value, ByteBuffer dest);
+    void validateClass(Object value) {
+        if(!clazz.isInstance(value)) {
+            if(value == null) {
+                throw new NullPointerException();
+            }
+            throw new IllegalArgumentException("class mismatch: "
+                    + value.getClass().getName()
+                    + " not assignable to "
+                    + clazz.getName()
+                    + " (" + Utils.friendlyClassName(value.getClass()) + " not instanceof " + Utils.friendlyClassName(clazz) + "/" + canonicalType + ")");
+        }
+    }
 
     static byte[] newUnitBuffer() {
         return new byte[UNIT_LENGTH_BYTES];
@@ -119,25 +153,5 @@ public abstract class ABIType<J> implements Serializable {
     @Override
     public final String toString() {
         return canonicalType;
-    }
-
-    final void toString(StringBuilder sb) {
-        switch (typeCode()) {
-        case TYPE_CODE_ARRAY:
-            sb.append('[');
-            ((ArrayType<?, ?>) this).elementType.toString(sb);
-            sb.append(']');
-            break;
-        case TYPE_CODE_TUPLE:
-            sb.append('(');
-            for(ABIType<?> e : (TupleType) this) {
-                e.toString(sb);
-            }
-            sb.append(')');
-            break;
-        default:
-            sb.append(this);
-        }
-        sb.append(' ').append(getName()).append(',');
     }
 }

@@ -15,75 +15,169 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import org.junit.Assert;
-import org.junit.Test;
+import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
+import com.esaulpaugh.headlong.util.Strings;
+import com.joemelsha.crypto.hash.Keccak;
+import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Random;
 
-import static com.esaulpaugh.headlong.TestUtils.assertThrown;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EqualsTest {
 
     @Test
-    public void testEquals() throws ParseException {
+    public void testEquals() {
 
-        Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        final Random r = new Random();
+        final Keccak k = new Keccak(256);
 
+        int maxIters = -1;
+        int i = 0;
         int n = 0;
         do {
 
-            MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong());
+            MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
 
             String canonical = mctc.function.getCanonicalSignature();
             if(mctc.rawSignature.equals(canonical)) {
+                i++;
                 continue;
             }
+            if(i > maxIters) {
+                maxIters = i;
+            }
+            i = 0;
 
             Function a = mctc.function;
             Function b = new Function(canonical);
 
 //            System.out.println(raw);
 
-            boolean equals = a.getParamTypes().recursiveEquals(b.getParamTypes());
+            boolean equals = recursiveEquals(a.getParamTypes(), b.getParamTypes());
 
 //            System.out.println(equals);
 
-            Assert.assertTrue(equals);
+            assertTrue(equals);
 
-            Assert.assertEquals(a, b);
+            assertNotSame(a.getParamTypes().canonicalType, b.getParamTypes().canonicalType);
+
+            assertEquals(a, b);
 
             n++;
         } while (n < 100);
+
+        System.out.println("n = " + n + ", maxIters = " + maxIters);
+
+        assertSame(TupleType.parse("(uint)").elementTypes[0].canonicalType, TupleType.parse("(uint)").elementTypes[0].canonicalType);
+        assertNotSame(Function.parse("(uint)").getParamTypes().canonicalType, Function.parse("(uint)").getParamTypes().canonicalType);
+
+        assertEquals(
+                Function.parse("(bool)", new WrappedKeccak(256)),
+                Function.parse("(bool)", new Keccak(256))
+        );
+    }
+
+    private static boolean recursiveEquals(TupleType tt, Object o) {
+        if (tt == o) return true;
+        if (o == null || tt.getClass() != o.getClass()) return false;
+        if (!tt.equals(o)) return false;
+        TupleType tupleType = (TupleType) o;
+        return Arrays.equals(tt.elementTypes, tupleType.elementTypes);
     }
 
     @Test
-    public void testBooleanNotEquals() throws Throwable {
-        Function f = new Function("baz(uint32,bool)");
-        Tuple argsTuple = new Tuple(69L, true);
-        ByteBuffer one = f.encodeCall(argsTuple);
+    public void complexFunctionTest() {
+        Function f = new Function("(function[2][][],bytes24,string[0][0],address[],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
 
-        final byte[] array = one.array();
+        WrappedKeccak wk = new WrappedKeccak(256);
+        byte[] digest = wk.digest(Strings.decode(f.getCanonicalSignature(), Strings.UTF_8));
+        assertArrayEquals(Arrays.copyOfRange(digest, 0, 4), f.selector());
 
-        System.out.println(Function.formatCall(array));
+        byte[] func = new byte[24];
+        TestUtils.seededRandom().nextBytes(func);
 
-        Tuple decoded;
+//                       10000000000000000000000000000000000000000
+//                        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        String uint160 = "ff00ee01dd02cc03cafebabe9906880777086609";
+        BigInteger addr = new BigInteger(uint160, 16);
+        assertEquals(160, uint160.length() * 4);
+        assertEquals(uint160, addr.toString(16));
+        Object[] argsIn = new Object[] {
+                new byte[][][][] { new byte[][][] { new byte[][] { func, func } } },
+                func,
+                new String[0][],
+                new BigInteger[] { addr },
+                BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(Byte.MAX_VALUE << 2)),
+                new Tuple(7),
+                new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple(9), new Tuple(-11) } } },
+                new Tuple[] { new Tuple(13), new Tuple(-15) },
+                new Tuple[] { new Tuple(17), new Tuple(-19) },
+                Long.MAX_VALUE / 8_500_000,
+                new Tuple[] { new Tuple((long) 0x7e), new Tuple((long) -0x7e) },
+                new Tuple(BigInteger.TEN)
+        };
 
-        array[array.length - 1] = 0;
-        System.out.println(Function.formatCall(array));
-        decoded = f.decodeCall(array);
-        Assert.assertNotEquals(decoded, argsTuple);
+        ByteBuffer abi = f.encodeCallWithArgs(argsIn);
 
-        array[array.length - 32] = (byte) 0x80;
-        System.out.println(Function.formatCall(array));
-        assertThrown(IllegalArgumentException.class, "exceeds bit limit", () -> f.decodeCall(array));
+        assertTrue(Function.formatCall(abi.array()).contains("18       000000000000000000000000" + uint160));
 
-        for (int i = array.length - 32; i < array.length; i++) {
-            array[i] = (byte) 0xFF;
-        }
-        array[array.length - 1] = (byte) 0xFE;
-        System.out.println(Function.formatCall(array));
-        assertThrown(IllegalArgumentException.class, "signed value given for unsigned type", () -> f.decodeCall(array));
+        Tuple tupleOut = f.decodeCall((ByteBuffer) abi.flip());
+
+        assertTrue(Arrays.deepEquals(argsIn, tupleOut.elements));
+    }
+
+    @Test
+    public void testUint32Array() {
+
+        long[] unsigneds = new long[] {
+                0x00000004L,
+                0xFFFFFFF7L,
+                0x11111111L,
+                0xFF00FF00L,
+                0x80808080L,
+                0xFF00FF00L
+        };
+
+        Function foo = Function.parse("foo(uint32[6])");
+
+        ByteBuffer bb = foo.encodeCall(Tuple.singleton(unsigneds));
+
+        Tuple dec = foo.decodeCall((ByteBuffer) bb.flip());
+
+        long[] decoded = (long[]) dec.get(0);
+
+        assertArrayEquals(unsigneds, decoded);
+    }
+
+    @Test
+    public void testUint64Array() {
+
+        BigInteger[] unsigneds = new BigInteger[] {
+                new BigInteger("0000000000000004", 16),
+                new BigInteger("000000FFFFFFFFF7", 16),
+                new BigInteger("1111111111111111", 16),
+                new BigInteger("7F00FF00FF00FF00", 16),
+                new BigInteger("8080808080808080", 16),
+                new BigInteger("FF00FF00FF00FF00", 16),
+        };
+
+        Function foo = Function.parse("foo(uint64[6])");
+
+        ByteBuffer bb = foo.encodeCall(Tuple.singleton(unsigneds));
+
+        Tuple dec = foo.decodeCall((ByteBuffer) bb.flip());
+
+        BigInteger[] decoded = (BigInteger[]) dec.get(0);
+
+        assertArrayEquals(unsigneds, decoded);
     }
 }

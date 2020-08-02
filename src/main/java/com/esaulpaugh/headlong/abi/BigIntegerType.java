@@ -18,13 +18,13 @@ package com.esaulpaugh.headlong.abi;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-final class BigIntegerType extends UnitType<BigInteger> {
+/** Represents integer types from uint64 to int256. */
+public final class BigIntegerType extends UnitType<BigInteger> {
 
-    private static final Class<BigInteger> CLASS = BigInteger.class;
     private static final String ARRAY_CLASS_NAME = BigInteger[].class.getName();
 
     BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {
-        super(canonicalType, CLASS, bitLength, unsigned);
+        super(canonicalType, BigInteger.class, bitLength, unsigned);
     }
 
     @Override
@@ -33,13 +33,29 @@ final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
-    int typeCode() {
+    public int typeCode() {
         return TYPE_CODE_BIG_INTEGER;
     }
 
     @Override
-    int byteLengthPacked(BigInteger value) {
-        return bitLength >> 3; // div 8
+    public int validate(Object value) {
+        validateClass(value);
+        validateBigInt((BigInteger) value);
+        return UNIT_LENGTH_BYTES;
+    }
+
+    @Override
+    int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
+        Encoding.insertInt((BigInteger) value, UNIT_LENGTH_BYTES, dest);
+        return nextOffset;
+    }
+
+    @Override
+    BigInteger decode(ByteBuffer bb, byte[] unitBuffer) {
+        bb.get(unitBuffer);
+        BigInteger bi = new BigInteger(unitBuffer);
+        validateBigInt(bi);
+        return bi;
     }
 
     @Override
@@ -47,24 +63,5 @@ final class BigIntegerType extends UnitType<BigInteger> {
         BigInteger bigInt = new BigInteger(s);
         validate(bigInt);
         return bigInt;
-    }
-
-    @Override
-    public int validate(BigInteger value) {
-        validateBigIntBitLen(value);
-        return UNIT_LENGTH_BYTES;
-    }
-
-    @Override
-    void encodeHead(BigInteger value, ByteBuffer dest, int[] offset) {
-        Encoding.insertInt(value, dest);
-    }
-
-    @Override
-    BigInteger decode(ByteBuffer bb, byte[] unitBuffer) {
-        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
-        BigInteger bi = new BigInteger(unitBuffer);
-        validateBigIntBitLen(bi);
-        return bi;
     }
 }

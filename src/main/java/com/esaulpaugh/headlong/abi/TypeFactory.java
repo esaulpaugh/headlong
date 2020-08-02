@@ -15,224 +15,149 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 
-import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
-import static com.esaulpaugh.headlong.abi.BaseTypeInfo.DECIMAL_BIT_LEN;
-import static com.esaulpaugh.headlong.abi.BaseTypeInfo.DECIMAL_SCALE;
-import static com.esaulpaugh.headlong.abi.BaseTypeInfo.FIXED_BIT_LEN;
-import static com.esaulpaugh.headlong.abi.BaseTypeInfo.FIXED_SCALE;
-
-/**
- * Creates the appropriate {@link ABIType} object for a given type string.
- */
+/** Creates the appropriate {@link ABIType} object for a given type string. */
 final class TypeFactory {
-
-    static final String UNRECOGNIZED_TYPE = "unrecognized type";
-
-    private static final ABIType<BigInteger> NAMELESS_INT_TYPE = new BigIntegerType("int256", 256, false);
-    private static final ABIType<BigInteger> NAMELESS_UINT_TYPE = new BigIntegerType("uint256", 256, true);
-
-    private static final ABIType<byte[]> NAMELESS_BYTES_TYPE = new ArrayType<>("bytes", ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME);
-
-    private static final ABIType<String> NAMELESS_STRING_TYPE = new ArrayType<>("string", ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME);
-
-    private static final ABIType<BigDecimal> NAMELESS_FIXED_TYPE = new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false);
-    private static final ABIType<BigDecimal> NAMELESS_UFIXED_TYPE = new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true);
-    private static final ABIType<BigDecimal> NAMELESS_DECIMAL_TYPE = new BigDecimalType("decimal", DECIMAL_BIT_LEN, DECIMAL_SCALE, false);
-
-    private static final ABIType<Boolean> NAMELESS_BOOLEAN_TYPE = new BooleanType();
 
     private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
 
-    static ABIType<?> createForTuple(TupleType baseTupleType, String suffix, String name) throws ParseException {
-        return create(baseTupleType.canonicalType + suffix, baseTupleType, name);
-    }
+    private static final int ADDRESS_BIT_LEN = 160;
 
-    static ABIType<?> create(String type) throws ParseException {
-        return create(type, null, null);
-    }
+    private static final int DECIMAL_BIT_LEN = 128;
+    private static final int DECIMAL_SCALE = 10;
 
-    static ABIType<?> create(String type, TupleType baseTupleType, String name) throws ParseException {
-        try {
-            if(name == null) {
-                return buildType(type, false, baseTupleType, true);
-            }
-            return buildType(type, false, baseTupleType, false)
-                    .setName(name);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+    private static final int FIXED_BIT_LEN = 128;
+    private static final int FIXED_SCALE = 18;
+
+    private static final int FUNCTION_BYTE_LEN = 24;
+
+    private static final Map<String, Supplier<ABIType<?>>> SUPPLIER_MAP;
+
+    static {
+        final Map<String, Supplier<ABIType<?>>> lambdaMap = new HashMap<>(256);
+
+        for(int n = 8; n <= 32; n += 8) {
+            mapInt(lambdaMap, "int" + n, n, false);
         }
+        for(int n = 40; n <= 64; n += 8) {
+            mapLong(lambdaMap, "int" + n, n, false);
+        }
+        for(int n = 72; n <= 256; n += 8) {
+            mapBigInteger(lambdaMap, "int" + n, n, false);
+        }
+        lambdaMap.put("int", lambdaMap.get("int256"));
+
+        for(int n = 8; n <= 24; n += 8) {
+            mapInt(lambdaMap, "uint" + n, n, true);
+        }
+        for(int n = 32; n <= 56; n += 8) {
+            mapLong(lambdaMap, "uint" + n, n, true);
+        }
+        for(int n = 64; n <= 256; n += 8) {
+            mapBigInteger(lambdaMap, "uint" + n, n, true);
+        }
+        lambdaMap.put("uint", lambdaMap.get("uint256"));
+        mapBigInteger(lambdaMap, "address", ADDRESS_BIT_LEN, true);
+
+        for (int n = 1; n <= 32; n++) {
+            mapStaticByteArray(lambdaMap, "bytes" + n, n);
+        }
+        mapStaticByteArray(lambdaMap, "function", FUNCTION_BYTE_LEN);
+        lambdaMap.put("bytes", () -> new ArrayType<>("bytes", ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, ArrayType.DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME));
+        lambdaMap.put("string", () -> new ArrayType<>("string", ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, ArrayType.DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME));
+
+        lambdaMap.put("fixed128x18", () -> new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
+        lambdaMap.put("ufixed128x18", () -> new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
+        lambdaMap.put("fixed", lambdaMap.get("fixed128x18"));
+        lambdaMap.put("ufixed", lambdaMap.get("ufixed128x18"));
+        lambdaMap.put("decimal", () -> new BigDecimalType("decimal", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
+
+        lambdaMap.put("bool", BooleanType::new);
+
+        SUPPLIER_MAP = Collections.unmodifiableMap(lambdaMap);
     }
 
-    private static ABIType<?> buildType(String type, boolean isArrayElement, TupleType baseTupleType, boolean nameless) throws ParseException, ClassNotFoundException {
+    private static void mapInt(Map<String, Supplier<ABIType<?>>> map, String type, int bitLen, boolean unsigned) {
+        map.put(type, () -> new IntType(type, bitLen, unsigned));
+    }
+
+    private static void mapLong(Map<String, Supplier<ABIType<?>>> map, String type, int bitLen, boolean unsigned) {
+        map.put(type, () -> new LongType(type, bitLen, unsigned));
+    }
+
+    private static void mapBigInteger(Map<String, Supplier<ABIType<?>>> map, String type, int bitLen, boolean unsigned) {
+        map.put(type, () -> new BigIntegerType(type, bitLen, unsigned));
+    }
+
+    private static void mapStaticByteArray(Map<String, Supplier<ABIType<?>>> map, String type, int arrayLen) {
+        map.put(type, () -> new ArrayType<>(type, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME));
+    }
+
+    static ABIType<?> create(String rawType, String name) {
+        return buildType(rawType, null)
+                .setName(name);
+    }
+
+    static ABIType<?> createFromBase(TupleType baseType, String typeSuffix, String name) {
+        return buildType(baseType.canonicalType + typeSuffix, baseType)
+                .setName(name);
+    }
+
+    private static ABIType<?> buildType(final String rawType, ABIType<?> baseType) {
         try {
-            final int idxOfLast = type.length() - 1;
-            if (type.charAt(idxOfLast) == ']') { // array
+            final int lastCharIndex = rawType.length() - 1;
+            if (rawType.charAt(lastCharIndex) == ']') { // array
 
-                final int fromIndex = idxOfLast - 1;
-                final int arrayOpenIndex = type.lastIndexOf('[', fromIndex);
+                final int secondToLastCharIndex = lastCharIndex - 1;
+                final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIndex);
 
-                final int length;
-                if (arrayOpenIndex == fromIndex) { // i.e. []
-                    length = DYNAMIC_LENGTH;
-                } else { // e.g. [4]
-                    try {
-                        length = Integer.parseInt(type.substring(arrayOpenIndex + 1, idxOfLast));
-                        if (length < 0) {
-                            throw new ParseException("negative array size", arrayOpenIndex + 1);
-                        }
-                    } catch (NumberFormatException nfe) {
-                        throw (ParseException) new ParseException("illegal argument", arrayOpenIndex + 1).initCause(nfe);
-                    }
-                }
-
-                final ABIType<?> elementType = buildType(type.substring(0, arrayOpenIndex), true, baseTupleType, nameless);
+                final ABIType<?> elementType = buildType(rawType.substring(0, arrayOpenIndex), baseType);
+                final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
+                final int length = arrayOpenIndex == secondToLastCharIndex ? ArrayType.DYNAMIC_LENGTH : parseLen(rawType, arrayOpenIndex + 1, lastCharIndex);
+                final boolean dynamic = length == ArrayType.DYNAMIC_LENGTH || elementType.dynamic;
                 final String arrayClassName = elementType.arrayClassName();
                 @SuppressWarnings("unchecked")
                 final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
-                final boolean dynamic = length == DYNAMIC_LENGTH || elementType.dynamic;
                 return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, '[' + arrayClassName);
-            } else {
-                if (baseTupleType != null) {
-                    return baseTupleType;
-                }
-                ABIType<?> baseType = resolveBaseType(type, isArrayElement, nameless);
-                if (baseType != null) {
-                    return baseType;
-                }
             }
+            if(baseType != null || (baseType = resolveBaseType(rawType)) != null) {
+                return baseType;
+            }
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         } catch (StringIndexOutOfBoundsException sioobe) { // e.g. type equals "" or "82]" or "[]" or "[1]"
             /* fall through */
         }
-        throw new ParseException(UNRECOGNIZED_TYPE + ": " + type, 0);
+        throw new IllegalArgumentException("unrecognized type: " + rawType);
     }
 
-    private static ABIType<?> resolveBaseType(String baseTypeStr, boolean isElement, boolean nameless) throws ParseException, ClassNotFoundException {
+    private static int parseLen(String rawType, int startLen, int lastCharIndex) {
+        try {
+            final String lengthStr = rawType.substring(startLen, lastCharIndex);
+            final int length = Integer.parseInt(lengthStr);
+            if (length >= 0) {
+                if(lengthStr.length() > 1 && rawType.charAt(startLen) == '0') {
+                    throw new IllegalArgumentException("leading zero in array length");
+                }
+                return length;
+            }
+            throw new IllegalArgumentException("negative array length");
+        } catch (NumberFormatException nfe) {
+            throw new IllegalArgumentException("illegal number format", nfe);
+        }
+    }
+
+    private static ABIType<?> resolveBaseType(String baseTypeStr) {
         if(baseTypeStr.charAt(0) == '(') {
             return parseTupleType(baseTypeStr);
         }
-
-        BaseTypeInfo info = BaseTypeInfo.get(baseTypeStr);
-        if(info != null) {
-            switch (baseTypeStr) { // baseType's hash code already cached due to BaseTypeInfo.get(baseTypeStr)
-            case "int8":
-            case "int16":
-            case "int24":
-            case "int32":   return new IntType(baseTypeStr, info.bitLen, false);
-            case "int40":
-            case "int48":
-            case "int56":
-            case "int64":   return new LongType(baseTypeStr, info.bitLen, false);
-            case "int72":
-            case "int80":
-            case "int88":
-            case "int96":
-            case "int104":
-            case "int112":
-            case "int120":
-            case "int128":
-            case "int136":
-            case "int144":
-            case "int152":
-            case "int160":
-            case "int168":
-            case "int176":
-            case "int184":
-            case "int192":
-            case "int200":
-            case "int208":
-            case "int216":
-            case "int224":
-            case "int232":
-            case "int240":
-            case "int248":  return new BigIntegerType(baseTypeStr, info.bitLen, false);
-            case "int256":
-            case "int":     return nameless ? NAMELESS_INT_TYPE : new BigIntegerType("int256", info.bitLen, false);
-            case "uint8":
-            case "uint16":
-            case "uint24":  return new IntType(baseTypeStr, info.bitLen, true);
-            case "uint32":  return isElement ? new IntType(baseTypeStr, info.bitLen, true) : new LongType(baseTypeStr, info.bitLen, true);
-            case "uint40":
-            case "uint48":
-            case "uint56":  return new LongType(baseTypeStr, info.bitLen, true);
-            case "uint64":  return isElement ? new LongType(baseTypeStr, info.bitLen, true) : new BigIntegerType(baseTypeStr, info.bitLen, true);
-            case "uint72":
-            case "uint80":
-            case "uint88":
-            case "uint96":
-            case "uint104":
-            case "uint112":
-            case "uint120":
-            case "uint128":
-            case "uint136":
-            case "uint144":
-            case "uint152":
-            case "uint160":
-            case "address":
-            case "uint168":
-            case "uint176":
-            case "uint184":
-            case "uint192":
-            case "uint200":
-            case "uint208":
-            case "uint216":
-            case "uint224":
-            case "uint232":
-            case "uint240":
-            case "uint248": return new BigIntegerType(baseTypeStr, info.bitLen, true);
-            case "uint256":
-            case "uint":    return nameless ? NAMELESS_UINT_TYPE : new BigIntegerType("uint256", info.bitLen, true);
-            case "bytes1":
-            case "bytes2":
-            case "bytes3":
-            case "bytes4":
-            case "bytes5":
-            case "bytes6":
-            case "bytes7":
-            case "bytes8":
-            case "bytes9":
-            case "bytes10":
-            case "bytes11":
-            case "bytes12":
-            case "bytes13":
-            case "bytes14":
-            case "bytes15":
-            case "bytes16":
-            case "bytes17":
-            case "bytes18":
-            case "bytes19":
-            case "bytes20":
-            case "bytes21":
-            case "bytes22":
-            case "bytes23":
-            case "bytes24":
-            case "function":
-            case "bytes25":
-            case "bytes26":
-            case "bytes27":
-            case "bytes28":
-            case "bytes29":
-            case "bytes30":
-            case "bytes31":
-            case "bytes32": return new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, false, ByteType.UNSIGNED, info.arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME);
-            case "bool":    return nameless ? NAMELESS_BOOLEAN_TYPE : new BooleanType();
-            case "bytes":   return nameless ? NAMELESS_BYTES_TYPE : new ArrayType<>(baseTypeStr, ArrayType.BYTE_ARRAY_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME);
-            case "string":  return nameless ? NAMELESS_STRING_TYPE : new ArrayType<>(baseTypeStr, ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME);
-            case "decimal": return nameless ? NAMELESS_DECIMAL_TYPE : new BigDecimalType(baseTypeStr, DECIMAL_BIT_LEN, DECIMAL_SCALE, false);
-            case "fixed":
-            case "fixed128x18":
-                            return nameless ? NAMELESS_FIXED_TYPE : new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false);
-            case "ufixed":
-            case "ufixed128x18":
-                            return nameless ? NAMELESS_UFIXED_TYPE : new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true);
-            default:        return null;
-            }
-        }
-        return tryParseFixed(baseTypeStr);
+        Supplier<ABIType<?>> supplier = SUPPLIER_MAP.get(baseTypeStr);
+        return supplier != null ? supplier.get() : tryParseFixed(baseTypeStr);
     }
 
     private static BigDecimalType tryParseFixed(final String type) {
@@ -254,82 +179,70 @@ final class TypeFactory {
     }
 
     static final String EMPTY_PARAMETER = "empty parameter";
-    static final String ILLEGAL_TUPLE_TERMINATION = "illegal tuple termination";
 
-    private static TupleType parseTupleType(final String rawTypeStr) throws ParseException, ClassNotFoundException {
-        final int end = rawTypeStr.length();
+    private static TupleType parseTupleType(final String rawTypeStr) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final ArrayList<ABIType<?>> elements = new ArrayList<>();
-
-        int argEnd = 1; // this inital value is important for empty params case: "()"
         try {
             int argStart = 1; // after opening '('
-            WHILE:
+            int argEnd = 1; // inital value important for empty params case: "()"
+            char prevEndChar = ')'; // inital value important for empty params case
+            final int end = rawTypeStr.length(); // must be >= 1
+            LOOP:
             while (argStart < end) {
-                int fromIndex;
-                char c = rawTypeStr.charAt(argStart);
-                switch (c) {
+                switch (rawTypeStr.charAt(argStart)) {
                 case '(': // element is tuple or tuple array
-                    fromIndex = findSubtupleEnd(rawTypeStr, end, argStart + 1);
+                    argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart + 1));
                     break;
                 case ')':
-                    if(rawTypeStr.charAt(argEnd) == ',') {
-                        throw new ParseException(EMPTY_PARAMETER, argStart);
+                    if(prevEndChar != ',') {
+                        break LOOP;
                     }
-                    break WHILE;
+                    throw new IllegalArgumentException(EMPTY_PARAMETER);
                 case ',':
-                    if (rawTypeStr.charAt(argStart - 1) == ')') {
-                        break WHILE;
+                    if (rawTypeStr.charAt(argEnd) == ')') {
+                        break LOOP;
                     }
-                    throw new ParseException(EMPTY_PARAMETER, argStart);
+                    throw new IllegalArgumentException(EMPTY_PARAMETER);
                 default: // non-tuple element
-                    fromIndex = argStart + 1;
+                    argEnd = nextTerminator(rawTypeStr, argStart + 1);
                 }
-                argEnd = nextTerminator(rawTypeStr, fromIndex);
-                if(argEnd == -1) {
-                    break;
+                elements.add(buildType(rawTypeStr.substring(argStart, argEnd), null));
+                if((prevEndChar = rawTypeStr.charAt(argEnd)) != ',') {
+                    break/*LOOP*/;
                 }
-                elements.add(buildType(rawTypeStr.substring(argStart, argEnd), false, null, true));
                 argStart = argEnd + 1; // jump over terminator
             }
-        } catch (ParseException pe) {
-            throw (ParseException) new ParseException("@ index " + elements.size() + ", " + pe.getMessage(), pe.getErrorOffset())
-                    .initCause(pe);
+            if(argEnd == end - 1 && prevEndChar == ')') {
+                return TupleType.wrap(elements.toArray(ABIType.EMPTY_TYPE_ARRAY));
+            }
+        } catch (IllegalArgumentException iae) {
+            throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);
         }
-        if(argEnd < 0 || argEnd != end - 1 || rawTypeStr.charAt(argEnd) != ')') {
-            throw new ParseException(ILLEGAL_TUPLE_TERMINATION, Math.max(0, argEnd));
-        }
-        return TupleType.wrap(elements.toArray(ABIType.EMPTY_TYPE_ARRAY));
+        throw new IllegalArgumentException("unrecognized type: " + rawTypeStr);
     }
 
-    private static int findSubtupleEnd(String parentTypeString, final int end, int i) throws ParseException {
+    private static int findSubtupleEnd(String parentTypeString, int i) {
         int depth = 1;
         do {
-            if(i < end) {
-                char x = parentTypeString.charAt(i++);
-                if(x > ')') {
-                    continue;
-                }
+            char x = parentTypeString.charAt(i++);
+            if(x <= ')') {
                 if(x == ')') {
                     depth--;
                 } else if(x == '(') {
                     depth++;
                 }
-            } else {
-                throw new ParseException(ILLEGAL_TUPLE_TERMINATION, end);
             }
         } while(depth > 0);
         return i;
     }
 
     private static int nextTerminator(String signature, int i) {
-        int comma = signature.indexOf(',', i);
-        int close = signature.indexOf(')', i);
-        if(comma == -1) {
-            return close;
-        }
-        if(close == -1) {
-            return comma;
-        }
-        return Math.min(comma, close);
+        final int comma = signature.indexOf(',', i);
+        final int close = signature.indexOf(')', i);
+        return comma == -1
+                ? close
+                : close == -1
+                    ? comma
+                    : Math.min(comma, close);
     }
 }

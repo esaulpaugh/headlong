@@ -1,12 +1,29 @@
+/*
+   Copyright 2019 Evan Saulpaugh
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import com.joemelsha.crypto.hash.Keccak;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TupleTest {
 
@@ -16,7 +33,7 @@ public class TupleTest {
             new short[0],
             new long[0],
             new boolean[0],
-            new Throwable(),
+            new Throwable() {},
             new BigInteger[0],
             new BigDecimal[0],
             true,
@@ -24,36 +41,36 @@ public class TupleTest {
             9L,
             "aha",
             '\0',
-            Tuple.EMPTY
+            Tuple.EMPTY,
+            0.1f,
+            1.9d
     };
 
     @Test
     public void testTypeSafety() throws Throwable {
 
-        Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        final Random r = TestUtils.seededRandom();
+        final Keccak k = new Keccak(256);
 
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < 1000; i++) {
 
-            rand.setSeed(i);
+            r.setSeed(i);
 
-            MonteCarloTestCase testCase = new MonteCarloTestCase(i);
-
-            System.out.println(i);
+            MonteCarloTestCase testCase = new MonteCarloTestCase(i, 3, 3, 3, 3, r, k);
 
             Object[] elements = testCase.argsTuple.elements;
 
             final int idx = 0;
             if(elements.length > idx) {
                 Object e = elements[idx];
-                Object replacement = OBJECTS[rand.nextInt(OBJECTS.length)];
+                Object replacement = OBJECTS[r.nextInt(OBJECTS.length)];
                 if(e.getClass() != replacement.getClass()) {
                     elements[idx] = replacement;
                 } else {
                     elements[idx] = new Object();
                 }
-//                testCase.function.encodeCall(Tuple.of(elements));
                 try {
-                    TestUtils.assertThrown(IllegalArgumentException.class, "but found", () -> testCase.function.encodeCall(Tuple.of(elements)));
+                    TestUtils.assertThrown(IllegalArgumentException.class, "not assignable to", () -> testCase.function.encodeCall(Tuple.of(elements)));
                 } catch (AssertionError ae) {
                     System.err.println(i);
                     ae.printStackTrace();
@@ -65,9 +82,10 @@ public class TupleTest {
 
     @Test
     public void fuzzNulls() throws Throwable {
-        Random r = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        final Random r = TestUtils.seededRandom();
+        final Keccak k = new Keccak(256);
         for (int i = 0; i < 1000; i++) {
-            MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong());
+            MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
             Tuple args = mctc.argsTuple;
             if(args.elements.length > 0) {
                 int idx = r.nextInt(args.elements.length);
@@ -112,15 +130,15 @@ public class TupleTest {
                 0b0,
                 1,
                 10L,
-                BigInteger.valueOf(100L),
+                BigInteger.valueOf(3405691582L),
                 BigDecimal.valueOf(120.997)
         };
 
         final int len = master.length;
 
-        Random rand = new Random(MonteCarloTest.getSeed(System.nanoTime()));
+        Random rand = TestUtils.seededRandom();
 
-        shuffle(master, rand);
+        TestUtils.shuffle(master, rand);
 
         Tuple tuple = new Tuple(master);
 
@@ -133,21 +151,12 @@ public class TupleTest {
                 final int n = j - i;
                 Object[] elements = new Object[n];
                 System.arraycopy(master, i, elements, 0, n);
-                Assert.assertEquals(tuple.subtuple(i, j), new Tuple(elements));
+                assertEquals(tuple.subtuple(i, j), new Tuple(elements));
 //                for (int k = i; k < j; k++) {
 //                    System.out.print((char) (k + 48));
 //                }
 //                System.out.println();
             }
-        }
-    }
-
-    private static void shuffle(Object[] arr, Random rand) {
-        for (int i = arr.length - 1; i > 0; i--) {
-            int o = rand.nextInt(i + 1);
-            Object x = arr[o];
-            arr[o] = arr[i];
-            arr[i] = x;
         }
     }
 }

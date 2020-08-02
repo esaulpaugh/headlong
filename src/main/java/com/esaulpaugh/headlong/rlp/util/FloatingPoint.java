@@ -15,19 +15,17 @@
 */
 package com.esaulpaugh.headlong.rlp.util;
 
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
+import com.esaulpaugh.headlong.util.Integers;
 
 import java.math.BigDecimal;
 
-/**
- * Utility for reading and writing floating point numbers from and to RLP format.
- */
+/** Utility for reading and writing floating point numbers from and to RLP format. */
 public final class FloatingPoint {
 
     /* float */
 
-    public static float getFloat(byte[] bytes, int i, int numBytes) throws DecodeException {
-        return Float.intBitsToFloat(Integers.getInt(bytes, i, numBytes));
+    public static float getFloat(byte[] bytes, int i, int numBytes, boolean lenient) {
+        return Float.intBitsToFloat(Integers.getInt(bytes, i, numBytes, lenient));
     }
 
     public static int putFloat(float val, byte[] bytes, int i) {
@@ -40,21 +38,21 @@ public final class FloatingPoint {
 
     /* double */
 
-    public static double getDouble(byte[] bytes, int i, int numBytes) throws DecodeException {
-        return Double.longBitsToDouble(Integers.getLong(bytes, i, numBytes));
-    }
-
-    public static byte[] toBytes(double val) {
-        return Integers.toBytes(Double.doubleToLongBits(val));
+    public static double getDouble(byte[] bytes, int i, int numBytes, boolean lenient) {
+        return Double.longBitsToDouble(Integers.getLong(bytes, i, numBytes, lenient));
     }
 
     public static int putDouble(double val, byte[] bytes, int i) {
         return Integers.putLong(Double.doubleToLongBits(val), bytes, i);
     }
 
+    public static byte[] toBytes(double val) {
+        return Integers.toBytes(Double.doubleToLongBits(val));
+    }
+
     /* BigDecimal */
 
-    public static BigDecimal getBigDecimal(byte[] bytes, int i, int unscaledNumBytes, int scale) {
-        return new BigDecimal(Integers.getBigInt(bytes, i, unscaledNumBytes), scale);
+    public static BigDecimal getBigDecimal(byte[] bytes, int i, int unscaledNumBytes, int scale, boolean lenient) {
+        return new BigDecimal(Integers.getBigInt(bytes, i, unscaledNumBytes, lenient), scale);
     }
 }

@@ -15,24 +15,36 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.exception.DecodeException;
-
-/**
- * Created by Evo on 1/19/2017.
- */
+/** Extends {@link RLPItem}. Created by Evo on 1/19/2017. */
 public final class RLPString extends RLPItem {
 
-    RLPString(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) throws DecodeException {
+    RLPString(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) {
         super(lead, type, buffer, index, containerEnd, lenient);
+    }
+
+    @Override
+    public boolean isString() {
+        return true;
     }
 
     @Override
     public boolean isList() {
         return false;
     }
-    
+
     @Override
-    public RLPString duplicate(RLPDecoder decoder) throws DecodeException {
-        return decoder.wrapString(encoding(), 0);
+    public RLPString asRLPString() {
+        return this;
+    }
+
+    @Override
+    public RLPList asRLPList() {
+        throw new ClassCastException("not an " + RLPList.class.getSimpleName());
+    }
+
+    /** @see RLPItem#duplicate(RLPDecoder) */
+    @Override
+    public RLPString duplicate(RLPDecoder decoder) {
+        return decoder.wrapString(encoding());
     }
 }
