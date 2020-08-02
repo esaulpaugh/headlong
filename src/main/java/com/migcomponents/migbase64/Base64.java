@@ -1,5 +1,7 @@
 package com.migcomponents.migbase64;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * If you find the code useful or you find a bug, please send me a note at base64 @ miginfocom . com.
  *
@@ -46,8 +48,8 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
 
     public static final int URL_SAFE_CHARS = 4;
 
-    private static final char[] TABLE_STANDARD = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
-    private static final char[] TABLE_URL_SAFE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
+    private static final byte[] TABLE_STANDARD = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes(StandardCharsets.US_ASCII);
+    private static final byte[] TABLE_URL_SAFE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".getBytes(StandardCharsets.US_ASCII);
 
     /**
      * Encodes a raw byte array into a Base64 <code>String</code>.
@@ -86,7 +88,7 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
         } else if (bytesRemainder > 0) {
             rawLen += charsLeft = 4;
         }
-        final char[] table = (flags & URL_SAFE_CHARS) != 0 ? TABLE_URL_SAFE : TABLE_STANDARD;
+        final byte[] table = (flags & URL_SAFE_CHARS) != 0 ? TABLE_URL_SAFE : TABLE_STANDARD;
         final int endEvenBytes = bytesOff + bytesEvenLen; // End of even 24-bits chunks
         byte[] out = (flags & NO_LINE_SEP) == 0
                 ? encodeChunksLineSep(buffer, bytesOff, table, endEvenBytes, new byte[rawLen + (((rawLen - 1) / 76) * 2)])
@@ -94,25 +96,25 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
         return encodeRemainder(buffer, bytesRemainder, charsLeft, table, endEvenBytes, out);
     }
 
-    private static byte[] encodeChunks(byte[] buffer, int i, char[] table, int end, byte[] out) {
+    private static byte[] encodeChunks(byte[] buffer, int i, byte[] table, int end, byte[] out) {
         for (int o = 0; i < end; ) {
             final int v = (buffer[i++] & 0xff) << 16 | (buffer[i++] & 0xff) << 8 | (buffer[i++] & 0xff);
-            out[o++] = (byte) table[v >>> 18]; // (v >>> 18) & 0x3f
-            out[o++] = (byte) table[(v >>> 12) & 0x3f];
-            out[o++] = (byte) table[(v >>> 6) & 0x3f];
-            out[o++] = (byte) table[v & 0x3f];
+            out[o++] = table[v >>> 18]; // (v >>> 18) & 0x3f
+            out[o++] = table[(v >>> 12) & 0x3f];
+            out[o++] = table[(v >>> 6) & 0x3f];
+            out[o++] = table[v & 0x3f];
         }
         return out;
     }
 
-    private static byte[] encodeChunksLineSep(byte[] buffer, int i, char[] table, int end, byte[] out) {
+    private static byte[] encodeChunksLineSep(byte[] buffer, int i, byte[] table, int end, byte[] out) {
         final int lineSepLim = out.length - 2;
         for (int o = 0, chungus = 0; i < end; ) {
             final int v = (buffer[i++] & 0xff) << 16 | (buffer[i++] & 0xff) << 8 | (buffer[i++] & 0xff);
-            out[o++] = (byte) table[v >>> 18]; // (v >>> 18) & 0x3f
-            out[o++] = (byte) table[(v >>> 12) & 0x3f];
-            out[o++] = (byte) table[(v >>> 6) & 0x3f];
-            out[o++] = (byte) table[v & 0x3f];
+            out[o++] = table[v >>> 18]; // (v >>> 18) & 0x3f
+            out[o++] = table[(v >>> 12) & 0x3f];
+            out[o++] = table[(v >>> 6) & 0x3f];
+            out[o++] = table[v & 0x3f];
             if (++chungus == 19 /* big */ && o < lineSepLim) {
                 out[o++] = '\r';
                 out[o++] = '\n';
@@ -122,18 +124,18 @@ public final class Base64 /* Modified by Evan Saulpaugh */ {
         return out;
     }
 
-    private static byte[] encodeRemainder(byte[] buffer, int numBytes, int numChars, char[] table, int endEvenBytes, byte[] out) {
+    private static byte[] encodeRemainder(byte[] buffer, int numBytes, int numChars, byte[] table, int endEvenBytes, byte[] out) {
         int v = 0;
-        char thirdChar = '=';
+        byte thirdChar = '=';
         switch (numBytes) { /* cases fall through */
         case 2: v = (buffer[endEvenBytes + 1] & 0xff) << 2; thirdChar = table[v & 0x3f];
         case 1: v |= (buffer[endEvenBytes] & 0xff) << 10;
             final int charsIdx = out.length - numChars;
             switch (numChars) { /* cases fall through */
             case 4: out[charsIdx + 3] = (byte) '=';
-            case 3: out[charsIdx + 2] = (byte) thirdChar;
-            case 2: out[charsIdx + 1] = (byte) table[(v >> 6) & 0x3f];
-            default:out[charsIdx]     = (byte) table[v >> 12]; // (v >> 12) & 0x3f
+            case 3: out[charsIdx + 2] = thirdChar;
+            case 2: out[charsIdx + 1] = table[(v >> 6) & 0x3f];
+            default:out[charsIdx]     = table[v >> 12]; // (v >> 12) & 0x3f
             }
         default: return out;
         }
