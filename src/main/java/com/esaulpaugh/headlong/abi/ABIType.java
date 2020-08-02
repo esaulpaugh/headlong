@@ -114,7 +114,7 @@ public abstract class ABIType<J> {
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
 
-    static void decodeTail(ByteBuffer bb, int[] offsets, int tailStart, Consumer<Integer> elementDecoder) {
+    static void decodeTails(ByteBuffer bb, int[] offsets, int tailStart, Consumer<Integer> tailDecoder) {
         for (int i = 0; i < offsets.length; i++) {
             final int offset = offsets[i];
             if(offset > 0) {
@@ -123,7 +123,7 @@ public abstract class ABIType<J> {
                     if (tailStart + offset > bb.position()) {
                         bb.position(tailStart + offset); // leniently jump to specified offset
                     }
-                    elementDecoder.accept(i);
+                    tailDecoder.accept(i);
                 } else {
                     throw new IllegalArgumentException("offset less than 0x20");
                 }

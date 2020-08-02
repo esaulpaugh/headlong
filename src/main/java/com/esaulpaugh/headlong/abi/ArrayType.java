@@ -445,7 +445,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
             for (int i = 0; i < len; i++) {
                 offsets[i] = Encoding.OFFSET_TYPE.decode(bb, unitBuffer);
             }
-            decodeTail(bb, offsets, tailStart, (i) -> elements[i] = elementType.decode(bb, unitBuffer));
+            decodeTails(bb, offsets, tailStart, (i) -> elements[i] = elementType.decode(bb, unitBuffer));
         }
         return elements;
     }
