@@ -117,12 +117,16 @@ public abstract class ABIType<J> {
     static void decodeTail(ByteBuffer bb, int[] offsets, int tailStart, Consumer<Integer> elementDecoder) {
         for (int i = 0; i < offsets.length; i++) {
             final int offset = offsets[i];
-            if (offset >= 0x20) {
-                /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-                if (tailStart + offset > bb.position()) {
-                    bb.position(tailStart + offset); // leniently jump to specified offset
+            if(offset > 0) {
+                if (offset >= 0x20) {
+                    /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
+                    if (tailStart + offset > bb.position()) {
+                        bb.position(tailStart + offset); // leniently jump to specified offset
+                    }
+                    elementDecoder.accept(i);
+                } else {
+                    throw new IllegalArgumentException("offset less than 0x20");
                 }
-                elementDecoder.accept(i);
             }
         }
     }

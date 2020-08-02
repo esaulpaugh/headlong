@@ -66,7 +66,7 @@ public class DecodeTest {
     private static final Tuple EXPECTED = new Tuple(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
 
     @Test
-    public void testLenient() {
+    public void testLenient() throws Throwable {
         final byte[] lenientBytes = Strings.decode(
                   "0000000000000000000000000000000000000000000000000000000000000045"
                 + "00000000000000000000000000000000000000000000000000000000000000a3"
@@ -77,6 +77,14 @@ public class DecodeTest {
                 + "7730307400000000000000000000000000000000000000000000000000000000");
 
         assertEquals(RETURN_ARGS, FUNCTION.decodeReturn(lenientBytes));
+
+        final byte[] tooSmallOffset = Strings.decode(
+                "0000000000000000000000000000000000000000000000000000000000000045"
+                        + "000000000000000000000000000000000000000000000000000000000000001f"
+                        + "0000000000000000000000000000000000000000000000000000000000000004"
+                        + "7730307400000000000000000000000000000000000000000000000000000000");
+
+        assertThrown(IllegalArgumentException.class, "offset less than 0x20", () -> FUNCTION.decodeReturn(tooSmallOffset));
     }
 
     @Test
