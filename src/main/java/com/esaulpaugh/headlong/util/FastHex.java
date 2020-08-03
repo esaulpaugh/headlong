@@ -56,12 +56,12 @@ public final class FastHex {
         DECODE_TABLE['7'] = 0x07;
         DECODE_TABLE['8'] = 0x08;
         DECODE_TABLE['9'] = 0x09;
-        DECODE_TABLE['A'] = DECODE_TABLE['a'] = 0x0a;
-        DECODE_TABLE['B'] = DECODE_TABLE['b'] = 0x0b;
-        DECODE_TABLE['C'] = DECODE_TABLE['c'] = 0x0c;
-        DECODE_TABLE['D'] = DECODE_TABLE['d'] = 0x0d;
-        DECODE_TABLE['E'] = DECODE_TABLE['e'] = 0x0e;
-        DECODE_TABLE['F'] = DECODE_TABLE['f'] = 0x0f;
+        DECODE_TABLE['A'] = DECODE_TABLE['a'] = 0xa;
+        DECODE_TABLE['B'] = DECODE_TABLE['b'] = 0xb;
+        DECODE_TABLE['C'] = DECODE_TABLE['c'] = 0xc;
+        DECODE_TABLE['D'] = DECODE_TABLE['d'] = 0xd;
+        DECODE_TABLE['E'] = DECODE_TABLE['e'] = 0xe;
+        DECODE_TABLE['F'] = DECODE_TABLE['f'] = 0xf;
     }
 
     public static String encodeToString(byte b) {
@@ -97,7 +97,7 @@ public final class FastHex {
         for (int j = 0; off < end; off++, j += CHARS_PER_BYTE) {
             int hexPair = ENCODE_TABLE[buffer[off] & 0xFF];
             bytes[j] = (byte) (hexPair >>> Byte.SIZE); // left
-            bytes[j+1] = (byte) (hexPair & 0xFF); // right
+            bytes[j+1] = (byte) hexPair; // right
         }
         return bytes;
     }
