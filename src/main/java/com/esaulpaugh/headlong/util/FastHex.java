@@ -27,7 +27,7 @@ public final class FastHex {
 
     // Byte values index directly into the encoding table (size 256) whose elements contain two char values each,
     // encoded together as an int.
-    private static final int[] ENCODE_TABLE = new int[1 << Byte.SIZE];
+    private static final short[] ENCODE_TABLE = new short[1 << Byte.SIZE];
 
     // Char values index directly into the decoding table (size 256).
     private static final byte[] DECODE_TABLE = new byte[1 << Byte.SIZE];
@@ -35,13 +35,13 @@ public final class FastHex {
     private static final byte NO_MAPPING = -1;
 
     static {
-        final int[] ints = new int[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+        final short[] ints = new short[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
         final int leftNibbleMask = 0xF0;
         final int rightNibbleMask = 0x0F;
         for (int i = 0; i < ENCODE_TABLE.length; i++) {
             int leftChar = ints[(i & leftNibbleMask) >>> BITS_PER_CHAR];
             int rightChar = ints[i & rightNibbleMask];
-            ENCODE_TABLE[i] = (leftChar << Byte.SIZE) | rightChar;
+            ENCODE_TABLE[i] = (short) ((leftChar << Byte.SIZE) | rightChar);
         }
 
         Arrays.fill(DECODE_TABLE, NO_MAPPING);
