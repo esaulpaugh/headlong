@@ -49,14 +49,14 @@ public class MeasureFunction {
         );
     }
 
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    public void init_with_keccak(Blackhole blackhole) {
-        blackhole.consume(Function.parse("sam(bytes,bool,uint256[])", new Keccak(256)));
-    }
-
+//    @Benchmark
+//    @Fork(value = 1, warmups = 1)
+//    @BenchmarkMode(Mode.Throughput)
+//    @Warmup(iterations = 1)
+//    public void init_with_keccak(Blackhole blackhole) {
+//        blackhole.consume(Function.parse("sam(bytes,bool,uint256[])", new Keccak(256)));
+//    }
+//
 //    @Benchmark
 //    @Fork(value = 1, warmups = 1)
 //    @BenchmarkMode(Mode.Throughput)
@@ -64,12 +64,12 @@ public class MeasureFunction {
 //    public void init_with_wrapped_bouncy_keccak(Blackhole blackhole) {
 //        blackhole.consume(Function.parse("sam(bytes,bool,uint256[])", new WrappedKeccak(256)));
 //    }
-
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    public void encode_call(Blackhole blackhole) {
-        blackhole.consume(f.encodeCall(args));
-    }
+//
+//    @Benchmark
+//    @Fork(value = 1, warmups = 1)
+//    @BenchmarkMode(Mode.Throughput)
+//    @Warmup(iterations = 1)
+//    public void encode_call(Blackhole blackhole) {
+//        blackhole.consume(f.encodeCall(args));
+//    }
 }
