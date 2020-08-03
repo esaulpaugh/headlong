@@ -81,13 +81,15 @@ public class MonteCarloTest {
 
         final String desc = "thread-" + Thread.currentThread().getId() + " seed: " + threadSeed + "L";
 
+        final Random instance = new Random();
+
         int i = 0;
         MonteCarloTestCase testCase = null;
         for(; i < n; i++) {
             try {
                 testCase = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
 //                if(testCase.function.getCanonicalSignature().contains("int[")) throw new Error("canonicalization failed!");
-                testCase.runAll();
+                testCase.runAll(instance);
 //                if(System.nanoTime() % 50_000_000 == 0) throw new Error("simulated random error");
 //                log.append('#')
 //                        .append(i)

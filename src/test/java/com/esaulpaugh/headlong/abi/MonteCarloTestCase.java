@@ -160,29 +160,30 @@ public class MonteCarloTestCase {
         return jsonObject;
     }
 
-    void runAll() {
-        runStandard(this.argsTuple);
-        runForPacked(this.argsTuple);
-        runSuperSerial(this.argsTuple);
+    void runAll(Random instance) {
+        ByteBuffer bb = runStandard();
+        runFuzzDecode(bb, instance);
+        runPacked();
+        runSuperSerial();
     }
 
-    void runStandard() {
-        runStandard(this.argsTuple);
-    }
-
-    void runStandard(Tuple args) {
+    ByteBuffer runStandard() {
+        final Tuple args = this.argsTuple;
         ByteBuffer bb = function.encodeCall(args);
         if (!args.equals(function.decodeCall((ByteBuffer) bb.flip()))) {
             throw new IllegalArgumentException(seed + " " + function.getCanonicalSignature() + " " + args);
         }
-        fuzzDecode(args, bb);
+        return bb;
     }
 
-    private void fuzzDecode(Tuple args, ByteBuffer bb) {
+    private void runFuzzDecode(ByteBuffer bb, Random r) {
+        final Tuple args = this.argsTuple;
+        r.setSeed(seed + 1);
         final byte[] babar = bb.array();
-        final int idx = new Random(seed + 1).nextInt(babar.length);
+        final int idx = r.nextInt(babar.length);
         final byte target = babar[idx];
-        babar[idx]++;
+        final byte addend = (byte) (1 + r.nextInt(255));
+        babar[idx] += addend;
         boolean equal = false;
         Tuple decoded = null;
         try {
@@ -195,28 +196,25 @@ public class MonteCarloTestCase {
             throw new Error(t);
         }
         if (equal) {
-            String change = target + " --> " + babar[idx] + " (0x" + Strings.encode(target) + " --> 0x" + Strings.encode(babar[idx]) + ")";
-            if("-17 --> -16 (0xef --> 0xf0)".equals(change)) {
-                String a = new String(new byte[] { (byte) 0xef, (byte) 0xbf, (byte) 0xbd }, StandardCharsets.UTF_8);
-                String b = new String(new byte[] { (byte) 0xf0, (byte) 0xbf, (byte) 0xbd }, StandardCharsets.UTF_8);
-                if (a.equals(b)) {
-                    return;
+            if(false) { // disabled
+                String change = target + " --> " + babar[idx] + " (0x" + Strings.encode(target) + " --> 0x" + Strings.encode(babar[idx]) + ")";
+                try {
+                    Thread.sleep(new Random(seed + 2).nextInt(50)); // deconflict timing of writes to System.err below
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
+                System.err.println(change);
+                System.err.println(function.getParamTypes() + "\n" + Function.formatCall(babar) + "\nidx=" + idx);
+                System.err.println(Strings.encode(babar, 0, idx, Strings.HEX));
+                System.err.println(SuperSerial.serialize(function.getParamTypes(), args, true));
+                System.err.println(SuperSerial.serialize(function.getParamTypes(), decoded, true));
+                throw new IllegalArgumentException("idx=" + idx + " " + seed + " " + function.getCanonicalSignature() + " " + args);
             }
-            try {
-                Thread.sleep(new Random(seed + 2).nextInt(50)); // deconflict timing of writes to System.err below
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.err.println(function.getParamTypes() + "\n" + Function.formatCall(babar) + "\nidx=" + idx);
-            System.err.println(Strings.encode(babar, 0, idx, Strings.HEX));
-            System.err.println(SuperSerial.serialize(function.getParamTypes(), args, true));
-            System.err.println(SuperSerial.serialize(function.getParamTypes(), decoded, true));
-            throw new IllegalArgumentException("idx=" + idx + " " + seed + " " + function.getCanonicalSignature() + " " + args);
         }
     }
 
-    void runForPacked(Tuple args) {
+    void runPacked() {
+        final Tuple args = this.argsTuple;
         final TupleType tt = this.function.getParamTypes();
         if(tt.canonicalType.contains("int[")) {
             throw new AssertionError("failed canonicalization!");
@@ -235,7 +233,8 @@ public class MonteCarloTestCase {
         }
     }
 
-    void runSuperSerial(Tuple args) {
+    void runSuperSerial() {
+        final Tuple args = this.argsTuple;
         final TupleType tt = this.function.getParamTypes();
 
         String str = SuperSerial.serialize(tt, args, false);
