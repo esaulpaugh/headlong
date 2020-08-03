@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -174,29 +175,43 @@ public class MonteCarloTestCase {
         if (!args.equals(function.decodeCall((ByteBuffer) bb.flip()))) {
             throw new IllegalArgumentException(seed + " " + function.getCanonicalSignature() + " " + args);
         }
-//        fuzzDecode(args, bb);
+        fuzzDecode(args, bb);
     }
 
     private void fuzzDecode(Tuple args, ByteBuffer bb) {
-        byte[] babar = bb.array();
-        int idx = new Random(seed + 1).nextInt(babar.length);
+        final byte[] babar = bb.array();
+        final int idx = new Random(seed + 1).nextInt(babar.length);
+        final byte target = babar[idx];
         babar[idx]++;
         boolean equal = false;
+        Tuple decoded = null;
         try {
-            equal = args.equals(function.decodeCall(babar));
-        } catch (BufferUnderflowException | IllegalArgumentException e) {
+            decoded = function.decodeCall(babar);
+            equal = args.equals(decoded);
+        } catch (IllegalArgumentException e) {
             /* do nothing */
         } catch (Throwable t) {
             t.printStackTrace();
             throw new Error(t);
         }
         if (equal) {
+            String change = target + " --> " + babar[idx] + " (0x" + Strings.encode(target) + " --> 0x" + Strings.encode(babar[idx]) + ")";
+            if("-17 --> -16 (0xef --> 0xf0)".equals(change)) {
+                String a = new String(new byte[] { (byte) 0xef, (byte) 0xbf, (byte) 0xbd }, StandardCharsets.UTF_8);
+                String b = new String(new byte[] { (byte) 0xf0, (byte) 0xbf, (byte) 0xbd }, StandardCharsets.UTF_8);
+                if (a.equals(b)) {
+                    return;
+                }
+            }
             try {
                 Thread.sleep(new Random(seed + 2).nextInt(50)); // deconflict timing of writes to System.err below
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             System.err.println(function.getParamTypes() + "\n" + Function.formatCall(babar) + "\nidx=" + idx);
+            System.err.println(Strings.encode(babar, 0, idx, Strings.HEX));
+            System.err.println(SuperSerial.serialize(function.getParamTypes(), args, true));
+            System.err.println(SuperSerial.serialize(function.getParamTypes(), decoded, true));
             throw new IllegalArgumentException("idx=" + idx + " " + seed + " " + function.getCanonicalSignature() + " " + args);
         }
     }
