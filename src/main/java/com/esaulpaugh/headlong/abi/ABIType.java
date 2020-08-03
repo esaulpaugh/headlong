@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
@@ -123,7 +124,11 @@ public abstract class ABIType<J> {
                     if (tailStart + offset > bb.position()) {
                         bb.position(tailStart + offset); // leniently jump to specified offset
                     }
-                    tailDecoder.accept(i);
+                    try {
+                        tailDecoder.accept(i);
+                    } catch (BufferUnderflowException bue) {
+                        throw new IllegalArgumentException(bue);
+                    }
                 } else {
                     throw new IllegalArgumentException("offset less than 0x20");
                 }
