@@ -20,11 +20,8 @@ import java.nio.charset.StandardCharsets;
 public class FastBase64 {
 
     public static final int NO_FLAGS = 0;
-
     public static final int NO_PADDING = 1;
-
     public static final int NO_LINE_SEP = 2; // No "\r\n" after 76 characters
-
     public static final int URL_SAFE_CHARS = 4;
 
     private static final byte[] STANDARD = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes(StandardCharsets.US_ASCII);
@@ -55,61 +52,49 @@ public class FastBase64 {
         } else if (bytesRemainder > 0) {
             rawLen += charsLeft = 4;
         }
-
         final boolean urlSafe = (flags & URL_SAFE_CHARS) != 0;
-        final boolean noLineSep = (flags & NO_LINE_SEP) != 0;
         final int endEvenBytes = bytesOff + bytesEvenLen; // End of even 24-bits chunks
-        final byte[] out = noLineSep ? new byte[rawLen] : new byte[rawLen + (((rawLen - 1) / LINE_LEN) * 2)];
-        final byte[] smallTable = urlSafe ? URL_SAFE : STANDARD;
-//        if(bytesLen < 250_000) {
-            insertQuadruples(buffer, bytesOff, smallTable, endEvenBytes, out, noLineSep);
-//        } else {
-//            LargeTableEncoder.insertQuadruples(buffer, bytesOff, endEvenBytes, out, urlSafe, noLineSep);
-//        }
-        insertRemainder(buffer, bytesRemainder, charsLeft, smallTable, endEvenBytes, out);
+        final byte[] out = (flags & NO_LINE_SEP) != 0
+                ? encodeMain(buffer, bytesOff, urlSafe ? BigUrlSafe.TABLE : BigStandard.TABLE, endEvenBytes, rawLen)
+                : encodeMainLineSep(buffer, bytesOff, urlSafe ? BigUrlSafe.TABLE : BigStandard.TABLE, endEvenBytes, rawLen + (((rawLen - 1) / LINE_LEN) * 2));
+        insertRemainder(buffer, bytesRemainder, charsLeft, urlSafe ? URL_SAFE : STANDARD, endEvenBytes, out);
         return out;
     }
 
-    private static void insertQuadruples(byte[] buffer, int bytesOff, byte[] smallTable, int endEvenBytes, byte[] out, boolean noLineSep) {
-        if(noLineSep) {
-            insertQuadruplesNoLineSep(buffer, bytesOff, smallTable, endEvenBytes, out);
-        } else {
-            insertQuadruples(buffer, bytesOff, smallTable, endEvenBytes, out);
+    private static byte[] encodeMain(byte[] buffer, int i, short[] table, int end, int len) {
+        byte[] out = new byte[len];
+        for (int o = 0; i < end; ) {
+            int _24bits = (buffer[i++] & 0xff) << Short.SIZE | (buffer[i++] & 0xff) << Byte.SIZE | (buffer[i++] & 0xff);
+            int ab = table[_24bits >>> 12];
+            int cd = table[_24bits & 0xfff];
+            out[o++] = (byte) (ab >>> Byte.SIZE);
+            out[o++] = (byte) ab;
+            out[o++] = (byte) (cd >>> Byte.SIZE);
+            out[o++] = (byte) cd;
         }
+        return out;
     }
 
-    private static void insertQuadruplesNoLineSep(byte[] buffer, int i, byte[] table, int end, byte[] out) {
-        int o = 0;
-        while (i < end) {
-            int _24bits = (buffer[i++] & 0xff) << Short.SIZE
-                    | (buffer[i++] & 0xff) << Byte.SIZE
-                    | (buffer[i++] & 0xff);
-            out[o++] = table[_24bits >>> 18]; // (v >>> 18) & 0x3f
-            out[o++] = table[(_24bits >>> 12) & 0x3f];
-            out[o++] = table[(_24bits >>> 6) & 0x3f];
-            out[o++] = table[_24bits & 0x3f];
-        }
-    }
-
-    private static void insertQuadruples(byte[] buffer, int i, byte[] table, int end, byte[] out) {
-        final int lineSepLimit = out.length - LINE_SEP_LEN;
+    private static byte[] encodeMainLineSep(byte[] buffer, int i, short[] table, int end, int len) {
+        byte[] out = new byte[len];
         int quadruples = 0;
-        int o = 0;
-        while (i < end) {
-            int _24bits = (buffer[i++] & 0xff) << Short.SIZE
-                    | (buffer[i++] & 0xff) << Byte.SIZE
-                    | (buffer[i++] & 0xff);
-            out[o++] = table[_24bits >>> 18];
-            out[o++] = table[(_24bits >>> 12) & 0x3f];
-            out[o++] = table[(_24bits >>> 6) & 0x3f];
-            out[o++] = table[_24bits & 0x3f];
-            if (++quadruples < LINE_LEN / 4 || o >= lineSepLimit) {
+        final int lineSepLimit = out.length - LINE_SEP_LEN;
+        for (int o = 0; i < end; ) {
+            int _24bits = (buffer[i++] & 0xff) << Short.SIZE | (buffer[i++] & 0xff) << Byte.SIZE | (buffer[i++] & 0xff);
+            int ab = table[_24bits >>> 12];
+            int cd = table[_24bits & 0xfff];
+            out[o++] = (byte) (ab >>> Byte.SIZE);
+            out[o++] = (byte) ab;
+            out[o++] = (byte) (cd >>> Byte.SIZE);
+            out[o++] = (byte) cd;
+            if (++quadruples < (LINE_LEN / 4) || o >= lineSepLimit) {
                 continue;
             }
             out[o++] = '\r';
             out[o++] = '\n';
             quadruples = 0;
         }
+        return out;
     }
 
     private static void insertRemainder(byte[] buffer, int numBytes, int numChars, byte[] table, int endEvenBytes, byte[] out) {
@@ -132,66 +117,23 @@ public class FastBase64 {
         }
     }
 
-//    private static final class LargeTableEncoder{
-//
-//        private static final short[] LARGE_STANDARD = new short[1 << 12];
-//        private static final short[] LARGE_URL_SAFE = new short[1 << 12];
-//
-//        static {
-//            final int len = STANDARD.length;
-//            for (int i = 0; i < len; i++) {
-//                final int offset = i * len;
-//                for (int j = 0; j < len; j++) {
-//                    LARGE_STANDARD[offset + j] = (short) ((STANDARD[i] << Byte.SIZE) | STANDARD[j]);
-//                    LARGE_URL_SAFE[offset + j] = (short) ((URL_SAFE[i] << Byte.SIZE) | URL_SAFE[j]);
-//                }
-//            }
-//        }
-//
-//        private static void insertQuadruples(byte[] buffer, int bytesOff, int endEvenBytes, byte[] out, boolean urlSafe, boolean noLineSep) {
-//            short[] table = urlSafe ? LargeTableEncoder.LARGE_URL_SAFE : LargeTableEncoder.LARGE_STANDARD;
-//            if(noLineSep) {
-//                LargeTableEncoder.insertQuadruplesNoLineSep(buffer, bytesOff, table, endEvenBytes, out);
-//            } else {
-//                LargeTableEncoder.insertQuadruples(buffer, bytesOff, table, endEvenBytes, out);
-//            }
-//        }
-//
-//        private static void insertQuadruplesNoLineSep(byte[] buffer, int i, short[] table, int end, byte[] out) {
-//            int o = 0;
-//            while (i < end) {
-//                int _24bits = (buffer[i++] & 0xff) << Short.SIZE
-//                        | (buffer[i++] & 0xff) << Byte.SIZE
-//                        | (buffer[i++] & 0xff);
-//                int ab = table[_24bits >>> 12];
-//                int cd = table[_24bits & 0xfff];
-//                out[o++] = (byte) (ab >>> 8);
-//                out[o++] = (byte) ab;
-//                out[o++] = (byte) (cd >>> 8);
-//                out[o++] = (byte) cd;
-//            }
-//        }
-//
-//        private static void insertQuadruples(byte[] buffer, int i, short[] table, int end, byte[] out) {
-//            final int lineSepLimit = out.length - LINE_SEP_LEN;
-//            int o = 0, quadruples = 0;
-//            while (i < end) {
-//                int _24bits = (buffer[i++] & 0xff) << Short.SIZE
-//                        | (buffer[i++] & 0xff) << Byte.SIZE
-//                        | (buffer[i++] & 0xff);
-//                int ab = table[_24bits >>> 12];
-//                int cd = table[_24bits & 0xfff];
-//                out[o++] = (byte) (ab >>> Byte.SIZE);
-//                out[o++] = (byte) ab;
-//                out[o++] = (byte) (cd >>> Byte.SIZE);
-//                out[o++] = (byte) cd;
-//                if(++quadruples < LINE_LEN / 4 || o >= lineSepLimit) {
-//                    continue;
-//                }
-//                out[o++] = '\r';
-//                out[o++] = '\n';
-//                quadruples = 0;
-//            }
-//        }
-//    }
+    private static final class BigStandard {
+        private static final short[] TABLE = initBig(STANDARD);
+    }
+
+    private static final class BigUrlSafe {
+        private static final short[] TABLE = initBig(URL_SAFE);
+    }
+
+    private static short[] initBig(byte[] smallTable) {
+        final short[] largeTable = new short[1 << 12];
+        final int len = smallTable.length;
+        for (int i = 0; i < len; i++) {
+            final int offset = i * len;
+            for (int j = 0; j < len; j++) {
+                largeTable[offset + j] = (short) ((smallTable[i] << Byte.SIZE) | smallTable[j]);
+            }
+        }
+        return largeTable;
+    }
 }

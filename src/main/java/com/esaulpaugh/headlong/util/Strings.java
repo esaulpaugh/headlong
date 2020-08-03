@@ -15,14 +15,8 @@
 */
 package com.esaulpaugh.headlong.util;
 
-import com.migcomponents.migbase64.Base64;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-
-import static com.migcomponents.migbase64.Base64.NO_LINE_SEP;
-import static com.migcomponents.migbase64.Base64.NO_PADDING;
-import static com.migcomponents.migbase64.Base64.URL_SAFE_CHARS;
 
 /** Utility for encoding and decoding hexadecimal, Base64, and UTF-8-encoded {@link String}s. */
 public final class Strings {
@@ -33,7 +27,7 @@ public final class Strings {
     public static final int UTF_8 = 1; // 256
     public static final int HEX = 0; // 16
 
-    public static final int URL_SAFE_FLAGS = URL_SAFE_CHARS | NO_LINE_SEP | NO_PADDING;
+    public static final int URL_SAFE_FLAGS = FastBase64.URL_SAFE_CHARS | FastBase64.NO_LINE_SEP | FastBase64.NO_PADDING;
 
     public static String encode(byte b) {
         return encode(new byte[] { b });
@@ -53,7 +47,7 @@ public final class Strings {
 
     public static String encode(byte[] buffer, int from, int len, int encoding) {
         switch (encoding) {
-        case BASE_64_URL_SAFE: return Base64.encodeToString(buffer, from, len, URL_SAFE_FLAGS);
+        case BASE_64_URL_SAFE: return FastBase64.encodeToString(buffer, from, len, URL_SAFE_FLAGS);
         case UTF_8: return new String(buffer, from, len, StandardCharsets.UTF_8);
         case HEX: return FastHex.encodeToString(buffer, from, len);
         default: throw new UnsupportedOperationException();

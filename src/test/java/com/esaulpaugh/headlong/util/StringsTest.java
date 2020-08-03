@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.migcomponents.migbase64.Base64;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
@@ -72,7 +71,7 @@ public class StringsTest {
         for(int j = 0; j < 250; j++) {
             byte[] x = new byte[j];
             rand.nextBytes(x);
-            String s = Base64.encodeToString(x, 0, j, Base64.NO_FLAGS);
+            String s = FastBase64.encodeToString(x, 0, j, FastBase64.NO_FLAGS);
             String s2 = mimeEncoder.encodeToString(x);
             assertEquals(base64EncodedLen(j, true, true), s.length());
             assertEquals(s2, s);
@@ -87,7 +86,7 @@ public class StringsTest {
         for (int j = 0; j < 250; j++) {
             byte[] x = new byte[j];
             rand.nextBytes(x);
-            String s = Base64.encodeToString(x, 0, j, Base64.URL_SAFE_CHARS | Base64.NO_LINE_SEP);
+            String s = FastBase64.encodeToString(x, 0, j, FastBase64.URL_SAFE_CHARS | FastBase64.NO_LINE_SEP);
             String sControl = encoder.encodeToString(x);
             assertEquals(base64EncodedLen(j, false, true), s.length());
             assertEquals(sControl, s);
