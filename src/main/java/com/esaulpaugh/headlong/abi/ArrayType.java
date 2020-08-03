@@ -346,6 +346,11 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         final int arrayLen = length == DYNAMIC_LENGTH
                 ? ARRAY_LENGTH_TYPE.decode(bb, unitBuffer)
                 : length;
+
+        if(arrayLen > Encoding.DECODE_ARRAY_SIZE_LIMIT) {
+            throw new IllegalArgumentException("arrayLen exceeds limit");
+        }
+
         try {
             switch (elementType.typeCode()) {
             case TYPE_CODE_BOOLEAN: return (J) decodeBooleanArray(bb, arrayLen, unitBuffer);
