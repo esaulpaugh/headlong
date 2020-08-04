@@ -26,7 +26,6 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
 final class Encoding {
 
-    static final int DECODE_SKIP_LIMIT_BYTES = 32_000; // 131
     static final int DECODE_ARRAY_SIZE_LIMIT = 64_000;
 
     static final int OFFSET_LENGTH_BYTES = UNIT_LENGTH_BYTES;

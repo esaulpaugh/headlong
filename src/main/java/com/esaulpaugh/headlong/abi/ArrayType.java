@@ -348,7 +348,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                 : length;
 
         if(arrayLen > Encoding.DECODE_ARRAY_SIZE_LIMIT) {
-            throw new IllegalArgumentException("arrayLen exceeds limit");
+            throw new IllegalArgumentException("arrayLen exceeds artificial limit of " + Encoding.DECODE_ARRAY_SIZE_LIMIT);
         }
 
         try {

@@ -35,12 +35,12 @@ public final class FastHex {
     private static final byte NO_MAPPING = -1;
 
     static {
-        final byte[] ints = new byte[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+        final byte[] chars = new byte[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
         final int leftNibbleMask = 0xF0;
         final int rightNibbleMask = 0x0F;
         for (int i = 0; i < ENCODE_TABLE.length; i++) {
-            int leftChar = ints[(i & leftNibbleMask) >>> BITS_PER_CHAR];
-            int rightChar = ints[i & rightNibbleMask];
+            int leftChar = chars[(i & leftNibbleMask) >>> BITS_PER_CHAR];
+            int rightChar = chars[i & rightNibbleMask];
             ENCODE_TABLE[i] = (short) ((leftChar << Byte.SIZE) | rightChar);
         }
 

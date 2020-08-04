@@ -122,9 +122,6 @@ public abstract class ABIType<J> {
                 if (offset >= 0x20) {
                     /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
                     if (tailStart + offset > bb.position()) {
-                        if(offset - 0x20 > Encoding.DECODE_SKIP_LIMIT_BYTES) {
-                            throw new IllegalArgumentException("lenient skip exceeds limit");
-                        }
                         bb.position(tailStart + offset); // leniently jump to specified offset
                     }
                     try {
