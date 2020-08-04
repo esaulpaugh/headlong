@@ -25,7 +25,6 @@
                     <include>com/esaulpaugh/headlong/**</include>
                     <include>com/google/gson/**</include>
                     <include>com/joemelsha/crypto/hash/Keccak.class</include>
-                    <include>com/migcomponents/migbase64/Base64.class</include>
 
                     <include>joptsimple/*.class</include>
                     <include>joptsimple/internal/*.class</include>
