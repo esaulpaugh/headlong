@@ -27,12 +27,17 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.Base64;
 import java.util.Random;
 
+import static java.lang.String.format;
+
 @State(Scope.Thread)
 public class MeasureBase64 {
+
+    public static final int THREE = 3;
 
     private static final byte[] SMALL = Base64.getUrlDecoder().decode("-IS4QHCYrYZbAKWCBRlAy5zzaDZXJBGkcnh4MHcBFZntXNFrdvJjX04jRzjzCBOonrkTfj499SZuOh8R33Ls8RRcy5wBgmlkgnY0gmlwhH8AAAGJc2VjcDI1NmsxoQPKY0yuDUmstAHYpMa2_oxVtw0RW_QAdpzBQA8yWM0xOIN1ZHCCdl8");
 
@@ -44,57 +49,83 @@ public class MeasureBase64 {
                 .nextBytes(LARGE);
     }
 
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = 5)
-    public void fastHexSmall() {
-        Base64.getUrlEncoder().encode(SMALL);
+    private static String slowHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(format("%02x", b & 0xff));
+        }
+        return sb.toString();
     }
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 5)
-    public void fastHexLarge() {
-        Base64.getUrlEncoder().encode(LARGE);
+    @Measurement(iterations = THREE)
+    public void slowSmall(Blackhole blackhole) {
+        blackhole.consume(slowHex(SMALL));
     }
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 5)
-    public void javaUtilBase64Small() {
-        Base64.getUrlEncoder().encode(SMALL);
+    @Measurement(iterations = THREE)
+    public void slowLarge(Blackhole blackhole) {
+        blackhole.consume(slowHex(LARGE));
     }
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 5)
-    public void javaUtilBase64Large() {
-        Base64.getUrlEncoder().encode(LARGE);
+    @Measurement(iterations = THREE)
+    public void fastHexSmall(Blackhole blackhole) {
+        blackhole.consume(Base64.getUrlEncoder().encode(SMALL));
     }
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 5)
-    public void fastBase64Small() {
-        FastBase64.encodeToBytes(SMALL, 0, SMALL.length, Strings.URL_SAFE_FLAGS);
+    @Measurement(iterations = THREE)
+    public void fastHexLarge(Blackhole blackhole) {
+        blackhole.consume(Base64.getUrlEncoder().encode(LARGE));
     }
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 5)
-    public void fastBase64Large() {
-        FastBase64.encodeToBytes(LARGE, 0, LARGE.length, Strings.URL_SAFE_FLAGS);
+    @Measurement(iterations = THREE)
+    public void javaUtilBase64Small(Blackhole blackhole) {
+        blackhole.consume(Base64.getUrlEncoder().encode(SMALL));
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.SingleShotTime)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
+    public void javaUtilBase64Large(Blackhole blackhole) {
+        blackhole.consume(Base64.getUrlEncoder().encode(LARGE));
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.SingleShotTime)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
+    public void fastBase64Small(Blackhole blackhole) {
+        blackhole.consume(FastBase64.encodeToBytes(SMALL, 0, SMALL.length, Strings.URL_SAFE_FLAGS));
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.SingleShotTime)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
+    public void fastBase64Large(Blackhole blackhole) {
+        blackhole.consume(FastBase64.encodeToBytes(LARGE, 0, LARGE.length, Strings.URL_SAFE_FLAGS));
     }
 }

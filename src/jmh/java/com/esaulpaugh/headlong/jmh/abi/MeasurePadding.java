@@ -30,6 +30,8 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 
+import static com.esaulpaugh.headlong.jmh.util.MeasureBase64.THREE;
+
 @State(Scope.Thread)
 public class MeasurePadding {
 
@@ -53,7 +55,7 @@ public class MeasurePadding {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 2)
+    @Measurement(iterations = THREE)
     public void cached() {
         insertPadding(paddingLen, negativeOnes, bb);
     }
@@ -62,7 +64,7 @@ public class MeasurePadding {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 2)
+    @Measurement(iterations = THREE)
     public void uncached() {
         putN(negativeOnes ? (byte) -1 : (byte) 0, paddingLen, bb);
     }

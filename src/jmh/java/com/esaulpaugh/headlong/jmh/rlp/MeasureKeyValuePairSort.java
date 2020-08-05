@@ -32,6 +32,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import static com.esaulpaugh.headlong.jmh.util.MeasureBase64.THREE;
+
 @State(Scope.Thread)
 public class MeasureKeyValuePairSort {
 
@@ -69,7 +71,7 @@ public class MeasureKeyValuePairSort {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 5)
+    @Measurement(iterations = THREE)
     public void sortArray() {
         Arrays.sort(array, KeyValuePair.PAIR_COMPARATOR);
     }
@@ -78,7 +80,7 @@ public class MeasureKeyValuePairSort {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 5)
+    @Measurement(iterations = THREE)
     public void sortArrayList() {
         arrayList.sort(KeyValuePair.PAIR_COMPARATOR);
     }
@@ -87,7 +89,7 @@ public class MeasureKeyValuePairSort {
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
-    @Measurement(iterations = 5)
+    @Measurement(iterations = THREE)
     public void sortArraysArrayList() {
         arraysArrayList.sort(KeyValuePair.PAIR_COMPARATOR);
     }

@@ -24,6 +24,7 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
@@ -32,6 +33,8 @@ import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.math.BigInteger;
+
+import static com.esaulpaugh.headlong.jmh.util.MeasureBase64.THREE;
 
 @State(Scope.Benchmark)
 public class MeasureFunction {
@@ -51,24 +54,27 @@ public class MeasureFunction {
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
     public void init_with_keccak(Blackhole blackhole) {
         blackhole.consume(Function.parse("sam(bytes,bool,uint256[])", new Keccak(256)));
     }
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
     public void init_with_wrapped_bouncy_keccak(Blackhole blackhole) {
         blackhole.consume(Function.parse("sam(bytes,bool,uint256[])", new WrappedKeccak(256)));
     }
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
     public void encode_call(Blackhole blackhole) {
         blackhole.consume(f.encodeCall(args));
     }
