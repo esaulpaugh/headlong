@@ -16,8 +16,8 @@ public class FunctionTest {
     public void testFunctionValidation() throws Throwable {
         final String errNamed = "functions of this type must be unnamed";
         final String errNotNamed = "functions of this type must be named";
-        final String errHasOutputs = "functions of this type cannot have outputs";
-        final String errHasInputs = "functions of this type cannot have inputs";
+        final String errHasOutputs = "functions of this type must have zero outputs";
+        final String errHasInputs = "functions of this type must have zero inputs";
         final TupleType inputs = TupleType.of("int");
         final TupleType outputs = TupleType.of("bool");
         final MessageDigest md = Function.newDefaultDigest();

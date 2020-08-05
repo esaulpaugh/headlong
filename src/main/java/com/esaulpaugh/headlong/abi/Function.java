@@ -165,41 +165,37 @@ public final class Function implements ABIObject {
                 : inputTypes.canonicalType;
     }
 
+    private static final String TYPE_MUST = "functions of this type must";
+
     private void validateFunction() {
         switch (type) {
         case FUNCTION:
             if(name == null) {
-                throw nameNullabilityException(false);
+                throw new IllegalArgumentException(TYPE_MUST + " be named");
             }
             break;
         case RECEIVE:
             if (!ABIJSON.RECEIVE.equals(name)) {
-                throw new IllegalArgumentException("functions of this type must be named \"" + ABIJSON.RECEIVE + "\"");
+                throw new IllegalArgumentException(TYPE_MUST + " be named \"" + ABIJSON.RECEIVE + "\"");
             }
             if (!ABIJSON.PAYABLE.equals(stateMutability)) {
-                throw new IllegalArgumentException("functions of this type must be " + ABIJSON.PAYABLE);
+                throw new IllegalArgumentException(TYPE_MUST + " be " + ABIJSON.PAYABLE);
             }
             /* fall through */
         case FALLBACK:
-            assertNoElements(inputTypes, "inputs");
+            if(inputTypes.elementTypes.length > 0) {
+                throw new IllegalArgumentException(TYPE_MUST + " have zero inputs");
+            }
             /* fall through */
         case CONSTRUCTOR:
-            assertNoElements(outputTypes, "outputs");
+            if(outputTypes.elementTypes.length > 0) {
+                throw new IllegalArgumentException(TYPE_MUST + " have zero outputs");
+            }
             if (type != Type.RECEIVE && name != null) {
-                throw nameNullabilityException(true);
+                throw new IllegalArgumentException(TYPE_MUST + " be unnamed");
             }
             /* fall through */
         default:
-        }
-    }
-
-    private static IllegalArgumentException nameNullabilityException(boolean mustBeNull) {
-        return new IllegalArgumentException("functions of this type must be " + (mustBeNull ? "un" : "") + "named");
-    }
-
-    private static void assertNoElements(TupleType tupleType, String description) {
-        if(tupleType.elementTypes.length > 0) {
-            throw new IllegalArgumentException("functions of this type cannot have " + description);
         }
     }
 
