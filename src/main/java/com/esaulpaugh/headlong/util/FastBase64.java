@@ -24,12 +24,27 @@ public class FastBase64 {
     public static final int NO_LINE_SEP = 2; // No "\r\n" after 76 characters
     public static final int URL_SAFE_CHARS = 4;
 
-    private static final byte[] STANDARD = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes(StandardCharsets.US_ASCII);
-    private static final byte[] URL_SAFE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".getBytes(StandardCharsets.US_ASCII);
-
     private static final int LINE_LEN = 76;
     private static final int LINE_SEP_LEN = 2;
     private static final byte PADDING_BYTE = '=';
+
+    private static final short[] URL_SAFE = init("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".getBytes(StandardCharsets.US_ASCII));
+
+    private static final class Standard { // inner class to delay loading of table until called for
+        private static final short[] STANDARD = init("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes(StandardCharsets.US_ASCII));
+    }
+
+    private static short[] init(byte[] smallTable) {
+        final short[] largeTable = new short[1 << 12];
+        final int len = smallTable.length;
+        for (int i = 0; i < len; i++) {
+            final int offset = i * len;
+            for (int j = 0; j < len; j++) {
+                largeTable[offset + j] = (short) ((smallTable[i] << Byte.SIZE) | smallTable[j]);
+            }
+        }
+        return largeTable;
+    }
 
     @SuppressWarnings("deprecation")
     public static String encodeToString(byte[] buffer, int off, int len, int flags) {
@@ -52,12 +67,12 @@ public class FastBase64 {
         } else if (bytesRemainder > 0) {
             rawLen += charsLeft = 4;
         }
-        final boolean urlSafe = (flags & URL_SAFE_CHARS) != 0;
         final int endEvenBytes = bytesOff + bytesEvenLen; // End of even 24-bits chunks
+        final short[] table = (flags & URL_SAFE_CHARS) != 0 ? URL_SAFE : Standard.STANDARD;
         final byte[] out = (flags & NO_LINE_SEP) != 0
-                ? encodeMain(buffer, bytesOff, urlSafe ? BigUrlSafe.TABLE : BigStandard.TABLE, endEvenBytes, rawLen)
-                : encodeMainLineSep(buffer, bytesOff, urlSafe ? BigUrlSafe.TABLE : BigStandard.TABLE, endEvenBytes, rawLen + (((rawLen - 1) / LINE_LEN) * 2));
-        insertRemainder(buffer, bytesRemainder, charsLeft, urlSafe ? URL_SAFE : STANDARD, endEvenBytes, out);
+                ? encodeMain(buffer, bytesOff, table, endEvenBytes, rawLen)
+                : encodeMainLineSep(buffer, bytesOff, table, endEvenBytes, rawLen + (((rawLen - 1) / LINE_LEN) * 2));
+        insertRemainder(buffer, bytesRemainder, charsLeft, table, endEvenBytes, out);
         return out;
     }
 
@@ -97,9 +112,9 @@ public class FastBase64 {
         return out;
     }
 
-    private static void insertRemainder(byte[] buffer, int numBytes, int numChars, byte[] table, int endEvenBytes, byte[] out) {
+    private static void insertRemainder(byte[] buffer, int numBytes, int numChars, short[] table, int endEvenBytes, byte[] out) {
         int bits = 0;
-        byte thirdChar = PADDING_BYTE;
+        short thirdChar = PADDING_BYTE;
         switch (numBytes) { /* cases fall through */
         case 2:
             bits = (buffer[endEvenBytes + 1] & 0xff) << 2;
@@ -109,31 +124,11 @@ public class FastBase64 {
             final int charsIdx = out.length - numChars;
             switch (numChars) { /* cases fall through */
             case 4: out[charsIdx + 3] = PADDING_BYTE;
-            case 3: out[charsIdx + 2] = thirdChar;
-            case 2: out[charsIdx + 1] = table[(bits >> 6) & 0x3f];
-            default:out[charsIdx]     = table[bits >> 12];
+            case 3: out[charsIdx + 2] = (byte) thirdChar;
+            case 2: out[charsIdx + 1] = (byte) table[(bits >> 6) & 0x3f];
+            default:out[charsIdx]     = (byte) table[bits >> 12];
             }
         default:
         }
-    }
-
-    private static final class BigStandard {
-        private static final short[] TABLE = initBig(STANDARD);
-    }
-
-    private static final class BigUrlSafe {
-        private static final short[] TABLE = initBig(URL_SAFE);
-    }
-
-    private static short[] initBig(byte[] smallTable) {
-        final short[] largeTable = new short[1 << 12];
-        final int len = smallTable.length;
-        for (int i = 0; i < len; i++) {
-            final int offset = i * len;
-            for (int j = 0; j < len; j++) {
-                largeTable[offset + j] = (short) ((smallTable[i] << Byte.SIZE) | smallTable[j]);
-            }
-        }
-        return largeTable;
     }
 }
