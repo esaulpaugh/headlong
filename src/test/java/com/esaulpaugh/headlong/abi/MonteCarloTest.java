@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.JsonUtils;
+import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -32,9 +33,12 @@ import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.WriteAbortedException;
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Random;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
@@ -315,40 +319,67 @@ public class MonteCarloTest {
 
     @Disabled("search for colliding signatures")
     @Test
-    public void findSelectorCollision() {
+    public void findSelectorCollisions() {
 
-        String smallestPrev = "O()";
-        String smallestNew = "QChn()";
-
-        final int threshold = 9; // smallestPrev.length() + smallestNew.length();
-
-        final int n = 12_000_000;
-
-        final HashMap<String, String> selectorHexes = new HashMap<>(8192, 0.75f);
+        final int n = 5_000_000;
 
         final Random r = TestUtils.seededRandom();
 
-        for(int i = 0; i < n; i++) {
-            String str = (
-                    r.nextBoolean()
-                            ? generateASCIIString(4, r)
-                            : r.nextBoolean() ? generateASCIIString(3, r)
-                            : r.nextBoolean() ? generateASCIIString(2, r)
-                            : r.nextBoolean() ? generateASCIIString(1, r) : ""
-            ) + "()";
-            final Function foo = Function.parse(str);
-            final String newKey = foo.selectorHex();
-            final String newSig = foo.getCanonicalSignature();
-            final String prevSig = selectorHexes.put(newKey, newSig);
-            if(prevSig != null && !prevSig.equals(newSig)) {
-                if(prevSig.length() + newSig.length() <= threshold) {
-                    smallestPrev = prevSig;
-                    smallestNew = newSig;
-                    System.err.println(i + ", " + newKey + "\t\t" + newSig + " != " + prevSig);
+        final char[] lowercase = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+//        final char[] allCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".toCharArray();
+
+        final String paramsTupleStr = "()";
+
+        for (char first : lowercase) {
+            final HashMap<String, String> signatureMap = new HashMap<>(n / 20, 0.75f);
+            final SortedSet<String> sorted = new TreeSet<>();
+            for (int i = 0; i < n; i++) {
+                final String str = generateName(first, lowercase, r) + paramsTupleStr;
+                final Function foo = Function.parse(str);
+                final String selectorHex = foo.selectorHex();
+                final String signature = foo.getCanonicalSignature();
+                final String name = signature.substring(0, signature.indexOf('('));
+                final String prevSig = signatureMap.put(selectorHex, signature);
+                if (prevSig != null
+                        && prevSig.charAt(0) == signature.charAt(0)
+                        && prevSig.charAt(1) == signature.charAt(1)
+                        && !prevSig.equals(signature)) {
+                    String prevName = prevSig.substring(0, prevSig.indexOf('('));
+                    final String result = selectorHex + " " + (prevName.compareTo(name) < 0
+                            ? prevName + "\t" + name
+                            : name + "\t" + prevName);
+                    sorted.add(result);
+//                    System.err.println(result);
+                    signatureMap.remove(selectorHex);
                 }
+                i++;
             }
-            i++;
+//            System.out.println(signatureMap.size() + " " + sorted.size());
+            MessageDigest keccak = Function.newDefaultDigest();
+            for (String s : sorted) {
+                String a = s.substring(s.lastIndexOf('\t') + 1) + paramsTupleStr;
+                String b = s.substring(s.indexOf(' ') + 1, s.indexOf('\t')) + paramsTupleStr;
+                String hashA = Strings.encode(keccak.digest(Strings.decode(a, Strings.UTF_8)));
+                String hashB = Strings.encode(keccak.digest(Strings.decode(b, Strings.UTF_8)));
+                System.out.println(a + " " + hashA + '\n' + b + " " + hashB);
+            }
         }
-        System.out.println(smallestPrev + " ============ " + smallestNew);
+    }
+
+    private static String generateName(char first, char[] chars, Random r) {
+        StringBuilder sb = new StringBuilder("" + first);
+        appendNext(sb, chars, r);
+        appendNext(sb, chars, r);
+        appendNext(sb, chars, r);
+        appendNext(sb, chars, r);
+        return sb.toString();
+    }
+
+    private static void appendNext(StringBuilder sb, char[] chars, Random r) {
+        sb.append(next(chars, r));
+    }
+
+    private static char next(char[] chars, Random r) {
+        return chars[r.nextInt(chars.length)];
     }
 }
