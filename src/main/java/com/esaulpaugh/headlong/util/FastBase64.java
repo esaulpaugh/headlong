@@ -54,18 +54,18 @@ public class FastBase64 {
 
     public static byte[] encodeToBytes(final byte[] buffer, final int offset, final int len, final int flags) {
         final int chunks = len / 3;
-        final int evenLen = chunks * 3;
-        final int bytesLeft = len - evenLen; // bytesLen % 3; // [0,2]
+        final int evenBytes = chunks * 3;
+        final int bytesLeft = len - evenBytes; // bytesLen % 3; // [0,2]
+        int chars = chunks * 4;
         int charsLeft = 0;
-        int rawLen = chunks * 4;
         if(bytesLeft > 0) {
-            rawLen += charsLeft = (flags & NO_PADDING) != 0 ? bytesLeft + 1 : 4;
+            chars += charsLeft = (flags & NO_PADDING) != 0 ? bytesLeft + 1 : 4;
         }
-        final int endEvenBytes = offset + evenLen; // End of even 24-bits chunks
+        final int endEvenBytes = offset + evenBytes; // End of even 24-bits chunks
         final short[] table = (flags & URL_SAFE_CHARS) != 0 ? URL_SAFE : Standard.STANDARD;
         final byte[] out = (flags & NO_LINE_SEP) != 0
-                ? encodeMain(buffer, offset, table, endEvenBytes, rawLen)
-                : encodeMainLineSep(buffer, offset, table, endEvenBytes, rawLen + (((rawLen - 1) / LINE_LEN) * 2));
+                ? encodeMain(buffer, offset, table, endEvenBytes, chars)
+                : encodeMainLineSep(buffer, offset, table, endEvenBytes, chars + (((chars - 1) / LINE_LEN) * 2));
         insertRemainder(buffer, bytesLeft, charsLeft, table, endEvenBytes, out);
         return out;
     }
