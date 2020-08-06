@@ -117,6 +117,15 @@ public class MeasureHexBase64 {
     @BenchmarkMode(Mode.SingleShotTime)
     @Warmup(iterations = 1)
     @Measurement(iterations = THREE)
+    public void smallBase64BC(Blackhole blackhole) {
+        blackhole.consume(org.bouncycastle.util.encoders.Base64.toBase64String(SMALL));
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.SingleShotTime)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
     public void smallBase64Fast(Blackhole blackhole) {
         blackhole.consume(FastBase64.encodeToString(SMALL, 0, SMALL.length, Strings.URL_SAFE_FLAGS));
     }
