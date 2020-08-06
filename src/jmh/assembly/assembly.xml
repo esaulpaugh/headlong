@@ -104,8 +104,17 @@
                     <include>org/bouncycastle/jcajce/provider/digest/BCMessageDigest.class</include>
                     <include>org/bouncycastle/jcajce/provider/digest/Keccak.class</include>
                     <include>org/bouncycastle/jcajce/provider/digest/Keccak$DigestKeccak.class</include>
+                    <include>org/bouncycastle/util/encoders/DecoderException.class</include>
+                    <include>org/bouncycastle/util/encoders/Encoder.class</include>
+                    <include>org/bouncycastle/util/encoders/EncoderException.class</include>
+                    <include>org/bouncycastle/util/encoders/Hex.class</include>
+                    <include>org/bouncycastle/util/encoders/HexEncoder.class</include>
                     <include>org/bouncycastle/util/Arrays.class</include>
+                    <include>org/bouncycastle/util/Iterable.class</include>
                     <include>org/bouncycastle/util/Pack.class</include>
+                    <include>org/bouncycastle/util/StringList.class</include>
+                    <include>org/bouncycastle/util/Strings.class</include>
+                    <include>org/bouncycastle/util/Strings$1.class</include>
                 </includes>
                 <excludes>
                     <exclude>org/openjdk/jmh/PerfAsm.class</exclude>
