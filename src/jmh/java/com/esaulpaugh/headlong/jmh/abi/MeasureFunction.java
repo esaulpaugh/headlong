@@ -34,7 +34,7 @@ import org.openjdk.jmh.infra.Blackhole;
 
 import java.math.BigInteger;
 
-import static com.esaulpaugh.headlong.jmh.util.MeasureBase64.THREE;
+import static com.esaulpaugh.headlong.jmh.Main.THREE;
 
 @State(Scope.Benchmark)
 public class MeasureFunction {

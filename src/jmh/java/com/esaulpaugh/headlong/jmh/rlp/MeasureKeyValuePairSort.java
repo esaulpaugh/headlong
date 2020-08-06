@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static com.esaulpaugh.headlong.jmh.util.MeasureBase64.THREE;
+import static com.esaulpaugh.headlong.jmh.Main.THREE;
 
 @State(Scope.Thread)
 public class MeasureKeyValuePairSort {
