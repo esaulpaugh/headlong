@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.TestUtils;
+import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
@@ -31,19 +32,12 @@ public class StringsTest {
 
     private static final Random RAND = TestUtils.seededRandom();
 
-    private static final Supplier<byte[]> SUPPLY_RANDOM = () -> {
-        byte[] x = new byte[RAND.nextInt(115)];
-        RAND.nextBytes(x);
-        return x;
-    };
+    private static final Supplier<byte[]> SUPPLY_RANDOM = () -> TestUtils.randomBytes(RAND.nextInt(115), RAND);
 
     private static void testEncoding(int n, int encoding, Supplier<byte[]> supplier) {
         for (int i = 0; i < n; i++) {
             byte[] x = supplier.get();
-            assertArrayEquals(
-                    x,
-                    Strings.decode(Strings.encode(x, encoding), encoding)
-            );
+            assertArrayEquals(x, Strings.decode(Strings.encode(x, encoding), encoding));
         }
     }
 
@@ -60,6 +54,10 @@ public class StringsTest {
 
     @Test
     public void hex() {
+        Random r = TestUtils.seededRandom();
+        byte[] bytes = TestUtils.randomBytes(r.nextInt(100), r);
+        assertEquals(Hex.toHexString(bytes), FastHex.encodeToString(bytes));
+
         testEncoding(20_000, HEX, SUPPLY_RANDOM);
     }
 
@@ -96,10 +94,9 @@ public class StringsTest {
 
     @Test
     public void base64Default() {
-        Random rand = TestUtils.seededRandom();
+        final Random rand = TestUtils.seededRandom();
         for(int j = 3; j < 250; j++) {
-            byte[] x = new byte[j];
-            rand.nextBytes(x);
+            byte[] x = TestUtils.randomBytes(j, rand);
             int offset = rand.nextInt(j / 3);
             int len = rand.nextInt(j / 2);
             String s = Strings.encode(x, offset, len, BASE_64_URL_SAFE);

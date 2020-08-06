@@ -90,9 +90,7 @@ public class KeccakTest {
     public void testPartial() throws DigestException {
         Keccak keccak = new Keccak(256);
 
-        byte[] x = new byte[7];
-        Random rand = TestUtils.seededRandom();
-        rand.nextBytes(x);
+        byte[] x = TestUtils.randomBytes(7);
 
         byte[] end = Arrays.copyOfRange(x, 4, 7);
 
@@ -205,8 +203,7 @@ public class KeccakTest {
     @Disabled("slow")
     @Test
     public void benchmark() {
-        byte[] bytes = new byte[50];
-        TestUtils.seededRandom().nextBytes(bytes);
+        byte[] bytes = TestUtils.randomBytes(50, TestUtils.seededRandom());
 
         final String labelWrapped = WrappedKeccak.class.getSimpleName() + ":\t";
         final String labelKeccak = Keccak.class.getSimpleName() + ":\t\t\t";

@@ -205,9 +205,7 @@ public class IntegersTest {
         assertArrayEquals(new byte[] { 0, a, b, c, d, e, f, g, h, 0 }, ten);
 
         Arrays.fill(ten, (byte) 0);
-        byte[] src = new byte[4];
-        Random rand = TestUtils.seededRandom();
-        rand.nextBytes(src);
+        byte[] src = TestUtils.randomBytes(4);
         insertBytes(3, ten, ten.length - 3, (byte) 0, src[1], src[2], src[3]);
         assertArrayEquals(new byte[] { 0, 0, 0, 0, 0, 0, 0, src[1], src[2], src[3] }, ten);
     }

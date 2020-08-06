@@ -80,6 +80,12 @@ public class TestUtils {
         }
     }
 
+    public static byte[] randomBytes(int n) {
+        byte[] random = new byte[n];
+        TestUtils.seededRandom().nextBytes(random);
+        return random;
+    }
+
     public static byte[] randomBytes(int n, Random r) {
         byte[] random = new byte[n];
         r.nextBytes(random);

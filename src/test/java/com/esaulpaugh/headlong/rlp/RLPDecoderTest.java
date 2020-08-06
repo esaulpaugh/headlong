@@ -65,9 +65,7 @@ public class RLPDecoderTest {
 
         Random r = TestUtils.seededRandom();
 
-        byte[] bytes = new byte[10];
-
-        r.nextBytes(bytes);
+        final byte[] bytes = TestUtils.randomBytes(10, r);
         while(bytes[2] == 0) {
             bytes[2] = (byte) r.nextInt();
         }

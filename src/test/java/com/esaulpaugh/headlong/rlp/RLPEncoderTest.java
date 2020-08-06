@@ -123,8 +123,7 @@ public class RLPEncoderTest {
 
             final char c = (char) rando.nextInt(128);
 
-            final byte[] buffer = new byte[1 + rando.nextInt(90)];
-            rando.nextBytes(buffer);
+            final byte[] buffer = TestUtils.randomBytes(1 + rando.nextInt(90), rando);
 
             final String str = Strings.encode(buffer, Strings.UTF_8);
             final byte by = (byte) rando.nextInt();

@@ -324,8 +324,7 @@ public class MonteCarloTestCase {
     }
 
     private static long generateLong(Random r, LongType longType) {
-        byte[] random = new byte[1 + r.nextInt(longType.bitLength >>> 3)]; // 1-8
-        r.nextBytes(random);
+        byte[] random = TestUtils.randomBytes(1 + r.nextInt(longType.bitLength / Byte.SIZE) /* 1-8 */, r);
         long x = new BigInteger(random).longValue();
         if(longType.unsigned && x < 0) {
             return ((-(x + 1)) << 1) + (r.nextBoolean() ? 1 : 0);
@@ -335,7 +334,7 @@ public class MonteCarloTestCase {
 
     private static BigInteger generateBigInteger(Random r, UnitType<?> type) {
         byte[] thirtyTwo = new byte[UNIT_LENGTH_BYTES];
-        final int len = 1 + r.nextInt(type.bitLength >>> 3); // 1-32
+        final int len = 1 + r.nextInt(type.bitLength / Byte.SIZE); // 1-32
         boolean zero = true;
         for (int i = UNIT_LENGTH_BYTES - len; i < UNIT_LENGTH_BYTES; i++) {
             byte b = (byte) r.nextInt();

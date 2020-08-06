@@ -102,8 +102,7 @@ public class EqualsTest {
         byte[] digest = wk.digest(Strings.decode(f.getCanonicalSignature(), Strings.UTF_8));
         assertArrayEquals(Arrays.copyOfRange(digest, 0, 4), f.selector());
 
-        byte[] func = new byte[24];
-        TestUtils.seededRandom().nextBytes(func);
+        byte[] func = TestUtils.randomBytes(24);
 
 //                       10000000000000000000000000000000000000000
 //                        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
