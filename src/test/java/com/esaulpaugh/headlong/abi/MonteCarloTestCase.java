@@ -344,7 +344,7 @@ public class MonteCarloTestCase {
         BigInteger nonneg = new BigInteger(zero ? 0 : 1, thirtyTwo);
 
         if(type.unsigned) {
-            return nonneg.shiftRight(1);
+            return nonneg;
         }
 
         BigInteger temp = nonneg.shiftRight(1);
