@@ -26,10 +26,8 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
 final class Encoding {
 
-    static final int DECODE_ARRAY_SIZE_LIMIT = 64_000;
-
     static final int OFFSET_LENGTH_BYTES = UNIT_LENGTH_BYTES;
-    static final IntType OFFSET_TYPE = new IntType("uint31", Integer.SIZE - 1, true);
+    static final IntType UINT17 = new IntType("uint17", 17, true); // small bit length for Denial-of-Service protection
 
     private static final byte NEGATIVE_ONE_BYTE = (byte) 0xFF;
     static final byte ZERO_BYTE = (byte) 0x00;

@@ -43,7 +43,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     static final Class<String> STRING_CLASS = String.class;
     static final String STRING_ARRAY_CLASS_NAME = String[].class.getName();
 
-    private static final IntType ARRAY_LENGTH_TYPE = new IntType("int32", Integer.SIZE, false);
     private static final int ARRAY_LENGTH_BYTE_LEN = UNIT_LENGTH_BYTES;
 
     static final int DYNAMIC_LENGTH = -1;
@@ -343,28 +342,17 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     @Override
     @SuppressWarnings("unchecked")
     J decode(ByteBuffer bb, byte[] unitBuffer) {
-        final int arrayLen = length == DYNAMIC_LENGTH
-                ? ARRAY_LENGTH_TYPE.decode(bb, unitBuffer)
-                : length;
-
-        if(arrayLen > Encoding.DECODE_ARRAY_SIZE_LIMIT) {
-            throw new IllegalArgumentException("arrayLen exceeds artificial limit of " + Encoding.DECODE_ARRAY_SIZE_LIMIT);
-        }
-
-        try {
-            switch (elementType.typeCode()) {
-            case TYPE_CODE_BOOLEAN: return (J) decodeBooleanArray(bb, arrayLen, unitBuffer);
-            case TYPE_CODE_BYTE: return (J) decodeByteArray(bb, arrayLen);
-            case TYPE_CODE_INT: return (J) decodeIntArray((IntType) elementType, bb, arrayLen, unitBuffer);
-            case TYPE_CODE_LONG: return (J) decodeLongArray((LongType) elementType, bb, arrayLen, unitBuffer);
-            case TYPE_CODE_BIG_INTEGER: return (J) decodeBigIntegerArray((BigIntegerType) elementType, bb, arrayLen, unitBuffer);
-            case TYPE_CODE_BIG_DECIMAL: return (J) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, unitBuffer);
-            case TYPE_CODE_ARRAY:
-            case TYPE_CODE_TUPLE: return (J) decodeObjectArray(arrayLen, bb, unitBuffer);
-            default: throw new Error();
-            }
-        } catch(NegativeArraySizeException nase) {
-            throw new IllegalArgumentException(nase);
+        final int arrayLen = length == DYNAMIC_LENGTH ? Encoding.UINT17.decode(bb, unitBuffer) : length;
+        switch (elementType.typeCode()) {
+        case TYPE_CODE_BOOLEAN: return (J) decodeBooleanArray(bb, arrayLen, unitBuffer);
+        case TYPE_CODE_BYTE: return (J) decodeByteArray(bb, arrayLen);
+        case TYPE_CODE_INT: return (J) decodeIntArray((IntType) elementType, bb, arrayLen, unitBuffer);
+        case TYPE_CODE_LONG: return (J) decodeLongArray((LongType) elementType, bb, arrayLen, unitBuffer);
+        case TYPE_CODE_BIG_INTEGER: return (J) decodeBigIntegerArray((BigIntegerType) elementType, bb, arrayLen, unitBuffer);
+        case TYPE_CODE_BIG_DECIMAL: return (J) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, unitBuffer);
+        case TYPE_CODE_ARRAY:
+        case TYPE_CODE_TUPLE: return (J) decodeObjectArray(arrayLen, bb, unitBuffer);
+        default: throw new Error();
         }
     }
 
@@ -448,7 +436,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
             final int tailStart = bb.position(); // save this value for later
             int[] offsets = new int[len];
             for (int i = 0; i < len; i++) {
-                offsets[i] = Encoding.OFFSET_TYPE.decode(bb, unitBuffer);
+                offsets[i] = Encoding.UINT17.decode(bb, unitBuffer);
             }
             decodeTails(bb, offsets, tailStart, (i) -> elements[i] = elementType.decode(bb, unitBuffer));
         }
