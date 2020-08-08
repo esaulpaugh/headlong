@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 public final class LongType extends UnitType<Long> {

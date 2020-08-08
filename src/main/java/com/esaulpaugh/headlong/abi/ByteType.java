@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 /** Currently used only as the element type for some {@link ArrayType}s. */
