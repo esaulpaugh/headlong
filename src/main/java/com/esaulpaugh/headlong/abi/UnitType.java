@@ -90,4 +90,16 @@ public abstract class UnitType<V> extends ABIType<V> { // V generally extends Nu
             throw new IllegalArgumentException("exceeds bit limit: " + actual + " > " + bitLength);
         }
     }
+
+    protected final BigInteger decodeValid(ByteBuffer bb, byte[] unitBuffer) {
+        int idx = 0;
+        if(unsigned) {
+            unitBuffer = new byte[1 + UNIT_LENGTH_BYTES]; // a leading zero byte
+            idx = 1;
+        }
+        bb.get(unitBuffer, idx, UNIT_LENGTH_BYTES);
+        BigInteger bi = new BigInteger(unitBuffer);
+        validateBigInt(bi);
+        return bi;
+    }
 }

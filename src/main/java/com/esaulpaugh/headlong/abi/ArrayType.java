@@ -389,7 +389,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private static int[] decodeIntArray(IntType intType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
         int[] ints = new int[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            ints[i] = decodeBigIntElement(intType, bb, unitBuffer).intValue();
+            ints[i] = intType.decode(bb, unitBuffer);
         }
         return ints;
     }
@@ -397,7 +397,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private static long[] decodeLongArray(LongType longType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
         long[] longs = new long[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            longs[i] = decodeBigIntElement(longType, bb, unitBuffer).longValue();
+            longs[i] = longType.decode(bb, unitBuffer);
         }
         return longs;
     }
@@ -405,7 +405,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private static BigInteger[] decodeBigIntegerArray(BigIntegerType bigIntegerType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            bigInts[i] = decodeBigIntElement(bigIntegerType, bb, unitBuffer);
+            bigInts[i] = bigIntegerType.decode(bb, unitBuffer);
         }
         return bigInts;
     }
@@ -414,16 +414,9 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         BigDecimal[] bigDecs = new BigDecimal[arrayLen];
         final int scale = bigDecimalType.scale;
         for (int i = 0; i < arrayLen; i++) {
-            bigDecs[i] = new BigDecimal(decodeBigIntElement(bigDecimalType, bb, unitBuffer), scale);
+            bigDecs[i] = new BigDecimal(bigDecimalType.decodeValid(bb, unitBuffer), scale);
         }
         return bigDecs;
-    }
-
-    private static BigInteger decodeBigIntElement(UnitType<?> type, ByteBuffer bb, byte[] unitBuffer) {
-        bb.get(unitBuffer);
-        BigInteger bi = new BigInteger(unitBuffer);
-        type.validateBigInt(bi);
-        return bi;
     }
 
     private Object[] decodeObjectArray(int len, ByteBuffer bb, byte[] unitBuffer) {

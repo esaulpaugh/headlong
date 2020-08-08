@@ -66,10 +66,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
 
     @Override
     BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) {
-        bb.get(unitBuffer);
-        BigInteger bi = new BigInteger(unitBuffer);
-        validateBigInt(bi);
-        return new BigDecimal(bi, scale);
+        return new BigDecimal(decodeValid(bb, unitBuffer), scale);
     }
 
     @Override
