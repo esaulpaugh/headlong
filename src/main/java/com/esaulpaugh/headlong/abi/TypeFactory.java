@@ -41,27 +41,16 @@ final class TypeFactory {
     static {
         final Map<String, Supplier<ABIType<?>>> lambdaMap = new HashMap<>(256);
 
-        for(int n = 8; n <= 32; n += 8) {
-            mapInt(lambdaMap, "int" + n, n, false);
-        }
-        for(int n = 40; n <= 64; n += 8) {
-            mapLong(lambdaMap, "int" + n, n, false);
-        }
-        for(int n = 72; n <= 256; n += 8) {
-            mapBigInteger(lambdaMap, "int" + n, n, false);
-        }
+        for(int n = 8; n <= 32; n += 8) mapInt(lambdaMap, "int" + n, n, false);
+        for(int n = 40; n <= 64; n += 8) mapLong(lambdaMap, "int" + n, n, false);
+        for(int n = 72; n <= 256; n += 8) mapBigInteger(lambdaMap, "int" + n, n, false);
         lambdaMap.put("int", lambdaMap.get("int256"));
 
-        for(int n = 8; n <= 24; n += 8) {
-            mapInt(lambdaMap, "uint" + n, n, true);
-        }
-        for(int n = 32; n <= 56; n += 8) {
-            mapLong(lambdaMap, "uint" + n, n, true);
-        }
-        for(int n = 64; n <= 256; n += 8) {
-            mapBigInteger(lambdaMap, "uint" + n, n, true);
-        }
+        for(int n = 8; n <= 24; n += 8) mapInt(lambdaMap, "uint" + n, n, true);
+        for(int n = 32; n <= 56; n += 8) mapLong(lambdaMap, "uint" + n, n, true);
+        for(int n = 64; n <= 256; n += 8) mapBigInteger(lambdaMap, "uint" + n, n, true);
         lambdaMap.put("uint", lambdaMap.get("uint256"));
+
         mapBigInteger(lambdaMap, "address", ADDRESS_BIT_LEN, true);
 
         for (int n = 1; n <= 32; n++) {

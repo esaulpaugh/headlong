@@ -94,7 +94,7 @@ public class EncodeTest {
                     try {
                         TupleType tt = TupleType.parse(sig);
                         if(!"()".equals(sig) && !"(())".equals(sig)) System.out.println("\t\t\t" + len + ' ' + sig);
-                    } catch (IllegalArgumentException iae) {
+                    } catch (IllegalArgumentException ignored) {
                         /* do nothing */
                     } catch (Throwable t) {
                         System.err.println(sig);

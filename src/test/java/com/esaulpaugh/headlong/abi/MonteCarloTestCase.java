@@ -187,7 +187,7 @@ public class MonteCarloTestCase {
         try {
             decoded = function.decodeCall(babar);
             equal = args.equals(decoded);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ignored) {
             /* do nothing */
         } catch (Throwable t) {
             t.printStackTrace();
