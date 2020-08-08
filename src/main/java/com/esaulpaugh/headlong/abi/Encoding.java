@@ -56,11 +56,11 @@ final class Encoding {
     static void insertInt(BigInteger signed, int paddedLen, ByteBuffer dest) {
         byte[] arr = signed.toByteArray();
         int arrLen = arr.length;
-        if(arrLen <= UNIT_LENGTH_BYTES) {
+        if(arrLen <= paddedLen) {
             insertPadding(paddedLen - arrLen, signed.signum() < 0, dest);
             dest.put(arr);
         } else {
-            dest.put(arr, 1, UNIT_LENGTH_BYTES);
+            dest.put(arr, 1, paddedLen);
         }
     }
 
