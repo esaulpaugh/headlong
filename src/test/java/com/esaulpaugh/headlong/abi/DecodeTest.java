@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
@@ -90,19 +91,68 @@ public class DecodeTest {
     @Test
     public void testUint() {
         byte[] _byte = Strings.decode("00000000000000000000000000000000000000000000000000000000000000FF");
-        assertEquals((int) (Math.pow(2, 8) - 1), new Function("()", "(uint8)").decodeReturn(_byte).get(0));
+        assertEquals((int) (Math.pow(2, 8)) - 1, new Function("()", "(uint8)").decodeReturn(_byte).get(0));
 
         byte[] _int_ = Strings.decode("000000000000000000000000000000000000000000000000000000000000FFFF");
-        assertEquals((int) (Math.pow(2, 16) - 1), new Function("()", "(uint16)").decodeReturn(_int_).get(0));
+        assertEquals((int) (Math.pow(2, 16)) - 1, new Function("()", "(uint16)").decodeReturn(_int_).get(0));
 
         byte[] _long = Strings.decode("00000000000000000000000000000000000000000000000000000000FFFFFFFF");
-        assertEquals((long) (Math.pow(2, 32) - 1), new Function("()", "(uint32)").decodeReturn(_long).get(0));
+        assertEquals((long) (Math.pow(2, 32)) - 1, new Function("()", "(uint32)").decodeReturn(_long).get(0));
 
         byte[] _160_ = Strings.decode("000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
         assertEquals(BigInteger.valueOf(2L).pow(160).subtract(BigInteger.ONE), new Function("()", "(address)").decodeReturn(_160_).get(0));
 
         byte[] _big_ = Strings.decode("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
         assertEquals(BigInteger.valueOf(2L).pow(256).subtract(BigInteger.ONE), new Function("()", "(uint)").decodeReturn(_big_).get(0));
+    }
+
+    @Test
+    public void testDoSLimit() throws Throwable {
+        final String _2_17 = Strings.encode(Integers.toBytes((long) Math.pow(2, 17) - 1));
+        System.out.println(_2_17);
+        final String bigOffset =
+                        "000000000000000000000000000000000000000000000000000000000001FFFF" +
+                        "0000000000000000000000000000000000000000000000000000000000000001" +
+                        "aa00000000000000000000000000000000000000000000000000000000000000";
+        assertThrown(
+                IllegalArgumentException.class,
+                "newPosition > limit: (131071 > 96)",
+                () -> Function.parse("()", "(bytes)").decodeReturn(Strings.decode(bigOffset))
+        );
+        final String bigLength =
+                        "0000000000000000000000000000000000000000000000000000000000000020" +
+                        "000000000000000000000000000000000000000000000000000000000001FFFF" +
+                        "aa00000000000000000000000000000000000000000000000000000000000000";
+        assertThrown(
+                IllegalArgumentException.class,
+                "java.nio.BufferUnderflowException",
+                () -> Function.parse("()", "(bytes)").decodeReturn(Strings.decode(bigLength))
+        );
+
+        final String tooBigOffset =
+                        "000000000000000000000000000000000000000000000000000000000002FFFF" +
+                        "0000000000000000000000000000000000000000000000000000000000000001" +
+                        "aa00000000000000000000000000000000000000000000000000000000000000";
+        assertThrown(
+                IllegalArgumentException.class,
+                "exceeds bit limit: 18 > 17",
+                () -> Function.parse("()", "(bytes)").decodeReturn(Strings.decode(tooBigOffset))
+        );
+        final String tooBigLength =
+                        "0000000000000000000000000000000000000000000000000000000000000020" +
+                        "000000000000000000000000000000000000000000000000000000000002FFFF" +
+                        "aa00000000000000000000000000000000000000000000000000000000000000";
+        assertThrown(
+                IllegalArgumentException.class,
+                "exceeds bit limit: 18 > 17",
+                () -> Function.parse("()", "(bytes)").decodeReturn(Strings.decode(tooBigLength))
+        );
+
+        final String valid =
+                        "0000000000000000000000000000000000000000000000000000000000000020" +
+                        "0000000000000000000000000000000000000000000000000000000000000001" +
+                        "aa00000000000000000000000000000000000000000000000000000000000000";
+        Function.parse("()", "(bytes)").decodeReturn(Strings.decode(valid));
     }
 
     @Test

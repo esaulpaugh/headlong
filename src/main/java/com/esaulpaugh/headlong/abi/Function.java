@@ -288,6 +288,10 @@ public final class Function implements ABIObject {
         return new Function(signature);
     }
 
+    public static Function parse(String signature, String outputs) {
+        return new Function(signature, outputs);
+    }
+
     public static Function parse(String signature, MessageDigest messageDigest) {
         return new Function(signature, null, messageDigest);
     }
