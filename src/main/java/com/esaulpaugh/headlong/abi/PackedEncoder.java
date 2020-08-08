@@ -30,7 +30,6 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BYTE;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
-import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
 final class PackedEncoder {
 
@@ -46,8 +45,8 @@ final class PackedEncoder {
         case TYPE_CODE_BYTE:
         case TYPE_CODE_INT:
         case TYPE_CODE_LONG: encodeInt(((Number) value).longValue(), type.byteLengthPacked(null), dest); return;
-        case TYPE_CODE_BIG_INTEGER: insertInt(((BigInteger) value), type.byteLengthPacked(null), dest, ((BigIntegerType) type).unsigned); return;
-        case TYPE_CODE_BIG_DECIMAL: insertInt(((BigDecimal) value).unscaledValue(), type.byteLengthPacked(null), dest, ((BigDecimalType) type).unsigned); return;
+        case TYPE_CODE_BIG_INTEGER: insertInt(((BigInteger) value), type.byteLengthPacked(null), dest); return;
+        case TYPE_CODE_BIG_DECIMAL: insertInt(((BigDecimal) value).unscaledValue(), type.byteLengthPacked(null), dest); return;
         case TYPE_CODE_ARRAY: encodeArray((ArrayType<? extends ABIType<?>, ?>) type, value, dest); return;
         case TYPE_CODE_TUPLE: encodeTuple((TupleType) type, (Tuple) value, dest); return;
         default: throw new Error();
@@ -61,8 +60,8 @@ final class PackedEncoder {
         case TYPE_CODE_BYTE: dest.put((byte[]) arrayType.decodeIfString(value)); return;
         case TYPE_CODE_INT: encodeInts((int[]) value, elementType.byteLengthPacked(null), dest); return;
         case TYPE_CODE_LONG: encodeLongs((long[]) value, elementType.byteLengthPacked(null), dest); return;
-        case TYPE_CODE_BIG_INTEGER: insertBigIntegers((BigInteger[]) value, elementType.byteLengthPacked(null), dest, ((BigIntegerType) elementType).unsigned); return;
-        case TYPE_CODE_BIG_DECIMAL: insertBigDecimals((BigDecimal[]) value, elementType.byteLengthPacked(null), dest, ((BigDecimalType) elementType).unsigned); return;
+        case TYPE_CODE_BIG_INTEGER: insertBigIntegers((BigInteger[]) value, elementType.byteLengthPacked(null), dest); return;
+        case TYPE_CODE_BIG_DECIMAL: insertBigDecimals((BigDecimal[]) value, elementType.byteLengthPacked(null), dest); return;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
             for(Object e : (Object[]) value) {
@@ -73,11 +72,8 @@ final class PackedEncoder {
         }
     }
 
-    private static void insertInt(BigInteger signed, int paddedLen, ByteBuffer dest, boolean unsigned) {
+    private static void insertInt(BigInteger signed, int paddedLen, ByteBuffer dest) {
         byte[] arr = signed.toByteArray();
-//        if(unsigned && arr[0] == 0x00) {
-//            arr = arr.length == 1 ? EMPTY_BYTE_ARRAY : Arrays.copyOfRange(arr, 1, arr.length - 1);
-//        }
         int arrLen = arr.length;
         if(arrLen <= paddedLen) {
             Encoding.insertPadding(paddedLen - arrLen, signed.signum() < 0, dest);
@@ -87,15 +83,15 @@ final class PackedEncoder {
         }
     }
 
-    private static void insertBigIntegers(BigInteger[] arr, int byteLen, ByteBuffer dest, boolean unsigned) {
+    private static void insertBigIntegers(BigInteger[] arr, int byteLen, ByteBuffer dest) {
         for (BigInteger e : arr) {
-            insertInt(e, byteLen, dest, unsigned);
+            insertInt(e, byteLen, dest);
         }
     }
 
-    private static void insertBigDecimals(BigDecimal[] arr, int byteLen, ByteBuffer dest, boolean unsigned) {
+    private static void insertBigDecimals(BigDecimal[] arr, int byteLen, ByteBuffer dest) {
         for (BigDecimal e : arr) {
-            insertInt(e.unscaledValue(), byteLen, dest, unsigned);
+            insertInt(e.unscaledValue(), byteLen, dest);
         }
     }
 

@@ -38,10 +38,7 @@ public final class IntType extends UnitType<Integer> {
 
     @Override
     Integer decode(ByteBuffer bb, byte[] unitBuffer) {
-        bb.get(unitBuffer);
-        BigInteger bi = new BigInteger(unitBuffer);
-        validateBigInt(bi);
-        return bi.intValue();
+        return decodeValid(bb, unitBuffer).intValue();
     }
 
     @Override

@@ -53,10 +53,7 @@ public final class ByteType extends UnitType<Byte> {
 
     @Override
     Byte decode(ByteBuffer bb, byte[] unitBuffer) {
-        bb.get(unitBuffer);
-        BigInteger bi = new BigInteger(unitBuffer);
-        validateBigInt(bi);
-        return bi.byteValue();
+        return decodeValid(bb, unitBuffer).byteValue();
     }
 
     @Override

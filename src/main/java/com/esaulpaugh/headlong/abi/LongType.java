@@ -38,10 +38,7 @@ public final class LongType extends UnitType<Long> {
 
     @Override
     Long decode(ByteBuffer bb, byte[] unitBuffer) {
-        bb.get(unitBuffer);
-        BigInteger bi = new BigInteger(unitBuffer);
-        validateBigInt(bi);
-        return bi.longValue();
+        return decodeValid(bb, unitBuffer).longValue();
     }
 
     @Override
