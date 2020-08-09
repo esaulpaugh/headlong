@@ -104,6 +104,8 @@
                     <include>org/bouncycastle/jcajce/provider/digest/BCMessageDigest.class</include>
                     <include>org/bouncycastle/jcajce/provider/digest/Keccak.class</include>
                     <include>org/bouncycastle/jcajce/provider/digest/Keccak$DigestKeccak.class</include>
+                    <include>org/bouncycastle/util/encoders/Base64.class</include>
+                    <include>org/bouncycastle/util/encoders/Base64Encoder.class</include>
                     <include>org/bouncycastle/util/encoders/DecoderException.class</include>
                     <include>org/bouncycastle/util/encoders/Encoder.class</include>
                     <include>org/bouncycastle/util/encoders/EncoderException.class</include>
