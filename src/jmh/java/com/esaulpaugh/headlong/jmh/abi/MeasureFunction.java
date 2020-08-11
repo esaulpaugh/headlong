@@ -54,7 +54,7 @@ public class MeasureFunction {
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.SingleShotTime)
+    @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
     @Measurement(iterations = THREE)
     public void init_with_keccak(Blackhole blackhole) {
@@ -63,7 +63,7 @@ public class MeasureFunction {
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.SingleShotTime)
+    @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
     @Measurement(iterations = THREE)
     public void init_with_wrapped_bouncy_keccak(Blackhole blackhole) {
@@ -72,7 +72,7 @@ public class MeasureFunction {
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.SingleShotTime)
+    @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
     @Measurement(iterations = THREE)
     public void encode_call(Blackhole blackhole) {

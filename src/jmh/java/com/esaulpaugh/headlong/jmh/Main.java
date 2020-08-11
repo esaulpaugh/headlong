@@ -23,7 +23,7 @@ public class Main {
                 .warmupIterations(1)
                 .forks(1)
                 .measurementIterations(THREE)
-//                .mode(Mode.SingleShotTime)
+//                .mode(Mode.Throughput)
                 .build();
 
         new Runner(opt).run();
