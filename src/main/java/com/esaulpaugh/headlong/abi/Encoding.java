@@ -27,7 +27,10 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 final class Encoding {
 
     static final int OFFSET_LENGTH_BYTES = UNIT_LENGTH_BYTES;
+
     static final IntType UINT17 = new IntType("uint17", 17, true); // small bit length for Denial-of-Service protection
+
+    static final IntType UINT31 = new IntType("uint31", 31, true);
 
     private static final byte NEGATIVE_ONE_BYTE = (byte) 0xFF;
     static final byte ZERO_BYTE = (byte) 0x00;

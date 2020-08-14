@@ -48,6 +48,14 @@ import java.util.concurrent.TimeoutException;
 
 public class MonteCarloTest {
 
+    @Test
+    public void repro() {
+        Random instance = new Random();
+        MessageDigest md = Function.newDefaultDigest();
+        MonteCarloTestCase testCase = new MonteCarloTestCase(7706440032491971509L,3,3,3,3, instance, md);
+        testCase.runAll(new Random());
+    }
+
     private static final int N = 400_000;
 
     @Test

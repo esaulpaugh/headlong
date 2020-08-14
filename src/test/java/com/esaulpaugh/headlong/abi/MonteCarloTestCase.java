@@ -474,7 +474,7 @@ public class MonteCarloTestCase {
 
     @Override
     public String toString() {
-        return "(" + seed + ',' + maxTupleDepth + ',' + maxTupleLen + ',' + maxArrayDepth + ',' + maxArrayLen + ") --> " + function.getCanonicalSignature();
+        return "(" + seed + "L," + maxTupleDepth + ',' + maxTupleLen + ',' + maxArrayDepth + ',' + maxArrayLen + ") --> " + function.getCanonicalSignature();
     }
 
     private static List<String> genOrderedFixedKeys() {

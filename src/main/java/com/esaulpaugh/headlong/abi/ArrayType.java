@@ -429,7 +429,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
             final int tailStart = bb.position(); // save this value for later
             int[] offsets = new int[len];
             for (int i = 0; i < len; i++) {
-                offsets[i] = Encoding.UINT17.decode(bb, unitBuffer);
+                offsets[i] = Encoding.UINT31.decode(bb, unitBuffer);
             }
             decodeTails(bb, offsets, tailStart, (i) -> elements[i] = elementType.decode(bb, unitBuffer));
         }
