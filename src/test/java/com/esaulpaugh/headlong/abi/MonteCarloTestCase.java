@@ -176,7 +176,7 @@ public class MonteCarloTestCase {
 
     private void runFuzzDecode(ByteBuffer bb, Random r) {
         final Tuple args = this.argsTuple;
-        r.setSeed(seed + 1);
+        r.setSeed(seed + 512);
         final byte[] babar = bb.array();
         final int idx = r.nextInt(babar.length);
         final byte target = babar[idx];

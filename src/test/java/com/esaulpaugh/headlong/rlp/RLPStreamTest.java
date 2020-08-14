@@ -92,7 +92,7 @@ public class RLPStreamTest {
 	}
 
     @Test
-    public void testObjectRLPStream() throws IOException, ClassNotFoundException {
+    public void testObjectRLPStream() throws IOException {
 
         // write RLP
         RLPOutputStream ros = new RLPOutputStream();

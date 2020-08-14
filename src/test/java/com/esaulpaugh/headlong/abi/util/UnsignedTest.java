@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 import java.util.Random;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class UnsignedTest {
 
     @Test
@@ -170,5 +172,35 @@ public class UnsignedTest {
                 Assertions.assertEquals(x, type.toUnsigned(type.toSigned(x)));
             }
         }
+    }
+
+    @Test
+    public void testUnsigned() {
+        Uint[] uints = new Uint[257];
+        for (int i = 0; i < uints.length; i++) {
+            uints[i] = new Uint(i);
+        }
+        Random r = TestUtils.seededRandom();
+        int plus1 = 0;
+        final int n = 1000;
+        for (int i = 0; i < n; i++) {
+            byte[] bytes = TestUtils.randomBytes(1 + r.nextInt(32), r);
+            byte[] unsignedBytes = new byte[1 + bytes.length];
+            System.arraycopy(bytes, 0, unsignedBytes, 1, bytes.length);
+            BigInteger a = new BigInteger(bytes);
+            BigInteger b = new BigInteger(unsignedBytes);
+            final int bitlen = b.bitLength();
+            try {
+                assertEquals(uints[bitlen].toUnsigned(a), b);
+            } catch (IllegalArgumentException iae) {
+                if(iae.getMessage().startsWith("signed has too many bits: ")) {
+                    assertEquals(uints[bitlen + 1].toUnsigned(a), b);
+                    plus1++;
+                } else {
+                    throw iae;
+                }
+            }
+        }
+        System.out.println((double) plus1 / n);
     }
 }

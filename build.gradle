@@ -17,7 +17,7 @@ compileJava {
 }
 
 test {
-    maxParallelForks = (int) Runtime.runtime.availableProcessors() ?: 1
+    maxParallelForks = Runtime.runtime.availableProcessors()
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
