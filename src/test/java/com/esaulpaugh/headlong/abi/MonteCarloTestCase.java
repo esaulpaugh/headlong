@@ -47,7 +47,6 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
-import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MonteCarloTestCase {
@@ -218,7 +217,9 @@ public class MonteCarloTestCase {
             throw new AssertionError("failed canonicalization!");
         }
         try {
-            if (!PackedDecoder.decode(tt, tt.encodePacked(args).array()).equals(args)) {
+            ByteBuffer bb = tt.encodePacked(args);
+            Tuple decoded = PackedDecoder.decode(tt, bb.array());
+            if (!decoded.equals(args)) {
                 throw new RuntimeException("not equal: " + tt.canonicalType);
             }
         } catch (IllegalArgumentException iae) {
@@ -333,22 +334,17 @@ public class MonteCarloTestCase {
     }
 
     private static BigInteger generateBigInteger(Random r, UnitType<?> type) {
-        byte[] thirtyTwo = new byte[UNIT_LENGTH_BYTES];
-        final int len = 1 + r.nextInt(type.bitLength / Byte.SIZE); // 1-32
+        byte[] magnitude = new byte[type.bitLength / Byte.SIZE];
+        r.nextBytes(magnitude);
         boolean zero = true;
-        for (int i = UNIT_LENGTH_BYTES - len; i < UNIT_LENGTH_BYTES; i++) {
-            byte b = (byte) r.nextInt();
+        for (byte b : magnitude) {
             zero &= b == 0;
-            thirtyTwo[i] = b;
         }
-        BigInteger nonneg = new BigInteger(zero ? 0 : 1, thirtyTwo);
-
-        if(type.unsigned) {
-            return nonneg;
+        BigInteger random = new BigInteger(zero ? 0 : type.unsigned || r.nextBoolean() ? 1 : -1, magnitude);
+        if(!type.unsigned && random.bitLength() >= type.bitLength) {
+            random = random.shiftRight(1);
         }
-
-        BigInteger temp = nonneg.shiftRight(1);
-        return r.nextBoolean() ? temp : temp.add(BigInteger.ONE).negate();
+        return random;
     }
 
     private static BigDecimal generateBigDecimal(Random r, BigDecimalType type) {
