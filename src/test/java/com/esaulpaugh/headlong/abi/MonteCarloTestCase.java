@@ -316,22 +316,13 @@ public class MonteCarloTestCase {
     }
 
     private static int generateInt(Random r, IntType intType) {
-        return generateInt(r, 1 + r.nextInt(intType.bitLength / Byte.SIZE), intType);
-    }
-
-    private static int generateInt(Random r, int len, UnitType<?> intType) {
-        int val = r.nextInt();
-        switch (len) {
-        case 1: val &= 0xff; break;
-        case 2: val &= 0xffff; break;
-        case 3: val &= 0xffffff; break;
-        case 4: break;
-        default: throw new Error();
+        byte[] buffer = new byte[1 + r.nextInt(intType.bitLength >>> 3)]; // 1-4
+        r.nextBytes(buffer);
+        int x = new BigInteger(buffer).intValue();
+        if(intType.unsigned && x < 0) {
+            return (-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0);
         }
-        if(!intType.unsigned && r.nextBoolean()) {
-            val |= 0x80000000;
-        }
-        return val;
+        return x;
     }
 
     private static long generateLong(Random r, LongType longType) {
