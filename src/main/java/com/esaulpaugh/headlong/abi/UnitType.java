@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
+import com.esaulpaugh.headlong.abi.util.Uint;
 import com.esaulpaugh.headlong.util.Integers;
 
 import java.math.BigInteger;
@@ -72,14 +73,22 @@ public abstract class UnitType<V> extends ABIType<V> { // V generally extends Nu
     }
 
     final void validatePrimitive(long longVal) {
-        checkBitLen(longVal >= 0 ? Integers.bitLen(longVal) : BizarroIntegers.bitLen(longVal));
         if (unsigned && longVal < 0) {
             throw new IllegalArgumentException("signed value given for unsigned type");
+        }
+        if(!unsigned) {
+            new Uint(bitLength).toUnsigned(longVal);
+        } else {
+            checkBitLen(Integers.bitLen(longVal));
         }
     }
 
     final void validateBigInt(BigInteger bigIntVal) {
-        checkBitLen(bigIntVal.bitLength());
+        if(!unsigned) {
+            new Uint(bitLength).toUnsigned(bigIntVal);
+        } else {
+            checkBitLen(bigIntVal.bitLength());
+        }
         if (unsigned && bigIntVal.signum() < 0) {
             throw new IllegalArgumentException("signed value given for unsigned type");
         }
