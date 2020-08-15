@@ -303,7 +303,7 @@ public class MonteCarloTestCase {
         case TYPE_CODE_BYTE: return generateByte(r);
         case TYPE_CODE_INT: return generateInt(r, (IntType) type);
         case TYPE_CODE_LONG: return generateLong(r, (LongType) type);
-        case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (UnitType<?>) type);
+        case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (BigIntegerType) type);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
         case TYPE_CODE_ARRAY: return generateArray((ArrayType<? extends ABIType<?>, ?>) type, r);
         case TYPE_CODE_TUPLE: return generateTuple((TupleType) type, r);
@@ -317,6 +317,7 @@ public class MonteCarloTestCase {
 
     private static int generateInt(Random r, IntType intType) {
         byte[] buffer = new byte[1 + r.nextInt(intType.bitLength >>> 3)]; // 1-4
+        r.nextBytes(buffer);
         int x = new BigInteger(buffer).intValue();
         if(intType.unsigned && x < 0) {
             return (-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0);
