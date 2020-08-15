@@ -155,25 +155,25 @@ public final class PackedDecoder {
     }
 
     private static int decodeBigInteger(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx, BigIntegerType type) {
-//        BigInteger val = new BigInteger(buffer, idx, elementLen); // Java 9+
         if(type.unsigned) {
             byte[] copy = new byte[1 + elementLen];
             System.arraycopy(buffer, idx, copy, 1, elementLen);
             dest[destIdx] = new BigInteger(copy);
         } else {
+//            dest[destIdx] = new BigInteger(buffer, idx, elementLen); // Java 9+
             dest[destIdx] = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
         }
         return elementLen;
     }
 
     private static int decodeBigDecimal(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx, BigDecimalType type) {
-//        BigInteger unscaled = new BigInteger(buffer, idx, elementLen); // Java 9+
         BigInteger unscaled;
         if(type.unsigned) {
             byte[] copy = new byte[1 + elementLen];
             System.arraycopy(buffer, idx, copy, 1, elementLen);
             unscaled = new BigInteger(copy);
         } else {
+//            unscaled = new BigInteger(buffer, idx, elementLen); // Java 9+
             unscaled = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
         }
         dest[destIdx] = new BigDecimal(unscaled, type.scale);
@@ -275,7 +275,7 @@ public final class PackedDecoder {
         int val = 0;
         byte leftmost;
         switch (len) { /* cases 4 through 1 fall through */
-        case 4: val = buffer[i+3] & 0xFF; shiftAmount = Byte.SIZE;
+        case 4: val  =  buffer[i+3] & 0xFF;                 shiftAmount  = Byte.SIZE;
         case 3: val |= (buffer[i+2] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 2: val |= (buffer[i+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
         case 1: val |= ((leftmost = buffer[i]) & 0xFF) << shiftAmount; break;
@@ -297,7 +297,7 @@ public final class PackedDecoder {
         long val = 0L;
         byte leftmost;
         switch (len) { /* cases 8 through 1 fall through */
-        case 8: val = buffer[i+7] & 0xFFL; shiftAmount = Byte.SIZE;
+        case 8: val  =  buffer[i+7] & 0xFFL;                 shiftAmount  = Byte.SIZE;
         case 7: val |= (buffer[i+6] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 6: val |= (buffer[i+5] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 5: val |= (buffer[i+4] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
