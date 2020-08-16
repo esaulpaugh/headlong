@@ -16,6 +16,8 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.util.SuperSerial;
 import com.google.gson.Gson;
@@ -139,6 +141,7 @@ public class MonteCarloTestCase {
         this.rawSignature = sig;
         this.function = new Function(sig, null, md);
         this.argsTuple = generateTuple(function.getParamTypes(), rng);
+        function.getParamTypes().validate(argsTuple);
     }
 
     JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) {
@@ -300,8 +303,8 @@ public class MonteCarloTestCase {
     private Object generateValue(ABIType<?> type, Random r) {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return r.nextBoolean();
-        case TYPE_CODE_BYTE: return generateByte(r);
-        case TYPE_CODE_INT: return generateInt(r, (IntType) type);
+        case TYPE_CODE_BYTE: return (byte) r.nextInt();
+        case TYPE_CODE_INT: return (int) generateLong(r, (IntType) type);
         case TYPE_CODE_LONG: return generateLong(r, (LongType) type);
         case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (BigIntegerType) type);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
@@ -311,30 +314,34 @@ public class MonteCarloTestCase {
         }
     }
 
-    private static byte generateByte(Random r) {
-        return (byte) r.nextInt();
+    private static long generateLong(Random r, UnitType<? extends Number> unitType) {
+        return generateLong(r, unitType.bitLength, 1 + r.nextInt(unitType.bitLength / Byte.SIZE), unitType.unsigned);
     }
 
-    private static int generateInt(Random r, IntType intType) {
-        byte[] buffer = new byte[1 + r.nextInt(intType.bitLength >>> 3)]; // 1-4
-        r.nextBytes(buffer);
-        int x = new BigInteger(buffer).intValue();
-        if(intType.unsigned && x < 0) {
-            return (-(x + 1) << 1) + (r.nextBoolean() ? 1 : 0);
+    private static long generateLong(Random r, int bitLen, int len, boolean unsigned) {
+        long val = r.nextLong();
+        switch (len) {
+        case 1: val &= 0xFFL; break;
+        case 2: val &= 0xFFFFL; break;
+        case 3: val &= 0xFFFFFFL; break;
+        case 4: val &= 0xFFFFFFFFL; break;
+        case 5: val &= 0xFFFFFFFFFFL; break;
+        case 6: val &= 0xFFFFFFFFFFFFL; break;
+        case 7: val &= 0xFFFFFFFFFFFFFFL; break;
+        case 8: break;
+        default: throw new Error();
         }
-        return x;
-    }
-
-    private static long generateLong(Random r, LongType longType) {
-        byte[] random = TestUtils.randomBytes(1 + r.nextInt(longType.bitLength / Byte.SIZE) /* 1-8 */, r);
-        long x = new BigInteger(random).longValue();
-        if(longType.unsigned && x < 0) {
-            return ((-(x + 1)) << 1) + (r.nextBoolean() ? 1 : 0);
+        val = unsigned || r.nextBoolean() ? val : val < 0 ? -(val + 1) : (-val - 1);
+        if(!unsigned) {
+            int valBitLen = val < 0 ? BizarroIntegers.bitLen(val) : Integers.bitLen(val);
+            if(valBitLen >= bitLen) {
+                val >>= 1;
+            }
         }
-        return x;
+        return val;
     }
 
-    private static BigInteger generateBigInteger(Random r, UnitType<?> type) {
+    private static BigInteger generateBigInteger(Random r, UnitType<? extends Number> type) {
         byte[] magnitude = new byte[type.bitLength / Byte.SIZE];
         r.nextBytes(magnitude);
         boolean zero = true;
@@ -394,7 +401,7 @@ public class MonteCarloTestCase {
     private static int[] generateIntArray(final int len, IntType intType, Random r) {
         int[] ints = new int[len];
         for (int i = 0; i < len; i++) {
-            ints[i] = generateInt(r, intType);
+            ints[i] = (int) generateLong(r, intType);
         }
         return ints;
     }

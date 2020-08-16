@@ -16,12 +16,16 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
+import com.esaulpaugh.headlong.util.Integers;
 import com.joemelsha.crypto.hash.Keccak;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -45,6 +49,67 @@ public class TupleTest {
             0.1f,
             1.9d
     };
+
+    @Disabled("meta test")
+    @Test
+    public void metaTest1() {
+        Random r = ThreadLocalRandom.current();
+
+        int bits = 24;
+
+        final int pow = (int) Math.pow(2.0, bits);
+        final int powMinus1 = pow - 1;
+        System.out.println(Long.toHexString(powMinus1));
+
+        System.out.println(pow);
+
+        boolean[] bools = new boolean[pow];
+
+        @SuppressWarnings("unchecked")
+        UnitType<? extends Number> type = (UnitType<? extends Number>) TupleType.parse("(int" + bits + ")").get(0);
+
+        for (int i = 0; i < 1_579_919_999; i++) {
+            bools[(int) generateLong(r, type) & powMinus1] = true;
+        }
+
+        int count = 0;
+        for (int i = 0; i < pow; i++) {
+            if(!bools[i]) {
+                count++;
+                System.err.println(i);
+            }
+        }
+
+        System.out.println("missed " + count);
+        System.out.println(pow - count + " / " + pow + " " + (1 - ((double) count / pow)));
+    }
+
+    private static long generateLong(Random r, UnitType<? extends Number> unitType) {
+        return generateLong(r, unitType.bitLength, 1 + r.nextInt(unitType.bitLength / Byte.SIZE), unitType.unsigned);
+    }
+
+    private static long generateLong(Random r, int bitLen, int len, boolean unsigned) {
+        long val = r.nextLong();
+        switch (len) {
+        case 1: val &= 0xFFL; break;
+        case 2: val &= 0xFFFFL; break;
+        case 3: val &= 0xFFFFFFL; break;
+        case 4: val &= 0xFFFFFFFFL; break;
+        case 5: val &= 0xFFFFFFFFFFL; break;
+        case 6: val &= 0xFFFFFFFFFFFFL; break;
+        case 7: val &= 0xFFFFFFFFFFFFFFL; break;
+        case 8: break;
+        default: throw new Error();
+        }
+        val = unsigned || r.nextBoolean() ? val : val < 0 ? -(val + 1) : (-val - 1);
+        if(!unsigned) {
+            int valBitLen = val < 0 ? BizarroIntegers.bitLen(val) : Integers.bitLen(val);
+            if(valBitLen >= bitLen) {
+                val >>= 1;
+            }
+        }
+        return val;
+    }
 
     @Test
     public void testTypeSafety() throws Throwable {
