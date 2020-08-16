@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
-import com.esaulpaugh.headlong.abi.util.Uint;
 import com.esaulpaugh.headlong.util.Integers;
 
 import java.math.BigInteger;
@@ -77,26 +76,28 @@ public abstract class UnitType<V> extends ABIType<V> { // V generally extends Nu
             if(unsigned) {
                 throw new IllegalArgumentException("signed value given for unsigned type");
             }
-            new Uint(bitLength).toUnsigned(longVal);
+            checkBitLen(BizarroIntegers.bitLen(longVal));
         } else {
             checkBitLen(Integers.bitLen(longVal));
         }
     }
 
     final void validateBigInt(BigInteger bigIntVal) {
-        if(bigIntVal.signum() < 0) {
-            if(unsigned) {
-                throw new IllegalArgumentException("signed value given for unsigned type");
-            }
-            new Uint(bitLength).toUnsigned(bigIntVal);
-        } else {
-            checkBitLen(bigIntVal.bitLength());
+        if(unsigned && bigIntVal.signum() < 0) {
+            throw new IllegalArgumentException("signed value given for unsigned type");
         }
+        checkBitLen(bigIntVal.bitLength());
     }
 
     final void checkBitLen(int actual) {
-        if (actual > bitLength) {
-            throw new IllegalArgumentException("exceeds bit limit: " + actual + " > " + bitLength);
+        if(unsigned) {
+            if(actual > bitLength) {
+                throw new IllegalArgumentException("unsigned val exceeds bit limit: " + actual + " > " + bitLength);
+            }
+        } else {
+            if (actual >= bitLength) {
+                throw new IllegalArgumentException("signed val exceeds bit limit: " + actual + " >= " + bitLength);
+            }
         }
     }
 
