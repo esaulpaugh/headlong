@@ -214,9 +214,8 @@ public class DecodeTest {
                 "0000000000000000000000000000000000000000000000000000000000000001"
         };
 
-        for (String hex : tooBig) {
-            TestUtils.assertThrown(IllegalArgumentException.class, "exceeds bit limit", () -> tt.decode(Strings.decode(hex)));
-        }
+        TestUtils.assertThrown(IllegalArgumentException.class, "exceeds bit limit: 2 > 1", () -> tt.decode(Strings.decode(tooBig[0])));
+        TestUtils.assertThrown(IllegalArgumentException.class, "signed value given for unsigned type", () -> tt.decode(Strings.decode(tooBig[1])));
         for (String hex : tooSmall) {
             TestUtils.assertThrown(IllegalArgumentException.class, "signed value given for unsigned type", () -> tt.decode(Strings.decode(hex)));
         }
@@ -242,7 +241,7 @@ public class DecodeTest {
 
         array[array.length - 32] = (byte) 0x80;
         System.out.println(Function.formatCall(array));
-        assertThrown(IllegalArgumentException.class, "exceeds bit limit", () -> f.decodeCall(array));
+        assertThrown(IllegalArgumentException.class, "signed value given for unsigned type", () -> f.decodeCall(array));
 
         for (int i = array.length - 32; i < array.length; i++) {
             array[i] = (byte) 0xFF;

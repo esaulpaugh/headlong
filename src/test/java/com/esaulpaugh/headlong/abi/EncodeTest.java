@@ -411,7 +411,7 @@ public class EncodeTest {
     public void testNesterErrMessage() throws Throwable {
         assertThrown(
                 IllegalArgumentException.class,
-                "tuple index 0: array index 1: signed has too many bits: 9 is not less than 8",
+                "tuple index 0: array index 1: exceeds bit limit: 9 > 8",
                 () -> Function.parse("(int8[])").encodeCall(Tuple.of((Object) new int[] { 120, 256 }))
         );
     }

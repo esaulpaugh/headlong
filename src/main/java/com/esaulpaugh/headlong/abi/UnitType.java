@@ -73,10 +73,10 @@ public abstract class UnitType<V> extends ABIType<V> { // V generally extends Nu
     }
 
     final void validatePrimitive(long longVal) {
-        if (unsigned && longVal < 0) {
-            throw new IllegalArgumentException("signed value given for unsigned type");
-        }
-        if(!unsigned) {
+        if(longVal < 0) {
+            if(unsigned) {
+                throw new IllegalArgumentException("signed value given for unsigned type");
+            }
             new Uint(bitLength).toUnsigned(longVal);
         } else {
             checkBitLen(Integers.bitLen(longVal));
@@ -84,13 +84,13 @@ public abstract class UnitType<V> extends ABIType<V> { // V generally extends Nu
     }
 
     final void validateBigInt(BigInteger bigIntVal) {
-        if(!unsigned) {
+        if(bigIntVal.signum() < 0) {
+            if(unsigned) {
+                throw new IllegalArgumentException("signed value given for unsigned type");
+            }
             new Uint(bitLength).toUnsigned(bigIntVal);
         } else {
             checkBitLen(bigIntVal.bitLength());
-        }
-        if (unsigned && bigIntVal.signum() < 0) {
-            throw new IllegalArgumentException("signed value given for unsigned type");
         }
     }
 
