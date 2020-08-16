@@ -97,7 +97,7 @@ public final class PackedDecoder {
             if(TYPE_CODE_ARRAY == typeCode) {
                 final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<? extends ABIType<?>, ?>) type;
                 end -= arrayType.elementType.byteLengthPacked(null) * arrayType.length;
-                decodeArray(arrayType, buffer, end, end, elements, i);
+                insertArray(arrayType, buffer, end, end, elements, i);
             } else if(TYPE_CODE_TUPLE == typeCode) {
                 TupleType inner = (TupleType) type;
                 int innerLen = inner.byteLengthPacked(null);
@@ -119,11 +119,11 @@ public final class PackedDecoder {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: elements[i] = BooleanType.decodeBoolean(buffer[idx]); return type.byteLengthPacked(null);
         case TYPE_CODE_BYTE: elements[i] = buffer[idx]; return type.byteLengthPacked(null);
-        case TYPE_CODE_INT: return decodeInt(type.byteLengthPacked(null), (IntType) type, buffer, idx, elements, i);
-        case TYPE_CODE_LONG: return decodeLong(type.byteLengthPacked(null), (LongType) type, buffer, idx, elements, i);
-        case TYPE_CODE_BIG_INTEGER: return decodeBigInteger(type.byteLengthPacked(null), buffer, idx, elements, i, (BigIntegerType) type);
-        case TYPE_CODE_BIG_DECIMAL: return decodeBigDecimal(type.byteLengthPacked(null), buffer, idx, elements, i, (BigDecimalType) type);
-        case TYPE_CODE_ARRAY: return decodeArray((ArrayType<? extends ABIType<?>, ?>) type, buffer, idx, end, elements, i);
+        case TYPE_CODE_INT: return insertInt((IntType) type, buffer, idx, type.byteLengthPacked(null), elements, i);
+        case TYPE_CODE_LONG: return insertLong((LongType) type, buffer, idx, type.byteLengthPacked(null), elements, i);
+        case TYPE_CODE_BIG_INTEGER: return insertBigInteger(type.byteLengthPacked(null), buffer, idx, elements, i, (BigIntegerType) type);
+        case TYPE_CODE_BIG_DECIMAL: return insertBigDecimal(type.byteLengthPacked(null), buffer, idx, elements, i, (BigDecimalType) type);
+        case TYPE_CODE_ARRAY: return insertArray((ArrayType<? extends ABIType<?>, ?>) type, buffer, idx, end, elements, i);
         case TYPE_CODE_TUPLE:
             return type.dynamic
                     ? decodeTuple((TupleType) type, buffer, idx, end, elements, i)
@@ -142,19 +142,17 @@ public final class PackedDecoder {
         return tupleType.byteLengthPacked(parentElements[pei] = new Tuple(elements));
     }
 
-    private static int decodeInt(int elementLen, IntType intType, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        int signed = getPackedInt(buffer, idx, elementLen);
-        dest[destIdx] = intType.unsigned ? (int) new Uint(intType.getBitLength()).toUnsignedLong(signed) : signed;
-        return elementLen;
+    private static int insertInt(UnitType<? extends Number> type, byte[] buffer, int idx, int len, Object[] dest, int destIdx) {
+        dest[destIdx] = (int) decodeLong(type, buffer, idx, len);
+        return len;
     }
 
-    private static int decodeLong(int elementLen, LongType longType, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        long signed = getPackedLong(buffer, idx, elementLen);
-        dest[destIdx] = longType.unsigned ? new Uint(longType.getBitLength()).toUnsignedLong(signed) : signed;
-        return elementLen;
+    private static int insertLong(UnitType<? extends Number> type, byte[] buffer, int idx, int len, Object[] dest, int destIdx) {
+        dest[destIdx] = decodeLong(type, buffer, idx, len);
+        return len;
     }
 
-    private static int decodeBigInteger(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx, BigIntegerType type) {
+    private static int insertBigInteger(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx, BigIntegerType type) {
         if(type.unsigned) {
             byte[] copy = new byte[1 + elementLen];
             System.arraycopy(buffer, idx, copy, 1, elementLen);
@@ -166,7 +164,7 @@ public final class PackedDecoder {
         return elementLen;
     }
 
-    private static int decodeBigDecimal(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx, BigDecimalType type) {
+    private static int insertBigDecimal(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx, BigDecimalType type) {
         BigInteger unscaled;
         if(type.unsigned) {
             byte[] copy = new byte[1 + elementLen];
@@ -180,7 +178,7 @@ public final class PackedDecoder {
         return elementLen;
     }
 
-    private static int decodeArray(ArrayType<? extends ABIType<?>, ?> arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) {
+    private static int insertArray(ArrayType<? extends ABIType<?>, ?> arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) {
         final ABIType<?> elementType = arrayType.elementType;
         final int elementByteLen = elementType.byteLengthPacked(null);
         final int arrayLen;
@@ -223,23 +221,27 @@ public final class PackedDecoder {
     }
 
     private static int[] decodeIntArray(IntType intType, int elementLen, int arrayLen, byte[] buffer, int idx) {
+        long[] longs = decodeLongArray(intType, elementLen, arrayLen, buffer, idx);
         int[] ints = new int[arrayLen];
-        Uint uint = new Uint(intType.bitLength);
-        for (int i = 0; i < arrayLen; i++) {
-            int signed = getPackedInt(buffer, idx, elementLen);
-            ints[i] = intType.unsigned ? (int) uint.toUnsignedLong(signed) : signed;
-            idx += elementLen;
+        for (int i = 0; i < longs.length; i++) {
+            ints[i] = (int) longs[i];
         }
         return ints;
     }
 
-    private static long[] decodeLongArray(LongType longType, int elementLen, int arrayLen, byte[] buffer, int idx) {
+    private static long[] decodeLongArray(UnitType<? extends Number> type, int elementLen, int arrayLen, byte[] buffer, int idx) {
         long[] longs = new long[arrayLen];
-        Uint uint = new Uint(longType.bitLength);
-        for (int i = 0; i < arrayLen; i++) {
-            long signed = getPackedLong(buffer, idx, elementLen);
-            longs[i] = longType.unsigned ? uint.toUnsignedLong(signed) : signed;
-            idx += elementLen;
+        if(type.unsigned) {
+            Uint uint = new Uint(type.bitLength);
+            for (int i = 0; i < arrayLen; i++) {
+                longs[i] = decodeUnsignedLong(uint, buffer, idx, elementLen);
+                idx += elementLen;
+            }
+        } else {
+            for (int i = 0; i < arrayLen; i++) {
+                longs[i] = decodeSignedLong(buffer, idx, elementLen);
+                idx += elementLen;
+            }
         }
         return longs;
     }
@@ -247,7 +249,7 @@ public final class PackedDecoder {
     private static BigInteger[] decodeBigIntegerArray(int elementLen, int arrayLen, byte[] buffer, int idx, BigIntegerType elementType) {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            idx += decodeBigInteger(elementLen, buffer, idx, bigInts, i, elementType);
+            idx += insertBigInteger(elementLen, buffer, idx, bigInts, i, elementType);
         }
         return bigInts;
     }
@@ -255,7 +257,7 @@ public final class PackedDecoder {
     private static BigDecimal[] decodeBigDecimalArray(int elementLen, int arrayLen, byte[] buffer, int idx, BigDecimalType elementType) {
         BigDecimal[] bigDecimals = new BigDecimal[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            idx += decodeBigDecimal(elementLen, buffer, idx, bigDecimals, i, elementType);
+            idx += insertBigDecimal(elementLen, buffer, idx, bigDecimals, i, elementType);
         }
         return bigDecimals;
     }
@@ -270,55 +272,23 @@ public final class PackedDecoder {
         return objects;
     }
 
-    static int getPackedInt(byte[] buffer, int i, int len) {
-        int shiftAmount = 0;
-        int val = 0;
-        byte leftmost;
-        switch (len) { /* cases 4 through 1 fall through */
-        case 4: val  =  buffer[i+3] & 0xFF;                 shiftAmount  = Byte.SIZE;
-        case 3: val |= (buffer[i+2] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 2: val |= (buffer[i+1] & 0xFF) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 1: val |= ((leftmost = buffer[i]) & 0xFF) << shiftAmount; break;
-        default: throw new IllegalArgumentException("len out of range: " + len);
-        }
-        if(leftmost < 0) { // if negative
-            // sign extend
-            switch (len) {
-            case 1: return val | 0xFFFFFF00;
-            case 2: return val | 0xFFFF0000;
-            case 3: return val | 0xFF000000;
-            }
-        }
-        return val;
+    private static long decodeLong(UnitType<? extends Number> type, byte[] buffer, int idx, int len) {
+        return type.unsigned
+                ? decodeUnsignedLong(new Uint(type.bitLength), buffer, idx, len)
+                : decodeSignedLong(buffer, idx, len);
     }
 
-    static long getPackedLong(final byte[] buffer, final int i, final int len) {
-        int shiftAmount = 0;
-        long val = 0L;
-        byte leftmost;
-        switch (len) { /* cases 8 through 1 fall through */
-        case 8: val  =  buffer[i+7] & 0xFFL;                 shiftAmount  = Byte.SIZE;
-        case 7: val |= (buffer[i+6] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 6: val |= (buffer[i+5] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 5: val |= (buffer[i+4] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 4: val |= (buffer[i+3] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 3: val |= (buffer[i+2] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 2: val |= (buffer[i+1] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-        case 1: val |= ((leftmost = buffer[i]) & 0xFFL) << shiftAmount; break;
-        default: throw new IllegalArgumentException("len out of range: " + len);
-        }
-        if(leftmost < 0) { // if negative
-            // sign extend
-            switch (len) { /* cases fall through */
-            case 1: return val | 0xFFFFFFFFFFFFFF00L;
-            case 2: return val | 0xFFFFFFFFFFFF0000L;
-            case 3: return val | 0xFFFFFFFFFF000000L;
-            case 4: return val | 0xFFFFFFFF00000000L;
-            case 5: return val | 0xFFFFFF0000000000L;
-            case 6: return val | 0xFFFF000000000000L;
-            case 7: return val | 0xFF00000000000000L;
-            }
-        }
-        return val;
+    private static long decodeUnsignedLong(Uint uint, byte[] buffer, int idx, int len) {
+        long signed = decodeBigInteger(buffer, idx, len).longValue();
+        return uint.toUnsignedLong(signed);
+    }
+
+    private static long decodeSignedLong(byte[] buffer, int idx, int len) {
+        return decodeBigInteger(buffer, idx, len).longValue();
+    }
+
+    static BigInteger decodeBigInteger(byte[] buffer, int i, int len) {
+//        return new BigInteger(buffer, i, len); // Java 9+
+        return new BigInteger(Arrays.copyOfRange(buffer, i, i + len));
     }
 }
