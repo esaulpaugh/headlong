@@ -141,7 +141,6 @@ public class MonteCarloTestCase {
         this.rawSignature = sig;
         this.function = new Function(sig, null, md);
         this.argsTuple = generateTuple(function.getParamTypes(), rng);
-        function.getParamTypes().validate(argsTuple);
     }
 
     JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) {
@@ -331,10 +330,10 @@ public class MonteCarloTestCase {
         case 8: break;
         default: throw new Error();
         }
-        val = unsigned || r.nextBoolean() ? val : val < 0 ? -(val + 1) : (-val - 1);
         if(!unsigned) {
+            val = r.nextBoolean() ? val : val < 0 ? -(val + 1) : (-val - 1);
             int valBitLen = val < 0 ? BizarroIntegers.bitLen(val) : Integers.bitLen(val);
-            if(valBitLen >= bitLen) {
+            if (valBitLen >= bitLen) {
                 val >>= 1;
             }
         }
@@ -400,16 +399,22 @@ public class MonteCarloTestCase {
 
     private static int[] generateIntArray(final int len, IntType intType, Random r) {
         int[] ints = new int[len];
+        final int bitLen = intType.bitLength;
+        final int bound = bitLen / Byte.SIZE;
+        final boolean unsigned = intType.unsigned;
         for (int i = 0; i < len; i++) {
-            ints[i] = (int) generateLong(r, intType);
+            ints[i] = (int) generateLong(r, bitLen, 1 + r.nextInt(bound), unsigned);
         }
         return ints;
     }
 
     private static long[] generateLongArray(final int len, LongType longType, Random r) {
         long[] longs = new long[len];
+        final int bitLen = longType.bitLength;
+        final int bound = bitLen / Byte.SIZE;
+        final boolean unsigned = longType.unsigned;
         for (int i = 0; i < len; i++) {
-            longs[i] = generateLong(r, longType);
+            longs[i] = generateLong(r, bitLen, 1 + r.nextInt(bound), unsigned);
         }
         return longs;
     }
