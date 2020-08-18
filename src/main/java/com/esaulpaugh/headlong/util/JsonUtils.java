@@ -50,32 +50,36 @@ public final class JsonUtils {
 
     public static String getString(JsonObject object, String key, String defaultVal) {
         JsonElement element = object.get(key);
-        if(element == null || element.isJsonNull()) {
+        if(isNull(element)) {
             return defaultVal;
         }
-        if(!element.isJsonPrimitive() || !((JsonPrimitive) element).isString()) {
-            throw new IllegalArgumentException(key + " is not a string");
+        if(element.isJsonPrimitive() && ((JsonPrimitive) element).isString()) {
+            return element.getAsString();
         }
-        return element.getAsString();
+        throw new IllegalArgumentException(key + " is not a string");
     }
 
     public static boolean getBoolean(JsonObject object, String key, Boolean defaultVal) {
         JsonElement element = object.get(key);
-        if(element == null || element.isJsonNull()) {
+        if(isNull(element)) {
             return defaultVal;
         }
-        if(!element.isJsonPrimitive() || !((JsonPrimitive) element).isBoolean()) {
-            throw new IllegalArgumentException(key + " is not a boolean");
+        if(element.isJsonPrimitive() && ((JsonPrimitive) element).isBoolean()) {
+            return element.getAsBoolean();
         }
-        return element.getAsBoolean();
+        throw new IllegalArgumentException(key + " is not a boolean");
     }
 
     public static JsonArray getArray(JsonObject object, String key, JsonArray defaultVal) {
         JsonElement element = object.get(key);
-        if (element == null || element.isJsonNull()) {
+        if(isNull(element)) {
             return defaultVal;
         }
         return element.getAsJsonArray();
+    }
+
+    private static boolean isNull(JsonElement element) {
+        return element == null || element.isJsonNull();
     }
 
     public static String toPrettyPrint(JsonElement element) {
