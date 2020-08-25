@@ -24,8 +24,6 @@ import java.math.BigInteger;
  */
 public final class Uint {
 
-    private static final BigInteger TWO = BigInteger.valueOf(2L);
-
     private static final long ZERO = 0L;
 
     public final int numBits;
@@ -40,7 +38,7 @@ public final class Uint {
             throw new IllegalArgumentException("numBits must be non-negative");
         }
         this.numBits = numBits;
-        this.range = TWO.shiftLeft(numBits - 1); // TWO.pow(numBits)
+        this.range = BigInteger.ONE.shiftLeft(numBits); // BigInteger.ONE.pow(numBits)
         long rangeLong, halfRangeLong, maskLong;
         try {
             rangeLong = range.longValueExact();
