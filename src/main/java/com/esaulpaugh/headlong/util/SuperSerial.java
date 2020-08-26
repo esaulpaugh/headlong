@@ -143,22 +143,22 @@ public final class SuperSerial {
         }
     }
 
-    private static Object deserializePrimitive(UnitType<?> ut, RLPItem item, boolean isInt) {
+    private static Number deserializePrimitive(UnitType<?> ut, RLPItem item, boolean isInt) {
         if(ut.isUnsigned() || (item.dataLength * Byte.SIZE) < ut.getBitLength()) {
             return isInt
-                    ? (Object) item.asInt(false)
-                    : (Object) item.asLong(false);
+                    ? (Number) item.asInt(false)
+                    : (Number) item.asLong(false);
         }
         final byte[] data = item.data();
         final int len = data.length;
         if(len > 0 && (data[0] & SIGN_BIT_MASK) != 0) {
             return isInt
-                    ? (Object) BizarroIntegers.getInt(data, 0, len)
-                    : (Object) BizarroIntegers.getLong(data, 0, len);
+                    ? (Number) BizarroIntegers.getInt(data, 0, len)
+                    : (Number) BizarroIntegers.getLong(data, 0, len);
         }
         return isInt
-                ? (Object) Integers.getInt(data, 0, len, false)
-                : (Object) Integers.getLong(data, 0, len, false);
+                ? (Number) Integers.getInt(data, 0, len, false)
+                : (Number) Integers.getLong(data, 0, len, false);
     }
 
     private static BigInteger deserializeBigInteger(UnitType<?> ut, RLPItem item) {
