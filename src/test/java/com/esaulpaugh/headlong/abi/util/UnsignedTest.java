@@ -30,10 +30,23 @@ public class UnsignedTest {
 
     @Test
     public void testExceptions() throws Throwable {
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "numBits must be non-negative", () -> new Uint(-1));
+        TestUtils.assertThrown(IllegalArgumentException.class, "numBits must be non-negative", () -> new Uint(Integer.MIN_VALUE));
+
+        Uint uint0 = new Uint(0);
+        assertEquals(-1L, uint0.toSignedLong(0L));
+        TestUtils.assertThrown(IllegalArgumentException.class, "unsigned has too many bits: 1 > 0", () -> uint0.toSignedLong(1L));
+
         Uint uint64 = new Uint(64);
         uint64.toSignedLong(Long.MAX_VALUE);
         uint64.toUnsigned(Long.MAX_VALUE);
 
+        TestUtils.assertThrown(
+                IllegalArgumentException.class,
+                "unsigned value is negative: -1",
+                () -> uint64.toSignedLong(-1L)
+        );
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
                 "unsigned value is negative: -9223372036854775808",
