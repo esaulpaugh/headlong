@@ -24,6 +24,8 @@ import java.math.BigInteger;
  */
 public final class Uint {
 
+    private static final int MAX_BIT_LEN = 4096;
+
     private static final long ZERO = 0L;
 
     public final int numBits;
@@ -36,6 +38,9 @@ public final class Uint {
     public Uint(int numBits) {
         if(numBits < 0) {
             throw new IllegalArgumentException("numBits must be non-negative");
+        }
+        if(numBits > MAX_BIT_LEN) {
+            throw new IllegalArgumentException("numBits exceeds limit: " + numBits + " > " + MAX_BIT_LEN);
         }
         this.numBits = numBits;
         this.range = BigInteger.ONE.shiftLeft(numBits); // BigInteger.ONE.pow(numBits)
