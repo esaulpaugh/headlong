@@ -146,18 +146,18 @@ public final class SuperSerial {
     private static Number deserializePrimitive(UnitType<?> ut, RLPItem item, boolean isInt) {
         if(ut.isUnsigned() || (item.dataLength * Byte.SIZE) < ut.getBitLength()) {
             return isInt
-                    ? (Number) item.asInt(false)
+                    ? item.asInt(false)
                     : (Number) item.asLong(false);
         }
         final byte[] data = item.data();
         final int len = data.length;
         if(len > 0 && (data[0] & SIGN_BIT_MASK) != 0) {
             return isInt
-                    ? (Number) BizarroIntegers.getInt(data, 0, len)
+                    ? BizarroIntegers.getInt(data, 0, len)
                     : (Number) BizarroIntegers.getLong(data, 0, len);
         }
         return isInt
-                ? (Number) Integers.getInt(data, 0, len, false)
+                ? Integers.getInt(data, 0, len, false)
                 : (Number) Integers.getLong(data, 0, len, false);
     }
 
