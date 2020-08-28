@@ -11,7 +11,7 @@ import java.security.MessageDigest;
  * Created: Jun 23, 2016
  *
  * Copyright 2016 Joseph Robert Melsha
- * Changed by Evan Saulpaugh
+ * Modifications by Evan Saulpaugh, licensed under the same terms as headlong
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
