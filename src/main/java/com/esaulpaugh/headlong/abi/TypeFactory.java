@@ -58,7 +58,7 @@ final class TypeFactory {
         mapBigInteger(lambdaMap, "address", ADDRESS_BIT_LEN, true);
         mapByteArray(lambdaMap, "function", FUNCTION_BYTE_LEN);
         mapByteArray(lambdaMap, "bytes", ArrayType.DYNAMIC_LENGTH);
-        lambdaMap.put("string", () -> new ArrayType<>("string", ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, ArrayType.DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME));
+        lambdaMap.put("string", () -> new ArrayType<ByteType, String>("string", ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, ArrayType.DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME));
 
         lambdaMap.put("fixed128x18", () -> new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
         lambdaMap.put("ufixed128x18", () -> new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
@@ -84,7 +84,7 @@ final class TypeFactory {
     }
 
     private static void mapByteArray(Map<String, Supplier<ABIType<?>>> map, String type, int arrayLen) {
-        map.put(type, () -> new ArrayType<>(type, ArrayType.BYTE_ARRAY_CLASS, arrayLen == ArrayType.DYNAMIC_LENGTH, ByteType.UNSIGNED, arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME));
+        map.put(type, () -> new ArrayType<ByteType, byte[]>(type, ArrayType.BYTE_ARRAY_CLASS, arrayLen == ArrayType.DYNAMIC_LENGTH, ByteType.UNSIGNED, arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME));
     }
 
     static ABIType<?> create(String rawType, String name) {
