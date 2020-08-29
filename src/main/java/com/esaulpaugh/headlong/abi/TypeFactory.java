@@ -122,7 +122,7 @@ final class TypeFactory {
         } catch (StringIndexOutOfBoundsException sioobe) { // e.g. type equals "" or "82]" or "[]" or "[1]"
             /* fall through */
         }
-        throw new IllegalArgumentException("unrecognized type: " + rawType);
+        throw new IllegalArgumentException("unrecognized type: \"" + rawType + '"');
     }
 
     private static int parseLen(String rawType, int startLen, int lastCharIndex) {
@@ -207,7 +207,7 @@ final class TypeFactory {
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);
         }
-        throw new IllegalArgumentException("unrecognized type: " + rawTypeStr);
+        return null;
     }
 
     private static int findSubtupleEnd(String parentTypeString, int i) {

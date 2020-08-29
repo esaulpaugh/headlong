@@ -185,26 +185,26 @@ public class EncodeTest {
     public void testIllegalSignatures() throws Throwable {
 
         assertThrown(ILLEGAL, "unrecognized type: ", () -> TupleType.parse(""));
-        assertThrown(ILLEGAL, "unrecognized type: (", () -> TupleType.parse("("));
-        assertThrown(ILLEGAL, "unrecognized type: )", () -> TupleType.parse(")"));
+        assertThrown(ILLEGAL, "unrecognized type: \"(\"", () -> TupleType.parse("("));
+        assertThrown(ILLEGAL, "unrecognized type: \")\"", () -> TupleType.parse(")"));
 
         assertThrown(ILLEGAL, "params start not found", () -> Function.parse(""));
-        assertThrown(ILLEGAL, "unrecognized type: (", () -> Function.parse("("));
+        assertThrown(ILLEGAL, "unrecognized type: \"(\"", () -> Function.parse("("));
         assertThrown(ILLEGAL, "params start not found", () -> Function.parse(")"));
 
-        assertThrown(ILLEGAL, "unrecognized type: aaaaaa", () -> TupleType.parse("aaaaaa"));
+        assertThrown(ILLEGAL, "unrecognized type: \"aaaaaa\"", () -> TupleType.parse("aaaaaa"));
 
-        assertThrown(ILLEGAL, "unrecognized type: ([", () -> Function.parse("(["));
+        assertThrown(ILLEGAL, "unrecognized type: \"([\"", () -> Function.parse("(["));
 
-        assertThrown(ILLEGAL, "unrecognized type: (int", () -> Function.parse("(int"));
+        assertThrown(ILLEGAL, "unrecognized type: \"(int\"", () -> Function.parse("(int"));
 
-        assertThrown(ILLEGAL, "unrecognized type: (bool[],", () -> Function.parse("(bool[],"));
+        assertThrown(ILLEGAL, "unrecognized type: \"(bool[],\"", () -> Function.parse("(bool[],"));
 
-        assertThrown(ILLEGAL, "unrecognized type: (()", () -> Function.parse("(()"));
+        assertThrown(ILLEGAL, "unrecognized type: \"(()\"", () -> Function.parse("(()"));
 
-        assertThrown(ILLEGAL, "unrecognized type: (())...", () -> Function.parse("(())..."));
+        assertThrown(ILLEGAL, "unrecognized type: \"(())...\"", () -> Function.parse("(())..."));
 
-        assertThrown(ILLEGAL, "unrecognized type: ((((()))", () -> Function.parse("((((()))"));
+        assertThrown(ILLEGAL, "unrecognized type: \"((((()))\"", () -> Function.parse("((((()))"));
 
         assertThrown(ILLEGAL, "illegal signature termination", () -> Function.parse("f()[]"));
     }
@@ -226,7 +226,7 @@ public class EncodeTest {
 
         assertThrown(ILLEGAL, "illegal char 0x2a6 '\u02a6' @ index 2", () -> new Function("ba\u02a6z(uint32,bool)"));
 
-        assertThrown(ILLEGAL, "@ index 1, @ index 0, unrecognized type: bool\u02a6", () -> new Function("baz(int32,(bool\u02a6))"));
+        assertThrown(ILLEGAL, "@ index 1, @ index 0, unrecognized type: \"bool\u02a6\"", () -> new Function("baz(int32,(bool\u02a6))"));
     }
 
     @Test
