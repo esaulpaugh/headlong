@@ -47,7 +47,7 @@ public class EncodeTest {
     @Test
     public void fuzzSignatures() throws InterruptedException {
 
-        final char[] alphabet = "(),abcdefgilmnorstuxy0123456789[]".toCharArray(); // "()uint8,[]".toCharArray(); // new char[128];
+        final char[] alphabet = "(),abcdefgilmnorstuxy8[]".toCharArray(); // "()uint8,[]".toCharArray(); // new char[128];
         final int alphabetLen = alphabet.length;
         if (alphabetLen == 128) {
             for (int i = 0; i < alphabetLen; i++) {

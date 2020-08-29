@@ -121,7 +121,9 @@ public class RLPDecoderTest {
                 invalid += task.invalid;
             }
         }
-        System.out.println(valid + " / " + (valid + invalid) + " (" + invalid + " invalid)");
+        String result = valid + " / " + (valid + invalid) + " (" + invalid + " invalid)";
+        System.out.println(result);
+        assertEquals("2273312768 / 4294967296 (2021654528 invalid)", result);
     }
 
     private static class ExhaustiveFuzzTask implements Runnable {
