@@ -91,7 +91,8 @@ public class ABIJsonCasesTest2 {
         private static String buildCallComparison(byte[] expected, byte[] actual) {
 
             StringBuilder sb = new StringBuilder("ID\t")
-                    .append(encode(Arrays.copyOfRange(expected, 0, Function.SELECTOR_LEN), HEX)).append(' ')
+                    .append(encode(Arrays.copyOfRange(expected, 0, Function.SELECTOR_LEN), HEX))
+                    .append("                                                         ")
                     .append(encode(Arrays.copyOfRange(actual, 0, Function.SELECTOR_LEN), HEX))
                     .append('\n');
             int idx = Function.SELECTOR_LEN;
