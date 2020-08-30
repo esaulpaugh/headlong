@@ -28,8 +28,6 @@ import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
 /** Creates the appropriate {@link ABIType} object for a given type string. */
 final class TypeFactory {
 
-    private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
-
     private static final int ADDRESS_BIT_LEN = 160;
 
     private static final int DECIMAL_BIT_LEN = 128;
@@ -113,7 +111,7 @@ final class TypeFactory {
                 final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
                 final Class<?> clazz = elementType.arrayClass();
                 final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType, arrayOpenIndex + 1, lastCharIdx);
-                return new ArrayType<>(type, clazz, elementType, length, Class.forName('[' + clazz.getName(), false, CLASS_LOADER));
+                return new ArrayType<>(type, clazz, elementType, length);
             }
             if(baseType != null || (baseType = resolveBaseType(rawType)) != null) {
                 return baseType;

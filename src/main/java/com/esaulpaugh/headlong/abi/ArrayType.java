@@ -37,6 +37,8 @@ import static com.esaulpaugh.headlong.util.Strings.UTF_8;
  */
 public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
+    private static final ClassLoader CLASS_LOADER = ArrayType.class.getClassLoader();
+
     static final Class<String> STRING_CLASS = String.class;
     static final Class<String[]> STRING_ARRAY_CLASS = String[].class;
 
@@ -50,8 +52,12 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private final Class<?> arrayClass;
 
+    ArrayType(String canonicalType, Class<J> clazz, E elementType, int length) throws ClassNotFoundException {
+        this(canonicalType, clazz, elementType, length, Class.forName('[' + clazz.getName(), false, CLASS_LOADER));
+    }
+
     ArrayType(String canonicalType, Class<J> clazz, E elementType, int length, Class<?> arrayClass) {
-        super(canonicalType, clazz, length == DYNAMIC_LENGTH || elementType.dynamic);
+        super(canonicalType, clazz, elementType.dynamic || length == DYNAMIC_LENGTH);
         this.elementType = elementType;
         this.length = length;
         this.arrayClass = arrayClass;
