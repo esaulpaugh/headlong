@@ -21,8 +21,6 @@ import java.nio.ByteBuffer;
 /** Unsigned 0 or 1. */
 public final class BooleanType extends UnitType<Boolean> {
 
-    private static final String ARRAY_CLASS_NAME = boolean[].class.getName();
-
     static final byte[] BOOLEAN_FALSE = new byte[UNIT_LENGTH_BYTES];
     static final byte[] BOOLEAN_TRUE = new byte[UNIT_LENGTH_BYTES];
 
@@ -35,8 +33,8 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    String arrayClassName() {
-        return ARRAY_CLASS_NAME;
+    Class<?> arrayClass() {
+        return boolean[].class;
     }
 
     @Override

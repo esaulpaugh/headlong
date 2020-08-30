@@ -58,7 +58,7 @@ final class TypeFactory {
         mapBigInteger(lambdaMap, "address", ADDRESS_BIT_LEN, true);
         mapByteArray(lambdaMap, "function", FUNCTION_BYTE_LEN);
         mapByteArray(lambdaMap, "bytes", ArrayType.DYNAMIC_LENGTH);
-        lambdaMap.put("string", () -> new ArrayType<ByteType, String>("string", ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, ArrayType.DYNAMIC_LENGTH, ArrayType.STRING_ARRAY_CLASS_NAME));
+        lambdaMap.put("string", () -> new ArrayType<ByteType, String>("string", ArrayType.STRING_CLASS, true, ByteType.UNSIGNED, ArrayType.DYNAMIC_LENGTH, String[].class));
 
         lambdaMap.put("fixed128x18", () -> new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
         lambdaMap.put("ufixed128x18", () -> new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
@@ -84,7 +84,7 @@ final class TypeFactory {
     }
 
     private static void mapByteArray(Map<String, Supplier<ABIType<?>>> map, String type, int arrayLen) {
-        map.put(type, () -> new ArrayType<ByteType, byte[]>(type, ArrayType.BYTE_ARRAY_CLASS, arrayLen == ArrayType.DYNAMIC_LENGTH, ByteType.UNSIGNED, arrayLen, ArrayType.BYTE_ARRAY_ARRAY_CLASS_NAME));
+        map.put(type, () -> new ArrayType<ByteType, byte[]>(type, byte[].class, arrayLen == ArrayType.DYNAMIC_LENGTH, ByteType.UNSIGNED, arrayLen, byte[][].class));
     }
 
     static ABIType<?> create(String rawType, String name) {
@@ -99,20 +99,18 @@ final class TypeFactory {
 
     private static ABIType<?> buildType(final String rawType, ABIType<?> baseType) {
         try {
-            final int lastCharIndex = rawType.length() - 1;
-            if (rawType.charAt(lastCharIndex) == ']') { // array
+            final int lastCharIdx = rawType.length() - 1;
+            if (rawType.charAt(lastCharIdx) == ']') { // array
 
-                final int secondToLastCharIndex = lastCharIndex - 1;
-                final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIndex);
+                final int secondToLastCharIdx = lastCharIdx - 1;
+                final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIdx);
 
                 final ABIType<?> elementType = buildType(rawType.substring(0, arrayOpenIndex), baseType);
                 final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
-                final int length = arrayOpenIndex == secondToLastCharIndex ? ArrayType.DYNAMIC_LENGTH : parseLen(rawType, arrayOpenIndex + 1, lastCharIndex);
+                final Class<?> clazz = elementType.arrayClass();
+                final int length = arrayOpenIndex == secondToLastCharIdx ? ArrayType.DYNAMIC_LENGTH : parseLen(rawType, arrayOpenIndex + 1, lastCharIdx);
                 final boolean dynamic = length == ArrayType.DYNAMIC_LENGTH || elementType.dynamic;
-                final String arrayClassName = elementType.arrayClassName();
-                @SuppressWarnings("unchecked")
-                final Class<Object> arrayClass = (Class<Object>) Class.forName(arrayClassName, false, CLASS_LOADER);
-                return new ArrayType<ABIType<?>, Object>(type, arrayClass, dynamic, elementType, length, '[' + arrayClassName);
+                return new ArrayType<>(type, clazz, dynamic, elementType, length, Class.forName('[' + clazz.getName(), false, CLASS_LOADER));
             }
             if(baseType != null || (baseType = resolveBaseType(rawType)) != null) {
                 return baseType;

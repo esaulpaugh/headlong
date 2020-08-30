@@ -19,15 +19,13 @@ import java.nio.ByteBuffer;
 
 public final class LongType extends UnitType<Long> {
 
-    private static final String ARRAY_CLASS_NAME = long[].class.getName();
-
     LongType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, Long.class, bitLength, unsigned);
     }
 
     @Override
-    String arrayClassName() {
-        return ARRAY_CLASS_NAME;
+    Class<?> arrayClass() {
+        return long[].class;
     }
 
     @Override

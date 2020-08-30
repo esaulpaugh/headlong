@@ -19,15 +19,13 @@ import java.nio.ByteBuffer;
 
 public final class IntType extends UnitType<Integer> {
 
-    private static final String ARRAY_CLASS_NAME = int[].class.getName();
-
     IntType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, Integer.class, bitLength, unsigned);
     }
 
     @Override
-    String arrayClassName() {
-        return ARRAY_CLASS_NAME;
+    Class<?> arrayClass() {
+        return int[].class;
     }
 
     @Override

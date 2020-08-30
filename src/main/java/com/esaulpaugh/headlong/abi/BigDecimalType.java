@@ -22,8 +22,6 @@ import java.nio.ByteBuffer;
 /** For decimal types such as fixed, ufixed, and decimal. */
 public final class BigDecimalType extends UnitType<BigDecimal> {
 
-    private static final String ARRAY_CLASS_NAME = BigDecimal[].class.getName();
-
     static final String ERR_SCALE_MISMATCH = "big decimal scale mismatch: actual != expected: %d != %d";
 
     final int scale;
@@ -38,8 +36,8 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    String arrayClassName() {
-        return ARRAY_CLASS_NAME;
+    Class<?> arrayClass() {
+        return BigDecimal[].class;
     }
 
     @Override

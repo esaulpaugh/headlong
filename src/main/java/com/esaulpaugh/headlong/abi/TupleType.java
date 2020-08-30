@@ -31,8 +31,6 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 /** @see ABIType */
 public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
-    private static final String ARRAY_CLASS_NAME = Tuple[].class.getName();
-
     private static final String EMPTY_TUPLE_STRING = "()";
 
     public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_TYPE_ARRAY);
@@ -67,8 +65,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    String arrayClassName() {
-        return ARRAY_CLASS_NAME;
+    Class<?> arrayClass() {
+        return Tuple[].class;
     }
 
     @Override

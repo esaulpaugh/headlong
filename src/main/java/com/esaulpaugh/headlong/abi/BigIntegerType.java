@@ -21,15 +21,13 @@ import java.nio.ByteBuffer;
 /** Represents integer types from uint64 to int256. */
 public final class BigIntegerType extends UnitType<BigInteger> {
 
-    private static final String ARRAY_CLASS_NAME = BigInteger[].class.getName();
-
     BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, BigInteger.class, bitLength, unsigned);
     }
 
     @Override
-    String arrayClassName() {
-        return ARRAY_CLASS_NAME;
+    Class<?> arrayClass() {
+        return BigInteger[].class;
     }
 
     @Override

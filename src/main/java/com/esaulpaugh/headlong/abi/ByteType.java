@@ -20,8 +20,6 @@ import java.nio.ByteBuffer;
 /** Currently used only as the element type for some {@link ArrayType}s. */
 public final class ByteType extends UnitType<Byte> {
 
-    private static final String ARRAY_CLASS_NAME = byte[].class.getName();
-
 //    static final ByteType SIGNED = new ByteType("int8", false);
     static final ByteType UNSIGNED = new ByteType("uint8", true);
 
@@ -30,8 +28,8 @@ public final class ByteType extends UnitType<Byte> {
     }
 
     @Override
-    String arrayClassName() {
-        return ARRAY_CLASS_NAME;
+    Class<?> arrayClass() {
+        return byte[].class;
     }
 
     @Override

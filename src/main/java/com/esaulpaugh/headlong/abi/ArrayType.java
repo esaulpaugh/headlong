@@ -37,11 +37,7 @@ import static com.esaulpaugh.headlong.util.Strings.UTF_8;
  */
 public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
-    static final Class<byte[]> BYTE_ARRAY_CLASS = byte[].class;
-    static final String BYTE_ARRAY_ARRAY_CLASS_NAME = byte[][].class.getName();
-
     static final Class<String> STRING_CLASS = String.class;
-    static final String STRING_ARRAY_CLASS_NAME = String[].class.getName();
 
     private static final int ARRAY_LENGTH_BYTE_LEN = UNIT_LENGTH_BYTES;
 
@@ -51,13 +47,13 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     final int length;
     private final boolean isString;
 
-    private final String arrayClassName;
+    private final Class<?> arrayClass;
 
-    ArrayType(String canonicalType, Class<J> clazz, boolean dynamic, E elementType, int length, String arrayClassName) {
+    ArrayType(String canonicalType, Class<J> clazz, boolean dynamic, E elementType, int length, Class<?> arrayClass) {
         super(canonicalType, clazz, dynamic);
         this.elementType = elementType;
         this.length = length;
-        this.arrayClassName = arrayClassName;
+        this.arrayClass = arrayClass;
         this.isString = clazz == STRING_CLASS;
     }
 
@@ -74,8 +70,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    String arrayClassName() {
-        return arrayClassName;
+    Class<?> arrayClass() {
+        return arrayClass;
     }
 
     @Override
