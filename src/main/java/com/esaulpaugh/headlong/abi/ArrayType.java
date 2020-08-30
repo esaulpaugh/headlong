@@ -46,22 +46,27 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     static final int DYNAMIC_LENGTH = -1;
 
-    final E elementType;
-    final int length;
     private final boolean isString;
+    final E elementType;
+    private final int length;
+    private final Supplier<Class<?>> arrayClass;
 
-    private final Class<?> arrayClass;
-
-    ArrayType(String canonicalType, Class<J> clazz, E elementType, int length) throws ClassNotFoundException {
-        this(canonicalType, clazz, elementType, length, Class.forName('[' + clazz.getName(), false, CLASS_LOADER));
+    ArrayType(String canonicalType, Class<J> clazz, E elementType, int length) {
+        this(canonicalType, clazz, elementType, length, () -> {
+            try {
+                return Class.forName('[' + clazz.getName(), false, CLASS_LOADER);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
-    ArrayType(String canonicalType, Class<J> clazz, E elementType, int length, Class<?> arrayClass) {
+    ArrayType(String canonicalType, Class<J> clazz, E elementType, int length, Supplier<Class<?>> arrayClass) {
         super(canonicalType, clazz, elementType.dynamic || length == DYNAMIC_LENGTH);
+        this.isString = clazz == STRING_CLASS;
         this.elementType = elementType;
         this.length = length;
         this.arrayClass = arrayClass;
-        this.isString = clazz == STRING_CLASS;
     }
 
     public E getElementType() {
@@ -78,7 +83,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     @Override
     Class<?> arrayClass() {
-        return arrayClass;
+        return arrayClass.get();
     }
 
     @Override

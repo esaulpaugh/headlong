@@ -68,7 +68,7 @@ public final class PackedDecoder {
         int numDynamic = 0;
         do {
             final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<? extends ABIType<?>, ?>) type;
-            if(DYNAMIC_LENGTH == arrayType.length) {
+            if(DYNAMIC_LENGTH == arrayType.getLength()) {
                 numDynamic++;
             }
             type = arrayType.elementType;
@@ -96,7 +96,7 @@ public final class PackedDecoder {
             final int typeCode = type.typeCode();
             if(TYPE_CODE_ARRAY == typeCode) {
                 final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<? extends ABIType<?>, ?>) type;
-                end -= arrayType.elementType.byteLengthPacked(null) * arrayType.length;
+                end -= arrayType.elementType.byteLengthPacked(null) * arrayType.getLength();
                 insertArray(arrayType, buffer, end, end, elements, i);
             } else if(TYPE_CODE_TUPLE == typeCode) {
                 TupleType inner = (TupleType) type;
@@ -182,13 +182,14 @@ public final class PackedDecoder {
         final ABIType<?> elementType = arrayType.elementType;
         final int elementByteLen = elementType.byteLengthPacked(null);
         final int arrayLen;
-        if(arrayType.length == DYNAMIC_LENGTH) {
+        final int typeLen = arrayType.getLength();
+        if(DYNAMIC_LENGTH == typeLen) {
             if (elementByteLen == 0) {
                 throw new IllegalArgumentException("can't decode dynamic number of zero-length elements");
             }
             arrayLen = (end - idx) / elementByteLen;
         } else {
-            arrayLen = arrayType.length;
+            arrayLen = typeLen;
         }
         final Object array;
         switch (elementType.typeCode()) {

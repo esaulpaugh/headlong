@@ -360,9 +360,10 @@ public class MonteCarloTestCase {
 
     private Object generateArray(ArrayType<? extends ABIType<?>, ?> arrayType, Random r) {
         ABIType<?> elementType = arrayType.elementType;
-        final int len = arrayType.length == DYNAMIC_LENGTH
-                ? r.nextInt(maxArrayLen + 1) // 0 to max
-                : arrayType.length;
+        final int typeLen = arrayType.getLength();
+        final int len = DYNAMIC_LENGTH == typeLen
+                ? r.nextInt(maxArrayLen + 1) // [0,max]
+                : typeLen;
 
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return generateBooleanArray(len, r);

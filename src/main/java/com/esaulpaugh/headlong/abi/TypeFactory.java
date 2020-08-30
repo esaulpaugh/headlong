@@ -60,7 +60,7 @@ final class TypeFactory {
         mapBigInteger(lambdaMap, "address", ADDRESS_BIT_LEN, true);
         mapByteArray(lambdaMap, "function", FUNCTION_BYTE_LEN);
         mapByteArray(lambdaMap, "bytes", DYNAMIC_LENGTH);
-        lambdaMap.put("string", () -> new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS));
+        lambdaMap.put("string", () -> new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, () -> STRING_ARRAY_CLASS));
 
         lambdaMap.put("fixed128x18", () -> new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
         lambdaMap.put("ufixed128x18", () -> new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
@@ -86,7 +86,7 @@ final class TypeFactory {
     }
 
     private static void mapByteArray(Map<String, Supplier<ABIType<?>>> map, String type, int arrayLen) {
-        map.put(type, () -> new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class));
+        map.put(type, () -> new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, () -> byte[][].class));
     }
 
     static ABIType<?> create(String rawType, String name) {
@@ -109,15 +109,12 @@ final class TypeFactory {
 
                 final ABIType<?> elementType = buildType(rawType.substring(0, arrayOpenIndex), baseType);
                 final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
-                final Class<?> clazz = elementType.arrayClass();
                 final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType, arrayOpenIndex + 1, lastCharIdx);
-                return new ArrayType<>(type, clazz, elementType, length);
+                return new ArrayType<>(type, elementType.arrayClass(), elementType, length);
             }
             if(baseType != null || (baseType = resolveBaseType(rawType)) != null) {
                 return baseType;
             }
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (StringIndexOutOfBoundsException sioobe) { // e.g. type equals "" or "82]" or "[]" or "[1]"
             /* fall through */
         }
