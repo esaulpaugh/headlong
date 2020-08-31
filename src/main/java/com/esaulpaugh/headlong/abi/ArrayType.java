@@ -23,7 +23,7 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.util.function.Supplier;
+import java.util.function.IntConsumer;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
@@ -157,11 +157,11 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private int byteCount(Object value) {
-        return ((byte[]) decodeIfString(value)).length;
+        return decodeIfString(value).length;
     }
 
-    Object decodeIfString(Object value) {
-        return !isString ? value : Strings.decode((String) value, UTF_8);
+    byte[] decodeIfString(Object value) {
+        return !isString ? (byte[]) value : Strings.decode((String) value, UTF_8);
     }
 
     Object encodeIfString(byte[] bytes) {
@@ -169,99 +169,73 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    public int validate(final Object value) {
-        validateClass(value);
-
-        final int staticLen;
-        switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: staticLen = checkLength(((boolean[]) value).length, value) * UNIT_LENGTH_BYTES; break;
-        case TYPE_CODE_BYTE: staticLen = Integers.roundLengthUp(checkLength(byteCount(value), value), UNIT_LENGTH_BYTES); break;
-        case TYPE_CODE_INT: staticLen = validateIntArray((int[]) value); break;
-        case TYPE_CODE_LONG: staticLen = validateLongArray((long[]) value); break;
-        case TYPE_CODE_BIG_INTEGER: staticLen = validateBigIntegerArray((BigInteger[]) value); break;
-        case TYPE_CODE_BIG_DECIMAL: staticLen = validateBigDecimalArray((BigDecimal[]) value); break;
-        case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: staticLen = validateObjectArray((Object[]) value); break;
-        default: throw new Error();
-        }
+    public int validate(final Object val) {
+        validateClass(val);
+        final int staticLen = validateElements(val);
         // arrays with variable number of elements get +32 for the array length
-        return length == DYNAMIC_LENGTH
-                ? ARRAY_LENGTH_BYTE_LEN + staticLen
-                : staticLen;
+        return length != DYNAMIC_LENGTH ? staticLen : ARRAY_LENGTH_BYTE_LEN + staticLen;
     }
 
-    private int validateIntArray(final int[] arr) {
-        final IntType intType = (IntType) elementType;
-        final int len = arr.length;
+    private int validateElements(Object val) {
+        switch (elementType.typeCode()) {
+            case TYPE_CODE_BOOLEAN: return validateBooleanArray((boolean[]) val);
+            case TYPE_CODE_BYTE: return validateByteArray(val);
+            case TYPE_CODE_INT: return validateInts((int[]) val, (IntType) elementType);
+            case TYPE_CODE_LONG: return validateLongs((long[]) val, (LongType) elementType);
+            case TYPE_CODE_BIG_INTEGER: return validateBigIntegers((BigInteger[]) val, (BigIntegerType) elementType);
+            case TYPE_CODE_BIG_DECIMAL: return validateBigDecimals((BigDecimal[]) val, (BigDecimalType) elementType);
+            case TYPE_CODE_ARRAY:
+            case TYPE_CODE_TUPLE: return validateObjects((Object[]) val);
+            default: throw new Error();
+        }
+    }
+
+    private int validateBooleanArray(boolean[] arr) {
+        return checkLength(arr.length, arr) * UNIT_LENGTH_BYTES;
+    }
+
+    private int validateByteArray(Object arr) {
+        return Integers.roundLengthUp(checkLength(byteCount(arr), arr), UNIT_LENGTH_BYTES);
+    }
+
+    private int validateInts(int[] arr, IntType type) {
+        return validateUnits(arr.length, arr, (i) -> type.validatePrimitive(arr[i]));
+    }
+
+    private int validateLongs(long[] arr, LongType type) {
+        return validateUnits(arr.length, arr, (i) -> type.validatePrimitive(arr[i]));
+    }
+
+    private int validateBigIntegers(BigInteger[] arr, BigIntegerType type) {
+        return validateUnits(arr.length, arr, (i) -> type.validateBigInt(arr[i]));
+    }
+
+    private int validateBigDecimals(BigDecimal[] arr, BigDecimalType type) {
+        return validateUnits(arr.length, arr, (i) -> {
+            BigDecimal e = arr[i];
+            type.validateBigInt(e.unscaledValue());
+            if (e.scale() != type.scale) {
+                throw new IllegalArgumentException(String.format(BigDecimalType.ERR_SCALE_MISMATCH, e.scale(), type.scale));
+            }
+        });
+    }
+
+    private int validateUnits(int len, Object arr, IntConsumer elementValidator) {
         checkLength(len, arr);
         int i = 0;
         try {
             for ( ; i < len; i++) {
-                intType.validatePrimitive(arr[i]); // validate without boxing primitive
+                elementValidator.accept(i);
             }
         } catch (IllegalArgumentException iae) {
-            throw abiException(iae, i);
+            throw new IllegalArgumentException("array index " + i + ": " + iae.getMessage());
         }
         return len * UNIT_LENGTH_BYTES;
-    }
-
-    private int validateLongArray(final long[] arr) {
-        final LongType longType = (LongType) elementType;
-        final int len = arr.length;
-        checkLength(len, arr);
-        int i = 0;
-        try {
-            for ( ; i < len; i++) {
-                longType.validatePrimitive(arr[i]); // validate without boxing primitive
-            }
-        } catch (IllegalArgumentException iae) {
-            throw abiException(iae, i);
-        }
-        return len * UNIT_LENGTH_BYTES;
-    }
-
-    private int validateBigIntegerArray(BigInteger[] arr) {
-        final int len = arr.length;
-        checkLength(len, arr);
-        BigIntegerType bigIntegerType = (BigIntegerType) elementType;
-        int i = 0;
-        try {
-            for ( ; i < len; i++) {
-                bigIntegerType.validateBigInt(arr[i]);
-            }
-        } catch (IllegalArgumentException iae) {
-            throw abiException(iae, i);
-        }
-        return len * UNIT_LENGTH_BYTES;
-    }
-
-    private int validateBigDecimalArray(BigDecimal[] arr) {
-        final int len = arr.length;
-        checkLength(len, arr);
-        BigDecimalType bigDecimalType = (BigDecimalType) elementType;
-        int i = 0;
-        try {
-            for ( ; i < len; i++) {
-                BigDecimal element = arr[i];
-                bigDecimalType.validateBigInt(element.unscaledValue());
-                if(element.scale() != bigDecimalType.scale) {
-                    throw new IllegalArgumentException(String.format(BigDecimalType.ERR_SCALE_MISMATCH, element.scale(), bigDecimalType.scale));
-                }
-            }
-        } catch (IllegalArgumentException iae) {
-            throw abiException(iae, i);
-        }
-        return len * UNIT_LENGTH_BYTES;
-    }
-
-    private static IllegalArgumentException abiException(IllegalArgumentException iae, int i) {
-        return new IllegalArgumentException("array index " + i + ": " + iae.getMessage());
     }
 
     /** For arrays of arrays or arrays of tuples only. */
-    private int validateObjectArray(Object[] arr) {
-        final int len = arr.length;
-        checkLength(len, arr);
+    private int validateObjects(final Object[] arr) {
+        final int len = checkLength(arr.length, arr);
         int byteLength = !elementType.dynamic ? 0 : len * UNIT_LENGTH_BYTES; // when dynamic, 32 bytes per offset
         for (int i = 0; i < len; i++) {
             byteLength += elementType.validate(arr[i]);
@@ -269,75 +243,94 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return byteLength;
     }
 
-    private int checkLength(final int valueLength, Object value) {
-        if(length == DYNAMIC_LENGTH || length == valueLength) {
-            return valueLength;
+    private int checkLength(final int valueLen, Object value) {
+        if(length != valueLen && length != DYNAMIC_LENGTH) {
+            throw new IllegalArgumentException(
+                    Utils.friendlyClassName(value.getClass(), valueLen)
+                            + " not instanceof " + Utils.friendlyClassName(clazz, length) + ", " +
+                            valueLen + " != " + length
+            );
         }
-        throw new IllegalArgumentException(
-                Utils.friendlyClassName(value.getClass(), valueLength)
-                        + " not instanceof " + Utils.friendlyClassName(clazz, length) + ", " +
-                        valueLength + " != " + length
-        );
+        return valueLen;
     }
 
     @Override
     void encodeTail(Object value, ByteBuffer dest) {
-        encodeArrayTail(decodeIfString(value), dest);
+        encodeArrayTail(value, dest);
     }
 
-    private void insert(Supplier<Integer> supplyLength, Runnable insert, ByteBuffer dest) {
+    private void insert(int len, ByteBuffer dest, Runnable insert) {
         if(length == DYNAMIC_LENGTH) {
-            Encoding.insertInt(supplyLength.get(), dest);
+            Encoding.insertInt(len, dest);
         }
         insert.run();
     }
 
     private void encodeArrayTail(Object v, ByteBuffer dest) {
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: boolean[] z = (boolean[])v; insert(() -> z.length, () -> insertBooleans(z, dest), dest); return;
-        case TYPE_CODE_BYTE: byte[] b = (byte[])v; insert(() -> b.length, () -> Encoding.insertBytesPadded(b, dest), dest); return;
-        case TYPE_CODE_INT: int[] i = (int[])v; insert(() -> i.length, () -> insertInts(i, dest), dest); return;
-        case TYPE_CODE_LONG: long[] j = (long[])v; insert(() -> j.length, () -> insertLongs(j, dest), dest); return;
-        case TYPE_CODE_BIG_INTEGER: BigInteger[] bi = (BigInteger[])v; insert(() -> bi.length, () -> Encoding.insertBigIntegers(bi, UNIT_LENGTH_BYTES, dest), dest); return;
-        case TYPE_CODE_BIG_DECIMAL: BigDecimal[] bd = (BigDecimal[])v; insert(() -> bd.length, () -> Encoding.insertBigDecimals(bd, UNIT_LENGTH_BYTES, dest), dest); return;
-        case TYPE_CODE_ARRAY:  // note that type for String[] has elementType.typeCode() == TYPE_CODE_ARRAY
-        case TYPE_CODE_TUPLE:
-            final Object[] objects = (Object[]) v;
-            if(dynamic) {
-                insert(() -> objects.length, () -> insertOffsets(objects, dest), dest);
-            }
-            for (Object object : objects) {
-                elementType.encodeTail(object, dest);
-            }
-            return;
+        case TYPE_CODE_BOOLEAN: encodeBooleans((boolean[]) v, dest); return;
+        case TYPE_CODE_BYTE: encodeBytes(decodeIfString(v), dest); return;
+        case TYPE_CODE_INT: encodeInts((int[]) v, dest); return;
+        case TYPE_CODE_LONG: encodeLongs((long[]) v, dest); return;
+        case TYPE_CODE_BIG_INTEGER: encodeBigIntegers((BigInteger[]) v, dest); return;
+        case TYPE_CODE_BIG_DECIMAL: encodeBigDecimals((BigDecimal[]) v, dest); return;
+        case TYPE_CODE_ARRAY: // note that type for String[] has elementType.typeCode() == TYPE_CODE_ARRAY
+        case TYPE_CODE_TUPLE: encodeObjects((Object[]) v, dest); return;
         default: throw new Error();
         }
     }
 
-    private void insertOffsets(final Object[] objects, ByteBuffer dest) {
+    private void encodeBooleans(boolean[] arr, ByteBuffer dest) {
+        insert(arr.length, dest, () -> {
+            for (boolean e : arr) {
+                dest.put(e ? BooleanType.BOOLEAN_TRUE : BooleanType.BOOLEAN_FALSE);
+            }
+        });
+    }
+
+    private void encodeBytes(byte[] arr, ByteBuffer dest) {
+        insert(arr.length, dest, () -> Encoding.insertBytesPadded(arr, dest));
+    }
+
+    private void encodeInts(int[] arr, ByteBuffer dest) {
+        insert(arr.length, dest, () -> {
+            for (int e : arr) {
+                Encoding.insertInt(e, dest);
+            }
+        });
+    }
+
+    private void encodeLongs(long[] arr, ByteBuffer dest) {
+        insert(arr.length, dest, () -> {
+            for (long e : arr) {
+                Encoding.insertInt(e, dest);
+            }
+        });
+    }
+
+    private void encodeBigIntegers(BigInteger[] arr, ByteBuffer dest) {
+        insert(arr.length, dest, () -> Encoding.insertBigIntegers(arr, UNIT_LENGTH_BYTES, dest));
+    }
+
+    private void encodeBigDecimals(BigDecimal[] arr, ByteBuffer dest) {
+        insert(arr.length, dest, () -> Encoding.insertBigDecimals(arr, UNIT_LENGTH_BYTES, dest));
+    }
+
+    private void encodeObjects(Object[] arr, ByteBuffer dest) {
+        if(dynamic) {
+            insert(arr.length, dest, () -> insertOffsets(arr, dest));
+        }
+        for (Object object : arr) {
+            elementType.encodeTail(object, dest);
+        }
+    }
+
+    private void insertOffsets(Object[] objects, ByteBuffer dest) {
         if (elementType.dynamic) {
             int nextOffset = objects.length * Encoding.OFFSET_LENGTH_BYTES;
             for (Object object : objects) {
                 nextOffset = Encoding.insertOffset(nextOffset, dest, elementType.byteLength(object));
             }
-        }
-    }
-
-    private static void insertBooleans(boolean[] bools, ByteBuffer dest) {
-        for (boolean e : bools) {
-            dest.put(e ? BooleanType.BOOLEAN_TRUE : BooleanType.BOOLEAN_FALSE);
-        }
-    }
-
-    private static void insertInts(int[] ints, ByteBuffer dest) {
-        for (int e : ints) {
-            Encoding.insertInt(e, dest);
-        }
-    }
-
-    private static void insertLongs(long[] longs, ByteBuffer dest) {
-        for (long e : longs) {
-            Encoding.insertInt(e, dest);
         }
     }
 

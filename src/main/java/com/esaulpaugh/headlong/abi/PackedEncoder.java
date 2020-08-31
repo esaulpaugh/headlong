@@ -57,7 +57,7 @@ final class PackedEncoder {
         final ABIType<?> elementType = arrayType.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: encodeBooleans((boolean[]) value, dest); return;
-        case TYPE_CODE_BYTE: dest.put((byte[]) arrayType.decodeIfString(value)); return;
+        case TYPE_CODE_BYTE: dest.put(arrayType.decodeIfString(value)); return;
         case TYPE_CODE_INT: encodeInts((int[]) value, elementType.byteLengthPacked(null), dest); return;
         case TYPE_CODE_LONG: encodeLongs((long[]) value, elementType.byteLengthPacked(null), dest); return;
         case TYPE_CODE_BIG_INTEGER: Encoding.insertBigIntegers((BigInteger[]) value, elementType.byteLengthPacked(null), dest); return;
