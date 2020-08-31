@@ -219,7 +219,7 @@ public final class ABIJSON {
             if(type.startsWith("(")) { // tuple
                 out.value(type.replace(type.substring(0, type.lastIndexOf(')') + 1), TUPLE));
                 ABIType<?> base = e;
-                while (base instanceof ArrayType) {
+                while (ABIType.TYPE_CODE_ARRAY == base.typeCode()) {
                     base = ((ArrayType<? extends ABIType<?>, ?>) base).elementType;
                 }
                 writeJsonArray(out, COMPONENTS, (TupleType) base, null);
