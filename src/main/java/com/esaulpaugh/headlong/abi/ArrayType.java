@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.function.IntConsumer;
 
+import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
@@ -171,9 +172,9 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     @Override
     public int validate(final Object val) {
         validateClass(val);
-        final int staticLen = validateElements(val);
+        final int elementsLen = validateElements(val);
         // arrays with variable number of elements get +32 for the array length
-        return length != DYNAMIC_LENGTH ? staticLen : ARRAY_LENGTH_BYTE_LEN + staticLen;
+        return length != DYNAMIC_LENGTH ? elementsLen : ARRAY_LENGTH_BYTE_LEN + elementsLen;
     }
 
     private int validateElements(Object val) {
@@ -236,7 +237,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     /** For arrays of arrays or arrays of tuples only. */
     private int validateObjects(final Object[] arr) {
         final int len = checkLength(arr.length, arr);
-        int byteLength = !elementType.dynamic ? 0 : len * UNIT_LENGTH_BYTES; // when dynamic, 32 bytes per offset
+        int byteLength = !elementType.dynamic ? 0 : len * OFFSET_LENGTH_BYTES; // when dynamic, 32 bytes per offset
         for (int i = 0; i < len; i++) {
             byteLength += elementType.validate(arr[i]);
         }
@@ -327,7 +328,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private void insertOffsets(Object[] objects, ByteBuffer dest) {
         if (elementType.dynamic) {
-            int nextOffset = objects.length * Encoding.OFFSET_LENGTH_BYTES;
+            int nextOffset = objects.length * OFFSET_LENGTH_BYTES;
             for (Object object : objects) {
                 nextOffset = Encoding.insertOffset(nextOffset, dest, elementType.byteLength(object));
             }
