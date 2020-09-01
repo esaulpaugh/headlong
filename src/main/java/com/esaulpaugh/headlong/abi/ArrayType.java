@@ -210,22 +210,17 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return measureObjects(elements, (int i) -> elementType.byteLengthPacked(elements[i]));
     }
 
-    private int measureObjects(Object[] elements, Inspector visitor) {
-        int byteLength = measureAll(elements, visitor);
+    private int measureObjects(Object[] elements, Inspector inspector) {
+        int byteLength = 0;
+        for (int i = 0; i < elements.length; i++) {
+            byteLength += inspector.inspect(i);
+        }
         return !elementType.dynamic ? byteLength : (elements.length * OFFSET_LENGTH_BYTES) + byteLength;
     }
 
     @FunctionalInterface
     private interface Inspector {
         int inspect(int i);
-    }
-
-    private static int measureAll(Object[] elements, Inspector inspector) {
-        int sum = 0;
-        for (int i = 0; i < elements.length; i++) {
-            sum += inspector.inspect(i);
-        }
-        return sum;
     }
 
     private int checkLength(final int valueLen, Object value) {
