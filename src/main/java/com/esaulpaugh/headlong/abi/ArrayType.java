@@ -85,9 +85,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     /**
-     * LOG_2_UNIT_LENGTH_BYTES == 5
-     * x << 5 == x * 32
-     *
      * @param value the value to measure
      * @return the length in bytes of this array when encoded
      */
@@ -213,7 +210,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return measureObjects(elements, (int i) -> elementType.byteLengthPacked(elements[i]));
     }
 
-    /** For arrays of arrays and arrays of tuples only. */
     private int measureObjects(Object[] elements, Inspector visitor) {
         int byteLength = measureAll(elements, visitor);
         return !elementType.dynamic ? byteLength : (elements.length * OFFSET_LENGTH_BYTES) + byteLength;
