@@ -20,8 +20,6 @@ import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.util.SuperSerial;
 
 import java.lang.reflect.Array;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.function.IntConsumer;
 
@@ -163,23 +161,23 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private int validateElements(Object val) {
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return validateBooleanArray((boolean[]) val);
-        case TYPE_CODE_BYTE: return validateByteArray(val);
+        case TYPE_CODE_BOOLEAN: return validateBooleans((boolean[]) val);
+        case TYPE_CODE_BYTE: return validateBytes(val);
         case TYPE_CODE_INT: return validateInts((int[]) val, (IntType) elementType);
         case TYPE_CODE_LONG: return validateLongs((long[]) val, (LongType) elementType);
-        case TYPE_CODE_BIG_INTEGER: return validateBigIntegers((BigInteger[]) val, (BigIntegerType) elementType);
-        case TYPE_CODE_BIG_DECIMAL: return validateBigDecimals((BigDecimal[]) val, (BigDecimalType) elementType);
+        case TYPE_CODE_BIG_INTEGER:
+        case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: return validateObjects((Object[]) val);
         default: throw new Error();
         }
     }
 
-    private int validateBooleanArray(boolean[] arr) {
+    private int validateBooleans(boolean[] arr) {
         return checkLength(arr.length, arr) * UNIT_LENGTH_BYTES;
     }
 
-    private int validateByteArray(Object arr) {
+    private int validateBytes(Object arr) {
         return Integers.roundLengthUp(checkLength(byteCount(arr), arr), UNIT_LENGTH_BYTES);
     }
 
@@ -189,20 +187,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private int validateLongs(long[] arr, LongType type) {
         return validateUnits(arr.length, arr, (i) -> type.validatePrimitive(arr[i]));
-    }
-
-    private int validateBigIntegers(BigInteger[] arr, BigIntegerType type) {
-        return validateUnits(arr.length, arr, (i) -> type.validateBigInt(arr[i]));
-    }
-
-    private int validateBigDecimals(BigDecimal[] arr, BigDecimalType type) {
-        return validateUnits(arr.length, arr, (i) -> {
-            BigDecimal e = arr[i];
-            type.validateBigInt(e.unscaledValue());
-            if (e.scale() != type.scale) {
-                throw new IllegalArgumentException(String.format(BigDecimalType.ERR_SCALE_MISMATCH, e.scale(), type.scale));
-            }
-        });
     }
 
     private int validateUnits(int len, Object arr, IntConsumer elementValidator) {
@@ -338,19 +322,19 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     J decode(ByteBuffer bb, byte[] unitBuffer) {
         final int arrayLen = length == DYNAMIC_LENGTH ? Encoding.UINT17.decode(bb, unitBuffer) : length;
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return (J) decodeBooleanArray(bb, arrayLen, unitBuffer);
-        case TYPE_CODE_BYTE: return (J) decodeByteArray(bb, arrayLen);
-        case TYPE_CODE_INT: return (J) decodeIntArray((IntType) elementType, bb, arrayLen, unitBuffer);
-        case TYPE_CODE_LONG: return (J) decodeLongArray((LongType) elementType, bb, arrayLen, unitBuffer);
+        case TYPE_CODE_BOOLEAN: return (J) decodeBooleans(bb, arrayLen, unitBuffer);
+        case TYPE_CODE_BYTE: return (J) decodeBytes(bb, arrayLen);
+        case TYPE_CODE_INT: return (J) decodeInts((IntType) elementType, bb, arrayLen, unitBuffer);
+        case TYPE_CODE_LONG: return (J) decodeLongs((LongType) elementType, bb, arrayLen, unitBuffer);
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return (J) decodeObjectArray(arrayLen, bb, unitBuffer);
+        case TYPE_CODE_TUPLE: return (J) decodeObjects(arrayLen, bb, unitBuffer);
         default: throw new Error();
         }
     }
 
-    private static boolean[] decodeBooleanArray(ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
+    private static boolean[] decodeBooleans(ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
         boolean[] booleans = new boolean[arrayLen]; // elements are false by default
         final int booleanOffset = UNIT_LENGTH_BYTES - Byte.BYTES;
         for(int i = 0; i < arrayLen; i++) {
@@ -369,7 +353,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return booleans;
     }
 
-    private Object decodeByteArray(ByteBuffer bb, int arrayLen) {
+    private Object decodeBytes(ByteBuffer bb, int arrayLen) {
         byte[] data = new byte[arrayLen];
         byte[] padding = new byte[Integers.roundLengthUp(arrayLen, UNIT_LENGTH_BYTES) - arrayLen];
         bb.get(data);
@@ -380,7 +364,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return encodeIfString(data);
     }
 
-    private static int[] decodeIntArray(IntType intType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
+    private static int[] decodeInts(IntType intType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
         int[] ints = new int[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
             ints[i] = intType.decode(bb, unitBuffer);
@@ -388,7 +372,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return ints;
     }
 
-    private static long[] decodeLongArray(LongType longType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
+    private static long[] decodeLongs(LongType longType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
         long[] longs = new long[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
             longs[i] = longType.decode(bb, unitBuffer);
@@ -396,7 +380,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return longs;
     }
 
-    private Object[] decodeObjectArray(int len, ByteBuffer bb, byte[] unitBuffer) {
+    private Object[] decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer) {
         final Object[] elements = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
         if(!this.dynamic || !elementType.dynamic) {
             for (int i = 0; i < len; i++) {
