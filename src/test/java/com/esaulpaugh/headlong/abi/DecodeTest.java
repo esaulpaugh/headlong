@@ -262,19 +262,24 @@ public class DecodeTest {
 //        System.out.println(Function.formatCall(array));
 
         array[array.length - 1] = 0;
-
         Tuple decoded = f.decodeCall(array);
         assertNotEquals(decoded, argsTuple);
 
+        array[array.length - 1] = 2;
+        assertThrown(IllegalArgumentException.class, "illegal boolean value @ 68", () -> f.decodeCall(array));
+
+        array[array.length - 1] = -1;
+        assertThrown(IllegalArgumentException.class, "illegal boolean value @ 68", () -> f.decodeCall(array));
+
         array[array.length - 32] = (byte) 0x80;
 
-        assertThrown(IllegalArgumentException.class, "illegal boolean value @ 100", () -> f.decodeCall(array));
+        assertThrown(IllegalArgumentException.class, "illegal boolean value @ 68", () -> f.decodeCall(array));
 
         for (int i = array.length - 32; i < array.length; i++) {
             array[i] = (byte) 0xFF;
         }
         array[array.length - 1] = (byte) 0xFE;
 
-        assertThrown(IllegalArgumentException.class, "illegal boolean value @ 100", () -> f.decodeCall(array));
+        assertThrown(IllegalArgumentException.class, "illegal boolean value @ 68", () -> f.decodeCall(array));
     }
 }

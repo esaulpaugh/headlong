@@ -41,7 +41,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     static final Class<String> STRING_CLASS = String.class;
     static final Class<String[]> STRING_ARRAY_CLASS = String[].class;
 
-    private static final int ARRAY_LENGTH_BYTE_LEN = UNIT_LENGTH_BYTES;
+    private static final int ARRAY_LENGTH_BYTES = UNIT_LENGTH_BYTES;
 
     static final int DYNAMIC_LENGTH = -1;
 
@@ -93,11 +93,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
      */
     @Override
     int byteLength(Object value) {
-        final int elementsLen = calcElementsLen(value);
-        // arrays with variable number of elements get +32 for the array length
-        return length == DYNAMIC_LENGTH
-                ? ARRAY_LENGTH_BYTE_LEN + elementsLen
-                : elementsLen;
+        return totalLength(calcElementsLen(value));
     }
 
     private int calcElementsLen(Object value) {
@@ -154,9 +150,11 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     @Override
     public int validate(final Object val) {
         validateClass(val);
-        final int elementsLen = validateElements(val);
-        // arrays with variable number of elements get +32 for the array length
-        return length != DYNAMIC_LENGTH ? elementsLen : ARRAY_LENGTH_BYTE_LEN + elementsLen;
+        return totalLength(validateElements(val));
+    }
+
+    private int totalLength(int elementsLen) { // arrays with variable number of elements get +32 for the array length
+        return length != DYNAMIC_LENGTH ? elementsLen : ARRAY_LENGTH_BYTES + elementsLen;
     }
 
     private int validateElements(Object val) {
@@ -335,22 +333,28 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private static boolean[] decodeBooleans(ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
-        boolean[] booleans = new boolean[arrayLen]; // elements are false by default
+        final boolean[] booleans = new boolean[arrayLen]; // elements are false by default
         final int booleanOffset = UNIT_LENGTH_BYTES - Byte.BYTES;
         for(int i = 0; i < arrayLen; i++) {
             bb.get(unitBuffer);
             for (int j = 0; j < booleanOffset; j++) {
-                if(unitBuffer[j] == 0) continue;
-                throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - j));
+                if(unitBuffer[j] == Encoding.ZERO_BYTE) {
+                    continue;
+                }
+                throw illegalBoolean(bb);
             }
             byte last = unitBuffer[booleanOffset];
-            if(last == 1) {
+            if(last == Encoding.ONE_BYTE) {
                 booleans[i] = true;
-            } else if(last != 0) {
-                throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
+            } else if(last != Encoding.ZERO_BYTE) {
+                throw illegalBoolean(bb);
             }
         }
         return booleans;
+    }
+
+    private static IllegalArgumentException illegalBoolean(ByteBuffer bb) {
+        return new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
     }
 
     private Object decodeBytes(ByteBuffer bb, int arrayLen) {
