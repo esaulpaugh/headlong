@@ -95,32 +95,25 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
      */
     @Override
     int byteLength(Object value) {
-        final int len;
-        switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: len = ((boolean[]) value).length * UNIT_LENGTH_BYTES; break;
-        case TYPE_CODE_BYTE: len = Integers.roundLengthUp(byteCount(value), UNIT_LENGTH_BYTES); break;
-        case TYPE_CODE_INT: len = ((int[]) value).length * UNIT_LENGTH_BYTES; break;
-        case TYPE_CODE_LONG: len = ((long[]) value).length * UNIT_LENGTH_BYTES; break;
-        case TYPE_CODE_BIG_INTEGER:
-        case TYPE_CODE_BIG_DECIMAL: len = ((Number[]) value).length * UNIT_LENGTH_BYTES; break;
-        case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: len = calcObjArrByteLen((Object[]) value); break;
-        default: throw new Error();
-        }
+        final int elementsLen = calcElementsLen(value);
         // arrays with variable number of elements get +32 for the array length
         return length == DYNAMIC_LENGTH
-                ? ARRAY_LENGTH_BYTE_LEN + len
-                : len;
+                ? ARRAY_LENGTH_BYTE_LEN + elementsLen
+                : elementsLen;
     }
 
-    private int calcObjArrByteLen(Object[] elements) {
-        int len = 0;
-        for (Object element : elements) {
-            len += elementType.byteLength(element);
+    private int calcElementsLen(Object value) {
+        switch (elementType.typeCode()) {
+        case TYPE_CODE_BOOLEAN: return ((boolean[]) value).length * UNIT_LENGTH_BYTES;
+        case TYPE_CODE_BYTE: return Integers.roundLengthUp(byteCount(value), UNIT_LENGTH_BYTES);
+        case TYPE_CODE_INT: return ((int[]) value).length * UNIT_LENGTH_BYTES;
+        case TYPE_CODE_LONG: return ((long[]) value).length * UNIT_LENGTH_BYTES;
+        case TYPE_CODE_BIG_INTEGER:
+        case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * UNIT_LENGTH_BYTES;
+        case TYPE_CODE_ARRAY:
+        case TYPE_CODE_TUPLE: return measureByteLen((Object[]) value);
+        default: throw new Error();
         }
-        return !elementType.dynamic
-                ? len
-                : len + (elements.length * UNIT_LENGTH_BYTES); // 32 bytes per offset
     }
 
     private int staticByteLengthPacked() {
@@ -135,7 +128,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         if(value == null) {
             return staticByteLengthPacked();
         }
-        final ABIType<?> elementType = this.elementType;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return ((boolean[]) value).length; // * 1
         case TYPE_CODE_BYTE: return byteCount(value); // * 1
@@ -144,17 +136,9 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return calcObjArrPackedByteLen((Object[]) value);
+        case TYPE_CODE_TUPLE: return measurePackedByteLen((Object[]) value);
         default: throw new Error();
         }
-    }
-
-    private int calcObjArrPackedByteLen(Object[] elements) {
-        int packedLen = 0;
-        for (Object element : elements) {
-            packedLen += elementType.byteLengthPacked(element);
-        }
-        return packedLen;
     }
 
     private int byteCount(Object value) {
@@ -179,15 +163,15 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private int validateElements(Object val) {
         switch (elementType.typeCode()) {
-            case TYPE_CODE_BOOLEAN: return validateBooleanArray((boolean[]) val);
-            case TYPE_CODE_BYTE: return validateByteArray(val);
-            case TYPE_CODE_INT: return validateInts((int[]) val, (IntType) elementType);
-            case TYPE_CODE_LONG: return validateLongs((long[]) val, (LongType) elementType);
-            case TYPE_CODE_BIG_INTEGER: return validateBigIntegers((BigInteger[]) val, (BigIntegerType) elementType);
-            case TYPE_CODE_BIG_DECIMAL: return validateBigDecimals((BigDecimal[]) val, (BigDecimalType) elementType);
-            case TYPE_CODE_ARRAY:
-            case TYPE_CODE_TUPLE: return validateObjects((Object[]) val);
-            default: throw new Error();
+        case TYPE_CODE_BOOLEAN: return validateBooleanArray((boolean[]) val);
+        case TYPE_CODE_BYTE: return validateByteArray(val);
+        case TYPE_CODE_INT: return validateInts((int[]) val, (IntType) elementType);
+        case TYPE_CODE_LONG: return validateLongs((long[]) val, (LongType) elementType);
+        case TYPE_CODE_BIG_INTEGER: return validateBigIntegers((BigInteger[]) val, (BigIntegerType) elementType);
+        case TYPE_CODE_BIG_DECIMAL: return validateBigDecimals((BigDecimal[]) val, (BigDecimalType) elementType);
+        case TYPE_CODE_ARRAY:
+        case TYPE_CODE_TUPLE: return validateObjects((Object[]) val);
+        default: throw new Error();
         }
     }
 
@@ -234,14 +218,36 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return len * UNIT_LENGTH_BYTES;
     }
 
-    /** For arrays of arrays or arrays of tuples only. */
-    private int validateObjects(final Object[] arr) {
-        final int len = checkLength(arr.length, arr);
-        int byteLength = !elementType.dynamic ? 0 : len * OFFSET_LENGTH_BYTES; // when dynamic, 32 bytes per offset
-        for (int i = 0; i < len; i++) {
-            byteLength += elementType.validate(arr[i]);
+    private int validateObjects(Object[] elements) {
+        checkLength(elements.length, elements);
+        return measureObjects(elements, (int i) -> elementType.validate(elements[i]));
+    }
+
+    private int measureByteLen(Object[] elements) {
+        return measureObjects(elements, (int i) -> elementType.byteLength(elements[i]));
+    }
+
+    private int measurePackedByteLen(Object[] elements) {
+        return measureObjects(elements, (int i) -> elementType.byteLengthPacked(elements[i]));
+    }
+
+    /** For arrays of arrays and arrays of tuples only. */
+    private int measureObjects(Object[] elements, Inspector visitor) {
+        int byteLength = measureAll(elements, visitor);
+        return !elementType.dynamic ? byteLength : (elements.length * OFFSET_LENGTH_BYTES) + byteLength;
+    }
+
+    @FunctionalInterface
+    private interface Inspector {
+        int inspect(int i);
+    }
+
+    private static int measureAll(Object[] elements, Inspector inspector) {
+        int sum = 0;
+        for (int i = 0; i < elements.length; i++) {
+            sum += inspector.inspect(i);
         }
-        return byteLength;
+        return sum;
     }
 
     private int checkLength(final int valueLen, Object value) {
@@ -273,9 +279,9 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BYTE: encodeBytes(decodeIfString(v), dest); return;
         case TYPE_CODE_INT: encodeInts((int[]) v, dest); return;
         case TYPE_CODE_LONG: encodeLongs((long[]) v, dest); return;
-        case TYPE_CODE_BIG_INTEGER: encodeBigIntegers((BigInteger[]) v, dest); return;
-        case TYPE_CODE_BIG_DECIMAL: encodeBigDecimals((BigDecimal[]) v, dest); return;
-        case TYPE_CODE_ARRAY: // note that type for String[] has elementType.typeCode() == TYPE_CODE_ARRAY
+        case TYPE_CODE_BIG_INTEGER:
+        case TYPE_CODE_BIG_DECIMAL:
+        case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: encodeObjects((Object[]) v, dest); return;
         default: throw new Error();
         }
@@ -309,14 +315,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         });
     }
 
-    private void encodeBigIntegers(BigInteger[] arr, ByteBuffer dest) {
-        insert(arr.length, dest, () -> Encoding.insertBigIntegers(arr, UNIT_LENGTH_BYTES, dest));
-    }
-
-    private void encodeBigDecimals(BigDecimal[] arr, ByteBuffer dest) {
-        insert(arr.length, dest, () -> Encoding.insertBigDecimals(arr, UNIT_LENGTH_BYTES, dest));
-    }
-
     private void encodeObjects(Object[] arr, ByteBuffer dest) {
         if(dynamic) {
             insert(arr.length, dest, () -> insertOffsets(arr, dest));
@@ -344,8 +342,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BYTE: return (J) decodeByteArray(bb, arrayLen);
         case TYPE_CODE_INT: return (J) decodeIntArray((IntType) elementType, bb, arrayLen, unitBuffer);
         case TYPE_CODE_LONG: return (J) decodeLongArray((LongType) elementType, bb, arrayLen, unitBuffer);
-        case TYPE_CODE_BIG_INTEGER: return (J) decodeBigIntegerArray((BigIntegerType) elementType, bb, arrayLen, unitBuffer);
-        case TYPE_CODE_BIG_DECIMAL: return (J) decodeBigDecimalArray((BigDecimalType) elementType, bb, arrayLen, unitBuffer);
+        case TYPE_CODE_BIG_INTEGER:
+        case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: return (J) decodeObjectArray(arrayLen, bb, unitBuffer);
         default: throw new Error();
@@ -396,23 +394,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
             longs[i] = longType.decode(bb, unitBuffer);
         }
         return longs;
-    }
-
-    private static BigInteger[] decodeBigIntegerArray(BigIntegerType bigIntegerType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
-        BigInteger[] bigInts = new BigInteger[arrayLen];
-        for (int i = 0; i < arrayLen; i++) {
-            bigInts[i] = bigIntegerType.decode(bb, unitBuffer);
-        }
-        return bigInts;
-    }
-
-    private static BigDecimal[] decodeBigDecimalArray(BigDecimalType bigDecimalType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
-        BigDecimal[] bigDecs = new BigDecimal[arrayLen];
-        final int scale = bigDecimalType.scale;
-        for (int i = 0; i < arrayLen; i++) {
-            bigDecs[i] = new BigDecimal(bigDecimalType.decodeValid(bb, unitBuffer), scale);
-        }
-        return bigDecs;
     }
 
     private Object[] decodeObjectArray(int len, ByteBuffer bb, byte[] unitBuffer) {

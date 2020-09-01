@@ -68,7 +68,7 @@ public abstract class UnitType<V> extends ABIType<V> { // V generally extends Nu
 
     @Override
     void encodeTail(Object value, ByteBuffer dest) {
-        throw new UnsupportedOperationException();
+        encodeHead(value, dest, 0);
     }
 
     final void validatePrimitive(long longVal) {
