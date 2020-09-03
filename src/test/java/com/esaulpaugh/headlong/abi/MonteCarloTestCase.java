@@ -128,15 +128,10 @@ public class MonteCarloTestCase {
         }
 
         // decanonicalize
-        final String sig = (generateFunctionName(rng) + generateTupleTypeString(canonicalBaseTypes, rng, 0))
-                .replace("int256,", "int,")
-                .replace("int256[", "int[")
-                .replace("int256)", "int)")
-                .replace("fixed128x18,", "fixed,")
-                .replace("fixed128x18[", "fixed[")
-                .replace("fixed128x18)", "fixed)");
-
-//        if(sig.contains("int256") || sig.contains("fixed128x18")) throw new Error(sig);
+        final String sig = generateFunctionName(rng)
+                + generateTupleTypeString(canonicalBaseTypes, rng, 0)
+                    .replace("int256", "int")
+                    .replace("fixed128x18", "fixed");
 
         this.rawSignature = sig;
         this.function = new Function(sig, null, md);
