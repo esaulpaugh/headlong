@@ -127,15 +127,22 @@ public class MonteCarloTestCase {
             canonicalBaseTypes[FIXED_START_INDEX + i] = FIXED_LIST.get(rng.nextInt(size));
         }
 
-        // decanonicalize
-        final String sig = generateFunctionName(rng)
-                + generateTupleTypeString(canonicalBaseTypes, rng, 0)
-                    .replace("int256", "int")
-                    .replace("fixed128x18", "fixed");
+        final String sig = generateSignature(canonicalBaseTypes, rng);
 
         this.rawSignature = sig;
         this.function = new Function(sig, null, md);
         this.argsTuple = generateTuple(function.getParamTypes(), rng);
+    }
+
+    private String generateSignature(String[] canonicalBaseTypes, Random rng) {
+        String tupleTypeString = generateTupleTypeString(canonicalBaseTypes, rng, 0);
+        if(rng.nextBoolean()) {
+            // decanonicalize
+            tupleTypeString = tupleTypeString
+                    .replace("int256", "int")
+                    .replace("fixed128x18", "fixed");
+        }
+        return generateFunctionName(rng) + tupleTypeString;
     }
 
     JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) {
