@@ -327,7 +327,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return negate ? manifest.length - count : count;
     }
 
-    private static String completeTupleTypeString(StringBuilder sb) {
+    static String completeTupleTypeString(StringBuilder sb) {
         final int len = sb.length();
         return len != 1
                 ? sb.replace(len - 1, len, ")").toString() // replace trailing comma

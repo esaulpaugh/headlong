@@ -119,30 +119,17 @@ public class MonteCarloTestCase {
 
         rng.setSeed(seed);
 
-        final String[] canonicalBaseTypes = BASE_TYPES.get();
+        final String[] baseTypes = BASE_TYPES.get();
 
         // insert random elements from FIXED_LIST
         final int size = FIXED_LIST.size();
         for (int i = 0; i < NUM_FIXED_ADDED; i++) {
-            canonicalBaseTypes[FIXED_START_INDEX + i] = FIXED_LIST.get(rng.nextInt(size));
+            baseTypes[FIXED_START_INDEX + i] = FIXED_LIST.get(rng.nextInt(size));
         }
 
-        final String sig = generateSignature(canonicalBaseTypes, rng);
-
-        this.rawSignature = sig;
-        this.function = new Function(sig, null, md);
+        this.rawSignature = generateFunctionName(rng) + generateTupleTypeString(baseTypes, rng, 0);
+        this.function = new Function(rawSignature, null, md);
         this.argsTuple = generateTuple(function.getParamTypes(), rng);
-    }
-
-    private String generateSignature(String[] canonicalBaseTypes, Random rng) {
-        String tupleTypeString = generateTupleTypeString(canonicalBaseTypes, rng, 0);
-        if(rng.nextBoolean()) {
-            // decanonicalize
-            tupleTypeString = tupleTypeString
-                    .replace("int256", "int")
-                    .replace("fixed128x18", "fixed");
-        }
-        return generateFunctionName(rng) + tupleTypeString;
     }
 
     JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) {
@@ -249,23 +236,22 @@ public class MonteCarloTestCase {
         assertEquals(args, deserial);
     }
 
-    private String generateTupleTypeString(String[] canonicalBaseTypes, Random r, int tupleDepth) {
-
-        ABIType<?>[] types = new ABIType<?>[r.nextInt(1 + maxTupleLen)]; // 0 to max
-        for (int i = 0; i < types.length; i++) {
-            types[i] = generateType(canonicalBaseTypes, r, tupleDepth);
-        }
-
+    private String generateTupleTypeString(String[] baseTypes, Random r, int tupleDepth) {
+        final int len = r.nextInt(1 + maxTupleLen);
         StringBuilder signature = new StringBuilder("(");
-        for (ABIType<?> t : types) {
-            signature.append(t.canonicalType).append(',');
+        for (int i = 0; i < len; i++) {
+            String typeStr = generateType(baseTypes, r, tupleDepth).canonicalType;
+            if(r.nextBoolean()) {
+                switch (typeStr) {
+                case "int256": typeStr = "int"; break;
+                case "uint256": typeStr = "uint"; break;
+                case "fixed128x18": typeStr = "fixed"; break;
+                case "ufixed128x18": typeStr = "ufixed"; break;
+                }
+            }
+            signature.append(typeStr).append(',');
         }
-        if (types.length > 0) {
-            signature.replace(signature.length() - 1, signature.length(), "");
-        }
-        signature.append(')');
-
-        return signature.toString();
+        return TupleType.completeTupleTypeString(signature);
     }
 
     private ABIType<?> generateType(String[] canonicalBaseTypes, Random r, final int tupleDepth) {
