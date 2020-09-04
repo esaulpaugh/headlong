@@ -35,11 +35,11 @@ public class ABIJsonCasesTest {
 
     private static final String RESOURCE = "tests/ethereum/ABITests/basic_abi_tests.json";
 
-    private static final String TEST_CASES;
+    private static final Set<Map.Entry<String, JsonElement>> TESTS;
 
     static {
         try {
-            TEST_CASES = TestUtils.readFileResourceAsString(ABIJsonCasesTest.class, RESOURCE);
+            TESTS = JsonUtils.parseObject(TestUtils.readFileResourceAsString(ABIJsonCasesTest.class, RESOURCE)).entrySet();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -62,12 +62,8 @@ public class ABIJsonCasesTest {
         }
 
         private static ABITestCase forKey(String key) {
-
-            JsonObject tests = JsonUtils.parseObject(TEST_CASES);
-            Set<Map.Entry<String, JsonElement>> entries = tests.entrySet();
-
             JsonObject jsonObject = null;
-            for (Map.Entry<String, JsonElement> e : entries) {
+            for (Map.Entry<String, JsonElement> e : TESTS) {
                 if (key.equals(e.getKey())) {
                     jsonObject = e.getValue().getAsJsonObject();
                     System.out.println(jsonObject);
@@ -83,18 +79,9 @@ public class ABIJsonCasesTest {
             JsonArray types = JsonUtils.getArray(jsonObject, "types");
 
             ABIType<?>[] array = new ABIType[types.size()];
-
-            int i = 0;
-            for (JsonElement type : types) {
-                String s = type.getAsString();
-                final int openIdx = s.indexOf('(');
-                if (openIdx >= 0) {
-                    array[i++] = Function.parse("(" + s + ")").getParamTypes().get(0);
-                } else {
-                    array[i++] = TypeFactory.create(s, null);
-                }
+            for (int i = 0; i < array.length; i++) {
+                array[i] = TypeFactory.create(types.get(i).getAsString(), null);
             }
-
             TupleType tt = TupleType.wrap(array);
 
             System.out.println(tt.canonicalType);
