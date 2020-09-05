@@ -26,7 +26,6 @@ import java.util.NoSuchElementException;
 
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.util.Strings.HEX;
 
 /** @see ABIType */
 public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
@@ -351,53 +350,48 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public static String format(byte[] abi) {
-        return format(abi, new LabelMaker() {
-            @Override
-            public String make(int offset) {
-                StringBuilder sb = new StringBuilder();
-                String labelStr = Long.toHexString(offset);
-                int zeroes = 6 - labelStr.length();
-                for (int i = 0; i < zeroes; i++) {
-                    sb.append(' ');
-                }
-                sb.append(labelStr);
-                pad(sb, ' ');
-                return sb.toString();
+        return format(abi, (idx) -> {
+            StringBuilder sb = new StringBuilder();
+            String labelStr = Long.toHexString(idx);
+            int zeroes = LABEL_PADDED_LEN - LABEL_PAD_RIGHT - labelStr.length();
+            for (int i = 0; i < zeroes; i++) {
+                sb.append(' ');
             }
+            sb.append(labelStr);
+            padLabel(sb);
+            return sb.toString();
         });
     }
 
-    public static String format(byte[] abi, LabelMaker labelMaker) {
+    public static String format(byte[] abi, RowLabeler labeler) {
         Integers.checkIsMultiple(abi.length, UNIT_LENGTH_BYTES);
-        StringBuilder sb = new StringBuilder();
-        int idx = 0;
-        while(idx < abi.length) {
-            if(idx > 0) {
+        return finishFormat(abi, 0, abi.length, labeler, new StringBuilder());
+    }
+
+    static String finishFormat(byte[] buffer, int offset, int end, RowLabeler labeler, StringBuilder sb) {
+        while(offset < end) {
+            if(offset > 0) {
                 sb.append('\n');
             }
-            sb.append(labelMaker.make(idx));
-            sb.append(Strings.encode(abi, idx, UNIT_LENGTH_BYTES, HEX));
-            idx += UNIT_LENGTH_BYTES;
+            sb.append(labeler.paddedLabel(offset));
+            sb.append(Strings.encode(buffer, offset, UNIT_LENGTH_BYTES, Strings.HEX));
+            offset += UNIT_LENGTH_BYTES;
         }
         return sb.toString();
     }
 
-    public static class LabelMaker {
+    @FunctionalInterface
+    public interface RowLabeler {
+        String paddedLabel(int offset);
+    }
 
-        static final int INDENT_WIDTH = 9;
+    private static final int LABEL_PADDED_LEN = 9;
+    private static final int LABEL_PAD_RIGHT = 3;
 
-        public String make(int offset) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(offset / UNIT_LENGTH_BYTES);
-            pad(sb, ' ');
-            return sb.toString();
-        }
-
-        public void pad( StringBuilder sb, char ch) {
-            int n = INDENT_WIDTH - sb.length();
-            for (int i = 0; i < n; i++) {
-                sb.append(ch);
-            }
+    static void padLabel(StringBuilder label) {
+        int n = LABEL_PADDED_LEN - label.length();
+        for (int i = 0; i < n; i++) {
+            label.append(' ');
         }
     }
 }

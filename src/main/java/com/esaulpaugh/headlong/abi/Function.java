@@ -325,7 +325,11 @@ public final class Function implements ABIObject {
     }
 
     public static String formatCall(byte[] buffer, int offset, final int length) {
-        return formatCall(buffer, offset, length, new TupleType.LabelMaker());
+        return formatCall(buffer, offset, length, (idx) -> {
+            StringBuilder sb = new StringBuilder(String.valueOf(idx / UNIT_LENGTH_BYTES));
+            TupleType.padLabel(sb);
+            return sb.toString();
+        });
     }
 
     /**
@@ -334,27 +338,15 @@ public final class Function implements ABIObject {
      * @param buffer the buffer containing the ABI call
      * @param offset the offset into the input buffer of the ABI call
      * @param length the length of the ABI call
-     * @param labelMaker code to generate the row labels
+     * @param labeller code to generate the row label
      * @return the formatted string
      * @throws IllegalArgumentException if the input length mod 32 != 4
      */
-    public static String formatCall(byte[] buffer, int offset, final int length, TupleType.LabelMaker labelMaker) {
+    public static String formatCall(byte[] buffer, int offset, final int length, TupleType.RowLabeler labeller) {
         Integers.checkIsMultiple(length - SELECTOR_LEN, UNIT_LENGTH_BYTES);
-        StringBuilder sb = new StringBuilder();
-        sb.append("ID");
-        final int n = TupleType.LabelMaker.INDENT_WIDTH - "ID".length();
-        for (int i = 0; i < n; i++) {
-            sb.append(' ');
-        }
+        StringBuilder sb = new StringBuilder("ID");
+        TupleType.padLabel(sb);
         sb.append(Strings.encode(buffer, offset, SELECTOR_LEN, Strings.HEX));
-        int idx = offset + SELECTOR_LEN;
-        final int end = offset + length;
-        while (idx < end) {
-            sb.append('\n');
-            sb.append(labelMaker.make(idx));
-            sb.append(Strings.encode(buffer, idx, UNIT_LENGTH_BYTES, Strings.HEX));
-            idx += UNIT_LENGTH_BYTES;
-        }
-        return sb.toString();
+        return TupleType.finishFormat(buffer, offset + SELECTOR_LEN, offset + length, labeller, sb);
     }
 }
