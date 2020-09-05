@@ -13,6 +13,19 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class FunctionTest {
 
     @Test
+    public void testFormatLength() {
+        int len = 4 + 32;
+        byte[] buffer = new byte[len + 103];
+        for (int i = 0; i < 33; i++) {
+            assertEquals(
+                    "ID       00000000\n" +
+                    "0        0000000000000000000000000000000000000000000000000000000000000000",
+                    Function.formatCall(buffer, i, len)
+            );
+        }
+    }
+
+    @Test
     public void testFunctionValidation() throws Throwable {
         final String errNamed = "functions of this type must be unnamed";
         final String errNotNamed = "functions of this type must be named";

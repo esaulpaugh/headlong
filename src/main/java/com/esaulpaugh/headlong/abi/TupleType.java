@@ -350,16 +350,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public static String format(byte[] abi) {
-        return format(abi, (idx) -> {
-            StringBuilder sb = new StringBuilder();
-            String labelStr = Long.toHexString(idx);
-            int zeroes = LABEL_PADDED_LEN - LABEL_PAD_RIGHT - labelStr.length();
-            for (int i = 0; i < zeroes; i++) {
-                sb.append(' ');
-            }
-            sb.append(labelStr);
-            padLabel(sb);
-            return sb.toString();
+        return format(abi, (row) -> {
+            String unpadded = Long.toHexString(row * UNIT_LENGTH_BYTES);
+            return pad((LABEL_PADDED_LEN - LABEL_RIGHT_PADDING) - unpadded.length(), unpadded);
         });
     }
 
@@ -369,11 +362,12 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     static String finishFormat(byte[] buffer, int offset, int end, RowLabeler labeler, StringBuilder sb) {
+        int row = 0;
         while(offset < end) {
             if(offset > 0) {
                 sb.append('\n');
             }
-            sb.append(labeler.paddedLabel(offset));
+            sb.append(labeler.paddedLabel(row++));
             sb.append(Strings.encode(buffer, offset, UNIT_LENGTH_BYTES, Strings.HEX));
             offset += UNIT_LENGTH_BYTES;
         }
@@ -382,16 +376,23 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @FunctionalInterface
     public interface RowLabeler {
-        String paddedLabel(int offset);
+        String paddedLabel(int row);
     }
 
     private static final int LABEL_PADDED_LEN = 9;
-    private static final int LABEL_PAD_RIGHT = 3;
+    private static final int LABEL_RIGHT_PADDING = 3;
 
-    static void padLabel(StringBuilder label) {
-        int n = LABEL_PADDED_LEN - label.length();
+    static String pad(int leftPadding, String unpadded) {
+        StringBuilder sb = new StringBuilder();
+        pad(sb, leftPadding);
+        sb.append(unpadded);
+        pad(sb, LABEL_PADDED_LEN - sb.length());
+        return sb.toString();
+    }
+
+    private static void pad(StringBuilder sb, int n) {
         for (int i = 0; i < n; i++) {
-            label.append(' ');
+            sb.append(' ');
         }
     }
 }
