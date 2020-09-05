@@ -348,7 +348,8 @@ public final class Function implements ABIObject {
         }
         sb.append(Strings.encode(buffer, offset, SELECTOR_LEN, Strings.HEX));
         int idx = offset + SELECTOR_LEN;
-        while (idx < length) {
+        final int end = offset + length;
+        while (idx < end) {
             sb.append('\n');
             sb.append(labelMaker.make(idx));
             sb.append(Strings.encode(buffer, idx, UNIT_LENGTH_BYTES, Strings.HEX));
