@@ -181,12 +181,11 @@ public class MonteCarloTest {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            MonteCarloTask that = (MonteCarloTask) o;
-            return start == that.start &&
-                    end == that.end &&
-                    Objects.equals(testCase, that.testCase);
+            if(!getClass().isInstance(o)) return false;
+            MonteCarloTask other = (MonteCarloTask) o;
+            return other.start == this.start &&
+                    other.end == this.end &&
+                    Objects.equals(other.testCase, this.testCase);
         }
 
         @Override
@@ -198,17 +197,21 @@ public class MonteCarloTest {
     @Test
     public void testThreadSafety() throws InterruptedException, TimeoutException {
 
-        final Random r = new Random();
+        final Random r =TestUtils.seededRandom();
         final Keccak k = new Keccak(256);
         final MonteCarloTestCase one = newComplexTestCase(r, k);
         final MonteCarloTestCase two = newComplexTestCase(r, k);
 
         System.out.println(one);
         System.out.println(two);
-        final MonteCarloTask task = new MonteCarloTask(one, 0, 308_011);
+        final MonteCarloTask oneTask = new MonteCarloTask(one, 0, 308_011);
 
         final int parallelism = Runtime.getRuntime().availableProcessors();
         final ExecutorService threadPool = Executors.newFixedThreadPool(parallelism);
+
+        ForkJoinPool fjPool = new ForkJoinPool();
+        fjPool.invoke(oneTask);
+
         for (int i = 0; i < parallelism; i++) {
             threadPool.submit(() -> {
                 for (int j = 0; j < 500; j++)
@@ -216,27 +219,23 @@ public class MonteCarloTest {
             });
         }
 
-        ForkJoinPool fjPool = new ForkJoinPool();
-
-        fjPool.invoke(task);
-
-        for (int j = 0; j < 500; j++)
+        for (int j = 0; j < 500; j++) {
             two.runStandard();
+        }
+
+        threadPool.shutdown();
+        threadPool.awaitTermination(20L, TimeUnit.SECONDS);
 
         fjPool.shutdown();
         if(!fjPool.awaitTermination(10, TimeUnit.SECONDS)) {
             throw new TimeoutException("not very Timely!!");
         }
-
-        threadPool.shutdown();
-        threadPool.awaitTermination(20L, TimeUnit.SECONDS);
     }
 
     @Test
     public void testNotSerializable() throws Throwable {
-        final Random r = new Random();
         final Keccak k = new Keccak(256);
-        final MonteCarloTask original = new MonteCarloTask(newComplexTestCase(r, k), 0, 1);
+        final MonteCarloTask original = new MonteCarloTask(newComplexTestCase(TestUtils.seededRandom(), k), 0, 1);
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         TestUtils.assertThrown(NotSerializableException.class, "com.esaulpaugh.headlong.abi.MonteCarloTestCase", () -> new ObjectOutputStream(baos)

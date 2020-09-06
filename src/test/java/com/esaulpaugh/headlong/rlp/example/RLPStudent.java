@@ -84,17 +84,13 @@ public class RLPStudent implements RLPEncodeable {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(!(obj instanceof RLPStudent)) {
-            return false;
-        }
-
-        RLPStudent other = (RLPStudent) obj;
-
-        return Objects.equals(name, other.name)
-                && Math.abs(gpa - other.gpa) < 0.00005f
-                && Arrays.equals(publicKey, other.publicKey)
-                && Objects.equals(balance, other.balance);
+    public boolean equals(Object o) {
+        if(!getClass().isInstance(o)) return false;
+        RLPStudent other = (RLPStudent) o;
+        return Objects.equals(other.name, this.name)
+                && Math.abs(other.gpa - this.gpa) < 0.00005f
+                && Arrays.equals(other.publicKey, this.publicKey)
+                && Objects.equals(other.balance, this.balance);
     }
 
     @Override

@@ -107,9 +107,9 @@ final class BaseTypeInfo {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        BaseTypeInfo that = (BaseTypeInfo) o;
-        return bitLen == that.bitLen && arrayLen == that.arrayLen;
+        if(!getClass().isInstance(o)) return false;
+        BaseTypeInfo other = (BaseTypeInfo) o;
+        return other.bitLen == this.bitLen
+                && other.arrayLen == this.arrayLen;
     }
 }

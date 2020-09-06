@@ -458,16 +458,15 @@ public class MonteCarloTestCase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        MonteCarloTestCase that = (MonteCarloTestCase) o;
-        return seed == that.seed
-                && maxTupleDepth == that.maxTupleDepth
-                && maxTupleLen == that.maxTupleLen
-                && maxArrayDepth == that.maxArrayDepth
-                && maxArrayLen == that.maxArrayLen
-                && Objects.equals(function, that.function)
-                && Objects.equals(argsTuple, that.argsTuple);
+        if(!getClass().isInstance(o)) return false;
+        MonteCarloTestCase other = (MonteCarloTestCase) o;
+        return other.seed == this.seed
+                && other.maxTupleDepth == this.maxTupleDepth
+                && other.maxTupleLen == this.maxTupleLen
+                && other.maxArrayDepth == this.maxArrayDepth
+                && other.maxArrayLen == this.maxArrayLen
+                && Objects.equals(other.function, this.function)
+                && Objects.equals(other.argsTuple, this.argsTuple);
     }
 
     @Override

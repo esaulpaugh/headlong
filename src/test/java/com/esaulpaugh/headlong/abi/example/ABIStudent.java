@@ -65,17 +65,13 @@ public class ABIStudent implements ABIEncodeable {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(!(obj instanceof ABIStudent)) {
-            return false;
-        }
-
-        ABIStudent other = (ABIStudent) obj;
-
-        return Objects.equals(name, other.name)
-                && Math.abs(gpa - other.gpa) < 0.00005f
-                && Arrays.equals(publicKey, other.publicKey)
-                && Objects.equals(balance, other.balance);
+    public boolean equals(Object o) {
+        if(!getClass().isInstance(o)) return false;
+        ABIStudent other = (ABIStudent) o;
+        return Objects.equals(other.name, this.name)
+                && Math.abs(other.gpa - this.gpa) < 0.00005f
+                && Arrays.equals(other.publicKey, this.publicKey)
+                && Objects.equals(other.balance, this.balance);
     }
 
     @Override
