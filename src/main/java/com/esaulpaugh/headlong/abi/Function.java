@@ -165,38 +165,40 @@ public final class Function implements ABIObject {
                 : inputTypes.canonicalType;
     }
 
-    private static final String TYPE_MUST = "functions of this type must";
-
     private void validateFunction() {
         switch (type) {
         case FUNCTION:
             if(name == null) {
-                throw new IllegalArgumentException(TYPE_MUST + " be named");
+                throw validationErr("define name");
             }
             break;
         case RECEIVE:
             if (!ABIJSON.RECEIVE.equals(name)) {
-                throw new IllegalArgumentException(TYPE_MUST + " be named \"" + ABIJSON.RECEIVE + "\"");
+                throw validationErr("define name as \"" + ABIJSON.RECEIVE + '"');
             }
             if (!ABIJSON.PAYABLE.equals(stateMutability)) {
-                throw new IllegalArgumentException(TYPE_MUST + " be " + ABIJSON.PAYABLE);
+                throw validationErr("define stateMutability as \"" + ABIJSON.PAYABLE + '"');
             }
             /* fall through */
         case FALLBACK:
             if(inputTypes.elementTypes.length > 0) {
-                throw new IllegalArgumentException(TYPE_MUST + " have zero inputs");
+                throw validationErr("define no inputs");
             }
             /* fall through */
         case CONSTRUCTOR:
             if(outputTypes.elementTypes.length > 0) {
-                throw new IllegalArgumentException(TYPE_MUST + " have zero outputs");
+                throw validationErr("define no outputs");
             }
             if (type != Type.RECEIVE && name != null) {
-                throw new IllegalArgumentException(TYPE_MUST + " be unnamed");
+                throw validationErr("not define name");
             }
             /* fall through */
         default:
         }
+    }
+
+    private IllegalArgumentException validationErr(String typeRuleStr) {
+        throw new IllegalArgumentException("type is \"" + type + "\"; functions of this type must " + typeRuleStr);
     }
 
     private void generateSelector(MessageDigest messageDigest) {
