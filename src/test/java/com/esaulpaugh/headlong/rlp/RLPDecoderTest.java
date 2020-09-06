@@ -360,42 +360,35 @@ public class RLPDecoderTest {
 
     @Test
     public void hugeListsLowMem() {
-        int lol;
-        byte[] buffer;
-        RLPList huge;
-        int i;
 
         long[] dataLengths = new long[] {
-                255,
-                Short.MAX_VALUE,
-                Short.MAX_VALUE * 50,
-                Short.MAX_VALUE * 1000,
-                Integer.MAX_VALUE / 13 // try this if using 32-bit java and getting OOME
-//                Integer.MAX_VALUE - 13
+                56,
+                Integer.MAX_VALUE / (((int) Math.pow(2, 23)) - 1),
+                Integer.MAX_VALUE / (((int) Math.pow(2, 15)) - 1),
+                Integer.MAX_VALUE / (((int) Math.pow(2, 7)) - 1)
         };
 
-        for (long dataLen : dataLengths) {
-            System.out.println("dataLen = " + dataLen);
-            lol = Integers.len(dataLen);
-            System.out.println("length of length = " + lol);
-            buffer = new byte[1 + lol + (int) dataLen];
+        for (int k = 0; k < dataLengths.length; k++) {
+            long dataLen = dataLengths[k];
+            int lol = Integers.len(dataLen);
+            System.out.print("length of length == " + (k + 1) + ", ");
+            assertEquals(k + 1, lol);
+            byte[] buffer = new byte[1 + lol + (int) dataLen];
             Arrays.fill(buffer, (byte) 0x09);
             buffer[0] = (byte) (0xf7 + lol);
             Integers.putLong(dataLen, buffer, 1);
-            i = 1 + lol;
-            final int size = buffer.length - i;
 
-            huge = RLP_STRICT.wrapList(buffer);
+            RLPList huge = RLP_STRICT.wrapList(buffer);
 
             int count = 0;
-            int j = huge.dataIndex;
-            while(j < huge.endIndex) {
-                RLPItem element = RLP_STRICT.wrap(buffer, j);
+            int i = huge.dataIndex;
+            final int end = huge.endIndex;
+            while(i < end) {
+                i = RLP_STRICT.wrap(buffer, i).endIndex;
                 count++;
-                j = element.endIndex;
             }
-            System.out.println("size = " + size + ", count = " + count + "\n");
-            assertEquals(size, count);
+            System.out.println("dataLen " + dataLen + " == " + count);
+            assertEquals(dataLen, count);
         }
     }
 
