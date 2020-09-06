@@ -273,11 +273,9 @@ public abstract class RLPItem {
     }
 
     @Override
-    public final boolean equals(Object obj) {
-        if(!(obj instanceof RLPItem)) {
-            return false;
-        }
-        RLPItem other = (RLPItem) obj;
+    public final boolean equals(Object o) {
+        if(!getClass().isInstance(o)) return false;
+        RLPItem other = (RLPItem) o;
 //        return Arrays.equals( // Java 9+ vectorizedMismatch
 //                this.buffer, this.index, this.endIndex,
 //                other.buffer, other.index, other.endIndex

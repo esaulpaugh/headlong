@@ -200,8 +200,8 @@ public final class Notation {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return other instanceof Notation && value.equals(((Notation) other).value);
+    public boolean equals(Object o) {
+        return getClass().isInstance(o) && (((Notation) o).value).equals(this.value);
     }
 
     @Override

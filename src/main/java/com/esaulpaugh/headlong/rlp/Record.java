@@ -133,9 +133,7 @@ public final class Record {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        return rlp.equals(((Record) o).rlp);
+        return getClass().isInstance(o) && ((Record) o).rlp.equals(this.rlp);
     }
 
     @Override
