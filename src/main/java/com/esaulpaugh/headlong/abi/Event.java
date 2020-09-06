@@ -81,24 +81,17 @@ public final class Event implements ABIObject {
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + inputs.hashCode();
-        result = 31 * result + Arrays.hashCode(indexManifest);
-        result = 31 * result + (anonymous ? 1 : 0);
-        return result;
+        return 31 * (31 * (31 * name.hashCode() + inputs.hashCode()) + Arrays.hashCode(indexManifest)) + Boolean.hashCode(anonymous);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Event event = (Event) o;
-
-        if (anonymous != event.anonymous) return false;
-        if (!name.equals(event.name)) return false;
-        if (!inputs.equals(event.inputs)) return false;
-        return Arrays.equals(indexManifest, event.indexManifest);
+        if(!getClass().isInstance(o)) return false;
+        Event other = (Event) o;
+        return other.anonymous == this.anonymous
+                && other.name.equals(this.name)
+                && other.inputs.equals(this.inputs)
+                && Arrays.equals(other.indexManifest, this.indexManifest);
     }
 
     public static Event fromJson(String eventJson) {

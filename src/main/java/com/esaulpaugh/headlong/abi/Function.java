@@ -262,16 +262,15 @@ public final class Function implements ABIObject {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Function function = (Function) o;
-        return type == function.type &&
-                Objects.equals(name, function.name) &&
-                inputTypes.equals(function.inputTypes) &&
-                outputTypes.equals(function.outputTypes) &&
-                Arrays.equals(selector, function.selector) &&
-                hashAlgorithm.equals(function.hashAlgorithm) &&
-                Objects.equals(stateMutability, function.stateMutability);
+        if(!getClass().isInstance(o)) return false;
+        Function other = (Function) o;
+        return other.type == this.type &&
+                Objects.equals(other.name, this.name) &&
+                other.inputTypes.equals(this.inputTypes) &&
+                other.outputTypes.equals(this.outputTypes) &&
+                Arrays.equals(other.selector, this.selector) &&
+                other.hashAlgorithm.equals(this.hashAlgorithm) &&
+                Objects.equals(other.stateMutability, this.stateMutability);
     }
 
     @Override
