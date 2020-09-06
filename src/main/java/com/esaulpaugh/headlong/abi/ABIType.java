@@ -168,7 +168,7 @@ public abstract class ABIType<J> {
 
     @Override
     public final boolean equals(Object o) {
-        return getClass().isInstance(o) && canonicalType.equals(((ABIType<?>) o).canonicalType);
+        return getClass().isInstance(o) && ((ABIType<?>) o).canonicalType.equals(this.canonicalType);
     }
 
     @Override

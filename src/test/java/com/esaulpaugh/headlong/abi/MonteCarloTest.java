@@ -197,7 +197,7 @@ public class MonteCarloTest {
     @Test
     public void testThreadSafety() throws InterruptedException, TimeoutException {
 
-        final Random r =TestUtils.seededRandom();
+        final Random r = TestUtils.seededRandom();
         final Keccak k = new Keccak(256);
         final MonteCarloTestCase one = newComplexTestCase(r, k);
         final MonteCarloTestCase two = newComplexTestCase(r, k);
