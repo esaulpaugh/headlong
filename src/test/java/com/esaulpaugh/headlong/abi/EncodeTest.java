@@ -188,9 +188,19 @@ public class EncodeTest {
         assertThrown(ILLEGAL, "unrecognized type: \"(\"", () -> TupleType.parse("("));
         assertThrown(ILLEGAL, "unrecognized type: \")\"", () -> TupleType.parse(")"));
 
-        assertThrown(StringIndexOutOfBoundsException.class, "begin 0, end -1, length 0", () -> Function.parse(""));
+        try {
+            assertThrown(StringIndexOutOfBoundsException.class, "begin 0, end -1, length 0", () -> Function.parse(""));
+        } catch (StringIndexOutOfBoundsException sioobe) {
+            assertThrown(StringIndexOutOfBoundsException.class, "String index out of range: -1", () -> Function.parse(""));
+        }
+
         assertThrown(ILLEGAL, "unrecognized type: \"(\"", () -> Function.parse("("));
-        assertThrown(StringIndexOutOfBoundsException.class, "begin 0, end -1, length 1", () -> Function.parse(")"));
+
+        try {
+            assertThrown(StringIndexOutOfBoundsException.class, "begin 0, end -1, length 1", () -> Function.parse(")"));
+        } catch (StringIndexOutOfBoundsException sioobe) {
+            assertThrown(StringIndexOutOfBoundsException.class, "String index out of range: -1", () -> Function.parse(")"));
+        }
 
         assertThrown(ILLEGAL, "unrecognized type: \"aaaaaa\"", () -> TupleType.parse("aaaaaa"));
 
@@ -206,7 +216,7 @@ public class EncodeTest {
 
         assertThrown(ILLEGAL, "unrecognized type: \"((((()))\"", () -> Function.parse("((((()))"));
 
-        assertThrown(ClassCastException.class, "ArrayType cannot be cast to class com.esaulpaugh.headlong.abi.TupleType", () -> Function.parse("f()[]"));
+        assertThrown(ClassCastException.class, "ArrayType cannot be cast to ", () -> Function.parse("f()[]"));
     }
 
     @Test
