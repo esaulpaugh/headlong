@@ -308,7 +308,7 @@ public class ABIJSONTest {
 
         TestUtils.CustomRunnable parse = () -> Function.fromJsonObject(function);
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "functions of this type must be named", parse);
+        TestUtils.assertThrown(IllegalArgumentException.class, "type is \"function\"; functions of this type must define name", parse);
 
         function.add("type", new JsonPrimitive("event"));
 
@@ -316,7 +316,7 @@ public class ABIJSONTest {
 
         function.add("type", new JsonPrimitive("function"));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "functions of this type must be named", parse);
+        TestUtils.assertThrown(IllegalArgumentException.class, "type is \"function\"; functions of this type must define name", parse);
 
         TestUtils.CustomRunnable[] updates = new TestUtils.CustomRunnable[] {
                 () -> function.add("type", new JsonPrimitive("fallback")),

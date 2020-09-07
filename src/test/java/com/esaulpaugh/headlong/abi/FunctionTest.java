@@ -27,6 +27,7 @@ public class FunctionTest {
 
     @Test
     public void testFunctionValidation() throws Throwable {
+        final Class<? extends Throwable> err = IllegalArgumentException.class;
         final String errNamed = "functions of this type must be unnamed";
         final String errNotNamed = "functions of this type must be named";
         final String errHasOutputs = "functions of this type must have zero outputs";
@@ -34,10 +35,10 @@ public class FunctionTest {
         final TupleType inputs = TupleType.of("int");
         final TupleType outputs = TupleType.of("bool");
         final MessageDigest md = Function.newDefaultDigest();
-        TestUtils.assertThrown(IllegalArgumentException.class, errHasOutputs, () -> new Function(Function.Type.CONSTRUCTOR, "foo()","(bool)", md));
-        TestUtils.assertThrown(IllegalArgumentException.class, errHasOutputs, () -> new Function(Function.Type.FALLBACK, "foo()","(bool)", md));
-        TestUtils.assertThrown(IllegalArgumentException.class, errNamed, () -> new Function(Function.Type.CONSTRUCTOR, "foo()","()", md));
-        TestUtils.assertThrown(IllegalArgumentException.class, errNamed, () -> new Function(Function.Type.FALLBACK, "foo()","()", md));
+        TestUtils.assertThrown(err, "type is \"constructor\"; functions of this type must define no outputs", () -> new Function(Function.Type.CONSTRUCTOR, "foo()","(bool)", md));
+        TestUtils.assertThrown(err, "type is \"fallback\"; functions of this type must define no outputs", () -> new Function(Function.Type.FALLBACK, "foo()","(bool)", md));
+        TestUtils.assertThrown(err, "type is \"constructor\"; functions of this type must not define name", () -> new Function(Function.Type.CONSTRUCTOR, "foo()","()", md));
+        TestUtils.assertThrown(err, "type is \"fallback\"; functions of this type must not define name", () -> new Function(Function.Type.FALLBACK, "foo()","()", md));
         Function f = new Function(Function.Type.CONSTRUCTOR, "()","()", md);
         assertNull(f.getName());
         assertEquals(TupleType.EMPTY, f.getParamTypes());
@@ -47,24 +48,24 @@ public class FunctionTest {
         assertNull(f.getName());
         assertEquals("Keccak-256", f.getHashAlgorithm());
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "functions of this type must be payable", () -> new Function(Function.Type.RECEIVE, "receive", inputs, outputs, null, md));
-        TestUtils.assertThrown(IllegalArgumentException.class, errHasInputs, () -> new Function(Function.Type.RECEIVE, "receive", inputs, outputs, "payable", md));
-        TestUtils.assertThrown(IllegalArgumentException.class, errHasOutputs, () -> new Function(Function.Type.RECEIVE, "receive", TupleType.EMPTY, outputs, "payable", md));
+        TestUtils.assertThrown(err, "type is \"receive\"; functions of this type must define stateMutability as \"payable\"", () -> new Function(Function.Type.RECEIVE, "receive", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "type is \"receive\"; functions of this type must define no inputs", () -> new Function(Function.Type.RECEIVE, "receive", inputs, outputs, "payable", md));
+        TestUtils.assertThrown(err, "type is \"receive\"; functions of this type must define no outputs", () -> new Function(Function.Type.RECEIVE, "receive", TupleType.EMPTY, outputs, "payable", md));
         f = new Function(Function.Type.RECEIVE, "receive", TupleType.EMPTY, TupleType.EMPTY, "payable", new WrappedKeccak(256));
         assertEquals("receive", f.getName());
         assertEquals("payable", f.getStateMutability());
         assertEquals("Keccak-256", f.getHashAlgorithm());
 
-        TestUtils.assertThrown(IllegalArgumentException.class, errNotNamed, () -> new Function(Function.Type.FUNCTION, null, TupleType.EMPTY, TupleType.EMPTY, null, md));
+        TestUtils.assertThrown(err, "type is \"function\"; functions of this type must define name", () -> new Function(Function.Type.FUNCTION, null, TupleType.EMPTY, TupleType.EMPTY, null, md));
         f = new Function(Function.Type.FUNCTION, "", TupleType.EMPTY, TupleType.EMPTY, null, md);
         assertEquals("", f.getName());
         assertNull(f.getStateMutability());
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "illegal char 0x28 '(' @ index 0", () -> new Function(Function.Type.FUNCTION, "(", inputs, outputs, null, md));
-        TestUtils.assertThrown(IllegalArgumentException.class, "illegal char 0x28 '(' @ index 1", () -> new Function(Function.Type.FUNCTION, "a(", inputs, outputs, null, md));
-        TestUtils.assertThrown(IllegalArgumentException.class, "illegal char 0x28 '(' @ index 0", () -> new Function(Function.Type.FUNCTION, "(b", inputs, outputs, null, md));
-        TestUtils.assertThrown(IllegalArgumentException.class, "illegal char 0x28 '(' @ index 1", () -> new Function(Function.Type.FUNCTION, "c(d", inputs, outputs, null, md));
-        TestUtils.assertThrown(IllegalArgumentException.class, "illegal char 0x256 '\u0256' @ index 0", () -> new Function(Function.Type.FUNCTION, "\u0256", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 0", () -> new Function(Function.Type.FUNCTION, "(", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 1", () -> new Function(Function.Type.FUNCTION, "a(", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 0", () -> new Function(Function.Type.FUNCTION, "(b", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 1", () -> new Function(Function.Type.FUNCTION, "c(d", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "illegal char 0x256 '\u0256' @ index 0", () -> new Function(Function.Type.FUNCTION, "\u0256", inputs, outputs, null, md));
         new Function(Function.Type.FUNCTION, "z", inputs, outputs, null, md);
         new Function(Function.Type.FUNCTION, "", inputs, outputs, null, md);
     }
