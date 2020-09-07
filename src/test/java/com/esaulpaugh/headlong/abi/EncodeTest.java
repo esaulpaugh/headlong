@@ -188,9 +188,9 @@ public class EncodeTest {
         assertThrown(ILLEGAL, "unrecognized type: \"(\"", () -> TupleType.parse("("));
         assertThrown(ILLEGAL, "unrecognized type: \")\"", () -> TupleType.parse(")"));
 
-        assertThrown(ILLEGAL, "params start not found", () -> Function.parse(""));
+        assertThrown(StringIndexOutOfBoundsException.class, "begin 0, end -1, length 0", () -> Function.parse(""));
         assertThrown(ILLEGAL, "unrecognized type: \"(\"", () -> Function.parse("("));
-        assertThrown(ILLEGAL, "params start not found", () -> Function.parse(")"));
+        assertThrown(StringIndexOutOfBoundsException.class, "begin 0, end -1, length 1", () -> Function.parse(")"));
 
         assertThrown(ILLEGAL, "unrecognized type: \"aaaaaa\"", () -> TupleType.parse("aaaaaa"));
 
@@ -206,7 +206,7 @@ public class EncodeTest {
 
         assertThrown(ILLEGAL, "unrecognized type: \"((((()))\"", () -> Function.parse("((((()))"));
 
-        assertThrown(ILLEGAL, "illegal signature termination", () -> Function.parse("f()[]"));
+        assertThrown(ClassCastException.class, "ArrayType cannot be cast to class com.esaulpaugh.headlong.abi.TupleType", () -> Function.parse("f()[]"));
     }
 
     @Test

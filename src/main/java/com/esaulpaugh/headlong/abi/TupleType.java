@@ -256,7 +256,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     /**
-     * Puts into the {@link ByteBuffer} at its current position the non-standard packed encoding of {@code values}.
+     * Puts into the given {@link ByteBuffer} at its current position the non-standard packed encoding of {@code values}.
      *
      * @param values the argument to be encoded
      * @param dest   the destination buffer

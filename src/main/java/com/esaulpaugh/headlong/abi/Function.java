@@ -95,24 +95,14 @@ public final class Function implements ABIObject {
      * @throws IllegalArgumentException if {@code signature} or {@code outputs} is malformed
      */
     public Function(Type type, String signature, String outputs, MessageDigest messageDigest) {
-        final int split = signature.indexOf('(');
-        if (split >= 0) {
-            try {
-                this.inputTypes = (TupleType) TypeFactory.create(signature.substring(split), null);
-            } catch (ClassCastException cce) {
-                throw new IllegalArgumentException("illegal signature termination", cce); // e.g. "foo()[]"
-            }
-            this.type = Objects.requireNonNull(type);
-            String name = Utils.regexValidate(ALL_ASCII_NO_OPEN_PAREN, OPEN_PAREN_OR_NON_ASCII, signature.substring(0, split)); // guaranteed not to contain '(' bc of split
-            this.name = name.isEmpty() && (type == Type.FALLBACK || type == Type.CONSTRUCTOR) ? null : name;
-            this.outputTypes = outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY;
-            this.stateMutability = null;
-            this.hashAlgorithm = messageDigest.getAlgorithm();
-            validateFunction();
-            generateSelector(messageDigest);
-        } else {
-            throw new IllegalArgumentException("params start not found");
-        }
+        this(
+                type,
+                type != Type.FUNCTION && type != Type.RECEIVE && signature.startsWith("(") ? null : signature.substring(0, signature.indexOf('(')),
+                TupleType.parse(signature.substring(signature.indexOf('('))),
+                outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY,
+                null,
+                messageDigest
+        );
     }
 
     public Function(Type type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) {
@@ -198,7 +188,7 @@ public final class Function implements ABIObject {
     }
 
     private IllegalArgumentException validationErr(String typeRuleStr) {
-        throw new IllegalArgumentException("type is \"" + type + "\"; functions of this type must " + typeRuleStr);
+        return new IllegalArgumentException("type is \"" + type + "\"; functions of this type must " + typeRuleStr);
     }
 
     private void generateSelector(MessageDigest messageDigest) {
@@ -335,14 +325,14 @@ public final class Function implements ABIObject {
      * @param buffer the buffer containing the ABI call
      * @param offset the offset into the input buffer of the ABI call
      * @param length the length of the ABI call
-     * @param labeller code to generate the row label
+     * @param labeler code to generate the row label
      * @return the formatted string
      * @throws IllegalArgumentException if the input length mod 32 != 4
      */
-    public static String formatCall(byte[] buffer, int offset, final int length, TupleType.RowLabeler labeller) {
+    public static String formatCall(byte[] buffer, int offset, final int length, TupleType.RowLabeler labeler) {
         Integers.checkIsMultiple(length - SELECTOR_LEN, UNIT_LENGTH_BYTES);
         StringBuilder sb = new StringBuilder(TupleType.pad(0, "ID"));
         sb.append(Strings.encode(buffer, offset, SELECTOR_LEN, Strings.HEX));
-        return TupleType.finishFormat(buffer, offset + SELECTOR_LEN, offset + length, labeller, sb);
+        return TupleType.finishFormat(buffer, offset + SELECTOR_LEN, offset + length, labeler, sb);
     }
 }
