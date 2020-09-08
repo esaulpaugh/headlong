@@ -90,7 +90,7 @@ public class RLPOutputStream extends OutputStream {
     
     private static class Baos extends ByteArrayOutputStream {
 
-        public Baos() {}
+        Baos() {}
     	
     	@Override
         public String toString() {
