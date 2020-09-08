@@ -89,6 +89,8 @@ public class RLPOutputStream extends OutputStream {
     }
     
     private static class Baos extends ByteArrayOutputStream {
+
+        public Baos() {}
     	
     	@Override
         public String toString() {

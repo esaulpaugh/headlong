@@ -242,6 +242,8 @@ public final class ABIJSON {
 
     private static class FunctionAdapter extends TypeAdapter<Function> {
 
+        public FunctionAdapter() {}
+
         @Override
         public void write(JsonWriter out, Function f) throws IOException {
             out.beginObject();
@@ -269,6 +271,8 @@ public final class ABIJSON {
     }
 
     private static class EventAdapter extends TypeAdapter<Event> {
+
+        public EventAdapter() {}
 
         @Override
         public void write(JsonWriter out, Event e) throws IOException {
