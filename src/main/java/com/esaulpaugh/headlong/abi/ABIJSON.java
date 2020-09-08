@@ -20,11 +20,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,13 +62,8 @@ public final class ABIJSON {
 
     static {
         GsonBuilder builder = new GsonBuilder();
-        GSON = builder
-                .registerTypeAdapter(Function.class, new FunctionAdapter())
-                .registerTypeAdapter(Event.class, new EventAdapter())
-                .create();
-        GSON_PRETTY = builder
-                .setPrettyPrinting()
-                .create();
+        GSON = builder.create();
+        GSON_PRETTY = builder.setPrettyPrinting().create();
     }
 
     public static Function parseFunction(String objectJson) {
@@ -204,8 +198,41 @@ public final class ABIJSON {
         return TypeFactory.create(typeStr, getString(object, NAME));
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    public static String toJson(Object abiObj, boolean pretty) {
-        return (pretty ? GSON_PRETTY : GSON).toJson(abiObj);
+    public static String toJson(ABIObject abiObj, boolean function, boolean pretty) {
+        try {
+            StringWriter out = new StringWriter();
+            writeABIObject((pretty ? GSON_PRETTY : GSON).newJsonWriter(out), abiObj, function);
+            return out.toString();
+        } catch (IOException io) {
+            throw new RuntimeException(io);
+        }
+    }
+
+    private static void writeABIObject(JsonWriter out, ABIObject abiObj, boolean function) throws IOException {
+        out.beginObject();
+        if(function) {
+            Function f = (Function) abiObj;
+            final Function.Type type = f.getType();
+            out.name(TYPE).value(type.toString());
+            if (type != Function.Type.FALLBACK) {
+                addIfValueNotNull(out, NAME, f.getName());
+                if (type != Function.Type.RECEIVE) {
+                    writeJsonArray(out, INPUTS, f.getParamTypes(), null);
+                    if (type != Function.Type.CONSTRUCTOR) {
+                        writeJsonArray(out, OUTPUTS, f.getOutputTypes(), null);
+                    }
+                }
+            }
+            final String stateMutability = f.getStateMutability();
+            addIfValueNotNull(out, STATE_MUTABILITY, stateMutability);
+            out.name(CONSTANT).value(VIEW.equals(stateMutability) || PURE.equals(stateMutability));
+        } else {
+            Event e = (Event) abiObj;
+            out.name(TYPE).value(EVENT);
+            addIfValueNotNull(out, NAME, e.getName());
+            writeJsonArray(out, INPUTS, e.getParams(), e.getIndexManifest());
+        }
+        out.endObject();
     }
 
     private static void writeJsonArray(JsonWriter out, String name, TupleType tupleType, boolean[] indexedManifest) throws IOException {
@@ -237,55 +264,6 @@ public final class ABIJSON {
     private static void addIfValueNotNull(JsonWriter out, String key, String value) throws IOException {
         if(value != null) {
             out.name(key).value(value);
-        }
-    }
-
-    private static class FunctionAdapter extends TypeAdapter<Function> {
-
-        public FunctionAdapter() {}
-
-        @Override
-        public void write(JsonWriter out, Function f) throws IOException {
-            out.beginObject();
-            final Function.Type type = f.getType();
-            out.name(TYPE).value(type.toString());
-            if(type != Function.Type.FALLBACK) {
-                addIfValueNotNull(out, NAME, f.getName());
-                if(type != Function.Type.RECEIVE) {
-                    writeJsonArray(out, INPUTS, f.getParamTypes(), null);
-                    if(type != Function.Type.CONSTRUCTOR) {
-                        writeJsonArray(out, OUTPUTS, f.getOutputTypes(), null);
-                    }
-                }
-            }
-            final String stateMutability = f.getStateMutability();
-            addIfValueNotNull(out, STATE_MUTABILITY, stateMutability);
-            out.name(CONSTANT).value(VIEW.equals(stateMutability) || PURE.equals(stateMutability));
-            out.endObject();
-        }
-
-        @Override
-        public Function read(JsonReader in) {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    private static class EventAdapter extends TypeAdapter<Event> {
-
-        public EventAdapter() {}
-
-        @Override
-        public void write(JsonWriter out, Event e) throws IOException {
-            out.beginObject();
-            out.name(TYPE).value(EVENT);
-            addIfValueNotNull(out, NAME, e.getName());
-            writeJsonArray(out, INPUTS, e.getParams(), e.getIndexManifest());
-            out.endObject();
-        }
-
-        @Override
-        public Event read(JsonReader in) {
-            throw new UnsupportedOperationException();
         }
     }
 }
