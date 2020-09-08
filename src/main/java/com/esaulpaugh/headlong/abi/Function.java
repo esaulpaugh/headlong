@@ -47,17 +47,7 @@ public final class Function implements ABIObject {
 
         @Override
         public String toString() {
-            return toString(this);
-        }
-
-        public static String toString(Function.Type type) {
-            switch (type) {
-            case FUNCTION: return ABIJSON.FUNCTION;
-            case RECEIVE: return ABIJSON.RECEIVE;
-            case FALLBACK: return ABIJSON.FALLBACK;
-            case CONSTRUCTOR: return ABIJSON.CONSTRUCTOR;
-            default: throw new Error();
-            }
+            return name().toLowerCase();
         }
     }
 
@@ -156,13 +146,13 @@ public final class Function implements ABIObject {
     }
 
     private void validateFunction() {
-        switch (type) {
-        case FUNCTION:
+        switch (type.toString()) {
+        case ABIJSON.FUNCTION:
             if(name == null) {
                 throw validationErr("define name");
             }
             break;
-        case RECEIVE:
+        case ABIJSON.RECEIVE:
             if (!ABIJSON.RECEIVE.equals(name)) {
                 throw validationErr("define name as \"" + ABIJSON.RECEIVE + '"');
             }
@@ -170,20 +160,20 @@ public final class Function implements ABIObject {
                 throw validationErr("define stateMutability as \"" + ABIJSON.PAYABLE + '"');
             }
             /* fall through */
-        case FALLBACK:
+        case ABIJSON.FALLBACK:
             if(inputTypes.elementTypes.length > 0) {
                 throw validationErr("define no inputs");
             }
             /* fall through */
-        case CONSTRUCTOR:
+        case ABIJSON.CONSTRUCTOR:
             if(outputTypes.elementTypes.length > 0) {
                 throw validationErr("define no outputs");
             }
             if (type != Type.RECEIVE && name != null) {
                 throw validationErr("not define name");
             }
-            /* fall through */
-        default:
+            return;
+        default: throw new Error();
         }
     }
 
