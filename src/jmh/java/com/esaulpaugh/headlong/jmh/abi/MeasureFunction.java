@@ -39,8 +39,12 @@ import static com.esaulpaugh.headlong.jmh.Main.THREE;
 @State(Scope.Benchmark)
 public class MeasureFunction {
 
+    private static final int BATCH_SIZE = 100_000;
+
     private Function f;
     private Tuple args;
+
+    private final byte[] encodedCall = Strings.decode("a5643bf20000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000464617665000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003");
 
     @Setup(Level.Trial)
     public void setUp() {
@@ -54,28 +58,37 @@ public class MeasureFunction {
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
+    @BenchmarkMode(Mode.AverageTime)
+    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
+    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
+    public void encode_call(Blackhole blackhole) {
+        blackhole.consume(f.encodeCall(args));
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.AverageTime)
     @Warmup(iterations = 1)
     @Measurement(iterations = THREE)
+    public void decode_call(Blackhole blackhole) {
+        blackhole.consume(f.decodeCall(encodedCall));
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.AverageTime)
+    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
+    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
     public void init_with_keccak(Blackhole blackhole) {
         blackhole.consume(Function.parse("sam(bytes,bool,uint256[])", new Keccak(256)));
     }
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
+    @BenchmarkMode(Mode.AverageTime)
+    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
+    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
     public void init_with_wrapped_bouncy_keccak(Blackhole blackhole) {
         blackhole.consume(Function.parse("sam(bytes,bool,uint256[])", new WrappedKeccak(256)));
-    }
-
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    public void encode_call(Blackhole blackhole) {
-        blackhole.consume(f.encodeCall(args));
     }
 }
