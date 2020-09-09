@@ -438,6 +438,7 @@
         <attribute name = "Implementation-Title" value = "${project.name}"/>
         <attribute name = "Implementation-Version" value = "${project.version}"/>
         <attribute name= "Automatic-Module-Name" value="${project.name}"/>
+        <attribute name= "Created-By" value="com.esaulpaugh"/>
       </manifest>
     </jar>
   </target>
