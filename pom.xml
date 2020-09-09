@@ -143,7 +143,6 @@
                 <version>2.22.2</version>
                 <configuration>
 <!--                    <skipTests>true</skipTests>&lt;!&ndash; ///////////////////////////// &ndash;&gt;-->
-                    <useSystemClassLoader>false</useSystemClassLoader>
                     <parallel>all</parallel>
                     <threadCount>32</threadCount>
                 </configuration>
