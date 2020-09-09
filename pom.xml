@@ -144,7 +144,7 @@
                 <configuration>
 <!--                    <skipTests>true</skipTests>&lt;!&ndash; ///////////////////////////// &ndash;&gt;-->
                     <parallel>all</parallel>
-                    <threadCount>32</threadCount>
+                    <useUnlimitedThreads>true</useUnlimitedThreads>
                 </configuration>
             </plugin>
             <plugin>
