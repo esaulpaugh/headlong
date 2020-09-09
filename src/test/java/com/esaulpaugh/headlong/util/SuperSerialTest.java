@@ -3,7 +3,9 @@ package com.esaulpaugh.headlong.util;
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.ABIType;
 import com.esaulpaugh.headlong.abi.ArrayType;
+import com.esaulpaugh.headlong.abi.BooleanType;
 import com.esaulpaugh.headlong.abi.Function;
+import com.esaulpaugh.headlong.abi.IntType;
 import com.esaulpaugh.headlong.abi.Tuple;
 import com.esaulpaugh.headlong.abi.TupleType;
 import org.junit.jupiter.api.Test;
@@ -45,13 +47,13 @@ public class SuperSerialTest {
     }
 
     @Test
-    public void testParseArgs() {
+    public void testParseArgs() throws Throwable {
 
         String boolArrStr = "['00', '01', '01']";
 
         TupleType tt = TupleType.parse("(bool[])");
 
-        Tuple tuple = tt.parseArgument("(" + boolArrStr + ")");
+        Tuple tuple = tt.parseArgument("(\n" + boolArrStr + "\n)");
 
         boolean[] arr0 = (boolean[]) tuple.get(0);
 
@@ -60,5 +62,24 @@ public class SuperSerialTest {
         boolean[] arr1 = (boolean[]) ((ArrayType<? extends ABIType<?>, ?>) tt.get(0)).parseArgument(boolArrStr);
 
         assertArrayEquals(arr0, arr1);
+
+        IntType int32 = (IntType) TupleType.parse("(int32)").get(0);
+
+        assertEquals(Integer.MIN_VALUE, int32.parseArgument(Integer.toString(Integer.MIN_VALUE)));
+        assertEquals(Integer.MAX_VALUE, int32.parseArgument(Integer.toString(Integer.MAX_VALUE)));
+
+        IntType int8 = (IntType) TupleType.parse("(int8)").get(0);
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "signed val exceeds bit limit: 8 >= 8", () -> int8.parseArgument("-129"));
+        TestUtils.assertThrown(IllegalArgumentException.class, "signed val exceeds bit limit: 8 >= 8", () -> int8.parseArgument("128"));
+
+        BooleanType bool = (BooleanType) TupleType.parse("(bool)").get(0);
+
+        assertEquals(true, bool.parseArgument("true"));
+        assertEquals(true, bool.parseArgument("TRUE"));
+        assertEquals(true, bool.parseArgument("tRUe"));
+        assertEquals(false, bool.parseArgument("false"));
+        assertEquals(false, bool.parseArgument(""));
+        assertEquals(false, bool.parseArgument("?\t*jjgHJge"));
     }
 }
