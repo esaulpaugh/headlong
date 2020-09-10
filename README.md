@@ -125,7 +125,7 @@ Also includes optimized implementations of:
 * hexadecimal
 * Keccak
 
-headlong (optionally) depends on gson and bouncycastle. Test suite should take less than one minute to run. Test packages require junit. Jar size is ~125 KiB as of 07/19/20. Java 8+.
+headlong (optionally) depends on gson and bouncycastle. Test suite should take less than one minute to run. Test packages require junit. Jar size is ~120 KiB. Java 8+.
 
 See the wiki for more, such as TupleTypes, packed encoding (and decoding), and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
