@@ -289,35 +289,30 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public TupleType subTupleType(boolean... manifest) {
-        return subTupleType(false, manifest);
+        return subTupleType(manifest, false);
     }
 
     public TupleType subTupleTypeNegative(boolean... manifest) {
-        return subTupleType(true, manifest);
+        return subTupleType(manifest, true);
     }
 
-    private TupleType subTupleType(boolean negate, boolean... manifest) {
-        final int len = checkLength(elementTypes, manifest);
-        final StringBuilder canonicalBuilder = new StringBuilder("(");
-        boolean dynamic = false;
-        final ABIType<?>[] selected = new ABIType<?>[getSelectionSize(manifest, negate)];
-        for (int i = 0, s = 0; i < len; i++) {
-            if(negate ^ manifest[i]) {
-                ABIType<?> e = elementTypes[i];
-                canonicalBuilder.append(e.canonicalType).append(',');
-                dynamic |= e.dynamic;
-                selected[s++] = e;
-            }
-        }
-        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected);
-    }
-
-    private static int checkLength(ABIType<?>[] elements, boolean[] manifest) {
+    private TupleType subTupleType(boolean[] manifest, boolean negate) {
         final int len = manifest.length;
-        if(len == elements.length) {
-            return len;
+        if(len == elementTypes.length) {
+            final StringBuilder canonicalBuilder = new StringBuilder("(");
+            boolean dynamic = false;
+            final ABIType<?>[] selected = new ABIType<?>[getSelectionSize(manifest, negate)];
+            for (int i = 0, s = 0; i < len; i++) {
+                if (negate ^ manifest[i]) {
+                    ABIType<?> e = elementTypes[i];
+                    canonicalBuilder.append(e.canonicalType).append(',');
+                    dynamic |= e.dynamic;
+                    selected[s++] = e;
+                }
+            }
+            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected);
         }
-        throw new IllegalArgumentException("manifest.length != elements.length: " + manifest.length + " != " + elements.length);
+        throw new IllegalArgumentException("manifest.length != elements.length: " + len + " != " + elementTypes.length);
     }
 
     private static int getSelectionSize(boolean[] manifest, boolean negate) {
