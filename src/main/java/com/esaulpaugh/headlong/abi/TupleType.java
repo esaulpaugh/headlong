@@ -312,7 +312,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             }
             return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected);
         }
-        throw new IllegalArgumentException("manifest.length != elements.length: " + len + " != " + elementTypes.length);
+        throw new IllegalArgumentException("manifest.length != elementTypes.length: " + len + " != " + elementTypes.length);
     }
 
     private static int getSelectionSize(boolean[] manifest, boolean negate) {
