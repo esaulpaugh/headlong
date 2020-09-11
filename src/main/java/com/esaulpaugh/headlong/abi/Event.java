@@ -76,7 +76,7 @@ public final class Event implements ABIObject {
     }
 
     public TupleType getNonIndexedParams() {
-        return inputs.subTupleType(indexManifest, true);
+        return inputs.subTupleTypeNegative(indexManifest);
     }
 
     @Override
