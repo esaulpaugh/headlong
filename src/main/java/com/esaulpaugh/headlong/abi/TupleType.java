@@ -351,7 +351,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     public static String format(byte[] abi) {
         return format(abi, (row) -> {
-            String unpadded = Long.toHexString(row * UNIT_LENGTH_BYTES);
+            String unpadded = Integer.toHexString(row * UNIT_LENGTH_BYTES);
             return pad((LABEL_PADDED_LEN - LABEL_RIGHT_PADDING) - unpadded.length(), unpadded);
         });
     }
