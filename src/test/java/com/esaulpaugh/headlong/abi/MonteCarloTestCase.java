@@ -71,10 +71,7 @@ public class MonteCarloTestCase {
     private static final int FIXED_START_INDEX;
 
     static {
-
-        final Map<String, BaseTypeInfo> baseInfoTypeMap = new HashMap<>(BaseTypeInfo.getBaseTypeInfoMap());
-
-        final Set<String> keys = baseInfoTypeMap.keySet();
+        final Set<String> keys = TypeFactory.SUPPLIER_MAP.keySet();
         final ArrayList<String> ordered = new ArrayList<>(keys);
         Collections.sort(ordered);
         final int numKeys = ordered.size();

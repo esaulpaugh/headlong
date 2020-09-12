@@ -38,7 +38,7 @@ final class TypeFactory {
 
     private static final int FUNCTION_BYTE_LEN = 24;
 
-    private static final Map<String, Supplier<ABIType<?>>> SUPPLIER_MAP;
+    static final Map<String, Supplier<ABIType<?>>> SUPPLIER_MAP;
 
     static {
         final Map<String, Supplier<ABIType<?>>> lambdaMap = new HashMap<>(256);

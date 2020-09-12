@@ -366,8 +366,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             if(offset > 0) {
                 sb.append('\n');
             }
-            sb.append(labeler.paddedLabel(row++));
-            sb.append(Strings.encode(buffer, offset, UNIT_LENGTH_BYTES, Strings.HEX));
+            sb.append(labeler.paddedLabel(row++))
+              .append(Strings.encode(buffer, offset, UNIT_LENGTH_BYTES, Strings.HEX));
             offset += UNIT_LENGTH_BYTES;
         }
         return sb.toString();
