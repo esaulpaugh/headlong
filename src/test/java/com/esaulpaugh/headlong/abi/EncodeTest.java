@@ -43,6 +43,8 @@ public class EncodeTest {
 
     private static final Class<IllegalArgumentException> ILLEGAL = IllegalArgumentException.class;
 
+    private static final Class<StringIndexOutOfBoundsException> SIOOBE = StringIndexOutOfBoundsException.class;
+
     @Disabled("may take minutes to run")
     @Test
     public void fuzzSignatures() throws InterruptedException {
@@ -187,41 +189,37 @@ public class EncodeTest {
         assertThrown(ILLEGAL, "unrecognized type: ", () -> TupleType.parse(""));
         assertThrown(ILLEGAL, "unrecognized type: \"(\"", () -> TupleType.parse("("));
         assertThrown(ILLEGAL, "unrecognized type: \")\"", () -> TupleType.parse(")"));
+        assertThrown(ILLEGAL, "unrecognized type: \"aaaaaa\"", () -> TupleType.parse("aaaaaa"));
 
+        final TestUtils.CustomRunnable emptyFn = () -> Function.parse("");
         try {
-            assertThrown(StringIndexOutOfBoundsException.class, "begin 0, end -1, length 0", () -> Function.parse(""));
+            assertThrown(SIOOBE, "begin 0, end -1, length 0", emptyFn);
         } catch (StringIndexOutOfBoundsException sioobe) {
             try {
-                assertThrown(StringIndexOutOfBoundsException.class, "String index out of range: -1", () -> Function.parse(""));
+                assertThrown(SIOOBE, "String index out of range: -1", emptyFn);
             } catch (StringIndexOutOfBoundsException sioobe2) {
-                assertThrown(StringIndexOutOfBoundsException.class, "String index out of range: 0", () -> Function.parse(""));
+                assertThrown(SIOOBE, "String index out of range: 0", emptyFn);
             }
         }
 
         assertThrown(ILLEGAL, "unrecognized type: \"(\"", () -> Function.parse("("));
 
+        final TestUtils.CustomRunnable closeFn = () -> Function.parse(")");
         try {
-            assertThrown(StringIndexOutOfBoundsException.class, "begin 0, end -1, length 1", () -> Function.parse(")"));
+            assertThrown(SIOOBE, "begin 0, end -1, length 1", closeFn);
         } catch (StringIndexOutOfBoundsException sioobe) {
             try {
-                assertThrown(StringIndexOutOfBoundsException.class, "String index out of range: -1", () -> Function.parse(")"));
+                assertThrown(SIOOBE, "String index out of range: -1", closeFn);
             } catch (StringIndexOutOfBoundsException sioobe2) {
-                assertThrown(StringIndexOutOfBoundsException.class, "String index out of range: 0", () -> Function.parse(")"));
+                assertThrown(SIOOBE, "String index out of range: 0", closeFn);
             }
         }
 
-        assertThrown(ILLEGAL, "unrecognized type: \"aaaaaa\"", () -> TupleType.parse("aaaaaa"));
-
         assertThrown(ILLEGAL, "unrecognized type: \"([\"", () -> Function.parse("(["));
-
         assertThrown(ILLEGAL, "unrecognized type: \"(int\"", () -> Function.parse("(int"));
-
         assertThrown(ILLEGAL, "unrecognized type: \"(bool[],\"", () -> Function.parse("(bool[],"));
-
         assertThrown(ILLEGAL, "unrecognized type: \"(()\"", () -> Function.parse("(()"));
-
         assertThrown(ILLEGAL, "unrecognized type: \"(())...\"", () -> Function.parse("(())..."));
-
         assertThrown(ILLEGAL, "unrecognized type: \"((((()))\"", () -> Function.parse("((((()))"));
 
         try {
