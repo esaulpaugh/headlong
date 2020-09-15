@@ -191,7 +191,11 @@ public class EncodeTest {
         try {
             assertThrown(StringIndexOutOfBoundsException.class, "begin 0, end -1, length 0", () -> Function.parse(""));
         } catch (StringIndexOutOfBoundsException sioobe) {
-            assertThrown(StringIndexOutOfBoundsException.class, "String index out of range: -1", () -> Function.parse(""));
+            try {
+                assertThrown(StringIndexOutOfBoundsException.class, "String index out of range: -1", () -> Function.parse(""));
+            } catch (StringIndexOutOfBoundsException sioobe2) {
+                assertThrown(StringIndexOutOfBoundsException.class, "String index out of range: 0", () -> Function.parse(""));
+            }
         }
 
         assertThrown(ILLEGAL, "unrecognized type: \"(\"", () -> Function.parse("("));
@@ -199,7 +203,11 @@ public class EncodeTest {
         try {
             assertThrown(StringIndexOutOfBoundsException.class, "begin 0, end -1, length 1", () -> Function.parse(")"));
         } catch (StringIndexOutOfBoundsException sioobe) {
-            assertThrown(StringIndexOutOfBoundsException.class, "String index out of range: -1", () -> Function.parse(")"));
+            try {
+                assertThrown(StringIndexOutOfBoundsException.class, "String index out of range: -1", () -> Function.parse(")"));
+            } catch (StringIndexOutOfBoundsException sioobe2) {
+                assertThrown(StringIndexOutOfBoundsException.class, "String index out of range: 0", () -> Function.parse(")"));
+            }
         }
 
         assertThrown(ILLEGAL, "unrecognized type: \"aaaaaa\"", () -> TupleType.parse("aaaaaa"));
@@ -216,7 +224,11 @@ public class EncodeTest {
 
         assertThrown(ILLEGAL, "unrecognized type: \"((((()))\"", () -> Function.parse("((((()))"));
 
-        assertThrown(ClassCastException.class, "ArrayType cannot be cast to ", () -> Function.parse("f()[]"));
+        try {
+            assertThrown(ClassCastException.class, "ArrayType cannot be cast to ", () -> Function.parse("f()[]"));
+        } catch (ClassCastException cce) {
+            assertThrown(ClassCastException.class, "ArrayType incompatible with com.esaulpaugh.headlong.abi.TupleType", () -> Function.parse("f()[]"));
+        }
     }
 
     @Test
