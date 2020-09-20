@@ -68,8 +68,8 @@ public class MeasureFunction {
     @Benchmark
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.AverageTime)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
+    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
+    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
     public void decode_call(Blackhole blackhole) {
         blackhole.consume(f.decodeCall(encodedCall));
     }
