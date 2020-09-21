@@ -40,7 +40,7 @@ public class FastBase64 {
         for (int i = 0; i < len; i++) {
             final int offset = i * len;
             for (int j = 0; j < len; j++) {
-                largeTable[offset + j] = (short) ((smallTable[i] << Byte.SIZE) | smallTable[j]);
+                largeTable[offset + j] = (short) ((smallTable[i] << Byte.SIZE) | (smallTable[j] & 0xFF));
             }
         }
         return largeTable;

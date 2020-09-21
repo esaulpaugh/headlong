@@ -41,7 +41,7 @@ public final class FastHex {
         for (int i = 0; i < ENCODE_TABLE.length; i++) {
             int leftChar = chars[(i & leftNibbleMask) >>> BITS_PER_CHAR];
             int rightChar = chars[i & rightNibbleMask];
-            ENCODE_TABLE[i] = (short) ((leftChar << Byte.SIZE) | rightChar);
+            ENCODE_TABLE[i] = (short) ((leftChar << Byte.SIZE) | (rightChar & 0xFFFF));
         }
 
         Arrays.fill(DECODE_TABLE, NO_MAPPING);
