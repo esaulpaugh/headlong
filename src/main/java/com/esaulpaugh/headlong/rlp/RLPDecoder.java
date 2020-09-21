@@ -23,6 +23,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiPredicate;
 
+import static com.esaulpaugh.headlong.rlp.DataType.*;
+
 /** Decodes RLP-formatted data. */
 public final class RLPDecoder {
 
@@ -99,10 +101,10 @@ public final class RLPDecoder {
     public RLPString wrapString(byte[] buffer, int index) {
         byte lead = buffer[index];
         DataType type = DataType.type(lead);
-        switch (type) {
-        case SINGLE_BYTE:
-        case STRING_SHORT:
-        case STRING_LONG: return new RLPString(lead, type, buffer, index, Integer.MAX_VALUE, lenient);
+        switch (type.ordinal()) {
+        case ORDINAL_SINGLE_BYTE:
+        case ORDINAL_STRING_SHORT:
+        case ORDINAL_STRING_LONG: return new RLPString(lead, type, buffer, index, Integer.MAX_VALUE, lenient);
         default: throw new IllegalArgumentException("item is not a string");
         }
     }
@@ -114,9 +116,9 @@ public final class RLPDecoder {
     public RLPList wrapList(byte[] buffer, int index) {
         byte lead = buffer[index];
         DataType type = DataType.type(lead);
-        switch (type) {
-        case LIST_SHORT:
-        case LIST_LONG: return new RLPList(lead, type, buffer, index, Integer.MAX_VALUE, lenient);
+        switch (type.ordinal()) {
+        case ORDINAL_LIST_SHORT:
+        case ORDINAL_LIST_LONG: return new RLPList(lead, type, buffer, index, Integer.MAX_VALUE, lenient);
         default: throw new IllegalArgumentException("item is not a list");
         }
     }
@@ -143,12 +145,12 @@ public final class RLPDecoder {
     RLPItem wrap(byte[] buffer, int index, int containerEnd) {
         byte lead = buffer[index];
         DataType type = DataType.type(lead);
-        switch (type) {
-        case SINGLE_BYTE:
-        case STRING_SHORT:
-        case STRING_LONG: return new RLPString(lead, type, buffer, index, containerEnd, lenient);
-        case LIST_SHORT:
-        case LIST_LONG: return new RLPList(lead, type, buffer, index, containerEnd, lenient);
+        switch (type.ordinal()) {
+        case ORDINAL_SINGLE_BYTE:
+        case ORDINAL_STRING_SHORT:
+        case ORDINAL_STRING_LONG: return new RLPString(lead, type, buffer, index, containerEnd, lenient);
+        case ORDINAL_LIST_SHORT:
+        case ORDINAL_LIST_LONG: return new RLPList(lead, type, buffer, index, containerEnd, lenient);
         default: throw new Error();
         }
     }

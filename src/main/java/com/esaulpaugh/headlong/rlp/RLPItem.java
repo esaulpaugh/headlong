@@ -25,8 +25,7 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
-import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT;
+import static com.esaulpaugh.headlong.rlp.DataType.*;
 
 /**
  * An immutable view of a portion of a byte array containing RLP-encoded data, starting at {@code index} (inclusive) and
@@ -53,18 +52,18 @@ public abstract class RLPItem {
         final long _dataLength;
         
         final int diff = lead - type.offset;
-        switch (type) {
-        case SINGLE_BYTE:
+        switch (type.ordinal()) {
+        case ORDINAL_SINGLE_BYTE:
             _dataIndex = index;
             _dataLength = 1;
             break;
-        case STRING_SHORT:
-        case LIST_SHORT:
+        case ORDINAL_STRING_SHORT:
+        case ORDINAL_LIST_SHORT:
             _dataIndex = index + 1;
             _dataLength = diff;
             break;
-        case STRING_LONG:
-        case LIST_LONG:
+        case ORDINAL_STRING_LONG:
+        case ORDINAL_LIST_LONG:
             int lengthIndex = index + 1;
             _dataIndex = lengthIndex + diff; // type dictates that diff guaranteed to be in [1,8]
             if (_dataIndex > containerEnd) {
