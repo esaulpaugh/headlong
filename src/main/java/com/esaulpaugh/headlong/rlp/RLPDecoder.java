@@ -23,7 +23,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiPredicate;
 
-import static com.esaulpaugh.headlong.rlp.DataType.*;
+import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_LONG;
+import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_SHORT;
+import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_SINGLE_BYTE;
+import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_LONG;
+import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_SHORT;
 
 /** Decodes RLP-formatted data. */
 public final class RLPDecoder {

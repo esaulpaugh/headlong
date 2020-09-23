@@ -25,7 +25,13 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import static com.esaulpaugh.headlong.rlp.DataType.*;
+import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
+import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_LONG;
+import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_SHORT;
+import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_SINGLE_BYTE;
+import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_LONG;
+import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_SHORT;
+import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT;
 
 /**
  * An immutable view of a portion of a byte array containing RLP-encoded data, starting at {@code index} (inclusive) and
