@@ -87,7 +87,7 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
 
     @Override
     public boolean equals(Object o) {
-        return (this == o) || (getClass().isInstance(o) && Arrays.equals(((KeyValuePair) o).key, this.key));
+        return (this == o) || (o instanceof KeyValuePair && Arrays.equals(((KeyValuePair) o).key, this.key));
     }
 
     @Override

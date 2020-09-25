@@ -86,7 +86,7 @@ public final class Event implements ABIObject {
 
     @Override
     public boolean equals(Object o) {
-        if(!getClass().isInstance(o)) return false;
+        if(!(o instanceof Event)) return false;
         Event other = (Event) o;
         return other.anonymous == this.anonymous
                 && other.name.equals(this.name)

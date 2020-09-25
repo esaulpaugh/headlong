@@ -245,7 +245,7 @@ public final class Function implements ABIObject {
 
     @Override
     public boolean equals(Object o) {
-        if(!getClass().isInstance(o)) return false;
+        if(!(o instanceof Function)) return false;
         Function other = (Function) o;
         return other.type == this.type &&
                 Objects.equals(other.name, this.name) &&
