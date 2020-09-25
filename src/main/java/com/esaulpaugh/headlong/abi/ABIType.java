@@ -137,7 +137,7 @@ public abstract class ABIType<J> {
     }
 
     /**
-     * Parses and validates a string representation of J. Not supported by {@link ArrayType}, {@link TupleType}.
+     * Parses and validates a string representation of J.
      *
      * @param s the object's string representation
      * @return  the object
