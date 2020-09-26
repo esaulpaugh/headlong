@@ -28,6 +28,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TupleTest {
@@ -114,10 +115,19 @@ public class TupleTest {
 
     @Test
     public void testTuple() {
-        final Tuple empty = new Tuple();
-        assertEquals(Tuple.EMPTY, empty);
+        final Tuple emptyA = new Tuple();
+        final Tuple emptyB = new Tuple(new Object[] {});
+
+        assertEquals(Tuple.EMPTY, emptyA);
+        assertEquals(Tuple.EMPTY, emptyB);
+
         assertTrue(Tuple.EMPTY.isEmpty());
-        assertTrue(empty.isEmpty());
+        assertTrue(emptyA.isEmpty());
+        assertTrue(emptyB.isEmpty());
+
+        assertFalse(new Tuple(0).isEmpty());
+        assertFalse(new Tuple(false).isEmpty());
+        assertFalse(new Tuple((Object) null).isEmpty());
     }
 
     @Test
