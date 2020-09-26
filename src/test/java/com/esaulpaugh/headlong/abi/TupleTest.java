@@ -28,6 +28,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TupleTest {
 
@@ -109,6 +110,14 @@ public class TupleTest {
             }
         }
         return val;
+    }
+
+    @Test
+    public void testTuple() {
+        final Tuple empty = new Tuple();
+        assertEquals(Tuple.EMPTY, empty);
+        assertTrue(Tuple.EMPTY.isEmpty());
+        assertTrue(empty.isEmpty());
     }
 
     @Test
