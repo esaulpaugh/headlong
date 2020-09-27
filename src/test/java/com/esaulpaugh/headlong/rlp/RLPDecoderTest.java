@@ -227,10 +227,16 @@ public class RLPDecoderTest {
 
     @Test
     public void testListIterable() throws Throwable {
-        RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
-        for(RLPItem item : rlpList) {
-            System.out.println(item.type() + " " + item.dataLength + " " + item.asString(Strings.HEX));
-        }
+        final RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
+        assertEquals(DataType.LIST_LONG, rlpList.type());
+
+        final List<RLPItem> elements = rlpList.elements();
+        assertEquals(DataType.LIST_SHORT, elements.get(0).type());
+        assertEquals(DataType.STRING_LONG, elements.get(1).type());
+        assertEquals(DataType.LIST_LONG, elements.get(2).type());
+        assertEquals(DataType.STRING_SHORT, elements.get(3).type());
+        assertEquals(DataType.STRING_SHORT, elements.get(4).type());
+        assertEquals(DataType.LIST_SHORT, elements.get(5).type());
 
         byte[] copy = Arrays.copyOf(LONG_LIST_BYTES, LONG_LIST_BYTES.length);
 
