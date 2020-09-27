@@ -60,8 +60,8 @@ final class PackedEncoder {
         case TYPE_CODE_BYTE: dest.put(arrayType.decodeIfString(value)); return;
         case TYPE_CODE_INT: encodeInts((int[]) value, elementType.byteLengthPacked(null), dest); return;
         case TYPE_CODE_LONG: encodeLongs((long[]) value, elementType.byteLengthPacked(null), dest); return;
-        case TYPE_CODE_BIG_INTEGER: Encoding.insertBigIntegers((BigInteger[]) value, elementType.byteLengthPacked(null), dest); return;
-        case TYPE_CODE_BIG_DECIMAL: Encoding.insertBigDecimals((BigDecimal[]) value, elementType.byteLengthPacked(null), dest); return;
+        case TYPE_CODE_BIG_INTEGER:
+        case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
             for(Object e : (Object[]) value) {

@@ -76,16 +76,4 @@ final class Encoding {
     static void insertPadding(int n, boolean negativeOnes, ByteBuffer dest) {
         dest.put(!negativeOnes ? CACHED_ZERO_PADDING : CACHED_NEG1_PADDING, 0, n);
     }
-
-    static void insertBigIntegers(BigInteger[] arr, int byteLen, ByteBuffer dest) {
-        for (BigInteger e : arr) {
-            insertInt(e, byteLen, dest);
-        }
-    }
-
-    static void insertBigDecimals(BigDecimal[] arr, int byteLen, ByteBuffer dest) {
-        for (BigDecimal e : arr) {
-            insertInt(e.unscaledValue(), byteLen, dest);
-        }
-    }
 }
