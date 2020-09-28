@@ -176,15 +176,15 @@ public final class SuperSerial {
 
     private static byte[] toSigned(int typeBits, BigInteger val) {
         final int signum = val.signum();
-        if(signum == 0) {
-            return Strings.EMPTY_BYTE_ARRAY;
-        }
-        final byte[] bytes = val.toByteArray();
-        return signum < 0
-                ? signExtendNegative(bytes, typeBits / Byte.SIZE)
-                : bytes[0] != 0
+        if(signum != 0) {
+            final byte[] bytes = val.toByteArray();
+            return signum < 0
+                    ? signExtendNegative(bytes, typeBits / Byte.SIZE)
+                    : bytes[0] != 0
                     ? bytes
                     : Arrays.copyOfRange(bytes, 1, bytes.length);
+        }
+        return Strings.EMPTY_BYTE_ARRAY;
     }
 
     private static byte[] signExtendNegative(final byte[] negative, final int newWidth) {
@@ -213,10 +213,10 @@ public final class SuperSerial {
     private static Object serializeArray(ArrayType<? extends ABIType<?>, ?> arrayType, Object arr) {
         final ABIType<?> elementType = arrayType.getElementType();
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return serializeBooleanArray(arr);
-        case TYPE_CODE_BYTE: return serializeByteArray(arrayType, arr);
-        case TYPE_CODE_INT: return serializeIntArray(arr);
-        case TYPE_CODE_LONG: return serializeLongArray(arr);
+        case TYPE_CODE_BOOLEAN: return serializeBooleanArray((boolean[]) arr);
+        case TYPE_CODE_BYTE: return serializeByteArray(arr, arrayType.isString());
+        case TYPE_CODE_INT: return serializeIntArray((int[]) arr);
+        case TYPE_CODE_LONG: return serializeLongArray((long[]) arr);
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
@@ -229,7 +229,7 @@ public final class SuperSerial {
         final ABIType<?> elementType = arrayType.getElementType();
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return deserializeBooleanArray((RLPList) item);
-        case TYPE_CODE_BYTE: return deserializeByteArray(arrayType, (RLPString) item);
+        case TYPE_CODE_BYTE: return deserializeByteArray(item, arrayType.isString());
         case TYPE_CODE_INT: return deserializeIntArray((RLPList) item);
         case TYPE_CODE_LONG: return deserializeLongArray((RLPList) item);
         case TYPE_CODE_BIG_INTEGER:
@@ -240,8 +240,7 @@ public final class SuperSerial {
         }
     }
 
-    private static byte[][] serializeBooleanArray(Object arr) {
-        boolean[] booleans = (boolean[]) arr;
+    private static byte[][] serializeBooleanArray(boolean[] booleans) {
         final int len = booleans.length;
         byte[][] out = new byte[len][];
         for (int i = 0; i < len; i++) {
@@ -260,16 +259,15 @@ public final class SuperSerial {
         return in;
     }
 
-    private static byte[] serializeByteArray(ArrayType<? extends ABIType<?>,?> arrayType, Object arr) {
-        return arrayType.isString() ? Strings.decode((String) arr, Strings.UTF_8) : (byte[]) arr;
+    private static byte[] serializeByteArray(Object arr, boolean isString) {
+        return isString ? Strings.decode((String) arr, Strings.UTF_8) : (byte[]) arr;
     }
 
-    private static Object deserializeByteArray(ArrayType<? extends ABIType<?>,?> arrayType, RLPString string) {
-        return arrayType.isString() ? string.asString(Strings.UTF_8) : string.asBytes();
+    private static Object deserializeByteArray(RLPItem item, boolean isString) {
+        return isString ? item.asString(Strings.UTF_8) : item.asBytes();
     }
 
-    private static byte[][] serializeIntArray(Object arr) {
-        int[] ints = (int[]) arr;
+    private static byte[][] serializeIntArray(int[] ints) {
         final int len = ints.length;
         byte[][] out = new byte[len][];
         for (int i = 0; i < len; i++) {
@@ -288,8 +286,7 @@ public final class SuperSerial {
         return in;
     }
 
-    private static byte[][] serializeLongArray(Object arr) {
-        long[] longs = (long[]) arr;
+    private static byte[][] serializeLongArray(long[] longs) {
         final int len = longs.length;
         byte[][] out = new byte[len][];
         for (int i = 0; i < len; i++) {
