@@ -251,10 +251,10 @@ public final class SuperSerial {
 
     private static boolean[] deserializeBooleanArray(RLPList list) {
         List<RLPItem> elements = list.elements(RLP_STRICT);
-        boolean[] in = new boolean[elements.size()];
-        int i = 0;
-        for (RLPItem e : elements) {
-            in[i++] = e.asBoolean();
+        final int len = elements.size();
+        boolean[] in = new boolean[len];
+        for (int i = 0; i < len; i++) {
+            in[i] = elements.get(i).asBoolean();
         }
         return in;
     }
@@ -278,10 +278,10 @@ public final class SuperSerial {
 
     private static int[] deserializeIntArray(RLPList list) {
         List<RLPItem> elements = list.elements(RLP_STRICT);
-        int[] in = new int[elements.size()];
-        int i = 0;
-        for (RLPItem e : elements) {
-            in[i++] = e.asInt(false);
+        final int len = elements.size();
+        int[] in = new int[len];
+        for (int i = 0; i < len; i++) {
+            in[i] = elements.get(i).asInt(false);
         }
         return in;
     }
@@ -297,10 +297,10 @@ public final class SuperSerial {
 
     private static long[] deserializeLongArray(RLPList list) {
         List<RLPItem> elements = list.elements(RLP_STRICT);
-        long[] in = new long[elements.size()];
-        int i = 0;
-        for (RLPItem e : elements) {
-            in[i++] = e.asLong();
+        final int len = elements.size();
+        long[] in = new long[len];
+        for (int i = 0; i < len; i++) {
+            in[i] = elements.get(i).asLong();
         }
         return in;
     }
@@ -317,10 +317,10 @@ public final class SuperSerial {
 
     private static Object[] deserializeObjectArray(ABIType<?> elementType, RLPList list) {
         List<RLPItem> elements = list.elements(RLP_STRICT);
-        Object[] in = (Object[]) Array.newInstance(elementType.clazz(), elements.size()); // reflection ftw
-        int i = 0;
-        for (RLPItem e : elements) {
-            in[i++] = deserialize(elementType, e);
+        final int len = elements.size();
+        Object[] in = (Object[]) Array.newInstance(elementType.clazz(), len); // reflection ftw
+        for (int i = 0; i < len; i++) {
+            in[i] = deserialize(elementType, elements.get(i));
         }
         return in;
     }
