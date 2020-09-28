@@ -531,6 +531,30 @@ public class RLPDecoderTest {
         for (int i = 0; i < 9; i++) {
             assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
         }
+
+        List<RLPItem> list = RLP_STRICT.collectN(rlp, 4);
+        assertEquals(4, list.size());
+        for (int i = 0; i < 4; i++) {
+            assertEquals(list.get(i), RLP_STRICT.wrap((byte) i));
+        }
+
+        list = RLP_STRICT.collectN(rlp, 1, 3);
+        assertEquals(3, list.size());
+        for (int i = 0; i < 3; i++) {
+            assertEquals(list.get(i), RLP_STRICT.wrap((byte) (i + 1)));
+        }
+
+        list = RLP_STRICT.collectAll(rlp, 1);
+        assertEquals(8, list.size());
+
+        list = RLP_STRICT.collectBefore(rlp, 3);
+        assertEquals(3, list.size());
+
+        list = RLP_STRICT.collectBefore(rlp, 2, 8);
+        assertEquals(6, list.size());
+        for (int i = 0; i < 6; i++) {
+            assertEquals(list.get(i), RLP_STRICT.wrap((byte) (i + 2)));
+        }
     }
 
     @Test
