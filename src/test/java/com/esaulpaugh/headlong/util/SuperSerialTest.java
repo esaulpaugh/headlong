@@ -29,6 +29,8 @@ public class SuperSerialTest {
                 () -> SuperSerial.deserialize(TupleType.parse("(uint256)"), "('0092030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2020')", false)
         );
 
+        TestUtils.assertThrown(IllegalArgumentException.class, "RLPList not allowed for this type: int8", () -> SuperSerial.deserialize(TupleType.of("int8"), "([])", false));
+
         String sig = "(uint[],int[],uint32,(int32,uint8,(bool[],int8,int40,int64,int,int,int[]),bool,bool,int256[]),int,int)";
 
         Function f = new Function(sig);
