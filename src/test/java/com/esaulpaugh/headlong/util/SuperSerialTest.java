@@ -1,3 +1,18 @@
+/*
+   Copyright 2020 Evan Saulpaugh
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
 package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.TestUtils;
@@ -29,7 +44,9 @@ public class SuperSerialTest {
                 () -> SuperSerial.deserialize(TupleType.parse("(uint256)"), "('0092030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2020')", false)
         );
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "RLPList not allowed for this type: int8", () -> SuperSerial.deserialize(TupleType.of("int8"), "([])", false));
+        TestUtils.assertThrown(IllegalArgumentException.class, "RLPList not allowed for this type: int8",
+                () -> SuperSerial.deserialize(TupleType.of("int8"), "([])", false)
+        );
 
         String sig = "(uint[],int[],uint32,(int32,uint8,(bool[],int8,int40,int64,int,int,int[]),bool,bool,int256[]),int,int)";
 
