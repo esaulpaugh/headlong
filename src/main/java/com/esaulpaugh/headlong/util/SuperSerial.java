@@ -37,7 +37,14 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.esaulpaugh.headlong.abi.ABIType.*;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_DECIMAL;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_INTEGER;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BOOLEAN;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BYTE;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 
