@@ -39,11 +39,10 @@ final class Utils {
 
     static String friendlyClassName(Class<?> clazz, Integer arrayLength) {
         final String className = clazz.getName();
-
         final int split = className.lastIndexOf('[') + 1;
         final boolean hasArraySuffix = split > 0;
-        final String base = hasArraySuffix ? className.substring(split) : className;
         final StringBuilder sb = new StringBuilder();
+        final String base = hasArraySuffix ? className.substring(split) : className;
         switch (base) {
             case "B": sb.append("byte"); break;
             case "S": sb.append("short"); break;
@@ -66,7 +65,7 @@ final class Utils {
                 sb.append('[').append(arrayLength).append(']');
                 i++;
             }
-            for ( ; i < split; i++) {
+            while (i++ < split) {
                 sb.append("[]");
             }
         }

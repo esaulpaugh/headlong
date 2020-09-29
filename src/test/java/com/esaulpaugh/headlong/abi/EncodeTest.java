@@ -435,4 +435,11 @@ public class EncodeTest {
                 () -> Function.parse("(int8[])").encodeCall(Tuple.of((Object) new int[] { 120, 256 }))
         );
     }
+
+    @Test
+    public void testTypeSafety() throws Throwable {
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Long not assignable to java.lang.Integer (Long not instanceof Integer/int32)",
+                () -> Function.parse("foo(int32)").encodeCallWithArgs(10L)
+        );
+    }
 }
