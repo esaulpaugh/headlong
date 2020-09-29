@@ -79,13 +79,13 @@ repositories {
 dependencies {
 
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'org.bouncycastle:bcprov-jdk15on:1.65'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.66'
 
     test.useJUnitPlatform()
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.2"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.2"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.7.0"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.0"
 
-    jmhImplementation 'commons-codec:commons-codec:1.14'
+    jmhImplementation 'commons-codec:commons-codec:1.15'
     jmhImplementation 'org.openjdk.jmh:jmh-core:1.23'
     jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.23'
 }

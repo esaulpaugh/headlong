@@ -441,5 +441,9 @@ public class EncodeTest {
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Long not assignable to java.lang.Integer (Long not instanceof Integer/int32)",
                 () -> Function.parse("foo(int32)").encodeCallWithArgs(10L)
         );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Long not assignable to [[[[I (Long not instanceof int[][][][]/int32[][][][])",
+                () -> Function.parse("foo(int32[][][][])").encodeCallWithArgs(10L)
+        );
     }
 }
