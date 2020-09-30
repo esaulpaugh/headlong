@@ -26,13 +26,11 @@ test {
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc' // deprecated
-//    archiveClassifier.set('javadoc')
     from javadoc.destinationDir
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources' // deprecated
-//    archiveClassifier.set('sources')
     from sourceSets.main.allSource
     finalizedBy(javadocJar)
 }

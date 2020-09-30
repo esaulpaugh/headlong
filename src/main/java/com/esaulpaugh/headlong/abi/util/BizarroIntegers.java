@@ -164,9 +164,9 @@ public final class BizarroIntegers {
         int shiftAmount = 0;
         long val = 0L;
         switch (len) { /* cases 8 through 1 fall through */
-        case 8: val  =  buffer[offset+7] & 0xFF;                  shiftAmount  = Byte.SIZE;
-        case 7: val |= (buffer[offset+6] & 0xFF)  << shiftAmount; shiftAmount += Byte.SIZE;
-        case 6: val |= (buffer[offset+5] & 0xFF)  << shiftAmount; shiftAmount += Byte.SIZE;
+        case 8: val  =  buffer[offset+7] & 0xFFL;                 shiftAmount  = Byte.SIZE;
+        case 7: val |= (buffer[offset+6] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+        case 6: val |= (buffer[offset+5] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 5: val |= (buffer[offset+4] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 4: val |= (buffer[offset+3] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
         case 3: val |= (buffer[offset+2] & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
