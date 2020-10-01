@@ -158,10 +158,11 @@ public class MonteCarloTestCase {
     }
 
     void runAll(Random instance) {
-        ByteBuffer bb = runStandard();
-        runFuzzDecode(bb, instance);
-        runPacked();
+        byte[] encoded = runStandard().array();
+        runFuzzDecode(encoded, instance);
         runSuperSerial();
+        runPacked();
+        runFuzzPackedDecode(instance);
     }
 
     ByteBuffer runStandard() {
@@ -173,10 +174,8 @@ public class MonteCarloTestCase {
         return bb;
     }
 
-    private void runFuzzDecode(ByteBuffer bb, Random r) {
-        final Tuple args = this.argsTuple;
+    private void runFuzzDecode(byte[] babar, Random r) {
         r.setSeed(seed + 512);
-        final byte[] babar = bb.array();
         final int idx = r.nextInt(babar.length);
         final byte target = babar[idx];
         final byte addend = (byte) (1 + r.nextInt(255));
@@ -185,6 +184,51 @@ public class MonteCarloTestCase {
         Tuple decoded = null;
         try {
             decoded = function.decodeCall(babar);
+            equal = this.argsTuple.equals(decoded);
+        } catch (IllegalArgumentException ignored) {
+            /* do nothing */
+        } catch (Throwable t) {
+            t.printStackTrace();
+            throw new Error(t);
+        }
+        if (equal) {
+            if(false) { // strings cause false positives
+                String change = target + " --> " + babar[idx] + " (0x" + Strings.encode(target) + " --> 0x" + Strings.encode(babar[idx]) + ")";
+                try {
+                    Thread.sleep(new Random(seed + 2).nextInt(50)); // deconflict timing of writes to System.err below
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                final Tuple args = this.argsTuple;
+                System.err.println(change);
+                System.err.println(function.getParamTypes() + "\n" + Function.formatCall(babar) + "\nidx=" + idx);
+                System.err.println(Strings.encode(babar, 0, idx, Strings.HEX));
+                System.err.println(SuperSerial.serialize(function.getParamTypes(), args, true));
+                System.err.println(SuperSerial.serialize(function.getParamTypes(), decoded, true));
+                throw new IllegalArgumentException("idx=" + idx + " " + seed + " " + function.getCanonicalSignature() + " " + args);
+            }
+        }
+    }
+
+    private void runFuzzPackedDecode(Random r) {
+        final TupleType tt = this.function.getParamTypes();
+        final Tuple args = this.argsTuple;
+        final int packedLen = tt.byteLengthPacked(args);
+        if(packedLen == 0) {
+            return;
+        }
+        ByteBuffer packed = ByteBuffer.allocate(packedLen);
+        PackedEncoder.encodeTuple(tt, args, packed);
+        r.setSeed(seed + 512);
+        final byte[] parr = packed.array();
+        final int idx = r.nextInt(parr.length);
+        final byte target = parr[idx];
+        final byte addend = (byte) (1 + r.nextInt(255));
+        parr[idx] += addend;
+        boolean equal = false;
+        Tuple decoded = null;
+        try {
+            decoded = PackedDecoder.decode(tt, parr);
             equal = args.equals(decoded);
         } catch (IllegalArgumentException ignored) {
             /* do nothing */
@@ -193,19 +237,8 @@ public class MonteCarloTestCase {
             throw new Error(t);
         }
         if (equal) {
-            if(false) { // disabled
-                String change = target + " --> " + babar[idx] + " (0x" + Strings.encode(target) + " --> 0x" + Strings.encode(babar[idx]) + ")";
-                try {
-                    Thread.sleep(new Random(seed + 2).nextInt(50)); // deconflict timing of writes to System.err below
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                System.err.println(change);
-                System.err.println(function.getParamTypes() + "\n" + Function.formatCall(babar) + "\nidx=" + idx);
-                System.err.println(Strings.encode(babar, 0, idx, Strings.HEX));
-                System.err.println(SuperSerial.serialize(function.getParamTypes(), args, true));
-                System.err.println(SuperSerial.serialize(function.getParamTypes(), decoded, true));
-                throw new IllegalArgumentException("idx=" + idx + " " + seed + " " + function.getCanonicalSignature() + " " + args);
+            if(false) { // strings cause false positives
+                throw new Error();
             }
         }
     }
@@ -226,7 +259,8 @@ public class MonteCarloTestCase {
             String msg = iae.getMessage();
             if(!"multiple dynamic elements".equals(msg)
                     && !"array of dynamic elements".equals(msg)
-                    && !"can't decode dynamic number of zero-length elements".equals(msg)) {
+                    && !"can't decode dynamic number of zero-length elements".equals(msg)
+                    && !msg.startsWith("illegal boolean value: ")) {
                 throw new RuntimeException(tt.canonicalType + " " + msg, iae);
             }
         }
