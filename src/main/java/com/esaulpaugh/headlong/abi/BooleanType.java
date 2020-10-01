@@ -44,7 +44,7 @@ public final class BooleanType extends UnitType<Boolean> {
 
     @Override
     int byteLengthPacked(Object value) {
-        return 1;
+        return Byte.BYTES;
     }
 
     @Override
@@ -68,7 +68,11 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     static Boolean decodeBoolean(byte b) {
-        return b == Encoding.ZERO_BYTE ? Boolean.FALSE : Boolean.TRUE;
+        switch (b) {
+            case Encoding.ZERO_BYTE: return Boolean.FALSE;
+            case Encoding.ONE_BYTE: return Boolean.TRUE;
+            default: throw new IllegalArgumentException("illegal boolean value: " + b);
+        }
     }
 
     @Override
