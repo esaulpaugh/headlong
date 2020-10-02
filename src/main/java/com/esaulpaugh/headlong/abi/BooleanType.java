@@ -21,8 +21,8 @@ import java.nio.ByteBuffer;
 /** Unsigned 0 or 1. */
 public final class BooleanType extends UnitType<Boolean> {
 
-    static final byte[] BOOLEAN_FALSE = new byte[UNIT_LENGTH_BYTES];
-    static final byte[] BOOLEAN_TRUE = new byte[UNIT_LENGTH_BYTES];
+    private static final byte[] BOOLEAN_FALSE = new byte[UNIT_LENGTH_BYTES];
+    private static final byte[] BOOLEAN_TRUE = new byte[UNIT_LENGTH_BYTES];
 
     static {
         BOOLEAN_TRUE[BOOLEAN_TRUE.length-1] = 1;
@@ -55,7 +55,7 @@ public final class BooleanType extends UnitType<Boolean> {
 
     @Override
     int encodeHead(Object value, ByteBuffer dest, int offset) {
-        dest.put((boolean) value ? BOOLEAN_TRUE : BOOLEAN_FALSE);
+        encodeBoolean((boolean) value, dest);
         return offset;
     }
 
@@ -65,6 +65,10 @@ public final class BooleanType extends UnitType<Boolean> {
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigInt(bi);
         return decodeBoolean(bi.byteValue());
+    }
+
+    static void encodeBoolean(boolean val, ByteBuffer dest) {
+        dest.put(val ? BOOLEAN_TRUE : BOOLEAN_FALSE);
     }
 
     static Boolean decodeBoolean(byte b) {

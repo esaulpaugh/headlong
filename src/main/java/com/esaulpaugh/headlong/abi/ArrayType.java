@@ -263,7 +263,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private void encodeBooleans(boolean[] arr, ByteBuffer dest) {
         insert(arr.length, dest, () -> {
             for (boolean e : arr) {
-                dest.put(e ? BooleanType.BOOLEAN_TRUE : BooleanType.BOOLEAN_FALSE);
+                BooleanType.encodeBoolean(e, dest);
             }
         });
     }
