@@ -116,7 +116,7 @@ public class TupleTest {
     @Test
     public void testTuple() {
         final Tuple emptyA = new Tuple();
-        final Tuple emptyB = new Tuple(new Object[] {});
+        final Tuple emptyB = new Tuple((Object[]) new Object[] {});
 
         assertEquals(Tuple.EMPTY, emptyA);
         assertEquals(Tuple.EMPTY, emptyB);

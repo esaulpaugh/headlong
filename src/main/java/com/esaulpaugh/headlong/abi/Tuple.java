@@ -43,10 +43,6 @@ public final class Tuple extends AbstractList<Object> implements RandomAccess {
         return elements.length;
     }
 
-    public boolean isEmpty() {
-        return this.size() == 0;
-    }
-
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(elements);
