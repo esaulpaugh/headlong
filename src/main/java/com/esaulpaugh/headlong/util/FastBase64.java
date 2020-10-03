@@ -31,10 +31,10 @@ public class FastBase64 {
     private static final short[] URL_SAFE = init("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".getBytes(StandardCharsets.US_ASCII));
 
     private static final class Standard { // inner class to delay loading of table until called for
-        private static final short[] STANDARD = init("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes(StandardCharsets.US_ASCII));
+        static final short[] STANDARD = init("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes(StandardCharsets.US_ASCII));
     }
 
-    private static short[] init(byte[] smallTable) {
+    static short[] init(byte[] smallTable) {
         final short[] largeTable = new short[1 << 12];
         final int len = smallTable.length;
         for (int i = 0; i < len; i++) {
