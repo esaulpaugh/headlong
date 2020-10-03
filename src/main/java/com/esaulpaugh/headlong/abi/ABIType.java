@@ -17,7 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
@@ -115,7 +115,7 @@ public abstract class ABIType<J> {
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
 
-    static void decodeTails(ByteBuffer bb, int[] offsets, int tailStart, Consumer<Integer> tailDecoder) {
+    static void decodeTails(ByteBuffer bb, int[] offsets, int tailStart, IntConsumer tailDecoder) {
         for (int i = 0; i < offsets.length; i++) {
             final int offset = offsets[i];
             if(offset > 0) {
