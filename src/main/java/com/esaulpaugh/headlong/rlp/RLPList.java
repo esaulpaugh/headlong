@@ -114,7 +114,7 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
     }
 
     public Iterator<RLPItem> iterator(RLPDecoder decoder) {
-        return new RLPListIterator(decoder);
+        return new RLPListIterator(decoder, this);
     }
 
     @Override
@@ -122,27 +122,30 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         return iterator(RLPDecoder.RLP_STRICT);
     }
 
-    private final class RLPListIterator implements Iterator<RLPItem> {
+    private static final class RLPListIterator implements Iterator<RLPItem> {
 
         private final RLPDecoder decoder;
+        private final byte[] buffer;
+        private int idx;
+        private final int endIndex;
 
-        private int nextElementIndex;
-
-        public RLPListIterator(RLPDecoder decoder) {
+        RLPListIterator(RLPDecoder decoder, RLPList rlpList) {
             this.decoder = decoder;
-            this.nextElementIndex = RLPList.this.dataIndex;
+            this.buffer = rlpList.buffer;
+            this.idx = rlpList.dataIndex;
+            this.endIndex = rlpList.endIndex;
         }
 
         @Override
         public boolean hasNext() {
-            return this.nextElementIndex < RLPList.this.endIndex;
+            return idx < endIndex;
         }
 
         @Override
         public RLPItem next() {
             if (hasNext()) {
-                RLPItem next = decoder.wrap(RLPList.this.buffer, this.nextElementIndex, RLPList.this.endIndex);
-                this.nextElementIndex = next.endIndex;
+                RLPItem next = decoder.wrap(buffer, idx, endIndex);
+                idx = next.endIndex;
                 return next;
             }
             throw new NoSuchElementException();
