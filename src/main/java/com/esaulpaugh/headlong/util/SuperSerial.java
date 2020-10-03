@@ -108,7 +108,7 @@ public final class SuperSerial {
     private static Object serialize(ABIType<?> type, Object obj) {
         final int typeCode = type.typeCode();
         switch (typeCode) {
-        case TYPE_CODE_BOOLEAN: return (boolean) obj ? TRUE : FALSE;
+        case TYPE_CODE_BOOLEAN: return serializeBoolean((boolean) obj);
         case TYPE_CODE_BYTE: return Integers.toBytes((byte) obj); // case currently goes unused
         case TYPE_CODE_INT: return toSigned(((IntType) type).getBitLength(), BigInteger.valueOf((int) obj));
         case TYPE_CODE_LONG: return toSigned(((LongType) type).getBitLength(), BigInteger.valueOf((long) obj));
@@ -122,6 +122,10 @@ public final class SuperSerial {
         case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, obj);
         default: throw new Error();
         }
+    }
+
+    private static byte[] serializeBoolean(boolean val) {
+        return val ? TRUE : FALSE;
     }
 
     private static Object serializeBigInteger(UnitType<?> ut, BigInteger bigInt) {
@@ -243,7 +247,7 @@ public final class SuperSerial {
         final int len = booleans.length;
         byte[][] out = new byte[len][];
         for (int i = 0; i < len; i++) {
-            out[i] = booleans[i] ? TRUE : FALSE;
+            out[i] = serializeBoolean(booleans[i]);
         }
         return out;
     }
