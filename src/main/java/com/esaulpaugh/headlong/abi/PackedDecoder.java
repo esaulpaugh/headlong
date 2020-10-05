@@ -67,7 +67,7 @@ public final class PackedDecoder {
     private static int countDynamicsArrayType(ABIType<?> type) {
         int numDynamic = 0;
         do {
-            final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<? extends ABIType<?>, ?>) type;
+            ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<? extends ABIType<?>, ?>) type;
             if(DYNAMIC_LENGTH == arrayType.getLength()) {
                 numDynamic++;
             }

@@ -51,8 +51,7 @@ public final class WrappedKeccak extends MessageDigest {
 
     @Override
     public int engineDigest(byte[] buf, int offset, int len) {
-        byte[] digest = engineDigest();
-        System.arraycopy(digest, 0, buf, offset, len);
+        System.arraycopy(engineDigest(), 0, buf, offset, len);
         return len;
     }
 
