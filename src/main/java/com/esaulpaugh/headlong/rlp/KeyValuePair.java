@@ -35,8 +35,8 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
         if(a != b) {
             int i = 0;
             final int len = Math.min(a.length, b.length);
-            boolean mismatch = false;
-            for ( ; i < len; i++) {
+            boolean mismatch;
+            for (mismatch = false; i < len; i++) {
                 if (a[i] != b[i]) {
                     mismatch = true;
                     break;

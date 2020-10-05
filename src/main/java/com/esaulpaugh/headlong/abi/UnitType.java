@@ -22,14 +22,14 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 /** Superclass for any 256-bit ("unit") Contract ABI type. Usually numbers or boolean. Not for arrays. */
-public abstract class UnitType<V> extends ABIType<V> { // V generally extends Number or is Boolean
+public abstract class UnitType<J> extends ABIType<J> { // J generally extends Number or is Boolean
 
     public static final int UNIT_LENGTH_BYTES = 32;
 
     final int bitLength;
     final boolean unsigned;
 
-    UnitType(String canonicalType, Class<V> clazz, int bitLength, boolean unsigned) {
+    UnitType(String canonicalType, Class<J> clazz, int bitLength, boolean unsigned) {
         super(canonicalType, clazz, false);
         this.bitLength = bitLength;
         this.unsigned = unsigned;
