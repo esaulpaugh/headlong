@@ -136,4 +136,9 @@ public class StringsTest {
 
         TestUtils.assertThrown(IllegalArgumentException.class, "illegal hex val @ 1", () -> FastHex.decode("0'"));
     }
+
+    @Test
+    public void testSingleByteHex() {
+        assertEquals("02", FastHex.encodeToString((byte) 0b0000_0010));
+    }
 }
