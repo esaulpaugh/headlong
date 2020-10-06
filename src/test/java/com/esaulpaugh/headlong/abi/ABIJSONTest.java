@@ -20,7 +20,6 @@ import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -31,6 +30,7 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ABIJSONTest {
@@ -263,12 +263,18 @@ public class ABIJSONTest {
         for (String originalJson : jsons) {
             ABIObject orig = ABIJSON.parseABIObject(JsonUtils.parseObject(originalJson));
             String newJson = orig.toJson(false);
-            Assertions.assertNotEquals(originalJson, newJson);
+            assertNotEquals(originalJson, newJson);
 
             ABIObject reconstructed = ABIJSON.parseABIObject(newJson);
 
-            Assertions.assertEquals(orig, reconstructed);
-            Assertions.assertEquals(originalJson, reconstructed.toString());
+            assertEquals(orig, reconstructed);
+            assertEquals(originalJson, reconstructed.toString());
+
+            if(orig instanceof Function) {
+                assertEquals(orig, ABIJSON.parseFunction(newJson));
+            } else {
+                assertEquals(orig, ABIJSON.parseEvent(newJson));
+            }
         }
     }
 

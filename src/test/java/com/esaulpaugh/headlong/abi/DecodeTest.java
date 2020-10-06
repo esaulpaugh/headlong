@@ -78,6 +78,7 @@ public class DecodeTest {
                 + "7730307400000000000000000000000000000000000000000000000000000000");
 
         assertEquals(RETURN_ARGS, FUNCTION.decodeReturn(lenientBytes));
+        assertEquals(RETURN_ARGS, FUNCTION.decodeReturn(ByteBuffer.wrap(lenientBytes)));
 
         final byte[] tooSmallOffset = Strings.decode(
                 "0000000000000000000000000000000000000000000000000000000000000045"
