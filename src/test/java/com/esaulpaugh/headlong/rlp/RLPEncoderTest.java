@@ -56,10 +56,14 @@ public class RLPEncoderTest {
                 new Object[0],
                 new byte[0]
         };
-        assertArrayEquals(
-                new byte[] { (byte)0xc2, (byte)0xc0, (byte)0x80 },
-                RLPEncoder.encodeAsList(objects)
-        );
+
+        byte[] expectedRLP = new byte[] { (byte)0xc2, (byte)0xc0, (byte)0x80 };
+
+        assertArrayEquals(expectedRLP, RLPEncoder.encodeAsList(objects));
+
+        ByteBuffer dest = ByteBuffer.allocate(expectedRLP.length);
+        RLPEncoder.encodeAsList(objects, dest);
+        assertArrayEquals(expectedRLP, dest.array());
     }
 
     @Test

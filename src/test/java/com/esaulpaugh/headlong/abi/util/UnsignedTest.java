@@ -218,4 +218,18 @@ public class UnsignedTest {
         }
         System.out.println((double) plus1 / n);
     }
+
+    @Test
+    public void testUnsignedAll() {
+
+        long[] unsignedA = new long[] { 249L, 252L, 253L, 0, 1, 7 };
+        BigInteger[] unsignedB = new BigInteger[] { BigInteger.valueOf(255L), BigInteger.valueOf(128L), BigInteger.valueOf(166L), BigInteger.valueOf(206L), BigInteger.valueOf(127L) };
+        BigInteger[] unsignedC = new BigInteger[] { BigInteger.valueOf(110L), BigInteger.valueOf(246L), BigInteger.valueOf(255L) };
+
+        Uint uint16 = new Uint(8);
+
+        Assertions.assertArrayEquals(unsignedA, uint16.toUnsignedLongAll(-7, -4, -3, 0, 1, 7));
+        Assertions.assertArrayEquals(unsignedB, uint16.toUnsignedAll(-1L, -128L, -90L, -50L, 127L));
+        Assertions.assertArrayEquals(unsignedC, uint16.toUnsignedAll(BigInteger.valueOf(110L), BigInteger.valueOf(-10L), BigInteger.valueOf(-1L)));
+    }
 }

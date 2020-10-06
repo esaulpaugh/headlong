@@ -83,10 +83,9 @@ public class RLPStreamTest {
 			assertEquals(notation, Notation.forEncoding(bytes));
 		}
 		try (RLPOutputStream ros = new RLPOutputStream()) {
-			Notation notation = Notation.forObjects(new Object[] { objects });
 			ros.writeList(Arrays.asList(objects));
 			byte[] bytes = ros.getByteArrayOutputStream().toByteArray();
-			assertEquals(notation, Notation.forEncoding(bytes));
+			assertEquals(Notation.forObjects(new Object[] { objects }), Notation.forEncoding(bytes));
 			assertEquals("ce880573490923738490c0c3827761", ros.getByteArrayOutputStream().toString());
 			assertEquals("ce880573490923738490c0c3827761", ros.getOutputStream().toString());
 			assertEquals("ce880573490923738490c0c3827761", ros.toString());
