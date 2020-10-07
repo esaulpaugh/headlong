@@ -49,7 +49,7 @@ public class EncodeTest {
     @Test
     public void fuzzSignatures() throws InterruptedException {
 
-        final char[] alphabet = "(),abcdefgilmnorstuxy8[]".toCharArray(); // "()uint8,[]".toCharArray(); // new char[128];
+        final char[] alphabet = "fixed80".toCharArray(); // "()uint8,[]" // new char[128]; // "(),abcdefgilmnorstuxy8[]"
         final int alphabetLen = alphabet.length;
         if (alphabetLen == 128) {
             for (int i = 0; i < alphabetLen; i++) {
@@ -64,20 +64,20 @@ public class EncodeTest {
                 128,
                 4_096,
                 524_288,
-                1_000_000,
-                1_000_000,
-                1_000_000,
-                1_000_000,
-                1_000_000,
-                1_000_000,
-                1_000_000,
-                1_000_000,
-                1_000_000
+                3_000_000,
+                3_000_000,
+                3_000_000,
+                3_000_000,
+                3_000_000,
+                3_000_000,
+                3_000_000,
+                3_000_000,
+                3_000_000
         };
 
         final Random r = TestUtils.seededRandom();
         final Runnable runnable = () -> {
-            for (int len = 0; len <= 12; len++) {
+            for (int len = 8; len <= 14; len++) {
                 System.out.println(len + "(" + Thread.currentThread().getId() + ")");
                 final char[] temp = new char[len];
                 if(len > 0) {
