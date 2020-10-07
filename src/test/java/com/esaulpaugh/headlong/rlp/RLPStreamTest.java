@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class RLPStreamTest {
 
     private static final byte TEST_BYTE = 0x79;
-    private static final byte[] TEST_BYTES = Strings.decode("'wort'X3", UTF_8);
+    static final byte[] TEST_BYTES = Strings.decode("'wort'X3", UTF_8);
     private static final String TEST_STRING = "2401";
 
     static final byte[] RLP_BYTES = new byte[] {
@@ -197,7 +197,7 @@ public class RLPStreamTest {
         private final AtomicBoolean canReceive;
         private final SendStreamThread senderThread;
 
-        private Throwable throwable;
+        Throwable throwable;
 
         public ReceiveStreamThread() {
             this.zero = System.nanoTime();
@@ -292,7 +292,7 @@ public class RLPStreamTest {
         private final Object receiver;
         private final AtomicBoolean canReceive;
 
-        private SendStreamThread(long zero, OutputStream os, Object receiver, AtomicBoolean canReceive) {
+        SendStreamThread(long zero, OutputStream os, Object receiver, AtomicBoolean canReceive) {
             this.zero = zero;
             this.os = os;
             this.receiver = receiver;
@@ -347,19 +347,19 @@ public class RLPStreamTest {
         }
     }
 
-    private static void assertHasNext(long zero, Iterator<RLPItem> iter) {
+    static void assertHasNext(long zero, Iterator<RLPItem> iter) {
         assertTrue(iter.hasNext());
         logReceipt(zero, true);
     }
 
-    private static void assertNoNext(long zero, Iterator<RLPItem> iter) throws Throwable {
+    static void assertNoNext(long zero, Iterator<RLPItem> iter) throws Throwable {
         assertFalse(iter.hasNext());
         TestUtils.assertThrown(NoSuchElementException.class, iter::next);
         assertFalse(iter.hasNext());
         logReceipt(zero, false);
     }
 
-    private static void logWrite(long zero, String message) {
+    static void logWrite(long zero, String message) {
         System.out.println(timestamp(zero) + "\u0009write " + message);
     }
 

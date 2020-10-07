@@ -129,10 +129,10 @@ public class RLPDecoderTest {
     private static class ExhaustiveFuzzTask implements Runnable {
 
         private final byte[] four;
-        private long valid, invalid;
+        long valid, invalid;
         private final String tag;
 
-        private ExhaustiveFuzzTask(byte[] four) {
+        ExhaustiveFuzzTask(byte[] four) {
             this.four = four;
             this.tag = Arrays.toString(four);
             System.out.println(tag);

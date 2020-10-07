@@ -60,7 +60,7 @@ public class ABIJsonCasesTest2 {
             }
         }
 
-        private boolean test(boolean function) {
+        boolean test(boolean function) {
             byte[] encoding = function ? this.function.encodeCall(values).array() : types.encode(values).array();
             try {
                 assertArrayEquals(result, encoding);

@@ -84,7 +84,7 @@ public class MonteCarloTest {
         System.out.println((workPerProcessor * i) + " done");
     }
 
-    private static void doMonteCarlo(long threadSeed, int n) {
+    static void doMonteCarlo(long threadSeed, int n) {
 
         final StringBuilder log = new StringBuilder();
 
@@ -125,14 +125,14 @@ public class MonteCarloTest {
 
     private static class GambleGambleRunnable implements Runnable {
 
-        private GambleGambleRunnable(long seed, int n) {
+        GambleGambleRunnable(long seed, int n) {
             this.seed = seed;
             this.n = n;
         }
 
         private final long seed;
         private final int n;
-        private Throwable thrown = null;
+        Throwable thrown = null;
 
         @Override
         public void run() {

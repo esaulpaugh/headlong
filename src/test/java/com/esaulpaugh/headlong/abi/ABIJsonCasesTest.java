@@ -35,7 +35,7 @@ public class ABIJsonCasesTest {
 
     private static final String RESOURCE = "tests/ethereum/ABITests/basic_abi_tests.json";
 
-    private static final Set<Map.Entry<String, JsonElement>> TESTS;
+    static final Set<Map.Entry<String, JsonElement>> TESTS;
 
     static {
         try {
@@ -61,7 +61,7 @@ public class ABIJsonCasesTest {
             this.function = function;
         }
 
-        private static ABITestCase forKey(String key) {
+        static ABITestCase forKey(String key) {
             JsonObject jsonObject = null;
             for (Map.Entry<String, JsonElement> e : TESTS) {
                 if (key.equals(e.getKey())) {
@@ -89,7 +89,7 @@ public class ABIJsonCasesTest {
             return new ABITestCase(key, args, result, types, new Function("test" + tt.canonicalType));
         }
 
-        private void test(Object[] argsArray) {
+        void test(Object[] argsArray) {
 
             Tuple t = new Tuple(argsArray);
             ByteBuffer bb = function.encodeCall(t);
