@@ -154,10 +154,14 @@ final class TypeFactory {
             final int indexOfX = type.lastIndexOf('x');
             try {
                 // no parseUnsignedInt on Android?
-                int M = Integer.parseInt(type.substring(idx + "fixed".length(), indexOfX));
-                int N = Integer.parseInt(type.substring(indexOfX + 1)); // everything after x
-                if ((M & 0x7) /* mod 8 */ == 0 && M >= 8 && M <= 256 && N > 0 && N <= 80) {
-                    return new BigDecimalType(type, M, N, unsigned);
+                final String mStr = type.substring(idx + "fixed".length(), indexOfX);
+                final String nStr = type.substring(indexOfX + 1);
+                if(!mStr.startsWith("0") && !nStr.startsWith("0")) {
+                    int M = Integer.parseInt(mStr);
+                    int N = Integer.parseInt(nStr); // everything after x
+                    if ((M & 0x7) /* mod 8 */ == 0 && M >= 8 && M <= 256 && N > 0 && N <= 80) {
+                        return new BigDecimalType(type, M, N, unsigned);
+                    }
                 }
             } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
             }

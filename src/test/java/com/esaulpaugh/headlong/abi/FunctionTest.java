@@ -28,6 +28,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class FunctionTest {
 
     @Test
+    public void testFixedLeadingZeroes() throws Throwable {
+        TestUtils.assertThrown(IllegalArgumentException.class, "@ index 0, unrecognized type: \"fixed8x011\"", () -> Function.parse("foo(fixed8x011)"));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "@ index 0, unrecognized type: \"fixed08x1\"", () -> Function.parse("foo(fixed08x1)"));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "@ index 0, unrecognized type: \"fixed08x079\"", () -> Function.parse("foo(fixed08x079)"));
+    }
+
+    @Test
     public void testFormatLength() {
         int len = 4 + 32;
         byte[] buffer = new byte[len + 103];
