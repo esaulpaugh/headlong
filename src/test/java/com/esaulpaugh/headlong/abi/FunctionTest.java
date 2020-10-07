@@ -30,10 +30,13 @@ public class FunctionTest {
     @Test
     public void testFixedLeadingZeroes() throws Throwable {
         TestUtils.assertThrown(IllegalArgumentException.class, "@ index 0, unrecognized type: \"fixed8x011\"", () -> Function.parse("foo(fixed8x011)"));
+        TestUtils.assertThrown(IllegalArgumentException.class, "@ index 0, unrecognized type: \"fixed8x0011\"", () -> Function.parse("foo(fixed8x0011)"));
 
         TestUtils.assertThrown(IllegalArgumentException.class, "@ index 0, unrecognized type: \"fixed08x1\"", () -> Function.parse("foo(fixed08x1)"));
+        TestUtils.assertThrown(IllegalArgumentException.class, "@ index 0, unrecognized type: \"fixed008x1\"", () -> Function.parse("foo(fixed008x1)"));
 
         TestUtils.assertThrown(IllegalArgumentException.class, "@ index 0, unrecognized type: \"fixed08x079\"", () -> Function.parse("foo(fixed08x079)"));
+        TestUtils.assertThrown(IllegalArgumentException.class, "@ index 0, unrecognized type: \"fixed008x0079\"", () -> Function.parse("foo(fixed008x0079)"));
     }
 
     @Test

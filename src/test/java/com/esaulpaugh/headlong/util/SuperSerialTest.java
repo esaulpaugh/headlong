@@ -100,5 +100,9 @@ public class SuperSerialTest {
         assertEquals(false, bool.parseArgument("false"));
         assertEquals(false, bool.parseArgument(""));
         assertEquals(false, bool.parseArgument("?\t*jjgHJge"));
+
+        assertEquals(127, int8.parseArgument("127"));
+        assertEquals(127, int8.parseArgument("0127"));
+        assertEquals(127, int8.parseArgument("00127"));
     }
 }
