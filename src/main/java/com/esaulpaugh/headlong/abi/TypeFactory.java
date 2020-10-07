@@ -160,7 +160,7 @@ final class TypeFactory {
                     int M = Integer.parseInt(mStr);
                     int N = Integer.parseInt(nStr); // everything after x
                     if ((M & 0x7) /* mod 8 */ == 0 && M >= 8 && M <= 256 && N > 0 && N <= 80) {
-                        return new BigDecimalType(type, M, N, unsigned);
+                        return new BigDecimalType((unsigned ? "ufixed" : "fixed") + M + 'x' + N, M, N, unsigned);
                     }
                 }
             } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
