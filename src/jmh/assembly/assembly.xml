@@ -30,6 +30,7 @@
 
                     <include>org/apache/commons/codec/BinaryDecoder.class</include>
                     <include>org/apache/commons/codec/BinaryEncoder.class</include>
+                    <include>org/apache/commons/codec/CodecPolicy.class</include>
                     <include>org/apache/commons/codec/Decoder.class</include>
                     <include>org/apache/commons/codec/DecoderException.class</include>
                     <include>org/apache/commons/codec/Encoder.class</include>
