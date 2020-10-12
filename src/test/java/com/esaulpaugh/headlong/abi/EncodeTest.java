@@ -26,8 +26,10 @@ import org.opentest4j.AssertionFailedError;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -49,11 +51,11 @@ public class EncodeTest {
     @Test
     public void fuzzSignatures() throws InterruptedException {
 
-        final char[] alphabet = "fixed80".toCharArray(); // "()uint8,[]" // new char[128]; // "(),abcdefgilmnorstuxy8[]"
+        final byte[] alphabet = ",int[8]()".getBytes(StandardCharsets.US_ASCII); // "()uint8,[]" // new char[128]; // "(),abcdefgilmnorstuxy8[]"
         final int alphabetLen = alphabet.length;
         if (alphabetLen == 128) {
-            for (int i = 0; i < alphabetLen; i++) {
-                alphabet[i] = (char) i;
+            for (int i = 0; i < alphabetLen; i++) { // (fixed128x18)
+                alphabet[i] = (byte) i;
             }
         }
 
@@ -76,10 +78,11 @@ public class EncodeTest {
         };
 
         final Random r = TestUtils.seededRandom();
+        final ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
         final Runnable runnable = () -> {
-            for (int len = 8; len <= 14; len++) {
+            for (int len = 0; len <= 13; len++) {
                 System.out.println(len + "(" + Thread.currentThread().getId() + ")");
-                final char[] temp = new char[len];
+                final byte[] temp = new byte[len];
                 if(len > 0) {
                     temp[0] = '(';
                 }
@@ -92,11 +95,15 @@ public class EncodeTest {
                     for (int i = 1; i < lim; i++) {
                         temp[i] = alphabet[r.nextInt(alphabetLen)];
                     }
-                    String sig = new String(temp);
+                    String sig = new String(temp, 0, 0, temp.length);
                     try {
                         TupleType tt = TupleType.parse(sig);
-                        if(!"()".equals(sig) && !"(())".equals(sig)) System.out.println("\t\t\t" + len + ' ' + sig);
-                    } catch (IllegalArgumentException ignored) {
+                        String val = tt.canonicalType;
+                        if(!map.contains(sig)) {
+                            map.put(val, sig);
+                            System.out.println("\t\t\t" + len + ' ' + sig + (sig.equals(val) ? "" : " --> " + val));
+                        }
+                    } catch (IllegalArgumentException | ClassCastException ignored) {
                         /* do nothing */
                     } catch (Throwable t) {
                         System.err.println(sig);
