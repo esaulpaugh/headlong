@@ -95,7 +95,7 @@ public class EncodeTest {
                     for (int i = 1; i < lim; i++) {
                         temp[i] = alphabet[r.nextInt(alphabetLen)];
                     }
-                    String sig = new String(temp, 0, 0, temp.length);
+                    String sig = new String(temp, 0, 0, len);
                     try {
                         TupleType tt = TupleType.parse(sig);
                         String val = tt.canonicalType;
