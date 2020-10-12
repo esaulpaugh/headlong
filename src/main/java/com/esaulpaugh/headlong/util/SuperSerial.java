@@ -116,7 +116,9 @@ public final class SuperSerial {
         case TYPE_CODE_BIG_DECIMAL:
             return serializeBigInteger(
                     (UnitType<?>) type,
-                    typeCode == TYPE_CODE_BIG_INTEGER ? (BigInteger) obj : ((BigDecimal) obj).unscaledValue()
+                    typeCode == TYPE_CODE_BIG_INTEGER
+                            ? (BigInteger) obj
+                            : ((BigDecimal) obj).unscaledValue()
             );
         case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?>) type, obj);
         case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, obj);
@@ -184,8 +186,8 @@ public final class SuperSerial {
             return signum < 0
                     ? signExtendNegative(bytes, typeBits / Byte.SIZE)
                     : bytes[0] != 0
-                    ? bytes
-                    : Arrays.copyOfRange(bytes, 1, bytes.length);
+                        ? bytes
+                        : Arrays.copyOfRange(bytes, 1, bytes.length);
         }
         return Strings.EMPTY_BYTE_ARRAY;
     }

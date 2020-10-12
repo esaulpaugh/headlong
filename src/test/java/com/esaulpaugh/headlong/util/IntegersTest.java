@@ -128,8 +128,8 @@ public class IntegersTest {
                     s == 0
                             ? 0
                             : s > 0 && s < 256
-                            ? 1
-                            : 2,
+                                ? 1
+                                : 2,
                     len
             );
         }
