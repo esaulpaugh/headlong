@@ -150,7 +150,7 @@ final class TypeFactory {
     private static BigDecimalType tryParseFixed(final String type) {
         final int idx = type.indexOf("fixed");
         boolean unsigned = false;
-        if (idx == 0 || (unsigned = idx == 1 && type.charAt(0) == 'u')) {
+        if (idx == 0 || (unsigned = (idx == 1 && type.charAt(0) == 'u'))) {
             final int indexOfX = type.lastIndexOf('x');
             try {
                 // no parseUnsignedInt on Android?
