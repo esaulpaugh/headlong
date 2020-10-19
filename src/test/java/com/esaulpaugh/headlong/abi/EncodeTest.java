@@ -55,7 +55,7 @@ public class EncodeTest {
     @Test
     public void fuzzSignatures() throws InterruptedException {
 
-        final byte[] alphabet = "0123456789".getBytes(StandardCharsets.US_ASCII); // new char[128]; // "(),abcdefgilmnorstuxy8[]"
+        final byte[] alphabet = "x0123456789".getBytes(StandardCharsets.US_ASCII); // new char[128]; // "(),abcdefgilmnorstuxy8[]"
         final int alphabetLen = alphabet.length;
         if (alphabetLen == 128) {
             for (int i = 0; i < alphabetLen; i++) { // (fixed128x18)
@@ -68,7 +68,7 @@ public class EncodeTest {
                 128,
                 128,
                 128,
-                4_096,
+                8_192,
                 524_288,
                 1_000_000,
                 1_000_000,
@@ -81,40 +81,30 @@ public class EncodeTest {
                 1_000_000
         };
 
+        final String prefix = "ufixed";
+        final int prefixLen = prefix.length();
+
         final Random r = TestUtils.seededRandom();
         final ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
         final Runnable runnable = () -> {
-            for (int len = 0; len <= 10; len++) {
+            for (int len = 0; len <= 14; len++) {
                 System.out.println(len + "(" + Thread.currentThread().getId() + ")");
                 final byte[] temp = new byte[len];
                 if(len > 0) {
                     temp[0] = '(';
-                }
-                if(len > 1) {
-                    temp[1] = 'u';
-                }
-                if(len > 2) {
-                    temp[2] = 'i';
-                }
-                if(len > 3) {
-                    temp[3] = 'n';
-                }
-                if(len > 4) {
-                    temp[4] = 't';
-                }
-//                if(len > 5) {
-//                    temp[5] = 'e';
-//                }
-//                if(len > 6) {
-//                    temp[6] = 'd';
-//                }
-                if(len > 1) {
-                    temp[len - 1] = ')';
+                    if(len > prefixLen) {
+                        for (int i = 0; i < prefixLen; i++) {
+                            temp[i + 1] = (byte) prefix.charAt(i);
+                        }
+                    }
+                    if(len > 1) {
+                        temp[len - 1] = ')';
+                    }
                 }
                 final int lim = temp.length - 1;
                 final int num = iterations[len]; // 1_000_000 + (int) Math.pow(3.7, len);
                 for (int j = 0; j < num; j++) {
-                    for (int i = 5; i < lim; i++) {
+                    for (int i = 1 + prefixLen; i < lim; i++) {
                         temp[i] = alphabet[r.nextInt(alphabetLen)];
                     }
                     String sig = new String(temp, 0, 0, len);
