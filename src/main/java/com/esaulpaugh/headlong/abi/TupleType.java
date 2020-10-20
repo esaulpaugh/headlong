@@ -166,22 +166,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    public Tuple decode(byte[] array) {
-        ByteBuffer bb = ByteBuffer.wrap(array);
-        Tuple decoded = decode(bb);
-        final int remaining = bb.remaining();
-        if(remaining == 0) {
-            return decoded;
-        }
-        throw new IllegalArgumentException("unconsumed bytes: " + remaining + " remaining");
-    }
-
-    @Override
-    public Tuple decode(ByteBuffer bb) {
-        return decode(bb, newUnitBuffer());
-    }
-
-    @Override
     Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
         final int len = elementTypes.length;
         final Object[] elements = new Object[len];

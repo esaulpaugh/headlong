@@ -112,11 +112,17 @@ public abstract class ABIType<J> {
 
     abstract void encodeTail(Object value, ByteBuffer dest);
 
-    public J decode(byte[] bytes) {
-        return decode(ByteBuffer.wrap(bytes));
+    public final J decode(byte[] array) {
+        ByteBuffer bb = ByteBuffer.wrap(array);
+        J decoded = decode(bb);
+        final int remaining = bb.remaining();
+        if(remaining == 0) {
+            return decoded;
+        }
+        throw new IllegalArgumentException("unconsumed bytes: " + remaining + " remaining");
     }
 
-    public J decode(ByteBuffer buffer) {
+    public final J decode(ByteBuffer buffer) {
         return decode(buffer, newUnitBuffer());
     }
 
