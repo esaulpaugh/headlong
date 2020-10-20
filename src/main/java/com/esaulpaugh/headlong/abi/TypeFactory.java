@@ -155,12 +155,11 @@ final class TypeFactory {
         if (idx == 0 || (unsigned = (idx == 1 && type.charAt(0) == 'u'))) {
             final int indexOfX = type.lastIndexOf('x');
             try {
-                // no parseUnsignedInt on Android?
                 final String mStr = type.substring(idx + "fixed".length(), indexOfX);
-                final String nStr = type.substring(indexOfX + 1);
+                final String nStr = type.substring(indexOfX + 1); // everything after x
                 if (mStr.charAt(0) != '0' && nStr.charAt(0) != '0') {
-                    int M = Integer.parseInt(mStr);
-                    int N = Integer.parseInt(nStr); // everything after x
+                    int M = Integer.parseInt(mStr); // no parseUnsignedInt on Android?
+                    int N = Integer.parseInt(nStr);
                     if (Integers.mod(M, 8) == 0 && M >= 8 && M <= 256 && N > 0 && N <= 80) {
                         return new BigDecimalType((unsigned ? "ufixed" : "fixed") + M + 'x' + N, M, N, unsigned);
                     }
