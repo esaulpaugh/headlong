@@ -128,12 +128,14 @@ final class TypeFactory {
     private static int parseLen(String rawType, int startLen, int lastCharIndex) {
         try {
             final String lengthStr = rawType.substring(startLen, lastCharIndex);
-            final int length = Integer.parseInt(lengthStr);
-            if (length >= 0) {
-                if(lengthStr.length() > 1 && rawType.charAt(startLen) == '0') {
-                    throw new IllegalArgumentException("leading zero in array length");
+            if(leadDigitValid(lengthStr.charAt(0))) {
+                final int length = Integer.parseInt(lengthStr);
+                if (length >= 0) {
+                    if (lengthStr.length() > 1 && rawType.charAt(startLen) == '0') {
+                        throw new IllegalArgumentException("leading zero in array length");
+                    }
+                    return length;
                 }
-                return length;
             }
             throw new IllegalArgumentException("negative array length");
         } catch (NumberFormatException nfe) {
@@ -157,7 +159,7 @@ final class TypeFactory {
             try {
                 final String mStr = type.substring(idx + "fixed".length(), indexOfX);
                 final String nStr = type.substring(indexOfX + 1); // everything after x
-                if (mStr.charAt(0) != '0' && nStr.charAt(0) != '0') {
+                if (leadDigitValid(mStr.charAt(0)) && leadDigitValid(nStr.charAt(0))) {
                     int M = Integer.parseInt(mStr); // no parseUnsignedInt on Android?
                     int N = Integer.parseInt(nStr);
                     if (Integers.mod(M, 8) == 0 && M >= 8 && M <= 256 && N > 0 && N <= 80) {
@@ -168,6 +170,10 @@ final class TypeFactory {
             }
         }
         return null;
+    }
+
+    private static boolean leadDigitValid(char c) {
+        return c > '0' && c <= '9';
     }
 
     static final String EMPTY_PARAMETER = "empty parameter";
