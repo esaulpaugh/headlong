@@ -87,6 +87,13 @@ public abstract class ABIType<J> {
 
     abstract int byteLengthPacked(Object value);
 
+    public final ByteBuffer encode(Object value) {
+        validate(value);
+        ByteBuffer dest = ByteBuffer.allocate(validate(value));
+        encodeTail(value, dest);
+        return dest;
+    }
+
     /**
      * Checks whether the given object is a valid argument for this {@link ABIType}. Requires an instance of type J.
      *
@@ -104,6 +111,14 @@ public abstract class ABIType<J> {
     }
 
     abstract void encodeTail(Object value, ByteBuffer dest);
+
+    public J decode(byte[] bytes) {
+        return decode(ByteBuffer.wrap(bytes));
+    }
+
+    public J decode(ByteBuffer buffer) {
+        return decode(buffer, newUnitBuffer());
+    }
 
     /**
      * Decodes the data at the buffer's current position according to this {@link ABIType}.

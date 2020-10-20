@@ -91,6 +91,10 @@ final class TypeFactory {
         map.put(type, () -> new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class));
     }
 
+    public static ABIType<?> create(String rawType) {
+        return create(rawType, null);
+    }
+
     static ABIType<?> create(String rawType, String name) {
         return buildType(rawType, null)
                 .setName(name);

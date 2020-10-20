@@ -165,6 +165,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return sum;
     }
 
+    @Override
     public Tuple decode(byte[] array) {
         ByteBuffer bb = ByteBuffer.wrap(array);
         Tuple decoded = decode(bb);
@@ -175,6 +176,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         throw new IllegalArgumentException("unconsumed bytes: " + remaining + " remaining");
     }
 
+    @Override
     public Tuple decode(ByteBuffer bb) {
         return decode(bb, newUnitBuffer());
     }
