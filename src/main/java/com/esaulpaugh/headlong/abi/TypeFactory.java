@@ -28,7 +28,7 @@ import static com.esaulpaugh.headlong.abi.ArrayType.STRING_ARRAY_CLASS;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
 
 /** Creates the appropriate {@link ABIType} object for a given type string. */
-final class TypeFactory {
+public final class TypeFactory {
 
     private static final int ADDRESS_BIT_LEN = 160;
 
