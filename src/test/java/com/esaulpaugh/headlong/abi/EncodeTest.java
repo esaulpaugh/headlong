@@ -297,9 +297,9 @@ public class EncodeTest {
     @Test
     public void testArrayLen() throws Throwable {
 
-        assertThrown(ILLEGAL, "@ index 0, negative array length", () -> Function.parse("abba(()[-04])"));
+        assertThrown(ILLEGAL, "@ index 0, bad array length", () -> Function.parse("abba(()[-04])"));
 
-        assertThrown(ILLEGAL, "@ index 0, leading zero in array length", () -> Function.parse("zaba(()[04])"));
+        assertThrown(ILLEGAL, "@ index 0, bad array length", () -> Function.parse("zaba(()[04])"));
 
         assertEquals(4, ((ArrayType<TupleType, Tuple[]>) Function.parse("yaba(()[4])").getParamTypes().get(0)).getLength());
     }

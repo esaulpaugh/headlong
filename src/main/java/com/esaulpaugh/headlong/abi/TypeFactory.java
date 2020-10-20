@@ -128,16 +128,13 @@ final class TypeFactory {
     private static int parseLen(String rawType, int startLen, int lastCharIndex) {
         try {
             final String lengthStr = rawType.substring(startLen, lastCharIndex);
-            if(leadDigitValid(lengthStr.charAt(0))) {
+            if(leadDigitValid(lengthStr.charAt(0)) || lengthStr.equals("0")) {
                 final int length = Integer.parseInt(lengthStr);
                 if (length >= 0) {
-                    if (lengthStr.length() > 1 && rawType.charAt(startLen) == '0') {
-                        throw new IllegalArgumentException("leading zero in array length");
-                    }
                     return length;
                 }
             }
-            throw new IllegalArgumentException("negative array length");
+            throw new IllegalArgumentException("bad array length");
         } catch (NumberFormatException nfe) {
             throw new IllegalArgumentException("illegal number format", nfe);
         }
