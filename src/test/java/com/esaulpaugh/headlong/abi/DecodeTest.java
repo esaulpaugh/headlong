@@ -296,17 +296,23 @@ public class DecodeTest {
                 "000000000000000000000000000000000000000000000000000000000000000d" +
                 "776f726c64212048656c6c6f2c00000000000000000000000000000000000000";
 
-        final String arrayString = "[Hello, world!, world! Hello,]";
+        final String[] array = new String[] { "Hello, world!", "world! Hello," };
 
-        Object decoded0 = Function.parse("()", "(string[])").getOutputTypes().get(0).decode(ByteBuffer.wrap(Strings.decode(s)), new byte[32]);
-        assertEquals(arrayString, Arrays.toString((Object[]) decoded0));
+        final ABIType<String[]> type = TypeFactory.create("string[]", String[].class, "nam");
+        final ABIType<Object> x = TypeFactory.create("string[]");
+        final ABIType<?> x2 = TypeFactory.create("string[]");
 
-        assertEquals(arrayString, Arrays.toString((Object[]) TypeFactory.create("string[]").decode(Strings.decode(s))));
+        assertEquals("nam", type.getName());
 
-        ByteBuffer buffer = TypeFactory.create("string[]").encode(new String[] { "Hello, world!", "world! Hello," });
+        System.out.println(x + " " + x2);
+
+        ByteBuffer buffer = type.encode(array);
 
         assertEquals(s, Strings.encode(buffer));
 
-        System.out.println(ABIType.format(buffer.array()));
+        Object decoded0 = Function.parse("()", "(string[])").getOutputTypes().get(0).decode(ByteBuffer.wrap(Strings.decode(s)), new byte[32]);
+        assertArrayEquals(array, (Object[]) decoded0);
+
+        assertArrayEquals(array, type.decode(Strings.decode(s)));
     }
 }
