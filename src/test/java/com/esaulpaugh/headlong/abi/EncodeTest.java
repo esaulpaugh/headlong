@@ -371,8 +371,8 @@ public class EncodeTest {
         byte[] aEncoding = a.encode(aArgs).array();
         byte[] bEncoding = b.encode(bArgs).array();
 
-//        System.out.println(TupleType.format(aEncoding));
-//        System.out.println(TupleType.format(bEncoding));
+//        System.out.println(ABIType.format(aEncoding));
+//        System.out.println(ABIType.format(bEncoding));
 
         assertArrayEquals(aEncoding, bEncoding);
     }

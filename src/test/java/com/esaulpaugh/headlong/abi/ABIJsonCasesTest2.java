@@ -70,8 +70,8 @@ public class ABIJsonCasesTest2 {
                     System.out.println(this.function.getCanonicalSignature() + ", " + this.values);
                     System.out.println(buildCallComparison(result, encoding));
                 } else {
-                    String[] resultTokens = TupleType.format(result).split("[\n]");
-                    String[] encodingTokens = TupleType.format(encoding).split("[\n]");
+                    String[] resultTokens = ABIType.format(result).split("[\n]");
+                    String[] encodingTokens = ABIType.format(encoding).split("[\n]");
                     System.out.println(types.canonicalType);
                     int i = 0;
                     for (; i < resultTokens.length; i++) {

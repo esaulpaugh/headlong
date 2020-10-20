@@ -307,6 +307,6 @@ public class DecodeTest {
 
         assertEquals(s, Strings.encode(buffer));
 
-        System.out.println(TupleType.format(buffer.array()));
+        System.out.println(ABIType.format(buffer.array()));
     }
 }

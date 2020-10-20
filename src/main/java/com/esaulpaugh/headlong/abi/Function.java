@@ -324,6 +324,6 @@ public final class Function implements ABIObject {
         Integers.checkIsMultiple(length - SELECTOR_LEN, UNIT_LENGTH_BYTES);
         StringBuilder sb = new StringBuilder(TupleType.pad(0, "ID"))
                 .append(Strings.encode(buffer, offset, SELECTOR_LEN, Strings.HEX));
-        return TupleType.finishFormat(buffer, offset + SELECTOR_LEN, offset + length, labeler, sb);
+        return ABIType.finishFormat(buffer, offset + SELECTOR_LEN, offset + length, labeler, sb);
     }
 }

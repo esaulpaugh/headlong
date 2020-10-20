@@ -15,6 +15,9 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.Integers;
+import com.esaulpaugh.headlong.util.Strings;
+
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.function.IntConsumer;
@@ -195,5 +198,52 @@ public abstract class ABIType<J> {
     @Override
     public final String toString() {
         return canonicalType;
+    }
+
+    public static String format(byte[] abi) {
+        return format(abi, (row) -> {
+            String unpadded = Integer.toHexString(row * UNIT_LENGTH_BYTES);
+            return pad((LABEL_PADDED_LEN - LABEL_RIGHT_PADDING) - unpadded.length(), unpadded);
+        });
+    }
+
+    public static String format(byte[] abi, RowLabeler labeler) {
+        Integers.checkIsMultiple(abi.length, UNIT_LENGTH_BYTES);
+        return finishFormat(abi, 0, abi.length, labeler, new StringBuilder());
+    }
+
+    static String finishFormat(byte[] buffer, int offset, int end, RowLabeler labeler, StringBuilder sb) {
+        int row = 0;
+        while(offset < end) {
+            if(offset > 0) {
+                sb.append('\n');
+            }
+            sb.append(labeler.paddedLabel(row++))
+                    .append(Strings.encode(buffer, offset, UNIT_LENGTH_BYTES, Strings.HEX));
+            offset += UNIT_LENGTH_BYTES;
+        }
+        return sb.toString();
+    }
+
+    @FunctionalInterface
+    public interface RowLabeler {
+        String paddedLabel(int row);
+    }
+
+    private static final int LABEL_PADDED_LEN = 9;
+    private static final int LABEL_RIGHT_PADDING = 3;
+
+    static String pad(int leftPadding, String unpadded) {
+        StringBuilder sb = new StringBuilder();
+        pad(sb, leftPadding);
+        sb.append(unpadded);
+        pad(sb, LABEL_PADDED_LEN - sb.length());
+        return sb.toString();
+    }
+
+    private static void pad(StringBuilder sb, int n) {
+        for (int i = 0; i < n; i++) {
+            sb.append(' ');
+        }
     }
 }
