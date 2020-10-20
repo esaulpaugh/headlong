@@ -43,7 +43,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private static final int ARRAY_LENGTH_BYTES = UNIT_LENGTH_BYTES;
 
-    static final int DYNAMIC_LENGTH = -1;
+    public static final int DYNAMIC_LENGTH = -1;
 
     private final boolean isString;
     final E elementType;

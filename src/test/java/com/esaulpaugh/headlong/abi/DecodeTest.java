@@ -301,8 +301,9 @@ public class DecodeTest {
         final ABIType<String[]> type = TypeFactory.create("string[]", String[].class, "nam");
         final ABIType<Object> x = TypeFactory.create("string[]");
         final ABIType<?> x2 = TypeFactory.create("string[]");
+        final ArrayType<ArrayType<ByteType, String>, String[]> arrayType = (ArrayType<ArrayType<ByteType, String>, String[]>) type;
 
-        assertEquals("nam", type.getName());
+        assertEquals("nam", arrayType.getName());
 
         System.out.println(x + " " + x2);
 
