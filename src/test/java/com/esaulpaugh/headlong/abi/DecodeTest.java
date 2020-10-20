@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -282,5 +283,30 @@ public class DecodeTest {
         array[array.length - 1] = (byte) 0xFE;
 
         assertThrown(IllegalArgumentException.class, "illegal boolean value @ 68", () -> f.decodeCall(array));
+    }
+
+    @Test
+    public void testStringArray()  {
+        final String s =
+                "0000000000000000000000000000000000000000000000000000000000000002" +
+                "0000000000000000000000000000000000000000000000000000000000000040" +
+                "0000000000000000000000000000000000000000000000000000000000000080" +
+                "000000000000000000000000000000000000000000000000000000000000000d" +
+                "48656c6c6f2c20776f726c642100000000000000000000000000000000000000" +
+                "000000000000000000000000000000000000000000000000000000000000000d" +
+                "776f726c64212048656c6c6f2c00000000000000000000000000000000000000";
+
+        final String arrayString = "[Hello, world!, world! Hello,]";
+
+        Object decoded0 = Function.parse("()", "(string[])").getOutputTypes().get(0).decode(ByteBuffer.wrap(Strings.decode(s)), new byte[32]);
+        assertEquals(arrayString, Arrays.toString((Object[]) decoded0));
+
+        assertEquals(arrayString, Arrays.toString((Object[]) TypeFactory.create("string[]").decode(Strings.decode(s))));
+
+        ByteBuffer buffer = TypeFactory.create("string[]").encode(new String[] { "Hello, world!", "world! Hello," });
+
+        assertEquals(s, Strings.encode(buffer));
+
+        System.out.println(TupleType.format(buffer.array()));
     }
 }
