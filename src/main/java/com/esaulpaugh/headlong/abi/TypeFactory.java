@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.Integers;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -156,10 +158,10 @@ final class TypeFactory {
                 // no parseUnsignedInt on Android?
                 final String mStr = type.substring(idx + "fixed".length(), indexOfX);
                 final String nStr = type.substring(indexOfX + 1);
-                if(!mStr.startsWith("0") && !nStr.startsWith("0")) {
+                if (mStr.charAt(0) != '0' && nStr.charAt(0) != '0') {
                     int M = Integer.parseInt(mStr);
                     int N = Integer.parseInt(nStr); // everything after x
-                    if ((M & 0x7) /* mod 8 */ == 0 && M >= 8 && M <= 256 && N > 0 && N <= 80) {
+                    if (Integers.mod(M, 8) == 0 && M >= 8 && M <= 256 && N > 0 && N <= 80) {
                         return new BigDecimalType((unsigned ? "ufixed" : "fixed") + M + 'x' + N, M, N, unsigned);
                     }
                 }
