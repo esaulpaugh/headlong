@@ -317,7 +317,7 @@ public class MonteCarloTestCase {
                 sb.append(']');
             }
         }
-        return TypeFactory.create(sb.toString(), null);
+        return TypeFactory.createType(sb.toString(), null);
     }
 
     private Tuple generateTuple(TupleType tupleType, Random r) {

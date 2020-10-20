@@ -195,7 +195,7 @@ public final class ABIJSON {
                     getString(object, NAME)
             );
         }
-        return TypeFactory.create(typeStr, getString(object, NAME));
+        return TypeFactory.createType(typeStr, getString(object, NAME));
     }
 // ---------------------------------------------------------------------------------------------------------------------
     public static String toJson(ABIObject abiObj, boolean function, boolean pretty) {

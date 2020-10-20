@@ -92,10 +92,10 @@ final class TypeFactory {
     }
 
     public static ABIType<?> create(String rawType) {
-        return create(rawType, null);
+        return createType(rawType, null);
     }
 
-    static ABIType<?> create(String rawType, String name) {
+    static ABIType<?> createType(String rawType, String name) {
         return buildType(rawType, null)
                 .setName(name);
     }
