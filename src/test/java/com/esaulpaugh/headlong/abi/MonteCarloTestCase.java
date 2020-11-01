@@ -25,6 +25,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -49,7 +50,7 @@ import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MonteCarloTestCase {
+public class MonteCarloTestCase implements Serializable {
 
     private static final int DEFAULT_MAX_TUPLE_DEPTH = 3;
     private static final int DEFAULT_MAX_TUPLE_LENGTH = 3;

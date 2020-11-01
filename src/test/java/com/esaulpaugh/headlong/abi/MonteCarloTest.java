@@ -238,11 +238,11 @@ public class MonteCarloTest {
         final MonteCarloTask original = new MonteCarloTask(newComplexTestCase(TestUtils.seededRandom(), k), 0, 1);
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        TestUtils.assertThrown(NotSerializableException.class, "com.esaulpaugh.headlong.abi.MonteCarloTestCase", () -> new ObjectOutputStream(baos)
+        TestUtils.assertThrown(NotSerializableException.class, "com.esaulpaugh.headlong.abi.Tuple", () -> new ObjectOutputStream(baos)
                 .writeObject(original));
 
         TestUtils.assertThrown(WriteAbortedException.class,
-                "writing aborted; java.io.NotSerializableException: com.esaulpaugh.headlong.abi.MonteCarloTestCase",
+                "writing aborted; java.io.NotSerializableException: com.esaulpaugh.headlong.abi.Tuple",
                 () -> new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()))
                 .readObject()
         );
