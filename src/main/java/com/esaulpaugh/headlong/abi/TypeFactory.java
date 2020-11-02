@@ -48,12 +48,10 @@ public final class TypeFactory {
         for(int n = 8; n <= 32; n += 8) mapInt(lambdaMap, "int" + n, n, false);
         for(int n = 40; n <= 64; n += 8) mapLong(lambdaMap, "int" + n, n, false);
         for(int n = 72; n <= 256; n += 8) mapBigInteger(lambdaMap, "int" + n, n, false);
-        lambdaMap.put("int", lambdaMap.get("int256"));
 
         for(int n = 8; n <= 24; n += 8) mapInt(lambdaMap, "uint" + n, n, true);
         for(int n = 32; n <= 56; n += 8) mapLong(lambdaMap, "uint" + n, n, true);
         for(int n = 64; n <= 256; n += 8) mapBigInteger(lambdaMap, "uint" + n, n, true);
-        lambdaMap.put("uint", lambdaMap.get("uint256"));
 
         for (int n = 1; n <= 32; n++) {
             mapByteArray(lambdaMap, "bytes" + n, n);
@@ -66,9 +64,12 @@ public final class TypeFactory {
 
         lambdaMap.put("fixed128x18", () -> new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
         lambdaMap.put("ufixed128x18", () -> new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
+        lambdaMap.put("decimal", () -> new BigDecimalType("decimal", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
+
+        lambdaMap.put("int", lambdaMap.get("int256"));
+        lambdaMap.put("uint", lambdaMap.get("uint256"));
         lambdaMap.put("fixed", lambdaMap.get("fixed128x18"));
         lambdaMap.put("ufixed", lambdaMap.get("ufixed128x18"));
-        lambdaMap.put("decimal", () -> new BigDecimalType("decimal", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
 
         lambdaMap.put("bool", BooleanType::new);
 
@@ -124,7 +125,7 @@ public final class TypeFactory {
 
                 final ABIType<?> elementType = buildType(rawType.substring(0, arrayOpenIndex), baseType);
                 final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
-                final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType, arrayOpenIndex + 1, lastCharIdx);
+                final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType.substring(arrayOpenIndex + 1, lastCharIdx));
                 return new ArrayType<>(type, elementType.arrayClass(), elementType, length);
             }
             if(baseType != null || (baseType = resolveBaseType(rawType)) != null) {
@@ -138,11 +139,10 @@ public final class TypeFactory {
         throw new IllegalArgumentException("unrecognized type: \"" + rawType + '"');
     }
 
-    private static int parseLen(String rawType, int startLen, int lastCharIndex) {
+    private static int parseLen(String lenStr) {
         try {
-            final String lengthStr = rawType.substring(startLen, lastCharIndex);
-            if(leadDigitValid(lengthStr.charAt(0)) || lengthStr.equals("0")) {
-                final int length = Integer.parseInt(lengthStr);
+            if(leadDigitValid(lenStr.charAt(0)) || lenStr.equals("0")) {
+                final int length = Integer.parseInt(lenStr);
                 if (length >= 0) {
                     return length;
                 }
