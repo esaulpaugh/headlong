@@ -147,10 +147,9 @@ public final class TypeFactory {
                     return length;
                 }
             }
-            throw new IllegalArgumentException("bad array length");
-        } catch (NumberFormatException nfe) {
-            throw new IllegalArgumentException("illegal number format", nfe);
+        } catch (NumberFormatException ignored) {
         }
+        throw new IllegalArgumentException("bad array length");
     }
 
     private static ABIType<?> resolveBaseType(String baseTypeStr) {
