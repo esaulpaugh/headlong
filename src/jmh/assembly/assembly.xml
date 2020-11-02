@@ -149,9 +149,9 @@
                 <include>com/esaulpaugh/headlong/jmh/abi/*.class</include>
                 <include>com/esaulpaugh/headlong/jmh/rlp/*.class</include>
                 <include>com/esaulpaugh/headlong/jmh/util/*.class</include>
-                <include>com/esaulpaugh/headlong/jmh/abi/generated/*.class</include>
-                <include>com/esaulpaugh/headlong/jmh/rlp/generated/*.class</include>
-                <include>com/esaulpaugh/headlong/jmh/util/generated/*.class</include>
+                <include>com/esaulpaugh/headlong/jmh/abi/jmh_generated/*.class</include>
+                <include>com/esaulpaugh/headlong/jmh/rlp/jmh_generated/*.class</include>
+                <include>com/esaulpaugh/headlong/jmh/util/jmh_generated/*.class</include>
                 <include>org/openjdk/jmh/*.class</include>
                 <include>META-INF/BenchmarkList</include>
                 <include>META-INF/CompilerHints</include>
