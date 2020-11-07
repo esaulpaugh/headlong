@@ -103,7 +103,7 @@ public class MonteCarloTest {
         return x;
     }
 
-    private static final int N = 400_000;
+    private static final int N = 100_000;
 
     @Test
     public void gambleGamble() throws InterruptedException, AssertionError, TimeoutException {
@@ -132,7 +132,7 @@ public class MonteCarloTest {
         System.out.println((workPerProcessor * i) + " done");
     }
 
-    static void doMonteCarlo(long threadSeed, int n) throws InterruptedException {
+    static void doMonteCarlo(long threadSeed, int n) {
 
         final StringBuilder log = new StringBuilder();
 
@@ -147,7 +147,7 @@ public class MonteCarloTest {
         MonteCarloTestCase testCase = null;
         for (; i < n; i++) {
             try {
-                testCase = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
+                testCase = new MonteCarloTestCase(r.nextLong(), 4, 3, 3, 4, r, k);
 //                if(testCase.function.getCanonicalSignature().contains("int[")) throw new Error("canonicalization failed!");
                 testCase.runAll(instance);
 //                if(System.nanoTime() % 50_000_000 == 0) throw new Error("simulated random error");
