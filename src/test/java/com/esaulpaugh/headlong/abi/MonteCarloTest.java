@@ -359,19 +359,6 @@ public class MonteCarloTest {
         Assertions.assertNotEquals(fa, fb);
     }
 
-    private static String generateASCIIString(final int len, Random r) {
-        char[] chars = new char[len];
-        for(int i = 0; i < len; i++) {
-            char c;
-            do {
-                c = (char) (r.nextInt(160)); // 95) + 32
-            } while (Character.isISOControl(c));
-            if(c == '(') c = '_';
-            chars[i] = c;
-        }
-        return new String(chars);
-    }
-
     @Disabled("search for colliding signatures")
     @Test
     public void findSelectorCollisions() {

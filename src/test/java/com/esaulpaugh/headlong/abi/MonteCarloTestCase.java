@@ -429,6 +429,19 @@ public class MonteCarloTestCase implements Serializable {
         return sb.toString();
     }
 
+//    private static String generateASCIIString(final int len, Random r) {
+//        byte[] bytes = new byte[len];
+//        for(int i = 0; i < len; i++) {
+//            int v;
+//            do {
+//                v = (char) (r.nextInt(160)); // 95) + 32
+//            } while (Character.isISOControl(v));
+//            if(v == '(') v = '_';
+//            bytes[i] = (byte) v;
+//        }
+//        return new String(bytes, 0, 0, len);
+//    }
+
     private static int[] generateIntArray(final int len, IntType intType, Random r) {
         int[] ints = new int[len];
         final int bitLen = intType.bitLength;
