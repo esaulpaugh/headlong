@@ -33,6 +33,8 @@ import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.WriteAbortedException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Objects;
@@ -50,12 +52,55 @@ import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
 
 public class MonteCarloTest {
 
-    @Test
-    public void repro() {
-        Random instance = new Random();
-        MessageDigest md = Function.newDefaultDigest();
-        MonteCarloTestCase testCase = new MonteCarloTestCase(7706440032491971509L,3,3,3,3, instance, md);
-        testCase.runAll(new Random());
+    @Disabled("high memory")
+    @Test // (88642710261245591L,4,4,4,4
+    public void testRepro() { // (245781902350714877L,5,5,5,4
+        Random instance = new Random(); // (1847095625529912080L,5,5,5,4
+        MessageDigest md = Function.newDefaultDigest(); // (-2049532359701068182L,4,4,4,4
+        MonteCarloTestCase testCase = new MonteCarloTestCase(3239653448104147572L,4,3,5,4, instance, md);
+        repro(testCase, true); // (3239653448104147572L,4,3,5,4)
+    }
+
+    private static void repro(MonteCarloTestCase testCase, boolean run) {
+        System.out.println(testCase.rawSignature);
+        System.out.println(count(testCase.argsTuple));
+        if (run) {
+            testCase.runAll(new Random());
+        }
+    }
+
+    private static int count(Object o) {
+        int x = 0;
+        if(o instanceof Object[]) {
+            for(Object e : (Object[]) o) {
+                x += count(e);
+            }
+        } else if(o instanceof Iterable) {
+            for(Object e : (Iterable<?>) o) {
+                x += count(e);
+            }
+        } else if (o instanceof byte[]) {
+            x += ((byte[]) o).length;
+        } else if(o instanceof BigInteger) {
+            x += ((BigInteger) o).toByteArray().length;
+        } else if(o instanceof BigDecimal) {
+            x += ((BigDecimal) o).unscaledValue().toByteArray().length;
+        } else if(o instanceof Integer) {
+            x += Integer.BYTES;
+        } else if(o instanceof Long) {
+            x += Long.BYTES;
+        } else if(o instanceof int[]) {
+            x += ((int[]) o).length * Integer.BYTES;
+        } else if(o instanceof long[]) {
+            x += ((long[]) o).length * Long.BYTES;
+        } else if(o instanceof Boolean) {
+            x += 1;
+        } else if(o instanceof String) {
+            x += Strings.decode((String) o, Strings.UTF_8).length;
+        } else {
+            throw new Error("" + o.getClass());
+        }
+        return x;
     }
 
     private static final int N = 400_000;
@@ -119,6 +164,7 @@ public class MonteCarloTest {
                 sleep();
                 System.err.println("#" + i + " failed for " + testCase);
                 System.err.println(desc);
+                repro(testCase, false);
                 throw t;
             }
         }
