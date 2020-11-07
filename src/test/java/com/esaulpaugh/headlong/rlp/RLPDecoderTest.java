@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 import static com.esaulpaugh.headlong.TestUtils.CustomRunnable;
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.TestUtils.await;
+import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
@@ -114,8 +114,7 @@ public class RLPDecoderTest {
             tasks[i] = new ExhaustiveFuzzTask(new byte[] { (byte) i, 0, 0, 0 });
             executorService.submit(tasks[i]);
         }
-        executorService.shutdown();
-        requireNoTimeout(await(executorService, 2000L));
+        requireNoTimeout(shutdownAwait(executorService, 2000L));
         long valid = 0, invalid = 0;
         for (ExhaustiveFuzzTask task : tasks) {
             if(task != null) {

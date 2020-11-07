@@ -40,7 +40,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.TestUtils.await;
+import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
 import static com.esaulpaugh.headlong.abi.TypeFactory.EMPTY_PARAMETER;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -132,8 +132,7 @@ public class EncodeTest {
         for (int k = 0; k < parallelism; k++) {
             pool.submit(runnable);
         }
-        pool.shutdown();
-        requireNoTimeout(await(pool, 3600L));
+        requireNoTimeout(shutdownAwait(pool, 3600L));
 
         final int size = map.size();
         System.out.println("\nsize=" + map.size());

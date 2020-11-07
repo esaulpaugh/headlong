@@ -47,7 +47,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.TimeoutException;
 
-import static com.esaulpaugh.headlong.TestUtils.await;
+import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
 
 public class MonteCarloTest {
@@ -120,8 +120,7 @@ public class MonteCarloTest {
         while (i < runnables.length) {
             pool.submit(runnables[i] = new GambleGambleRunnable(masterSeed + (i++), workPerProcessor));
         }
-        pool.shutdown();
-        boolean noTimeout = TestUtils.await(pool, 600L);
+        boolean noTimeout = TestUtils.shutdownAwait(pool, 600L);
 
         for (GambleGambleRunnable runnable : runnables) {
             if(runnable.thrown != null) {
@@ -273,11 +272,8 @@ public class MonteCarloTest {
             two.runStandard();
         }
 
-        threadPool.shutdown();
-        requireNoTimeout(await(threadPool, 20L));
-
-        fjPool.shutdown();
-        requireNoTimeout(await(fjPool, 10L));
+        requireNoTimeout(shutdownAwait(threadPool, 20L));
+        requireNoTimeout(shutdownAwait(fjPool, 10L));
     }
 
     @Test

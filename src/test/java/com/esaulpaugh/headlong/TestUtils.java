@@ -36,7 +36,8 @@ import java.util.concurrent.TimeoutException;
 
 public class TestUtils {
 
-    public static boolean await(ExecutorService exec, long timeoutSeconds) throws InterruptedException {
+    public static boolean shutdownAwait(ExecutorService exec, long timeoutSeconds) throws InterruptedException {
+        exec.shutdown();
         return exec.awaitTermination(timeoutSeconds, TimeUnit.SECONDS);
     }
 
