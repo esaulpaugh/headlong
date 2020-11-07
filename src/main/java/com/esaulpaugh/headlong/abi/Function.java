@@ -218,6 +218,12 @@ public final class Function implements ABIObject {
         return decodeCall(ByteBuffer.wrap(array));
     }
 
+    /**
+     * The inverse of {@link #encodeCall}.
+     *
+     * @param abiBuffer the encoded function call
+     * @return  the decoded arguments
+     */
     public Tuple decodeCall(ByteBuffer abiBuffer) {
         final byte[] unitBuffer = ABIType.newUnitBuffer();
         abiBuffer.get(unitBuffer, 0, SELECTOR_LEN);
@@ -227,7 +233,7 @@ public final class Function implements ABIObject {
                         + ", found: " + Strings.encode(unitBuffer, 0, SELECTOR_LEN, Strings.HEX));
             }
         }
-        return inputTypes.decode(abiBuffer, unitBuffer);
+        return inputTypes.decode(abiBuffer, unitBuffer); // unitBuffer contents are ignored, overwritten during decode
     }
 
     public Tuple decodeReturn(byte[] returnVals) {
