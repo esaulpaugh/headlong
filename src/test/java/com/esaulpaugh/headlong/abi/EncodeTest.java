@@ -36,10 +36,12 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
+import static com.esaulpaugh.headlong.TestUtils.await;
+import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
 import static com.esaulpaugh.headlong.abi.TypeFactory.EMPTY_PARAMETER;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -53,7 +55,7 @@ public class EncodeTest {
 
     @Disabled("may take minutes to run")
     @Test
-    public void fuzzSignatures() throws InterruptedException {
+    public void fuzzSignatures() throws InterruptedException, TimeoutException {
 
         final byte[] alphabet = "x0123456789".getBytes(StandardCharsets.US_ASCII); // new char[128]; // "(),abcdefgilmnorstuxy8[]"
         final int alphabetLen = alphabet.length;
@@ -131,9 +133,11 @@ public class EncodeTest {
             pool.submit(runnable);
         }
         pool.shutdown();
-        pool.awaitTermination(600L, TimeUnit.SECONDS);
+        requireNoTimeout(await(pool, 3600L));
 
+        final int size = map.size();
         System.out.println("\nsize=" + map.size());
+        assertEquals(2 + (32 * 80), size);
 
         List<String> list = new ArrayList<>();
         for(Map.Entry<String, String> e : map.entrySet()) {

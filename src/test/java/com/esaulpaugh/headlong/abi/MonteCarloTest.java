@@ -43,8 +43,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import static com.esaulpaugh.headlong.TestUtils.await;
+import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
 
 public class MonteCarloTest {
 
@@ -59,7 +61,7 @@ public class MonteCarloTest {
     private static final int N = 400_000;
 
     @Test
-    public void gambleGamble() throws InterruptedException, AssertionError {
+    public void gambleGamble() throws InterruptedException, AssertionError, TimeoutException {
 
         final long masterSeed = TestUtils.getSeed(System.nanoTime()); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
@@ -74,17 +76,19 @@ public class MonteCarloTest {
             pool.submit(runnables[i] = new GambleGambleRunnable(masterSeed + (i++), workPerProcessor));
         }
         pool.shutdown();
-        pool.awaitTermination(300L, TimeUnit.SECONDS);
+        boolean noTimeout = TestUtils.await(pool, 600L);
+
         for (GambleGambleRunnable runnable : runnables) {
             if(runnable.thrown != null) {
                 throw new AssertionError(runnable.thrown);
             }
         }
 
+        requireNoTimeout(noTimeout);
         System.out.println((workPerProcessor * i) + " done");
     }
 
-    static void doMonteCarlo(long threadSeed, int n) {
+    static void doMonteCarlo(long threadSeed, int n) throws InterruptedException {
 
         final StringBuilder log = new StringBuilder();
 
@@ -97,7 +101,7 @@ public class MonteCarloTest {
 
         int i = 0;
         MonteCarloTestCase testCase = null;
-        for(; i < n; i++) {
+        for (; i < n; i++) {
             try {
                 testCase = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
 //                if(testCase.function.getCanonicalSignature().contains("int[")) throw new Error("canonicalization failed!");
@@ -224,12 +228,10 @@ public class MonteCarloTest {
         }
 
         threadPool.shutdown();
-        threadPool.awaitTermination(20L, TimeUnit.SECONDS);
+        requireNoTimeout(await(threadPool, 20L));
 
         fjPool.shutdown();
-        if(!fjPool.awaitTermination(10, TimeUnit.SECONDS)) {
-            throw new TimeoutException("not very Timely!!");
-        }
+        requireNoTimeout(await(fjPool, 10L));
     }
 
     @Test

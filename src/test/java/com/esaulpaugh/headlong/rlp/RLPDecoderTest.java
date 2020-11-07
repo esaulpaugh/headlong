@@ -32,12 +32,14 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 import static com.esaulpaugh.headlong.TestUtils.CustomRunnable;
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
+import static com.esaulpaugh.headlong.TestUtils.await;
+import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
@@ -104,7 +106,7 @@ public class RLPDecoderTest {
 
     @Disabled("slow")
     @Test
-    public void exhaustiveFuzz() throws InterruptedException {
+    public void exhaustiveFuzz() throws InterruptedException, TimeoutException {
         ExecutorService executorService = Executors.newWorkStealingPool();
         ExhaustiveFuzzTask[] tasks = new ExhaustiveFuzzTask[256];
         for (int i = 0; i < tasks.length; i++) {
@@ -113,7 +115,7 @@ public class RLPDecoderTest {
             executorService.submit(tasks[i]);
         }
         executorService.shutdown();
-        executorService.awaitTermination(35L, TimeUnit.MINUTES);
+        requireNoTimeout(await(executorService, 2000L));
         long valid = 0, invalid = 0;
         for (ExhaustiveFuzzTask task : tasks) {
             if(task != null) {

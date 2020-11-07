@@ -29,9 +29,22 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class TestUtils {
+
+    public static boolean await(ExecutorService exec, long timeoutSeconds) throws InterruptedException {
+        return exec.awaitTermination(timeoutSeconds, TimeUnit.SECONDS);
+    }
+
+    public static void requireNoTimeout(boolean noTimeout) throws TimeoutException {
+        if(!noTimeout) {
+            throw new TimeoutException("not very Timely!!");
+        }
+    }
 
     public static Random seededRandom() {
         return new Random(TestUtils.getSeed(System.nanoTime()));
