@@ -226,9 +226,9 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private int checkLength(final int valueLen, Object value) {
         if(length != valueLen && length != DYNAMIC_LENGTH) {
             throw new IllegalArgumentException(
-                    Utils.friendlyClassName(value.getClass(), valueLen)
-                            + " not instanceof " + Utils.friendlyClassName(clazz, length) + ", " +
-                            valueLen + " != " + length
+                    friendlyClassName(value.getClass(), valueLen)
+                            + " not instanceof " + friendlyClassName(clazz, length) + ", "
+                            + valueLen + " != " + length
             );
         }
         return valueLen;

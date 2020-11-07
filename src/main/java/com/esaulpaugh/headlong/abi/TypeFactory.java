@@ -148,6 +148,7 @@ public final class TypeFactory {
                 }
             }
         } catch (NumberFormatException ignored) {
+            /* fall through */
         }
         throw new IllegalArgumentException("bad array length");
     }
@@ -176,6 +177,7 @@ public final class TypeFactory {
                     }
                 }
             } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
+                /* fall through */
             }
         }
         return null;

@@ -28,6 +28,7 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -98,7 +99,7 @@ public final class Function implements ABIObject {
 
     public Function(Type type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) {
         this.type = Objects.requireNonNull(type);
-        this.name = name != null ? Utils.regexValidate(ALL_ASCII_NO_OPEN_PAREN, OPEN_PAREN_OR_NON_ASCII, name) : null;
+        this.name = name != null ? regexValidate(ALL_ASCII_NO_OPEN_PAREN, OPEN_PAREN_OR_NON_ASCII, name) : null;
         this.inputTypes = Objects.requireNonNull(inputTypes);
         this.outputTypes = Objects.requireNonNull(outputTypes);
         this.stateMutability = stateMutability;
@@ -264,6 +265,19 @@ public final class Function implements ABIObject {
     @Override
     public String toJson(boolean pretty) {
         return ABIJSON.toJson(this, true, pretty);
+    }
+
+    static String regexValidate(Pattern validString, Pattern illegalChar, String input) {
+        if(validString.matcher(input).matches()) {
+            return input;
+        }
+        Matcher badChar = illegalChar.matcher(input);
+        if (badChar.find()) {
+            int idx = badChar.start();
+            char c = input.charAt(idx);
+            throw new IllegalArgumentException("illegal char 0x" + Integer.toHexString(c) + " '" + c + "' @ index " + idx);
+        }
+        throw new Error("regex mismatch");
     }
 // ---------------------------------------------------------------------------------------------------------------------
     public static Function parse(String signature) {

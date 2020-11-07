@@ -177,7 +177,7 @@ public abstract class ABIType<J> {
                     + value.getClass().getName()
                     + " not assignable to "
                     + clazz.getName()
-                    + " (" + Utils.friendlyClassName(value.getClass()) + " not instanceof " + Utils.friendlyClassName(clazz) + "/" + canonicalType + ")");
+                    + " (" + friendlyClassName(value.getClass()) + " not instanceof " + friendlyClassName(clazz) + "/" + canonicalType + ")");
         }
     }
 
@@ -245,5 +245,44 @@ public abstract class ABIType<J> {
         for (int i = 0; i < n; i++) {
             sb.append(' ');
         }
+    }
+
+    static String friendlyClassName(Class<?> clazz) {
+        return friendlyClassName(clazz, null);
+    }
+
+    static String friendlyClassName(Class<?> clazz, Integer arrayLength) {
+        final String className = clazz.getName();
+        final int split = className.lastIndexOf('[') + 1;
+        final boolean hasArraySuffix = split > 0;
+        final StringBuilder sb = new StringBuilder();
+        final String base = hasArraySuffix ? className.substring(split) : className;
+        switch (base) {
+            case "B": sb.append("byte"); break;
+            case "S": sb.append("short"); break;
+            case "I": sb.append("int"); break;
+            case "J": sb.append("long"); break;
+            case "F": sb.append("float"); break;
+            case "D": sb.append("double"); break;
+            case "C": sb.append("char"); break;
+            case "Z": sb.append("boolean"); break;
+            default: {
+                int lastDotIndex = base.lastIndexOf('.');
+                if(lastDotIndex != -1) {
+                    sb.append(base, lastDotIndex + 1, base.length() - (base.charAt(0) == 'L' ? 1 : 0));
+                }
+            }
+        }
+        if(hasArraySuffix) {
+            int i = 0;
+            if(arrayLength != null && arrayLength >= 0) {
+                sb.append('[').append(arrayLength).append(']');
+                i++;
+            }
+            while (i++ < split) {
+                sb.append("[]");
+            }
+        }
+        return sb.toString();
     }
 }
