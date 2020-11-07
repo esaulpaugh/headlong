@@ -22,8 +22,6 @@ import java.nio.ByteBuffer;
 /** For decimal types such as fixed, ufixed, and decimal. */
 public final class BigDecimalType extends UnitType<BigDecimal> {
 
-    static final String ERR_SCALE_MISMATCH = "big decimal scale mismatch: actual != expected: %d != %d";
-
     final int scale;
 
     BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean unsigned) {
@@ -53,7 +51,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
         if(dec.scale() == scale) {
             return UNIT_LENGTH_BYTES;
         }
-        throw new IllegalArgumentException(String.format(ERR_SCALE_MISMATCH, dec.scale(), scale));
+        throw new IllegalArgumentException("big decimal scale mismatch: actual != expected: " + dec.scale() + " != " + scale);
     }
 
     @Override
