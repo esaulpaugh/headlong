@@ -79,26 +79,35 @@ public class MonteCarloTest {
             for(Object e : (Iterable<?>) o) {
                 x += count(e);
             }
-        } else if (o instanceof byte[]) {
-            x += ((byte[]) o).length;
-        } else if(o instanceof BigInteger) {
-            x += ((BigInteger) o).toByteArray().length;
-        } else if(o instanceof BigDecimal) {
-            x += ((BigDecimal) o).unscaledValue().toByteArray().length;
-        } else if(o instanceof Integer) {
-            x += Integer.BYTES;
-        } else if(o instanceof Long) {
-            x += Long.BYTES;
-        } else if(o instanceof int[]) {
-            x += ((int[]) o).length * Integer.BYTES;
-        } else if(o instanceof long[]) {
-            x += ((long[]) o).length * Long.BYTES;
-        } else if(o instanceof Boolean) {
-            x += 1;
-        } else if(o instanceof String) {
-            x += Strings.decode((String) o, Strings.UTF_8).length;
+        } else if(o instanceof Number) {
+            if(o instanceof BigInteger) {
+                x += ((BigInteger) o).toByteArray().length;
+            } else if(o instanceof BigDecimal) {
+                x += ((BigDecimal) o).unscaledValue().toByteArray().length;
+            } else if(o instanceof Integer) {
+                x += Integer.BYTES;
+            } else if(o instanceof Long) {
+                x += Long.BYTES;
+            } else {
+                throw new Error("" + o.getClass());
+            }
         } else {
-            throw new Error("" + o.getClass());
+            Class<?> c = o.getClass();
+            if (c == Boolean.class) {
+                x += 1;
+            } else if (c == boolean[].class) {
+                x += ((boolean[]) o).length;
+            } else if (c == int[].class) {
+                x += ((int[]) o).length * Integer.BYTES;
+            } else if (c == long[].class) {
+                x += ((long[]) o).length * Long.BYTES;
+            } else if (c == byte[].class) {
+                x += ((byte[]) o).length;
+            } else if (c == String.class) {
+                x += Strings.decode((String) o, Strings.UTF_8).length;
+            } else {
+                throw new Error("" + c);
+            }
         }
         return x;
     }
@@ -157,7 +166,6 @@ public class MonteCarloTest {
 //                        .append("\t\t")
 //                        .append(testCase.function.getCanonicalSignature().substring(testCase.function.getCanonicalSignature().indexOf('('))) // print function params
 //                        .append('\n');
-                i++;
             } catch (Throwable t) {
                 System.out.println(log.toString());
                 sleep();

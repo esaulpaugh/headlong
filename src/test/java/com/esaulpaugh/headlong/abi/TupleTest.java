@@ -67,8 +67,7 @@ public class TupleTest {
 
         boolean[] bools = new boolean[pow];
 
-        @SuppressWarnings("unchecked")
-        UnitType<? extends Number> type = (UnitType<? extends Number>) TupleType.parse("(int" + bits + ")").get(0);
+        IntType type = (IntType) TypeFactory.create("int" + bits, Integer.class);
 
         for (int i = 0; i < 1_579_919_999; i++) {
             bools[(int) generateLong(r, type) & powMinus1] = true;

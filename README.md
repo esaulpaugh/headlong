@@ -10,7 +10,7 @@ ABI spec: https://solidity.readthedocs.io/en/latest/abi-spec.html
 
 RLP spec: https://github.com/ethereum/wiki/wiki/RLP
 
-SHA-256 (headlong-4.0.0.jar): 60901358a33d78cb9893e4d839113e757a6d31a6842da37d16254019c07873eb
+SHA-256 (headlong-4.0.1.jar): 56d02076dee49be090d8cd04296101316c75a1ae27b533a545068410954b7f0f
 
 ## Usage
 
@@ -49,6 +49,17 @@ Tuple decoded = foo.decodeReturn(
 );
         
 System.out.println(decoded.equals(new Tuple(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t")));
+```
+
+```java
+Function fooTwo = new Function("fooTwo()", "(uint8)");
+Integer returned = fooTwo.decodeSingletonReturn(FastHex.decode("00000000000000000000000000000000000000000000000000000000000000FF", Integer.class));
+```
+
+#### Creating types directly
+
+```java
+BooleanType bool = (BooleanType) TypeFactory.create("bool", Boolean.class);
 ```
 
 ### RLP codec
@@ -92,14 +103,14 @@ Or build locally:
 Clone the project and install to your local maven repository using `gradle publishToMavenLocal` or `mvn install`, then declare it as a dependency:
 
 ```groovy
-implementation 'com.esaulpaugh:headlong:4.0.1-SNAPSHOT'
+implementation 'com.esaulpaugh:headlong:4.0.2-SNAPSHOT'
 ```
 
 ```xml
 <dependency>
     <groupId>com.esaulpaugh</groupId>
     <artifactId>headlong</artifactId>
-    <version>4.0.1-SNAPSHOT</version>
+    <version>4.0.2-SNAPSHOT</version>
 </dependency>
 ```
 Alternatively:
