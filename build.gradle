@@ -81,7 +81,7 @@ repositories {
 dependencies {
 
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'org.bouncycastle:bcprov-jdk15on:1.66'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.68'
 
     test.useJUnitPlatform()
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.7.0"
