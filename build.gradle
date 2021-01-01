@@ -88,8 +88,8 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.0"
 
     jmhImplementation 'commons-codec:commons-codec:1.15'
-    jmhImplementation 'org.openjdk.jmh:jmh-core:1.26'
-    jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.26'
+    jmhImplementation 'org.openjdk.jmh:jmh-core:1.27'
+    jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.27'
 }
 
 task jmh(type: JavaExec, dependsOn: jmhClasses) { // run benchmarks with `gradle jmh`
