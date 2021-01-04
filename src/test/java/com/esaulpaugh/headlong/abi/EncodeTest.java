@@ -482,6 +482,11 @@ public class EncodeTest {
 
     @Test
     public void testMinAndMax() throws Throwable {
+
+        BooleanType bool = (BooleanType) TypeFactory.create("bool", Boolean.class);
+        assertEquals(0, bool.minValue().longValueExact());
+        assertEquals(1, bool.maxValue().longValueExact());
+
         for (int i = 8; i <= 256; i += 8) {
             UnitType<?> unsigned = (UnitType<?>) TypeFactory.create("uint" + i);
             UnitType<?> signed = (UnitType<?>) TypeFactory.create("int" + i);
@@ -510,17 +515,39 @@ public class EncodeTest {
     }
 
     private static void testMinAndMax(UnitType<?> type, String err1Substr, String err2Substr) throws Throwable {
-        assertThrown(
-                IllegalArgumentException.class,
-                err1Substr,
-                () -> type.validateBigInt(type.minValue().subtract(BigInteger.ONE))
-        );
+        assertThrown(ILLEGAL, err1Substr, () -> type.validateBigInt(type.minValue().subtract(BigInteger.ONE)));
         type.validateBigInt(type.minValue());
         type.validateBigInt(type.maxValue());
-        assertThrown(
-                IllegalArgumentException.class,
-                err2Substr,
-                () -> type.validateBigInt(type.maxValue().add(BigInteger.ONE))
-        );
+        assertThrown(ILLEGAL, err2Substr, () -> type.validateBigInt(type.maxValue().add(BigInteger.ONE)));
+    }
+
+    private static final double DELTA = 0.000000000000000001d;
+    private static final BigDecimal O_1 = new BigDecimal("0.1");
+
+    @Test
+    public void testDecimalMinMax() throws Throwable {
+        BigDecimalType decimal = (BigDecimalType) TypeFactory.create("decimal", BigDecimal.class);
+        BigDecimal decimalMin = new BigDecimal(new BigInteger("-170141183460469231731687303715884105728"), 10);
+        BigDecimal decimalMax = new BigDecimal(new BigInteger("170141183460469231731687303715884105727"), 10);
+
+        assertThrown(ILLEGAL, "signed val exceeds bit limit: 128 >= 128", () -> decimal.validate(decimalMin.subtract(O_1)));
+        decimal.validate(decimalMin);
+        decimal.validate(decimalMax);
+        assertThrown(ILLEGAL, "signed val exceeds bit limit: 128 >= 128", () -> decimal.validate(decimalMax.add(O_1)));
+
+        BigDecimalType ufixed = (BigDecimalType) TypeFactory.create("ufixed", BigDecimal.class);
+        BigDecimal u128Max = new BigDecimal(new BigInteger("340282366920938463463374607431768211455"), 18);
+
+        System.out.println(ufixed.minDecimal() + " " + ufixed.maxDecimal());
+
+        assertEquals(0.0d, ufixed.minDecimal().doubleValue(), DELTA);
+        assertEquals(u128Max.doubleValue(), ufixed.maxDecimal().doubleValue(), DELTA);
+
+        ufixed.validate(new BigDecimal(BigInteger.ZERO, 18));
+        assertThrown(ILLEGAL, "signed value given for unsigned type", () -> ufixed.validate(O_1.negate()));
+
+        ufixed.validate(u128Max);
+        assertThrown(ILLEGAL, "unsigned val exceeds bit limit: 129 > 128", () -> ufixed.validate(u128Max.add(BigDecimal.ONE)));
+        assertThrown(ILLEGAL, "unsigned val exceeds bit limit: 129 > 128", () -> ufixed.validate(u128Max.add(O_1)));
     }
 }

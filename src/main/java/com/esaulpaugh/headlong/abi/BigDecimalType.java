@@ -71,4 +71,12 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
         validate(bigDec);
         return bigDec;
     }
+
+    public BigDecimal minDecimal() {
+        return new BigDecimal(minValue(), scale);
+    }
+
+    public BigDecimal maxDecimal() {
+        return new BigDecimal(maxValue(), scale);
+    }
 }
