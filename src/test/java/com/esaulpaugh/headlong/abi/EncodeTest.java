@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.util.Uint;
 import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Assertions;
@@ -476,6 +477,50 @@ public class EncodeTest {
 
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Long not assignable to [[[[I (Long not instanceof int[][][][]/int32[][][][])",
                 () -> Function.parse("foo(int32[][][][])").encodeCallWithArgs(10L)
+        );
+    }
+
+    @Test
+    public void testMinAndMax() throws Throwable {
+        for (int i = 8; i <= 256; i += 8) {
+            UnitType<?> unsigned = (UnitType<?>) TypeFactory.create("uint" + i);
+            UnitType<?> signed = (UnitType<?>) TypeFactory.create("int" + i);
+
+//            System.out.println(unsigned.minValue() + " ==> " + unsigned.maxValue() + ", " + signed.minValue() + " ==> " + signed.maxValue());
+
+            testMinAndMax(unsigned, "signed value given for unsigned type", " > ");
+            testMinAndMax(signed, " >= ", " >= ");
+
+            Uint uint = new Uint(i);
+            final long mask = uint.maskLong;
+            if(mask != 0) {
+                assertEquals(mask, unsigned.maxValue().longValueExact());
+                assertEquals(BigInteger.valueOf(mask), signed.maxValue().shiftLeft(1).add(BigInteger.ONE));
+
+                assertEquals(Long.toBinaryString(unsigned.maxValue().longValueExact()).substring(1), Long.toBinaryString(signed.maxValue().longValueExact()));
+                assertEquals(0, Long.numberOfTrailingZeros(unsigned.maxValue().longValueExact()));
+                assertEquals(0, Long.numberOfTrailingZeros(signed.maxValue().longValueExact()));
+
+                assertEquals(Long.SIZE, Long.numberOfTrailingZeros(unsigned.minValue().longValueExact()));
+                assertEquals(i - 1, Long.numberOfTrailingZeros(signed.minValue().longValueExact()));
+            }
+            assertEquals(uint.range, unsigned.maxValue().subtract(unsigned.minValue()).add(BigInteger.ONE));
+            assertEquals(uint.halfRange, signed.maxValue().add(BigInteger.ONE));
+        }
+    }
+
+    private static void testMinAndMax(UnitType<?> type, String err1Substr, String err2Substr) throws Throwable {
+        assertThrown(
+                IllegalArgumentException.class,
+                err1Substr,
+                () -> type.validateBigInt(type.minValue().subtract(BigInteger.ONE))
+        );
+        type.validateBigInt(type.minValue());
+        type.validateBigInt(type.maxValue());
+        assertThrown(
+                IllegalArgumentException.class,
+                err2Substr,
+                () -> type.validateBigInt(type.maxValue().add(BigInteger.ONE))
         );
     }
 }
