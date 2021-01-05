@@ -33,6 +33,14 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
         return scale;
     }
 
+    public BigDecimal minDecimal() {
+        return new BigDecimal(minValue(), scale);
+    }
+
+    public BigDecimal maxDecimal() {
+        return new BigDecimal(maxValue(), scale);
+    }
+
     @Override
     Class<?> arrayClass() {
         return BigDecimal[].class;
@@ -70,13 +78,5 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
         BigDecimal bigDec = new BigDecimal(new BigInteger(s, 10), scale);
         validate(bigDec);
         return bigDec;
-    }
-
-    public BigDecimal minDecimal() {
-        return new BigDecimal(minValue(), scale);
-    }
-
-    public BigDecimal maxDecimal() {
-        return new BigDecimal(maxValue(), scale);
     }
 }
