@@ -31,7 +31,6 @@ final class Encoding {
 
     static final IntType UINT31 = new IntType("uint31", 31, true);
 
-    private static final byte NEGATIVE_ONE_BYTE = (byte) 0xFF;
     static final byte ZERO_BYTE = (byte) 0x00;
     static final byte ONE_BYTE = (byte) 0x01;
 
@@ -39,7 +38,7 @@ final class Encoding {
     private static final byte[] CACHED_NEG1_PADDING = new byte[UNIT_LENGTH_BYTES];
 
     static {
-        Arrays.fill(CACHED_NEG1_PADDING, NEGATIVE_ONE_BYTE);
+        Arrays.fill(CACHED_NEG1_PADDING, (byte) 0xFF);
     }
 
     private static final byte[] NON_NEGATIVE_INT_PADDING = new byte[UNIT_LENGTH_BYTES - Long.BYTES];
