@@ -484,12 +484,12 @@ public class EncodeTest {
     public void testMinAndMax() throws Throwable {
 
         BooleanType bool = (BooleanType) TypeFactory.create("bool", Boolean.class);
-        assertEquals(0, bool.minValue().longValueExact());
-        assertEquals(1, bool.maxValue().longValueExact());
+        assertEquals(BigInteger.ZERO, bool.minValue());
+        assertEquals(BigInteger.ONE, bool.maxValue());
 
         for (int i = 8; i <= 256; i += 8) {
-            UnitType<?> unsigned = (UnitType<?>) TypeFactory.create("uint" + i);
-            UnitType<?> signed = (UnitType<?>) TypeFactory.create("int" + i);
+            final UnitType<?> unsigned = (UnitType<?>) TypeFactory.create("uint" + i);
+            final UnitType<?> signed = (UnitType<?>) TypeFactory.create("int" + i);
 
 //            System.out.println(unsigned.minValue() + " ==> " + unsigned.maxValue() + ", " + signed.minValue() + " ==> " + signed.maxValue());
 
@@ -499,15 +499,21 @@ public class EncodeTest {
             Uint uint = new Uint(i);
             final long mask = uint.maskLong;
             if(mask != 0) {
-                assertEquals(mask, unsigned.maxValue().longValueExact());
-                assertEquals(BigInteger.valueOf(mask), signed.maxValue().shiftLeft(1).add(BigInteger.ONE));
+                final long uMax = unsigned.maxValue().longValueExact();
+                final long uMin = unsigned.minValue().longValueExact();
+                final long max = signed.maxValue().longValueExact();
+                final long min = signed.minValue().longValueExact();
 
-                assertEquals(Long.toBinaryString(unsigned.maxValue().longValueExact()).substring(1), Long.toBinaryString(signed.maxValue().longValueExact()));
-                assertEquals(0, Long.numberOfTrailingZeros(unsigned.maxValue().longValueExact()));
-                assertEquals(0, Long.numberOfTrailingZeros(signed.maxValue().longValueExact()));
+                assertEquals(mask, uMax);
+                assertEquals(mask, max * 2 + 1);
 
-                assertEquals(Long.SIZE, Long.numberOfTrailingZeros(unsigned.minValue().longValueExact()));
-                assertEquals(i - 1, Long.numberOfTrailingZeros(signed.minValue().longValueExact()));
+                assertEquals(Long.toBinaryString(uMax).substring(1), Long.toBinaryString(max));
+                assertEquals(0L, uMin);
+                assertEquals(Long.SIZE - i, Long.numberOfLeadingZeros(uMax));
+                assertEquals(0, Long.numberOfTrailingZeros(uMax));
+
+                assertEquals(i - 1, Long.numberOfTrailingZeros(min));
+                assertEquals(0, Long.numberOfTrailingZeros(max));
             }
             assertEquals(uint.range, unsigned.maxValue().subtract(unsigned.minValue()).add(BigInteger.ONE));
             assertEquals(uint.halfRange, signed.maxValue().add(BigInteger.ONE));
@@ -549,5 +555,13 @@ public class EncodeTest {
         ufixed.validate(u128Max);
         assertThrown(ILLEGAL, "unsigned val exceeds bit limit: 129 > 128", () -> ufixed.validate(u128Max.add(BigDecimal.ONE)));
         assertThrown(ILLEGAL, "unsigned val exceeds bit limit: 129 > 128", () -> ufixed.validate(u128Max.add(O_1)));
+
+        BigDecimalType fixed = (BigDecimalType) TypeFactory.create("fixed", BigDecimal.class);
+
+        assertEquals(((UnitType<?>) TypeFactory.create("uint128")).maxValue(), ufixed.maxValue());
+        assertEquals(((UnitType<?>) TypeFactory.create("uint128")).minValue(), ufixed.minValue());
+
+        assertEquals(((UnitType<?>) TypeFactory.create("int128")).maxValue(), fixed.maxValue());
+        assertEquals(((UnitType<?>) TypeFactory.create("int128")).minValue(), fixed.minValue());
     }
 }

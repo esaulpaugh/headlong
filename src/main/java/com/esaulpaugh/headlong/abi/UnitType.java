@@ -35,6 +35,14 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         this.unsigned = unsigned;
     }
 
+    public int getBitLength() {
+        return bitLength;
+    }
+
+    public boolean isUnsigned() {
+        return unsigned;
+    }
+
     public final BigInteger minValue() {
         return unsigned
                 ? BigInteger.ZERO
@@ -43,14 +51,6 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
     public final BigInteger maxValue() {
         return BigInteger.valueOf(2L).pow(unsigned ? bitLength : bitLength - 1).subtract(BigInteger.ONE);
-    }
-
-    public int getBitLength() {
-        return bitLength;
-    }
-
-    public boolean isUnsigned() {
-        return unsigned;
     }
 
     @Override
