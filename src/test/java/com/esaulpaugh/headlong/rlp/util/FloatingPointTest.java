@@ -24,6 +24,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Random;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class FloatingPointTest {
 
     @Test
@@ -33,11 +36,12 @@ public class FloatingPointTest {
             final float flo = r.nextFloat();
             byte[] floBytes = FloatingPoint.toBytes(flo);
             byte[] floPutted = new byte[floBytes.length];
-            FloatingPoint.putFloat(flo, floPutted, 0);
-            Assertions.assertArrayEquals(floBytes, floPutted);
+            int len = FloatingPoint.putFloat(flo, floPutted, 0);
+            assertEquals(floBytes.length, len);
+            assertArrayEquals(floBytes, floPutted);
 
             float floGotten = FloatingPoint.getFloat(floBytes, 0, floBytes.length, false);
-            Assertions.assertEquals(flo, floGotten);
+            assertEquals(flo, floGotten);
         }
     }
 
@@ -48,11 +52,12 @@ public class FloatingPointTest {
             final double dub = r.nextDouble();
             byte[] dubBytes = FloatingPoint.toBytes(dub);
             byte[] dubPutted = new byte[dubBytes.length];
-            FloatingPoint.putDouble(dub, dubPutted, 0);
-            Assertions.assertArrayEquals(dubBytes, dubPutted);
+            int len = FloatingPoint.putDouble(dub, dubPutted, 0);
+            assertEquals(dubBytes.length, len);
+            assertArrayEquals(dubBytes, dubPutted);
 
             double dubGotten = FloatingPoint.getDouble(dubBytes, 0, dubBytes.length, false);
-            Assertions.assertEquals(dub, dubGotten);
+            assertEquals(dub, dubGotten);
         }
     }
 
@@ -65,7 +70,7 @@ public class FloatingPointTest {
             byte[] bytes = Integers.toBytesUnsigned(bigDec.unscaledValue());
 
             BigDecimal gotten = FloatingPoint.getBigDecimal(bytes, 0, bytes.length, bigDec.scale(), false);
-            Assertions.assertEquals(bigDec, gotten);
+            assertEquals(bigDec, gotten);
         }
     }
 }

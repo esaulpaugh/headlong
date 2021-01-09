@@ -41,8 +41,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
+import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.abi.TypeFactory.EMPTY_PARAMETER;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -461,7 +461,7 @@ public class EncodeTest {
     }
 
     @Test
-    public void testNesterErrMessage() throws Throwable {
+    public void testNestedErrMessage() throws Throwable {
         assertThrown(
                 IllegalArgumentException.class,
                 "tuple index 0: array index 1: signed val exceeds bit limit: 9 >= 8",
