@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.IntFunction;
 
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
 
@@ -73,21 +74,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     int byteLength(Object value) {
         final Object[] elements = ((Tuple) value).elements;
-        int len = 0;
-        for (int i = 0; i < elementTypes.length; i++) {
+        return len((i) -> {
             ABIType<?> type = elementTypes[i];
             int byteLen = type.byteLength(elements[i]);
-            len += !type.dynamic ? byteLen : OFFSET_LENGTH_BYTES + byteLen;
-        }
-        return len;
-    }
-
-    private int staticByteLengthPacked() {
-        int len = 0;
-        for (ABIType<?> elementType : elementTypes) {
-            len += elementType.byteLengthPacked(null);
-        }
-        return len;
+            return type.dynamic ? OFFSET_LENGTH_BYTES + byteLen : byteLen;
+        });
     }
 
     /**
@@ -97,12 +88,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     public int byteLengthPacked(Object value) {
         if (value == null) {
-            return staticByteLengthPacked();
+            return len((i) -> elementTypes[i].byteLengthPacked(null));
         }
         final Object[] elements = ((Tuple) value).elements;
+        return len((i) -> elementTypes[i].byteLengthPacked(elements[i]));
+    }
+
+    private int len(IntFunction<Integer> elementCount) {
         int len = 0;
-        for (int i = 0; i < elementTypes.length; i++) {
-            len += elementTypes[i].byteLengthPacked(elements[i]);
+        for(int i = 0; i < elementTypes.length; i++) {
+            len += elementCount.apply(i);
         }
         return len;
     }
@@ -116,13 +111,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         if(elements.length == elementTypes.length) {
             int i = 0;
             try {
-                int len = 0;
-                for (; i < elementTypes.length; i++) {
-                    ABIType<?> type = elementTypes[i];
-                    int byteLen = type.validate(elements[i]);
-                    len += !type.dynamic ? byteLen : OFFSET_LENGTH_BYTES + byteLen;
-                }
-                return len;
+                return len((j) -> {
+                    ABIType<?> type = elementTypes[j];
+                    int byteLen = type.validate(elements[j]);
+                    return type.dynamic ? OFFSET_LENGTH_BYTES + byteLen : byteLen;
+                });
             } catch (NullPointerException | IllegalArgumentException e) {
                 throw new IllegalArgumentException("tuple index " + i + ": " + e.getMessage());
             }

@@ -122,6 +122,7 @@ public final class Record {
         byte[] sign(byte[] message, int off, int len);
     }
 
+    @FunctionalInterface
     public interface Verifier {
         void verify(byte[] signature, byte[] content) throws SignatureException;
     }
