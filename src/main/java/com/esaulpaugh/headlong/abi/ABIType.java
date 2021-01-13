@@ -21,6 +21,7 @@ import com.esaulpaugh.headlong.util.Strings;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
@@ -139,7 +140,25 @@ public abstract class ABIType<J> {
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
 
-    static void decodeTails(ByteBuffer bb, int[] offsets, int tailStart, IntConsumer tailDecoder) {
+    static void decodeTails(int len, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
+        final int start = bb.position(); // save this value before offsets are decoded
+        decodeTailsWithOffsets(start, decodeOffsets(len, bb, unitBuffer, elements, getType), bb, unitBuffer, elements, getType);
+    }
+
+    private static int[] decodeOffsets(int len, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
+        int[] offsets = new int[len];
+        for(int i = 0; i < len; i++) {
+            ABIType<?> elementType = getType.apply(i);
+            if(!elementType.dynamic) {
+                elements[i] = elementType.decode(bb, unitBuffer);
+            } else {
+                offsets[i] = Encoding.UINT31.decode(bb, unitBuffer);
+            }
+        }
+        return offsets;
+    }
+
+    private static void decodeTailsWithOffsets(int tailStart, int[] offsets, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
         for (int i = 0; i < offsets.length; i++) {
             final int offset = offsets[i];
             if(offset > 0) {
@@ -149,7 +168,7 @@ public abstract class ABIType<J> {
                         bb.position(tailStart + offset); // leniently jump to specified offset
                     }
                     try {
-                        tailDecoder.accept(i);
+                        elements[i] = getType.apply(i).decode(bb, unitBuffer);
                     } catch (BufferUnderflowException bue) {
                         throw new IllegalArgumentException(bue);
                     }

@@ -323,25 +323,24 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         }
     }
 
-    private static boolean[] decodeBooleans(ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
+    private static Object decodeBooleans(ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
         final boolean[] booleans = new boolean[arrayLen]; // elements are false by default
         final int booleanOffset = UNIT_LENGTH_BYTES - Byte.BYTES;
-        for(int i = 0; i < arrayLen; i++) {
+        return decode(arrayLen, (i) -> {
             bb.get(unitBuffer);
             for (int j = 0; j < booleanOffset; j++) {
-                if(unitBuffer[j] == Encoding.ZERO_BYTE) {
+                if (unitBuffer[j] == Encoding.ZERO_BYTE) {
                     continue;
                 }
                 throw illegalBoolean(bb);
             }
             byte last = unitBuffer[booleanOffset];
-            if(last == Encoding.ONE_BYTE) {
+            if (last == Encoding.ONE_BYTE) {
                 booleans[i] = true;
-            } else if(last != Encoding.ZERO_BYTE) {
+            } else if (last != Encoding.ZERO_BYTE) {
                 throw illegalBoolean(bb);
             }
-        }
-        return booleans;
+        }, booleans);
     }
 
     private static IllegalArgumentException illegalBoolean(ByteBuffer bb) {
@@ -359,37 +358,27 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return encodeIfString(data);
     }
 
-    private static int[] decodeInts(IntType intType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
+    private static Object decodeInts(IntType intType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
         int[] ints = new int[arrayLen];
-        for (int i = 0; i < arrayLen; i++) {
-            ints[i] = intType.decode(bb, unitBuffer);
-        }
-        return ints;
+        return decode(arrayLen, (i) -> ints[i] = intType.decode(bb, unitBuffer), ints);
     }
 
-    private static long[] decodeLongs(LongType longType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
+    private static Object decodeLongs(LongType longType, ByteBuffer bb, int arrayLen, byte[] unitBuffer) {
         long[] longs = new long[arrayLen];
-        for (int i = 0; i < arrayLen; i++) {
-            longs[i] = longType.decode(bb, unitBuffer);
-        }
-        return longs;
+        return decode(arrayLen, (i) -> longs[i] = longType.decode(bb, unitBuffer), longs);
     }
 
-    private Object[] decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer) {
+    private Object decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer) {
         final Object[] elements = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
-        if(!this.dynamic || !elementType.dynamic) {
-            for (int i = 0; i < len; i++) {
-                elements[i] = elementType.decode(bb, unitBuffer);
-            }
-        } else {
-            final int tailStart = bb.position(); // save this value for later
-            int[] offsets = new int[len];
-            for (int i = 0; i < len; i++) {
-                offsets[i] = Encoding.UINT31.decode(bb, unitBuffer);
-            }
-            decodeTails(bb, offsets, tailStart, (i) -> elements[i] = elementType.decode(bb, unitBuffer));
-        }
+        decodeTails(len, bb, unitBuffer, elements, (i) -> elementType);
         return elements;
+    }
+
+    private static Object decode(int arrayLen, IntConsumer elementDecoder, Object returnVal) {
+        for(int i = 0; i < arrayLen; i++) {
+            elementDecoder.accept(i);
+        }
+        return returnVal;
     }
 
     /**
