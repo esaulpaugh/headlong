@@ -158,18 +158,19 @@ public abstract class ABIType<J> {
         for (int i = 0; i < len; i++) {
             final int offset = offsets[i];
             if(offset > 0) {
-                if (offset >= 0x20) {
+                final int jump = start + offset;
+                final int pos = bb.position();
+                if(jump != pos) {
                     /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-                    if (start + offset > bb.position()) {
-                        bb.position(start + offset); // leniently jump to specified offset
+                    if(jump < pos) {
+                        throw new IllegalArgumentException("illegal backwards jump: (" + start + "+" + offset + "=" + jump + ")<" + pos);
                     }
-                    try {
-                        elements[i] = getType.apply(i).decode(bb, unitBuffer);
-                    } catch (BufferUnderflowException bue) {
-                        throw new IllegalArgumentException(bue);
-                    }
-                } else {
-                    throw new IllegalArgumentException("offset less than 0x20");
+                    bb.position(jump); // leniently jump to specified offset
+                }
+                try {
+                    elements[i] = getType.apply(i).decode(bb, unitBuffer);
+                } catch (BufferUnderflowException bue) {
+                    throw new IllegalArgumentException(bue);
                 }
             }
         }

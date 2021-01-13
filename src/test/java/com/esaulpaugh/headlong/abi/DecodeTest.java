@@ -82,11 +82,11 @@ public class DecodeTest {
 
         final byte[] tooSmallOffset = Strings.decode(
                 "0000000000000000000000000000000000000000000000000000000000000045"
-                        + "000000000000000000000000000000000000000000000000000000000000001f"
+                        + "000000000000000000000000000000000000000000000000000000000000003f"
                         + "0000000000000000000000000000000000000000000000000000000000000004"
                         + "7730307400000000000000000000000000000000000000000000000000000000");
 
-        assertThrown(IllegalArgumentException.class, "offset less than 0x20", () -> FUNCTION.decodeReturn(tooSmallOffset));
+        assertThrown(IllegalArgumentException.class, "illegal backwards jump: (0+63=63)<64", () -> FUNCTION.decodeReturn(tooSmallOffset));
     }
 
     @Test
