@@ -296,7 +296,7 @@ public class ABIJSONTest {
 
         printTupleType(f.getOutputTypes());
 
-        f = Function.fromJson(FUNCTION_B_JSON);
+        f = Function.fromJson(FUNCTION_B_JSON, Function.newDefaultDigest());
         System.out.println(f.getName() + " : " + f.getCanonicalSignature());
         assertEquals(TupleType.EMPTY, f.getOutputTypes());
         assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.getCanonicalSignature());
@@ -364,7 +364,7 @@ public class ABIJSONTest {
         Event expectedA = new Event("a_name", "()", new boolean[0]);
         Event expectedB = new Event("a_name", TupleType.EMPTY, new boolean[0], false);
 
-        assertEquals(expectedA, Event.fromJsonObject(jsonObject));
+        assertEquals(expectedA, Event.fromJson(jsonObject.toString()));
         assertEquals(expectedB, expectedA);
     }
 
