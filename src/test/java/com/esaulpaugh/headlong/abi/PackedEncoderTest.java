@@ -298,16 +298,18 @@ public class PackedEncoderTest {
 
     @Test
     public void testSignExtendInt() {
-        int expected = BizarroIntegers.getInt(Strings.decode("8FFFFF"), 0, 3);
-        int result = PackedDecoder.decodeBigInteger(Strings.decode("8FFFFF"), 0, 3).intValue();
+        byte[] bytes = Strings.decode("8FFFFF");
+        int expected = BizarroIntegers.getInt(bytes, 0, 3);
+        int result = PackedDecoder.decodeBigInteger(bytes, 0, 3).intValue();
         assertTrue(result < 0);
         assertEquals(expected, result);
     }
 
     @Test
     public void testSignExtendLong() {
-        long expectedL = BizarroIntegers.getLong(Strings.decode("8FFFFFFFFF"), 0, 5);
-        long resultL = PackedDecoder.decodeBigInteger(Strings.decode("8FFFFFFFFF"), 0, 5).longValue();
+        byte[] bytes = Strings.decode("8FFFFFFFFF");
+        long expectedL = BizarroIntegers.getLong(bytes, 0, 5);
+        long resultL = PackedDecoder.decodeBigInteger(bytes, 0, 5).longValue();
         assertTrue(resultL < 0);
         assertEquals(expectedL, resultL);
     }

@@ -20,7 +20,6 @@ import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
