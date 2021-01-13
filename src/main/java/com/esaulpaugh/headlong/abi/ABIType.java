@@ -140,17 +140,12 @@ public abstract class ABIType<J> {
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
 
-    static void decodeTails(int len, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
-        final int start = bb.position(); // save this value before offsets are decoded
-        decodeTailsWithOffsets(start, decodeOffsets(len, bb, unitBuffer, elements, getType), bb, unitBuffer, elements, getType);
-    }
-
     private static int[] decodeOffsets(int len, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
-        int[] offsets = new int[len];
+        final int[] offsets = new int[len];
         for(int i = 0; i < len; i++) {
-            ABIType<?> elementType = getType.apply(i);
-            if(!elementType.dynamic) {
-                elements[i] = elementType.decode(bb, unitBuffer);
+            ABIType<?> t = getType.apply(i);
+            if(!t.dynamic) {
+                elements[i] = t.decode(bb, unitBuffer);
             } else {
                 offsets[i] = Encoding.UINT31.decode(bb, unitBuffer);
             }
@@ -158,14 +153,16 @@ public abstract class ABIType<J> {
         return offsets;
     }
 
-    private static void decodeTailsWithOffsets(int tailStart, int[] offsets, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
-        for (int i = 0; i < offsets.length; i++) {
+    static void decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
+        final int start = bb.position(); // save this value before offsets are decoded
+        final int[] offsets = decodeOffsets(len, bb, unitBuffer, elements, getType);
+        for (int i = 0; i < len; i++) {
             final int offset = offsets[i];
             if(offset > 0) {
                 if (offset >= 0x20) {
                     /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-                    if (tailStart + offset > bb.position()) {
-                        bb.position(tailStart + offset); // leniently jump to specified offset
+                    if (start + offset > bb.position()) {
+                        bb.position(start + offset); // leniently jump to specified offset
                     }
                     try {
                         elements[i] = getType.apply(i).decode(bb, unitBuffer);

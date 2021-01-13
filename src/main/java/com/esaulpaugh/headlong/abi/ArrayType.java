@@ -369,8 +369,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private Object decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer) {
-        final Object[] elements = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
-        decodeTails(len, bb, unitBuffer, elements, (i) -> elementType);
+        Object[] elements = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
+        decodeObjects(len, bb, unitBuffer, elements, (i) -> elementType);
         return elements;
     }
 

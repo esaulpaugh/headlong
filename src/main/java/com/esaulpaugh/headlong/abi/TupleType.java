@@ -158,8 +158,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
         final int len = elementTypes.length;
-        final Object[] elements = new Object[len];
-        decodeTails(len, bb, unitBuffer, elements, (i) -> elementTypes[i]);
+        Object[] elements = new Object[len];
+        decodeObjects(len, bb, unitBuffer, elements, (i) -> elementTypes[i]);
         return new Tuple(elements);
     }
 
