@@ -41,16 +41,13 @@ final class Encoding {
         Arrays.fill(CACHED_NEG1_PADDING, (byte) 0xFF);
     }
 
-    private static final byte[] NON_NEGATIVE_INT_PADDING = new byte[UNIT_LENGTH_BYTES - Long.BYTES];
-    private static final byte[] NEGATIVE_INT_PADDING = Arrays.copyOfRange(CACHED_NEG1_PADDING, 0, UNIT_LENGTH_BYTES - Long.BYTES);
-
     static int insertOffset(final int offset, ByteBuffer dest, int tailByteLen) {
         insertInt(offset, dest);
         return offset + tailByteLen; // return next offset
     }
 
     static void insertInt(long val, ByteBuffer dest) {
-        dest.put(val >= 0 ? NON_NEGATIVE_INT_PADDING : NEGATIVE_INT_PADDING);
+        insertPadding(UNIT_LENGTH_BYTES - Long.BYTES, val < 0, dest);
         dest.putLong(val);
     }
 
