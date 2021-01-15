@@ -56,7 +56,7 @@ final class Encoding {
         int arrLen = arr.length;
         if(arrLen <= paddedLen) {
             insertPadding(paddedLen - arrLen, signed.signum() < 0, dest);
-            dest.put(arr);
+            dest.put(arr, 0 ,arrLen);
         } else {
             dest.put(arr, 1, paddedLen);
         }
