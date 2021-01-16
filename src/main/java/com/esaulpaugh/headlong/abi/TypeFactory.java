@@ -139,7 +139,7 @@ public final class TypeFactory {
         throw new IllegalArgumentException("unrecognized type: \"" + rawType + '"');
     }
 
-    private static int parseLen(String lenStr) {
+    private static int parseLen(final String lenStr) {
         try {
             if(leadDigitValid(lenStr.charAt(0)) || lenStr.equals("0")) {
                 final int length = Integer.parseInt(lenStr);
@@ -153,7 +153,7 @@ public final class TypeFactory {
         throw new IllegalArgumentException("bad array length");
     }
 
-    private static ABIType<?> resolveBaseType(String baseTypeStr) {
+    private static ABIType<?> resolveBaseType(final String baseTypeStr) {
         if(baseTypeStr.charAt(0) == '(') {
             return parseTupleType(baseTypeStr);
         }
@@ -170,8 +170,8 @@ public final class TypeFactory {
                 final String mStr = type.substring(idx + "fixed".length(), indexOfX);
                 final String nStr = type.substring(indexOfX + 1); // everything after x
                 if (leadDigitValid(mStr.charAt(0)) && leadDigitValid(nStr.charAt(0))) {
-                    int M = Integer.parseInt(mStr); // no parseUnsignedInt on Android?
-                    int N = Integer.parseInt(nStr);
+                    final int M = Integer.parseInt(mStr); // no parseUnsignedInt on Android?
+                    final int N = Integer.parseInt(nStr);
                     if (Integers.mod(M, 8) == 0 && M >= 8 && M <= 256 && N > 0 && N <= 80) {
                         return new BigDecimalType((unsigned ? "ufixed" : "fixed") + M + 'x' + N, M, N, unsigned);
                     }
@@ -247,11 +247,14 @@ public final class TypeFactory {
 
     private static int nextTerminator(String signature, int i) {
         final int comma = signature.indexOf(',', i);
-        final int close = signature.indexOf(')', i);
-        return comma == -1
-                ? close
-                : close == -1
-                    ? comma
-                    : Math.min(comma, close);
+        if(comma < 0) {
+            return signature.indexOf(')', i);
+        }
+        for ( ; i < comma; i++) {
+            if (signature.charAt(i) == ')') {
+                return i;
+            }
+        }
+        return comma;
     }
 }
