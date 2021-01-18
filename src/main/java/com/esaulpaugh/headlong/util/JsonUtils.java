@@ -40,7 +40,7 @@ public final class JsonUtils {
         return getString(object, key, null);
     }
 
-    public static boolean getBoolean(JsonObject object, String key) {
+    public static Boolean getBoolean(JsonObject object, String key) {
         return getBoolean(object, key, null);
     }
 
@@ -59,7 +59,7 @@ public final class JsonUtils {
         throw new IllegalArgumentException(key + " is not a string");
     }
 
-    public static boolean getBoolean(JsonObject object, String key, Boolean defaultVal) {
+    public static Boolean getBoolean(JsonObject object, String key, Boolean defaultVal) {
         JsonElement element = object.get(key);
         if(isNull(element)) {
             return defaultVal;

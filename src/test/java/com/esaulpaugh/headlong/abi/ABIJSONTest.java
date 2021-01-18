@@ -437,4 +437,13 @@ public class ABIJSONTest {
         assertEquals("a", event.getIndexedParams().get(0).getName());
         assertEquals("b", event.getNonIndexedParams().get(0).getName());
     }
+
+    @Test
+    public void testJsonUtils() {
+        JsonObject empty = new JsonObject();
+        Boolean b = JsonUtils.getBoolean(empty, "constant");
+        assertNull(b);
+        Boolean b2 = JsonUtils.getBoolean(empty, "constant", null);
+        assertNull(b2);
+    }
 }
