@@ -246,15 +246,11 @@ public final class TypeFactory {
     }
 
     private static int nextTerminator(String signature, int i) {
-        final int comma = signature.indexOf(',', i);
-        if(comma < 0) {
-            return signature.indexOf(')', i);
+        final int len = signature.length();
+        for( ; i < len; i++) {
+            char c = signature.charAt(i);
+            if(c == ',' || c == ')') return i;
         }
-        for ( ; i < comma; i++) {
-            if (signature.charAt(i) == ')') {
-                return i;
-            }
-        }
-        return comma;
+        return -1;
     }
 }
