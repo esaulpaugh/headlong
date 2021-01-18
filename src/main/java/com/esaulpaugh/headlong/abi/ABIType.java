@@ -139,7 +139,7 @@ public abstract class ABIType<J> {
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
 
-    private static int[] decodeOffsets(int len, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
+    private static int[] decodeHeads(int len, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
         final int[] offsets = new int[len];
         for(int i = 0; i < len; i++) {
             ABIType<?> t = getType.apply(i);
@@ -154,7 +154,7 @@ public abstract class ABIType<J> {
 
     static void decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
         final int start = bb.position(); // save this value before offsets are decoded
-        final int[] offsets = decodeOffsets(len, bb, unitBuffer, elements, getType);
+        final int[] offsets = decodeHeads(len, bb, unitBuffer, elements, getType);
         for (int i = 0; i < len; i++) {
             final int offset = offsets[i];
             if(offset > 0) {
