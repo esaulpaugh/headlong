@@ -640,4 +640,19 @@ public class RLPDecoderTest {
 
         System.out.println(joined);
     }
+
+    @Test
+    public void testExport() {
+        RLPList list = RLP_STRICT.wrapList(LONG_LIST_BYTES);
+
+        byte[] buffer = new byte[list.encodingLength()];
+        int idx = list.export(buffer, 0);
+        assertEquals(list.encodingLength(), idx);
+        assertArrayEquals(buffer, list.encoding());
+
+        buffer = new byte[list.dataLength];
+        idx = list.exportData(buffer, 0);
+        assertEquals(list.dataLength, idx);
+        assertArrayEquals(buffer, list.data());
+    }
 }

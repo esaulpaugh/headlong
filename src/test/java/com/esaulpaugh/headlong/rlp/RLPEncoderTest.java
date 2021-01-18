@@ -173,7 +173,10 @@ public class RLPEncoderTest {
             assertEquals(i, iter.next().asInt(false));
             assertEquals(l, iter.next().asLong());
             assertEquals(signed, iter.next().asBigIntSigned());
-            assertEquals(unsigned, iter.next().asBigInt(false));
+            RLPItem bigIntItem = iter.next();
+            assertEquals(unsigned, bigIntItem.asBigInt());
+            assertEquals(unsigned, bigIntItem.asBigInt(false));
+            assertEquals(unsigned, bigIntItem.asBigInt(true));
 
             assertEquals(f, iter.next().asFloat(false), Double.MIN_NORMAL);
             assertEquals(d, iter.next().asDouble(false), Double.MIN_NORMAL);
