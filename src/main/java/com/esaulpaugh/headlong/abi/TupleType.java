@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.SuperSerial;
 
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -125,31 +126,26 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     void encodeTail(Object value, ByteBuffer dest) {
-        final Object[] values = ((Tuple) value).elements;
-        if(!dynamic) {
-            encodeHeads(elementTypes, values, dest, -1);
-            return;
+        encodeObjects(this, ((Tuple) value).elements, dest, (i) -> elementTypes[i]);
+    }
+
+    static void encodeObjects(ABIType<?> _this, Object[] values, ByteBuffer dest, IntFunction<ABIType<?>> getType) {
+        int nextOffset = !_this.dynamic ? -1 : headLengthSum(values, getType);
+        for (int i = 0; i < values.length; i++) {
+            nextOffset = getType.apply(i).encodeHead(values[i], dest, nextOffset);
         }
-        final ABIType<?>[] types = elementTypes;
-        encodeHeads(types, values, dest, headLengthSum(types, values));
-        for (int i = 0; i < types.length; i++) {
-            ABIType<?> t = types[i];
+        for (int i = 0; i < values.length; i++) {
+            ABIType<?> t = getType.apply(i);
             if(t.dynamic) {
                 t.encodeTail(values[i], dest);
             }
         }
     }
 
-    private static void encodeHeads(ABIType<?>[] types, Object[] values, ByteBuffer dest, int nextOffset) {
-        for (int i = 0; i < types.length; i++) {
-            nextOffset = types[i].encodeHead(values[i], dest, nextOffset);
-        }
-    }
-
-    private static int headLengthSum(ABIType<?>[] types, Object[] elements) {
+    private static int headLengthSum(Object[] elements, IntFunction<ABIType<?>> getType) {
         int sum = 0;
-        for (int i = 0; i < types.length; i++) {
-            ABIType<?> type = types[i];
+        for (int i = 0; i < elements.length; i++) {
+            ABIType<?> type = getType.apply(i);
             sum += !type.dynamic ? type.byteLength(elements[i]) : OFFSET_LENGTH_BYTES;
         }
         return sum;
@@ -161,6 +157,43 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         Object[] elements = new Object[len];
         decodeObjects(len, bb, unitBuffer, elements, (i) -> elementTypes[i]);
         return new Tuple(elements);
+    }
+
+    private static int[] decodeHeads(int len, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
+        final int[] offsets = new int[len];
+        for(int i = 0; i < len; i++) {
+            ABIType<?> t = getType.apply(i);
+            if(!t.dynamic) {
+                elements[i] = t.decode(bb, unitBuffer);
+            } else {
+                offsets[i] = Encoding.UINT31.decode(bb, unitBuffer);
+            }
+        }
+        return offsets;
+    }
+
+    static void decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
+        final int start = bb.position(); // save this value before offsets are decoded
+        final int[] offsets = decodeHeads(len, bb, unitBuffer, elements, getType);
+        for (int i = 0; i < len; i++) {
+            final int offset = offsets[i];
+            if(offset > 0) {
+                final int jump = start + offset;
+                final int pos = bb.position();
+                if(jump != pos) {
+                    /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
+                    if(jump < pos) {
+                        throw new IllegalArgumentException("illegal backwards jump: (" + start + "+" + offset + "=" + jump + ")<" + pos);
+                    }
+                    bb.position(jump); // leniently jump to specified offset
+                }
+                try {
+                    elements[i] = getType.apply(i).decode(bb, unitBuffer);
+                } catch (BufferUnderflowException bue) {
+                    throw new IllegalArgumentException(bue);
+                }
+            }
+        }
     }
 
     /**

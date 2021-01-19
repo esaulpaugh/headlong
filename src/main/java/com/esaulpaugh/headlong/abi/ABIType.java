@@ -18,9 +18,7 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
-import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.util.function.IntFunction;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
@@ -138,43 +136,6 @@ public abstract class ABIType<J> {
      * @throws IllegalArgumentException if the data is malformed
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
-
-    private static int[] decodeHeads(int len, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
-        final int[] offsets = new int[len];
-        for(int i = 0; i < len; i++) {
-            ABIType<?> t = getType.apply(i);
-            if(!t.dynamic) {
-                elements[i] = t.decode(bb, unitBuffer);
-            } else {
-                offsets[i] = Encoding.UINT31.decode(bb, unitBuffer);
-            }
-        }
-        return offsets;
-    }
-
-    static void decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
-        final int start = bb.position(); // save this value before offsets are decoded
-        final int[] offsets = decodeHeads(len, bb, unitBuffer, elements, getType);
-        for (int i = 0; i < len; i++) {
-            final int offset = offsets[i];
-            if(offset > 0) {
-                final int jump = start + offset;
-                final int pos = bb.position();
-                if(jump != pos) {
-                    /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-                    if(jump < pos) {
-                        throw new IllegalArgumentException("illegal backwards jump: (" + start + "+" + offset + "=" + jump + ")<" + pos);
-                    }
-                    bb.position(jump); // leniently jump to specified offset
-                }
-                try {
-                    elements[i] = getType.apply(i).decode(bb, unitBuffer);
-                } catch (BufferUnderflowException bue) {
-                    throw new IllegalArgumentException(bue);
-                }
-            }
-        }
-    }
 
     /**
      * Parses and validates a string representation of J.
