@@ -247,7 +247,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_TUPLE:
             Object[] arr = (Object[]) value;
             encodeArrayLen(arr.length, dest);
-            TupleType.encodeObjects(this, arr, dest, (i) -> elementType);
+            TupleType.encodeObjects(dynamic, arr, dest, (i) -> elementType);
             return;
         default: throw new Error();
         }
