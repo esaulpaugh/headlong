@@ -121,8 +121,8 @@ public final class PackedDecoder {
         case TYPE_CODE_BYTE: elements[i] = buffer[idx]; return type.byteLengthPacked(null);
         case TYPE_CODE_INT: return insertInt((IntType) type, buffer, idx, type.byteLengthPacked(null), elements, i);
         case TYPE_CODE_LONG: return insertLong((LongType) type, buffer, idx, type.byteLengthPacked(null), elements, i);
-        case TYPE_CODE_BIG_INTEGER: return insertBigInteger(type.byteLengthPacked(null), buffer, idx, elements, i, (BigIntegerType) type);
-        case TYPE_CODE_BIG_DECIMAL: return insertBigDecimal(type.byteLengthPacked(null), buffer, idx, elements, i, (BigDecimalType) type);
+        case TYPE_CODE_BIG_INTEGER: return insertBigInteger((BigIntegerType) type, type.byteLengthPacked(null), buffer, idx, elements, i);
+        case TYPE_CODE_BIG_DECIMAL: return insertBigDecimal((BigDecimalType) type, type.byteLengthPacked(null), buffer, idx, elements, i);
         case TYPE_CODE_ARRAY: return insertArray((ArrayType<? extends ABIType<?>, ?>) type, buffer, idx, end, elements, i);
         case TYPE_CODE_TUPLE:
             return type.dynamic
@@ -152,7 +152,7 @@ public final class PackedDecoder {
         return len;
     }
 
-    private static int insertBigInteger(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx, BigIntegerType type) {
+    private static int insertBigInteger(BigIntegerType type, int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
         if(type.unsigned) {
             byte[] copy = new byte[1 + elementLen];
             System.arraycopy(buffer, idx, copy, 1, elementLen);
@@ -164,7 +164,7 @@ public final class PackedDecoder {
         return elementLen;
     }
 
-    private static int insertBigDecimal(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx, BigDecimalType type) {
+    private static int insertBigDecimal(BigDecimalType type, int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
         BigInteger unscaled;
         if(type.unsigned) {
             byte[] copy = new byte[1 + elementLen];
@@ -194,11 +194,11 @@ public final class PackedDecoder {
         final Object array;
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: array = decodeBooleanArray(arrayLen, buffer, idx); break;
-        case TYPE_CODE_BYTE: array = arrayType.encodeIfString(decodeByteArray(arrayLen, buffer, idx)); break;
+        case TYPE_CODE_BYTE: array = decodeByteArray(arrayType, arrayLen, buffer, idx); break;
         case TYPE_CODE_INT: array = decodeIntArray((IntType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_LONG: array = decodeLongArray((LongType) elementType, elementByteLen, arrayLen, buffer, idx); break;
-        case TYPE_CODE_BIG_INTEGER: array = decodeBigIntegerArray(elementByteLen, arrayLen, buffer, idx, (BigIntegerType) elementType); break;
-        case TYPE_CODE_BIG_DECIMAL: array = decodeBigDecimalArray(elementByteLen, arrayLen, buffer, idx, (BigDecimalType) elementType); break;
+        case TYPE_CODE_BIG_INTEGER: array = decodeBigIntegerArray((BigIntegerType) elementType, elementByteLen, arrayLen, buffer, idx); break;
+        case TYPE_CODE_BIG_DECIMAL: array = decodeBigDecimalArray((BigDecimalType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: array = decodeObjectArray(arrayLen, elementType, buffer, idx, end); break;
         default: throw new Error();
@@ -215,10 +215,10 @@ public final class PackedDecoder {
         return booleans;
     }
 
-    private static byte[] decodeByteArray(int arrayLen, byte[] buffer, int idx) {
+    private static Object decodeByteArray(ArrayType<?, ?> arrayType, int arrayLen, byte[] buffer, int idx) {
         byte[] bytes = new byte[arrayLen];
         System.arraycopy(buffer, idx, bytes, 0, arrayLen);
-        return bytes;
+        return arrayType.encodeIfString(bytes);
     }
 
     private static int[] decodeIntArray(IntType intType, int elementLen, int arrayLen, byte[] buffer, int idx) {
@@ -247,18 +247,18 @@ public final class PackedDecoder {
         return longs;
     }
 
-    private static BigInteger[] decodeBigIntegerArray(int elementLen, int arrayLen, byte[] buffer, int idx, BigIntegerType elementType) {
+    private static BigInteger[] decodeBigIntegerArray(BigIntegerType elementType, int elementLen, int arrayLen, byte[] buffer, int idx) {
         BigInteger[] bigInts = new BigInteger[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            idx += insertBigInteger(elementLen, buffer, idx, bigInts, i, elementType);
+            idx += insertBigInteger(elementType, elementLen, buffer, idx, bigInts, i);
         }
         return bigInts;
     }
 
-    private static BigDecimal[] decodeBigDecimalArray(int elementLen, int arrayLen, byte[] buffer, int idx, BigDecimalType elementType) {
+    private static BigDecimal[] decodeBigDecimalArray(BigDecimalType elementType, int elementLen, int arrayLen, byte[] buffer, int idx) {
         BigDecimal[] bigDecimals = new BigDecimal[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
-            idx += insertBigDecimal(elementLen, buffer, idx, bigDecimals, i, elementType);
+            idx += insertBigDecimal(elementType, elementLen, buffer, idx, bigDecimals, i);
         }
         return bigDecimals;
     }
