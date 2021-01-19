@@ -132,7 +132,7 @@ public final class TypeFactory {
                 return baseType;
             }
         } catch (ClassNotFoundException cnfe) {
-            throw new RuntimeException(cnfe);
+            throw new Error(cnfe);
         } catch (StringIndexOutOfBoundsException sioobe) { // e.g. type equals "" or "82]" or "[]" or "[1]"
             /* fall through */
         }

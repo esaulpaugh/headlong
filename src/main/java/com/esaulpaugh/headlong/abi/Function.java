@@ -189,7 +189,7 @@ public final class Function implements ABIObject {
         try {
             messageDigest.digest(selector, 0, SELECTOR_LEN);
         } catch (DigestException de) {
-            throw new RuntimeException(de);
+            throw new Error(de);
         }
     }
 

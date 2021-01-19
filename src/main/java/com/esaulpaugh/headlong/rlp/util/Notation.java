@@ -92,7 +92,7 @@ public final class Notation {
         return forEncoding(RLPEncoder.encodeSequentially(objects));
     }
 
-    private static RuntimeException exceedsContainer(int index, long end, int containerEnd) {
+    private static IllegalArgumentException exceedsContainer(int index, long end, int containerEnd) {
         return new IllegalArgumentException("element @ index " + index + " exceeds its container: " + end + " > " + containerEnd);
     }
 
