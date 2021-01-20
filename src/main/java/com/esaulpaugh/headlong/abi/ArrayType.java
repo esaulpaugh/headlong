@@ -236,73 +236,52 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     @Override
     void encodeTail(Object value, ByteBuffer dest) {
-        encodeArrayTail(value, dest);
-    }
-
-    private void insert(int len, ByteBuffer dest, Runnable insert) {
-        if(length == DYNAMIC_LENGTH) {
-            Encoding.insertInt(len, dest);
-        }
-        insert.run();
-    }
-
-    private void encodeArrayTail(Object v, ByteBuffer dest) {
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: encodeBooleans((boolean[]) v, dest); return;
-        case TYPE_CODE_BYTE: encodeBytes(decodeIfString(v), dest); return;
-        case TYPE_CODE_INT: encodeInts((int[]) v, dest); return;
-        case TYPE_CODE_LONG: encodeLongs((long[]) v, dest); return;
+        case TYPE_CODE_BOOLEAN: encodeBooleans((boolean[]) value, dest); return;
+        case TYPE_CODE_BYTE: encodeBytes(decodeIfString(value), dest); return;
+        case TYPE_CODE_INT: encodeInts((int[]) value, dest); return;
+        case TYPE_CODE_LONG: encodeLongs((long[]) value, dest); return;
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: encodeObjects((Object[]) v, dest); return;
+        case TYPE_CODE_TUPLE:
+            Object[] arr = (Object[]) value;
+            encodeArrayLen(arr.length, dest);
+            TupleType.encodeObjects(dynamic, arr, dest, (i) -> elementType);
+            return;
         default: throw new Error();
         }
     }
 
+    private void encodeArrayLen(int len, ByteBuffer dest) {
+        if(length == DYNAMIC_LENGTH) {
+            Encoding.insertInt(len, dest);
+        }
+    }
+
     private void encodeBooleans(boolean[] arr, ByteBuffer dest) {
-        insert(arr.length, dest, () -> {
-            for (boolean e : arr) {
-                BooleanType.encodeBoolean(e, dest);
-            }
-        });
+        encodeArrayLen(arr.length, dest);
+        for (boolean e : arr) {
+            BooleanType.encodeBoolean(e, dest);
+        }
     }
 
     private void encodeBytes(byte[] arr, ByteBuffer dest) {
-        insert(arr.length, dest, () -> Encoding.insertBytesPadded(arr, dest));
+        encodeArrayLen(arr.length, dest);
+        Encoding.insertBytesPadded(arr, dest);
     }
 
     private void encodeInts(int[] arr, ByteBuffer dest) {
-        insert(arr.length, dest, () -> {
-            for (int e : arr) {
-                Encoding.insertInt(e, dest);
-            }
-        });
+        encodeArrayLen(arr.length, dest);
+        for (int e : arr) {
+            Encoding.insertInt(e, dest);
+        }
     }
 
     private void encodeLongs(long[] arr, ByteBuffer dest) {
-        insert(arr.length, dest, () -> {
-            for (long e : arr) {
-                Encoding.insertInt(e, dest);
-            }
-        });
-    }
-
-    private void encodeObjects(Object[] arr, ByteBuffer dest) {
-        if(dynamic) {
-            insert(arr.length, dest, () -> insertOffsets(arr, dest));
-        }
-        for (Object object : arr) {
-            elementType.encodeTail(object, dest);
-        }
-    }
-
-    private void insertOffsets(Object[] objects, ByteBuffer dest) {
-        if (elementType.dynamic) {
-            int nextOffset = objects.length * OFFSET_LENGTH_BYTES;
-            for (Object object : objects) {
-                nextOffset = Encoding.insertOffset(nextOffset, dest, elementType.byteLength(object));
-            }
+        encodeArrayLen(arr.length, dest);
+        for (long e : arr) {
+            Encoding.insertInt(e, dest);
         }
     }
 
@@ -377,7 +356,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private Object decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer) {
         Object[] elements = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
-        decodeObjects(len, bb, unitBuffer, elements, (i) -> elementType);
+        TupleType.decodeObjects(len, bb, unitBuffer, elements, (i) -> elementType);
         return elements;
     }
 

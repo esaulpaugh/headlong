@@ -30,6 +30,7 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -279,33 +280,36 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testParseFunction() {
+    public void testParseFunctionA() {
+        final Function f = Function.fromJson(FUNCTION_A_JSON);
+        final TupleType in = f.getParamTypes();
+        final TupleType out = f.getOutputTypes();
+        final ABIType<?> out0 = out.get(0);
 
-        Function f;
+        System.out.println(f.getName() + " : " + f.getCanonicalSignature() + " : " + out0);
+        assertEquals(1, in.elementTypes.length);
+        assertEquals(1, out.elementTypes.length);
 
-        f = Function.fromJson(FUNCTION_A_JSON);
-        System.out.println(f.getName() + " : " + f.getCanonicalSignature() + " : " + f.getOutputTypes().get(0));
-        assertEquals(1, f.getParamTypes().elementTypes.length);
         assertEquals("foo((decimal,decimal)[][])", f.getCanonicalSignature());
-        assertEquals(1, f.getOutputTypes().elementTypes.length);
-        assertEquals("uint64", f.getOutputTypes().get(0).canonicalType);
+        assertEquals("uint64", out0.getCanonicalType());
+
+        assertFalse(out0.isDynamic());
         assertNull(f.getStateMutability());
         f.encodeCallWithArgs((Object) new Tuple[][] { new Tuple[] { new Tuple(new BigDecimal(BigInteger.ONE, 10), new BigDecimal(BigInteger.TEN, 10)) } });
 
-        printTupleType(f.getParamTypes());
+        printTupleType(in);
+        printTupleType(out);
+    }
 
-        printTupleType(f.getOutputTypes());
-
-        f = Function.fromJson(FUNCTION_B_JSON, Function.newDefaultDigest());
+    @Test
+    public void testParseFunctionB() {
+        final Function f = Function.fromJson(FUNCTION_B_JSON, Function.newDefaultDigest());
         System.out.println(f.getName() + " : " + f.getCanonicalSignature());
         assertEquals(TupleType.EMPTY, f.getOutputTypes());
         assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.getCanonicalSignature());
         assertEquals("view", f.getStateMutability());
 
         printTupleType(f.getParamTypes());
-
-        Function f2 = Function.fromJson("{\"name\": \"foo\", \"type\": \"function\", \"inputs\": [ {\"name\": \"complex_nums\", \"type\": \"tuple[]\", \"components\": [ {\"name\": \"real\", \"type\": \"decimal\"}, {\"name\": \"imaginary\", \"type\": \"decimal\"} ]} ]}");
-        System.out.println(f2.toJson(false));
     }
 
     @Test

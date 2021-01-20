@@ -71,14 +71,8 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     }
 
     @Override
-    int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
-        Encoding.insertInt(((Number) value).longValue(), dest);
-        return nextOffset;
-    }
-
-    @Override
     void encodeTail(Object value, ByteBuffer dest) {
-        encodeHead(value, dest, 0);
+        Encoding.insertInt(((Number) value).longValue(), dest);
     }
 
     final void validatePrimitive(long longVal) {
