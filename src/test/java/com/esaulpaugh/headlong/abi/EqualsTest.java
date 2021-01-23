@@ -45,9 +45,9 @@ public class EqualsTest {
         int n = 0;
         do {
 
-            MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
+            final MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
 
-            String canonical = mctc.function.getCanonicalSignature();
+            final String canonical = mctc.function.getCanonicalSignature();
             if(mctc.rawSignature.equals(canonical)) {
                 i++;
                 continue;
@@ -57,8 +57,8 @@ public class EqualsTest {
             }
             i = 0;
 
-            Function a = mctc.function;
-            Function b = new Function(canonical);
+            final Function a = mctc.function;
+            final Function b = new Function(canonical);
 
 //            System.out.println(raw);
 
@@ -67,6 +67,8 @@ public class EqualsTest {
 //            System.out.println(equals);
 
             assertTrue(equals);
+
+            assertEquals(a.hashCode(), b.hashCode());
 
             assertNotSame(a.getParamTypes().canonicalType, b.getParamTypes().canonicalType);
 
