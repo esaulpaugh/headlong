@@ -193,8 +193,12 @@ public final class Function implements ABIObject {
         }
     }
 
+    private int validatedCallLength(Tuple args) {
+        return Function.SELECTOR_LEN + inputTypes.validate(args);
+    }
+
     public int measureCallLength(Tuple args) {
-        return Function.SELECTOR_LEN + inputTypes.measureEncodedLength(args);
+        return validatedCallLength(args);
     }
 
     public ByteBuffer encodeCallWithArgs(Object... args) {
@@ -202,8 +206,9 @@ public final class Function implements ABIObject {
     }
 
     public ByteBuffer encodeCall(Tuple args) {
-        ByteBuffer dest = ByteBuffer.wrap(new byte[measureCallLength(args)]); // ByteOrder.BIG_ENDIAN by default
-        encodeCall(args, dest);
+        ByteBuffer dest = ByteBuffer.wrap(new byte[validatedCallLength(args)]); // ByteOrder.BIG_ENDIAN by default
+        dest.put(selector);
+        inputTypes.encodeTail(args, dest);
         return dest;
     }
 
