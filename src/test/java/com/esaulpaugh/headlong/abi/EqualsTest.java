@@ -69,6 +69,8 @@ public class EqualsTest {
             assertTrue(equals);
 
             assertEquals(a.hashCode(), b.hashCode());
+            assertEquals(a.toJson(false), b.toJson(false));
+            assertEquals(a.toString(), b.toString());
 
             assertNotSame(a.getParamTypes().canonicalType, b.getParamTypes().canonicalType);
 
