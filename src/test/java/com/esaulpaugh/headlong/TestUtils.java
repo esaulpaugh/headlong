@@ -53,8 +53,8 @@ public class TestUtils {
 
     public static long getSeed(final long protoseed) {
         long c = protoseed * (System.nanoTime() << 1) * -System.nanoTime();
-        c ^= c << 32;
-        return c ^ (c >> 32);
+        c ^= c >> 32;
+        return c ^ (c << 33);
     }
 
     public static long pickRandom(Random r) {
