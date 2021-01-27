@@ -29,7 +29,7 @@ public final class Uint {
     private static final long ZERO = 0L;
 
     public final int numBits;
-    public final BigInteger range;
+    public final BigInteger range; // always greater than 0
     public final long rangeLong;
     public final BigInteger halfRange;
     public final long halfRangeLong;
@@ -44,13 +44,11 @@ public final class Uint {
         }
         this.numBits = numBits;
         this.range = BigInteger.ONE.shiftLeft(numBits); // BigInteger.ONE.pow(numBits)
-        long rangeLong, halfRangeLong, maskLong;
-        try {
+        long rangeLong = ZERO, halfRangeLong = ZERO, maskLong = ZERO;
+        if(range.bitLength() < Long.SIZE) {
             rangeLong = range.longValueExact();
             halfRangeLong = rangeLong >> 1;
-            maskLong = range.subtract(BigInteger.ONE).longValueExact();
-        } catch (ArithmeticException ae) {
-            rangeLong = halfRangeLong = maskLong = ZERO;
+            maskLong = rangeLong - 1;
         }
         this.rangeLong = rangeLong;
         this.halfRange = range.shiftRight(1);
