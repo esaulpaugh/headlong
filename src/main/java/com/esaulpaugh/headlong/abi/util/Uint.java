@@ -46,7 +46,7 @@ public final class Uint {
         this.range = BigInteger.ONE.shiftLeft(numBits); // BigInteger.ONE.pow(numBits)
         long rangeLong = ZERO, halfRangeLong = ZERO, maskLong = ZERO;
         if(range.bitLength() < Long.SIZE) {
-            rangeLong = range.longValueExact();
+            rangeLong = range.longValue();
             halfRangeLong = rangeLong >> 1;
             maskLong = rangeLong - 1;
         }
