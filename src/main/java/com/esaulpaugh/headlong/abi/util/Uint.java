@@ -70,7 +70,7 @@ public final class Uint {
             }
             throw tooManyBitsException(bitLen, numBits, false);
         }
-        return toSigned(BigInteger.valueOf(unsigned)).longValueExact();
+        return toSigned(BigInteger.valueOf(unsigned)).longValue();
     }
 
     public BigInteger toSigned(BigInteger unsigned) {
