@@ -48,7 +48,11 @@ public class TestUtils {
     }
 
     public static Random seededRandom() {
-        return new Random(TestUtils.getSeed(System.nanoTime()));
+        return new Random(getSeed());
+    }
+
+    public static long getSeed() {
+        return getSeed(System.nanoTime());
     }
 
     public static long getSeed(final long protoseed) {

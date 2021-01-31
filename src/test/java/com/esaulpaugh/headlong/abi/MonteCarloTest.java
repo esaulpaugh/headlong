@@ -117,7 +117,7 @@ public class MonteCarloTest {
     @Test
     public void gambleGamble() throws InterruptedException, AssertionError, TimeoutException {
 
-        final long masterSeed = TestUtils.getSeed(System.nanoTime()); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
+        final long masterSeed = TestUtils.getSeed(); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
         System.out.println("MASTER SEED: " + masterSeed + "L");
 
@@ -301,7 +301,7 @@ public class MonteCarloTest {
     }
 
     private static MonteCarloTestCase newComplexTestCase(Random r, Keccak k) {
-        long seed = TestUtils.getSeed(System.nanoTime());
+        long seed = TestUtils.getSeed();
         final long origSeed = seed;
 
         MonteCarloTestCase testCase;
