@@ -321,7 +321,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     static String completeTupleTypeString(StringBuilder sb) {
         final int len = sb.length();
         return len != 1
-                ? sb.replace(len - 1, len, ")").toString() // replace trailing comma
+                ? sb.deleteCharAt(len - 1).append(')').toString() // replace trailing comma
                 : EMPTY_TUPLE_STRING;
     }
 
