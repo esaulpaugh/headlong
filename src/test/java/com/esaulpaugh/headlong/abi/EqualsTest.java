@@ -37,7 +37,7 @@ public class EqualsTest {
     @Test
     public void testEquals() {
 
-        final Random r = new Random();
+        final Random r = TestUtils.seededRandom();
         final Keccak k = new Keccak(256);
 
         int maxIters = -1;

@@ -481,6 +481,17 @@ public class EncodeTest {
     }
 
     @Test
+    public void testUnconsumedTrailing() throws Throwable {
+        final ABIType<?> type = TypeFactory.create("uint");
+        final int extra = 1 + TestUtils.seededRandom().nextInt(40);
+        assertThrown(
+                ILLEGAL,
+                "unconsumed bytes: " + extra + " remaining",
+                () -> type.decode(new byte[UNIT_LENGTH_BYTES + extra])
+        );
+    }
+
+    @Test
     public void testMinAndMax() throws Throwable {
 
         BooleanType bool = (BooleanType) TypeFactory.create("bool", Boolean.class);

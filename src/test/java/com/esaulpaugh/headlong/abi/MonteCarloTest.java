@@ -325,7 +325,7 @@ public class MonteCarloTest {
     @Disabled("run if you need to generate random test cases")
     @Test
     public void printNewTestCases() {
-        final Random r = new Random();
+        final Random r = TestUtils.seededRandom();
         final Keccak k = new Keccak(256);
         final Gson ugly = new GsonBuilder().create();
         final JsonPrimitive version = new JsonPrimitive("1.4.4+commit.3ad2258");
