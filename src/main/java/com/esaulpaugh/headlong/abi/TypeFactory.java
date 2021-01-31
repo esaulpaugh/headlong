@@ -200,7 +200,7 @@ public final class TypeFactory {
             while (argStart < end) {
                 switch (rawTypeStr.charAt(argStart)) {
                 case '(': // element is tuple or tuple array
-                    argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart + 1));
+                    argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart));
                     break;
                 case ')':
                     if(prevEndChar != ',') {
@@ -213,7 +213,7 @@ public final class TypeFactory {
                     }
                     throw new IllegalArgumentException(EMPTY_PARAMETER);
                 default: // non-tuple element
-                    argEnd = nextTerminator(rawTypeStr, argStart + 1);
+                    argEnd = nextTerminator(rawTypeStr, argStart);
                 }
                 elements.add(buildType(rawTypeStr.substring(argStart, argEnd), null));
                 if((prevEndChar = rawTypeStr.charAt(argEnd)) != ',') {
@@ -233,7 +233,7 @@ public final class TypeFactory {
     private static int findSubtupleEnd(String parentTypeString, int i) {
         int depth = 1;
         do {
-            char x = parentTypeString.charAt(i++);
+            char x = parentTypeString.charAt(++i);
             if(x <= ')') {
                 if(x == ')') {
                     depth--;
@@ -242,7 +242,7 @@ public final class TypeFactory {
                 }
             }
         } while(depth > 0);
-        return i;
+        return i + 1;
     }
 
     private static int nextTerminator(String signature, int i) {
