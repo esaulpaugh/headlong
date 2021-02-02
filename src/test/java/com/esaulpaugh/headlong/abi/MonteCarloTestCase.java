@@ -205,7 +205,7 @@ public class MonteCarloTestCase implements Serializable {
             System.err.println(Strings.encode(babar, 0, idx, Strings.HEX));
             System.err.println(SuperSerial.serialize(function.getParamTypes(), args, true));
             System.err.println(SuperSerial.serialize(function.getParamTypes(), decoded, true));
-            throw new IllegalArgumentException("idx=" + idx + " " + seed + " " + function.getCanonicalSignature() + " " + args);
+            throw new AssertionError("idx=" + idx + " " + seed + " " + function.getCanonicalSignature() + " " + args);
         }
     }
 
@@ -223,22 +223,20 @@ public class MonteCarloTestCase implements Serializable {
 //        final byte target = parr[idx];
         final byte addend = (byte) (1 + r.nextInt(255));
         parr[idx] += addend;
-//        boolean equal = false;
+        boolean equal = false;
         Tuple decoded = null;
         try {
             decoded = PackedDecoder.decode(tt, parr);
-//            equal = args.equals(decoded);
+            equal = args.equals(decoded);
         } catch (IllegalArgumentException ignored) {
             /* do nothing */
         } catch (Throwable t) {
             t.printStackTrace();
             throw new Error(t);
         }
-//        if (equal) {
-//            if(false) { // strings cause false positives
-//                throw new Error();
-//            }
-//        }
+        if (equal && !function.getCanonicalSignature().contains("string")) { // strings cause false positives
+            throw new AssertionError("equal: " + function.getCanonicalSignature() + " with " + decoded);
+        }
     }
 
     void runPacked() {
