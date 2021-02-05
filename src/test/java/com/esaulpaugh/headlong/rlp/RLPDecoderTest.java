@@ -230,6 +230,8 @@ public class RLPDecoderTest {
     public void testListIterable() throws Throwable {
         final RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
         assertEquals(DataType.LIST_LONG, rlpList.type());
+        assertFalse(rlpList.isString());
+        assertTrue(rlpList.isList());
 
         final List<RLPItem> elements = rlpList.elements();
         assertEquals(DataType.LIST_SHORT, elements.get(0).type());
@@ -258,6 +260,9 @@ public class RLPDecoderTest {
         assertEquals(rlpList, rlpList.duplicate(RLP_STRICT));
         RLPString rlpString = RLP_STRICT.wrapString((byte) 0x00);
         assertEquals(rlpString, rlpString.duplicate(RLP_STRICT));
+
+        assertTrue(rlpString.isString());
+        assertFalse(rlpString.isList());
     }
 
     @Test
