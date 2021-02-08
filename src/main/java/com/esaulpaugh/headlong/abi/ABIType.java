@@ -103,6 +103,10 @@ public abstract class ABIType<J> {
      */
     public abstract int validate(Object value);
 
+    public int measureEncodedLength(Object value) {
+        return validate(value);
+    }
+
     int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
         if (!dynamic) {
             encodeTail(value, dest);

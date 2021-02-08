@@ -232,10 +232,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return this;
     }
 
-    public int measureEncodedLength(Tuple values) {
-        return validate(values);
-    }
-
     /**
      * Returns the non-standard-packed encoding of {@code values}.
      *
