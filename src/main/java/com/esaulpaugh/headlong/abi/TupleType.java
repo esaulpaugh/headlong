@@ -19,6 +19,7 @@ import com.esaulpaugh.headlong.util.SuperSerial;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -294,28 +295,18 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         if(len == elementTypes.length) {
             final StringBuilder canonicalBuilder = new StringBuilder("(");
             boolean dynamic = false;
-            final ABIType<?>[] selected = new ABIType<?>[getSelectionSize(manifest, negate)];
-            for (int i = 0, s = 0; i < len; i++) {
+            final ArrayList<ABIType<?>> selected = new ArrayList<>(len);
+            for (int i = 0; i < len; i++) {
                 if (negate ^ manifest[i]) {
                     ABIType<?> e = elementTypes[i];
                     canonicalBuilder.append(e.canonicalType).append(',');
                     dynamic |= e.dynamic;
-                    selected[s++] = e;
+                    selected.add(e);
                 }
             }
-            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected);
+            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected.toArray(EMPTY_TYPE_ARRAY));
         }
         throw new IllegalArgumentException("manifest.length != elementTypes.length: " + len + " != " + elementTypes.length);
-    }
-
-    private static int getSelectionSize(boolean[] manifest, boolean negate) {
-        int count = 0;
-        for (boolean b : manifest) {
-            if(b) {
-                count++;
-            }
-        }
-        return negate ? manifest.length - count : count;
     }
 
     static String completeTupleTypeString(StringBuilder sb) {
