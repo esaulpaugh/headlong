@@ -103,7 +103,7 @@ public abstract class ABIType<J> {
      */
     public abstract int validate(Object value);
 
-    public int measureEncodedLength(Object value) {
+    public final int measureEncodedLength(Object value) {
         return validate(value);
     }
 
