@@ -79,7 +79,7 @@ public final class RLPEncoder {
         if (val <= Integer.MAX_VALUE) {
             return (int) val;
         }
-        throw new IllegalArgumentException("integer overflow");
+        throw new ArithmeticException("integer overflow");
     }
 
     private static boolean isShort(int dataLen) {
