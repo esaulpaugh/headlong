@@ -53,13 +53,13 @@ public final class RLPDecoder {
      * @return an iterator over the items in the sequence
      */
     public Iterator<RLPItem> sequenceIterator(byte[] buffer, int index) {
-        return new SeqIter(null, RLPDecoder.this, buffer, index);
+        return new SeqIter(RLPDecoder.this, buffer, index);
     }
 
     private static class SeqIter extends RLPStreamIterator {
 
-        SeqIter(InputStream is, RLPDecoder decoder, byte[] buffer, int index) {
-            super(is, decoder, buffer, index);
+        SeqIter(RLPDecoder decoder, byte[] buffer, int index) {
+            super(null, decoder, buffer, index);
         }
 
         @Override
