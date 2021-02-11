@@ -44,7 +44,8 @@ public final class RLPEncoder {
     }
 
     static int itemLen(int dataLen) {
-        return (isShort(dataLen) ? 1 : 1 + Integers.len(dataLen)) + dataLen;
+        return (isShort(dataLen) ? 1 : 1 + Integers.len(dataLen))
+                + dataLen;
     }
 
     static void insertListPrefix(int dataLen, ByteBuffer bb) {
@@ -63,22 +64,12 @@ public final class RLPEncoder {
     static void insertRecordContentList(int dataLen, long seq, List<KeyValuePair> pairs, ByteBuffer bb) {
         pairs.sort(KeyValuePair.PAIR_COMPARATOR); // note that ArrayList overrides List.sort
         insertListPrefix(dataLen, bb);
-        encodeString(seq, bb);
+        encodeString(Integers.toBytes(seq), bb);
         for (KeyValuePair pair : pairs) {
             encodeKeyValuePair(pair, bb);
         }
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    private static void encodeString(long val, ByteBuffer bb) {
-        final int dataLen = Integers.len(val);
-        if (dataLen == Byte.BYTES) {
-            encodeLen1String((byte) val, bb);
-            return;
-        }
-        bb.put((byte) (STRING_SHORT_OFFSET + dataLen)); // dataLen is 0 or 2-8
-        Integers.putLong(val, bb);
-    }
-
     private static void encodeKeyValuePair(KeyValuePair pair, ByteBuffer bb) {
         encodeString(pair.getKey(), bb);
         encodeString(pair.getValue(), bb);
@@ -125,8 +116,7 @@ public final class RLPEncoder {
     }
 
     private static int listEncodedLen(Iterable<?> items) {
-        final int dataLen = sumEncodedLen(items);
-        return Byte.BYTES + (isShort(dataLen) ? dataLen : Integers.len(dataLen) + dataLen);
+        return itemLen(sumEncodedLen(items));
     }
 
     // visible to Record
@@ -148,7 +138,7 @@ public final class RLPEncoder {
 
     private static void encodeString(byte[] data, ByteBuffer bb) {
         final int dataLen = data.length;
-        if (dataLen == Byte.BYTES) { // short string
+        if (dataLen == 1) {
             encodeLen1String(data[0], bb);
             return;
         }
@@ -163,7 +153,7 @@ public final class RLPEncoder {
 
     private static void encodeLen1String(byte first, ByteBuffer bb) {
         if (first < 0x00) { // same as (first & 0xFF) >= 0x80
-            bb.put((byte) (STRING_SHORT_OFFSET + Byte.BYTES));
+            bb.put((byte) (STRING_SHORT_OFFSET + 1));
         }
         bb.put(first);
     }
