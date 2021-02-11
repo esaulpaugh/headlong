@@ -88,7 +88,7 @@ public abstract class RLPItem {
         if(_endIndex > containerEnd) {
             throw exceedsContainer(index, _endIndex, containerEnd, containerEnd == buffer.length);
         }
-        if(!lenient && _dataLength == 1 && type == STRING_SHORT && buffer[_dataIndex] >= 0x00) { // same as (buffer[_dataIndex] & 0xFF) < 0x80
+        if(!lenient && _dataLength == 1 && type == STRING_SHORT && DataType.isSingleByte(buffer[_dataIndex])) {
             throw new IllegalArgumentException("invalid rlp for single byte @ " + index);
         }
 

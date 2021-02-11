@@ -211,7 +211,7 @@ public class RLPDecoderTest {
                         break;
                     }
                 case "81":
-                    if(!decoder.lenient || buffer[1] >= 0x00) {
+                    if(!decoder.lenient || DataType.isSingleByte(buffer[1])) {
                         break;
                     }
                     throw new RuntimeException(Strings.encode(buffer));

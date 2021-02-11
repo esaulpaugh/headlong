@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
@@ -37,23 +36,22 @@ public final class Record {
 
     public Record(long seq, List<KeyValuePair> pairs, Signer signer) {
         final int signatureLen = signer.signatureLength();
-        final int payloadLen = rlpEncodedLen(seq) + RLPEncoder.dataLen(pairs);
-        final int recordListDataLen = RLPEncoder.prefixLength(signatureLen) + signatureLen + payloadLen;
-        final int recordListPrefixLen = RLPEncoder.prefixLength(recordListDataLen);
-        final int recordLen = recordListPrefixLen + recordListDataLen;
+        final int payloadLen = RLPEncoder.measureEncodedLen(seq) + RLPEncoder.dataLen(pairs);
+        final int recordListDataLen = RLPEncoder.itemLen(signatureLen) + payloadLen;
+        final int recordLen = RLPEncoder.itemLen(recordListDataLen);
 
         checkRecordLen(recordLen);
 
         final ByteBuffer bb = ByteBuffer.allocate(recordLen);
         RLPEncoder.insertListPrefix(recordListDataLen, bb);
 
-        final int contentListLen = RLPEncoder.prefixLength(payloadLen) + payloadLen;
+        final int contentListLen = RLPEncoder.itemLen(payloadLen);
         final int contentListOffset = recordLen - contentListLen;
         bb.position(contentListOffset);
         RLPEncoder.insertRecordContentList(payloadLen, seq, pairs, bb);
 
         final byte[] signature = signer.sign(bb.array(), contentListOffset, contentListLen);
-        bb.position(recordListPrefixLen);
+        bb.position(recordLen - recordListDataLen);
         RLPEncoder.encodeItem(signature, bb);
 
         this.rlp = RLP_STRICT.wrapList(bb.array());
@@ -111,14 +109,14 @@ public final class Record {
 
     private byte[] getContentBytes(int index) {
         int contentDataLen = rlp.encodingLength() - index;
-        ByteBuffer bb = ByteBuffer.allocate(RLPEncoder.prefixLength(contentDataLen) + contentDataLen);
+        ByteBuffer bb = ByteBuffer.allocate(RLPEncoder.itemLen(contentDataLen));
         RLPEncoder.insertListPrefix(contentDataLen, bb);
         rlp.exportRange(index, index + contentDataLen, bb.array(), bb.position());
         return bb.array();
     }
 
     public interface Signer {
-        int signatureLength();
+        int signatureLength(); // should be greater than 1
         byte[] sign(byte[] message, int off, int len);
     }
 
@@ -140,13 +138,5 @@ public final class Record {
     @Override
     public String toString() {
         return ENR_PREFIX + rlp.toString(BASE_64_URL_SAFE);
-    }
-
-    private static int rlpEncodedLen(long val) {
-        int dataLen = Integers.len(val);
-        if (dataLen == 1) {
-            return (byte) val >= 0x00 ? 1 : 2;
-        }
-        return 1 + dataLen;
     }
 }

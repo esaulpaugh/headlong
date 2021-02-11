@@ -77,4 +77,8 @@ public enum DataType {
             return SINGLE_BYTE;
         }
     }
+
+    public static boolean isSingleByte(byte b) {
+        return b >= 0x00; // same as (buffer[idx] & 0xFF) < 0x80
+    }
 }

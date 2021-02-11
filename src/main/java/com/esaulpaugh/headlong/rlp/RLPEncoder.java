@@ -39,10 +39,12 @@ public final class RLPEncoder {
         return requireNoOverflow(sum);
     }
 
-    static int prefixLength(int dataLen) {
-        return isShort(dataLen)
-                ? Byte.BYTES
-                : Byte.BYTES + Integers.len(dataLen);
+    static int measureEncodedLen(long val) {
+        return stringEncodedLen(Integers.toBytes(val));
+    }
+
+    static int itemLen(int dataLen) {
+        return (isShort(dataLen) ? 1 : 1 + Integers.len(dataLen)) + dataLen;
     }
 
     static void insertListPrefix(int dataLen, ByteBuffer bb) {
@@ -123,12 +125,7 @@ public final class RLPEncoder {
 
     private static int stringEncodedLen(byte[] byteString) {
         final int dataLen = byteString.length;
-        return Byte.BYTES +
-                (isShort(dataLen)
-                        ? dataLen == Byte.BYTES && byteString[0] >= 0x00 // same as (byteString[0] & 0xFF) < 0x80
-                            ? 0
-                            : dataLen
-                        : Integers.len(dataLen) + dataLen);
+        return itemLen(dataLen == 1 && DataType.isSingleByte(byteString[0]) ? 0 : dataLen);
     }
 
     private static int listEncodedLen(Iterable<?> items) {
@@ -319,7 +316,7 @@ public final class RLPEncoder {
      */
     public static byte[] encodeAsList(Iterable<?> elements) {
         int dataLen = sumEncodedLen(elements);
-        ByteBuffer bb = ByteBuffer.allocate(prefixLength(dataLen) + dataLen);
+        ByteBuffer bb = ByteBuffer.allocate(itemLen(dataLen));
         encodeList(dataLen, elements, bb);
         return bb.array();
     }

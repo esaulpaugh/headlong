@@ -145,7 +145,10 @@ public class RLPEncoderTest {
             final double d = rando.nextDouble();
             final BigDecimal bd = new BigDecimal(BigInteger.ONE, 18);
 
+            byte[] skippedItem = new byte[rando.nextInt(75)];
+
             final byte[] rlp = RLPEncoder.encodeSequentially(
+                    skippedItem,
                     Integers.toBytes((short) c),
                     Strings.decode(str, Strings.UTF_8),
                     Integers.toBytes(by),
@@ -159,7 +162,7 @@ public class RLPEncoderTest {
                     bd.unscaledValue().toByteArray()
             );
 
-            final Iterator<RLPItem> iter = RLPDecoder.RLP_STRICT.sequenceIterator(rlp);
+            final Iterator<RLPItem> iter = RLPDecoder.RLP_STRICT.sequenceIterator(rlp, RLPDecoder.RLP_STRICT.wrap(rlp).endIndex);
 
             final RLPItem charItem = iter.next();
             assertEquals(c, charItem.asChar(false));
