@@ -53,21 +53,27 @@ public final class RLPDecoder {
      * @return an iterator over the items in the sequence
      */
     public Iterator<RLPItem> sequenceIterator(byte[] buffer, int index) {
-        return new RLPStreamIterator(null, RLPDecoder.this, buffer, index) {
+        return new SeqIter(null, RLPDecoder.this, buffer, index);
+    }
 
-            @Override
-            public boolean hasNext() {
-                if (next != null) {
-                    return true;
-                }
-                if (index < buffer.length) {
-                    next = decoder.wrap(buffer, index);
-                    this.index = next.endIndex;
-                    return true;
-                }
-                return false;
+    private static class SeqIter extends RLPStreamIterator {
+
+        SeqIter(InputStream is, RLPDecoder decoder, byte[] buffer, int index) {
+            super(is, decoder, buffer, index);
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (next != null) {
+                return true;
             }
-        };
+            if (index < buffer.length) {
+                next = decoder.wrap(buffer, index);
+                this.index = next.endIndex;
+                return true;
+            }
+            return false;
+        }
     }
 
     public RLPStream stream(byte[] bytes) {
