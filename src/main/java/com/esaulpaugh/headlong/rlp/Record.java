@@ -35,7 +35,13 @@ public final class Record {
     private final RLPList rlp;
 
     public Record(long seq, List<KeyValuePair> pairs, Signer signer) {
+        if(seq < 0) {
+            throw new IllegalArgumentException("negative seq");
+        }
         final int signatureLen = signer.signatureLength();
+        if(signatureLen < 0) {
+            throw new IllegalArgumentException("signer specifies negative signature length");
+        }
         final int payloadLen = RLPEncoder.measureEncodedLen(seq) + RLPEncoder.dataLen(pairs);
         final int recordListDataLen = RLPEncoder.itemLen(signatureLen) + payloadLen;
         final int recordLen = RLPEncoder.itemLen(recordListDataLen);

@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.rlp.KeyValuePair.ID;
 import static com.esaulpaugh.headlong.rlp.KeyValuePair.IP;
 import static com.esaulpaugh.headlong.rlp.KeyValuePair.PAIR_COMPARATOR;
@@ -99,12 +100,61 @@ public class EIP778Test {
 
     @Test
     public void testParseErrs() throws Throwable {
-        TestUtils.assertThrown(IllegalArgumentException.class, "unconsumed trailing bytes", () -> Record.parse(ENR_STRING + "A", NULL_VERIFIER));
+        assertThrown(IllegalArgumentException.class, "unconsumed trailing bytes", () -> Record.parse(ENR_STRING + "A", NULL_VERIFIER));
         assertEquals(300, MAX_LEN_LIST.length);
         Record.decode(MAX_LEN_LIST, NULL_VERIFIER);
         byte[] maxLenPlusOne = Arrays.copyOf(MAX_LEN_LIST, MAX_LEN_LIST.length + 1);
         maxLenPlusOne[2]++; // increment len in RLP prefix
-        TestUtils.assertThrown(IllegalArgumentException.class, "record length exceeds maximum: 301 > 300", () -> Record.decode(maxLenPlusOne, NULL_VERIFIER));
+        assertThrown(IllegalArgumentException.class, "record length exceeds maximum: 301 > 300", () -> Record.decode(maxLenPlusOne, NULL_VERIFIER));
+    }
+
+    @Test
+    public void testErrs() throws Throwable {
+        final long seq = -TestUtils.seededRandom().nextInt(Integer.MAX_VALUE);
+        assertThrown(
+                IllegalArgumentException.class,
+                "negative seq",
+                () -> new Record(seq, new ArrayList<>(), new Record.Signer() {
+                    @Override
+                    public int signatureLength() {
+                        return 0;
+                    }
+
+                    @Override
+                    public byte[] sign(byte[] message, int off, int len) {
+                        return null;
+                    }
+                })
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                "signer specifies negative signature length",
+                () -> new Record(0x07, new ArrayList<>(), new Record.Signer() {
+                    @Override
+                    public int signatureLength() {
+                        return -1;
+                    }
+
+                    @Override
+                    public byte[] sign(byte[] message, int off, int len) {
+                        return null;
+                    }
+                })
+        );
+        assertThrown(
+                NullPointerException.class,
+                () -> new Record(0L, new ArrayList<>(), new Record.Signer() {
+                    @Override
+                    public int signatureLength() {
+                        return 0;
+                    }
+
+                    @Override
+                    public byte[] sign(byte[] message, int off, int len) {
+                        return null;
+                    }
+                })
+        );
     }
 
     @Test
@@ -149,10 +199,10 @@ public class EIP778Test {
     public void testDuplicateKeys() throws Throwable {
         byte[] keyBytes = new byte[0];
         final List<KeyValuePair> pairs = Arrays.asList(new KeyValuePair(keyBytes, new byte[0]), new KeyValuePair(keyBytes, new byte[1]));
-        TestUtils.assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs.sort(PAIR_COMPARATOR));
+        assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs.sort(PAIR_COMPARATOR));
 
         final List<KeyValuePair> pairs2 = Arrays.asList(new KeyValuePair(new byte[] { 2 }, new byte[0]), new KeyValuePair(new byte[] { 2 }, new byte[1]));
-        TestUtils.assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs2.sort(PAIR_COMPARATOR));
+        assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs2.sort(PAIR_COMPARATOR));
     }
 
     @Test
@@ -190,6 +240,6 @@ public class EIP778Test {
             System.out.println(p);
         }
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "duplicate key: " + UDP, () -> new Record(seq, pairs, SIGNER));
+        assertThrown(IllegalArgumentException.class, "duplicate key: " + UDP, () -> new Record(seq, pairs, SIGNER));
     }
 }

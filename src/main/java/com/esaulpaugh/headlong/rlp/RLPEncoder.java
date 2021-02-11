@@ -61,15 +61,11 @@ public final class RLPEncoder {
      * @see java.util.Arrays.ArrayList#sort(Comparator)
      */
     static void insertRecordContentList(int dataLen, long seq, List<KeyValuePair> pairs, ByteBuffer bb) {
-        if(seq >= 0) {
-            pairs.sort(KeyValuePair.PAIR_COMPARATOR); // note that ArrayList overrides List.sort
-            insertListPrefix(dataLen, bb);
-            encodeString(seq, bb);
-            for (KeyValuePair pair : pairs) {
-                encodeKeyValuePair(pair, bb);
-            }
-        } else {
-            throw new IllegalArgumentException("negative seq");
+        pairs.sort(KeyValuePair.PAIR_COMPARATOR); // note that ArrayList overrides List.sort
+        insertListPrefix(dataLen, bb);
+        encodeString(seq, bb);
+        for (KeyValuePair pair : pairs) {
+            encodeKeyValuePair(pair, bb);
         }
     }
 // ---------------------------------------------------------------------------------------------------------------------
