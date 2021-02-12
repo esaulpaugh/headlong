@@ -188,11 +188,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     }
                     bb.position(jump); // leniently jump to specified offset
                 }
-                try {
-                    elements[i] = getType.apply(i).decode(bb, unitBuffer);
-                } catch (BufferUnderflowException bue) {
-                    throw new IllegalArgumentException(bue);
-                }
+                elements[i] = getType.apply(i).decode(bb, unitBuffer);
             }
         }
     }

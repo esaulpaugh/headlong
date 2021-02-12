@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -186,7 +187,7 @@ public class MonteCarloTestCase implements Serializable {
         try {
             decoded = function.decodeCall(babar);
             equal = this.argsTuple.equals(decoded);
-        } catch (IllegalArgumentException ignored) {
+        } catch (IllegalArgumentException | BufferUnderflowException ignored) {
             /* do nothing */
         } catch (Throwable t) {
             t.printStackTrace();

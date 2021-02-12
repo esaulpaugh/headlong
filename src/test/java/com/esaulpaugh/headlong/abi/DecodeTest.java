@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
@@ -130,8 +131,7 @@ public class DecodeTest {
                         "000000000000000000000000000000000000000000000000000000000001ffff" +
                         "aa00000000000000000000000000000000000000000000000000000000000000";
         assertThrown(
-                IllegalArgumentException.class,
-                "java.nio.BufferUnderflowException",
+                BufferUnderflowException.class,
                 () -> Function.parse("()", "(bytes)").decodeReturn(Strings.decode(bigLength))
         );
         final String tooBigLength =
