@@ -273,7 +273,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             try {
                 return elementTypes[index++];
             } catch (ArrayIndexOutOfBoundsException aioobe) {
-                throw (NoSuchElementException) new NoSuchElementException().initCause(aioobe);
+                throw new NoSuchElementException();
             }
         }
     }
