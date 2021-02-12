@@ -254,24 +254,28 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     public Iterator<ABIType<?>> iterator() {
-        return new Iterator<ABIType<?>>() {
+        return new Iter();
+    }
 
-            private int index; // = 0
+    private class Iter implements Iterator<ABIType<?>> {
 
-            @Override
-            public boolean hasNext() {
-                return index < elementTypes.length;
+        private int index; // = 0
+
+        Iter() {}
+
+        @Override
+        public boolean hasNext() {
+            return index < elementTypes.length;
+        }
+
+        @Override
+        public ABIType<?> next() {
+            try {
+                return elementTypes[index++];
+            } catch (ArrayIndexOutOfBoundsException aioobe) {
+                throw (NoSuchElementException) new NoSuchElementException().initCause(aioobe);
             }
-
-            @Override
-            public ABIType<?> next() {
-                try {
-                    return elementTypes[index++];
-                } catch (ArrayIndexOutOfBoundsException aioobe) {
-                    throw new NoSuchElementException(aioobe.getMessage());
-                }
-            }
-        };
+        }
     }
 
     public TupleType subTupleType(boolean... manifest) {
