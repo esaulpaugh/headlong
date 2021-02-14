@@ -17,7 +17,6 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.SuperSerial;
 
-import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
