@@ -92,7 +92,7 @@ public final class TypeFactory {
         map.put(type, () -> new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class));
     }
 
-    public static ABIType<Object> create(String rawType) {
+    public static ABIType<?> create(String rawType) {
         return create(rawType, Object.class);
     }
 

@@ -307,7 +307,7 @@ public class DecodeTest {
 
         assertArrayEquals(abi.array(), type.encode(array).array());
 
-        final ABIType<Object> x = TypeFactory.create("string[]");
+        final ABIType<Object> x = TypeFactory.create("string[]", Object.class);
         final ABIType<?> x2 = TypeFactory.create("string[]");
         final ArrayType<ArrayType<ByteType, String>, String[]> arrayType = (ArrayType<ArrayType<ByteType, String>, String[]>) type;
 

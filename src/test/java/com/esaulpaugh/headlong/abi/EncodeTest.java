@@ -499,7 +499,7 @@ public class EncodeTest {
     @Test
     public void testMinAndMax() throws Throwable {
 
-        BooleanType bool = (BooleanType) TypeFactory.create("bool", Boolean.class);
+        BooleanType bool = (BooleanType) TypeFactory.create("bool");
         assertEquals(BigInteger.ZERO, bool.minValue());
         assertEquals(BigInteger.ONE, bool.maxValue());
 
@@ -548,7 +548,7 @@ public class EncodeTest {
 
     @Test
     public void testDecimalMinMax() throws Throwable {
-        BigDecimalType decimal = (BigDecimalType) TypeFactory.create("decimal", BigDecimal.class);
+        BigDecimalType decimal = (BigDecimalType) TypeFactory.create("decimal");
         BigDecimal decimalMin = new BigDecimal(new BigInteger("-170141183460469231731687303715884105728"), 10);
         BigDecimal decimalMax = new BigDecimal(new BigInteger("170141183460469231731687303715884105727"), 10);
 
@@ -557,7 +557,7 @@ public class EncodeTest {
         decimal.validate(decimalMax);
         assertThrown(ILLEGAL, "signed val exceeds bit limit: 128 >= 128", () -> decimal.validate(decimalMax.add(O_1)));
 
-        BigDecimalType ufixed = (BigDecimalType) TypeFactory.create("ufixed", BigDecimal.class);
+        BigDecimalType ufixed = (BigDecimalType) TypeFactory.create("ufixed");
         BigDecimal u128Max = new BigDecimal(new BigInteger("340282366920938463463374607431768211455"), 18);
 
         System.out.println(ufixed.minDecimal() + " " + ufixed.maxDecimal());
@@ -572,7 +572,7 @@ public class EncodeTest {
         assertThrown(ILLEGAL, "unsigned val exceeds bit limit: 129 > 128", () -> ufixed.validate(u128Max.add(BigDecimal.ONE)));
         assertThrown(ILLEGAL, "unsigned val exceeds bit limit: 129 > 128", () -> ufixed.validate(u128Max.add(O_1)));
 
-        BigDecimalType fixed = (BigDecimalType) TypeFactory.create("fixed", BigDecimal.class);
+        BigDecimalType fixed = (BigDecimalType) TypeFactory.create("fixed");
 
         assertEquals(((UnitType<?>) TypeFactory.create("uint128")).maxValue(), ufixed.maxValue());
         assertEquals(((UnitType<?>) TypeFactory.create("uint128")).minValue(), ufixed.minValue());
