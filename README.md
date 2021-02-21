@@ -53,13 +53,13 @@ System.out.println(decoded.equals(new Tuple(new BigDecimal(BigInteger.valueOf(69
 
 ```java
 Function fooTwo = new Function("fooTwo()", "(uint8)");
-Integer returned = fooTwo.decodeSingletonReturn(FastHex.decode("00000000000000000000000000000000000000000000000000000000000000FF"), Integer.class);
+Integer returned = fooTwo.decodeSingletonReturn(FastHex.decode("00000000000000000000000000000000000000000000000000000000000000FF"));
 ```
 
 #### Creating types directly
 
 ```java
-BooleanType bool = (BooleanType) TypeFactory.create("bool", Boolean.class);
+BooleanType bool = (BooleanType) TypeFactory.create("bool");
 ```
 
 ### RLP codec

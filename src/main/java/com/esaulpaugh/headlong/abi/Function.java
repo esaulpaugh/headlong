@@ -245,12 +245,8 @@ public final class Function implements ABIObject {
         return outputTypes.decode(returnVals);
     }
 
-    public Object decodeSingletonReturn(byte[] singleton) {
-        return decodeSingletonReturn(singleton, Object.class);
-    }
-
     @SuppressWarnings("unchecked")
-    public <J> J decodeSingletonReturn(byte[] singleton, Class<J> classOfJ) {
+    public <J> J decodeSingletonReturn(byte[] singleton) {
         return (J) outputTypes.get(0).decode(singleton);
     }
 

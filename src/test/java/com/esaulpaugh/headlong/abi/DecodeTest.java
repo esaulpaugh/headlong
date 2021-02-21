@@ -97,8 +97,8 @@ public class DecodeTest {
         byte[] _byte = Strings.decode("00000000000000000000000000000000000000000000000000000000000000FF");
 
         assertEquals(val, f.decodeReturn(_byte).get(0));
-        assertEquals(val, f.decodeSingletonReturn(_byte));
-        assertEquals(val, f.decodeSingletonReturn(_byte, Integer.class));
+        assertEquals(val, (Object) f.decodeSingletonReturn(_byte));
+        assertEquals(val, (Object) f.decodeSingletonReturn(_byte));
 
         byte[] _int_ = Strings.decode("000000000000000000000000000000000000000000000000000000000000FFFF");
         assertEquals((int) (Math.pow(2, 16)) - 1, new Function("()", "(uint16)").decodeReturn(_int_).get(0));
