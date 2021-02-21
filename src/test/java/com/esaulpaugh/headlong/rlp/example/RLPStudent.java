@@ -23,6 +23,7 @@ import com.esaulpaugh.headlong.util.Strings;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
@@ -115,7 +116,7 @@ public class RLPStudent implements RLPEncodeable {
     }
 
     @Override
-    public void toRLP(byte[] dest, int destIndex) {
-        RLPEncoder.encodeSequentially(toObjectArray(), dest, destIndex);
+    public void toRLP(ByteBuffer dest) {
+        RLPEncoder.encodeSequentially(toObjectArray(), dest);
     }
 }

@@ -15,11 +15,13 @@
 */
 package com.esaulpaugh.headlong.rlp.example;
 
+import java.nio.ByteBuffer;
+
 public interface RLPEncodeable {
 
     Object[] toObjectArray();
 
     byte[] toRLP();
 
-    void toRLP(byte[] dest, int destIndex);
+    void toRLP(ByteBuffer dest);
 }

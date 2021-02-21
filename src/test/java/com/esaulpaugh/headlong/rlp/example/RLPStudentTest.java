@@ -18,6 +18,8 @@ package com.esaulpaugh.headlong.rlp.example;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
+
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,7 +39,7 @@ public class RLPStudentTest {
         assertEquals(STUDENT_TO_STRING, plato.toString());
 
         byte[] rlp = new byte[205];
-        plato.toRLP(rlp, 0);
+        plato.toRLP(ByteBuffer.wrap(rlp));
         assertArrayEquals(studentRlp, rlp);
     }
 

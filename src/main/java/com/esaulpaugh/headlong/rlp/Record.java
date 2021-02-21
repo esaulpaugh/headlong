@@ -34,7 +34,7 @@ public final class Record {
 
     private final RLPList rlp;
 
-    public Record(long seq, List<KeyValuePair> pairs, Signer signer) {
+    public Record(final long seq, List<KeyValuePair> pairs, Signer signer) {
         if(seq < 0) {
             throw new IllegalArgumentException("negative seq");
         }
