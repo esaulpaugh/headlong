@@ -99,7 +99,7 @@ public final class Function implements ABIObject {
 
     public Function(Type type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) {
         this.type = Objects.requireNonNull(type);
-        this.name = name != null ? regexValidate(ALL_ASCII_NO_OPEN_PAREN, OPEN_PAREN_OR_NON_ASCII, name) : null;
+        this.name = name != null ? validateName(name) : null;
         this.inputTypes = Objects.requireNonNull(inputTypes);
         this.outputTypes = Objects.requireNonNull(outputTypes);
         this.stateMutability = stateMutability;
@@ -283,11 +283,11 @@ public final class Function implements ABIObject {
         return ABIJSON.toJson(this, true, pretty);
     }
 
-    static String regexValidate(Pattern validString, Pattern illegalChar, String input) {
-        if(validString.matcher(input).matches()) {
+    private static String validateName(String input) {
+        if(ALL_ASCII_NO_OPEN_PAREN.matcher(input).matches()) {
             return input;
         }
-        Matcher badChar = illegalChar.matcher(input);
+        Matcher badChar = OPEN_PAREN_OR_NON_ASCII.matcher(input);
         if (badChar.find()) {
             int idx = badChar.start();
             char c = input.charAt(idx);
