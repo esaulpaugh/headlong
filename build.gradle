@@ -84,8 +84,8 @@ dependencies {
     implementation 'org.bouncycastle:bcprov-jdk15on:1.68'
 
     test.useJUnitPlatform()
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.7.0"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.0"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.7.1"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.1"
 
     jmhImplementation 'commons-codec:commons-codec:1.15'
     jmhImplementation 'org.openjdk.jmh:jmh-core:1.27'
