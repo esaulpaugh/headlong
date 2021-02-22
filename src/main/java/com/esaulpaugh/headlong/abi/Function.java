@@ -153,7 +153,7 @@ public final class Function implements ABIObject {
             if(name == null) {
                 throw validationErr("define name");
             }
-            break;
+            return;
         case ABIJSON.RECEIVE:
             if (!ABIJSON.RECEIVE.equals(name)) {
                 throw validationErr("define name as \"" + ABIJSON.RECEIVE + '"');
