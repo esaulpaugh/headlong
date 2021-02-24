@@ -200,39 +200,36 @@ public final class ABIJSON {
 // ---------------------------------------------------------------------------------------------------------------------
     public static String toJson(ABIObject abiObj, boolean function, boolean pretty) {
         try {
-            StringWriter out = new StringWriter();
-            writeABIObject((pretty ? GSON_PRETTY : GSON).newJsonWriter(out), abiObj, function);
-            return out.toString();
+            StringWriter stringOut = new StringWriter();
+            JsonWriter out = (pretty ? GSON_PRETTY : GSON).newJsonWriter(stringOut);
+            out.beginObject();
+            if(function) {
+                Function f = (Function) abiObj;
+                final Function.Type type = f.getType();
+                out.name(TYPE).value(type.toString());
+                if (type != Function.Type.FALLBACK) {
+                    addIfValueNotNull(out, NAME, f.getName());
+                    if (type != Function.Type.RECEIVE) {
+                        writeJsonArray(out, INPUTS, f.getParamTypes(), null);
+                        if (type != Function.Type.CONSTRUCTOR) {
+                            writeJsonArray(out, OUTPUTS, f.getOutputTypes(), null);
+                        }
+                    }
+                }
+                final String stateMutability = f.getStateMutability();
+                addIfValueNotNull(out, STATE_MUTABILITY, stateMutability);
+                out.name(CONSTANT).value(VIEW.equals(stateMutability) || PURE.equals(stateMutability));
+            } else {
+                Event e = (Event) abiObj;
+                out.name(TYPE).value(EVENT);
+                addIfValueNotNull(out, NAME, e.getName());
+                writeJsonArray(out, INPUTS, e.getParams(), e.getIndexManifest());
+            }
+            out.endObject();
+            return stringOut.toString();
         } catch (IOException io) {
             throw new RuntimeException(io);
         }
-    }
-
-    private static void writeABIObject(JsonWriter out, ABIObject abiObj, boolean function) throws IOException {
-        out.beginObject();
-        if(function) {
-            Function f = (Function) abiObj;
-            final Function.Type type = f.getType();
-            out.name(TYPE).value(type.toString());
-            if (type != Function.Type.FALLBACK) {
-                addIfValueNotNull(out, NAME, f.getName());
-                if (type != Function.Type.RECEIVE) {
-                    writeJsonArray(out, INPUTS, f.getParamTypes(), null);
-                    if (type != Function.Type.CONSTRUCTOR) {
-                        writeJsonArray(out, OUTPUTS, f.getOutputTypes(), null);
-                    }
-                }
-            }
-            final String stateMutability = f.getStateMutability();
-            addIfValueNotNull(out, STATE_MUTABILITY, stateMutability);
-            out.name(CONSTANT).value(VIEW.equals(stateMutability) || PURE.equals(stateMutability));
-        } else {
-            Event e = (Event) abiObj;
-            out.name(TYPE).value(EVENT);
-            addIfValueNotNull(out, NAME, e.getName());
-            writeJsonArray(out, INPUTS, e.getParams(), e.getIndexManifest());
-        }
-        out.endObject();
     }
 
     private static void writeJsonArray(JsonWriter out, String name, TupleType tupleType, boolean[] indexedManifest) throws IOException {
