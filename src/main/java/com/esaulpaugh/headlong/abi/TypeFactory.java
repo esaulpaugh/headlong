@@ -133,7 +133,7 @@ public final class TypeFactory {
             }
         } catch (ClassNotFoundException cnfe) {
             throw new Error(cnfe);
-        } catch (StringIndexOutOfBoundsException sioobe) { // e.g. type equals "" or "82]" or "[]" or "[1]"
+        } catch (StringIndexOutOfBoundsException ignored) { // e.g. type equals "" or "82]" or "[]" or "[1]"
             /* fall through */
         }
         throw new IllegalArgumentException("unrecognized type: \"" + rawType + '"');
