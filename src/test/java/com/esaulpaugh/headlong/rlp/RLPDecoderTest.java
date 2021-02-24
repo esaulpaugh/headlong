@@ -171,22 +171,26 @@ public class RLPDecoderTest {
 
     @Test
     public void randomFuzz() {
-        RLPDecoder decoder = RLP_STRICT;
-        Random r = TestUtils.seededRandom();
-        byte[] buffer = new byte[56];
+        final Random r = TestUtils.seededRandom();
+        fuzzRLP(RLP_STRICT, r, 25_000);
+        fuzzRLP(RLP_LENIENT, r, 25_000);
+    }
+
+    private static void fuzzRLP(RLPDecoder decoder, Random r, final int n) {
+        final byte[] buffer = new byte[56];
         int valid = 0, invalid = 0;
-        for (int i = 0; i < 500_000; i++) {
+        for (int i = 0; i < n; i++) {
             r.nextBytes(buffer);
+            final String first = Strings.encode(buffer[0]);
             try {
                 RLPItem item = decoder.wrap(buffer);
                 valid++;
-                String first = Strings.encode(buffer[0]);
                 if (item.asBoolean()) {
                     switch (first) {
                     case "c0":
                     case "80":
                     case "00":
-                        throw new RuntimeException(Strings.encode(buffer));
+                        throw exception(buffer);
                     default:
                     }
                 } else {
@@ -196,34 +200,33 @@ public class RLPDecoderTest {
                     case "00":
                         break;
                     default:
-                        throw new RuntimeException(Strings.encode(buffer));
+                        throw exception(buffer);
                     }
-                    if (item.asChar(false) != '\u0000') {
-                        throw new RuntimeException(Strings.encode(buffer));
+                    if (item.asChar(true) != '\u0000') {
+                        throw exception(buffer);
                     }
                 }
             } catch (IllegalArgumentException iae) {
                 invalid++;
-                String first = Strings.encode(buffer[0]);
                 switch (first) {
-                case "00":
-                    if(!decoder.lenient) {
-                        break;
-                    }
                 case "81":
-                    if(!decoder.lenient || DataType.isSingleByte(buffer[1])) {
+                    if(!decoder.lenient && DataType.isSingleByte(buffer[1])) {
                         break;
                     }
-                    throw new RuntimeException(Strings.encode(buffer));
+                    throw exception(buffer);
                 case "b8": case "b9": case "ba": case "bb": case "bc": case "bd": case "be": case "bf":
                 case "f8": case "f9": case "fa": case "fb": case "fc": case "fd": case "fe": case "ff":
                     break;
                 default:
-                    throw new RuntimeException(Strings.encode(buffer));
+                    throw exception(buffer);
                 }
             }
         }
-        System.out.println("valid: " + valid + " / " + (valid + invalid) + " (" + invalid + " invalid)");
+        System.out.println("valid: " + valid + " / " + n + " (" + invalid + " invalid) lenient=" + decoder.lenient);
+    }
+
+    private static RuntimeException exception(byte[] buffer) {
+        return new RuntimeException(Strings.encode(buffer));
     }
 
     @Test
