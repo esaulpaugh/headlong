@@ -56,9 +56,8 @@ public final class Record {
         bb.position(contentListOffset);
         RLPEncoder.insertRecordContentList(payloadLen, seq, pairs, bb);
 
-        final byte[] signature = signer.sign(bb.array(), contentListOffset, contentListLen);
         bb.position(recordLen - recordListDataLen);
-        RLPEncoder.encodeItem(signature, bb);
+        RLPEncoder.encodeItem(signer.sign(bb.array(), contentListOffset, contentListLen), bb);
 
         this.rlp = RLP_STRICT.wrapList(bb.array());
     }

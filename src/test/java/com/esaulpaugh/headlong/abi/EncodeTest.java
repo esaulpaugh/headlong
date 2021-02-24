@@ -460,7 +460,7 @@ public class EncodeTest {
     public void testScaleErr() throws Throwable {
         assertThrown(
                 IllegalArgumentException.class,
-                "big decimal scale mismatch: actual != expected: 1 != 9",
+                "BigDecimal scale mismatch: actual != expected: 1 != 9",
                 () -> Function.parse("(fixed56x9)").encodeCall(Tuple.of(new BigDecimal("0.2")))
         );
     }
