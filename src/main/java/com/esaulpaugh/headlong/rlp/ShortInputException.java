@@ -20,8 +20,4 @@ package com.esaulpaugh.headlong.rlp;
  * streaming, i.e. it is a proper prefix of some hypothetical longer item that is valid.
  */
 final class ShortInputException extends IllegalArgumentException {
-
-    ShortInputException(String msg) {
-        super(msg);
-    }
 }
