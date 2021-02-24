@@ -88,10 +88,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
      */
     @Override
     public int byteLengthPacked(Object value) {
-        if (value == null) {
-            return len((i) -> elementTypes[i].byteLengthPacked(null));
-        }
-        final Object[] elements = ((Tuple) value).elements;
+        final Object[] elements = value != null ? ((Tuple) value).elements : new Object[elementTypes.length];
         return len((i) -> elementTypes[i].byteLengthPacked(elements[i]));
     }
 
