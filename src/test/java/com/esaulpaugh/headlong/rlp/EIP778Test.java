@@ -162,18 +162,20 @@ public class EIP778Test {
 
     @Test
     public void testEip778() throws SignatureException {
+        final long seq = 1L;
         final List<KeyValuePair> pairs = Arrays.asList(
                 new KeyValuePair(IP, "7f000001", HEX),
                 new KeyValuePair(UDP, "765f", HEX),
                 new KeyValuePair(ID, "v4", UTF_8),
                 new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
         );
-        KeyValuePair[] array = pairs.toArray(new KeyValuePair[0]);
+        final KeyValuePair[] array = pairs.toArray(new KeyValuePair[0]);
 
-        Record record = new Record(1L, pairs, SIGNER);
+        final Record record = new Record(seq, pairs, SIGNER);
 
         assertEquals(VECTOR.getSignature(), record.getSignature());
         assertEquals(VECTOR.getContent(), record.getContent());
+        assertEquals(VECTOR.getSeq(), record.getSeq());
         assertEquals(VECTOR.getRLP(), record.getRLP());
         assertEquals(VECTOR.toString(), record.toString());
         assertEquals(VECTOR, record);
@@ -182,11 +184,8 @@ public class EIP778Test {
         System.out.println("verified = " + content);
         Iterator<RLPItem> iter = content.iterator(RLPDecoder.RLP_STRICT);
 
-        assertEquals(VECTOR.getSeq(), record.getSeq());
-
-        long seq = iter.next().asLong();
-
-        assertEquals(1L, seq);
+        assertEquals(seq, record.getSeq());
+        assertEquals(seq, iter.next().asLong());
 
         Arrays.sort(array);
         int i = 0;
