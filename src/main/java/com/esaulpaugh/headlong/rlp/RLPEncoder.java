@@ -61,7 +61,7 @@ public final class RLPEncoder {
      * @see java.util.ArrayList#sort(Comparator)
      * @see java.util.Arrays.ArrayList#sort(Comparator)
      */
-    static void insertRecordContentList(int dataLen, long seq, List<KeyValuePair> pairs, ByteBuffer bb) {
+    static void insertRecordContent(int dataLen, long seq, List<KeyValuePair> pairs, ByteBuffer bb) {
         pairs.sort(KeyValuePair.PAIR_COMPARATOR); // note that ArrayList overrides List.sort
         insertListPrefix(dataLen, bb);
         encodeString(Integers.toBytes(seq), bb);
