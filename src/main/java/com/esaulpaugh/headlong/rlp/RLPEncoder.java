@@ -30,6 +30,9 @@ import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
 
 /** For encoding data to Recursive Length Prefix format. */
 public final class RLPEncoder {
+
+    private RLPEncoder() {}
+
 // -------------- made visibile to Record -------------------------------------------------------------------------------
     static int dataLen(List<KeyValuePair> pairs) {
         long sum = 0;

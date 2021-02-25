@@ -37,6 +37,8 @@ import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
  */
 public final class PackedDecoder {
 
+    private PackedDecoder() {}
+
     public static Tuple decode(TupleType types, byte[] buffer) {
         return decode(types, buffer, 0, buffer.length);
     }

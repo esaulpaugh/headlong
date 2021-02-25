@@ -30,6 +30,8 @@ import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
 /** Creates the appropriate {@link ABIType} object for a given type string. */
 public final class TypeFactory {
 
+    private TypeFactory() {}
+
     private static final int ADDRESS_BIT_LEN = 160;
 
     private static final int DECIMAL_BIT_LEN = 128;

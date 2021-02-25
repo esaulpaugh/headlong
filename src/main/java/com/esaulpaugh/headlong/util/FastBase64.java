@@ -17,7 +17,9 @@ package com.esaulpaugh.headlong.util;
 
 import java.nio.charset.StandardCharsets;
 
-public class FastBase64 {
+public final class FastBase64 {
+
+    private FastBase64() {}
 
     public static final int NO_FLAGS = 0;
     public static final int NO_PADDING = 1;
@@ -31,6 +33,7 @@ public class FastBase64 {
     private static final short[] URL_SAFE = init("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".getBytes(StandardCharsets.US_ASCII));
 
     private static final class Standard { // inner class to delay loading of table until called for
+        Standard() {}
         static final short[] STANDARD = init("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes(StandardCharsets.US_ASCII));
     }
 

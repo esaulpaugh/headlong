@@ -24,6 +24,8 @@ import com.google.gson.JsonPrimitive;
 
 public final class JsonUtils {
 
+    private JsonUtils() {}
+
     public static JsonElement parse(String json) {
         return JsonParser.parseString(json);
     }

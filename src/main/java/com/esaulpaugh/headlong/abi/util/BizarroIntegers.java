@@ -35,6 +35,8 @@ import java.nio.ByteBuffer;
  */
 public final class BizarroIntegers {
 
+    private BizarroIntegers() {}
+
     public static byte[] toBytes(byte val) {
         return val != -1 ? new byte[] { val } : Strings.EMPTY_BYTE_ARRAY;
     }

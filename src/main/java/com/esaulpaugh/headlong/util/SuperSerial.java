@@ -51,6 +51,8 @@ import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 /** Serializes and deserializes {@link Tuple}s through the use of RLP encoding. */
 public final class SuperSerial {
 
+    private SuperSerial() {}
+
     private static final byte[] TRUE = new byte[] { 0x1 };
     private static final byte[] FALSE = new byte[0];
 

@@ -21,6 +21,8 @@ import java.nio.ByteBuffer;
 /** Utility for reading and writing integers from and to RLP-compatible format. */
 public final class Integers {
 
+    private Integers() {}
+
     /**
      * Returns an integer's minimal big-endian two's complement representation. The integer zero is represented by the
      * empty byte array.

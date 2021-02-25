@@ -21,6 +21,8 @@ import java.util.Arrays;
 /** Uses a larger encoding table to speed up encoding. */
 public final class FastHex {
 
+    private FastHex() {}
+
     private static final int CHARS_PER_BYTE = 2;
 
     private static final int BITS_PER_CHAR = Byte.SIZE / CHARS_PER_BYTE;

@@ -33,6 +33,8 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 
 final class PackedEncoder {
 
+    private PackedEncoder() {}
+
     static void encodeTuple(TupleType tupleType, Tuple tuple, ByteBuffer dest) {
         for (int i = 0; i < tupleType.elementTypes.length; i++) {
             encode(tupleType.elementTypes[i], tuple.elements[i], dest);

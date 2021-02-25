@@ -23,6 +23,8 @@ import java.util.List;
 /** Decodes RLP object notation as defined by the {@link Notation} class. */
 public final class NotationParser {
 
+    private NotationParser() {}
+
     private static final int LIST = 0;
     private static final int STRING = 1;
 

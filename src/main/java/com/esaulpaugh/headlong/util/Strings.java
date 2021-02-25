@@ -21,6 +21,8 @@ import java.nio.charset.StandardCharsets;
 /** Utility for encoding and decoding hexadecimal, Base64, and UTF-8-encoded {@link String}s. */
 public final class Strings {
 
+    private Strings() {}
+
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
     public static final int BASE_64_URL_SAFE = 2; // 64

@@ -56,7 +56,7 @@ public final class RLPDecoder {
         return new SeqIter(RLPDecoder.this, buffer, index);
     }
 
-    private static class SeqIter extends RLPStreamIterator {
+    private static final class SeqIter extends RLPStreamIterator {
 
         SeqIter(RLPDecoder decoder, byte[] buffer, int index) {
             super(null, decoder, buffer, index);

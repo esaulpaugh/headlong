@@ -22,6 +22,8 @@ import java.math.BigDecimal;
 /** Utility for reading and writing floating point numbers from and to RLP format. */
 public final class FloatingPoint {
 
+    private FloatingPoint() {}
+
     /* float */
 
     public static float getFloat(byte[] bytes, int i, int numBytes, boolean lenient) {

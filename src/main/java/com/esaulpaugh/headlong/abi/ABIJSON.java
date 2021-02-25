@@ -37,6 +37,8 @@ import static com.esaulpaugh.headlong.util.JsonUtils.parseObject;
 /** For parsing JSON representations of {@link ABIObject}s according to the ABI specification. */
 public final class ABIJSON {
 
+    private ABIJSON() {}
+
     private static final String NAME = "name";
     private static final String TYPE = "type";
     static final String FUNCTION = "function";
