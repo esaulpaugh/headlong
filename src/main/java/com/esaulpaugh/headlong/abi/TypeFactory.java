@@ -98,19 +98,19 @@ public final class TypeFactory {
 
     @SuppressWarnings("unchecked")
     public static <J> ABIType<J> create(String rawType, Class<J> classOfJ, String name) {
-        return (ABIType<J>) createType(rawType, null, name);
+        return (ABIType<J>) build(rawType, null, name);
     }
 
     public static ABIType<?> create(String rawType) {
-        return createType(rawType, null, null);
+        return build(rawType, null, null);
     }
 
-    static ABIType<?> createType(String rawType, TupleType baseType, String name) {
-        return buildType(rawType, baseType)
+    static ABIType<?> build(String rawType, TupleType baseType, String name) {
+        return _build(rawType, baseType)
                 .setName(name);
     }
 
-    private static ABIType<?> buildType(final String rawType, ABIType<?> baseType) {
+    private static ABIType<?> _build(final String rawType, ABIType<?> baseType) {
         try {
             final int lastCharIdx = rawType.length() - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array
@@ -118,7 +118,7 @@ public final class TypeFactory {
                 final int secondToLastCharIdx = lastCharIdx - 1;
                 final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIdx);
 
-                final ABIType<?> elementType = buildType(rawType.substring(0, arrayOpenIndex), baseType);
+                final ABIType<?> elementType = _build(rawType.substring(0, arrayOpenIndex), baseType);
                 final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
                 final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType.substring(arrayOpenIndex + 1, lastCharIdx));
                 return new ArrayType<>(type, elementType.arrayClass(), elementType, length);
@@ -210,7 +210,7 @@ public final class TypeFactory {
                 default: // non-tuple element
                     argEnd = nextTerminator(rawTypeStr, argStart);
                 }
-                elements.add(buildType(rawTypeStr.substring(argStart, argEnd), null));
+                elements.add(_build(rawTypeStr.substring(argStart, argEnd), null));
                 if((prevEndChar = rawTypeStr.charAt(argEnd)) != ',') {
                     break/*LOOP*/;
                 }

@@ -190,7 +190,7 @@ public final class ABIJSON {
         final String typeStr = getString(object, TYPE);
         if(typeStr.startsWith(TUPLE)) {
             TupleType baseType = parseTypes(getArray(object, COMPONENTS));
-            return TypeFactory.createType(
+            return TypeFactory.build(
                     baseType.canonicalType + typeStr.substring(TUPLE.length()), // + suffix e.g. "[4][]"
                     baseType,
                     getString(object, NAME));
