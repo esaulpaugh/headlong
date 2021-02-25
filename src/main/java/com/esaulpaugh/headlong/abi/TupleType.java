@@ -152,26 +152,22 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
         final int len = elementTypes.length;
         Object[] elements = new Object[len];
-        decodeObjects(len, bb, unitBuffer, elements, (i) -> elementTypes[i]);
+        decodeObjects(bb, unitBuffer, (i) -> elementTypes[i], elements);
         return new Tuple(elements);
     }
 
-    private static int[] decodeHeads(int len, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
+    static void decodeObjects(ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects) {
+        final int len = objects.length;
+        final int start = bb.position(); // save this value before offsets are decoded
         final int[] offsets = new int[len];
         for(int i = 0; i < len; i++) {
             ABIType<?> t = getType.apply(i);
             if(!t.dynamic) {
-                elements[i] = t.decode(bb, unitBuffer);
+                objects[i] = t.decode(bb, unitBuffer);
             } else {
                 offsets[i] = Encoding.UINT31.decode(bb, unitBuffer);
             }
         }
-        return offsets;
-    }
-
-    static void decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer, Object[] elements, IntFunction<ABIType<?>> getType) {
-        final int start = bb.position(); // save this value before offsets are decoded
-        final int[] offsets = decodeHeads(len, bb, unitBuffer, elements, getType);
         for (int i = 0; i < len; i++) {
             final int offset = offsets[i];
             if(offset > 0) {
@@ -184,7 +180,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     }
                     bb.position(jump); // leniently jump to specified offset
                 }
-                elements[i] = getType.apply(i).decode(bb, unitBuffer);
+                objects[i] = getType.apply(i).decode(bb, unitBuffer);
             }
         }
     }
