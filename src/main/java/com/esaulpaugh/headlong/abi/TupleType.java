@@ -123,10 +123,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     void encodeTail(Object value, ByteBuffer dest) {
-        encodeObjects(dynamic, ((Tuple) value).elements, dest, (i) -> elementTypes[i]);
+        encodeObjects(dynamic, ((Tuple) value).elements, (i) -> elementTypes[i], dest);
     }
 
-    static void encodeObjects(boolean dynamic, Object[] values, ByteBuffer dest, IntFunction<ABIType<?>> getType) {
+    static void encodeObjects(boolean dynamic, Object[] values, IntFunction<ABIType<?>> getType, ByteBuffer dest) {
         int nextOffset = !dynamic ? 0 : headLength(values, getType);
         for (int i = 0; i < values.length; i++) {
             nextOffset = getType.apply(i).encodeHead(values[i], dest, nextOffset);
