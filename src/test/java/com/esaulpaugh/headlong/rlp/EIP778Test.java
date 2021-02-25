@@ -41,12 +41,12 @@ public class EIP778Test {
 
     private static final String ENR_STRING = "enr:-IS4QHCYrYZbAKWCBRlAy5zzaDZXJBGkcnh4MHcBFZntXNFrdvJjX04jRzjzCBOonrkTfj499SZuOh8R33Ls8RRcy5wBgmlkgnY0gmlwhH8AAAGJc2VjcDI1NmsxoQPKY0yuDUmstAHYpMa2_oxVtw0RW_QAdpzBQA8yWM0xOIN1ZHCCdl8";
 
-    private static final Record.Signer SIGNER = new Record.Signer() {
+    static final byte[] SIG = FastHex.decode(
+            "7098ad865b00a582051940cb9cf36836572411a47278783077011599ed5cd16b"
+          + "76f2635f4e234738f30813a89eb9137e3e3df5266e3a1f11df72ecf1145ccb9c"
+    );
 
-        private final byte[] SIG = FastHex.decode(
-                "7098ad865b00a582051940cb9cf36836572411a47278783077011599ed5cd16b"
-              + "76f2635f4e234738f30813a89eb9137e3e3df5266e3a1f11df72ecf1145ccb9c"
-        );
+    private static final Record.Signer SIGNER = new Record.Signer() {
 
         @Override
         public int signatureLength() {
@@ -55,17 +55,20 @@ public class EIP778Test {
 
         @Override
         public byte[] sign(byte[] message, int off, int len) {
+//            System.out.println("SIGNING " + Strings.encode(message, off, len, HEX));
             return SIG;
         }
     };
 
-    private static final Record.Verifier NULL_VERIFIER = (s,c) -> {};
+    private static final Record.Verifier VERIFIER = (s,c) -> {
+        if(!Arrays.equals(s, SIG)) throw new SignatureException();
+    };
 
     private static final Record VECTOR;
 
     static {
         try {
-            VECTOR = Record.parse(ENR_STRING, NULL_VERIFIER);
+            VECTOR = Record.parse(ENR_STRING, VERIFIER);
         } catch (SignatureException se) {
             throw new RuntimeException(se);
         }
@@ -100,12 +103,12 @@ public class EIP778Test {
 
     @Test
     public void testParseErrs() throws Throwable {
-        assertThrown(IllegalArgumentException.class, "unconsumed trailing bytes", () -> Record.parse(ENR_STRING + "A", NULL_VERIFIER));
+        assertThrown(IllegalArgumentException.class, "unconsumed trailing bytes", () -> Record.parse(ENR_STRING + "A", VERIFIER));
         assertEquals(300, MAX_LEN_LIST.length);
-        Record.decode(MAX_LEN_LIST, NULL_VERIFIER);
+        assertThrown(SignatureException.class, () -> Record.decode(MAX_LEN_LIST, VERIFIER));
         byte[] maxLenPlusOne = Arrays.copyOf(MAX_LEN_LIST, MAX_LEN_LIST.length + 1);
         maxLenPlusOne[2]++; // increment len in RLP prefix
-        assertThrown(IllegalArgumentException.class, "record length exceeds maximum: 301 > 300", () -> Record.decode(maxLenPlusOne, NULL_VERIFIER));
+        assertThrown(IllegalArgumentException.class, "record length exceeds maximum: 301 > 300", () -> Record.decode(maxLenPlusOne, VERIFIER));
     }
 
     @Test
@@ -192,7 +195,7 @@ public class EIP778Test {
         }
         assertEquals(ENR_STRING, record.toString());
 
-        assertEquals(record, Record.parse(record.toString(), NULL_VERIFIER));
+        assertEquals(record, Record.parse(record.toString(), VERIFIER));
     }
 
     @Test
