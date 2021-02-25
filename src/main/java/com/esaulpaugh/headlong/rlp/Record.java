@@ -42,23 +42,24 @@ public final class Record {
         if(signatureLen < 0) {
             throw new IllegalArgumentException("signer specifies negative signature length");
         }
-        final int payloadLen = RLPEncoder.measureEncodedLen(seq) + RLPEncoder.dataLen(pairs);
-        final int recordListDataLen = RLPEncoder.itemLen(signatureLen) + payloadLen;
-        final int recordLen = RLPEncoder.itemLen(recordListDataLen);
+        final int contentDataLen = RLPEncoder.measureEncodedLen(seq) + RLPEncoder.dataLen(pairs); // content list prefix not included
+        final int contentLen = RLPEncoder.itemLen(contentDataLen);
+
+        final int recordDataLen = RLPEncoder.itemLen(signatureLen) + contentDataLen;
+        final int recordLen = RLPEncoder.itemLen(recordDataLen);
 
         checkRecordLen(recordLen);
 
         final ByteBuffer bb = ByteBuffer.allocate(recordLen);
-        RLPEncoder.insertListPrefix(recordListDataLen, bb);
+        RLPEncoder.insertListPrefix(recordDataLen, bb);
+        final int signatureStart = bb.position();
 
-        final int contentListLen = RLPEncoder.itemLen(payloadLen);
-        final int contentListOffset = recordLen - contentListLen;
-        bb.position(contentListOffset);
-        RLPEncoder.insertRecordContentList(payloadLen, seq, pairs, bb);
+        final int contentOffset = recordLen - contentLen;
+        bb.position(contentOffset);
+        RLPEncoder.insertRecordContentList(contentDataLen, seq, pairs, bb);
 
-        bb.position(recordLen - recordListDataLen);
-        RLPEncoder.encodeItem(signer.sign(bb.array(), contentListOffset, contentListLen), bb);
-
+        bb.position(signatureStart); // end of signature will overwrite content list prefix
+        RLPEncoder.encodeItem(signer.sign(bb.array(), contentOffset, contentLen), bb);
         this.rlp = RLP_STRICT.wrapList(bb.array());
     }
 
@@ -89,7 +90,7 @@ public final class Record {
         }
         Record record = new Record(rlpList);
         RLPString signatureItem = record.getSignature();
-        byte[] content = record.getContentBytes(signatureItem.endIndex);
+        byte[] content = record.content(signatureItem.endIndex);
         verifier.verify(signatureItem.asBytes(), content); // verify signature
         return record;
     }
@@ -103,7 +104,7 @@ public final class Record {
     }
 
     public RLPList getContent() {
-        return RLP_STRICT.wrapList(getContentBytes(getSignature().endIndex));
+        return RLP_STRICT.wrapList(content(getSignature().endIndex));
     }
 
     public long getSeq() {
@@ -112,7 +113,8 @@ public final class Record {
         return iter.next().asLong();
     }
 
-    private byte[] getContentBytes(int index) {
+    // reconstruct the content list from the content data
+    private byte[] content(int index) {
         int contentDataLen = rlp.encodingLength() - index;
         ByteBuffer bb = ByteBuffer.allocate(RLPEncoder.itemLen(contentDataLen));
         RLPEncoder.insertListPrefix(contentDataLen, bb);
@@ -121,7 +123,7 @@ public final class Record {
     }
 
     public interface Signer {
-        int signatureLength(); // should be greater than 1
+        int signatureLength();
         byte[] sign(byte[] message, int off, int len);
     }
 
