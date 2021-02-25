@@ -80,7 +80,7 @@ public class ABIJsonCasesTest {
 
             ABIType<?>[] array = new ABIType[types.size()];
             for (int i = 0; i < array.length; i++) {
-                array[i] = TypeFactory.createType(types.get(i).getAsString(), null);
+                array[i] = TypeFactory.create(types.get(i).getAsString());
             }
             TupleType tt = TupleType.wrap(array);
 

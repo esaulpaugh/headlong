@@ -189,13 +189,13 @@ public final class ABIJSON {
     private static ABIType<?> parseType(JsonObject object) {
         final String typeStr = getString(object, TYPE);
         if(typeStr.startsWith(TUPLE)) {
-            return TypeFactory.createFromBase(
-                    parseTypes(getArray(object, COMPONENTS)),
-                    typeStr.substring(TUPLE.length()), // suffix e.g. "[4][]"
-                    getString(object, NAME)
-            );
+            TupleType baseType = parseTypes(getArray(object, COMPONENTS));
+            return TypeFactory.createType(
+                    baseType.canonicalType + typeStr.substring(TUPLE.length()), // + suffix e.g. "[4][]"
+                    baseType,
+                    getString(object, NAME));
         }
-        return TypeFactory.createType(typeStr, getString(object, NAME));
+        return TypeFactory.create(typeStr, Object.class, getString(object, NAME));
     }
 // ---------------------------------------------------------------------------------------------------------------------
     public static String toJson(ABIObject abiObj, boolean function, boolean pretty) {

@@ -315,7 +315,7 @@ public class MonteCarloTestCase implements Serializable {
                 sb.append(']');
             }
         }
-        return TypeFactory.createType(sb.toString(), null);
+        return TypeFactory.create(sb.toString());
     }
 
     private Tuple generateTuple(TupleType tupleType, Random r) {

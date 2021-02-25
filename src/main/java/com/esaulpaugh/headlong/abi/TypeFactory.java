@@ -92,26 +92,21 @@ public final class TypeFactory {
         map.put(type, () -> new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class));
     }
 
-    public static ABIType<?> create(String rawType) {
-        return create(rawType, Object.class);
-    }
-
     public static <J> ABIType<J> create(String rawType, Class<J> classOfJ) {
         return create(rawType, classOfJ, null);
     }
 
     @SuppressWarnings("unchecked")
     public static <J> ABIType<J> create(String rawType, Class<J> classOfJ, String name) {
-        return (ABIType<J>) createType(rawType, name);
+        return (ABIType<J>) createType(rawType, null, name);
     }
 
-    static ABIType<?> createType(String rawType, String name) {
-        return buildType(rawType, null)
-                .setName(name);
+    public static ABIType<?> create(String rawType) {
+        return createType(rawType, null, null);
     }
 
-    static ABIType<?> createFromBase(TupleType baseType, String typeSuffix, String name) {
-        return buildType(baseType.canonicalType + typeSuffix, baseType)
+    static ABIType<?> createType(String rawType, TupleType baseType, String name) {
+        return buildType(rawType, baseType)
                 .setName(name);
     }
 
