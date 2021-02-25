@@ -149,17 +149,22 @@ public abstract class ABIType<J> {
      */
     public abstract J parseArgument(String s);
 
-    void validateClass(Object value) {
+    final void validateClass(Object value) {
         if(!clazz.isInstance(value)) {
             if(value == null) {
                 throw new NullPointerException();
             }
-            throw new IllegalArgumentException("class mismatch: "
-                    + value.getClass().getName()
-                    + " not assignable to "
-                    + clazz.getName()
-                    + " (" + friendlyClassName(value.getClass()) + " not instanceof " + friendlyClassName(clazz) + "/" + canonicalType + ")");
+            throw mismatchErr("class",
+                            value.getClass().getName(), clazz.getName(),
+                            friendlyClassName(clazz, -1), friendlyClassName(value.getClass(), -1));
         }
+    }
+
+    IllegalArgumentException mismatchErr(String prefix, String a, String e, String r, String f) {
+        return new IllegalArgumentException(
+                prefix + " mismatch: " + a + " != " + e + " ; "
+                + canonicalType + " requires " + r + " but found " + f
+        );
     }
 
     static byte[] newUnitBuffer() {
@@ -228,11 +233,7 @@ public abstract class ABIType<J> {
         }
     }
 
-    static String friendlyClassName(Class<?> clazz) {
-        return friendlyClassName(clazz, null);
-    }
-
-    static String friendlyClassName(Class<?> clazz, Integer arrayLength) {
+    static String friendlyClassName(Class<?> clazz, int arrayLen) {
         final String className = clazz.getName();
         final int split = className.lastIndexOf('[') + 1;
         final boolean hasArraySuffix = split > 0;
@@ -256,8 +257,8 @@ public abstract class ABIType<J> {
         }
         if(hasArraySuffix) {
             int i = 0;
-            if(arrayLength != null && arrayLength >= 0) {
-                sb.append('[').append(arrayLength).append(']');
+            if(arrayLen >= 0) {
+                sb.append('[').append(arrayLen).append(']');
                 i++;
             }
             while (i++ < split) {

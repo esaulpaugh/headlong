@@ -476,12 +476,20 @@ public class EncodeTest {
 
     @Test
     public void testTypeSafety() throws Throwable {
-        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Long not assignable to java.lang.Integer (Long not instanceof Integer/int32)",
-                () -> Function.parse("foo(int32)").encodeCallWithArgs(10L)
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Object != java.lang.Integer ; int32 requires Integer but found Object",
+                () -> Function.parse("foo(int32)").encodeCallWithArgs(new Object())
         );
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Long not assignable to [[[[I (Long not instanceof int[][][][]/int32[][][][])",
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Long != [[[[I ; int32[][][][] requires int[][][][] but found Long",
                 () -> Function.parse("foo(int32[][][][])").encodeCallWithArgs(10L)
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: [[[I != [[[[I ; int32[][][7][] requires int[][][][] but found int[][][]",
+                () -> Function.parse("foo(int32[][][7][])").encodeCallWithArgs((Object) new int[][][] {})
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: length mismatch: int[2][][][] != int[3][][][] ; int32[][][][3] requires length 3 but found 2",
+                () -> Function.parse("foo(int32[][][][3])").encodeCallWithArgs((Object) new int[][][][] {new int[][][]{}, new int[][][]{}})
         );
     }
 

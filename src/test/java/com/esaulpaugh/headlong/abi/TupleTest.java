@@ -153,7 +153,7 @@ public class TupleTest {
                     elements[idx] = new Object();
                 }
                 try {
-                    TestUtils.assertThrown(IllegalArgumentException.class, "not assignable to", () -> testCase.function.encodeCall(Tuple.of(elements)));
+                    TestUtils.assertThrown(IllegalArgumentException.class, " but found ", () -> testCase.function.encodeCall(Tuple.of(elements)));
                 } catch (AssertionError ae) {
                     System.err.println(i);
                     ae.printStackTrace();
