@@ -476,20 +476,28 @@ public class EncodeTest {
 
     @Test
     public void testTypeSafety() throws Throwable {
-        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Object != java.lang.Integer ; int32 requires Integer but found Object",
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Object != java.lang.Integer (int32 requires Integer but found Object)",
                 () -> Function.parse("foo(int32)").encodeCallWithArgs(new Object())
         );
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Long != [[[[I ; int32[][][][] requires int[][][][] but found Long",
-                () -> Function.parse("foo(int32[][][][])").encodeCallWithArgs(10L)
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Long != [I (int32[] requires int[] but found Long)",
+                () -> Function.parse("foo(int32[])").encodeCallWithArgs(10L)
         );
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: [[[I != [[[[I ; int32[][][7][] requires int[][][][] but found int[][][]",
-                () -> Function.parse("foo(int32[][][7][])").encodeCallWithArgs((Object) new int[][][] {})
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: [[[[I != [[[[J (uint32[][][7][] requires long[][][][] but found int[][][][])",
+                () -> Function.parse("foo(uint32[][][7][])").encodeCallWithArgs((Object) new int[][][][] {})
         );
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: length mismatch: int[2][][][] != int[3][][][] ; int32[][][][3] requires length 3 but found 2",
-                () -> Function.parse("foo(int32[][][][3])").encodeCallWithArgs((Object) new int[][][][] {new int[][][]{}, new int[][][]{}})
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.String != [Ljava.math.BigInteger; (address[5] requires BigInteger[] but found String)",
+                () -> Function.parse("foo(address[5])").encodeCallWithArgs("0xaaaaaaaaaaaaaaaaaaa")
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: array length mismatch: boolean[2][][] != boolean[3][][] (bool[][][3] requires length 3 but found 2)",
+                () -> Function.parse("foo(bool[][][3])").encodeCallWithArgs((Object) new boolean[][][] {new boolean[][]{}, new boolean[][]{}})
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: array length mismatch: byte[31] != byte[21] (bytes21 requires length 21 but found 31)",
+                () -> Function.parse("foo(bytes21)").encodeCallWithArgs((Object) new byte[31])
         );
     }
 

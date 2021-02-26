@@ -162,8 +162,8 @@ public abstract class ABIType<J> {
 
     IllegalArgumentException mismatchErr(String prefix, String a, String e, String r, String f) {
         return new IllegalArgumentException(
-                prefix + " mismatch: " + a + " != " + e + " ; "
-                + canonicalType + " requires " + r + " but found " + f
+                prefix + " mismatch: " + a + " != " + e + " ("
+                + canonicalType + " requires " + r + " but found " + f + ")"
         );
     }
 
