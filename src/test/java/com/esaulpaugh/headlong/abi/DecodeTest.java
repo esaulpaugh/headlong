@@ -290,7 +290,7 @@ public class DecodeTest {
 
     @Test
     public void testStringArray()  {
-        final ABIType<String[]> type = TypeFactory.create("string[]", String[].class, "nam");
+        final ArrayType<ArrayType<ByteType, String>, String[]> type = (ArrayType<ArrayType<ByteType, String>, String[]>) TypeFactory.create("string[]", String[].class, "nam");
         final String[] array = new String[] { "Hello, world!", "world! Hello," };
         final ByteBuffer abi = ByteBuffer.wrap(
                 Strings.decode(
