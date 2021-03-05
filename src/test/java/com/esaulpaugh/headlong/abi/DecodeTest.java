@@ -307,17 +307,20 @@ public class DecodeTest {
         assertArrayEquals(abi.array(), type.encode(array).array());
 
         {
-            final ABIType<?> a =                  TypeFactory.create("string[]");
-            final ABIType<Object> b =             TypeFactory.create("string[]", Object.class);
-            final ABIType<String[]> c =           TypeFactory.create("string[]", String[].class);
-            final ABIType<String[]> d =           TypeFactory.create("string[]", null);
-            final ABIType<?> e =                  TypeFactory.create("string[]", null);
+            final ABIType<?>                  a = TypeFactory.create("string[]");
+            final ABIType<Object>             b = TypeFactory.create("string[]", Object.class);
+            final ABIType<String[]>           c = TypeFactory.create("string[]", String[].class);
+            final ABIType<String[]>           d = TypeFactory.create("string[]", null);
+            final ABIType<?>                  e = TypeFactory.create("string[]", null);
             final ABIType<? extends String[]> f = TypeFactory.create("string[]", null);
 
+            final ArrayType<?, ?>        g = (ArrayType<?, ?>)        TypeFactory.create("string[]");
+            final ArrayType<?, ?>        h = (ArrayType<?, ?>)        TypeFactory.create("string[]", null);
+            final ArrayType<?, String[]> i = (ArrayType<?, String[]>) TypeFactory.create("string[]", String[].class);
             @SuppressWarnings("unchecked")
-            final ABIType<? extends String[]> g = (ABIType<? extends String[]>) TypeFactory.create("string[]");
-            final ArrayType<?, ?> h = (ArrayType<?, ?>) TypeFactory.create("string[]", null);
-            final ArrayType<?, ?> i = (ArrayType<?, ?>) TypeFactory.create("string[]", String[].class);
+            final ArrayType<?, String[]> j = (ArrayType<?, String[]>) TypeFactory.create("string[]");
+            @SuppressWarnings("unchecked")
+            final ABIType<? extends String[]> k = (ABIType<? extends String[]>) TypeFactory.create("string[]");
         }
 
         assertEquals("nam", type.getName());
