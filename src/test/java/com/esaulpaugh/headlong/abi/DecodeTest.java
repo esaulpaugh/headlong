@@ -306,12 +306,21 @@ public class DecodeTest {
 
         assertArrayEquals(abi.array(), type.encode(array).array());
 
-        final ABIType<Object> x = TypeFactory.create("string[]", Object.class);
-        final ABIType<String[]> x2 = TypeFactory.create("string[]", String[].class);
-        final ABIType<?> x3 = TypeFactory.create("string[]");
-        final ArrayType<ArrayType<ByteType, String>, String[]> arrayType = (ArrayType<ArrayType<ByteType, String>, String[]>) type;
+        {
+            final ABIType<?> a =                  TypeFactory.create("string[]");
+            final ABIType<Object> b =             TypeFactory.create("string[]", Object.class);
+            final ABIType<String[]> c =           TypeFactory.create("string[]", String[].class);
+            final ABIType<String[]> d =           TypeFactory.create("string[]", null);
+            final ABIType<?> e =                  TypeFactory.create("string[]", null);
+            final ABIType<? extends String[]> f = TypeFactory.create("string[]", null);
 
-        assertEquals("nam", arrayType.getName());
+            @SuppressWarnings("unchecked")
+            final ABIType<? extends String[]> g = (ABIType<? extends String[]>) TypeFactory.create("string[]");
+            final ArrayType<?, ?> h = (ArrayType<?, ?>) TypeFactory.create("string[]", null);
+            final ArrayType<?, ?> i = (ArrayType<?, ?>) TypeFactory.create("string[]", String[].class);
+        }
+
+        assertEquals("nam", type.getName());
 
         Object decoded0 = Function.parse("()", "(string[])").getOutputTypes().get(0).decode(abi, new byte[32]);
         assertArrayEquals(array, (Object[]) decoded0);
