@@ -140,7 +140,7 @@ public final class SuperSerial {
     private static Object deserialize(ABIType<?> type, RLPItem item) {
         final int typeCode = type.typeCode();
         if(typeCode < TYPE_CODE_ARRAY && item.isList()) {
-            throw new IllegalArgumentException("RLPList not allowed for this type: " + type + "\n" + item);
+            throw new IllegalArgumentException("RLPList not allowed for this type: " + type);
         }
         switch (typeCode) {
         case TYPE_CODE_BOOLEAN: return item.asBoolean();

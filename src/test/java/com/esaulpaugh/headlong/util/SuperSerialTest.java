@@ -45,7 +45,7 @@ public class SuperSerialTest {
         );
 
         TestUtils.assertThrown(IllegalArgumentException.class, "RLPList not allowed for this type: int8",
-                () -> SuperSerial.deserialize(TupleType.of("int8"), "([])", false)
+                () -> SuperSerial.deserialize(TupleType.of("int8"), "(['90', '80', '77'])", false)
         );
 
         String sig = "(uint[],int[],uint32,(int32,uint8,(bool[],int8,int40,int64,int,int,int[]),bool,bool,int256[]),int,int)";
