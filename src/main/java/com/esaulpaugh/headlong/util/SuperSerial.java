@@ -109,20 +109,13 @@ public final class SuperSerial {
     }
 
     private static Object serialize(ABIType<?> type, Object obj) {
-        final int typeCode = type.typeCode();
-        switch (typeCode) {
+        switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return serializeBoolean((boolean) obj);
         case TYPE_CODE_BYTE: return Integers.toBytes((byte) obj); // case currently goes unused
         case TYPE_CODE_INT: return toSigned(((IntType) type).getBitLength(), BigInteger.valueOf((int) obj));
         case TYPE_CODE_LONG: return toSigned(((LongType) type).getBitLength(), BigInteger.valueOf((long) obj));
-        case TYPE_CODE_BIG_INTEGER:
-        case TYPE_CODE_BIG_DECIMAL:
-            return serializeBigInteger(
-                    (UnitType<?>) type,
-                    typeCode == TYPE_CODE_BIG_INTEGER
-                            ? (BigInteger) obj
-                            : ((BigDecimal) obj).unscaledValue()
-            );
+        case TYPE_CODE_BIG_INTEGER: return serializeBigInteger((UnitType<?>) type, (BigInteger) obj);
+        case TYPE_CODE_BIG_DECIMAL: return serializeBigInteger((UnitType<?>) type, ((BigDecimal) obj).unscaledValue());
         case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?>) type, obj);
         case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, obj);
         default: throw new Error();
@@ -145,13 +138,12 @@ public final class SuperSerial {
         switch (typeCode) {
         case TYPE_CODE_BOOLEAN: return item.asBoolean();
         case TYPE_CODE_BYTE: return item.asByte(false); // case currently goes unused
-        case TYPE_CODE_INT:
-        case TYPE_CODE_LONG: return deserializePrimitive((UnitType<?>) type, item, typeCode == TYPE_CODE_INT);
-        case TYPE_CODE_BIG_INTEGER:
+        case TYPE_CODE_INT: return deserializePrimitive((UnitType<?>) type, item, true);
+        case TYPE_CODE_LONG: return deserializePrimitive((UnitType<?>) type, item, false);
+        case TYPE_CODE_BIG_INTEGER: return deserializeBigInteger((UnitType<?>) type, item);
         case TYPE_CODE_BIG_DECIMAL:
-            final UnitType<?> ut = (UnitType<?>) type;
-            final BigInteger bigInt = deserializeBigInteger(ut, item);
-            return typeCode == TYPE_CODE_BIG_INTEGER ? bigInt : new BigDecimal(bigInt, ((BigDecimalType) ut).getScale());
+            BigDecimalType bdt = (BigDecimalType) type;
+            return new BigDecimal(deserializeBigInteger(bdt, item), bdt.getScale());
         case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<? extends ABIType<?>, ?>) type, item);
         case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());
         default: throw new Error();
