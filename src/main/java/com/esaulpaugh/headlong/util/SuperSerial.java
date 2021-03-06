@@ -221,7 +221,7 @@ public final class SuperSerial {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return serializeObjectArray(arr, type.getElementType());
+        case TYPE_CODE_TUPLE: return serializeObjectArray((Object[]) arr, type.getElementType());
         default: throw new Error();
         }
     }
@@ -241,9 +241,8 @@ public final class SuperSerial {
     }
 
     private static byte[][] serializeBooleanArray(boolean[] booleans) {
-        final int len = booleans.length;
-        byte[][] out = new byte[len][];
-        for (int i = 0; i < len; i++) {
+        byte[][] out = new byte[booleans.length][];
+        for (int i = 0; i < booleans.length; i++) {
             out[i] = serializeBoolean(booleans[i]);
         }
         return out;
@@ -268,9 +267,8 @@ public final class SuperSerial {
     }
 
     private static byte[][] serializeIntArray(int[] ints) {
-        final int len = ints.length;
-        byte[][] out = new byte[len][];
-        for (int i = 0; i < len; i++) {
+        byte[][] out = new byte[ints.length][];
+        for (int i = 0; i < ints.length; i++) {
             out[i] = Integers.toBytes(ints[i]);
         }
         return out;
@@ -289,9 +287,8 @@ public final class SuperSerial {
     }
 
     private static byte[][] serializeLongArray(long[] longs) {
-        final int len = longs.length;
-        byte[][] out = new byte[len][];
-        for (int i = 0; i < len; i++) {
+        byte[][] out = new byte[longs.length][];
+        for (int i = 0; i < longs.length; i++) {
             out[i] = Integers.toBytes(longs[i]);
         }
         return out;
@@ -309,11 +306,9 @@ public final class SuperSerial {
         return in;
     }
 
-    private static Object[] serializeObjectArray(Object arr, ABIType<?> elementType) {
-        Object[] objects = (Object[]) arr;
-        final int len = objects.length;
-        Object[] out = new Object[len];
-        for (int i = 0; i < len; i++) {
+    private static Object[] serializeObjectArray(Object[] objects, ABIType<?> elementType) {
+        Object[] out = new Object[objects.length];
+        for (int i = 0; i < objects.length; i++) {
             out[i] = serialize(elementType, objects[i]);
         }
         return out;
