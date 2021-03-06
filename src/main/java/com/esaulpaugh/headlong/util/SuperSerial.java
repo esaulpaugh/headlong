@@ -122,16 +122,12 @@ public final class SuperSerial {
         }
     }
 
-    private static byte[] serializeInteger(int bitLen, BigInteger val) {
-        return toSigned(bitLen, val);
-    }
-
     private static byte[] serializeBoolean(boolean val) {
         return val ? TRUE : FALSE;
     }
 
     private static Object serializeBigInteger(UnitType<?> ut, BigInteger bigInt) {
-        return ut.isUnsigned() ? Integers.toBytesUnsigned(bigInt) : toSigned(ut.getBitLength(), bigInt);
+        return ut.isUnsigned() ? Integers.toBytesUnsigned(bigInt) : serializeInteger(ut.getBitLength(), bigInt);
     }
 
     private static Object deserialize(ABIType<?> type, RLPItem item) {
@@ -179,7 +175,7 @@ public final class SuperSerial {
                 : asSigned(ut.getBitLength(), item);
     }
 
-    private static byte[] toSigned(int typeBits, BigInteger val) {
+    private static byte[] serializeInteger(int typeBits, BigInteger val) {
         if(val.signum() != 0) {
             final byte[] bytes = val.toByteArray();
             return val.signum() < 0
