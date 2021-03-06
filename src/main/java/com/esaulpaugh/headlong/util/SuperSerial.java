@@ -138,8 +138,8 @@ public final class SuperSerial {
         switch (typeCode) {
         case TYPE_CODE_BOOLEAN: return item.asBoolean();
         case TYPE_CODE_BYTE: return item.asByte(false); // case currently goes unused
-        case TYPE_CODE_INT: return deserializePrimitive((UnitType<?>) type, item, true);
-        case TYPE_CODE_LONG: return deserializePrimitive((UnitType<?>) type, item, false);
+        case TYPE_CODE_INT: return deserializeInt((IntType) type, item);
+        case TYPE_CODE_LONG: return deserializeLong((LongType) type, item);
         case TYPE_CODE_BIG_INTEGER: return deserializeBigInteger((UnitType<?>) type, item);
         case TYPE_CODE_BIG_DECIMAL:
             BigDecimalType bdt = (BigDecimalType) type;
@@ -150,22 +150,24 @@ public final class SuperSerial {
         }
     }
 
-    private static Number deserializePrimitive(UnitType<?> ut, RLPItem item, boolean isInt) {
-        if(ut.isUnsigned() || (item.dataLength * Byte.SIZE) < ut.getBitLength()) {
-            return isInt
-                    ? item.asInt(false)
-                    : (Number) item.asLong(false);
+    private static Integer deserializeInt(IntType type, RLPItem item) {
+        if (type.isUnsigned() || (item.dataLength * Byte.SIZE) < type.getBitLength()) {
+            return item.asInt();
         }
         final byte[] data = item.data();
-        final int len = data.length;
-        if(len > 0 && (data[0] & SIGN_BIT_MASK) != 0) {
-            return isInt
-                    ? BizarroIntegers.getInt(data, 0, len)
-                    : (Number) BizarroIntegers.getLong(data, 0, len);
+        return data.length > 0 && (data[0] & SIGN_BIT_MASK) != 0
+                ? BizarroIntegers.getInt(data, 0, data.length)
+                : Integers.getInt(data, 0, data.length, false);
+    }
+
+    private static Long deserializeLong(LongType type, RLPItem item) {
+        if (type.isUnsigned() || (item.dataLength * Byte.SIZE) < type.getBitLength()) {
+            return item.asLong();
         }
-        return isInt
-                ? Integers.getInt(data, 0, len, false)
-                : (Number) Integers.getLong(data, 0, len, false);
+        final byte[] data = item.data();
+        return data.length > 0 && (data[0] & SIGN_BIT_MASK) != 0
+                ? BizarroIntegers.getLong(data, 0, data.length)
+                : Integers.getLong(data, 0, data.length, false);
     }
 
     private static BigInteger deserializeBigInteger(UnitType<?> ut, RLPItem item) {
