@@ -24,6 +24,7 @@ import com.esaulpaugh.headlong.abi.Tuple;
 import com.esaulpaugh.headlong.abi.TupleType;
 import com.esaulpaugh.headlong.abi.UnitType;
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
+import com.esaulpaugh.headlong.abi.util.Uint;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
@@ -237,8 +238,8 @@ public final class SuperSerial {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return deserializeBooleanArray((RLPList) item);
         case TYPE_CODE_BYTE: return deserializeByteArray(item, arrayType.isString());
-        case TYPE_CODE_INT: return deserializeIntArray((RLPList) item);
-        case TYPE_CODE_LONG: return deserializeLongArray((RLPList) item);
+        case TYPE_CODE_INT: return deserializeIntArray((RLPList) item, (IntType) arrayType.getElementType());
+        case TYPE_CODE_LONG: return deserializeLongArray((RLPList) item, (LongType) arrayType.getElementType());
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
@@ -283,12 +284,14 @@ public final class SuperSerial {
         return out;
     }
 
-    private static int[] deserializeIntArray(RLPList list) {
-        List<RLPItem> elements = list.elements(RLP_STRICT);
+    private static int[] deserializeIntArray(RLPList list, IntType type) {
+        final List<RLPItem> elements = list.elements(RLP_STRICT);
         final int len = elements.size();
-        int[] in = new int[len];
+        final int[] in = new int[len];
+        final Uint uint = new Uint(type.getBitLength());
         for (int i = 0; i < len; i++) {
-            in[i] = elements.get(i).asInt(false);
+            int x = elements.get(i).asInt();
+            in[i] = !type.isUnsigned() && x >= uint.halfRangeLong ? (int) uint.toSignedLong(x) : x;
         }
         return in;
     }
@@ -302,12 +305,14 @@ public final class SuperSerial {
         return out;
     }
 
-    private static long[] deserializeLongArray(RLPList list) {
-        List<RLPItem> elements = list.elements(RLP_STRICT);
+    private static long[] deserializeLongArray(RLPList list, LongType type) {
+        final List<RLPItem> elements = list.elements(RLP_STRICT);
         final int len = elements.size();
-        long[] in = new long[len];
+        final long[] in = new long[len];
+        final Uint uint = new Uint(type.getBitLength());
         for (int i = 0; i < len; i++) {
-            in[i] = elements.get(i).asLong();
+            long x = elements.get(i).asLong();
+            in[i] = !type.isUnsigned() && x >= uint.halfRangeLong ? uint.toSignedLong(x) : x;
         }
         return in;
     }
