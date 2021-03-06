@@ -137,8 +137,8 @@ public final class SuperSerial {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return item.asBoolean();
         case TYPE_CODE_BYTE: return item.asByte(); // case currently goes unused
-        case TYPE_CODE_INT: return deserializeInt((IntType) type, item);
-        case TYPE_CODE_LONG: return deserializeLong((LongType) type, item);
+        case TYPE_CODE_INT: return deserializeBigInteger((UnitType<?>) type, item).intValueExact();
+        case TYPE_CODE_LONG: return deserializeBigInteger((UnitType<?>) type, item).longValueExact();
         case TYPE_CODE_BIG_INTEGER: return deserializeBigInteger((UnitType<?>) type, item);
         case TYPE_CODE_BIG_DECIMAL:
             BigDecimalType bdt = (BigDecimalType) type;
@@ -147,26 +147,6 @@ public final class SuperSerial {
         case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());
         default: throw new Error();
         }
-    }
-
-    private static Integer deserializeInt(IntType type, RLPItem item) {
-        if (type.isUnsigned() || (item.dataLength * Byte.SIZE) < type.getBitLength()) {
-            return item.asInt();
-        }
-        final byte[] data = item.data();
-        return data.length > 0 && (data[0] & SIGN_BIT_MASK) != 0
-                ? BizarroIntegers.getInt(data, 0, data.length)
-                : Integers.getInt(data, 0, data.length, false);
-    }
-
-    private static Long deserializeLong(LongType type, RLPItem item) {
-        if (type.isUnsigned() || (item.dataLength * Byte.SIZE) < type.getBitLength()) {
-            return item.asLong();
-        }
-        final byte[] data = item.data();
-        return data.length > 0 && (data[0] & SIGN_BIT_MASK) != 0
-                ? BizarroIntegers.getLong(data, 0, data.length)
-                : Integers.getLong(data, 0, data.length, false);
     }
 
     private static BigInteger deserializeBigInteger(UnitType<?> ut, RLPItem item) {
@@ -276,7 +256,7 @@ public final class SuperSerial {
         final int len = elements.size();
         final int[] in = new int[len];
         for (int i = 0; i < len; i++) {
-            in[i] = deserializeInt(type, elements.get(i));
+            in[i] = deserializeBigInteger(type, elements.get(i)).intValueExact();
         }
         return in;
     }
@@ -294,7 +274,7 @@ public final class SuperSerial {
         final int len = elements.size();
         final long[] in = new long[len];
         for (int i = 0; i < len; i++) {
-            in[i] = deserializeLong(type, elements.get(i));
+            in[i] = deserializeBigInteger(type, elements.get(i)).longValueExact();
         }
         return in;
     }
