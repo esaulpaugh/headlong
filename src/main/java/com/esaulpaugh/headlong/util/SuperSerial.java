@@ -137,7 +137,7 @@ public final class SuperSerial {
         }
         switch (typeCode) {
         case TYPE_CODE_BOOLEAN: return item.asBoolean();
-        case TYPE_CODE_BYTE: return item.asByte(false); // case currently goes unused
+        case TYPE_CODE_BYTE: return item.asByte(); // case currently goes unused
         case TYPE_CODE_INT: return deserializeInt((IntType) type, item);
         case TYPE_CODE_LONG: return deserializeLong((LongType) type, item);
         case TYPE_CODE_BIG_INTEGER: return deserializeBigInteger((UnitType<?>) type, item);
@@ -172,7 +172,7 @@ public final class SuperSerial {
 
     private static BigInteger deserializeBigInteger(UnitType<?> ut, RLPItem item) {
         return ut.isUnsigned()
-                ? item.asBigInt(false)
+                ? item.asBigInt()
                 : asSigned(ut.getBitLength(), item);
     }
 
