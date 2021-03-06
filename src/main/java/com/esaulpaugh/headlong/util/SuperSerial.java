@@ -131,11 +131,10 @@ public final class SuperSerial {
     }
 
     private static Object deserialize(ABIType<?> type, RLPItem item) {
-        final int typeCode = type.typeCode();
-        if(typeCode < TYPE_CODE_ARRAY && item.isList()) {
+        if(type.typeCode() < TYPE_CODE_ARRAY && item.isList()) {
             throw new IllegalArgumentException("RLPList not allowed for this type: " + type);
         }
-        switch (typeCode) {
+        switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return item.asBoolean();
         case TYPE_CODE_BYTE: return item.asByte(); // case currently goes unused
         case TYPE_CODE_INT: return deserializeInt((IntType) type, item);
@@ -177,10 +176,9 @@ public final class SuperSerial {
     }
 
     private static byte[] toSigned(int typeBits, BigInteger val) {
-        final int signum = val.signum();
-        if(signum != 0) {
+        if(val.signum() != 0) {
             final byte[] bytes = val.toByteArray();
-            return signum < 0
+            return val.signum() < 0
                     ? signExtendNegative(bytes, typeBits / Byte.SIZE)
                     : bytes[0] != 0
                         ? bytes
@@ -197,14 +195,13 @@ public final class SuperSerial {
     }
 
     private static BigInteger asSigned(int typeBits, RLPItem item) {
-        final int dataLen = item.dataLength;
-        if(dataLen != 0) {
-            if (dataLen * Byte.SIZE < typeBits) {
-                byte[] padded = new byte[dataLen + 1];
+        if(item.dataLength != 0) {
+            if (item.dataLength * Byte.SIZE < typeBits) {
+                byte[] padded = new byte[item.dataLength + 1];
                 item.exportData(padded, 1);
                 return new BigInteger(padded);
             }
-            if(dataLen > UNIT_LENGTH_BYTES) {
+            if(item.dataLength > UNIT_LENGTH_BYTES) {
                 throw new IllegalArgumentException("integer data cannot exceed " + UNIT_LENGTH_BYTES + " bytes");
             }
             return item.asBigIntSigned();

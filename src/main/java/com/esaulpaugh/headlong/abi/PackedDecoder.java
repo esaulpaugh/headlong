@@ -83,12 +83,11 @@ public final class PackedDecoder {
 
     private static int decodeTuple(TupleType tupleType, byte[] buffer, int start, int end, Object[] parentElements, int pei) {
         final ABIType<?>[] elementTypes = tupleType.elementTypes;
-        final int len = elementTypes.length;
-        final Object[] elements = new Object[len];
+        final Object[] elements = new Object[elementTypes.length];
 
         int mark = -1;
 
-        for (int i = len - 1; i >= 0; i--) {
+        for (int i = elementTypes.length - 1; i >= 0; i--) {
             final ABIType<?> type = elementTypes[i];
             if (type.dynamic) {
                 mark = i;
@@ -136,9 +135,8 @@ public final class PackedDecoder {
 
     private static int decodeTupleStatic(TupleType tupleType, byte[] buffer, int idx, int end, Object[] parentElements, int pei) {
         final ABIType<?>[] elementTypes = tupleType.elementTypes;
-        final int len = elementTypes.length;
-        final Object[] elements = new Object[len];
-        for (int i = 0; i < len; i++) {
+        final Object[] elements = new Object[elementTypes.length];
+        for (int i = 0; i < elementTypes.length; i++) {
             idx += decode(elementTypes[i], buffer, idx, end, elements, i);
         }
         return tupleType.byteLengthPacked(parentElements[pei] = new Tuple(elements));

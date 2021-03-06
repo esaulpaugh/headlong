@@ -39,10 +39,9 @@ public final class FastBase64 {
 
     static short[] init(byte[] smallTable) {
         final short[] largeTable = new short[1 << 12];
-        final int len = smallTable.length;
-        for (int i = 0; i < len; i++) {
-            final int offset = i * len;
-            for (int j = 0; j < len; j++) {
+        for (int i = 0; i < smallTable.length; i++) {
+            final int offset = i * smallTable.length;
+            for (int j = 0; j < smallTable.length; j++) {
                 largeTable[offset + j] = (short) ((smallTable[i] << Byte.SIZE) | (smallTable[j] & 0xFF));
             }
         }

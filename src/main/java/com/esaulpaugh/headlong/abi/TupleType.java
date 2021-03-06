@@ -157,10 +157,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     static void decodeObjects(ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects) {
-        final int len = objects.length;
         final int start = bb.position(); // save this value before offsets are decoded
-        final int[] offsets = new int[len];
-        for(int i = 0; i < len; i++) {
+        final int[] offsets = new int[objects.length];
+        for(int i = 0; i < objects.length; i++) {
             ABIType<?> t = getType.apply(i);
             if(!t.dynamic) {
                 objects[i] = t.decode(bb, unitBuffer);
@@ -168,7 +167,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 offsets[i] = Encoding.UINT31.decode(bb, unitBuffer);
             }
         }
-        for (int i = 0; i < len; i++) {
+        for (int i = 0; i < objects.length; i++) {
             final int offset = offsets[i];
             if(offset > 0) {
                 final int jump = start + offset;
@@ -279,12 +278,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     private TupleType subTupleType(boolean[] manifest, boolean negate) {
-        final int len = manifest.length;
-        if(len == elementTypes.length) {
+        if(manifest.length == elementTypes.length) {
             final StringBuilder canonicalBuilder = new StringBuilder("(");
             boolean dynamic = false;
-            final ArrayList<ABIType<?>> selected = new ArrayList<>(len);
-            for (int i = 0; i < len; i++) {
+            final ArrayList<ABIType<?>> selected = new ArrayList<>(manifest.length);
+            for (int i = 0; i < manifest.length; i++) {
                 if (negate ^ manifest[i]) {
                     ABIType<?> e = elementTypes[i];
                     canonicalBuilder.append(e.canonicalType).append(',');
@@ -294,7 +292,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             }
             return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected.toArray(EMPTY_TYPE_ARRAY));
         }
-        throw new IllegalArgumentException("manifest.length != elementTypes.length: " + len + " != " + elementTypes.length);
+        throw new IllegalArgumentException("manifest.length != elementTypes.length: " + manifest.length + " != " + elementTypes.length);
     }
 
     static String completeTupleTypeString(StringBuilder sb) {
