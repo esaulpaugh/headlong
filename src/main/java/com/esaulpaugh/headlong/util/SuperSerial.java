@@ -112,14 +112,18 @@ public final class SuperSerial {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return serializeBoolean((boolean) obj);
         case TYPE_CODE_BYTE: return Integers.toBytes((byte) obj); // case currently goes unused
-        case TYPE_CODE_INT: return toSigned(((IntType) type).getBitLength(), BigInteger.valueOf((int) obj));
-        case TYPE_CODE_LONG: return toSigned(((LongType) type).getBitLength(), BigInteger.valueOf((long) obj));
+        case TYPE_CODE_INT:
+        case TYPE_CODE_LONG: return serializeInteger(((UnitType<?>) type).getBitLength(), BigInteger.valueOf(((Number) obj).longValue()));
         case TYPE_CODE_BIG_INTEGER: return serializeBigInteger((UnitType<?>) type, (BigInteger) obj);
         case TYPE_CODE_BIG_DECIMAL: return serializeBigInteger((UnitType<?>) type, ((BigDecimal) obj).unscaledValue());
         case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?>) type, obj);
         case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, obj);
         default: throw new Error();
         }
+    }
+
+    private static byte[] serializeInteger(int bitLen, BigInteger val) {
+        return toSigned(bitLen, val);
     }
 
     private static byte[] serializeBoolean(boolean val) {
@@ -213,8 +217,8 @@ public final class SuperSerial {
         switch (type.getElementType().typeCode()) {
         case TYPE_CODE_BOOLEAN: return serializeBooleanArray((boolean[]) arr);
         case TYPE_CODE_BYTE: return serializeByteArray(arr, type.isString());
-        case TYPE_CODE_INT: return serializeIntArray((int[]) arr);
-        case TYPE_CODE_LONG: return serializeLongArray((long[]) arr);
+        case TYPE_CODE_INT: return serializeIntArray(((UnitType<?>) type.getElementType()).getBitLength(), (int[]) arr);
+        case TYPE_CODE_LONG: return serializeLongArray(((UnitType<?>) type.getElementType()).getBitLength(), (long[]) arr);
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
@@ -263,10 +267,10 @@ public final class SuperSerial {
         return isString ? item.asString(Strings.UTF_8) : item.asBytes();
     }
 
-    private static byte[][] serializeIntArray(int[] ints) {
-        byte[][] out = new byte[ints.length][];
-        for (int i = 0; i < ints.length; i++) {
-            out[i] = Integers.toBytes(ints[i]);
+    private static byte[][] serializeIntArray(int bitLen, int[] values) {
+        byte[][] out = new byte[values.length][];
+        for (int i = 0; i < values.length; i++) {
+            out[i] = serializeInteger(bitLen, BigInteger.valueOf(values[i]));
         }
         return out;
     }
@@ -283,10 +287,10 @@ public final class SuperSerial {
         return in;
     }
 
-    private static byte[][] serializeLongArray(long[] longs) {
-        byte[][] out = new byte[longs.length][];
-        for (int i = 0; i < longs.length; i++) {
-            out[i] = Integers.toBytes(longs[i]);
+    private static byte[][] serializeLongArray(int bitLen, long[] values) {
+        byte[][] out = new byte[values.length][];
+        for (int i = 0; i < values.length; i++) {
+            out[i] = serializeInteger(bitLen, BigInteger.valueOf(values[i]));
         }
         return out;
     }
