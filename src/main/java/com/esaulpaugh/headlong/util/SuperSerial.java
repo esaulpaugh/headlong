@@ -80,9 +80,8 @@ public final class SuperSerial {
 
     private static Object[] serializeTuple(TupleType tupleType, Object obj) {
         Tuple tuple = (Tuple) obj;
-        final int len = tupleType.size();
-        Object[] out = new Object[len];
-        for(int i = 0; i < len; i++) {
+        Object[] out = new Object[tupleType.size()];
+        for(int i = 0; i < out.length; i++) {
             out[i] = serialize(tupleType.get(i), tuple.get(i));
         }
         return out;
@@ -90,9 +89,8 @@ public final class SuperSerial {
 
     private static Tuple deserializeTuple(TupleType tupleType, byte[] sequence) {
         Iterator<RLPItem> sequenceIterator = RLP_STRICT.sequenceIterator(sequence);
-        final int len = tupleType.size();
-        Object[] elements = new Object[len];
-        for(int i = 0; i < len; i++) {
+        Object[] elements = new Object[tupleType.size()];
+        for(int i = 0; i < elements.length; i++) {
             elements[i] = deserialize(tupleType.get(i), sequenceIterator.next());
         }
         if(sequenceIterator.hasNext()) {
@@ -216,9 +214,8 @@ public final class SuperSerial {
 
     private static boolean[] deserializeBooleanArray(RLPList list) {
         List<RLPItem> elements = list.elements(RLP_STRICT);
-        final int len = elements.size();
-        boolean[] in = new boolean[len];
-        for (int i = 0; i < len; i++) {
+        boolean[] in = new boolean[elements.size()];
+        for (int i = 0; i < in.length; i++) {
             in[i] = elements.get(i).asBoolean();
         }
         return in;
@@ -242,9 +239,8 @@ public final class SuperSerial {
 
     private static int[] deserializeIntArray(RLPList list, IntType type) {
         final List<RLPItem> elements = list.elements(RLP_STRICT);
-        final int len = elements.size();
-        final int[] in = new int[len];
-        for (int i = 0; i < len; i++) {
+        final int[] in = new int[elements.size()];
+        for (int i = 0; i < in.length; i++) {
             in[i] = deserializeBigInteger(type, elements.get(i)).intValueExact();
         }
         return in;
@@ -260,9 +256,8 @@ public final class SuperSerial {
 
     private static long[] deserializeLongArray(RLPList list, LongType type) {
         final List<RLPItem> elements = list.elements(RLP_STRICT);
-        final int len = elements.size();
-        final long[] in = new long[len];
-        for (int i = 0; i < len; i++) {
+        final long[] in = new long[elements.size()];
+        for (int i = 0; i < in.length; i++) {
             in[i] = deserializeBigInteger(type, elements.get(i)).longValueExact();
         }
         return in;
@@ -278,9 +273,8 @@ public final class SuperSerial {
 
     private static Object[] deserializeObjectArray(ABIType<?> elementType, RLPList list) {
         List<RLPItem> elements = list.elements(RLP_STRICT);
-        final int len = elements.size();
-        Object[] in = (Object[]) Array.newInstance(elementType.clazz(), len); // reflection ftw
-        for (int i = 0; i < len; i++) {
+        Object[] in = (Object[]) Array.newInstance(elementType.clazz(), elements.size()); // reflection ftw
+        for (int i = 0; i < in.length; i++) {
             in[i] = deserialize(elementType, elements.get(i));
         }
         return in;
