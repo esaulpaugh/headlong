@@ -138,12 +138,6 @@ public final class SuperSerial {
         }
     }
 
-    private static BigInteger deserializeBigInteger(UnitType<?> ut, RLPItem item) {
-        return ut.isUnsigned()
-                ? item.asBigInt()
-                : asSigned(ut.getBitLength(), item);
-    }
-
     private static byte[] serializeBigInteger(UnitType<?> ut, BigInteger val) {
         if(ut.isUnsigned()) {
             return Integers.toBytesUnsigned(val);
@@ -166,9 +160,12 @@ public final class SuperSerial {
         return extended;
     }
 
-    private static BigInteger asSigned(int typeBits, RLPItem item) {
+    private static BigInteger deserializeBigInteger(UnitType<?> ut, RLPItem item) {
+        if(ut.isUnsigned()) {
+            return item.asBigInt();
+        }
         if(item.dataLength != 0) {
-            if (item.dataLength * Byte.SIZE < typeBits) {
+            if (item.dataLength * Byte.SIZE < ut.getBitLength()) {
                 byte[] padded = new byte[item.dataLength + 1];
                 item.exportData(padded, 1);
                 return new BigInteger(padded);
