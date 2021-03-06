@@ -275,10 +275,8 @@ public final class SuperSerial {
         final List<RLPItem> elements = list.elements(RLP_STRICT);
         final int len = elements.size();
         final int[] in = new int[len];
-        final Uint uint = new Uint(type.getBitLength());
         for (int i = 0; i < len; i++) {
-            int x = elements.get(i).asInt();
-            in[i] = !type.isUnsigned() && x >= uint.halfRangeLong ? (int) uint.toSignedLong(x) : x;
+            in[i] = deserializeInt(type, elements.get(i));
         }
         return in;
     }
@@ -295,10 +293,8 @@ public final class SuperSerial {
         final List<RLPItem> elements = list.elements(RLP_STRICT);
         final int len = elements.size();
         final long[] in = new long[len];
-        final Uint uint = new Uint(type.getBitLength());
         for (int i = 0; i < len; i++) {
-            long x = elements.get(i).asLong();
-            in[i] = !type.isUnsigned() && x >= uint.halfRangeLong ? uint.toSignedLong(x) : x;
+            in[i] = deserializeLong(type, elements.get(i));
         }
         return in;
     }
