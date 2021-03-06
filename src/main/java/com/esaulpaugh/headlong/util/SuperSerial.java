@@ -23,8 +23,6 @@ import com.esaulpaugh.headlong.abi.LongType;
 import com.esaulpaugh.headlong.abi.Tuple;
 import com.esaulpaugh.headlong.abi.TupleType;
 import com.esaulpaugh.headlong.abi.UnitType;
-import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
-import com.esaulpaugh.headlong.abi.util.Uint;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
@@ -56,11 +54,6 @@ public final class SuperSerial {
 
     private static final byte[] TRUE = new byte[] { 0x1 };
     private static final byte[] FALSE = new byte[0];
-
-    /**
-     * Bit mask to select the sign bit of a {@code byte}.
-     */
-    private static final int SIGN_BIT_MASK = 0x80;
 
     public static String serialize(TupleType tupleType, Tuple tuple, boolean machine) {
         tupleType.validate(tuple);
@@ -113,7 +106,7 @@ public final class SuperSerial {
         case TYPE_CODE_BOOLEAN: return serializeBoolean((boolean) obj);
         case TYPE_CODE_BYTE: return Integers.toBytes((byte) obj); // case currently goes unused
         case TYPE_CODE_INT:
-        case TYPE_CODE_LONG: return serializeInteger(((UnitType<?>) type).getBitLength(), BigInteger.valueOf(((Number) obj).longValue()));
+        case TYPE_CODE_LONG: return serializeBigInteger((UnitType<?>) type, BigInteger.valueOf(((Number) obj).longValue()));
         case TYPE_CODE_BIG_INTEGER: return serializeBigInteger((UnitType<?>) type, (BigInteger) obj);
         case TYPE_CODE_BIG_DECIMAL: return serializeBigInteger((UnitType<?>) type, ((BigDecimal) obj).unscaledValue());
         case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?>) type, obj);
@@ -124,10 +117,6 @@ public final class SuperSerial {
 
     private static byte[] serializeBoolean(boolean val) {
         return val ? TRUE : FALSE;
-    }
-
-    private static Object serializeBigInteger(UnitType<?> ut, BigInteger bigInt) {
-        return ut.isUnsigned() ? Integers.toBytesUnsigned(bigInt) : serializeInteger(ut.getBitLength(), bigInt);
     }
 
     private static Object deserialize(ABIType<?> type, RLPItem item) {
@@ -155,11 +144,14 @@ public final class SuperSerial {
                 : asSigned(ut.getBitLength(), item);
     }
 
-    private static byte[] serializeInteger(int typeBits, BigInteger val) {
+    private static byte[] serializeBigInteger(UnitType<?> ut, BigInteger val) {
+        if(ut.isUnsigned()) {
+            return Integers.toBytesUnsigned(val);
+        }
         if(val.signum() != 0) {
             final byte[] bytes = val.toByteArray();
             return val.signum() < 0
-                    ? signExtendNegative(bytes, typeBits / Byte.SIZE)
+                    ? signExtendNegative(bytes, ut.getBitLength() / Byte.SIZE)
                     : bytes[0] != 0
                         ? bytes
                         : Arrays.copyOfRange(bytes, 1, bytes.length);
@@ -193,8 +185,8 @@ public final class SuperSerial {
         switch (type.getElementType().typeCode()) {
         case TYPE_CODE_BOOLEAN: return serializeBooleanArray((boolean[]) arr);
         case TYPE_CODE_BYTE: return serializeByteArray(arr, type.isString());
-        case TYPE_CODE_INT: return serializeIntArray(((UnitType<?>) type.getElementType()).getBitLength(), (int[]) arr);
-        case TYPE_CODE_LONG: return serializeLongArray(((UnitType<?>) type.getElementType()).getBitLength(), (long[]) arr);
+        case TYPE_CODE_INT: return serializeIntArray((UnitType<?>) type.getElementType(), (int[]) arr);
+        case TYPE_CODE_LONG: return serializeLongArray((UnitType<?>) type.getElementType(), (long[]) arr);
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
@@ -243,10 +235,10 @@ public final class SuperSerial {
         return isString ? item.asString(Strings.UTF_8) : item.asBytes();
     }
 
-    private static byte[][] serializeIntArray(int bitLen, int[] values) {
+    private static byte[][] serializeIntArray(UnitType<?> ut, int[] values) {
         byte[][] out = new byte[values.length][];
         for (int i = 0; i < values.length; i++) {
-            out[i] = serializeInteger(bitLen, BigInteger.valueOf(values[i]));
+            out[i] = serializeBigInteger(ut, BigInteger.valueOf(values[i]));
         }
         return out;
     }
@@ -261,10 +253,10 @@ public final class SuperSerial {
         return in;
     }
 
-    private static byte[][] serializeLongArray(int bitLen, long[] values) {
+    private static byte[][] serializeLongArray(UnitType<?> ut, long[] values) {
         byte[][] out = new byte[values.length][];
         for (int i = 0; i < values.length; i++) {
-            out[i] = serializeInteger(bitLen, BigInteger.valueOf(values[i]));
+            out[i] = serializeBigInteger(ut, BigInteger.valueOf(values[i]));
         }
         return out;
     }
