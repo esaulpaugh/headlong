@@ -64,8 +64,12 @@ public final class Function implements ABIObject {
     private final TupleType outputTypes;
     private final String stateMutability;
 
-    private final byte[] selector = new byte[SELECTOR_LEN];
+    private final byte[] selector;
     private final String hashAlgorithm;
+
+    { // instance initializer
+        this.selector = new byte[SELECTOR_LEN];
+    }
 
     public Function(String signature) {
         this(signature, null);
