@@ -383,7 +383,7 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     private static BigDecimal generateBigDecimal(Random r, BigDecimalType type) {
-        return new BigDecimal(generateBigInteger(r, type), type.scale);
+        return new BigDecimal(generateBigInteger(r, type), type.getScale());
     }
 
     private Object generateArray(ArrayType<? extends ABIType<?>, ?> arrayType, Random r) {

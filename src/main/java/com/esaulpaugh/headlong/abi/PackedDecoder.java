@@ -174,7 +174,7 @@ public final class PackedDecoder {
 //            unscaled = new BigInteger(buffer, idx, elementLen); // Java 9+
             unscaled = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
         }
-        dest[destIdx] = new BigDecimal(unscaled, type.scale);
+        dest[destIdx] = new BigDecimal(unscaled, type.getScale());
         return elementLen;
     }
 
