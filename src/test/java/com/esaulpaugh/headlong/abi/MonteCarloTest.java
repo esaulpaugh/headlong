@@ -112,7 +112,7 @@ public class MonteCarloTest {
         return x;
     }
 
-    private static final int N = 100_000;
+    private static final int N = 60_100_000;
 
     @Test
     public void gambleGamble() throws InterruptedException, AssertionError, TimeoutException {

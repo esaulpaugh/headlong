@@ -46,7 +46,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     public static final int DYNAMIC_LENGTH = -1;
 
     private final boolean isString;
-    final E elementType;
+    private final E elementType;
     private final int length;
     private final Class<?> arrayClass;
 

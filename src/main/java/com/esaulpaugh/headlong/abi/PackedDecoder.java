@@ -73,7 +73,7 @@ public final class PackedDecoder {
             if(DYNAMIC_LENGTH == arrayType.getLength()) {
                 numDynamic++;
             }
-            type = arrayType.elementType;
+            type = arrayType.getElementType();
         } while (TYPE_CODE_ARRAY == type.typeCode()); // loop until type is the base type
         if(TYPE_CODE_TUPLE == type.typeCode()) {
             numDynamic += countDynamicsTupleType((TupleType) type);
@@ -97,7 +97,7 @@ public final class PackedDecoder {
             final int typeCode = type.typeCode();
             if(TYPE_CODE_ARRAY == typeCode) {
                 final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<? extends ABIType<?>, ?>) type;
-                end -= arrayType.elementType.byteLengthPacked(null) * arrayType.getLength();
+                end -= arrayType.getElementType().byteLengthPacked(null) * arrayType.getLength();
                 insertArray(arrayType, buffer, end, end, elements, i);
             } else if(TYPE_CODE_TUPLE == typeCode) {
                 TupleType inner = (TupleType) type;
@@ -179,7 +179,7 @@ public final class PackedDecoder {
     }
 
     private static int insertArray(ArrayType<? extends ABIType<?>, ?> arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) {
-        final ABIType<?> elementType = arrayType.elementType;
+        final ABIType<?> elementType = arrayType.getElementType();
         final int elementByteLen = elementType.byteLengthPacked(null);
         final int arrayLen;
         final int typeLen = arrayType.getLength();

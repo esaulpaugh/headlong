@@ -246,7 +246,7 @@ public final class ABIJSON {
                 out.value(type.replace(type.substring(0, type.lastIndexOf(')') + 1), TUPLE));
                 ABIType<?> base = e;
                 while (ABIType.TYPE_CODE_ARRAY == base.typeCode()) {
-                    base = ((ArrayType<? extends ABIType<?>, ?>) base).elementType;
+                    base = ((ArrayType<? extends ABIType<?>, ?>) base).getElementType();
                 }
                 writeJsonArray(out, COMPONENTS, (TupleType) base, null);
             } else {

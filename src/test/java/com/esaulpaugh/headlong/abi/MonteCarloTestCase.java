@@ -387,7 +387,7 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     private Object generateArray(ArrayType<? extends ABIType<?>, ?> arrayType, Random r) {
-        ABIType<?> elementType = arrayType.elementType;
+        ABIType<?> elementType = arrayType.getElementType();
         final int typeLen = arrayType.getLength();
         final int len = DYNAMIC_LENGTH == typeLen
                 ? r.nextInt(maxArrayLen + 1) // [0,max]
@@ -495,9 +495,9 @@ public class MonteCarloTestCase implements Serializable {
 
     private Object[] generateObjectArray(ArrayType<? extends ABIType<?>, ?> arrayType, final int len, Random r) {
 
-        Object[] dest = (Object[]) Array.newInstance(arrayType.elementType.clazz, len);
+        Object[] dest = (Object[]) Array.newInstance(arrayType.getElementType().clazz, len);
 
-        final ArrayType<? extends ABIType<?>, ?> elementType = (ArrayType<? extends ABIType<?>, ?>) arrayType.elementType;
+        final ArrayType<? extends ABIType<?>, ?> elementType = (ArrayType<? extends ABIType<?>, ?>) arrayType.getElementType();
         for (int i = 0; i < len; i++) {
             dest[i] = generateArray(elementType, r);
         }

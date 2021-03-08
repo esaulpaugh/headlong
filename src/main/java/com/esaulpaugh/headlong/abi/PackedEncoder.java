@@ -56,7 +56,7 @@ final class PackedEncoder {
     }
 
     private static void encodeArray(ArrayType<? extends ABIType<?>, ?> arrayType, Object value, ByteBuffer dest) {
-        final ABIType<?> elementType = arrayType.elementType;
+        final ABIType<?> elementType = arrayType.getElementType();
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: encodeBooleans((boolean[]) value, dest); return;
         case TYPE_CODE_BYTE: dest.put(arrayType.decodeIfString(value)); return;
