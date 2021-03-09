@@ -51,15 +51,18 @@ public final class Record {
         final int contentOffset = recordLen - contentLen;
 
         final ByteBuffer record = ByteBuffer.allocate(recordLen);
-        RLPEncoder.insertRecordContent(contentDataLen, seq, pairs, record.position(contentOffset));
+        record.position(contentOffset);
+        RLPEncoder.insertRecordContent(contentDataLen, seq, pairs, record);
 
         byte[] recordArr = record.array();
         byte[] signature = signer.sign(recordArr, contentOffset, contentLen);
         if(signature.length != signatureLen) {
             throw new RuntimeException("incorrect signature length: " + signature.length + " != " + signatureLen);
         }
-        RLPEncoder.encodeItem(signature, record.position(recordLen - recordDataLen)); // end of signature will overwrite content list prefix
-        RLPEncoder.insertListPrefix(recordDataLen, record.position(0));
+        record.position(recordLen - recordDataLen);
+        RLPEncoder.encodeItem(signature, record); // end of signature will overwrite content list prefix
+        record.position(0);
+        RLPEncoder.insertListPrefix(recordDataLen, record);
         return recordArr;
     }
 
