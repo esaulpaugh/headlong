@@ -55,6 +55,9 @@ public final class Record {
 
         byte[] recordArr = record.array();
         byte[] signature = signer.sign(recordArr, contentOffset, contentLen);
+        if(signature.length != signatureLen) {
+            throw new RuntimeException("incorrect signature length: " + signature.length + " != " + signatureLen);
+        }
         RLPEncoder.encodeItem(signature, record.position(recordLen - recordDataLen)); // end of signature will overwrite content list prefix
         RLPEncoder.insertListPrefix(recordDataLen, record.position(0));
         return recordArr;

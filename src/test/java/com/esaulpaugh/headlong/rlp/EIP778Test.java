@@ -224,6 +224,27 @@ public class EIP778Test {
     }
 
     @Test
+    public void testIncorrectSignatureLength() throws Throwable {
+        final List<KeyValuePair> pairs = Arrays.asList(
+                new KeyValuePair(IP, "7f000001", HEX),
+                new KeyValuePair(UDP, "765f", HEX),
+                new KeyValuePair(ID, "v4", UTF_8),
+                new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
+        );
+        assertThrown(RuntimeException.class, "incorrect signature length: 32 != 64", () -> new Record(90L, pairs, new Record.Signer() {
+            @Override
+            public int signatureLength() {
+                return 64;
+            }
+
+            @Override
+            public byte[] sign(byte[] message, int off, int len) {
+                return new byte[32];
+            }
+        }));
+    }
+
+    @Test
     public void testDuplicateKeys() throws Throwable {
         byte[] keyBytes = new byte[0];
         final List<KeyValuePair> pairs = Arrays.asList(new KeyValuePair(keyBytes, new byte[0]), new KeyValuePair(keyBytes, new byte[1]));
