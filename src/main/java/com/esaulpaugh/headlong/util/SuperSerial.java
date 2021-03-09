@@ -46,6 +46,7 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
+import static com.esaulpaugh.headlong.util.Strings.EMPTY_BYTE_ARRAY;
 
 /** Serializes and deserializes {@link Tuple}s through the use of RLP encoding. */
 public final class SuperSerial {
@@ -53,7 +54,7 @@ public final class SuperSerial {
     private SuperSerial() {}
 
     private static final byte[] TRUE = new byte[] { 0x1 };
-    private static final byte[] FALSE = new byte[0];
+    private static final byte[] FALSE = EMPTY_BYTE_ARRAY;
 
     public static String serialize(TupleType tupleType, Tuple tuple, boolean machine) {
         tupleType.validate(tuple);
@@ -148,7 +149,7 @@ public final class SuperSerial {
                         ? bytes
                         : Arrays.copyOfRange(bytes, 1, bytes.length);
         }
-        return Strings.EMPTY_BYTE_ARRAY;
+        return EMPTY_BYTE_ARRAY;
     }
 
     private static byte[] signExtendNegative(final byte[] negative, final int newWidth) {
@@ -185,7 +186,7 @@ public final class SuperSerial {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return serializeObjectArray((Object[]) arr, type.getElementType());
+        case TYPE_CODE_TUPLE: return serializeObjectArray(type.getElementType(), (Object[]) arr);
         default: throw new Error();
         }
     }
@@ -194,8 +195,8 @@ public final class SuperSerial {
         switch (type.getElementType().typeCode()) {
         case TYPE_CODE_BOOLEAN: return deserializeBooleanArray((RLPList) item);
         case TYPE_CODE_BYTE: return deserializeByteArray(item, type.isString());
-        case TYPE_CODE_INT: return deserializeIntArray((RLPList) item, (IntType) type.getElementType());
-        case TYPE_CODE_LONG: return deserializeLongArray((RLPList) item, (LongType) type.getElementType());
+        case TYPE_CODE_INT: return deserializeIntArray((IntType) type.getElementType(), (RLPList) item);
+        case TYPE_CODE_LONG: return deserializeLongArray((LongType) type.getElementType(), (RLPList) item);
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
@@ -213,7 +214,7 @@ public final class SuperSerial {
     }
 
     private static boolean[] deserializeBooleanArray(RLPList list) {
-        List<RLPItem> elements = list.elements(RLP_STRICT);
+        final List<RLPItem> elements = list.elements(RLP_STRICT);
         boolean[] in = new boolean[elements.size()];
         for (int i = 0; i < in.length; i++) {
             in[i] = elements.get(i).asBoolean();
@@ -237,9 +238,9 @@ public final class SuperSerial {
         return out;
     }
 
-    private static int[] deserializeIntArray(RLPList list, IntType type) {
+    private static int[] deserializeIntArray(IntType type, RLPList list) {
         final List<RLPItem> elements = list.elements(RLP_STRICT);
-        final int[] in = new int[elements.size()];
+        int[] in = new int[elements.size()];
         for (int i = 0; i < in.length; i++) {
             in[i] = deserializeBigInteger(type, elements.get(i)).intValueExact();
         }
@@ -254,16 +255,16 @@ public final class SuperSerial {
         return out;
     }
 
-    private static long[] deserializeLongArray(RLPList list, LongType type) {
+    private static long[] deserializeLongArray(LongType type, RLPList list) {
         final List<RLPItem> elements = list.elements(RLP_STRICT);
-        final long[] in = new long[elements.size()];
+        long[] in = new long[elements.size()];
         for (int i = 0; i < in.length; i++) {
             in[i] = deserializeBigInteger(type, elements.get(i)).longValueExact();
         }
         return in;
     }
 
-    private static Object[] serializeObjectArray(Object[] objects, ABIType<?> elementType) {
+    private static Object[] serializeObjectArray(ABIType<?> elementType, Object[] objects) {
         Object[] out = new Object[objects.length];
         for (int i = 0; i < objects.length; i++) {
             out[i] = serialize(elementType, objects[i]);
@@ -272,7 +273,7 @@ public final class SuperSerial {
     }
 
     private static Object[] deserializeObjectArray(ABIType<?> elementType, RLPList list) {
-        List<RLPItem> elements = list.elements(RLP_STRICT);
+        final List<RLPItem> elements = list.elements(RLP_STRICT);
         Object[] in = (Object[]) Array.newInstance(elementType.clazz(), elements.size()); // reflection ftw
         for (int i = 0; i < in.length; i++) {
             in[i] = deserialize(elementType, elements.get(i));
