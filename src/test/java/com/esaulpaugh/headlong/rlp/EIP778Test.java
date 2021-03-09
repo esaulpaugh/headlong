@@ -130,7 +130,7 @@ public class EIP778Test {
                 })
         );
         assertThrown(
-                IllegalArgumentException.class,
+                RuntimeException.class,
                 "signer specifies negative signature length",
                 () -> new Record(0x07, new ArrayList<>(), new Record.Signer() {
                     @Override
@@ -195,6 +195,32 @@ public class EIP778Test {
         assertEquals(ENR_STRING, record.toString());
 
         assertEquals(record, Record.parse(record.toString(), VERIFIER));
+    }
+
+    @Test
+    public void testZeroLenSig() {
+        final long seq = 1L;
+        final List<KeyValuePair> pairs = Arrays.asList(
+                new KeyValuePair(IP, "7f000001", HEX),
+                new KeyValuePair(UDP, "765f", HEX),
+                new KeyValuePair(ID, "v4", UTF_8),
+                new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
+        );
+        final Record record = new Record(seq, pairs, new Record.Signer() {
+            @Override
+            public int signatureLength() {
+                return 0;
+            }
+
+            @Override
+            public byte[] sign(byte[] message, int off, int len) {
+                return new byte[0];
+            }
+        });
+        System.out.println(record.getSignature());
+        for(RLPItem it : record.getContent()) {
+            System.out.println(it);
+        }
     }
 
     @Test

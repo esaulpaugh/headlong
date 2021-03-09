@@ -40,7 +40,7 @@ public final class Record {
         }
         final int signatureLen = signer.signatureLength();
         if(signatureLen < 0) {
-            throw new IllegalArgumentException("signer specifies negative signature length");
+            throw new RuntimeException("signer specifies negative signature length");
         }
         final int contentDataLen = RLPEncoder.measureEncodedLen(seq) + RLPEncoder.dataLen(pairs); // content list prefix not included
         final int recordDataLen = RLPEncoder.itemLen(signatureLen) + contentDataLen;
