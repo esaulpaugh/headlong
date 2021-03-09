@@ -47,18 +47,16 @@ public final class Record {
         final int recordLen = RLPEncoder.itemLen(recordDataLen);
         checkRecordLen(recordLen);
 
-        final ByteBuffer record = ByteBuffer.allocate(recordLen);
-        RLPEncoder.insertListPrefix(recordDataLen, record);
-        final int signatureStart = record.position();
-
         final int contentLen = RLPEncoder.itemLen(contentDataLen);
         final int contentOffset = recordLen - contentLen;
-        record.position(contentOffset);
-        RLPEncoder.insertRecordContent(contentDataLen, seq, pairs, record);
 
-        record.position(signatureStart); // end of signature will overwrite content list prefix
+        final ByteBuffer record = ByteBuffer.allocate(recordLen);
+        RLPEncoder.insertRecordContent(contentDataLen, seq, pairs, record.position(contentOffset));
+
         byte[] recordArr = record.array();
-        RLPEncoder.encodeItem(signer.sign(recordArr, contentOffset, contentLen), record);
+        byte[] signature = signer.sign(recordArr, contentOffset, contentLen);
+        RLPEncoder.encodeItem(signature, record.position(recordLen - recordDataLen)); // end of signature will overwrite content list prefix
+        RLPEncoder.insertListPrefix(recordDataLen, record.position(0));
         return recordArr;
     }
 
