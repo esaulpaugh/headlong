@@ -55,12 +55,14 @@ public final class Record {
         RLPEncoder.insertRecordContent(contentDataLen, seq, pairs, record);
 
         byte[] recordArr = record.array();
+        // caution: signer can modify content bytes before or after signing
         byte[] signature = signer.sign(recordArr, contentOffset, contentLen);
         if(signature.length != signatureLen) {
             throw new RuntimeException("incorrect signature length: " + signature.length + " != " + signatureLen);
         }
+        // content list prefix will be overwritten after signing
         record.position(recordLen - recordDataLen);
-        RLPEncoder.encodeItem(signature, record); // end of signature will overwrite content list prefix
+        RLPEncoder.encodeItem(signature, record);
         record.position(0);
         RLPEncoder.insertListPrefix(recordDataLen, record);
         return recordArr;
