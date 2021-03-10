@@ -34,7 +34,7 @@ public final class Record {
 
     private final RLPList rlp;
 
-    public static byte[] encode(final long seq, List<KeyValuePair> pairs, Signer signer) {
+    public static ByteBuffer encode(final long seq, List<KeyValuePair> pairs, Signer signer) {
         if(seq < 0) {
             throw new IllegalArgumentException("negative seq");
         }
@@ -60,11 +60,11 @@ public final class Record {
         final ByteBuffer record = ByteBuffer.wrap(recordArr);
         RLPEncoder.insertListPrefix(recordDataLen, record);
         RLPEncoder.encodeItem(signature, record);
-        return record.array();
+        return record;
     }
 
     public Record(final long seq, List<KeyValuePair> pairs, Signer signer) {
-        this.rlp = RLP_STRICT.wrapList(encode(seq, pairs, signer));
+        this.rlp = RLP_STRICT.wrapList(encode(seq, pairs, signer).array());
     }
 
     private Record(RLPList recordRLP) { // validate before calling
