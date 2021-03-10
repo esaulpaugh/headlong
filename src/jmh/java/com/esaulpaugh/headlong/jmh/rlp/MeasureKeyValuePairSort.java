@@ -15,7 +15,7 @@
 */
 package com.esaulpaugh.headlong.jmh.rlp;
 
-import com.esaulpaugh.headlong.rlp.KeyValuePair;
+import com.esaulpaugh.headlong.rlp.KVP;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -44,9 +44,9 @@ public class MeasureKeyValuePairSort {
 
     final Random rand = new Random();
 
-    final KeyValuePair[] array = new KeyValuePair[SIZE];
-    final List<KeyValuePair> arrayList = new ArrayList<>();
-    List<KeyValuePair> arraysArrayList;
+    final KVP[] array = new KVP[SIZE];
+    final List<KVP> arrayList = new ArrayList<>();
+    List<KVP> arraysArrayList;
 
     @Setup(Level.Invocation)
     public void init() {
@@ -60,7 +60,7 @@ public class MeasureKeyValuePairSort {
             value = new byte[rand.nextInt(VALUE_LEN_BOUND)];
             rand.nextBytes(key);
             rand.nextBytes(value);
-            KeyValuePair pair = new KeyValuePair(key, value);
+            KVP pair = new KVP(key, value);
             array[i] = pair;
             arrayList.add(pair);
         }
@@ -73,7 +73,7 @@ public class MeasureKeyValuePairSort {
     @Warmup(iterations = 1)
     @Measurement(iterations = THREE)
     public void sortArray() {
-        Arrays.sort(array, KeyValuePair.PAIR_COMPARATOR);
+        Arrays.sort(array, KVP.PAIR_COMPARATOR);
     }
 
     @Benchmark
@@ -82,7 +82,7 @@ public class MeasureKeyValuePairSort {
     @Warmup(iterations = 1)
     @Measurement(iterations = THREE)
     public void sortArrayList() {
-        arrayList.sort(KeyValuePair.PAIR_COMPARATOR);
+        arrayList.sort(KVP.PAIR_COMPARATOR);
     }
 
     @Benchmark
@@ -91,6 +91,6 @@ public class MeasureKeyValuePairSort {
     @Warmup(iterations = 1)
     @Measurement(iterations = THREE)
     public void sortArraysArrayList() {
-        arraysArrayList.sort(KeyValuePair.PAIR_COMPARATOR);
+        arraysArrayList.sort(KVP.PAIR_COMPARATOR);
     }
 }

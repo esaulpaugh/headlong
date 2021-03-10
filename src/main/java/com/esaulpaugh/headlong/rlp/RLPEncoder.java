@@ -34,9 +34,9 @@ public final class RLPEncoder {
     private RLPEncoder() {}
 
 // -------------- made visibile to Record -------------------------------------------------------------------------------
-    static int payloadLen(long seq, List<KeyValuePair> pairs) {
+    static int payloadLen(long seq, List<KVP> pairs) {
         long sum = stringEncodedLen(Integers.toBytes(seq));
-        for (KeyValuePair pair : pairs) {
+        for (KVP pair : pairs) {
             sum += pair.length();
         }
         return requireNoOverflow(sum);
@@ -60,13 +60,13 @@ public final class RLPEncoder {
      * @see java.util.ArrayList#sort(Comparator)
      * @see java.util.Arrays.ArrayList#sort(Comparator)
      */
-    static byte[] encodeRecordContent(int dataLen, long seq, List<KeyValuePair> pairs) {
-        pairs.sort(KeyValuePair.PAIR_COMPARATOR); // note that ArrayList overrides List.sort
+    static byte[] encodeRecordContent(int dataLen, long seq, List<KVP> pairs) {
+        pairs.sort(KVP.PAIR_COMPARATOR); // note that ArrayList overrides List.sort
         byte[] arr = new byte[itemLen(dataLen)];
         ByteBuffer bb = ByteBuffer.wrap(arr);
         insertListPrefix(dataLen, bb);
         encodeString(Integers.toBytes(seq), bb);
-        for (KeyValuePair pair : pairs) {
+        for (KVP pair : pairs) {
             pair.export(bb);
         }
         return arr;

@@ -28,7 +28,7 @@ import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
  *
  * @see Record
  */
-public final class KeyValuePair implements Comparable<KeyValuePair> {
+public final class KVP implements Comparable<KVP> {
 
     public static final String ID = "id";
     public static final String SECP256K1 = "secp256k1";
@@ -44,38 +44,38 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
     private final int keyDataIdx;
     private final int length;
 
-    public KeyValuePair(String keyUtf8, String val, int valEncoding) {
+    public KVP(String keyUtf8, String val, int valEncoding) {
         this(keyUtf8, Strings.decode(val, valEncoding));
     }
 
-    public KeyValuePair(String keyUtf8, byte[] rawVal) {
+    public KVP(String keyUtf8, byte[] rawVal) {
         this(Strings.decode(keyUtf8, Strings.UTF_8), rawVal);
     }
 
-    public KeyValuePair(byte[] key, byte[] value) {
+    public KVP(byte[] key, byte[] value) {
         this.k = RLPEncoder.encodeString(key);
         this.v = RLPEncoder.encodeString(value);
         this.keyDataIdx = keyItem().dataIndex;
         this.length = k.length + v.length;
     }
 
-    public KeyValuePair(RLPItem key, RLPItem value) {
+    public KVP(RLPItem key, RLPItem value) {
         this(key.encoding(), value.encoding(), key.dataIndex);
     }
 
-    private KeyValuePair(KeyValuePair p, byte[] value) {
+    private KVP(KVP p, byte[] value) {
         this(p.k, RLPEncoder.encodeString(value), p.keyDataIdx);
     }
 
-    private KeyValuePair(byte[] k, byte[] v, int i) {
+    private KVP(byte[] k, byte[] v, int i) {
         this.k = k;
         this.v = v;
         this.keyDataIdx = i;
         this.length = k.length + v.length;
     }
 
-    public KeyValuePair withValue(byte[] value) {
-        return new KeyValuePair(this, value);
+    public KVP withValue(byte[] value) {
+        return new KVP(this, value);
     }
 
     public String key() {
@@ -105,7 +105,7 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
 
     @Override
     public boolean equals(Object o) {
-        return (this == o) || (o instanceof KeyValuePair && Arrays.equals(((KeyValuePair) o).k, this.k));
+        return (this == o) || (o instanceof KVP && Arrays.equals(((KVP) o).k, this.k));
     }
 
     @Override
@@ -114,11 +114,11 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
     }
 
     @Override
-    public int compareTo(KeyValuePair other) {
+    public int compareTo(KVP other) {
         return PAIR_COMPARATOR.compare(this, other);
     }
 
-    public static final Comparator<KeyValuePair> PAIR_COMPARATOR = (pa, pb) -> {
+    public static final Comparator<KVP> PAIR_COMPARATOR = (pa, pb) -> {
         byte[] a = pa.k;
         byte[] b = pb.k;
         if(a != b) {

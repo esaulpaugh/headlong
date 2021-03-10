@@ -30,11 +30,11 @@ import java.util.Random;
 import java.util.Set;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.rlp.KeyValuePair.ID;
-import static com.esaulpaugh.headlong.rlp.KeyValuePair.IP;
-import static com.esaulpaugh.headlong.rlp.KeyValuePair.PAIR_COMPARATOR;
-import static com.esaulpaugh.headlong.rlp.KeyValuePair.SECP256K1;
-import static com.esaulpaugh.headlong.rlp.KeyValuePair.UDP;
+import static com.esaulpaugh.headlong.rlp.KVP.ID;
+import static com.esaulpaugh.headlong.rlp.KVP.IP;
+import static com.esaulpaugh.headlong.rlp.KVP.PAIR_COMPARATOR;
+import static com.esaulpaugh.headlong.rlp.KVP.SECP256K1;
+import static com.esaulpaugh.headlong.rlp.KVP.UDP;
 import static com.esaulpaugh.headlong.util.Strings.EMPTY_BYTE_ARRAY;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
@@ -183,8 +183,8 @@ public class EIP778Test {
                 String b = generateASCIIString(j, r);
                 if(!a.equals(b)) {
                     int str = a.compareTo(b) < 0 ? 0 : 1;
-                    KeyValuePair pairA = new KeyValuePair(a, EMPTY_BYTE_ARRAY);
-                    KeyValuePair pairB = new KeyValuePair(b, EMPTY_BYTE_ARRAY);
+                    KVP pairA = new KVP(a, EMPTY_BYTE_ARRAY);
+                    KVP pairB = new KVP(b, EMPTY_BYTE_ARRAY);
                     int pair = pairA.compareTo(pairB) < 0 ? 0 : 1;
                     assertEquals(str, pair, pairA + " " + pairB);
                 }
@@ -203,14 +203,14 @@ public class EIP778Test {
     @Test
     public void testEip778() throws SignatureException {
         final long seq = 1L;
-        final List<KeyValuePair> pairs = Arrays.asList(
-                new KeyValuePair(IP, "7f000001", HEX),
-                new KeyValuePair(UDP, "765f", HEX),
-                new KeyValuePair(ID, "v4", UTF_8),
-                new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
+        final List<KVP> pairs = Arrays.asList(
+                new KVP(IP, "7f000001", HEX),
+                new KVP(UDP, "765f", HEX),
+                new KVP(ID, "v4", UTF_8),
+                new KVP(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
         );
-        final KeyValuePair[] empty = new KeyValuePair[0];
-        final KeyValuePair[] array = pairs.toArray(empty);
+        final KVP[] empty = new KVP[0];
+        final KVP[] array = pairs.toArray(empty);
 
         final Record record = new Record(SIGNER, seq, pairs);
 
@@ -232,7 +232,7 @@ public class EIP778Test {
 
         Arrays.sort(array);
 
-        List<KeyValuePair> pairList = record.getPairs();
+        List<KVP> pairList = record.getPairs();
 
         assertArrayEquals(array, record.getPairs().toArray(empty));
 
@@ -243,15 +243,15 @@ public class EIP778Test {
 
         assertEquals(seq, record.visit((k, v) -> {}));
 
-        final Iterator<KeyValuePair> listIter = pairList.iterator();
+        final Iterator<KVP> listIter = pairList.iterator();
         final Iterator<Map.Entry<String, byte[]>> mapIter = map.entrySet().iterator();
         int i = 0;
         while (contentIter.hasNext() || listIter.hasNext() || mapIter.hasNext()) {
-            final KeyValuePair expected = array[i];
-            testEqual(expected, new KeyValuePair(contentIter.next(), contentIter.next()));
+            final KVP expected = array[i];
+            testEqual(expected, new KVP(contentIter.next(), contentIter.next()));
             testEqual(expected, listIter.next());
             Map.Entry<String, byte[]> e = mapIter.next();
-            testEqual(expected, new KeyValuePair(e.getKey(), e.getValue()));
+            testEqual(expected, new KVP(e.getKey(), e.getValue()));
             testEqual(expected, expected.withValue(expected.value().asBytes()));
             i++;
         }
@@ -260,7 +260,7 @@ public class EIP778Test {
         assertEquals(record, Record.parse(record.toString(), VERIFIER));
     }
 
-    private static void testEqual(KeyValuePair a, KeyValuePair b) {
+    private static void testEqual(KVP a, KVP b) {
         assertNotSame(a, b);
         assertEquals(a, b);
     }
@@ -279,10 +279,10 @@ public class EIP778Test {
                     }
                 },
                 1L,
-                new KeyValuePair(IP, "7f000001", HEX),
-                new KeyValuePair(UDP, "765f", HEX),
-                new KeyValuePair(ID, "v4", UTF_8),
-                new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
+                new KVP(IP, "7f000001", HEX),
+                new KVP(UDP, "765f", HEX),
+                new KVP(ID, "v4", UTF_8),
+                new KVP(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
         );
         System.out.println(record.getSignature());
         for(RLPItem it : record.getContent()) {
@@ -306,19 +306,19 @@ public class EIP778Test {
                             }
                         },
                         90L,
-                        new KeyValuePair(IP, "7f000001", HEX),
-                        new KeyValuePair(UDP, "765f", HEX),
-                        new KeyValuePair(ID, "v4", UTF_8),
-                        new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)));
+                        new KVP(IP, "7f000001", HEX),
+                        new KVP(UDP, "765f", HEX),
+                        new KVP(ID, "v4", UTF_8),
+                        new KVP(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)));
     }
 
     @Test
     public void testDuplicateKeys() throws Throwable {
         byte[] keyBytes = new byte[0];
-        final List<KeyValuePair> pairs = Arrays.asList(new KeyValuePair(keyBytes, new byte[0]), new KeyValuePair(keyBytes, new byte[1]));
+        final List<KVP> pairs = Arrays.asList(new KVP(keyBytes, new byte[0]), new KVP(keyBytes, new byte[1]));
         assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs.sort(PAIR_COMPARATOR));
 
-        final List<KeyValuePair> pairs2 = Arrays.asList(new KeyValuePair(new byte[] { 2 }, new byte[0]), new KeyValuePair(new byte[] { 2 }, new byte[1]));
+        final List<KVP> pairs2 = Arrays.asList(new KVP(new byte[] { 2 }, new byte[0]), new KVP(new byte[] { 2 }, new byte[1]));
         assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs2.sort(PAIR_COMPARATOR));
     }
 
@@ -345,15 +345,15 @@ public class EIP778Test {
     public void testDuplicateKey() throws Throwable {
         long seq = 3L;
 
-        final List<KeyValuePair> pairs = Arrays.asList(
-                new KeyValuePair(IP, "7f000001", HEX),
-                new KeyValuePair(UDP, "765f", HEX),
-                new KeyValuePair(ID, "v4", UTF_8),
-                new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX),
-                new KeyValuePair(UDP, "0000", HEX)
+        final List<KVP> pairs = Arrays.asList(
+                new KVP(IP, "7f000001", HEX),
+                new KVP(UDP, "765f", HEX),
+                new KVP(ID, "v4", UTF_8),
+                new KVP(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX),
+                new KVP(UDP, "0000", HEX)
         );
 
-        for (KeyValuePair p : pairs) {
+        for (KVP p : pairs) {
             System.out.println(p);
         }
 

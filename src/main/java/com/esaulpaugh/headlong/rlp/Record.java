@@ -39,11 +39,11 @@ public final class Record {
 
     private final RLPList rlp;
 
-    public static ByteBuffer encode(Signer signer, long seq, KeyValuePair... pairs) {
+    public static ByteBuffer encode(Signer signer, long seq, KVP... pairs) {
         return encode(signer, seq, Arrays.asList(pairs));
     }
 
-    public static ByteBuffer encode(Signer signer, final long seq, List<KeyValuePair> pairs) {
+    public static ByteBuffer encode(Signer signer, final long seq, List<KVP> pairs) {
         if(seq < 0) {
             throw new IllegalArgumentException("negative seq");
         }
@@ -71,11 +71,11 @@ public final class Record {
         return bb;
     }
 
-    public Record(Signer signer, long seq, KeyValuePair... pairs) {
+    public Record(Signer signer, long seq, KVP... pairs) {
         this(signer, seq, Arrays.asList(pairs));
     }
 
-    public Record(Signer signer, long seq, List<KeyValuePair> pairs) {
+    public Record(Signer signer, long seq, List<KVP> pairs) {
         this.rlp = RLP_STRICT.wrapList(encode(signer, seq, pairs).array());
     }
 
@@ -130,9 +130,9 @@ public final class Record {
         return iter.next().asLong();
     }
 
-    public List<KeyValuePair> getPairs() {
-        List<KeyValuePair> list = new ArrayList<>();
-        visit((k, v) -> list.add(new KeyValuePair(k, v)));
+    public List<KVP> getPairs() {
+        List<KVP> list = new ArrayList<>();
+        visit((k, v) -> list.add(new KVP(k, v)));
         return list;
     }
 
