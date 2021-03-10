@@ -110,7 +110,7 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
 
     @Override
     public String toString() {
-        return key() + " --> " + value();
+        return key() + " --> " + value().asString(Strings.HEX);
     }
 
     @Override
