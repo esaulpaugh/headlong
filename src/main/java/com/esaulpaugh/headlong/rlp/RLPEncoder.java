@@ -124,7 +124,6 @@ public final class RLPEncoder {
         return itemLen(sumEncodedLen(items));
     }
 
-    // visible to Record
     private static void encodeItem(Object raw, ByteBuffer bb) {
         if (raw instanceof byte[]) {
             encodeString((byte[]) raw, bb);
@@ -141,6 +140,7 @@ public final class RLPEncoder {
         }
     }
 
+    // visible to Record
     static void encodeString(byte[] data, ByteBuffer bb) {
         final int dataLen = data.length;
         if (dataLen == 1) {
