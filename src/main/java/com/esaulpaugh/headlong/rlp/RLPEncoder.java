@@ -35,7 +35,7 @@ public final class RLPEncoder {
 
 // -------------- made visibile to Record -------------------------------------------------------------------------------
     static int payloadLen(long seq, List<KeyValuePair> pairs) {
-        long sum = stringEncodedLen(Integers.toBytes(seq));;
+        long sum = stringEncodedLen(Integers.toBytes(seq));
         for (KeyValuePair pair : pairs) {
             sum += pair.length();
         }
