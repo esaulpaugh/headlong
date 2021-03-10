@@ -17,10 +17,11 @@ package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.util.Strings;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import static com.esaulpaugh.headlong.util.Strings.UTF_8;
+import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 
 /**
  * As per EIP-778.
@@ -30,24 +31,24 @@ import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 public final class KeyValuePair implements Comparable<KeyValuePair> {
 
     public static final Comparator<KeyValuePair> PAIR_COMPARATOR = (pa, pb) -> {
-        byte[] a = pa.key;
-        byte[] b = pb.key;
+        byte[] a = pa.k;
+        byte[] b = pb.k;
         if(a != b) {
-            int i = 0;
-            final int len = Math.min(a.length, b.length);
-            boolean mismatch;
-            for (mismatch = false; i < len; i++) {
-                if (a[i] != b[i]) {
-                    mismatch = true;
+            final int aOff = pa.keyDataIdx;
+            final int bOff = pb.keyDataIdx;
+            final int len = Math.min(a.length - aOff, b.length - bOff);
+            int i;
+            for (i = 0; i < len; i++) {
+                if (a[aOff + i] != b[bOff + i]) {
                     break;
                 }
             }
-            int result = mismatch ? a[i] - b[i] : a.length - b.length;
-            if(result != 0) {
+            int result = i < len ? a[aOff + i] - b[bOff + i] : (a.length - aOff) - (b.length - bOff);
+            if (result != 0) {
                 return result;
             }
         }
-        throw new IllegalArgumentException("duplicate key: " + Strings.encode(a, UTF_8));
+        throw new IllegalArgumentException("duplicate key: " + pa.key());
     };
 
     public static final String ID = "id";
@@ -59,40 +60,74 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
     public static final String TCP6 = "tcp6";
     public static final String UDP6 = "udp6";
 
-    private final byte[] key;
-    private final byte[] value;
+    private final byte[] k;
+    private final byte[] v;
+    private final int keyDataIdx;
+    private final int length;
 
-    public KeyValuePair(String key, String value, int valueEncoding) {
-        this.key = Strings.decode(key, UTF_8);
-        this.value = Strings.decode(value, valueEncoding);
+    public KeyValuePair(String keyUtf8, String rawVal, int valueEncoding) {
+        this(Strings.decode(keyUtf8, Strings.UTF_8), Strings.decode(rawVal, valueEncoding));
     }
 
     public KeyValuePair(byte[] key, byte[] value) {
-        this.key = Arrays.copyOf(key, key.length);
-        this.value = Arrays.copyOf(value, value.length);
+        this.k = RLPEncoder.encodeString(key);
+        this.v = RLPEncoder.encodeString(value);
+        this.keyDataIdx = keyItem().dataIndex;
+        this.length = k.length + v.length;
     }
 
-    public byte[] getKey() {
-        return Arrays.copyOf(key, key.length);
+    public KeyValuePair(RLPItem key, RLPItem value) {
+        this(key.encoding(), value.encoding(), key.dataIndex);
     }
 
-    public byte[] getValue() {
-        return Arrays.copyOf(value, value.length);
+    private KeyValuePair(KeyValuePair p, byte[] value) {
+        this(p.k, RLPEncoder.encodeString(value), p.keyDataIdx);
+    }
+
+    private KeyValuePair(byte[] k, byte[] v, int i) {
+        this.k = k;
+        this.v = v;
+        this.keyDataIdx = i;
+        this.length = k.length + v.length;
+    }
+
+    public KeyValuePair withValue(byte[] value) {
+        return new KeyValuePair(this, value);
+    }
+
+    public String key() {
+        return keyItem().asString(Strings.UTF_8);
+    }
+
+    public RLPString keyItem() {
+        return RLP_STRICT.wrapString(k);
+    }
+
+    public RLPString value() {
+        return RLP_STRICT.wrapString(v);
+    }
+
+    void export(ByteBuffer bb) {
+        bb.put(k).put(v);
+    }
+
+    int length() {
+        return length;
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(key);
+        return Arrays.hashCode(k);
     }
 
     @Override
     public boolean equals(Object o) {
-        return (this == o) || (o instanceof KeyValuePair && Arrays.equals(((KeyValuePair) o).key, this.key));
+        return (this == o) || (o instanceof KeyValuePair && Arrays.equals(((KeyValuePair) o).k, this.k));
     }
 
     @Override
     public String toString() {
-        return Strings.encode(key, UTF_8) + " --> " + Strings.encode(value, Strings.HEX);
+        return key() + " --> " + value();
     }
 
     @Override

@@ -260,9 +260,9 @@ public class RLPDecoderTest {
     @Test
     public void duplicate() {
         RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
-        assertEquals(rlpList, rlpList.duplicate(RLP_STRICT));
+        assertEquals(rlpList, rlpList.duplicate());
         RLPString rlpString = RLP_STRICT.wrapString((byte) 0x00);
-        assertEquals(rlpString, rlpString.duplicate(RLP_STRICT));
+        assertEquals(rlpString, rlpString.duplicate());
 
         assertTrue(rlpString.isString());
         assertFalse(rlpString.isList());

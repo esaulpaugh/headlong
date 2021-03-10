@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
@@ -43,8 +44,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EIP778Test {
-
-    private static final String ENR_STRING = "enr:-IS4QHCYrYZbAKWCBRlAy5zzaDZXJBGkcnh4MHcBFZntXNFrdvJjX04jRzjzCBOonrkTfj499SZuOh8R33Ls8RRcy5wBgmlkgnY0gmlwhH8AAAGJc2VjcDI1NmsxoQPKY0yuDUmstAHYpMa2_oxVtw0RW_QAdpzBQA8yWM0xOIN1ZHCCdl8";
 
     static final byte[] SIG = FastHex.decode(
             "7098ad865b00a582051940cb9cf36836572411a47278783077011599ed5cd16b"
@@ -64,9 +63,21 @@ public class EIP778Test {
         }
     };
 
+    private static final String ENR_STRING = "enr:-IS4QHCYrYZbAKWCBRlAy5zzaDZXJBGkcnh4MHcBFZntXNFrdvJjX04jRzjzCBOonrkTfj499SZuOh8R33Ls8RRcy5wBgmlkgnY0gmlwhH8AAAGJc2VjcDI1NmsxoQPKY0yuDUmstAHYpMa2_oxVtw0RW_QAdpzBQA8yWM0xOIN1ZHCCdl8";
+
     private static final Record.Verifier VERIFIER = (s,c) -> {
         if(!Arrays.equals(s, SIG)) throw new SignatureException();
     };
+
+    private static final String RECORD_HEX;
+
+    static {
+        try {
+            RECORD_HEX = Strings.encode(Record.parse(ENR_STRING, VERIFIER).getRLP().encoding());
+        } catch (SignatureException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private static final Record VECTOR;
 
@@ -165,6 +176,33 @@ public class EIP778Test {
     }
 
     @Test
+    public void testSort() {
+        final String val = "";
+        Random r = TestUtils.seededRandom();
+        for (int i = 0; i < 50; i++) {
+            for (int j = 0; j < 50; j++) {
+                String a = generateASCIIString(j, r);
+                String b = generateASCIIString(j, r);
+                if(!a.equals(b)) {
+                    int str = a.compareTo(b) < 0 ? 0 : 1;
+                    KeyValuePair pairA = new KeyValuePair(a, val, HEX);
+                    KeyValuePair pairB = new KeyValuePair(b, val, HEX);
+                    int pair = pairA.compareTo(pairB) < 0 ? 0 : 1;
+                    assertEquals(str, pair, pairA + " " + pairB);
+                }
+            }
+        }
+    }
+
+    private static String generateASCIIString(final int len, Random r) {
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < len; i++) {
+            sb.append((char) (r.nextInt(95) + 32));
+        }
+        return sb.toString();
+    }
+
+    @Test
     public void testEip778() throws SignatureException {
         final long seq = 1L;
         final List<KeyValuePair> pairs = Arrays.asList(
@@ -177,6 +215,8 @@ public class EIP778Test {
         final KeyValuePair[] array = pairs.toArray(empty);
 
         final Record record = new Record(seq, pairs, SIGNER);
+
+        assertEquals(RECORD_HEX, record.getRLP().encodingString(HEX));
 
         assertEquals(VECTOR.getSignature(), record.getSignature());
         assertEquals(VECTOR.getContent(), record.getContent());
@@ -219,7 +259,7 @@ public class EIP778Test {
 
     private static LinkedHashSet<KeyValuePair> getPayload(Record r) {
         LinkedHashSet<KeyValuePair> set = new LinkedHashSet<>();
-        r.visit((k, v) -> set.add(new KeyValuePair(k.asBytes(), v.asBytes())));
+        r.visit((k, v) -> set.add(new KeyValuePair(k, v)));
         return set;
     }
 

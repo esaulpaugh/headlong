@@ -22,6 +22,10 @@ public final class RLPString extends RLPItem {
         super(lead, type, buffer, index, containerEnd, lenient);
     }
 
+    RLPString(RLPString o) {
+        super(o);
+    }
+
     @Override
     public boolean isString() {
         return true;
@@ -42,9 +46,9 @@ public final class RLPString extends RLPItem {
         throw new ClassCastException("not an " + RLPList.class.getSimpleName());
     }
 
-    /** @see RLPItem#duplicate(RLPDecoder) */
+    /** @see RLPItem#duplicate() */
     @Override
-    public RLPString duplicate(RLPDecoder decoder) {
-        return decoder.wrapString(encoding());
+    public RLPString duplicate() {
+        return new RLPString(this);
     }
 }

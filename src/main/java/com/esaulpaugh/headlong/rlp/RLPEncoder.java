@@ -34,16 +34,12 @@ public final class RLPEncoder {
     private RLPEncoder() {}
 
 // -------------- made visibile to Record -------------------------------------------------------------------------------
-    static int dataLen(List<KeyValuePair> pairs) {
-        long sum = 0;
+    static int payloadLen(long seq, List<KeyValuePair> pairs) {
+        long sum = stringEncodedLen(Integers.toBytes(seq));;
         for (KeyValuePair pair : pairs) {
-            sum += stringEncodedLen(pair.getKey()) + stringEncodedLen(pair.getValue());
+            sum += pair.length();
         }
         return requireNoOverflow(sum);
-    }
-
-    static int measureEncodedLen(long val) {
-        return stringEncodedLen(Integers.toBytes(val));
     }
 
     static int itemLen(int dataLen) {
@@ -66,20 +62,16 @@ public final class RLPEncoder {
      */
     static byte[] encodeRecordContent(int dataLen, long seq, List<KeyValuePair> pairs) {
         pairs.sort(KeyValuePair.PAIR_COMPARATOR); // note that ArrayList overrides List.sort
-        ByteBuffer bb = ByteBuffer.allocate(itemLen(dataLen));
+        byte[] arr = new byte[itemLen(dataLen)];
+        ByteBuffer bb = ByteBuffer.wrap(arr);
         insertListPrefix(dataLen, bb);
         encodeString(Integers.toBytes(seq), bb);
         for (KeyValuePair pair : pairs) {
-            encodeKeyValuePair(pair, bb);
+            pair.export(bb);
         }
-        return bb.array();
+        return arr;
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    private static void encodeKeyValuePair(KeyValuePair pair, ByteBuffer bb) {
-        encodeString(pair.getKey(), bb);
-        encodeString(pair.getValue(), bb);
-    }
-
     private static int requireNoOverflow(long val) {
         if (val <= Integer.MAX_VALUE) {
             return (int) val;
