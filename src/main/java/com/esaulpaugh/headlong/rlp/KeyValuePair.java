@@ -44,12 +44,12 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
     private final int keyDataIdx;
     private final int length;
 
-    public KeyValuePair(String keyUtf8, byte[] rawVal) {
-        this(Strings.decode(keyUtf8, Strings.UTF_8), rawVal);
+    public KeyValuePair(String keyUtf8, String val, int valEncoding) {
+        this(keyUtf8, Strings.decode(val, valEncoding));
     }
 
-    public KeyValuePair(String keyUtf8, String val, int valEncoding) {
-        this(Strings.decode(keyUtf8, Strings.UTF_8), Strings.decode(val, valEncoding));
+    public KeyValuePair(String keyUtf8, byte[] rawVal) {
+        this(Strings.decode(keyUtf8, Strings.UTF_8), rawVal);
     }
 
     public KeyValuePair(byte[] key, byte[] value) {
