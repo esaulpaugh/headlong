@@ -35,6 +35,7 @@ import static com.esaulpaugh.headlong.rlp.KVP.IP;
 import static com.esaulpaugh.headlong.rlp.KVP.PAIR_COMPARATOR;
 import static com.esaulpaugh.headlong.rlp.KVP.SECP256K1;
 import static com.esaulpaugh.headlong.rlp.KVP.UDP;
+import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
 import static com.esaulpaugh.headlong.util.Strings.EMPTY_BYTE_ARRAY;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
@@ -247,12 +248,15 @@ public class EIP778Test {
         final Iterator<Map.Entry<String, byte[]>> mapIter = map.entrySet().iterator();
         int i = 0;
         while (contentIter.hasNext() || listIter.hasNext() || mapIter.hasNext()) {
-            final KVP expected = array[i];
-            testEqual(expected, new KVP(contentIter.next(), contentIter.next()));
-            testEqual(expected, listIter.next());
-            Map.Entry<String, byte[]> e = mapIter.next();
-            testEqual(expected, new KVP(e.getKey(), e.getValue()));
-            testEqual(expected, expected.withValue(expected.value().asBytes()));
+            final KVP e = array[i];
+            testEqual(e, new KVP(contentIter.next(), contentIter.next()));
+            testEqual(e, listIter.next());
+            Map.Entry<String, byte[]> entry = mapIter.next();
+            testEqual(e, new KVP(entry.getKey(), entry.getValue()));
+            testEqual(e, e.withValue(e.value().asBytes()));
+            testEqual(e, e.withValue(e.value().asString(HEX), HEX));
+            testEqual(e, e.withValue(e.value().asString(UTF_8), UTF_8));
+            testEqual(e, e.withValue(e.value().asString(BASE_64_URL_SAFE), BASE_64_URL_SAFE));
             i++;
         }
         assertEquals(ENR_STRING, record.toString());

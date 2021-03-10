@@ -74,12 +74,12 @@ public final class KVP implements Comparable<KVP> {
         this.length = k.length + v.length;
     }
 
-    public KVP withValue(byte[] value) {
-        return new KVP(this, value);
+    public KVP withValue(String val, int valEncoding) {
+        return withValue(Strings.decode(val, valEncoding));
     }
 
-    public KVP withValue(String val, int valEncoding) {
-        return new KVP(this, Strings.decode(val, valEncoding));
+    public KVP withValue(byte[] value) {
+        return new KVP(this, value);
     }
 
     public String key() {
