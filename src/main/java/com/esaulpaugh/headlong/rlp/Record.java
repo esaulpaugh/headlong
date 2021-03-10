@@ -19,8 +19,11 @@ import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
 import java.security.SignatureException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
@@ -116,6 +119,18 @@ public final class Record {
         Iterator<RLPItem> iter = rlp.iterator();
         iter.next(); // skip signature
         return iter.next().asLong();
+    }
+
+    public List<KeyValuePair> getPairs() {
+        List<KeyValuePair> list = new ArrayList<>();
+        visit((k, v) -> list.add(new KeyValuePair(k, v)));
+        return list;
+    }
+
+    public Map<String, byte[]> map() {
+        Map<String, byte[]> map = new LinkedHashMap<>();
+        visit((k, v) -> map.put(k.asString(Strings.UTF_8), v.asBytes()));
+        return map;
     }
 
     /**

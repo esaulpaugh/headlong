@@ -42,6 +42,7 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 public class EIP778Test {
 
@@ -227,29 +228,34 @@ public class EIP778Test {
 
         RLPList content = record.getContent();
         System.out.println("verified = " + content);
-        Iterator<RLPItem> rlpIter = content.iterator(RLPDecoder.RLP_STRICT);
+        final Iterator<RLPItem> contentIter = content.iterator(RLPDecoder.RLP_STRICT);
 
         assertEquals(seq, record.getSeq());
-        assertEquals(seq, rlpIter.next().asLong());
+        assertEquals(seq, contentIter.next().asLong());
 
         Arrays.sort(array);
 
-        assertArrayEquals(array, getPayload(record).toArray(empty));
+        List<KeyValuePair> pairList = record.getPairs();
 
-        LinkedHashMap<String, byte[]> map = new LinkedHashMap<>();
-        long seq2 = record.visit((k, v) -> map.put(k.asString(UTF_8), v.asBytes()));
-        assertEquals(seq, seq2);
+        assertArrayEquals(array, record.getPairs().toArray(empty));
 
-        assertArrayEquals(map.get(ID), Strings.decode("v4", UTF_8));
-        assertArrayEquals(map.get(SECP256K1), Strings.decode("03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138"));
+        Map<String, byte[]> map = record.map();
+        assertArrayEquals(Strings.decode("765f"), record.map().get(UDP));
+        assertArrayEquals(Strings.decode("v4", UTF_8), map.get(ID));
+        assertArrayEquals(Strings.decode("03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138"), map.get(SECP256K1));
 
+        assertEquals(seq, record.visit((k, v) -> {}));
+
+        final Iterator<KeyValuePair> listIter = pairList.iterator();
         final Iterator<Map.Entry<String, byte[]>> mapIter = map.entrySet().iterator();
         int i = 0;
-        while (rlpIter.hasNext()) {
+        while (contentIter.hasNext() || listIter.hasNext() || mapIter.hasNext()) {
             final KeyValuePair expected = array[i];
-            assertEquals(expected, new KeyValuePair(rlpIter.next().asBytes(), rlpIter.next().asBytes()));
+            testEqual(expected, new KeyValuePair(contentIter.next().asBytes(), contentIter.next().asBytes()));
+            testEqual(expected, listIter.next());
             Map.Entry<String, byte[]> e = mapIter.next();
-            assertEquals(expected, new KeyValuePair(Strings.decode(e.getKey(), UTF_8), e.getValue()));
+            testEqual(expected, new KeyValuePair(Strings.decode(e.getKey(), UTF_8), e.getValue()));
+            testEqual(expected, expected.withValue(expected.value().asBytes()));
             i++;
         }
         assertEquals(ENR_STRING, record.toString());
@@ -257,10 +263,9 @@ public class EIP778Test {
         assertEquals(record, Record.parse(record.toString(), VERIFIER));
     }
 
-    private static LinkedHashSet<KeyValuePair> getPayload(Record r) {
-        LinkedHashSet<KeyValuePair> set = new LinkedHashSet<>();
-        r.visit((k, v) -> set.add(new KeyValuePair(k, v)));
-        return set;
+    private static void testEqual(KeyValuePair a, KeyValuePair b) {
+        assertNotSame(a, b);
+        assertEquals(a, b);
     }
 
     @Test
