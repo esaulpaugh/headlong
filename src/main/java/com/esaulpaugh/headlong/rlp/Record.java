@@ -20,6 +20,7 @@ import com.esaulpaugh.headlong.util.Strings;
 import java.nio.ByteBuffer;
 import java.security.SignatureException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -38,7 +39,11 @@ public final class Record {
 
     private final RLPList rlp;
 
-    public static ByteBuffer encode(final long seq, List<KeyValuePair> pairs, Signer signer) {
+    public static ByteBuffer encode(Signer signer, long seq, KeyValuePair... pairs) {
+        return encode(signer, seq, Arrays.asList(pairs));
+    }
+
+    public static ByteBuffer encode(Signer signer, final long seq, List<KeyValuePair> pairs) {
         if(seq < 0) {
             throw new IllegalArgumentException("negative seq");
         }
@@ -66,8 +71,12 @@ public final class Record {
         return bb;
     }
 
-    public Record(final long seq, List<KeyValuePair> pairs, Signer signer) {
-        this.rlp = RLP_STRICT.wrapList(encode(seq, pairs, signer).array());
+    public Record(Signer signer, long seq, KeyValuePair... pairs) {
+        this(signer, seq, Arrays.asList(pairs));
+    }
+
+    public Record(Signer signer, long seq, List<KeyValuePair> pairs) {
+        this.rlp = RLP_STRICT.wrapList(encode(signer, seq, pairs).array());
     }
 
     private Record(RLPList recordRLP) { // validate before calling
