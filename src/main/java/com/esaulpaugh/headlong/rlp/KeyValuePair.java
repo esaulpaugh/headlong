@@ -30,27 +30,6 @@ import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
  */
 public final class KeyValuePair implements Comparable<KeyValuePair> {
 
-    public static final Comparator<KeyValuePair> PAIR_COMPARATOR = (pa, pb) -> {
-        byte[] a = pa.k;
-        byte[] b = pb.k;
-        if(a != b) {
-            final int aOff = pa.keyDataIdx;
-            final int bOff = pb.keyDataIdx;
-            final int len = Math.min(a.length - aOff, b.length - bOff);
-            int i;
-            for (i = 0; i < len; i++) {
-                if (a[aOff + i] != b[bOff + i]) {
-                    break;
-                }
-            }
-            int result = i < len ? a[aOff + i] - b[bOff + i] : (a.length - aOff) - (b.length - bOff);
-            if (result != 0) {
-                return result;
-            }
-        }
-        throw new IllegalArgumentException("duplicate key: " + pa.key());
-    };
-
     public static final String ID = "id";
     public static final String SECP256K1 = "secp256k1";
     public static final String IP = "ip";
@@ -134,4 +113,25 @@ public final class KeyValuePair implements Comparable<KeyValuePair> {
     public int compareTo(KeyValuePair other) {
         return PAIR_COMPARATOR.compare(this, other);
     }
+
+    public static final Comparator<KeyValuePair> PAIR_COMPARATOR = (pa, pb) -> {
+        byte[] a = pa.k;
+        byte[] b = pb.k;
+        if(a != b) {
+            final int aOff = pa.keyDataIdx;
+            final int bOff = pb.keyDataIdx;
+            final int len = Math.min(a.length - aOff, b.length - bOff);
+            int i;
+            for (i = 0; i < len; i++) {
+                if (a[aOff + i] != b[bOff + i]) {
+                    break;
+                }
+            }
+            int result = i < len ? a[aOff + i] - b[bOff + i] : (a.length - aOff) - (b.length - bOff);
+            if (result != 0) {
+                return result;
+            }
+        }
+        throw new IllegalArgumentException("duplicate key: " + pa.key());
+    };
 }
