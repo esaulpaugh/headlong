@@ -54,8 +54,7 @@ public class EIP778Test {
         }
 
         @Override
-        public byte[] sign(byte[] message, int off, int len) {
-//            System.out.println("SIGNING " + Strings.encode(message, off, len, HEX));
+        public byte[] sign(byte[] content) {
             return SIG;
         }
     };
@@ -124,7 +123,7 @@ public class EIP778Test {
                     }
 
                     @Override
-                    public byte[] sign(byte[] message, int off, int len) {
+                    public byte[] sign(byte[] content) {
                         return null;
                     }
                 })
@@ -139,7 +138,7 @@ public class EIP778Test {
                     }
 
                     @Override
-                    public byte[] sign(byte[] message, int off, int len) {
+                    public byte[] sign(byte[] content) {
                         return null;
                     }
                 })
@@ -153,7 +152,7 @@ public class EIP778Test {
                     }
 
                     @Override
-                    public byte[] sign(byte[] message, int off, int len) {
+                    public byte[] sign(byte[] content) {
                         return null;
                     }
                 })
@@ -213,7 +212,7 @@ public class EIP778Test {
             }
 
             @Override
-            public byte[] sign(byte[] message, int off, int len) {
+            public byte[] sign(byte[] content) {
                 return new byte[0];
             }
         });
@@ -238,7 +237,7 @@ public class EIP778Test {
             }
 
             @Override
-            public byte[] sign(byte[] message, int off, int len) {
+            public byte[] sign(byte[] content) {
                 return new byte[32];
             }
         }));

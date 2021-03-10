@@ -42,30 +42,25 @@ public final class Record {
         if(signatureLen < 0) {
             throw new RuntimeException("signer specifies negative signature length");
         }
-        final int contentDataLen = RLPEncoder.measureEncodedLen(seq) + RLPEncoder.dataLen(pairs); // content list prefix not included
-        final int recordDataLen = RLPEncoder.itemLen(signatureLen) + contentDataLen;
+        final int payloadLen = RLPEncoder.measureEncodedLen(seq) + RLPEncoder.dataLen(pairs); // content list prefix not included
+        final int recordDataLen = RLPEncoder.itemLen(signatureLen) + payloadLen;
         final int recordLen = RLPEncoder.itemLen(recordDataLen);
         checkRecordLen(recordLen);
 
-        final int contentLen = RLPEncoder.itemLen(contentDataLen);
-        final int contentOffset = recordLen - contentLen;
+        final byte[] content = RLPEncoder.encodeRecordContent(payloadLen, seq, pairs);
+        final byte[] recordArr = new byte[recordLen];
+        // copy payload to record before sending to signer
+        System.arraycopy(content, content.length - payloadLen, recordArr, recordLen - payloadLen, payloadLen);
 
-        final ByteBuffer record = ByteBuffer.allocate(recordLen);
-        record.position(contentOffset);
-        RLPEncoder.insertRecordContent(contentDataLen, seq, pairs, record);
-
-        byte[] recordArr = record.array();
-        // caution: signer can modify content bytes before or after signing
-        byte[] signature = signer.sign(recordArr, contentOffset, contentLen);
+        byte[] signature = signer.sign(content);
         if(signature.length != signatureLen) {
             throw new RuntimeException("incorrect signature length: " + signature.length + " != " + signatureLen);
         }
-        // content list prefix will be overwritten after signing
-        record.position(recordLen - recordDataLen);
-        RLPEncoder.encodeItem(signature, record);
-        record.position(0);
+
+        final ByteBuffer record = ByteBuffer.wrap(recordArr);
         RLPEncoder.insertListPrefix(recordDataLen, record);
-        return recordArr;
+        RLPEncoder.encodeItem(signature, record);
+        return record.array();
     }
 
     public Record(final long seq, List<KeyValuePair> pairs, Signer signer) {
@@ -133,7 +128,7 @@ public final class Record {
 
     public interface Signer {
         int signatureLength();
-        byte[] sign(byte[] message, int off, int len);
+        byte[] sign(byte[] content);
     }
 
     @FunctionalInterface

@@ -64,13 +64,15 @@ public final class RLPEncoder {
      * @see java.util.ArrayList#sort(Comparator)
      * @see java.util.Arrays.ArrayList#sort(Comparator)
      */
-    static void insertRecordContent(int dataLen, long seq, List<KeyValuePair> pairs, ByteBuffer bb) {
+    static byte[] encodeRecordContent(int dataLen, long seq, List<KeyValuePair> pairs) {
         pairs.sort(KeyValuePair.PAIR_COMPARATOR); // note that ArrayList overrides List.sort
+        ByteBuffer bb = ByteBuffer.allocate(itemLen(dataLen));
         insertListPrefix(dataLen, bb);
         encodeString(Integers.toBytes(seq), bb);
         for (KeyValuePair pair : pairs) {
             encodeKeyValuePair(pair, bb);
         }
+        return bb.array();
     }
 // ---------------------------------------------------------------------------------------------------------------------
     private static void encodeKeyValuePair(KeyValuePair pair, ByteBuffer bb) {
