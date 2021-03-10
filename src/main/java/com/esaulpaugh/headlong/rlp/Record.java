@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import java.security.SignatureException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
@@ -104,7 +105,7 @@ public final class Record {
     }
 
     public RLPString getSignature() {
-        return getRLP().iterator(RLP_STRICT).next().asRLPString();
+        return rlp.iterator(RLP_STRICT).next().asRLPString();
     }
 
     public RLPList getContent() {
@@ -112,9 +113,23 @@ public final class Record {
     }
 
     public long getSeq() {
-        Iterator<RLPItem> iter = getRLP().iterator();
-        iter.next();
+        Iterator<RLPItem> iter = rlp.iterator();
+        iter.next(); // skip signature
         return iter.next().asLong();
+    }
+
+    /**
+     * @param visitor   pair-consuming code
+     * @return seq
+     * */
+    public long visit(BiConsumer<RLPItem, RLPItem> visitor) {
+        Iterator<RLPItem> iter = rlp.iterator();
+        iter.next(); // skip signature
+        long seq = iter.next().asLong();
+        while (iter.hasNext()) {
+            visitor.accept(iter.next(), iter.next());
+        }
+        return seq;
     }
 
     // reconstruct the content list from the content data

@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.security.SignatureException;
@@ -24,7 +25,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
@@ -35,6 +39,7 @@ import static com.esaulpaugh.headlong.rlp.KeyValuePair.SECP256K1;
 import static com.esaulpaugh.headlong.rlp.KeyValuePair.UDP;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EIP778Test {
@@ -168,7 +173,8 @@ public class EIP778Test {
                 new KeyValuePair(ID, "v4", UTF_8),
                 new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
         );
-        final KeyValuePair[] array = pairs.toArray(new KeyValuePair[0]);
+        final KeyValuePair[] empty = new KeyValuePair[0];
+        final KeyValuePair[] array = pairs.toArray(empty);
 
         final Record record = new Record(seq, pairs, SIGNER);
 
@@ -181,19 +187,40 @@ public class EIP778Test {
 
         RLPList content = record.getContent();
         System.out.println("verified = " + content);
-        Iterator<RLPItem> iter = content.iterator(RLPDecoder.RLP_STRICT);
+        Iterator<RLPItem> rlpIter = content.iterator(RLPDecoder.RLP_STRICT);
 
         assertEquals(seq, record.getSeq());
-        assertEquals(seq, iter.next().asLong());
+        assertEquals(seq, rlpIter.next().asLong());
 
         Arrays.sort(array);
+
+        assertArrayEquals(array, getPayload(record).toArray(empty));
+
+        LinkedHashMap<String, byte[]> map = new LinkedHashMap<>();
+        long seq2 = record.visit((k, v) -> map.put(k.asString(UTF_8), v.asBytes()));
+        assertEquals(seq, seq2);
+
+        assertArrayEquals(map.get(ID), Strings.decode("v4", UTF_8));
+        assertArrayEquals(map.get(SECP256K1), Strings.decode("03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138"));
+
+        final Iterator<Map.Entry<String, byte[]>> mapIter = map.entrySet().iterator();
         int i = 0;
-        while (iter.hasNext()) {
-            assertEquals(array[i++], new KeyValuePair(iter.next().asBytes(), iter.next().asBytes()));
+        while (rlpIter.hasNext()) {
+            final KeyValuePair expected = array[i];
+            assertEquals(expected, new KeyValuePair(rlpIter.next().asBytes(), rlpIter.next().asBytes()));
+            Map.Entry<String, byte[]> e = mapIter.next();
+            assertEquals(expected, new KeyValuePair(Strings.decode(e.getKey(), UTF_8), e.getValue()));
+            i++;
         }
         assertEquals(ENR_STRING, record.toString());
 
         assertEquals(record, Record.parse(record.toString(), VERIFIER));
+    }
+
+    private static LinkedHashSet<KeyValuePair> getPayload(Record r) {
+        LinkedHashSet<KeyValuePair> set = new LinkedHashSet<>();
+        r.visit((k, v) -> set.add(new KeyValuePair(k.asBytes(), v.asBytes())));
+        return set;
     }
 
     @Test
