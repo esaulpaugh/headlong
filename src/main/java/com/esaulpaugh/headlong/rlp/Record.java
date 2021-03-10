@@ -44,23 +44,22 @@ public final class Record {
         }
         final int payloadLen = RLPEncoder.measureEncodedLen(seq) + RLPEncoder.dataLen(pairs); // content list prefix not included
         final int recordDataLen = RLPEncoder.itemLen(signatureLen) + payloadLen;
-        final int recordLen = RLPEncoder.itemLen(recordDataLen);
-        checkRecordLen(recordLen);
 
+        final byte[] record = new byte[checkRecordLen(RLPEncoder.itemLen(recordDataLen))];
         final byte[] content = RLPEncoder.encodeRecordContent(payloadLen, seq, pairs);
-        final byte[] recordArr = new byte[recordLen];
-        // copy payload to record before sending to signer
-        System.arraycopy(content, content.length - payloadLen, recordArr, recordLen - payloadLen, payloadLen);
 
-        byte[] signature = signer.sign(content);
+        // copy payload to record before sending to signer
+        System.arraycopy(content, content.length - payloadLen, record, record.length - payloadLen, payloadLen);
+
+        final byte[] signature = signer.sign(content);
         if(signature.length != signatureLen) {
             throw new RuntimeException("incorrect signature length: " + signature.length + " != " + signatureLen);
         }
 
-        final ByteBuffer record = ByteBuffer.wrap(recordArr);
-        RLPEncoder.insertListPrefix(recordDataLen, record);
-        RLPEncoder.encodeItem(signature, record);
-        return record;
+        final ByteBuffer bb = ByteBuffer.wrap(record);
+        RLPEncoder.insertListPrefix(recordDataLen, bb);
+        RLPEncoder.encodeItem(signature, bb);
+        return bb;
     }
 
     public Record(final long seq, List<KeyValuePair> pairs, Signer signer) {
@@ -71,10 +70,11 @@ public final class Record {
         this.rlp = recordRLP;
     }
 
-    private static void checkRecordLen(int recordLen) {
+    private static int checkRecordLen(int recordLen) {
         if(recordLen > MAX_RECORD_LEN) {
             throw new IllegalArgumentException("record length exceeds maximum: " + recordLen + " > " + MAX_RECORD_LEN);
         }
+        return recordLen;
     }
 
     public static Record parse(String enrString, Verifier verifier) throws SignatureException {
