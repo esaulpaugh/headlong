@@ -53,7 +53,7 @@ public final class Record {
 
         final byte[] signature = signer.sign(content);
         if(signature.length != signatureLen) {
-            throw new RuntimeException("incorrect signature length: " + signature.length + " != " + signatureLen);
+            throw new RuntimeException("unexpected signature length: " + signature.length + " != " + signatureLen);
         }
 
         final ByteBuffer bb = ByteBuffer.wrap(record);

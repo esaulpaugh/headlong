@@ -230,7 +230,7 @@ public class EIP778Test {
                 new KeyValuePair(ID, "v4", UTF_8),
                 new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
         );
-        assertThrown(RuntimeException.class, "incorrect signature length: 32 != 64", () -> new Record(90L, pairs, new Record.Signer() {
+        assertThrown(RuntimeException.class, "unexpected signature length: 32 != 64", () -> new Record(90L, pairs, new Record.Signer() {
             @Override
             public int signatureLength() {
                 return 64;
