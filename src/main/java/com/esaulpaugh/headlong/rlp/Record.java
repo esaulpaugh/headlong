@@ -58,7 +58,7 @@ public final class Record {
 
         final ByteBuffer bb = ByteBuffer.wrap(record);
         RLPEncoder.insertListPrefix(recordDataLen, bb);
-        RLPEncoder.encodeItem(signature, bb);
+        RLPEncoder.encodeString(signature, bb);
         return bb;
     }
 

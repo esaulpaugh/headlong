@@ -125,7 +125,7 @@ public final class RLPEncoder {
     }
 
     // visible to Record
-    static void encodeItem(Object raw, ByteBuffer bb) {
+    private static void encodeItem(Object raw, ByteBuffer bb) {
         if (raw instanceof byte[]) {
             encodeString((byte[]) raw, bb);
         } else if (raw instanceof Iterable<?>) {
@@ -141,7 +141,7 @@ public final class RLPEncoder {
         }
     }
 
-    private static void encodeString(byte[] data, ByteBuffer bb) {
+    static void encodeString(byte[] data, ByteBuffer bb) {
         final int dataLen = data.length;
         if (dataLen == 1) {
             encodeLen1String(data[0], bb);
