@@ -38,6 +38,7 @@ import static com.esaulpaugh.headlong.rlp.KeyValuePair.IP;
 import static com.esaulpaugh.headlong.rlp.KeyValuePair.PAIR_COMPARATOR;
 import static com.esaulpaugh.headlong.rlp.KeyValuePair.SECP256K1;
 import static com.esaulpaugh.headlong.rlp.KeyValuePair.UDP;
+import static com.esaulpaugh.headlong.util.Strings.EMPTY_BYTE_ARRAY;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -178,7 +179,6 @@ public class EIP778Test {
 
     @Test
     public void testSort() {
-        final String val = "";
         Random r = TestUtils.seededRandom();
         for (int i = 0; i < 50; i++) {
             for (int j = 0; j < 50; j++) {
@@ -186,8 +186,8 @@ public class EIP778Test {
                 String b = generateASCIIString(j, r);
                 if(!a.equals(b)) {
                     int str = a.compareTo(b) < 0 ? 0 : 1;
-                    KeyValuePair pairA = new KeyValuePair(a, val, HEX);
-                    KeyValuePair pairB = new KeyValuePair(b, val, HEX);
+                    KeyValuePair pairA = new KeyValuePair(a, EMPTY_BYTE_ARRAY);
+                    KeyValuePair pairB = new KeyValuePair(b, EMPTY_BYTE_ARRAY);
                     int pair = pairA.compareTo(pairB) < 0 ? 0 : 1;
                     assertEquals(str, pair, pairA + " " + pairB);
                 }
@@ -251,10 +251,10 @@ public class EIP778Test {
         int i = 0;
         while (contentIter.hasNext() || listIter.hasNext() || mapIter.hasNext()) {
             final KeyValuePair expected = array[i];
-            testEqual(expected, new KeyValuePair(contentIter.next().asBytes(), contentIter.next().asBytes()));
+            testEqual(expected, new KeyValuePair(contentIter.next(), contentIter.next()));
             testEqual(expected, listIter.next());
             Map.Entry<String, byte[]> e = mapIter.next();
-            testEqual(expected, new KeyValuePair(Strings.decode(e.getKey(), UTF_8), e.getValue()));
+            testEqual(expected, new KeyValuePair(e.getKey(), e.getValue()));
             testEqual(expected, expected.withValue(expected.value().asBytes()));
             i++;
         }
