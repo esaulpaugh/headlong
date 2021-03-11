@@ -19,8 +19,12 @@ import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
 import java.security.SignatureException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
@@ -35,7 +39,11 @@ public final class Record {
 
     private final RLPList rlp;
 
-    public static ByteBuffer encode(final long seq, List<KeyValuePair> pairs, Signer signer) {
+    public static ByteBuffer encode(Signer signer, long seq, KVP... pairs) {
+        return encode(signer, seq, Arrays.asList(pairs));
+    }
+
+    public static ByteBuffer encode(Signer signer, final long seq, List<KVP> pairs) {
         if(seq < 0) {
             throw new IllegalArgumentException("negative seq");
         }
@@ -43,7 +51,7 @@ public final class Record {
         if(signatureLen < 0) {
             throw new RuntimeException("signer specifies negative signature length");
         }
-        final int payloadLen = RLPEncoder.measureEncodedLen(seq) + RLPEncoder.dataLen(pairs); // content list prefix not included
+        final int payloadLen = RLPEncoder.payloadLen(seq, pairs); // content list prefix not included
         final int recordDataLen = RLPEncoder.itemLen(signatureLen) + payloadLen;
 
         final byte[] record = new byte[checkRecordLen(RLPEncoder.itemLen(recordDataLen))];
@@ -63,8 +71,12 @@ public final class Record {
         return bb;
     }
 
-    public Record(final long seq, List<KeyValuePair> pairs, Signer signer) {
-        this.rlp = RLP_STRICT.wrapList(encode(seq, pairs, signer).array());
+    public Record(Signer signer, long seq, KVP... pairs) {
+        this(signer, seq, Arrays.asList(pairs));
+    }
+
+    public Record(Signer signer, long seq, List<KVP> pairs) {
+        this.rlp = RLP_STRICT.wrapList(encode(signer, seq, pairs).array());
     }
 
     private Record(RLPList recordRLP) { // validate before calling
@@ -89,7 +101,7 @@ public final class Record {
     public static Record decode(byte[] bytes, Verifier verifier) throws SignatureException {
         checkRecordLen(bytes.length);
         RLPList rlpList = RLP_STRICT.wrapList(bytes)
-                .duplicate(RLP_STRICT); // defensive copy
+                .duplicate(); // defensive copy
         if(rlpList.encodingLength() != bytes.length) {
             throw new IllegalArgumentException("unconsumed trailing bytes");
         }
@@ -116,6 +128,18 @@ public final class Record {
         Iterator<RLPItem> iter = rlp.iterator();
         iter.next(); // skip signature
         return iter.next().asLong();
+    }
+
+    public List<KVP> getPairs() {
+        List<KVP> list = new ArrayList<>();
+        visit((k, v) -> list.add(new KVP(k, v)));
+        return list;
+    }
+
+    public Map<String, byte[]> map() {
+        Map<String, byte[]> map = new LinkedHashMap<>();
+        visit((k, v) -> map.put(k.asString(Strings.UTF_8), v.asBytes()));
+        return map;
     }
 
     /**
@@ -163,6 +187,6 @@ public final class Record {
 
     @Override
     public String toString() {
-        return ENR_PREFIX + rlp.toString(BASE_64_URL_SAFE);
+        return ENR_PREFIX + rlp.encodingString(BASE_64_URL_SAFE);
     }
 }

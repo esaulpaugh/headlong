@@ -34,16 +34,12 @@ public final class RLPEncoder {
     private RLPEncoder() {}
 
 // -------------- made visibile to Record -------------------------------------------------------------------------------
-    static int dataLen(List<KeyValuePair> pairs) {
-        long sum = 0;
-        for (KeyValuePair pair : pairs) {
-            sum += stringEncodedLen(pair.getKey()) + stringEncodedLen(pair.getValue());
+    static int payloadLen(long seq, List<KVP> pairs) {
+        long sum = stringEncodedLen(Integers.toBytes(seq));
+        for (KVP pair : pairs) {
+            sum += pair.length();
         }
         return requireNoOverflow(sum);
-    }
-
-    static int measureEncodedLen(long val) {
-        return stringEncodedLen(Integers.toBytes(val));
     }
 
     static int itemLen(int dataLen) {
@@ -64,22 +60,18 @@ public final class RLPEncoder {
      * @see java.util.ArrayList#sort(Comparator)
      * @see java.util.Arrays.ArrayList#sort(Comparator)
      */
-    static byte[] encodeRecordContent(int dataLen, long seq, List<KeyValuePair> pairs) {
-        pairs.sort(KeyValuePair.PAIR_COMPARATOR); // note that ArrayList overrides List.sort
-        ByteBuffer bb = ByteBuffer.allocate(itemLen(dataLen));
+    static byte[] encodeRecordContent(int dataLen, long seq, List<KVP> pairs) {
+        pairs.sort(KVP.PAIR_COMPARATOR); // note that ArrayList overrides List.sort
+        byte[] arr = new byte[itemLen(dataLen)];
+        ByteBuffer bb = ByteBuffer.wrap(arr);
         insertListPrefix(dataLen, bb);
         encodeString(Integers.toBytes(seq), bb);
-        for (KeyValuePair pair : pairs) {
-            encodeKeyValuePair(pair, bb);
+        for (KVP pair : pairs) {
+            pair.export(bb);
         }
-        return bb.array();
+        return arr;
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    private static void encodeKeyValuePair(KeyValuePair pair, ByteBuffer bb) {
-        encodeString(pair.getKey(), bb);
-        encodeString(pair.getValue(), bb);
-    }
-
     private static int requireNoOverflow(long val) {
         if (val <= Integer.MAX_VALUE) {
             return (int) val;

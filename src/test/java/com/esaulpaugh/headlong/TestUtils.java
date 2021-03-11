@@ -110,6 +110,14 @@ public class TestUtils {
         return random;
     }
 
+    public static String generateASCIIString(final int len, Random r) {
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < len; i++) {
+            sb.append((char) (r.nextInt(95) + 32));
+        }
+        return sb.toString();
+    }
+
     public static void printAndReset(StringBuilder sb) {
         System.out.println(sb.toString());
         sb.delete(0, sb.length());

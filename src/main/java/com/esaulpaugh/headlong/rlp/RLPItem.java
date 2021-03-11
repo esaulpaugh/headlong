@@ -99,6 +99,14 @@ public abstract class RLPItem {
         this.endIndex = (int) _endIndex;
     }
 
+    RLPItem(RLPItem it) {
+        this.buffer = it.encoding();
+        this.index = 0;
+        this.dataIndex = buffer.length - it.dataLength;
+        this.dataLength = it.dataLength;
+        this.endIndex = buffer.length;
+    }
+
     static IllegalArgumentException exceedsContainer(int index, long end, int containerEnd, boolean shortInput) {
         String msg = "element @ index " + index + " exceeds its container: " + end + " > " + containerEnd;
         return shortInput ? new ShortInputException(msg) : new IllegalArgumentException(msg);
@@ -115,6 +123,14 @@ public abstract class RLPItem {
     public abstract RLPString asRLPString();
 
     public abstract RLPList asRLPList();
+
+    /**
+     * Clones this object.
+     *
+     * @return an independent and exact copy
+     * @throws IllegalArgumentException if a problem in re-decoding the item occurs
+     */
+    public abstract RLPItem duplicate();
 
     public final int encodingLength() {
         return endIndex - index;
@@ -257,15 +273,6 @@ public abstract class RLPItem {
     }
 
     /**
-     * Clones this object.
-     *
-     * @param decoder either {@link RLPDecoder#RLP_STRICT} or {@link RLPDecoder#RLP_LENIENT}
-     * @return an independent and exact copy
-     * @throws IllegalArgumentException if a problem in re-decoding the item occurs
-     */
-    public abstract RLPItem duplicate(RLPDecoder decoder);
-
-    /**
      * @see Arrays#hashCode(byte[])
      */
     @Override
@@ -309,7 +316,7 @@ public abstract class RLPItem {
      * @param encoding one of { {@link Strings#BASE_64_URL_SAFE}, {@link Strings#UTF_8}, {@link Strings#HEX} }.
      * @return  this item's bytes, including RLP prefix, encoded to your liking
      */
-    public String toString(int encoding) {
+    public String encodingString(int encoding) {
         return Strings.encode(buffer, index, encodingLength(), encoding);
     }
 }

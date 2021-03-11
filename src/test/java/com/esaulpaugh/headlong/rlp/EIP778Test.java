@@ -21,30 +21,29 @@ import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.security.SignatureException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.rlp.KeyValuePair.ID;
-import static com.esaulpaugh.headlong.rlp.KeyValuePair.IP;
-import static com.esaulpaugh.headlong.rlp.KeyValuePair.PAIR_COMPARATOR;
-import static com.esaulpaugh.headlong.rlp.KeyValuePair.SECP256K1;
-import static com.esaulpaugh.headlong.rlp.KeyValuePair.UDP;
+import static com.esaulpaugh.headlong.rlp.KVP.ID;
+import static com.esaulpaugh.headlong.rlp.KVP.IP;
+import static com.esaulpaugh.headlong.rlp.KVP.PAIR_COMPARATOR;
+import static com.esaulpaugh.headlong.rlp.KVP.SECP256K1;
+import static com.esaulpaugh.headlong.rlp.KVP.UDP;
+import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
+import static com.esaulpaugh.headlong.util.Strings.EMPTY_BYTE_ARRAY;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 public class EIP778Test {
-
-    private static final String ENR_STRING = "enr:-IS4QHCYrYZbAKWCBRlAy5zzaDZXJBGkcnh4MHcBFZntXNFrdvJjX04jRzjzCBOonrkTfj499SZuOh8R33Ls8RRcy5wBgmlkgnY0gmlwhH8AAAGJc2VjcDI1NmsxoQPKY0yuDUmstAHYpMa2_oxVtw0RW_QAdpzBQA8yWM0xOIN1ZHCCdl8";
 
     static final byte[] SIG = FastHex.decode(
             "7098ad865b00a582051940cb9cf36836572411a47278783077011599ed5cd16b"
@@ -64,9 +63,21 @@ public class EIP778Test {
         }
     };
 
+    private static final String ENR_STRING = "enr:-IS4QHCYrYZbAKWCBRlAy5zzaDZXJBGkcnh4MHcBFZntXNFrdvJjX04jRzjzCBOonrkTfj499SZuOh8R33Ls8RRcy5wBgmlkgnY0gmlwhH8AAAGJc2VjcDI1NmsxoQPKY0yuDUmstAHYpMa2_oxVtw0RW_QAdpzBQA8yWM0xOIN1ZHCCdl8";
+
     private static final Record.Verifier VERIFIER = (s,c) -> {
         if(!Arrays.equals(s, SIG)) throw new SignatureException();
     };
+
+    private static final String RECORD_HEX;
+
+    static {
+        try {
+            RECORD_HEX = Strings.encode(Record.parse(ENR_STRING, VERIFIER).getRLP().encoding());
+        } catch (SignatureException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private static final Record VECTOR;
 
@@ -121,7 +132,7 @@ public class EIP778Test {
         assertThrown(
                 IllegalArgumentException.class,
                 "negative seq",
-                () -> new Record(seq, new ArrayList<>(), new Record.Signer() {
+                () -> new Record(new Record.Signer() {
                     @Override
                     public int signatureLength() {
                         return 0;
@@ -131,12 +142,12 @@ public class EIP778Test {
                     public byte[] sign(byte[] content) {
                         return null;
                     }
-                })
+                }, seq)
         );
         assertThrown(
                 RuntimeException.class,
                 "signer specifies negative signature length",
-                () -> new Record(0x07, new ArrayList<>(), new Record.Signer() {
+                () -> new Record(new Record.Signer() {
                     @Override
                     public int signatureLength() {
                         return -1;
@@ -146,11 +157,11 @@ public class EIP778Test {
                     public byte[] sign(byte[] content) {
                         return null;
                     }
-                })
+                }, 0x07)
         );
         assertThrown(
                 NullPointerException.class,
-                () -> new Record(0L, new ArrayList<>(), new Record.Signer() {
+                () -> new Record(new Record.Signer() {
                     @Override
                     public int signatureLength() {
                         return 0;
@@ -160,23 +171,43 @@ public class EIP778Test {
                     public byte[] sign(byte[] content) {
                         return null;
                     }
-                })
+                }, 0L)
         );
+    }
+
+    @Test
+    public void testSort() {
+        Random r = TestUtils.seededRandom();
+        for (int j = 0; j < 50; j++) {
+            for (int i = 0; i < 50; i++) {
+                String a = TestUtils.generateASCIIString(j, r);
+                String b = TestUtils.generateASCIIString(j, r);
+                if (!a.equals(b)) {
+                    int str = a.compareTo(b) < 0 ? 0 : 1;
+                    KVP pairA = new KVP(a, EMPTY_BYTE_ARRAY);
+                    KVP pairB = new KVP(b, EMPTY_BYTE_ARRAY);
+                    int pair = pairA.compareTo(pairB) < 0 ? 0 : 1;
+                    assertEquals(str, pair, pairA + " " + pairB);
+                }
+            }
+        }
     }
 
     @Test
     public void testEip778() throws SignatureException {
         final long seq = 1L;
-        final List<KeyValuePair> pairs = Arrays.asList(
-                new KeyValuePair(IP, "7f000001", HEX),
-                new KeyValuePair(UDP, "765f", HEX),
-                new KeyValuePair(ID, "v4", UTF_8),
-                new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
+        final List<KVP> pairs = Arrays.asList(
+                new KVP(IP, "7f000001", HEX),
+                new KVP(UDP, "765f", HEX),
+                new KVP(ID, "v4", UTF_8),
+                new KVP(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
         );
-        final KeyValuePair[] empty = new KeyValuePair[0];
-        final KeyValuePair[] array = pairs.toArray(empty);
+        final KVP[] empty = new KVP[0];
+        final KVP[] array = pairs.toArray(empty);
 
-        final Record record = new Record(seq, pairs, SIGNER);
+        final Record record = new Record(SIGNER, seq, pairs);
+
+        assertEquals(RECORD_HEX, record.getRLP().encodingString(HEX));
 
         assertEquals(VECTOR.getSignature(), record.getSignature());
         assertEquals(VECTOR.getContent(), record.getContent());
@@ -187,29 +218,37 @@ public class EIP778Test {
 
         RLPList content = record.getContent();
         System.out.println("verified = " + content);
-        Iterator<RLPItem> rlpIter = content.iterator(RLPDecoder.RLP_STRICT);
+        final Iterator<RLPItem> contentIter = content.iterator(RLPDecoder.RLP_STRICT);
 
         assertEquals(seq, record.getSeq());
-        assertEquals(seq, rlpIter.next().asLong());
+        assertEquals(seq, contentIter.next().asLong());
 
         Arrays.sort(array);
 
-        assertArrayEquals(array, getPayload(record).toArray(empty));
+        List<KVP> pairList = record.getPairs();
 
-        LinkedHashMap<String, byte[]> map = new LinkedHashMap<>();
-        long seq2 = record.visit((k, v) -> map.put(k.asString(UTF_8), v.asBytes()));
-        assertEquals(seq, seq2);
+        assertArrayEquals(array, record.getPairs().toArray(empty));
 
-        assertArrayEquals(map.get(ID), Strings.decode("v4", UTF_8));
-        assertArrayEquals(map.get(SECP256K1), Strings.decode("03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138"));
+        Map<String, byte[]> map = record.map();
+        assertArrayEquals(Strings.decode("765f"), record.map().get(UDP));
+        assertArrayEquals(Strings.decode("v4", UTF_8), map.get(ID));
+        assertArrayEquals(Strings.decode("03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138"), map.get(SECP256K1));
 
+        assertEquals(seq, record.visit((k, v) -> {}));
+
+        final Iterator<KVP> listIter = pairList.iterator();
         final Iterator<Map.Entry<String, byte[]>> mapIter = map.entrySet().iterator();
         int i = 0;
-        while (rlpIter.hasNext()) {
-            final KeyValuePair expected = array[i];
-            assertEquals(expected, new KeyValuePair(rlpIter.next().asBytes(), rlpIter.next().asBytes()));
-            Map.Entry<String, byte[]> e = mapIter.next();
-            assertEquals(expected, new KeyValuePair(Strings.decode(e.getKey(), UTF_8), e.getValue()));
+        while (contentIter.hasNext() || listIter.hasNext() || mapIter.hasNext()) {
+            final KVP e = array[i];
+            testEqual(e, new KVP(contentIter.next(), contentIter.next()));
+            testEqual(e, listIter.next());
+            Map.Entry<String, byte[]> entry = mapIter.next();
+            testEqual(e, new KVP(entry.getKey(), entry.getValue()));
+            testEqual(e, e.withValue(e.value().asBytes()));
+            testEqual(e, e.withValue(e.value().asString(HEX), HEX));
+            testEqual(e, e.withValue(e.value().asString(UTF_8), UTF_8));
+            testEqual(e, e.withValue(e.value().asString(BASE_64_URL_SAFE), BASE_64_URL_SAFE));
             i++;
         }
         assertEquals(ENR_STRING, record.toString());
@@ -217,32 +256,30 @@ public class EIP778Test {
         assertEquals(record, Record.parse(record.toString(), VERIFIER));
     }
 
-    private static LinkedHashSet<KeyValuePair> getPayload(Record r) {
-        LinkedHashSet<KeyValuePair> set = new LinkedHashSet<>();
-        r.visit((k, v) -> set.add(new KeyValuePair(k.asBytes(), v.asBytes())));
-        return set;
+    private static void testEqual(KVP a, KVP b) {
+        assertNotSame(a, b);
+        assertEquals(a, b);
     }
 
     @Test
     public void testZeroLenSig() {
-        final long seq = 1L;
-        final List<KeyValuePair> pairs = Arrays.asList(
-                new KeyValuePair(IP, "7f000001", HEX),
-                new KeyValuePair(UDP, "765f", HEX),
-                new KeyValuePair(ID, "v4", UTF_8),
-                new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
-        );
-        final Record record = new Record(seq, pairs, new Record.Signer() {
-            @Override
-            public int signatureLength() {
-                return 0;
-            }
+        Record record = new Record(new Record.Signer() {
+                    @Override
+                    public int signatureLength() {
+                        return 0;
+                    }
 
-            @Override
-            public byte[] sign(byte[] content) {
-                return new byte[0];
-            }
-        });
+                    @Override
+                    public byte[] sign(byte[] content) {
+                        return new byte[0];
+                    }
+                },
+                1L,
+                new KVP(IP, "7f000001", HEX),
+                new KVP(UDP, "765f", HEX),
+                new KVP(ID, "v4", UTF_8),
+                new KVP(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
+        );
         System.out.println(record.getSignature());
         for(RLPItem it : record.getContent()) {
             System.out.println(it);
@@ -251,32 +288,33 @@ public class EIP778Test {
 
     @Test
     public void testIncorrectSignatureLength() throws Throwable {
-        final List<KeyValuePair> pairs = Arrays.asList(
-                new KeyValuePair(IP, "7f000001", HEX),
-                new KeyValuePair(UDP, "765f", HEX),
-                new KeyValuePair(ID, "v4", UTF_8),
-                new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
-        );
-        assertThrown(RuntimeException.class, "unexpected signature length: 32 != 64", () -> new Record(90L, pairs, new Record.Signer() {
-            @Override
-            public int signatureLength() {
-                return 64;
-            }
+        assertThrown(RuntimeException.class,
+                "unexpected signature length: 32 != 64",
+                        () -> new Record(new Record.Signer() {
+                            @Override
+                            public int signatureLength() {
+                                return 64;
+                            }
 
-            @Override
-            public byte[] sign(byte[] content) {
-                return new byte[32];
-            }
-        }));
+                            @Override
+                            public byte[] sign(byte[] content) {
+                                return new byte[32];
+                            }
+                        },
+                        90L,
+                        new KVP(IP, "7f000001", HEX),
+                        new KVP(UDP, "765f", HEX),
+                        new KVP(ID, "v4", UTF_8),
+                        new KVP(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)));
     }
 
     @Test
     public void testDuplicateKeys() throws Throwable {
         byte[] keyBytes = new byte[0];
-        final List<KeyValuePair> pairs = Arrays.asList(new KeyValuePair(keyBytes, new byte[0]), new KeyValuePair(keyBytes, new byte[1]));
+        final List<KVP> pairs = Arrays.asList(new KVP(keyBytes, new byte[0]), new KVP(keyBytes, new byte[1]));
         assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs.sort(PAIR_COMPARATOR));
 
-        final List<KeyValuePair> pairs2 = Arrays.asList(new KeyValuePair(new byte[] { 2 }, new byte[0]), new KeyValuePair(new byte[] { 2 }, new byte[1]));
+        final List<KVP> pairs2 = Arrays.asList(new KVP(new byte[] { 2 }, new byte[0]), new KVP(new byte[] { 2 }, new byte[1]));
         assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs2.sort(PAIR_COMPARATOR));
     }
 
@@ -288,7 +326,7 @@ public class EIP778Test {
             int i = 0;
             do {
                 if(temp >= 0) {
-                    Record r = new Record(temp, new ArrayList<>(0), SIGNER);
+                    Record r = new Record(SIGNER, temp);
                     int len = r.getRLP().encodingLength();
                     System.out.println(temp + " -> " + len);
                     recordLengths.add(len);
@@ -303,18 +341,18 @@ public class EIP778Test {
     public void testDuplicateKey() throws Throwable {
         long seq = 3L;
 
-        final List<KeyValuePair> pairs = Arrays.asList(
-                new KeyValuePair(IP, "7f000001", HEX),
-                new KeyValuePair(UDP, "765f", HEX),
-                new KeyValuePair(ID, "v4", UTF_8),
-                new KeyValuePair(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX),
-                new KeyValuePair(UDP, "765f", HEX)
+        final List<KVP> pairs = Arrays.asList(
+                new KVP(IP, "7f000001", HEX),
+                new KVP(UDP, "765f", HEX),
+                new KVP(ID, "v4", UTF_8),
+                new KVP(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX),
+                new KVP(UDP, "0000", HEX)
         );
 
-        for (KeyValuePair p : pairs) {
+        for (KVP p : pairs) {
             System.out.println(p);
         }
 
-        assertThrown(IllegalArgumentException.class, "duplicate key: " + UDP, () -> new Record(seq, pairs, SIGNER));
+        assertThrown(IllegalArgumentException.class, "duplicate key: " + UDP, () -> new Record(SIGNER, seq, pairs));
     }
 }

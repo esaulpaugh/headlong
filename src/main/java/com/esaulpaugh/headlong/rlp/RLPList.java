@@ -30,6 +30,10 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         super(lead, type, buffer, index, containerEnd, lenient);
     }
 
+    RLPList(RLPList o) {
+        super(o);
+    }
+
     @Override
     public boolean isString() {
         return false;
@@ -48,6 +52,12 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
     @Override
     public RLPList asRLPList() {
         return this;
+    }
+
+    /** @see RLPItem#duplicate() */
+    @Override
+    public RLPList duplicate() {
+        return new RLPList(this);
     }
 
     /**
@@ -105,12 +115,6 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
             collection.add(item);
             i = item.endIndex;
         }
-    }
-
-    /** @see RLPItem#duplicate(RLPDecoder) */
-    @Override
-    public RLPList duplicate(RLPDecoder decoder) {
-        return decoder.wrapList(encoding());
     }
 
     public Iterator<RLPItem> iterator(RLPDecoder decoder) {
