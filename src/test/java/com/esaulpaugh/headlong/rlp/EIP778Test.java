@@ -178,11 +178,11 @@ public class EIP778Test {
     @Test
     public void testSort() {
         Random r = TestUtils.seededRandom();
-        for (int i = 0; i < 50; i++) {
-            for (int j = 0; j < 50; j++) {
-                String a = generateASCIIString(j, r);
-                String b = generateASCIIString(j, r);
-                if(!a.equals(b)) {
+        for (int j = 0; j < 50; j++) {
+            for (int i = 0; i < 50; i++) {
+                String a = TestUtils.generateASCIIString(j, r);
+                String b = TestUtils.generateASCIIString(j, r);
+                if (!a.equals(b)) {
                     int str = a.compareTo(b) < 0 ? 0 : 1;
                     KVP pairA = new KVP(a, EMPTY_BYTE_ARRAY);
                     KVP pairB = new KVP(b, EMPTY_BYTE_ARRAY);
@@ -191,14 +191,6 @@ public class EIP778Test {
                 }
             }
         }
-    }
-
-    private static String generateASCIIString(final int len, Random r) {
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < len; i++) {
-            sb.append((char) (r.nextInt(95) + 32));
-        }
-        return sb.toString();
     }
 
     @Test
