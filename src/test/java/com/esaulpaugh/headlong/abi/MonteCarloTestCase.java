@@ -166,6 +166,11 @@ public class MonteCarloTestCase implements Serializable {
         runSuperSerial();
         runPacked();
         runFuzzPackedDecode(instance);
+        runJson(instance);
+    }
+
+    void runJson(Random r) {
+        assertEquals(function, Function.fromJson(function.toJson(r.nextBoolean())));
     }
 
     ByteBuffer runStandard() {
