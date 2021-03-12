@@ -82,10 +82,6 @@ public final class KVP implements Comparable<KVP> {
         return new KVP(this, value);
     }
 
-    public String keyString() {
-        return key().asString(Strings.UTF_8);
-    }
-
     public RLPString key() {
         return RLP_STRICT.wrapString(k);
     }
@@ -110,7 +106,7 @@ public final class KVP implements Comparable<KVP> {
 
     @Override
     public String toString() {
-        return keyString() + " --> " + value().asString(Strings.HEX);
+        return key().asString(Strings.UTF_8) + " --> " + value().asString(Strings.HEX);
     }
 
     @Override
@@ -136,6 +132,6 @@ public final class KVP implements Comparable<KVP> {
                 return result;
             }
         }
-        throw new IllegalArgumentException("duplicate key: " + pa.keyString());
+        throw new IllegalArgumentException("duplicate key: " + pa.key().asString(Strings.UTF_8));
     };
 }
