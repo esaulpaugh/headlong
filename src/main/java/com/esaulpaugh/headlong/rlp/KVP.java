@@ -55,7 +55,7 @@ public final class KVP implements Comparable<KVP> {
     public KVP(byte[] key, byte[] value) {
         this.k = RLPEncoder.encodeString(key);
         this.v = RLPEncoder.encodeString(value);
-        this.keyDataIdx = keyItem().dataIndex;
+        this.keyDataIdx = key().dataIndex;
         this.length = k.length + v.length;
     }
 
@@ -82,11 +82,11 @@ public final class KVP implements Comparable<KVP> {
         return new KVP(this, value);
     }
 
-    public String key() {
-        return keyItem().asString(Strings.UTF_8);
+    public String keyString() {
+        return key().asString(Strings.UTF_8);
     }
 
-    public RLPString keyItem() {
+    public RLPString key() {
         return RLP_STRICT.wrapString(k);
     }
 
@@ -114,7 +114,7 @@ public final class KVP implements Comparable<KVP> {
 
     @Override
     public String toString() {
-        return key() + " --> " + value().asString(Strings.HEX);
+        return keyString() + " --> " + value().asString(Strings.HEX);
     }
 
     @Override
@@ -140,6 +140,6 @@ public final class KVP implements Comparable<KVP> {
                 return result;
             }
         }
-        throw new IllegalArgumentException("duplicate key: " + pa.key());
+        throw new IllegalArgumentException("duplicate key: " + pa.keyString());
     };
 }
