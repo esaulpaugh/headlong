@@ -37,7 +37,7 @@ public final class RLPEncoder {
     static int payloadLen(long seq, List<KVP> pairs) {
         long sum = stringEncodedLen(Integers.toBytes(seq));
         for (KVP pair : pairs) {
-            sum += pair.length();
+            sum += pair.length;
         }
         return requireNoOverflow(sum);
     }

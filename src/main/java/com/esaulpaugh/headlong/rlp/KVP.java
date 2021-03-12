@@ -42,7 +42,7 @@ public final class KVP implements Comparable<KVP> {
     private final byte[] k;
     private final byte[] v;
     private final int keyDataIdx;
-    private final int length;
+    final int length;
 
     public KVP(String keyUtf8, String val, int valEncoding) {
         this(keyUtf8, Strings.decode(val, valEncoding));
@@ -96,10 +96,6 @@ public final class KVP implements Comparable<KVP> {
 
     void export(ByteBuffer bb) {
         bb.put(k).put(v);
-    }
-
-    int length() {
-        return length;
     }
 
     @Override
