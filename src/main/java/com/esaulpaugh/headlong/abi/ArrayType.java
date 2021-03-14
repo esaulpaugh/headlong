@@ -148,25 +148,25 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    public int validate(final Object val) {
-        validateClass(val);
-        return totalLength(validateElements(val));
+    public int validate(Object value) {
+        validateClass(value);
+        return totalLength(validateElements(value));
     }
 
     private int totalLength(int elementsLen) { // arrays with variable number of elements get +32 for the array length
         return length != DYNAMIC_LENGTH ? elementsLen : ARRAY_LENGTH_BYTES + elementsLen;
     }
 
-    private int validateElements(Object val) {
+    private int validateElements(Object value) {
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return validateBooleans((boolean[]) val);
-        case TYPE_CODE_BYTE: return validateBytes(val);
-        case TYPE_CODE_INT: return validateInts((int[]) val, (IntType) elementType);
-        case TYPE_CODE_LONG: return validateLongs((long[]) val, (LongType) elementType);
+        case TYPE_CODE_BOOLEAN: return validateBooleans((boolean[]) value);
+        case TYPE_CODE_BYTE: return validateBytes(value);
+        case TYPE_CODE_INT: return validateInts((int[]) value, (IntType) elementType);
+        case TYPE_CODE_LONG: return validateLongs((long[]) value, (LongType) elementType);
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return validateObjects((Object[]) val);
+        case TYPE_CODE_TUPLE: return validateObjects((Object[]) value);
         default: throw new Error();
         }
     }
