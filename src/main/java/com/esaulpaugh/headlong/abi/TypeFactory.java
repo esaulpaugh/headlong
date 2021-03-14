@@ -191,16 +191,16 @@ public final class TypeFactory {
         try {
             int argStart = 1; // after opening '('
             int argEnd = 1; // inital value important for empty params case: "()"
-            char prevEndChar = ')'; // inital value important for empty params case
-            final int end = rawTypeStr.length(); // must be >= 1
+            char prevTerminator = ')'; // inital value important for empty params case
+            final int last = rawTypeStr.length() - 1; // must be >= 0
             LOOP:
-            while (argStart < end) {
+            while (argStart <= last) {
                 switch (rawTypeStr.charAt(argStart)) {
                 case '(': // element is tuple or tuple array
                     argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart));
                     break;
                 case ')':
-                    if(prevEndChar != ',') {
+                    if(prevTerminator != ',') {
                         break LOOP;
                     }
                     throw new IllegalArgumentException(EMPTY_PARAMETER);
@@ -213,12 +213,12 @@ public final class TypeFactory {
                     argEnd = nextTerminator(rawTypeStr, argStart);
                 }
                 elements.add(_build(rawTypeStr.substring(argStart, argEnd), null));
-                if((prevEndChar = rawTypeStr.charAt(argEnd)) != ',') {
+                if((prevTerminator = rawTypeStr.charAt(argEnd)) != ',') {
                     break/*LOOP*/;
                 }
                 argStart = argEnd + 1; // jump over terminator
             }
-            if(argEnd == end - 1 && prevEndChar == ')') {
+            if(argEnd == last && prevTerminator == ')') {
                 return TupleType.wrap(elements.toArray(ABIType.EMPTY_TYPE_ARRAY));
             }
         } catch (IllegalArgumentException iae) {
