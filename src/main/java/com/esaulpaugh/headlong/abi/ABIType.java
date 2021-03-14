@@ -19,6 +19,7 @@ import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
+import java.util.function.IntFunction;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
@@ -193,27 +194,22 @@ public abstract class ABIType<J> {
         });
     }
 
-    public static String format(byte[] abi, RowLabeler labeler) {
+    public static String format(byte[] abi, IntFunction<String> labeler) {
         Integers.checkIsMultiple(abi.length, UNIT_LENGTH_BYTES);
         return finishFormat(abi, 0, abi.length, labeler, new StringBuilder());
     }
 
-    static String finishFormat(byte[] buffer, int offset, int end, RowLabeler labeler, StringBuilder sb) {
+    static String finishFormat(byte[] buffer, int offset, int end, IntFunction<String> labeler, StringBuilder sb) {
         int row = 0;
         while(offset < end) {
             if(offset > 0) {
                 sb.append('\n');
             }
-            sb.append(labeler.paddedLabel(row++))
+            sb.append(labeler.apply(row++))
                     .append(Strings.encode(buffer, offset, UNIT_LENGTH_BYTES, Strings.HEX));
             offset += UNIT_LENGTH_BYTES;
         }
         return sb.toString();
-    }
-
-    @FunctionalInterface
-    public interface RowLabeler {
-        String paddedLabel(int row);
     }
 
     private static final int LABEL_PADDED_LEN = 9;

@@ -28,6 +28,7 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.IntFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -354,7 +355,7 @@ public final class Function implements ABIObject {
      * @return the formatted string
      * @throws IllegalArgumentException if the input length mod 32 != 4
      */
-    public static String formatCall(byte[] buffer, int offset, final int length, TupleType.RowLabeler labeler) {
+    public static String formatCall(byte[] buffer, int offset, final int length, IntFunction<String> labeler) {
         Integers.checkIsMultiple(length - SELECTOR_LEN, UNIT_LENGTH_BYTES);
         StringBuilder sb = new StringBuilder(TupleType.pad(0, "ID"))
                 .append(Strings.encode(buffer, offset, SELECTOR_LEN, Strings.HEX));
