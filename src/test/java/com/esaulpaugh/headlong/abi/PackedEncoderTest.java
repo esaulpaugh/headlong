@@ -75,7 +75,7 @@ public class PackedEncoderTest {
     public void testEmptyTupleArray() throws Throwable {
         TupleType tupleType = TupleType.parse("(()[])");
 
-        Tuple test = Tuple.of(((Object) new Tuple[0]));
+        Tuple test = Tuple.singleton((new Tuple[0]));
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
@@ -88,7 +88,7 @@ public class PackedEncoderTest {
     public void testHard() {
         TupleType tupleType = TupleType.parse("((bytes,(uint8[2][2])))");
 
-        Tuple test = Tuple.of(Tuple.of(new byte[0], Tuple.of((Object) new int[][] { new int[] {1,2}, new int[] {3,4} })));
+        Tuple test = Tuple.of(Tuple.of(new byte[0], Tuple.singleton(new int[][] { new int[] {1,2}, new int[] {3,4} })));
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
@@ -110,7 +110,7 @@ public class PackedEncoderTest {
     public void testStaticTupleInsideDynamic() {
         TupleType tupleType = TupleType.parse("((bytes1),bytes)");
 
-        Tuple test = Tuple.of(new Tuple((Object) new byte[] { -1 }), new byte[] { -2, -3 });
+        Tuple test = Tuple.of(Tuple.singleton(new byte[] { -1 }), new byte[] { -2, -3 });
 
         ByteBuffer bb = tupleType.encodePacked(test);
 

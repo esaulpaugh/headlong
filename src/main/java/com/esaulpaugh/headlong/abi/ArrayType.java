@@ -21,8 +21,6 @@ import com.esaulpaugh.headlong.util.SuperSerial;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import java.util.function.IntConsumer;
-import java.util.function.ToIntFunction;
 
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -106,7 +104,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return measureByteLen((Object[]) value);
+        case TYPE_CODE_TUPLE: return measureByteLength((Object[]) value);
         default: throw new Error();
         }
     }
@@ -181,49 +179,54 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private int validateInts(int[] arr, IntType type) {
-        return validateUnits(arr.length, arr, (i) -> type.validatePrimitive(arr[i]));
-    }
-
-    private int validateLongs(long[] arr, LongType type) {
-        return validateUnits(arr.length, arr, (i) -> type.validatePrimitive(arr[i]));
-    }
-
-    private int validateUnits(int len, Object arr, IntConsumer elementValidator) {
-        checkLength(len, arr);
+        checkLength(arr.length, arr);
         int i = 0;
         try {
-            for ( ; i < len; i++) {
-                elementValidator.accept(i);
+            for ( ; i < arr.length; i++) {
+                type.validatePrimitive(arr[i]);
             }
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException("array index " + i + ": " + iae.getMessage());
         }
-        return len * UNIT_LENGTH_BYTES;
+        return arr.length * UNIT_LENGTH_BYTES;
+    }
+
+    private int validateLongs(long[] arr, LongType type) {
+        checkLength(arr.length, arr);
+        int i = 0;
+        try {
+            for ( ; i < arr.length; i++) {
+                type.validatePrimitive(arr[i]);
+            }
+        } catch (IllegalArgumentException iae) {
+            throw new IllegalArgumentException("array index " + i + ": " + iae.getMessage());
+        }
+        return arr.length * UNIT_LENGTH_BYTES;
     }
 
     private int validateObjects(Object[] elements) {
         checkLength(elements.length, elements);
-        return measureObjects(elements, (v) -> elementType.validate(v));
-    }
-
-    private int measureByteLen(Object[] elements) {
-        return measureObjects(elements, (v) -> elementType.byteLength(v));
-    }
-
-    private int measureByteLengthPacked(Object[] elements) {
-        int byteLength = 0; // no offsets when packed
+        int byteLength = elementType.dynamic ? elements.length * OFFSET_LENGTH_BYTES : 0;
         for (Object e : elements) {
-            byteLength += elementType.byteLengthPacked(e);
+            byteLength += elementType.validate(e);
         }
         return byteLength;
     }
 
-    private int measureObjects(Object[] elements, ToIntFunction<Object> ruler) {
-        int byteLength = 0;
+    private int measureByteLength(Object[] elements) {
+        int byteLength = elementType.dynamic ? elements.length * OFFSET_LENGTH_BYTES : 0;
         for (Object e : elements) {
-            byteLength += ruler.applyAsInt(e);
+            byteLength += elementType.byteLength(e);
         }
-        return !elementType.dynamic ? byteLength : (elements.length * OFFSET_LENGTH_BYTES) + byteLength;
+        return byteLength;
+    }
+
+    private int measureByteLengthPacked(Object[] elements) {
+        int byteLength = 0; // offsets not counted for packed
+        for (Object e : elements) {
+            byteLength += elementType.byteLengthPacked(e);
+        }
+        return byteLength;
     }
 
     private int checkLength(final int valueLen, Object value) {
