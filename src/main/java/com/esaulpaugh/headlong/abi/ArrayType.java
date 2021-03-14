@@ -131,7 +131,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return measurePackedByteLen((Object[]) value);
+        case TYPE_CODE_TUPLE: return measureByteLengthPacked((Object[]) value);
         default: throw new Error();
         }
     }
@@ -210,8 +210,12 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return measureObjects(elements, (v) -> elementType.byteLength(v));
     }
 
-    private int measurePackedByteLen(Object[] elements) {
-        return measureObjects(elements, (v) -> elementType.byteLengthPacked(v));
+    private int measureByteLengthPacked(Object[] elements) {
+        int byteLength = 0; // no offsets when packed
+        for (Object e : elements) {
+            byteLength += elementType.byteLengthPacked(e);
+        }
+        return byteLength;
     }
 
     private int measureObjects(Object[] elements, ToIntFunction<Object> ruler) {

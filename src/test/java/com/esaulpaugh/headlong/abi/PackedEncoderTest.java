@@ -50,7 +50,7 @@ public class PackedEncoderTest {
         TestUtils.assertThrown(IllegalArgumentException.class, "multiple dynamic elements", () -> PackedDecoder.decode(tupleType, bb.array()));
 
         TupleType _tt = TupleType.parse("(int144[][1])");
-        Tuple _test = Tuple.of((Object) new BigInteger[][] { new BigInteger[] { } });
+        Tuple _test = Tuple.singleton(new BigInteger[][] { new BigInteger[] { } });
         _tt.validate(_test);
         ByteBuffer _bb = _tt.encodePacked(_test);
         TestUtils.assertThrown(IllegalArgumentException.class, "array of dynamic elements", () -> PackedDecoder.decode(_tt, _bb.array()));
@@ -60,7 +60,7 @@ public class PackedEncoderTest {
     public void testTupleArray() {
         TupleType tupleType = TupleType.parse("((bool)[])");
 
-        Tuple test = Tuple.of(((Object) new Tuple[] { Tuple.of(true), Tuple.of(false), Tuple.of(true) }));
+        Tuple test = Tuple.singleton((new Tuple[] { Tuple.of(true), Tuple.of(false), Tuple.of(true) }));
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
@@ -312,5 +312,14 @@ public class PackedEncoderTest {
         long resultL = PackedDecoder.decodeBigInteger(bytes, 0, 5).longValue();
         assertTrue(resultL < 0);
         assertEquals(expectedL, resultL);
+    }
+
+    @Test
+    public void testTupleLenPacked() {
+        TupleType tt = TupleType.parse("(string[2][2])");
+        Tuple vals = Tuple.singleton(new String[][] { new String[] { "a", "bc" }, new String[] { "defg", "hijklmno" }});
+        int len = tt.byteLengthPacked(vals);
+        assertEquals(15, len);
+        assertEquals("6162636465666768696a6b6c6d6e6f", Strings.encode(tt.encodePacked(vals).array()));
     }
 }

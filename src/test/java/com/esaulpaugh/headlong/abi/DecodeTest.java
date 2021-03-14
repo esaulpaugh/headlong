@@ -199,7 +199,7 @@ public class DecodeTest {
                 "0000000000000000000000000000000000000000000000000000000000000002"
                 )
         );
-        assertEquals(Tuple.of((Object) new Tuple[] { Tuple.EMPTY, Tuple.EMPTY }), decoded);
+        assertEquals(Tuple.singleton(new Tuple[] { Tuple.EMPTY, Tuple.EMPTY }), decoded);
     }
 
     @Test
