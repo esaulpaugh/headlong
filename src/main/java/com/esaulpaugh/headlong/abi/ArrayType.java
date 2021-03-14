@@ -111,10 +111,10 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private int staticByteLengthPacked() {
-        if(length != DYNAMIC_LENGTH) {
-            return length * elementType.byteLengthPacked(null);
+        if(length == DYNAMIC_LENGTH) {
+            throw new IllegalArgumentException("array of dynamic elements");
         }
-        throw new IllegalArgumentException("array of dynamic elements");
+        return length * elementType.byteLengthPacked(null);
     }
 
     @Override
@@ -153,8 +153,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return totalLength(validateElements(value));
     }
 
-    private int totalLength(int elementsLen) { // arrays with variable number of elements get +32 for the array length
-        return length != DYNAMIC_LENGTH ? elementsLen : ARRAY_LENGTH_BYTES + elementsLen;
+    private int totalLength(int elementsLen) { // if type has variable # of elements, add 32 for the array length
+        return length == DYNAMIC_LENGTH ? ARRAY_LENGTH_BYTES + elementsLen : elementsLen;
     }
 
     private int validateElements(Object value) {
