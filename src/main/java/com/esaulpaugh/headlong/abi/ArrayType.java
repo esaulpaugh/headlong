@@ -180,18 +180,15 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private int validateInts(int[] arr, IntType type) {
-        checkLength(arr.length, arr);
-        return countBytes(elementType.dynamic, arr.length, (i) -> type.validatePrimitive(arr[i]));
+        return countBytes(elementType.dynamic, checkLength(arr.length, arr), (i) -> type.validatePrimitive(arr[i]));
     }
 
     private int validateLongs(long[] arr, LongType type) {
-        checkLength(arr.length, arr);
-        return countBytes(elementType.dynamic, arr.length, (i) -> type.validatePrimitive(arr[i]));
+        return countBytes(elementType.dynamic, checkLength(arr.length, arr), (i) -> type.validatePrimitive(arr[i]));
     }
 
     private int validateObjects(Object[] arr) {
-        checkLength(arr.length, arr);
-        return countBytes(elementType.dynamic, arr.length, (i) -> elementType.validate(arr[i]));
+        return countBytes(elementType.dynamic, checkLength(arr.length, arr), (i) -> elementType.validate(arr[i]));
     }
 
     private int measureByteLength(Object[] arr) {
@@ -301,20 +298,16 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                 if (unitBuffer[j] == Encoding.ZERO_BYTE) {
                     continue;
                 }
-                throw illegalBoolean(bb);
+                throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
             }
             byte last = unitBuffer[booleanOffset];
             if (last == Encoding.ONE_BYTE) {
                 booleans[i] = true;
             } else if (last != Encoding.ZERO_BYTE) {
-                throw illegalBoolean(bb);
+                throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
             }
         }
         return booleans;
-    }
-
-    private static IllegalArgumentException illegalBoolean(ByteBuffer bb) {
-        return new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
     }
 
     private Object decodeBytes(int len, ByteBuffer bb) {
