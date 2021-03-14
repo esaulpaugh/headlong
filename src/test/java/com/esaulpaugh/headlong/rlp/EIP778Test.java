@@ -187,7 +187,7 @@ public class EIP778Test {
                     KVP pairA = new KVP(a, EMPTY_BYTE_ARRAY);
                     KVP pairB = new KVP(b, EMPTY_BYTE_ARRAY);
                     int pair = pairA.compareTo(pairB) < 0 ? 0 : 1;
-                    assertEquals(str, pair, pairA + " " + pairB);
+                    assertEquals(str, pair);
                 }
             }
         }
@@ -280,10 +280,7 @@ public class EIP778Test {
                 new KVP(ID, "v4", UTF_8),
                 new KVP(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
         );
-        System.out.println(record.getSignature());
-        for(RLPItem it : record.getContent()) {
-            System.out.println(it);
-        }
+        assertEquals(0, record.getSignature().dataLength);
     }
 
     @Test
