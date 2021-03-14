@@ -50,7 +50,7 @@ public final class Tuple extends AbstractList<Object> implements RandomAccess {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Tuple && Arrays.deepEquals(((Tuple) o).elements, this.elements);
+        return o == this || (o instanceof Tuple && Arrays.deepEquals(((Tuple) o).elements, this.elements));
     }
 
     @Override

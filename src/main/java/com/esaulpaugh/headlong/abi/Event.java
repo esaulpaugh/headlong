@@ -32,12 +32,12 @@ public final class Event implements ABIObject {
 
     private final boolean anonymous;
 
-    public Event(String name, String paramsString, boolean[] indexed) {
-        this(name, paramsString, indexed, false);
+    public Event(String name, String params, boolean[] indexed) {
+        this(name, params, indexed, false);
     }
 
-    public Event(String name, String paramsString, boolean[] indexed, boolean anonymous) {
-        this(name, TupleType.parse(paramsString), indexed, anonymous);
+    public Event(String name, String params, boolean[] indexed, boolean anonymous) {
+        this(name, TupleType.parse(params), indexed, anonymous);
     }
 
     public Event(String name, TupleType params, boolean[] indexed, boolean anonymous) {
@@ -86,6 +86,7 @@ public final class Event implements ABIObject {
 
     @Override
     public boolean equals(Object o) {
+        if(o == this) return true;
         if(!(o instanceof Event)) return false;
         Event other = (Event) o;
         return other.anonymous == this.anonymous

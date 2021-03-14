@@ -286,6 +286,7 @@ public abstract class RLPItem {
 
     @Override
     public final boolean equals(Object o) {
+        if(o == this) return true;
         if(!(o instanceof RLPItem)) return false;
         RLPItem other = (RLPItem) o;
 //        return Arrays.equals( // Java 9+ vectorizedMismatch

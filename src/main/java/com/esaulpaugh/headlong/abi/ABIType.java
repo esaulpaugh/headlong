@@ -179,7 +179,7 @@ public abstract class ABIType<J> {
 
     @Override
     public final boolean equals(Object o) {
-        return o instanceof ABIType && ((ABIType<?>) o).canonicalType.equals(this.canonicalType);
+        return o == this || (o instanceof ABIType && ((ABIType<?>) o).canonicalType.equals(this.canonicalType));
     }
 
     @Override
