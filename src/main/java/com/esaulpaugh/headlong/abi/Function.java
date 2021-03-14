@@ -108,7 +108,7 @@ public final class Function implements ABIObject {
         this.inputTypes = Objects.requireNonNull(inputTypes);
         this.outputTypes = Objects.requireNonNull(outputTypes);
         this.stateMutability = stateMutability;
-        this.hashAlgorithm = messageDigest.getAlgorithm();
+        this.hashAlgorithm = Objects.requireNonNull(messageDigest.getAlgorithm());
         validateFunction();
         generateSelector(messageDigest);
     }
