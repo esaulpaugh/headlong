@@ -202,28 +202,28 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private int validateObjects(Object[] elements) {
         checkLength(elements.length, elements);
-        return measureObjects(elements, (int i) -> elementType.validate(elements[i]));
+        return measureObjects(elements, elementType::validate);
     }
 
     private int measureByteLen(Object[] elements) {
-        return measureObjects(elements, (int i) -> elementType.byteLength(elements[i]));
+        return measureObjects(elements, elementType::byteLength);
     }
 
     private int measurePackedByteLen(Object[] elements) {
-        return measureObjects(elements, (int i) -> elementType.byteLengthPacked(elements[i]));
+        return measureObjects(elements, elementType::byteLengthPacked);
     }
 
     private int measureObjects(Object[] elements, Inspector inspector) {
         int byteLength = 0;
-        for (int i = 0; i < elements.length; i++) {
-            byteLength += inspector.inspect(i);
+        for (Object e : elements) {
+            byteLength += inspector.inspect(e);
         }
         return !elementType.dynamic ? byteLength : (elements.length * OFFSET_LENGTH_BYTES) + byteLength;
     }
 
     @FunctionalInterface
     private interface Inspector {
-        int inspect(int i);
+        int inspect(Object o);
     }
 
     private int checkLength(final int valueLen, Object value) {
