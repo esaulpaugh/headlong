@@ -21,6 +21,7 @@ import com.esaulpaugh.headlong.util.SuperSerial;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
+import java.util.function.IntUnaryOperator;
 
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -180,51 +181,36 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private int validateInts(int[] arr, IntType type) {
         checkLength(arr.length, arr);
-        int i = 0;
-        try {
-            for ( ; i < arr.length; i++) {
-                type.validatePrimitive(arr[i]);
-            }
-        } catch (IllegalArgumentException iae) {
-            throw new IllegalArgumentException("array index " + i + ": " + iae.getMessage());
-        }
-        return arr.length * UNIT_LENGTH_BYTES;
+        return countBytes(elementType.dynamic, arr.length, (i) -> type.validatePrimitive(arr[i]));
     }
 
     private int validateLongs(long[] arr, LongType type) {
         checkLength(arr.length, arr);
+        return countBytes(elementType.dynamic, arr.length, (i) -> type.validatePrimitive(arr[i]));
+    }
+
+    private int validateObjects(Object[] arr) {
+        checkLength(arr.length, arr);
+        return countBytes(elementType.dynamic, arr.length, (i) -> elementType.validate(arr[i]));
+    }
+
+    private int measureByteLength(Object[] arr) {
+        return countBytes(elementType.dynamic, arr.length, (i) -> elementType.byteLength(arr[i]));
+    }
+
+    private int measureByteLengthPacked(Object[] arr) { // don't count offsets
+        return countBytes(false, arr.length, (i) -> elementType.byteLengthPacked(arr[i]));
+    }
+
+    private static int countBytes(boolean dynamics, int len, IntUnaryOperator counter) {
+        int byteLength = dynamics ? len * OFFSET_LENGTH_BYTES : 0;
         int i = 0;
         try {
-            for ( ; i < arr.length; i++) {
-                type.validatePrimitive(arr[i]);
+            for ( ; i < len; i++) {
+                byteLength += counter.applyAsInt(i);
             }
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException("array index " + i + ": " + iae.getMessage());
-        }
-        return arr.length * UNIT_LENGTH_BYTES;
-    }
-
-    private int validateObjects(Object[] elements) {
-        checkLength(elements.length, elements);
-        int byteLength = elementType.dynamic ? elements.length * OFFSET_LENGTH_BYTES : 0;
-        for (Object e : elements) {
-            byteLength += elementType.validate(e);
-        }
-        return byteLength;
-    }
-
-    private int measureByteLength(Object[] elements) {
-        int byteLength = elementType.dynamic ? elements.length * OFFSET_LENGTH_BYTES : 0;
-        for (Object e : elements) {
-            byteLength += elementType.byteLength(e);
-        }
-        return byteLength;
-    }
-
-    private int measureByteLengthPacked(Object[] elements) {
-        int byteLength = 0; // offsets not counted for packed
-        for (Object e : elements) {
-            byteLength += elementType.byteLengthPacked(e);
         }
         return byteLength;
     }
