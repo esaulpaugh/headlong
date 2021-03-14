@@ -22,6 +22,7 @@ import com.esaulpaugh.headlong.util.SuperSerial;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.function.IntConsumer;
+import java.util.function.ToIntFunction;
 
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -213,17 +214,12 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return measureObjects(elements, (v) -> elementType.byteLengthPacked(v));
     }
 
-    private int measureObjects(Object[] elements, Inspector inspector) {
+    private int measureObjects(Object[] elements, ToIntFunction<Object> ruler) {
         int byteLength = 0;
         for (Object e : elements) {
-            byteLength += inspector.inspect(e);
+            byteLength += ruler.applyAsInt(e);
         }
         return !elementType.dynamic ? byteLength : (elements.length * OFFSET_LENGTH_BYTES) + byteLength;
-    }
-
-    @FunctionalInterface
-    private interface Inspector {
-        int inspect(Object v);
     }
 
     private int checkLength(final int valueLen, Object value) {
