@@ -170,7 +170,9 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     void runJson(Random r) {
-        assertEquals(function, Function.fromJson(function.toJson(r.nextBoolean())));
+        if(r.nextInt(10) == 0) {
+            assertEquals(function, Function.fromJson(function.toJson(r.nextBoolean())));
+        }
     }
 
     ByteBuffer runStandard() {
