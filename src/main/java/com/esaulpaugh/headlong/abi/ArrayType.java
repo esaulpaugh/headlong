@@ -202,15 +202,15 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private int validateObjects(Object[] elements) {
         checkLength(elements.length, elements);
-        return measureObjects(elements, elementType::validate);
+        return measureObjects(elements, (v) -> elementType.validate(v));
     }
 
     private int measureByteLen(Object[] elements) {
-        return measureObjects(elements, elementType::byteLength);
+        return measureObjects(elements, (v) -> elementType.byteLength(v));
     }
 
     private int measurePackedByteLen(Object[] elements) {
-        return measureObjects(elements, elementType::byteLengthPacked);
+        return measureObjects(elements, (v) -> elementType.byteLengthPacked(v));
     }
 
     private int measureObjects(Object[] elements, Inspector inspector) {
@@ -223,7 +223,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     @FunctionalInterface
     private interface Inspector {
-        int inspect(Object o);
+        int inspect(Object v);
     }
 
     private int checkLength(final int valueLen, Object value) {
