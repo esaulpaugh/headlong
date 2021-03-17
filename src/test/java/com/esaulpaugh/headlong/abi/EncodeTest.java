@@ -476,8 +476,8 @@ public class EncodeTest {
 
     @Test
     public void testTypeSafety() throws Throwable {
-        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Object != java.lang.Integer (int32 requires Integer but found Object)",
-                () -> Function.parse("foo(int32)").encodeCallWithArgs(new Object())
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1: class mismatch: java.lang.Object != java.lang.Integer (int32 requires Integer but found Object)",
+                () -> Function.parse("foo(bool,int32)").encodeCallWithArgs(false, new Object())
         );
 
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Long != [I (int32[] requires int[] but found Long)",

@@ -37,7 +37,7 @@ public final class ByteType extends UnitType<Byte> {
     }
 
     @Override
-    int byteLengthPacked(Byte value) {
+    int byteLengthPacked(Object value) {
         return Byte.BYTES;
     }
 

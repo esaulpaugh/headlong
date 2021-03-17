@@ -255,14 +255,14 @@ public class MonteCarloTestCase implements Serializable {
         }
         try {
             ByteBuffer bb = tt.encodePacked(args);
-            Tuple decoded = PackedDecoder.decode(tt, bb.array());
+            Tuple decoded = tt.decodePacked(bb.array());
             if (!decoded.equals(args)) {
                 throw new RuntimeException("not equal: " + tt.canonicalType);
             }
         } catch (IllegalArgumentException iae) {
             String msg = iae.getMessage();
             if(!"multiple dynamic elements".equals(msg)
-                    && !"array of dynamic elements".equals(msg)
+                    && !msg.endsWith("array of dynamic elements")
                     && !"can't decode dynamic number of zero-length elements".equals(msg)
                     && !msg.startsWith("illegal boolean value: ")) {
                 throw new RuntimeException(tt.canonicalType + " " + msg, iae);

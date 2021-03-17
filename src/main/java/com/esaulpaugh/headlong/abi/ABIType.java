@@ -85,33 +85,13 @@ public abstract class ABIType<J> {
      */
     public abstract int typeCode();
 
-    @SuppressWarnings("unchecked")
-    final int _byteLength(Object value) {
-        return byteLength((J) value);
-    }
-
-    @SuppressWarnings("unchecked")
-    final int _byteLengthPacked(Object value) {
-        return byteLengthPacked((J) value);
-    }
-
     public final int _validate(Object value) {
         return validate(validateClass(value));
     }
 
-    @SuppressWarnings("unchecked")
-    final int _encodeHead(Object value, ByteBuffer dest, int nextOffset) {
-        return encodeHead((J) value, dest, nextOffset);
-    }
+    abstract int byteLength(Object value);
 
-    @SuppressWarnings("unchecked")
-    final void _encodeTail(Object value, ByteBuffer dest) {
-         encodeTail((J) value, dest);
-    }
-
-    abstract int byteLength(J value);
-
-    abstract int byteLengthPacked(J value);
+    abstract int byteLengthPacked(Object value);
 
     public final ByteBuffer encode(J value) {
         ByteBuffer dest = ByteBuffer.allocate(validate(value));
@@ -161,7 +141,7 @@ public abstract class ABIType<J> {
         return validate(value);
     }
 
-    int encodeHead(J value, ByteBuffer dest, int nextOffset) {
+    int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
         if (!dynamic) {
             encodeTail(value, dest);
             return nextOffset;
@@ -169,7 +149,7 @@ public abstract class ABIType<J> {
         return Encoding.insertOffset(nextOffset, dest, byteLength(value));
     }
 
-    abstract void encodeTail(J value, ByteBuffer dest);
+    abstract void encodeTail(Object value, ByteBuffer dest);
 
     public final J decode(byte[] array) {
         ByteBuffer bb = ByteBuffer.wrap(array);
