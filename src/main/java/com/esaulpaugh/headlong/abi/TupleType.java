@@ -99,10 +99,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             for ( ; i < len; i++) {
                 count += counter.applyAsInt(i);
             }
+            return count;
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException((array ? "array" : "tuple") + " index " + i + ": " + iae.getMessage());
         }
-        return count;
     }
 
     @Override
@@ -113,8 +113,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 final Object v = value.elements[i];
                 try {
                     return type.dynamic ? OFFSET_LENGTH_BYTES + type._validate(v) : type._validate(v);
-                } catch (NullPointerException | IllegalArgumentException ex) {
-                    throw ex instanceof NullPointerException ? new IllegalArgumentException(ex.getMessage(), ex) : ex;
+                } catch (NullPointerException npe) {
+                    throw new IllegalArgumentException("null", npe);
                 }
             });
         }
