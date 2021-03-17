@@ -25,10 +25,10 @@ public final class Strings {
 
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
-    public static final int ASCII = 3; // 128
-    public static final int BASE_64_URL_SAFE = 2; // 64
-    public static final int UTF_8 = 1; // 256
     public static final int HEX = 0; // 16
+    public static final int UTF_8 = 1; // 256
+    public static final int BASE_64_URL_SAFE = 2; // 64
+    public static final int ASCII = 3; // 128
 
     public static final int URL_SAFE_FLAGS = FastBase64.URL_SAFE_CHARS | FastBase64.NO_LINE_SEP | FastBase64.NO_PADDING;
 
