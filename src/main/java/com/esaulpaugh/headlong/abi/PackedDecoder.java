@@ -110,7 +110,9 @@ public final class PackedDecoder {
                 start += decode(elementTypes[i], buffer, start, end, elements, i);
             }
         }
-        return tupleType.byteLengthPacked(parentElements[pei] = new Tuple(elements));
+        Tuple t = new Tuple(elements);
+        parentElements[pei] = t;
+        return tupleType.byteLengthPacked(t);
     }
 
     private static int decode(ABIType<?> type, byte[] buffer, int idx, int end, Object[] elements, int i) {
@@ -136,7 +138,9 @@ public final class PackedDecoder {
         for (int i = 0; i < elementTypes.length; i++) {
             idx += decode(elementTypes[i], buffer, idx, end, elements, i);
         }
-        return tupleType.byteLengthPacked(parentElements[pei] = new Tuple(elements));
+        Tuple t = new Tuple(elements);
+        parentElements[pei] = t;
+        return tupleType.byteLengthPacked(t);
     }
 
     private static int insertInt(UnitType<? extends Number> type, byte[] buffer, int idx, int len, Object[] dest, int destIdx) {

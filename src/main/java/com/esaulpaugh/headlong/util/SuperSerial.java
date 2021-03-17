@@ -75,7 +75,7 @@ public final class SuperSerial {
     public static <T> T deserializeArray(ArrayType<? extends ABIType<?>, ?> arrayType, String str, boolean machine, Class<T> classOfT) {
         byte[] rlp = machine ? Strings.decode(str) : RLPEncoder.encodeSequentially(NotationParser.parse(str));
         Object array = deserializeArray(arrayType, RLP_STRICT.wrap(rlp));
-        arrayType.validate(array);
+        arrayType._validate(array);
         return classOfT.cast(array);
     }
 

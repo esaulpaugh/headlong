@@ -54,23 +54,22 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     }
 
     @Override
-    final int byteLength(Object value) {
+    final int byteLength(J value) {
         return UNIT_LENGTH_BYTES;
     }
 
     @Override
-    int byteLengthPacked(Object value) {
+    int byteLengthPacked(J value) {
         return bitLength / Byte.SIZE;
     }
 
     @Override
-    public int validate(Object value) {
-        validateClass(value);
+    public int validate(J value) {
         return validatePrimitive(((Number) value).longValue());
     }
 
     @Override
-    void encodeTail(Object value, ByteBuffer dest) {
+    void encodeTail(J value, ByteBuffer dest) {
         Encoding.insertInt(((Number) value).longValue(), dest);
     }
 

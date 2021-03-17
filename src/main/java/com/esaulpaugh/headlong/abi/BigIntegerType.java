@@ -36,15 +36,14 @@ public final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
-    public int validate(Object value) {
-        validateClass(value);
-        validateBigInt((BigInteger) value);
+    public int validate(BigInteger value) {
+        validateBigInt(value);
         return UNIT_LENGTH_BYTES;
     }
 
     @Override
-    int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
-        Encoding.insertInt((BigInteger) value, UNIT_LENGTH_BYTES, dest);
+    int encodeHead(BigInteger value, ByteBuffer dest, int nextOffset) {
+        Encoding.insertInt(value, UNIT_LENGTH_BYTES, dest);
         return nextOffset;
     }
 

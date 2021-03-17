@@ -73,11 +73,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    int byteLength(Object value) {
+    int byteLength(Tuple value) {
         final Object[] elements = ((Tuple) value).elements;
         return len((i) -> {
             ABIType<?> type = elementTypes[i];
-            int byteLen = type.byteLength(elements[i]);
+            int byteLen = type._byteLength(elements[i]);
             return type.dynamic ? OFFSET_LENGTH_BYTES + byteLen : byteLen;
         });
     }
@@ -87,9 +87,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
      * @return the length in bytes of the non-standard packed encoding
      */
     @Override
-    public int byteLengthPacked(Object value) {
-        final Object[] elements = value != null ? ((Tuple) value).elements : new Object[elementTypes.length];
-        return len((i) -> elementTypes[i].byteLengthPacked(elements[i]));
+    public int byteLengthPacked(Tuple value) {
+        final Object[] elements = value != null ? value.elements : new Object[elementTypes.length];
+        return len((i) -> elementTypes[i]._byteLengthPacked(elements[i]));
     }
 
     private int len(IntFunction<Integer> elementCount) {
@@ -101,20 +101,22 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    public int validate(final Object value) {
-        validateClass(value);
-
-        final Object[] elements = ((Tuple) value).elements;
+    public int validate(final Tuple value) {
+        final Object[] elements = value.elements;
 
         if(elements.length == elementTypes.length) {
             int i = 0;
             try {
                 return len((j) -> {
                     ABIType<?> type = elementTypes[j];
-                    int byteLen = type.validate(elements[j]);
+                    int byteLen = type._validate(elements[j]);
                     return type.dynamic ? OFFSET_LENGTH_BYTES + byteLen : byteLen;
                 });
-            } catch (NullPointerException | IllegalArgumentException e) {
+            } catch (NullPointerException | IllegalArgumentException | ClassCastException e) {
+                if(e instanceof ClassCastException) {
+                    validateClass(elements[i]);
+                    throw new Error(); // validateClass must throw
+                }
                 throw new IllegalArgumentException("tuple index " + i + ": " + e.getMessage(), e);
             }
         }
@@ -122,19 +124,19 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    void encodeTail(Object value, ByteBuffer dest) {
-        encodeObjects(dynamic, ((Tuple) value).elements, (i) -> elementTypes[i], dest);
+    void encodeTail(Tuple value, ByteBuffer dest) {
+        encodeObjects(dynamic, value.elements, (i) -> elementTypes[i], dest);
     }
 
     static void encodeObjects(boolean dynamic, Object[] values, IntFunction<ABIType<?>> getType, ByteBuffer dest) {
         int nextOffset = !dynamic ? 0 : headLength(values, getType);
         for (int i = 0; i < values.length; i++) {
-            nextOffset = getType.apply(i).encodeHead(values[i], dest, nextOffset);
+            nextOffset = getType.apply(i)._encodeHead(values[i], dest, nextOffset);
         }
         for (int i = 0; i < values.length; i++) {
             ABIType<?> t = getType.apply(i);
             if(t.dynamic) {
-                t.encodeTail(values[i], dest);
+                t._encodeTail(values[i], dest);
             }
         }
     }
@@ -143,7 +145,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         int sum = 0;
         for (int i = 0; i < elements.length; i++) {
             ABIType<?> type = getType.apply(i);
-            sum += !type.dynamic ? type.byteLength(elements[i]) : OFFSET_LENGTH_BYTES;
+            sum += !type.dynamic ? type._byteLength(elements[i]) : OFFSET_LENGTH_BYTES;
         }
         return sum;
     }
@@ -200,46 +202,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
      *
      * @param elements  values corresponding to this {@link TupleType}'s element types
      * @return  the encoding
-     * @see #encode(Tuple)
      */
     public ByteBuffer encodeElements(Object... elements) {
         return encode(new Tuple(elements));
-    }
-
-    public ByteBuffer encode(Tuple values) {
-        ByteBuffer dest = ByteBuffer.allocate(validate(values));
-        encodeTail(values, dest);
-        return dest;
-    }
-
-    public TupleType encode(Tuple values, ByteBuffer dest) {
-        validate(values);
-        encodeTail(values, dest);
-        return this;
-    }
-
-    /**
-     * Returns the non-standard-packed encoding of {@code values}.
-     *
-     * @param values the argument to be encoded
-     * @return the encoding
-     */
-    public ByteBuffer encodePacked(Tuple values) {
-        validate(values);
-        ByteBuffer dest = ByteBuffer.allocate(byteLengthPacked(values));
-        PackedEncoder.encodeTuple(this, values, dest);
-        return dest;
-    }
-
-    /**
-     * Puts into the given {@link ByteBuffer} at its current position the non-standard packed encoding of {@code values}.
-     *
-     * @param values the argument to be encoded
-     * @param dest   the destination buffer
-     */
-    public void encodePacked(Tuple values, ByteBuffer dest) {
-        validate(values);
-        PackedEncoder.encodeTuple(this, values, dest);
     }
 
     @Override

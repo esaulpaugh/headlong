@@ -85,15 +85,68 @@ public abstract class ABIType<J> {
      */
     public abstract int typeCode();
 
-    abstract int byteLength(Object value);
+    @SuppressWarnings("unchecked")
+    final int _byteLength(Object value) {
+        return byteLength((J) value);
+    }
 
-    abstract int byteLengthPacked(Object value);
+    @SuppressWarnings("unchecked")
+    final int _byteLengthPacked(Object value) {
+        return byteLengthPacked((J) value);
+    }
 
-    public final ByteBuffer encode(Object value) {
-        validate(value);
+    public final int _validate(Object value) {
+        return validate(validateClass(value));
+    }
+
+    @SuppressWarnings("unchecked")
+    final int _encodeHead(Object value, ByteBuffer dest, int nextOffset) {
+        return encodeHead((J) value, dest, nextOffset);
+    }
+
+    @SuppressWarnings("unchecked")
+    final void _encodeTail(Object value, ByteBuffer dest) {
+         encodeTail((J) value, dest);
+    }
+
+    abstract int byteLength(J value);
+
+    abstract int byteLengthPacked(J value);
+
+    public final ByteBuffer encode(J value) {
         ByteBuffer dest = ByteBuffer.allocate(validate(value));
         encodeTail(value, dest);
         return dest;
+    }
+
+    public final ABIType<J> encode(J value, ByteBuffer dest) {
+        validate(value);
+        encodeTail(value, dest);
+        return this;
+    }
+
+    /**
+     * Returns the non-standard-packed encoding of {@code values}.
+     *
+     * @param value the argument to be encoded
+     * @return the encoding
+     */
+    public final ByteBuffer encodePacked(J value) {
+        validate(value);
+        ByteBuffer dest = ByteBuffer.allocate(byteLengthPacked(value));
+        PackedEncoder.encode(this, value, dest);
+        return dest;
+    }
+
+    /**
+     * Puts into the given {@link ByteBuffer} at its current position the non-standard packed encoding of {@code value}.
+     *
+     * @param value the argument to be encoded
+     * @param dest   the destination buffer
+     */
+    public final void encodePacked(J value, ByteBuffer dest) {
+        validate(value);
+        PackedEncoder.encode(this, value, dest);
     }
 
     /**
@@ -102,13 +155,13 @@ public abstract class ABIType<J> {
      * @param value an object of type J
      * @return the byte length of the ABI encoding of {@code value}
      */
-    public abstract int validate(Object value);
+    public abstract int validate(J value);
 
-    public final int measureEncodedLength(Object value) {
+    public final int measureEncodedLength(J value) {
         return validate(value);
     }
 
-    int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
+    int encodeHead(J value, ByteBuffer dest, int nextOffset) {
         if (!dynamic) {
             encodeTail(value, dest);
             return nextOffset;
@@ -116,7 +169,7 @@ public abstract class ABIType<J> {
         return Encoding.insertOffset(nextOffset, dest, byteLength(value));
     }
 
-    abstract void encodeTail(Object value, ByteBuffer dest);
+    abstract void encodeTail(J value, ByteBuffer dest);
 
     public final J decode(byte[] array) {
         ByteBuffer bb = ByteBuffer.wrap(array);
@@ -150,7 +203,8 @@ public abstract class ABIType<J> {
      */
     public abstract J parseArgument(String s);
 
-    final void validateClass(Object value) {
+    @SuppressWarnings("unchecked")
+    final J validateClass(Object value) {
         if(!clazz.isInstance(value)) {
             if(value == null) {
                 throw new NullPointerException();
@@ -159,6 +213,7 @@ public abstract class ABIType<J> {
                             value.getClass().getName(), clazz.getName(),
                             friendlyClassName(clazz, -1), friendlyClassName(value.getClass(), -1));
         }
+        return (J) value;
     }
 
     IllegalArgumentException mismatchErr(String prefix, String a, String e, String r, String f) {

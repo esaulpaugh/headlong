@@ -289,7 +289,7 @@ public class DecodeTest {
     }
 
     @Test
-    public void testStringArray()  {
+    public void testStringArray() throws Throwable {
         final ArrayType<ArrayType<ByteType, String>, String[]> type = (ArrayType<ArrayType<ByteType, String>, String[]>) TypeFactory.create("string[]", String[].class, "nam");
         final String[] array = new String[] { "Hello, world!", "world! Hello," };
         final ByteBuffer abi = ByteBuffer.wrap(
@@ -310,6 +310,12 @@ public class DecodeTest {
             final ABIType<?>                  a = TypeFactory.create("string[]");
             final ABIType<Object>             b = TypeFactory.create("string[]", Object.class);
             final ABIType<String[]>           c = TypeFactory.create("string[]", String[].class);
+            final ABIType<Object[]>           c_ = TypeFactory.create("string[]", Object[].class);
+            assertThrown(
+                    IllegalArgumentException.class,
+                    "class mismatch: [Ljava.lang.Object; != [Ljava.lang.String; (string[] requires String[] but found Object[])",
+                    () -> c_.encode(new Object[] { "" })
+            );
             final ABIType<String[]>           d = TypeFactory.create("string[]", null);
             final ABIType<?>                  e = TypeFactory.create("string[]", null);
             final ABIType<? extends String[]> f = TypeFactory.create("string[]", null);
