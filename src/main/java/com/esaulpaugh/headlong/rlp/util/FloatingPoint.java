@@ -17,8 +17,6 @@ package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.util.Integers;
 
-import java.math.BigDecimal;
-
 /** Utility for reading and writing floating point numbers from and to RLP format. */
 public final class FloatingPoint {
 
@@ -50,11 +48,5 @@ public final class FloatingPoint {
 
     public static byte[] toBytes(double val) {
         return Integers.toBytes(Double.doubleToLongBits(val));
-    }
-
-    /* BigDecimal */
-
-    public static BigDecimal getBigDecimal(byte[] bytes, int i, int unscaledNumBytes, int scale, boolean lenient) {
-        return new BigDecimal(Integers.getBigInt(bytes, i, unscaledNumBytes, lenient), scale);
     }
 }
