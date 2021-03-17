@@ -112,30 +112,6 @@ public final class Uint {
         throw tooManyBitsException(bitLen, numBits, true);
     }
 
-    public long[] toUnsignedLongAll(int... signeds) {
-        long[] out = new long[signeds.length];
-        for (int i = 0; i < out.length; i++) {
-            out[i] = toUnsignedLong(signeds[i]);
-        }
-        return out;
-    }
-
-    public BigInteger[] toUnsignedAll(long... signeds) {
-        BigInteger[] out = new BigInteger[signeds.length];
-        for (int i = 0; i < out.length; i++) {
-            out[i] = toUnsigned(signeds[i]);
-        }
-        return out;
-    }
-
-    public BigInteger[] toUnsignedAll(BigInteger... signeds) {
-        BigInteger[] out = new BigInteger[signeds.length];
-        for (int i = 0; i < out.length; i++) {
-            out[i] = toUnsigned(signeds[i]);
-        }
-        return out;
-    }
-
     private static IllegalArgumentException tooManyBitsException(int bitLen, int rangeNumBits, boolean signed) {
         return signed
                 ? new IllegalArgumentException("signed has too many bits: " + bitLen + " is not less than " + rangeNumBits)
