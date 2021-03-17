@@ -66,11 +66,7 @@ public final class FastHex {
         DECODE_TABLE['F'] = DECODE_TABLE['f'] = 0xf;
     }
 
-    public static String encodeToString(byte b) {
-        return encodeToString(new byte[] { b });
-    }
-
-    public static String encodeToString(byte[] buffer) {
+    public static String encodeToString(byte... buffer) {
         return encodeToString(buffer, 0, buffer.length);
     }
 
