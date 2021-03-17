@@ -195,6 +195,11 @@ public abstract class ABIType<J> {
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
 
+    @SuppressWarnings("unchecked")
+    public final J decodePacked(byte[] buffer) {
+        return (J) PackedDecoder.decode(TupleType.wrap(new ABIType[] { this } ), buffer).get(0);
+    }
+
     /**
      * Parses and validates a string representation of J.
      *
