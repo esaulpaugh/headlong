@@ -76,8 +76,6 @@ public abstract class ABIType<J> {
         return this;
     }
 
-    abstract Class<?> arrayClass() throws ClassNotFoundException;
-
     /**
      * Returns an integer code specific to this instance's class, which is a subclass of {@link ABIType}.
      *
@@ -85,13 +83,47 @@ public abstract class ABIType<J> {
      */
     public abstract int typeCode();
 
-    public final int _validate(Object value) {
-        return validate(validateClass(value));
-    }
+    abstract Class<?> arrayClass() throws ClassNotFoundException;
 
     abstract int byteLength(Object value);
 
     abstract int byteLengthPacked(Object value);
+
+    /**
+     * Checks whether the given object is a valid argument for this {@link ABIType}. Requires an instance of type J.
+     *
+     * @param value an object of type J
+     * @return the byte length of the ABI encoding of {@code value}
+     */
+    public abstract int validate(J value);
+
+    public final int _validate(Object value) {
+        return validate(validateClass(value));
+    }
+
+    @SuppressWarnings("unchecked")
+    final J validateClass(Object value) {
+        if(!clazz.isInstance(value)) {
+            if(value == null) {
+                throw new NullPointerException();
+            }
+            throw mismatchErr("class",
+                    value.getClass().getName(), clazz.getName(),
+                    friendlyClassName(clazz, -1), friendlyClassName(value.getClass(), -1));
+        }
+        return (J) value;
+    }
+
+    IllegalArgumentException mismatchErr(String prefix, String a, String e, String r, String f) {
+        return new IllegalArgumentException(
+                prefix + " mismatch: " + a + " != " + e + " ("
+                        + canonicalType + " requires " + r + " but found " + f + ")"
+        );
+    }
+
+    public final int measureEncodedLength(J value) {
+        return validate(value);
+    }
 
     public final ByteBuffer encode(J value) {
         ByteBuffer dest = ByteBuffer.allocate(validate(value));
@@ -104,6 +136,16 @@ public abstract class ABIType<J> {
         encodeTail(value, dest);
         return this;
     }
+
+    int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
+        if (!dynamic) {
+            encodeTail(value, dest);
+            return nextOffset;
+        }
+        return Encoding.insertOffset(nextOffset, dest, byteLength(value));
+    }
+
+    abstract void encodeTail(Object value, ByteBuffer dest);
 
     /**
      * Returns the non-standard-packed encoding of {@code values}.
@@ -128,28 +170,6 @@ public abstract class ABIType<J> {
         validate(value);
         PackedEncoder.encode(this, value, dest);
     }
-
-    /**
-     * Checks whether the given object is a valid argument for this {@link ABIType}. Requires an instance of type J.
-     *
-     * @param value an object of type J
-     * @return the byte length of the ABI encoding of {@code value}
-     */
-    public abstract int validate(J value);
-
-    public final int measureEncodedLength(J value) {
-        return validate(value);
-    }
-
-    int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
-        if (!dynamic) {
-            encodeTail(value, dest);
-            return nextOffset;
-        }
-        return Encoding.insertOffset(nextOffset, dest, byteLength(value));
-    }
-
-    abstract void encodeTail(Object value, ByteBuffer dest);
 
     public final J decode(byte[] array) {
         ByteBuffer bb = ByteBuffer.wrap(array);
@@ -187,26 +207,6 @@ public abstract class ABIType<J> {
      * @return  the object
      */
     public abstract J parseArgument(String s);
-
-    @SuppressWarnings("unchecked")
-    final J validateClass(Object value) {
-        if(!clazz.isInstance(value)) {
-            if(value == null) {
-                throw new NullPointerException();
-            }
-            throw mismatchErr("class",
-                            value.getClass().getName(), clazz.getName(),
-                            friendlyClassName(clazz, -1), friendlyClassName(value.getClass(), -1));
-        }
-        return (J) value;
-    }
-
-    IllegalArgumentException mismatchErr(String prefix, String a, String e, String r, String f) {
-        return new IllegalArgumentException(
-                prefix + " mismatch: " + a + " != " + e + " ("
-                + canonicalType + " requires " + r + " but found " + f + ")"
-        );
-    }
 
     static byte[] newUnitBuffer() {
         return new byte[UNIT_LENGTH_BYTES];
