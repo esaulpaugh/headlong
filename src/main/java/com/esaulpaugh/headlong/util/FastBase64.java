@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.util;
 
-import java.nio.charset.StandardCharsets;
-
 public final class FastBase64 {
 
     private FastBase64() {}
