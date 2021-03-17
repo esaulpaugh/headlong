@@ -565,6 +565,7 @@ public class EncodeTest {
 
     private static final double DELTA = 0.000000000000000001d;
     private static final BigDecimal O_1 = new BigDecimal("0.1");
+    private static final BigDecimal O_000000000000000001 = new BigDecimal("0.000000000000000001");
 
     @Test
     public void testDecimalMinMax() throws Throwable {
@@ -586,7 +587,9 @@ public class EncodeTest {
         assertEquals(u128Max.doubleValue(), ufixed.maxDecimal().doubleValue(), DELTA);
 
         ufixed.validate(new BigDecimal(BigInteger.ZERO, 18));
-        assertThrown(ILLEGAL, "signed value given for unsigned type", () -> ufixed.validate(O_1.negate()));
+        assertThrown(ILLEGAL, "BigDecimal scale mismatch: actual != expected: 1 != 18", () -> ufixed.validate(O_1.negate()));
+        ufixed.validate(O_000000000000000001);
+        assertThrown(ILLEGAL, "signed value given for unsigned type", () -> ufixed.validate(O_000000000000000001.negate()));
 
         ufixed.validate(u128Max);
         assertThrown(ILLEGAL, "unsigned val exceeds bit limit: 129 > 128", () -> ufixed.validate(u128Max.add(BigDecimal.ONE)));

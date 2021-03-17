@@ -85,11 +85,12 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         return UNIT_LENGTH_BYTES;
     }
 
-    final void validateBigInt(BigInteger bigIntVal) {
+    final int validateBigInt(BigInteger bigIntVal) {
         if(unsigned && bigIntVal.signum() < 0) {
             throw new IllegalArgumentException("signed value given for unsigned type");
         }
         checkBitLen(bigIntVal.bitLength());
+        return UNIT_LENGTH_BYTES;
     }
 
     final void checkBitLen(int actual) {
