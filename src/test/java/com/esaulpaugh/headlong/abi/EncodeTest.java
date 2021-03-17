@@ -476,6 +476,10 @@ public class EncodeTest {
 
     @Test
     public void testTypeSafety() throws Throwable {
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1: null",
+                () -> Function.parse("foo(bool,int32)").encodeCallWithArgs(true, null)
+        );
+
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1: class mismatch: java.lang.Object != java.lang.Integer (int32 requires Integer but found Object)",
                 () -> Function.parse("foo(bool,int32)").encodeCallWithArgs(false, new Object())
         );
