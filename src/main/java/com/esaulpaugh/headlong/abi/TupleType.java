@@ -113,16 +113,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 final Object v = value.elements[i];
                 try {
                     return type.dynamic ? OFFSET_LENGTH_BYTES + type._validate(v) : type._validate(v);
-                } catch (IllegalArgumentException | NullPointerException | ClassCastException e) {
-                    if (e instanceof NullPointerException) {
-                        throw new IllegalArgumentException(e.getMessage(), e);
-                    }
-                    if (v instanceof ClassCastException) {
-                        validateClass(v);
-                        throw new Error(); // validateClass must throw
-                    }
-                    throw e;
-//                    throw new IllegalArgumentException(" index " + i + ": " + ex.getMessage(), ex);
+                } catch (NullPointerException | IllegalArgumentException ex) {
+                    throw ex instanceof NullPointerException ? new IllegalArgumentException(ex.getMessage(), ex) : ex;
                 }
             });
         }
