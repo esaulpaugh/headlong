@@ -58,7 +58,7 @@ public class EncodeTest {
     @Test
     public void fuzzSignatures() throws InterruptedException, TimeoutException {
 
-        final byte[] alphabet = "x0123456789".getBytes(StandardCharsets.US_ASCII); // new char[128]; // "(),abcdefgilmnorstuxy8[]"
+        final byte[] alphabet = Strings.decode("x0123456789", Strings.ASCII); // new char[128]; // "(),abcdefgilmnorstuxy8[]"
         final int alphabetLen = alphabet.length;
         if (alphabetLen == 128) {
             for (int i = 0; i < alphabetLen; i++) { // (fixed128x18)

@@ -30,11 +30,11 @@ public final class FastBase64 {
     private static final int LINE_SEP_LEN = 2;
     private static final byte PADDING_BYTE = '=';
 
-    private static final short[] URL_SAFE = init("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".getBytes(StandardCharsets.US_ASCII));
+    private static final short[] URL_SAFE = init(Strings.decode("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_", Strings.ASCII));
 
     private static final class Standard { // inner class to delay loading of table until called for
         Standard() {}
-        static final short[] STANDARD = init("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes(StandardCharsets.US_ASCII));
+        static final short[] STANDARD = init(Strings.decode("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", Strings.ASCII));
     }
 
     static short[] init(byte[] smallTable) {

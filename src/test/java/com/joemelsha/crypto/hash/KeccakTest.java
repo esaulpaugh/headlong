@@ -36,8 +36,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class KeccakTest {
 
-    private static final byte[] PART_A = "abcdefghijklmnopqrstuvwxyz".getBytes(StandardCharsets.US_ASCII);
-    private static final byte[] PART_B = "ABCDEFG".getBytes(StandardCharsets.US_ASCII);
+    private static final byte[] PART_A = Strings.decode("abcdefghijklmnopqrstuvwxyz", Strings.ASCII);
+    private static final byte[] PART_B = Strings.decode("ABCDEFG", Strings.ASCII);
     private static final byte[] WHOLE;
 
     static {

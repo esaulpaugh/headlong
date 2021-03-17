@@ -190,7 +190,7 @@ public final class Function implements ABIObject {
 
     private void generateSelector(MessageDigest messageDigest) {
         messageDigest.reset();
-        messageDigest.update(Strings.decode(getCanonicalSignature(), Strings.UTF_8));
+        messageDigest.update(Strings.decode(getCanonicalSignature(), Strings.ASCII));
         try {
             messageDigest.digest(selector, 0, SELECTOR_LEN);
         } catch (DigestException de) {
