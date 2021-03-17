@@ -234,7 +234,7 @@ public class MonteCarloTestCase implements Serializable {
         boolean equal = false;
         Tuple decoded = null;
         try {
-            decoded = PackedDecoder.decode(tt, parr);
+            decoded = tt.decodePacked(parr);
             equal = args.equals(decoded);
         } catch (IllegalArgumentException ignored) {
             /* do nothing */

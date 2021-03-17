@@ -35,15 +35,15 @@ import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 /**
  * Experimental. Unoptimized.
  */
-public final class PackedDecoder {
+final class PackedDecoder {
 
     private PackedDecoder() {}
 
-    public static Tuple decode(TupleType types, byte[] buffer) {
+    static Tuple decode(TupleType types, byte[] buffer) {
         return decode(types, buffer, 0, buffer.length);
     }
 
-    public static Tuple decode(TupleType tupleType, byte[] buffer, int from, int to) {
+    static Tuple decode(TupleType tupleType, byte[] buffer, int from, int to) {
         if (countDynamicsTupleType(tupleType) <= 1) {
             final Tuple[] elements = new Tuple[1];
             decodeTuple(tupleType, buffer, from, to, elements, 0); // can also call decodeTupleStatic if numDynamic == 0
