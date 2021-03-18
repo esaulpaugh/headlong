@@ -178,9 +178,9 @@ public final class ABIJSON {
                 }
                 return new Event(
                         getString(event, NAME),
+                        getBoolean(event, ANONYMOUS, false),
                         TupleType.wrap(inputsArray),
-                        indexed,
-                        getBoolean(event, ANONYMOUS, false)
+                        indexed
                 );
             }
             throw new IllegalArgumentException("array \"" + INPUTS + "\" null or not found");

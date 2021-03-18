@@ -28,7 +28,7 @@ public class EventTest {
         final String name = "ahoy";
         final boolean[] indexed = new boolean[] { false, false, true, false, true };
         final String paramsString ="(int,uint,(),bool[],ufixed256x10)";
-        Event event = new Event(name, paramsString, indexed);
+        Event event = Event.create(name, TupleType.parse(paramsString), indexed);
 
         assertEquals(name, event.getName());
         assertEquals(TupleType.parse(paramsString), event.getParams());

@@ -365,8 +365,8 @@ public class ABIJSONTest {
 
         runnable.run();
 
-        Event expectedA = new Event("a_name", "()", new boolean[0]);
-        Event expectedB = new Event("a_name", TupleType.EMPTY, new boolean[0], false);
+        Event expectedA = Event.create("a_name", TupleType.parse("()"));
+        Event expectedB = Event.create("a_name", TupleType.EMPTY);
         assertEquals(expectedA, expectedB);
         assertEquals(expectedA.hashCode(), expectedB.hashCode());
 
