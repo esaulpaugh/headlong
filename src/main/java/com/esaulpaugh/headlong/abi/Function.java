@@ -91,6 +91,7 @@ public final class Function implements ABIObject {
      * @param name          this function's name
      * @param inputs        {@link TupleType} describing this function's input parameters
      * @param outputs       {@link TupleType} type describing this function's return types
+     * @param stateMutability   "pure", "view", "payable" etc.
      * @param messageDigest hash function with which to generate the 4-byte selector
      * @throws IllegalArgumentException if {@code signature} or {@code outputs} is malformed
      */
