@@ -367,9 +367,10 @@ public class ABIJSONTest {
 
         Event expectedA = new Event("a_name", "()", new boolean[0]);
         Event expectedB = new Event("a_name", TupleType.EMPTY, new boolean[0], false);
+        assertEquals(expectedA, expectedB);
+        assertEquals(expectedA.hashCode(), expectedB.hashCode());
 
         assertEquals(expectedA, Event.fromJson(jsonObject.toString()));
-        assertEquals(expectedB, expectedA);
     }
 
     @Test
