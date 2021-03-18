@@ -35,6 +35,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     finalizedBy(javadocJar)
 }
 
+def junitVersion = '5.7.1'
 def jmhVersion = '1.28'
 def bcVersion = '1.68'
 
@@ -86,8 +87,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
 
     test.useJUnitPlatform()
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.7.1"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.1"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:' + junitVersion
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:' + junitVersion
     testImplementation 'org.bouncycastle:bcprov-jdk15on:' + bcVersion
 
     jmhImplementation 'commons-codec:commons-codec:1.15'
