@@ -92,12 +92,13 @@ public class DecodeTest {
 
     @Test
     public void testUint() {
-        Function f = new Function("()", "(uint8)");
+        Function foo = new Function("foo()", "(uint8)");
         int val = (int) (Math.pow(2, 8)) - 1;
         byte[] _byte = Strings.decode("00000000000000000000000000000000000000000000000000000000000000FF");
 
-        assertEquals(val, f.decodeReturn(_byte).get(0));
-        assertEquals(val, (int) f.decodeSingletonReturn(_byte));
+        assertEquals(val, foo.decodeReturn(_byte).get(0));
+        int i = foo.decodeSingletonReturn(_byte);
+        assertEquals(val, i);
 
         byte[] _int_ = Strings.decode("000000000000000000000000000000000000000000000000000000000000FFFF");
         assertEquals((int) (Math.pow(2, 16)) - 1, new Function("()", "(uint16)").decodeReturn(_int_).get(0));
@@ -108,8 +109,14 @@ public class DecodeTest {
         byte[] _160_ = Strings.decode("000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
         assertEquals(BigInteger.valueOf(2L).pow(160).subtract(BigInteger.ONE), new Function("()", "(address)").decodeReturn(_160_).get(0));
 
+        Function foo2 = new Function("()", "(uint)");
         byte[] _big_ = Strings.decode("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-        assertEquals(BigInteger.valueOf(2L).pow(256).subtract(BigInteger.ONE), new Function("()", "(uint)").decodeReturn(_big_).get(0));
+        BigInteger expected = BigInteger.valueOf(2L).pow(256).subtract(BigInteger.ONE);
+        BigInteger bi = ((UnitType<?>) foo2.getOutputs().get(0)).maxValue();
+        assertEquals(expected, bi);
+        assertEquals(expected, foo2.decodeReturn(_big_).get(0));
+        BigInteger n = foo2.decodeSingletonReturn(_big_);
+        assertEquals(expected, n);
     }
 
     @Test
@@ -172,15 +179,15 @@ public class DecodeTest {
     @Test
     public void testDecode() throws Throwable {
 
-        assertArrayEquals(FUNCTION.getOutputTypes().encode(RETURN_ARGS).array(), RETURN_BYTES);
+        assertArrayEquals(FUNCTION.getOutputs().encode(RETURN_ARGS).array(), RETURN_BYTES);
 
         Tuple decoded = FUNCTION.decodeReturn(RETURN_BYTES);
         assertEquals(EXPECTED, decoded);
 
-        decoded = FUNCTION.getOutputTypes().decode(RETURN_BYTES);
+        decoded = FUNCTION.getOutputs().decode(RETURN_BYTES);
         assertEquals(EXPECTED, decoded);
 
-        decoded = TupleType.parse(FUNCTION.getOutputTypes().toString()).decode(ByteBuffer.wrap(RETURN_BYTES));
+        decoded = TupleType.parse(FUNCTION.getOutputs().toString()).decode(ByteBuffer.wrap(RETURN_BYTES));
         assertEquals(EXPECTED, decoded);
 
         decoded = TupleType.parseElements("ufixed,string").decode(ByteBuffer.wrap(RETURN_BYTES));
@@ -331,7 +338,7 @@ public class DecodeTest {
 
         assertEquals("nam", type.getName());
 
-        Object decoded0 = Function.parse("()", "(string[])").getOutputTypes().get(0).decode(abi, new byte[32]);
+        Object decoded0 = Function.parse("()", "(string[])").getOutputs().get(0).decode(abi, new byte[32]);
         assertArrayEquals(array, (Object[]) decoded0);
 
         assertArrayEquals(array, type.decode(abi.array()));

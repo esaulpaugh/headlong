@@ -65,7 +65,7 @@ public class FunctionTest {
         Function f = new Function(Function.Type.CONSTRUCTOR, "()","()", md);
         assertNull(f.getName());
         assertEquals(TupleType.EMPTY, f.getInputs());
-        assertEquals(TupleType.EMPTY, f.getOutputTypes());
+        assertEquals(TupleType.EMPTY, f.getOutputs());
         f = new Function(Function.Type.FALLBACK, "()","()", md);
         assertEquals(Function.Type.FALLBACK, f.getType());
         assertNull(f.getName());

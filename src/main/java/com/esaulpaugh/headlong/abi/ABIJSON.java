@@ -214,7 +214,7 @@ public final class ABIJSON {
                     if (type != Function.Type.RECEIVE) {
                         writeJsonArray(out, INPUTS, x.getInputs(), null);
                         if (type != Function.Type.CONSTRUCTOR) {
-                            writeJsonArray(out, OUTPUTS, f.getOutputTypes(), null);
+                            writeJsonArray(out, OUTPUTS, f.getOutputs(), null);
                         }
                     }
                 }

@@ -127,7 +127,7 @@ public final class Function implements ABIObject {
         return inputTypes;
     }
 
-    public TupleType getOutputTypes() {
+    public TupleType getOutputs() {
         return outputTypes;
     }
 

@@ -283,7 +283,7 @@ public class ABIJSONTest {
     public void testParseFunctionA() {
         final Function f = Function.fromJson(FUNCTION_A_JSON);
         final TupleType in = f.getInputs();
-        final TupleType out = f.getOutputTypes();
+        final TupleType out = f.getOutputs();
         final ABIType<?> out0 = out.get(0);
 
         System.out.println(f.getName() + " : " + f.getCanonicalSignature() + " : " + out0);
@@ -305,7 +305,7 @@ public class ABIJSONTest {
     public void testParseFunctionB() {
         final Function f = Function.fromJson(FUNCTION_B_JSON, Function.newDefaultDigest());
         System.out.println(f.getName() + " : " + f.getCanonicalSignature());
-        assertEquals(TupleType.EMPTY, f.getOutputTypes());
+        assertEquals(TupleType.EMPTY, f.getOutputs());
         assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.getCanonicalSignature());
         assertEquals("view", f.getStateMutability());
 
@@ -419,7 +419,7 @@ public class ABIJSONTest {
 
         for(Function x : functions) {
             printTupleType(x.getInputs());
-            assertEquals(TupleType.EMPTY, x.getOutputTypes());
+            assertEquals(TupleType.EMPTY, x.getOutputs());
         }
 
         Function fallback = functions.get(0);
@@ -427,12 +427,12 @@ public class ABIJSONTest {
 
         assertEquals(Function.Type.FALLBACK, fallback.getType());
         assertEquals(TupleType.EMPTY, fallback.getInputs());
-        assertEquals(TupleType.EMPTY, fallback.getOutputTypes());
+        assertEquals(TupleType.EMPTY, fallback.getOutputs());
         assertEquals("pure", fallback.getStateMutability());
 
         assertEquals(Function.Type.CONSTRUCTOR, constructor.getType());
         assertEquals(TupleType.parse("(bool)"), constructor.getInputs());
-        assertEquals(TupleType.EMPTY, fallback.getOutputTypes());
+        assertEquals(TupleType.EMPTY, fallback.getOutputs());
         assertEquals("nonpayable", constructor.getStateMutability());
     }
 
