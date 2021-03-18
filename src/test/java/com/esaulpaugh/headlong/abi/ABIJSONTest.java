@@ -303,7 +303,7 @@ public class ABIJSONTest {
 
     @Test
     public void testParseFunctionB() {
-        final Function f = Function.fromJson(FUNCTION_B_JSON, Function.newDefaultDigest());
+        final Function f = Function.fromJson(FUNCTION_B_JSON);
         System.out.println(f.getName() + " : " + f.getCanonicalSignature());
         assertEquals(TupleType.EMPTY, f.getOutputs());
         assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.getCanonicalSignature());

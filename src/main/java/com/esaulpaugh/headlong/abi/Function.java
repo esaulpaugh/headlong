@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.util.Strings;
@@ -77,36 +76,29 @@ public final class Function implements ABIObject {
     }
 
     public Function(String signature, String outputs) {
-        this(Type.FUNCTION, signature, outputs, newDefaultDigest());
-    }
-
-    public Function(String signature, String outputs, MessageDigest messageDigest) {
-        this(Type.FUNCTION, signature, outputs, messageDigest);
-    }
-
-    /**
-     * @param type          to denote function, receive, fallback, or constructor
-     * @param signature     the function's signature e.g. "foo(int,bool)"
-     * @param outputs       the signature of the tuple containing this function's return types
-     * @param messageDigest the hash function with which to generate the 4-byte selector
-     * @throws IllegalArgumentException if {@code signature} or {@code outputs} is malformed
-     */
-    public Function(Type type, String signature, String outputs, MessageDigest messageDigest) {
         this(
-                type,
-                type != Type.FUNCTION && type != Type.RECEIVE && signature.startsWith("(") ? null : signature.substring(0, signature.indexOf('(')),
+                Type.FUNCTION,
+                signature.substring(0, signature.indexOf('(')),
                 TupleType.parse(signature.substring(signature.indexOf('('))),
                 outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY,
                 null,
-                messageDigest
+                Function.newDefaultDigest()
         );
     }
 
-    public Function(Type type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) {
+    /**
+     * @param type          enum denoting one of: function, receive, fallback, or constructor
+     * @param name          this function's name
+     * @param inputs        {@link TupleType} describing this function's input parameters
+     * @param outputs       {@link TupleType} type describing this function's return types
+     * @param messageDigest hash function with which to generate the 4-byte selector
+     * @throws IllegalArgumentException if {@code signature} or {@code outputs} is malformed
+     */
+    public Function(Type type, String name, TupleType inputs, TupleType outputs, String stateMutability, MessageDigest messageDigest) {
         this.type = Objects.requireNonNull(type);
         this.name = name != null ? validateName(name) : null;
-        this.inputTypes = Objects.requireNonNull(inputTypes);
-        this.outputTypes = Objects.requireNonNull(outputTypes);
+        this.inputTypes = Objects.requireNonNull(inputs);
+        this.outputTypes = Objects.requireNonNull(outputs);
         this.stateMutability = stateMutability;
         this.hashAlgorithm = Objects.requireNonNull(messageDigest.getAlgorithm());
         validateFunction();
@@ -252,13 +244,13 @@ public final class Function implements ABIObject {
         return outputTypes.decode(returnVals);
     }
 
+    public Tuple decodeReturn(ByteBuffer returnVals) {
+        return outputTypes.decode(returnVals);
+    }
+
     @SuppressWarnings("unchecked")
     public <J> J decodeSingletonReturn(byte[] singleton) {
         return (J) outputTypes.get(0).decode(singleton);
-    }
-
-    public Tuple decodeReturn(ByteBuffer returnVals) {
-        return outputTypes.decode(returnVals);
     }
 
     @Override
@@ -312,29 +304,16 @@ public final class Function implements ABIObject {
         return new Function(signature, outputs);
     }
 
-    public static Function parse(String signature, MessageDigest messageDigest) {
-        return new Function(signature, null, messageDigest);
-    }
-
     public static Function fromJson(String objectJson) {
         return fromJsonObject(JsonUtils.parseObject(objectJson));
     }
 
-    public static Function fromJson(String objectJson, MessageDigest messageDigest) {
-        return fromJsonObject(JsonUtils.parseObject(objectJson), messageDigest);
-    }
-
     public static Function fromJsonObject(JsonObject function) {
-        return fromJsonObject(function, Function.newDefaultDigest());
-    }
-
-    public static Function fromJsonObject(JsonObject function, MessageDigest messageDigest) {
-        return ABIJSON.parseFunction(function, messageDigest);
+        return ABIJSON.parseFunction(function, Function.newDefaultDigest());
     }
 
     /**
      * @return a {@link MessageDigest}
-     * @see WrappedKeccak
      */
     public static MessageDigest newDefaultDigest() {
         return new Keccak(256); // replace this with your preferred impl

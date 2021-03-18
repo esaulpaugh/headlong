@@ -83,11 +83,6 @@ public class EqualsTest {
 
         assertSame(TupleType.parse("(uint)").elementTypes[0].canonicalType, TupleType.parse("(uint)").elementTypes[0].canonicalType);
         assertNotSame(Function.parse("(uint)").getInputs().canonicalType, Function.parse("(uint)").getInputs().canonicalType);
-
-        assertEquals(
-                Function.parse("(bool)", new WrappedKeccak(256)),
-                Function.parse("(bool)", new Keccak(256))
-        );
     }
 
     private static boolean recursiveEquals(TupleType tt, Object o) {
