@@ -27,7 +27,6 @@ import org.opentest4j.AssertionFailedError;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -306,7 +305,7 @@ public class EncodeTest {
 
         assertThrown(ILLEGAL, "@ index 0, bad array length", () -> Function.parse("zaba(()[04])"));
 
-        assertEquals(4, ((ArrayType<TupleType, Tuple[]>) Function.parse("yaba(()[4])").getParamTypes().get(0)).getLength());
+        assertEquals(4, ((ArrayType<TupleType, Tuple[]>) Function.parse("yaba(()[4])").getInputs().get(0)).getLength());
     }
 
     @Test
@@ -385,7 +384,7 @@ public class EncodeTest {
     @Test
     public void paddingTest() {
         final Function f = new Function("(bool,uint8,int64,address,ufixed,bytes2,(string),bytes,function)");
-        final TupleType paramTypes = f.getParamTypes();
+        final TupleType paramTypes = f.getInputs();
 
         StringBuilder sb = new StringBuilder();
         for(ABIType<?> type : paramTypes) {

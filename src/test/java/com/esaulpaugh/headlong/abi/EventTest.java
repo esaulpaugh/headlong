@@ -31,7 +31,7 @@ public class EventTest {
         Event event = Event.create(name, TupleType.parse(paramsString), indexed);
 
         assertEquals(name, event.getName());
-        assertEquals(TupleType.parse(paramsString), event.getParams());
+        assertEquals(TupleType.parse(paramsString), event.getInputs());
         assertArrayEquals(indexed, event.getIndexManifest());
         assertFalse(event.isAnonymous());
 

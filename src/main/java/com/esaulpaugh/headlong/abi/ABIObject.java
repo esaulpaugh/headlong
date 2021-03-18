@@ -18,6 +18,10 @@ package com.esaulpaugh.headlong.abi;
 /** Supertype of {@link Function} and {@link Event}. */
 public interface ABIObject {
 
+    String getName();
+
+    TupleType getInputs();
+
     String getCanonicalSignature();
 
     String toJson(boolean pretty);

@@ -160,7 +160,7 @@ public class PackedEncoderTest {
 
         Function function = new Function(tupleType.canonicalType);
 
-        String hex = Strings.encode(function.getParamTypes().encode(test));
+        String hex = Strings.encode(function.getInputs().encode(test));
 
         System.out.println(hex);
 

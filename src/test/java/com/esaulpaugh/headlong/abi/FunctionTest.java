@@ -64,7 +64,7 @@ public class FunctionTest {
         TestUtils.assertThrown(err, "type is \"fallback\"; functions of this type must not define name", () -> new Function(Function.Type.FALLBACK, "foo()","()", md));
         Function f = new Function(Function.Type.CONSTRUCTOR, "()","()", md);
         assertNull(f.getName());
-        assertEquals(TupleType.EMPTY, f.getParamTypes());
+        assertEquals(TupleType.EMPTY, f.getInputs());
         assertEquals(TupleType.EMPTY, f.getOutputTypes());
         f = new Function(Function.Type.FALLBACK, "()","()", md);
         assertEquals(Function.Type.FALLBACK, f.getType());

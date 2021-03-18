@@ -200,19 +200,19 @@ public final class ABIJSON {
         return TypeFactory.create(typeStr, Object.class, getString(object, NAME));
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    public static String toJson(ABIObject abiObj, boolean function, boolean pretty) {
+    public static String toJson(ABIObject x, boolean function, boolean pretty) {
         try {
             StringWriter stringOut = new StringWriter();
             JsonWriter out = (pretty ? GSON_PRETTY : GSON).newJsonWriter(stringOut);
             out.beginObject();
             if(function) {
-                Function f = (Function) abiObj;
+                Function f = (Function) x;
                 final Function.Type type = f.getType();
                 out.name(TYPE).value(type.toString());
                 if (type != Function.Type.FALLBACK) {
-                    addIfValueNotNull(out, NAME, f.getName());
+                    addIfValueNotNull(out, NAME, x.getName());
                     if (type != Function.Type.RECEIVE) {
-                        writeJsonArray(out, INPUTS, f.getParamTypes(), null);
+                        writeJsonArray(out, INPUTS, x.getInputs(), null);
                         if (type != Function.Type.CONSTRUCTOR) {
                             writeJsonArray(out, OUTPUTS, f.getOutputTypes(), null);
                         }
@@ -222,10 +222,9 @@ public final class ABIJSON {
                 addIfValueNotNull(out, STATE_MUTABILITY, stateMutability);
                 out.name(CONSTANT).value(VIEW.equals(stateMutability) || PURE.equals(stateMutability));
             } else {
-                Event e = (Event) abiObj;
                 out.name(TYPE).value(EVENT);
-                addIfValueNotNull(out, NAME, e.getName());
-                writeJsonArray(out, INPUTS, e.getParams(), e.getIndexManifest());
+                addIfValueNotNull(out, NAME, x.getName());
+                writeJsonArray(out, INPUTS, x.getInputs(), ((Event) x).getIndexManifest());
             }
             out.endObject();
             return stringOut.toString();

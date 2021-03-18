@@ -54,13 +54,13 @@ public class SuperSerialTest {
 
         String vals = "([  ], [ '' ], '80', ['7f', '3b', [ [  ], '', '', '30ffcc0009', '01', '02', [ '70' ] ], '', '01', ['92030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2020']], '', '05')";
 
-        Tuple decoded = SuperSerial.deserialize(f.getParamTypes(), vals, false);
+        Tuple decoded = SuperSerial.deserialize(f.getInputs(), vals, false);
 
-        f.getParamTypes().validate(decoded);
+        f.getInputs().validate(decoded);
 
-        ByteBuffer bb = f.getParamTypes().encode(decoded);
+        ByteBuffer bb = f.getInputs().encode(decoded);
 
-        Tuple dd = f.getParamTypes().decode((ByteBuffer) bb.flip());
+        Tuple dd = f.getInputs().decode((ByteBuffer) bb.flip());
 
         assertEquals(decoded, dd);
     }

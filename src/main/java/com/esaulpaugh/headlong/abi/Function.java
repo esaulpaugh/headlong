@@ -117,11 +117,13 @@ public final class Function implements ABIObject {
         return type;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
-    public TupleType getParamTypes() {
+    @Override
+    public TupleType getInputs() {
         return inputTypes;
     }
 

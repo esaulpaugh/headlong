@@ -140,18 +140,18 @@ public class MonteCarloTestCase implements Serializable {
 
         this.rawSignature = generateFunctionName(rng) + generateTupleTypeString(baseTypes, rng, 0);
         this.function = new Function(rawSignature, null, md);
-        this.argsTuple = generateTuple(function.getParamTypes(), rng);
+        this.argsTuple = generateTuple(function.getInputs(), rng);
     }
 
     JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) {
 
-        Function f = Function.parse(name + this.function.getParamTypes().canonicalType); // this.function;
+        Function f = Function.parse(name + this.function.getInputs().canonicalType); // this.function;
 
         ByteBuffer abi = f.encodeCall(this.argsTuple);
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.add("name", new JsonPrimitive(name));
-        jsonObject.add("types", Serializer.serializeTypes(f.getParamTypes(), gson));
+        jsonObject.add("types", Serializer.serializeTypes(f.getInputs(), gson));
         jsonObject.add("values", Serializer.serializeValues(this.argsTuple, gson));
         jsonObject.add("result", new JsonPrimitive("0x" + Strings.encode(abi)));
         jsonObject.add("version", version);
@@ -209,16 +209,16 @@ public class MonteCarloTestCase implements Serializable {
             }
             final Tuple args = this.argsTuple;
             System.err.println(change);
-            System.err.println(function.getParamTypes() + "\n" + Function.formatCall(babar) + "\nidx=" + idx);
+            System.err.println(function.getInputs() + "\n" + Function.formatCall(babar) + "\nidx=" + idx);
             System.err.println(Strings.encode(babar, 0, idx, Strings.HEX));
-            System.err.println(SuperSerial.serialize(function.getParamTypes(), args, true));
-            System.err.println(SuperSerial.serialize(function.getParamTypes(), decoded, true));
+            System.err.println(SuperSerial.serialize(function.getInputs(), args, true));
+            System.err.println(SuperSerial.serialize(function.getInputs(), decoded, true));
             throw new AssertionError("idx=" + idx + " " + seed + " " + function.getCanonicalSignature() + " " + args);
         }
     }
 
     private void runFuzzPackedDecode(Random r) {
-        final TupleType tt = this.function.getParamTypes();
+        final TupleType tt = this.function.getInputs();
         final Tuple args = this.argsTuple;
         final int packedLen = tt.byteLengthPacked(args);
         if(packedLen == 0) {
@@ -249,7 +249,7 @@ public class MonteCarloTestCase implements Serializable {
 
     void runPacked() {
         final Tuple args = this.argsTuple;
-        final TupleType tt = this.function.getParamTypes();
+        final TupleType tt = this.function.getInputs();
         if(tt.canonicalType.contains("int[")) {
             throw new AssertionError("failed canonicalization!");
         }
@@ -272,7 +272,7 @@ public class MonteCarloTestCase implements Serializable {
 
     void runSuperSerial() {
         final Tuple args = this.argsTuple;
-        final TupleType tt = this.function.getParamTypes();
+        final TupleType tt = this.function.getInputs();
 
         String str = SuperSerial.serialize(tt, args, false);
         Tuple deserial = SuperSerial.deserialize(tt, str, false);
