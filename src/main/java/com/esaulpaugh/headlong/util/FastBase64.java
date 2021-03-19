@@ -47,12 +47,12 @@ public final class FastBase64 {
     }
 
     @SuppressWarnings("deprecation")
-    public static String encodeToString(byte[] buffer, int off, int len, int flags) {
-        byte[] enc = encodeToBytes(buffer, off, len, flags);
+    public static String encodeToString(byte[] buffer, int offset, int len, int flags) {
+        byte[] enc = encodeToBytes(buffer, offset, len, flags);
         return new String(enc, 0, 0, enc.length);
     }
 
-    public static byte[] encodeToBytes(final byte[] buffer, final int offset, final int len, final int flags) {
+    public static byte[] encodeToBytes(byte[] buffer, int offset, int len, int flags) {
         final int chunks = len / 3;
         final int evenBytes = chunks * 3;
         final int bytesLeft = len - evenBytes; // bytesLen % 3; // [0,2]
