@@ -80,8 +80,7 @@ public final class BooleanType extends UnitType<Boolean> {
 
     @Override
     public Boolean parseArgument(String s) {
-        Boolean bool = Boolean.parseBoolean(s);
-        validate(bool);
-        return bool;
+        return Boolean.parseBoolean(s);
+//        validate(bool);
     }
 }

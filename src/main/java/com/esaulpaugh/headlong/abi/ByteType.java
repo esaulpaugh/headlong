@@ -53,8 +53,7 @@ public final class ByteType extends UnitType<Byte> {
 
     @Override
     public Byte parseArgument(String s) {
-        Byte b = Byte.parseByte(s);
-        validate(b);
-        return b;
+        return Byte.parseByte(s);
+//        validate(b);
     }
 }
