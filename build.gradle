@@ -18,7 +18,10 @@ compileJava {
     if (!Jvm.current().getJavaVersion().isCompatibleWith(JavaVersion.VERSION_1_8)) {
         options.compilerArgs.addAll(['--release', '8'])
     }
+    options.encoding = "ASCII"
 }
+
+compileTestJava.options.encoding = "UTF-8"
 
 test {
     maxParallelForks = Runtime.runtime.availableProcessors()
