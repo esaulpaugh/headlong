@@ -26,7 +26,6 @@ import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.TupleType.countBytes;
 import static com.esaulpaugh.headlong.abi.TupleType.totalLen;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 /**
  * Represents static array types such as bytes3 or uint16[3][2] and dynamic array types such as decimal[5][] or
@@ -139,11 +138,11 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     byte[] decodeIfString(Object value) {
-        return !isString ? (byte[]) value : Strings.decode((String) value, UTF_8);
+        return !isString ? (byte[]) value : Strings.decode((String) value, Strings.UTF_8);
     }
 
     Object encodeIfString(byte[] bytes) {
-        return !isString ? bytes : Strings.encode(bytes, UTF_8);
+        return !isString ? bytes : Strings.encode(bytes, Strings.UTF_8);
     }
 
     @Override
