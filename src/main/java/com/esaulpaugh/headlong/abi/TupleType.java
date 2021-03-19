@@ -26,6 +26,7 @@ import java.util.function.IntFunction;
 import java.util.function.IntUnaryOperator;
 
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
 /** @see ABIType */
 public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
@@ -76,11 +77,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     int byteLength(final Object value) {
         final Object[] elements = ((Tuple) value).elements;
-        return countBytes(false, elementTypes.length, 0, (i) -> {
-            ABIType<?> type = elementTypes[i];
-            int byteLen = type.byteLength(elements[i]);
-            return type.dynamic ? OFFSET_LENGTH_BYTES + byteLen : byteLen;
-        });
+        return countBytes(false, elementTypes.length, 0, (i) -> measureObject(elementTypes[i], elements[i]));
+    }
+
+    private int measureObject(ABIType<?> type, Object value) {
+        return totalLen(type.byteLength(value), type.dynamic);
     }
 
     /**
@@ -108,17 +109,21 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     public int validate(final Tuple value) {
         if (value.elements.length == elementTypes.length) {
-            return countBytes(false, elementTypes.length, 0, (i) -> {
-                final ABIType<?> type = elementTypes[i];
-                final Object v = value.elements[i];
-                try {
-                    return type.dynamic ? OFFSET_LENGTH_BYTES + type._validate(v) : type._validate(v);
-                } catch (NullPointerException npe) {
-                    throw new IllegalArgumentException("null", npe);
-                }
-            });
+            return countBytes(false, elementTypes.length, 0, (i) -> validateObject(elementTypes[i], value.elements[i]));
         }
         throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + value.elements.length + " != " + elementTypes.length);
+    }
+
+    private int validateObject(ABIType<?> type, Object value) {
+        try {
+            return totalLen(type._validate(value), type.dynamic);
+        } catch (NullPointerException npe) {
+            throw new IllegalArgumentException("null", npe);
+        }
+    }
+
+    static int totalLen(int byteLen, boolean addUnit) {
+        return addUnit ? UNIT_LENGTH_BYTES + byteLen : byteLen;
     }
 
     @Override

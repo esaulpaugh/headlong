@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.TupleType.countBytes;
+import static com.esaulpaugh.headlong.abi.TupleType.totalLen;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
@@ -40,8 +41,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     static final Class<String> STRING_CLASS = String.class;
     static final Class<String[]> STRING_ARRAY_CLASS = String[].class;
-
-    private static final int ARRAY_LENGTH_BYTES = UNIT_LENGTH_BYTES;
 
     public static final int DYNAMIC_LENGTH = -1;
 
@@ -93,7 +92,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
      */
     @Override
     int byteLength(Object value) {
-        return totalLength(calcElementsLen(value));
+        return totalLen(calcElementsLen(value), length == DYNAMIC_LENGTH);
     }
 
     private int calcElementsLen(Object value) {
@@ -149,11 +148,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     @Override
     public int validate(J value) {
-        return totalLength(validateElements(validateClass(value))); // validateClass to disallow Object[] etc
-    }
-
-    private int totalLength(int elementsLen) { // if type has variable # of elements, add 32 for the array length
-        return length == DYNAMIC_LENGTH ? ARRAY_LENGTH_BYTES + elementsLen : elementsLen;
+        return totalLen(validateElements(validateClass(value)), length == DYNAMIC_LENGTH); // validateClass to disallow Object[] etc
     }
 
     private int validateElements(J value) {
