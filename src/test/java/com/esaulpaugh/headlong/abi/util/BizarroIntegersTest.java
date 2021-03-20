@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi.util;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.util.IntegersTest;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
@@ -113,7 +114,7 @@ public class BizarroIntegersTest {
 
     @Test
     public void lenInt() {
-        new ForkJoinPool().invoke(new BizzaroLenIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        new ForkJoinPool().invoke(new BizarroLenIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
     @Test
@@ -156,9 +157,9 @@ public class BizarroIntegersTest {
         }
     }
 
-    private static final class BizzaroLenIntTask extends TestUtils.LenIntTask {
+    private static final class BizarroLenIntTask extends TestUtils.LenIntTask {
 
-        public BizzaroLenIntTask(int start, int end) {
+        public BizarroLenIntTask(int start, int end) {
             super(start, end);
         }
 
@@ -166,5 +167,10 @@ public class BizarroIntegersTest {
         protected int len(int val) {
             return BizarroIntegers.len(val);
         }
+    }
+
+    @Test
+    public void testReturnValues() {
+        IntegersTest.testReturnValues(BizarroIntegers::len, BizarroIntegers::putLong);
     }
 }
