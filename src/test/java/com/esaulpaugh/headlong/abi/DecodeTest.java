@@ -334,6 +334,11 @@ public class DecodeTest {
             final ArrayType<?, String[]> j = (ArrayType<?, String[]>) TypeFactory.create("string[]");
             @SuppressWarnings("unchecked")
             final ABIType<? extends String[]> k = (ABIType<? extends String[]>) TypeFactory.create("string[]");
+
+            final IntType l = TypeFactory.createType("int16", IntType.class);
+            final ArrayType<?, BigInteger[]> m = (ArrayType<?, BigInteger[]>) TypeFactory.create("int[]", BigInteger[].class);
+            final TupleType n = (TupleType) TypeFactory.create("(bool)", Tuple.class);
+            m.encode(new BigInteger[] {});
         }
 
         assertEquals("nam", type.getName());
