@@ -25,7 +25,6 @@ import java.nio.ByteBuffer;
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.function.IntFunction;
 import java.util.regex.Matcher;
