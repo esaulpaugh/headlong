@@ -132,22 +132,6 @@ public final class RLPEncoder {
         }
     }
 
-    // visible to Record
-    static void encodeString(byte[] data, ByteBuffer bb) {
-        final int dataLen = data.length;
-        if (dataLen == 1) {
-            encodeLen1String(data[0], bb);
-            return;
-        }
-        if (isShort(dataLen)) {
-            bb.put((byte) (STRING_SHORT_OFFSET + dataLen)); // dataLen is 0 or 2-55
-        } else { // long string
-            bb.put((byte) (STRING_LONG_OFFSET + Integers.len(dataLen)));
-            Integers.putLong(dataLen, bb);
-        }
-        bb.put(data);
-    }
-
     private static void encodeLen1String(byte first, ByteBuffer bb) {
         if (first < 0x00) { // same as (first & 0xFF) >= 0x80
             bb.put((byte) (STRING_SHORT_OFFSET + 1));
@@ -180,6 +164,27 @@ public final class RLPEncoder {
         ByteBuffer bb = ByteBuffer.allocate(stringEncodedLen(byteString));
         encodeString(byteString, bb);
         return bb.array();
+    }
+
+    /**
+     * Puts into the destination buffer at its current position the RLP encoding of the given byte string.
+     *
+     * @param byteString the byte string to be encoded
+     * @param dest    the destination for the sequence of RLP encodings
+     */
+    public static void encodeString(byte[] byteString, ByteBuffer dest) {
+        final int dataLen = byteString.length;
+        if (isShort(dataLen)) {
+            if (dataLen == 1) {
+                encodeLen1String(byteString[0], dest);
+                return;
+            }
+            dest.put((byte) (STRING_SHORT_OFFSET + dataLen)); // dataLen is 0 or 2-55
+        } else { // long string
+            dest.put((byte) (STRING_LONG_OFFSET + Integers.len(dataLen)));
+            Integers.putLong(dataLen, dest);
+        }
+        dest.put(byteString);
     }
 
     /**

@@ -19,9 +19,12 @@ import com.esaulpaugh.headlong.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
+import java.util.function.ToIntBiFunction;
+import java.util.function.ToIntFunction;
 
 import static com.esaulpaugh.headlong.TestUtils.insertBytes;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -279,5 +282,26 @@ public class IntegersTest {
         assertTrue(errs[i++].contains(aioobe));
 
         System.out.println(i + " / " + errs.length + " passed");
+    }
+
+    @Test
+    public void testReturnValues() {
+        testReturnValues(Integers::len, Integers::putLong);
+    }
+
+    public static void testReturnValues(ToIntFunction<Long> getLen, ToIntBiFunction<Long, ByteBuffer> put) {
+        Random r = TestUtils.seededRandom();
+        ByteBuffer bb = ByteBuffer.allocate(Long.BYTES + r.nextInt(35));
+        final int offsetBound = 1 + bb.capacity() - Long.BYTES;
+        for (int i = 0; i < 50; i++) {
+            int offset = r.nextInt(offsetBound);
+            bb.position(offset);
+            final long val = TestUtils.pickRandom(r);
+            int len0 = getLen.applyAsInt(val);
+            int len1 = put.applyAsInt(val, bb);
+            int len2 = bb.position() - offset;
+            assertEquals(len0, len1);
+            assertEquals(len1, len2);
+        }
     }
 }

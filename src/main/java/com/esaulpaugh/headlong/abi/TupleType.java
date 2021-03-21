@@ -23,8 +23,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.IntFunction;
+import java.util.function.IntUnaryOperator;
 
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
 /** @see ABIType */
 public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
@@ -73,13 +75,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    int byteLength(Object value) {
+    int byteLength(final Object value) {
         final Object[] elements = ((Tuple) value).elements;
-        return len((i) -> {
-            ABIType<?> type = elementTypes[i];
-            int byteLen = type.byteLength(elements[i]);
-            return type.dynamic ? OFFSET_LENGTH_BYTES + byteLen : byteLen;
-        });
+        return countBytes(false, elementTypes.length, 0, (i) -> measureObject(elementTypes[i], elements[i]));
+    }
+
+    private int measureObject(ABIType<?> type, Object value) {
+        return totalLen(type.byteLength(value), type.dynamic);
     }
 
     /**
@@ -89,36 +91,39 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     public int byteLengthPacked(Object value) {
         final Object[] elements = value != null ? ((Tuple) value).elements : new Object[elementTypes.length];
-        return len((i) -> elementTypes[i].byteLengthPacked(elements[i]));
+        return countBytes(false, elementTypes.length, 0, (i) -> elementTypes[i].byteLengthPacked(elements[i]));
     }
 
-    private int len(IntFunction<Integer> elementCount) {
-        int len = 0;
-        for(int i = 0; i < elementTypes.length; i++) {
-            len += elementCount.apply(i);
+    static int countBytes(boolean array, int len, int count, IntUnaryOperator counter) {
+        int i = 0;
+        try {
+            for ( ; i < len; i++) {
+                count += counter.applyAsInt(i);
+            }
+            return count;
+        } catch (IllegalArgumentException iae) {
+            throw new IllegalArgumentException((array ? "array" : "tuple") + " index " + i + ": " + iae.getMessage());
         }
-        return len;
     }
 
     @Override
-    public int validate(final Object value) {
-        validateClass(value);
-
-        final Object[] elements = ((Tuple) value).elements;
-
-        if(elements.length == elementTypes.length) {
-            int i = 0;
-            try {
-                return len((j) -> {
-                    ABIType<?> type = elementTypes[j];
-                    int byteLen = type.validate(elements[j]);
-                    return type.dynamic ? OFFSET_LENGTH_BYTES + byteLen : byteLen;
-                });
-            } catch (NullPointerException | IllegalArgumentException e) {
-                throw new IllegalArgumentException("tuple index " + i + ": " + e.getMessage(), e);
-            }
+    public int validate(final Tuple value) {
+        if (value.elements.length == elementTypes.length) {
+            return countBytes(false, elementTypes.length, 0, (i) -> validateObject(elementTypes[i], value.elements[i]));
         }
-        throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + elements.length + " != " + elementTypes.length);
+        throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + value.elements.length + " != " + elementTypes.length);
+    }
+
+    private int validateObject(ABIType<?> type, Object value) {
+        try {
+            return totalLen(type._validate(value), type.dynamic);
+        } catch (NullPointerException npe) {
+            throw new IllegalArgumentException("null", npe);
+        }
+    }
+
+    static int totalLen(int byteLen, boolean addUnit) {
+        return addUnit ? UNIT_LENGTH_BYTES + byteLen : byteLen;
     }
 
     @Override
@@ -200,46 +205,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
      *
      * @param elements  values corresponding to this {@link TupleType}'s element types
      * @return  the encoding
-     * @see #encode(Tuple)
      */
     public ByteBuffer encodeElements(Object... elements) {
         return encode(new Tuple(elements));
-    }
-
-    public ByteBuffer encode(Tuple values) {
-        ByteBuffer dest = ByteBuffer.allocate(validate(values));
-        encodeTail(values, dest);
-        return dest;
-    }
-
-    public TupleType encode(Tuple values, ByteBuffer dest) {
-        validate(values);
-        encodeTail(values, dest);
-        return this;
-    }
-
-    /**
-     * Returns the non-standard-packed encoding of {@code values}.
-     *
-     * @param values the argument to be encoded
-     * @return the encoding
-     */
-    public ByteBuffer encodePacked(Tuple values) {
-        validate(values);
-        ByteBuffer dest = ByteBuffer.allocate(byteLengthPacked(values));
-        PackedEncoder.encodeTuple(this, values, dest);
-        return dest;
-    }
-
-    /**
-     * Puts into the given {@link ByteBuffer} at its current position the non-standard packed encoding of {@code values}.
-     *
-     * @param values the argument to be encoded
-     * @param dest   the destination buffer
-     */
-    public void encodePacked(Tuple values, ByteBuffer dest) {
-        validate(values);
-        PackedEncoder.encodeTuple(this, values, dest);
     }
 
     @Override

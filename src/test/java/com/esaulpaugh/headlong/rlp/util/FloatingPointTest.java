@@ -17,7 +17,6 @@ package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.Integers;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -69,8 +68,12 @@ public class FloatingPointTest {
             final BigDecimal bigDec = new BigDecimal(new BigInteger(random), r.nextInt(20));
             byte[] bytes = Integers.toBytesUnsigned(bigDec.unscaledValue());
 
-            BigDecimal gotten = FloatingPoint.getBigDecimal(bytes, 0, bytes.length, bigDec.scale(), false);
+            BigDecimal gotten = getBigDecimal(bytes, 0, bytes.length, bigDec.scale(), false);
             assertEquals(bigDec, gotten);
         }
+    }
+
+    public static BigDecimal getBigDecimal(byte[] bytes, int i, int unscaledNumBytes, int scale, boolean lenient) {
+        return new BigDecimal(Integers.getBigInt(bytes, i, unscaledNumBytes, lenient), scale);
     }
 }

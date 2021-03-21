@@ -35,15 +35,15 @@ import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 /**
  * Experimental. Unoptimized.
  */
-public final class PackedDecoder {
+final class PackedDecoder {
 
     private PackedDecoder() {}
 
-    public static Tuple decode(TupleType types, byte[] buffer) {
+    static Tuple decode(TupleType types, byte[] buffer) {
         return decode(types, buffer, 0, buffer.length);
     }
 
-    public static Tuple decode(TupleType tupleType, byte[] buffer, int from, int to) {
+    static Tuple decode(TupleType tupleType, byte[] buffer, int from, int to) {
         if (countDynamicsTupleType(tupleType) <= 1) {
             final Tuple[] elements = new Tuple[1];
             decodeTuple(tupleType, buffer, from, to, elements, 0); // can also call decodeTupleStatic if numDynamic == 0
@@ -110,7 +110,9 @@ public final class PackedDecoder {
                 start += decode(elementTypes[i], buffer, start, end, elements, i);
             }
         }
-        return tupleType.byteLengthPacked(parentElements[pei] = new Tuple(elements));
+        Tuple t = new Tuple(elements);
+        parentElements[pei] = t;
+        return tupleType.byteLengthPacked(t);
     }
 
     private static int decode(ABIType<?> type, byte[] buffer, int idx, int end, Object[] elements, int i) {
@@ -136,7 +138,9 @@ public final class PackedDecoder {
         for (int i = 0; i < elementTypes.length; i++) {
             idx += decode(elementTypes[i], buffer, idx, end, elements, i);
         }
-        return tupleType.byteLengthPacked(parentElements[pei] = new Tuple(elements));
+        Tuple t = new Tuple(elements);
+        parentElements[pei] = t;
+        return tupleType.byteLengthPacked(t);
     }
 
     private static int insertInt(UnitType<? extends Number> type, byte[] buffer, int idx, int len, Object[] dest, int destIdx) {

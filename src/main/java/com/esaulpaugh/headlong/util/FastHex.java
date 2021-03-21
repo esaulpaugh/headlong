@@ -66,38 +66,21 @@ public final class FastHex {
         DECODE_TABLE['F'] = DECODE_TABLE['f'] = 0xf;
     }
 
-    public static String encodeToString(byte b) {
-        return encodeToString(new byte[] { b });
-    }
-
-    public static String encodeToString(byte[] buffer) {
+    public static String encodeToString(byte... buffer) {
         return encodeToString(buffer, 0, buffer.length);
     }
 
     @SuppressWarnings("deprecation")
-    public static String encodeToString(byte[] buffer, int offset, final int len) {
-//        char[] enc = encodeToChars(buffer, offset, len);
-//        return new String(enc); // faster on Java 8 (i.e. no compact strings)
+    public static String encodeToString(byte[] buffer, int offset, int len) {
         byte[] enc = encodeToBytes(buffer, offset, len);
         return new String(enc, 0, 0, enc.length); // faster on Java 9+ (compact strings on by default)
     }
 
-//    public static char[] encodeToChars(byte[] buffer, int off, final int len) {
-//        final int end = off + len;
-//        char[] chars = new char[len * CHARS_PER_BYTE];
-//        for (int j = 0; off < end; off++, j += CHARS_PER_BYTE) {
-//            int hexPair = ENCODE_TABLE[buffer[off] & 0xFF];
-//            chars[j] = (char) (hexPair >>> Byte.SIZE); // left
-//            chars[j+1] = (char) (hexPair & 0xFF); // right
-//        }
-//        return chars;
-//    }
-
-    public static byte[] encodeToBytes(byte[] buffer, int off, final int len) {
-        final int end = off + len;
+    public static byte[] encodeToBytes(byte[] buffer, int offset, int len) {
+        final int end = offset + len;
         byte[] bytes = new byte[len * CHARS_PER_BYTE];
-        for (int j = 0; off < end; off++, j += CHARS_PER_BYTE) {
-            int hexPair = ENCODE_TABLE[buffer[off] & 0xFF];
+        for (int j = 0; offset < end; offset++, j += CHARS_PER_BYTE) {
+            int hexPair = ENCODE_TABLE[buffer[offset] & 0xFF];
             bytes[j] = (byte) (hexPair >>> Byte.SIZE); // left
             bytes[j+1] = (byte) hexPair; // right
         }
@@ -112,7 +95,7 @@ public final class FastHex {
         return decode(hex.getBytes(StandardCharsets.US_ASCII), offset, len);
     }
 
-    public static byte[] decode(final byte[] hexBytes, int offset, final int len) {
+    public static byte[] decode(byte[] hexBytes, int offset, int len) {
         if (Integers.mod(len, CHARS_PER_BYTE) == 0) {
             final int bytesLen = len / CHARS_PER_BYTE;
             final byte[] bytes = new byte[bytesLen];

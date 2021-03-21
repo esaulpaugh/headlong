@@ -17,9 +17,7 @@ package com.esaulpaugh.headlong.jmh.abi;
 
 import com.esaulpaugh.headlong.abi.Function;
 import com.esaulpaugh.headlong.abi.Tuple;
-import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
 import com.esaulpaugh.headlong.util.Strings;
-import com.joemelsha.crypto.hash.Keccak;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -80,15 +78,15 @@ public class MeasureFunction {
     @Warmup(batchSize = BATCH_SIZE, iterations = 1)
     @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
     public void init_with_keccak(Blackhole blackhole) {
-        blackhole.consume(Function.parse("sam(bytes,bool,uint256[])", new Keccak(256)));
+        blackhole.consume(Function.parse("sam(bytes,bool,uint256[])"));
     }
 
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.AverageTime)
-    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
-    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
-    public void init_with_wrapped_bouncy_keccak(Blackhole blackhole) {
-        blackhole.consume(Function.parse("sam(bytes,bool,uint256[])", new WrappedKeccak(256)));
-    }
+//    @Benchmark
+//    @Fork(value = 1, warmups = 1)
+//    @BenchmarkMode(Mode.AverageTime)
+//    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
+//    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
+//    public void init_with_wrapped_bouncy_keccak(Blackhole blackhole) {
+//        blackhole.consume(Function.parse("sam(bytes,bool,uint256[])", new WrappedKeccak(256)));
+//    }
 }

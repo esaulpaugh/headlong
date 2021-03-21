@@ -62,7 +62,7 @@ public class EqualsTest {
 
 //            System.out.println(raw);
 
-            boolean equals = recursiveEquals(a.getParamTypes(), b.getParamTypes());
+            boolean equals = recursiveEquals(a.getInputs(), b.getInputs());
 
 //            System.out.println(equals);
 
@@ -72,7 +72,7 @@ public class EqualsTest {
             assertEquals(a.toJson(false), b.toJson(false));
             assertEquals(a.toString(), b.toString());
 
-            assertNotSame(a.getParamTypes().canonicalType, b.getParamTypes().canonicalType);
+            assertNotSame(a.getInputs().canonicalType, b.getInputs().canonicalType);
 
             assertEquals(a, b);
 
@@ -82,12 +82,7 @@ public class EqualsTest {
         System.out.println("n = " + n + ", maxIters = " + maxIters);
 
         assertSame(TupleType.parse("(uint)").elementTypes[0].canonicalType, TupleType.parse("(uint)").elementTypes[0].canonicalType);
-        assertNotSame(Function.parse("(uint)").getParamTypes().canonicalType, Function.parse("(uint)").getParamTypes().canonicalType);
-
-        assertEquals(
-                Function.parse("(bool)", new WrappedKeccak(256)),
-                Function.parse("(bool)", new Keccak(256))
-        );
+        assertNotSame(Function.parse("(uint)").getInputs().canonicalType, Function.parse("(uint)").getInputs().canonicalType);
     }
 
     private static boolean recursiveEquals(TupleType tt, Object o) {

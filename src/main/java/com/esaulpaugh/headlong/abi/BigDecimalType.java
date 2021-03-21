@@ -52,14 +52,11 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    public int validate(Object value) {
-        validateClass(value);
-        BigDecimal dec = (BigDecimal) value;
-        validateBigInt(dec.unscaledValue());
-        if(dec.scale() == scale) {
-            return UNIT_LENGTH_BYTES;
+    public int validate(BigDecimal value) {
+        if(value.scale() != scale) {
+            throw new IllegalArgumentException("BigDecimal scale mismatch: actual != expected: " + value.scale() + " != " + scale);
         }
-        throw new IllegalArgumentException("BigDecimal scale mismatch: actual != expected: " + dec.scale() + " != " + scale);
+        return validateBigInt(value.unscaledValue());
     }
 
     @Override

@@ -266,7 +266,7 @@ public class ABIJSONTest {
             String newJson = orig.toJson(false);
             assertNotEquals(originalJson, newJson);
 
-            ABIObject reconstructed = ABIJSON.parseABIObject(newJson);
+            ABIObject reconstructed = ABIJSON.parseABIObject(JsonUtils.parseObject(newJson));
 
             assertEquals(orig, reconstructed);
             assertEquals(originalJson, reconstructed.toString());
@@ -282,8 +282,8 @@ public class ABIJSONTest {
     @Test
     public void testParseFunctionA() {
         final Function f = Function.fromJson(FUNCTION_A_JSON);
-        final TupleType in = f.getParamTypes();
-        final TupleType out = f.getOutputTypes();
+        final TupleType in = f.getInputs();
+        final TupleType out = f.getOutputs();
         final ABIType<?> out0 = out.get(0);
 
         System.out.println(f.getName() + " : " + f.getCanonicalSignature() + " : " + out0);
@@ -303,13 +303,13 @@ public class ABIJSONTest {
 
     @Test
     public void testParseFunctionB() {
-        final Function f = Function.fromJson(FUNCTION_B_JSON, Function.newDefaultDigest());
+        final Function f = Function.fromJson(FUNCTION_B_JSON);
         System.out.println(f.getName() + " : " + f.getCanonicalSignature());
-        assertEquals(TupleType.EMPTY, f.getOutputTypes());
+        assertEquals(TupleType.EMPTY, f.getOutputs());
         assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.getCanonicalSignature());
         assertEquals("view", f.getStateMutability());
 
-        printTupleType(f.getParamTypes());
+        printTupleType(f.getInputs());
     }
 
     @Test
@@ -365,11 +365,26 @@ public class ABIJSONTest {
 
         runnable.run();
 
-        Event expectedA = new Event("a_name", "()", new boolean[0]);
-        Event expectedB = new Event("a_name", TupleType.EMPTY, new boolean[0], false);
+        Event expectedA = Event.create("a_name", TupleType.parse("()"));
+        Event expectedB = Event.create("a_name", TupleType.EMPTY);
+        assertEquals(expectedA, expectedB);
+        assertEquals(expectedA.hashCode(), expectedB.hashCode());
 
         assertEquals(expectedA, Event.fromJson(jsonObject.toString()));
-        assertEquals(expectedB, expectedA);
+    }
+
+    @Test
+    public void testAnonymousEvent() {
+        TupleType inputs1 = TupleType.parse("(bool[],int,(uint32,string)[])");
+        TupleType inputs2 = TupleType.parse(inputs1.canonicalType);
+        TupleType inputs3 = Function.parse("foo(bool[],int,(uint32,string)[])").getInputs();
+        Event a = Event.createAnonymous("x17", inputs1, true, false, true);
+        Event b = Event.createAnonymous("x17", inputs2, true, false, true);
+        Event c = new Event("x17", true, inputs3, true, false, true);
+        assertEquals(a, b);
+        assertEquals(a, c);
+        assertEquals(a.hashCode(), b.hashCode());
+        assertEquals(a.hashCode(), c.hashCode());
     }
 
     @Test
@@ -389,9 +404,9 @@ public class ABIJSONTest {
 
         Function func = functions.get(0);
 
-        printTupleType(func.getParamTypes());
+        printTupleType(func.getInputs());
 
-        assertEquals(Function.Type.FUNCTION, func.getType());
+        assertEquals(TypeEnum.FUNCTION, func.getType());
         assertEquals("", func.getName());
         assertNull(func.getStateMutability());
 
@@ -403,21 +418,21 @@ public class ABIJSONTest {
         assertNull(functions.get(1).getName());
 
         for(Function x : functions) {
-            printTupleType(x.getParamTypes());
-            assertEquals(TupleType.EMPTY, x.getOutputTypes());
+            printTupleType(x.getInputs());
+            assertEquals(TupleType.EMPTY, x.getOutputs());
         }
 
         Function fallback = functions.get(0);
         Function constructor = functions.get(1);
 
-        assertEquals(Function.Type.FALLBACK, fallback.getType());
-        assertEquals(TupleType.EMPTY, fallback.getParamTypes());
-        assertEquals(TupleType.EMPTY, fallback.getOutputTypes());
+        assertEquals(TypeEnum.FALLBACK, fallback.getType());
+        assertEquals(TupleType.EMPTY, fallback.getInputs());
+        assertEquals(TupleType.EMPTY, fallback.getOutputs());
         assertEquals("pure", fallback.getStateMutability());
 
-        assertEquals(Function.Type.CONSTRUCTOR, constructor.getType());
-        assertEquals(TupleType.parse("(bool)"), constructor.getParamTypes());
-        assertEquals(TupleType.EMPTY, fallback.getOutputTypes());
+        assertEquals(TypeEnum.CONSTRUCTOR, constructor.getType());
+        assertEquals(TupleType.parse("(bool)"), constructor.getInputs());
+        assertEquals(TupleType.EMPTY, fallback.getOutputs());
         assertEquals("nonpayable", constructor.getStateMutability());
     }
 
@@ -430,13 +445,13 @@ public class ABIJSONTest {
         Event event = events.get(0);
 
         assertEquals("an_event", event.getName());
-        assertEquals(TupleType.parse("(bytes,uint256)"), event.getParams());
+        assertEquals(TupleType.parse("(bytes,uint256)"), event.getInputs());
         assertEquals(TupleType.parse("(bytes)"), event.getIndexedParams());
         assertEquals(TupleType.parse("(uint256)"), event.getNonIndexedParams());
         assertArrayEquals(new boolean[] { true, false }, event.getIndexManifest());
 
-        assertEquals("a", event.getParams().get(0).getName());
-        assertEquals("b", event.getParams().get(1).getName());
+        assertEquals("a", event.getInputs().get(0).getName());
+        assertEquals("b", event.getInputs().get(1).getName());
 
         assertEquals("a", event.getIndexedParams().get(0).getName());
         assertEquals("b", event.getNonIndexedParams().get(0).getName());

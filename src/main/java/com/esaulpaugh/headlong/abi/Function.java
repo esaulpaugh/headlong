@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.util.Strings;
@@ -26,7 +25,6 @@ import java.nio.ByteBuffer;
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.function.IntFunction;
 import java.util.regex.Matcher;
@@ -40,26 +38,12 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
  */
 public final class Function implements ABIObject {
 
-    /** The various variants of {@link Function}. */
-    public enum Type {
-
-        FUNCTION,
-        RECEIVE,
-        FALLBACK,
-        CONSTRUCTOR;
-
-        @Override
-        public String toString() {
-            return name().toLowerCase(Locale.ENGLISH);
-        }
-    }
-
     private static final Pattern ALL_ASCII_NO_OPEN_PAREN = Pattern.compile("^[[^(]&&\\p{ASCII}]*$");
     private static final Pattern OPEN_PAREN_OR_NON_ASCII = Pattern.compile("[([^\\p{ASCII}]]");
 
     public static final int SELECTOR_LEN = 4;
 
-    private final Type type;
+    private final TypeEnum type;
     private final String name;
     private final TupleType inputTypes;
     private final TupleType outputTypes;
@@ -77,55 +61,51 @@ public final class Function implements ABIObject {
     }
 
     public Function(String signature, String outputs) {
-        this(Type.FUNCTION, signature, outputs, newDefaultDigest());
-    }
-
-    public Function(String signature, String outputs, MessageDigest messageDigest) {
-        this(Type.FUNCTION, signature, outputs, messageDigest);
-    }
-
-    /**
-     * @param type          to denote function, receive, fallback, or constructor
-     * @param signature     the function's signature e.g. "foo(int,bool)"
-     * @param outputs       the signature of the tuple containing this function's return types
-     * @param messageDigest the hash function with which to generate the 4-byte selector
-     * @throws IllegalArgumentException if {@code signature} or {@code outputs} is malformed
-     */
-    public Function(Type type, String signature, String outputs, MessageDigest messageDigest) {
         this(
-                type,
-                type != Type.FUNCTION && type != Type.RECEIVE && signature.startsWith("(") ? null : signature.substring(0, signature.indexOf('(')),
+                TypeEnum.FUNCTION,
+                signature.substring(0, signature.indexOf('(')),
                 TupleType.parse(signature.substring(signature.indexOf('('))),
                 outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY,
                 null,
-                messageDigest
+                Function.newDefaultDigest()
         );
     }
 
-    public Function(Type type, String name, TupleType inputTypes, TupleType outputTypes, String stateMutability, MessageDigest messageDigest) {
+    /**
+     * @param type          enum denoting one of: function, receive, fallback, or constructor
+     * @param name          this function's name
+     * @param inputs        {@link TupleType} describing this function's input parameters
+     * @param outputs       {@link TupleType} type describing this function's return types
+     * @param stateMutability   "pure", "view", "payable" etc.
+     * @param messageDigest hash function with which to generate the 4-byte selector
+     * @throws IllegalArgumentException if {@code signature} or {@code outputs} is malformed
+     */
+    public Function(TypeEnum type, String name, TupleType inputs, TupleType outputs, String stateMutability, MessageDigest messageDigest) {
         this.type = Objects.requireNonNull(type);
         this.name = name != null ? validateName(name) : null;
-        this.inputTypes = Objects.requireNonNull(inputTypes);
-        this.outputTypes = Objects.requireNonNull(outputTypes);
+        this.inputTypes = Objects.requireNonNull(inputs);
+        this.outputTypes = Objects.requireNonNull(outputs);
         this.stateMutability = stateMutability;
         this.hashAlgorithm = Objects.requireNonNull(messageDigest.getAlgorithm());
         validateFunction();
         generateSelector(messageDigest);
     }
 
-    public Type getType() {
+    public TypeEnum getType() {
         return type;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
-    public TupleType getParamTypes() {
+    @Override
+    public TupleType getInputs() {
         return inputTypes;
     }
 
-    public TupleType getOutputTypes() {
+    public TupleType getOutputs() {
         return outputTypes;
     }
 
@@ -153,13 +133,13 @@ public final class Function implements ABIObject {
     }
 
     private void validateFunction() {
-        switch (type.toString()) {
-        case ABIJSON.FUNCTION:
+        switch (type) {
+        case FUNCTION:
             if(name == null) {
                 throw validationErr("define name");
             }
             return;
-        case ABIJSON.RECEIVE:
+        case RECEIVE:
             if (!ABIJSON.RECEIVE.equals(name)) {
                 throw validationErr("define name as \"" + ABIJSON.RECEIVE + '"');
             }
@@ -167,19 +147,21 @@ public final class Function implements ABIObject {
                 throw validationErr("define stateMutability as \"" + ABIJSON.PAYABLE + '"');
             }
             /* fall through */
-        case ABIJSON.FALLBACK:
+        case FALLBACK:
             if(inputTypes.elementTypes.length > 0) {
                 throw validationErr("define no inputs");
             }
             /* fall through */
-        case ABIJSON.CONSTRUCTOR:
+        case CONSTRUCTOR:
             if(outputTypes.elementTypes.length > 0) {
                 throw validationErr("define no outputs");
             }
-            if (type != Type.RECEIVE && name != null) {
+            if (type != TypeEnum.RECEIVE && name != null) {
                 throw validationErr("not define name");
             }
             return;
+        case EVENT:
+            throw TypeEnum.unexpectedType(type.toString());
         default: throw new Error();
         }
     }
@@ -190,7 +172,7 @@ public final class Function implements ABIObject {
 
     private void generateSelector(MessageDigest messageDigest) {
         messageDigest.reset();
-        messageDigest.update(Strings.decode(getCanonicalSignature(), Strings.UTF_8));
+        messageDigest.update(Strings.decode(getCanonicalSignature(), Strings.ASCII));
         try {
             messageDigest.digest(selector, 0, SELECTOR_LEN);
         } catch (DigestException de) {
@@ -250,13 +232,13 @@ public final class Function implements ABIObject {
         return outputTypes.decode(returnVals);
     }
 
+    public Tuple decodeReturn(ByteBuffer returnVals) {
+        return outputTypes.decode(returnVals);
+    }
+
     @SuppressWarnings("unchecked")
     public <J> J decodeSingletonReturn(byte[] singleton) {
         return (J) outputTypes.get(0).decode(singleton);
-    }
-
-    public Tuple decodeReturn(ByteBuffer returnVals) {
-        return outputTypes.decode(returnVals);
     }
 
     @Override
@@ -310,29 +292,16 @@ public final class Function implements ABIObject {
         return new Function(signature, outputs);
     }
 
-    public static Function parse(String signature, MessageDigest messageDigest) {
-        return new Function(signature, null, messageDigest);
-    }
-
     public static Function fromJson(String objectJson) {
         return fromJsonObject(JsonUtils.parseObject(objectJson));
     }
 
-    public static Function fromJson(String objectJson, MessageDigest messageDigest) {
-        return fromJsonObject(JsonUtils.parseObject(objectJson), messageDigest);
-    }
-
     public static Function fromJsonObject(JsonObject function) {
-        return fromJsonObject(function, Function.newDefaultDigest());
-    }
-
-    public static Function fromJsonObject(JsonObject function, MessageDigest messageDigest) {
-        return ABIJSON.parseFunction(function, messageDigest);
+        return ABIJSON.parseFunction(function);
     }
 
     /**
      * @return a {@link MessageDigest}
-     * @see WrappedKeccak
      */
     public static MessageDigest newDefaultDigest() {
         return new Keccak(256); // replace this with your preferred impl

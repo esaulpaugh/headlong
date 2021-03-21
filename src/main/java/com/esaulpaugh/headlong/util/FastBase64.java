@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.util;
 
-import java.nio.charset.StandardCharsets;
-
 public final class FastBase64 {
 
     private FastBase64() {}
@@ -30,11 +28,11 @@ public final class FastBase64 {
     private static final int LINE_SEP_LEN = 2;
     private static final byte PADDING_BYTE = '=';
 
-    private static final short[] URL_SAFE = init("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".getBytes(StandardCharsets.US_ASCII));
+    private static final short[] URL_SAFE = init(Strings.decode("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_", Strings.ASCII));
 
     private static final class Standard { // inner class to delay loading of table until called for
         Standard() {}
-        static final short[] STANDARD = init("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes(StandardCharsets.US_ASCII));
+        static final short[] STANDARD = init(Strings.decode("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", Strings.ASCII));
     }
 
     static short[] init(byte[] smallTable) {
@@ -49,12 +47,12 @@ public final class FastBase64 {
     }
 
     @SuppressWarnings("deprecation")
-    public static String encodeToString(byte[] buffer, int off, int len, int flags) {
-        byte[] enc = encodeToBytes(buffer, off, len, flags);
+    public static String encodeToString(byte[] buffer, int offset, int len, int flags) {
+        byte[] enc = encodeToBytes(buffer, offset, len, flags);
         return new String(enc, 0, 0, enc.length);
     }
 
-    public static byte[] encodeToBytes(final byte[] buffer, final int offset, final int len, final int flags) {
+    public static byte[] encodeToBytes(byte[] buffer, int offset, int len, int flags) {
         final int chunks = len / 3;
         final int evenBytes = chunks * 3;
         final int bytesLeft = len - evenBytes; // bytesLen % 3; // [0,2]

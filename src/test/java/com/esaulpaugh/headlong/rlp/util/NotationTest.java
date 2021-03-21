@@ -62,7 +62,7 @@ public class NotationTest {
 
         System.out.println(notation);
 
-        Notation n = Notation.forEncoding(RLPEncoder.encodeSequentially(NotationParser.parse(NOTATION)));
+        Notation n = Notation.forEncoding(RLPEncoder.encodeSequentially(Notation.parse(NOTATION)));
         assertEquals(notation, n.toString());
         assertEquals(NOTATION, n.toString());
 

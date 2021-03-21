@@ -25,24 +25,21 @@ import java.util.Objects;
 public final class Event implements ABIObject {
 
     private final String name;
-
+    private final boolean anonymous;
     private final TupleType inputs;
-
     private final boolean[] indexManifest;
 
-    private final boolean anonymous;
-
-    public Event(String name, String params, boolean[] indexed) {
-        this(name, params, indexed, false);
+    public static Event create(String name, TupleType inputs, boolean... indexed) {
+        return new Event(name, false, inputs, indexed);
     }
 
-    public Event(String name, String params, boolean[] indexed, boolean anonymous) {
-        this(name, TupleType.parse(params), indexed, anonymous);
+    public static Event createAnonymous(String name, TupleType inputs, boolean... indexed) {
+        return new Event(name, true, inputs, indexed);
     }
 
-    public Event(String name, TupleType params, boolean[] indexed, boolean anonymous) {
+    public Event(String name, boolean anonymous, TupleType inputs, boolean... indexed) {
         this.name = Objects.requireNonNull(name);
-        this.inputs = Objects.requireNonNull(params);
+        this.inputs = Objects.requireNonNull(inputs);
         if(indexed.length != inputs.elementTypes.length) {
             throw new IllegalArgumentException("indexed.length doesn't match number of inputs");
         }
@@ -50,11 +47,13 @@ public final class Event implements ABIObject {
         this.anonymous = anonymous;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
-    public TupleType getParams() {
+    @Override
+    public TupleType getInputs() {
         return inputs;
     }
 

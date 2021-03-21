@@ -58,6 +58,11 @@ public class StringsTest {
         byte[] bytes = TestUtils.randomBytes(r.nextInt(100), r);
         assertEquals(Hex.toHexString(bytes), FastHex.encodeToString(bytes));
 
+        assertEquals(
+                Hex.toHexString(new byte[] { 0, -1, 9, 51, 127, -128 }),
+                FastHex.encodeToString((byte)0, (byte)-1, (byte)9, (byte)51, (byte)127, (byte)-128)
+        );
+
         testEncoding(20_000, HEX, SUPPLY_RANDOM);
     }
 

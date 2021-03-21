@@ -21,11 +21,11 @@ import com.esaulpaugh.headlong.util.SuperSerial;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import java.util.function.IntUnaryOperator;
 
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.TupleType.countBytes;
+import static com.esaulpaugh.headlong.abi.TupleType.totalLen;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 /**
  * Represents static array types such as bytes3 or uint16[3][2] and dynamic array types such as decimal[5][] or
@@ -40,8 +40,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     static final Class<String> STRING_CLASS = String.class;
     static final Class<String[]> STRING_ARRAY_CLASS = String[].class;
-
-    private static final int ARRAY_LENGTH_BYTES = UNIT_LENGTH_BYTES;
 
     public static final int DYNAMIC_LENGTH = -1;
 
@@ -93,7 +91,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
      */
     @Override
     int byteLength(Object value) {
-        return totalLength(calcElementsLen(value));
+        return totalLen(calcElementsLen(value), length == DYNAMIC_LENGTH);
     }
 
     private int calcElementsLen(Object value) {
@@ -140,24 +138,19 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     byte[] decodeIfString(Object value) {
-        return !isString ? (byte[]) value : Strings.decode((String) value, UTF_8);
+        return !isString ? (byte[]) value : Strings.decode((String) value, Strings.UTF_8);
     }
 
     Object encodeIfString(byte[] bytes) {
-        return !isString ? bytes : Strings.encode(bytes, UTF_8);
+        return !isString ? bytes : Strings.encode(bytes, Strings.UTF_8);
     }
 
     @Override
-    public int validate(Object value) {
-        validateClass(value);
-        return totalLength(validateElements(value));
+    public int validate(J value) {
+        return totalLen(validateElements(validateClass(value)), length == DYNAMIC_LENGTH); // validateClass to disallow Object[] etc
     }
 
-    private int totalLength(int elementsLen) { // if type has variable # of elements, add 32 for the array length
-        return length == DYNAMIC_LENGTH ? ARRAY_LENGTH_BYTES + elementsLen : elementsLen;
-    }
-
-    private int validateElements(Object value) {
+    private int validateElements(J value) {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return validateBooleans((boolean[]) value);
         case TYPE_CODE_BYTE: return validateBytes(value);
@@ -175,41 +168,32 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return checkLength(arr.length, arr) * UNIT_LENGTH_BYTES;
     }
 
-    private int validateBytes(Object arr) {
+    private int validateBytes(J arr) {
         return Integers.roundLengthUp(checkLength(byteCount(arr), arr), UNIT_LENGTH_BYTES);
     }
 
+    private int offsetsLen(int len) {
+        return elementType.dynamic ? OFFSET_LENGTH_BYTES * len: 0;
+    }
+
     private int validateInts(int[] arr, IntType type) {
-        return countBytes(elementType.dynamic, checkLength(arr.length, arr), (i) -> type.validatePrimitive(arr[i]));
+        return countBytes(true, checkLength(arr.length, arr), offsetsLen(arr.length), (i) -> type.validatePrimitive(arr[i]));
     }
 
     private int validateLongs(long[] arr, LongType type) {
-        return countBytes(elementType.dynamic, checkLength(arr.length, arr), (i) -> type.validatePrimitive(arr[i]));
+        return countBytes(true, checkLength(arr.length, arr), offsetsLen(arr.length), (i) -> type.validatePrimitive(arr[i]));
     }
 
     private int validateObjects(Object[] arr) {
-        return countBytes(elementType.dynamic, checkLength(arr.length, arr), (i) -> elementType.validate(arr[i]));
+        return countBytes(true, checkLength(arr.length, arr), offsetsLen(arr.length), (i) -> elementType._validate(arr[i]));
     }
 
     private int measureByteLength(Object[] arr) {
-        return countBytes(elementType.dynamic, arr.length, (i) -> elementType.byteLength(arr[i]));
+        return countBytes(true, arr.length, offsetsLen(arr.length), (i) -> elementType.byteLength(arr[i]));
     }
 
     private int measureByteLengthPacked(Object[] arr) { // don't count offsets
-        return countBytes(false, arr.length, (i) -> elementType.byteLengthPacked(arr[i]));
-    }
-
-    private static int countBytes(boolean dynamics, int len, IntUnaryOperator counter) {
-        int byteLength = dynamics ? len * OFFSET_LENGTH_BYTES : 0;
-        int i = 0;
-        try {
-            for ( ; i < len; i++) {
-                byteLength += counter.applyAsInt(i);
-            }
-        } catch (IllegalArgumentException iae) {
-            throw new IllegalArgumentException("array index " + i + ": " + iae.getMessage());
-        }
-        return byteLength;
+        return countBytes(true, arr.length, 0, (i) -> elementType.byteLengthPacked(arr[i]));
     }
 
     private int checkLength(final int valueLen, Object value) {

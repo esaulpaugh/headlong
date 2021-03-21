@@ -228,8 +228,32 @@ public class UnsignedTest {
 
         Uint uint16 = new Uint(8);
 
-        Assertions.assertArrayEquals(unsignedA, uint16.toUnsignedLongAll(-7, -4, -3, 0, 1, 7));
-        Assertions.assertArrayEquals(unsignedB, uint16.toUnsignedAll(-1L, -128L, -90L, -50L, 127L));
-        Assertions.assertArrayEquals(unsignedC, uint16.toUnsignedAll(BigInteger.valueOf(110L), BigInteger.valueOf(-10L), BigInteger.valueOf(-1L)));
+        Assertions.assertArrayEquals(unsignedA, toUnsignedLongAll(uint16, -7, -4, -3, 0, 1, 7));
+        Assertions.assertArrayEquals(unsignedB, toUnsignedAll(uint16, -1L, -128L, -90L, -50L, 127L));
+        Assertions.assertArrayEquals(unsignedC, toUnsignedAll(uint16, BigInteger.valueOf(110L), BigInteger.valueOf(-10L), BigInteger.valueOf(-1L)));
+    }
+
+    public long[] toUnsignedLongAll(Uint uint, int... signeds) {
+        long[] out = new long[signeds.length];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = uint.toUnsignedLong(signeds[i]);
+        }
+        return out;
+    }
+
+    public BigInteger[] toUnsignedAll(Uint uint, long... signeds) {
+        BigInteger[] out = new BigInteger[signeds.length];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = uint.toUnsigned(signeds[i]);
+        }
+        return out;
+    }
+
+    public BigInteger[] toUnsignedAll(Uint uint, BigInteger... signeds) {
+        BigInteger[] out = new BigInteger[signeds.length];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = uint.toUnsigned(signeds[i]);
+        }
+        return out;
     }
 }

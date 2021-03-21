@@ -27,7 +27,6 @@ import org.opentest4j.AssertionFailedError;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,7 +57,7 @@ public class EncodeTest {
     @Test
     public void fuzzSignatures() throws InterruptedException, TimeoutException {
 
-        final byte[] alphabet = "x0123456789".getBytes(StandardCharsets.US_ASCII); // new char[128]; // "(),abcdefgilmnorstuxy8[]"
+        final byte[] alphabet = Strings.decode("x0123456789", Strings.ASCII); // new char[128]; // "(),abcdefgilmnorstuxy8[]"
         final int alphabetLen = alphabet.length;
         if (alphabetLen == 128) {
             for (int i = 0; i < alphabetLen; i++) { // (fixed128x18)
@@ -306,7 +305,7 @@ public class EncodeTest {
 
         assertThrown(ILLEGAL, "@ index 0, bad array length", () -> Function.parse("zaba(()[04])"));
 
-        assertEquals(4, ((ArrayType<TupleType, Tuple[]>) Function.parse("yaba(()[4])").getParamTypes().get(0)).getLength());
+        assertEquals(4, ((ArrayType<TupleType, Tuple[]>) Function.parse("yaba(()[4])").getInputs().get(0)).getLength());
     }
 
     @Test
@@ -385,7 +384,7 @@ public class EncodeTest {
     @Test
     public void paddingTest() {
         final Function f = new Function("(bool,uint8,int64,address,ufixed,bytes2,(string),bytes,function)");
-        final TupleType paramTypes = f.getParamTypes();
+        final TupleType paramTypes = f.getInputs();
 
         StringBuilder sb = new StringBuilder();
         for(ABIType<?> type : paramTypes) {
@@ -476,8 +475,12 @@ public class EncodeTest {
 
     @Test
     public void testTypeSafety() throws Throwable {
-        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Object != java.lang.Integer (int32 requires Integer but found Object)",
-                () -> Function.parse("foo(int32)").encodeCallWithArgs(new Object())
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1: null",
+                () -> Function.parse("foo(bool,int32)").encodeCallWithArgs(true, null)
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1: class mismatch: java.lang.Object != java.lang.Integer (int32 requires Integer but found Object)",
+                () -> Function.parse("foo(bool,int32)").encodeCallWithArgs(false, new Object())
         );
 
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Long != [I (int32[] requires int[] but found Long)",
@@ -561,6 +564,7 @@ public class EncodeTest {
 
     private static final double DELTA = 0.000000000000000001d;
     private static final BigDecimal O_1 = new BigDecimal("0.1");
+    private static final BigDecimal O_000000000000000001 = new BigDecimal("0.000000000000000001");
 
     @Test
     public void testDecimalMinMax() throws Throwable {
@@ -582,7 +586,9 @@ public class EncodeTest {
         assertEquals(u128Max.doubleValue(), ufixed.maxDecimal().doubleValue(), DELTA);
 
         ufixed.validate(new BigDecimal(BigInteger.ZERO, 18));
-        assertThrown(ILLEGAL, "signed value given for unsigned type", () -> ufixed.validate(O_1.negate()));
+        assertThrown(ILLEGAL, "BigDecimal scale mismatch: actual != expected: 1 != 18", () -> ufixed.validate(O_1.negate()));
+        ufixed.validate(O_000000000000000001);
+        assertThrown(ILLEGAL, "signed value given for unsigned type", () -> ufixed.validate(O_000000000000000001.negate()));
 
         ufixed.validate(u128Max);
         assertThrown(ILLEGAL, "unsigned val exceeds bit limit: 129 > 128", () -> ufixed.validate(u128Max.add(BigDecimal.ONE)));

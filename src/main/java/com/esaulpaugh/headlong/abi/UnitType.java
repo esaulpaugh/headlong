@@ -21,7 +21,7 @@ import com.esaulpaugh.headlong.util.Integers;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-/** Superclass for any 256-bit ("unit") Contract ABI type. Usually numbers or boolean. Not for arrays. */
+/** Superclass for any 256-bit ("unit") Contract ABI type. Usually numbers or boolean. Not for arrays or tuples. */
 public abstract class UnitType<J> extends ABIType<J> { // J generally extends Number or is Boolean
 
     public static final int UNIT_LENGTH_BYTES = 32;
@@ -64,8 +64,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     }
 
     @Override
-    public int validate(Object value) {
-        validateClass(value);
+    public int validate(J value) {
         return validatePrimitive(((Number) value).longValue());
     }
 
@@ -86,11 +85,12 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         return UNIT_LENGTH_BYTES;
     }
 
-    final void validateBigInt(BigInteger bigIntVal) {
+    final int validateBigInt(BigInteger bigIntVal) {
         if(unsigned && bigIntVal.signum() < 0) {
             throw new IllegalArgumentException("signed value given for unsigned type");
         }
         checkBitLen(bigIntVal.bitLength());
+        return UNIT_LENGTH_BYTES;
     }
 
     final void checkBitLen(int actual) {

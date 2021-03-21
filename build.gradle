@@ -9,7 +9,7 @@ plugins {
 
 group 'com.esaulpaugh'
 archivesBaseName = "headlong"
-version '4.5.0-SNAPSHOT'
+version '5.0.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -18,6 +18,10 @@ compileJava {
     if (!Jvm.current().getJavaVersion().isCompatibleWith(JavaVersion.VERSION_1_8)) {
         options.compilerArgs.addAll(['--release', '8'])
     }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
 }
 
 test {
@@ -34,6 +38,10 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
     finalizedBy(javadocJar)
 }
+
+def junitVersion = '5.7.1'
+def jmhVersion = '1.28'
+def bcVersion = '1.68'
 
 static def todayUTC() {
     SimpleDateFormat sdf = new SimpleDateFormat("MMMMM d yyyy")
@@ -81,15 +89,16 @@ repositories {
 dependencies {
 
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'org.bouncycastle:bcprov-jdk15on:1.68'
 
     test.useJUnitPlatform()
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.7.1"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.1"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:' + junitVersion
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:' + junitVersion
+    testImplementation 'org.bouncycastle:bcprov-jdk15on:' + bcVersion
 
     jmhImplementation 'commons-codec:commons-codec:1.15'
-    jmhImplementation 'org.openjdk.jmh:jmh-core:1.28'
-    jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.27'
+    jmhImplementation 'org.openjdk.jmh:jmh-core:' + jmhVersion
+    jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:' + jmhVersion
+    jmhImplementation 'org.bouncycastle:bcprov-jdk15on:' + bcVersion
 }
 
 task jmh(type: JavaExec, dependsOn: jmhClasses) { // run benchmarks with `gradle jmh`

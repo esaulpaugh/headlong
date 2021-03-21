@@ -27,7 +27,6 @@ import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
 import com.esaulpaugh.headlong.rlp.util.Notation;
-import com.esaulpaugh.headlong.rlp.util.NotationParser;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -67,15 +66,15 @@ public final class SuperSerial {
         Tuple in = deserializeTuple(
                 tupleType,
                 machine ? Strings.decode(str)
-                        : RLPEncoder.encodeSequentially(NotationParser.parse(str)));
+                        : RLPEncoder.encodeSequentially(Notation.parse(str)));
         tupleType.validate(in);
         return in;
     }
 
     public static <T> T deserializeArray(ArrayType<? extends ABIType<?>, ?> arrayType, String str, boolean machine, Class<T> classOfT) {
-        byte[] rlp = machine ? Strings.decode(str) : RLPEncoder.encodeSequentially(NotationParser.parse(str));
+        byte[] rlp = machine ? Strings.decode(str) : RLPEncoder.encodeSequentially(Notation.parse(str));
         Object array = deserializeArray(arrayType, RLP_STRICT.wrap(rlp));
-        arrayType.validate(array);
+        arrayType._validate(array);
         return classOfT.cast(array);
     }
 

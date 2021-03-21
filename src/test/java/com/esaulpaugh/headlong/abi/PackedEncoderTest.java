@@ -47,13 +47,13 @@ public class PackedEncoderTest {
         TupleType tupleType = TupleType.parse("(int120[],(int96,ufixed256x47)[])");
         Tuple test = Tuple.of(new BigInteger[] { BigInteger.TEN }, new Tuple[] { Tuple.of(BigInteger.TEN, new BigDecimal(BigInteger.TEN, 47)) });
         ByteBuffer bb = tupleType.encodePacked(test);
-        TestUtils.assertThrown(IllegalArgumentException.class, "multiple dynamic elements", () -> PackedDecoder.decode(tupleType, bb.array()));
+        TestUtils.assertThrown(IllegalArgumentException.class, "multiple dynamic elements", () -> tupleType.decodePacked(bb.array()));
 
         TupleType _tt = TupleType.parse("(int144[][1])");
         Tuple _test = Tuple.singleton(new BigInteger[][] { new BigInteger[] { } });
         _tt.validate(_test);
         ByteBuffer _bb = _tt.encodePacked(_test);
-        TestUtils.assertThrown(IllegalArgumentException.class, "array of dynamic elements", () -> PackedDecoder.decode(_tt, _bb.array()));
+        TestUtils.assertThrown(IllegalArgumentException.class, "array of dynamic elements", () -> _tt.decodePacked(_bb.array()));
     }
 
     @Test
@@ -66,7 +66,7 @@ public class PackedEncoderTest {
 
         assertEquals("010001", Strings.encode(bb));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
+        Tuple decoded = tupleType.decodePacked(bb.array());
 
         assertEquals(test, decoded);
     }
@@ -81,7 +81,7 @@ public class PackedEncoderTest {
 
         assertEquals("", Strings.encode(bb));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "can't decode dynamic number of zero-length elements", () -> PackedDecoder.decode(tupleType, bb.array()));
+        TestUtils.assertThrown(IllegalArgumentException.class, "can't decode dynamic number of zero-length elements", () -> tupleType.decodePacked(bb.array()));
     }
 
     @Test
@@ -116,7 +116,7 @@ public class PackedEncoderTest {
 
         assertEquals("fffefd", Strings.encode(bb));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, Strings.decode("fffefd"));
+        Tuple decoded = tupleType.decodePacked(Strings.decode("fffefd"));
 
         assertEquals(test, decoded);
     }
@@ -131,7 +131,7 @@ public class PackedEncoderTest {
 
         assertEquals("00fffe01fd", Strings.encode(bb));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, Strings.decode("00fffe01fd"));
+        Tuple decoded = tupleType.decodePacked(Strings.decode("00fffe01fd"));
 
         assertEquals(test, decoded);
     }
@@ -160,7 +160,7 @@ public class PackedEncoderTest {
 
         Function function = new Function(tupleType.canonicalType);
 
-        String hex = Strings.encode(function.getParamTypes().encode(test));
+        String hex = Strings.encode(function.getInputs().encode(test));
 
         System.out.println(hex);
 
@@ -196,7 +196,7 @@ public class PackedEncoderTest {
 
         assertEquals("fffffe0100", Strings.encode(bb));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
+        Tuple decoded = tupleType.decodePacked(bb.array());
 
         assertEquals(values, decoded);
     }
@@ -214,7 +214,7 @@ public class PackedEncoderTest {
 
         assertEquals("000300050000070000080000090000000900000000ffffffff0100010000000000000006ffffffffffffffffff", Strings.encode(bb));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
+        Tuple decoded = tupleType.decodePacked(bb.array());
 
         assertEquals(test, decoded);
     }
@@ -233,7 +233,7 @@ public class PackedEncoderTest {
 
         assertEquals("00000000000000010000000000000002000000000000000300000000000000040000000000000000000000000000000000000000000000000000000000000001", Strings.encode(bb));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, packedArray);
+        Tuple decoded = tupleType.decodePacked(packedArray);
 
         assertEquals(values, decoded);
     }
@@ -251,7 +251,7 @@ public class PackedEncoderTest {
 
         assertEquals("010101010100", Strings.encode(bb));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
+        Tuple decoded = tupleType.decodePacked(bb.array());
 
         assertEquals(values, decoded);
     }
@@ -271,7 +271,7 @@ public class PackedEncoderTest {
 
         assertEquals("800000", Strings.encode(bb));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
+        Tuple decoded = tupleType.decodePacked(bb.array());
 
         assertEquals(values, decoded);
     }
@@ -291,7 +291,7 @@ public class PackedEncoderTest {
 
         assertEquals("000000800000000000800000", Strings.encode(bb));
 
-        Tuple decoded = PackedDecoder.decode(tupleType, bb.array());
+        Tuple decoded = tupleType.decodePacked(bb.array());
 
         assertEquals(values, decoded);
     }

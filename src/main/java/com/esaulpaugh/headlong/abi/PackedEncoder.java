@@ -35,13 +35,7 @@ final class PackedEncoder {
 
     private PackedEncoder() {}
 
-    static void encodeTuple(TupleType tupleType, Tuple tuple, ByteBuffer dest) {
-        for (int i = 0; i < tupleType.elementTypes.length; i++) {
-            encode(tupleType.elementTypes[i], tuple.elements[i], dest);
-        }
-    }
-
-    private static void encode(ABIType<?> type, Object value, ByteBuffer dest) {
+    static void encode(ABIType<?> type, Object value, ByteBuffer dest) {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: encodeBoolean((boolean) value, dest); return;
         case TYPE_CODE_BYTE:
@@ -51,25 +45,6 @@ final class PackedEncoder {
         case TYPE_CODE_BIG_DECIMAL: Encoding.insertInt(((BigDecimal) value).unscaledValue(), type.byteLengthPacked(null), dest); return;
         case TYPE_CODE_ARRAY: encodeArray((ArrayType<? extends ABIType<?>, ?>) type, value, dest); return;
         case TYPE_CODE_TUPLE: encodeTuple((TupleType) type, (Tuple) value, dest); return;
-        default: throw new Error();
-        }
-    }
-
-    private static void encodeArray(ArrayType<? extends ABIType<?>, ?> arrayType, Object value, ByteBuffer dest) {
-        final ABIType<?> elementType = arrayType.getElementType();
-        switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: encodeBooleans((boolean[]) value, dest); return;
-        case TYPE_CODE_BYTE: dest.put(arrayType.decodeIfString(value)); return;
-        case TYPE_CODE_INT: encodeInts((int[]) value, elementType.byteLengthPacked(null), dest); return;
-        case TYPE_CODE_LONG: encodeLongs((long[]) value, elementType.byteLengthPacked(null), dest); return;
-        case TYPE_CODE_BIG_INTEGER:
-        case TYPE_CODE_BIG_DECIMAL:
-        case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE:
-            for(Object e : (Object[]) value) {
-                encode(elementType, e, dest);
-            }
-            return;
         default: throw new Error();
         }
     }
@@ -103,6 +78,31 @@ final class PackedEncoder {
         } else {
             Encoding.insertPadding(byteLen - BizarroIntegers.len(value), true, dest);
             BizarroIntegers.putLong(value, dest);
+        }
+    }
+
+    private static void encodeArray(ArrayType<? extends ABIType<?>, ?> arrayType, Object value, ByteBuffer dest) {
+        final ABIType<?> elementType = arrayType.getElementType();
+        switch (elementType.typeCode()) {
+        case TYPE_CODE_BOOLEAN: encodeBooleans((boolean[]) value, dest); return;
+        case TYPE_CODE_BYTE: dest.put(arrayType.decodeIfString(value)); return;
+        case TYPE_CODE_INT: encodeInts((int[]) value, elementType.byteLengthPacked(null), dest); return;
+        case TYPE_CODE_LONG: encodeLongs((long[]) value, elementType.byteLengthPacked(null), dest); return;
+        case TYPE_CODE_BIG_INTEGER:
+        case TYPE_CODE_BIG_DECIMAL:
+        case TYPE_CODE_ARRAY:
+        case TYPE_CODE_TUPLE:
+            for(Object e : (Object[]) value) {
+                encode(elementType, e, dest);
+            }
+            return;
+        default: throw new Error();
+        }
+    }
+
+    private static void encodeTuple(TupleType tupleType, Tuple tuple, ByteBuffer dest) {
+        for (int i = 0; i < tupleType.elementTypes.length; i++) {
+            encode(tupleType.elementTypes[i], tuple.elements[i], dest);
         }
     }
 }

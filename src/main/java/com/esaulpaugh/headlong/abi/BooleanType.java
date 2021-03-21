@@ -48,8 +48,7 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    public int validate(Object value) {
-        validateClass(value);
+    public int validate(Boolean value) {
         return UNIT_LENGTH_BYTES;
     }
 
@@ -81,8 +80,7 @@ public final class BooleanType extends UnitType<Boolean> {
 
     @Override
     public Boolean parseArgument(String s) {
-        Boolean bool = Boolean.parseBoolean(s);
-        validate(bool);
-        return bool;
+        return Boolean.parseBoolean(s);
+//        validate(bool);
     }
 }
