@@ -39,26 +39,12 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
  */
 public final class Function implements ABIObject {
 
-    /** The various variants of {@link Function}. */
-    public enum Type {
-
-        FUNCTION,
-        RECEIVE,
-        FALLBACK,
-        CONSTRUCTOR;
-
-        @Override
-        public String toString() {
-            return name().toLowerCase(Locale.ENGLISH);
-        }
-    }
-
     private static final Pattern ALL_ASCII_NO_OPEN_PAREN = Pattern.compile("^[[^(]&&\\p{ASCII}]*$");
     private static final Pattern OPEN_PAREN_OR_NON_ASCII = Pattern.compile("[([^\\p{ASCII}]]");
 
     public static final int SELECTOR_LEN = 4;
 
-    private final Type type;
+    private final TypeEnum type;
     private final String name;
     private final TupleType inputTypes;
     private final TupleType outputTypes;
@@ -77,7 +63,7 @@ public final class Function implements ABIObject {
 
     public Function(String signature, String outputs) {
         this(
-                Type.FUNCTION,
+                TypeEnum.FUNCTION,
                 signature.substring(0, signature.indexOf('(')),
                 TupleType.parse(signature.substring(signature.indexOf('('))),
                 outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY,
@@ -95,7 +81,7 @@ public final class Function implements ABIObject {
      * @param messageDigest hash function with which to generate the 4-byte selector
      * @throws IllegalArgumentException if {@code signature} or {@code outputs} is malformed
      */
-    public Function(Type type, String name, TupleType inputs, TupleType outputs, String stateMutability, MessageDigest messageDigest) {
+    public Function(TypeEnum type, String name, TupleType inputs, TupleType outputs, String stateMutability, MessageDigest messageDigest) {
         this.type = Objects.requireNonNull(type);
         this.name = name != null ? validateName(name) : null;
         this.inputTypes = Objects.requireNonNull(inputs);
@@ -106,7 +92,7 @@ public final class Function implements ABIObject {
         generateSelector(messageDigest);
     }
 
-    public Type getType() {
+    public TypeEnum getType() {
         return type;
     }
 
@@ -148,13 +134,13 @@ public final class Function implements ABIObject {
     }
 
     private void validateFunction() {
-        switch (type.toString()) {
-        case ABIJSON.FUNCTION:
+        switch (type) {
+        case FUNCTION:
             if(name == null) {
                 throw validationErr("define name");
             }
             return;
-        case ABIJSON.RECEIVE:
+        case RECEIVE:
             if (!ABIJSON.RECEIVE.equals(name)) {
                 throw validationErr("define name as \"" + ABIJSON.RECEIVE + '"');
             }
@@ -162,19 +148,21 @@ public final class Function implements ABIObject {
                 throw validationErr("define stateMutability as \"" + ABIJSON.PAYABLE + '"');
             }
             /* fall through */
-        case ABIJSON.FALLBACK:
+        case FALLBACK:
             if(inputTypes.elementTypes.length > 0) {
                 throw validationErr("define no inputs");
             }
             /* fall through */
-        case ABIJSON.CONSTRUCTOR:
+        case CONSTRUCTOR:
             if(outputTypes.elementTypes.length > 0) {
                 throw validationErr("define no outputs");
             }
-            if (type != Type.RECEIVE && name != null) {
+            if (type != TypeEnum.RECEIVE && name != null) {
                 throw validationErr("not define name");
             }
             return;
+        case EVENT:
+            throw TypeEnum.unexpectedType(type.toString());
         default: throw new Error();
         }
     }
@@ -310,7 +298,7 @@ public final class Function implements ABIObject {
     }
 
     public static Function fromJsonObject(JsonObject function) {
-        return ABIJSON.parseFunction(function, Function.newDefaultDigest());
+        return ABIJSON.parseFunction(function);
     }
 
     /**

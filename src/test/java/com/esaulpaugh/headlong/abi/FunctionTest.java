@@ -58,39 +58,39 @@ public class FunctionTest {
         final TupleType inputs = TupleType.of("int");
         final TupleType outputs = TupleType.of("bool");
         final MessageDigest md = Function.newDefaultDigest();
-        TestUtils.assertThrown(err, "type is \"constructor\"; functions of this type must define no outputs", () -> new Function(Function.Type.CONSTRUCTOR, "foo", TupleType.EMPTY, TupleType.parse("(bool)"), null, md));
-        TestUtils.assertThrown(err, "type is \"fallback\"; functions of this type must define no outputs", () -> new Function(Function.Type.FALLBACK, "foo", TupleType.EMPTY, TupleType.parse("(bool)"), null, md));
-        TestUtils.assertThrown(err, "type is \"constructor\"; functions of this type must not define name", () -> new Function(Function.Type.CONSTRUCTOR, "foo", TupleType.EMPTY, TupleType.EMPTY, null, md));
-        TestUtils.assertThrown(err, "type is \"fallback\"; functions of this type must not define name", () -> new Function(Function.Type.FALLBACK, "foo", TupleType.EMPTY, TupleType.EMPTY, null, md));
-        Function f = new Function(Function.Type.CONSTRUCTOR, null, TupleType.EMPTY, TupleType.EMPTY, null, md);
+        TestUtils.assertThrown(err, "type is \"constructor\"; functions of this type must define no outputs", () -> new Function(TypeEnum.CONSTRUCTOR, "foo", TupleType.EMPTY, TupleType.parse("(bool)"), null, md));
+        TestUtils.assertThrown(err, "type is \"fallback\"; functions of this type must define no outputs", () -> new Function(TypeEnum.FALLBACK, "foo", TupleType.EMPTY, TupleType.parse("(bool)"), null, md));
+        TestUtils.assertThrown(err, "type is \"constructor\"; functions of this type must not define name", () -> new Function(TypeEnum.CONSTRUCTOR, "foo", TupleType.EMPTY, TupleType.EMPTY, null, md));
+        TestUtils.assertThrown(err, "type is \"fallback\"; functions of this type must not define name", () -> new Function(TypeEnum.FALLBACK, "foo", TupleType.EMPTY, TupleType.EMPTY, null, md));
+        Function f = new Function(TypeEnum.CONSTRUCTOR, null, TupleType.EMPTY, TupleType.EMPTY, null, md);
         assertNull(f.getName());
         assertEquals(TupleType.EMPTY, f.getInputs());
         assertEquals(TupleType.EMPTY, f.getOutputs());
-        f = new Function(Function.Type.FALLBACK, null, TupleType.EMPTY, TupleType.EMPTY, null, md);
-        assertEquals(Function.Type.FALLBACK, f.getType());
+        f = new Function(TypeEnum.FALLBACK, null, TupleType.EMPTY, TupleType.EMPTY, null, md);
+        assertEquals(TypeEnum.FALLBACK, f.getType());
         assertNull(f.getName());
         assertEquals("Keccak-256", f.getHashAlgorithm());
 
-        TestUtils.assertThrown(err, "type is \"receive\"; functions of this type must define stateMutability as \"payable\"", () -> new Function(Function.Type.RECEIVE, "receive", inputs, outputs, null, md));
-        TestUtils.assertThrown(err, "type is \"receive\"; functions of this type must define no inputs", () -> new Function(Function.Type.RECEIVE, "receive", inputs, outputs, "payable", md));
-        TestUtils.assertThrown(err, "type is \"receive\"; functions of this type must define no outputs", () -> new Function(Function.Type.RECEIVE, "receive", TupleType.EMPTY, outputs, "payable", md));
-        f = new Function(Function.Type.RECEIVE, "receive", TupleType.EMPTY, TupleType.EMPTY, "payable", new WrappedKeccak(256));
+        TestUtils.assertThrown(err, "type is \"receive\"; functions of this type must define stateMutability as \"payable\"", () -> new Function(TypeEnum.RECEIVE, "receive", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "type is \"receive\"; functions of this type must define no inputs", () -> new Function(TypeEnum.RECEIVE, "receive", inputs, outputs, "payable", md));
+        TestUtils.assertThrown(err, "type is \"receive\"; functions of this type must define no outputs", () -> new Function(TypeEnum.RECEIVE, "receive", TupleType.EMPTY, outputs, "payable", md));
+        f = new Function(TypeEnum.RECEIVE, "receive", TupleType.EMPTY, TupleType.EMPTY, "payable", new WrappedKeccak(256));
         assertEquals("receive", f.getName());
         assertEquals("payable", f.getStateMutability());
         assertEquals("Keccak-256", f.getHashAlgorithm());
 
-        TestUtils.assertThrown(err, "type is \"function\"; functions of this type must define name", () -> new Function(Function.Type.FUNCTION, null, TupleType.EMPTY, TupleType.EMPTY, null, md));
-        f = new Function(Function.Type.FUNCTION, "", TupleType.EMPTY, TupleType.EMPTY, null, md);
+        TestUtils.assertThrown(err, "type is \"function\"; functions of this type must define name", () -> new Function(TypeEnum.FUNCTION, null, TupleType.EMPTY, TupleType.EMPTY, null, md));
+        f = new Function(TypeEnum.FUNCTION, "", TupleType.EMPTY, TupleType.EMPTY, null, md);
         assertEquals("", f.getName());
         assertNull(f.getStateMutability());
 
-        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 0", () -> new Function(Function.Type.FUNCTION, "(", inputs, outputs, null, md));
-        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 1", () -> new Function(Function.Type.FUNCTION, "a(", inputs, outputs, null, md));
-        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 0", () -> new Function(Function.Type.FUNCTION, "(b", inputs, outputs, null, md));
-        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 1", () -> new Function(Function.Type.FUNCTION, "c(d", inputs, outputs, null, md));
-        TestUtils.assertThrown(err, "illegal char 0x256 '\u0256' @ index 0", () -> new Function(Function.Type.FUNCTION, "\u0256", inputs, outputs, null, md));
-        new Function(Function.Type.FUNCTION, "z", inputs, outputs, null, md);
-        new Function(Function.Type.FUNCTION, "", inputs, outputs, null, md);
+        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 0", () -> new Function(TypeEnum.FUNCTION, "(", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 1", () -> new Function(TypeEnum.FUNCTION, "a(", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 0", () -> new Function(TypeEnum.FUNCTION, "(b", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 1", () -> new Function(TypeEnum.FUNCTION, "c(d", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "illegal char 0x256 '\u0256' @ index 0", () -> new Function(TypeEnum.FUNCTION, "\u0256", inputs, outputs, null, md));
+        new Function(TypeEnum.FUNCTION, "z", inputs, outputs, null, md);
+        new Function(TypeEnum.FUNCTION, "", inputs, outputs, null, md);
     }
 
     @Test

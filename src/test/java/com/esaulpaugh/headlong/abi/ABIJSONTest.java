@@ -266,7 +266,7 @@ public class ABIJSONTest {
             String newJson = orig.toJson(false);
             assertNotEquals(originalJson, newJson);
 
-            ABIObject reconstructed = ABIJSON.parseABIObject(newJson);
+            ABIObject reconstructed = ABIJSON.parseABIObject(JsonUtils.parseObject(newJson));
 
             assertEquals(orig, reconstructed);
             assertEquals(originalJson, reconstructed.toString());
@@ -406,7 +406,7 @@ public class ABIJSONTest {
 
         printTupleType(func.getInputs());
 
-        assertEquals(Function.Type.FUNCTION, func.getType());
+        assertEquals(TypeEnum.FUNCTION, func.getType());
         assertEquals("", func.getName());
         assertNull(func.getStateMutability());
 
@@ -425,12 +425,12 @@ public class ABIJSONTest {
         Function fallback = functions.get(0);
         Function constructor = functions.get(1);
 
-        assertEquals(Function.Type.FALLBACK, fallback.getType());
+        assertEquals(TypeEnum.FALLBACK, fallback.getType());
         assertEquals(TupleType.EMPTY, fallback.getInputs());
         assertEquals(TupleType.EMPTY, fallback.getOutputs());
         assertEquals("pure", fallback.getStateMutability());
 
-        assertEquals(Function.Type.CONSTRUCTOR, constructor.getType());
+        assertEquals(TypeEnum.CONSTRUCTOR, constructor.getType());
         assertEquals(TupleType.parse("(bool)"), constructor.getInputs());
         assertEquals(TupleType.EMPTY, fallback.getOutputs());
         assertEquals("nonpayable", constructor.getStateMutability());
