@@ -254,10 +254,11 @@ public class EncodeTest {
         assertThrown(ILLEGAL, "unrecognized type: \"(())...\"", () -> Function.parse("(())..."));
         assertThrown(ILLEGAL, "unrecognized type: \"((((()))\"", () -> Function.parse("((((()))"));
 
+        TestUtils.CustomRunnable r = () -> Function.parse("f()[]");
         try {
-            assertThrown(ClassCastException.class, "ArrayType cannot be cast to ", () -> Function.parse("f()[]"));
+            assertThrown(ClassCastException.class, "Cannot cast com.esaulpaugh.headlong.abi.ArrayType to com.esaulpaugh.headlong.abi.TupleType", r);
         } catch (ClassCastException cce) {
-            assertThrown(ClassCastException.class, "ArrayType incompatible with com.esaulpaugh.headlong.abi.TupleType", () -> Function.parse("f()[]"));
+            assertThrown(ClassCastException.class, "Cannot cast class com.esaulpaugh.headlong.abi.ArrayType to class com.esaulpaugh.headlong.abi.TupleType", r);
         }
     }
 
