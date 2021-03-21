@@ -184,7 +184,7 @@ public final class ABIJSON {
         return TypeFactory.create(typeStr, Object.class, getString(object, NAME));
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    public static String toJson(ABIObject x, boolean function, boolean pretty) {
+    static String toJson(ABIObject x, boolean function, boolean pretty) {
         try {
             StringWriter stringOut = new StringWriter();
             JsonWriter out = (pretty ? GSON_PRETTY : GSON).newJsonWriter(stringOut);
@@ -206,9 +206,10 @@ public final class ABIJSON {
                 addIfValueNotNull(out, STATE_MUTABILITY, stateMutability);
                 out.name(CONSTANT).value(VIEW.equals(stateMutability) || PURE.equals(stateMutability));
             } else {
+                Event e = (Event) x;
                 out.name(TYPE).value(EVENT);
                 addIfValueNotNull(out, NAME, x.getName());
-                writeJsonArray(out, INPUTS, x.getInputs(), ((Event) x).getIndexManifest());
+                writeJsonArray(out, INPUTS, x.getInputs(), e.getIndexManifest());
             }
             out.endObject();
             return stringOut.toString();
