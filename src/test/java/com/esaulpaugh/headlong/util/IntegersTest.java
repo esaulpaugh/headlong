@@ -292,7 +292,7 @@ public class IntegersTest {
     public static void testReturnValues(ToIntFunction<Long> getLen, ToIntBiFunction<Long, ByteBuffer> put) {
         Random r = TestUtils.seededRandom();
         ByteBuffer bb = ByteBuffer.allocate(Long.BYTES + r.nextInt(35));
-        final int offsetBound = bb.capacity() - Long.BYTES;
+        final int offsetBound = 1 + bb.capacity() - Long.BYTES;
         for (int i = 0; i < 50; i++) {
             int offset = r.nextInt(offsetBound);
             bb.position(offset);
