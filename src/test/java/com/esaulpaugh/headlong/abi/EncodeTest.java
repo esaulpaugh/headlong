@@ -60,7 +60,7 @@ public class EncodeTest {
         final byte[] alphabet = Strings.decode("x0123456789", Strings.ASCII); // new char[128]; // "(),abcdefgilmnorstuxy8[]"
         final int alphabetLen = alphabet.length;
         if (alphabetLen == 128) {
-            for (int i = 0; i < alphabetLen; i++) { // (fixed128x18)
+            for (int i = 0; i < alphabetLen; i++) {
                 alphabet[i] = (byte) i;
             }
         }
@@ -86,12 +86,13 @@ public class EncodeTest {
         final String prefix = "ufixed";
         final int prefixLen = prefix.length();
 
-        final Random r = TestUtils.seededRandom();
+        final Random rand = TestUtils.seededRandom();
         final ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
         final Runnable runnable = () -> {
             for (int len = 0; len <= 14; len++) {
                 System.out.println(len + "(" + Thread.currentThread().getId() + ")");
                 final byte[] temp = new byte[len];
+                final int last = len - 1;
                 if(len > 0) {
                     temp[0] = '(';
                     if(len > prefixLen) {
@@ -100,27 +101,25 @@ public class EncodeTest {
                         }
                     }
                     if(len > 1) {
-                        temp[len - 1] = ')';
+                        temp[last] = ')';
                     }
                 }
-                final int lim = temp.length - 1;
                 final int num = iterations[len]; // 1_000_000 + (int) Math.pow(3.7, len);
                 for (int j = 0; j < num; j++) {
-                    for (int i = 1 + prefixLen; i < lim; i++) {
-                        temp[i] = alphabet[r.nextInt(alphabetLen)];
+                    for (int i = 1 + prefixLen; i < last; i++) {
+                        temp[i] = alphabet[rand.nextInt(alphabetLen)];
                     }
                     String sig = new String(temp, 0, 0, len);
                     try {
                         TupleType tt = TupleType.parse(sig);
-                        String canon = tt.canonicalType;
                         if(map.containsKey(sig)) continue;
+                        String canon = tt.canonicalType;
                         map.put(sig, canon);
                         System.out.println("\t\t\t" + len + ' ' + sig + (sig.equals(canon) ? "" : " --> " + canon));
                     } catch (IllegalArgumentException | ClassCastException ignored) {
                         /* do nothing */
                     } catch (Throwable t) {
                         System.err.println(sig);
-                        t.printStackTrace();
                         throw new RuntimeException(t);
                     }
                 }
@@ -135,7 +134,7 @@ public class EncodeTest {
         requireNoTimeout(shutdownAwait(pool, 3600L));
 
         final int size = map.size();
-        System.out.println("\nsize=" + map.size());
+        System.out.println("\nsize=" + size);
 
         List<String> list = new ArrayList<>();
         for(Map.Entry<String, String> e : map.entrySet()) {
