@@ -28,22 +28,23 @@ public final class FastBase64 {
     private static final int LINE_SEP_LEN = 2;
     private static final byte PADDING_BYTE = '=';
 
-    private static final short[] URL_SAFE = init(Strings.decode("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_", Strings.ASCII));
+    private static final short[] URL_SAFE = table("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_");
 
     private static final class Standard { // inner class to delay loading of table until called for
         Standard() {}
-        static final short[] STANDARD = init(Strings.decode("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", Strings.ASCII));
+        static final short[] STANDARD = table("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
     }
 
-    static short[] init(byte[] smallTable) {
-        final short[] largeTable = new short[1 << 12];
-        for (int i = 0; i < smallTable.length; i++) {
-            final int offset = i * smallTable.length;
-            for (int j = 0; j < smallTable.length; j++) {
-                largeTable[offset + j] = (short) ((smallTable[i] << Byte.SIZE) | (smallTable[j] & 0xFF));
+    static short[] table(String alphabet) {
+        final byte[] bytes = Strings.decode(alphabet, Strings.ASCII);
+        final short[] table = new short[1 << 12];
+        for (int i = 0, offset = 0; i < bytes.length; i++, offset += bytes.length) {
+            int leftBits = bytes[i] << Byte.SIZE;
+            for (int j = 0; j < bytes.length; j++) {
+                table[offset + j] = (short) (leftBits | (bytes[j] & 0xFF));
             }
         }
-        return largeTable;
+        return table;
     }
 
     @SuppressWarnings("deprecation")
