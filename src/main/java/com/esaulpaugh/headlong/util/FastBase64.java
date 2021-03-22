@@ -31,7 +31,7 @@ public final class FastBase64 {
     private static final short[] URL_SAFE = table("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_");
 
     private static final class Standard { // inner class to delay loading of table until called for
-        Standard() {}
+        private Standard() {}
         static final short[] STANDARD = table("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
     }
 
