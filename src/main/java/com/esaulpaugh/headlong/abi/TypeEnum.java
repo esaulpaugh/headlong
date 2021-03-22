@@ -1,32 +1,34 @@
 package com.esaulpaugh.headlong.abi;
 
-import java.util.Locale;
-
 public enum TypeEnum {
 
-    FUNCTION,
-    RECEIVE,
-    FALLBACK,
-    CONSTRUCTOR,
-    EVENT;
+    EVENT(ABIJSON.EVENT),
+    FUNCTION(ABIJSON.FUNCTION),
+    RECEIVE(ABIJSON.RECEIVE),
+    FALLBACK(ABIJSON.FALLBACK),
+    CONSTRUCTOR(ABIJSON.CONSTRUCTOR);
+
+    final String name;
+
+    TypeEnum(String name) {
+        this.name = name;
+    }
 
     @Override
     public String toString() {
-        return name().toLowerCase(Locale.ENGLISH);
+        return name;
     }
 
     public static TypeEnum parse(String typeString) {
-        if(typeString != null) {
-            switch (typeString) {
-            case ABIJSON.FUNCTION: return TypeEnum.FUNCTION;
-            case ABIJSON.RECEIVE: return TypeEnum.RECEIVE;
-            case ABIJSON.FALLBACK: return TypeEnum.FALLBACK;
-            case ABIJSON.CONSTRUCTOR: return TypeEnum.CONSTRUCTOR;
-            case ABIJSON.EVENT: return TypeEnum.EVENT;
-            default: throw unexpectedType(typeString);
+        for (TypeEnum e : values()) {
+            if(e.name.equals(typeString)) {
+                return e;
             }
         }
-        return TypeEnum.FUNCTION;
+        if(typeString == null) {
+            return FUNCTION;
+        }
+        throw unexpectedType(typeString);
     }
 
     static IllegalArgumentException unexpectedType(String t) {

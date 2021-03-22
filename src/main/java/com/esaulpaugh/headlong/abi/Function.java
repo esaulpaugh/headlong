@@ -30,6 +30,11 @@ import java.util.function.IntFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.esaulpaugh.headlong.abi.ABIJSON.CONSTRUCTOR;
+import static com.esaulpaugh.headlong.abi.ABIJSON.EVENT;
+import static com.esaulpaugh.headlong.abi.ABIJSON.FALLBACK;
+import static com.esaulpaugh.headlong.abi.ABIJSON.FUNCTION;
+import static com.esaulpaugh.headlong.abi.ABIJSON.RECEIVE;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
 /**
@@ -133,26 +138,26 @@ public final class Function implements ABIObject {
     }
 
     private void validateFunction() {
-        switch (type.toString()) {
-        case ABIJSON.FUNCTION:
+        switch (type.name) {
+        case FUNCTION:
             if(name == null) {
                 throw validationErr("define name");
             }
             return;
-        case ABIJSON.RECEIVE:
-            if (!ABIJSON.RECEIVE.equals(name)) {
-                throw validationErr("define name as \"" + ABIJSON.RECEIVE + '"');
+        case RECEIVE:
+            if (!RECEIVE.equals(name)) {
+                throw validationErr("define name as \"" + RECEIVE + '"');
             }
             if (!ABIJSON.PAYABLE.equals(stateMutability)) {
                 throw validationErr("define stateMutability as \"" + ABIJSON.PAYABLE + '"');
             }
             /* fall through */
-        case ABIJSON.FALLBACK:
+        case FALLBACK:
             if(inputTypes.elementTypes.length > 0) {
                 throw validationErr("define no inputs");
             }
             /* fall through */
-        case ABIJSON.CONSTRUCTOR:
+        case CONSTRUCTOR:
             if(outputTypes.elementTypes.length > 0) {
                 throw validationErr("define no outputs");
             }
@@ -160,7 +165,7 @@ public final class Function implements ABIObject {
                 throw validationErr("not define name");
             }
             return;
-        case ABIJSON.EVENT:
+        case EVENT:
             throw TypeEnum.unexpectedType(type.toString());
         default: throw new Error();
         }
