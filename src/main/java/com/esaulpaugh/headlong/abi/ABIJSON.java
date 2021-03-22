@@ -77,7 +77,7 @@ public final class ABIJSON {
     }
 
     public static Function parseFunction(JsonObject function, MessageDigest messageDigest) {
-        return _parseFunction(TypeEnum.parse(getString(function, TYPE)), function, messageDigest);
+        return _parseFunction(getString(function, TYPE), function, messageDigest);
     }
 
     public static Event parseEvent(String objectJson) {
@@ -86,15 +86,15 @@ public final class ABIJSON {
 
     public static Event parseEvent(JsonObject event) {
         String type = getString(event, TYPE);
-        if(EVENT.equals(type)) {
+        if(isEvent(type)) {
             return _parseEvent(event);
         }
         throw TypeEnum.unexpectedType(type);
     }
 
     public static ABIObject parseABIObject(JsonObject object) {
-        final TypeEnum type = TypeEnum.parse(getString(object, TYPE));
-        return TypeEnum.EVENT == type
+        String type = getString(object, TYPE);
+        return isEvent(type)
                 ? _parseEvent(object)
                 : _parseFunction(type, object, Function.newDefaultDigest());
     }
@@ -116,8 +116,8 @@ public final class ABIJSON {
         for (JsonElement e : array) {
             if (e.isJsonObject()) {
                 JsonObject jsonObj = (JsonObject) e;
-                TypeEnum type = TypeEnum.parse(getString(jsonObj, TYPE));
-                if(TypeEnum.EVENT == type) {
+                String type = getString(jsonObj, TYPE);
+                if(isEvent(type)) {
                     if(events) {
                         abiObjects.add(classOfT.cast(parseEvent(jsonObj)));
                     }
@@ -129,9 +129,13 @@ public final class ABIJSON {
         return abiObjects;
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    private static Function _parseFunction(TypeEnum type, JsonObject function, MessageDigest digest) {
+    private static boolean isEvent(String typeString) {
+        return EVENT.equals(typeString);
+    }
+
+    private static Function _parseFunction(String type, JsonObject function, MessageDigest digest) {
         return new Function(
-                type,
+                TypeEnum.parse(type),
                 getString(function, NAME),
                 parseTypes(getArray(function, INPUTS)),
                 parseTypes(getArray(function, OUTPUTS)),
