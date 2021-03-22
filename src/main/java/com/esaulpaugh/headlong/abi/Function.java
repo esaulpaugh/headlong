@@ -133,13 +133,13 @@ public final class Function implements ABIObject {
     }
 
     private void validateFunction() {
-        switch (type) {
-        case FUNCTION:
+        switch (type.toString()) {
+        case ABIJSON.FUNCTION:
             if(name == null) {
                 throw validationErr("define name");
             }
             return;
-        case RECEIVE:
+        case ABIJSON.RECEIVE:
             if (!ABIJSON.RECEIVE.equals(name)) {
                 throw validationErr("define name as \"" + ABIJSON.RECEIVE + '"');
             }
@@ -147,12 +147,12 @@ public final class Function implements ABIObject {
                 throw validationErr("define stateMutability as \"" + ABIJSON.PAYABLE + '"');
             }
             /* fall through */
-        case FALLBACK:
+        case ABIJSON.FALLBACK:
             if(inputTypes.elementTypes.length > 0) {
                 throw validationErr("define no inputs");
             }
             /* fall through */
-        case CONSTRUCTOR:
+        case ABIJSON.CONSTRUCTOR:
             if(outputTypes.elementTypes.length > 0) {
                 throw validationErr("define no outputs");
             }
@@ -160,7 +160,7 @@ public final class Function implements ABIObject {
                 throw validationErr("not define name");
             }
             return;
-        case EVENT:
+        case ABIJSON.EVENT:
             throw TypeEnum.unexpectedType(type.toString());
         default: throw new Error();
         }
