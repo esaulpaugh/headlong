@@ -100,20 +100,24 @@ public final class ABIJSON {
     }
 
     public static List<Function> parseFunctions(String arrayJson) {
-        return parseObjects(parseArray(arrayJson), true, false, Function.newDefaultDigest(), Function.class);
+        return parseElements(arrayJson, true, false, Function.newDefaultDigest(), Function.class);
     }
 
     public static List<Event> parseEvents(String arrayJson) {
-        return parseObjects(parseArray(arrayJson), false, true, null, Event.class);
+        return parseElements(arrayJson, false, true, null, Event.class);
     }
 
-    public static <T extends ABIObject> List<T> parseObjects(final JsonArray array,
+    public static List<ABIObject> parseElements(String arrayJson) {
+        return parseElements(arrayJson, true, true, Function.newDefaultDigest(), ABIObject.class);
+    }
+
+    private static <T extends ABIObject> List<T> parseElements(final String arrayJson,
                                                              final boolean functions,
                                                              final boolean events,
                                                              final MessageDigest digest,
-                                                             final Class<T> classOfT) { // e.g. ABIObject.class
+                                                             final Class<T> classOfT) {
         final List<T> abiObjects = new ArrayList<>();
-        for (JsonElement e : array) {
+        for (JsonElement e : parseArray(arrayJson)) {
             if (e.isJsonObject()) {
                 JsonObject jsonObj = (JsonObject) e;
                 String type = getString(jsonObj, TYPE);
