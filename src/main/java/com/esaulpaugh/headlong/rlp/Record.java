@@ -90,6 +90,28 @@ public final class Record {
         return recordLen;
     }
 
+    public Record with(Signer signer, long seq, KVP newPair) {
+        final RLPItem newKey = newPair.key();
+        final Iterator<RLPItem> iter = rlp.iterator();
+        iter.next(); // skip signature
+        iter.next(); // skip seq
+        final List<KVP> newList = new ArrayList<>();
+        boolean replaced = false;
+        while (iter.hasNext()) {
+            RLPItem k = iter.next();
+            RLPItem v = iter.next();
+            if(k.equals(newKey)) {
+                replaced = newList.add(newPair);
+            } else {
+                newList.add(new KVP(k, v));
+            }
+        }
+        if(!replaced) {
+            newList.add(newPair);
+        }
+        return new Record(signer, seq, newList);
+    }
+
     public static Record parse(String enrString, Verifier verifier) throws SignatureException {
         if(enrString.startsWith(ENR_PREFIX)) {
             byte[] bytes = Strings.decode(enrString.substring(ENR_PREFIX.length()), BASE_64_URL_SAFE);

@@ -34,6 +34,7 @@ import static com.esaulpaugh.headlong.rlp.KVP.ID;
 import static com.esaulpaugh.headlong.rlp.KVP.IP;
 import static com.esaulpaugh.headlong.rlp.KVP.PAIR_COMPARATOR;
 import static com.esaulpaugh.headlong.rlp.KVP.SECP256K1;
+import static com.esaulpaugh.headlong.rlp.KVP.TCP6;
 import static com.esaulpaugh.headlong.rlp.KVP.UDP;
 import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
 import static com.esaulpaugh.headlong.util.Strings.EMPTY_BYTE_ARRAY;
@@ -351,5 +352,22 @@ public class EIP778Test {
         }
 
         assertThrown(IllegalArgumentException.class, "duplicate key: " + UDP, () -> new Record(SIGNER, seq, pairs));
+    }
+
+    @Test
+    public void testRecordWith() {
+        {
+            Record with = VECTOR.with(SIGNER, 808L, new KVP(UDP, "0009", HEX));
+            Map<String, byte[]> map = with.map();
+            assertEquals(4, map.size());
+            assertEquals(808L, with.getSeq());
+            assertArrayEquals(Strings.decode("0009", HEX), map.get(UDP));
+        }
+
+        Record with = VECTOR.with(SIGNER, 4L, new KVP(TCP6, "656934", HEX));
+        assertEquals(4L, with.getSeq());
+        Map<String, byte[]> map = with.map();
+        assertEquals(5, map.size());
+        assertArrayEquals(Strings.decode("656934", HEX), map.get(TCP6));
     }
 }

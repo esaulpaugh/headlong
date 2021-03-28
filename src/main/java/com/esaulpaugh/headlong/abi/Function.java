@@ -30,6 +30,11 @@ import java.util.function.IntFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.esaulpaugh.headlong.abi.ABIJSON.CONSTRUCTOR;
+import static com.esaulpaugh.headlong.abi.ABIJSON.EVENT;
+import static com.esaulpaugh.headlong.abi.ABIJSON.FALLBACK;
+import static com.esaulpaugh.headlong.abi.ABIJSON.FUNCTION;
+import static com.esaulpaugh.headlong.abi.ABIJSON.RECEIVE;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
 /**
@@ -133,15 +138,15 @@ public final class Function implements ABIObject {
     }
 
     private void validateFunction() {
-        switch (type) {
+        switch (type.name) {
         case FUNCTION:
             if(name == null) {
                 throw validationErr("define name");
             }
             return;
         case RECEIVE:
-            if (!ABIJSON.RECEIVE.equals(name)) {
-                throw validationErr("define name as \"" + ABIJSON.RECEIVE + '"');
+            if (!RECEIVE.equals(name)) {
+                throw validationErr("define name as \"" + RECEIVE + '"');
             }
             if (!ABIJSON.PAYABLE.equals(stateMutability)) {
                 throw validationErr("define stateMutability as \"" + ABIJSON.PAYABLE + '"');
