@@ -139,6 +139,8 @@ public final class Function implements ABIObject {
 
     private void validateFunction() {
         switch (type.name) {
+        case EVENT:
+            throw TypeEnum.unexpectedType(type.toString());
         case FUNCTION:
             if(name == null) {
                 throw validationErr("define name");
@@ -165,8 +167,6 @@ public final class Function implements ABIObject {
                 throw validationErr("not define name");
             }
             return;
-        case EVENT:
-            throw TypeEnum.unexpectedType(type.toString());
         default: throw new Error();
         }
     }

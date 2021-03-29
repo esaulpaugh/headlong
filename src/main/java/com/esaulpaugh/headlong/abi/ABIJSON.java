@@ -41,11 +41,11 @@ public final class ABIJSON {
 
     private static final String NAME = "name";
     private static final String TYPE = "type";
+    static final String EVENT = "event";
     static final String FUNCTION = "function";
     static final String RECEIVE = "receive";
     static final String FALLBACK = "fallback";
     static final String CONSTRUCTOR = "constructor";
-    static final String EVENT = "event";
     private static final String INPUTS = "inputs";
     private static final String OUTPUTS = "outputs";
     private static final String TUPLE = "tuple";
