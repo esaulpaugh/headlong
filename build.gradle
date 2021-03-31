@@ -40,7 +40,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 
 def junitVersion = '5.7.1'
-def jmhVersion = '1.28'
+def jmhVersion = '1.29'
 def bcVersion = '1.68'
 
 static def todayUTC() {
