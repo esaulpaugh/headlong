@@ -199,8 +199,7 @@ public class EIP778Test {
                 new KVP(ID, "v4", UTF_8),
                 new KVP(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
         );
-        final KVP[] empty = new KVP[0];
-        final KVP[] array = pairs.toArray(empty);
+        final KVP[] array = pairs.toArray(EMPTY_ARRAY);
 
         final Record record = new Record(SIGNER, seq, pairs);
 
@@ -224,7 +223,7 @@ public class EIP778Test {
 
         List<KVP> pairList = record.getPairs();
 
-        assertArrayEquals(array, record.getPairs().toArray(empty));
+        assertArrayEquals(array, record.getPairs().toArray(EMPTY_ARRAY));
 
         Map<String, byte[]> map = record.map();
         assertArrayEquals(Strings.decode("765f"), record.map().get(UDP));
