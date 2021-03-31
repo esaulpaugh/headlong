@@ -30,6 +30,8 @@ import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
  */
 public final class KVP implements Comparable<KVP> {
 
+    public static final KVP[] EMPTY_ARRAY = new KVP[0];
+
     public static final String ID = "id";
     public static final String SECP256K1 = "secp256k1";
     public static final String IP = "ip";
@@ -132,6 +134,10 @@ public final class KVP implements Comparable<KVP> {
                 return result;
             }
         }
-        throw new IllegalArgumentException("duplicate key: " + pa.key().asString(Strings.UTF_8));
+        throw pa.duplicateKeyErr();
     };
+
+    IllegalArgumentException duplicateKeyErr() {
+        return new IllegalArgumentException("duplicate key: " + key().asString(Strings.UTF_8));
+    }
 }

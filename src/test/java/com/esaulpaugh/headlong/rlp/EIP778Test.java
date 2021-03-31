@@ -30,12 +30,8 @@ import java.util.Random;
 import java.util.Set;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.rlp.KVP.ID;
-import static com.esaulpaugh.headlong.rlp.KVP.IP;
-import static com.esaulpaugh.headlong.rlp.KVP.PAIR_COMPARATOR;
-import static com.esaulpaugh.headlong.rlp.KVP.SECP256K1;
-import static com.esaulpaugh.headlong.rlp.KVP.TCP6;
-import static com.esaulpaugh.headlong.rlp.KVP.UDP;
+import static com.esaulpaugh.headlong.rlp.KVP.*;
+import static com.esaulpaugh.headlong.util.Strings.ASCII;
 import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
 import static com.esaulpaugh.headlong.util.Strings.EMPTY_BYTE_ARRAY;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
@@ -369,5 +365,18 @@ public class EIP778Test {
         Map<String, byte[]> map = with.map();
         assertEquals(5, map.size());
         assertArrayEquals(Strings.decode("656934", HEX), map.get(TCP6));
+    }
+
+    @Test
+    public void testRecordWith2() throws Throwable {
+        assertEquals(4L, VECTOR.map().size());
+
+        Record with = VECTOR.with(SIGNER, Long.MAX_VALUE, new KVP(UDP6, "8007", HEX), new KVP(IP6, "ff00ff00", HEX));
+        Map<String, byte[]> map = with.map();
+        assertEquals(6, map.size());
+        assertEquals(Long.MAX_VALUE, with.getSeq());
+        assertArrayEquals(Strings.decode("8007", HEX), map.get(UDP6));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "duplicate key: tcp", () -> with.with(SIGNER, 0L, new KVP(TCP, "blah", ASCII), new KVP(TCP, "bleh", ASCII)));
     }
 }

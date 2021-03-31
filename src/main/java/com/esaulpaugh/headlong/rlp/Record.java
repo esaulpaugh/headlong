@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -90,26 +91,15 @@ public final class Record {
         return recordLen;
     }
 
-    public Record with(Signer signer, long seq, KVP newPair) {
-        final RLPItem newKey = newPair.key();
-        final Iterator<RLPItem> iter = rlp.iterator();
-        iter.next(); // skip signature
-        iter.next(); // skip seq
-        final List<KVP> newList = new ArrayList<>();
-        boolean replaced = false;
-        while (iter.hasNext()) {
-            RLPItem k = iter.next();
-            RLPItem v = iter.next();
-            if(k.equals(newKey)) {
-                replaced = newList.add(newPair);
-            } else {
-                newList.add(new KVP(k, v));
+    public Record with(Signer signer, long seq, KVP... newPairs) {
+        final HashSet<KVP> pairSet = new HashSet<>();
+        for (KVP pair : newPairs) {
+            if(!pairSet.add(pair)) {
+                throw pair.duplicateKeyErr();
             }
         }
-        if(!replaced) {
-            newList.add(newPair);
-        }
-        return new Record(signer, seq, newList);
+        visit((k, v) -> pairSet.add(new KVP(k, v)));
+        return new Record(signer, seq, pairSet.toArray(KVP.EMPTY_ARRAY));
     }
 
     public static Record parse(String enrString, Verifier verifier) throws SignatureException {
