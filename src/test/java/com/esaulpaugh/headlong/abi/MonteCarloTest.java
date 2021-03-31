@@ -115,7 +115,7 @@ public class MonteCarloTest {
     private static final int N = 64_000;
 
     @Test
-    public void gambleGamble() throws InterruptedException, AssertionError, TimeoutException {
+    public void gambleGamble() throws InterruptedException, TimeoutException {
 
         final long masterSeed = TestUtils.getSeed(); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
