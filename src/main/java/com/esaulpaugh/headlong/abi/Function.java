@@ -163,7 +163,7 @@ public final class Function implements ABIObject {
             if(outputTypes.size() != 0) {
                 throw validationErr("define no outputs");
             }
-            if (type != TypeEnum.RECEIVE && name != null) {
+            if (name != null && type != TypeEnum.RECEIVE) {
                 throw validationErr("not define name");
             }
             return;
