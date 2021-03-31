@@ -33,7 +33,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     private static final String EMPTY_TUPLE_STRING = "()";
 
-    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_TYPE_ARRAY);
+    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY);
 
     final ABIType<?>[] elementTypes;
 
@@ -257,7 +257,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     selected.add(e);
                 }
             }
-            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected.toArray(EMPTY_TYPE_ARRAY));
+            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected.toArray(EMPTY_ARRAY));
         }
         throw new IllegalArgumentException("manifest.length != elementTypes.length: " + manifest.length + " != " + elementTypes.length);
     }

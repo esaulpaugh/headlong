@@ -40,7 +40,7 @@ public abstract class ABIType<J> {
     public static final int TYPE_CODE_ARRAY = 6;
     public static final int TYPE_CODE_TUPLE = 7;
 
-    public static final ABIType<?>[] EMPTY_TYPE_ARRAY = new ABIType<?>[0];
+    public static final ABIType<?>[] EMPTY_ARRAY = new ABIType<?>[0];
 
     final String canonicalType;
     final Class<J> clazz;
