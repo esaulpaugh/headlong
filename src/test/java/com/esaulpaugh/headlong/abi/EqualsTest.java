@@ -81,8 +81,8 @@ public class EqualsTest {
 
         System.out.println("n = " + n + ", maxIters = " + maxIters);
 
-        assertSame(TupleType.parse("(uint)").elementTypes[0].canonicalType, TupleType.parse("(uint)").elementTypes[0].canonicalType);
-        assertNotSame(Function.parse("(uint)").getInputs().canonicalType, Function.parse("(uint)").getInputs().canonicalType);
+        assertSame(TupleType.parse("(uint)").get(0).getCanonicalType(), TupleType.parse("(uint)").get(0).getCanonicalType());
+        assertNotSame(Function.parse("(uint)").getInputs().getCanonicalType(), Function.parse("(uint)").getInputs().getCanonicalType());
     }
 
     private static boolean recursiveEquals(TupleType tt, Object o) {

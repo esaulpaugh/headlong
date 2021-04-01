@@ -102,7 +102,7 @@ final class PackedEncoder {
 
     private static void encodeTuple(TupleType tupleType, Tuple tuple, ByteBuffer dest) {
         for (int i = 0; i < tupleType.elementTypes.length; i++) {
-            encode(tupleType.elementTypes[i], tuple.elements[i], dest);
+            encode(tupleType.get(i), tuple.get(i), dest);
         }
     }
 }

@@ -75,9 +75,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    int byteLength(final Object value) {
-        final Object[] elements = ((Tuple) value).elements;
-        return countBytes(false, size(), 0, (i) -> measureObject(elementTypes[i], elements[i]));
+    int byteLength(Object value) {
+        Tuple tuple = (Tuple) value;
+        return countBytes(false, size(), 0, (i) -> measureObject(get(i), tuple.get(i)));
     }
 
     private int measureObject(ABIType<?> type, Object value) {
@@ -91,7 +91,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     public int byteLengthPacked(Object value) {
         final Object[] elements = value != null ? ((Tuple) value).elements : new Object[size()];
-        return countBytes(false, size(), 0, (i) -> elementTypes[i].byteLengthPacked(elements[i]));
+        return countBytes(false, size(), 0, (i) -> get(i).byteLengthPacked(elements[i]));
     }
 
     static int countBytes(boolean array, int len, int count, IntUnaryOperator counter) {
@@ -109,7 +109,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     public int validate(final Tuple value) {
         if (value.size() == this.size()) {
-            return countBytes(false, this.size(), 0, (i) -> validateObject(elementTypes[i], value.elements[i]));
+            return countBytes(false, this.size(), 0, (i) -> validateObject(get(i), value.get(i)));
         }
         throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + value.size() + " != " + this.size());
     }
@@ -128,7 +128,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     void encodeTail(Object value, ByteBuffer dest) {
-        encodeObjects(dynamic, ((Tuple) value).elements, (i) -> elementTypes[i], dest);
+        encodeObjects(dynamic, ((Tuple) value).elements, this::get, dest);
     }
 
     static void encodeObjects(boolean dynamic, Object[] values, IntFunction<ABIType<?>> getType, ByteBuffer dest) {
@@ -156,7 +156,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
         Object[] elements = new Object[size()];
-        decodeObjects(bb, unitBuffer, (i) -> elementTypes[i], elements);
+        decodeObjects(bb, unitBuffer, this::get, elements);
         return new Tuple(elements);
     }
 
@@ -229,7 +229,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         @Override
         public ABIType<?> next() {
             try {
-                return elementTypes[index++];
+                return get(index++);
             } catch (ArrayIndexOutOfBoundsException aioobe) {
                 throw new NoSuchElementException();
             }
@@ -251,7 +251,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             final ArrayList<ABIType<?>> selected = new ArrayList<>(manifest.length);
             for (int i = 0; i < manifest.length; i++) {
                 if (negate ^ manifest[i]) {
-                    ABIType<?> e = elementTypes[i];
+                    ABIType<?> e = get(i);
                     canonicalBuilder.append(e.canonicalType).append(',');
                     dynamic |= e.dynamic;
                     selected.add(e);
