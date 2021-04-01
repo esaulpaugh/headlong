@@ -229,7 +229,7 @@ public final class ABIJSON {
     private static void writeJsonArray(JsonWriter out, String name, TupleType tupleType, boolean[] indexedManifest) throws IOException {
         out.name(name).beginArray();
         for (int i = 0; i < tupleType.elementTypes.length; i++) {
-            final ABIType<?> e = tupleType.elementTypes[i];
+            final ABIType<?> e = tupleType.get(i);
             out.beginObject();
             addIfValueNotNull(out, NAME, e.getName());
             out.name(TYPE);

@@ -40,7 +40,7 @@ public final class Event implements ABIObject {
     public Event(String name, boolean anonymous, TupleType inputs, boolean... indexed) {
         this.name = Objects.requireNonNull(name);
         this.inputs = Objects.requireNonNull(inputs);
-        if(indexed.length != inputs.elementTypes.length) {
+        if(indexed.length != inputs.size()) {
             throw new IllegalArgumentException("indexed.length doesn't match number of inputs");
         }
         this.indexManifest = Arrays.copyOf(indexed, indexed.length);

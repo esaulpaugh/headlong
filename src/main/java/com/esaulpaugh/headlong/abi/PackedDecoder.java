@@ -82,13 +82,12 @@ final class PackedDecoder {
     }
 
     private static int decodeTuple(TupleType tupleType, byte[] buffer, int start, int end, Object[] parentElements, int pei) {
-        final ABIType<?>[] elementTypes = tupleType.elementTypes;
-        final Object[] elements = new Object[elementTypes.length];
+        final Object[] elements = new Object[tupleType.size()];
 
         int mark = -1;
 
-        for (int i = elementTypes.length - 1; i >= 0; i--) {
-            final ABIType<?> type = elementTypes[i];
+        for (int i = tupleType.size() - 1; i >= 0; i--) {
+            final ABIType<?> type = tupleType.elementTypes[i];
             if (type.dynamic) {
                 mark = i;
                 break;
@@ -101,13 +100,13 @@ final class PackedDecoder {
             } else if(TYPE_CODE_TUPLE == type.typeCode()) {
                 end -= decodeTupleStatic((TupleType) type, buffer, end - type.byteLengthPacked(null), end, elements, i);
             } else {
-                end -= decode(elementTypes[i], buffer, end - type.byteLengthPacked(null), end, elements, i);
+                end -= decode(tupleType.elementTypes[i], buffer, end - type.byteLengthPacked(null), end, elements, i);
             }
         }
 
         if (mark > -1) {
             for (int i = 0; i <= mark; i++) {
-                start += decode(elementTypes[i], buffer, start, end, elements, i);
+                start += decode(tupleType.elementTypes[i], buffer, start, end, elements, i);
             }
         }
         Tuple t = new Tuple(elements);
@@ -133,10 +132,9 @@ final class PackedDecoder {
     }
 
     private static int decodeTupleStatic(TupleType tupleType, byte[] buffer, int idx, int end, Object[] parentElements, int pei) {
-        final ABIType<?>[] elementTypes = tupleType.elementTypes;
-        final Object[] elements = new Object[elementTypes.length];
-        for (int i = 0; i < elementTypes.length; i++) {
-            idx += decode(elementTypes[i], buffer, idx, end, elements, i);
+        final Object[] elements = new Object[tupleType.size()];
+        for (int i = 0; i < elements.length; i++) {
+            idx += decode(tupleType.elementTypes[i], buffer, idx, end, elements, i);
         }
         Tuple t = new Tuple(elements);
         parentElements[pei] = t;

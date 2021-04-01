@@ -61,7 +61,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public ABIType<?>[] elements() {
-        return Arrays.copyOf(elementTypes, elementTypes.length);
+        return Arrays.copyOf(elementTypes, size());
     }
 
     @Override
@@ -77,7 +77,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     int byteLength(final Object value) {
         final Object[] elements = ((Tuple) value).elements;
-        return countBytes(false, elementTypes.length, 0, (i) -> measureObject(elementTypes[i], elements[i]));
+        return countBytes(false, size(), 0, (i) -> measureObject(elementTypes[i], elements[i]));
     }
 
     private int measureObject(ABIType<?> type, Object value) {
@@ -90,8 +90,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
      */
     @Override
     public int byteLengthPacked(Object value) {
-        final Object[] elements = value != null ? ((Tuple) value).elements : new Object[elementTypes.length];
-        return countBytes(false, elementTypes.length, 0, (i) -> elementTypes[i].byteLengthPacked(elements[i]));
+        final Object[] elements = value != null ? ((Tuple) value).elements : new Object[size()];
+        return countBytes(false, size(), 0, (i) -> elementTypes[i].byteLengthPacked(elements[i]));
     }
 
     static int countBytes(boolean array, int len, int count, IntUnaryOperator counter) {
@@ -108,10 +108,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     public int validate(final Tuple value) {
-        if (value.elements.length == elementTypes.length) {
-            return countBytes(false, elementTypes.length, 0, (i) -> validateObject(elementTypes[i], value.elements[i]));
+        if (value.size() == this.size()) {
+            return countBytes(false, this.size(), 0, (i) -> validateObject(elementTypes[i], value.elements[i]));
         }
-        throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + value.elements.length + " != " + elementTypes.length);
+        throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + value.size() + " != " + this.size());
     }
 
     private int validateObject(ABIType<?> type, Object value) {
@@ -155,7 +155,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
-        Object[] elements = new Object[elementTypes.length];
+        Object[] elements = new Object[size()];
         decodeObjects(bb, unitBuffer, (i) -> elementTypes[i], elements);
         return new Tuple(elements);
     }
@@ -223,7 +223,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
         @Override
         public boolean hasNext() {
-            return index < elementTypes.length;
+            return index < size();
         }
 
         @Override
@@ -245,7 +245,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     private TupleType subTupleType(boolean[] manifest, boolean negate) {
-        if(manifest.length == elementTypes.length) {
+        if(manifest.length == size()) {
             final StringBuilder canonicalBuilder = new StringBuilder("(");
             boolean dynamic = false;
             final ArrayList<ABIType<?>> selected = new ArrayList<>(manifest.length);
@@ -259,7 +259,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             }
             return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected.toArray(EMPTY_ARRAY));
         }
-        throw new IllegalArgumentException("manifest.length != elementTypes.length: " + manifest.length + " != " + elementTypes.length);
+        throw new IllegalArgumentException("manifest.length != elementTypes.length: " + manifest.length + " != " + size());
     }
 
     static String completeTupleTypeString(StringBuilder sb) {
