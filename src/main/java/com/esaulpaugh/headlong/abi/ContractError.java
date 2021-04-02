@@ -1,6 +1,6 @@
 package com.esaulpaugh.headlong.abi;
 
-public class Error implements ABIObject {
+public class ContractError implements ABIObject {
 
     @Override
     public String getName() {
