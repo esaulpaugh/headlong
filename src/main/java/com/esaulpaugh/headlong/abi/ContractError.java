@@ -1,5 +1,8 @@
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.JsonUtils;
+import com.google.gson.JsonObject;
+
 import java.util.Objects;
 
 public class ContractError implements ABIObject {
@@ -32,12 +35,38 @@ public class ContractError implements ABIObject {
         return name + inputs.canonicalType;
     }
 
+    public Function function() {
+        return Function.parse(getCanonicalSignature());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, inputs);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ContractError that = (ContractError) o;
+        return name.equals(that.name) && inputs.equals(that.inputs);
+    }
+
+    public static ContractError fromJson(String errorJson) {
+        return fromJsonObject(JsonUtils.parseObject(errorJson));
+    }
+
+    public static ContractError fromJsonObject(JsonObject error) {
+        return ABIJSON.parseError(error);
+    }
+
     @Override
     public String toJson(boolean pretty) {
         return ABIJSON.toJson(this, ABIJSON.ERRORS, pretty);
     }
 
-    public Function function() {
-        return Function.parse(getCanonicalSignature());
+    @Override
+    public String toString() {
+        return toJson(true);
     }
 }

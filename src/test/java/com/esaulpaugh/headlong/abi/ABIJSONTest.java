@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ABIJSONTest {
@@ -506,7 +507,13 @@ public class ABIJSONTest {
         assertEquals("InsufficientBalance", error.getName());
         assertEquals(TupleType.parse("(uint,uint)"), error.getInputs());
         assertEquals("InsufficientBalance(uint256,uint256)", error.getCanonicalSignature());
+        assertEquals(Function.parse("InsufficientBalance(uint,uint)"), error.function());
         assertEquals(expectedJson, error.toJson(true));
+        assertEquals(expectedJson, error.toString());
+        ContractError other = ContractError.fromJson(expectedJson);
+        assertNotSame(other, error);
+        assertEquals(other.hashCode(), error.hashCode());
+        assertEquals(other, error);
     }
 
     @Test
