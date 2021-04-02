@@ -107,10 +107,6 @@ public final class ABIJSON {
         throw TypeEnum.unexpectedType(type);
     }
 
-    private static ContractError _parseError(JsonObject error) {
-        return new ContractError(getString(error, NAME), parseTypes(getArray(error, INPUTS)));
-    }
-
     public static ABIObject parseABIObject(JsonObject object) {
         String type = getString(object, TYPE);
         return isEvent(type)
@@ -195,6 +191,10 @@ public final class ABIJSON {
             );
         }
         throw new IllegalArgumentException("array \"" + INPUTS + "\" null or not found");
+    }
+
+    private static ContractError _parseError(JsonObject error) {
+        return new ContractError(getString(error, NAME), parseTypes(getArray(error, INPUTS)));
     }
 
     private static TupleType parseTypes(JsonArray array) {
