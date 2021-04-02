@@ -96,6 +96,7 @@ public final class Function implements ABIObject {
         generateSelector(messageDigest);
     }
 
+    @Override
     public TypeEnum getType() {
         return type;
     }

@@ -48,6 +48,11 @@ public final class Event implements ABIObject {
     }
 
     @Override
+    public TypeEnum getType() {
+        return TypeEnum.EVENT;
+    }
+
+    @Override
     public String getName() {
         return name;
     }
