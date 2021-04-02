@@ -99,17 +99,25 @@ public final class ABIJSON {
         throw TypeEnum.unexpectedType(type);
     }
 
+    public static ContractError parseError(JsonObject error) {
+        String type = getString(error, TYPE);
+        if(isError(type)) {
+            return _parseError(error);
+        }
+        throw TypeEnum.unexpectedType(type);
+    }
+
+    private static ContractError _parseError(JsonObject error) {
+        return new ContractError(getString(error, NAME), parseTypes(getArray(error, INPUTS)));
+    }
+
     public static ABIObject parseABIObject(JsonObject object) {
         String type = getString(object, TYPE);
         return isEvent(type)
                 ? _parseEvent(object)
                 : isError(type)
-                    ? _parseError(object)
+                    ? parseError(object)
                     : _parseFunction(type, object, Function.newDefaultDigest());
-    }
-
-    private static ABIObject _parseError(JsonObject error) {
-        throw new UnsupportedOperationException("TODO");
     }
 
     public static List<Function> parseFunctions(String arrayJson) {
@@ -118,6 +126,10 @@ public final class ABIJSON {
 
     public static List<Event> parseEvents(String arrayJson) {
         return parseElements(arrayJson, EVENTS, Event.class);
+    }
+
+    public static List<ContractError> parseErrors(String arrayJson) {
+        return parseElements(arrayJson, ERRORS, ContractError.class);
     }
 
     public static List<ABIObject> parseElements(String arrayJson) {
@@ -208,12 +220,12 @@ public final class ABIJSON {
         return TypeFactory.create(typeStr, Object.class, getString(object, NAME));
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    static String toJson(ABIObject x, boolean function, boolean pretty) {
+    static String toJson(ABIObject x, int flags, boolean pretty) {
         try {
             StringWriter stringOut = new StringWriter();
             JsonWriter out = (pretty ? GSON_PRETTY : GSON).newJsonWriter(stringOut);
             out.beginObject();
-            if(function) {
+            if((flags & FUNCTIONS) != 0) {
                 Function f = (Function) x;
                 final TypeEnum type = f.getType();
                 out.name(TYPE).value(type.toString());
@@ -229,11 +241,15 @@ public final class ABIJSON {
                 final String stateMutability = f.getStateMutability();
                 addIfValueNotNull(out, STATE_MUTABILITY, stateMutability);
                 out.name(CONSTANT).value(VIEW.equals(stateMutability) || PURE.equals(stateMutability));
-            } else {
+            } else if ((flags & EVENTS) != 0) {
                 Event e = (Event) x;
                 out.name(TYPE).value(EVENT);
                 addIfValueNotNull(out, NAME, x.getName());
                 writeJsonArray(out, INPUTS, x.getInputs(), e.getIndexManifest());
+            } else {
+                out.name(TYPE).value(ERROR);
+                addIfValueNotNull(out, NAME, x.getName());
+                writeJsonArray(out, INPUTS, x.getInputs(), null);
             }
             out.endObject();
             return stringOut.toString();

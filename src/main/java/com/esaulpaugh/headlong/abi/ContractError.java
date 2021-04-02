@@ -1,6 +1,16 @@
 package com.esaulpaugh.headlong.abi;
 
+import java.util.Objects;
+
 public class ContractError implements ABIObject {
+
+    private final String name;
+    private final TupleType inputs;
+
+    public ContractError(String name, TupleType inputs) {
+        this.name = Objects.requireNonNull(name);
+        this.inputs = Objects.requireNonNull(inputs);
+    }
 
     @Override
     public TypeEnum getType() {
@@ -9,21 +19,21 @@ public class ContractError implements ABIObject {
 
     @Override
     public String getName() {
-        return null;
+        return name;
     }
 
     @Override
     public TupleType getInputs() {
-        return null;
+        return inputs;
     }
 
     @Override
     public String getCanonicalSignature() {
-        return null;
+        return name + inputs.canonicalType;
     }
 
     @Override
     public String toJson(boolean pretty) {
-        return null;
+        return ABIJSON.toJson(this, ABIJSON.ERRORS, pretty);
     }
 }

@@ -2,11 +2,11 @@ package com.esaulpaugh.headlong.abi;
 
 public enum TypeEnum {
 
-    EVENT(ABIJSON.EVENT),
     FUNCTION(ABIJSON.FUNCTION),
     RECEIVE(ABIJSON.RECEIVE),
     FALLBACK(ABIJSON.FALLBACK),
     CONSTRUCTOR(ABIJSON.CONSTRUCTOR),
+    EVENT(ABIJSON.EVENT),
     ERROR(ABIJSON.ERROR);
 
     final String name;

@@ -109,7 +109,7 @@ public final class Event implements ABIObject {
 
     @Override
     public String toJson(boolean pretty) {
-        return ABIJSON.toJson(this, false, pretty);
+        return ABIJSON.toJson(this, ABIJSON.EVENTS, pretty);
     }
 
     @Override

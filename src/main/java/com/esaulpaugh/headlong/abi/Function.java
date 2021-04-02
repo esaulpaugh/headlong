@@ -274,7 +274,7 @@ public final class Function implements ABIObject {
 
     @Override
     public String toJson(boolean pretty) {
-        return ABIJSON.toJson(this, true, pretty);
+        return ABIJSON.toJson(this, ABIJSON.FUNCTIONS, pretty);
     }
 
     private static String validateName(String input) {
