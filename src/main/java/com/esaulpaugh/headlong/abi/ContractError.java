@@ -36,4 +36,8 @@ public class ContractError implements ABIObject {
     public String toJson(boolean pretty) {
         return ABIJSON.toJson(this, ABIJSON.ERRORS, pretty);
     }
+
+    public Function function() {
+        return Function.parse(getCanonicalSignature());
+    }
 }
