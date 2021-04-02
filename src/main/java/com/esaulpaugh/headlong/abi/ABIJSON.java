@@ -39,6 +39,12 @@ public final class ABIJSON {
 
     private ABIJSON() {}
 
+    public static final int FUNCTIONS = 1;
+    public static final int EVENTS = 2;
+    public static final int ERRORS = 4;
+
+    public static final int ALL = FUNCTIONS | EVENTS | ERRORS;
+
     private static final String NAME = "name";
     private static final String TYPE = "type";
     static final String EVENT = "event";
@@ -107,33 +113,32 @@ public final class ABIJSON {
     }
 
     public static List<Function> parseFunctions(String arrayJson) {
-        return parseElements(arrayJson, true, false, Function.newDefaultDigest(), Function.class);
+        return parseElements(arrayJson, FUNCTIONS, Function.class);
     }
 
     public static List<Event> parseEvents(String arrayJson) {
-        return parseElements(arrayJson, false, true, null, Event.class);
+        return parseElements(arrayJson, EVENTS, Event.class);
     }
 
     public static List<ABIObject> parseElements(String arrayJson) {
-        return parseElements(arrayJson, true, true, Function.newDefaultDigest(), ABIObject.class);
+        return parseElements(arrayJson, ALL, ABIObject.class);
     }
 
-    private static <T extends ABIObject> List<T> parseElements(final String arrayJson,
-                                                             final boolean functions,
-                                                             final boolean events,
-                                                             final MessageDigest digest,
-                                                             final Class<T> classOfT) { // TODO support Error
+    private static <T extends ABIObject> List<T> parseElements(String arrayJson, int flags, Class<T> classOfT) {
         final List<T> abiObjects = new ArrayList<>();
         for (JsonElement e : parseArray(arrayJson)) {
             if (e.isJsonObject()) {
-                JsonObject jsonObj = (JsonObject) e;
-                String type = getString(jsonObj, TYPE);
-                if(isEvent(type)) {
-                    if(events) {
-                        abiObjects.add(classOfT.cast(parseEvent(jsonObj)));
-                    }
-                } else if(functions) {
-                    abiObjects.add(classOfT.cast(_parseFunction(type, jsonObj, digest)));
+                ABIObject o = parseABIObject(e.getAsJsonObject());
+                boolean add;
+                if(o.getType() == TypeEnum.EVENT) {
+                    add = (flags & EVENTS) != 0;
+                } else if(o.getType() == TypeEnum.ERROR) {
+                    add = (flags & ERRORS) != 0;
+                } else {
+                    add = (flags & FUNCTIONS) != 0;
+                }
+                if(add) {
+                    abiObjects.add(classOfT.cast(o));
                 }
             }
         }
