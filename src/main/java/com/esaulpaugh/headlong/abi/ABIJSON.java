@@ -46,6 +46,7 @@ public final class ABIJSON {
     static final String RECEIVE = "receive";
     static final String FALLBACK = "fallback";
     static final String CONSTRUCTOR = "constructor";
+    static final String ERROR = "error";
     private static final String INPUTS = "inputs";
     private static final String OUTPUTS = "outputs";
     private static final String TUPLE = "tuple";
@@ -96,7 +97,13 @@ public final class ABIJSON {
         String type = getString(object, TYPE);
         return isEvent(type)
                 ? _parseEvent(object)
-                : _parseFunction(type, object, Function.newDefaultDigest());
+                : isError(type)
+                    ? _parseError(object)
+                    : _parseFunction(type, object, Function.newDefaultDigest());
+    }
+
+    private static ABIObject _parseError(JsonObject error) {
+        throw new UnsupportedOperationException("TODO");
     }
 
     public static List<Function> parseFunctions(String arrayJson) {
@@ -115,7 +122,7 @@ public final class ABIJSON {
                                                              final boolean functions,
                                                              final boolean events,
                                                              final MessageDigest digest,
-                                                             final Class<T> classOfT) {
+                                                             final Class<T> classOfT) { // TODO support Error
         final List<T> abiObjects = new ArrayList<>();
         for (JsonElement e : parseArray(arrayJson)) {
             if (e.isJsonObject()) {
@@ -135,6 +142,10 @@ public final class ABIJSON {
 // ---------------------------------------------------------------------------------------------------------------------
     private static boolean isEvent(String typeString) {
         return EVENT.equals(typeString);
+    }
+
+    private static boolean isError(String typeString) {
+        return ERROR.equals(typeString);
     }
 
     private static Function _parseFunction(String type, JsonObject function, MessageDigest digest) {
