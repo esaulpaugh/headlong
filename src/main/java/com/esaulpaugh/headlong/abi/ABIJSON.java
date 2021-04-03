@@ -157,8 +157,8 @@ public final class ABIJSON {
         return new Function(
                 TypeEnum.parse(type),
                 getString(function, NAME),
-                parseTypes(getArray(function, INPUTS)),
-                parseTypes(getArray(function, OUTPUTS)),
+                parseTupleType(function, INPUTS),
+                parseTupleType(function, OUTPUTS),
                 getString(function, STATE_MUTABILITY),
                 digest
         );
@@ -186,10 +186,11 @@ public final class ABIJSON {
     }
 
     private static ContractError _parseError(JsonObject error) {
-        return new ContractError(getString(error, NAME), parseTypes(getArray(error, INPUTS)));
+        return new ContractError(getString(error, NAME), parseTupleType(error, INPUTS));
     }
 
-    private static TupleType parseTypes(JsonArray array) {
+    private static TupleType parseTupleType(JsonObject parent, String arrayName) {
+        JsonArray array = getArray(parent, arrayName);
         if (array != null) {
             final ABIType<?>[] elementsArray = new ABIType[array.size()];
             for (int i = 0; i < elementsArray.length; i++) {
@@ -203,7 +204,7 @@ public final class ABIJSON {
     private static ABIType<?> parseType(JsonObject object) {
         final String typeStr = getString(object, TYPE);
         if(typeStr.startsWith(TUPLE)) {
-            TupleType baseType = parseTypes(getArray(object, COMPONENTS));
+            TupleType baseType = parseTupleType(object, COMPONENTS);
             return TypeFactory.build(
                     baseType.canonicalType + typeStr.substring(TUPLE.length()), // + suffix e.g. "[4][]"
                     baseType,
