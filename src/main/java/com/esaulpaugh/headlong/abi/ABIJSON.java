@@ -92,19 +92,17 @@ public final class ABIJSON {
     }
 
     public static Event parseEvent(JsonObject event) {
-        String type = getString(event, TYPE);
-        if(isEvent(type)) {
+        if(isEvent(getString(event, TYPE))) {
             return _parseEvent(event);
         }
-        throw TypeEnum.unexpectedType(type);
+        throw TypeEnum.unexpectedType(getString(event, TYPE));
     }
 
     public static ContractError parseError(JsonObject error) {
-        String type = getString(error, TYPE);
-        if(isError(type)) {
+        if(isError(getString(error, TYPE))) {
             return _parseError(error);
         }
-        throw TypeEnum.unexpectedType(type);
+        throw TypeEnum.unexpectedType(getString(error, TYPE));
     }
 
     public static ABIObject parseABIObject(JsonObject object) {
@@ -133,19 +131,13 @@ public final class ABIJSON {
     }
 
     private static <T extends ABIObject> List<T> parseElements(String arrayJson, int flags, Class<T> classOfT) {
+        boolean functions = (flags & FUNCTIONS) != 0, events = (flags & EVENTS) != 0, errors = (flags & ERRORS) != 0;
         final List<T> abiObjects = new ArrayList<>();
         for (JsonElement e : parseArray(arrayJson)) {
             if (e.isJsonObject()) {
                 ABIObject o = parseABIObject(e.getAsJsonObject());
-                boolean add;
-                if(o.getType() == TypeEnum.EVENT) {
-                    add = (flags & EVENTS) != 0;
-                } else if(o.getType() == TypeEnum.ERROR) {
-                    add = (flags & ERRORS) != 0;
-                } else {
-                    add = (flags & FUNCTIONS) != 0;
-                }
-                if(add) {
+                TypeEnum t = o.getType();
+                if(t == TypeEnum.EVENT ? events : t == TypeEnum.ERROR ? errors : functions) {
                     abiObjects.add(classOfT.cast(o));
                 }
             }
