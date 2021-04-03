@@ -39,6 +39,12 @@ public final class ABIJSON {
 
     private ABIJSON() {}
 
+    public static final int FUNCTIONS = 1;
+    public static final int EVENTS = 2;
+    public static final int ERRORS = 4;
+
+    public static final int ALL = FUNCTIONS | EVENTS | ERRORS;
+
     private static final String NAME = "name";
     private static final String TYPE = "type";
     static final String EVENT = "event";
@@ -46,6 +52,7 @@ public final class ABIJSON {
     static final String RECEIVE = "receive";
     static final String FALLBACK = "fallback";
     static final String CONSTRUCTOR = "constructor";
+    static final String ERROR = "error";
     private static final String INPUTS = "inputs";
     private static final String OUTPUTS = "outputs";
     private static final String TUPLE = "tuple";
@@ -92,41 +99,54 @@ public final class ABIJSON {
         throw TypeEnum.unexpectedType(type);
     }
 
+    public static ContractError parseError(JsonObject error) {
+        String type = getString(error, TYPE);
+        if(isError(type)) {
+            return _parseError(error);
+        }
+        throw TypeEnum.unexpectedType(type);
+    }
+
     public static ABIObject parseABIObject(JsonObject object) {
         String type = getString(object, TYPE);
         return isEvent(type)
                 ? _parseEvent(object)
-                : _parseFunction(type, object, Function.newDefaultDigest());
+                : isError(type)
+                    ? parseError(object)
+                    : _parseFunction(type, object, Function.newDefaultDigest());
     }
 
     public static List<Function> parseFunctions(String arrayJson) {
-        return parseElements(arrayJson, true, false, Function.newDefaultDigest(), Function.class);
+        return parseElements(arrayJson, FUNCTIONS, Function.class);
     }
 
     public static List<Event> parseEvents(String arrayJson) {
-        return parseElements(arrayJson, false, true, null, Event.class);
+        return parseElements(arrayJson, EVENTS, Event.class);
+    }
+
+    public static List<ContractError> parseErrors(String arrayJson) {
+        return parseElements(arrayJson, ERRORS, ContractError.class);
     }
 
     public static List<ABIObject> parseElements(String arrayJson) {
-        return parseElements(arrayJson, true, true, Function.newDefaultDigest(), ABIObject.class);
+        return parseElements(arrayJson, ALL, ABIObject.class);
     }
 
-    private static <T extends ABIObject> List<T> parseElements(final String arrayJson,
-                                                             final boolean functions,
-                                                             final boolean events,
-                                                             final MessageDigest digest,
-                                                             final Class<T> classOfT) {
+    private static <T extends ABIObject> List<T> parseElements(String arrayJson, int flags, Class<T> classOfT) {
         final List<T> abiObjects = new ArrayList<>();
         for (JsonElement e : parseArray(arrayJson)) {
             if (e.isJsonObject()) {
-                JsonObject jsonObj = (JsonObject) e;
-                String type = getString(jsonObj, TYPE);
-                if(isEvent(type)) {
-                    if(events) {
-                        abiObjects.add(classOfT.cast(parseEvent(jsonObj)));
-                    }
-                } else if(functions) {
-                    abiObjects.add(classOfT.cast(_parseFunction(type, jsonObj, digest)));
+                ABIObject o = parseABIObject(e.getAsJsonObject());
+                boolean add;
+                if(o.getType() == TypeEnum.EVENT) {
+                    add = (flags & EVENTS) != 0;
+                } else if(o.getType() == TypeEnum.ERROR) {
+                    add = (flags & ERRORS) != 0;
+                } else {
+                    add = (flags & FUNCTIONS) != 0;
+                }
+                if(add) {
+                    abiObjects.add(classOfT.cast(o));
                 }
             }
         }
@@ -135,6 +155,10 @@ public final class ABIJSON {
 // ---------------------------------------------------------------------------------------------------------------------
     private static boolean isEvent(String typeString) {
         return EVENT.equals(typeString);
+    }
+
+    private static boolean isError(String typeString) {
+        return ERROR.equals(typeString);
     }
 
     private static Function _parseFunction(String type, JsonObject function, MessageDigest digest) {
@@ -169,6 +193,10 @@ public final class ABIJSON {
         throw new IllegalArgumentException("array \"" + INPUTS + "\" null or not found");
     }
 
+    private static ContractError _parseError(JsonObject error) {
+        return new ContractError(getString(error, NAME), parseTypes(getArray(error, INPUTS)));
+    }
+
     private static TupleType parseTypes(JsonArray array) {
         if (array != null) {
             final ABIType<?>[] elementsArray = new ABIType[array.size()];
@@ -192,12 +220,12 @@ public final class ABIJSON {
         return TypeFactory.create(typeStr, Object.class, getString(object, NAME));
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    static String toJson(ABIObject x, boolean function, boolean pretty) {
+    static String toJson(ABIObject x, int flags, boolean pretty) {
         try {
             StringWriter stringOut = new StringWriter();
             JsonWriter out = (pretty ? GSON_PRETTY : GSON).newJsonWriter(stringOut);
             out.beginObject();
-            if(function) {
+            if((flags & FUNCTIONS) != 0) {
                 Function f = (Function) x;
                 final TypeEnum type = f.getType();
                 out.name(TYPE).value(type.toString());
@@ -213,11 +241,15 @@ public final class ABIJSON {
                 final String stateMutability = f.getStateMutability();
                 addIfValueNotNull(out, STATE_MUTABILITY, stateMutability);
                 out.name(CONSTANT).value(VIEW.equals(stateMutability) || PURE.equals(stateMutability));
-            } else {
+            } else if ((flags & EVENTS) != 0) {
                 Event e = (Event) x;
                 out.name(TYPE).value(EVENT);
                 addIfValueNotNull(out, NAME, x.getName());
                 writeJsonArray(out, INPUTS, x.getInputs(), e.getIndexManifest());
+            } else {
+                out.name(TYPE).value(ERROR);
+                addIfValueNotNull(out, NAME, x.getName());
+                writeJsonArray(out, INPUTS, x.getInputs(), null);
             }
             out.endObject();
             return stringOut.toString();

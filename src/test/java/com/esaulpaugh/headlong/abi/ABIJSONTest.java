@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ABIJSONTest {
@@ -455,6 +456,64 @@ public class ABIJSONTest {
 
         assertEquals("a", event.getIndexedParams().get(0).getName());
         assertEquals("b", event.getNonIndexedParams().get(0).getName());
+
+        final String eventJson = "{\n" +
+                "  \"type\": \"event\",\n" +
+                "  \"name\": \"an_event\",\n" +
+                "  \"inputs\": [\n" +
+                "    {\n" +
+                "      \"name\": \"a\",\n" +
+                "      \"type\": \"bytes\",\n" +
+                "      \"indexed\": true\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"name\": \"b\",\n" +
+                "      \"type\": \"uint256\",\n" +
+                "      \"indexed\": false\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        assertEquals(eventJson, event.toJson(true));
+    }
+
+    @Test
+    public void testGetErrors() {
+        final String objectJson = "{\n" +
+                "  \"type\": \"error\",\n" +
+                "  \"name\": \"InsufficientBalance\",\n" +
+                "  \"inputs\": [\n" +
+                "    {\n" +
+                "      \"name\": \"available\",\n" +
+                "      \"type\": \"uint256\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"name\": \"required\",\n" +
+                "      \"type\": \"uint256\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+        final String arrayJson = "[" + objectJson + "]";
+
+        ContractError error = ABIJSON.parseErrors(arrayJson).get(0);
+        testError(error, objectJson);
+
+        error = ABIJSON.parseError(JsonUtils.parseObject(objectJson));
+        testError(error, objectJson);
+    }
+
+    private static void testError(ContractError error, String expectedJson) {
+        assertEquals(error.getType(), TypeEnum.ERROR);
+        assertEquals("InsufficientBalance", error.getName());
+        assertEquals(TupleType.parse("(uint,uint)"), error.getInputs());
+        assertEquals("InsufficientBalance(uint256,uint256)", error.getCanonicalSignature());
+        assertEquals(Function.parse("InsufficientBalance(uint,uint)"), error.function());
+        assertEquals(expectedJson, error.toJson(true));
+        assertEquals(expectedJson, error.toString());
+        ContractError other = ContractError.fromJson(expectedJson);
+        assertNotSame(other, error);
+        assertEquals(other.hashCode(), error.hashCode());
+        assertEquals(other, error);
     }
 
     @Test
