@@ -30,11 +30,13 @@ import java.util.function.IntFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.esaulpaugh.headlong.abi.ABIJSON.CONSTRUCTOR;
-import static com.esaulpaugh.headlong.abi.ABIJSON.EVENT;
-import static com.esaulpaugh.headlong.abi.ABIJSON.FALLBACK;
-import static com.esaulpaugh.headlong.abi.ABIJSON.FUNCTION;
 import static com.esaulpaugh.headlong.abi.ABIJSON.RECEIVE;
+import static com.esaulpaugh.headlong.abi.TypeEnum.ORDINAL_CONSTRUCTOR;
+import static com.esaulpaugh.headlong.abi.TypeEnum.ORDINAL_ERROR;
+import static com.esaulpaugh.headlong.abi.TypeEnum.ORDINAL_EVENT;
+import static com.esaulpaugh.headlong.abi.TypeEnum.ORDINAL_FALLBACK;
+import static com.esaulpaugh.headlong.abi.TypeEnum.ORDINAL_FUNCTION;
+import static com.esaulpaugh.headlong.abi.TypeEnum.ORDINAL_RECEIVE;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
 /**
@@ -139,15 +141,13 @@ public final class Function implements ABIObject {
     }
 
     private void validateFunction() {
-        switch (type.name) {
-        case EVENT:
-            throw TypeEnum.unexpectedType(type.toString());
-        case FUNCTION:
+        switch (type.ordinal()) {
+        case ORDINAL_FUNCTION:
             if(name == null) {
                 throw validationErr("define name");
             }
             return;
-        case RECEIVE:
+        case ORDINAL_RECEIVE:
             if (!RECEIVE.equals(name)) {
                 throw validationErr("define name as \"" + RECEIVE + '"');
             }
@@ -155,12 +155,12 @@ public final class Function implements ABIObject {
                 throw validationErr("define stateMutability as \"" + ABIJSON.PAYABLE + '"');
             }
             /* fall through */
-        case FALLBACK:
+        case ORDINAL_FALLBACK:
             if(inputTypes.size() != 0) {
                 throw validationErr("define no inputs");
             }
             /* fall through */
-        case CONSTRUCTOR:
+        case ORDINAL_CONSTRUCTOR:
             if(outputTypes.size() != 0) {
                 throw validationErr("define no outputs");
             }
@@ -168,7 +168,9 @@ public final class Function implements ABIObject {
                 throw validationErr("not define name");
             }
             return;
-        default: throw new Error();
+        case ORDINAL_EVENT:
+        case ORDINAL_ERROR:
+        default: throw TypeEnum.unexpectedType(type.name);
         }
     }
 
@@ -331,7 +333,7 @@ public final class Function implements ABIObject {
      * @return the formatted string
      * @throws IllegalArgumentException if the input length mod 32 != 4
      */
-    public static String formatCall(byte[] buffer, int offset, final int length, IntFunction<String> labeler) {
+    public static String formatCall(byte[] buffer, final int offset, final int length, IntFunction<String> labeler) {
         Integers.checkIsMultiple(length - SELECTOR_LEN, UNIT_LENGTH_BYTES);
         StringBuilder sb = new StringBuilder(TupleType.pad(0, "ID"))
                 .append(Strings.encode(buffer, offset, SELECTOR_LEN, Strings.HEX));

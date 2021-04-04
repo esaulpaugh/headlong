@@ -9,6 +9,13 @@ public enum TypeEnum {
     EVENT(ABIJSON.EVENT),
     ERROR(ABIJSON.ERROR);
 
+    static final int ORDINAL_FUNCTION = 0;
+    static final int ORDINAL_RECEIVE = 1;
+    static final int ORDINAL_FALLBACK = 2;
+    static final int ORDINAL_CONSTRUCTOR = 3;
+    static final int ORDINAL_EVENT = 4;
+    static final int ORDINAL_ERROR = 5;
+
     final String name;
 
     TypeEnum(String name) {
