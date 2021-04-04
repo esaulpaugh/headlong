@@ -341,4 +341,12 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     public J parseArgument(String s) { // expects RLP object notation such as "['00', '01', '01']"
         return SuperSerial.deserializeArray(this, s, false, clazz);
     }
+
+    public static ABIType<?> baseType(ABIType<?> e) {
+        ABIType<?> base = e;
+        while (base.typeCode() == ABIType.TYPE_CODE_ARRAY) {
+            base = ((ArrayType<? extends ABIType<?>, ?>) base).getElementType();
+        }
+        return base;
+    }
 }

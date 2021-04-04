@@ -264,26 +264,21 @@ public final class ABIJSON {
 
     private static void tupleType(JsonWriter out, String name, TupleType tupleType, boolean[] indexedManifest) throws IOException {
         out.name(name).beginArray();
-        for (int i = 0; i < tupleType.elementTypes.length; i++) {
-            final ABIType<?> e = tupleType.get(i);
+        int i = 0;
+        for (ABIType<?> e : tupleType) {
+            final String type = e.canonicalType;
+            final boolean tupleBase = type.charAt(0) == '(';
             out.beginObject();
             name(out, e.getName());
-            out.name(TYPE);
-            final String type = e.canonicalType;
-            if(type.startsWith("(")) { // tuple
-                out.value(type.replace(type.substring(0, type.lastIndexOf(')') + 1), TUPLE));
-                ABIType<?> base = e;
-                while (base.typeCode() != ABIType.TYPE_CODE_TUPLE) {
-                    base = ((ArrayType<? extends ABIType<?>, ?>) base).getElementType();
-                }
-                tupleType(out, COMPONENTS, (TupleType) base, null);
-            } else {
-                out.value(type);
+            type(out, tupleBase ? type.replace(type.substring(0, type.lastIndexOf(')') + 1), TUPLE) : type);
+            if(tupleBase) {
+                tupleType(out, COMPONENTS, (TupleType) ArrayType.baseType(e), null);
             }
             if(indexedManifest != null) {
                 out.name(INDEXED).value(indexedManifest[i]);
             }
             out.endObject();
+            i++;
         }
         out.endArray();
     }
