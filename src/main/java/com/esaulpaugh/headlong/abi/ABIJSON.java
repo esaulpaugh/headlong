@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -65,15 +63,6 @@ public final class ABIJSON {
     static final String PAYABLE = "payable";
 //    private static final String NONPAYABLE = "nonpayable";// to mark as nonpayable, do not specify any stateMutability
     private static final String CONSTANT = "constant"; // deprecated
-
-    private static final Gson GSON;
-    private static final Gson GSON_PRETTY;
-
-    static {
-        GsonBuilder builder = new GsonBuilder();
-        GSON = builder.create();
-        GSON_PRETTY = builder.setPrettyPrinting().create();
-    }
 
     public static Function parseFunction(String objectJson) {
         return parseFunction(parseObject(objectJson));
@@ -216,7 +205,10 @@ public final class ABIJSON {
     static String toJson(ABIObject x, int flags, boolean pretty) {
         try {
             StringWriter stringOut = new StringWriter();
-            JsonWriter out = (pretty ? GSON_PRETTY : GSON).newJsonWriter(stringOut);
+            JsonWriter out = new JsonWriter(stringOut);
+            if (pretty) {
+                out.setIndent("  ");
+            }
             out.beginObject();
             if((flags & FUNCTIONS) != 0) {
                 Function f = (Function) x;
