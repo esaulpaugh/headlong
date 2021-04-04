@@ -131,7 +131,7 @@ public final class ABIJSON {
     }
 
     private static <T extends ABIObject> List<T> parseElements(String arrayJson, int flags, Class<T> classOfT) {
-        boolean functions = (flags & FUNCTIONS) != 0, events = (flags & EVENTS) != 0, errors = (flags & ERRORS) != 0;
+        final boolean functions = (flags & FUNCTIONS) != 0, events = (flags & EVENTS) != 0, errors = (flags & ERRORS) != 0;
         final List<T> abiObjects = new ArrayList<>();
         for (JsonElement e : parseArray(arrayJson)) {
             if (e.isJsonObject()) {
@@ -221,28 +221,26 @@ public final class ABIJSON {
             if((flags & FUNCTIONS) != 0) {
                 Function f = (Function) x;
                 final TypeEnum type = f.getType();
-                out.name(TYPE).value(type.toString());
+                type(out, type.toString());
                 if (type != TypeEnum.FALLBACK) {
-                    addIfValueNotNull(out, NAME, x.getName());
+                    name(out, x.getName());
                     if (type != TypeEnum.RECEIVE) {
-                        writeJsonArray(out, INPUTS, x.getInputs(), null);
+                        tupleType(out, INPUTS, x.getInputs());
                         if (type != TypeEnum.CONSTRUCTOR) {
-                            writeJsonArray(out, OUTPUTS, f.getOutputs(), null);
+                            tupleType(out, OUTPUTS, f.getOutputs());
                         }
                     }
                 }
-                final String stateMutability = f.getStateMutability();
-                addIfValueNotNull(out, STATE_MUTABILITY, stateMutability);
-                out.name(CONSTANT).value(VIEW.equals(stateMutability) || PURE.equals(stateMutability));
+                stateMutability(out, f.getStateMutability());
             } else if ((flags & EVENTS) != 0) {
                 Event e = (Event) x;
-                out.name(TYPE).value(EVENT);
-                addIfValueNotNull(out, NAME, x.getName());
-                writeJsonArray(out, INPUTS, x.getInputs(), e.getIndexManifest());
+                type(out, EVENT);
+                name(out, x.getName());
+                tupleType(out, INPUTS, x.getInputs(), e.getIndexManifest());
             } else {
-                out.name(TYPE).value(ERROR);
-                addIfValueNotNull(out, NAME, x.getName());
-                writeJsonArray(out, INPUTS, x.getInputs(), null);
+                type(out, ERROR);
+                name(out, x.getName());
+                tupleType(out, INPUTS, x.getInputs());
             }
             out.endObject();
             return stringOut.toString();
@@ -251,7 +249,24 @@ public final class ABIJSON {
         }
     }
 
-    private static void writeJsonArray(JsonWriter out, String name, TupleType tupleType, boolean[] indexedManifest) throws IOException {
+    private static void type(JsonWriter out, String type) throws IOException {
+        out.name(TYPE).value(type);
+    }
+
+    private static void name(JsonWriter out, String name) throws IOException {
+        addIfValueNotNull(out, NAME, name);
+    }
+
+    private static void stateMutability(JsonWriter out, String stateMutability) throws IOException {
+        addIfValueNotNull(out, STATE_MUTABILITY, stateMutability);
+        out.name(CONSTANT).value(VIEW.equals(stateMutability) || PURE.equals(stateMutability));
+    }
+
+    private static void tupleType(JsonWriter out, String name, TupleType tupleType) throws IOException {
+        tupleType(out, name, tupleType, null);
+    }
+
+    private static void tupleType(JsonWriter out, String name, TupleType tupleType, boolean[] indexedManifest) throws IOException {
         out.name(name).beginArray();
         for (int i = 0; i < tupleType.elementTypes.length; i++) {
             final ABIType<?> e = tupleType.get(i);
@@ -265,7 +280,7 @@ public final class ABIJSON {
                 while (ABIType.TYPE_CODE_ARRAY == base.typeCode()) {
                     base = ((ArrayType<? extends ABIType<?>, ?>) base).getElementType();
                 }
-                writeJsonArray(out, COMPONENTS, (TupleType) base, null);
+                tupleType(out, COMPONENTS, (TupleType) base, null);
             } else {
                 out.value(type);
             }
