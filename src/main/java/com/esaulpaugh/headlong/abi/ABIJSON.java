@@ -246,11 +246,15 @@ public final class ABIJSON {
     }
 
     private static void name(JsonWriter out, String name) throws IOException {
-        addIfValueNotNull(out, NAME, name);
+        if(name != null) {
+            out.name(NAME).value(name);
+        }
     }
 
     private static void stateMutability(JsonWriter out, String stateMutability) throws IOException {
-        addIfValueNotNull(out, STATE_MUTABILITY, stateMutability);
+        if(stateMutability != null) {
+            out.name(STATE_MUTABILITY).value(stateMutability);
+        }
         out.name(CONSTANT).value(VIEW.equals(stateMutability) || PURE.equals(stateMutability));
     }
 
@@ -263,7 +267,7 @@ public final class ABIJSON {
         for (int i = 0; i < tupleType.elementTypes.length; i++) {
             final ABIType<?> e = tupleType.get(i);
             out.beginObject();
-            addIfValueNotNull(out, NAME, e.getName());
+            name(out, e.getName());
             out.name(TYPE);
             final String type = e.canonicalType;
             if(type.startsWith("(")) { // tuple
@@ -282,11 +286,5 @@ public final class ABIJSON {
             out.endObject();
         }
         out.endArray();
-    }
-
-    private static void addIfValueNotNull(JsonWriter out, String key, String value) throws IOException {
-        if(value != null) {
-            out.name(key).value(value);
-        }
     }
 }
