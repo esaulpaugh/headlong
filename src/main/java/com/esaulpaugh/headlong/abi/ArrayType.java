@@ -342,11 +342,10 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return SuperSerial.deserializeArray(this, s, false, clazz);
     }
 
-    public static ABIType<?> baseType(ABIType<?> e) {
-        ABIType<?> base = e;
-        while (base.typeCode() == ABIType.TYPE_CODE_ARRAY) {
-            base = ((ArrayType<? extends ABIType<?>, ?>) base).getElementType();
+    public static ABIType<?> baseType(ABIType<?> type) {
+        while (type.typeCode() == ABIType.TYPE_CODE_ARRAY) {
+            type = ((ArrayType<? extends ABIType<?>, ?>) type).getElementType();
         }
-        return base;
+        return type;
     }
 }
