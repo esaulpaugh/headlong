@@ -503,7 +503,7 @@ public class ABIJSONTest {
     }
 
     private static void testError(ContractError error, String expectedJson) {
-        assertEquals(error.getType(), TypeEnum.ERROR);
+        assertEquals(TypeEnum.ERROR, error.getType());
         assertEquals("InsufficientBalance", error.getName());
         assertEquals(TupleType.parse("(uint,uint)"), error.getInputs());
         assertEquals("InsufficientBalance(uint256,uint256)", error.getCanonicalSignature());
