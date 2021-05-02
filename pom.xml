@@ -20,6 +20,7 @@
     <properties>
         <argLine>-Dfile.encoding=UTF-8</argLine>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <junit.version>5.7.1</junit.version>
         <jmh.version>1.29</jmh.version>
         <maven.build.timestamp.format>MMMMM d yyyy</maven.build.timestamp.format>
     </properties>
@@ -42,13 +43,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.7.1</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.7.1</version>
+            <version>${junit.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
