@@ -61,53 +61,49 @@ public class Deserializer {
         return new Tuple(elements);
     }
 
-    private static Object parseValue(ABIType<?> type, JsonElement value) {
-        switch (type.typeCode()) {
-            case ABIType.TYPE_CODE_BOOLEAN: return value.getAsJsonObject().get("value").getAsBoolean();
-            case ABIType.TYPE_CODE_BYTE: return (byte) value.getAsJsonObject().get("value").getAsInt();
-            case ABIType.TYPE_CODE_INT: return value.getAsJsonObject().get("value").getAsInt();
-            case ABIType.TYPE_CODE_LONG: {
-                JsonObject valueObj = value.getAsJsonObject();
-                String valueValue = valueObj.get("value").getAsString();
-                return Long.parseLong(valueValue);
-            }
-            case ABIType.TYPE_CODE_BIG_INTEGER: {
-                JsonObject valueObj = value.getAsJsonObject();
-                String valueType = valueObj.get("type").getAsString();
-                String valueValue = valueObj.get("value").getAsString();
-                if("string".equals(valueType)) {
-                    BigInteger val = new BigInteger(FastHex.decode(valueValue, 2, valueValue.length() - 2));
-                    BigIntegerType bigIntType = (BigIntegerType) type;
-                    if(bigIntType.isUnsigned()) {
-                        return new Uint(bigIntType.getBitLength()).toUnsigned(val);
-                    }
-                    return val;
-                } else {
-                    return new BigInteger(valueValue);
+    private static Object parseValue(final ABIType<?> type, final JsonElement value) {
+        final int typeCode = type.typeCode();
+        if(typeCode == ABIType.TYPE_CODE_ARRAY) {
+            return parseArrayValue((ArrayType<? extends ABIType<?>, ?>) type, value);
+        }
+        final JsonObject valueObj = value.getAsJsonObject();
+        final JsonElement valVal = valueObj.get("value");
+        switch (typeCode) {
+        case ABIType.TYPE_CODE_BOOLEAN: return valVal.getAsBoolean();
+        case ABIType.TYPE_CODE_BYTE: return (byte) valVal.getAsInt();
+        case ABIType.TYPE_CODE_INT: return valVal.getAsInt();
+        case ABIType.TYPE_CODE_LONG: return Long.parseLong(valVal.getAsString());
+        case ABIType.TYPE_CODE_BIG_INTEGER: {
+            String valueType = valueObj.get("type").getAsString();
+            String valStr = valVal.getAsString();
+            if ("string".equals(valueType)) {
+                BigIntegerType bigIntType = (BigIntegerType) type;
+                BigInteger val = new BigInteger(FastHex.decode(valStr, 2, valStr.length() - 2));
+                if (bigIntType.isUnsigned()) {
+                    return new Uint(bigIntType.getBitLength()).toUnsigned(val);
                 }
+                return val;
+            } else {
+                return new BigInteger(valStr);
             }
-            case ABIType.TYPE_CODE_BIG_DECIMAL: {
-                String valueValue = value.getAsJsonObject().get("value").getAsString();
-                return new BigDecimal(new BigInteger(valueValue), ((BigDecimalType) type).getScale());
-            }
-            case ABIType.TYPE_CODE_ARRAY: return parseArrayValue((ArrayType<? extends ABIType<?>, ?>) type, value);
-            case ABIType.TYPE_CODE_TUPLE: return parseTupleValue((TupleType) type, value.getAsJsonObject().get("value").getAsJsonArray());
-            default: throw new Error();
+        }
+        case ABIType.TYPE_CODE_BIG_DECIMAL: return new BigDecimal(
+                new BigInteger(valVal.getAsString()), ((BigDecimalType) type).getScale()
+        );
+        case ABIType.TYPE_CODE_TUPLE: return parseTupleValue((TupleType) type, valVal.getAsJsonArray());
+        default: throw new Error();
         }
     }
 
-    private static Object parseArrayValue(ArrayType<? extends ABIType<?>, ?> arrayType, JsonElement value) {
-        if (arrayType.isString()) {
-            return value.getAsJsonObject().get("value").getAsString();
-        }
+    private static Object parseArrayValue(final ArrayType<?, ?> arrayType, final JsonElement value) {
         if (value.isJsonArray()) {
-            JsonArray valueValue = value.getAsJsonArray();
-            final int len = valueValue.size();
+            JsonArray valArr = value.getAsJsonArray();
+            final int len = valArr.size();
             final ABIType<?> elementType = arrayType.getElementType();
             int i = 0;
             final Object arrayObj;
             final Class<?> clazz = elementType.clazz();
-            final Iterator<JsonElement> iter = valueValue.iterator();
+            final Iterator<JsonElement> iter = valArr.iterator();
             if (Boolean.class == clazz) {
                 boolean[] array = (boolean[]) (arrayObj = new boolean[len]);
                 for (; i < len; i++) {
@@ -136,11 +132,14 @@ public class Deserializer {
             }
             return arrayObj;
         }
-        JsonObject valueObj = value.getAsJsonObject();
+        final JsonObject valueObj = value.getAsJsonObject();
+        if (arrayType.isString()) {
+            return valueObj.get("value").getAsString();
+        }
         String valueType = valueObj.get("type").getAsString();
         if ("buffer".equals(valueType)) {
-            String valueValue = valueObj.get("value").getAsString();
-            return FastHex.decode(valueValue, 2, valueValue.length() - 2);
+            String valStr = valueObj.get("value").getAsString();
+            return FastHex.decode(valStr, 2, valStr.length() - 2);
         } else {
             throw new RuntimeException("????");
         }
