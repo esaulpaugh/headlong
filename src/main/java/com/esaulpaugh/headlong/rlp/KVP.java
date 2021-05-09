@@ -118,32 +118,29 @@ public final class KVP implements Comparable<KVP> {
 
     public static final Comparator<KVP> PAIR_COMPARATOR = (pa, pb) -> {
         int result = compare(pa, pb);
-        if (result != 0) {
-            return result;
+        if (result == 0) {
+            throw pa.duplicateKeyErr();
         }
-        throw pa.duplicateKeyErr();
+        return result;
     };
 
     private static int compare(KVP pa, KVP pb) {
         byte[] a = pa.k;
         byte[] b = pb.k;
-        if(a != b) {
-            int aOff = pa.keyDataIdx;
-            int bOff = pb.keyDataIdx;
-            final int aLen = a.length - aOff;
-            final int bLen = b.length - bOff;
-            final int len = Math.min(aLen, bLen);
-            final int end = aOff + len;
-            while(aOff < end) {
-                int av = a[aOff++];
-                int bv = b[bOff++];
-                if (av != bv) {
-                    return av - bv;
-                }
+        int aOff = pa.keyDataIdx;
+        int bOff = pb.keyDataIdx;
+        final int aLen = a.length - aOff;
+        final int bLen = b.length - bOff;
+        final int len = Math.min(aLen, bLen);
+        final int end = aOff + len;
+        while(aOff < end) {
+            int av = a[aOff++];
+            int bv = b[bOff++];
+            if (av != bv) {
+                return av - bv;
             }
-            return aLen - bLen;
         }
-        return 0;
+        return aLen - bLen;
     }
 
     IllegalArgumentException duplicateKeyErr() {
