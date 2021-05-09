@@ -117,27 +117,34 @@ public final class KVP implements Comparable<KVP> {
     }
 
     public static final Comparator<KVP> PAIR_COMPARATOR = (pa, pb) -> {
-        byte[] a = pa.k;
-        byte[] b = pb.k;
-        if(a != b) {
-            final int aOff = pa.keyDataIdx;
-            final int bOff = pb.keyDataIdx;
-            final int aLen = a.length - aOff;
-            final int bLen = b.length - bOff;
-            final int len = Math.min(aLen, bLen);
-            int i;
-            for (i = 0; i < len; i++) {
-                if (a[aOff + i] != b[bOff + i]) {
-                    break;
-                }
-            }
-            int result = i < len ? a[aOff + i] - b[bOff + i] : aLen - bLen;
-            if (result != 0) {
-                return result;
-            }
+        int result = compare(pa, pb);
+        if (result != 0) {
+            return result;
         }
         throw pa.duplicateKeyErr();
     };
+
+    private static int compare(KVP pa, KVP pb) {
+        byte[] a = pa.k;
+        byte[] b = pb.k;
+        if(a != b) {
+            int aOff = pa.keyDataIdx;
+            int bOff = pb.keyDataIdx;
+            final int aLen = a.length - aOff;
+            final int bLen = b.length - bOff;
+            final int len = Math.min(aLen, bLen);
+            final int end = aOff + len;
+            while(aOff < end) {
+                int av = a[aOff++];
+                int bv = b[bOff++];
+                if (av != bv) {
+                    return av - bv;
+                }
+            }
+            return aLen - bLen;
+        }
+        return 0;
+    }
 
     IllegalArgumentException duplicateKeyErr() {
         return new IllegalArgumentException("duplicate key: " + key().asString(Strings.UTF_8));
