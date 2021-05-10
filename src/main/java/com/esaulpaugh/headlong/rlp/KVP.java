@@ -131,8 +131,7 @@ public final class KVP implements Comparable<KVP> {
         int bOff = pb.keyDataIdx;
         final int aLen = a.length - aOff;
         final int bLen = b.length - bOff;
-        final int len = Math.min(aLen, bLen);
-        final int end = aOff + len;
+        final int end = aOff + Math.min(aLen, bLen);
         while(aOff < end) {
             int av = a[aOff++];
             int bv = b[bOff++];
