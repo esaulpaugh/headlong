@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import java.security.SignatureException;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -305,10 +306,10 @@ public class EIP778Test {
     public void testDuplicateKeys() throws Throwable {
         byte[] keyBytes = new byte[0];
         final List<KVP> pairs = Arrays.asList(new KVP(keyBytes, new byte[0]), new KVP(keyBytes, new byte[1]));
-        assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs.sort(PAIR_COMPARATOR));
+        assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs.sort(Comparator.naturalOrder()));
 
         final List<KVP> pairs2 = Arrays.asList(new KVP(new byte[] { 2 }, new byte[0]), new KVP(new byte[] { 2 }, new byte[1]));
-        assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs2.sort(PAIR_COMPARATOR));
+        assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs2.sort(Comparator.naturalOrder()));
     }
 
     @Test

@@ -19,7 +19,6 @@ import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Comparator;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 
@@ -113,16 +112,12 @@ public final class KVP implements Comparable<KVP> {
 
     @Override
     public int compareTo(KVP other) {
-        return PAIR_COMPARATOR.compare(this, other);
-    }
-
-    public static final Comparator<KVP> PAIR_COMPARATOR = (pa, pb) -> {
-        int result = compare(pa, pb);
+        int result = compare(this, other);
         if (result == 0) {
-            throw pa.duplicateKeyErr();
+            throw duplicateKeyErr();
         }
         return result;
-    };
+    }
 
     private static int compare(KVP pa, KVP pb) {
         byte[] a = pa.k;

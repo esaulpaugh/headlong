@@ -61,7 +61,7 @@ public final class RLPEncoder {
      * @see java.util.Arrays.ArrayList#sort(Comparator)
      */
     static byte[] encodeRecordContent(int dataLen, long seq, List<KVP> pairs) {
-        pairs.sort(KVP.PAIR_COMPARATOR); // note that ArrayList overrides List.sort
+        pairs.sort(Comparator.naturalOrder()); // note that ArrayList overrides List.sort
         byte[] arr = new byte[itemLen(dataLen)];
         ByteBuffer bb = ByteBuffer.wrap(arr);
         insertListPrefix(dataLen, bb);
