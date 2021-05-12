@@ -29,6 +29,7 @@ import org.openjdk.jmh.annotations.Warmup;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -73,7 +74,7 @@ public class MeasureKeyValuePairSort {
     @Warmup(iterations = 1)
     @Measurement(iterations = THREE)
     public void sortArray() {
-        Arrays.sort(array, KVP.PAIR_COMPARATOR);
+        Arrays.sort(array, Comparator.naturalOrder());
     }
 
     @Benchmark
@@ -82,7 +83,7 @@ public class MeasureKeyValuePairSort {
     @Warmup(iterations = 1)
     @Measurement(iterations = THREE)
     public void sortArrayList() {
-        arrayList.sort(KVP.PAIR_COMPARATOR);
+        arrayList.sort(Comparator.naturalOrder());
     }
 
     @Benchmark
@@ -91,6 +92,6 @@ public class MeasureKeyValuePairSort {
     @Warmup(iterations = 1)
     @Measurement(iterations = THREE)
     public void sortArraysArrayList() {
-        arraysArrayList.sort(KVP.PAIR_COMPARATOR);
+        arraysArrayList.sort(Comparator.naturalOrder());
     }
 }
