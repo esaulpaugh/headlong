@@ -30,6 +30,18 @@ public interface ABIObject {
 
     String toJson(boolean pretty);
 
+    default boolean isFunction() {
+        return false;
+    }
+
+    default boolean isEvent() {
+        return false;
+    }
+
+    default boolean isContractError() {
+        return false;
+    }
+
     default Function asFunction() {
         return (Function) this;
     }

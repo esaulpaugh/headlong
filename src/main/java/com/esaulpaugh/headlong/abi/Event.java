@@ -116,4 +116,9 @@ public final class Event implements ABIObject {
     public String toString() {
         return toJson(true);
     }
+
+    @Override
+    public boolean isEvent() {
+        return true;
+    }
 }

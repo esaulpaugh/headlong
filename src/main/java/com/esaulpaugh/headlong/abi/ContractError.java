@@ -69,4 +69,9 @@ public class ContractError implements ABIObject {
     public String toString() {
         return toJson(true);
     }
+
+    @Override
+    public boolean isContractError() {
+        return true;
+    }
 }

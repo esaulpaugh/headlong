@@ -279,6 +279,11 @@ public final class Function implements ABIObject {
         return ABIJSON.toJson(this, ABIJSON.FUNCTIONS, pretty);
     }
 
+    @Override
+    public boolean isFunction() {
+        return true;
+    }
+
     private static String validateName(String input) {
         if(ALL_ASCII_NO_OPEN_PAREN.matcher(input).matches()) {
             return input;

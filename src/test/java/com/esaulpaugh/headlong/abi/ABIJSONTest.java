@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ABIJSONTest {
 
@@ -303,6 +304,10 @@ public class ABIJSONTest {
 
         Function f2 = ABIObject.fromJson(FUNCTION_A_JSON).asFunction();
         assertEquals(f, f2);
+
+        assertTrue(f.isFunction());
+        assertFalse(f.isEvent());
+        assertFalse(f.isContractError());
     }
 
     @Test
@@ -379,6 +384,10 @@ public class ABIJSONTest {
 
         Event e = ABIObject.fromJson(json).asEvent();
         assertEquals(expectedA, e);
+
+        assertFalse(e.isFunction());
+        assertTrue(e.isEvent());
+        assertFalse(e.isContractError());
     }
 
     @Test
@@ -524,6 +533,10 @@ public class ABIJSONTest {
 
         ContractError err = ABIObject.fromJson(expectedJson).asContractError();
         assertEquals(other, err);
+
+        assertFalse(err.isFunction());
+        assertFalse(err.isEvent());
+        assertTrue(err.isContractError());
     }
 
     @Test
