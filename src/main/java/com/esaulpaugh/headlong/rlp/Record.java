@@ -137,7 +137,7 @@ public final class Record {
     }
 
     public long getSeq() {
-        return iterate(null, false);
+        return iterate(false, null);
     }
 
     public List<KVP> getPairs() {
@@ -157,16 +157,16 @@ public final class Record {
      * @return seq
      * */
     public long visitAll(BiConsumer<RLPItem, RLPItem> visitor) {
-        return iterate(visitor, true);
+        return iterate(true, visitor);
     }
 
-    private long iterate(BiConsumer<RLPItem, RLPItem> visitor, boolean pairs) {
+    private long iterate(boolean pairs, BiConsumer<RLPItem, RLPItem> pairVisitor) {
         Iterator<RLPItem> iter = rlp.iterator();
         iter.next(); // skip signature
         long seq = iter.next().asLong();
         if (pairs) {
             while (iter.hasNext()) {
-                visitor.accept(iter.next(), iter.next());
+                pairVisitor.accept(iter.next(), iter.next());
             }
         }
         return seq;
