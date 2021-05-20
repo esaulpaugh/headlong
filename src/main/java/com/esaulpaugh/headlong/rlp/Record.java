@@ -98,7 +98,7 @@ public final class Record {
                 throw pair.duplicateKeyErr();
             }
         }
-        visit((k, v) -> pairSet.add(new KVP(k, v)));
+        visitAll((k, v) -> pairSet.add(new KVP(k, v)));
         return new Record(signer, seq, pairSet.toArray(KVP.EMPTY_ARRAY));
     }
 
@@ -144,13 +144,13 @@ public final class Record {
 
     public List<KVP> getPairs() {
         List<KVP> list = new ArrayList<>();
-        visit((k, v) -> list.add(new KVP(k, v)));
+        visitAll((k, v) -> list.add(new KVP(k, v)));
         return list;
     }
 
     public Map<String, byte[]> map() {
         Map<String, byte[]> map = new LinkedHashMap<>();
-        visit((k, v) -> map.put(k.asString(Strings.UTF_8), v.asBytes()));
+        visitAll((k, v) -> map.put(k.asString(Strings.UTF_8), v.asBytes()));
         return map;
     }
 
@@ -158,7 +158,7 @@ public final class Record {
      * @param visitor   pair-consuming code
      * @return seq
      * */
-    public long visit(BiConsumer<RLPItem, RLPItem> visitor) {
+    public long visitAll(BiConsumer<RLPItem, RLPItem> visitor) {
         Iterator<RLPItem> iter = rlp.iterator();
         iter.next(); // skip signature
         long seq = iter.next().asLong();

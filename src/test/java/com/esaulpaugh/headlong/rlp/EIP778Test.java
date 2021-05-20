@@ -231,7 +231,7 @@ public class EIP778Test {
         assertArrayEquals(Strings.decode("v4", UTF_8), map.get(ID));
         assertArrayEquals(Strings.decode("03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138"), map.get(SECP256K1));
 
-        assertEquals(seq, record.visit((k, v) -> {}));
+        assertEquals(seq, record.visitAll((k, v) -> {}));
 
         final Iterator<KVP> listIter = pairList.iterator();
         final Iterator<Map.Entry<String, byte[]>> mapIter = map.entrySet().iterator();
