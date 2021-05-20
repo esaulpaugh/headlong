@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.JsonUtils;
+
 /** Supertype of {@link Function} and {@link Event}. */
 public interface ABIObject {
 
@@ -27,4 +29,20 @@ public interface ABIObject {
     String getCanonicalSignature();
 
     String toJson(boolean pretty);
+
+    default Function asFunction() {
+        return (Function) this;
+    }
+
+    default Event asEvent() {
+        return (Event) this;
+    }
+
+    default ContractError asContractError() {
+        return (ContractError) this;
+    }
+
+    static ABIObject fromJson(String json) {
+        return ABIJSON.parseABIObject(JsonUtils.parseObject(json));
+    }
 }

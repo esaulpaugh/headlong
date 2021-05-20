@@ -300,6 +300,9 @@ public class ABIJSONTest {
 
         printTupleType(in);
         printTupleType(out);
+
+        Function f2 = ABIObject.fromJson(FUNCTION_A_JSON).asFunction();
+        assertEquals(f, f2);
     }
 
     @Test
@@ -371,7 +374,11 @@ public class ABIJSONTest {
         assertEquals(expectedA, expectedB);
         assertEquals(expectedA.hashCode(), expectedB.hashCode());
 
-        assertEquals(expectedA, Event.fromJson(jsonObject.toString()));
+        String json = jsonObject.toString();
+        assertEquals(expectedA, Event.fromJson(json));
+
+        Event e = ABIObject.fromJson(json).asEvent();
+        assertEquals(expectedA, e);
     }
 
     @Test
@@ -514,6 +521,9 @@ public class ABIJSONTest {
         assertNotSame(other, error);
         assertEquals(other.hashCode(), error.hashCode());
         assertEquals(other, error);
+
+        ContractError err = ABIObject.fromJson(expectedJson).asContractError();
+        assertEquals(other, err);
     }
 
     @Test
