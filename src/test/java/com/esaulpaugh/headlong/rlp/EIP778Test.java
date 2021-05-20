@@ -379,4 +379,37 @@ public class EIP778Test {
 
         TestUtils.assertThrown(IllegalArgumentException.class, "duplicate key: tcp", () -> with.with(SIGNER, 0L, new KVP(TCP, "blah", ASCII), new KVP(TCP, "bleh", ASCII)));
     }
+
+    @Test
+    public void testSignVerify() throws Throwable {
+        Record r = new Record(new Record.Signer() {
+            @Override
+            public int signatureLength() {
+                return 64;
+            }
+
+            @Override
+            public byte[] sign(byte[] content) {
+                Arrays.fill(content, (byte) 0xff);
+                return SIG;
+            }
+        },
+        1L,
+        new KVP(IP, "7f000001", HEX),
+        new KVP(UDP, "765f", HEX),
+        new KVP(ID, "v4", UTF_8),
+        new KVP(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX));
+        assertEquals(ENR_STRING, r.toString());
+
+        assertThrown(SignatureException.class, "moops", () -> Record.parse(ENR_STRING, (signature, content) -> {
+            throw new SignatureException("moops");
+        }));
+
+        Record r2 = Record.parse(ENR_STRING, (signature, content) -> {
+            Arrays.fill(content, (byte) 0xff);
+            Arrays.fill(signature, (byte) 0x07);
+        });
+
+        assertEquals(ENR_STRING, r2.toString());
+    }
 }

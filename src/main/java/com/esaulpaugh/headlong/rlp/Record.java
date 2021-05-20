@@ -137,9 +137,7 @@ public final class Record {
     }
 
     public long getSeq() {
-        Iterator<RLPItem> iter = rlp.iterator();
-        iter.next(); // skip signature
-        return iter.next().asLong();
+        return iterate(null, false);
     }
 
     public List<KVP> getPairs() {
@@ -159,17 +157,23 @@ public final class Record {
      * @return seq
      * */
     public long visitAll(BiConsumer<RLPItem, RLPItem> visitor) {
+        return iterate(visitor, true);
+    }
+
+    private long iterate(BiConsumer<RLPItem, RLPItem> visitor, boolean pairs) {
         Iterator<RLPItem> iter = rlp.iterator();
         iter.next(); // skip signature
         long seq = iter.next().asLong();
-        while (iter.hasNext()) {
-            visitor.accept(iter.next(), iter.next());
+        if (pairs) {
+            while (iter.hasNext()) {
+                visitor.accept(iter.next(), iter.next());
+            }
         }
         return seq;
     }
 
-    // reconstruct the content list from the content data
     private byte[] content(int index) {
+        // reconstruct the content list from the content data
         int contentDataLen = rlp.encodingLength() - index;
         ByteBuffer bb = ByteBuffer.allocate(RLPEncoder.itemLen(contentDataLen));
         RLPEncoder.insertListPrefix(contentDataLen, bb);
