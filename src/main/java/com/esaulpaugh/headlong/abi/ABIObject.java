@@ -17,7 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.JsonUtils;
 
-/** Supertype of {@link Function} and {@link Event}. */
+/** Supertype of json-encodeable types {@link Function}, {@link Event}, and {@link ContractError}.*/
 public interface ABIObject {
 
     TypeEnum getType();
