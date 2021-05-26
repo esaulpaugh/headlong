@@ -188,7 +188,7 @@ public abstract class RLPItem {
      * @return the byte array representation of this item's data
      * @see RLPItem#data()
      */
-    public byte[] asBytes() {
+    public final byte[] asBytes() {
         return data();
     }
 
@@ -198,7 +198,7 @@ public abstract class RLPItem {
      * @param encoding one of { {@link Strings#BASE_64_URL_SAFE}, {@link Strings#UTF_8}, {@link Strings#HEX} }.
      * @return  this item's payload (data) bytes, encoded to your liking
      */
-    public String asString(int encoding) {
+    public final String asString(int encoding) {
         return Strings.encode(buffer, dataIndex, dataLength, encoding);
     }
 
@@ -208,7 +208,7 @@ public abstract class RLPItem {
      *
      * @return the {@code boolean}
      */
-    public boolean asBoolean() {
+    public final boolean asBoolean() {
         return dataLength != 0 && buffer[index] != 0x00;
     }
 
@@ -220,55 +220,55 @@ public abstract class RLPItem {
      * @throws IllegalArgumentException if this item is not interpretable as a char
      * @see #asShort(boolean)
      */
-    public char asChar(boolean lenient) {
+    public final char asChar(boolean lenient) {
         return (char) asShort(lenient);
     }
 
-    public byte asByte(boolean lenient) {
+    public final byte asByte(boolean lenient) {
         return Integers.getByte(buffer, dataIndex, dataLength, lenient);
     }
 
-    public short asShort(boolean lenient) {
+    public final short asShort(boolean lenient) {
         return Integers.getShort(buffer, dataIndex, dataLength, lenient);
     }
 
-    public int asInt(boolean lenient) {
+    public final int asInt(boolean lenient) {
         return Integers.getInt(buffer, dataIndex, dataLength, lenient);
     }
 
-    public long asLong(boolean lenient) {
+    public final long asLong(boolean lenient) {
         return Integers.getLong(buffer, dataIndex, dataLength, lenient);
     }
 
-    public BigInteger asBigInt(boolean lenient) {
+    public final BigInteger asBigInt(boolean lenient) {
         return Integers.getBigInt(buffer, dataIndex, dataLength, lenient);
     }
 
-    public float asFloat(boolean lenient) {
+    public final float asFloat(boolean lenient) {
         return FloatingPoint.getFloat(buffer, dataIndex, dataLength, lenient);
     }
 
-    public double asDouble(boolean lenient) {
+    public final double asDouble(boolean lenient) {
         return FloatingPoint.getDouble(buffer, dataIndex, dataLength, lenient);
     }
 
-    public byte asByte() {
+    public final byte asByte() {
         return asByte(false);
     }
 
-    public int asInt() {
+    public final int asInt() {
         return asInt(false);
     }
 
-    public long asLong() {
+    public final long asLong() {
         return asLong(false);
     }
 
-    public BigInteger asBigInt() {
+    public final BigInteger asBigInt() {
         return asBigInt(false);
     }
 
-    public BigInteger asBigIntSigned() {
+    public final BigInteger asBigIntSigned() {
         return new BigInteger(data());
     }
 
@@ -309,7 +309,7 @@ public abstract class RLPItem {
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return Notation.forEncoding(buffer, index, endIndex).toString();
     }
 
@@ -317,7 +317,7 @@ public abstract class RLPItem {
      * @param encoding one of { {@link Strings#BASE_64_URL_SAFE}, {@link Strings#UTF_8}, {@link Strings#HEX} }.
      * @return  this item's bytes, including RLP prefix, encoded to your liking
      */
-    public String encodingString(int encoding) {
+    public final String encodingString(int encoding) {
         return Strings.encode(buffer, index, encodingLength(), encoding);
     }
 }
