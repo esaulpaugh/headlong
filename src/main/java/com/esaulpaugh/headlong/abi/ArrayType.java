@@ -173,7 +173,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private int offsetsLen(int len) {
-        return elementType.dynamic ? OFFSET_LENGTH_BYTES * len: 0;
+        return elementType.dynamic ? OFFSET_LENGTH_BYTES * len : 0;
     }
 
     private int validateInts(int[] arr, IntType type) {
