@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -520,14 +521,14 @@ public class RLPDecoderTest {
         }
 
         hashSet = new HashSet<>();
-        RLP_STRICT.collectN(rlp, 4, 3, hashSet);
+        collectN(rlp, 4, 3, hashSet);
         assertEquals(3, hashSet.size());
         for (int i = 4; i < 7; i++) {
             assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
         }
 
         hashSet = new HashSet<>();
-        n = RLP_STRICT.collectBefore(rlp, 1, 6, hashSet);
+        n = collectUntil(rlp, 1, 6, hashSet);
         assertEquals(5, n);
         assertEquals(5, hashSet.size());
         for (int i = 1; i < 6; i++) {
@@ -535,31 +536,31 @@ public class RLPDecoderTest {
         }
 
         hashSet = new HashSet<>();
-        n = RLP_STRICT.collectAll(rlp, 0, hashSet);
+        n = collectAll(rlp, 0, hashSet);
         assertEquals(9, n);
         for (int i = 0; i < 9; i++) {
             assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
         }
 
-        List<RLPItem> list = RLP_STRICT.collectN(rlp, 4);
+        List<RLPItem> list = collectN(rlp, 4);
         assertEquals(4, list.size());
         for (int i = 0; i < 4; i++) {
             assertEquals(list.get(i), RLP_STRICT.wrap((byte) i));
         }
 
-        list = RLP_STRICT.collectN(rlp, 1, 3);
+        list = collectN(rlp, 1, 3);
         assertEquals(3, list.size());
         for (int i = 0; i < 3; i++) {
             assertEquals(list.get(i), RLP_STRICT.wrap((byte) (i + 1)));
         }
 
-        list = RLP_STRICT.collectAll(rlp, 1);
+        list = collectAll(rlp, 1);
         assertEquals(8, list.size());
 
-        list = RLP_STRICT.collectBefore(rlp, 3);
+        list = collectUntil(rlp, 3);
         assertEquals(3, list.size());
 
-        list = RLP_STRICT.collectBefore(rlp, 2, 8);
+        list = collectUntil(rlp, 2, 8);
         assertEquals(6, list.size());
         for (int i = 0; i < 6; i++) {
             assertEquals(list.get(i), RLP_STRICT.wrap((byte) (i + 2)));
@@ -662,5 +663,45 @@ public class RLPDecoderTest {
         idx = list.exportData(buffer, 0);
         assertEquals(list.dataLength, idx);
         assertArrayEquals(buffer, list.data());
+    }
+
+    public static List<RLPItem> collectAll(byte[] encodings) {
+        return collectAll(encodings, 0);
+    }
+
+    public static List<RLPItem> collectAll(byte[] encodings, int index) {
+        return collectUntil(encodings, index, encodings.length);
+    }
+
+    public static List<RLPItem> collectUntil(byte[] encodings, int endIndex) {
+        return collectUntil(encodings, 0, endIndex);
+    }
+
+    public static List<RLPItem> collectUntil(byte[] encodings, int index, int endIndex) {
+        ArrayList<RLPItem> dest = new ArrayList<>();
+        collectUntil(encodings, index, endIndex, dest);
+        return dest;
+    }
+
+    public static List<RLPItem> collectN(byte[] encodings, int n) {
+        return collectN(encodings, 0, n);
+    }
+
+    public static List<RLPItem> collectN(byte[] encodings, int index, int n) {
+        ArrayList<RLPItem> dest = new ArrayList<>(n);
+        RLP_STRICT.collect(encodings, index, (count, idx) -> count < n, dest);
+        return dest;
+    }
+
+    public static int collectAll(byte[] encodings, int index, Collection<RLPItem> dest) {
+        return collectUntil(encodings, index, encodings.length, dest);
+    }
+
+    public static int collectUntil(byte[] encodings, int index, int endIndex, Collection<RLPItem> dest) {
+        return RLP_STRICT.collect(encodings, index, (count, idx) -> idx < endIndex, dest);
+    }
+
+    public static void collectN(byte[] encodings, int index, int n, Collection<RLPItem> dest) {
+        RLP_STRICT.collect(encodings, index, (count, idx) -> count < n, dest);
     }
 }

@@ -126,7 +126,7 @@ public class RLPStreamTest {
 
     @Test
     public void testStreamEasy() throws Throwable {
-        RLPItem[] collected = RLP_STRICT.collectAll(RLP_BYTES).toArray(RLPItem.EMPTY_ARRAY);
+        RLPItem[] collected = RLPDecoderTest.collectAll(RLP_BYTES).toArray(RLPItem.EMPTY_ARRAY);
         RLPItem[] streamed = RLP_STRICT.stream(RLP_BYTES).collect().toArray(RLPItem.EMPTY_ARRAY);
 
         assertTrue(Arrays.deepEquals(collected, streamed));

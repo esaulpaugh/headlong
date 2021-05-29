@@ -165,54 +165,19 @@ public final class RLPDecoder {
         }
     }
 
-    /*
-     *  Methods for gathering sequential items into a collection
+    /**
+     * For gathering sequential items into a collection.
+     *
+     * @param buffer the buffer containing the encodings
+     * @param index the index into the buffer of the first encoding
+     * @param predicate the condition under which an item is to be added to the collection
+     * @param collection    the collection to which the items will be added
+     * @return  the number of items added
      */
-
-    public List<RLPItem> collectAll(byte[] encodings) {
-        return collectAll(encodings, 0);
-    }
-
-    public List<RLPItem> collectAll(byte[] encodings, int index) {
-        return collectBefore(encodings, index, encodings.length);
-    }
-
-    public List<RLPItem> collectBefore(byte[] encodings, int endIndex) {
-        return collectBefore(encodings, 0, endIndex);
-    }
-
-    public List<RLPItem> collectBefore(byte[] encodings, int index, int endIndex) {
-        ArrayList<RLPItem> dest = new ArrayList<>();
-        collectBefore(encodings, index, endIndex, dest);
-        return dest;
-    }
-
-    public List<RLPItem> collectN(byte[] encodings, int n) {
-        return collectN(encodings, 0, n);
-    }
-
-    public List<RLPItem> collectN(byte[] encodings, int index, int n) {
-        ArrayList<RLPItem> dest = new ArrayList<>(n);
-        collect(encodings, index, (count, idx) -> count < n, dest);
-        return dest;
-    }
-    // --------
-    public int collectAll(byte[] encodings, int index, Collection<RLPItem> dest) {
-        return collectBefore(encodings, index, encodings.length, dest);
-    }
-
-    public int collectBefore(byte[] encodings, int index, int endIndex, Collection<RLPItem> dest) {
-        return collect(encodings, index, (count, idx) -> idx < endIndex, dest);
-    }
-
-    public void collectN(byte[] encodings, int index, int n, Collection<RLPItem> dest) {
-        collect(encodings, index, (count, idx) -> count < n, dest);
-    }
-    // -------
-    public int collect(byte[] encodings, int index, BiPredicate<Integer, Integer> predicate, Collection<RLPItem> collection) {
+    public int collect(byte[] buffer, int index, BiPredicate<Integer, Integer> predicate, Collection<RLPItem> collection) {
         int count = 0;
         while (predicate.test(count, index)) {
-            RLPItem item = wrap(encodings, index);
+            RLPItem item = wrap(buffer, index);
             collection.add(item);
             count++;
             index = item.endIndex;
