@@ -260,9 +260,7 @@ public class PackedEncoderTest {
     public void testUint24() {
         TupleType tupleType = TupleType.parse("(uint24)");
 
-        int signed = Integer.MIN_VALUE / 256;
-
-        Tuple values = new Tuple((int) new Uint(24).toUnsignedLong(signed));
+        Tuple values = new Tuple((int) new Uint(24).toUnsignedLong(Integer.MIN_VALUE / 256));
 
         ByteBuffer bb = tupleType.encodePacked(values);
         assertEquals(bb.capacity(), bb.position());
@@ -280,9 +278,8 @@ public class PackedEncoderTest {
     public void testBigDecimalArr() {
         TupleType tupleType = TupleType.parse("(ufixed48x21[])");
 
-        int signed = Integer.MIN_VALUE / 256;
-
-        Tuple values = new Tuple((Object) new BigDecimal[] { new BigDecimal(new Uint(24).toUnsigned(signed), 21), new BigDecimal(new Uint(24).toUnsigned(signed), 21) });
+        BigDecimal val = new BigDecimal(new Uint(24).toUnsigned(Integer.MIN_VALUE / 256), 21);
+        Tuple values = new Tuple((Object) new BigDecimal[] { val, val });
 
         ByteBuffer bb = tupleType.encodePacked(values);
         assertEquals(bb.capacity(), bb.position());
