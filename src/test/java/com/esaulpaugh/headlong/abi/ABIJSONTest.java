@@ -282,7 +282,7 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testParseFunctionA() {
+    public void testParseFunctionA() throws Throwable {
         final Function f = Function.fromJson(FUNCTION_A_JSON);
         final TupleType in = f.getInputs();
         final TupleType out = f.getOutputs();
@@ -304,6 +304,9 @@ public class ABIJSONTest {
 
         Function f2 = ABIObject.fromJson(FUNCTION_A_JSON).asFunction();
         assertEquals(f, f2);
+
+        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.ContractError", f2::asContractError);
+        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Event", f2::asEvent);
 
         assertTrue(f.isFunction());
         assertFalse(f.isEvent());
@@ -384,6 +387,9 @@ public class ABIJSONTest {
 
         Event e = ABIObject.fromJson(json).asEvent();
         assertEquals(expectedA, e);
+
+        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.ContractError", e::asContractError);
+        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Function", e::asFunction);
 
         assertFalse(e.isFunction());
         assertTrue(e.isEvent());
@@ -494,7 +500,7 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testGetErrors() {
+    public void testGetErrors() throws Throwable {
         final String objectJson = "{\n" +
                 "  \"type\": \"error\",\n" +
                 "  \"name\": \"InsufficientBalance\",\n" +
@@ -513,6 +519,9 @@ public class ABIJSONTest {
 
         ContractError error = ABIJSON.parseErrors(arrayJson).get(0);
         testError(error, objectJson);
+
+        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Function", error::asFunction);
+        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Event", error::asEvent);
 
         error = ABIJSON.parseError(JsonUtils.parseObject(objectJson));
         testError(error, objectJson);
