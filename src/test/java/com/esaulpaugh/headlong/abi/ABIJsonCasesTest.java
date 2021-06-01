@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -78,11 +79,11 @@ public class ABIJsonCasesTest {
             String result = JsonUtils.getString(jsonObject, "result");
             JsonArray types = JsonUtils.getArray(jsonObject, "types");
 
-            ABIType<?>[] array = new ABIType[types.size()];
-            for (int i = 0; i < array.length; i++) {
-                array[i] = TypeFactory.create(types.get(i).getAsString());
+            final ArrayList<ABIType<?>> typeList = new ArrayList<>(types.size());
+            for (JsonElement e : types) {
+                typeList.add(TypeFactory.create(e.getAsString()));
             }
-            TupleType tt = TupleType.wrap(array);
+            TupleType tt = TupleType.wrap(typeList);
 
             System.out.println(tt.canonicalType);
 

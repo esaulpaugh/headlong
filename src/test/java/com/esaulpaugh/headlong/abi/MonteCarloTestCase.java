@@ -326,10 +326,11 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     private Tuple generateTuple(TupleType tupleType, Random r) {
-        final ABIType<?>[] types = tupleType.elementTypes;
-        Object[] args = new Object[types.length];
-        for (int i = 0; i < types.length; i++) {
-            args[i] = generateValue(types[i], r);
+        final List<ABIType<?>> types = tupleType.elementTypes();
+        final int size = types.size();
+        Object[] args = new Object[size];
+        for (int i = 0; i < size; i++) {
+            args[i] = generateValue(types.get(i), r);
         }
         return new Tuple(args);
     }

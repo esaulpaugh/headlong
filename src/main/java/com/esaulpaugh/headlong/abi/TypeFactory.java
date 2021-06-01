@@ -223,7 +223,7 @@ public final class TypeFactory {
                 argStart = argEnd + 1; // jump over terminator
             }
             if(argEnd == last && prevTerminator == ')') {
-                return TupleType.wrap(elements.toArray(ABIType.EMPTY_ARRAY));
+                return TupleType.wrap(elements);
             }
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);

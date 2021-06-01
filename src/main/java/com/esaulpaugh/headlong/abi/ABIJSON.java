@@ -157,17 +157,17 @@ public final class ABIJSON {
         final JsonArray inputs = getArray(event, INPUTS);
         if (inputs != null) {
             final int inputsLen = inputs.size();
-            final ABIType<?>[] inputsArray = new ABIType[inputsLen];
+            final List<ABIType<?>> typeList = new ArrayList<>(inputsLen);
             final boolean[] indexed = new boolean[inputsLen];
             for (int i = 0; i < inputsLen; i++) {
                 JsonObject inputObj = inputs.get(i).getAsJsonObject();
-                inputsArray[i] = parseType(inputObj);
+                typeList.add(parseType(inputObj));
                 indexed[i] = getBoolean(inputObj, INDEXED);
             }
             return new Event(
                     getString(event, NAME),
                     getBoolean(event, ANONYMOUS, false),
-                    TupleType.wrap(inputsArray),
+                    TupleType.wrap(typeList),
                     indexed
             );
         }
@@ -181,11 +181,11 @@ public final class ABIJSON {
     private static TupleType parseTupleType(JsonObject parent, String arrayName) {
         JsonArray array = getArray(parent, arrayName);
         if (array != null) {
-            final ABIType<?>[] elementsArray = new ABIType[array.size()];
-            for (int i = 0; i < elementsArray.length; i++) {
-                elementsArray[i] = parseType(array.get(i).getAsJsonObject());
+            final List<ABIType<?>> typeList = new ArrayList<>(array.size());
+            for(JsonElement e : array) {
+                typeList.add(parseType(e.getAsJsonObject()));
             }
-            return TupleType.wrap(elementsArray);
+            return TupleType.wrap(typeList);
         }
         return TupleType.EMPTY;
     }

@@ -289,8 +289,8 @@ public class ABIJSONTest {
         final ABIType<?> out0 = out.get(0);
 
         System.out.println(f.getName() + " : " + f.getCanonicalSignature() + " : " + out0);
-        assertEquals(1, in.elementTypes.length);
-        assertEquals(1, out.elementTypes.length);
+        assertEquals(1, in.elementTypes().size());
+        assertEquals(1, out.elementTypes().size());
 
         assertEquals("foo((decimal,decimal)[][])", f.getCanonicalSignature());
         assertEquals("uint64", out0.getCanonicalType());
