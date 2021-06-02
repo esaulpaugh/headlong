@@ -61,11 +61,6 @@ public class ContractError implements ABIObject {
     }
 
     @Override
-    public String toJson(boolean pretty) {
-        return ABIJSON.toJson(this, ABIJSON.ERRORS, pretty);
-    }
-
-    @Override
     public String toString() {
         return toJson(true);
     }

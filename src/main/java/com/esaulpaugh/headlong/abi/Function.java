@@ -275,11 +275,6 @@ public final class Function implements ABIObject {
     }
 
     @Override
-    public String toJson(boolean pretty) {
-        return ABIJSON.toJson(this, ABIJSON.FUNCTIONS, pretty);
-    }
-
-    @Override
     public boolean isFunction() {
         return true;
     }

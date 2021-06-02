@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.JsonUtils;
+import com.google.gson.JsonObject;
 
 /** Supertype of json-encodeable types {@link Function}, {@link Event}, and {@link ContractError}.*/
 public interface ABIObject {
@@ -28,7 +29,9 @@ public interface ABIObject {
 
     String getCanonicalSignature();
 
-    String toJson(boolean pretty);
+    default String toJson(boolean pretty) {
+        return ABIJSON.toJson(this, pretty);
+    }
 
     default boolean isFunction() {
         return false;
@@ -56,5 +59,9 @@ public interface ABIObject {
 
     static ABIObject fromJson(String json) {
         return ABIJSON.parseABIObject(JsonUtils.parseObject(json));
+    }
+
+    static ABIObject fromJsonObject(JsonObject object) {
+        return ABIJSON.parseABIObject(object);
     }
 }

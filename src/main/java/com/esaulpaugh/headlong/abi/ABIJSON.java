@@ -73,7 +73,7 @@ public final class ABIJSON {
     }
 
     public static Function parseFunction(JsonObject function, MessageDigest messageDigest) {
-        return _parseFunction(getString(function, TYPE), function, messageDigest);
+        return _parseFunction(getType(function), function, messageDigest);
     }
 
     public static Event parseEvent(String objectJson) {
@@ -81,21 +81,21 @@ public final class ABIJSON {
     }
 
     public static Event parseEvent(JsonObject event) {
-        if(isEvent(getString(event, TYPE))) {
+        if(isEvent(getType(event))) {
             return _parseEvent(event);
         }
-        throw TypeEnum.unexpectedType(getString(event, TYPE));
+        throw TypeEnum.unexpectedType(getType(event));
     }
 
     public static ContractError parseError(JsonObject error) {
-        if(isError(getString(error, TYPE))) {
+        if(isError(getType(error))) {
             return _parseError(error);
         }
-        throw TypeEnum.unexpectedType(getString(error, TYPE));
+        throw TypeEnum.unexpectedType(getType(error));
     }
 
     public static ABIObject parseABIObject(JsonObject object) {
-        String type = getString(object, TYPE);
+        String type = getType(object);
         return isEvent(type)
                 ? _parseEvent(object)
                 : isError(type)
@@ -121,31 +121,30 @@ public final class ABIJSON {
 
     private static <T extends ABIObject> List<T> parseElements(String arrayJson, int flags, Class<T> classOfT) {
         final boolean functions = (flags & FUNCTIONS) != 0, events = (flags & EVENTS) != 0, errors = (flags & ERRORS) != 0;
-        final List<T> abiObjects = new ArrayList<>();
+        final List<T> selected = new ArrayList<>();
         for (JsonElement e : parseArray(arrayJson)) {
             if (e.isJsonObject()) {
                 ABIObject o = parseABIObject(e.getAsJsonObject());
-                TypeEnum t = o.getType();
-                if(t == TypeEnum.EVENT ? events : t == TypeEnum.ERROR ? errors : functions) {
-                    abiObjects.add(classOfT.cast(o));
+                if(o.isEvent() ? events : o.isContractError() ? errors : functions) {
+                    selected.add(classOfT.cast(o));
                 }
             }
         }
-        return abiObjects;
+        return selected;
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    private static boolean isEvent(String typeString) {
-        return EVENT.equals(typeString);
+    private static boolean isEvent(String type) {
+        return EVENT.equals(type);
     }
 
-    private static boolean isError(String typeString) {
-        return ERROR.equals(typeString);
+    private static boolean isError(String type) {
+        return ERROR.equals(type);
     }
 
     private static Function _parseFunction(String type, JsonObject function, MessageDigest digest) {
         return new Function(
                 TypeEnum.parse(type),
-                getString(function, NAME),
+                getName(function),
                 parseTupleType(function, INPUTS),
                 parseTupleType(function, OUTPUTS),
                 getString(function, STATE_MUTABILITY),
@@ -165,7 +164,7 @@ public final class ABIJSON {
                 indexed[i] = getBoolean(inputObj, INDEXED);
             }
             return new Event(
-                    getString(event, NAME),
+                    getName(event),
                     getBoolean(event, ANONYMOUS, false),
                     TupleType.wrap(typeList),
                     indexed
@@ -175,7 +174,7 @@ public final class ABIJSON {
     }
 
     private static ContractError _parseError(JsonObject error) {
-        return new ContractError(getString(error, NAME), parseTupleType(error, INPUTS));
+        return new ContractError(getName(error), parseTupleType(error, INPUTS));
     }
 
     private static TupleType parseTupleType(JsonObject parent, String arrayName) {
@@ -191,18 +190,27 @@ public final class ABIJSON {
     }
 
     private static ABIType<?> parseType(JsonObject object) {
-        final String typeStr = getString(object, TYPE);
-        if(typeStr.startsWith(TUPLE)) {
+        final String type = getType(object);
+        final String name = getName(object);
+        if(type.startsWith(TUPLE)) {
             TupleType baseType = parseTupleType(object, COMPONENTS);
             return TypeFactory.build(
-                    baseType.canonicalType + typeStr.substring(TUPLE.length()), // + suffix e.g. "[4][]"
+                    baseType.canonicalType + type.substring(TUPLE.length()), // + suffix e.g. "[4][]"
                     baseType,
-                    getString(object, NAME));
+                    name);
         }
-        return TypeFactory.create(typeStr, Object.class, getString(object, NAME));
+        return TypeFactory.create(type, Object.class, name);
+    }
+
+    private static String getType(JsonObject obj) {
+        return getString(obj, TYPE);
+    }
+
+    private static String getName(JsonObject obj) {
+        return getString(obj, NAME);
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    static String toJson(ABIObject x, int flags, boolean pretty) {
+    static String toJson(ABIObject o, boolean pretty) {
         try {
             StringWriter stringOut = new StringWriter();
             JsonWriter out = new JsonWriter(stringOut);
@@ -210,29 +218,29 @@ public final class ABIJSON {
                 out.setIndent("  ");
             }
             out.beginObject();
-            if((flags & FUNCTIONS) != 0) {
-                Function f = (Function) x;
-                final TypeEnum type = f.getType();
-                type(out, type.toString());
-                if (type != TypeEnum.FALLBACK) {
-                    name(out, x.getName());
-                    if (type != TypeEnum.RECEIVE) {
-                        tupleType(out, INPUTS, x.getInputs());
-                        if (type != TypeEnum.CONSTRUCTOR) {
+            if(o.isFunction()) {
+                final Function f = o.asFunction();
+                final TypeEnum t = f.getType();
+                type(out, t.toString());
+                if (t != TypeEnum.FALLBACK) {
+                    name(out, o.getName());
+                    if (t != TypeEnum.RECEIVE) {
+                        tupleType(out, INPUTS, o.getInputs());
+                        if (t != TypeEnum.CONSTRUCTOR) {
                             tupleType(out, OUTPUTS, f.getOutputs());
                         }
                     }
                 }
                 stateMutability(out, f.getStateMutability());
-            } else if ((flags & EVENTS) != 0) {
-                Event e = (Event) x;
+            } else if (o.isEvent()) {
+                Event e = o.asEvent();
                 type(out, EVENT);
-                name(out, x.getName());
-                tupleType(out, INPUTS, x.getInputs(), e.getIndexManifest());
+                name(out, o.getName());
+                tupleType(out, INPUTS, o.getInputs(), e.getIndexManifest());
             } else {
                 type(out, ERROR);
-                name(out, x.getName());
-                tupleType(out, INPUTS, x.getInputs());
+                name(out, o.getName());
+                tupleType(out, INPUTS, o.getInputs());
             }
             out.endObject();
             return stringOut.toString();
