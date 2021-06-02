@@ -180,14 +180,14 @@ public final class ABIJSON {
 
     private static TupleType parseTupleType(JsonObject parent, String arrayName) {
         JsonArray array = getArray(parent, arrayName);
-        if (array != null) {
-            final List<ABIType<?>> typeList = new ArrayList<>(array.size());
-            for(JsonElement e : array) {
-                typeList.add(parseType(e.getAsJsonObject()));
-            }
-            return TupleType.wrap(typeList);
+        if (array == null || array.isEmpty()/* isEmpty requires gson v2.8.7 */) {
+            return TupleType.EMPTY;
         }
-        return TupleType.EMPTY;
+        final List<ABIType<?>> typeList = new ArrayList<>(array.size());
+        for(JsonElement e : array) {
+            typeList.add(parseType(e.getAsJsonObject()));
+        }
+        return TupleType.wrap(typeList);
     }
 
     private static ABIType<?> parseType(JsonObject object) {
