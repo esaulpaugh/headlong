@@ -113,7 +113,7 @@ public abstract class ABIType<J> {
         return (J) value;
     }
 
-    IllegalArgumentException mismatchErr(String prefix, String a, String e, String r, String f) {
+    final IllegalArgumentException mismatchErr(String prefix, String a, String e, String r, String f) {
         return new IllegalArgumentException(
                 prefix + " mismatch: " + a + " != " + e + " ("
                         + canonicalType + " requires " + r + " but found " + f + ")"
@@ -136,7 +136,7 @@ public abstract class ABIType<J> {
         return this;
     }
 
-    int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
+    final int encodeHead(Object value, ByteBuffer dest, int nextOffset) {
         if (!dynamic) {
             encodeTail(value, dest);
             return nextOffset;

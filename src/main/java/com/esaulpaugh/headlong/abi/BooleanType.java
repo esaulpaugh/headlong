@@ -53,9 +53,8 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    int encodeHead(Object value, ByteBuffer dest, int offset) {
+    void encodeTail(Object value, ByteBuffer dest) {
         encodeBoolean((boolean) value, dest);
-        return offset;
     }
 
     @Override
