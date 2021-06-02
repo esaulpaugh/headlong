@@ -286,7 +286,8 @@ public class ABIJSONTest {
 
     @Test
     public void testParseFunctionA() throws Throwable {
-        final Function f = Function.fromJson(FUNCTION_A_JSON);
+        final JsonObject object = JsonUtils.parseObject(FUNCTION_A_JSON);
+        final Function f = Function.fromJsonObject(object);
         final TupleType in = f.getInputs();
         final TupleType out = f.getOutputs();
         final ABIType<?> out0 = out.get(0);
@@ -307,6 +308,7 @@ public class ABIJSONTest {
 
         Function f2 = ABIObject.fromJson(FUNCTION_A_JSON).asFunction();
         assertEquals(f, f2);
+        assertEquals(f, ABIObject.fromJsonObject(object));
 
         TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.ContractError", f2::asContractError);
         TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Event", f2::asEvent);
@@ -390,6 +392,7 @@ public class ABIJSONTest {
 
         Event e = ABIObject.fromJson(json).asEvent();
         assertEquals(expectedA, e);
+        assertEquals(e, ABIObject.fromJsonObject(jsonObject));
 
         TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.ContractError", e::asContractError);
         TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Function", e::asFunction);
@@ -530,25 +533,30 @@ public class ABIJSONTest {
         testError(error, objectJson);
     }
 
-    private static void testError(ContractError error, String expectedJson) {
+    private static void testError(ContractError error, String json) {
         assertEquals(TypeEnum.ERROR, error.getType());
         assertEquals("InsufficientBalance", error.getName());
         assertEquals(TupleType.parse("(uint,uint)"), error.getInputs());
         assertEquals("InsufficientBalance(uint256,uint256)", error.getCanonicalSignature());
         assertEquals(Function.parse("InsufficientBalance(uint,uint)"), error.function());
-        assertEquals(expectedJson, error.toJson(true));
-        assertEquals(expectedJson, error.toString());
-        ContractError other = ContractError.fromJson(expectedJson);
-        assertNotSame(other, error);
-        assertEquals(other.hashCode(), error.hashCode());
-        assertEquals(other, error);
+        assertEquals(json, error.toJson(true));
+        assertEquals(json, error.toString());
 
-        ContractError err = ABIObject.fromJson(expectedJson).asContractError();
-        assertEquals(other, err);
+        final JsonObject object = JsonUtils.parseObject(json);
+        testEqualNotSame(error, ContractError.fromJson(json));
+        testEqualNotSame(error, ContractError.fromJsonObject(object));
+        testEqualNotSame(error, ABIObject.fromJson(json).asContractError());
+        testEqualNotSame(error, ABIObject.fromJsonObject(object).asContractError());
 
-        assertFalse(err.isFunction());
-        assertFalse(err.isEvent());
-        assertTrue(err.isContractError());
+        assertFalse(error.isFunction());
+        assertFalse(error.isEvent());
+        assertTrue(error.isContractError());
+    }
+
+    private static void testEqualNotSame(ContractError a, ContractError b) {
+        assertNotSame(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
+        assertEquals(a, b);
     }
 
     @Test
