@@ -25,6 +25,9 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
@@ -555,5 +558,50 @@ public class ABIJSONTest {
         assertNull(b);
         Boolean b2 = JsonUtils.getBoolean(empty, "constant", null);
         assertNull(b2);
+    }
+
+    @Test
+    public void testParseElements() {
+        List<ABIObject> list = ABIJSON.parseElements(CONTRACT_JSON);
+        assertEquals(2, list.size());
+        assertTrue(list.stream().anyMatch(ABIObject::isEvent));
+        assertTrue(list.stream().anyMatch(ABIObject::isFunction));
+    }
+
+    @Test
+    public void testStreamObjects() {
+        List<ABIObject> objects = ABIJSON.parseElements(CONTRACT_JSON);
+
+        List<Function> functions = objects.stream()
+                .filter(ABIObject::isFunction)
+                .map(ABIObject::asFunction)
+                .collect(Collectors.toList());
+        assertEquals(1, functions.size());
+
+        List<Event> events = objects.stream()
+                .filter(ABIObject::isEvent)
+                .map(ABIObject::asEvent)
+                .collect(Collectors.toList());
+        assertEquals(1, events.size());
+
+        List<ContractError> errors = objects.stream()
+                .filter(ABIObject::isContractError)
+                .map(ABIObject::asContractError)
+                .collect(Collectors.toList());
+        assertEquals(0, errors.size());
+
+        List<ABIType<?>> flat = objects.stream()
+                .map(ABIObject::getInputs)
+                .flatMap(ABIJSONTest::flatten)
+                .collect(Collectors.toList());
+
+        assertEquals(8, flat.size());
+    }
+
+    public static Stream<ABIType<?>> flatten(ABIType<?> type) {
+        return type instanceof TupleType
+                ? StreamSupport.stream(((TupleType) type).spliterator(), false)
+                .flatMap(ABIJSONTest::flatten)
+                : Stream.of(type);
     }
 }
