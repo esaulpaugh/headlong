@@ -507,7 +507,7 @@ public class ABIJSONTest {
 
     @Test
     public void testGetErrors() throws Throwable {
-        final String objectJson = "{\n" +
+        final String json = "{\n" +
                 "  \"type\": \"error\",\n" +
                 "  \"name\": \"InsufficientBalance\",\n" +
                 "  \"inputs\": [\n" +
@@ -521,19 +521,21 @@ public class ABIJSONTest {
                 "    }\n" +
                 "  ]\n" +
                 "}";
-        final String arrayJson = "[" + objectJson + "]";
+        JsonObject object = JsonUtils.parseObject(json);
 
-        ContractError error = ABIJSON.parseErrors(arrayJson).get(0);
-        testError(error, objectJson);
+        ContractError error0 = ABIJSON.parseErrors("[" + json + "]").get(0);
+        ContractError error1 = ABIJSON.parseError(object);
 
-        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Function", error::asFunction);
-        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Event", error::asEvent);
+        testError(error0, json, object);
+        testError(error1, json, object);
 
-        error = ABIJSON.parseError(JsonUtils.parseObject(objectJson));
-        testError(error, objectJson);
+        assertEquals(error0, error1);
+
+        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Function", error0::asFunction);
+        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Event", error0::asEvent);
     }
 
-    private static void testError(ContractError error, String json) {
+    private static void testError(ContractError error, String json, JsonObject object) {
         assertEquals(TypeEnum.ERROR, error.getType());
         assertEquals("InsufficientBalance", error.getName());
         assertEquals(TupleType.parse("(uint,uint)"), error.getInputs());
@@ -542,7 +544,6 @@ public class ABIJSONTest {
         assertEquals(json, error.toJson(true));
         assertEquals(json, error.toString());
 
-        final JsonObject object = JsonUtils.parseObject(json);
         testEqualNotSame(error, ContractError.fromJson(json));
         testEqualNotSame(error, ContractError.fromJsonObject(object));
         testEqualNotSame(error, ABIObject.fromJson(json).asContractError());
