@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.util.Integers;
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -43,11 +41,6 @@ final class Encoding {
         Arrays.fill(CACHED_NEG1_PADDING, (byte) 0xFF);
     }
 
-    static int insertOffset(final int offset, ByteBuffer dest, int tailByteLen) {
-        insertInt(offset, dest);
-        return offset + tailByteLen; // return next offset
-    }
-
     static void insertInt(long val, ByteBuffer dest) {
         insertPadding(UNIT_LENGTH_BYTES - Long.BYTES, val < 0, dest);
         dest.putLong(val);
@@ -62,12 +55,6 @@ final class Encoding {
         } else {
             dest.put(arr, 1, paddedLen);
         }
-    }
-
-    static void insertBytesPadded(byte[] bytes, ByteBuffer dest) {
-        dest.put(bytes);
-        int rem = Integers.mod(bytes.length, UNIT_LENGTH_BYTES);
-        insertPadding(rem != 0 ? UNIT_LENGTH_BYTES - rem : 0, false, dest);
     }
 
     static void insertPadding(int n, boolean negativeOnes, ByteBuffer dest) {
