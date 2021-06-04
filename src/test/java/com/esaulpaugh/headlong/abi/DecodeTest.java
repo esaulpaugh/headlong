@@ -179,7 +179,7 @@ public class DecodeTest {
     @Test
     public void testDecode() throws Throwable {
 
-        assertArrayEquals(FUNCTION.getOutputs().encode(RETURN_ARGS).array(), RETURN_BYTES);
+        assertArrayEquals(RETURN_BYTES, FUNCTION.getOutputs().encode(RETURN_ARGS).array());
 
         Tuple decoded = FUNCTION.decodeReturn(RETURN_BYTES);
         assertEquals(EXPECTED, decoded);

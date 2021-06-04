@@ -47,13 +47,13 @@ public class KeccakTest {
 
     @Test
     public void testGetDigestLength() {
-        assertEquals(new Keccak(256).getDigestLength(), 32);
-        assertEquals(new WrappedKeccak(256).getDigestLength(), 32);
+        assertEquals(32, new Keccak(256).getDigestLength());
+        assertEquals(32, new WrappedKeccak(256).getDigestLength());
 
-        assertEquals(new Keccak(288).getDigestLength(), 36);
-        assertEquals(new WrappedKeccak(288).getDigestLength(), 36);
+        assertEquals(36, new Keccak(288).getDigestLength());
+        assertEquals(36, new WrappedKeccak(288).getDigestLength());
 
-        assertEquals(new Keccak(512).getDigestLength(), 64);
+        assertEquals(64, new Keccak(512).getDigestLength());
     }
 
     @Test
