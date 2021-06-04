@@ -72,13 +72,17 @@ public final class Notation {
         return forEncoding(encoding, 0, encoding.length);
     }
 
-    public static Notation forEncoding(final byte[] buffer, final int index, int end) {
+    public static Notation forEncoding(byte[] buffer, int index, int end) {
+        return new Notation(encode(buffer, index, end));
+    }
+
+    public static String encode(final byte[] buffer, final int index, int end) {
         if(index >= 0) {
             end = Math.min(buffer.length, end);
             if (index <= end) {
                 StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
                 buildLongList(sb, buffer, index, end, 0);
-                return new Notation(sb.append(END_NOTATION).toString());
+                return sb.append(END_NOTATION).toString();
             }
             throw new IllegalArgumentException("index > end: " + index + " > " + end);
         }
