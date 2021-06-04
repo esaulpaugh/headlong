@@ -93,7 +93,7 @@ public class RLPOutputStream extends OutputStream {
         Baos() {}
     	
     	@Override
-        public String toString() {
+        public synchronized String toString() {
             return Strings.encode(buf, 0, count, Strings.HEX);
         }
     }
