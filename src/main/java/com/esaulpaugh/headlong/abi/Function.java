@@ -320,7 +320,7 @@ public final class Function implements ABIObject {
     }
 
     public static String formatCall(byte[] buffer, int offset, final int length) {
-        return formatCall(buffer, offset, length, (row) -> TupleType.pad(0, "" + row));
+        return formatCall(buffer, offset, length, (int row) -> ABIType.pad(0, "" + row));
     }
 
     /**
@@ -335,7 +335,7 @@ public final class Function implements ABIObject {
      */
     public static String formatCall(byte[] buffer, final int offset, final int length, IntFunction<String> labeler) {
         Integers.checkIsMultiple(length - SELECTOR_LEN, UNIT_LENGTH_BYTES);
-        StringBuilder sb = new StringBuilder(TupleType.pad(0, "ID"))
+        StringBuilder sb = new StringBuilder(ABIType.pad(0, "ID"))
                 .append(Strings.encode(buffer, offset, SELECTOR_LEN, Strings.HEX));
         return ABIType.finishFormat(buffer, offset + SELECTOR_LEN, offset + length, labeler, sb);
     }

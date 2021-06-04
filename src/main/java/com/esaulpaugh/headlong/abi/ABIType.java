@@ -228,7 +228,7 @@ public abstract class ABIType<J> {
     }
 
     public static String format(byte[] abi) {
-        return format(abi, (row) -> {
+        return format(abi, (int row) -> {
             String unpadded = Integer.toHexString(row * UNIT_LENGTH_BYTES);
             return pad((LABEL_PADDED_LEN - LABEL_RIGHT_PADDING) - unpadded.length(), unpadded);
         });
