@@ -32,7 +32,7 @@ public final class FastBase64 {
 
     private static final class Standard { // inner class to delay loading of table until called for
         private Standard() {}
-        static final short[] STANDARD = table("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+        static final short[] TABLE = table("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
     }
 
     static short[] table(String alphabet) {
@@ -63,7 +63,7 @@ public final class FastBase64 {
             chars += charsLeft = (flags & NO_PADDING) != 0 ? bytesLeft + 1 : 4;
         }
         final int endEvenBytes = offset + evenBytes; // End of even 24-bits chunks
-        final short[] table = (flags & URL_SAFE_CHARS) != 0 ? URL_SAFE : Standard.STANDARD;
+        final short[] table = (flags & URL_SAFE_CHARS) != 0 ? URL_SAFE : Standard.TABLE;
         final byte[] out = (flags & NO_LINE_SEP) != 0
                 ? encodeMain(buffer, offset, table, endEvenBytes, chars)
                 : encodeMainLineSep(buffer, offset, table, endEvenBytes, chars + (((chars - 1) / LINE_LEN) * 2));
