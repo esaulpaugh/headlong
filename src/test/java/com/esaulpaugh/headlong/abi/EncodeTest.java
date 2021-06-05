@@ -46,6 +46,8 @@ import static com.esaulpaugh.headlong.abi.TypeFactory.EMPTY_PARAMETER;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EncodeTest {
 
@@ -379,6 +381,14 @@ public class EncodeTest {
 //        System.out.println(ABIType.format(bEncoding));
 
         assertArrayEquals(aEncoding, bEncoding);
+    }
+
+    @Test
+    public void testIsEmpty() {
+        assertTrue(TupleType.EMPTY.isEmpty());
+        assertTrue(TupleType.parse("()").isEmpty());
+        assertFalse(TupleType.parse("(int)").isEmpty());
+        assertFalse(TupleType.parse("(bool,string)").isEmpty());
     }
 
     @Test

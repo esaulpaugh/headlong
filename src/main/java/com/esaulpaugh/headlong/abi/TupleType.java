@@ -56,6 +56,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return elementTypes.size();
     }
 
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
     public ABIType<?> get(int index) {
         return elementTypes.get(index);
     }

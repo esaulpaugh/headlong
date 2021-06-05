@@ -156,12 +156,12 @@ public final class Function implements ABIObject {
             }
             /* fall through */
         case ORDINAL_FALLBACK:
-            if(inputTypes.size() != 0) {
+            if(!inputTypes.isEmpty()) {
                 throw validationErr("define no inputs");
             }
             /* fall through */
         case ORDINAL_CONSTRUCTOR:
-            if(outputTypes.size() != 0) {
+            if(!outputTypes.isEmpty()) {
                 throw validationErr("define no outputs");
             }
             if (name != null && type != TypeEnum.RECEIVE) {
