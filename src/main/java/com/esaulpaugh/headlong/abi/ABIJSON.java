@@ -99,7 +99,7 @@ public final class ABIJSON {
         return isEvent(type)
                 ? _parseEvent(object)
                 : isError(type)
-                    ? parseError(object)
+                    ? _parseError(object)
                     : _parseFunction(type, object, Function.newDefaultDigest());
     }
 
