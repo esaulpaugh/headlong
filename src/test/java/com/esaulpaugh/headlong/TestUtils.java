@@ -103,9 +103,7 @@ public class TestUtils {
     }
 
     public static byte[] randomBytes(int n) {
-        byte[] random = new byte[n];
-        TestUtils.seededRandom().nextBytes(random);
-        return random;
+        return randomBytes(n, TestUtils.seededRandom());
     }
 
     public static byte[] randomBytes(int n, Random r) {
