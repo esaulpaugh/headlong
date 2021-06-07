@@ -78,8 +78,7 @@ public final class SuperSerial {
         return classOfT.cast(array);
     }
 
-    private static Object[] serializeTuple(TupleType tupleType, Object obj) {
-        Tuple tuple = (Tuple) obj;
+    private static Object[] serializeTuple(TupleType tupleType, Tuple tuple) {
         Object[] out = new Object[tupleType.size()];
         for(int i = 0; i < out.length; i++) {
             out[i] = serialize(tupleType.get(i), tuple.get(i));
@@ -108,7 +107,7 @@ public final class SuperSerial {
         case TYPE_CODE_BIG_INTEGER: return serializeBigInteger((UnitType<?>) type, (BigInteger) obj);
         case TYPE_CODE_BIG_DECIMAL: return serializeBigInteger((UnitType<?>) type, ((BigDecimal) obj).unscaledValue());
         case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?>) type, obj);
-        case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, obj);
+        case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, (Tuple) obj);
         default: throw new Error();
         }
     }
