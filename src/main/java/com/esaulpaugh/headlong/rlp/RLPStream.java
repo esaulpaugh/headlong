@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 /** An incoming stream of RLP-encoded data. */
 public final class RLPStream implements Iterable<RLPItem>, AutoCloseable {
@@ -36,7 +37,7 @@ public final class RLPStream implements Iterable<RLPItem>, AutoCloseable {
         this.decoder = decoder;
     }
 
-    public ArrayList<RLPItem> collect() {
+    public List<RLPItem> collect() {
         return collect(new ArrayList<>());
     }
 

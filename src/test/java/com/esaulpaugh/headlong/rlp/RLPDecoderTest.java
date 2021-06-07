@@ -630,7 +630,7 @@ public class RLPDecoderTest {
 
     @Test
     public void testStreaming() {
-        ArrayList<RLPItem> collection = RLP_STRICT.stream(RLPStreamTest.RLP_BYTES)
+        List<RLPItem> collection = RLP_STRICT.stream(RLPStreamTest.RLP_BYTES)
                 .collect();
 
         String joined = collection.stream()
