@@ -62,19 +62,23 @@ public class TestUtils {
     }
 
     public static long pickRandom(Random r) {
-        long x = r.nextLong();
-        switch (r.nextInt(Long.BYTES)) {
-        case 0: break;
-        case 1: x &= 0x00FFFFFF_FFFFFFFFL; break;
-        case 2: x &= 0x0000FFFF_FFFFFFFFL; break;
-        case 3: x &= 0x000000FF_FFFFFFFFL; break;
-        case 4: x &= 0x00000000_FFFFFFFFL; break;
-        case 5: x &= 0x00000000_00FFFFFFL; break;
-        case 6: x &= 0x00000000_0000FFFFL; break;
-        case 7: x &= 0x00000000_000000FFL; break;
+        return pickRandom(r, 1 + r.nextInt(Long.BYTES), false);
+    }
+
+    public static long pickRandom(Random r, int byteLen, boolean unsigned) {
+        long val = r.nextLong();
+        switch (byteLen) {
+        case 1: val &= 0xFFL; break;
+        case 2: val &= 0xFFFFL; break;
+        case 3: val &= 0xFFFFFFL; break;
+        case 4: val &= 0xFFFFFFFFL; break;
+        case 5: val &= 0xFFFFFFFFFFL; break;
+        case 6: val &= 0xFFFFFFFFFFFFL; break;
+        case 7: val &= 0xFFFFFFFFFFFFFFL; break;
+        case 8: break;
         default: throw new Error();
         }
-        return r.nextBoolean() ? -x : x;
+        return unsigned || r.nextBoolean() ? val : -val;
     }
 
     public static void shuffle(Object[] arr, Random rand) {

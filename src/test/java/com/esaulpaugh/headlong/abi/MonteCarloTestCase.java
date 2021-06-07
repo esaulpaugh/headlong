@@ -350,30 +350,12 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     private static long generateLong(Random r, UnitType<? extends Number> unitType) {
-        return generateLong(r, unitType.bitLength, 1 + r.nextInt(unitType.bitLength / Byte.SIZE), unitType.unsigned);
-    }
-
-    private static long generateLong(Random r, int bitLen, int len, boolean unsigned) {
-        long val = r.nextLong();
-        switch (len) {
-        case 1: val &= 0xFFL; break;
-        case 2: val &= 0xFFFFL; break;
-        case 3: val &= 0xFFFFFFL; break;
-        case 4: val &= 0xFFFFFFFFL; break;
-        case 5: val &= 0xFFFFFFFFFFL; break;
-        case 6: val &= 0xFFFFFFFFFFFFL; break;
-        case 7: val &= 0xFFFFFFFFFFFFFFL; break;
-        case 8: break;
-        default: throw new Error();
+        long x = TestUtils.pickRandom(r, 1 + r.nextInt(unitType.bitLength / Byte.SIZE), unitType.unsigned);
+        int valBitLen = x < 0 ? BizarroIntegers.bitLen(x) : Integers.bitLen(x);
+        if (valBitLen >= unitType.bitLength) {
+            x >>= 1;
         }
-        if(!unsigned) {
-            val = r.nextBoolean() ? val : val < 0 ? -(val + 1) : (-val - 1);
-            int valBitLen = val < 0 ? BizarroIntegers.bitLen(val) : Integers.bitLen(val);
-            if (valBitLen >= bitLen) {
-                val >>= 1;
-            }
-        }
-        return val;
+        return x;
     }
 
     private static BigInteger generateBigInteger(Random r, UnitType<? extends Number> type) {
@@ -441,22 +423,16 @@ public class MonteCarloTestCase implements Serializable {
 
     private static int[] generateIntArray(final int len, IntType intType, Random r) {
         int[] ints = new int[len];
-        final int bitLen = intType.bitLength;
-        final int bound = bitLen / Byte.SIZE;
-        final boolean unsigned = intType.unsigned;
         for (int i = 0; i < len; i++) {
-            ints[i] = (int) generateLong(r, bitLen, 1 + r.nextInt(bound), unsigned);
+            ints[i] = (int) generateLong(r, intType);
         }
         return ints;
     }
 
     private static long[] generateLongArray(final int len, LongType longType, Random r) {
         long[] longs = new long[len];
-        final int bitLen = longType.bitLength;
-        final int bound = bitLen / Byte.SIZE;
-        final boolean unsigned = longType.unsigned;
         for (int i = 0; i < len; i++) {
-            longs[i] = generateLong(r, bitLen, 1 + r.nextInt(bound), unsigned);
+            longs[i] = generateLong(r, longType);
         }
         return longs;
     }
