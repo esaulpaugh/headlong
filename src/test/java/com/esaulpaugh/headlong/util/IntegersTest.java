@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.TestUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -164,6 +165,7 @@ public class IntegersTest {
         }
     }
 
+    @Disabled("tests TestUtils methods")
     @Test
     public void testInsertBytes() {
         byte[] ten = new byte[10];
