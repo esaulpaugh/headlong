@@ -179,10 +179,11 @@ public final class ABIJSON {
 
     private static TupleType parseTupleType(JsonObject parent, String arrayName) {
         JsonArray array = getArray(parent, arrayName);
-        if (array == null || array.isEmpty()/* isEmpty requires gson v2.8.7 */) {
+        final int size;
+        if (array == null || (size = array.size()) <= 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
             return TupleType.EMPTY;
         }
-        final List<ABIType<?>> typeList = new ArrayList<>(array.size());
+        final List<ABIType<?>> typeList = new ArrayList<>(size);
         for(JsonElement e : array) {
             typeList.add(parseType(e.getAsJsonObject()));
         }
