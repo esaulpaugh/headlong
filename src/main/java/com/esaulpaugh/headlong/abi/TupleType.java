@@ -228,12 +228,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return subTupleType(manifest, true);
     }
 
-    private TupleType subTupleType(boolean[] manifest, boolean negate) {
-        if(manifest.length == size()) {
+    private TupleType subTupleType(final boolean[] manifest, final boolean negate) {
+        final int size = size();
+        if(manifest.length == size) {
             final StringBuilder canonicalBuilder = new StringBuilder("(");
             boolean dynamic = false;
-            final ArrayList<ABIType<?>> selected = new ArrayList<>(manifest.length);
-            for (int i = 0; i < manifest.length; i++) {
+            final List<ABIType<?>> selected = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
                 if (negate ^ manifest[i]) {
                     ABIType<?> e = get(i);
                     canonicalBuilder.append(e.canonicalType).append(',');
@@ -243,7 +244,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             }
             return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected.toArray(EMPTY_ARRAY));
         }
-        throw new IllegalArgumentException("manifest.length != elementTypes.length: " + manifest.length + " != " + size());
+        throw new IllegalArgumentException("manifest.length != elementTypes.length: " + manifest.length + " != " + size);
     }
 
     static String completeTupleTypeString(StringBuilder sb) {
