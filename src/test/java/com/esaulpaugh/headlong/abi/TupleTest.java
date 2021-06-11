@@ -242,4 +242,33 @@ public class TupleTest {
             }
         }
     }
+
+    @Test
+    public void testSubtubleType() throws Throwable {
+        TupleType tt = TupleType.parse("(bytes3,uint16[],string)");
+
+        assertEquals(TupleType.EMPTY, tt.subTupleType(false, false, false));
+        assertEquals(TupleType.of("string"), tt.subTupleType(false, false, true));
+        assertEquals(TupleType.of("uint16[]"), tt.subTupleType(false, true, false));
+        assertEquals(TupleType.of("uint16[]", "string"), tt.subTupleType(false, true, true));
+        assertEquals(TupleType.of("bytes3"), tt.subTupleType(true, false, false));
+        assertEquals(TupleType.of("bytes3", "string"), tt.subTupleType(true, false, true));
+        assertEquals(TupleType.of("bytes3", "uint16[]"), tt.subTupleType(true, true, false));
+        assertEquals(TupleType.of("bytes3", "uint16[]", "string"), tt.subTupleType(true, true, true));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(true, true));
+        TestUtils.assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(false, false, false, false));
+
+        assertEquals(TupleType.of("bytes3", "uint16[]", "string"), tt.subTupleTypeNegative(false, false, false));
+        assertEquals(TupleType.of("bytes3", "uint16[]"), tt.subTupleTypeNegative(false, false, true));
+        assertEquals(TupleType.of("bytes3", "string"), tt.subTupleTypeNegative(false, true, false));
+        assertEquals(TupleType.of("bytes3"), tt.subTupleTypeNegative(false, true, true));
+        assertEquals(TupleType.of("uint16[]", "string"), tt.subTupleTypeNegative(true, false, false));
+        assertEquals(TupleType.of("uint16[]"), tt.subTupleTypeNegative(true, false, true));
+        assertEquals(TupleType.of("string"), tt.subTupleTypeNegative(true, true, false));
+        assertEquals(TupleType.EMPTY, tt.subTupleTypeNegative(true, true, true));
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(new boolean[0]));
+        TestUtils.assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(new boolean[5]));
+    }
 }

@@ -19,6 +19,7 @@ import com.esaulpaugh.headlong.util.SuperSerial;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -33,16 +34,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     private static final String EMPTY_TUPLE_STRING = "()";
 
-    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, Collections.emptyList());
+    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY);
 
-    private final List<ABIType<?>> elementTypes;
+    final ABIType<?>[] elementTypes;
 
-    private TupleType(String canonicalType, boolean dynamic, List<ABIType<?>> elementTypes) {
+    private TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes) {
         super(canonicalType, Tuple.class, dynamic);
-        this.elementTypes = Collections.unmodifiableList(elementTypes);
+        this.elementTypes = elementTypes;
     }
 
-    static TupleType wrap(List<ABIType<?>> elements) {
+    static TupleType wrap(ABIType<?>[] elements) {
         StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
         for (ABIType<?> e : elements) {
@@ -53,7 +54,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public int size() {
-        return elementTypes.size();
+        return elementTypes.length;
     }
 
     public boolean isEmpty() {
@@ -61,11 +62,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public ABIType<?> get(int index) {
-        return elementTypes.get(index);
+        return elementTypes[index];
     }
 
     public List<ABIType<?>> elementTypes() {
-        return elementTypes;
+        return Collections.unmodifiableList(Arrays.asList(elementTypes));
     }
 
     @Override
@@ -132,7 +133,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     void encodeTail(Object value, ByteBuffer dest) {
-        encodeObjects(dynamic, ((Tuple) value).elements, this::get, dest);
+        encodeObjects(dynamic, ((Tuple) value).elements, TupleType.this::get, dest);
     }
 
     static void encodeObjects(boolean dynamic, Object[] values, IntFunction<ABIType<?>> getType, ByteBuffer dest) {
@@ -160,7 +161,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
         Object[] elements = new Object[size()];
-        decodeObjects(bb, unitBuffer, this::get, elements);
+        decodeObjects(bb, unitBuffer, TupleType.this::get, elements);
         return new Tuple(elements);
     }
 
@@ -216,7 +217,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     public Iterator<ABIType<?>> iterator() {
-        return elementTypes.iterator();
+        return Arrays.asList(elementTypes).iterator();
     }
 
     public TupleType subTupleType(boolean... manifest) {
@@ -227,12 +228,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return subTupleType(manifest, true);
     }
 
-    private TupleType subTupleType(boolean[] manifest, boolean negate) {
-        if(manifest.length == size()) {
+    private TupleType subTupleType(final boolean[] manifest, final boolean negate) {
+        final int size = size();
+        if(manifest.length == size) {
             final StringBuilder canonicalBuilder = new StringBuilder("(");
             boolean dynamic = false;
-            final ArrayList<ABIType<?>> selected = new ArrayList<>(manifest.length);
-            for (int i = 0; i < manifest.length; i++) {
+            final List<ABIType<?>> selected = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
                 if (negate ^ manifest[i]) {
                     ABIType<?> e = get(i);
                     canonicalBuilder.append(e.canonicalType).append(',');
@@ -240,9 +242,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     selected.add(e);
                 }
             }
-            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected);
+            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected.toArray(EMPTY_ARRAY));
         }
-        throw new IllegalArgumentException("manifest.length != elementTypes.length: " + manifest.length + " != " + size());
+        throw new IllegalArgumentException("manifest.length != size(): " + manifest.length + " != " + size);
     }
 
     static String completeTupleTypeString(StringBuilder sb) {

@@ -397,7 +397,7 @@ public class EncodeTest {
         final TupleType paramTypes = f.getInputs();
 
         StringBuilder sb = new StringBuilder();
-        for(ABIType<?> type : paramTypes) {
+        for(ABIType<?> type : paramTypes.elementTypes) {
             sb.append(type.getClass().getSimpleName()).append(',');
         }
         Assertions.assertEquals("BooleanType,IntType,LongType,BigIntegerType,BigDecimalType,ArrayType,TupleType,ArrayType,ArrayType,", sb.toString());
