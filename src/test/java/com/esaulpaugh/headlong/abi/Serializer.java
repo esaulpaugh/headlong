@@ -30,7 +30,7 @@ public class Serializer {
     public static JsonPrimitive serializeTypes(TupleType tupleType, Gson gson) {
         JsonArray array = new JsonArray();
 
-        for(ABIType<?> type : tupleType) {
+        for(ABIType<?> type : tupleType.elementTypes) {
             array.add(new JsonPrimitive(type.canonicalType.replace("(", "tuple(")));
         }
         return new JsonPrimitive(gson.toJson(array));

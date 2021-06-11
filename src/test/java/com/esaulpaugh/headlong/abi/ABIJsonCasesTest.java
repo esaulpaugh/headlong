@@ -79,11 +79,12 @@ public class ABIJsonCasesTest {
             String result = JsonUtils.getString(jsonObject, "result");
             JsonArray types = JsonUtils.getArray(jsonObject, "types");
 
-            final ArrayList<ABIType<?>> typeList = new ArrayList<>(types.size());
-            for (JsonElement e : types) {
-                typeList.add(TypeFactory.create(e.getAsString()));
+            final int size = types.size();
+            final ABIType<?>[] arr = new ABIType<?>[size];
+            for (int i = 0; i < size; i++) {
+                arr[i] = TypeFactory.create(types.get(i).getAsString());
             }
-            TupleType tt = TupleType.wrap(typeList);
+            TupleType tt = TupleType.wrap(arr);
 
             System.out.println(tt.canonicalType);
 

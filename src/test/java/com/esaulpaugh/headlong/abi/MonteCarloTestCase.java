@@ -140,7 +140,7 @@ public class MonteCarloTestCase implements Serializable {
 
         this.rawSignature = generateFunctionName(rng) + generateTupleTypeString(baseTypes, rng, 0);
         this.function = new Function(rawSignature, null);
-        this.argsTuple = generateTuple(function.getInputs(), rng);
+        this.argsTuple = generateTuple(function.getInputs().elementTypes, rng);
     }
 
     JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) {
@@ -325,12 +325,11 @@ public class MonteCarloTestCase implements Serializable {
         return TypeFactory.create(sb.toString());
     }
 
-    private Tuple generateTuple(TupleType tupleType, Random r) {
-        final List<ABIType<?>> types = tupleType.elementTypes();
-        final int size = types.size();
+    private Tuple generateTuple(ABIType<?>[] elementTypes, Random r) {
+        final int size = elementTypes.length;
         Object[] args = new Object[size];
         for (int i = 0; i < size; i++) {
-            args[i] = generateValue(types.get(i), r);
+            args[i] = generateValue(elementTypes[i], r);
         }
         return new Tuple(args);
     }
@@ -344,7 +343,7 @@ public class MonteCarloTestCase implements Serializable {
         case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (BigIntegerType) type);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
         case TYPE_CODE_ARRAY: return generateArray((ArrayType<? extends ABIType<?>, ?>) type, r);
-        case TYPE_CODE_TUPLE: return generateTuple((TupleType) type, r);
+        case TYPE_CODE_TUPLE: return generateTuple(((TupleType) type).elementTypes, r);
         default: throw new Error();
         }
     }
@@ -464,7 +463,7 @@ public class MonteCarloTestCase implements Serializable {
     private Tuple[] generateTupleArray(TupleType tupleType, final int len, Random r) {
         Tuple[] tuples = new Tuple[len];
         for (int i = 0; i < len; i++) {
-            tuples[i] = generateTuple(tupleType, r);
+            tuples[i] = generateTuple(tupleType.elementTypes, r);
         }
         return tuples;
     }

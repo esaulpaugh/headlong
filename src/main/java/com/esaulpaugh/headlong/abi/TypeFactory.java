@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static com.esaulpaugh.headlong.abi.ABIType.EMPTY_ARRAY;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_ARRAY_CLASS;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
@@ -223,7 +224,7 @@ public final class TypeFactory {
                 argStart = argEnd + 1; // jump over terminator
             }
             if(argEnd == last && prevTerminator == ')') {
-                return TupleType.wrap(elements);
+                return TupleType.wrap(elements.toArray(EMPTY_ARRAY));
             }
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);

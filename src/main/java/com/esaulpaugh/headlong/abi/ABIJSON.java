@@ -156,17 +156,17 @@ public final class ABIJSON {
         final JsonArray inputs = getArray(event, INPUTS);
         if (inputs != null) {
             final int inputsLen = inputs.size();
-            final List<ABIType<?>> typeList = new ArrayList<>(inputsLen);
+            final ABIType<?>[] types = new ABIType<?>[inputsLen];
             final boolean[] indexed = new boolean[inputsLen];
             for (int i = 0; i < inputsLen; i++) {
                 JsonObject inputObj = inputs.get(i).getAsJsonObject();
-                typeList.add(parseType(inputObj));
+                types[i] = parseType(inputObj);
                 indexed[i] = getBoolean(inputObj, INDEXED);
             }
             return new Event(
                     getName(event),
                     getBoolean(event, ANONYMOUS, false),
-                    TupleType.wrap(typeList),
+                    TupleType.wrap(types),
                     indexed
             );
         }
@@ -183,11 +183,11 @@ public final class ABIJSON {
         if (array == null || (size = array.size()) <= 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
             return TupleType.EMPTY;
         }
-        final List<ABIType<?>> typeList = new ArrayList<>(size);
-        for(JsonElement e : array) {
-            typeList.add(parseType(e.getAsJsonObject()));
+        final ABIType<?>[] elements = new ABIType[size];
+        for(int i = 0; i < size; i++) {
+            elements[i] = parseType(array.get(i).getAsJsonObject());
         }
-        return TupleType.wrap(typeList);
+        return TupleType.wrap(elements);
     }
 
     private static ABIType<?> parseType(JsonObject object) {
@@ -274,7 +274,7 @@ public final class ABIJSON {
     private static void tupleType(JsonWriter out, String name, TupleType tupleType, boolean[] indexedManifest) throws IOException {
         out.name(name).beginArray();
         int i = 0;
-        for (ABIType<?> e : tupleType) {
+        for (ABIType<?> e : tupleType.elementTypes) {
             final String type = e.canonicalType;
             final boolean tupleBase = type.charAt(0) == '(';
             out.beginObject();

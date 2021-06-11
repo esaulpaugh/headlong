@@ -56,7 +56,7 @@ final class PackedDecoder {
 
     private static int countDynamicsTupleType(TupleType tupleType) {
         int numDynamic = 0;
-        for (ABIType<?> e : tupleType) {
+        for (ABIType<?> e : tupleType.elementTypes) {
             numDynamic += !e.dynamic
                     ? 0
                     : TYPE_CODE_TUPLE == e.typeCode()
