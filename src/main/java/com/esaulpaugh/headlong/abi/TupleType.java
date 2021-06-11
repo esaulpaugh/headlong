@@ -244,7 +244,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             }
             return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected.toArray(EMPTY_ARRAY));
         }
-        throw new IllegalArgumentException("manifest.length != elementTypes.length: " + manifest.length + " != " + size);
+        throw new IllegalArgumentException("manifest.length != size(): " + manifest.length + " != " + size);
     }
 
     static String completeTupleTypeString(StringBuilder sb) {
