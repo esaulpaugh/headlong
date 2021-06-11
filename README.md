@@ -10,7 +10,7 @@ ABI spec: https://solidity.readthedocs.io/en/latest/abi-spec.html
 
 RLP spec: https://github.com/ethereum/wiki/wiki/RLP
 
-SHA-256 (headlong-5.1.0.jar): 8c631fa21a85e6a94e3a88b93f78dd88b9ae151c78ac5d5abb4537da140ccddd
+SHA-256 (headlong-5.2.0.jar): 53a4a8d1587ec229630b2401e832a309b34bf69c92b6a05b3234232cb1521943
 
 ## Usage
 
@@ -103,14 +103,14 @@ Or build locally:
 Clone the project and install to your local maven repository using `gradle publishToMavenLocal` or `mvn install`, then declare it as a dependency:
 
 ```groovy
-implementation 'com.esaulpaugh:headlong:5.1.1-SNAPSHOT'
+implementation 'com.esaulpaugh:headlong:5.2.1-SNAPSHOT'
 ```
 
 ```xml
 <dependency>
     <groupId>com.esaulpaugh</groupId>
     <artifactId>headlong</artifactId>
-    <version>5.1.1-SNAPSHOT</version>
+    <version>5.2.1-SNAPSHOT</version>
 </dependency>
 ```
 Alternatively:
