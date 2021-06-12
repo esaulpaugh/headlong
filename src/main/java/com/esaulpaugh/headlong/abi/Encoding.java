@@ -48,10 +48,9 @@ final class Encoding {
 
     static void insertInt(BigInteger signed, int paddedLen, ByteBuffer dest) {
         byte[] arr = signed.toByteArray();
-        int arrLen = arr.length;
-        if(arrLen <= paddedLen) {
-            insertPadding(paddedLen - arrLen, signed.signum() < 0, dest);
-            dest.put(arr, 0 ,arrLen);
+        if(arr.length <= paddedLen) {
+            insertPadding(paddedLen - arr.length, signed.signum() < 0, dest);
+            dest.put(arr, 0 ,arr.length);
         } else {
             dest.put(arr, 1, paddedLen);
         }
