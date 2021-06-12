@@ -226,9 +226,9 @@ public final class ABIJSON {
                 if (t != TypeEnum.FALLBACK) {
                     name(out, o.getName());
                     if (t != TypeEnum.RECEIVE) {
-                        tupleType(out, INPUTS, o.getInputs());
+                        tupleType(out, INPUTS, o.getInputs(), null);
                         if (t != TypeEnum.CONSTRUCTOR) {
-                            tupleType(out, OUTPUTS, f.getOutputs());
+                            tupleType(out, OUTPUTS, f.getOutputs(), null);
                         }
                     }
                 }
@@ -241,7 +241,7 @@ public final class ABIJSON {
             } else {
                 type(out, ERROR);
                 name(out, o.getName());
-                tupleType(out, INPUTS, o.getInputs());
+                tupleType(out, INPUTS, o.getInputs(), null);
             }
             out.endObject();
             return stringOut.toString();
@@ -265,10 +265,6 @@ public final class ABIJSON {
             out.name(STATE_MUTABILITY).value(stateMutability);
         }
         out.name(CONSTANT).value(VIEW.equals(stateMutability) || PURE.equals(stateMutability));
-    }
-
-    private static void tupleType(JsonWriter out, String name, TupleType tupleType) throws IOException {
-        tupleType(out, name, tupleType, null);
     }
 
     private static void tupleType(JsonWriter out, String name, TupleType tupleType, boolean[] indexedManifest) throws IOException {
