@@ -15,7 +15,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 compileJava {
-    if (!Jvm.current().getJavaVersion().isCompatibleWith(JavaVersion.VERSION_1_8)) {
+    if (Jvm.current().getJavaVersion().compareTo(JavaVersion.VERSION_1_8) < 0) {
         options.compilerArgs.addAll(['--release', '8'])
     }
 }
@@ -102,7 +102,7 @@ dependencies {
 }
 
 task jmh(type: JavaExec, dependsOn: jmhClasses) { // run benchmarks with `gradle jmh`
-    mainClass.set('org.openjdk.jmh.Main')
+    main = 'org.openjdk.jmh.Main'
     classpath = sourceSets.jmh.compileClasspath + sourceSets.jmh.runtimeClasspath
 }
 
