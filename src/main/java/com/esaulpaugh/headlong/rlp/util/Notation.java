@@ -73,10 +73,14 @@ public final class Notation {
     }
 
     public static Notation forEncoding(byte[] buffer, int index, int end) {
-        return new Notation(encode(buffer, index, end));
+        return new Notation(encodeToString(buffer, index, end));
     }
 
-    public static String encode(final byte[] buffer, final int index, int end) {
+    public static String encodeToString(byte[] rlp) {
+        return encodeToString(rlp, 0, rlp.length);
+    }
+
+    public static String encodeToString(final byte[] buffer, final int index, int end) {
         if(index >= 0) {
             end = Math.min(buffer.length, end);
             if (index <= end) {

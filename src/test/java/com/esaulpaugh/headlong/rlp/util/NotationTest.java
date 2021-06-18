@@ -58,7 +58,10 @@ public class NotationTest {
     @Test
     public void test() {
 
-        String notation = Notation.forEncoding(ENCODING).toString(); // Arrays.copyOfRange(rlp, 10, rlp.length)
+        String notation = Notation.encodeToString(ENCODING); // Arrays.copyOfRange(rlp, 10, rlp.length)
+        assertEquals(notation, Notation.encodeToString(ENCODING, 0, ENCODING.length));
+        assertEquals(notation, Notation.forEncoding(ENCODING).toString());
+        assertEquals(notation, Notation.forEncoding(ENCODING, 0, ENCODING.length).toString());
 
         System.out.println(notation);
 

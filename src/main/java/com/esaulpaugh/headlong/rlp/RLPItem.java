@@ -310,7 +310,7 @@ public abstract class RLPItem {
 
     @Override
     public final String toString() {
-        return Notation.encode(buffer, index, endIndex);
+        return Notation.encodeToString(buffer, index, endIndex);
     }
 
     /**
