@@ -28,14 +28,12 @@ public enum TypeEnum {
     }
 
     public static TypeEnum parse(String typeString) {
-        for (TypeEnum e : values()) {
-            if(e.name.equals(typeString)) {
-                return e;
-            }
-        }
-        if(typeString == null) {
-            return FUNCTION;
-        }
+        if(ABIJSON.FUNCTION.equals(typeString) || typeString == null) return FUNCTION;
+        if(ABIJSON.RECEIVE.equals(typeString)) return RECEIVE;
+        if(ABIJSON.FALLBACK.equals(typeString)) return FALLBACK;
+        if(ABIJSON.CONSTRUCTOR.equals(typeString)) return CONSTRUCTOR;
+        if(ABIJSON.EVENT.equals(typeString)) return EVENT;
+        if(ABIJSON.ERROR.equals(typeString)) return ERROR;
         throw unexpectedType(typeString);
     }
 
