@@ -37,9 +37,9 @@ public final class ABIJSON {
 
     private ABIJSON() {}
 
-    public static final int FUNCTIONS = 1;
-    public static final int EVENTS = 2;
-    public static final int ERRORS = 4;
+    public static final int FUNCTIONS = 0b001;
+    public static final int EVENTS =    0b010;
+    public static final int ERRORS =    0b100;
 
     public static final int ALL = FUNCTIONS | EVENTS | ERRORS;
 
