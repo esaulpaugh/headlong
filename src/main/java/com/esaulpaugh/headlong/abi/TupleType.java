@@ -43,7 +43,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         this.elementTypes = elementTypes;
     }
 
-    static TupleType wrap(ABIType<?>[] elements) {
+    static TupleType wrap(ABIType<?>... elements) {
         StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
         for (ABIType<?> e : elements) {
