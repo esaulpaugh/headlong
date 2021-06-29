@@ -257,7 +257,8 @@ public class EncodeTest {
 
         TestUtils.CustomRunnable r = () -> Function.parse("f()[]");
         try {
-            assertThrown(ClassCastException.class, "Cannot cast com.esaulpaugh.headlong.abi.ArrayType to com.esaulpaugh.headlong.abi.TupleType", r);
+            assertThrown(ClassCastException.class, "class com.esaulpaugh.headlong.abi.ArrayType cannot be cast to class com.esaulpaugh.headlong.abi.TupleType", r);
+//            assertThrown(ClassCastException.class, "Cannot cast com.esaulpaugh.headlong.abi.ArrayType to com.esaulpaugh.headlong.abi.TupleType", r);
         } catch (ClassCastException cce) {
             assertThrown(ClassCastException.class, "Cannot cast class com.esaulpaugh.headlong.abi.ArrayType to class com.esaulpaugh.headlong.abi.TupleType", r);
         }
