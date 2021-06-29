@@ -19,7 +19,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.function.BiPredicate;
 
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_LONG;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_SHORT;
