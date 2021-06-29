@@ -162,6 +162,11 @@ public final class RLPDecoder {
         default: throw new Error();
         }
     }
+    
+    @FunctionalInterface
+    public interface BiIntPredicate {
+        boolean test(int count, int index);
+    }
 
     /**
      * For gathering sequential items into a collection.
@@ -172,7 +177,7 @@ public final class RLPDecoder {
      * @param collection    the collection to which the items will be added
      * @return  the number of items added
      */
-    public int collect(byte[] buffer, int index, BiPredicate<Integer, Integer> predicate, Collection<? super RLPItem> collection) {
+    public int collect(byte[] buffer, int index, BiIntPredicate predicate, Collection<? super RLPItem> collection) {
         int count = 0;
         while (predicate.test(count, index)) {
             RLPItem item = wrap(buffer, index);

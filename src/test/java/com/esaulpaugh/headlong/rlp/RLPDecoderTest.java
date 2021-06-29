@@ -41,6 +41,7 @@ import static com.esaulpaugh.headlong.TestUtils.CustomRunnable;
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
+import com.esaulpaugh.headlong.rlp.RLPDecoder.BiIntPredicate;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
@@ -495,8 +496,8 @@ public class RLPDecoderTest {
         assertEquals('\0', RLP_STRICT.wrap((byte) 0x00).asChar(true));
     }
 
-    private static final BiPredicate<Integer, Integer> UNTIL_COUNT_FIVE = (count, index) -> count < 5;
-    private static final BiPredicate<Integer, Integer> UNTIL_INDEX_SEVEN = (count, index) -> index < 7;
+    private static final BiIntPredicate UNTIL_COUNT_FIVE = (count, index) -> count < 5;
+    private static final BiIntPredicate UNTIL_INDEX_SEVEN = (count, index) -> index < 7;
 
     @Test
     public void collect() {
