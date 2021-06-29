@@ -41,8 +41,6 @@ public final class ABIJSON {
     public static final int EVENTS =    0b010;
     public static final int ERRORS =    0b100;
 
-    public static final int ALL = FUNCTIONS | EVENTS | ERRORS;
-
     private static final String NAME = "name";
     private static final String TYPE = "type";
     static final String FUNCTION = "function";
@@ -116,10 +114,10 @@ public final class ABIJSON {
     }
 
     public static List<ABIObject> parseElements(String arrayJson) {
-        return parseElements(arrayJson, ALL, ABIObject.class);
+        return parseElements(arrayJson, FUNCTIONS | EVENTS | ERRORS, ABIObject.class);
     }
 
-    private static <T extends ABIObject> List<T> parseElements(String arrayJson, int flags, Class<T> classOfT) {
+    public static <T extends ABIObject> List<T> parseElements(String arrayJson, int flags, Class<T> classOfT) {
         final boolean functions = (flags & FUNCTIONS) != 0, events = (flags & EVENTS) != 0, errors = (flags & ERRORS) != 0;
         final List<T> selected = new ArrayList<>();
         for (JsonElement e : parseArray(arrayJson)) {
