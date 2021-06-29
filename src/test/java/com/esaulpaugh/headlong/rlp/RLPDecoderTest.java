@@ -500,6 +500,12 @@ public class RLPDecoderTest {
 
     @Test
     public void collect() {
+        
+        Set<Object> objectSet = new HashSet<>();
+        int numAdded = RLPDecoder.RLP_STRICT.collect(LONG_LIST_BYTES, 0, (count, index) -> index < LONG_LIST_BYTES.length, objectSet);
+        assertEquals(1, numAdded);
+        assertEquals(1, objectSet.size());
+        
         byte[] rlp = new byte[9];
         for (int i = 0; i < rlp.length; i++) {
             rlp[i] = (byte) i;

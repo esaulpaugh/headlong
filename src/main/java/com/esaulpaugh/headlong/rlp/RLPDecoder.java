@@ -172,7 +172,7 @@ public final class RLPDecoder {
      * @param collection    the collection to which the items will be added
      * @return  the number of items added
      */
-    public int collect(byte[] buffer, int index, BiPredicate<Integer, Integer> predicate, Collection<RLPItem> collection) {
+    public int collect(byte[] buffer, int index, BiPredicate<Integer, Integer> predicate, Collection<? super RLPItem> collection) {
         int count = 0;
         while (predicate.test(count, index)) {
             RLPItem item = wrap(buffer, index);
