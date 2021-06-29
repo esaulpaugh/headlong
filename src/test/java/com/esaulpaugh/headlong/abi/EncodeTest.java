@@ -260,9 +260,13 @@ public class EncodeTest {
             assertThrown(ClassCastException.class, "class com.esaulpaugh.headlong.abi.ArrayType cannot be cast to class com.esaulpaugh.headlong.abi.TupleType", r);
         } catch (ClassCastException cce) {
             try {
-            assertThrown(ClassCastException.class, "Cannot cast class com.esaulpaugh.headlong.abi.ArrayType to class com.esaulpaugh.headlong.abi.TupleType", r);
-            } catch(ClassCastException cce2) {
-                assertThrown(ClassCastException.class, "Cannot cast com.esaulpaugh.headlong.abi.ArrayType to com.esaulpaugh.headlong.abi.TupleType", r);
+                assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.ArrayType cannot be cast to com.esaulpaugh.headlong.abi.TupleType", r);
+            } catch (ClassCastException cce2) {
+                try {
+                    assertThrown(ClassCastException.class, "Cannot cast class com.esaulpaugh.headlong.abi.ArrayType to class com.esaulpaugh.headlong.abi.TupleType", r);
+                } catch(ClassCastException cce3) {
+                    assertThrown(ClassCastException.class, "Cannot cast com.esaulpaugh.headlong.abi.ArrayType to com.esaulpaugh.headlong.abi.TupleType", r);
+                }
             }
         }
     }
