@@ -95,8 +95,8 @@ public final class TypeFactory {
         map.put(type, () -> new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class));
     }
 
-    public static <T extends ABIType<?>> T createType(String rawType, Class<T> classOfT) {
-        return classOfT.cast(build(rawType, null, null));
+    public static <T extends ABIType<?>> T createType(String rawType) {
+        return (T) build(rawType, null, null);
     }
 
     public static <J> ABIType<J> create(String rawType, Class<J> classOfJ) {
