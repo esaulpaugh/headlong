@@ -504,10 +504,8 @@ public class ABIJSONTest {
 
         assertEquals(eventJson, event.toJson(true));
     }
-
-    @Test
-    public void testGetErrors() throws Throwable {
-        final String json = "{\n" +
+    
+    private static final String ERROR_JSON = "{\n" +
                 "  \"type\": \"error\",\n" +
                 "  \"name\": \"InsufficientBalance\",\n" +
                 "  \"inputs\": [\n" +
@@ -521,13 +519,18 @@ public class ABIJSONTest {
                 "    }\n" +
                 "  ]\n" +
                 "}";
-        JsonObject object = JsonUtils.parseObject(json);
+    
+    private static final String ERROR_JSON_ARRAY = "[" + ERROR_JSON + "]";
 
-        ContractError error0 = ABIJSON.parseErrors("[" + json + "]").get(0);
+    @Test
+    public void testGetErrors() throws Throwable {
+        JsonObject object = JsonUtils.parseObject(ERROR_JSON);
+
+        ContractError error0 = ABIJSON.parseErrors(ERROR_JSON_ARRAY).get(0);
         ContractError error1 = ABIJSON.parseError(object);
 
-        testError(error0, json, object);
-        testError(error1, json, object);
+        testError(error0, ERROR_JSON, object);
+        testError(error1, ERROR_JSON, object);
 
         assertEquals(error0, error1);
 
@@ -571,10 +574,31 @@ public class ABIJSONTest {
 
     @Test
     public void testParseElements() {
-        List<ABIObject> list = ABIJSON.parseElements(CONTRACT_JSON);
+        
+        List<ABIObject> list = ABIJSON.parseElements(CONTRACT_JSON, 0);
+        assertEquals(0, list.size());
+        
+        list = ABIJSON.parseElements(CONTRACT_JSON);
         assertEquals(2, list.size());
         assertTrue(list.stream().anyMatch(ABIObject::isEvent));
         assertTrue(list.stream().anyMatch(ABIObject::isFunction));
+        
+        list = ABIJSON.parseElements(CONTRACT_JSON, ABIJSON.FUNCTIONS | ABIJSON.EVENTS);
+        assertEquals(2, list.size());
+        assertTrue(list.stream().anyMatch(ABIObject::isEvent));
+        assertTrue(list.stream().anyMatch(ABIObject::isFunction));
+        
+        list = ABIJSON.parseElements(CONTRACT_JSON, ABIJSON.EVENTS | ABIJSON.ERRORS);
+        assertEquals(1, list.size());
+        assertTrue(list.stream().anyMatch(ABIObject::isEvent));
+        
+        List<Function> fList = ABIJSON.parseElements(CONTRACT_JSON, ABIJSON.FUNCTIONS);
+        assertEquals(1, fList.size());
+        assertTrue(fList.stream().anyMatch(ABIObject::isFunction));
+        
+        List<ContractError> errList = ABIJSON.parseElements(ERROR_JSON_ARRAY, ABIJSON.ERRORS);
+        assertEquals(1, errList.size());
+        assertTrue(errList.stream().anyMatch(ABIObject::isContractError));
     }
 
     @Test

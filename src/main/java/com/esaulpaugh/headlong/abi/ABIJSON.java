@@ -102,29 +102,29 @@ public final class ABIJSON {
     }
 
     public static List<Function> parseFunctions(String arrayJson) {
-        return parseElements(arrayJson, FUNCTIONS, Function.class);
+        return parseElements(arrayJson, FUNCTIONS);
     }
 
     public static List<Event> parseEvents(String arrayJson) {
-        return parseElements(arrayJson, EVENTS, Event.class);
+        return parseElements(arrayJson, EVENTS);
     }
 
     public static List<ContractError> parseErrors(String arrayJson) {
-        return parseElements(arrayJson, ERRORS, ContractError.class);
+        return parseElements(arrayJson, ERRORS);
     }
 
     public static List<ABIObject> parseElements(String arrayJson) {
-        return parseElements(arrayJson, FUNCTIONS | EVENTS | ERRORS, ABIObject.class);
+        return parseElements(arrayJson, FUNCTIONS | EVENTS | ERRORS);
     }
 
-    public static <T extends ABIObject> List<T> parseElements(String arrayJson, int flags, Class<T> classOfT) {
+    public static <T extends ABIObject> List<T> parseElements(String arrayJson, int flags) {
         final boolean functions = (flags & FUNCTIONS) != 0, events = (flags & EVENTS) != 0, errors = (flags & ERRORS) != 0;
         final List<T> selected = new ArrayList<>();
         for (JsonElement e : parseArray(arrayJson)) {
             if (e.isJsonObject()) {
                 ABIObject o = parseABIObject(e.getAsJsonObject());
                 if(o.isEvent() ? events : o.isContractError() ? errors : functions) {
-                    selected.add(classOfT.cast(o));
+                    selected.add((T) o);
                 }
             }
         }
