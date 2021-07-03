@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.util;
+package com.esaulpaugh.headlong.abi.util;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
