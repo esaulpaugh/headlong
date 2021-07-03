@@ -28,13 +28,18 @@ public enum TypeEnum {
     }
 
     public static TypeEnum parse(String typeString) {
-        if(ABIJSON.FUNCTION.equals(typeString) || typeString == null) return FUNCTION;
-        if(ABIJSON.RECEIVE.equals(typeString)) return RECEIVE;
-        if(ABIJSON.FALLBACK.equals(typeString)) return FALLBACK;
-        if(ABIJSON.CONSTRUCTOR.equals(typeString)) return CONSTRUCTOR;
-        if(ABIJSON.EVENT.equals(typeString)) return EVENT;
-        if(ABIJSON.ERROR.equals(typeString)) return ERROR;
-        throw unexpectedType(typeString);
+        if(typeString == null) {
+            return FUNCTION;
+        }
+        switch (typeString) {
+        case ABIJSON.FUNCTION: return FUNCTION;
+        case ABIJSON.RECEIVE: return RECEIVE;
+        case ABIJSON.FALLBACK: return FALLBACK;
+        case ABIJSON.CONSTRUCTOR: return CONSTRUCTOR;
+        case ABIJSON.EVENT: return EVENT;
+        case ABIJSON.ERROR: return ERROR;
+        default: throw unexpectedType(typeString);
+        }
     }
 
     static IllegalArgumentException unexpectedType(String t) {
