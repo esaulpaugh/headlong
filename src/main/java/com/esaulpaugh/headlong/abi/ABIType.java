@@ -198,7 +198,7 @@ public abstract class ABIType<J> {
 
     @SuppressWarnings("unchecked")
     public final J decodePacked(byte[] buffer) {
-        return (J) PackedDecoder.decode(TupleType.wrap(new ABIType<?>[] { this }), buffer).get(0);
+        return (J) PackedDecoder.decode(TupleType.wrap(this), buffer).get(0);
     }
 
     /**

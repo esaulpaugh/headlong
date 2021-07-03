@@ -136,8 +136,8 @@ public final class ABIJSON {
 
     @SuppressWarnings("unchecked")
     public static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types) {
-        final MessageDigest digest = Function.newDefaultDigest();
         final List<T> selected = new ArrayList<>();
+        final MessageDigest digest = Function.newDefaultDigest();
         for (JsonElement e : parseArray(arrayJson)) {
             if (e.isJsonObject()) {
                 JsonObject object = e.getAsJsonObject();
@@ -152,10 +152,10 @@ public final class ABIJSON {
 
     private static ABIObject parseABIObject(TypeEnum t, JsonObject object, MessageDigest digest) {
         switch (t.ordinal()) {
-        case TypeEnum.ORDINAL_FUNCTION: return _parseFunction(TypeEnum.FUNCTION, object, digest);
-        case TypeEnum.ORDINAL_RECEIVE: return _parseFunction(TypeEnum.RECEIVE, object, digest);
-        case TypeEnum.ORDINAL_FALLBACK: return _parseFunction(TypeEnum.FALLBACK, object, digest);
-        case TypeEnum.ORDINAL_CONSTRUCTOR: return _parseFunction(TypeEnum.CONSTRUCTOR, object, digest);
+        case TypeEnum.ORDINAL_FUNCTION:
+        case TypeEnum.ORDINAL_RECEIVE:
+        case TypeEnum.ORDINAL_FALLBACK:
+        case TypeEnum.ORDINAL_CONSTRUCTOR: return _parseFunction(t, object, digest);
         case TypeEnum.ORDINAL_EVENT: return _parseEvent(object);
         case TypeEnum.ORDINAL_ERROR: return _parseError(object);
         default: throw new Error();
