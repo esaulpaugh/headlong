@@ -82,7 +82,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     int byteLength(Object value) {
         Tuple tuple = (Tuple) value;
-        return countBytes(false, size(), 0, (i) -> measureObject(get(i), tuple.get(i)));
+        return countBytes(false, size(), 0, i -> measureObject(get(i), tuple.get(i)));
     }
 
     private int measureObject(ABIType<?> type, Object value) {
@@ -96,7 +96,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     public int byteLengthPacked(Object value) {
         final Object[] elements = value != null ? ((Tuple) value).elements : new Object[size()];
-        return countBytes(false, size(), 0, (i) -> get(i).byteLengthPacked(elements[i]));
+        return countBytes(false, size(), 0, i -> get(i).byteLengthPacked(elements[i]));
     }
 
     static int countBytes(boolean array, int len, int count, IntUnaryOperator counter) {
@@ -114,7 +114,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     public int validate(final Tuple value) {
         if (value.size() == this.size()) {
-            return countBytes(false, this.size(), 0, (i) -> validateObject(get(i), value.get(i)));
+            return countBytes(false, this.size(), 0, i -> validateObject(get(i), value.get(i)));
         }
         throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + value.size() + " != " + this.size());
     }
