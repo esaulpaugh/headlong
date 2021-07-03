@@ -95,6 +95,7 @@ public final class TypeFactory {
         map.put(type, () -> new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class));
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T createType(String rawType) {
         return (T) build(rawType, null, null);
     }
