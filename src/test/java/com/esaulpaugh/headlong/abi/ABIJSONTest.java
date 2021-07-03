@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -575,20 +576,20 @@ public class ABIJSONTest {
     @Test
     public void testParseElements() {
         
-        List<ABIObject> list = ABIJSON.parseElements(CONTRACT_JSON, 0);
+        List<ABIObject> list = ABIJSON.parseElements(CONTRACT_JSON, EnumSet.noneOf(TypeEnum.class));
         assertEquals(0, list.size());
         
         list = ABIJSON.parseElements(CONTRACT_JSON);
         assertEquals(2, list.size());
         assertTrue(list.stream().anyMatch(ABIObject::isEvent));
         assertTrue(list.stream().anyMatch(ABIObject::isFunction));
-        
-        list = ABIJSON.parseElements(CONTRACT_JSON, ABIJSON.FUNCTIONS | ABIJSON.EVENTS);
+
+        list = ABIJSON.parseElements(CONTRACT_JSON, EnumSet.of(TypeEnum.FUNCTION, TypeEnum.RECEIVE, TypeEnum.FALLBACK, TypeEnum.CONSTRUCTOR, TypeEnum.EVENT));
         assertEquals(2, list.size());
         assertTrue(list.stream().anyMatch(ABIObject::isEvent));
         assertTrue(list.stream().anyMatch(ABIObject::isFunction));
         
-        list = ABIJSON.parseElements(CONTRACT_JSON, ABIJSON.EVENTS | ABIJSON.ERRORS);
+        list = ABIJSON.parseElements(CONTRACT_JSON, EnumSet.of(TypeEnum.EVENT, TypeEnum.ERROR));
         assertEquals(1, list.size());
         assertTrue(list.stream().anyMatch(ABIObject::isEvent));
         
@@ -599,6 +600,54 @@ public class ABIJSONTest {
         List<ContractError> errList = ABIJSON.parseElements(ERROR_JSON_ARRAY, ABIJSON.ERRORS);
         assertEquals(1, errList.size());
         assertTrue(errList.stream().anyMatch(ABIObject::isContractError));
+    }
+
+    @Test
+    public void testEnumSet() {
+        {
+            List<ABIObject> list = ABIJSON.parseElements(CONTRACT_JSON, EnumSet.noneOf(TypeEnum.class));
+            assertEquals(0, list.size());
+
+            list = ABIJSON.parseElements(CONTRACT_JSON, EnumSet.of(TypeEnum.FUNCTION, TypeEnum.EVENT));
+            assertEquals(2, list.size());
+            assertTrue(list.stream().anyMatch(ABIObject::isEvent));
+            assertTrue(list.stream().anyMatch(ABIObject::isFunction));
+
+            list = ABIJSON.parseElements(CONTRACT_JSON, EnumSet.of(TypeEnum.EVENT, TypeEnum.ERROR));
+            assertEquals(1, list.size());
+            assertTrue(list.stream().anyMatch(ABIObject::isEvent));
+
+            List<Function> fList = ABIJSON.parseElements(CONTRACT_JSON, EnumSet.of(TypeEnum.FUNCTION));
+            assertEquals(1, fList.size());
+            assertTrue(fList.stream().anyMatch(ABIObject::isFunction));
+
+            List<ContractError> errList = ABIJSON.parseElements(ERROR_JSON_ARRAY, EnumSet.of(TypeEnum.ERROR));
+            assertEquals(1, errList.size());
+            assertTrue(errList.stream().anyMatch(ABIObject::isContractError));
+        }
+
+        testFallbackConstructorReceive(EnumSet.noneOf(TypeEnum.class), 0);
+        testFallbackConstructorReceive(EnumSet.of(TypeEnum.FUNCTION), 0);
+        testFallbackConstructorReceive(EnumSet.of(TypeEnum.EVENT), 0);
+        testFallbackConstructorReceive(EnumSet.of(TypeEnum.ERROR), 0);
+
+        testFallbackConstructorReceive(EnumSet.of(TypeEnum.RECEIVE), 1);
+        testFallbackConstructorReceive(EnumSet.of(TypeEnum.FALLBACK), 1);
+        testFallbackConstructorReceive(EnumSet.of(TypeEnum.CONSTRUCTOR), 1);
+
+        testFallbackConstructorReceive(EnumSet.of(TypeEnum.RECEIVE, TypeEnum.FALLBACK), 2);
+        testFallbackConstructorReceive(EnumSet.of(TypeEnum.RECEIVE, TypeEnum.CONSTRUCTOR), 2);
+        testFallbackConstructorReceive(EnumSet.of(TypeEnum.FALLBACK, TypeEnum.CONSTRUCTOR), 2);
+
+        testFallbackConstructorReceive(EnumSet.of(TypeEnum.RECEIVE, TypeEnum.FALLBACK, TypeEnum.CONSTRUCTOR), 3);
+    }
+
+    private static void testFallbackConstructorReceive(EnumSet<TypeEnum> expectedTypes, int expectedSize) {
+        List<Function> fns = ABIJSON.parseElements(FALLBACK_CONSTRUCTOR_RECEIVE, expectedTypes);
+        assertEquals(expectedSize, fns.size());
+        for(Function f : fns) {
+            assertTrue(expectedTypes.contains(f.getType()));
+        }
     }
 
     @Test
