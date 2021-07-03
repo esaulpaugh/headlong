@@ -177,23 +177,23 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private int validateInts(int[] arr, IntType type) {
-        return countBytes(true, checkLength(arr.length, arr), offsetsLen(arr.length), (i) -> type.validatePrimitive(arr[i]));
+        return countBytes(true, checkLength(arr.length, arr), offsetsLen(arr.length), i -> type.validatePrimitive(arr[i]));
     }
 
     private int validateLongs(long[] arr, LongType type) {
-        return countBytes(true, checkLength(arr.length, arr), offsetsLen(arr.length), (i) -> type.validatePrimitive(arr[i]));
+        return countBytes(true, checkLength(arr.length, arr), offsetsLen(arr.length), i -> type.validatePrimitive(arr[i]));
     }
 
     private int validateObjects(Object[] arr) {
-        return countBytes(true, checkLength(arr.length, arr), offsetsLen(arr.length), (i) -> elementType._validate(arr[i]));
+        return countBytes(true, checkLength(arr.length, arr), offsetsLen(arr.length), i -> elementType._validate(arr[i]));
     }
 
     private int measureByteLength(Object[] arr) {
-        return countBytes(true, arr.length, offsetsLen(arr.length), (i) -> elementType.byteLength(arr[i]));
+        return countBytes(true, arr.length, offsetsLen(arr.length), i -> elementType.byteLength(arr[i]));
     }
 
     private int measureByteLengthPacked(Object[] arr) { // don't count offsets
-        return countBytes(true, arr.length, 0, (i) -> elementType.byteLengthPacked(arr[i]));
+        return countBytes(true, arr.length, 0, i -> elementType.byteLengthPacked(arr[i]));
     }
 
     private int checkLength(final int valueLen, Object value) {
@@ -218,7 +218,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_TUPLE:
             Object[] arr = (Object[]) value;
             encodeArrayLen(arr.length, dest);
-            TupleType.encodeObjects(dynamic, arr, (i) -> elementType, dest);
+            TupleType.encodeObjects(dynamic, arr, i -> elementType, dest);
             return;
         default: throw new Error();
         }
@@ -326,7 +326,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private Object decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer) {
         Object[] elements = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
-        TupleType.decodeObjects(bb, unitBuffer, (i) -> elementType, elements);
+        TupleType.decodeObjects(bb, unitBuffer, i -> elementType, elements);
         return elements;
     }
 
@@ -337,8 +337,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
      * @return  the parsed array
      * @see com.esaulpaugh.headlong.rlp.util.Notation
      */
-    @SuppressWarnings("unchecked")
     @Override
+    @SuppressWarnings("unchecked")
     public J parseArgument(String s) { // expects RLP object notation such as "['00', '01', '01']"
         return (J) SuperSerial.deserializeArray(this, s, false);
     }
