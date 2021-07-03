@@ -101,6 +101,17 @@ public final class ABIJSON {
     }
 
     /**
+     * Selects all objects with type {@link TypeEnum#FUNCTION}.
+     *
+     * @see #parseFunctions(String) 
+     * @param arrayJson the JSON array string
+     * @return  the parsed {@link Function}s
+     */
+    public static List<Function> parseNormalFunctions(String arrayJson) {
+        return parseElements(arrayJson, EnumSet.of(TypeEnum.FUNCTION));
+    }
+
+    /**
      * Selects all objects with type {@link TypeEnum#FUNCTION}, {@link TypeEnum#RECEIVE}, {@link TypeEnum#FALLBACK}, or
      * {@link TypeEnum#CONSTRUCTOR}.
      *

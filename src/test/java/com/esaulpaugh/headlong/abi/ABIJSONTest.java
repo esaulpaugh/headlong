@@ -440,8 +440,10 @@ public class ABIJSONTest {
         assertEquals("", func.getName());
         assertNull(func.getStateMutability());
 
-        functions = ABIJSON.parseFunctions(FALLBACK_CONSTRUCTOR_RECEIVE);
+        functions = ABIJSON.parseNormalFunctions(FALLBACK_CONSTRUCTOR_RECEIVE);
+        assertEquals(0, functions.size());
 
+        functions = ABIJSON.parseFunctions(FALLBACK_CONSTRUCTOR_RECEIVE);
         assertEquals(3, functions.size());
 
         assertNull(functions.get(0).getName());
