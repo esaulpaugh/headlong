@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.rlp.RLPDecoder.BiIntPredicate;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Disabled;
@@ -34,14 +35,12 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
-import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 import static com.esaulpaugh.headlong.TestUtils.CustomRunnable;
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
-import com.esaulpaugh.headlong.rlp.RLPDecoder.BiIntPredicate;
+import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;

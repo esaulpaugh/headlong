@@ -619,7 +619,7 @@ public class ABIJSONTest {
             assertEquals(1, list.size());
             assertTrue(list.stream().anyMatch(ABIObject::isEvent));
 
-            List<Function> fList = ABIJSON.parseElements(CONTRACT_JSON, EnumSet.of(TypeEnum.FUNCTION));
+            List<Function> fList = ABIJSON.parseNormalFunctions(CONTRACT_JSON);
             assertEquals(1, fList.size());
             assertTrue(fList.stream().anyMatch(ABIObject::isFunction));
 
