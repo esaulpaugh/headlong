@@ -576,7 +576,7 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testParseElements() {
+    public void testParseElements() throws Throwable {
         
         List<ABIObject> list = ABIJSON.parseElements(CONTRACT_JSON, EnumSet.noneOf(TypeEnum.class));
         assertEquals(0, list.size());
@@ -602,6 +602,11 @@ public class ABIJSONTest {
         List<ContractError> errList = ABIJSON.parseElements(ERROR_JSON_ARRAY, ABIJSON.ERRORS);
         assertEquals(1, errList.size());
         assertTrue(errList.stream().anyMatch(ABIObject::isContractError));
+
+        TestUtils.assertThrown(UnsupportedOperationException.class, () -> ABIJSON.FUNCTIONS.add(TypeEnum.EVENT));
+        TestUtils.assertThrown(UnsupportedOperationException.class, () -> ABIJSON.EVENTS.add(TypeEnum.CONSTRUCTOR));
+        TestUtils.assertThrown(UnsupportedOperationException.class, () -> ABIJSON.ERRORS.add(TypeEnum.EVENT));
+        TestUtils.assertThrown(UnsupportedOperationException.class, () -> ABIJSON.ALL.remove(TypeEnum.EVENT));
     }
 
     @Test
