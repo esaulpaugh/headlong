@@ -71,11 +71,11 @@ public final class SuperSerial {
         return in;
     }
 
-    public static <T> T deserializeArray(ArrayType<? extends ABIType<?>, ?> arrayType, String str, boolean machine, Class<T> classOfT) {
+    public static Object deserializeArray(ArrayType<? extends ABIType<?>, ?> arrayType, String str, boolean machine) {
         byte[] rlp = machine ? Strings.decode(str) : RLPEncoder.encodeSequentially(Notation.parse(str));
         Object array = deserializeArray(arrayType, RLP_STRICT.wrap(rlp));
         arrayType._validate(array);
-        return classOfT.cast(array);
+        return array;
     }
 
     private static Object[] serializeTuple(TupleType tupleType, Tuple tuple) {

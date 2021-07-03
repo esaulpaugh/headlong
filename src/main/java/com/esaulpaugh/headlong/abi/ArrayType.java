@@ -337,9 +337,10 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
      * @return  the parsed array
      * @see com.esaulpaugh.headlong.rlp.util.Notation
      */
+    @SuppressWarnings("unchecked")
     @Override
     public J parseArgument(String s) { // expects RLP object notation such as "['00', '01', '01']"
-        return SuperSerial.deserializeArray(this, s, false, clazz);
+        return (J) SuperSerial.deserializeArray(this, s, false);
     }
 
     public static ABIType<?> baseType(ABIType<?> type) {
