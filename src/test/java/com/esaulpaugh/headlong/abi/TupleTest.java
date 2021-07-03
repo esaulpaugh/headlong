@@ -67,7 +67,7 @@ public class TupleTest {
 
         boolean[] bools = new boolean[pow];
 
-        IntType type = (IntType) TypeFactory.create("int" + bits);
+        IntType type = TypeFactory.create("int" + bits);
 
         for (int i = 0; i < 1_579_919_999; i++) {
             bools[(int) generateLong(r, type) & powMinus1] = true;

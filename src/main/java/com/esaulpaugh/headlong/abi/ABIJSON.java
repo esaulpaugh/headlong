@@ -210,7 +210,7 @@ public final class ABIJSON {
                     baseType,
                     name);
         }
-        return TypeFactory.create(type, Object.class, name);
+        return TypeFactory.build(type, null, name);
     }
 
     private static String getType(JsonObject obj) {

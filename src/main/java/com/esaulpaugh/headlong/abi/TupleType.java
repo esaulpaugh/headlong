@@ -255,7 +255,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public static TupleType parse(String rawTupleTypeString) {
-        return TypeFactory.createType(rawTupleTypeString);
+        return TypeFactory.create(rawTupleTypeString);
     }
 
     public static TupleType of(String... typeStrings) {

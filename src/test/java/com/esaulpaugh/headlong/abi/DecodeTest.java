@@ -297,7 +297,7 @@ public class DecodeTest {
 
     @Test
     public void testStringArray() throws Throwable {
-        final ArrayType<ArrayType<ByteType, String>, String[]> type = (ArrayType<ArrayType<ByteType, String>, String[]>) TypeFactory.create("string[]", String[].class, "nam");
+        final ArrayType<ArrayType<ByteType, String>, String[]> type = TypeFactory.create("string[]", "nam");
         final String[] array = new String[] { "Hello, world!", "world! Hello," };
         final ByteBuffer abi = ByteBuffer.wrap(
                 Strings.decode(
@@ -315,32 +315,31 @@ public class DecodeTest {
 
         {
             final ABIType<?>                  a = TypeFactory.create("string[]");
-            final ABIType<Object>             b = TypeFactory.create("string[]", Object.class);
-            final ABIType<String[]>           c = TypeFactory.create("string[]", String[].class);
-            final ABIType<Object[]>           c_ = TypeFactory.create("string[]", Object[].class);
+            final ABIType<Object>             b = TypeFactory.create("string[]");
+            final ABIType<String[]>           c = TypeFactory.create("string[]");
+            final ABIType<Object[]>           c_ = TypeFactory.create("string[]");
             assertThrown(
                     IllegalArgumentException.class,
                     "class mismatch: [Ljava.lang.Object; != [Ljava.lang.String; (string[] requires String[] but found Object[])",
                     () -> c_.encode(new Object[] { "" })
             );
-            final ABIType<String[]>           d = TypeFactory.create("string[]", null);
-            final ABIType<?>                  e = TypeFactory.create("string[]", null);
-            final ABIType<? extends String[]> f = TypeFactory.create("string[]", null);
+            final ABIType<String[]>           d = TypeFactory.create("string[]");
+            final ABIType<?>                  e = TypeFactory.create("string[]");
+            final ABIType<? extends String[]> f = TypeFactory.create("string[]");
 
-            final ArrayType<?, ?>        g = (ArrayType<?, ?>)        TypeFactory.create("string[]");
-            final ArrayType<?, ?>        h = (ArrayType<?, ?>)        TypeFactory.create("string[]", null);
-            final ArrayType<?, String[]> i = (ArrayType<?, String[]>) TypeFactory.create("string[]", String[].class);
+            final ArrayType<?, ?>        g = TypeFactory.create("string[]");
+            final ArrayType<?, ?>        h = TypeFactory.create("string[]");
+            final ArrayType<?, String[]> i = TypeFactory.create("string[]");
             @SuppressWarnings("unchecked")
-            final ArrayType<?, String[]> j = (ArrayType<?, String[]>) TypeFactory.create("string[]");
-            @SuppressWarnings("unchecked")
-            final ABIType<? extends String[]> k = (ABIType<? extends String[]>) TypeFactory.create("string[]");
+            final ArrayType<?, String[]> j = TypeFactory.create("string[]");
+            final ABIType<? extends String[]> k = TypeFactory.create("string[]");
 
-            final IntType l = TypeFactory.createType("int16");
-            final ArrayType<?, BigInteger[]> m = (ArrayType<?, BigInteger[]>) TypeFactory.create("int[]", BigInteger[].class);
-            final TupleType n = (TupleType) TypeFactory.create("(bool)", Tuple.class);
+            final IntType l = TypeFactory.create("int16");
+            final ArrayType<?, BigInteger[]> m = TypeFactory.create("int[]");
+            final TupleType n = TypeFactory.create("(bool)");
             m.encode(new BigInteger[] {});
             
-            TupleType.wrap(TypeFactory.createType("int"), TypeFactory.createType("bytes[7]"));
+            TupleType.wrap(TypeFactory.create("int"), TypeFactory.create("bytes[7]"));
         }
 
         assertEquals("nam", type.getName());
