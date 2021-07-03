@@ -330,8 +330,7 @@ public class DecodeTest {
             final ArrayType<?, ?>        g = TypeFactory.create("string[]");
             final ArrayType<?, ?>        h = TypeFactory.create("string[]");
             final ArrayType<?, String[]> i = TypeFactory.create("string[]");
-            @SuppressWarnings("unchecked")
-            final ArrayType<?, String[]> j = TypeFactory.create("string[]");
+            final ArrayType<ArrayType<ByteType, String>, String[]> j = TypeFactory.create("string[]");
             final ABIType<? extends String[]> k = TypeFactory.create("string[]");
 
             final IntType l = TypeFactory.create("int16");

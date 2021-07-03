@@ -541,8 +541,8 @@ public class EncodeTest {
         assertEquals(BigInteger.ONE, bool.maxValue());
 
         for (int i = 8; i <= 256; i += 8) {
-            final UnitType<?> unsigned = (UnitType<?>) TypeFactory.create("uint" + i);
-            final UnitType<?> signed = (UnitType<?>) TypeFactory.create("int" + i);
+            final UnitType<?> unsigned = TypeFactory.create("uint" + i);
+            final UnitType<?> signed = TypeFactory.create("int" + i);
 
 //            System.out.println(unsigned.minValue() + " ==> " + unsigned.maxValue() + ", " + signed.minValue() + " ==> " + signed.maxValue());
 

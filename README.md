@@ -59,7 +59,8 @@ Integer returned = fooTwo.decodeSingletonReturn(FastHex.decode("0000000000000000
 #### Creating types directly
 
 ```java
-BooleanType bool = (BooleanType) TypeFactory.create("bool");
+BooleanType bool = TypeFactory.create("bool");
+IntType uint24 = TypeFactory.create("uint24");
 ```
 
 ### RLP codec
