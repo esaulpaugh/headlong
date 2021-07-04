@@ -192,13 +192,8 @@ public final class TypeFactory {
             final int last = rawTypeStr.length() - 1; // must be >= 0
             while (argStart <= last) {
                 char c = rawTypeStr.charAt(argStart);
-                if (c == ',') {
-                    if (rawTypeStr.charAt(argEnd) == ')') {
-                        break;
-                    }
-                    throw new IllegalArgumentException(EMPTY_PARAMETER);
-                } else if (c == ')') {
-                    if(prevTerminator != ',') {
+                if(c == ')' || c == ',') {
+                    if(c == ')' && prevTerminator != ',') {
                         break;
                     }
                     throw new IllegalArgumentException(EMPTY_PARAMETER);
