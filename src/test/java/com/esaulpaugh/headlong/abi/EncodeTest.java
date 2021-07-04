@@ -42,7 +42,6 @@ import java.util.function.Supplier;
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
 import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
-import static com.esaulpaugh.headlong.abi.TypeFactory.EMPTY_PARAMETER;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,6 +53,8 @@ public class EncodeTest {
     private static final Class<IllegalArgumentException> ILLEGAL = IllegalArgumentException.class;
 
     private static final Class<StringIndexOutOfBoundsException> SIOOBE = StringIndexOutOfBoundsException.class;
+
+    private static final String EMPTY_PARAMETER = "empty parameter";
 
     @Disabled("may take minutes to run")
     @Test

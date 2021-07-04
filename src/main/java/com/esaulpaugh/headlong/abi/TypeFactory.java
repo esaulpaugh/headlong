@@ -181,8 +181,6 @@ public final class TypeFactory {
         return c > '0' && c <= '9';
     }
 
-    static final String EMPTY_PARAMETER = "empty parameter";
-
     private static TupleType parseTupleType(final String rawTypeStr) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final ArrayList<ABIType<?>> elements = new ArrayList<>();
         try {
@@ -193,7 +191,7 @@ public final class TypeFactory {
             while (argStart <= last) {
                 char c = rawTypeStr.charAt(argStart);
                 if(c == ',' || (c == ')' && prevTerminator == ',')) {
-                    throw new IllegalArgumentException(EMPTY_PARAMETER);
+                    throw new IllegalArgumentException("empty parameter");
                 } else if(c != ')') {
                     argEnd = nextTerminator(rawTypeStr, c == '(' ? findSubtupleEnd(rawTypeStr, argStart) : argStart);
                     elements.add(_build(rawTypeStr.substring(argStart, argEnd), null));
