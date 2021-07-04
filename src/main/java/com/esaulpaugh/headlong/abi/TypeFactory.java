@@ -190,28 +190,23 @@ public final class TypeFactory {
             int argEnd = 1; // inital value important for empty params case: "()"
             char prevTerminator = ')'; // inital value important for empty params case
             final int last = rawTypeStr.length() - 1; // must be >= 0
-            LOOP:
             while (argStart <= last) {
-                switch (rawTypeStr.charAt(argStart)) {
-                case '(': // element is tuple or tuple array
-                    argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart));
-                    break;
-                case ')':
-                    if(prevTerminator != ',') {
-                        break LOOP;
-                    }
-                    throw new IllegalArgumentException(EMPTY_PARAMETER);
-                case ',':
+                char c = rawTypeStr.charAt(argStart);
+                if (c == ',') {
                     if (rawTypeStr.charAt(argEnd) == ')') {
-                        break LOOP;
+                        break;
                     }
                     throw new IllegalArgumentException(EMPTY_PARAMETER);
-                default: // non-tuple element
-                    argEnd = nextTerminator(rawTypeStr, argStart);
+                } else if (c == ')') {
+                    if(prevTerminator != ',') {
+                        break;
+                    }
+                    throw new IllegalArgumentException(EMPTY_PARAMETER);
                 }
+                argEnd = nextTerminator(rawTypeStr, c == '(' ? findSubtupleEnd(rawTypeStr, argStart) : argStart);
                 elements.add(_build(rawTypeStr.substring(argStart, argEnd), null));
                 if((prevTerminator = rawTypeStr.charAt(argEnd)) != ',') {
-                    break/*LOOP*/;
+                    break;
                 }
                 argStart = argEnd + 1; // jump over terminator
             }
