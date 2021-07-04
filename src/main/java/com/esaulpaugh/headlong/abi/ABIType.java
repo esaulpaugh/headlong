@@ -228,10 +228,13 @@ public abstract class ABIType<J> {
         return canonicalType;
     }
 
+    private static final int LABEL_LEN = 6;
+    private static final int LABEL_PADDED_LEN = LABEL_LEN + 3;
+
     public static String format(byte[] abi) {
         return format(abi, (int row) -> {
             String unpadded = Integer.toHexString(row * UNIT_LENGTH_BYTES);
-            return pad((LABEL_PADDED_LEN - LABEL_RIGHT_PADDING) - unpadded.length(), unpadded);
+            return pad(LABEL_LEN - unpadded.length(), unpadded);
         });
     }
 
@@ -252,9 +255,6 @@ public abstract class ABIType<J> {
         }
         return sb.toString();
     }
-
-    private static final int LABEL_PADDED_LEN = 9;
-    private static final int LABEL_RIGHT_PADDING = 3;
 
     static String pad(int leftPadding, String unpadded) {
         StringBuilder sb = new StringBuilder();
