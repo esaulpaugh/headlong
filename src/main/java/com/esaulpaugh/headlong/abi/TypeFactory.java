@@ -192,15 +192,14 @@ public final class TypeFactory {
             final int last = rawTypeStr.length() - 1; // must be >= 0
             while (argStart <= last) {
                 char c = rawTypeStr.charAt(argStart);
-                if(c == ')' || c == ',') {
-                    if(c == ')' && prevTerminator != ',') {
-                        break;
-                    }
+                if(c == ',' || (c == ')' && prevTerminator == ',')) {
                     throw new IllegalArgumentException(EMPTY_PARAMETER);
+                } else if(c != ')') {
+                    argEnd = nextTerminator(rawTypeStr, c == '(' ? findSubtupleEnd(rawTypeStr, argStart) : argStart);
+                    elements.add(_build(rawTypeStr.substring(argStart, argEnd), null));
+                    prevTerminator = rawTypeStr.charAt(argEnd);
                 }
-                argEnd = nextTerminator(rawTypeStr, c == '(' ? findSubtupleEnd(rawTypeStr, argStart) : argStart);
-                elements.add(_build(rawTypeStr.substring(argStart, argEnd), null));
-                if((prevTerminator = rawTypeStr.charAt(argEnd)) != ',') {
+                if(prevTerminator == ')') {
                     break;
                 }
                 argStart = argEnd + 1; // jump over terminator
