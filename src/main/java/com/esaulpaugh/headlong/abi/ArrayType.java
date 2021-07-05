@@ -36,7 +36,7 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
  */
 public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
-    private static final ClassLoader CLASS_LOADER = ArrayType.class.getClassLoader();
+    private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
 
     static final Class<String> STRING_CLASS = String.class;
     static final Class<String[]> STRING_ARRAY_CLASS = String[].class;
