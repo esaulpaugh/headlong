@@ -46,7 +46,7 @@ public abstract class ABIType<J> {
     final Class<J> clazz;
     final boolean dynamic;
 
-    private String name = null;
+    private String name;
 
     ABIType(String canonicalType, Class<J> clazz, boolean dynamic) {
         this.canonicalType = canonicalType; // .intern() to save memory and allow == comparison?

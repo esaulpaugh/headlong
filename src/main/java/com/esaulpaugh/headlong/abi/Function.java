@@ -320,7 +320,7 @@ public final class Function implements ABIObject {
     }
 
     public static String formatCall(byte[] buffer, int offset, final int length) {
-        return formatCall(buffer, offset, length, (int row) -> ABIType.pad(0, "" + row));
+        return formatCall(buffer, offset, length, (int row) -> ABIType.pad(0, Integer.toString(row)));
     }
 
     /**
