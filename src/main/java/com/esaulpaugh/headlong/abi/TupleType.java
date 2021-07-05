@@ -107,7 +107,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             }
             return count;
         } catch (IllegalArgumentException iae) {
-            throw new IllegalArgumentException((array ? "array" : "tuple") + " index " + i + ": " + iae.getMessage());
+            throw new IllegalArgumentException((array ? "array" : "tuple") + " index " + i + ": " + iae.getMessage(), iae);
         }
     }
 
