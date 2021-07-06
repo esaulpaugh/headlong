@@ -133,13 +133,10 @@ public final class TypeFactory {
         throw new IllegalArgumentException("unrecognized type: \"" + rawType + '"');
     }
 
-    private static int parseLen(final String lenStr) {
+    private static int parseLen(String lenStr) {
         try {
-            if(leadDigitValid(lenStr.charAt(0)) || lenStr.equals("0")) {
-                final int length = Integer.parseInt(lenStr);
-                if (length >= 0) {
-                    return length;
-                }
+            if(leadDigitValid(lenStr.charAt(0)) || "0".equals(lenStr)) {
+                return Integer.parseInt(lenStr);
             }
         } catch (NumberFormatException ignored) {
             /* fall through */
