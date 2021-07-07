@@ -125,8 +125,12 @@ public class TestUtils {
         sb.delete(0, sb.length());
     }
 
-    public static String readFileResourceAsString(Class<?> clazz, String name) throws IOException {
-        URL url = clazz.getClassLoader().getResource(name);
+    public static String readFileResourceAsString(String resourceName) throws IOException {
+        return readFileResourceAsString(Thread.currentThread().getContextClassLoader(), resourceName);
+    }
+
+    public static String readFileResourceAsString(ClassLoader classLoader, String resourceName) throws IOException {
+        URL url = classLoader.getResource(resourceName);
         if(url == null) {
             throw new IOException("url null");
         }

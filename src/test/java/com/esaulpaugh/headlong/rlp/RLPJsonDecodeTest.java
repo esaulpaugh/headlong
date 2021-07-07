@@ -31,7 +31,7 @@ public class RLPJsonDecodeTest {
 
     @Test
     public void testValid() throws IOException {
-        String exampleJson = TestUtils.readFileResourceAsString(RLPJsonEncodeTest.class, "tests/ethereum/RLPTests/RandomRLPTests/example.json");
+        String exampleJson = TestUtils.readFileResourceAsString("tests/ethereum/RLPTests/RandomRLPTests/example.json");
 
         for (Map.Entry<String, JsonElement> e : RLPJsonEncodeTest.parseEntrySet(exampleJson)) {
             decodeRecursively(RLPJsonEncodeTest.parseOut(e.getValue().getAsJsonObject()));
@@ -41,7 +41,7 @@ public class RLPJsonDecodeTest {
     @Test
     public void testInvalid() throws IOException {
 
-        String testCasesJson = TestUtils.readFileResourceAsString(RLPJsonEncodeTest.class, "tests/ethereum/RLPTests/invalidRLPTest.json");
+        String testCasesJson = TestUtils.readFileResourceAsString("tests/ethereum/RLPTests/invalidRLPTest.json");
 
         for (Map.Entry<String, JsonElement> e : RLPJsonEncodeTest.parseEntrySet(testCasesJson)) {
 

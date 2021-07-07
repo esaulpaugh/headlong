@@ -38,7 +38,7 @@ public class RLPJsonEncodeTest {
     @Test
     public void testCases() throws IOException {
 
-        String testCasesJson = TestUtils.readFileResourceAsString(RLPJsonEncodeTest.class, "tests/ethereum/RLPTests/rlptest.json");
+        String testCasesJson = TestUtils.readFileResourceAsString("tests/ethereum/RLPTests/rlptest.json");
 
         for (Map.Entry<String, JsonElement> entry : parseEntrySet(testCasesJson)) {
             JsonObject value = entry.getValue().getAsJsonObject();

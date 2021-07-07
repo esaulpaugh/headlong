@@ -39,7 +39,7 @@ public class BasicABICasesTest {
 
     static {
         try {
-            TESTS = JsonUtils.parseObject(TestUtils.readFileResourceAsString(BasicABICasesTest.class, RESOURCE)).entrySet();
+            TESTS = JsonUtils.parseObject(TestUtils.readFileResourceAsString(RESOURCE)).entrySet();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -113,12 +113,12 @@ public class AdvancedABICasesTest {
 
     @Test
     public void testAbiV2Cases() throws IOException {
-        runCases(JsonUtils.parseArray(TestUtils.readFileResourceAsString(BasicABICasesTest.class, ABI_V2_CASES_PATH)), false);
+        runCases(JsonUtils.parseArray(TestUtils.readFileResourceAsString(ABI_V2_CASES_PATH)), false);
     }
 
     @Test
     public void testHeadlongCases() throws IOException {
-        runCases(JsonUtils.parseArray(TestUtils.readFileResourceAsString(BasicABICasesTest.class, HEADLONG_CASES_PATH)), true);
+        runCases(JsonUtils.parseArray(TestUtils.readFileResourceAsString(HEADLONG_CASES_PATH)), true);
     }
 
     private static void runCases(final JsonArray cases, final boolean function) {
