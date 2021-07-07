@@ -31,7 +31,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public class ABIJsonCasesTest {
+public class BasicABICasesTest {
 
     private static final String RESOURCE = "tests/ethereum/ABITests/basic_abi_tests.json";
 
@@ -39,7 +39,7 @@ public class ABIJsonCasesTest {
 
     static {
         try {
-            TESTS = JsonUtils.parseObject(TestUtils.readFileResourceAsString(ABIJsonCasesTest.class, RESOURCE)).entrySet();
+            TESTS = JsonUtils.parseObject(TestUtils.readFileResourceAsString(BasicABICasesTest.class, RESOURCE)).entrySet();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

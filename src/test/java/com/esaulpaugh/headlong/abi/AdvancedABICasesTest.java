@@ -29,7 +29,7 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.encode;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public class ABIJsonCasesTest2 {
+public class AdvancedABICasesTest {
 
     private static final String ABI_V2_CASES_PATH = "tests/ethers-io/tests/tests/contract-interface-abi2.json";
     private static final String HEADLONG_CASES_PATH = "tests/headlong/tests/abi_tests.json";
@@ -113,12 +113,12 @@ public class ABIJsonCasesTest2 {
 
     @Test
     public void testAbiV2Cases() throws IOException {
-        runCases(JsonUtils.parseArray(TestUtils.readFileResourceAsString(ABIJsonCasesTest.class, ABI_V2_CASES_PATH)), false);
+        runCases(JsonUtils.parseArray(TestUtils.readFileResourceAsString(BasicABICasesTest.class, ABI_V2_CASES_PATH)), false);
     }
 
     @Test
     public void testHeadlongCases() throws IOException {
-        runCases(JsonUtils.parseArray(TestUtils.readFileResourceAsString(ABIJsonCasesTest.class, HEADLONG_CASES_PATH)), true);
+        runCases(JsonUtils.parseArray(TestUtils.readFileResourceAsString(BasicABICasesTest.class, HEADLONG_CASES_PATH)), true);
     }
 
     private static void runCases(final JsonArray cases, final boolean function) {
