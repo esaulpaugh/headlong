@@ -74,7 +74,7 @@ public final class TypeFactory {
         lambdaMap.put("fixed", lambdaMap.get("fixed128x18"));
         lambdaMap.put("ufixed", lambdaMap.get("ufixed128x18"));
 
-        lambdaMap.put("bool", BooleanType::new);
+        lambdaMap.put("bool", () -> BooleanType.INSTANCE);
 
         SUPPLIER_MAP = Collections.unmodifiableMap(lambdaMap);
     }

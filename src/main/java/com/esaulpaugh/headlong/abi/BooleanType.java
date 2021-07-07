@@ -20,6 +20,8 @@ import java.nio.ByteBuffer;
 
 /** Unsigned 0 or 1. */
 public final class BooleanType extends UnitType<Boolean> {
+    
+    static final BooleanType INSTANCE = new BooleanType();
 
     private static final byte[] BOOLEAN_FALSE = new byte[UNIT_LENGTH_BYTES];
     private static final byte[] BOOLEAN_TRUE = new byte[UNIT_LENGTH_BYTES];
