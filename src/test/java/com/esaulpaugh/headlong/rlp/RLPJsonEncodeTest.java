@@ -16,8 +16,8 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.abi.util.JsonUtils;
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -30,9 +30,8 @@ import java.util.Set;
 import static com.esaulpaugh.headlong.TestUtils.parseArrayToBytesHierarchy;
 import static com.esaulpaugh.headlong.TestUtils.parseBigIntegerStringPoundSign;
 import static com.esaulpaugh.headlong.TestUtils.parseLong;
-import static com.esaulpaugh.headlong.TestUtils.parseObject;
 import static com.esaulpaugh.headlong.TestUtils.parseString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class RLPJsonEncodeTest {
 
@@ -42,31 +41,8 @@ public class RLPJsonEncodeTest {
         String testCasesJson = TestUtils.readFileResourceAsString(RLPJsonEncodeTest.class, "tests/ethereum/RLPTests/rlptest.json");
 
         for (Map.Entry<String, JsonElement> entry : parseEntrySet(testCasesJson)) {
-
-            JsonObject jsonObject = entry.getValue().getAsJsonObject();
-            JsonElement in = jsonObject.get("in");
-
-            byte[] actualBytes;
-            if(in.isJsonArray()) {
-                actualBytes = RLPEncoder.encodeAsList(parseArrayToBytesHierarchy(in.getAsJsonArray()));
-            } else if(in.isJsonObject()) {
-                System.err.println("json object");
-                parseObject(in);
-                actualBytes = null;
-            } else {
-                try {
-                    actualBytes = RLPEncoder.encodeString(Integers.toBytes(parseLong(in)));
-                } catch (NumberFormatException nfe) {
-                    actualBytes = RLPEncoder.encodeString(
-                            in.getAsString().startsWith("#")
-                                    ? parseBigIntegerStringPoundSign(in).toByteArray()
-                                    : Strings.decode(parseString(in), Strings.UTF_8)
-                    );
-                }
-            }
-            String expected = Strings.encode(getOutBytes(entry));
-            String actual = Strings.encode(actualBytes);
-            assertEquals(expected, actual);
+            JsonObject value = entry.getValue().getAsJsonObject();
+            assertArrayEquals(parseOut(value), parseIn(value));
         }
     }
 
@@ -76,15 +52,33 @@ public class RLPJsonEncodeTest {
                 .entrySet();
     }
 
-    static byte[] getOutBytes(Map.Entry<String, JsonElement> e) {
-        JsonObject jsonObject = e.getValue().getAsJsonObject();
+    static byte[] parseIn(JsonObject value) {
+        JsonElement in = value.get("in");
+        if(in.isJsonArray()) {
+            return RLPEncoder.encodeAsList(parseArrayToBytesHierarchy(in.getAsJsonArray()));
+        } else if(in.isJsonPrimitive()) {
+            try {
+                return RLPEncoder.encodeString(Integers.toBytes(parseLong(in)));
+            } catch (NumberFormatException nfe) {
+                return RLPEncoder.encodeString(
+                        in.getAsString().startsWith("#")
+                                ? parseBigIntegerStringPoundSign(in).toByteArray()
+                                : Strings.decode(parseString(in), Strings.UTF_8)
+                );
+            }
+        } else if(in.isJsonObject()) {
+            throw new Error("unexpected json object");
+        } else if(in.isJsonNull()) {
+            throw new Error("unexpected json null");
+        } else {
+            throw new Error();
+        }
+    }
 
-        System.out.println(jsonObject);
-
-        JsonElement out = jsonObject.get("out");
-
+    static byte[] parseOut(JsonObject value) {
+        JsonElement out = value.get("out");
+        System.out.println(out);
         String outString = out.getAsString();
-
         return Strings.decode(outString.substring(outString.indexOf("0x") + "0x".length()));
     }
 }

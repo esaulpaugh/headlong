@@ -154,7 +154,7 @@ public class TestUtils {
         ArrayList<Object> arrayList = new ArrayList<>();
         for (JsonElement element : array) {
             if(element.isJsonObject()) {
-                arrayList.add(parseObject(element));
+                throw new Error("found json object");
             } else if(element.isJsonArray()) {
                 arrayList.add(parseArrayToBytesHierarchy(element.getAsJsonArray()));
             } else if(element.isJsonPrimitive()) {
@@ -216,10 +216,6 @@ public class TestUtils {
 
     public static long parseLong(JsonElement in) {
         return in.getAsLong();
-    }
-
-    public static Object parseObject(JsonElement in) {
-        throw new UnsupportedOperationException("unsupported");
     }
 
     public static BigInteger parseAddress(JsonElement in) { // uint160
