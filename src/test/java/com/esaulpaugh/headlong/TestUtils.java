@@ -21,11 +21,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import org.junit.jupiter.api.Assertions;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -129,20 +130,11 @@ public class TestUtils {
         if(url == null) {
             throw new IOException("url null");
         }
-        return readFile(url.getFile()).toString("UTF-8");
-    }
-
-    private static ByteArrayOutputStream readFile(String filepath) throws IOException {
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
-        try (FileInputStream fis = new FileInputStream(filepath)) {
-            byte[] buffer = new byte[2048];
-            int len;
-            while ((len = fis.read(buffer)) >= 0) {
-                result.write(buffer, 0, len);
-            }
+        try {
+            return Strings.encode(Files.readAllBytes(Paths.get(url.toURI())), Strings.UTF_8);
+        } catch (URISyntaxException use) {
+            throw new RuntimeException(use);
         }
-        System.out.println("READ " + filepath);
-        return result;
     }
 
     public static byte[] parsePrimitiveToBytes(JsonElement in) {
