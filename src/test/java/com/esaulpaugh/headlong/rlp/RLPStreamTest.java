@@ -35,7 +35,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
@@ -188,13 +191,18 @@ public class RLPStreamTest {
         }
     }
 
+    private static final int RECEIVE = 0;
+    private static final int SEND = 1;
+
     private static class ReceiveStreamThread extends Thread {
 
-        private final Object receiver = new Object();
+        private final Lock lock = new ReentrantLock();
+        private final Condition send = lock.newCondition();
+        private final Condition receive = lock.newCondition();
 
         private final long zero;
         private final PipedOutputStream pos;
-        private final AtomicBoolean canReceive;
+        private final AtomicInteger mode;
         private final SendStreamThread senderThread;
 
         Throwable throwable;
@@ -202,8 +210,8 @@ public class RLPStreamTest {
         public ReceiveStreamThread() {
             this.zero = System.nanoTime();
             this.pos = new PipedOutputStream();
-            this.canReceive = new AtomicBoolean(false);
-            this.senderThread = new SendStreamThread(zero, pos, receiver, canReceive);
+            this.mode = new AtomicInteger(SEND);
+            this.senderThread = new SendStreamThread(zero, pos, lock, mode, send, receive);
         }
 
         @Override
@@ -216,18 +224,17 @@ public class RLPStreamTest {
                 Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
                 senderThread.start();
-                waitForNotifiedSender();
+                lock.lock();
+                signalWaitLock(lock, mode, SEND, send, RECEIVE, receive);
 
                 assertNoNext(iter);
-
-                waitForNotifiedSender();
+                signalWaitLock(lock, mode, SEND, send, RECEIVE, receive);
 
                 assertHasNext(iter);
                 assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
                 assertNoNext(iter);
                 assertNoNext(iter);
-
-                waitForNotifiedSender();
+                signalWaitLock(lock, mode, SEND, send, RECEIVE, receive);
 
                 for (byte b : TEST_BYTES) {
                     assertHasNext(iter);
@@ -235,15 +242,14 @@ public class RLPStreamTest {
                 }
                 assertNoNext(iter);
 
-                waitForNotifiedSender();
+                signalWaitLock(lock, mode, SEND, send, RECEIVE, receive);
+
+                assertNoNext(iter);
+                signalWaitLock(lock, mode, SEND, send, RECEIVE, receive);
 
                 assertNoNext(iter);
 
-                waitForNotifiedSender();
-
-                assertNoNext(iter);
-
-                waitForNotifiedSender();
+                signalWait(lock, mode, SEND, send, RECEIVE, receive);
 
                 assertHasNext(iter);
                 assertTrue(iter.hasNext());
@@ -260,22 +266,6 @@ public class RLPStreamTest {
             }
         }
 
-        private void waitForNotifiedSender() throws InterruptedException {
-            notifySender();
-            synchronized (receiver) {
-                while(!canReceive.get()) {
-                    receiver.wait();
-                }
-            }
-        }
-
-        private void notifySender() {
-            synchronized (senderThread) {
-                canReceive.set(false);
-                senderThread.notifyAll();
-            }
-        }
-
         private void assertNoNext(Iterator<RLPItem> iter) throws Throwable {
             RLPStreamTest.assertNoNext(zero, iter);
         }
@@ -289,55 +279,44 @@ public class RLPStreamTest {
 
         private final long zero;
         private final OutputStream os;
-        private final Object receiver;
-        private final AtomicBoolean canReceive;
+        private final Lock lock;
+        private final AtomicInteger mode;
+        private final Condition send;
+        private final Condition receive;
 
-        SendStreamThread(long zero, OutputStream os, Object receiver, AtomicBoolean canReceive) {
+        SendStreamThread(long zero, OutputStream os, Lock lock, AtomicInteger mode, Condition send, Condition receive) {
             this.zero = zero;
             this.os = os;
-            this.receiver = receiver;
-            this.canReceive = canReceive;
+            this.lock = lock;
+            this.mode = mode;
+            this.send = send;
+            this.receive = receive;
         }
 
         @Override
         public void run() {
             try {
-                waitForNotifiedReceiver();
+                lock.lock();
+                signalWaitLock(lock, mode, RECEIVE, receive, SEND, send);
                 write(TEST_BYTE);
-                waitForNotifiedReceiver();
+                signalWaitLock(lock, mode, RECEIVE, receive, SEND, send);
                 for (byte b : TEST_BYTES) {
                     write(b);
                 }
-                waitForNotifiedReceiver();
+                signalWaitLock(lock, mode, RECEIVE, receive, SEND, send);
                 byte[] rlpString = RLPEncoder.encodeString(Strings.decode(TEST_STRING, UTF_8));
                 int i = 0;
                 write(rlpString[i++]);
-                waitForNotifiedReceiver();
+                signalWaitLock(lock, mode, RECEIVE, receive, SEND, send);
                 write(rlpString[i++]);
-                waitForNotifiedReceiver();
+                signalWaitLock(lock, mode, RECEIVE, receive, SEND, send);
                 while(i < rlpString.length) {
                     write(rlpString[i++]);
                 }
                 write(TEST_BYTE);
-                notifyReceiver();
+                signalUnlock(lock, mode, RECEIVE, receive);
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
-            }
-        }
-
-        private void waitForNotifiedReceiver() throws InterruptedException {
-            notifyReceiver();
-            synchronized (SendStreamThread.this) {
-                while(canReceive.get()) {
-                    this.wait();
-                }
-            }
-        }
-
-        private void notifyReceiver() {
-            synchronized (receiver) {
-                canReceive.set(true);
-                receiver.notifyAll();
             }
         }
 
@@ -345,6 +324,32 @@ public class RLPStreamTest {
             os.write(b);
             logWrite(zero, "'" + (char) b + "' (0x" + Strings.encode(b) +")");
         }
+    }
+
+    private static void signalUnlock(Lock lock, AtomicInteger condition, int set, Condition signal) {
+        try {
+            condition.set(set);
+            signal.signalAll();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private static void signalWait(Lock lock, AtomicInteger condition, int set, Condition signal, int waitFor, Condition wait) throws InterruptedException {
+        try {
+            condition.set(set);
+            signal.signalAll();
+            while (condition.get() != waitFor) {
+                wait.await();
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private static void signalWaitLock(Lock lock, AtomicInteger condition, int set, Condition signal, int waitFor, Condition wait) throws InterruptedException {
+        signalWait(lock, condition, set, signal, waitFor, wait);
+        lock.lock();
     }
 
     static void assertHasNext(long zero, Iterator<RLPItem> iter) {
