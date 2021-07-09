@@ -183,8 +183,6 @@ public class RLPStreamTest {
             for(RLPItem item : stream) {
                 System.out.println(item);
             }
-        } catch (IOException e) {
-            throw e;
         }
     }
 
@@ -330,8 +328,8 @@ public class RLPStreamTest {
     
     private static void signalWait(CyclicBarrier theirs, CyclicBarrier ours) throws InterruptedException {
         try {
-            theirs.await();
-            ours.await();
+            theirs.await(); // wake up other thread
+            ours.await(); // wait to be woken up
         } catch (BrokenBarrierException bbe) {
             throw new RuntimeException(bbe);
         }
