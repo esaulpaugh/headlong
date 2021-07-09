@@ -35,13 +35,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -148,9 +146,7 @@ public class RLPStreamTest {
     @Test
     public void testStreamHard() throws Throwable {
         ReceiveStreamTask task = new ReceiveStreamTask();
-        Thread thread = new Thread(task);
-        thread.start();
-        thread.join();
+        task.run();
         Throwable t = task.throwable;
         if(t != null) {
             throw t;
@@ -182,38 +178,25 @@ public class RLPStreamTest {
     }
 
     @Test
-    public void testInterfaces() {
+    public void testInterfaces() throws IOException {
         try (RLPStream stream = new RLPStream(new ByteArrayInputStream(new byte[0]))) {
             for(RLPItem item : stream) {
                 System.out.println(item);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw e;
         }
     }
 
-    private static final int RECEIVE = 0;
-    private static final int SEND = 1;
-
     private static class ReceiveStreamTask implements Runnable {
 
-        private final Lock lock = new ReentrantLock();
-        private final Condition send = lock.newCondition();
-        private final Condition receive = lock.newCondition();
-
-        private final long zero;
-        private final PipedOutputStream pos;
-        private final AtomicInteger mode;
-        private final SendStreamTask senderTask;
+        private final long zero = System.nanoTime();
+        private final PipedOutputStream pos = new PipedOutputStream();
+        private final CyclicBarrier receiveBarrier = new CyclicBarrier(2);
+        private final CyclicBarrier sendBarrier = new CyclicBarrier(2);
+        private final SendStreamTask senderTask = new SendStreamTask(zero, pos, receiveBarrier, sendBarrier);
 
         Throwable throwable;
-
-        public ReceiveStreamTask() {
-            this.zero = System.nanoTime();
-            this.pos = new PipedOutputStream();
-            this.mode = new AtomicInteger(SEND);
-            this.senderTask = new SendStreamTask(zero, pos, lock, mode, send, receive);
-        }
 
         @Override
         public void run() {
@@ -226,7 +209,6 @@ public class RLPStreamTest {
                 Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
                 senderThread.start();
-                lock.lock();
 
                 Runnable[] subtasks = new Runnable[] {
                         () -> assertNoNext(iter),
@@ -258,7 +240,7 @@ public class RLPStreamTest {
                 };
 
                 for(Runnable subtask : subtasks) {
-                    signalWaitRelock(lock, mode, SEND, send, RECEIVE, receive);
+                    signalWait(sendBarrier, receiveBarrier);
                     subtask.run();
                 }
 
@@ -266,8 +248,6 @@ public class RLPStreamTest {
             } catch (Throwable io) {
                 throwable = io;
                 senderThread.interrupt();
-            } finally {
-                trySignalUnlock(lock, mode, SEND, send);
             }
         }
 
@@ -288,23 +268,18 @@ public class RLPStreamTest {
 
         private final long zero;
         private final OutputStream os;
-        private final Lock lock;
-        private final AtomicInteger mode;
-        private final Condition send;
-        private final Condition receive;
+        private final CyclicBarrier receiveBarrier;
+        private final CyclicBarrier sendBarrier;
 
-        SendStreamTask(long zero, OutputStream os, Lock lock, AtomicInteger mode, Condition send, Condition receive) {
+        SendStreamTask(long zero, OutputStream os, CyclicBarrier receiveBarrier, CyclicBarrier sendBarrier) {
             this.zero = zero;
             this.os = os;
-            this.lock = lock;
-            this.mode = mode;
-            this.send = send;
-            this.receive = receive;
+            this.sendBarrier = sendBarrier;
+            this.receiveBarrier = receiveBarrier;
         }
 
         @Override
         public void run() {
-            lock.lock();
             try {
                 final byte[] rlpString = RLPEncoder.encodeString(Strings.decode(TEST_STRING, UTF_8));
                 Runnable[] subtasks = new Runnable[] {
@@ -324,14 +299,14 @@ public class RLPStreamTest {
                         }
                 };
 
+                doWait(sendBarrier);
                 for(Runnable subtask : subtasks) {
-                    signalWaitRelock(lock, mode, RECEIVE, receive, SEND, send);
+                    signalWait(receiveBarrier, sendBarrier);
                     subtask.run();
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } finally {
-                trySignalUnlock(lock, mode, RECEIVE, receive);
+                doWait(receiveBarrier);
+            } catch (InterruptedException ie) {
+                throw new RuntimeException(ie);
             }
         }
 
@@ -344,38 +319,22 @@ public class RLPStreamTest {
             }
         }
     }
-
-    private static void trySignalUnlock(Lock lock, AtomicInteger condition, int set, Condition signal) {
+    
+    private static void doWait(CyclicBarrier ours) throws InterruptedException {
         try {
-            signalUnlock(lock, condition, set, signal);
-        } catch (IllegalMonitorStateException ignored) {
+            ours.await();
+        } catch (BrokenBarrierException bbe) {
+            throw new RuntimeException(bbe);
         }
     }
-
-    private static void signal(AtomicInteger condition, int set, Condition signal) {
-        condition.set(set);
-        signal.signalAll();
-    }
-
-    private static void signalUnlock(Lock lock, AtomicInteger condition, int set, Condition signal) {
-        signal(condition, set, signal);
-        lock.unlock();
-    }
-
-    private static void signalWaitUnlock(Lock lock, AtomicInteger condition, int set, Condition signal, int waitFor, Condition wait) throws InterruptedException {
+    
+    private static void signalWait(CyclicBarrier theirs, CyclicBarrier ours) throws InterruptedException {
         try {
-            signal(condition, set, signal);
-            while (condition.get() != waitFor) {
-                wait.await();
-            }
-        } finally {
-            lock.unlock();
+            theirs.await();
+            ours.await();
+        } catch (BrokenBarrierException bbe) {
+            throw new RuntimeException(bbe);
         }
-    }
-
-    private static void signalWaitRelock(Lock lock, AtomicInteger condition, int set, Condition signal, int waitFor, Condition wait) throws InterruptedException {
-        signalWaitUnlock(lock, condition, set, signal, waitFor, wait);
-        lock.lock();
     }
 
     static void assertHasNext(long zero, Iterator<RLPItem> iter) {
