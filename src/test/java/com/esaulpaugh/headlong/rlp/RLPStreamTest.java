@@ -147,10 +147,11 @@ public class RLPStreamTest {
 
     @Test
     public void testStreamHard() throws Throwable {
-        ReceiveStreamThread thread = new ReceiveStreamThread();
+        ReceiveStreamTask task = new ReceiveStreamTask();
+        Thread thread = new Thread(task);
         thread.start();
         thread.join();
-        Throwable t = thread.throwable;
+        Throwable t = task.throwable;
         if(t != null) {
             throw t;
         }
@@ -194,7 +195,7 @@ public class RLPStreamTest {
     private static final int RECEIVE = 0;
     private static final int SEND = 1;
 
-    private static class ReceiveStreamThread extends Thread {
+    private static class ReceiveStreamTask implements Runnable {
 
         private final Lock lock = new ReentrantLock();
         private final Condition send = lock.newCondition();
@@ -203,19 +204,20 @@ public class RLPStreamTest {
         private final long zero;
         private final PipedOutputStream pos;
         private final AtomicInteger mode;
-        private final SendStreamThread senderThread;
+        private final SendStreamTask senderTask;
 
         Throwable throwable;
 
-        public ReceiveStreamThread() {
+        public ReceiveStreamTask() {
             this.zero = System.nanoTime();
             this.pos = new PipedOutputStream();
             this.mode = new AtomicInteger(SEND);
-            this.senderThread = new SendStreamThread(zero, pos, lock, mode, send, receive);
+            this.senderTask = new SendStreamTask(zero, pos, lock, mode, send, receive);
         }
 
         @Override
         public void run() {
+            Thread senderThread = new Thread(senderTask);
             try (RLPStream stream = new RLPStream(new PipedInputStream(pos, 512))) {
 
                 Iterator<RLPItem> iter = stream.iterator();
@@ -277,7 +279,7 @@ public class RLPStreamTest {
         }
     }
 
-    private static class SendStreamThread extends Thread {
+    private static class SendStreamTask implements Runnable {
 
         private final long zero;
         private final OutputStream os;
@@ -286,7 +288,7 @@ public class RLPStreamTest {
         private final Condition send;
         private final Condition receive;
 
-        SendStreamThread(long zero, OutputStream os, Lock lock, AtomicInteger mode, Condition send, Condition receive) {
+        SendStreamTask(long zero, OutputStream os, Lock lock, AtomicInteger mode, Condition send, Condition receive) {
             this.zero = zero;
             this.os = os;
             this.lock = lock;
