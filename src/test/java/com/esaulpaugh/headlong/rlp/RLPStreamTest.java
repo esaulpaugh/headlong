@@ -227,40 +227,41 @@ public class RLPStreamTest {
 
                 senderThread.start();
                 lock.lock();
-                signalWaitRelock(lock, mode, SEND, send, RECEIVE, receive);
 
-                assertNoNext(iter);
-                signalWaitRelock(lock, mode, SEND, send, RECEIVE, receive);
+                Runnable[] subtasks = new Runnable[] {
+                        () -> assertNoNext(iter),
+                        () -> {
+                            assertHasNext(iter);
+                            assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
+                            assertNoNext(iter);
+                            assertNoNext(iter);
+                        },
+                        () -> {
+                            for (byte b : TEST_BYTES) {
+                                assertHasNext(iter);
+                                assertArrayEquals(new byte[] { b }, iter.next().asBytes());
+                            }
+                            assertNoNext(iter);
+                        },
+                        () -> assertNoNext(iter),
+                        () -> assertNoNext(iter),
+                        () -> {
+                            assertHasNext(iter);
+                            assertTrue(iter.hasNext());
+                            assertEquals(TEST_STRING, iter.next().asString(UTF_8));
+                            assertHasNext(iter);
+                            assertTrue(iter.hasNext());
+                            assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
+                            assertNoNext(iter);
+                            assertNoNext(iter);
+                        }
+                };
 
-                assertHasNext(iter);
-                assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
-                assertNoNext(iter);
-                assertNoNext(iter);
-                signalWaitRelock(lock, mode, SEND, send, RECEIVE, receive);
-
-                for (byte b : TEST_BYTES) {
-                    assertHasNext(iter);
-                    assertArrayEquals(new byte[] { b }, iter.next().asBytes());
+                for(Runnable subtask : subtasks) {
+                    signalWaitRelock(lock, mode, SEND, send, RECEIVE, receive);
+                    subtask.run();
                 }
-                assertNoNext(iter);
 
-                signalWaitRelock(lock, mode, SEND, send, RECEIVE, receive);
-
-                assertNoNext(iter);
-                signalWaitRelock(lock, mode, SEND, send, RECEIVE, receive);
-
-                assertNoNext(iter);
-
-                signalWaitRelock(lock, mode, SEND, send, RECEIVE, receive);
-
-                assertHasNext(iter);
-                assertTrue(iter.hasNext());
-                assertEquals(TEST_STRING, iter.next().asString(UTF_8));
-                assertHasNext(iter);
-                assertTrue(iter.hasNext());
-                assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
-                assertNoNext(iter);
-                assertNoNext(iter);
                 senderThread.join();
             } catch (Throwable io) {
                 throwable = io;
@@ -270,8 +271,12 @@ public class RLPStreamTest {
             }
         }
 
-        private void assertNoNext(Iterator<RLPItem> iter) throws Throwable {
-            RLPStreamTest.assertNoNext(zero, iter);
+        private void assertNoNext(Iterator<RLPItem> iter) throws RuntimeException {
+            try {
+                RLPStreamTest.assertNoNext(zero, iter);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
         }
 
         private void assertHasNext(Iterator<RLPItem> iter) {
@@ -301,33 +306,42 @@ public class RLPStreamTest {
         public void run() {
             lock.lock();
             try {
-                signalWaitRelock(lock, mode, RECEIVE, receive, SEND, send);
-                write(TEST_BYTE);
-                signalWaitRelock(lock, mode, RECEIVE, receive, SEND, send);
-                for (byte b : TEST_BYTES) {
-                    write(b);
+                final byte[] rlpString = RLPEncoder.encodeString(Strings.decode(TEST_STRING, UTF_8));
+                Runnable[] subtasks = new Runnable[] {
+                        () -> write(TEST_BYTE),
+                        () -> {
+                            for (byte b : TEST_BYTES) {
+                                write(b);
+                            }
+                        },
+                        () -> write(rlpString[0]),
+                        () -> write(rlpString[1]),
+                        () -> {
+                            for (int i = 2; i < rlpString.length; i++) {
+                                write(rlpString[i]);
+                            }
+                            write(TEST_BYTE);
+                        }
+                };
+
+                for(Runnable subtask : subtasks) {
+                    signalWaitRelock(lock, mode, RECEIVE, receive, SEND, send);
+                    subtask.run();
                 }
-                signalWaitRelock(lock, mode, RECEIVE, receive, SEND, send);
-                byte[] rlpString = RLPEncoder.encodeString(Strings.decode(TEST_STRING, UTF_8));
-                int i = 0;
-                write(rlpString[i++]);
-                signalWaitRelock(lock, mode, RECEIVE, receive, SEND, send);
-                write(rlpString[i++]);
-                signalWaitRelock(lock, mode, RECEIVE, receive, SEND, send);
-                while(i < rlpString.length) {
-                    write(rlpString[i++]);
-                }
-                write(TEST_BYTE);
-            } catch (InterruptedException | IOException e) {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             } finally {
                 trySignalUnlock(lock, mode, RECEIVE, receive);
             }
         }
 
-        private void write(byte b) throws IOException {
-            os.write(b);
-            logWrite(zero, "'" + (char) b + "' (0x" + Strings.encode(b) +")");
+        private void write(byte b) throws RuntimeException {
+            try {
+                os.write(b);
+                logWrite(zero, "'" + (char) b + "' (0x" + Strings.encode(b) +")");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
