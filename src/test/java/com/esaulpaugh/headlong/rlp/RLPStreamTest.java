@@ -225,16 +225,16 @@ public class RLPStreamTest {
 
                 senderThread.start();
                 lock.lock();
-                signalWaitLock(lock, mode, SEND, send, RECEIVE, receive);
+                signalWaitRelock(lock, mode, SEND, send, RECEIVE, receive);
 
                 assertNoNext(iter);
-                signalWaitLock(lock, mode, SEND, send, RECEIVE, receive);
+                signalWaitRelock(lock, mode, SEND, send, RECEIVE, receive);
 
                 assertHasNext(iter);
                 assertArrayEquals(new byte[] { TEST_BYTE }, iter.next().asBytes());
                 assertNoNext(iter);
                 assertNoNext(iter);
-                signalWaitLock(lock, mode, SEND, send, RECEIVE, receive);
+                signalWaitRelock(lock, mode, SEND, send, RECEIVE, receive);
 
                 for (byte b : TEST_BYTES) {
                     assertHasNext(iter);
@@ -242,14 +242,14 @@ public class RLPStreamTest {
                 }
                 assertNoNext(iter);
 
-                signalWaitLock(lock, mode, SEND, send, RECEIVE, receive);
+                signalWaitRelock(lock, mode, SEND, send, RECEIVE, receive);
 
                 assertNoNext(iter);
-                signalWaitLock(lock, mode, SEND, send, RECEIVE, receive);
+                signalWaitRelock(lock, mode, SEND, send, RECEIVE, receive);
 
                 assertNoNext(iter);
 
-                signalWait(lock, mode, SEND, send, RECEIVE, receive);
+                signalWaitRelock(lock, mode, SEND, send, RECEIVE, receive);
 
                 assertHasNext(iter);
                 assertTrue(iter.hasNext());
@@ -263,6 +263,8 @@ public class RLPStreamTest {
             } catch (Throwable io) {
                 throwable = io;
                 senderThread.interrupt();
+            } finally {
+                trySignalUnlock(lock, mode, SEND, send);
             }
         }
 
@@ -295,28 +297,29 @@ public class RLPStreamTest {
 
         @Override
         public void run() {
+            lock.lock();
             try {
-                lock.lock();
-                signalWaitLock(lock, mode, RECEIVE, receive, SEND, send);
+                signalWaitRelock(lock, mode, RECEIVE, receive, SEND, send);
                 write(TEST_BYTE);
-                signalWaitLock(lock, mode, RECEIVE, receive, SEND, send);
+                signalWaitRelock(lock, mode, RECEIVE, receive, SEND, send);
                 for (byte b : TEST_BYTES) {
                     write(b);
                 }
-                signalWaitLock(lock, mode, RECEIVE, receive, SEND, send);
+                signalWaitRelock(lock, mode, RECEIVE, receive, SEND, send);
                 byte[] rlpString = RLPEncoder.encodeString(Strings.decode(TEST_STRING, UTF_8));
                 int i = 0;
                 write(rlpString[i++]);
-                signalWaitLock(lock, mode, RECEIVE, receive, SEND, send);
+                signalWaitRelock(lock, mode, RECEIVE, receive, SEND, send);
                 write(rlpString[i++]);
-                signalWaitLock(lock, mode, RECEIVE, receive, SEND, send);
+                signalWaitRelock(lock, mode, RECEIVE, receive, SEND, send);
                 while(i < rlpString.length) {
                     write(rlpString[i++]);
                 }
                 write(TEST_BYTE);
-                signalUnlock(lock, mode, RECEIVE, receive);
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
+            } finally {
+                trySignalUnlock(lock, mode, RECEIVE, receive);
             }
         }
 
@@ -326,19 +329,26 @@ public class RLPStreamTest {
         }
     }
 
-    private static void signalUnlock(Lock lock, AtomicInteger condition, int set, Condition signal) {
+    private static void trySignalUnlock(Lock lock, AtomicInteger condition, int set, Condition signal) {
         try {
-            condition.set(set);
-            signal.signalAll();
-        } finally {
-            lock.unlock();
+            signalUnlock(lock, condition, set, signal);
+        } catch (IllegalMonitorStateException ignored) {
         }
     }
 
-    private static void signalWait(Lock lock, AtomicInteger condition, int set, Condition signal, int waitFor, Condition wait) throws InterruptedException {
+    private static void signal(AtomicInteger condition, int set, Condition signal) {
+        condition.set(set);
+        signal.signalAll();
+    }
+
+    private static void signalUnlock(Lock lock, AtomicInteger condition, int set, Condition signal) {
+        signal(condition, set, signal);
+        lock.unlock();
+    }
+
+    private static void signalWaitUnlock(Lock lock, AtomicInteger condition, int set, Condition signal, int waitFor, Condition wait) throws InterruptedException {
         try {
-            condition.set(set);
-            signal.signalAll();
+            signal(condition, set, signal);
             while (condition.get() != waitFor) {
                 wait.await();
             }
@@ -347,8 +357,8 @@ public class RLPStreamTest {
         }
     }
 
-    private static void signalWaitLock(Lock lock, AtomicInteger condition, int set, Condition signal, int waitFor, Condition wait) throws InterruptedException {
-        signalWait(lock, condition, set, signal, waitFor, wait);
+    private static void signalWaitRelock(Lock lock, AtomicInteger condition, int set, Condition signal, int waitFor, Condition wait) throws InterruptedException {
+        signalWaitUnlock(lock, condition, set, signal, waitFor, wait);
         lock.lock();
     }
 
