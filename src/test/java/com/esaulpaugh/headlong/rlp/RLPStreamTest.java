@@ -304,6 +304,7 @@ public class RLPStreamTest {
                 }
                 doWait(receiveBarrier);
             } catch (InterruptedException ie) {
+                ie.printStackTrace();
                 throw new RuntimeException(ie);
             }
         }
