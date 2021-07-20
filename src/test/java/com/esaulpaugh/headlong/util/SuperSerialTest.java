@@ -78,7 +78,7 @@ public class SuperSerialTest {
 
         assertArrayEquals(new boolean[] { false, true, true}, arr0);
 
-        boolean[] arr1 = (boolean[]) ((ArrayType<? extends ABIType<?>, ?>) tt.get(0)).parseArgument(boolArrStr);
+        boolean[] arr1 = (boolean[]) tt.get(0).parseArgument(boolArrStr);
 
         assertArrayEquals(arr0, arr1);
 
