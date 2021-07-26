@@ -227,7 +227,7 @@ public class TupleTest {
 
         int start = 1 + rand.nextInt(len);
         int end = rand.nextInt(start);
-        TestUtils.assertThrown(NegativeArraySizeException.class, String.valueOf(end - start), () -> tuple.subtuple(start, end));
+        TestUtils.assertThrown(IllegalArgumentException.class, start + " > " + end, () -> tuple.subtuple(start, end));
 
         for (int i = 0; i <= len; i++) {
             for (int j = len; j >= i; j--) {

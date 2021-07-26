@@ -59,10 +59,7 @@ public final class Tuple extends AbstractList<Object> implements RandomAccess {
     }
 
     public Tuple subtuple(int startIndex, int endIndex) {
-        final int len = endIndex - startIndex;
-        Object[] copy = new Object[len];
-        System.arraycopy(elements, startIndex, copy, 0, len);
-        return new Tuple(copy);
+        return new Tuple(Arrays.copyOfRange(elements, startIndex, endIndex));
     }
 
     public static Tuple of(Object... elements) {
