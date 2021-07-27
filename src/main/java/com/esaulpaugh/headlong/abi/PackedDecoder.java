@@ -93,13 +93,16 @@ final class PackedDecoder {
                 break;
             }
             // static types only
-            if(TYPE_CODE_ARRAY == type.typeCode()) {
+            switch (type.typeCode()) {
+            case TYPE_CODE_ARRAY:
                 final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<? extends ABIType<?>, ?>) type;
                 end -= arrayType.getElementType().byteLengthPacked(null) * arrayType.getLength();
                 insertArray(arrayType, buffer, end, end, elements, i);
-            } else if(TYPE_CODE_TUPLE == type.typeCode()) {
+                break;
+            case TYPE_CODE_TUPLE:
                 end -= decodeTupleStatic((TupleType) type, buffer, end - type.byteLengthPacked(null), end, elements, i);
-            } else {
+                break;
+            default:
                 end -= decode(tupleType.get(i), buffer, end - type.byteLengthPacked(null), end, elements, i);
             }
         }
