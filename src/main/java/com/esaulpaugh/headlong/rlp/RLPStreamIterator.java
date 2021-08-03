@@ -22,12 +22,12 @@ import java.util.NoSuchElementException;
 
 class RLPStreamIterator implements Iterator<RLPItem> {
 
-    protected final InputStream is;
-    protected final RLPDecoder decoder;
-    protected byte[] buffer;
-    protected int index;
+    final InputStream is;
+    final RLPDecoder decoder;
+    byte[] buffer;
+    int index;
 
-    protected RLPItem next;
+    RLPItem next;
 
     RLPStreamIterator(InputStream is, RLPDecoder decoder) {
         this(is, decoder, new byte[0], 0); // make sure index == buffer.length

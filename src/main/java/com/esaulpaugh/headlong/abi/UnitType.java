@@ -105,7 +105,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         }
     }
 
-    protected final BigInteger decodeValid(ByteBuffer bb, byte[] unitBuffer) {
+    final BigInteger decodeValid(ByteBuffer bb, byte[] unitBuffer) {
         int idx = 0;
         if(unsigned) {
             unitBuffer = new byte[1 + UNIT_LENGTH_BYTES]; // a leading zero byte
