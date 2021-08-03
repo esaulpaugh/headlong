@@ -336,19 +336,19 @@ public class RLPStreamTest {
         }
     }
 
-    static void assertHasNext(long zero, Iterator<RLPItem> iter) {
+    private static void assertHasNext(long zero, Iterator<RLPItem> iter) {
         assertTrue(iter.hasNext());
         logReceipt(zero, true);
     }
 
-    static void assertNoNext(long zero, Iterator<RLPItem> iter) throws Throwable {
+    private static void assertNoNext(long zero, Iterator<RLPItem> iter) throws Throwable {
         assertFalse(iter.hasNext());
         TestUtils.assertThrown(NoSuchElementException.class, iter::next);
         assertFalse(iter.hasNext());
         logReceipt(zero, false);
     }
 
-    static void logWrite(long zero, String message) {
+    private static void logWrite(long zero, String message) {
         System.out.println(timestamp(zero) + "\u0009write " + message);
     }
 
