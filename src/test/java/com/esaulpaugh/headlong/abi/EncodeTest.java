@@ -225,29 +225,10 @@ public class EncodeTest {
         assertThrown(ILLEGAL, "unrecognized type: \")\"", () -> TupleType.parse(")"));
         assertThrown(ILLEGAL, "unrecognized type: \"aaaaaa\"", () -> TupleType.parse("aaaaaa"));
 
-        final TestUtils.CustomRunnable emptyFn = () -> Function.parse("");
-        try {
-            assertThrown(SIOOBE, "begin 0, end -1, length 0", emptyFn);
-        } catch (StringIndexOutOfBoundsException sioobe) {
-            try {
-                assertThrown(SIOOBE, "String index out of range: -1", emptyFn);
-            } catch (StringIndexOutOfBoundsException sioobe2) {
-                assertThrown(SIOOBE, "String index out of range: 0", emptyFn);
-            }
-        }
+        testSIOOBE("");
+        testSIOOBE(")");
 
         assertThrown(ILLEGAL, "unrecognized type: \"(\"", () -> Function.parse("("));
-
-        final TestUtils.CustomRunnable closeFn = () -> Function.parse(")");
-        try {
-            assertThrown(SIOOBE, "begin 0, end -1, length 1", closeFn);
-        } catch (StringIndexOutOfBoundsException sioobe) {
-            try {
-                assertThrown(SIOOBE, "String index out of range: -1", closeFn);
-            } catch (StringIndexOutOfBoundsException sioobe2) {
-                assertThrown(SIOOBE, "String index out of range: 0", closeFn);
-            }
-        }
 
         assertThrown(ILLEGAL, "unrecognized type: \"([\"", () -> Function.parse("(["));
         assertThrown(ILLEGAL, "unrecognized type: \"(int\"", () -> Function.parse("(int"));
@@ -267,6 +248,23 @@ public class EncodeTest {
                     assertThrown(ClassCastException.class, "Cannot cast class com.esaulpaugh.headlong.abi.ArrayType to class com.esaulpaugh.headlong.abi.TupleType", r);
                 } catch(ClassCastException cce3) {
                     assertThrown(ClassCastException.class, "Cannot cast com.esaulpaugh.headlong.abi.ArrayType to com.esaulpaugh.headlong.abi.TupleType", r);
+                }
+            }
+        }
+    }
+
+    private static void testSIOOBE(String signature) throws Throwable {
+        final TestUtils.CustomRunnable closeFn = () -> Function.parse(signature);
+        try {
+            assertThrown(SIOOBE, "begin 0, end -1, length 1", closeFn);
+        } catch (StringIndexOutOfBoundsException sioobe) {
+            try {
+                assertThrown(SIOOBE, "String index out of range: -1", closeFn);
+            } catch (StringIndexOutOfBoundsException sioobe2) {
+                try {
+                    assertThrown(SIOOBE, "String index out of range: 0", closeFn);
+                } catch (StringIndexOutOfBoundsException sioobe3) {
+                    assertThrown(SIOOBE, "Range [0, -1) out of bounds for length " + signature.length(), closeFn); // JDK 18
                 }
             }
         }
