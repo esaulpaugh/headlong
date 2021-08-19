@@ -256,7 +256,7 @@ public class EncodeTest {
     private static void testSIOOBE(String signature) throws Throwable {
         final TestUtils.CustomRunnable closeFn = () -> Function.parse(signature);
         try {
-            assertThrown(SIOOBE, "begin 0, end -1, length 1", closeFn);
+            assertThrown(SIOOBE, "begin 0, end -1, length " + signature.length(), closeFn);
         } catch (StringIndexOutOfBoundsException sioobe) {
             try {
                 assertThrown(SIOOBE, "String index out of range: -1", closeFn);
