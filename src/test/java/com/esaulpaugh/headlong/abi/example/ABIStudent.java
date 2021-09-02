@@ -37,10 +37,12 @@ public class ABIStudent implements ABIEncodeable {
     }
 
     public ABIStudent(Tuple values) {
-        this.name = (String) values.get(0);
-        this.gpa = ((BigDecimal) values.get(1)).floatValue();
-        this.publicKey = (byte[]) values.get(2);
-        this.balance = new BigDecimal(new BigInteger((byte[]) values.get(3)), (int) values.get(4));
+        this(
+                (String) values.get(0),
+                ((BigDecimal) values.get(1)).floatValue(),
+                (byte[]) values.get(2),
+                new BigDecimal(new BigInteger((byte[]) values.get(3)), (int) values.get(4))
+        );
     }
 
     public String getName() {

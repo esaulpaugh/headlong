@@ -29,18 +29,17 @@ public class ABIStudentTest {
 
     @Test
     public void abiDecodeEncode() {
+        final TupleType tt = TupleType.parse("(string,fixed128x9,bytes,bytes,uint16)");
+
         final ByteBuffer studentAbi = ByteBuffer.wrap(Strings.decode(STUDENT_ABI));
 
-        TupleType tt = TupleType.parse("(string,fixed128x9,bytes,bytes,uint16)");
+        final ABIStudent plato = new ABIStudent(tt.decode(studentAbi));
 
-        ABIStudent plato = new ABIStudent(tt.decode(studentAbi));
-
-        ByteBuffer reencoded = tt.encode(plato.toTuple());
+        final ByteBuffer reencoded = tt.encode(plato.toTuple());
+        assertArrayEquals(studentAbi.array(), reencoded.array());
 
         System.out.println(Strings.encode(reencoded));
         System.out.println(Strings.encode(tt.encodePacked(plato.toTuple())));
         System.out.println(plato);
-
-        assertArrayEquals(studentAbi.array(), reencoded.array());
     }
 }
