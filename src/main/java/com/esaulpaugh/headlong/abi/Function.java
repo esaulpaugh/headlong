@@ -79,8 +79,8 @@ public final class Function implements ABIObject {
     }
 
     /**
-     * @param type          enum denoting one of: function, receive, fallback, or constructor
-     * @param name          this function's name
+     * @param type          enum denoting one of: function, receive, fallback, constructor
+     * @param name          this function's name, being the first part of the function signature
      * @param inputs        {@link TupleType} describing this function's input parameters
      * @param outputs       {@link TupleType} type describing this function's return types
      * @param stateMutability   "pure", "view", "payable" etc.
