@@ -150,19 +150,26 @@ public class PackedEncoderTest {
 
         Function function = new Function(tupleType.canonicalType);
 
-        String hex = Strings.encode(function.getInputs().encode(test));
+        byte[] abi = function.getInputs().encode(test).array();
 
-        byte[] abi = Strings.decode("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff420000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000d48656c6c6f2c20776f726c642100000000000000000000000000000000000000");
+        String hex =
+                "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" +
+                "4200000000000000000000000000000000000000000000000000000000000000" +
+                "0000000000000000000000000000000000000000000000000000000000000003" +
+                "0000000000000000000000000000000000000000000000000000000000000080" +
+                "000000000000000000000000000000000000000000000000000000000000000d" +
+                "48656c6c6f2c20776f726c642100000000000000000000000000000000000000";
 
-        byte[] call = new byte[Function.SELECTOR_LEN + abi.length];
+        assertEquals(hex, Strings.encode(abi));
+
+        byte[] call = new byte[function.measureCallLength(test)];
+        assertEquals(Function.SELECTOR_LEN + abi.length, call.length);
 
         System.arraycopy(function.selector(), 0, call, 0, Function.SELECTOR_LEN);
         System.arraycopy(abi, 0, call, Function.SELECTOR_LEN, abi.length);
 
-        Tuple args = function.decodeCall(call);
-
         TupleType tt = TupleType.parse(tupleType.canonicalType);
-
+        Tuple args = function.decodeCall(call);
         assertEquals("ffff42000348656c6c6f2c20776f726c6421", Strings.encode(tt.encodePacked(args)));
 
     }
