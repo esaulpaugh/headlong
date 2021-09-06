@@ -85,7 +85,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return countBytes(false, size(), 0, i -> measureObject(get(i), tuple.get(i)));
     }
 
-    private int measureObject(ABIType<?> type, Object value) {
+    private static int measureObject(ABIType<?> type, Object value) {
         return totalLen(type.byteLength(value), type.dynamic);
     }
 
@@ -119,7 +119,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + value.size() + " != " + this.size());
     }
 
-    private int validateObject(ABIType<?> type, Object value) {
+    private static int validateObject(ABIType<?> type, Object value) {
         try {
             return totalLen(type._validate(value), type.dynamic);
         } catch (NullPointerException npe) {
