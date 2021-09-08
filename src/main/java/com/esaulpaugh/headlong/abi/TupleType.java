@@ -266,7 +266,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return parse(completeTupleTypeString(sb));
     }
 
-    public static TupleType parseElements(String rawElementsString) {
-        return parse('(' + rawElementsString + ')');
+    public static TupleType parseElements(String rawTypesList) {
+        if(rawTypesList.endsWith(",")) {
+            rawTypesList = rawTypesList.substring(0, rawTypesList.length() - 1);
+        }
+        return parse('(' + rawTypesList + ')');
     }
 }

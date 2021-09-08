@@ -190,7 +190,9 @@ public class DecodeTest {
         decoded = TupleType.parse(FUNCTION.getOutputs().toString()).decode(ByteBuffer.wrap(RETURN_BYTES));
         assertEquals(EXPECTED, decoded);
 
-        decoded = TupleType.parseElements("ufixed,string").decode(ByteBuffer.wrap(RETURN_BYTES));
+        TupleType tt = TupleType.parseElements("ufixed,string,");
+        assertEquals(TupleType.parseElements("ufixed,string"), tt);
+        decoded = tt.decode(ByteBuffer.wrap(RETURN_BYTES));
         assertEquals(EXPECTED, decoded);
 
         assertThrown(IllegalArgumentException.class, "malformed array: non-zero padding byte", () -> FUNCTION.decodeReturn(BAD_PADDING_A));
