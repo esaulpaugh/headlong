@@ -190,7 +190,7 @@ public final class TypeFactory {
                 if(c == ',' || (c == ')' && prevTerminator == ',')) {
                     throw new IllegalArgumentException("empty parameter");
                 } else if(c != ')') {
-                    argEnd = nextTerminator(rawTypeStr, c == '(' ? findSubtupleEnd(rawTypeStr, argStart) : argStart);
+                    argEnd = findArgEnd(rawTypeStr, argStart, c);
                     elements.add(_build(rawTypeStr.substring(argStart, argEnd), null));
                     prevTerminator = rawTypeStr.charAt(argEnd);
                 }
@@ -206,6 +206,10 @@ public final class TypeFactory {
             throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);
         }
         return null;
+    }
+
+    private static int findArgEnd(String rawTypeStr, int argStart, char c) {
+        return nextTerminator(rawTypeStr, c == '(' ? findSubtupleEnd(rawTypeStr, argStart) : argStart);
     }
 
     private static int findSubtupleEnd(String parentTypeString, int i) {
