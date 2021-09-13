@@ -15,10 +15,13 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_LONG;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_SHORT;
@@ -50,35 +53,29 @@ public final class RLPDecoder {
      * @return an iterator over the items in the sequence
      */
     public Iterator<RLPItem> sequenceIterator(byte[] buffer, int index) {
-        return new SeqIter(RLPDecoder.this, buffer, index);
+        return new RLPStreamIterator.RLPSequenceIterator(RLPDecoder.this, buffer, index);
     }
 
-    private static final class SeqIter extends RLPStreamIterator {
-
-        SeqIter(RLPDecoder decoder, byte[] buffer, int index) {
-            super(null, decoder, buffer, index);
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (next != null) {
-                return true;
-            }
-            if (index < buffer.length) {
-                next = decoder.wrap(buffer, index);
-                this.index = next.endIndex;
-                return true;
-            }
-            return false;
-        }
+    /**
+     * Returns an iterator over the sequence of RLPItems in the given {@link InputStream}.
+     *
+     * @param is    the stream of RLP data
+     * @return  an iterator over the items in the stream
+     */
+    public Iterator<RLPItem> streamIterator(InputStream is) {
+        return new RLPStreamIterator(is, RLPDecoder.this);
     }
 
-    public RLPStream stream(byte[] bytes) {
-        return stream(new ByteArrayInputStream(bytes));
+    public Stream<RLPItem> stream(byte[] bytes) {
+        return stream(sequenceIterator(bytes));
     }
 
-    public RLPStream stream(InputStream is) {
-        return new RLPStream(is, this);
+    public Stream<RLPItem> stream(InputStream is) {
+        return stream(streamIterator(is));
+    }
+
+    private static Stream<RLPItem> stream(Iterator<RLPItem> iter) {
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iter, Spliterator.ORDERED), false);
     }
 
     public Iterator<RLPItem> listIterator(byte[] buffer) {

@@ -40,6 +40,9 @@ import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -107,10 +110,11 @@ public class RLPStreamTest {
 		}
 
         // decode RLP
-        RLPStream stream = new RLPStream(new ByteArrayInputStream(ros.getByteArrayOutputStream().toByteArray()));
+        Iterator<RLPItem> iter = RLP_STRICT.stream(ros.getByteArrayOutputStream().toByteArray()).iterator();
         ByteArrayOutputStream decoded = new ByteArrayOutputStream();
         int count = 0;
-        for (RLPItem item : stream) {
+        while (iter.hasNext()) {
+            RLPItem item = iter.next();
             item.exportData(decoded);
             count++;
         }
@@ -128,7 +132,8 @@ public class RLPStreamTest {
     @Test
     public void testStreamEasy() throws Throwable {
         RLPItem[] collected = RLPDecoderTest.collectAll(RLP_BYTES).toArray(RLPItem.EMPTY_ARRAY);
-        RLPItem[] streamed = RLP_STRICT.stream(RLP_BYTES).collect().toArray(RLPItem.EMPTY_ARRAY);
+        Stream<RLPItem> stream = RLP_STRICT.stream(RLP_BYTES);
+        RLPItem[] streamed = stream.collect(Collectors.toList()).toArray(RLPItem.EMPTY_ARRAY);
 
         assertTrue(Arrays.deepEquals(collected, streamed));
 
@@ -157,12 +162,12 @@ public class RLPStreamTest {
     public void testUnrecoverable() throws Throwable {
         try (PipedOutputStream pos = new PipedOutputStream();
              PipedInputStream pis = new PipedInputStream(pos, 512);
-             RLPStream stream = new RLPStream(pis)) {
+             Stream<RLPItem> stream = RLP_STRICT.stream(pis)) {
             pos.write(0x81);
             pos.write(0x00);
             Iterator<RLPItem> iter = stream.iterator();
             TestUtils.assertThrown(IllegalArgumentException.class, "invalid rlp for single byte @ 0", iter::hasNext);
-            try (RLPStream stream2 = new RLPStream(pis)) {
+            try (Stream<RLPItem> stream2 = RLP_STRICT.stream(pis)) {
                 pos.write(0xf8);
                 pos.write(0x37);
                 Iterator<RLPItem> iter2 = stream2.iterator();
@@ -178,11 +183,9 @@ public class RLPStreamTest {
     }
 
     @Test
-    public void testInterfaces() throws IOException {
-        try (RLPStream stream = new RLPStream(new ByteArrayInputStream(new byte[0]))) {
-            for(RLPItem item : stream) {
-                System.out.println(item);
-            }
+    public void testInterfaces() {
+        try (Stream<RLPItem> stream = RLP_STRICT.stream(new ByteArrayInputStream(new byte[0]))) {
+            stream.forEach(System.out::println);
         }
     }
 
@@ -199,7 +202,7 @@ public class RLPStreamTest {
         @Override
         public void run() {
             Thread senderThread = new Thread(senderTask);
-            try (RLPStream stream = new RLPStream(new PipedInputStream(pos, 512))) {
+            try (Stream<RLPItem> stream = RLP_STRICT.stream(new PipedInputStream(pos, 512))) {
 
                 Iterator<RLPItem> iter = stream.iterator();
 

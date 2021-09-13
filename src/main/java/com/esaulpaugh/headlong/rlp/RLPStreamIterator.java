@@ -79,4 +79,24 @@ class RLPStreamIterator implements Iterator<RLPItem> {
         }
         throw new NoSuchElementException();
     }
+
+    static final class RLPSequenceIterator extends RLPStreamIterator {
+
+        RLPSequenceIterator(RLPDecoder decoder, byte[] buffer, int index) {
+            super(null, decoder, buffer, index);
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (next != null) {
+                return true;
+            }
+            if (index < buffer.length) {
+                next = decoder.wrap(buffer, index);
+                this.index = next.endIndex;
+                return true;
+            }
+            return false;
+        }
+    }
 }
