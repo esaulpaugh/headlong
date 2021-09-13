@@ -66,7 +66,7 @@ class RLPSequenceIterator implements Iterator<RLPItem> {
             this(is, decoder, new byte[0], 0); // make sure index == buffer.length
         }
 
-        StreamRLPSequenceIterator(InputStream is, RLPDecoder decoder, byte[] buffer, int index) {
+        private StreamRLPSequenceIterator(InputStream is, RLPDecoder decoder, byte[] buffer, int index) {
             super(decoder, buffer, index);
             this.is = is;
         }
