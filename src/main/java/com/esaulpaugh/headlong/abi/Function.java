@@ -56,12 +56,8 @@ public final class Function implements ABIObject {
     private final TupleType outputTypes;
     private final String stateMutability;
 
-    private final byte[] selector;
     private final String hashAlgorithm;
-
-    { // instance initializer
-        this.selector = new byte[SELECTOR_LEN];
-    }
+    private final byte[] selector = new byte[SELECTOR_LEN];
 
     public Function(String signature) {
         this(signature, null);
@@ -121,16 +117,16 @@ public final class Function implements ABIObject {
         return stateMutability;
     }
 
+    public String getHashAlgorithm() {
+        return hashAlgorithm;
+    }
+
     public byte[] selector() {
         return Arrays.copyOf(selector, selector.length);
     }
 
     public String selectorHex() {
         return Strings.encode(selector);
-    }
-
-    public String getHashAlgorithm() {
-        return hashAlgorithm;
     }
 
     @Override
@@ -251,7 +247,7 @@ public final class Function implements ABIObject {
 
     @Override
     public int hashCode() {
-        return 31 * Objects.hash(type, name, inputTypes, outputTypes, hashAlgorithm, stateMutability)
+        return 31 * Objects.hash(type, name, inputTypes, outputTypes, stateMutability, hashAlgorithm)
                 + Arrays.hashCode(selector);
     }
 
@@ -264,9 +260,9 @@ public final class Function implements ABIObject {
                 Objects.equals(other.name, this.name) &&
                 other.inputTypes.equals(this.inputTypes) &&
                 other.outputTypes.equals(this.outputTypes) &&
-                Arrays.equals(other.selector, this.selector) &&
+                Objects.equals(other.stateMutability, this.stateMutability) &&
                 other.hashAlgorithm.equals(this.hashAlgorithm) &&
-                Objects.equals(other.stateMutability, this.stateMutability);
+                Arrays.equals(other.selector, this.selector);
     }
 
     @Override
