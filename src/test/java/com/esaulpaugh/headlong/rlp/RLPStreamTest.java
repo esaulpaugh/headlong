@@ -110,7 +110,7 @@ public class RLPStreamTest {
 		}
 
         // decode RLP
-        Iterator<RLPItem> iter = RLP_STRICT.stream(ros.getByteArrayOutputStream().toByteArray()).iterator();
+        Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(ros.getByteArrayOutputStream().toByteArray());
         ByteArrayOutputStream decoded = new ByteArrayOutputStream();
         int count = 0;
         while (iter.hasNext()) {
@@ -132,7 +132,7 @@ public class RLPStreamTest {
     @Test
     public void testStreamEasy() throws Throwable {
         RLPItem[] collected = RLPDecoderTest.collectAll(RLP_BYTES).toArray(RLPItem.EMPTY_ARRAY);
-        Stream<RLPItem> stream = RLP_STRICT.stream(RLP_BYTES);
+        Stream<RLPItem> stream = RLP_STRICT.stream(RLP_BYTES, 0);
         RLPItem[] streamed = stream.collect(Collectors.toList()).toArray(RLPItem.EMPTY_ARRAY);
 
         assertTrue(Arrays.deepEquals(collected, streamed));

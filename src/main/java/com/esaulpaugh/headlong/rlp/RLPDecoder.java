@@ -62,7 +62,7 @@ public final class RLPDecoder {
      * @param is    the stream of RLP data
      * @return  an iterator over the items in the stream
      */
-    public Iterator<RLPItem> streamIterator(InputStream is) {
+    public Iterator<RLPItem> sequenceIterator(InputStream is) {
         return new RLPStreamIterator(is, RLPDecoder.this);
     }
 
@@ -70,8 +70,12 @@ public final class RLPDecoder {
         return stream(sequenceIterator(bytes));
     }
 
+    public Stream<RLPItem> stream(byte[] buffer, int index) {
+        return stream(sequenceIterator(buffer, index));
+    }
+
     public Stream<RLPItem> stream(InputStream is) {
-        return stream(streamIterator(is));
+        return stream(sequenceIterator(is));
     }
 
     private static Stream<RLPItem> stream(Iterator<RLPItem> iter) {
