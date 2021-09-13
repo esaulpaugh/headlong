@@ -20,21 +20,15 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-class RLPStreamIterator implements Iterator<RLPItem> {
+class RLPSequenceIterator implements Iterator<RLPItem> {
 
-    final InputStream is;
     final RLPDecoder decoder;
     byte[] buffer;
     int index;
 
     RLPItem next;
 
-    RLPStreamIterator(InputStream is, RLPDecoder decoder) {
-        this(is, decoder, new byte[0], 0); // make sure index == buffer.length
-    }
-
-    RLPStreamIterator(InputStream is, RLPDecoder decoder, byte[] buffer, int index) {
-        this.is = is;
+    RLPSequenceIterator(RLPDecoder decoder, byte[] buffer, int index) {
         this.decoder = decoder;
         this.buffer = buffer;
         this.index = index;
@@ -45,28 +39,12 @@ class RLPStreamIterator implements Iterator<RLPItem> {
         if (next != null) {
             return true;
         }
-        try {
-            final int available = is.available();
-            if (available > 0) {
-                int keptBytes = buffer.length - index;
-                byte[] newBuffer = new byte[keptBytes + available];
-                System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
-                buffer = newBuffer;
-                index = 0;
-                int read = is.read(buffer, keptBytes, available);
-                if (read != available) {
-                    throw new IOException("read failed: " + read + " != " + available);
-                }
-            } else if (index >= buffer.length) {
-                return false;
-            }
+        if (index < buffer.length) {
             next = decoder.wrap(buffer, index);
+            this.index = next.endIndex;
             return true;
-        } catch (ShortInputException e) {
-            return false;
-        } catch (IOException io) {
-            throw new RuntimeException(io);
         }
+        return false;
     }
 
     @Override
@@ -80,10 +58,17 @@ class RLPStreamIterator implements Iterator<RLPItem> {
         throw new NoSuchElementException();
     }
 
-    static final class RLPSequenceIterator extends RLPStreamIterator {
+    static final class StreamRLPSequenceIterator extends RLPSequenceIterator {
 
-        RLPSequenceIterator(RLPDecoder decoder, byte[] buffer, int index) {
-            super(null, decoder, buffer, index);
+        final InputStream is;
+
+        StreamRLPSequenceIterator(InputStream is, RLPDecoder decoder) {
+            this(is, decoder, new byte[0], 0); // make sure index == buffer.length
+        }
+
+        StreamRLPSequenceIterator(InputStream is, RLPDecoder decoder, byte[] buffer, int index) {
+            super(decoder, buffer, index);
+            this.is = is;
         }
 
         @Override
@@ -91,12 +76,28 @@ class RLPStreamIterator implements Iterator<RLPItem> {
             if (next != null) {
                 return true;
             }
-            if (index < buffer.length) {
+            try {
+                final int available = is.available();
+                if (available > 0) {
+                    int keptBytes = buffer.length - index;
+                    byte[] newBuffer = new byte[keptBytes + available];
+                    System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
+                    buffer = newBuffer;
+                    index = 0;
+                    int read = is.read(buffer, keptBytes, available);
+                    if (read != available) {
+                        throw new IOException("read failed: " + read + " != " + available);
+                    }
+                } else if (index >= buffer.length) {
+                    return false;
+                }
                 next = decoder.wrap(buffer, index);
-                this.index = next.endIndex;
                 return true;
+            } catch (ShortInputException e) {
+                return false;
+            } catch (IOException io) {
+                throw new RuntimeException(io);
             }
-            return false;
         }
     }
 }
