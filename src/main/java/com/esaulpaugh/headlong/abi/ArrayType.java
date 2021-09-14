@@ -48,16 +48,13 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private final int length;
     private final Class<?> arrayClass;
 
-    { // instance initializer
-        this.isString = clazz == STRING_CLASS;
-    }
-
     ArrayType(String canonicalType, Class<J> clazz, E elementType, int length) {
         this(canonicalType, clazz, elementType, length, null);
     }
 
     ArrayType(String canonicalType, Class<J> clazz, E elementType, int length, Class<?> arrayClass) {
-        super(canonicalType, clazz, length == DYNAMIC_LENGTH || elementType.dynamic);
+        super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic);
+        this.isString = STRING_CLASS == clazz;
         this.elementType = elementType;
         this.length = length;
         this.arrayClass = arrayClass;
