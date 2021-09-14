@@ -218,8 +218,6 @@ public final class Notation {
         return value;
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    private static final int LIST = 0;
-    private static final int STRING = 1;
 
     /**
      * Returns the object hierarchy represented by the notation.
@@ -229,14 +227,15 @@ public final class Notation {
      */
     public static List<Object> parse(String notation) {
         List<Object> topLevelObjects = new ArrayList<>(); // a sequence (as in encodeSequentially)
-        parse(notation, 0, -1, notation.length(), topLevelObjects, new int[2]);
+        parse(notation, 0, -1, notation.length(), topLevelObjects);
         return topLevelObjects;
     }
 
-    private static int parse(String notation, int i, int nextArrayEnd, final int end, List<Object> parent, int[] resultHolder) {
+    private static int parse(String notation, int i, int nextArrayEnd, final int end, List<Object> parent) {
 
         while (i < end) {
-            if(!findNextObject(notation, i, resultHolder)) {
+            int nextObjectIndex = findNextObject(notation, i);
+            if(nextObjectIndex < 0) {
                 return Integer.MAX_VALUE;
             }
 
@@ -247,13 +246,11 @@ public final class Notation {
                 }
             }
 
-            int nextObjectIndex = resultHolder[0];
-
             if(nextArrayEnd < nextObjectIndex) {
                 return nextArrayEnd + END_LIST.length();
             }
 
-            if(STRING == resultHolder[1] /* nextObjectType */) {
+            if(notation.charAt(nextObjectIndex) == '\'') {
                 int datumStart = nextObjectIndex + BEGIN_STRING.length();
                 int datumEnd = notation.indexOf(END_STRING, datumStart);
                 if(datumEnd < 0) {
@@ -263,28 +260,19 @@ public final class Notation {
                 i = datumEnd + END_STRING.length();
             } else {
                 List<Object> childList = new ArrayList<>();
-                i = parse(notation, nextObjectIndex + BEGIN_LIST.length(), nextArrayEnd, end, childList, resultHolder);
+                i = parse(notation, nextObjectIndex + BEGIN_LIST.length(), nextArrayEnd, end, childList);
                 parent.add(childList);
             }
         }
         return Integer.MAX_VALUE;
     }
 
-    private static boolean findNextObject(String notation, int startIndex, int[] resultHolder) {
-        final int indexString = notation.indexOf(BEGIN_STRING, startIndex);
-        final int indexList = notation.indexOf(BEGIN_LIST, startIndex);
-        if(indexString == -1) {
-            if(indexList == -1) {
-                return false;
-            }
-        } else if(indexString < indexList || indexList == -1) {
-            resultHolder[0] = indexString;
-            resultHolder[1] = STRING;
-            return true;
+    private static int findNextObject(String signature, int i) {
+        final int len = signature.length();
+        for( ; i < len; i++) {
+            char c = signature.charAt(i);
+            if(c == '\'' || c == '[') return i; // char values hardcoded
         }
-        // indexString == -1 || indexList <= indexString
-        resultHolder[0] = indexList;
-        resultHolder[1] = LIST;
-        return true;
+        return -1;
     }
 }
