@@ -229,13 +229,11 @@ public final class Notation {
      */
     public static List<Object> parse(String notation) {
         List<Object> topLevelObjects = new ArrayList<>(); // a sequence (as in encodeSequentially)
-        parse(notation, 0, notation.length(), topLevelObjects, new int[2]);
+        parse(notation, 0, -1, notation.length(), topLevelObjects, new int[2]);
         return topLevelObjects;
     }
 
-    private static int parse(String notation, int i, final int end, List<Object> parent, int[] resultHolder) {
-
-        int nextArrayEnd = -1;
+    private static int parse(String notation, int i, int nextArrayEnd, final int end, List<Object> parent, int[] resultHolder) {
 
         while (i < end) {
             if(!findNextObject(notation, i, resultHolder)) {
@@ -265,12 +263,11 @@ public final class Notation {
                 i = datumEnd + END_STRING.length();
             } else {
                 List<Object> childList = new ArrayList<>();
-                i = parse(notation, nextObjectIndex + BEGIN_LIST.length(), end, childList, resultHolder);
+                i = parse(notation, nextObjectIndex + BEGIN_LIST.length(), nextArrayEnd, end, childList, resultHolder);
                 parent.add(childList);
             }
         }
-
-        return end + END_LIST.length();
+        return Integer.MAX_VALUE;
     }
 
     private static boolean findNextObject(String notation, int startIndex, int[] resultHolder) {
