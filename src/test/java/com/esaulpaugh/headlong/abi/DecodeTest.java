@@ -299,17 +299,16 @@ public class DecodeTest {
     }
 
     @Test
-    public void testStringArray() throws Throwable {
-
+    public void testNameOverwrite() {
         BooleanType t = TypeFactory.create("bool", "moo");
-
         assertEquals("moo", t.getName());
-
         BooleanType q = TypeFactory.create("bool");
-
         assertNull(q.getName());
         assertEquals("moo", t.getName());
+    }
 
+    @Test
+    public void testStringArray() throws Throwable {
         final ArrayType<ArrayType<ByteType, String>, String[]> type = TypeFactory.create("string[]", "nam");
         final String[] array = new String[] { "Hello, world!", "world! Hello," };
         final ByteBuffer abi = ByteBuffer.wrap(
