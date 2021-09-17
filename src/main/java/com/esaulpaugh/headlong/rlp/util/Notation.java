@@ -41,11 +41,7 @@ public final class Notation {
 
     private static final String SHORT_LIST_START = BEGIN_LIST + ' ';
 
-    private static final String DELIMITER_SPACE = DELIMITER + ' ';
-    private static final String STRING_DELIMIT_SPACE = END_STRING + DELIMITER_SPACE;
-    private static final String STRING_DELIMIT = END_STRING + DELIMITER;
-
-    private static final String SHORT_LIST_END = ' ' + END_LIST + DELIMITER_SPACE;
+    private static final String SHORT_LIST_END = ' ' + END_LIST + DELIMITER + ' ';
     private static final String SHORT_LIST_END_NO_SPACE = ' ' + END_LIST + DELIMITER;
     private static final String LONG_LIST_END = END_LIST + DELIMITER;
 
@@ -138,7 +134,7 @@ public final class Notation {
             throw new IllegalArgumentException("invalid rlp for single byte @ " + (from - 1)); // item prefix is 1 byte
         }
         sb.append(BEGIN_STRING).append(Strings.encode(data, from, len, Strings.HEX))
-                .append(addSpace ? STRING_DELIMIT_SPACE : STRING_DELIMIT);
+                .append(addSpace ? END_STRING + DELIMITER + ' ' : END_STRING + DELIMITER);
         return to;
     }
 
@@ -187,7 +183,7 @@ public final class Notation {
             }
         }
         if (/* hasElement */ dataIndex != end) {
-            sb.replace(sb.length() - (shortList ? DELIMITER_SPACE : DELIMITER).length(), sb.length(), ""); // trim
+            sb.replace(sb.length() - (shortList ? DELIMITER + ' ' : DELIMITER).length(), sb.length(), ""); // trim
         }
     }
 
