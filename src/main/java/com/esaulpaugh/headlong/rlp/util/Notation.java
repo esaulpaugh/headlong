@@ -39,12 +39,6 @@ public final class Notation {
     private static final String END_STRING = "'";
     private static final String DELIMITER = ",";
 
-    private static final String SHORT_LIST_START = BEGIN_LIST + ' ';
-
-    private static final String SHORT_LIST_END = ' ' + END_LIST + DELIMITER + ' ';
-    private static final String SHORT_LIST_END_NO_SPACE = ' ' + END_LIST + DELIMITER;
-    private static final String LONG_LIST_END = END_LIST + DELIMITER;
-
     private static final String[] LINE_PADDING_CACHE;
 
     static {
@@ -144,15 +138,17 @@ public final class Notation {
         }
         buildListContent(sb, dataIndex, end, data, false, depth + 1);
         if(depth != 0) {
-            sb.append(getLinePadding(depth)).append(LONG_LIST_END);
+            sb.append(getLinePadding(depth)).append(END_LIST + DELIMITER);
         }
         return end;
     }
 
     private static int buildShortList(StringBuilder sb, byte[] data, int dataIndex, int end, int depth, boolean addSpace) {
-        sb.append(SHORT_LIST_START);
+        sb.append(BEGIN_LIST + ' ');
         buildListContent(sb, dataIndex, end, data, true, depth + 1);
-        sb.append(addSpace ? SHORT_LIST_END : SHORT_LIST_END_NO_SPACE);
+        sb.append(addSpace
+                ? ' ' + END_LIST + DELIMITER + ' '
+                : ' ' + END_LIST + DELIMITER);
         return end;
     }
 
