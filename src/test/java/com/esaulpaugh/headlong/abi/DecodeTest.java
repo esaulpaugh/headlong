@@ -302,9 +302,15 @@ public class DecodeTest {
     public void testNameOverwrite() {
         BooleanType t = TypeFactory.create("bool", "moo");
         assertEquals("moo", t.getName());
+
         BooleanType q = TypeFactory.create("bool");
-        assertNull(q.getName());
         assertEquals("moo", t.getName());
+        assertNull(q.getName());
+
+        BooleanType z = TypeFactory.create("bool", "jumbo");
+        assertEquals("moo", t.getName());
+        assertNull(q.getName());
+        assertEquals("jumbo", z.getName());
     }
 
     @Test
