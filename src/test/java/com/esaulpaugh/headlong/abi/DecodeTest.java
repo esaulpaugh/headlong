@@ -30,6 +30,7 @@ import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class DecodeTest {
 
@@ -299,6 +300,16 @@ public class DecodeTest {
 
     @Test
     public void testStringArray() throws Throwable {
+
+        BooleanType t = TypeFactory.create("bool", "moo");
+
+        assertEquals("moo", t.getName());
+
+        BooleanType q = TypeFactory.create("bool");
+
+        assertNull(q.getName());
+        assertEquals("moo", t.getName());
+
         final ArrayType<ArrayType<ByteType, String>, String[]> type = TypeFactory.create("string[]", "nam");
         final String[] array = new String[] { "Hello, world!", "world! Hello," };
         final ByteBuffer abi = ByteBuffer.wrap(
