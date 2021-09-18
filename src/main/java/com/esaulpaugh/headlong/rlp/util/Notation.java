@@ -259,10 +259,10 @@ public final class Notation {
         return Integer.MAX_VALUE;
     }
 
-    private static int findNextObject(String signature, int i) {
-        final int len = signature.length();
+    private static int findNextObject(String notation, int i) {
+        final int len = notation.length();
         for( ; i < len; i++) {
-            char c = signature.charAt(i);
+            char c = notation.charAt(i);
             if(c == '\'' || c == '[') return i; // char values hardcoded
         }
         return -1;
