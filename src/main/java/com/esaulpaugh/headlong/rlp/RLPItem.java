@@ -80,7 +80,7 @@ public abstract class RLPItem {
                 throw new IllegalArgumentException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
             }
             break;
-        default: throw new Error();
+        default: throw new AssertionError();
         }
 
         final long _endIndex = _dataIndex + _dataLength;

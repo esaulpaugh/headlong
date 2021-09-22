@@ -158,7 +158,7 @@ public final class ABIJSON {
         case TypeEnum.ORDINAL_CONSTRUCTOR: return _parseFunction(t, object, digest);
         case TypeEnum.ORDINAL_EVENT: return _parseEvent(object);
         case TypeEnum.ORDINAL_ERROR: return _parseError(object);
-        default: throw new Error();
+        default: throw new AssertionError();
         }
     }
 // ---------------------------------------------------------------------------------------------------------------------

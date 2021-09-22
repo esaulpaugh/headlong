@@ -159,7 +159,7 @@ public final class RLPDecoder {
         case ORDINAL_STRING_LONG: return new RLPString(lead, type, buffer, index, containerEnd, lenient);
         case ORDINAL_LIST_SHORT:
         case ORDINAL_LIST_LONG: return new RLPList(lead, type, buffer, index, containerEnd, lenient);
-        default: throw new Error();
+        default: throw new AssertionError();
         }
     }
     

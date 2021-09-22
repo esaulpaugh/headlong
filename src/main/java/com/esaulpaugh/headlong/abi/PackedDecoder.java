@@ -130,7 +130,7 @@ final class PackedDecoder {
             return type.dynamic
                     ? decodeTuple((TupleType) type, buffer, idx, end, elements, i)
                     : decodeTupleStatic((TupleType) type, buffer, idx, end, elements, i);
-        default: throw new Error();
+        default: throw new AssertionError();
         }
     }
 
@@ -203,7 +203,7 @@ final class PackedDecoder {
         case TYPE_CODE_BIG_DECIMAL: array = decodeBigDecimalArray((BigDecimalType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: array = decodeObjectArray(arrayLen, elementType, buffer, idx, end); break;
-        default: throw new Error();
+        default: throw new AssertionError();
         }
         dest[destIdx] = array;
         return arrayLen * elementByteLen;

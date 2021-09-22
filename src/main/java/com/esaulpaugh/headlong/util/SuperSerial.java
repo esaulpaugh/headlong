@@ -108,7 +108,7 @@ public final class SuperSerial {
         case TYPE_CODE_BIG_DECIMAL: return serializeBigInteger((UnitType<?>) type, ((BigDecimal) obj).unscaledValue());
         case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?>) type, obj);
         case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, (Tuple) obj);
-        default: throw new Error();
+        default: throw new AssertionError();
         }
     }
 
@@ -131,7 +131,7 @@ public final class SuperSerial {
             return new BigDecimal(deserializeBigInteger(bdt, item), bdt.getScale());
         case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<? extends ABIType<?>, ?>) type, item);
         case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());
-        default: throw new Error();
+        default: throw new AssertionError();
         }
     }
 
@@ -185,7 +185,7 @@ public final class SuperSerial {
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: return serializeObjectArray(type.getElementType(), (Object[]) arr);
-        default: throw new Error();
+        default: throw new AssertionError();
         }
     }
 
@@ -199,7 +199,7 @@ public final class SuperSerial {
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: return deserializeObjectArray(type.getElementType(), (RLPList) item);
-        default: throw new Error();
+        default: throw new AssertionError();
         }
     }
 

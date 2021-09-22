@@ -180,7 +180,7 @@ public final class Function implements ABIObject {
         try {
             messageDigest.digest(selector, 0, SELECTOR_LEN);
         } catch (DigestException de) {
-            throw new Error(de);
+            throw new AssertionError(de);
         }
     }
 
@@ -285,7 +285,7 @@ public final class Function implements ABIObject {
             char c = input.charAt(idx);
             throw new IllegalArgumentException("illegal char 0x" + Integer.toHexString(c) + " '" + c + "' @ index " + idx);
         }
-        throw new Error("regex mismatch");
+        throw new AssertionError("regex mismatch");
     }
 // ---------------------------------------------------------------------------------------------------------------------
     public static Function parse(String signature) {
