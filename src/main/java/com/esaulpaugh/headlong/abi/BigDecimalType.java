@@ -65,6 +65,11 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
+    void encodePackedUnchecked(BigDecimal value, ByteBuffer dest) {
+        Encoding.insertInt(value.unscaledValue(), byteLengthPacked(null), dest);
+    }
+
+    @Override
     BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) {
         return new BigDecimal(decodeValid(bb, unitBuffer), scale);
     }

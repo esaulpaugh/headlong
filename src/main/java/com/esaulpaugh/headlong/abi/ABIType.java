@@ -155,9 +155,8 @@ public abstract class ABIType<J> {
      * @return the encoding
      */
     public final ByteBuffer encodePacked(J value) {
-        validate(value);
         ByteBuffer dest = ByteBuffer.allocate(byteLengthPacked(value));
-        PackedEncoder.encode(this, value, dest);
+        encodePacked(value, dest);
         return dest;
     }
 
@@ -169,8 +168,15 @@ public abstract class ABIType<J> {
      */
     public final void encodePacked(J value, ByteBuffer dest) {
         validate(value);
-        PackedEncoder.encode(this, value, dest);
+        encodePackedUnchecked(value, dest);
     }
+
+    @SuppressWarnings("unchecked")
+    final void encodeObjectPacked(Object value, ByteBuffer dest) {
+        encodePacked((J) value ,dest);
+    }
+
+    abstract void encodePackedUnchecked(J value, ByteBuffer dest);
 
     public final J decode(byte[] array) {
         ByteBuffer bb = ByteBuffer.wrap(array);

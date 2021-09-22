@@ -73,6 +73,11 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         Encoding.insertInt(((Number) value).longValue(), dest);
     }
 
+    @Override
+    void encodePackedUnchecked(J value, ByteBuffer dest) {
+        LongType.encodeLong(((Number) value).longValue(), byteLengthPacked(null), dest);
+    }
+
     final int validatePrimitive(long longVal) {
         if(longVal < 0) {
             if(unsigned) {

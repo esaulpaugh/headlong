@@ -46,6 +46,11 @@ public final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
+    void encodePackedUnchecked(BigInteger value, ByteBuffer dest) {
+        Encoding.insertInt(value, byteLengthPacked(null), dest);
+    }
+
+    @Override
     BigInteger decode(ByteBuffer bb, byte[] unitBuffer) {
         return decodeValid(bb, unitBuffer);
     }

@@ -58,11 +58,20 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
+    public void encodePackedUnchecked(Boolean value, ByteBuffer dest) {
+        encodeBooleanPacked(value, dest);
+    }
+
+    @Override
     Boolean decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer);
         BigInteger bi = new BigInteger(unitBuffer);
         validateBigInt(bi);
         return decodeBoolean(bi.byteValue());
+    }
+
+    static void encodeBooleanPacked(boolean value, ByteBuffer dest) {
+        dest.put(value ? Encoding.ONE_BYTE : Encoding.ZERO_BYTE);
     }
 
     static void encodeBoolean(boolean val, ByteBuffer dest) {

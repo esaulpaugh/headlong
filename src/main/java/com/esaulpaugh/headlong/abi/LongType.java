@@ -15,6 +15,9 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
+import com.esaulpaugh.headlong.util.Integers;
+
 import java.nio.ByteBuffer;
 
 public final class LongType extends UnitType<Long> {
@@ -43,5 +46,15 @@ public final class LongType extends UnitType<Long> {
         Long lo = Long.parseLong(s);
         validate(lo);
         return lo;
+    }
+
+    static void encodeLong(long value, int byteLen, ByteBuffer dest) {
+        if(value >= 0) {
+            Encoding.insertPadding(byteLen - Integers.len(value), false, dest);
+            Integers.putLong(value, dest);
+        } else {
+            Encoding.insertPadding(byteLen - BizarroIntegers.len(value), true, dest);
+            BizarroIntegers.putLong(value, dest);
+        }
     }
 }

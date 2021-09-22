@@ -134,7 +134,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return decodeIfString(value).length;
     }
 
-    byte[] decodeIfString(Object value) {
+    private byte[] decodeIfString(Object value) {
         return !isString ? (byte[]) value : Strings.decode((String) value, Strings.UTF_8);
     }
 
@@ -218,6 +218,43 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
             TupleType.encodeObjects(dynamic, arr, i -> elementType, dest);
             return;
         default: throw new Error();
+        }
+    }
+
+    @Override
+    public void encodePackedUnchecked(J value, ByteBuffer dest) {
+        switch (elementType.typeCode()) {
+        case TYPE_CODE_BOOLEAN: encodeBooleansPacked((boolean[]) value, dest); return;
+        case TYPE_CODE_BYTE: dest.put(decodeIfString(value)); return;
+        case TYPE_CODE_INT: encodeIntsPacked((int[]) value, elementType.byteLengthPacked(null), dest); return;
+        case TYPE_CODE_LONG: encodeLongsPacked((long[]) value, elementType.byteLengthPacked(null), dest); return;
+        case TYPE_CODE_BIG_INTEGER:
+        case TYPE_CODE_BIG_DECIMAL:
+        case TYPE_CODE_ARRAY:
+        case TYPE_CODE_TUPLE:
+            for(Object e : (Object[]) value) {
+                elementType.encodeObjectPacked(e, dest);
+            }
+            return;
+        default: throw new Error();
+        }
+    }
+
+    private static void encodeBooleansPacked(boolean[] arr, ByteBuffer dest) {
+        for (boolean bool : arr) {
+            BooleanType.encodeBooleanPacked(bool, dest);
+        }
+    }
+
+    private static void encodeIntsPacked(int[] arr, int byteLen, ByteBuffer dest) {
+        for (int e : arr) {
+            LongType.encodeLong(e, byteLen, dest);
+        }
+    }
+
+    private static void encodeLongsPacked(long[] arr, int byteLen, ByteBuffer dest) {
+        for (long e : arr) {
+            LongType.encodeLong(e, byteLen, dest);
         }
     }
 
