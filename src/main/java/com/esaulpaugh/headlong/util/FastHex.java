@@ -68,12 +68,12 @@ public final class FastHex {
 
     public static byte[] decode(String hex, int offset, int len) {
         final byte[] bytes = new byte[len / CHARS_PER_BYTE];
-        return decode(offset, len, bytes, (i, o) -> (byte) decodeBytes((byte) hex.charAt(o), (byte) hex.charAt(o+1), o));
+        return decode(offset, len, bytes, (i, o) -> decodeBytes((byte) hex.charAt(o), (byte) hex.charAt(o+1), o));
     }
 
     public static byte[] decode(byte[] hexBytes, int offset, int len) {
         final byte[] bytes = new byte[len / CHARS_PER_BYTE];
-        return decode(offset, len, bytes, (i, o) -> (byte) decodeBytes(hexBytes[o], hexBytes[o+1], o));
+        return decode(offset, len, bytes, (i, o) -> decodeBytes(hexBytes[o], hexBytes[o+1], o));
     }
 
     private static byte[] decode(int offset, final int len, final byte[] dest, final IntBinaryOperator decoder) {
