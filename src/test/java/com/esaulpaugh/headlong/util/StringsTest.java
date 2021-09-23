@@ -152,13 +152,10 @@ public class StringsTest {
     @Test
     public void testHexDecode() {
         int count = 0;
-        final byte[] in = new byte[2];
         for (int i = 0; i < 256; i++) {
             for (int j = 0; j < 256; j++) {
                 try {
-                    in[0] = (byte) i;
-                    in[1] = (byte) j;
-                    assertArrayEquals(FastHex.decode("" + (char) i + (char) j), FastHex.decode(in, 0, 2));
+                    FastHex.decode("" + (char) i + (char) j);
                 } catch (IllegalArgumentException iae) {
                     if(iae.getMessage().contains("illegal hex val @ ")) {
                         count++;
