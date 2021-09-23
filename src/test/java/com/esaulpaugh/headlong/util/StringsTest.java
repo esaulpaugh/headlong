@@ -157,7 +157,7 @@ public class StringsTest {
                 try {
                     FastHex.decode("" + (char) i + (char) j);
                 } catch (IllegalArgumentException iae) {
-                    if(iae.getMessage().contains("illegal hex val @ ")) {
+                    if(iae.getMessage().startsWith("illegal")) {
                         count++;
                     }
                 }
