@@ -155,8 +155,9 @@ public abstract class ABIType<J> {
      * @return the encoding
      */
     public final ByteBuffer encodePacked(J value) {
+        validate(value);
         ByteBuffer dest = ByteBuffer.allocate(byteLengthPacked(value));
-        encodePacked(value, dest);
+        encodePackedUnchecked(value, dest);
         return dest;
     }
 
