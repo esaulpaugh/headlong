@@ -34,8 +34,6 @@ public final class FastHex {
     // Char values index directly into the decoding table (size 256).
     private static final byte[] DECODE_TABLE = new byte[1 << Byte.SIZE];
 
-    private static final byte NO_MAPPING = -1;
-
     static {
         final char[] chars = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
         final int leftNibbleMask = 0xF0;
@@ -46,7 +44,7 @@ public final class FastHex {
             ENCODE_TABLE[i] = (short) ((leftChar << Byte.SIZE) | rightChar);
         }
 
-        Arrays.fill(DECODE_TABLE, NO_MAPPING);
+        Arrays.fill(DECODE_TABLE, (byte) 0x80);
 
         DECODE_TABLE['0'] = 0x00;
         DECODE_TABLE['1'] = 0x01;
@@ -97,13 +95,12 @@ public final class FastHex {
 
     public static byte[] decode(byte[] hexBytes, int offset, int len) {
         if (Integers.mod(len, CHARS_PER_BYTE) == 0) {
-            final int bytesLen = len / CHARS_PER_BYTE;
-            final byte[] bytes = new byte[bytesLen];
-            for (int i = 0; i < bytesLen; i++, offset += CHARS_PER_BYTE) {
-                byte left = DECODE_TABLE[hexBytes[offset]];
-                byte right = DECODE_TABLE[hexBytes[offset+1]];
-                if (left == NO_MAPPING || right == NO_MAPPING) {
-                    throw new IllegalArgumentException("illegal hex val @ " + (left == NO_MAPPING ? offset : offset + 1));
+            final byte[] bytes = new byte[len / CHARS_PER_BYTE];
+            for (int i = 0; i < bytes.length; i++) {
+                byte left = DECODE_TABLE[hexBytes[offset++]];
+                byte right = DECODE_TABLE[hexBytes[offset++]];
+                if (left + right < 0) {
+                    throw new IllegalArgumentException("illegal hex val @ " + (left < 0 ? offset - 2 : offset - 1));
                 }
                 bytes[i] = (byte) ((left << BITS_PER_CHAR) | right);
             }
