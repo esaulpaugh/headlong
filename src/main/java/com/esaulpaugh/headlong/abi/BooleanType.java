@@ -58,7 +58,7 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    public void encodePackedUnchecked(Boolean value, ByteBuffer dest) {
+    void encodePackedUnchecked(Boolean value, ByteBuffer dest) {
         encodeBooleanPacked(value, dest);
     }
 

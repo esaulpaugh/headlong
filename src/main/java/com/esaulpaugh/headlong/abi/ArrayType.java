@@ -257,7 +257,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    public void encodePackedUnchecked(J value, ByteBuffer dest) {
+    void encodePackedUnchecked(J value, ByteBuffer dest) {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: encodeBooleansPacked((boolean[]) value, dest); return;
         case TYPE_CODE_BYTE: dest.put(decodeIfString(value)); return;

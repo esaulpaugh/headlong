@@ -137,7 +137,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    public void encodePackedUnchecked(Tuple value, ByteBuffer dest) {
+    void encodePackedUnchecked(Tuple value, ByteBuffer dest) {
         final int size = size();
         for (int i = 0; i < size; i++) {
             get(i).encodeObjectPacked(value.get(i), dest);
