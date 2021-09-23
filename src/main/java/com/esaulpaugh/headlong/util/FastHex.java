@@ -86,10 +86,10 @@ public final class FastHex {
     }
 
     private static int decodeByte(IntUnaryOperator extractor, int offset) {
-        return decodeByte(extractor.applyAsInt(offset), offset) << BITS_PER_CHAR | decodeByte(extractor.applyAsInt(++offset), offset);
+        return decodeNibble(extractor.applyAsInt(offset), offset) << BITS_PER_CHAR | decodeNibble(extractor.applyAsInt(++offset), offset);
     }
 
-    private static int decodeByte(int c, int offset) {
+    private static int decodeNibble(int c, int offset) {
         switch (c) {
         case '0':
         case '1':
