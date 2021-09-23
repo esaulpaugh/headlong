@@ -268,7 +268,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
             for(Object e : (Object[]) value) {
-                elementType.encodeObjectPacked(e, dest);
+                elementType.encodeObjectPackedUnchecked(e, dest);
             }
             return;
         default: throw new AssertionError();
