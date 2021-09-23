@@ -160,10 +160,6 @@ public class StringsTest {
                     if(iae.getMessage().contains("illegal hex val @ ")) {
                         count++;
                     }
-                } catch (ArrayIndexOutOfBoundsException aioobe) {
-                    if(aioobe.getMessage().contains("out of bounds for length 256")) {
-                        count++;
-                    }
                 }
             }
         }

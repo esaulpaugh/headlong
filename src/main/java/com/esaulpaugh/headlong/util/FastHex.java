@@ -87,7 +87,7 @@ public final class FastHex {
     }
 
     private static int decodeBytes(byte a, byte b, int offset) {
-        return ((decodeByte(a, offset, -2) << BITS_PER_CHAR) | decodeByte(b, offset, -1));
+        return (decodeByte(a, offset, -2) << BITS_PER_CHAR) | decodeByte(b, offset, -1);
     }
 
     private static int decodeByte(final byte c, int offset, int offsetDelta) {
