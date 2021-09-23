@@ -15,9 +15,6 @@
 */
 package com.esaulpaugh.headlong.util;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-
 /** Uses a larger encoding table to speed up encoding. */
 public final class FastHex {
 
@@ -31,9 +28,6 @@ public final class FastHex {
     // encoded together as an int.
     private static final short[] ENCODE_TABLE = new short[1 << Byte.SIZE];
 
-    // Char values index directly into the decoding table (size 256).
-    private static final byte[] DECODE_TABLE = new byte[1 << Byte.SIZE];
-
     static {
         final char[] chars = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
         final int leftNibbleMask = 0xF0;
@@ -43,25 +37,6 @@ public final class FastHex {
             char rightChar = chars[i & rightNibbleMask];
             ENCODE_TABLE[i] = (short) ((leftChar << Byte.SIZE) | rightChar);
         }
-
-        Arrays.fill(DECODE_TABLE, (byte) 0x80);
-
-        DECODE_TABLE['0'] = 0x00;
-        DECODE_TABLE['1'] = 0x01;
-        DECODE_TABLE['2'] = 0x02;
-        DECODE_TABLE['3'] = 0x03;
-        DECODE_TABLE['4'] = 0x04;
-        DECODE_TABLE['5'] = 0x05;
-        DECODE_TABLE['6'] = 0x06;
-        DECODE_TABLE['7'] = 0x07;
-        DECODE_TABLE['8'] = 0x08;
-        DECODE_TABLE['9'] = 0x09;
-        DECODE_TABLE['A'] = DECODE_TABLE['a'] = 0xa;
-        DECODE_TABLE['B'] = DECODE_TABLE['b'] = 0xb;
-        DECODE_TABLE['C'] = DECODE_TABLE['c'] = 0xc;
-        DECODE_TABLE['D'] = DECODE_TABLE['d'] = 0xd;
-        DECODE_TABLE['E'] = DECODE_TABLE['e'] = 0xe;
-        DECODE_TABLE['F'] = DECODE_TABLE['f'] = 0xf;
     }
 
     public static String encodeToString(byte... buffer) {
@@ -89,24 +64,46 @@ public final class FastHex {
         return decode(hex, 0, hex.length());
     }
 
+    @FunctionalInterface
+    private interface BiIntConsumer {
+        void decode(int a, int b);
+    }
+
     public static byte[] decode(String hex, int offset, int len) {
-        return decode(hex.getBytes(StandardCharsets.US_ASCII), offset, len);
+        final byte[] bytes = new byte[len / CHARS_PER_BYTE];
+        return decode(offset, len, bytes, (i, o) -> bytes[i] = (byte) decodeBytes((byte) hex.charAt(o), (byte) hex.charAt(o+1), o));
     }
 
     public static byte[] decode(byte[] hexBytes, int offset, int len) {
-        if (Integers.mod(len, CHARS_PER_BYTE) == 0) {
-            final byte[] bytes = new byte[len / CHARS_PER_BYTE];
-            for (int i = 0; i < bytes.length; i++) {
-                byte left = DECODE_TABLE[hexBytes[offset++]];
-                byte right = DECODE_TABLE[hexBytes[offset++]];
-                if (left + right < 0) {
-                    offset -= left < 0 ? 2 : 1;
-                    throw new IllegalArgumentException("illegal hex val @ " + offset);
-                }
-                bytes[i] = (byte) ((left << BITS_PER_CHAR) | right);
-            }
-            return bytes;
+        final byte[] bytes = new byte[len / CHARS_PER_BYTE];
+        return decode(offset, len, bytes, (i, o) -> bytes[i] = (byte) decodeBytes(hexBytes[o], hexBytes[o+1], o));
+    }
+
+    private static byte[] decode(int offset, final int len, final byte[] dest, final BiIntConsumer decoder) {
+        if (Integers.mod(len, CHARS_PER_BYTE) != 0) {
+            throw new IllegalArgumentException("len must be a multiple of two");
         }
-        throw new IllegalArgumentException("len must be a multiple of two");
+        for (int i = 0; i < dest.length; i++) {
+            decoder.decode(i, offset);
+            offset += 2;
+        }
+        return dest;
+    }
+
+    private static int decodeBytes(byte a, byte b, int offset) {
+        return ((decodeByte(a, offset, 0) << BITS_PER_CHAR) | decodeByte(b, offset, 1));
+    }
+
+    private static int decodeByte(final byte c, int offset, int offsetDelta) {
+        if(c >= '0' && c <= '9') {
+            return c - '0';
+        }
+        if (c >= 'a' && c <= 'f') {
+            return c - ('a' - 0xa);
+        }
+        if (c >= 'A' && c <= 'F') {
+            return  c - ('A' - 0xA);
+        }
+        throw new IllegalArgumentException("illegal hex val @ " + (offset + offsetDelta));
     }
 }
