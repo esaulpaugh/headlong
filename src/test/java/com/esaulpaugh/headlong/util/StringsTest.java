@@ -146,4 +146,28 @@ public class StringsTest {
     public void testSingleByteHex() {
         assertEquals("02", FastHex.encodeToString((byte) 0b0000_0010));
     }
+
+    @Test
+    public void testHexDecode() {
+        int count = 0;
+        final byte[] in = new byte[2];
+        for (int i = 0; i < 256; i++) {
+            for (int j = 0; j < 256; j++) {
+                try {
+                    in[0] = (byte) i;
+                    in[1] = (byte) j;
+                    assertArrayEquals(FastHex.decode("" + (char) i + (char) j), FastHex.decode(in, 0, 2));
+                } catch (IllegalArgumentException iae) {
+                    if(iae.getMessage().contains("illegal hex val @ ")) {
+                        count++;
+                    }
+                } catch (ArrayIndexOutOfBoundsException aioobe) {
+                    if(aioobe.getMessage().contains("out of bounds for length 256")) {
+                        count++;
+                    }
+                }
+            }
+        }
+        assertEquals("0123456789ABCDEFabcdef".length(), (int) Math.sqrt(256 * 256 - count));
+    }
 }
