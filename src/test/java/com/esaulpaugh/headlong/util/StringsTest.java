@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.TestUtils;
 import org.bouncycastle.util.encoders.Hex;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
@@ -147,6 +148,7 @@ public class StringsTest {
         assertEquals("02", FastHex.encodeToString((byte) 0b0000_0010));
     }
 
+    @Disabled("slowish")
     @Test
     public void testHexDecode() {
         int count = 0;
