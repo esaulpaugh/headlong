@@ -100,7 +100,8 @@ public final class FastHex {
                 byte left = DECODE_TABLE[hexBytes[offset++]];
                 byte right = DECODE_TABLE[hexBytes[offset++]];
                 if (left + right < 0) {
-                    throw new IllegalArgumentException("illegal hex val @ " + (left < 0 ? offset - 2 : offset - 1));
+                    offset -= left < 0 ? 2 : 1;
+                    throw new IllegalArgumentException("illegal hex val @ " + offset);
                 }
                 bytes[i] = (byte) ((left << BITS_PER_CHAR) | right);
             }
