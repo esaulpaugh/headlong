@@ -15,7 +15,7 @@
 */
 package com.esaulpaugh.headlong.util;
 
-import java.util.function.IntBinaryOperator;
+import java.util.function.IntUnaryOperator;
 
 /** Uses a larger encoding table to speed up encoding. Uses a switch statement to speed up decoding.*/
 public final class FastHex {
@@ -67,30 +67,29 @@ public final class FastHex {
     }
 
     public static byte[] decode(String hex, int offset, int len) {
-        final byte[] bytes = new byte[len / CHARS_PER_BYTE];
-        return decode(offset, len, bytes, (i, o) -> decodeBytes((byte) hex.charAt(o), (byte) hex.charAt(o+1), o));
+        return decode(offset, len, hex::charAt);
     }
 
     public static byte[] decode(byte[] hexBytes, int offset, int len) {
-        final byte[] bytes = new byte[len / CHARS_PER_BYTE];
-        return decode(offset, len, bytes, (i, o) -> decodeBytes(hexBytes[o], hexBytes[o+1], o));
+        return decode(offset, len, o -> hexBytes[o]);
     }
 
-    private static byte[] decode(int offset, final int len, final byte[] dest, final IntBinaryOperator decoder) {
+    private static byte[] decode(int offset, int len, IntUnaryOperator extractor) {
         if (Integers.mod(len, CHARS_PER_BYTE) != 0) {
             throw new IllegalArgumentException("len must be a multiple of two");
         }
+        byte[] dest = new byte[len / CHARS_PER_BYTE];
         for (int i = 0; i < dest.length; i++, offset += 2) {
-            dest[i] = (byte) decoder.applyAsInt(i, offset);
+            dest[i] = (byte) decodeByte(extractor, offset);
         }
         return dest;
     }
 
-    private static int decodeBytes(byte a, byte b, int offset) {
-        return decodeByte(a, offset, 0) << BITS_PER_CHAR | decodeByte(b, offset, 1);
+    private static int decodeByte(IntUnaryOperator extractor, int offset) {
+        return decodeByte(extractor.applyAsInt(offset), offset) << BITS_PER_CHAR | decodeByte(extractor.applyAsInt(++offset), offset);
     }
 
-    private static int decodeByte(final byte c, int offset, int offsetDelta) {
+    private static int decodeByte(int c, int offset) {
         switch (c) {
         case '0':
         case '1':
@@ -114,7 +113,7 @@ public final class FastHex {
         case 'd':
         case 'e':
         case 'f': return c - ('a' - 0xa);
-        default: throw new IllegalArgumentException("illegal hex val @ " + (offset + offsetDelta));
+        default: throw new IllegalArgumentException("illegal hex val @ " + offset);
         }
     }
 }
