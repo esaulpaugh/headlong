@@ -20,6 +20,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.function.Supplier;
 
@@ -155,7 +156,9 @@ public class StringsTest {
         for (int i = 0; i < 256; i++) {
             for (int j = 0; j < 256; j++) {
                 try {
-                    FastHex.decode("" + (char) i + (char) j);
+                    String s = "" + (char) i + (char) j;
+                    byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
+                    assertArrayEquals(FastHex.decode(bytes, 0, s.length()), FastHex.decode(s));
                 } catch (IllegalArgumentException iae) {
                     if(iae.getMessage().startsWith("illegal")) {
                         count++;
