@@ -149,23 +149,25 @@ public class StringsTest {
         assertEquals("02", FastHex.encodeToString((byte) 0b0000_0010));
     }
 
-    @Disabled("slowish")
+    @Disabled("slow")
     @Test
     public void testHexDecode() {
         int count = 0;
-        for (int i = 0; i < 256; i++) {
-            for (int j = 0; j < 256; j++) {
-                try {
-                    String s = "" + (char) i + (char) j;
-                    byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
-                    assertArrayEquals(FastHex.decode(bytes, 0, s.length()), FastHex.decode(s));
-                } catch (IllegalArgumentException iae) {
-                    if(iae.getMessage().startsWith("illegal")) {
-                        count++;
+        for (int k = 0; k < 256; k++) {
+            for (int i = 0; i < 256; i++) {
+                for (int j = 0; j < 256; j++) {
+                    try {
+                        String s = "0" + (char) k + (char) i + (char) j;
+                        byte[] bytes = s.getBytes(StandardCharsets.US_ASCII);
+                        assertArrayEquals(FastHex.decode(bytes, 0, bytes.length), FastHex.decode(s));
+                    } catch (IllegalArgumentException iae) {
+                        if (iae.getMessage().startsWith("i")) {
+                            count++;
+                        }
                     }
                 }
             }
         }
-        assertEquals("0123456789ABCDEFabcdef".length(), (int) Math.sqrt(256 * 256 - count));
+        assertEquals("0123456789ABCDEFabcdef".length(), (int) Math.cbrt(256 * 256 * 256 - count));
     }
 }
