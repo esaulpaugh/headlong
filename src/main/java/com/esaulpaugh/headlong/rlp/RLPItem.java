@@ -314,7 +314,7 @@ public abstract class RLPItem {
     }
 
     /**
-     * @param encoding one of { {@link Strings#BASE_64_URL_SAFE}, {@link Strings#UTF_8}, {@link Strings#HEX} }.
+     * @param encoding one of { {@link Strings#HEX}, {@link Strings#UTF_8}, {@link Strings#BASE_64_URL_SAFE}, {@link Strings#ASCII} }.
      * @return  this item's bytes, including RLP prefix, encoded to your liking
      */
     public final String encodingString(int encoding) {
