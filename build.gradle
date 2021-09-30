@@ -39,7 +39,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     finalizedBy(javadocJar)
 }
 
-def junitVersion = '5.7.2'
+def junitVersion = '5.8.1'
 def jmhVersion = '1.33'
 def bcVersion = '1.69'
 
