@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.util.JsonUtils;
+import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -26,6 +27,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -283,6 +285,105 @@ public class ABIJSONTest {
                 assertEquals(orig, ABIJSON.parseEvent(newJson));
             }
         }
+    }
+
+    @Test
+    public void testBigIntAddrs() throws Throwable {
+        testBigIntAddr(BigInteger.ZERO);
+        testBigIntAddr(BigInteger.ONE);
+        testBigIntAddr(BigInteger.TEN);
+        testBigIntAddr(BigInteger.valueOf(2L));
+        testBigIntAddr(BigIntegerType.decodeAddress("0x82095cafebabecafebabe00083ce15d74e191051"));
+        testBigIntAddr(BigIntegerType.decodeAddress("0x4bec173f8d9d3d90188777cafebabecafebabe99"));
+        testBigIntAddr(BigIntegerType.decodeAddress("0x5cafebabecafebabe7570ad8ac11f8d812ee0606"));
+        testBigIntAddr(BigIntegerType.decodeAddress("0x0000000005cafebabecafebabe7570ad8ac11f8d"));
+        testBigIntAddr(BigIntegerType.decodeAddress("0x0000000000000000000082095cafebabecafebab"));
+
+        TestUtils.assertThrown(IllegalArgumentException.class,
+                "invalid bit length: 161",
+                () -> BigIntegerType.formatAddress(new BigInteger("182095cafebabecafebabe00083ce15d74e191051", 16))
+        );
+        TestUtils.assertThrown(IllegalArgumentException.class,
+                "invalid bit length: 164",
+                () -> BigIntegerType.formatAddress(new BigInteger("82095cafebabecafebabe00083ce15d74e1910510", 16))
+        );
+
+        final Random r = TestUtils.seededRandom();
+        for (int i = 0; i < 1000; i++) {
+            testBigIntAddr(generateAddress(r));
+        }
+    }
+
+    @Test
+    public void testStringAddrs() throws Throwable {
+        testStringAddr(BigIntegerType.formatAddress(BigInteger.ZERO));
+        testStringAddr(BigIntegerType.formatAddress(BigInteger.ONE));
+        testStringAddr(BigIntegerType.formatAddress(BigInteger.TEN));
+        testStringAddr(BigIntegerType.formatAddress(BigInteger.valueOf(2L)));
+        testStringAddr("0x82095cafebabecafebabe00083ce15d74e191051");
+        testStringAddr("0x4bec173f8d9d3d90188777cafebabecafebabe99");
+        testStringAddr("0x5cafebabecafebabe7570ad8ac11f8d812ee0606");
+        testStringAddr("0x0000000005cafebabecafebabe7570ad8ac11f8d");
+        testStringAddr("0x0000000000000000000082095cafebabecafebab");
+        testStringAddr("0xc0ec0fbb1c07aebe2a6975d50b5f6441b05023f9");
+        testStringAddr("0xa62274005cafebabecafebabecaebb178db50ad6");
+        testStringAddr("0xc6782c3a8155971a5d16005cafebabecafebabe8");
+
+        TestUtils.assertThrown(IllegalArgumentException.class,
+                "expected prefix 0x not found",
+                () -> BigIntegerType.decodeAddress("aaaaa")
+        );
+        TestUtils.assertThrown(IllegalArgumentException.class,
+                "expected prefix 0x not found",
+                () -> BigIntegerType.decodeAddress("5cafebabecafebabe7570ad8ac11f8d812ee0606")
+        );
+        TestUtils.assertThrown(IllegalArgumentException.class,
+                "expected address length: 42; actual: 41",
+                () -> BigIntegerType.decodeAddress("0xa83aaef1b5c928162005cafebabecafebabecb0")
+        );
+        TestUtils.assertThrown(IllegalArgumentException.class,
+                "expected address length: 42; actual: 43",
+                () -> BigIntegerType.decodeAddress("0xa83aaef1b5c928162005cafebabecafebabecb0a0")
+        );
+
+        final byte[] _20 = new byte[20];
+        final Random r = TestUtils.seededRandom();
+        for (int i = 0; i < 1000; i++) {
+            testStringAddr(generateStringAddress(_20, r));
+        }
+    }
+
+    private static void testStringAddr(final String addrString) {
+        final BigInteger addr = BigIntegerType.decodeAddress(addrString);
+        assertTrue(addr.bitLength() <= 160);
+        assertEquals(addr, BigIntegerType.decodeAddress(addrString));
+    }
+
+    private static String generateStringAddress(byte[] _20, Random r) {
+        r.nextBytes(_20);
+        return "0x" + Strings.encode(_20);
+    }
+
+    private static void testBigIntAddr(final BigInteger addr) {
+        final String addrString = BigIntegerType.formatAddress(addr);
+        assertTrue(addrString.startsWith("0x"));
+        assertEquals(BigIntegerType.ADDRESS_STRING_LEN, addrString.length());
+        assertEquals(addr, BigIntegerType.decodeAddress(addrString));
+    }
+
+    private static BigInteger generateAddress(Random r) {
+        final BigIntegerType type = TypeFactory.create("address");
+        byte[] magnitude = new byte[type.bitLength / Byte.SIZE];
+        r.nextBytes(magnitude);
+        boolean zero = true;
+        for (byte b : magnitude) {
+            zero &= b == 0;
+        }
+        BigInteger random = new BigInteger(zero ? 0 : type.unsigned || r.nextBoolean() ? 1 : -1, magnitude);
+        if(!type.unsigned && random.bitLength() >= type.bitLength) {
+            random = random.shiftRight(1);
+        }
+        return random;
     }
 
     @Test

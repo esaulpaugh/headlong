@@ -61,4 +61,51 @@ public final class BigIntegerType extends UnitType<BigInteger> {
         validate(bigInt);
         return bigInt;
     }
+
+    public static final String ADDRESS_PREFIX = "0x";
+    public static final int ADDRESS_HEX_LEN = 160 / (Byte.SIZE / 2);
+    public static final int ADDRESS_STRING_LEN = ADDRESS_PREFIX.length() + ADDRESS_HEX_LEN;
+
+    public static String formatAddress(final BigInteger address) {
+        final String result = _formatAddr(address);
+        if(_decodeAddr(result).equals(address)) {
+            return result;
+        }
+        throw new AssertionError();
+    }
+
+    public static BigInteger decodeAddress(final String address) {
+        final BigInteger result = _decodeAddr(address);
+        if(_formatAddr(result).equals(address)) {
+            return result;
+        }
+        throw new AssertionError();
+    }
+
+    private static String _formatAddr(final BigInteger address) {
+        final String minimalHex = address.toString(16);
+        final int leftPad = ADDRESS_HEX_LEN - minimalHex.length();
+        if(leftPad < 0) {
+            throw new IllegalArgumentException("invalid bit length: " + address.bitLength());
+        }
+        final StringBuilder addrBuilder = new StringBuilder(ADDRESS_PREFIX);
+        for (int i = 0; i < leftPad; i++) {
+            addrBuilder.append('0');
+        }
+        final String result = addrBuilder.append(minimalHex).toString();
+        if(result.length() == ADDRESS_STRING_LEN) {
+            return result;
+        }
+        throw new AssertionError();
+    }
+
+    private static BigInteger _decodeAddr(final String addrStr) {
+        if(!addrStr.startsWith(ADDRESS_PREFIX)) {
+            throw new IllegalArgumentException("expected prefix 0x not found");
+        }
+        if(addrStr.length() != ADDRESS_STRING_LEN) {
+            throw new IllegalArgumentException("expected address length: " + ADDRESS_STRING_LEN + "; actual: " + addrStr.length());
+        }
+        return new BigInteger(addrStr.substring(ADDRESS_PREFIX.length()), 16);
+    }
 }
