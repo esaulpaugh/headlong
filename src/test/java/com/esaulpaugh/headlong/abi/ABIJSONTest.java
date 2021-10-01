@@ -309,9 +309,20 @@ public class ABIJSONTest {
         );
 
         final Random r = TestUtils.seededRandom();
-        for (int i = 0; i < 1000; i++) {
-            testBigIntAddr(generateAddress(r));
+        final BigIntegerType type = TypeFactory.create("address");
+        final byte[] magnitude = new byte[type.bitLength / Byte.SIZE];
+        for (int i = 0; i < 1_000; i++) {
+            testBigIntAddr(generateBigIntAddress(r, magnitude));
         }
+    }
+
+    private static BigInteger generateBigIntAddress(Random r, byte[] magnitude) {
+        r.nextBytes(magnitude);
+        boolean zero = true;
+        for (byte b : magnitude) {
+            zero &= b == 0;
+        }
+        return new BigInteger(zero ? 0 : 1, magnitude);
     }
 
     @Test
@@ -348,7 +359,7 @@ public class ABIJSONTest {
 
         final byte[] _20 = new byte[20];
         final Random r = TestUtils.seededRandom();
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 1_000; i++) {
             testStringAddr(generateStringAddress(_20, r));
         }
     }
@@ -369,21 +380,6 @@ public class ABIJSONTest {
         assertTrue(addrString.startsWith("0x"));
         assertEquals(BigIntegerType.ADDRESS_STRING_LEN, addrString.length());
         assertEquals(addr, BigIntegerType.decodeAddress(addrString));
-    }
-
-    private static BigInteger generateAddress(Random r) {
-        final BigIntegerType type = TypeFactory.create("address");
-        byte[] magnitude = new byte[type.bitLength / Byte.SIZE];
-        r.nextBytes(magnitude);
-        boolean zero = true;
-        for (byte b : magnitude) {
-            zero &= b == 0;
-        }
-        BigInteger random = new BigInteger(zero ? 0 : type.unsigned || r.nextBoolean() ? 1 : -1, magnitude);
-        if(!type.unsigned && random.bitLength() >= type.bitLength) {
-            random = random.shiftRight(1);
-        }
-        return random;
     }
 
     @Test
