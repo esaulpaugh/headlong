@@ -20,7 +20,6 @@ import java.util.function.IntUnaryOperator;
 
 import static com.esaulpaugh.headlong.util.FastHex.BITS_PER_CHAR;
 import static com.esaulpaugh.headlong.util.FastHex.CHARS_PER_BYTE;
-import static com.esaulpaugh.headlong.util.FastHex.decodeNibble;
 
 /** Decode up to 1.6 gigabytes of hexadecimal data per second using a large lookup table. */
 public class FasterHex {
@@ -29,18 +28,22 @@ public class FasterHex {
 
     static {
         Arrays.fill(DECODE_TABLE, (byte) -1);
-        insert('0', '9');
-        insert('A', 'F');
-        insert('a', 'f');
+        insertAll('0', '9');
+        insertAll('A', 'F');
+        insertAll('a', 'f');
     }
 
-    private static void insert(int start, int end) {
-        final int o = -1;
+    private static void insertAll(int start, int end) {
         for (int i = start; i <= end; i++) {
-            for (int j = '0'; j <= '9'; j++) DECODE_TABLE[i << 7 | j] = (short) (decodeNibble(i, o) << BITS_PER_CHAR | decodeNibble(j, o)); // ASCII values are at most 7 bits
-            for (int j = 'A'; j <= 'F'; j++) DECODE_TABLE[i << 7 | j] = (short) (decodeNibble(i, o) << BITS_PER_CHAR | decodeNibble(j, o));
-            for (int j = 'a'; j <= 'f'; j++) DECODE_TABLE[i << 7 | j] = (short) (decodeNibble(i, o) << BITS_PER_CHAR | decodeNibble(j, o));
+            for (int j = '0'; j <= '9'; j++) insert(i, j);
+            for (int j = 'A'; j <= 'F'; j++) insert(i, j);
+            for (int j = 'a'; j <= 'f'; j++) insert(i, j);
         }
+    }
+
+    private static void insert(int i, int j) {
+        // ASCII values are at most 7 bits
+        DECODE_TABLE[i << 7 | j] = (short) (FastHex.decodeNibble(i, -1) << BITS_PER_CHAR | FastHex.decodeNibble(j, -1));
     }
 
     public static byte[] decode(String hex) {
