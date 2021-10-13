@@ -24,6 +24,8 @@ import static com.esaulpaugh.headlong.util.FastHex.CHARS_PER_BYTE;
 /** Decode up to 1.6 gigabytes of hexadecimal data per second using a large lookup table. */
 public class FasterHex {
 
+    private FasterHex() {}
+
     private static final short[] DECODE_TABLE = new short[13_159]; // ('f' << 7) + 'f' + 1
 
     static {
