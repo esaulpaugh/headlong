@@ -17,14 +17,14 @@ package com.esaulpaugh.headlong.util;
 
 import java.util.function.IntUnaryOperator;
 
-/** Uses a larger encoding table to speed up encoding. Uses a switch statement to speed up decoding.*/
+/** Uses a larger encoding table to speed up encoding. Does not use any lookup table for decoding.*/
 public final class FastHex {
 
     private FastHex() {}
 
-    private static final int CHARS_PER_BYTE = 2;
+    static final int CHARS_PER_BYTE = 2;
 
-    private static final int BITS_PER_CHAR = Byte.SIZE / CHARS_PER_BYTE;
+    static final int BITS_PER_CHAR = Byte.SIZE / CHARS_PER_BYTE;
 
     // Byte values index directly into the encoding table (size 256) whose elements consist of two ASCII values encoded
     // together as a short
@@ -79,7 +79,7 @@ public final class FastHex {
             throw new IllegalArgumentException("len must be a multiple of two");
         }
         byte[] dest = new byte[len / CHARS_PER_BYTE];
-        for (int i = 0; i < dest.length; i++, offset += 2) {
+        for (int i = 0; i < dest.length; i++, offset += CHARS_PER_BYTE) {
             dest[i] = (byte) decodeByte(extractor, offset);
         }
         return dest;
@@ -89,7 +89,7 @@ public final class FastHex {
         return decodeNibble(extractor.applyAsInt(offset), offset) << BITS_PER_CHAR | decodeNibble(extractor.applyAsInt(++offset), offset);
     }
 
-    private static int decodeNibble(int c, int offset) {
+    static int decodeNibble(int c, int offset) {
         switch (c) {
         case '0':
         case '1':
