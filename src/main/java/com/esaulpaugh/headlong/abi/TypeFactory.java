@@ -33,7 +33,7 @@ public final class TypeFactory {
 
     private TypeFactory() {}
 
-    private static final int ADDRESS_BIT_LEN = 160;
+    static final int ADDRESS_BIT_LEN = 160;
 
     private static final int DECIMAL_BIT_LEN = 128;
     private static final int DECIMAL_SCALE = 10;

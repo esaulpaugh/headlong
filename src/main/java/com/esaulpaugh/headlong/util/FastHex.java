@@ -22,9 +22,9 @@ public final class FastHex {
 
     private FastHex() {}
 
-    static final int CHARS_PER_BYTE = 2;
+    public static final int CHARS_PER_BYTE = 2;
 
-    static final int BITS_PER_CHAR = Byte.SIZE / CHARS_PER_BYTE;
+    public static final int BITS_PER_CHAR = Byte.SIZE / CHARS_PER_BYTE;
 
     // Byte values index directly into the encoding table (size 256) whose elements consist of two ASCII values encoded
     // together as a short

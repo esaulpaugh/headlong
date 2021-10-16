@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.FastHex;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
@@ -62,8 +64,9 @@ public final class BigIntegerType extends UnitType<BigInteger> {
         return bigInt;
     }
 
+    public static final int HEX_RADIX = 16;
     public static final String ADDRESS_PREFIX = "0x";
-    public static final int ADDRESS_HEX_LEN = 160 / (Byte.SIZE / 2);
+    public static final int ADDRESS_HEX_LEN = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
     public static final int ADDRESS_STRING_LEN = ADDRESS_PREFIX.length() + ADDRESS_HEX_LEN;
 
     public static String formatAddress(final BigInteger address) {
@@ -83,7 +86,7 @@ public final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     private static String _formatAddr(final BigInteger address) {
-        final String minimalHex = address.toString(16);
+        final String minimalHex = address.toString(HEX_RADIX);
         final int leftPad = ADDRESS_HEX_LEN - minimalHex.length();
         if(leftPad < 0) {
             throw new IllegalArgumentException("invalid bit length: " + address.bitLength());
@@ -106,6 +109,6 @@ public final class BigIntegerType extends UnitType<BigInteger> {
         if(addrStr.length() != ADDRESS_STRING_LEN) {
             throw new IllegalArgumentException("expected address length: " + ADDRESS_STRING_LEN + "; actual: " + addrStr.length());
         }
-        return new BigInteger(addrStr.substring(ADDRESS_PREFIX.length()), 16);
+        return new BigInteger(addrStr.substring(ADDRESS_PREFIX.length()), HEX_RADIX);
     }
 }
