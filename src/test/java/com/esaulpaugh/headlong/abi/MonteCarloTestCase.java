@@ -298,7 +298,14 @@ public class MonteCarloTestCase implements Serializable {
             }
             signature.append(typeStr).append(',');
         }
-        return TupleType.completeTupleTypeString(signature);
+        return completeTupleTypeString(signature);
+    }
+
+    private static String completeTupleTypeString(StringBuilder sb) {
+        final int len = sb.length();
+        return len != 1
+                ? sb.deleteCharAt(len - 1).append(')').toString() // replace trailing comma
+                : "()";
     }
 
     private ABIType<?> generateType(String[] canonicalBaseTypes, Random r, final int tupleDepth) {

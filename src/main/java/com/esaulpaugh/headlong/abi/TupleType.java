@@ -255,7 +255,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         throw new IllegalArgumentException("manifest.length != size(): " + manifest.length + " != " + size);
     }
 
-    static String completeTupleTypeString(StringBuilder sb) {
+    private static String completeTupleTypeString(StringBuilder sb) {
         final int len = sb.length();
         return len != 1
                 ? sb.deleteCharAt(len - 1).append(')').toString() // replace trailing comma

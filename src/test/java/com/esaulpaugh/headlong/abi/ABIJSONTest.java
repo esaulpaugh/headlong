@@ -414,6 +414,8 @@ public class ABIJSONTest {
         assertTrue(f.isFunction());
         assertFalse(f.isEvent());
         assertFalse(f.isContractError());
+
+        assertTrue(in.isDynamic());
     }
 
     @Test
