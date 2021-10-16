@@ -89,7 +89,7 @@ public final class FastHex {
         return decodeNibble(extractor.applyAsInt(offset), offset) << BITS_PER_CHAR | decodeNibble(extractor.applyAsInt(++offset), offset);
     }
 
-    static int decodeNibble(int c, int offset) {
+    private static int decodeNibble(int c, int offset) {
         switch (c) {
         case '0':
         case '1':

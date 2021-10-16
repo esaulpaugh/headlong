@@ -142,12 +142,6 @@ public class StringsTest {
         TestUtils.assertThrown(IllegalArgumentException.class, "illegal hex val @ 0", () -> FastHex.decode("(0"));
 
         TestUtils.assertThrown(IllegalArgumentException.class, "illegal hex val @ 1", () -> FastHex.decode("0'"));
-
-        TestUtils.assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FasterHex.decode("0"));
-        TestUtils.assertThrown(IllegalArgumentException.class, "invalid hex pair @ 0", () -> FasterHex.decode("(0"));
-        TestUtils.assertThrown(IllegalArgumentException.class, "invalid hex pair @ 0", () -> FasterHex.decode("0'"));
-        TestUtils.assertThrown(IllegalArgumentException.class, "invalid hex pair @ 2", () -> FasterHex.decode("ff(0"));
-        TestUtils.assertThrown(IllegalArgumentException.class, "invalid hex pair @ 2", () -> FasterHex.decode("fe0'"));
     }
 
     @Test

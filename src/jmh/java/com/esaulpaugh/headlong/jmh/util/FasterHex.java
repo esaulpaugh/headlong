@@ -13,7 +13,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.util;
+package com.esaulpaugh.headlong.jmh.util;
+
+import com.esaulpaugh.headlong.util.Integers;
 
 import java.util.Arrays;
 import java.util.function.IntUnaryOperator;
@@ -45,7 +47,16 @@ public class FasterHex {
 
     private static void insert(int i, int j) {
         // ASCII values are at most 7 bits
-        DECODE_TABLE[i << 7 | j] = (short) (FastHex.decodeNibble(i, -1) << BITS_PER_CHAR | FastHex.decodeNibble(j, -1));
+        DECODE_TABLE[i << 7 | j] = (short) (decodeNibble(i) << BITS_PER_CHAR | decodeNibble(j));
+    }
+
+    private static int decodeNibble(int c) {
+        switch (c) {
+        case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': return c - '0';
+        case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': return  c - ('A' - 0xA);
+        case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': return c - ('a' - 0xa);
+        default: throw new AssertionError();
+        }
     }
 
     public static byte[] decode(String hex) {
