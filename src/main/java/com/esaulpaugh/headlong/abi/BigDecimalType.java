@@ -19,7 +19,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-/** For decimal types such as fixed, ufixed, and decimal. */
+/** Represents a decimal type such as fixed, ufixed, or decimal. */
 public final class BigDecimalType extends UnitType<BigDecimal> {
 
     private final int scale;

@@ -23,7 +23,7 @@ import java.util.Arrays;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 
 /**
- * As per EIP-778.
+ * A key-value pair as per EIP-778.
  *
  * @see Record
  */

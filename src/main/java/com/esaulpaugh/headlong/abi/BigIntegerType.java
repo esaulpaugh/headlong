@@ -20,7 +20,7 @@ import com.esaulpaugh.headlong.util.FastHex;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-/** Represents integer types from uint64 to int256. */
+/** Represents an integer type such as uint64 or int256. */
 public final class BigIntegerType extends UnitType<BigInteger> {
 
     BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {

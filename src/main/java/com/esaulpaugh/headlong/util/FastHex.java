@@ -17,7 +17,7 @@ package com.esaulpaugh.headlong.util;
 
 import java.util.function.IntUnaryOperator;
 
-/** Uses a larger encoding table to speed up encoding. Does not use any lookup table for decoding.*/
+/** Hexadecimal codec optimized for small inputs. */
 public final class FastHex {
 
     private FastHex() {}

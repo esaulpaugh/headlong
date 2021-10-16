@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/** An {@link java.util.Iterator} over consecutive serialized RLP items. */
 class RLPSequenceIterator implements Iterator<RLPItem> {
 
     final RLPDecoder decoder;
