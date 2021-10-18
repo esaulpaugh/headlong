@@ -75,7 +75,7 @@ public final class FastHex {
     }
 
     private static byte[] decode(int offset, int len, IntUnaryOperator extractor) {
-        if (Integers.mod(len, CHARS_PER_BYTE) != 0) {
+        if (!Integers.isMultiple(len, CHARS_PER_BYTE)) {
             throw new IllegalArgumentException("len must be a multiple of two");
         }
         byte[] dest = new byte[len / CHARS_PER_BYTE];

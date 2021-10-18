@@ -470,9 +470,13 @@ public final class Integers {
         return mod != 0 ? len + (powerOfTwo - mod) : len;
     }
 
-    public static void checkIsMultiple(int len, int powerOfTwo) {
-        if(mod(len, powerOfTwo) != 0) {
-            throw new IllegalArgumentException("expected length mod " + powerOfTwo + " == 0, found: " + (len % powerOfTwo));
+    public static boolean isMultiple(int val, int powerOfTwo) {
+        return mod(val, powerOfTwo) == 0;
+    }
+
+    public static void checkIsMultiple(int val, int powerOfTwo) {
+        if(!isMultiple(val, powerOfTwo)) {
+            throw new IllegalArgumentException("expected length mod " + powerOfTwo + " == 0, found: " + (val % powerOfTwo));
         }
     }
 }

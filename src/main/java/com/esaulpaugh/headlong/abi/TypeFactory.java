@@ -163,7 +163,7 @@ public final class TypeFactory {
                 if (leadDigitValid(mStr.charAt(0)) && leadDigitValid(nStr.charAt(0))) {
                     final int M = Integer.parseInt(mStr); // no parseUnsignedInt on Android?
                     final int N = Integer.parseInt(nStr);
-                    if (Integers.mod(M, 8) == 0 && M >= 8 && M <= 256 && N > 0 && N <= 80) {
+                    if (Integers.isMultiple(M, 8) && M >= 8 && M <= 256 && N > 0 && N <= 80) {
                         return new BigDecimalType((unsigned ? "ufixed" : "fixed") + M + 'x' + N, M, N, unsigned);
                     }
                 }
