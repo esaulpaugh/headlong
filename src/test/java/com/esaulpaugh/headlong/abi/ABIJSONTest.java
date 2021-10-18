@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
@@ -308,21 +309,27 @@ public class ABIJSONTest {
                 () -> BigIntegerType.formatAddress(new BigInteger("82095cafebabecafebabe00083ce15d74e1910510", 16))
         );
 
-        final Random r = TestUtils.seededRandom();
+        final SecureRandom sr = new SecureRandom();
+        sr.setSeed(new SecureRandom().generateSeed(64));
+        sr.setSeed(sr.generateSeed(64));
         final BigIntegerType type = TypeFactory.create("address");
-        final byte[] magnitude = new byte[type.bitLength / Byte.SIZE];
-        for (int i = 0; i < 1_000; i++) {
-            testBigIntAddr(generateBigIntAddress(r, magnitude));
+        for (int i = 0; i < 500; i++) {
+            testBigIntAddr(new BigInteger(type.bitLength, sr));
         }
-    }
 
-    private static BigInteger generateBigIntAddress(Random r, byte[] magnitude) {
-        r.nextBytes(magnitude);
-        boolean zero = true;
-        for (byte b : magnitude) {
-            zero &= b == 0;
+        final Random r = new Random(sr.nextLong());
+        for (int bitlen = 0; bitlen <= 160; bitlen++) {
+            for (int i = 0; i < 10; i++) {
+                testBigIntAddr(new BigInteger(bitlen, r));
+            }
         }
-        return new BigInteger(zero ? 0 : 1, magnitude);
+        BigInteger temp;
+        do {
+            temp = new BigInteger(161, r);
+        } while (temp.bitLength() < 161);
+        final BigInteger tooBig = temp;
+        TestUtils.assertThrown(IllegalArgumentException.class, "invalid bit length: 161", () -> BigIntegerType.formatAddress(tooBig));
+
     }
 
     @Test
