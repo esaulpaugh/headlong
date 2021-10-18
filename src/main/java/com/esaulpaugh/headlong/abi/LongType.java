@@ -50,10 +50,10 @@ public final class LongType extends UnitType<Long> {
 
     static void encodeLong(long value, int byteLen, ByteBuffer dest) {
         if(value >= 0) {
-            Encoding.insertPadding(byteLen - Integers.len(value), false, dest);
+            Encoding.insert00Padding(byteLen - Integers.len(value), dest);
             Integers.putLong(value, dest);
         } else {
-            Encoding.insertPadding(byteLen - BizarroIntegers.len(value), true, dest);
+            Encoding.insertFFPadding(byteLen - BizarroIntegers.len(value), dest);
             BizarroIntegers.putLong(value, dest);
         }
     }

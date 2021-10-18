@@ -41,6 +41,11 @@ final class Encoding {
         Arrays.fill(CACHED_NEG1_PADDING, (byte) 0xFF);
     }
 
+    static void insertIntUnsigned(long val, ByteBuffer dest) {
+        insert00Padding(UNIT_LENGTH_BYTES - Long.BYTES, dest);
+        dest.putLong(val);
+    }
+
     static void insertInt(long val, ByteBuffer dest) {
         insertPadding(UNIT_LENGTH_BYTES - Long.BYTES, val < 0, dest);
         dest.putLong(val);
@@ -56,7 +61,19 @@ final class Encoding {
         }
     }
 
-    static void insertPadding(int n, boolean negativeOnes, ByteBuffer dest) {
-        dest.put(!negativeOnes ? CACHED_ZERO_PADDING : CACHED_NEG1_PADDING, 0, n);
+    private static void insertPadding(int n, boolean negativeOnes, ByteBuffer dest) {
+        if(negativeOnes) {
+            insertFFPadding(n, dest);
+        } else {
+            insert00Padding(n, dest);
+        }
+    }
+
+    static void insert00Padding(int n, ByteBuffer dest) {
+        dest.put(CACHED_ZERO_PADDING, 0, n);
+    }
+
+    static void insertFFPadding(int n, ByteBuffer dest) {
+        dest.put(CACHED_NEG1_PADDING, 0, n);
     }
 }

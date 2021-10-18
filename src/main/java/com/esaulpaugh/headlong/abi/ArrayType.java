@@ -224,7 +224,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private void encodeArrayLen(int len, ByteBuffer dest) {
         if(length == DYNAMIC_LENGTH) {
-            Encoding.insertInt(len, dest);
+            Encoding.insertIntUnsigned(len, dest);
         }
     }
 
@@ -239,7 +239,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         encodeArrayLen(arr.length, dest);
         dest.put(arr);
         int rem = Integers.mod(arr.length, UNIT_LENGTH_BYTES);
-        Encoding.insertPadding(rem != 0 ? UNIT_LENGTH_BYTES - rem : 0, false, dest);
+        Encoding.insert00Padding(rem != 0 ? UNIT_LENGTH_BYTES - rem : 0, dest);
     }
 
     private void encodeInts(int[] arr, ByteBuffer dest) {

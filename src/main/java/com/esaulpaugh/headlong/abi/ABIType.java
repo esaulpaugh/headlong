@@ -142,7 +142,7 @@ public abstract class ABIType<J> {
             encodeTail(value, dest);
             return offset;
         }
-        Encoding.insertInt(offset, dest); // insert offset
+        Encoding.insertIntUnsigned(offset, dest); // insert offset
         return offset + byteLength(value); // return next offset
     }
 
