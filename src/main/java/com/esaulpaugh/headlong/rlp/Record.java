@@ -170,11 +170,12 @@ public final class Record {
 
     private byte[] content(int index) {
         // reconstruct the content list from the content data
-        int contentDataLen = rlp.encodingLength() - index;
-        ByteBuffer bb = ByteBuffer.allocate(RLPEncoder.itemLen(contentDataLen));
+        final int contentDataLen = rlp.encodingLength() - index;
+        final ByteBuffer bb = ByteBuffer.allocate(RLPEncoder.itemLen(contentDataLen));
         RLPEncoder.insertListPrefix(contentDataLen, bb);
-        rlp.exportRange(index, index + contentDataLen, bb.array(), bb.position());
-        return bb.array();
+        final byte[] arr = bb.array();
+        rlp.exportRange(index, index + contentDataLen, arr, bb.position());
+        return arr;
     }
 
     public interface Signer {
