@@ -368,7 +368,7 @@ public class MonteCarloTestCase implements Serializable {
         if(type.unsigned) {
             return new BigInteger(type.bitLength, r);
         }
-        final byte[] magnitude = new byte[(int) Math.ceil((double) type.bitLength / Byte.SIZE)];
+        final byte[] magnitude = new byte[(int) ((type.bitLength + 7L) / Byte.SIZE)];
         r.nextBytes(magnitude);
         switch (type.bitLength & 0x7) {
         case 1: magnitude[0] &= 0b0000_0001; break;
