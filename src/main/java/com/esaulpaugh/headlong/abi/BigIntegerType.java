@@ -64,10 +64,10 @@ public final class BigIntegerType extends UnitType<BigInteger> {
         return bigInt;
     }
 
-    public static final int HEX_RADIX = 16;
+    private static final int HEX_RADIX = 16;
+    private static final int ADDRESS_HEX_CHARS = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
     public static final String ADDRESS_PREFIX = "0x";
-    public static final int ADDRESS_HEX_LEN = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
-    public static final int ADDRESS_STRING_LEN = ADDRESS_PREFIX.length() + ADDRESS_HEX_LEN;
+    public static final int ADDRESS_STRING_LEN = ADDRESS_PREFIX.length() + ADDRESS_HEX_CHARS;
 
     public static String formatAddress(final BigInteger address) {
         final String result = _formatAddr(address);
@@ -87,7 +87,7 @@ public final class BigIntegerType extends UnitType<BigInteger> {
 
     private static String _formatAddr(final BigInteger address) {
         final String minimalHex = address.toString(HEX_RADIX);
-        final int leftPad = ADDRESS_HEX_LEN - minimalHex.length();
+        final int leftPad = ADDRESS_HEX_CHARS - minimalHex.length();
         if(leftPad < 0) {
             throw new IllegalArgumentException("invalid bit length: " + address.bitLength());
         }

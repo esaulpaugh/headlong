@@ -329,7 +329,6 @@ public class ABIJSONTest {
         } while (temp.bitLength() < 161);
         final BigInteger tooBig = temp;
         TestUtils.assertThrown(IllegalArgumentException.class, "invalid bit length: 161", () -> BigIntegerType.formatAddress(tooBig));
-
     }
 
     @Test
