@@ -365,14 +365,20 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     private static BigInteger generateBigInteger(Random r, UnitType<? extends Number> type) {
+        if(type.unsigned) {
+            return new BigInteger(type.bitLength, r);
+        }
         byte[] magnitude = new byte[type.bitLength / Byte.SIZE];
         r.nextBytes(magnitude);
         boolean zero = true;
         for (byte b : magnitude) {
             zero &= b == 0;
         }
-        BigInteger random = new BigInteger(zero ? 0 : type.unsigned || r.nextBoolean() ? 1 : -1, magnitude);
-        if(!type.unsigned && random.bitLength() >= type.bitLength) {
+        BigInteger random = new BigInteger(zero ? 0 : r.nextBoolean() ? 1 : -1, magnitude);
+        if(random.bitLength() > type.bitLength) {
+            throw new AssertionError();
+        }
+        if(random.bitLength() == type.bitLength) {
             random = random.shiftRight(1);
         }
         return random;
