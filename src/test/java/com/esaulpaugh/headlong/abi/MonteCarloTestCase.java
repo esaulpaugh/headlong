@@ -357,7 +357,7 @@ public class MonteCarloTestCase implements Serializable {
 
     static long generateLong(Random r, UnitType<? extends Number> unitType) {
         long x = TestUtils.pickRandom(r, 1 + r.nextInt(unitType.bitLength / Byte.SIZE), unitType.unsigned);
-        int valBitLen = x < 0 ? BizarroIntegers.bitLen(x) : Integers.bitLen(x);
+        final int valBitLen = x < 0 ? BizarroIntegers.bitLen(x) : Integers.bitLen(x);
         if (valBitLen >= unitType.bitLength) {
             x >>= 1;
         }
@@ -383,7 +383,7 @@ public class MonteCarloTestCase implements Serializable {
         for (byte b : magnitude) {
             zero &= b == 0;
         }
-        BigInteger val = new BigInteger(zero ? 0 : r.nextBoolean() ? 1 : -1, magnitude);
+        final BigInteger val = new BigInteger(zero ? 0 : r.nextBoolean() ? 1 : -1, magnitude);
         return val.bitLength() < type.bitLength ? val : val.shiftRight(1);
     }
 
@@ -392,7 +392,7 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     private Object generateArray(ArrayType<? extends ABIType<?>, ?> arrayType, Random r) {
-        ABIType<?> elementType = arrayType.getElementType();
+        final ABIType<?> elementType = arrayType.getElementType();
         final int typeLen = arrayType.getLength();
         final int len = DYNAMIC_LENGTH == typeLen
                 ? r.nextInt(maxArrayLen + 1) // [0,max]
@@ -422,19 +422,6 @@ public class MonteCarloTestCase implements Serializable {
     private static String generateUtf8String(int len, Random r) {
         return Strings.encode(TestUtils.randomBytes(len, r), Strings.UTF_8);
     }
-
-//    private static String generateASCIIString(final int len, Random r) {
-//        byte[] bytes = new byte[len];
-//        for(int i = 0; i < len; i++) {
-//            int v;
-//            do {
-//                v = (char) (r.nextInt(160)); // 95) + 32
-//            } while (Character.isISOControl(v));
-//            if(v == '(') v = '_';
-//            bytes[i] = (byte) v;
-//        }
-//        return new String(bytes, 0, 0, len);
-//    }
 
     private static int[] generateIntArray(final int len, IntType intType, Random r) {
         int[] ints = new int[len];
