@@ -269,6 +269,7 @@ public abstract class RLPItem {
     }
 
     public final BigInteger asBigIntSigned() {
+//        return new BigInteger(buffer, dataIndex, dataLength); // Java 9+
         return new BigInteger(data());
     }
 
