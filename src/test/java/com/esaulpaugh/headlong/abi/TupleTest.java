@@ -16,8 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
-import com.esaulpaugh.headlong.util.Integers;
 import com.joemelsha.crypto.hash.Keccak;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -67,10 +65,12 @@ public class TupleTest {
 
         boolean[] bools = new boolean[pow];
 
-        IntType type = TypeFactory.create("int" + bits);
+        BigIntegerType type = new BigIntegerType("int" + bits, bits, false);
+//        BooleanType type = new BooleanType();
 
         for (int i = 0; i < 1_579_919_999; i++) {
-            bools[(int) generateLong(r, type) & powMinus1] = true;
+            bools[MonteCarloTestCase.generateBigInteger(r, type).intValue() & powMinus1] = true;
+//            bools[(int) MonteCarloTestCase.generateLong(r, type) & powMinus1] = true;
         }
 
         int count = 0;
@@ -83,33 +83,6 @@ public class TupleTest {
 
         System.out.println("missed " + count);
         System.out.println(pow - count + " / " + pow + " " + (1 - ((double) count / pow)));
-    }
-
-    private static long generateLong(Random r, UnitType<? extends Number> unitType) {
-        return generateLong(r, unitType.bitLength, 1 + r.nextInt(unitType.bitLength / Byte.SIZE), unitType.unsigned);
-    }
-
-    private static long generateLong(Random r, int bitLen, int len, boolean unsigned) {
-        long val = r.nextLong();
-        switch (len) {
-        case 1: val &= 0xFFL; break;
-        case 2: val &= 0xFFFFL; break;
-        case 3: val &= 0xFFFFFFL; break;
-        case 4: val &= 0xFFFFFFFFL; break;
-        case 5: val &= 0xFFFFFFFFFFL; break;
-        case 6: val &= 0xFFFFFFFFFFFFL; break;
-        case 7: val &= 0xFFFFFFFFFFFFFFL; break;
-        case 8: break;
-        default: throw new Error();
-        }
-        val = unsigned || r.nextBoolean() ? val : val < 0 ? -(val + 1) : (-val - 1);
-        if(!unsigned) {
-            int valBitLen = val < 0 ? BizarroIntegers.bitLen(val) : Integers.bitLen(val);
-            if(valBitLen >= bitLen) {
-                val >>= 1;
-            }
-        }
-        return val;
     }
 
     @Test

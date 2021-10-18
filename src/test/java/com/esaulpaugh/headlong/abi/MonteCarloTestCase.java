@@ -355,7 +355,7 @@ public class MonteCarloTestCase implements Serializable {
         }
     }
 
-    private static long generateLong(Random r, UnitType<? extends Number> unitType) {
+    static long generateLong(Random r, UnitType<? extends Number> unitType) {
         long x = TestUtils.pickRandom(r, 1 + r.nextInt(unitType.bitLength / Byte.SIZE), unitType.unsigned);
         int valBitLen = x < 0 ? BizarroIntegers.bitLen(x) : Integers.bitLen(x);
         if (valBitLen >= unitType.bitLength) {
@@ -364,24 +364,27 @@ public class MonteCarloTestCase implements Serializable {
         return x;
     }
 
-    private static BigInteger generateBigInteger(Random r, UnitType<? extends Number> type) {
+    static BigInteger generateBigInteger(Random r, UnitType<?> type) {
         if(type.unsigned) {
             return new BigInteger(type.bitLength, r);
         }
-        byte[] magnitude = new byte[type.bitLength / Byte.SIZE];
+        final byte[] magnitude = new byte[(int) Math.ceil((double) type.bitLength / Byte.SIZE)];
         r.nextBytes(magnitude);
+        switch (type.bitLength & 0x7) {
+        case 1: magnitude[0] &= 0b0000_0001; break;
+        case 2: magnitude[0] &= 0b0000_0011; break;
+        case 3: magnitude[0] &= 0b0000_0111; break;
+        case 4: magnitude[0] &= 0b0000_1111; break;
+        case 5: magnitude[0] &= 0b0001_1111; break;
+        case 6: magnitude[0] &= 0b0011_1111; break;
+        case 7: magnitude[0] &= 0b0111_1111;
+        }
         boolean zero = true;
         for (byte b : magnitude) {
             zero &= b == 0;
         }
-        BigInteger random = new BigInteger(zero ? 0 : r.nextBoolean() ? 1 : -1, magnitude);
-        if(random.bitLength() > type.bitLength) {
-            throw new AssertionError();
-        }
-        if(random.bitLength() == type.bitLength) {
-            random = random.shiftRight(1);
-        }
-        return random;
+        BigInteger val = new BigInteger(zero ? 0 : r.nextBoolean() ? 1 : -1, magnitude);
+        return val.bitLength() < type.bitLength ? val : val.shiftRight(1);
     }
 
     private static BigDecimal generateBigDecimal(Random r, BigDecimalType type) {
