@@ -159,7 +159,7 @@ public final class SuperSerial {
 
     private static BigInteger deserializeBigInteger(UnitType<?> ut, RLPItem item) {
         if(ut.isUnsigned()) {
-            return item.asBigInt();
+            return item.asBigInt(true);
         }
         if(item.dataLength != 0) {
             if (item.dataLength * Byte.SIZE < ut.getBitLength()) {
