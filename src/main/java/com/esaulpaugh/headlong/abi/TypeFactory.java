@@ -120,7 +120,7 @@ public final class TypeFactory {
                 final ABIType<?> elementType = _build(rawType.substring(0, arrayOpenIndex), baseType);
                 final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
                 final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType.substring(arrayOpenIndex + 1, lastCharIdx));
-                return new ArrayType<>(type, elementType.arrayClass(), elementType, length);
+                return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null);
             }
             if(baseType != null || (baseType = resolveBaseType(rawType)) != null) {
                 return baseType;
