@@ -104,14 +104,14 @@ Or build locally:
 Clone the project and install to your local maven repository using `gradle publishToMavenLocal` or `mvn install`, then declare it as a dependency:
 
 ```groovy
-implementation 'com.esaulpaugh:headlong:5.4.1-SNAPSHOT'
+implementation 'com.esaulpaugh:headlong:5.4.2-SNAPSHOT'
 ```
 
 ```xml
 <dependency>
     <groupId>com.esaulpaugh</groupId>
     <artifactId>headlong</artifactId>
-    <version>5.4.1-SNAPSHOT</version>
+    <version>5.4.2-SNAPSHOT</version>
 </dependency>
 ```
 Alternatively:
