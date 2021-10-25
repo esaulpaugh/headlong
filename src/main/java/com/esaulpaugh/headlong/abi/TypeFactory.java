@@ -136,7 +136,7 @@ public final class TypeFactory {
     private static int parseLen(String lenStr) {
         try {
 //            final char first = rawType.charAt(start);
-//            if(leadDigitValid(first) || (((end - start) == 1) && first == '0')) {
+//            if(leadDigitValid(first) || (first == '0' && end - start == 1)) {
 //                return Integer.parseInt(rawType, start, end, 10); // Java 9+
 //            }
             if(leadDigitValid(lenStr.charAt(0)) || "0".equals(lenStr)) {
