@@ -10,7 +10,7 @@ ABI spec: https://solidity.readthedocs.io/en/latest/abi-spec.html
 
 RLP spec: https://github.com/ethereum/wiki/wiki/RLP
 
-SHA-256 (headlong-5.4.0.jar): b151613162123e820709af544e4a3a9d8ab4e00361861c932804a21b8da4ce7e
+SHA-256 (headlong-5.4.1.jar): 79b532b917e9fe926dad4c7c102b81e33f7d82f787264a4ae2b60922d89083dc
 
 ## Usage
 
