@@ -68,6 +68,7 @@ public final class BigIntegerType extends UnitType<BigInteger> {
     private static final int ADDRESS_HEX_CHARS = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
     public static final String ADDRESS_PREFIX = "0x";
     public static final int ADDRESS_STRING_LEN = ADDRESS_PREFIX.length() + ADDRESS_HEX_CHARS;
+    private static final BigIntegerType ADDRESS_TYPE = TypeFactory.create("address");
 
     public static String formatAddress(final BigInteger address) {
         final String result = _formatAddr(address);
@@ -109,6 +110,11 @@ public final class BigIntegerType extends UnitType<BigInteger> {
         if(addrStr.length() != ADDRESS_STRING_LEN) {
             throw new IllegalArgumentException("expected address length: " + ADDRESS_STRING_LEN + "; actual: " + addrStr.length());
         }
-        return new BigInteger(addrStr.substring(ADDRESS_PREFIX.length()), HEX_RADIX);
+        final BigInteger address = new BigInteger(addrStr.substring(ADDRESS_PREFIX.length()), HEX_RADIX);
+        if(address.signum() < 0) {
+            throw new AssertionError();
+        }
+        ADDRESS_TYPE.validate(address);
+        return address;
     }
 }

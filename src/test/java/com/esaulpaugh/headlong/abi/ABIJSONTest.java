@@ -371,6 +371,9 @@ public class ABIJSONTest {
 
         BigInteger _ffff = BigIntegerType.decodeAddress("0x000000000000000000000000000000000000ffff");
         assertEquals(BigInteger.valueOf(65535L), _ffff);
+
+        BigInteger _8000 = BigIntegerType.decodeAddress("0x800000000000000000000000000000000000ffff");
+        assertTrue(_8000.signum() > 0);
     }
 
     private static void testStringAddr(final String addrString) {
