@@ -197,7 +197,7 @@ public final class Function implements ABIObject {
     }
 
     public ByteBuffer encodeCall(Tuple args) {
-        ByteBuffer dest = ByteBuffer.wrap(new byte[validatedCallLength(args)]); // ByteOrder.BIG_ENDIAN by default
+        ByteBuffer dest = ByteBuffer.allocate(validatedCallLength(args)); // ByteOrder.BIG_ENDIAN by default
         dest.put(selector);
         inputTypes.encodeTail(args, dest);
         return dest;
