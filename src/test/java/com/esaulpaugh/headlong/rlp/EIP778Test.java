@@ -20,6 +20,7 @@ import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -411,5 +412,15 @@ public class EIP778Test {
         });
 
         assertEquals(ENR_STRING, r2.toString());
+    }
+
+    @Test
+    public void testEncode() {
+        ByteBuffer bb = Record.encode(SIGNER, 1L, new KVP(IP, "7f000001", HEX),
+                new KVP(UDP, "765f", HEX),
+                new KVP(ID, "v4", UTF_8),
+                new KVP(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX));
+
+        assertEquals(RECORD_HEX, Strings.encode(bb));
     }
 }

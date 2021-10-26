@@ -382,7 +382,9 @@ public class EncodeTest {
         Tuple bArgs = new Tuple(new Tuple((Object[]) args));
 
         byte[] aEncoding = a.encode(aArgs).array();
-        byte[] bEncoding = b.encode(bArgs).array();
+        ByteBuffer bDest = ByteBuffer.allocate(b.measureEncodedLength(bArgs));
+        b.encode(bArgs, bDest);
+        byte[] bEncoding = bDest.array();
 
 //        System.out.println(ABIType.format(aEncoding));
 //        System.out.println(ABIType.format(bEncoding));
