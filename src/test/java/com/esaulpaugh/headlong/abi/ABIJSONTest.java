@@ -347,6 +347,16 @@ public class ABIJSONTest {
         testStringAddr("0xc6782c3a8155971a5d16005cafebabecafebabe8");
 
         TestUtils.assertThrown(IllegalArgumentException.class,
+                "illegal hex val @ 0",
+                () -> BigIntegerType.decodeAddress("0x+000000000000000000082095cafebabecafebab")
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class,
+                "illegal hex val @ 0",
+                () -> BigIntegerType.decodeAddress("0x-000000000000000000082095cafebabecafebab")
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class,
                 "expected prefix 0x not found",
                 () -> BigIntegerType.decodeAddress("aaaaa")
         );

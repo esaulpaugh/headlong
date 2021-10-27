@@ -110,7 +110,9 @@ public final class BigIntegerType extends UnitType<BigInteger> {
         if(addrStr.length() != ADDRESS_STRING_LEN) {
             throw new IllegalArgumentException("expected address length: " + ADDRESS_STRING_LEN + "; actual: " + addrStr.length());
         }
-        final BigInteger address = new BigInteger(addrStr.substring(ADDRESS_PREFIX.length()), HEX_RADIX);
+        final String hex = addrStr.substring(ADDRESS_PREFIX.length());
+        final BigInteger address = new BigInteger(hex, HEX_RADIX);
+        FastHex.decode(hex);
         if(address.signum() < 0) {
             throw new AssertionError();
         }
