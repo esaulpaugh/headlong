@@ -660,7 +660,7 @@
   {
     "name": "headlong_127",
     "types": "[\"address\",\"ufixed152x12[2][2]\",\"tuple(ufixed24x30[])\",\"bytes19\"]",
-    "values": "[{\"type\":\"string\",\"value\":\"0x2e84f8401cfb9a9c14f4b32f48093a11\"},[[{\"type\":\"number\",\"value\":\"71323796357582\"},{\"type\":\"number\",\"value\":\"3844730604846280652389813052788018565977894\"}],[{\"type\":\"number\",\"value\":\"1719792814876880294250\"},{\"type\":\"number\",\"value\":\"342275802844095312127572\"}]],{\"type\":\"tuple\",\"value\":[[{\"type\":\"number\",\"value\":\"3115\"},{\"type\":\"number\",\"value\":\"17657\"}]]},{\"type\":\"buffer\",\"value\":\"0x1eddaeef5c6e6b421c6a2d891edf741ac9e5a7\"}]",
+    "values": "[{\"type\":\"string\",\"value\":\"0x000000002e84f8401cfb9a9c14f4b32f48093a11\"},[[{\"type\":\"number\",\"value\":\"71323796357582\"},{\"type\":\"number\",\"value\":\"3844730604846280652389813052788018565977894\"}],[{\"type\":\"number\",\"value\":\"1719792814876880294250\"},{\"type\":\"number\",\"value\":\"342275802844095312127572\"}]],{\"type\":\"tuple\",\"value\":[[{\"type\":\"number\",\"value\":\"3115\"},{\"type\":\"number\",\"value\":\"17657\"}]]},{\"type\":\"buffer\",\"value\":\"0x1eddaeef5c6e6b421c6a2d891edf741ac9e5a7\"}]",
     "result": "0xfea20dc3000000000000000000000000000000002e84f8401cfb9a9c14f4b32f48093a11000000000000000000000000000000000000000000000000000040de5d8bc1ce00000000000000000000000000002c22a5d3ff5f716edf65df7a75cd84b9972600000000000000000000000000000000000000000000005d3aeb75471594516a00000000000000000000000000000000000000000000487acef6afc7b145665400000000000000000000000000000000000000000000000000000000000000e01eddaeef5c6e6b421c6a2d891edf741ac9e5a700000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000c2b00000000000000000000000000000000000000000000000000000000000044f9",
     "version": "1.4.4+commit.3ad2258"
   },
@@ -709,7 +709,7 @@
   {
     "name": "headlong_136",
     "types": "[\"bytes32\",\"fixed232x42\",\"address\",\"uint168\"]",
-    "values": "[{\"type\":\"buffer\",\"value\":\"0xa40165d0b9ab12b437b4833cada19db4ddfa2cc3b5f68419a448ec92805d7bfc\"},{\"type\":\"number\",\"value\":\"153184169209000617518094920\"},{\"type\":\"string\",\"value\":\"0x7c8b0e678687e8fbe038399144dfb91d70\"},{\"type\":\"string\",\"value\":\"0x4f9d6773eee65ee08b99\"}]",
+    "values": "[{\"type\":\"buffer\",\"value\":\"0xa40165d0b9ab12b437b4833cada19db4ddfa2cc3b5f68419a448ec92805d7bfc\"},{\"type\":\"number\",\"value\":\"153184169209000617518094920\"},{\"type\":\"string\",\"value\":\"0x0000007c8b0e678687e8fbe038399144dfb91d70\"},{\"type\":\"string\",\"value\":\"0x4f9d6773eee65ee08b99\"}]",
     "result": "0xc06dd6f9a40165d0b9ab12b437b4833cada19db4ddfa2cc3b5f68419a448ec92805d7bfc0000000000000000000000000000000000000000007eb60273cc81cb0a04da480000000000000000000000000000007c8b0e678687e8fbe038399144dfb91d70000000000000000000000000000000000000000000004f9d6773eee65ee08b99",
     "version": "1.4.4+commit.3ad2258"
   },
@@ -1129,7 +1129,7 @@
   {
     "name": "headlong_218",
     "types": "[\"address\",\"uint48\",\"fixed16x76\",\"fixed176x78\"]",
-    "values": "[{\"type\":\"string\",\"value\":\"0x1c9279\"},{\"type\":\"number\",\"value\":\"31979304\"},{\"type\":\"number\",\"value\":\"-14881\"},{\"type\":\"number\",\"value\":\"-219364013343\"}]",
+    "values": "[{\"type\":\"string\",\"value\":\"0x00000000000000000000000000000000001c9279\"},{\"type\":\"number\",\"value\":\"31979304\"},{\"type\":\"number\",\"value\":\"-14881\"},{\"type\":\"number\",\"value\":\"-219364013343\"}]",
     "result": "0xd0b255b900000000000000000000000000000000000000000000000000000000001c92790000000000000000000000000000000000000000000000000000000001e7f728ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc5dfffffffffffffffffffffffffffffffffffffffffffffffffffffffccece2cae1",
     "version": "1.4.4+commit.3ad2258"
   },
