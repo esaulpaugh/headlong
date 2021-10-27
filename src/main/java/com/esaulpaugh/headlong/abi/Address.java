@@ -37,7 +37,7 @@ public final class Address {
 
     @Override
     public String toString() {
-        return formatAddress(address);
+        return format(address);
     }
 
     private static final int HEX_RADIX = 16;
@@ -46,7 +46,7 @@ public final class Address {
     public static final int ADDRESS_STRING_LEN = ADDRESS_PREFIX.length() + ADDRESS_HEX_CHARS;
     private static final AddressType ADDRESS_TYPE = TypeFactory.create("address");
 
-    public static String formatAddress(final BigInteger address) {
+    public static String format(final BigInteger address) {
         final String result = _formatAddr(address);
         if(_decodeAddr(result).equals(address)) {
             return result;

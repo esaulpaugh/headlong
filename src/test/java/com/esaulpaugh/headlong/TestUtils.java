@@ -226,7 +226,7 @@ public class TestUtils {
     public static Address parseAddress(JsonElement in) { // uint160
         String hex = "00" + in.getAsString().substring(2);
         byte[] bytes = Strings.decode(hex);
-        return Address.wrap(Address.formatAddress(new BigInteger(bytes)));
+        return Address.wrap(Address.format(new BigInteger(bytes)));
     }
 
     /** Asserts that the arguments are either both true or both false. */

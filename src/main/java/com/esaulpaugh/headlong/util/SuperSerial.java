@@ -127,7 +127,7 @@ public final class SuperSerial {
             return new BigDecimal(deserializeBigInteger(bdt, item), bdt.getScale());
         case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<? extends ABIType<?>, ?>) type, item);
         case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());
-        case TYPE_CODE_ADDRESS: return Address.wrap(Address.formatAddress(deserializeBigInteger((AddressType) type, item)));
+        case TYPE_CODE_ADDRESS: return Address.wrap(Address.format(deserializeBigInteger((AddressType) type, item)));
         default: throw new AssertionError();
         }
     }

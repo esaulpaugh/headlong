@@ -28,11 +28,11 @@ public class AddressTest {
 
         TestUtils.assertThrown(IllegalArgumentException.class,
                 "invalid bit length: 161",
-                () -> Address.formatAddress(new BigInteger("182095cafebabecafebabe00083ce15d74e191051", 16))
+                () -> Address.format(new BigInteger("182095cafebabecafebabe00083ce15d74e191051", 16))
         );
         TestUtils.assertThrown(IllegalArgumentException.class,
                 "invalid bit length: 164",
-                () -> Address.formatAddress(new BigInteger("82095cafebabecafebabe00083ce15d74e1910510", 16))
+                () -> Address.format(new BigInteger("82095cafebabecafebabe00083ce15d74e1910510", 16))
         );
 
         final SecureRandom sr = new SecureRandom();
@@ -54,15 +54,15 @@ public class AddressTest {
             temp = new BigInteger(161, r);
         } while (temp.bitLength() < 161);
         final BigInteger tooBig = temp;
-        TestUtils.assertThrown(IllegalArgumentException.class, "invalid bit length: 161", () -> Address.formatAddress(tooBig));
+        TestUtils.assertThrown(IllegalArgumentException.class, "invalid bit length: 161", () -> Address.format(tooBig));
     }
 
     @Test
     public void testStringAddrs() throws Throwable {
-        testStringAddr(Address.formatAddress(BigInteger.ZERO));
-        testStringAddr(Address.formatAddress(BigInteger.ONE));
-        testStringAddr(Address.formatAddress(BigInteger.TEN));
-        testStringAddr(Address.formatAddress(BigInteger.valueOf(2L)));
+        testStringAddr(Address.format(BigInteger.ZERO));
+        testStringAddr(Address.format(BigInteger.ONE));
+        testStringAddr(Address.format(BigInteger.TEN));
+        testStringAddr(Address.format(BigInteger.valueOf(2L)));
         testStringAddr("0x82095cafebabecafebabe00083ce15d74e191051");
         testStringAddr("0x4bec173f8d9d3d90188777cafebabecafebabe99");
         testStringAddr("0x4bec173f8d9d3d90188777CAFEBABEcafebabe99");
@@ -123,7 +123,7 @@ public class AddressTest {
     }
 
     private static void testBigIntAddr(final BigInteger addr) {
-        final String addrString = Address.formatAddress(addr);
+        final String addrString = Address.format(addr);
         assertTrue(addrString.startsWith("0x"));
         assertEquals(Address.ADDRESS_STRING_LEN, addrString.length());
         assertEquals(new Address(addr), Address.wrap(addrString));
