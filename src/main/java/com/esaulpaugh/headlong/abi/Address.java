@@ -9,8 +9,12 @@ public final class Address {
 
     public final BigInteger address;
 
-    public static Address wrap(String address) {
-        return new Address(decodeAddress(address));
+    public static Address wrap(final String address) {
+        final BigInteger result = _decodeAddr(address);
+        if(_formatAddr(result).equals(address.toLowerCase(Locale.US))) {
+            return new Address(result);
+        }
+        throw new AssertionError();
     }
 
     Address(BigInteger address) {
@@ -45,14 +49,6 @@ public final class Address {
     public static String formatAddress(final BigInteger address) {
         final String result = _formatAddr(address);
         if(_decodeAddr(result).equals(address)) {
-            return result;
-        }
-        throw new AssertionError();
-    }
-
-    public static BigInteger decodeAddress(final String address) {
-        final BigInteger result = _decodeAddr(address);
-        if(_formatAddr(result).equals(address.toLowerCase(Locale.US))) {
             return result;
         }
         throw new AssertionError();

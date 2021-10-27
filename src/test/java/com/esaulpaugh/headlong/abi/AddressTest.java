@@ -19,11 +19,12 @@ public class AddressTest {
         testBigIntAddr(BigInteger.ONE);
         testBigIntAddr(BigInteger.TEN);
         testBigIntAddr(BigInteger.valueOf(2L));
-        testBigIntAddr(Address.decodeAddress("0x82095cafebabecafebabe00083ce15d74e191051"));
-        testBigIntAddr(Address.decodeAddress("0x4bec173f8d9d3d90188777cafebabecafebabe99"));
-        testBigIntAddr(Address.decodeAddress("0x5cafebabecafebabe7570ad8ac11f8d812ee0606"));
-        testBigIntAddr(Address.decodeAddress("0x0000000005cafebabecafebabe7570ad8ac11f8d"));
-        testBigIntAddr(Address.decodeAddress("0x0000000000000000000082095cafebabecafebab"));
+        testBigIntAddr(Address.wrap("0x82095cafebabecafebabe00083ce15d74e191051").address);
+        testBigIntAddr(Address.wrap("0x4bec173f8d9d3d90188777cafebabecafebabe99").address);
+        testBigIntAddr(Address.wrap("0x4bec173f8d9d3d90188777CAFEBABEcafebabe99").address);
+        testBigIntAddr(Address.wrap("0x5cafebabecafebabe7570ad8ac11f8d812ee0606").address);
+        testBigIntAddr(Address.wrap("0x0000000005cafebabecafebabe7570ad8ac11f8d").address);
+        testBigIntAddr(Address.wrap("0x0000000000000000000082095cafebabecafebab").address);
 
         TestUtils.assertThrown(IllegalArgumentException.class,
                 "invalid bit length: 161",
@@ -74,29 +75,29 @@ public class AddressTest {
 
         TestUtils.assertThrown(IllegalArgumentException.class,
                 "illegal hex val @ 0",
-                () -> Address.decodeAddress("0x+000000000000000000082095cafebabecafebab")
+                () -> Address.wrap("0x+000000000000000000082095cafebabecafebab")
         );
 
         TestUtils.assertThrown(IllegalArgumentException.class,
                 "illegal hex val @ 0",
-                () -> Address.decodeAddress("0x-000000000000000000082095cafebabecafebab")
+                () -> Address.wrap("0x-000000000000000000082095cafebabecafebab")
         );
 
         TestUtils.assertThrown(IllegalArgumentException.class,
                 "expected prefix 0x not found",
-                () -> Address.decodeAddress("aaaaa")
+                () -> Address.wrap("aaaaa")
         );
         TestUtils.assertThrown(IllegalArgumentException.class,
                 "expected prefix 0x not found",
-                () -> Address.decodeAddress("5cafebabecafebabe7570ad8ac11f8d812ee0606")
+                () -> Address.wrap("5cafebabecafebabe7570ad8ac11f8d812ee0606")
         );
         TestUtils.assertThrown(IllegalArgumentException.class,
                 "expected address length: 42; actual: 41",
-                () -> Address.decodeAddress("0xa83aaef1b5c928162005cafebabecafebabecb0")
+                () -> Address.wrap("0xa83aaef1b5c928162005cafebabecafebabecb0")
         );
         TestUtils.assertThrown(IllegalArgumentException.class,
                 "expected address length: 42; actual: 43",
-                () -> Address.decodeAddress("0xa83aaef1b5c928162005cafebabecafebabecb0a0")
+                () -> Address.wrap("0xa83aaef1b5c928162005cafebabecafebabecb0a0")
         );
 
         final byte[] _20 = new byte[20];
@@ -105,17 +106,15 @@ public class AddressTest {
             testStringAddr(generateStringAddress(_20, r));
         }
 
-        BigInteger _ffff = Address.decodeAddress("0x000000000000000000000000000000000000ffff");
+        BigInteger _ffff = Address.wrap("0x000000000000000000000000000000000000ffff").address;
         assertEquals(BigInteger.valueOf(65535L), _ffff);
 
-        BigInteger _8000 = Address.decodeAddress("0x800000000000000000000000000000000000ffff");
+        BigInteger _8000 = Address.wrap("0x800000000000000000000000000000000000ffff").address;
         assertTrue(_8000.signum() > 0);
     }
 
     private static void testStringAddr(final String addrString) {
-        final BigInteger addr = Address.decodeAddress(addrString);
-        assertTrue(addr.bitLength() <= 160);
-        assertEquals(addr, Address.decodeAddress(addrString));
+        assertTrue(Address.wrap(addrString).address.bitLength() <= 160);
     }
 
     private static String generateStringAddress(byte[] _20, Random r) {
@@ -127,6 +126,6 @@ public class AddressTest {
         final String addrString = Address.formatAddress(addr);
         assertTrue(addrString.startsWith("0x"));
         assertEquals(Address.ADDRESS_STRING_LEN, addrString.length());
-        assertEquals(addr, Address.decodeAddress(addrString));
+        assertEquals(new Address(addr), Address.wrap(addrString));
     }
 }
