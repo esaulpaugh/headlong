@@ -64,6 +64,7 @@ public class AddressTest {
         testStringAddr(Address.formatAddress(BigInteger.valueOf(2L)));
         testStringAddr("0x82095cafebabecafebabe00083ce15d74e191051");
         testStringAddr("0x4bec173f8d9d3d90188777cafebabecafebabe99");
+        testStringAddr("0x4bec173f8d9d3d90188777CAFEBABEcafebabe99");
         testStringAddr("0x5cafebabecafebabe7570ad8ac11f8d812ee0606");
         testStringAddr("0x0000000005cafebabecafebabe7570ad8ac11f8d");
         testStringAddr("0x0000000000000000000082095cafebabecafebab");
