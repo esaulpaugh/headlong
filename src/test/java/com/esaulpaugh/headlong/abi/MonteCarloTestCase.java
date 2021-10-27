@@ -47,6 +47,7 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BYTE;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ADDRESS;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -351,8 +352,13 @@ public class MonteCarloTestCase implements Serializable {
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
         case TYPE_CODE_ARRAY: return generateArray((ArrayType<? extends ABIType<?>, ?>) type, r);
         case TYPE_CODE_TUPLE: return generateTuple(((TupleType) type).elementTypes, r);
+        case TYPE_CODE_ADDRESS: return generateAddress(r);
         default: throw new Error();
         }
+    }
+
+    private Address generateAddress(Random r) {
+        return new Address(generateBigInteger(r, AddressType.ADDRESS_INNER));
     }
 
     static long generateLong(Random r, UnitType<? extends Number> unitType) {
@@ -411,8 +417,17 @@ public class MonteCarloTestCase implements Serializable {
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimalArray(len, (BigDecimalType) elementType, r);
         case TYPE_CODE_ARRAY: return generateObjectArray(arrayType, len, r);
         case TYPE_CODE_TUPLE: return generateTupleArray((TupleType) elementType, len, r);
+        case TYPE_CODE_ADDRESS: return generateAddressArray(len, r);
         default: throw new Error();
         }
+    }
+
+    private Address[] generateAddressArray(int len, Random r) {
+        Address[] addresses = new Address[len];
+        for (int i = 0; i < addresses.length; i++) {
+            addresses[i] = generateAddress(r);
+        }
+        return addresses;
     }
 
     private static String generateFunctionName(Random r) {

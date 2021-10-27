@@ -16,6 +16,8 @@
 package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.abi.ABIType;
+import com.esaulpaugh.headlong.abi.Address;
+import com.esaulpaugh.headlong.abi.AddressType;
 import com.esaulpaugh.headlong.abi.ArrayType;
 import com.esaulpaugh.headlong.abi.BigDecimalType;
 import com.esaulpaugh.headlong.abi.IntType;
@@ -35,14 +37,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_DECIMAL;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_INTEGER;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BOOLEAN;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BYTE;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
+import static com.esaulpaugh.headlong.abi.ABIType.*;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.EMPTY_BYTE_ARRAY;
@@ -108,6 +103,7 @@ public final class SuperSerial {
         case TYPE_CODE_BIG_DECIMAL: return serializeBigInteger((UnitType<?>) type, ((BigDecimal) obj).unscaledValue());
         case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?>) type, obj);
         case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, (Tuple) obj);
+        case TYPE_CODE_ADDRESS: return serializeBigInteger((AddressType) type, ((Address) obj).address);
         default: throw new AssertionError();
         }
     }
@@ -131,6 +127,7 @@ public final class SuperSerial {
             return new BigDecimal(deserializeBigInteger(bdt, item), bdt.getScale());
         case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<? extends ABIType<?>, ?>) type, item);
         case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());
+        case TYPE_CODE_ADDRESS: return Address.wrap(Address.formatAddress(deserializeBigInteger((AddressType) type, item)));
         default: throw new AssertionError();
         }
     }
@@ -184,7 +181,8 @@ public final class SuperSerial {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return serializeObjectArray(type.getElementType(), (Object[]) arr);
+        case TYPE_CODE_TUPLE:
+        case TYPE_CODE_ADDRESS: return serializeObjectArray(type.getElementType(), (Object[]) arr);
         default: throw new AssertionError();
         }
     }
@@ -198,7 +196,8 @@ public final class SuperSerial {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return deserializeObjectArray(type.getElementType(), (RLPList) item);
+        case TYPE_CODE_TUPLE:
+        case TYPE_CODE_ADDRESS: return deserializeObjectArray(type.getElementType(), (RLPList) item);
         default: throw new AssertionError();
         }
     }

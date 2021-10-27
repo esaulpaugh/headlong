@@ -96,7 +96,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return measureByteLength((Object[]) value);
+        case TYPE_CODE_TUPLE:
+        case TYPE_CODE_ADDRESS: return measureByteLength((Object[]) value);
         default: throw new AssertionError();
         }
     }
@@ -121,7 +122,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return measureByteLengthPacked((Object[]) value);
+        case TYPE_CODE_TUPLE:
+        case TYPE_CODE_ADDRESS: return measureByteLengthPacked((Object[]) value);
         default: throw new AssertionError();
         }
     }
@@ -152,7 +154,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return validateObjects((Object[]) value);
+        case TYPE_CODE_TUPLE:
+        case TYPE_CODE_ADDRESS: return validateObjects((Object[]) value);
         default: throw new AssertionError();
         }
     }
@@ -208,7 +211,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: encodeObjects((Object[]) value, dest); return;
+        case TYPE_CODE_TUPLE:
+        case TYPE_CODE_ADDRESS: encodeObjects((Object[]) value, dest); return;
         default: throw new AssertionError();
         }
     }
@@ -263,6 +267,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
+        case TYPE_CODE_ADDRESS:
             for(Object e : (Object[]) value) {
                 elementType.encodeObjectPackedUnchecked(e, dest);
             }
@@ -301,7 +306,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return (J) decodeObjects(arrayLen, bb, unitBuffer);
+        case TYPE_CODE_TUPLE:
+        case TYPE_CODE_ADDRESS: return (J) decodeObjects(arrayLen, bb, unitBuffer);
         default: throw new AssertionError();
         }
     }

@@ -22,14 +22,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_DECIMAL;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_INTEGER;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BOOLEAN;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BYTE;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
+import static com.esaulpaugh.headlong.abi.ABIType.*;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 
 /**
@@ -123,6 +116,7 @@ final class PackedDecoder {
         case TYPE_CODE_BYTE: elements[i] = buffer[idx]; return type.byteLengthPacked(null);
         case TYPE_CODE_INT: return insertInt((IntType) type, buffer, idx, type.byteLengthPacked(null), elements, i);
         case TYPE_CODE_LONG: return insertLong((LongType) type, buffer, idx, type.byteLengthPacked(null), elements, i);
+        case TYPE_CODE_ADDRESS: return insertAddress(type.byteLengthPacked(null), buffer, idx, elements, i);
         case TYPE_CODE_BIG_INTEGER: return insertBigInteger((BigIntegerType) type, type.byteLengthPacked(null), buffer, idx, elements, i);
         case TYPE_CODE_BIG_DECIMAL: return insertBigDecimal((BigDecimalType) type, type.byteLengthPacked(null), buffer, idx, elements, i);
         case TYPE_CODE_ARRAY: return insertArray((ArrayType<? extends ABIType<?>, ?>) type, buffer, idx, end, elements, i);
@@ -152,6 +146,13 @@ final class PackedDecoder {
     private static int insertLong(UnitType<? extends Number> type, byte[] buffer, int idx, int len, Object[] dest, int destIdx) {
         dest[destIdx] = decodeLong(type, buffer, idx, len);
         return len;
+    }
+
+    private static int insertAddress(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
+        byte[] copy = new byte[1 + elementLen];
+        System.arraycopy(buffer, idx, copy, 1, elementLen);
+        dest[destIdx] = new Address(new BigInteger(copy));
+        return elementLen;
     }
 
     private static int insertBigInteger(BigIntegerType type, int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
@@ -202,7 +203,8 @@ final class PackedDecoder {
         case TYPE_CODE_BIG_INTEGER: array = decodeBigIntegerArray((BigIntegerType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_BIG_DECIMAL: array = decodeBigDecimalArray((BigDecimalType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: array = decodeObjectArray(arrayLen, elementType, buffer, idx, end); break;
+        case TYPE_CODE_TUPLE:
+        case TYPE_CODE_ADDRESS: array = decodeObjectArray(arrayLen, elementType, buffer, idx, end); break;
         default: throw new AssertionError();
         }
         dest[destIdx] = array;

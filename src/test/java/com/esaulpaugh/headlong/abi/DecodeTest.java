@@ -108,7 +108,7 @@ public class DecodeTest {
         assertEquals((long) (Math.pow(2, 32)) - 1, new Function("()", "(uint32)").decodeReturn(_long).get(0));
 
         byte[] _160_ = Strings.decode("000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-        assertEquals(BigInteger.valueOf(2L).pow(160).subtract(BigInteger.ONE), new Function("()", "(address)").decodeReturn(_160_).get(0));
+        assertEquals(new Address(BigInteger.valueOf(2L).pow(160).subtract(BigInteger.ONE)), new Function("()", "(address)").decodeReturn(_160_).get(0));
 
         Function foo2 = new Function("()", "(uint)");
         byte[] _big_ = Strings.decode("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
