@@ -16,10 +16,10 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.FastHex;
-import com.esaulpaugh.headlong.util.Strings;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 public final class Address {
@@ -122,7 +122,7 @@ public final class Address {
     private static String raw_to_checksummed(String address) {
         checkRawAddress(address);
         address = address.toLowerCase(Locale.ENGLISH).replace(HEX_PREFIX, "");
-        final String hash = Strings.encode(new Keccak(256).digest(Strings.decode(address, Strings.ASCII)), Strings.HEX);
+        final String hash = FastHex.encodeToString(new Keccak(256).digest(address.getBytes(StandardCharsets.US_ASCII)));
         final StringBuilder ret = new StringBuilder(HEX_PREFIX);
 
         for (int i = 0; i < address.length(); i++) {
