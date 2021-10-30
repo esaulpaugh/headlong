@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.rlp;
 
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
