@@ -124,8 +124,8 @@ public final class Address {
 
     /**
      * @see <a href="https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md#implementation">EIP-55</a>
-     * @param address   the
-     * @return  the address with the correct checksum casing
+     * @param address   the hexadecimal Ethereum address
+     * @return  the same address with the correct EIP-55 checksum casing
      */
     private static String raw_to_checksummed(String address) {
         checkRawAddress(address);
