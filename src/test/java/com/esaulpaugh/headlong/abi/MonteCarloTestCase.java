@@ -357,7 +357,7 @@ public class MonteCarloTestCase implements Serializable {
         }
     }
 
-    private Address generateAddress(Random r) {
+    static Address generateAddress(Random r) {
         return new Address(generateBigInteger(r, AddressType.ADDRESS_INNER));
     }
 

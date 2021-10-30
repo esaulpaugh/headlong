@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -105,10 +106,11 @@ public class EqualsTest {
 
 //                       10000000000000000000000000000000000000000
 //                        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        String uint160 = "ff00ee01dd02cc03cafebabe9906880777086609";
-        Address addr = Address.wrap("0x" + uint160);
+        final String uint160 = "FF00eE01dd02cC03cafEBAbe9906880777086609";
         assertEquals(160, uint160.length() * 4);
-        assertEquals(uint160, addr.address.toString(16));
+        final String lowercase = uint160.toLowerCase(Locale.ENGLISH);
+        final Address addr = Address.wrap("0x" + uint160);
+        assertEquals(lowercase, addr.address.toString(16));
         Object[] argsIn = new Object[] {
                 new byte[][][][] { new byte[][][] { new byte[][] { func, func } } },
                 func,
@@ -126,7 +128,7 @@ public class EqualsTest {
 
         ByteBuffer abi = f.encodeCallWithArgs(argsIn);
 
-        assertTrue(Function.formatCall(abi.array()).contains("18       000000000000000000000000" + uint160));
+        assertTrue(Function.formatCall(abi.array()).contains("18       000000000000000000000000" + lowercase));
 
         Tuple tupleOut = f.decodeCall((ByteBuffer) abi.flip());
 
