@@ -55,7 +55,6 @@ public class AddressTest {
         testBigIntAddr(BigInteger.ONE);
         testBigIntAddr(BigInteger.TEN);
         testBigIntAddr(BigInteger.valueOf(2L));
-        System.out.println(Address.toChecksumAddress("0x0000000000000000000082095cafebabecafebab"));
         testBigIntAddr(Address.wrap("0x82095CAfeBaBECaFebaBe00083Ce15d74e191051").value);
         testBigIntAddr(Address.wrap("0x4bEc173F8D9D3D90188777cAfeBabeCafebAbE99").value);
         testBigIntAddr(Address.wrap("0x5cafEBaBEcafEBabE7570ad8AC11f8d812ee0606").value);
@@ -163,6 +162,11 @@ public class AddressTest {
         final String addrString = Address.format(addr);
         assertTrue(addrString.startsWith("0x"));
         assertEquals(Address.ADDRESS_STRING_LEN, addrString.length());
-        assertEquals(new Address(addr), Address.wrap(addrString));
+        final Address constructed = new Address(addr);
+        final Address wrapped = Address.wrap(addrString);
+        assertEquals(constructed, wrapped);
+        final String wrappedString = wrapped.toString();
+        assertEquals(constructed.toString(), wrappedString);
+        assertEquals(addrString, wrappedString);
     }
 }
