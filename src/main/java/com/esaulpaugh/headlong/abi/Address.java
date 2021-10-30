@@ -111,7 +111,7 @@ public final class Address {
         if(address.length() != ADDRESS_STRING_LEN) {
             throw new IllegalArgumentException("expected address length " + ADDRESS_STRING_LEN + "; actual is " + address.length());
         }
-        FastHex.decode(address, HEX_PREFIX.length(), address.length()  - HEX_PREFIX.length()); // check for non-hex chars
+        FastHex.decode(address, HEX_PREFIX.length(), address.length() - HEX_PREFIX.length()); // check for non-hex chars
     }
 
     /**
