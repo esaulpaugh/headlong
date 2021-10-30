@@ -64,7 +64,6 @@ public final class Address {
     }
 
     public static void validateChecksumAddress(final String checksumAddress) {
-        checkRawAddress(checksumAddress);
         if(raw_to_checksummed(checksumAddress).equals(checksumAddress)) {
             return;
         }
@@ -72,7 +71,6 @@ public final class Address {
     }
 
     public static String toChecksumAddress(final String address) {
-        checkRawAddress(address);
         final String checksumAddr = raw_to_checksummed(address);
         if(!checksumAddr.toLowerCase(Locale.ENGLISH).equals(address.toLowerCase(Locale.ENGLISH))) { // sanity check
             throw new AssertionError();
@@ -122,6 +120,7 @@ public final class Address {
      * @return  the address with the correct checksum casing
      */
     private static String raw_to_checksummed(String address) {
+        checkRawAddress(address);
         address = address.toLowerCase(Locale.ENGLISH).replace(HEX_PREFIX, "");
         final String hash = Strings.encode(new Keccak(256).digest(Strings.decode(address, Strings.ASCII)), Strings.HEX);
         final StringBuilder ret = new StringBuilder(HEX_PREFIX);
