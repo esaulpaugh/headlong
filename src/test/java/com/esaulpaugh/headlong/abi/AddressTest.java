@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.util.FastHex;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -164,6 +165,17 @@ public class AddressTest {
 
         BigInteger _8000 = Address.wrap("0x8000000000000000000000000000000000000000").value();
         assertTrue(_8000.signum() > 0);
+
+        final BigIntegerType uint160Type = TypeFactory.create("uint160");
+
+        final BigInteger _0000 = Address.wrap("0x0000000000000000000000000000000000000000").value();
+        assertEquals(uint160Type.minValue(), _0000);
+
+        final BigInteger _FFfF = Address.wrap("0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF").value();
+        assertEquals(uint160Type.maxValue(), _FFfF);
+
+        final BigInteger _ffFf = Address.wrap("0xffFfffFFFffffFFFFfFFFfffFFFfffFfFFfFff0f").value();
+        assertEquals(uint160Type.maxValue().subtract(BigInteger.valueOf(240L)), _ffFf);
     }
 
     private static void testStringAddr(final String addrString) {
@@ -173,12 +185,34 @@ public class AddressTest {
     private static void testBigIntAddr(final BigInteger addr) {
         final String addrString = Address.toChecksumAddress(addr);
         assertTrue(addrString.startsWith("0x"));
-        assertEquals(Address.ADDRESS_STRING_LEN, addrString.length());
-        final Address a = Address.wrap(Address.toChecksumAddress(addr));
+        assertEquals(42, addrString.length());
+        final String checksumAddress = Address.toChecksumAddress(addr);
+        final Address a = Address.wrap(checksumAddress);
+        assertEquals(checksumAddress, a.toString());
+        assertEquals(addrString, checksumAddress);
         final Address b = Address.wrap(addrString);
+        assertEquals(addrString, b.toString());
         assertEquals(a, b);
-        final String bStr = b.toString();
-        assertEquals(a.toString(), bStr);
-        assertEquals(addrString, bStr);
+        assertEquals(a.value(), b.value());
+        assertEquals(addr, a.value());
+        assertEquals(addr, computeValue(checksumAddress));
+        assertEquals(addr, computeValue2(checksumAddress));
+    }
+
+    private static BigInteger computeValue(String checksumAddress) {
+        int hexBytes = (checksumAddress.length() - 2) / FastHex.CHARS_PER_BYTE;
+        byte[] bytes = new byte[1 + hexBytes];
+        System.arraycopy(FastHex.decode(checksumAddress, 2, checksumAddress.length() - 2), 0, bytes, 1, hexBytes);
+        return new BigInteger(bytes);
+    }
+
+    private static BigInteger computeValue2(String checksumAddress) {
+        return new BigInteger(checksumAddress.substring(2), 16);
+    }
+
+    @Test
+    public void testConstants() {
+        assertEquals("0x", Address.HEX_PREFIX);
+        assertEquals(42, Address.ADDRESS_STRING_LEN);
     }
 }
