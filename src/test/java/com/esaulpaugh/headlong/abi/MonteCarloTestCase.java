@@ -370,14 +370,17 @@ public class MonteCarloTestCase implements Serializable {
         }
         final byte[] magnitude = new byte[(int) ((type.bitLength + 7L) / Byte.SIZE)];
         r.nextBytes(magnitude);
-        switch (type.bitLength & 0x7) {
-        case 1: magnitude[0] &= 0b0000_0001; break;
-        case 2: magnitude[0] &= 0b0000_0011; break;
-        case 3: magnitude[0] &= 0b0000_0111; break;
-        case 4: magnitude[0] &= 0b0000_1111; break;
-        case 5: magnitude[0] &= 0b0001_1111; break;
-        case 6: magnitude[0] &= 0b0011_1111; break;
-        case 7: magnitude[0] &= 0b0111_1111;
+        final int mod = Integers.mod(type.bitLength, Byte.SIZE);
+        if(mod != 0) {
+            switch (mod) {
+            case 1: magnitude[0] &= 0b0000_0001; break;
+            case 2: magnitude[0] &= 0b0000_0011; break;
+            case 3: magnitude[0] &= 0b0000_0111; break;
+            case 4: magnitude[0] &= 0b0000_1111; break;
+            case 5: magnitude[0] &= 0b0001_1111; break;
+            case 6: magnitude[0] &= 0b0011_1111; break;
+            case 7: magnitude[0] &= 0b0111_1111;
+            }
         }
         boolean zero = true;
         for (byte b : magnitude) {
@@ -391,8 +394,10 @@ public class MonteCarloTestCase implements Serializable {
         return new BigDecimal(generateBigInteger(r, type), type.getScale());
     }
 
+    private static final UnitType<?> ADDRESS_TYPE = TypeFactory.create("address");
+
     static Address generateAddress(Random r) {
-        return new Address(generateBigInteger(r, new BigIntegerType("TEMP", TypeFactory.ADDRESS_BIT_LEN, true)));
+        return new Address(generateBigInteger(r, ADDRESS_TYPE));
     }
 
     private Object generateArray(ArrayType<? extends ABIType<?>, ?> arrayType, Random r) {
