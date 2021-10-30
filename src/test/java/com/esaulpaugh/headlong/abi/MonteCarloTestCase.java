@@ -357,8 +357,8 @@ public class MonteCarloTestCase implements Serializable {
 
     static long generateLong(Random r, UnitType<? extends Number> unitType) {
         long x = TestUtils.pickRandom(r, 1 + r.nextInt(unitType.bitLength / Byte.SIZE), unitType.unsigned);
-        final int valBitLen = x < 0 ? BizarroIntegers.bitLen(x) : Integers.bitLen(x);
-        if (valBitLen >= unitType.bitLength) {
+        if (!unitType.unsigned
+                && (x < 0 ? BizarroIntegers.bitLen(x) : Integers.bitLen(x)) >= unitType.bitLength) {
             x >>= 1;
         }
         return x;

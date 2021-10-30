@@ -78,7 +78,7 @@ public class TestUtils {
         case 8: break;
         default: throw new Error();
         }
-        return unsigned || r.nextBoolean() ? val : -val - 1;
+        return unsigned && val < 0 ? -(val + 1) : val;
     }
 
     public static void shuffle(Object[] arr, Random rand) {
