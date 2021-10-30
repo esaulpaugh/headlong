@@ -110,7 +110,7 @@ public class EqualsTest {
         assertEquals(160, uint160.length() * 4);
         final String lowercase = uint160.toLowerCase(Locale.ENGLISH);
         final Address addr = Address.wrap("0x" + uint160);
-        assertEquals(lowercase, addr.address.toString(16));
+        assertEquals(lowercase, addr.value.toString(16));
         Object[] argsIn = new Object[] {
                 new byte[][][][] { new byte[][][] { new byte[][] { func, func } } },
                 func,

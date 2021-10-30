@@ -106,7 +106,7 @@ public class MonteCarloTest {
             } else if (c == String.class) {
                 x += Strings.decode((String) o, Strings.UTF_8).length;
             } else if(c == Address.class) {
-                x += ((Address) o).address.toByteArray().length;
+                x += ((Address) o).value.toByteArray().length;
             } else {
                 throw new Error("" + c);
             }

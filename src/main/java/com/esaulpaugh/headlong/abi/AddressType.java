@@ -22,12 +22,12 @@ public final class AddressType extends UnitType<Address> {
 
     @Override
     public int validate(Address value) {
-        return ADDRESS_INNER.validate(value.address);
+        return ADDRESS_INNER.validate(value.value);
     }
 
     @Override
     void encodeTail(Object value, ByteBuffer dest) {
-        ADDRESS_INNER.encodeTail(((Address) value).address, dest);
+        ADDRESS_INNER.encodeTail(((Address) value).value, dest);
     }
 
     @Override
@@ -37,7 +37,7 @@ public final class AddressType extends UnitType<Address> {
 
     @Override
     void encodePackedUnchecked(Address value, ByteBuffer dest) {
-        ADDRESS_INNER.encodePackedUnchecked(value.address, dest);
+        ADDRESS_INNER.encodePackedUnchecked(value.value, dest);
     }
 
     @Override

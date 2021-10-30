@@ -9,7 +9,7 @@ import java.util.Locale;
 
 public final class Address {
 
-    public final BigInteger address;
+    public final BigInteger value;
 
     public static Address wrap(final String address) {
         final BigInteger result = toBigInt(address);
@@ -19,27 +19,27 @@ public final class Address {
         throw new AssertionError();
     }
 
-    Address(BigInteger address) {
-        this.address = address;
+    Address(BigInteger value) {
+        this.value = value;
     }
 
     @Override
     public int hashCode() {
-        return address.hashCode();
+        return value.hashCode();
     }
 
     @Override
     public boolean equals(Object o) {
         if(o instanceof Address) {
             Address other = (Address) o;
-            return address.equals(other.address);
+            return value.equals(other.value);
         }
         return false;
     }
 
     @Override
     public String toString() {
-        return format(address);
+        return format(value);
     }
 
     private static final int HEX_RADIX = 16;

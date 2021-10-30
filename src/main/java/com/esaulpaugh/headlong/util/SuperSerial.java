@@ -103,7 +103,7 @@ public final class SuperSerial {
         case TYPE_CODE_BIG_DECIMAL: return serializeBigInteger((UnitType<?>) type, ((BigDecimal) obj).unscaledValue());
         case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?>) type, obj);
         case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, (Tuple) obj);
-        case TYPE_CODE_ADDRESS: return serializeBigInteger((AddressType) type, ((Address) obj).address);
+        case TYPE_CODE_ADDRESS: return serializeBigInteger((AddressType) type, ((Address) obj).value);
         default: throw new AssertionError();
         }
     }
