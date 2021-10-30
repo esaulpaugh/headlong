@@ -69,11 +69,11 @@ public class AddressTest {
         testBigIntAddr(BigInteger.ONE);
         testBigIntAddr(BigInteger.TEN);
         testBigIntAddr(BigInteger.valueOf(2L));
-        testBigIntAddr(Address.wrap("0x82095CAfeBaBECaFebaBe00083Ce15d74e191051").value);
-        testBigIntAddr(Address.wrap("0x4bEc173F8D9D3D90188777cAfeBabeCafebAbE99").value);
-        testBigIntAddr(Address.wrap("0x5cafEBaBEcafEBabE7570ad8AC11f8d812ee0606").value);
-        testBigIntAddr(Address.wrap("0x0000000005CaFEbabeCafEbABE7570ad8ac11F8d").value);
-        testBigIntAddr(Address.wrap("0x0000000000000000000082095CafEBABEcAFebAB").value);
+        testBigIntAddr(Address.wrap("0x82095CAfeBaBECaFebaBe00083Ce15d74e191051").value());
+        testBigIntAddr(Address.wrap("0x4bEc173F8D9D3D90188777cAfeBabeCafebAbE99").value());
+        testBigIntAddr(Address.wrap("0x5cafEBaBEcafEBabE7570ad8AC11f8d812ee0606").value());
+        testBigIntAddr(Address.wrap("0x0000000005CaFEbabeCafEbABE7570ad8ac11F8d").value());
+        testBigIntAddr(Address.wrap("0x0000000000000000000082095CafEBABEcAFebAB").value());
 
         TestUtils.assertThrown(IllegalArgumentException.class,
                 "invalid bit length: 161",
@@ -159,15 +159,15 @@ public class AddressTest {
             testStringAddr(MonteCarloTestCase.generateAddressString(r));
         }
 
-        BigInteger _FFff = Address.wrap("0x000000000000000000000000000000000000FFff").value;
+        BigInteger _FFff = Address.wrap("0x000000000000000000000000000000000000FFff").value();
         assertEquals(BigInteger.valueOf(65535L), _FFff);
 
-        BigInteger _8000 = Address.wrap("0x8000000000000000000000000000000000000000").value;
+        BigInteger _8000 = Address.wrap("0x8000000000000000000000000000000000000000").value();
         assertTrue(_8000.signum() > 0);
     }
 
     private static void testStringAddr(final String addrString) {
-        assertTrue(Address.wrap(addrString).value.bitLength() <= 160);
+        assertTrue(Address.wrap(addrString).value().bitLength() <= 160);
     }
 
     private static void testBigIntAddr(final BigInteger addr) {

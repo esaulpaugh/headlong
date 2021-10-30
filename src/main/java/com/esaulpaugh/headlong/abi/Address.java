@@ -29,10 +29,14 @@ public final class Address {
     public static final String HEX_PREFIX = "0x";
     public static final int ADDRESS_STRING_LEN = HEX_PREFIX.length() + ADDRESS_HEX_CHARS;
 
-    public final BigInteger value;
+    private final BigInteger value;
 
     private Address(BigInteger value) {
         this.value = value;
+    }
+
+    public BigInteger value() {
+        return value;
     }
 
     @Override
