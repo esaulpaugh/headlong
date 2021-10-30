@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
