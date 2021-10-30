@@ -18,6 +18,7 @@ package com.esaulpaugh.headlong.rlp;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
+import java.security.InvalidParameterException;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +51,7 @@ public final class Record {
         }
         final int signatureLen = signer.signatureLength();
         if(signatureLen < 0) {
-            throw new RuntimeException("signer specifies negative signature length");
+            throw new InvalidParameterException("signer specifies negative signature length");
         }
         final int payloadLen = RLPEncoder.payloadLen(seq, pairs); // content list prefix not included
         final int recordDataLen = RLPEncoder.itemLen(signatureLen) + payloadLen;
@@ -63,7 +64,7 @@ public final class Record {
 
         final byte[] signature = signer.sign(content);
         if(signature.length != signatureLen) {
-            throw new RuntimeException("unexpected signature length: " + signature.length + " != " + signatureLen);
+            throw new InvalidParameterException("unexpected signature length: " + signature.length + " != " + signatureLen);
         }
 
         final ByteBuffer bb = ByteBuffer.wrap(record);
