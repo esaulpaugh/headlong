@@ -391,6 +391,10 @@ public class MonteCarloTestCase implements Serializable {
         return new BigDecimal(generateBigInteger(r, type), type.getScale());
     }
 
+    static Address generateAddress(Random r) {
+        return new Address(generateBigInteger(r, new BigIntegerType("TEMP", TypeFactory.ADDRESS_BIT_LEN, true)));
+    }
+
     private Object generateArray(ArrayType<? extends ABIType<?>, ?> arrayType, Random r) {
         final ABIType<?> elementType = arrayType.getElementType();
         final int typeLen = arrayType.getLength();
