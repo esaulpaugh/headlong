@@ -41,7 +41,7 @@ public class AddressTest {
                 "0xD1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb" };
 
         for(String address : valid) {
-            Address.requireValidChecksum(address);
+            Address.verifyChecksum(address);
         }
     }
 
@@ -60,7 +60,7 @@ public class AddressTest {
         };
 
         for(String address : valid) {
-            Address.requireValidChecksum(address);
+            Address.verifyChecksum(address);
         }
     }
 
@@ -78,11 +78,11 @@ public class AddressTest {
 
         TestUtils.assertThrown(IllegalArgumentException.class,
                 "invalid bit length: 161",
-                () -> Address.format(new BigInteger("182095cafebabecafebabe00083ce15d74e191051", 16))
+                () -> Address.toChecksumAddress(new BigInteger("182095cafebabecafebabe00083ce15d74e191051", 16))
         );
         TestUtils.assertThrown(IllegalArgumentException.class,
                 "invalid bit length: 164",
-                () -> Address.format(new BigInteger("82095cafebabecafebabe00083ce15d74e1910510", 16))
+                () -> Address.toChecksumAddress(new BigInteger("82095cafebabecafebabe00083ce15d74e1910510", 16))
         );
 
         final SecureRandom sr = new SecureRandom();
@@ -103,15 +103,15 @@ public class AddressTest {
             temp = new BigInteger(161, r);
         } while (temp.bitLength() < 161);
         final BigInteger tooBig = temp;
-        TestUtils.assertThrown(IllegalArgumentException.class, "invalid bit length: 161", () -> Address.format(tooBig));
+        TestUtils.assertThrown(IllegalArgumentException.class, "invalid bit length: 161", () -> Address.toChecksumAddress(tooBig));
     }
 
     @Test
     public void testStringAddrs() throws Throwable {
-        testStringAddr(Address.format(BigInteger.ZERO));
-        testStringAddr(Address.format(BigInteger.ONE));
-        testStringAddr(Address.format(BigInteger.TEN));
-        testStringAddr(Address.format(BigInteger.valueOf(2L)));
+        testStringAddr(Address.toChecksumAddress(BigInteger.ZERO));
+        testStringAddr(Address.toChecksumAddress(BigInteger.ONE));
+        testStringAddr(Address.toChecksumAddress(BigInteger.TEN));
+        testStringAddr(Address.toChecksumAddress(BigInteger.valueOf(2L)));
         TestUtils.assertThrown(IllegalArgumentException.class, "invalid checksum", () -> Address.wrap("0x82095cafebabecafebabe00083ce15d74e191051"));
         TestUtils.assertThrown(IllegalArgumentException.class, "invalid checksum", () -> Address.wrap("0x4bec173f8d9d3d90188777cafebabecafebabe99"));
         TestUtils.assertThrown(IllegalArgumentException.class, "invalid checksum", () -> Address.wrap("0x4bec173f8d9d3d90188777CAFEBABEcafebabe99"));
@@ -124,13 +124,18 @@ public class AddressTest {
         TestUtils.assertThrown(IllegalArgumentException.class, "invalid checksum", () -> Address.wrap("0x000000000000000000000000000000000000ffff"));
 
         TestUtils.assertThrown(IllegalArgumentException.class,
-                "illegal hex val @ 0",
+                "illegal hex val @ 2",
                 () -> Address.wrap("0x+000000000000000000082095cafebabecafebab")
         );
 
         TestUtils.assertThrown(IllegalArgumentException.class,
-                "illegal hex val @ 0",
+                "illegal hex val @ 2",
                 () -> Address.wrap("0x-000000000000000000082095cafebabecafebab")
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class,
+                "illegal hex val @ 41",
+                () -> Address.wrap("0x0000000000000000000082095cafebabecafeba+")
         );
 
         TestUtils.assertThrown(IllegalArgumentException.class,
@@ -169,11 +174,11 @@ public class AddressTest {
 
     private static String generateStringAddress(byte[] _20, Random r) {
         r.nextBytes(_20);
-        return Address.toChecksumAddress(Strings.encode(_20));
+        return Address.toChecksumAddress(Address.HEX_PREFIX + Strings.encode(_20));
     }
 
     private static void testBigIntAddr(final BigInteger addr) {
-        final String addrString = Address.format(addr);
+        final String addrString = Address.toChecksumAddress(addr);
         assertTrue(addrString.startsWith("0x"));
         assertEquals(Address.ADDRESS_STRING_LEN, addrString.length());
         final Address constructed = new Address(addr);

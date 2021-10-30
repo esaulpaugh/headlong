@@ -46,31 +46,19 @@ public final class Address {
 
     @Override
     public String toString() {
-        return format(value);
+        return toChecksumAddress(value);
     }
 
-    public static Address wrap(final String address) {
-        final BigInteger value = toBigInt(address);
-        if(format(value).equals(address)) {
+    public static Address wrap(final String checksumAddress) {
+        validateAddress(checksumAddress);
+        final BigInteger value = to_big_int(checksumAddress);
+        if(toChecksumAddress(value).equals(checksumAddress)) {
             return new Address(value);
         }
         throw new AssertionError();
     }
 
-    public static String format(final BigInteger address) {
-        final String result = toString(address);
-        if(toBigInt(result).equals(address)) {
-            return result;
-        }
-        throw new AssertionError();
-    }
-
-    private static final int HEX_RADIX = 16;
-    private static final int ADDRESS_HEX_CHARS = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
-    public static final String HEX_PREFIX = "0x";
-    public static final int ADDRESS_STRING_LEN = HEX_PREFIX.length() + ADDRESS_HEX_CHARS;
-
-    private static String toString(final BigInteger address) {
+    public static String toChecksumAddress(final BigInteger address) {
         final String minimalHex = address.toString(HEX_RADIX);
         final int leftPad = ADDRESS_HEX_CHARS - minimalHex.length();
         if(leftPad < 0) {
@@ -80,38 +68,60 @@ public final class Address {
         for (int i = 0; i < leftPad; i++) {
             addrBuilder.append('0');
         }
-        final String result = addrBuilder.append(minimalHex).toString();
-        if(result.length() == ADDRESS_STRING_LEN) {
-            return toChecksumAddress(result);
+        final String rawAddress = addrBuilder.append(minimalHex).toString();
+        if(rawAddress.length() == ADDRESS_STRING_LEN) {
+            final String checksumAddress = toChecksumAddress(rawAddress);
+            if(to_big_int(checksumAddress).equals(address)) {
+                return checksumAddress;
+            }
         }
         throw new AssertionError();
     }
 
-    private static BigInteger toBigInt(final String addrStr) {
-        if(!addrStr.startsWith(HEX_PREFIX)) {
+    private static final int HEX_RADIX = 16;
+    private static final int ADDRESS_HEX_CHARS = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
+    public static final String HEX_PREFIX = "0x";
+    public static final int ADDRESS_STRING_LEN = HEX_PREFIX.length() + ADDRESS_HEX_CHARS;
+
+    public static String toChecksumAddress(final String address) {
+        checkRawAddress(address);
+        final String checksumAddr = raw_to_checksummed(address);
+        validateAddress(checksumAddr);
+        return checksumAddr;
+    }
+
+    private static BigInteger to_big_int(final String validated) {
+        return new BigInteger(validated.substring(HEX_PREFIX.length()), HEX_RADIX);
+    }
+
+    private static void validateAddress(final String checksumAddress) {
+        checkRawAddress(checksumAddress);
+        verifyChecksum(checksumAddress);
+    }
+
+    private static void checkRawAddress(final String address) {
+        if(!address.startsWith(HEX_PREFIX)) {
             throw new IllegalArgumentException("expected prefix 0x not found");
         }
-        if(addrStr.length() != ADDRESS_STRING_LEN) {
-            throw new IllegalArgumentException("expected address length: " + ADDRESS_STRING_LEN + "; actual: " + addrStr.length());
+        if(address.length() != ADDRESS_STRING_LEN) {
+            throw new IllegalArgumentException("expected address length: " + ADDRESS_STRING_LEN + "; actual: " + address.length());
         }
-        final String hex = addrStr.substring(HEX_PREFIX.length());
-        FastHex.decode(hex); // check for non-hex chars
-        requireValidChecksum(addrStr);
-        final BigInteger address = new BigInteger(hex, HEX_RADIX);
-        if(address.signum() < 0) {
-            throw new AssertionError();
-        }
-        return address;
+        FastHex.decode(address, HEX_PREFIX.length(), address.length()  - HEX_PREFIX.length()); // check for non-hex chars
     }
 
-    public static void requireValidChecksum(final String address) {
-        if(toChecksumAddress(address).equals(address)) {
-            return;
+    public static void verifyChecksum(final String address) {
+        final String checksummed = raw_to_checksummed(address);
+        if(!checksummed.equals(address)) {
+            throw new IllegalArgumentException("invalid checksum");
         }
-        throw new IllegalArgumentException("invalid checksum");
     }
 
-    public static String toChecksumAddress(String address) {
+    /**
+     * @see <a href="https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md#implementation">EIP-55</a>
+     * @param address   the
+     * @return  the address with the correct checksum casing
+     */
+    private static String raw_to_checksummed(String address) {
         address = address.toLowerCase(Locale.ENGLISH).replace(HEX_PREFIX, "");
         final String hash = Strings.encode(new Keccak(256).digest(Strings.decode(address, Strings.ASCII)), Strings.HEX);
         final StringBuilder ret = new StringBuilder(HEX_PREFIX);
