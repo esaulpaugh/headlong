@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.util.FastHex;
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
