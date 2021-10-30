@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.rlp.RLPDecoder.BiIntPredicate;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Disabled;
@@ -502,24 +501,32 @@ public class RLPDecoderTest {
     public void collect() {
         
         Set<Object> objectSet = new HashSet<>();
-        int numAdded = RLPDecoder.RLP_STRICT.collect(LONG_LIST_BYTES, 0, (count, index) -> index < LONG_LIST_BYTES.length, objectSet);
+        int numAdded = collectUntil(LONG_LIST_BYTES, 0, LONG_LIST_BYTES.length, objectSet);
         assertEquals(1, numAdded);
         assertEquals(1, objectSet.size());
+
+        assertEquals(1, RLPDecoder.RLP_STRICT.stream(LONG_LIST_BYTES)
+                .collect(Collectors.toSet()).size());
+
+        final int x = 90;
+        RLPDecoder.RLP_STRICT.stream(LONG_LIST_BYTES)
+                .limit(10)
+                .filter(item -> item.index < x)
+                .collect(Collectors.toSet());
         
         byte[] rlp = new byte[9];
         for (int i = 0; i < rlp.length; i++) {
             rlp[i] = (byte) i;
         }
         Set<RLPItem> hashSet = new HashSet<>();
-        int n = RLP_STRICT.collect(rlp, 0, UNTIL_COUNT_FIVE, hashSet);
-        assertEquals(5, n);
+        collectN(rlp, 0, 5, hashSet);
         assertEquals(5, hashSet.size());
         for (int i = 0; i < 5; i++) {
             assertTrue(hashSet.contains(RLP_STRICT.wrap((byte) i)));
         }
 
         hashSet = new HashSet<>();
-        n = RLP_STRICT.collect(rlp, 0, UNTIL_INDEX_SEVEN, hashSet);
+        int n = collectUntil(rlp, 0, 7, hashSet);
         assertEquals(7, n);
         assertEquals(7, hashSet.size());
         for (int i = 0; i < 7; i++) {
@@ -694,20 +701,47 @@ public class RLPDecoderTest {
     }
 
     public static List<RLPItem> collectN(byte[] encodings, int index, int n) {
-        ArrayList<RLPItem> dest = new ArrayList<>(n);
-        RLP_STRICT.collect(encodings, index, (count, idx) -> count < n, dest);
-        return dest;
+        return RLP_STRICT.stream(encodings, index)
+                .limit(n)
+                .collect(Collectors.toList());
     }
 
-    public static int collectAll(byte[] encodings, int index, Collection<RLPItem> dest) {
+    public static int collectAll(byte[] encodings, int index, Collection<? super RLPItem> dest) {
         return collectUntil(encodings, index, encodings.length, dest);
     }
 
-    public static int collectUntil(byte[] encodings, int index, int endIndex, Collection<RLPItem> dest) {
-        return RLP_STRICT.collect(encodings, index, (count, idx) -> idx < endIndex, dest);
+    public static int collectUntil(byte[] encodings, int index, int endIndex, Collection<? super RLPItem> dest) {
+        return collect(RLP_STRICT, encodings, index, (count, idx) -> idx < endIndex, dest);
     }
 
-    public static void collectN(byte[] encodings, int index, int n, Collection<RLPItem> dest) {
-        RLP_STRICT.collect(encodings, index, (count, idx) -> count < n, dest);
+    public static void collectN(byte[] encodings, int index, int n, Collection<? super RLPItem> dest) {
+        RLP_STRICT.stream(encodings, index)
+                .limit(n)
+                .collect(Collectors.toCollection(() -> dest));
+    }
+
+    @FunctionalInterface
+    public interface BiIntPredicate {
+        boolean test(int count, int index);
+    }
+
+    /**
+     * For gathering sequential items into a collection.
+     *
+     * @param buffer the buffer containing the encodings
+     * @param index the index into the buffer of the first encoding
+     * @param predicate the condition under which an item is to be added to the collection
+     * @param collection    the collection to which the items will be added
+     * @return  the number of items added
+     */
+    public static int collect(RLPDecoder decoder, byte[] buffer, int index, BiIntPredicate predicate, Collection<? super RLPItem> collection) {
+        int count = 0;
+        while (predicate.test(count, index)) {
+            RLPItem item = decoder.wrap(buffer, index);
+            collection.add(item);
+            count++;
+            index = item.endIndex;
+        }
+        return count;
     }
 }

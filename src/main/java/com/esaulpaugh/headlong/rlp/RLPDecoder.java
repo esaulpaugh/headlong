@@ -162,29 +162,4 @@ public final class RLPDecoder {
         default: throw new AssertionError();
         }
     }
-    
-    @FunctionalInterface
-    public interface BiIntPredicate {
-        boolean test(int count, int index);
-    }
-
-    /**
-     * For gathering sequential items into a collection.
-     *
-     * @param buffer the buffer containing the encodings
-     * @param index the index into the buffer of the first encoding
-     * @param predicate the condition under which an item is to be added to the collection
-     * @param collection    the collection to which the items will be added
-     * @return  the number of items added
-     */
-    public int collect(byte[] buffer, int index, BiIntPredicate predicate, Collection<? super RLPItem> collection) {
-        int count = 0;
-        while (predicate.test(count, index)) {
-            RLPItem item = wrap(buffer, index);
-            collection.add(item);
-            count++;
-            index = item.endIndex;
-        }
-        return count;
-    }
 }
