@@ -12,8 +12,8 @@ public final class Address {
     public final BigInteger address;
 
     public static Address wrap(final String address) {
-        final BigInteger result = _decodeAddr(address);
-        if(_formatAddr(result).equals(address)) {
+        final BigInteger result = toBigInt(address);
+        if(format(result).equals(address)) {
             return new Address(result);
         }
         throw new AssertionError();
@@ -49,14 +49,14 @@ public final class Address {
     private static final AddressType ADDRESS_TYPE = TypeFactory.create("address");
 
     public static String format(final BigInteger address) {
-        final String result = _formatAddr(address);
-        if(_decodeAddr(result).equals(address)) {
+        final String result = toString(address);
+        if(toBigInt(result).equals(address)) {
             return result;
         }
         throw new AssertionError();
     }
 
-    private static String _formatAddr(final BigInteger address) {
+    private static String toString(final BigInteger address) {
         final String minimalHex = address.toString(HEX_RADIX);
         final int leftPad = ADDRESS_HEX_CHARS - minimalHex.length();
         if(leftPad < 0) {
@@ -73,7 +73,7 @@ public final class Address {
         throw new AssertionError();
     }
 
-    private static BigInteger _decodeAddr(final String addrStr) {
+    private static BigInteger toBigInt(final String addrStr) {
         if(!addrStr.startsWith(HEX_PREFIX)) {
             throw new IllegalArgumentException("expected prefix 0x not found");
         }
