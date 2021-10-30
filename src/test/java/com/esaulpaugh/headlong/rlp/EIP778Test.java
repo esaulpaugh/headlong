@@ -21,6 +21,7 @@ import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
+import java.security.InvalidParameterException;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -144,7 +145,7 @@ public class EIP778Test {
                 }, seq)
         );
         assertThrown(
-                RuntimeException.class,
+                InvalidParameterException.class,
                 "signer specifies negative signature length",
                 () -> new Record(new Record.Signer() {
                     @Override
@@ -283,7 +284,7 @@ public class EIP778Test {
 
     @Test
     public void testIncorrectSignatureLength() throws Throwable {
-        assertThrown(RuntimeException.class,
+        assertThrown(InvalidParameterException.class,
                 "unexpected signature length: 32 != 64",
                         () -> new Record(new Record.Signer() {
                             @Override
