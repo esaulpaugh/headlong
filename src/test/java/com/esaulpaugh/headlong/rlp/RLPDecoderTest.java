@@ -494,9 +494,6 @@ public class RLPDecoderTest {
         assertEquals('\0', RLP_STRICT.wrap((byte) 0x00).asChar(true));
     }
 
-    private static final BiIntPredicate UNTIL_COUNT_FIVE = (count, index) -> count < 5;
-    private static final BiIntPredicate UNTIL_INDEX_SEVEN = (count, index) -> index < 7;
-
     @Test
     public void collect() {
         
