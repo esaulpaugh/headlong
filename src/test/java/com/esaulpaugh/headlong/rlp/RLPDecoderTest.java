@@ -507,12 +507,6 @@ public class RLPDecoderTest {
 
         assertEquals(1, RLPDecoder.RLP_STRICT.stream(LONG_LIST_BYTES)
                 .collect(Collectors.toSet()).size());
-
-        final int x = 90;
-        RLPDecoder.RLP_STRICT.stream(LONG_LIST_BYTES)
-                .limit(10)
-                .filter(item -> item.index < x)
-                .collect(Collectors.toSet());
         
         byte[] rlp = new byte[9];
         for (int i = 0; i < rlp.length; i++) {
