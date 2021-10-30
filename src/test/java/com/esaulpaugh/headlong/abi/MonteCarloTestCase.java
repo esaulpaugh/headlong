@@ -394,10 +394,18 @@ public class MonteCarloTestCase implements Serializable {
         return new BigDecimal(generateBigInteger(r, type), type.getScale());
     }
 
-    private static final UnitType<?> ADDRESS_TYPE = TypeFactory.create("address");
+//    private static final UnitType<?> ADDRESS_TYPE = TypeFactory.create("address");
 
     static Address generateAddress(Random r) {
-        return new Address(generateBigInteger(r, ADDRESS_TYPE));
+        return Address.wrap(generateAddressString(r));
+//        return Address.wrap(Address.toChecksumAddress(generateBigInteger(r, ADDRESS_TYPE)));
+//        return new Address(generateBigInteger(r, ADDRESS_TYPE));
+    }
+
+    static String generateAddressString(Random r) {
+        byte[] _20 = new byte[TypeFactory.ADDRESS_BIT_LEN / Byte.SIZE];
+        r.nextBytes(_20);
+        return Address.toChecksumAddress(Address.HEX_PREFIX + Strings.encode(_20));
     }
 
     private Object generateArray(ArrayType<? extends ABIType<?>, ?> arrayType, Random r) {

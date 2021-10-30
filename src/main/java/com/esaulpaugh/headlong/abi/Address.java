@@ -31,7 +31,7 @@ public final class Address {
 
     public final BigInteger value;
 
-    Address(BigInteger value) {
+    private Address(BigInteger value) {
         this.value = value;
     }
 

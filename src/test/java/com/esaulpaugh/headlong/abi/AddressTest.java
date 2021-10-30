@@ -155,10 +155,9 @@ public class AddressTest {
                 () -> Address.wrap("0xa83aaef1b5c928162005cafebabecafebabecb0a0")
         );
 
-        final byte[] _20 = new byte[20];
         final Random r = TestUtils.seededRandom();
         for (int i = 0; i < 1_000; i++) {
-            testStringAddr(generateStringAddress(_20, r));
+            testStringAddr(MonteCarloTestCase.generateAddressString(r));
         }
 
         BigInteger _FFff = Address.wrap("0x000000000000000000000000000000000000FFff").value;
@@ -172,20 +171,15 @@ public class AddressTest {
         assertTrue(Address.wrap(addrString).value.bitLength() <= 160);
     }
 
-    private static String generateStringAddress(byte[] _20, Random r) {
-        r.nextBytes(_20);
-        return Address.toChecksumAddress(Address.HEX_PREFIX + Strings.encode(_20));
-    }
-
     private static void testBigIntAddr(final BigInteger addr) {
         final String addrString = Address.toChecksumAddress(addr);
         assertTrue(addrString.startsWith("0x"));
         assertEquals(Address.ADDRESS_STRING_LEN, addrString.length());
-        final Address constructed = new Address(addr);
-        final Address wrapped = Address.wrap(addrString);
-        assertEquals(constructed, wrapped);
-        final String wrappedString = wrapped.toString();
-        assertEquals(constructed.toString(), wrappedString);
-        assertEquals(addrString, wrappedString);
+        final Address a = Address.wrap(Address.toChecksumAddress(addr));
+        final Address b = Address.wrap(addrString);
+        assertEquals(a, b);
+        final String bStr = b.toString();
+        assertEquals(a.toString(), bStr);
+        assertEquals(addrString, bStr);
     }
 }
