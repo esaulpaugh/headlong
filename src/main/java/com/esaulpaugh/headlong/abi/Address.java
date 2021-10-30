@@ -11,14 +11,6 @@ public final class Address {
 
     public final BigInteger value;
 
-    public static Address wrap(final String address) {
-        final BigInteger result = toBigInt(address);
-        if(format(result).equals(address)) {
-            return new Address(result);
-        }
-        throw new AssertionError();
-    }
-
     Address(BigInteger value) {
         this.value = value;
     }
@@ -42,11 +34,13 @@ public final class Address {
         return format(value);
     }
 
-    private static final int HEX_RADIX = 16;
-    private static final int ADDRESS_HEX_CHARS = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
-    public static final String HEX_PREFIX = "0x";
-    public static final int ADDRESS_STRING_LEN = HEX_PREFIX.length() + ADDRESS_HEX_CHARS;
-    private static final AddressType ADDRESS_TYPE = TypeFactory.create("address");
+    public static Address wrap(final String address) {
+        final BigInteger value = toBigInt(address);
+        if(format(value).equals(address)) {
+            return new Address(value);
+        }
+        throw new AssertionError();
+    }
 
     public static String format(final BigInteger address) {
         final String result = toString(address);
@@ -55,6 +49,12 @@ public final class Address {
         }
         throw new AssertionError();
     }
+
+    private static final int HEX_RADIX = 16;
+    private static final int ADDRESS_HEX_CHARS = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
+    public static final String HEX_PREFIX = "0x";
+    public static final int ADDRESS_STRING_LEN = HEX_PREFIX.length() + ADDRESS_HEX_CHARS;
+    private static final AddressType ADDRESS_TYPE = TypeFactory.create("address");
 
     private static String toString(final BigInteger address) {
         final String minimalHex = address.toString(HEX_RADIX);
