@@ -39,6 +39,10 @@ public final class Address {
         return value;
     }
 
+    static Address wrapDecoded(BigInteger decoded) {
+        return new Address(decoded);
+    }
+
     @Override
     public int hashCode() {
         return value.hashCode();
