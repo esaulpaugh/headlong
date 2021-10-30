@@ -24,6 +24,11 @@ import java.util.Locale;
 
 public final class Address {
 
+    private static final int HEX_RADIX = 16;
+    private static final int ADDRESS_HEX_CHARS = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
+    public static final String HEX_PREFIX = "0x";
+    public static final int ADDRESS_STRING_LEN = HEX_PREFIX.length() + ADDRESS_HEX_CHARS;
+
     public final BigInteger value;
 
     Address(BigInteger value) {
@@ -58,6 +63,24 @@ public final class Address {
         throw new AssertionError();
     }
 
+    public static void validateChecksumAddress(final String checksumAddress) {
+        checkRawAddress(checksumAddress);
+        if(raw_to_checksummed(checksumAddress).equals(checksumAddress)) {
+            return;
+        }
+        throw new IllegalArgumentException("invalid checksum");
+    }
+
+    public static String toChecksumAddress(final String address) {
+        checkRawAddress(address);
+        final String checksumAddr = raw_to_checksummed(address);
+        if(!checksumAddr.toLowerCase(Locale.ENGLISH).equals(address.toLowerCase(Locale.ENGLISH))) { // sanity check
+            throw new AssertionError();
+        }
+        validateChecksumAddress(checksumAddr);
+        return checksumAddr;
+    }
+
     public static String toChecksumAddress(final BigInteger address) {
         final String minimalHex = address.toString(HEX_RADIX);
         final int leftPad = ADDRESS_HEX_CHARS - minimalHex.length();
@@ -79,21 +102,6 @@ public final class Address {
         throw new AssertionError();
     }
 
-    private static final int HEX_RADIX = 16;
-    private static final int ADDRESS_HEX_CHARS = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
-    public static final String HEX_PREFIX = "0x";
-    public static final int ADDRESS_STRING_LEN = HEX_PREFIX.length() + ADDRESS_HEX_CHARS;
-
-    public static String toChecksumAddress(final String address) {
-        checkRawAddress(address);
-        final String checksumAddr = raw_to_checksummed(address);
-        if(!checksumAddr.toLowerCase(Locale.ENGLISH).equals(address.toLowerCase(Locale.ENGLISH))) { // sanity check
-            throw new AssertionError();
-        }
-        validateChecksumAddress(checksumAddr);
-        return checksumAddr;
-    }
-
     private static BigInteger to_big_int(final String validated) {
         return new BigInteger(validated.substring(HEX_PREFIX.length()), HEX_RADIX);
     }
@@ -103,17 +111,9 @@ public final class Address {
             throw new IllegalArgumentException("expected prefix 0x not found");
         }
         if(address.length() != ADDRESS_STRING_LEN) {
-            throw new IllegalArgumentException("expected address length: " + ADDRESS_STRING_LEN + "; actual: " + address.length());
+            throw new IllegalArgumentException("expected address length " + ADDRESS_STRING_LEN + "; actual is " + address.length());
         }
         FastHex.decode(address, HEX_PREFIX.length(), address.length()  - HEX_PREFIX.length()); // check for non-hex chars
-    }
-
-    public static void validateChecksumAddress(final String checksumAddress) {
-        checkRawAddress(checksumAddress);
-        if(raw_to_checksummed(checksumAddress).equals(checksumAddress)) {
-            return;
-        }
-        throw new IllegalArgumentException("invalid checksum");
     }
 
     /**

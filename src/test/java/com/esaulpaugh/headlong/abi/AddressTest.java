@@ -147,11 +147,11 @@ public class AddressTest {
                 () -> Address.wrap("5cafebabecafebabe7570ad8ac11f8d812ee0606")
         );
         TestUtils.assertThrown(IllegalArgumentException.class,
-                "expected address length: 42; actual: 41",
+                "expected address length 42; actual is 41",
                 () -> Address.wrap("0xa83aaef1b5c928162005cafebabecafebabecb0")
         );
         TestUtils.assertThrown(IllegalArgumentException.class,
-                "expected address length: 42; actual: 43",
+                "expected address length 42; actual is 43",
                 () -> Address.wrap("0xa83aaef1b5c928162005cafebabecafebabecb0a0")
         );
 
