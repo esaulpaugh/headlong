@@ -41,7 +41,7 @@ public class AddressTest {
                 "0xD1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb" };
 
         for(String address : valid) {
-            Address.verifyChecksum(address);
+            Address.validateChecksumAddress(address);
         }
     }
 
@@ -60,7 +60,7 @@ public class AddressTest {
         };
 
         for(String address : valid) {
-            Address.verifyChecksum(address);
+            Address.validateChecksumAddress(address);
         }
     }
 

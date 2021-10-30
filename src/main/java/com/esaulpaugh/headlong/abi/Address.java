@@ -50,9 +50,9 @@ public final class Address {
     }
 
     public static Address wrap(final String checksumAddress) {
-        validateAddress(checksumAddress);
+        validateChecksumAddress(checksumAddress);
         final BigInteger value = to_big_int(checksumAddress);
-        if(toChecksumAddress(value).equals(checksumAddress)) {
+        if(toChecksumAddress(value).equals(checksumAddress)) { // sanity check
             return new Address(value);
         }
         throw new AssertionError();
@@ -69,11 +69,12 @@ public final class Address {
             addrBuilder.append('0');
         }
         final String rawAddress = addrBuilder.append(minimalHex).toString();
-        if(rawAddress.length() == ADDRESS_STRING_LEN) {
-            final String checksumAddress = toChecksumAddress(rawAddress);
-            if(to_big_int(checksumAddress).equals(address)) {
-                return checksumAddress;
-            }
+        final String checksumAddress = toChecksumAddress(rawAddress);
+        // sanity checks
+        if(rawAddress.length() == ADDRESS_STRING_LEN
+                && checksumAddress.length() == ADDRESS_STRING_LEN
+                && to_big_int(checksumAddress).equals(address)) {
+            return checksumAddress;
         }
         throw new AssertionError();
     }
@@ -86,17 +87,15 @@ public final class Address {
     public static String toChecksumAddress(final String address) {
         checkRawAddress(address);
         final String checksumAddr = raw_to_checksummed(address);
-        validateAddress(checksumAddr);
+        if(!checksumAddr.toLowerCase(Locale.ENGLISH).equals(address.toLowerCase(Locale.ENGLISH))) { // sanity check
+            throw new AssertionError();
+        }
+        validateChecksumAddress(checksumAddr);
         return checksumAddr;
     }
 
     private static BigInteger to_big_int(final String validated) {
         return new BigInteger(validated.substring(HEX_PREFIX.length()), HEX_RADIX);
-    }
-
-    private static void validateAddress(final String checksumAddress) {
-        checkRawAddress(checksumAddress);
-        verifyChecksum(checksumAddress);
     }
 
     private static void checkRawAddress(final String address) {
@@ -109,11 +108,12 @@ public final class Address {
         FastHex.decode(address, HEX_PREFIX.length(), address.length()  - HEX_PREFIX.length()); // check for non-hex chars
     }
 
-    public static void verifyChecksum(final String address) {
-        final String checksummed = raw_to_checksummed(address);
-        if(!checksummed.equals(address)) {
-            throw new IllegalArgumentException("invalid checksum");
+    public static void validateChecksumAddress(final String checksumAddress) {
+        checkRawAddress(checksumAddress);
+        if(raw_to_checksummed(checksumAddress).equals(checksumAddress)) {
+            return;
         }
+        throw new IllegalArgumentException("invalid checksum");
     }
 
     /**
