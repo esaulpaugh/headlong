@@ -20,10 +20,10 @@ import java.nio.ByteBuffer;
 /** Currently used only as the element type for some {@link ArrayType}s. */
 public final class ByteType extends UnitType<Byte> {
 
-    static final ByteType SIGNED = new ByteType("int8", false);
+    static final ByteType SIGNED = new ByteType();
 
-    private ByteType(String canonicalType, boolean unsigned) {
-        super(canonicalType, Byte.class, Byte.SIZE, unsigned);
+    private ByteType() {
+        super("int8", Byte.class, Byte.SIZE, false);
     }
 
     @Override
