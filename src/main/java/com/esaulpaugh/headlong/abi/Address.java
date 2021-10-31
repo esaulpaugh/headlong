@@ -148,11 +148,11 @@ public final class Address {
     }
 
     @SuppressWarnings("deprecation")
-    private static String toLowercase(String address) {
-        final int len = address.length();
+    private static String toLowercase(String str) {
+        final int len = str.length();
         final byte[] ascii = new byte[len];
         for (int i = 0; i < len; i++) {
-            ascii[i] = (byte) Character.toLowerCase((int) address.charAt(i));
+            ascii[i] = (byte) Character.toLowerCase((int) str.charAt(i));
         }
         return new String(ascii, 0, 0, ascii.length);
     }
