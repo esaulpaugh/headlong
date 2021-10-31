@@ -164,9 +164,9 @@ public final class TypeFactory {
             try {
                 final String mStr = type.substring(idx + "fixed".length(), indexOfX);
                 final String nStr = type.substring(indexOfX + 1); // everything after x
-                if (leadDigitValid(mStr.charAt(0)) && leadDigitValid(nStr.charAt(0))) { // cannot start with 0
-                    final int M = Integer.parseUnsignedInt(mStr); // no parseUnsignedInt on older Android versions?
-                    final int N = Integer.parseUnsignedInt(nStr);
+                if (leadDigitValid(mStr.charAt(0)) && leadDigitValid(nStr.charAt(0))) { // starts with a digit 1-9
+                    final int M = Integer.parseInt(mStr); // no parseUnsignedInt on older Android versions?
+                    final int N = Integer.parseInt(nStr);
                     if (Integers.isMultiple(M, 8) && M <= 256 && N <= 80) { // no multiples of 8 less than 8 except 0
                         return new BigDecimalType((unsigned ? "ufixed" : "fixed") + M + 'x' + N, M, N, unsigned);
                     }
