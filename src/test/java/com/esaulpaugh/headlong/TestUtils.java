@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong;
 
+import com.esaulpaugh.headlong.abi.Address;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonArray;
@@ -222,10 +223,10 @@ public class TestUtils {
         return in.getAsLong();
     }
 
-    public static BigInteger parseAddress(JsonElement in) { // uint160
+    public static Address parseAddress(JsonElement in) { // uint160
         String hex = "00" + in.getAsString().substring(2);
         byte[] bytes = Strings.decode(hex);
-        return new BigInteger(bytes);
+        return Address.wrap(Address.toChecksumAddress(new BigInteger(bytes)));
     }
 
     /** Asserts that the arguments are either both true or both false. */

@@ -102,13 +102,13 @@ public class DecodeTest {
         assertEquals(val, i);
 
         byte[] _int_ = Strings.decode("000000000000000000000000000000000000000000000000000000000000FFFF");
-        assertEquals((int) (Math.pow(2, 16)) - 1, new Function("()", "(uint16)").decodeReturn(_int_).get(0));
+        assertEquals((int) (Math.pow(2, 16)) - 1, (int) new Function("()", "(uint16)").decodeSingletonReturn(_int_));
 
         byte[] _long = Strings.decode("00000000000000000000000000000000000000000000000000000000FFFFFFFF");
-        assertEquals((long) (Math.pow(2, 32)) - 1, new Function("()", "(uint32)").decodeReturn(_long).get(0));
+        assertEquals((long) (Math.pow(2, 32)) - 1, (long) new Function("()", "(uint32)").decodeSingletonReturn(_long));
 
         byte[] _160_ = Strings.decode("000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-        assertEquals(BigInteger.valueOf(2L).pow(160).subtract(BigInteger.ONE), new Function("()", "(address)").decodeReturn(_160_).get(0));
+        assertEquals(Address.wrapDecoded(BigInteger.valueOf(2L).pow(160).subtract(BigInteger.ONE)), new Function("()", "(address)").decodeSingletonReturn(_160_));
 
         Function foo2 = new Function("()", "(uint)");
         byte[] _big_ = Strings.decode("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");

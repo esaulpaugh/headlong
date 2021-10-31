@@ -60,7 +60,7 @@ public final class TypeFactory {
             mapByteArray(lambdaMap, "bytes" + n, n);
         }
 
-        mapBigInteger(lambdaMap, "address", ADDRESS_BIT_LEN, true);
+        lambdaMap.put("address", AddressType::new);
         mapByteArray(lambdaMap, "function", FUNCTION_BYTE_LEN);
         mapByteArray(lambdaMap, "bytes", DYNAMIC_LENGTH);
         lambdaMap.put("string", () -> new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS));

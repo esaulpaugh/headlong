@@ -106,14 +106,14 @@ public class EqualsTest {
 //                       10000000000000000000000000000000000000000
 //                        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         String uint160 = "ff00ee01dd02cc03cafebabe9906880777086609";
-        BigInteger addr = new BigInteger(uint160, 16);
+        Address addr = Address.wrapDecoded(new BigInteger(uint160, 16));
         assertEquals(160, uint160.length() * 4);
-        assertEquals(uint160, addr.toString(16));
+        assertEquals(uint160, addr.value().toString(16));
         Object[] argsIn = new Object[] {
                 new byte[][][][] { new byte[][][] { new byte[][] { func, func } } },
                 func,
                 new String[0][],
-                new BigInteger[] { addr },
+                new Address[] { addr },
                 BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(Byte.MAX_VALUE << 2)),
                 new Tuple(7),
                 new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple(9), new Tuple(-11) } } },
