@@ -20,7 +20,6 @@ import com.joemelsha.crypto.hash.Keccak;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
 
 public final class Address {
 
@@ -80,12 +79,9 @@ public final class Address {
 
     public static String toChecksumAddress(final String address) {
         final Keccak k = new Keccak(256);
-        final String checksumAddr = raw_to_checksummed(address, k);
-        if(!checksumAddr.toLowerCase(Locale.ENGLISH).equals(address.toLowerCase(Locale.ENGLISH))) { // sanity check
-            throw new AssertionError();
-        }
-        validateChecksumAddress(checksumAddr, k);
-        return checksumAddr;
+        final String out = raw_to_checksummed(address, k);
+        validateChecksumAddress(out, k); // sanity check
+        return out;
     }
 
     public static String toChecksumAddress(final BigInteger address) {
@@ -129,22 +125,26 @@ public final class Address {
      * @return  the same address with the correct EIP-55 checksum casing
      */
     @SuppressWarnings("deprecation")
-    private static String raw_to_checksummed(String address, Keccak k) {
+    private static String raw_to_checksummed(final String address, final Keccak k) {
         checkRawAddress(address);
-        address = toLowercaseAscii(address);
-        k.update(address.getBytes(StandardCharsets.US_ASCII), HEX_PREFIX.length(), ADDRESS_STRING_LEN - HEX_PREFIX.length());
+        final String lowercaseAddr = toLowercaseAscii(address);
+        k.update(lowercaseAddr.getBytes(StandardCharsets.US_ASCII), HEX_PREFIX.length(), ADDRESS_STRING_LEN - HEX_PREFIX.length());
         final byte[] digest = k.digest();
         final String hash = FastHex.encodeToString(digest);
         final byte[] ret = new byte[] {'0', 'x',
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         for (int i = HEX_PREFIX.length(); i < ret.length; i++) {
-            int a = address.charAt(i);
+            int a = lowercaseAddr.charAt(i);
             ret[i] = (byte) (Integer.parseInt(String.valueOf(hash.charAt(i - HEX_PREFIX.length())), HEX_RADIX) >= 8
                     ? Character.toUpperCase(a)
                     : a);
         }
-        return new String(ret, 0, 0, ret.length);
+        final String out = new String(ret, 0, 0, ret.length);
+        if(!toLowercaseAscii(out).equals(lowercaseAddr)) { // sanity check
+            throw new AssertionError();
+        }
+        return out;
     }
 
     @SuppressWarnings("deprecation")
