@@ -60,10 +60,10 @@ public final class Address {
     public static Address wrap(final String checksumAddress) {
         validateChecksumAddress(checksumAddress);
         final BigInteger value = to_big_int(checksumAddress);
-        if(toChecksumAddress(value).equals(checksumAddress)) { // sanity check
+//        if(toChecksumAddress(value).equals(checksumAddress)) { // sanity check
             return new Address(value);
-        }
-        throw new AssertionError();
+//        }
+//        throw new AssertionError();
     }
 
     public static void validateChecksumAddress(final String checksumAddress) {
@@ -78,9 +78,8 @@ public final class Address {
     }
 
     public static String toChecksumAddress(final String address) {
-        final Keccak k = new Keccak(256);
-        final String out = raw_to_checksummed(address, k);
-        validateChecksumAddress(out, k); // sanity check
+        final String out = raw_to_checksummed(address, new Keccak(256));
+//        validateChecksumAddress(out, new Keccak(256)); // sanity check
         return out;
     }
 
@@ -97,12 +96,12 @@ public final class Address {
         final String rawAddress = addrBuilder.append(minimalHex).toString();
         final String checksumAddress = toChecksumAddress(rawAddress);
         // sanity checks
-        if(rawAddress.length() == ADDRESS_STRING_LEN
-                && checksumAddress.length() == ADDRESS_STRING_LEN
-                && to_big_int(checksumAddress).equals(address)) {
+//        if(rawAddress.length() == ADDRESS_STRING_LEN
+//                && checksumAddress.length() == ADDRESS_STRING_LEN
+//                && to_big_int(checksumAddress).equals(address)) {
             return checksumAddress;
-        }
-        throw new AssertionError();
+//        }
+//        throw new AssertionError();
     }
 
     private static BigInteger to_big_int(final String validated) {
@@ -141,9 +140,9 @@ public final class Address {
                     : a);
         }
         final String out = new String(ret, 0, 0, ret.length);
-        if(!toLowercaseAscii(out).equals(lowercaseAddr)) { // sanity check
-            throw new AssertionError();
-        }
+//        if(!toLowercaseAscii(out).equals(lowercaseAddr)) { // sanity check
+//            throw new AssertionError();
+//        }
         return out;
     }
 
