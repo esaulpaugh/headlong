@@ -125,7 +125,7 @@ public final class Address {
      */
     private static String raw_to_checksummed(String address) {
         checkRawAddress(address);
-        address = address.toLowerCase(Locale.ENGLISH).replace(HEX_PREFIX, "");
+        address = toLowercaseReplace0x(address);
         final String hash = FastHex.encodeToString(new Keccak(256).digest(address.getBytes(StandardCharsets.US_ASCII)));
         final StringBuilder ret = new StringBuilder(HEX_PREFIX);
 
@@ -138,5 +138,15 @@ public final class Address {
         }
 
         return ret.toString();
+    }
+
+    @SuppressWarnings("deprecation")
+    private static String toLowercaseReplace0x(String address) {
+        final int len = address.length() - 2;
+        final byte[] ascii = new byte[len];
+        for (int j = 0; j < len; j++) {
+            ascii[j] = (byte) Character.toLowerCase((int) address.charAt(j + 2));
+        }
+        return new String(ascii, 0, 0, ascii.length);
     }
 }
