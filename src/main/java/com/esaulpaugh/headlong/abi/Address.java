@@ -59,28 +59,14 @@ public final class Address {
 
     public static Address wrap(final String checksumAddress) {
         validateChecksumAddress(checksumAddress);
-        final BigInteger value = to_big_int(checksumAddress);
-//        if(toChecksumAddress(value).equals(checksumAddress)) { // sanity check
-            return new Address(value);
-//        }
-//        throw new AssertionError();
+        return new Address(to_big_int(checksumAddress));
     }
 
     public static void validateChecksumAddress(final String checksumAddress) {
-        validateChecksumAddress(checksumAddress, new Keccak(256));
-    }
-
-    private static void validateChecksumAddress(final String checksumAddress, final Keccak k) {
-        if(raw_to_checksummed(checksumAddress, k).equals(checksumAddress)) {
+        if(toChecksumAddress(checksumAddress).equals(checksumAddress)) {
             return;
         }
         throw new IllegalArgumentException("invalid checksum");
-    }
-
-    public static String toChecksumAddress(final String address) {
-        final String out = raw_to_checksummed(address, new Keccak(256));
-//        validateChecksumAddress(out, new Keccak(256)); // sanity check
-        return out;
     }
 
     public static String toChecksumAddress(final BigInteger address) {
@@ -89,19 +75,11 @@ public final class Address {
         if(leftPad < 0) {
             throw new IllegalArgumentException("invalid bit length: " + address.bitLength());
         }
-        final StringBuilder addrBuilder = new StringBuilder(HEX_PREFIX);
+        final StringBuilder rawAddress = new StringBuilder(HEX_PREFIX);
         for (int i = 0; i < leftPad; i++) {
-            addrBuilder.append('0');
+            rawAddress.append('0');
         }
-        final String rawAddress = addrBuilder.append(minimalHex).toString();
-        final String checksumAddress = toChecksumAddress(rawAddress);
-        // sanity checks
-//        if(rawAddress.length() == ADDRESS_STRING_LEN
-//                && checksumAddress.length() == ADDRESS_STRING_LEN
-//                && to_big_int(checksumAddress).equals(address)) {
-            return checksumAddress;
-//        }
-//        throw new AssertionError();
+        return toChecksumAddress(rawAddress.append(minimalHex).toString());
     }
 
     private static BigInteger to_big_int(final String validated) {
@@ -124,11 +102,12 @@ public final class Address {
      * @return  the same address with the correct EIP-55 checksum casing
      */
     @SuppressWarnings("deprecation")
-    private static String raw_to_checksummed(final String address, final Keccak k) {
+    public static String toChecksumAddress(final String address) {
         checkRawAddress(address);
         final String lowercaseAddr = toLowercaseAscii(address);
-        k.update(lowercaseAddr.getBytes(StandardCharsets.US_ASCII), HEX_PREFIX.length(), ADDRESS_STRING_LEN - HEX_PREFIX.length());
-        final byte[] digest = k.digest();
+        final Keccak keccak256 = new Keccak(256);
+        keccak256.update(lowercaseAddr.getBytes(StandardCharsets.US_ASCII), HEX_PREFIX.length(), ADDRESS_STRING_LEN - HEX_PREFIX.length());
+        final byte[] digest = keccak256.digest();
         final String hash = FastHex.encodeToString(digest);
         final byte[] ret = new byte[] {'0', 'x',
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -139,11 +118,7 @@ public final class Address {
                     ? Character.toUpperCase(a)
                     : a);
         }
-        final String out = new String(ret, 0, 0, ret.length);
-//        if(!toLowercaseAscii(out).equals(lowercaseAddr)) { // sanity check
-//            throw new AssertionError();
-//        }
-        return out;
+        return new String(ret, 0, 0, ret.length);
     }
 
     @SuppressWarnings("deprecation")
