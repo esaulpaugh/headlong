@@ -106,7 +106,7 @@ public class EqualsTest {
 //                       10000000000000000000000000000000000000000
 //                        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         String uint160 = "ff00ee01dd02cc03cafebabe9906880777086609";
-        Address addr = Address.wrapDecoded(new BigInteger(uint160, 16));
+        Address addr = new Address(new BigInteger(uint160, 16));
         assertEquals(160, uint160.length() * 4);
         assertEquals(uint160, addr.value().toString(16));
         Object[] argsIn = new Object[] {

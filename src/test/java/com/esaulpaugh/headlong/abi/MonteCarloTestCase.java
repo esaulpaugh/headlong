@@ -401,7 +401,7 @@ public class MonteCarloTestCase implements Serializable {
     static Address generateAddress(Random r) {
 //        return Address.wrap(generateAddressString(r));
 //        return Address.wrap(Address.toChecksumAddress(generateBigInteger(r, ADDRESS_TYPE)));
-        return Address.wrapDecoded(new BigInteger(TypeFactory.ADDRESS_BIT_LEN - r.nextInt(160), r));
+        return new Address(new BigInteger(TypeFactory.ADDRESS_BIT_LEN - r.nextInt(160), r));
     }
 
     private Object generateArray(ArrayType<? extends ABIType<?>, ?> arrayType, Random r) {

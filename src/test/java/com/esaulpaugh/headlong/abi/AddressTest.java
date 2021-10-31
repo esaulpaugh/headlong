@@ -59,8 +59,8 @@ public class AddressTest {
     public void testGeneratedChecksums() {
         final Random r = TestUtils.seededRandom();
         String[] valid = new String[] {
-                Address.wrapDecoded(BigInteger.valueOf(TestUtils.pickRandom(r, 8, true))).toString(),
-                Address.wrapDecoded(BigInteger.valueOf(TestUtils.pickRandom(r, 8, true))).toString(),
+                new Address(BigInteger.valueOf(TestUtils.pickRandom(r, 8, true))).toString(),
+                new Address(BigInteger.valueOf(TestUtils.pickRandom(r, 8, true))).toString(),
                 MonteCarloTestCase.generateAddress(r).toString(),
                 MonteCarloTestCase.generateAddress(r).toString()
         };

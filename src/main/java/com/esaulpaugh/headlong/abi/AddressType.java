@@ -47,7 +47,7 @@ public final class AddressType extends UnitType<Address> {
 
     @Override
     Address decode(ByteBuffer bb, byte[] unitBuffer) {
-        return Address.wrapDecoded(ADDRESS_INNER.decode(bb, unitBuffer));
+        return new Address(ADDRESS_INNER.decode(bb, unitBuffer));
     }
 
     @Override

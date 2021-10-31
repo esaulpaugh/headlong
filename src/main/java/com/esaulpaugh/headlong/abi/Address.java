@@ -31,16 +31,12 @@ public final class Address {
 
     private final BigInteger value;
 
-    private Address(BigInteger value) {
+    Address(BigInteger value) {
         this.value = value;
     }
 
     public BigInteger value() {
         return value;
-    }
-
-    static Address wrapDecoded(BigInteger decoded) {
-        return new Address(decoded);
     }
 
     @Override

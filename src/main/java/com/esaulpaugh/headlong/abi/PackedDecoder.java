@@ -171,7 +171,7 @@ final class PackedDecoder {
     private static int insertAddress(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
         byte[] copy = new byte[1 + elementLen];
         System.arraycopy(buffer, idx, copy, 1, elementLen);
-        dest[destIdx] = Address.wrapDecoded(new BigInteger(copy));
+        dest[destIdx] = new Address(new BigInteger(copy));
         return elementLen;
     }
 
