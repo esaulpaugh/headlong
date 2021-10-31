@@ -39,6 +39,7 @@ public abstract class ABIType<J> {
 
     public static final int TYPE_CODE_ARRAY = 6;
     public static final int TYPE_CODE_TUPLE = 7;
+    public static final int TYPE_CODE_ADDRESS = 8;
 
     public static final ABIType<?>[] EMPTY_ARRAY = new ABIType<?>[0];
 
