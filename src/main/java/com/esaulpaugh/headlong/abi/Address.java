@@ -68,18 +68,23 @@ public final class Address {
     }
 
     public static void validateChecksumAddress(final String checksumAddress) {
-        if(raw_to_checksummed(checksumAddress).equals(checksumAddress)) {
+        validateChecksumAddress(checksumAddress, new Keccak(256));
+    }
+
+    private static void validateChecksumAddress(final String checksumAddress, final Keccak k) {
+        if(raw_to_checksummed(checksumAddress, k).equals(checksumAddress)) {
             return;
         }
         throw new IllegalArgumentException("invalid checksum");
     }
 
     public static String toChecksumAddress(final String address) {
-        final String checksumAddr = raw_to_checksummed(address);
+        final Keccak k = new Keccak(256);
+        final String checksumAddr = raw_to_checksummed(address, k);
         if(!checksumAddr.toLowerCase(Locale.ENGLISH).equals(address.toLowerCase(Locale.ENGLISH))) { // sanity check
             throw new AssertionError();
         }
-        validateChecksumAddress(checksumAddr);
+        validateChecksumAddress(checksumAddr, k);
         return checksumAddr;
     }
 
@@ -123,29 +128,31 @@ public final class Address {
      * @param address   the hexadecimal Ethereum address
      * @return  the same address with the correct EIP-55 checksum casing
      */
-    private static String raw_to_checksummed(String address) {
+    @SuppressWarnings("deprecation")
+    private static String raw_to_checksummed(String address, Keccak k) {
         checkRawAddress(address);
-        address = toLowercaseReplace0x(address);
-        final String hash = FastHex.encodeToString(new Keccak(256).digest(address.getBytes(StandardCharsets.US_ASCII)));
-        final StringBuilder ret = new StringBuilder(HEX_PREFIX);
-
-        for (int i = 0; i < address.length(); i++) {
-            if(Integer.parseInt(String.valueOf(hash.charAt(i)), HEX_RADIX) >= 8) {
-                ret.append(Character.toUpperCase(address.charAt(i)));
-            } else {
-                ret.append(address.charAt(i));
-            }
+        address = toLowercaseWithout0x(address);
+        k.update(address.getBytes(StandardCharsets.US_ASCII), HEX_PREFIX.length(), ADDRESS_STRING_LEN - HEX_PREFIX.length());
+        final byte[] digest = k.digest();
+        final String hash = FastHex.encodeToString(digest);
+        final byte[] ret = new byte[] {'0', 'x',
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        for (int i = HEX_PREFIX.length(); i < ret.length; i++) {
+            int a = address.charAt(i);
+            ret[i] = (byte) (Integer.parseInt(String.valueOf(hash.charAt(i - HEX_PREFIX.length())), HEX_RADIX) >= 8
+                    ? Character.toUpperCase(a)
+                    : a);
         }
-
-        return ret.toString();
+        return new String(ret, 0, 0, ret.length);
     }
 
     @SuppressWarnings("deprecation")
-    private static String toLowercaseReplace0x(String address) {
-        final int len = address.length() - 2;
+    private static String toLowercaseWithout0x(String address) {
+        final int len = address.length();
         final byte[] ascii = new byte[len];
-        for (int j = 0; j < len; j++) {
-            ascii[j] = (byte) Character.toLowerCase((int) address.charAt(j + 2));
+        for (int i = 0; i < len; i++) {
+            ascii[i] = (byte) Character.toLowerCase((int) address.charAt(i));
         }
         return new String(ascii, 0, 0, ascii.length);
     }
