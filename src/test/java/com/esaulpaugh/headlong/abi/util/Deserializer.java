@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi.util;
 
 import com.esaulpaugh.headlong.abi.ABIType;
+import com.esaulpaugh.headlong.abi.Address;
 import com.esaulpaugh.headlong.abi.ArrayType;
 import com.esaulpaugh.headlong.abi.BigDecimalType;
 import com.esaulpaugh.headlong.abi.BigIntegerType;
@@ -90,6 +91,7 @@ public class Deserializer {
                 new BigInteger(valVal.getAsString()), ((BigDecimalType) type).getScale()
         );
         case ABIType.TYPE_CODE_TUPLE: return parseTupleValue((TupleType) type, valVal.getAsJsonArray());
+        case ABIType.TYPE_CODE_ADDRESS: return Address.wrap(valVal.getAsString());
         default: throw new Error();
         }
     }

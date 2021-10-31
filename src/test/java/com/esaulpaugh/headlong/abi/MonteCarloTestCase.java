@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ADDRESS;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_DECIMAL;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_INTEGER;
@@ -351,6 +352,7 @@ public class MonteCarloTestCase implements Serializable {
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
         case TYPE_CODE_ARRAY: return generateArray((ArrayType<? extends ABIType<?>, ?>) type, r);
         case TYPE_CODE_TUPLE: return generateTuple(((TupleType) type).elementTypes, r);
+        case TYPE_CODE_ADDRESS: return generateAddress(r);
         default: throw new Error();
         }
     }
@@ -428,6 +430,7 @@ public class MonteCarloTestCase implements Serializable {
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimalArray(len, (BigDecimalType) elementType, r);
         case TYPE_CODE_ARRAY: return generateObjectArray(arrayType, len, r);
         case TYPE_CODE_TUPLE: return generateTupleArray((TupleType) elementType, len, r);
+        case TYPE_CODE_ADDRESS: return generateAddressArray(len, r);
         default: throw new Error();
         }
     }
@@ -486,6 +489,14 @@ public class MonteCarloTestCase implements Serializable {
             tuples[i] = generateTuple(tupleType.elementTypes, r);
         }
         return tuples;
+    }
+
+    private Address[] generateAddressArray(final int len, Random r) {
+        Address[] addresses = new Address[len];
+        for (int i = 0; i < len; i++) {
+            addresses[i] = generateAddress(r);
+        }
+        return addresses;
     }
 
     private Object[] generateObjectArray(ArrayType<? extends ABIType<?>, ?> arrayType, final int len, Random r) {

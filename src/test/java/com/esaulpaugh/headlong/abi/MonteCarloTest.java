@@ -105,6 +105,8 @@ public class MonteCarloTest {
                 x += ((byte[]) o).length;
             } else if (c == String.class) {
                 x += Strings.decode((String) o, Strings.UTF_8).length;
+            } else if (c == Address.class) {
+                x += TypeFactory.ADDRESS_BIT_LEN / Byte.SIZE;
             } else {
                 throw new Error("" + c);
             }

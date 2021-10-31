@@ -30,6 +30,7 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BYTE;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ADDRESS;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 
 /**
@@ -130,6 +131,7 @@ final class PackedDecoder {
             return type.dynamic
                     ? decodeTuple((TupleType) type, buffer, idx, end, elements, i)
                     : decodeTupleStatic((TupleType) type, buffer, idx, end, elements, i);
+        case TYPE_CODE_ADDRESS: return insertAddress(type.byteLengthPacked(null), buffer, idx, elements, i);
         default: throw new AssertionError();
         }
     }
@@ -163,6 +165,13 @@ final class PackedDecoder {
 //            dest[destIdx] = new BigInteger(buffer, idx, elementLen); // Java 9+
             dest[destIdx] = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
         }
+        return elementLen;
+    }
+
+    private static int insertAddress(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
+        byte[] copy = new byte[1 + elementLen];
+        System.arraycopy(buffer, idx, copy, 1, elementLen);
+        dest[destIdx] = Address.wrapDecoded(new BigInteger(copy));
         return elementLen;
     }
 
@@ -202,7 +211,8 @@ final class PackedDecoder {
         case TYPE_CODE_BIG_INTEGER: array = decodeBigIntegerArray((BigIntegerType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_BIG_DECIMAL: array = decodeBigDecimalArray((BigDecimalType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: array = decodeObjectArray(arrayLen, elementType, buffer, idx, end); break;
+        case TYPE_CODE_TUPLE:
+        case TYPE_CODE_ADDRESS: array = decodeObjectArray(arrayLen, elementType, buffer, idx, end); break;
         default: throw new AssertionError();
         }
         dest[destIdx] = array;
