@@ -59,7 +59,7 @@ public final class Address {
 
     public static Address wrap(final String checksumAddress) {
         validateChecksumAddress(checksumAddress);
-        return new Address(to_big_int(checksumAddress));
+        return new Address(new BigInteger(checksumAddress.substring(HEX_PREFIX.length()), HEX_RADIX));
     }
 
     public static void validateChecksumAddress(final String checksumAddress) {
@@ -80,10 +80,6 @@ public final class Address {
             rawAddress.append('0');
         }
         return toChecksumAddress(rawAddress.append(minimalHex).toString());
-    }
-
-    private static BigInteger to_big_int(final String validated) {
-        return new BigInteger(validated.substring(HEX_PREFIX.length()), HEX_RADIX);
     }
 
     private static void checkRawAddress(final String address) {
