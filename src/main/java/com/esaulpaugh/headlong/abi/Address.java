@@ -131,7 +131,7 @@ public final class Address {
     @SuppressWarnings("deprecation")
     private static String raw_to_checksummed(String address, Keccak k) {
         checkRawAddress(address);
-        address = toLowercase(address);
+        address = toLowercaseAscii(address);
         k.update(address.getBytes(StandardCharsets.US_ASCII), HEX_PREFIX.length(), ADDRESS_STRING_LEN - HEX_PREFIX.length());
         final byte[] digest = k.digest();
         final String hash = FastHex.encodeToString(digest);
@@ -148,7 +148,7 @@ public final class Address {
     }
 
     @SuppressWarnings("deprecation")
-    private static String toLowercase(String str) {
+    private static String toLowercaseAscii(String str) {
         final int len = str.length();
         final byte[] ascii = new byte[len];
         for (int i = 0; i < len; i++) {
