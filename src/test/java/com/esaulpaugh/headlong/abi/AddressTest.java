@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -110,16 +111,22 @@ public class AddressTest {
         assertThrown(IllegalArgumentException.class, "invalid bit length: 161", () -> Address.toChecksumAddress(tooBig));
     }
 
+    private static String generateAddressString(Random r) {
+        byte[] _20 = new byte[TypeFactory.ADDRESS_BIT_LEN / Byte.SIZE];
+        r.nextBytes(_20);
+        return Address.toChecksumAddress(Address.HEX_PREFIX + Strings.encode(_20));
+    }
+
     @Test
-    public void testStringAddrs() throws Throwable {
+    public void testStringAddrs() {
         testStringAddr(Address.toChecksumAddress(BigInteger.ZERO));
         testStringAddr(Address.toChecksumAddress(BigInteger.ONE));
         testStringAddr(Address.toChecksumAddress(BigInteger.TEN));
         testStringAddr(Address.toChecksumAddress(BigInteger.valueOf(2L)));
 
         final Random r = TestUtils.seededRandom();
-        testStringAddr(MonteCarloTestCase.generateAddressString(r));
-        testStringAddr(MonteCarloTestCase.generateAddressString(r));
+        testStringAddr(generateAddressString(r));
+        testStringAddr(generateAddressString(r));
 
         BigInteger _FFff = Address.wrap("0x000000000000000000000000000000000000FFff").value();
         assertEquals(BigInteger.valueOf(65535L), _FFff);
