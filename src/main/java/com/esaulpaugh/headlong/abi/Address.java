@@ -23,10 +23,9 @@ import java.nio.ByteBuffer;
 
 public final class Address {
 
-    public static final String HEX_PREFIX = "0x";
+    private static final String HEX_PREFIX = "0x";
     private static final int PREFIX_LEN = 2;
     private static final int ADDRESS_HEX_CHARS = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
-    public static final int ADDRESS_STRING_LEN = PREFIX_LEN + ADDRESS_HEX_CHARS;
     private static final int HEX_RADIX = 16;
 
     private final BigInteger value;
@@ -90,10 +89,14 @@ public final class Address {
      */
     @SuppressWarnings("deprecation")
     public static String toChecksumAddress(final String address) {
-        if(address.length() != ADDRESS_STRING_LEN) {
-            throw new IllegalArgumentException("expected address length " + ADDRESS_STRING_LEN + "; actual is " + address.length());
+        final int addressLen = PREFIX_LEN + ADDRESS_HEX_CHARS;
+        if(address.charAt(0) != '0' || address.charAt(1) != 'x') {
+            throw new IllegalArgumentException("missing 0x prefix");
         }
-        final byte[] ret = new byte[ADDRESS_STRING_LEN];
+        if(address.length() != addressLen) {
+            throw new IllegalArgumentException("expected address length " + addressLen + "; actual is " + address.length());
+        }
+        final byte[] ret = new byte[addressLen];
         ret[0] = '0';
         ret[1] = 'x';
         final byte[] hash = lowercaseAndHash(address, ret);

@@ -114,7 +114,7 @@ public class AddressTest {
     private static String generateAddressString(Random r) {
         byte[] _20 = new byte[TypeFactory.ADDRESS_BIT_LEN / Byte.SIZE];
         r.nextBytes(_20);
-        return Address.toChecksumAddress(Address.HEX_PREFIX + Strings.encode(_20));
+        return Address.toChecksumAddress("0x" + Strings.encode(_20));
     }
 
     @Test
@@ -204,11 +204,11 @@ public class AddressTest {
                 () -> Address.wrap("0x0000000000000000000082095cafebabecafeba+")
         );
         assertThrown(IllegalArgumentException.class,
-                "expected address length 42; actual is 5",
+                "missing 0x prefix",
                 () -> Address.wrap("aaaaa")
         );
         assertThrown(IllegalArgumentException.class,
-                "expected address length 42; actual is 40",
+                "missing 0x prefix",
                 () -> Address.wrap("5cafebabecafebabe7570ad8ac11f8d812ee0606")
         );
         assertThrown(IllegalArgumentException.class,
@@ -219,11 +219,5 @@ public class AddressTest {
                 "expected address length 42; actual is 43",
                 () -> Address.wrap("0xa83aaef1b5c928162005cafebabecafebabecb0a0")
         );
-    }
-
-    @Test
-    public void testConstants() {
-        assertEquals("0x", Address.HEX_PREFIX);
-        assertEquals(42, Address.ADDRESS_STRING_LEN);
     }
 }
