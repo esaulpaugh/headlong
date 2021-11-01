@@ -19,6 +19,7 @@ import com.esaulpaugh.headlong.util.FastHex;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public final class Address {
@@ -103,16 +104,15 @@ public final class Address {
         final String lowercaseAddr = toLowercaseAscii(address);
         final Keccak keccak256 = new Keccak(256);
         keccak256.update(lowercaseAddr.getBytes(StandardCharsets.US_ASCII), HEX_PREFIX.length(), ADDRESS_STRING_LEN - HEX_PREFIX.length());
-        final byte[] digest = keccak256.digest();
-        final String hash = FastHex.encodeToString(digest);
-        final byte[] ret = new byte[] {'0', 'x',
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        for (int i = HEX_PREFIX.length(); i < ret.length; i++) {
+        final ByteBuffer digest = ByteBuffer.wrap(new byte[33], 1, 32);
+        keccak256.digest(digest);
+        final String hash = FastHex.encodeToString(digest.array());
+        final byte[] ret = new byte[Address.ADDRESS_STRING_LEN];
+        ret[0] = '0';
+        ret[1] = 'x';
+        for (int i = 2; i < ret.length; i++) {
             int a = lowercaseAddr.charAt(i);
-            ret[i] = (byte) (Integer.parseInt(String.valueOf(hash.charAt(i - HEX_PREFIX.length())), HEX_RADIX) >= 8
-                    ? Character.toUpperCase(a)
-                    : a);
+            ret[i] = (byte) (isHigh(hash.charAt(i)) ? Character.toUpperCase(a) : a);
         }
         return new String(ret, 0, 0, ret.length);
     }
@@ -125,5 +125,12 @@ public final class Address {
             ascii[i] = (byte) Character.toLowerCase((int) str.charAt(i));
         }
         return new String(ascii, 0, 0, ascii.length);
+    }
+
+    private static boolean isHigh(int c) {
+        switch (c) {
+        case '8':case '9':case 'a':case 'b':case 'c':case 'd':case 'e':case 'f': return true;
+        default: return false;
+        }
     }
 }
