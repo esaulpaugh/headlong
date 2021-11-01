@@ -70,7 +70,7 @@ public final class Address {
         throw new IllegalArgumentException("invalid checksum");
     }
 
-    public static String toChecksumAddress(final BigInteger address) { // 1580531
+    public static String toChecksumAddress(final BigInteger address) {
         final String minimalHex = address.toString(HEX_RADIX);
         final int start = ADDRESS_LEN_CHARS - minimalHex.length();
         if(start < PREFIX_LEN) {
