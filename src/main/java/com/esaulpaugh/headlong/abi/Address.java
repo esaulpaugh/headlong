@@ -101,9 +101,12 @@ public final class Address {
     @SuppressWarnings("deprecation")
     public static String toChecksumAddress(final String address) {
         checkRawAddress(address);
-        final String lowercaseAddr = toLowercaseAscii(address);
+        final byte[] ascii = new byte[Address.ADDRESS_STRING_LEN];
+        for (int i = 0; i < ascii.length; i++) {
+            ascii[i] = (byte) Character.toLowerCase((int) address.charAt(i));
+        }
         final Keccak keccak256 = new Keccak(256);
-        keccak256.update(lowercaseAddr.getBytes(StandardCharsets.US_ASCII), HEX_PREFIX.length(), ADDRESS_STRING_LEN - HEX_PREFIX.length());
+        keccak256.update(ascii, HEX_PREFIX.length(), ADDRESS_STRING_LEN - HEX_PREFIX.length());
         final ByteBuffer digest = ByteBuffer.wrap(new byte[33], 1, 32);
         keccak256.digest(digest);
         final String hash = FastHex.encodeToString(digest.array());
@@ -111,20 +114,10 @@ public final class Address {
         ret[0] = '0';
         ret[1] = 'x';
         for (int i = 2; i < ret.length; i++) {
-            int a = lowercaseAddr.charAt(i);
+            int a = ascii[i];
             ret[i] = (byte) (isHigh(hash.charAt(i)) ? Character.toUpperCase(a) : a);
         }
         return new String(ret, 0, 0, ret.length);
-    }
-
-    @SuppressWarnings("deprecation")
-    private static String toLowercaseAscii(String str) {
-        final int len = str.length();
-        final byte[] ascii = new byte[len];
-        for (int i = 0; i < len; i++) {
-            ascii[i] = (byte) Character.toLowerCase((int) str.charAt(i));
-        }
-        return new String(ascii, 0, 0, ascii.length);
     }
 
     private static boolean isHigh(int c) {
