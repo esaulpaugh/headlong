@@ -20,12 +20,13 @@ import com.joemelsha.crypto.hash.Keccak;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public final class Address {
 
-    private static final String HEX_PREFIX = "0x";
     private static final int PREFIX_LEN = 2;
     private static final int ADDRESS_HEX_CHARS = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
+    private static final int ADDRESS_LEN_CHARS = PREFIX_LEN + ADDRESS_HEX_CHARS;
     private static final int HEX_RADIX = 16;
 
     private final BigInteger value;
@@ -69,17 +70,18 @@ public final class Address {
         throw new IllegalArgumentException("invalid checksum");
     }
 
-    public static String toChecksumAddress(final BigInteger address) {
+    public static String toChecksumAddress(final BigInteger address) { // 1580531
         final String minimalHex = address.toString(HEX_RADIX);
-        final int leftPad = ADDRESS_HEX_CHARS - minimalHex.length();
-        if(leftPad < 0) {
+        final int start = ADDRESS_LEN_CHARS - minimalHex.length();
+        if(start < PREFIX_LEN) {
             throw new IllegalArgumentException("invalid bit length: " + address.bitLength());
         }
-        final StringBuilder rawAddress = new StringBuilder(HEX_PREFIX);
-        for (int i = 0; i < leftPad; i++) {
-            rawAddress.append('0');
-        }
-        return toChecksumAddress(rawAddress.append(minimalHex).toString());
+        final byte[] addressBytes = "0x0000000000000000000000000000000000000000".getBytes(StandardCharsets.US_ASCII);
+        int i = start;
+        do {
+            addressBytes[i] = (byte) minimalHex.charAt(i - start);
+        } while (++i < addressBytes.length);
+        return doChecksum(addressBytes);
     }
 
     /**
@@ -87,40 +89,41 @@ public final class Address {
      * @param address   the hexadecimal Ethereum address
      * @return  the same address with the correct EIP-55 checksum casing
      */
-    @SuppressWarnings("deprecation")
     public static String toChecksumAddress(final String address) {
-        final int addressLen = PREFIX_LEN + ADDRESS_HEX_CHARS;
         if(address.charAt(0) != '0' || address.charAt(1) != 'x') {
             throw new IllegalArgumentException("missing 0x prefix");
         }
-        if(address.length() != addressLen) {
-            throw new IllegalArgumentException("expected address length " + addressLen + "; actual is " + address.length());
+        if(address.length() != ADDRESS_LEN_CHARS) {
+            throw new IllegalArgumentException("expected address length " + ADDRESS_LEN_CHARS + "; actual is " + address.length());
         }
-        final byte[] ret = new byte[addressLen];
-        ret[0] = '0';
-        ret[1] = 'x';
-        final byte[] hash = lowercaseAndHash(address, ret);
-        for (int i = PREFIX_LEN; i < ret.length; i++) {
-            final int c = ret[i];
-            switch (hash[i]) {
-            case'8':case'9':case'a':case'b':case'c':case'd':case'e':case'f':
-                ret[i] = (byte) Character.toUpperCase(c);
-            }
-        }
-        return new String(ret, 0, 0, ret.length);
+        final byte[] addressBytes = "0x0000000000000000000000000000000000000000".getBytes(StandardCharsets.US_ASCII);
+        lowercaseHex(address, addressBytes);
+        return doChecksum(addressBytes);
     }
 
-    private static byte[] lowercaseAndHash(final String address, byte[] out) {
-        for (int i = PREFIX_LEN; i < out.length; i++) {
-            out[i] = (byte) getLowercaseHex(address, i);
-        }
+    @SuppressWarnings("deprecation")
+    private static String doChecksum(byte[] addressBytes) {
         final Keccak keccak256 = new Keccak(256);
-        keccak256.update(out, PREFIX_LEN, ADDRESS_HEX_CHARS);
+        keccak256.update(addressBytes, PREFIX_LEN, ADDRESS_HEX_CHARS);
         final int offset = PREFIX_LEN / FastHex.CHARS_PER_BYTE; // offset by one byte so the indices of the hex-encoded hash and the address ascii line up
         final ByteBuffer digest = ByteBuffer.wrap(new byte[offset + 256 / Byte.SIZE], offset, 32);
         keccak256.digest(digest);
         final byte[] digestBytes = digest.array();
-        return FastHex.encodeToBytes(digestBytes, 0, digestBytes.length);
+        final byte[] hash = FastHex.encodeToBytes(digestBytes, 0, digestBytes.length);
+        for (int i = PREFIX_LEN; i < addressBytes.length; i++) {
+            final int c = addressBytes[i];
+            switch (hash[i]) {
+                case'8':case'9':case'a':case'b':case'c':case'd':case'e':case'f':
+                    addressBytes[i] = (byte) Character.toUpperCase(c);
+            }
+        }
+        return new String(addressBytes, 0, 0, addressBytes.length);
+    }
+
+    private static void lowercaseHex(final String address, byte[] out) {
+        for (int i = PREFIX_LEN; i < out.length; i++) {
+            out[i] = (byte) getLowercaseHex(address, i);
+        }
     }
 
     private static int getLowercaseHex(String address, int i) {
