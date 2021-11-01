@@ -51,6 +51,7 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MonteCarloTestCase implements Serializable {
 
@@ -254,20 +255,23 @@ public class MonteCarloTestCase implements Serializable {
         if(tt.canonicalType.contains("int[")) {
             throw new AssertionError("failed canonicalization!");
         }
+        final ByteBuffer bb = tt.encodePacked(args);
         try {
-            ByteBuffer bb = tt.encodePacked(args);
             Tuple decoded = tt.decodePacked(bb.array());
             if (!decoded.equals(args)) {
                 throw new RuntimeException("not equal: " + tt.canonicalType);
             }
         } catch (IllegalArgumentException iae) {
-            String msg = iae.getMessage();
-            if(!"multiple dynamic elements".equals(msg)
-                    && !msg.endsWith("array of dynamic elements")
-                    && !"can't decode dynamic number of zero-length elements".equals(msg)
-                    && !msg.startsWith("illegal boolean value: ")) {
+            final String msg = iae.getMessage();
+            if(msg.contains("multiple dynamic elements: ")) {
+                final int parsed = Integer.parseInt(msg.substring(msg.lastIndexOf(' ') + 1));
+                assertTrue(parsed > 1 && parsed == PackedDecoder.countDynamicsTupleType(tt));
+            } else if(!msg.endsWith("array of dynamic elements")
+                    && !"can't decode dynamic number of zero-length elements".equals(msg)) {
                 throw new RuntimeException(tt.canonicalType + " " + msg, iae);
             }
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
         }
     }
 

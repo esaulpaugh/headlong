@@ -45,17 +45,18 @@ final class PackedDecoder {
     }
 
     static Tuple decode(TupleType tupleType, byte[] buffer, int from, int to) {
-        if (countDynamicsTupleType(tupleType) <= 1) {
+        final int count = countDynamicsTupleType(tupleType);
+        if (count <= 1) {
             final Tuple[] elements = new Tuple[1];
             decodeTuple(tupleType, buffer, from, to, elements, 0); // can also call decodeTupleStatic if numDynamic == 0
             final Tuple tuple = elements[0];
             tupleType.validate(tuple);
             return tuple;
         }
-        throw new IllegalArgumentException("multiple dynamic elements");
+        throw new IllegalArgumentException("multiple dynamic elements: " + count);
     }
 
-    private static int countDynamicsTupleType(TupleType tupleType) {
+    static int countDynamicsTupleType(TupleType tupleType) {
         int numDynamic = 0;
         for (ABIType<?> e : tupleType.elementTypes) {
             numDynamic += !e.dynamic
