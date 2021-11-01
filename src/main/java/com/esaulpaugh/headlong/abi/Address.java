@@ -115,7 +115,7 @@ public final class Address {
             out[i] = (byte) Character.toLowerCase(address.charAt(i));
         }
         final Keccak keccak256 = new Keccak(256);
-        keccak256.update(out, address.startsWith(HEX_PREFIX) ? 2 : 0, ADDRESS_HEX_CHARS);
+        keccak256.update(out, PREFIX_LEN, ADDRESS_HEX_CHARS);
         final int offset = PREFIX_LEN / FastHex.CHARS_PER_BYTE; // offset by one byte so the indices of the hex-encoded hash and the address ascii line up
         final ByteBuffer digest = ByteBuffer.wrap(new byte[offset + 256 / Byte.SIZE], offset, 32);
         keccak256.digest(digest);
