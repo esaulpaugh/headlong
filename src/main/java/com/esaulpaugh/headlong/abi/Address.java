@@ -106,7 +106,7 @@ public final class Address {
     }
 
     @SuppressWarnings("deprecation")
-    private static String doChecksum(byte[] addressBytes) {
+    private static String doChecksum(final byte[] addressBytes) {
         final Keccak keccak256 = new Keccak(256);
         keccak256.update(addressBytes, PREFIX_LEN, ADDRESS_HEX_CHARS);
         final int offset = PREFIX_LEN / FastHex.CHARS_PER_BYTE; // offset by one byte so the indices of the hex-encoded hash and the address ascii line up
@@ -122,7 +122,7 @@ public final class Address {
         return new String(addressBytes, 0, 0, addressBytes.length);
     }
 
-    private static void lowercaseHex(final String address, byte[] out) {
+    private static void lowercaseHex(String address, byte[] out) {
         for (int i = PREFIX_LEN; i < out.length; i++) {
             out[i] = (byte) getLowercaseHex(address, i);
         }
