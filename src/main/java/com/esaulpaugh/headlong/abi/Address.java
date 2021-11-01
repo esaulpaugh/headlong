@@ -102,9 +102,7 @@ public final class Address {
         final byte[] hash = lowercaseAndHash(address, ret);
         for (int i = PREFIX_LEN; i < ret.length; i++) {
             final int c = ret[i];
-            if(!isHex(c)) {
-                throw new IllegalArgumentException("illegal hex val @ " + i);
-            }
+            requireIsHex(c, i);
             ret[i] = (byte) (isHigh(hash[i]) ? Character.toUpperCase(c) : c);
         }
         return new String(ret, 0, 0, ret.length);
@@ -123,13 +121,14 @@ public final class Address {
         return FastHex.encodeToBytes(digestBytes, 0, digestBytes.length);
     }
 
-    private static boolean isHex(int c) {
+    private static void requireIsHex(int c, int idx) {
         switch (c) {
         case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
         case 'A':case 'B':case 'C':case 'D':case 'E':case 'F':
-        case 'a':case 'b':case 'c':case 'd':case 'e':case 'f': return true;
-        default: return false;
+        case 'a':case 'b':case 'c':case 'd':case 'e':case 'f': return;
+        default:
         }
+        throw new IllegalArgumentException("illegal hex val @ " + idx);
     }
 
     private static boolean isHigh(int c) {
