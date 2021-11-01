@@ -270,8 +270,6 @@ public class MonteCarloTestCase implements Serializable {
                     && !"can't decode dynamic number of zero-length elements".equals(msg)) {
                 throw new RuntimeException(tt.canonicalType + " " + msg, iae);
             }
-        } catch (Throwable t) {
-            throw new RuntimeException(t);
         }
     }
 
