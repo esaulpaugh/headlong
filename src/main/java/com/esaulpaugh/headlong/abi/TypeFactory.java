@@ -125,8 +125,6 @@ public final class TypeFactory {
             if(baseType != null || (baseType = resolveBaseType(rawType)) != null) {
                 return baseType;
             }
-        } catch (ClassNotFoundException cnfe) {
-            throw new AssertionError(cnfe);
         } catch (StringIndexOutOfBoundsException ignored) { // e.g. type equals "" or "82]" or "[]" or "[1]"
             /* fall through */
         }

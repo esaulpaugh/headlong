@@ -77,7 +77,7 @@ public abstract class ABIType<J> {
         return this;
     }
 
-    abstract Class<?> arrayClass() throws ClassNotFoundException;
+    abstract Class<?> arrayClass();
 
     /**
      * Returns an integer code specific to this instance's class, which is a subclass of {@link ABIType}.
