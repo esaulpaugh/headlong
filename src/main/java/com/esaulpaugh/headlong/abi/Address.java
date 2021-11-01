@@ -102,7 +102,6 @@ public final class Address {
         final byte[] hash = lowercaseAndHash(address, ret);
         for (int i = PREFIX_LEN; i < ret.length; i++) {
             final int c = ret[i];
-            checkIsHex(c, i);
             switch (hash[i]) {
             case'8':case'9':case'a':case'b':case'c':case'd':case'e':case'f':
                 ret[i] = (byte) Character.toUpperCase(c);
@@ -113,7 +112,7 @@ public final class Address {
 
     private static byte[] lowercaseAndHash(final String address, byte[] out) {
         for (int i = PREFIX_LEN; i < out.length; i++) {
-            out[i] = (byte) Character.toLowerCase(address.charAt(i));
+            out[i] = getLowercaseHexByte(address, i);
         }
         final Keccak keccak256 = new Keccak(256);
         keccak256.update(out, PREFIX_LEN, ADDRESS_HEX_CHARS);
@@ -124,12 +123,13 @@ public final class Address {
         return FastHex.encodeToBytes(digestBytes, 0, digestBytes.length);
     }
 
-    private static void checkIsHex(int c, int idx) {
+    private static byte getLowercaseHexByte(String address, int i) {
+        final int c = address.charAt(i);
         switch (c) {
         case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
-        case 'A':case 'B':case 'C':case 'D':case 'E':case 'F':
-        case 'a':case 'b':case 'c':case 'd':case 'e':case 'f': return;
-        default: throw new IllegalArgumentException("illegal hex val @ " + idx);
+        case 'a':case 'b':case 'c':case 'd':case 'e':case 'f': return (byte) c;
+        case 'A':case 'B':case 'C':case 'D':case 'E':case 'F': return (byte) Character.toLowerCase(c);
+        default: throw new IllegalArgumentException("illegal hex val @ " + i);
         }
     }
 }
