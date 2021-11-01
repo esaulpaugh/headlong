@@ -22,6 +22,10 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Provides type safety by disambiguating address arguments from {@link String} and {@link BigInteger} while imposing
+ *  certain format requirements such as <a href="https://eips.ethereum.org/EIPS/eip-55">EIP-55: Mixed-case checksum address encoding</a>.
+ */
 public final class Address {
 
     private static final int PREFIX_LEN = 2;
@@ -112,8 +116,7 @@ public final class Address {
         for (int i = PREFIX_LEN; i < addressBytes.length; i++) {
             final int c = addressBytes[i];
             switch (hash[i]) {
-                case'8':case'9':case'a':case'b':case'c':case'd':case'e':case'f':
-                    addressBytes[i] = (byte) Character.toUpperCase(c);
+            case'8':case'9':case'a':case'b':case'c':case'd':case'e':case'f': addressBytes[i] = (byte) Character.toUpperCase(c);
             }
         }
         return new String(addressBytes, 0, 0, addressBytes.length);

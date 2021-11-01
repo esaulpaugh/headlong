@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import java.nio.ByteBuffer;
 
+/** The {@link ABIType} for {@link Address}es. Corresponds to the "address" type. */
 public final class AddressType extends UnitType<Address> {
 
     static final BigIntegerType ADDRESS_INNER = new BigIntegerType("ADDRESS_INNER", TypeFactory.ADDRESS_BIT_LEN, true);
