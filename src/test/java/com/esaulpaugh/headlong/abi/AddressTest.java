@@ -204,11 +204,11 @@ public class AddressTest {
                 () -> Address.wrap("0x0000000000000000000082095cafebabecafeba+")
         );
         assertThrown(IllegalArgumentException.class,
-                "expected prefix 0x not found",
+                "expected address length 42; actual is 5",
                 () -> Address.wrap("aaaaa")
         );
         assertThrown(IllegalArgumentException.class,
-                "expected prefix 0x not found",
+                "expected address length 42; actual is 40",
                 () -> Address.wrap("5cafebabecafebabe7570ad8ac11f8d812ee0606")
         );
         assertThrown(IllegalArgumentException.class,

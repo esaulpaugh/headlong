@@ -20,14 +20,14 @@ import com.joemelsha.crypto.hash.Keccak;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
 public final class Address {
 
-    private static final int HEX_RADIX = 16;
-    private static final int ADDRESS_HEX_CHARS = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
     public static final String HEX_PREFIX = "0x";
-    public static final int ADDRESS_STRING_LEN = HEX_PREFIX.length() + ADDRESS_HEX_CHARS;
+    private static final int PREFIX_LEN = 2;
+    private static final int ADDRESS_HEX_CHARS = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
+    public static final int ADDRESS_STRING_LEN = PREFIX_LEN + ADDRESS_HEX_CHARS;
+    private static final int HEX_RADIX = 16;
 
     private final BigInteger value;
 
@@ -60,7 +60,7 @@ public final class Address {
 
     public static Address wrap(final String checksumAddress) {
         validateChecksumAddress(checksumAddress);
-        return new Address(new BigInteger(checksumAddress.substring(HEX_PREFIX.length()), HEX_RADIX));
+        return new Address(new BigInteger(checksumAddress.substring(PREFIX_LEN), HEX_RADIX));
     }
 
     public static void validateChecksumAddress(final String checksumAddress) {
@@ -83,16 +83,6 @@ public final class Address {
         return toChecksumAddress(rawAddress.append(minimalHex).toString());
     }
 
-    private static void checkRawAddress(final String address) {
-        if(!address.startsWith(HEX_PREFIX)) {
-            throw new IllegalArgumentException("expected prefix 0x not found");
-        }
-        if(address.length() != ADDRESS_STRING_LEN) {
-            throw new IllegalArgumentException("expected address length " + ADDRESS_STRING_LEN + "; actual is " + address.length());
-        }
-        FastHex.decode(address, HEX_PREFIX.length(), address.length() - HEX_PREFIX.length()); // check for non-hex chars
-    }
-
     /**
      * @see <a href="https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md#implementation">EIP-55</a>
      * @param address   the hexadecimal Ethereum address
@@ -100,24 +90,43 @@ public final class Address {
      */
     @SuppressWarnings("deprecation")
     public static String toChecksumAddress(final String address) {
-        checkRawAddress(address);
-        final byte[] ascii = new byte[Address.ADDRESS_STRING_LEN];
-        for (int i = 0; i < ascii.length; i++) {
-            ascii[i] = (byte) Character.toLowerCase((int) address.charAt(i));
+        if(address.length() != ADDRESS_STRING_LEN) {
+            throw new IllegalArgumentException("expected address length " + ADDRESS_STRING_LEN + "; actual is " + address.length());
         }
-        final Keccak keccak256 = new Keccak(256);
-        keccak256.update(ascii, HEX_PREFIX.length(), ADDRESS_STRING_LEN - HEX_PREFIX.length());
-        final ByteBuffer digest = ByteBuffer.wrap(new byte[33], 1, 32);
-        keccak256.digest(digest);
-        final String hash = FastHex.encodeToString(digest.array());
-        final byte[] ret = new byte[Address.ADDRESS_STRING_LEN];
+        final byte[] ret = new byte[ADDRESS_STRING_LEN];
         ret[0] = '0';
         ret[1] = 'x';
-        for (int i = 2; i < ret.length; i++) {
-            int a = ascii[i];
-            ret[i] = (byte) (isHigh(hash.charAt(i)) ? Character.toUpperCase(a) : a);
+        final byte[] hash = lowercaseAndHash(address, ret);
+        for (int i = PREFIX_LEN; i < ret.length; i++) {
+            final int c = ret[i];
+            if(!isHex(c)) {
+                throw new IllegalArgumentException("illegal hex val @ " + i);
+            }
+            ret[i] = (byte) (isHigh(hash[i]) ? Character.toUpperCase(c) : c);
         }
         return new String(ret, 0, 0, ret.length);
+    }
+
+    private static byte[] lowercaseAndHash(final String address, byte[] out) {
+        for (int i = PREFIX_LEN; i < out.length; i++) {
+            out[i] = (byte) Character.toLowerCase(address.charAt(i));
+        }
+        final Keccak keccak256 = new Keccak(256);
+        keccak256.update(out, address.startsWith(HEX_PREFIX) ? 2 : 0, ADDRESS_HEX_CHARS);
+        final int offset = PREFIX_LEN / FastHex.CHARS_PER_BYTE; // offset by one byte so the indices of the hex-encoded hash and the address ascii line up
+        final ByteBuffer digest = ByteBuffer.wrap(new byte[offset + 256 / Byte.SIZE], offset, 32);
+        keccak256.digest(digest);
+        final byte[] digestBytes = digest.array();
+        return FastHex.encodeToBytes(digestBytes, 0, digestBytes.length);
+    }
+
+    private static boolean isHex(int c) {
+        switch (c) {
+        case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
+        case 'A':case 'B':case 'C':case 'D':case 'E':case 'F':
+        case 'a':case 'b':case 'c':case 'd':case 'e':case 'f': return true;
+        default: return false;
+        }
     }
 
     private static boolean isHigh(int c) {
