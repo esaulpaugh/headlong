@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
+import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import com.joemelsha.crypto.hash.Keccak;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -105,11 +107,15 @@ public class EqualsTest {
 
 //                       10000000000000000000000000000000000000000
 //                        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        String uint160 = "ff00ee01dd02cc03cafebabe9906880777086609";
-        Address addr = new Address(new BigInteger(uint160, 16));
-        assertEquals(160, uint160.length() * 4);
-        assertEquals(uint160, addr.value().toString(16));
-        Object[] argsIn = new Object[] {
+        final String addressHex = "ff00ee01dd02cc03cafebabe9906880777086609";
+        assertEquals(TypeFactory.ADDRESS_BIT_LEN, addressHex.length() * FastHex.BITS_PER_CHAR);
+        final String checksumAddress = Address.toChecksumAddress("0x" + addressHex);
+        assertEquals("0xFF00eE01dd02cC03cafEBAbe9906880777086609", checksumAddress);
+        assertEquals(addressHex, checksumAddress.replace("0x", "").toLowerCase(Locale.ENGLISH));
+        final Address addr = Address.wrap(checksumAddress);
+        assertEquals(addressHex, addr.value().toString(16));
+
+        final Object[] argsIn = new Object[] {
                 new byte[][][][] { new byte[][][] { new byte[][] { func, func } } },
                 func,
                 new String[0][],
@@ -124,11 +130,11 @@ public class EqualsTest {
                 new Tuple(BigInteger.TEN)
         };
 
-        ByteBuffer abi = f.encodeCallWithArgs(argsIn);
+        final ByteBuffer abi = f.encodeCallWithArgs(argsIn);
 
-        assertTrue(Function.formatCall(abi.array()).contains("18       000000000000000000000000" + uint160));
+        assertTrue(Function.formatCall(abi.array()).contains("18       000000000000000000000000" + addressHex));
 
-        Tuple tupleOut = f.decodeCall((ByteBuffer) abi.flip());
+        final Tuple tupleOut = f.decodeCall((ByteBuffer) abi.flip());
 
         assertTrue(Arrays.deepEquals(argsIn, tupleOut.elements));
     }
