@@ -51,6 +51,10 @@ public final class FastHex {
         return new String(enc, 0, 0, enc.length); // faster on Java 9+ (compact strings on by default)
     }
 
+    public static byte[] encodeToBytes(byte... buffer) {
+        return encodeToBytes(buffer, 0, buffer.length);
+    }
+
     public static byte[] encodeToBytes(byte[] buffer, int offset, int len) {
         final int end = offset + len;
         byte[] bytes = new byte[len * CHARS_PER_BYTE];

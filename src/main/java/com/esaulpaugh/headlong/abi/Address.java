@@ -108,8 +108,7 @@ public final class Address {
         final int offset = PREFIX_LEN / FastHex.CHARS_PER_BYTE; // offset by one byte so the indices of the hex-encoded hash and the address ascii line up
         final ByteBuffer digest = ByteBuffer.wrap(new byte[offset + 256 / Byte.SIZE], offset, 32);
         keccak256.digest(digest);
-        final byte[] digestBytes = digest.array();
-        final byte[] hash = FastHex.encodeToBytes(digestBytes, 0, digestBytes.length);
+        final byte[] hash = FastHex.encodeToBytes(digest.array());
         for (int i = PREFIX_LEN; i < addressBytes.length; i++) {
             final int c = addressBytes[i];
             switch (hash[i]) {
