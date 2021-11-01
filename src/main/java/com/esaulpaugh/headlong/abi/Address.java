@@ -101,7 +101,9 @@ public final class Address {
             throw new IllegalArgumentException("expected address length " + ADDRESS_LEN_CHARS + "; actual is " + address.length());
         }
         final byte[] addressBytes = "0x0000000000000000000000000000000000000000".getBytes(StandardCharsets.US_ASCII);
-        lowercaseHex(address, addressBytes);
+        for (int i = PREFIX_LEN; i < addressBytes.length; i++) {
+            addressBytes[i] = (byte) getLowercaseHex(address, i);
+        }
         return doChecksum(addressBytes);
     }
 
@@ -122,13 +124,7 @@ public final class Address {
         return new String(addressBytes, 0, 0, addressBytes.length);
     }
 
-    private static void lowercaseHex(String address, byte[] out) {
-        for (int i = PREFIX_LEN; i < out.length; i++) {
-            out[i] = (byte) getLowercaseHex(address, i);
-        }
-    }
-
-    private static int getLowercaseHex(String address, int i) {
+    private static int getLowercaseHex(final String address, final int i) {
         final int c = address.charAt(i);
         switch (c) {
         case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
