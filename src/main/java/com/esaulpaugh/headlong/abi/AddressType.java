@@ -26,7 +26,7 @@ public final class AddressType extends UnitType<Address> {
     }
 
     @Override
-    Class<?> arrayClass() throws ClassNotFoundException {
+    Class<?> arrayClass() {
         return Address[].class;
     }
 
