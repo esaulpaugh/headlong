@@ -195,7 +195,7 @@ public abstract class RLPItem {
     /**
      * Returns the {@link String}, of the given encoding, representing this item.
      *
-     * @param encoding one of { {@link Strings#BASE_64_URL_SAFE}, {@link Strings#UTF_8}, {@link Strings#HEX} }.
+     * @param encoding one of { {@link Strings#HEX}, {@link Strings#UTF_8}, {@link Strings#BASE_64_URL_SAFE}, {@link Strings#ASCII} }.
      * @return  this item's payload (data) bytes, encoded to your liking
      */
     public final String asString(int encoding) {
