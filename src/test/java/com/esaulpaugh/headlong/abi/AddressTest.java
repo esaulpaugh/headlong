@@ -50,8 +50,7 @@ public class AddressTest {
     public void testGeneratedChecksums() {
         final Random r = TestUtils.seededRandom();
         String[] valid = new String[] {
-                new Address(BigInteger.valueOf(TestUtils.pickRandom(r, 8, true))).toString(),
-                new Address(BigInteger.valueOf(TestUtils.pickRandom(r, 8, true))).toString(),
+                new Address(BigInteger.valueOf(TestUtils.pickRandom(r, 1 + r.nextInt(Long.BYTES), true))).toString(),
                 MonteCarloTestCase.generateAddress(r).toString(),
                 MonteCarloTestCase.generateAddress(r).toString()
         };
@@ -72,7 +71,6 @@ public class AddressTest {
         final BigInteger valueB = Address.wrap(addr).value();
         assertEquals(valueA, valueB);
         assertTrue(valueA.bitLength() <= 160);
-        System.out.println(checksummed + " == " + addr);
     }
 
     @Test
