@@ -97,13 +97,16 @@ public class EqualsTest {
 
     @Test
     public void complexFunctionTest() {
-        Function f = new Function("(function[2][][],bytes24,string[0][0],address[],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))");
+        final String sig = "(function[2][][],bytes24,string[0][0],address[],uint72,(uint8),(int16)[2][][1],(int24)[],(int32)[],uint40,(int48)[],(uint))";
+        final Function f = new Function(sig);
+        final String canonical = f.getCanonicalSignature();
+        assertEquals(sig.replace("(uint)", "(uint256)"), canonical);
 
-        WrappedKeccak wk = new WrappedKeccak(256);
-        byte[] digest = wk.digest(Strings.decode(f.getCanonicalSignature(), Strings.UTF_8));
+        final WrappedKeccak wk = new WrappedKeccak(256);
+        final byte[] digest = wk.digest(Strings.decode(canonical, Strings.ASCII));
         assertArrayEquals(Arrays.copyOfRange(digest, 0, 4), f.selector());
 
-        byte[] func = TestUtils.randomBytes(24);
+        final byte[] func = TestUtils.randomBytes(24);
 
 //                       10000000000000000000000000000000000000000
 //                        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
