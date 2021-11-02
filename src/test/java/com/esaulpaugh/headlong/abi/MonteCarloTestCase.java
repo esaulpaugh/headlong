@@ -398,8 +398,6 @@ public class MonteCarloTestCase implements Serializable {
         return new BigDecimal(generateBigInteger(r, type), type.getScale());
     }
 
-//    private static final UnitType<?> ADDRESS_TYPE = TypeFactory.create("address");
-
     static Address generateAddress(Random r) {
 //        return Address.wrap(generateAddressString(r));
 //        return Address.wrap(Address.toChecksumAddress(generateBigInteger(r, ADDRESS_TYPE)));

@@ -43,34 +43,27 @@ public class AddressTest {
 
     @Test
     public void testVectorChecksums() {
-        testAddresses(VECTORS);
+        for(String vector : VECTORS) {
+            testAddress(vector);
+        }
     }
 
     @Test
     public void testGeneratedChecksums() {
         final Random r = TestUtils.seededRandom();
-        String[] valid = new String[] {
-                new Address(BigInteger.valueOf(TestUtils.pickRandom(r, 1 + r.nextInt(Long.BYTES), true))).toString(),
-                MonteCarloTestCase.generateAddress(r).toString(),
-                MonteCarloTestCase.generateAddress(r).toString()
-        };
-        testAddresses(valid);
+        testAddress(new Address(BigInteger.valueOf(TestUtils.pickRandom(r, 1 + r.nextInt(Long.BYTES), true))).toString());
+        testAddress(MonteCarloTestCase.generateAddress(r).toString());
+        testAddress(MonteCarloTestCase.generateAddress(r).toString());
     }
 
-    private static void testAddresses(String[] addresses) {
-        for(String addr : addresses) {
-            testAddress(addr);
-        }
-    }
-
-    private static void testAddress(String addr) {
-        final String checksummed = Address.toChecksumAddress(addr);
-        Address.validateChecksumAddress(checksummed);
-        assertEquals(checksummed.toLowerCase(Locale.ENGLISH), addr.toLowerCase(Locale.ENGLISH));
-        final BigInteger valueA = Address.wrap(checksummed).value();
-        final BigInteger valueB = Address.wrap(addr).value();
-        assertEquals(valueA, valueB);
-        assertTrue(valueA.bitLength() <= 160);
+    private static void testAddress(String addrStr) {
+        final String checksummedStr = Address.toChecksumAddress(addrStr);
+        Address.validateChecksumAddress(checksummedStr);
+        assertEquals(checksummedStr.toLowerCase(Locale.ENGLISH), addrStr.toLowerCase(Locale.ENGLISH));
+        final Address checksummed = Address.wrap(checksummedStr);
+        final BigInteger checksummedVal = checksummed.value();
+        assertEquals(checksummedVal, Address.wrap(addrStr).value());
+        assertTrue(checksummedVal.bitLength() <= 160);
     }
 
     @Test
@@ -89,31 +82,36 @@ public class AddressTest {
 
     @Test
     public void testStringAddrs() {
+        final Random r = TestUtils.seededRandom();
+
         testAddress(Address.toChecksumAddress(BigInteger.ZERO));
         testAddress(Address.toChecksumAddress(BigInteger.ONE));
         testAddress(Address.toChecksumAddress(BigInteger.TEN));
         testAddress(Address.toChecksumAddress(BigInteger.valueOf(2L)));
-
-        final Random r = TestUtils.seededRandom();
         testAddress(generateAddressString(r));
         testAddress(generateAddressString(r));
 
         BigInteger _FFff = Address.wrap("0x000000000000000000000000000000000000FFff").value();
         assertEquals(BigInteger.valueOf(65535L), _FFff);
 
+        BigInteger _10000 = Address.wrap("0x0000000000000000000000000000000000010000").value();
+        assertEquals(BigInteger.valueOf(65536L), _10000);
+
         BigInteger _8000 = Address.wrap("0x8000000000000000000000000000000000000000").value();
         assertTrue(_8000.signum() > 0);
 
         final BigIntegerType uint160Type = TypeFactory.create("uint160");
+        final BigInteger min = uint160Type.minValue();
+        final BigInteger max = uint160Type.maxValue();
 
         final BigInteger _0000 = Address.wrap("0x0000000000000000000000000000000000000000").value();
-        assertEquals(uint160Type.minValue(), _0000);
+        assertEquals(min, _0000);
 
         final BigInteger _FFfF = Address.wrap("0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF").value();
-        assertEquals(uint160Type.maxValue(), _FFfF);
+        assertEquals(max, _FFfF);
 
         final BigInteger _ffFf = Address.wrap("0xffFfffFFFffffFFFFfFFFfffFFFfffFfFFfFff0f").value();
-        assertEquals(uint160Type.maxValue().subtract(BigInteger.valueOf(240L)), _ffFf);
+        assertEquals(max.subtract(BigInteger.valueOf(240L)), _ffFf);
     }
 
     @Test
@@ -133,6 +131,18 @@ public class AddressTest {
             testBigIntAddressVal(val);
         }
 
+        final SecureRandom sr = new SecureRandom();
+        sr.setSeed(new SecureRandom().generateSeed(64));
+        sr.setSeed(sr.generateSeed(64));
+        testBigIntAddressVal(new BigInteger(TypeFactory.ADDRESS_BIT_LEN, sr));
+        testBigIntAddressVal(new BigInteger(TypeFactory.ADDRESS_BIT_LEN, sr));
+
+        BigInteger temp;
+        do {
+            temp = new BigInteger(161, sr);
+        } while (temp.bitLength() < 161);
+        final BigInteger tooBig = temp;
+        assertThrown(IllegalArgumentException.class, "invalid bit length: 161", () -> Address.toChecksumAddress(tooBig));
         assertThrown(IllegalArgumentException.class,
                 "invalid bit length: 161",
                 () -> Address.toChecksumAddress(new BigInteger("182095cafebabecafebabe00083ce15d74e191051", 16))
@@ -142,24 +152,11 @@ public class AddressTest {
                 () -> Address.toChecksumAddress(new BigInteger("82095cafebabecafebabe00083ce15d74e1910510", 16))
         );
 
-        final SecureRandom sr = new SecureRandom();
-        sr.setSeed(new SecureRandom().generateSeed(64));
-        sr.setSeed(sr.generateSeed(64));
-        for (int i = 0; i < 10; i++) {
-            testBigIntAddressVal(new BigInteger(TypeFactory.ADDRESS_BIT_LEN, sr));
-        }
-
         final Random r = new Random(sr.nextLong());
         for (int bitlen = 0; bitlen <= 160; bitlen++) {
             testBigIntAddressVal(new BigInteger(bitlen, r));
             testBigIntAddressVal(new BigInteger(bitlen, r));
         }
-        BigInteger temp;
-        do {
-            temp = new BigInteger(161, r);
-        } while (temp.bitLength() < 161);
-        final BigInteger tooBig = temp;
-        assertThrown(IllegalArgumentException.class, "invalid bit length: 161", () -> Address.toChecksumAddress(tooBig));
     }
 
     private static void testBigIntAddressVal(final BigInteger addrVal) {
@@ -176,9 +173,9 @@ public class AddressTest {
     }
 
     private static BigInteger computeValue1(final String checksumAddress) {
-        final int hexBytes = (checksumAddress.length() - 2) / FastHex.CHARS_PER_BYTE;
-        final byte[] bytes = new byte[1 + hexBytes];
-        System.arraycopy(FastHex.decode(checksumAddress, 2, checksumAddress.length() - 2), 0, bytes, 1, hexBytes);
+        final int numDataBytes = (checksumAddress.length() - 2) / FastHex.CHARS_PER_BYTE;
+        final byte[] bytes = new byte[1 + numDataBytes];
+        System.arraycopy(FastHex.decode(checksumAddress, 2, checksumAddress.length() - 2), 0, bytes, 1, numDataBytes);
         return new BigInteger(bytes);
     }
 
