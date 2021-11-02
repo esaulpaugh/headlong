@@ -94,11 +94,11 @@ public final class Address {
      * @return  the same address with the correct EIP-55 checksum casing
      */
     public static String toChecksumAddress(final String address) {
-        if(address.charAt(0) != '0' || address.charAt(1) != 'x') {
-            throw new IllegalArgumentException("missing 0x prefix");
-        }
         if(address.length() != ADDRESS_LEN_CHARS) {
             throw new IllegalArgumentException("expected address length " + ADDRESS_LEN_CHARS + "; actual is " + address.length());
+        }
+        if(address.charAt(0) != '0' || address.charAt(1) != 'x') {
+            throw new IllegalArgumentException("missing 0x prefix");
         }
         final byte[] addressBytes = "0x0000000000000000000000000000000000000000".getBytes(StandardCharsets.US_ASCII);
         for (int i = PREFIX_LEN; i < addressBytes.length; i++) {

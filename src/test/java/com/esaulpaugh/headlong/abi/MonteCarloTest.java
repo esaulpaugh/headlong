@@ -362,6 +362,7 @@ public class MonteCarloTest {
         Assertions.assertEquals("a0ea32de", fa.selectorHex());
 
         Assertions.assertEquals(fa.selectorHex(), fb.selectorHex());
+        Assertions.assertNotSame(fa, fb);
         Assertions.assertNotEquals(fa, fb);
     }
 

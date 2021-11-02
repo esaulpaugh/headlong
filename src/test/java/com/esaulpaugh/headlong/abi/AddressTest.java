@@ -237,7 +237,7 @@ public class AddressTest {
                 () -> Address.wrap("0x0000000000000000000082095cafebabecafeba+")
         );
         assertThrown(IllegalArgumentException.class,
-                "missing 0x prefix",
+                "expected address length 42; actual is 7",
                 () -> Address.wrap("0yaaaaa")
         );
         assertThrown(IllegalArgumentException.class,
@@ -252,5 +252,24 @@ public class AddressTest {
                 "expected address length 42; actual is 43",
                 () -> Address.wrap("0xa83aaef1b5c928162005cafebabecafebabecb0a0")
         );
+    }
+
+    @Test
+    public void testJunk() throws Throwable {
+        assertThrown(IllegalArgumentException.class, "expected address length 42; actual is 0", () -> Address.toChecksumAddress(""));
+        assertThrown(IllegalArgumentException.class, "expected address length 42; actual is 1", () -> Address.toChecksumAddress("\0"));
+        assertThrown(IllegalArgumentException.class, "expected address length 42; actual is 2", () -> Address.toChecksumAddress("0x"));
+        assertThrown(IllegalArgumentException.class,
+                "missing 0x prefix",
+                () -> Address.toChecksumAddress("\0x\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0")
+        );
+        assertThrown(IllegalArgumentException.class,
+                "illegal hex val @ 37",
+                () -> Address.toChecksumAddress("0x00000000000000000000000000000000000\u00090000")
+        );
+        BigInteger big = null;
+        assertThrown(NullPointerException.class, () -> Address.toChecksumAddress(big));
+        String s = null;
+        assertThrown(NullPointerException.class, () -> Address.toChecksumAddress(s));
     }
 }
