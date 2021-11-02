@@ -124,7 +124,7 @@ public class AddressTest {
                 BigInteger.ZERO,
                 BigInteger.ONE,
                 BigInteger.TEN,
-                BigInteger.valueOf(2L),
+                BigInteger.valueOf(256L),
                 Address.wrap("0x82095CAfeBaBECaFebaBe00083Ce15d74e191051").value(),
                 Address.wrap("0x4bEc173F8D9D3D90188777cAfeBabeCafebAbE99").value(),
                 Address.wrap("0x5cafEBaBEcafEBabE7570ad8AC11f8d812ee0606").value(),
@@ -171,34 +171,50 @@ public class AddressTest {
         final Address address = Address.wrap(checksumAddress);
         assertEquals(checksumAddress, address.toString());
         assertEquals(addrVal, address.value());
-        assertEquals(addrVal, computeValue(checksumAddress));
+        assertEquals(addrVal, computeValue1(checksumAddress));
         assertEquals(addrVal, computeValue2(checksumAddress));
-        assertEquals(addrVal, computeValue3(checksumAddress));
+//        assertEquals(addrVal, computeValue3(checksumAddress));
+//        assertEquals(addrVal, computeValue4(checksumAddress));
     }
 
-    private static BigInteger computeValue(String checksumAddress) {
+    private static BigInteger computeValue1(final String checksumAddress) {
         final int hexBytes = (checksumAddress.length() - 2) / FastHex.CHARS_PER_BYTE;
         final byte[] bytes = new byte[1 + hexBytes];
         System.arraycopy(FastHex.decode(checksumAddress, 2, checksumAddress.length() - 2), 0, bytes, 1, hexBytes);
         return new BigInteger(bytes);
     }
 
-    private static BigInteger computeValue2(String checksumAddress) {
+    private static BigInteger computeValue2(final String checksumAddress) {
         return new BigInteger(checksumAddress.substring(2), 16);
     }
 
-    private static BigInteger computeValue3(final String checksumAddress) {
-        BigInteger sum = BigInteger.ZERO;
-        int shiftAmt = 39 * FastHex.BITS_PER_CHAR;
-        for (int i = 2; i < 42; i++, shiftAmt -= FastHex.BITS_PER_CHAR) {
-            final String hex = String.valueOf(checksumAddress.charAt(i));
-            final BigInteger decimal = new BigInteger(hex, 16);
-            final BigInteger shifted = decimal.shiftLeft(shiftAmt); // (39 - i) * 4
-            sum = sum.add(shifted);
-//            System.out.println("i = " + i + ": 0x" + hex + " -> " + decimal + "; " + decimal + " << " + shiftAmt + " = " + shifted + "; sum = " + sum);
-        }
-        return sum;
-    }
+//    private static BigInteger computeValue3(final String checksumAddress) {
+//        BigInteger sum = BigInteger.ZERO;
+//        int shiftAmt = (42 - 2 - 1) * FastHex.BITS_PER_CHAR;
+//        for (int i = 2; i < 42; i++, shiftAmt -= FastHex.BITS_PER_CHAR) {
+//            final String hex = String.valueOf(checksumAddress.charAt(i));
+//            final BigInteger decimal = new BigInteger(hex, 16);
+//            final BigInteger shifted = decimal.shiftLeft(shiftAmt); // (39 - i) * 4
+//            sum = sum.add(shifted);
+////            System.out.println("i = " + i + ": 0x" + hex + " -> " + decimal + "; " + decimal + " << " + shiftAmt + " = " + shifted + "; sum = " + sum);
+//        }
+//        return sum;
+//    }
+//
+//    private static BigInteger computeValue4(final String checksumAddress) {
+//        BigInteger sum = BigInteger.ZERO;
+//        int shiftAmt = 42 / 2 - 2;
+//        for (int i = 2; i < 42; i+=2, shiftAmt--) {
+//            sum = sum.add(new BigInteger(zeroPad(Integer.parseInt(checksumAddress.substring(i, i+2), 16), shiftAmt)));
+//        }
+//        return sum;
+//    }
+//
+//    private static byte[] zeroPad(final int c, final int n) {
+//        byte[] bytes = new byte[2 + n];
+//        bytes[1] = (byte) c;
+//        return bytes;
+//    }
 
     @Test
     public void testStringAddrExceptions() throws Throwable {
