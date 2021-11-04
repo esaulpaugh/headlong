@@ -84,11 +84,11 @@ public final class KVP implements Comparable<KVP> {
     }
 
     public RLPString key() {
-        return RLP_STRICT.wrapString(k);
+        return RLP_STRICT.wrap(k);
     }
 
     public RLPString value() {
-        return RLP_STRICT.wrapString(v);
+        return RLP_STRICT.wrap(v);
     }
 
     void export(ByteBuffer bb) {

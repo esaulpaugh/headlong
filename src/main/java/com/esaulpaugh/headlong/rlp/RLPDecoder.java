@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.util.Integers;
+
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -22,11 +24,13 @@ import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_LONG;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_SHORT;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_SINGLE_BYTE;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_LONG;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_SHORT;
+import static com.esaulpaugh.headlong.rlp.RLPItem.exceedsContainer;
 
 /** Decodes RLP-formatted data. */
 public final class RLPDecoder {
@@ -94,39 +98,45 @@ public final class RLPDecoder {
      * @throws IllegalArgumentException  if the RLP list failed to decode
      */
     public Iterator<RLPItem> listIterator(byte[] buffer, int index) {
-        return wrapList(buffer, index).iterator(this);
+        RLPList list = wrap(buffer, index);
+        return list.iterator(this);
     }
-    
-    public RLPString wrapString(byte lengthOneRlp) {
-        return wrapString(new byte[] { lengthOneRlp }, 0);
-    }
-    
-    public RLPString wrapString(byte[] encoding) {
-        return wrapString(encoding, 0);
-    }
-    
-    public RLPString wrapString(byte[] buffer, int index) {
-        byte lead = buffer[index];
-        DataType type = DataType.type(lead);
-        switch (type.ordinal()) {
-        case ORDINAL_SINGLE_BYTE:
-        case ORDINAL_STRING_SHORT:
-        case ORDINAL_STRING_LONG: return new RLPString(lead, type, buffer, index, Integer.MAX_VALUE, lenient);
-        default: throw new IllegalArgumentException("item is not a string");
+
+    private RLPString newString(byte[] buffer, int index, int dataIndex, int dataLength, int containerEnd, boolean isShort) {
+        final long endIndex = dataIndex + dataLength;
+        checkNotExceedsContainer(index, endIndex, containerEnd);
+        if(isShort && !lenient && dataLength == 1 && DataType.isSingleByte(buffer[dataIndex])) {
+            throw new IllegalArgumentException("invalid rlp for single byte @ " + index);
         }
+        return new RLPString(buffer, index, dataIndex, dataLength, (int) endIndex);
     }
 
-    public RLPList wrapList(byte[] encoding) {
-        return wrapList(encoding, 0);
+    private RLPList newList(byte[] buffer, int index, int dataIndex, int dataLength, int containerEnd) {
+        final long endIndex = dataIndex + dataLength;
+        checkNotExceedsContainer(index, endIndex, containerEnd);
+        return new RLPList(buffer, index, dataIndex, dataLength, (int) endIndex);
     }
 
-    public RLPList wrapList(byte[] buffer, int index) {
-        byte lead = buffer[index];
-        DataType type = DataType.type(lead);
-        switch (type.ordinal()) {
-        case ORDINAL_LIST_SHORT:
-        case ORDINAL_LIST_LONG: return new RLPList(lead, type, buffer, index, Integer.MAX_VALUE, lenient);
-        default: throw new IllegalArgumentException("item is not a list");
+    @SuppressWarnings("unchecked")
+    private <T extends RLPItem> T newLongItem(final byte[] buffer, final int index, final int diff, final int containerEnd, final boolean isString) {
+        final int lengthIndex = index + 1;
+        final int dataIndex = lengthIndex + diff;
+        checkNotExceedsContainer(index, dataIndex, containerEnd);
+        final long dataLength = Integers.getLong(buffer, lengthIndex, diff, lenient);
+        if(dataLength < MIN_LONG_DATA_LEN) {
+            throw new IllegalArgumentException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + dataLength + " for element @ " + index);
+        }
+        final long endIndex = dataIndex + dataLength;
+        checkNotExceedsContainer(index, endIndex, containerEnd);
+        return (T) (isString
+                ? new RLPString(buffer, index, dataIndex, (int) dataLength, (int) endIndex)
+                : new RLPList(buffer, index, dataIndex, (int) dataLength, (int) endIndex)
+        );
+    }
+
+    private static void checkNotExceedsContainer(int index, long val, int end) {
+        if (val > end) {
+            throw exceedsContainer(index, val, end, true);
         }
     }
 
@@ -137,27 +147,33 @@ public final class RLPDecoder {
      * @return the item
      * @throws IllegalArgumentException if the byte fails to decode
      */
-    public RLPItem wrap(byte lengthOneRLP) {
+    public <T extends RLPItem> T wrap(byte lengthOneRLP) {
         return wrap(new byte[] { lengthOneRLP }, 0);
     }
 
-    public RLPItem wrap(byte[] encoding) {
+    public <T extends RLPItem> T wrap(byte[] encoding) {
         return wrap(encoding, 0);
     }
 
-    public RLPItem wrap(byte[] buffer, int index) {
-        return wrap(buffer, index, Integer.MAX_VALUE);
+    public <T extends RLPItem> T wrap(byte[] buffer, int index) {
+        return wrap(buffer, index, buffer.length);
     }
 
-    RLPItem wrap(byte[] buffer, int index, int containerEnd) {
+    @SuppressWarnings("unchecked")
+    <T extends RLPItem> T wrap(byte[] buffer, int index, int containerEnd) {
         byte lead = buffer[index];
         DataType type = DataType.type(lead);
         switch (type.ordinal()) {
         case ORDINAL_SINGLE_BYTE:
+            return (T) newString(buffer, index, index, 1, containerEnd, false);
         case ORDINAL_STRING_SHORT:
-        case ORDINAL_STRING_LONG: return new RLPString(lead, type, buffer, index, containerEnd, lenient);
+            return (T) newString(buffer, index, index + 1, lead - type.offset, containerEnd, true);
+        case ORDINAL_STRING_LONG:
+            return newLongItem(buffer, index, lead - type.offset, containerEnd, true);
         case ORDINAL_LIST_SHORT:
-        case ORDINAL_LIST_LONG: return new RLPList(lead, type, buffer, index, containerEnd, lenient);
+            return (T) newList(buffer, index, index + 1, lead - type.offset, containerEnd);
+        case ORDINAL_LIST_LONG:
+            return newLongItem(buffer, index, lead - type.offset, containerEnd, false);
         default: throw new AssertionError();
         }
     }

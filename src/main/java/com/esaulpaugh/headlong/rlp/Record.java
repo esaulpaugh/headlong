@@ -78,7 +78,7 @@ public final class Record {
     }
 
     public Record(Signer signer, long seq, List<KVP> pairs) {
-        this.rlp = RLP_STRICT.wrapList(encode(signer, seq, pairs).array());
+        this.rlp = RLP_STRICT.wrap(encode(signer, seq, pairs).array());
     }
 
     private Record(RLPList recordRLP) { // validate before calling
@@ -113,7 +113,7 @@ public final class Record {
 
     public static Record decode(byte[] bytes, Verifier verifier) throws SignatureException {
         checkRecordLen(bytes.length);
-        RLPList rlpList = RLP_STRICT.wrapList(bytes)
+        RLPList rlpList = RLP_STRICT.wrap(bytes)
                 .duplicate(); // defensive copy
         if(rlpList.encodingLength() != bytes.length) {
             throw new IllegalArgumentException("unconsumed trailing bytes");
@@ -134,7 +134,7 @@ public final class Record {
     }
 
     public RLPList getContent() {
-        return RLP_STRICT.wrapList(content(getSignature().endIndex));
+        return RLP_STRICT.wrap(content(getSignature().endIndex));
     }
 
     public long getSeq() {

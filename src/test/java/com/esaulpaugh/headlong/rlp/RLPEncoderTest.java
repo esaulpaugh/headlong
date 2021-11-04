@@ -69,9 +69,9 @@ public class RLPEncoderTest {
     @Test
     public void toList() {
 
-        RLPString item0 = RLPDecoder.RLP_STRICT.wrapString(new byte[] {(byte) 0x81, (byte) 0x80 });
-        RLPString item1 = RLPDecoder.RLP_STRICT.wrapString(new byte[] {(byte) 0x7e });
-        RLPList item2 = RLPDecoder.RLP_STRICT.wrapList(new byte[] {(byte) 0xc1, (byte) 0x80 });
+        RLPString item0 = RLPDecoder.RLP_STRICT.wrap(new byte[] {(byte) 0x81, (byte) 0x80 });
+        RLPString item1 = RLPDecoder.RLP_STRICT.wrap(new byte[] {(byte) 0x7e });
+        RLPList item2 = RLPDecoder.RLP_STRICT.wrap(new byte[] {(byte) 0xc1, (byte) 0x80 });
 
         RLPList rlpList = RLPEncoder.toList(item0, item1, item2);
         List<RLPItem> elements = rlpList.elements(RLPDecoder.RLP_STRICT);
@@ -106,7 +106,7 @@ public class RLPEncoderTest {
                 0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,
         };
 
-        RLPList longList = RLPDecoder.RLP_STRICT.wrapList(bytes);
+        RLPList longList = RLPDecoder.RLP_STRICT.wrap(bytes);
 
         List<RLPItem> elements = longList.elements(RLPDecoder.RLP_STRICT);
 

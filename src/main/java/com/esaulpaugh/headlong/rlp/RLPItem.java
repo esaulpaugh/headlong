@@ -25,14 +25,6 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
-import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_LONG;
-import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_SHORT;
-import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_SINGLE_BYTE;
-import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_LONG;
-import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_SHORT;
-import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT;
-
 /**
  * An immutable view of a portion of a (possibly mutable) byte array containing RLP-encoded data, starting at {@code index}
  * (inclusive) and ending at {@code endIndex} (exclusive), representing a single item (either a string or list). Useful
@@ -51,52 +43,12 @@ public abstract class RLPItem {
     public final transient int dataLength;
     public final transient int endIndex;
 
-    RLPItem(final byte lead, final DataType type, final byte[] buffer, final int index, int containerEnd, final boolean lenient) {
-        containerEnd = Math.min(buffer.length, containerEnd);
-
-        final int _dataIndex;
-        final long _dataLength;
-        
-        final int diff = lead - type.offset;
-        switch (type.ordinal()) {
-        case ORDINAL_SINGLE_BYTE:
-            _dataIndex = index;
-            _dataLength = 1;
-            break;
-        case ORDINAL_STRING_SHORT:
-        case ORDINAL_LIST_SHORT:
-            _dataIndex = index + 1;
-            _dataLength = diff;
-            break;
-        case ORDINAL_STRING_LONG:
-        case ORDINAL_LIST_LONG:
-            int lengthIndex = index + 1;
-            _dataIndex = lengthIndex + diff; // type dictates that diff guaranteed to be in [1,8]
-            if (_dataIndex > containerEnd) {
-                throw exceedsContainer(index, _dataIndex, containerEnd, containerEnd == buffer.length);
-            }
-            _dataLength = Integers.getLong(buffer, lengthIndex, diff, lenient);
-            if(_dataLength < MIN_LONG_DATA_LEN) {
-                throw new IllegalArgumentException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
-            }
-            break;
-        default: throw new AssertionError();
-        }
-
-        final long _endIndex = _dataIndex + _dataLength;
-
-        if(_endIndex > containerEnd) {
-            throw exceedsContainer(index, _endIndex, containerEnd, containerEnd == buffer.length);
-        }
-        if(!lenient && _dataLength == 1 && type == STRING_SHORT && DataType.isSingleByte(buffer[_dataIndex])) {
-            throw new IllegalArgumentException("invalid rlp for single byte @ " + index);
-        }
-
+    RLPItem(final byte[] buffer, final int index, final int dataIndex, final int dataLength, final int endIndex) {
         this.buffer = buffer;
         this.index = index;
-        this.dataIndex = _dataIndex;
-        this.dataLength = (int) _dataLength;
-        this.endIndex = (int) _endIndex;
+        this.dataIndex = dataIndex;
+        this.dataLength = dataLength;
+        this.endIndex = endIndex;
     }
 
     RLPItem(RLPItem it) {
@@ -130,7 +82,7 @@ public abstract class RLPItem {
      * @return an independent and exact copy
      * @throws IllegalArgumentException if a problem in re-decoding the item occurs
      */
-    public abstract RLPItem duplicate();
+    public abstract <T extends RLPItem> T duplicate();
 
     public final int encodingLength() {
         return endIndex - index;
