@@ -24,12 +24,14 @@ import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.esaulpaugh.headlong.rlp.DataType.LIST_SHORT_OFFSET;
 import static com.esaulpaugh.headlong.rlp.DataType.MIN_LONG_DATA_LEN;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_LONG;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_LIST_SHORT;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_SINGLE_BYTE;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_LONG;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_SHORT;
+import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
 
 /** Decodes RLP-formatted data. */
 public final class RLPDecoder {
@@ -127,26 +129,25 @@ public final class RLPDecoder {
         switch (type.ordinal()) {
         case ORDINAL_SINGLE_BYTE:
             return (T) new RLPString(buffer, index, index, 1, requireInBounds(index + 1L, containerEnd, buffer, index));
-        case ORDINAL_STRING_SHORT:
+        case ORDINAL_STRING_SHORT: {
+            final int dataIndex = index + 1;
+            final int dataLength = lead - STRING_SHORT_OFFSET;
+            final int endIndex = requireInBounds((long) dataIndex + dataLength, containerEnd, buffer, index);
+            if (!lenient && dataLength == 1 && DataType.isSingleByte(buffer[dataIndex])) {
+                throw new IllegalArgumentException("invalid rlp for single byte @ " + index);
+            }
+            return (T) new RLPString(buffer, index, dataIndex, dataLength, endIndex);
+        }
         case ORDINAL_LIST_SHORT:
-            return newShortItem(buffer, index, index + 1, lead - type.offset, containerEnd, type.isString);
+            final int dataIndex = index + 1;
+            final int dataLength = lead - LIST_SHORT_OFFSET;
+            final int endIndex = requireInBounds((long) dataIndex + dataLength, containerEnd, buffer, index);
+            return (T) new RLPList(buffer, index, dataIndex, dataLength, endIndex);
         case ORDINAL_STRING_LONG:
         case ORDINAL_LIST_LONG:
             return newLongItem(buffer, index, lead - type.offset, containerEnd, type.isString);
         default: throw new AssertionError();
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T extends RLPItem> T newShortItem(byte[] buffer, int index, int dataIndex, int dataLength, int containerEnd, boolean isString) {
-        final int endIndex = requireInBounds((long) dataIndex + dataLength, containerEnd, buffer, index);
-        if(isString) {
-            if(!lenient && dataLength == 1 && DataType.isSingleByte(buffer[dataIndex])) {
-                throw new IllegalArgumentException("invalid rlp for single byte @ " + index);
-            }
-            return (T) new RLPString(buffer, index, dataIndex, dataLength, endIndex);
-        }
-        return (T) new RLPList(buffer, index, dataIndex, dataLength, endIndex);
     }
 
     @SuppressWarnings("unchecked")
