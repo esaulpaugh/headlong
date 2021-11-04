@@ -59,11 +59,6 @@ public abstract class RLPItem {
         this.endIndex = buffer.length;
     }
 
-    static IllegalArgumentException exceedsContainer(int index, long end, int containerEnd, boolean shortInput) {
-        String msg = "element @ index " + index + " exceeds its container: " + end + " > " + containerEnd;
-        return shortInput ? new ShortInputException(msg) : new IllegalArgumentException(msg);
-    }
-
     public final DataType type() {
         return DataType.type(buffer[index]);
     }
