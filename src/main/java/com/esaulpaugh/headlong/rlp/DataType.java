@@ -20,19 +20,19 @@ public enum DataType {
 
     SINGLE_BYTE(0, true, false),
     STRING_SHORT(0x80, true, false),
-    LIST_SHORT(0xc0, false, false),
     STRING_LONG(0xb7, true, true),
+    LIST_SHORT(0xc0, false, false),
     LIST_LONG(0xf7, false, true);
 
     static final byte STRING_SHORT_OFFSET = (byte) 0x80;
-    static final byte LIST_SHORT_OFFSET = (byte) 0xc0;
     static final byte STRING_LONG_OFFSET = (byte) 0xb7;
+    static final byte LIST_SHORT_OFFSET = (byte) 0xc0;
     static final byte LIST_LONG_OFFSET = (byte) 0xf7;
 
     static final int ORDINAL_SINGLE_BYTE = 0;
     static final int ORDINAL_STRING_SHORT = 1;
-    static final int ORDINAL_LIST_SHORT = 2;
-    static final int ORDINAL_STRING_LONG = 3;
+    static final int ORDINAL_STRING_LONG = 2;
+    static final int ORDINAL_LIST_SHORT = 3;
     static final int ORDINAL_LIST_LONG = 4;
 
     public static final int MIN_LONG_DATA_LEN = 56;

@@ -35,13 +35,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
+import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
-import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -143,7 +144,6 @@ public class RLPStreamTest {
 
         TestUtils.assertThrown(IllegalArgumentException.class, "len is out of range: 10", () -> encodings.stream()
                 .map(RLP_STRICT::wrap)
-                .map(o -> (RLPItem) o)
                 .mapToInt(RLPItem::asInt)
                 .sum());
     }

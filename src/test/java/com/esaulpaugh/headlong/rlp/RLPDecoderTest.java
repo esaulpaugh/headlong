@@ -95,13 +95,13 @@ public class RLPDecoderTest {
         TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 2", () -> RLP_STRICT.wrap(vectors[1]).asShort(false));
         TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 4", RLP_STRICT.wrap(vectors[2])::asInt);
         TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 8", RLP_STRICT.wrap(vectors[3])::asLong);
-        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 10", RLP_STRICT.wrap(vectors[4])::asBigInt);
+        TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "1, len: 10", RLP_STRICT.wrapString(vectors[4])::asBigInt);
 
         assertEquals(0, RLP_STRICT.wrap(vectors[0]).asByte(true));
         assertEquals(99, RLP_STRICT.wrap(vectors[1]).asShort(true));
         assertEquals(8389121, RLP_STRICT.wrap(vectors[2]).asInt(true));
         assertEquals(0xff060504030201L, RLP_STRICT.wrap(vectors[3]).asLong(true));
-        assertEquals(new BigInteger("00ce5a0c040d155988", 16), RLP_STRICT.wrap(vectors[4]).asBigInt(true));
+        assertEquals(new BigInteger("00ce5a0c040d155988", 16), RLP_STRICT.wrapString(vectors[4]).asBigInt(true));
     }
 
     @Disabled("slow")
@@ -231,7 +231,7 @@ public class RLPDecoderTest {
 
     @Test
     public void testListIterable() throws Throwable {
-        final RLPList rlpList = RLP_STRICT.wrap(LONG_LIST_BYTES);
+        final RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
         assertEquals(DataType.LIST_LONG, rlpList.type());
         assertFalse(rlpList.isString());
         assertTrue(rlpList.isList());
@@ -248,7 +248,7 @@ public class RLPDecoderTest {
 
         copy[copy.length - 11]++;
 
-        RLPList brokenList = RLP_STRICT.wrap(copy);
+        RLPList brokenList = RLP_STRICT.wrapList(copy);
 
         assertThrown(ShortInputException.class, "element @ index 139 exceeds its container: 151 > 150", () -> {
             for(RLPItem item : brokenList) {
@@ -259,9 +259,9 @@ public class RLPDecoderTest {
 
     @Test
     public void duplicate() {
-        RLPList rlpList = RLP_STRICT.wrap(LONG_LIST_BYTES);
+        RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
         assertEquals(rlpList, rlpList.duplicate());
-        RLPString rlpString = RLP_STRICT.wrap((byte) 0x00);
+        RLPString rlpString = RLP_STRICT.wrapString((byte) 0x00);
         assertEquals(rlpString, rlpString.duplicate());
 
         assertTrue(rlpString.isString());
@@ -274,7 +274,7 @@ public class RLPDecoderTest {
                 (byte)0xc8, (byte)0x80, 0, (byte)0x81, (byte) 0xAA, (byte)0x81, (byte)'\u0080', (byte)0x81, '\u007f', (byte)'\u230A'
         };
 
-        RLPList list = RLP_STRICT.wrap(invalidAf);
+        RLPList list = RLP_STRICT.wrapList(invalidAf);
 
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
@@ -287,7 +287,7 @@ public class RLPDecoderTest {
 
     @Test
     public void list() {
-        RLPList rlpList = RLP_STRICT.wrap(LONG_LIST_BYTES);
+        RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
         List<RLPItem> actualList = rlpList.elements(RLP_STRICT);
 
         assertEquals(148, rlpList.dataLength);
@@ -315,7 +315,7 @@ public class RLPDecoderTest {
             buffer = new byte[1 + lol + (int) dataLen];
             buffer[0] = (byte) (0xb7 + lol);
             Integers.putLong(dataLen, buffer, 1);
-            huge = RLP_STRICT.wrap(buffer);
+            huge = RLP_STRICT.wrapString(buffer);
             data = huge.asString(UTF_8);
             System.out.println(dataLen);
             assertEquals(dataLen, data.length());
@@ -364,7 +364,7 @@ public class RLPDecoderTest {
                 i += elementEncodedLen;
             }
             size += buffer.length - i;
-            huge = RLP_STRICT.wrap(buffer);
+            huge = RLP_STRICT.wrapList(buffer);
             ArrayList<RLPItem> elements = new ArrayList<>(size);
             huge.elements(RLP_STRICT, elements);
             System.out.println("trailing single byte items = " + (buffer.length - i));
@@ -393,7 +393,7 @@ public class RLPDecoderTest {
             buffer[0] = (byte) (0xf7 + lol);
             Integers.putLong(dataLen, buffer, 1);
 
-            RLPList huge = RLP_STRICT.wrap(buffer);
+            RLPList huge = RLP_STRICT.wrapList(buffer);
 
             int count = 0;
             int i = huge.dataIndex;
@@ -591,7 +591,7 @@ public class RLPDecoderTest {
     }
 
     private static CustomRunnable decodeList(final byte[] rlp) {
-        return () -> RLP_LENIENT.wrap(rlp, 0).asRLPList().elements(RLP_STRICT);
+        return () -> RLP_LENIENT.wrapList(rlp, 0).elements(RLP_STRICT);
     }
 
     @Test
@@ -604,7 +604,7 @@ public class RLPDecoderTest {
         assertEquals(list.length, RLPEncoder.encodeAsList(new Object[] { a, b, c }, list, 0));
         Iterator<RLPItem> listIter = RLP_STRICT.listIterator(list);
 
-        for (RLPItem item : RLP_STRICT.wrap(list).asRLPList()) {
+        for (RLPItem item : RLP_STRICT.wrapList(list)) {
             System.out.print(item);
         }
 
@@ -656,7 +656,7 @@ public class RLPDecoderTest {
 
     @Test
     public void testExport() {
-        RLPList list = RLP_STRICT.wrap(LONG_LIST_BYTES);
+        RLPList list = RLP_STRICT.wrapList(LONG_LIST_BYTES);
 
         byte[] buffer = new byte[list.encodingLength()];
         int idx = list.export(buffer, 0);
