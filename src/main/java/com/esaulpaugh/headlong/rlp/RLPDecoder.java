@@ -111,7 +111,7 @@ public final class RLPDecoder {
         switch (type.ordinal()) {
         case ORDINAL_SINGLE_BYTE:
         case ORDINAL_STRING_SHORT:
-        case ORDINAL_STRING_LONG: return new RLPString(lead, type, buffer, index, Integer.MAX_VALUE, lenient);
+        case ORDINAL_STRING_LONG: return new RLPString(lead, type, buffer, index, buffer.length, lenient);
         default: throw new IllegalArgumentException("item is not a string");
         }
     }
@@ -125,7 +125,7 @@ public final class RLPDecoder {
         DataType type = DataType.type(lead);
         switch (type.ordinal()) {
         case ORDINAL_LIST_SHORT:
-        case ORDINAL_LIST_LONG: return new RLPList(lead, type, buffer, index, Integer.MAX_VALUE, lenient);
+        case ORDINAL_LIST_LONG: return new RLPList(lead, type, buffer, index, buffer.length, lenient);
         default: throw new IllegalArgumentException("item is not a list");
         }
     }
@@ -146,7 +146,7 @@ public final class RLPDecoder {
     }
 
     public RLPItem wrap(byte[] buffer, int index) {
-        return wrap(buffer, index, Integer.MAX_VALUE);
+        return wrap(buffer, index, buffer.length);
     }
 
     RLPItem wrap(byte[] buffer, int index, int containerEnd) {

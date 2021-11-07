@@ -52,8 +52,6 @@ public abstract class RLPItem {
     public final transient int endIndex;
 
     RLPItem(final byte lead, final DataType type, final byte[] buffer, final int index, int containerEnd, final boolean lenient) {
-        containerEnd = Math.min(buffer.length, containerEnd);
-
         final int _dataIndex;
         final long _dataLength;
         
