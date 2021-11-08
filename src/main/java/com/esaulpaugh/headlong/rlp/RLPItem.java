@@ -144,7 +144,7 @@ public abstract class RLPItem {
 
     public final byte[] copyOfRange(int from, int to) {
         byte[] range = new byte[to - from];
-        System.arraycopy(buffer, from, range, 0, range.length);
+        exportRange(from, to, range, 0);
         return range;
     }
 
