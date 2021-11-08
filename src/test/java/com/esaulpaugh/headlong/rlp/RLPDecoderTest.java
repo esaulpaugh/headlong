@@ -42,6 +42,7 @@ import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
 import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
+import static com.esaulpaugh.headlong.util.Strings.EMPTY_BYTE_ARRAY;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -763,5 +764,19 @@ public class RLPDecoderTest {
         assertArrayEquals(new byte[] { (byte) 0xc5, 0, 1, 2, 3, (byte) 0xc0 }, out2);
 
         assertArrayEquals(new byte[] { 2, 3 }, item.copyOfRange(5, 7));
+    }
+
+    @Test
+    public void testExportBounds() throws Throwable {
+        final byte[] in = new byte[] { 0, (byte) 0xf8, 56, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+        RLPList list = RLP_STRICT.wrapList(in, 1);
+
+        final String msg0 = "out of bounds: from < index (0 < 1)";
+        assertThrown(IllegalArgumentException.class, msg0, () -> list.copyOfRange(0, 8));
+        assertThrown(IllegalArgumentException.class, msg0, () -> list.exportRange(0, 8, EMPTY_BYTE_ARRAY, 0));
+
+        final String msg1 = "out of bounds: to > endIndex (60 > " + list.endIndex + ')';
+        assertThrown(IllegalArgumentException.class, msg1, () -> list.copyOfRange(1, 60));
+        assertThrown(IllegalArgumentException.class, msg1, () -> list.exportRange(1, 60, EMPTY_BYTE_ARRAY, 0));
     }
 }

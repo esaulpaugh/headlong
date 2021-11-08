@@ -180,9 +180,9 @@ public abstract class RLPItem {
                 System.arraycopy(buffer, from, dest, destIndex, len);
                 return destIndex + len;
             }
-            throw new IndexOutOfBoundsException(to + " > " + endIndex);
+            throw new IllegalArgumentException("out of bounds: to > endIndex (" + to + " > " + endIndex + ')');
         }
-        throw new IndexOutOfBoundsException(from + " < " + index);
+        throw new IllegalArgumentException("out of bounds: from < index (" + from + " < " + index + ')');
     }
 
     /**
