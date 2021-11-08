@@ -742,31 +742,25 @@ public class RLPDecoderTest {
         final byte[] in = new byte[] { (byte)0x83,1,3,5 };
         RLPItem item = RLP_STRICT.wrapString(in);
         final byte[] out = new byte[] { 0,0,0,0,0 };
-        int ret = item.exportData(out, 1);
-        assertEquals(1 + item.dataLength, ret);
+        assertEquals(1 + item.dataLength, item.exportData(out, 1));
         assertArrayEquals(new byte[] {0,1,3,5,0}, out);
 
-        ret = item.export(out, 1);
-        assertEquals(1 + item.encodingLength(), ret);
+        assertEquals(1 + item.encodingLength(), item.export(out, 1));
         assertArrayEquals(new byte[] {0,(byte)0x83,1,3,5}, out);
 
-        ret = item.exportRange(2, 4, out, 0);
-        assertEquals(4 - 2, ret);
+        assertEquals(4 - 2, item.exportRange(2, 4, out, 0));
         assertArrayEquals(new byte[] {3,5,1,3,5}, out);
 
         final byte[] in2 = new byte[] { 0, 0, (byte) 0xc5, 0, 1, 2, 3, (byte) 0xc0 };
         item = RLP_STRICT.wrapList(in2, 2);
-        ret = item.exportRange(2, 3, out, 2);
-        assertEquals(2 + (3 - 2), ret);
+        assertEquals(2 + (3 - 2), item.exportRange(2, 3, out, 2));
         assertArrayEquals(new byte[] {3,5,(byte) 0xc5,3,5}, out);
 
-        ret = item.exportData(out, 0);
-        assertEquals(item.dataLength, ret);
+        assertEquals(item.dataLength, item.exportData(out, 0));
         assertArrayEquals(new byte[] { 0, 1, 2, 3, (byte) 0xc0 }, out);
 
-        byte[] out2 = new byte[6];
-        ret = item.export(out2, 0);
-        assertEquals(item.encodingLength(), ret);
+        final byte[] out2 = new byte[6];
+        assertEquals(item.encodingLength(), item.export(out2, 0));
         assertArrayEquals(new byte[] { (byte) 0xc5, 0, 1, 2, 3, (byte) 0xc0 }, out2);
 
         assertArrayEquals(new byte[] { 2, 3 }, item.copyOfRange(5, 7));
