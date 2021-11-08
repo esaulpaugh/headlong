@@ -735,4 +735,33 @@ public class RLPDecoderTest {
         }
         return count;
     }
+
+    @Test
+    public void testExports() {
+        final byte[] in = new byte[] { (byte)0x83,1,3,5 };
+        RLPItem item = RLP_STRICT.wrapString(in);
+        final byte[] out = new byte[] { 0,0,0,0,0 };
+        item.exportData(out, 1);
+        assertArrayEquals(new byte[] {0,1,3,5,0}, out);
+
+        item.export(out, 1);
+        assertArrayEquals(new byte[] {0,(byte)0x83,1,3,5}, out);
+
+        item.exportRange(2, 4, out, 0);
+        assertArrayEquals(new byte[] {3,5,1,3,5}, out);
+
+        final byte[] in2 = new byte[] { 0, 0, (byte) 0xc5, 0, 1, 2, 3, (byte) 0xc0 };
+        item = RLP_STRICT.wrapList(in2, 2);
+        item.exportRange(2, 3, out, 2);
+        assertArrayEquals(new byte[] {3,5,(byte) 0xc5,3,5}, out);
+
+        item.exportData(out, 0);
+        assertArrayEquals(new byte[] { 0, 1, 2, 3, (byte) 0xc0 }, out);
+
+        byte[] out2 = new byte[6];
+        item.export(out2, 0);
+        assertArrayEquals(new byte[] { (byte) 0xc5, 0, 1, 2, 3, (byte) 0xc0 }, out2);
+
+        assertArrayEquals(new byte[] { 2, 3 }, item.copyOfRange(5, 7));
+    }
 }
