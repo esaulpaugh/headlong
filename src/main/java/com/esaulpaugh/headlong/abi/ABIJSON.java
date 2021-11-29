@@ -20,6 +20,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 
+import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.security.MessageDigest;
@@ -234,7 +235,7 @@ public final class ABIJSON {
 // ---------------------------------------------------------------------------------------------------------------------
     static String toJson(ABIObject o, boolean pretty) {
         try {
-            StringWriter stringOut = new StringWriter();
+            CharArrayWriter stringOut = new CharArrayWriter(256);
             JsonWriter out = new JsonWriter(stringOut);
             if (pretty) {
                 out.setIndent("  ");
