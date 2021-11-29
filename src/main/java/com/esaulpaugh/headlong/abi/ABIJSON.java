@@ -22,7 +22,6 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
