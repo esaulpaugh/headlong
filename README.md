@@ -134,8 +134,9 @@ https://github.com/esaulpaugh/headlong-android
 Also includes optimized implementations of:
 
 * EIP-778 Ethereum Node Records
-* hexadecimal
+* EIP-55 Mixed-case checksum address encoding
 * Keccak
+* hexadecimal
 
 headlong depends on gson v2.8.9. Test suite should take less than one minute to run. Test packages require junit. Jar size is ~116 KiB. Java 8+.
 
