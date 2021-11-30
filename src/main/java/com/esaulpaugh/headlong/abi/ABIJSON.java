@@ -22,8 +22,10 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -234,7 +236,7 @@ public final class ABIJSON {
 // ---------------------------------------------------------------------------------------------------------------------
     static String toJson(ABIObject o, boolean pretty) {
         try {
-            CharArrayWriter stringOut = new CharArrayWriter(256);
+            Writer stringOut = new NonSyncWriter();
             JsonWriter out = new JsonWriter(stringOut);
             if (pretty) {
                 out.setIndent("  ");
@@ -307,5 +309,42 @@ public final class ABIJSON {
             i++;
         }
         out.endArray();
+    }
+
+    static class NonSyncWriter extends CharArrayWriter {
+
+        private void ensureCapacity(int newCount) {
+            if (newCount > buf.length) {
+                buf = Arrays.copyOf(buf, Math.max(buf.length << 1, newCount));
+            }
+        }
+
+        @Override
+        public void write(int c) {
+            int newCount = count + 1;
+            ensureCapacity(newCount);
+            buf[count] = (char) c;
+            count = newCount;
+        }
+
+        @Override
+        public void write(String str, int off, int len) {
+            int newCount = count + len;
+            ensureCapacity(newCount);
+            str.getChars(off, off + len, buf, count);
+            count = newCount;
+        }
+
+        @Override
+        public NonSyncWriter append(CharSequence csq) {
+            String str = csq.toString();
+            write(str, 0, str.length());
+            return this;
+        }
+
+        @Override
+        public String toString() {
+            return new String(buf, 0, count);
+        }
     }
 }
