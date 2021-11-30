@@ -244,4 +244,9 @@ public class TupleTest {
         TestUtils.assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(new boolean[0]));
         TestUtils.assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(new boolean[5]));
     }
+
+    @Test
+    public void testElementTypes() throws Throwable {
+        TestUtils.assertThrown(UnsupportedOperationException.class, () -> TupleType.parse("(bool)").elementTypes().clear());
+    }
 }
