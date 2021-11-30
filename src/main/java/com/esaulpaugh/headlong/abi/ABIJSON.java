@@ -311,7 +311,11 @@ public final class ABIJSON {
         out.endArray();
     }
 
-    static class NonSyncWriter extends CharArrayWriter {
+    private static class NonSyncWriter extends CharArrayWriter {
+
+        NonSyncWriter() {
+            super(256);
+        }
 
         private void ensureCapacity(int newCount) {
             if (newCount > buf.length) {
