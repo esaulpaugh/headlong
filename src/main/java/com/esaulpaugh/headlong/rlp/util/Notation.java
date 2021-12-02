@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.rlp.DataType;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
+import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
@@ -248,7 +249,7 @@ public final class Notation {
                 if(datumEnd < 0) {
                     throw new IllegalArgumentException("unterminated string @ " + datumStart);
                 }
-                parent.add(Strings.decode(notation.substring(datumStart, datumEnd)));
+                parent.add(FastHex.decode(notation, datumStart, datumEnd - datumStart));
                 i = datumEnd + END_STRING.length();
             } else {
                 List<Object> childList = new ArrayList<>();
