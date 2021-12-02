@@ -194,7 +194,7 @@ public abstract class RLPItem {
     }
 
     /**
-     * Returns the {@link String}, of the given encoding, representing this item.
+     * Returns the {@link String}, of the given encoding, representing this item's data.
      *
      * @param encoding one of { {@link Strings#HEX}, {@link Strings#UTF_8}, {@link Strings#BASE_64_URL_SAFE}, {@link Strings#ASCII} }.
      * @return  this item's payload (data) bytes, encoded to your liking
@@ -204,7 +204,7 @@ public abstract class RLPItem {
     }
 
     /**
-     * Returns the {@code boolean} representation for this item. False for {@code 0xc0}, {@code 0x80}, and {@code 0x00};
+     * Returns the {@code boolean} representation for this item's data. False for {@code 0xc0}, {@code 0x80}, and {@code 0x00};
      * true for everything else.
      *
      * @return the {@code boolean}
@@ -214,7 +214,7 @@ public abstract class RLPItem {
     }
 
     /**
-     * Returns the {@code char} representation for this item.
+     * Returns the {@code char} representation for this item's data.
      *
      * @param lenient whether to allow leading zeroes in the raw data
      * @return the {@code char}
