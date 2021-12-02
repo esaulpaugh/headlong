@@ -317,22 +317,20 @@ public final class ABIJSON {
             super(256);
         }
 
-        private void ensureCapacity(int newCount) {
-            if (newCount > buf.length) {
-                buf = Arrays.copyOf(buf, Math.max(buf.length << 1, newCount));
-            }
-        }
-
         @Override
         public void write(int c) {
-            ensureCapacity(count + 1);
+            if (count + 1 > buf.length) {
+                buf = Arrays.copyOf(buf, buf.length << 1);
+            }
             buf[count++] = (char) c;
         }
 
         @Override
         public void write(String str, int off, int len) {
             int newCount = count + len;
-            ensureCapacity(newCount);
+            if (newCount > buf.length) {
+                buf = Arrays.copyOf(buf, Math.max(buf.length << 1, newCount));
+            }
             str.getChars(off, off + len, buf, count);
             count = newCount;
         }
