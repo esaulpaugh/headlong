@@ -314,7 +314,7 @@ public final class ABIJSON {
     private static class NonSyncWriter extends CharArrayWriter {
 
         NonSyncWriter() {
-            super(256);
+            super(256); // must be > 0
         }
 
         @Override
