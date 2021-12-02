@@ -313,7 +313,7 @@ public final class Integers {
      * @see #toBytes(long)
      * @see #putLong(long, byte[], int)
      */
-    public static long getLong(final byte[] buffer, final int offset, final int len, boolean lenient) {
+    public static long getLong(final byte[] buffer, final int offset, final int len, final boolean lenient) {
         int shiftAmount = 0;
         long val = 0L;
         switch (len) { /* cases 8 through 1 fall through */

@@ -325,10 +325,8 @@ public final class ABIJSON {
 
         @Override
         public void write(int c) {
-            int newCount = count + 1;
-            ensureCapacity(newCount);
-            buf[count] = (char) c;
-            count = newCount;
+            ensureCapacity(count + 1);
+            buf[count++] = (char) c;
         }
 
         @Override
