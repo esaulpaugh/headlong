@@ -24,12 +24,15 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Locale;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AddressTest {
+
+    private static final Pattern ADDRESS_PATTERN = Pattern.compile("^0x[0-9A-Fa-f]{40}$");
 
     private static final String[] VECTORS = new String[] {
             "0x52908400098527886E0F7030069857D2E4169EE7",
@@ -57,6 +60,7 @@ public class AddressTest {
     }
 
     private static void testAddress(String addrStr) {
+        assertTrue(ADDRESS_PATTERN.matcher(addrStr).matches());
         final String checksummedStr = Address.toChecksumAddress(addrStr);
         Address.validateChecksumAddress(checksummedStr);
         assertEquals(checksummedStr.toLowerCase(Locale.ENGLISH), addrStr.toLowerCase(Locale.ENGLISH));
