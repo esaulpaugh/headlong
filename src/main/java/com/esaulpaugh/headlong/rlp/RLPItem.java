@@ -45,7 +45,7 @@ public abstract class RLPItem {
     public static final RLPItem[] EMPTY_ARRAY = new RLPItem[0];
 
     final byte[] buffer;
-    final int index;
+    public final int index;
 
     public final transient int dataIndex;
     public final transient int dataLength;
