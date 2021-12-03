@@ -64,11 +64,15 @@ public final class Function implements ABIObject {
     }
 
     public Function(String signature, String outputs) {
+        this(signature, signature.indexOf('('), outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY);
+    }
+
+    private Function(final String signature, final int inputsIdx, final TupleType outputs) {
         this(
                 TypeEnum.FUNCTION,
-                signature.substring(0, signature.indexOf('(')),
-                TupleType.parse(signature.substring(signature.indexOf('('))),
-                outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY,
+                signature.substring(0, inputsIdx),
+                TupleType.parse(signature.substring(inputsIdx)),
+                outputs,
                 null,
                 Function.newDefaultDigest()
         );
