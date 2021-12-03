@@ -49,6 +49,7 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
+import static com.esaulpaugh.headlong.abi.TypeFactory.ADDRESS_BIT_LEN;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -399,9 +400,7 @@ public class MonteCarloTestCase implements Serializable {
     }
 
     static Address generateAddress(Random r) {
-//        return Address.wrap(generateAddressString(r));
-//        return Address.wrap(Address.toChecksumAddress(generateBigInteger(r, ADDRESS_TYPE)));
-        return new Address(new BigInteger(r.nextBoolean() ? TypeFactory.ADDRESS_BIT_LEN : TypeFactory.ADDRESS_BIT_LEN - r.nextInt(160), r));
+        return new Address(new BigInteger(r.nextBoolean() ? ADDRESS_BIT_LEN : ADDRESS_BIT_LEN - r.nextInt(ADDRESS_BIT_LEN), r));
     }
 
     private Object generateArray(ArrayType<? extends ABIType<?>, ?> arrayType, Random r) {
