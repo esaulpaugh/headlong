@@ -294,13 +294,14 @@ public final class ABIJSON {
         out.name(name).beginArray();
         int i = 0;
         for (ABIType<?> e : tupleType.elementTypes) {
-            final String type = e.canonicalType;
-            final boolean tupleBase = type.charAt(0) == '(';
             out.beginObject();
             name(out, e.getName());
-            type(out, tupleBase ? type.replace(type.substring(0, type.lastIndexOf(')') + 1), TUPLE) : type);
-            if(tupleBase) {
+            final String type = e.canonicalType;
+            if(type.charAt(0) == '(') {
+                type(out, type.replace(type.substring(0, type.lastIndexOf(')') + 1), TUPLE));
                 tupleType(out, COMPONENTS, (TupleType) ArrayType.baseType(e), null);
+            } else {
+                type(out, type);
             }
             if(indexedManifest != null) {
                 out.name(INDEXED).value(indexedManifest[i]);
