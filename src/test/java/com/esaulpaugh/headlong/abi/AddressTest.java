@@ -59,15 +59,15 @@ public class AddressTest {
         testAddress(MonteCarloTestCase.generateAddress(r).toString());
     }
 
-    private static void testAddress(String addrStr) {
-        assertTrue(ADDRESS_PATTERN.matcher(addrStr).matches());
-        Address.validateChecksumAddress(addrStr);
-        final String checksummedStr = Address.toChecksumAddress(addrStr);
-        assertEquals(addrStr, checksummedStr);
-        assertEquals(checksummedStr.toLowerCase(Locale.ENGLISH), addrStr.toLowerCase(Locale.ENGLISH));
+    private static void testAddress(final String in) {
+        assertTrue(ADDRESS_PATTERN.matcher(in).matches());
+        Address.validateChecksumAddress(in);
+        final String checksummedStr = Address.toChecksumAddress(in);
+        assertEquals(in, checksummedStr);
         final Address checksummed = Address.wrap(checksummedStr);
+        assertEquals(in, checksummed.toString());
         final BigInteger checksummedVal = checksummed.value();
-        assertEquals(checksummedVal, Address.wrap(addrStr).value());
+        assertEquals(checksummedVal, Address.wrap(in).value());
         assertTrue(checksummedVal.bitLength() <= 160);
     }
 
