@@ -115,18 +115,9 @@ public final class RLPDecoder {
         byte lead = buffer[index];
         DataType type = DataType.type(lead);
         switch (type.ordinal()) {
-        case ORDINAL_SINGLE_BYTE:
-            return new RLPString(buffer, index, index, 1, requireInBounds(index + 1L, buffer.length, buffer, index));
-        case ORDINAL_STRING_SHORT:
-            final int dataIndex = index + 1;
-            final int dataLength = lead - STRING_SHORT_OFFSET;
-            final int endIndex = requireInBounds((long) dataIndex + dataLength, buffer.length, buffer, index);
-            if (!lenient && dataLength == 1 && DataType.isSingleByte(buffer[dataIndex])) {
-                throw new IllegalArgumentException("invalid rlp for single byte @ " + index);
-            }
-            return new RLPString(buffer, index, dataIndex, dataLength, endIndex);
-        case ORDINAL_STRING_LONG:
-            return newLongItem(buffer, index, lead - type.offset, buffer.length, type.isString);
+        case ORDINAL_SINGLE_BYTE: return new RLPString(buffer, index, index, 1, requireInBounds(index + 1L, buffer.length, buffer, index));
+        case ORDINAL_STRING_SHORT: return newStringShort(buffer, index, lead, buffer.length);
+        case ORDINAL_STRING_LONG: return newLongItem(buffer, index, lead - type.offset, buffer.length, type.isString);
         default: throw new IllegalArgumentException("item is not a string");
         }
     }
@@ -139,13 +130,8 @@ public final class RLPDecoder {
         byte lead = buffer[index];
         DataType type = DataType.type(lead);
         switch (type.ordinal()) {
-        case ORDINAL_LIST_SHORT:
-            final int dataIndex = index + 1;
-            final int dataLength = lead - LIST_SHORT_OFFSET;
-            final int endIndex = requireInBounds((long) dataIndex + dataLength, buffer.length, buffer, index);
-            return new RLPList(buffer, index, dataIndex, dataLength, endIndex);
-        case ORDINAL_LIST_LONG:
-            return newLongItem(buffer, index, lead - type.offset, buffer.length, type.isString);
+        case ORDINAL_LIST_SHORT: return newListShort(buffer, index, lead, buffer.length);
+        case ORDINAL_LIST_LONG: return newLongItem(buffer, index, lead - type.offset, buffer.length, type.isString);
         default: throw new IllegalArgumentException("item is not a string");
         }
     }
@@ -178,27 +164,30 @@ public final class RLPDecoder {
         byte lead = buffer[index];
         DataType type = DataType.type(lead);
         switch (type.ordinal()) {
-        case ORDINAL_SINGLE_BYTE:
-            return (T) new RLPString(buffer, index, index, 1, requireInBounds(index + 1L, containerEnd, buffer, index));
-        case ORDINAL_STRING_SHORT: {
-            final int dataIndex = index + 1;
-            final int dataLength = lead - STRING_SHORT_OFFSET;
-            final int endIndex = requireInBounds((long) dataIndex + dataLength, containerEnd, buffer, index);
-            if (!lenient && dataLength == 1 && DataType.isSingleByte(buffer[dataIndex])) {
-                throw new IllegalArgumentException("invalid rlp for single byte @ " + index);
-            }
-            return (T) new RLPString(buffer, index, dataIndex, dataLength, endIndex);
-        }
-        case ORDINAL_LIST_SHORT:
-            final int dataIndex = index + 1;
-            final int dataLength = lead - LIST_SHORT_OFFSET;
-            final int endIndex = requireInBounds((long) dataIndex + dataLength, containerEnd, buffer, index);
-            return (T) new RLPList(buffer, index, dataIndex, dataLength, endIndex);
+        case ORDINAL_SINGLE_BYTE: return (T) new RLPString(buffer, index, index, 1, requireInBounds(index + 1L, containerEnd, buffer, index));
+        case ORDINAL_STRING_SHORT: return (T) newStringShort(buffer, index, lead, containerEnd);
+        case ORDINAL_LIST_SHORT: return (T) newListShort(buffer, index, lead, containerEnd);
         case ORDINAL_STRING_LONG:
-        case ORDINAL_LIST_LONG:
-            return newLongItem(buffer, index, lead - type.offset, containerEnd, type.isString);
+        case ORDINAL_LIST_LONG: return newLongItem(buffer, index, lead - type.offset, containerEnd, type.isString);
         default: throw new AssertionError();
         }
+    }
+
+    private RLPString newStringShort(byte[] buffer, int index, byte lead, int containerEnd) {
+        final int dataIndex = index + 1;
+        final int dataLength = lead - STRING_SHORT_OFFSET;
+        final int endIndex = requireInBounds((long) dataIndex + dataLength, containerEnd, buffer, index);
+        if (!lenient && dataLength == 1 && DataType.isSingleByte(buffer[dataIndex])) {
+            throw new IllegalArgumentException("invalid rlp for single byte @ " + index);
+        }
+        return new RLPString(buffer, index, dataIndex, dataLength, endIndex);
+    }
+
+    private RLPList newListShort(byte[] buffer, int index, byte lead, int containerEnd) {
+        final int dataIndex = index + 1;
+        final int dataLength = lead - LIST_SHORT_OFFSET;
+        final int endIndex = requireInBounds((long) dataIndex + dataLength, containerEnd, buffer, index);
+        return new RLPList(buffer, index, dataIndex, dataLength, endIndex);
     }
 
     @SuppressWarnings("unchecked")
@@ -210,18 +199,18 @@ public final class RLPDecoder {
             throw new IllegalArgumentException("long element data length must be " + MIN_LONG_DATA_LEN
                     + " or greater; found: " + dataLength + " for element @ " + index);
         }
-        requireInBounds(dataLength, containerEnd, buffer, index);
+        final int dataLen = requireInBounds(dataLength, containerEnd, buffer, index);
         final int endIndex = requireInBounds(dataIndex + dataLength, containerEnd, buffer, index);
         return (T) (isString
-                ? new RLPString(buffer, index, dataIndex, (int) dataLength, endIndex)
-                : new RLPList(buffer, index, dataIndex, (int) dataLength, endIndex)
+                ? new RLPString(buffer, index, dataIndex, dataLen, endIndex)
+                : new RLPList(buffer, index, dataIndex, dataLen, endIndex)
         );
     }
 
     private static int requireInBounds(long val, int containerEnd, byte[] buffer, int index) {
         if (val > containerEnd) {
             String msg = "element @ index " + index + " exceeds its container: " + val + " > " + containerEnd;
-            throw containerEnd == buffer.length ? new ShortInputException(msg) : new IllegalArgumentException(msg);
+            throw buffer.length == containerEnd ? new ShortInputException(msg) : new IllegalArgumentException(msg);
         }
         return (int) val;
     }
