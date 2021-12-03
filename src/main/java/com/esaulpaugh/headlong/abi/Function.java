@@ -60,7 +60,7 @@ public final class Function implements ABIObject {
     private final byte[] selector = new byte[SELECTOR_LEN];
 
     public Function(String signature) {
-        this(signature, null);
+        this(signature, signature.indexOf('('), TupleType.EMPTY);
     }
 
     public Function(String signature, String outputs) {

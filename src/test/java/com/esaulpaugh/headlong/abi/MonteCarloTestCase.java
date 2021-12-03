@@ -141,7 +141,7 @@ public class MonteCarloTestCase implements Serializable {
         }
 
         this.rawSignature = generateFunctionName(rng) + generateTupleTypeString(baseTypes, rng, 0);
-        this.function = new Function(rawSignature, null);
+        this.function = new Function(rawSignature);
         this.argsTuple = generateTuple(function.getInputs().elementTypes, rng);
     }
 
