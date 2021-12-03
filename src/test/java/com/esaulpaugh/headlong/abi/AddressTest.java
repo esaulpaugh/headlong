@@ -61,8 +61,9 @@ public class AddressTest {
 
     private static void testAddress(String addrStr) {
         assertTrue(ADDRESS_PATTERN.matcher(addrStr).matches());
+        Address.validateChecksumAddress(addrStr);
         final String checksummedStr = Address.toChecksumAddress(addrStr);
-        Address.validateChecksumAddress(checksummedStr);
+        assertEquals(addrStr, checksummedStr);
         assertEquals(checksummedStr.toLowerCase(Locale.ENGLISH), addrStr.toLowerCase(Locale.ENGLISH));
         final Address checksummed = Address.wrap(checksummedStr);
         final BigInteger checksummedVal = checksummed.value();
