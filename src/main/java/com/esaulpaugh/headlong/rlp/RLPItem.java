@@ -77,6 +77,9 @@ public abstract class RLPItem {
             if(_dataLength < MIN_LONG_DATA_LEN) {
                 throw new IllegalArgumentException("long element data length must be " + MIN_LONG_DATA_LEN + " or greater; found: " + _dataLength + " for element @ " + index);
             }
+            if(_dataLength > containerEnd) {
+                throw exceedsContainer(index, _dataLength, containerEnd, containerEnd == buffer.length);
+            }
             break;
         default: throw new AssertionError();
         }
@@ -105,8 +108,8 @@ public abstract class RLPItem {
         this.endIndex = buffer.length;
     }
 
-    static IllegalArgumentException exceedsContainer(int index, long end, int containerEnd, boolean shortInput) {
-        String msg = "element @ index " + index + " exceeds its container: " + end + " > " + containerEnd;
+    static IllegalArgumentException exceedsContainer(int index, long illegal, int containerEnd, boolean shortInput) {
+        String msg = "element @ index " + index + " exceeds its container: " + illegal + " > " + containerEnd;
         return shortInput ? new ShortInputException(msg) : new IllegalArgumentException(msg);
     }
 

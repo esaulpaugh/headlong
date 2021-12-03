@@ -773,4 +773,23 @@ public class RLPDecoderTest {
         expected[59] = -3;
         assertArrayEquals(expected, out3);
     }
+
+    @Test
+    public void testOverflow() throws Throwable {
+        byte[] bytes = new byte[] { (byte) 0xbf,
+                (byte) 0x7f, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+                (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+        };
+        assertThrown(
+                IllegalArgumentException.class,
+                "element @ index 0 exceeds its container: 9223372036854775807 > 9",
+                () -> RLP_STRICT.wrap(bytes)
+        );
+        bytes[0] = (byte) 0xff;
+        assertThrown(
+                IllegalArgumentException.class,
+                "element @ index 0 exceeds its container: 9223372036854775807 > 9",
+                () -> RLP_STRICT.wrap(bytes)
+        );
+    }
 }
