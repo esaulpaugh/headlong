@@ -748,14 +748,6 @@ public class RLPDecoderTest {
         assertEquals(1 + item.encodingLength(), item.export(out, 1));
         assertArrayEquals(new byte[] {0,(byte)0x83,1,3,5}, out);
 
-        assertEquals(4 - 2, item.exportRange(2, 4, out, 0));
-        assertArrayEquals(new byte[] {3,5,1,3,5}, out);
-
-        final byte[] in2 = new byte[] { 0, 0, (byte) 0xc5, 0, 1, 2, 3, (byte) 0xc0 };
-        item = RLP_STRICT.wrapList(in2, 2);
-        assertEquals(2 + (3 - 2), item.exportRange(2, 3, out, 2));
-        assertArrayEquals(new byte[] {3,5,(byte) 0xc5,3,5}, out);
-
         assertEquals(item.dataLength, item.exportData(out, 0));
         assertArrayEquals(new byte[] { 0, 1, 2, 3, (byte) 0xc0 }, out);
 
@@ -788,10 +780,8 @@ public class RLPDecoderTest {
 
         final String msg0 = "out of bounds: from < index (0 < 1)";
         assertThrown(IllegalArgumentException.class, msg0, () -> list.copyOfRange(0, 8));
-        assertThrown(IllegalArgumentException.class, msg0, () -> list.exportRange(0, 8, EMPTY_BYTE_ARRAY, 0));
 
         final String msg1 = "out of bounds: to > endIndex (60 > " + list.endIndex + ')';
         assertThrown(IllegalArgumentException.class, msg1, () -> list.copyOfRange(1, 60));
-        assertThrown(IllegalArgumentException.class, msg1, () -> list.exportRange(1, 60, EMPTY_BYTE_ARRAY, 0));
     }
 }

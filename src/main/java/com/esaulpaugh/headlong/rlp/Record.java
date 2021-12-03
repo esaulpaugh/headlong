@@ -175,7 +175,7 @@ public final class Record {
         final ByteBuffer bb = ByteBuffer.allocate(RLPEncoder.itemLen(contentDataLen));
         RLPEncoder.insertListPrefix(contentDataLen, bb);
         final byte[] arr = bb.array();
-        rlp.exportRange(index, index + contentDataLen, arr, bb.position());
+        System.arraycopy(rlp.buffer, index, arr, bb.position(), contentDataLen);
         return arr;
     }
 

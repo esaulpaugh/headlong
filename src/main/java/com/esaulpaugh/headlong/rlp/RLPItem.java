@@ -143,9 +143,15 @@ public abstract class RLPItem {
     }
 
     public final byte[] copyOfRange(int from, int to) {
-        byte[] range = new byte[to - from];
-        exportRange(from, to, range, 0);
-        return range;
+        if(from >= index) {
+            if(to <= endIndex) {
+                byte[] range = new byte[to - from];
+                System.arraycopy(buffer, from, range, 0, range.length);
+                return range;
+            }
+            throw new IllegalArgumentException("out of bounds: to > endIndex (" + to + " > " + endIndex + ')');
+        }
+        throw new IllegalArgumentException("out of bounds: from < index (" + from + " < " + index + ')');
     }
 
     public final int export(byte[] dest, int destIndex) {
@@ -161,28 +167,6 @@ public abstract class RLPItem {
 
     public final void exportData(OutputStream os) throws IOException {
         os.write(buffer, dataIndex, dataLength);
-    }
-
-    /**
-     * Copies the specified range of bytes from this item's underlying buffer into the specified destination array.
-     *
-     * @param from      the initial index of the range to be copied, inclusive
-     * @param to        the final index of the range to be copied, exclusive
-     * @param dest      the destination array into which the bytes will be copied
-     * @param destIndex the index into the destination array at which to place the bytes
-     * @return the next index into {@code dest}
-     * @throws IndexOutOfBoundsException if {@code from < index} or {@code to > endIndex}
-     */
-    public final int exportRange(int from, int to, byte[] dest, int destIndex) {
-        if(from >= index) {
-            if(to <= endIndex) {
-                int len = to - from;
-                System.arraycopy(buffer, from, dest, destIndex, len);
-                return destIndex + len;
-            }
-            throw new IllegalArgumentException("out of bounds: to > endIndex (" + to + " > " + endIndex + ')');
-        }
-        throw new IllegalArgumentException("out of bounds: from < index (" + from + " < " + index + ')');
     }
 
     /**
