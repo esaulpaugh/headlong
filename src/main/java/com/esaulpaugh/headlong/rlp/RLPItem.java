@@ -142,16 +142,10 @@ public abstract class RLPItem {
         return copyOfRange(dataIndex, endIndex);
     }
 
-    public final byte[] copyOfRange(int from, int to) {
-        if(from >= index) {
-            if(to <= endIndex) {
-                byte[] range = new byte[to - from];
-                System.arraycopy(buffer, from, range, 0, range.length);
-                return range;
-            }
-            throw new IllegalArgumentException("out of bounds: to > endIndex (" + to + " > " + endIndex + ')');
-        }
-        throw new IllegalArgumentException("out of bounds: from < index (" + from + " < " + index + ')');
+    private byte[] copyOfRange(int from, int to) {
+        byte[] range = new byte[to - from];
+        System.arraycopy(buffer, from, range, 0, range.length);
+        return range;
     }
 
     public final int export(byte[] dest, int destIndex) {

@@ -758,8 +758,6 @@ public class RLPDecoderTest {
         assertEquals(item.encodingLength(), item.export(out2, 0));
         assertArrayEquals(new byte[] { (byte) 0xc5, 0, 1, 2, 3, (byte) 0xc0 }, out2);
 
-        assertArrayEquals(new byte[] { 2, 3 }, item.copyOfRange(5, 7));
-
         final byte[] longString = new byte[58];
         longString[0] = (byte) 0xb8;
         longString[1] = 56;
@@ -774,17 +772,5 @@ public class RLPDecoderTest {
         expected[52] = 10;
         expected[59] = -3;
         assertArrayEquals(expected, out3);
-    }
-
-    @Test
-    public void testExportBounds() throws Throwable {
-        final byte[] in = new byte[] { 0, (byte) 0xf8, 56, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-        RLPList list = RLP_STRICT.wrapList(in, 1);
-
-        final String msg0 = "out of bounds: from < index (0 < 1)";
-        assertThrown(IllegalArgumentException.class, msg0, () -> list.copyOfRange(0, 8));
-
-        final String msg1 = "out of bounds: to > endIndex (60 > " + list.endIndex + ')';
-        assertThrown(IllegalArgumentException.class, msg1, () -> list.copyOfRange(1, 60));
     }
 }
