@@ -64,10 +64,6 @@ public final class KVP implements Comparable<KVP> {
         this(key.encoding(), value.encoding(), key.dataIndex);
     }
 
-    private KVP(KVP p, byte[] value) {
-        this(p.k, RLPEncoder.encodeString(value), p.keyDataIdx);
-    }
-
     private KVP(byte[] k, byte[] v, int i) {
         this.k = k;
         this.v = v;
@@ -80,7 +76,7 @@ public final class KVP implements Comparable<KVP> {
     }
 
     public KVP withValue(byte[] value) {
-        return new KVP(this, value);
+        return new KVP(this.k, RLPEncoder.encodeString(value), this.keyDataIdx);
     }
 
     public RLPString key() {
