@@ -143,7 +143,7 @@ public class RLPStreamTest {
         }
 
         TestUtils.assertThrown(IllegalArgumentException.class, "len is out of range: 10", () -> encodings.stream()
-                .map(RLP_STRICT::wrap)
+                .map(RLP_STRICT::wrapItem)
                 .mapToInt(RLPItem::asInt)
                 .sum());
     }

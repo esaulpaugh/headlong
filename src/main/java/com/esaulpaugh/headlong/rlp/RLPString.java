@@ -18,12 +18,8 @@ package com.esaulpaugh.headlong.rlp;
 /** Extends {@link RLPItem}. Created by Evo on 1/19/2017. */
 public final class RLPString extends RLPItem {
 
-    RLPString(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) {
-        super(lead, type, buffer, index, containerEnd, lenient);
-    }
-
-    RLPString(RLPString o) {
-        super(o);
+    RLPString(byte[] buffer, int index, int dataIndex, int dataLength, int endIndex) {
+        super(buffer, index, dataIndex, dataLength, endIndex);
     }
 
     @Override
@@ -49,6 +45,6 @@ public final class RLPString extends RLPItem {
     /** @see RLPItem#duplicate() */
     @Override
     public RLPString duplicate() {
-        return new RLPString(this);
+        return new RLPString(buffer, index, dataIndex, dataLength, endIndex);
     }
 }

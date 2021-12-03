@@ -26,12 +26,8 @@ import java.util.NoSuchElementException;
 /** Extends {@link RLPItem}. Implements {@link Iterable}. Created by Evo on 1/19/2017. */
 public final class RLPList extends RLPItem implements Iterable<RLPItem> {
 
-    RLPList(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) {
-        super(lead, type, buffer, index, containerEnd, lenient);
-    }
-
-    RLPList(RLPList o) {
-        super(o);
+    RLPList(byte[] buffer, int index, int dataIndex, int dataLength, int endIndex) {
+        super(buffer, index, dataIndex, dataLength, endIndex);
     }
 
     @Override
@@ -57,7 +53,7 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
     /** @see RLPItem#duplicate() */
     @Override
     public RLPList duplicate() {
-        return new RLPList(this);
+        return new RLPList(buffer, index, dataIndex, dataLength, endIndex);
     }
 
     /**
