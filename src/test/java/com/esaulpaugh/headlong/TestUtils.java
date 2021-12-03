@@ -133,7 +133,7 @@ public class TestUtils {
     public static String readFileResourceAsString(ClassLoader classLoader, String resourceName) throws IOException {
         URL url = classLoader.getResource(resourceName);
         if(url == null) {
-            throw new IOException("url null");
+            throw new IOException("resource not found");
         }
         try {
             return Strings.encode(Files.readAllBytes(Paths.get(url.toURI())), Strings.UTF_8);
@@ -158,16 +158,12 @@ public class TestUtils {
     public static ArrayList<Object> parseArrayToBytesHierarchy(final JsonArray array) {
         ArrayList<Object> arrayList = new ArrayList<>();
         for (JsonElement element : array) {
-            if(element.isJsonObject()) {
-                throw new Error("found json object");
-            } else if(element.isJsonArray()) {
+            if(element.isJsonArray()) {
                 arrayList.add(parseArrayToBytesHierarchy(element.getAsJsonArray()));
             } else if(element.isJsonPrimitive()) {
                 arrayList.add(parsePrimitiveToBytes(element));
-            } else if(element.isJsonNull()) {
-                throw new RuntimeException("null??");
             } else {
-                throw new RuntimeException("?????");
+                throw new Error("unexpected element type");
             }
         }
         return arrayList;
@@ -180,10 +176,8 @@ public class TestUtils {
             JsonElement element = array.get(i);
             if(element.isJsonPrimitive()) {
                 longs[i] = parseLong(element);
-            } else if(element.isJsonNull()) {
-                throw new RuntimeException("null??");
             } else {
-                throw new RuntimeException("?????");
+                throw new Error("unexpected element type");
             }
         }
         return longs;
@@ -223,10 +217,8 @@ public class TestUtils {
         return in.getAsLong();
     }
 
-    public static Address parseAddress(JsonElement in) { // uint160
-        String hex = "00" + in.getAsString().substring(2);
-        byte[] bytes = Strings.decode(hex);
-        return Address.wrap(Address.toChecksumAddress(new BigInteger(bytes)));
+    public static Address parseAddress(JsonElement in) {
+        return Address.wrap(Address.toChecksumAddress(in.getAsString()));
     }
 
     /** Asserts that the arguments are either both true or both false. */
