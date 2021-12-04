@@ -99,8 +99,7 @@ public final class RLPDecoder {
      * @throws IllegalArgumentException  if the RLP list failed to decode
      */
     public Iterator<RLPItem> listIterator(byte[] buffer, int index) {
-        RLPList list = wrap(buffer, index);
-        return list.iterator(this);
+        return wrapList(buffer, index).iterator(this);
     }
 
     public RLPString wrapString(byte lengthOneRLP) {
