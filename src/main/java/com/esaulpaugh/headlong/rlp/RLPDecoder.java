@@ -143,7 +143,8 @@ public final class RLPDecoder {
      * Returns an {@link RLPItem} for a length-one encoding (e.g. 0xc0)
      *
      * @param lengthOneRLP the encoding
-     * @return the item
+     * @param <T>   the desired return type
+     * @return  the item
      * @throws IllegalArgumentException if the byte fails to decode
      */
     public <T extends RLPItem> T wrap(byte lengthOneRLP) {
