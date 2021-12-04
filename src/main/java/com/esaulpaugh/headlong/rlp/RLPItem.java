@@ -76,17 +76,11 @@ public abstract class RLPItem {
     }
 
     public final byte[] encoding() {
-        return copyOfRange(index, endIndex);
+        return Arrays.copyOfRange(buffer, index, endIndex);
     }
 
     public final byte[] data() {
-        return copyOfRange(dataIndex, endIndex);
-    }
-
-    private byte[] copyOfRange(int from, int to) {
-        byte[] range = new byte[to - from];
-        System.arraycopy(buffer, from, range, 0, range.length);
-        return range;
+        return Arrays.copyOfRange(buffer, dataIndex, endIndex);
     }
 
     public final int export(byte[] dest, int destIndex) {
