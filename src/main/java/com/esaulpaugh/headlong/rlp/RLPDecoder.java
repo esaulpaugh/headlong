@@ -102,10 +102,6 @@ public final class RLPDecoder {
         return wrapList(buffer, index).iterator(this);
     }
 
-    public RLPString wrapString(byte lengthOneRLP) {
-        return wrapString(new byte[] { lengthOneRLP }, 0);
-    }
-
     public RLPString wrapString(byte[] buffer) {
         return wrapString(buffer, 0);
     }
@@ -151,8 +147,8 @@ public final class RLPDecoder {
         return wrap(new byte[] { lengthOneRLP }, 0);
     }
 
-    public <T extends RLPItem> T wrap(byte[] encoding) {
-        return wrap(encoding, 0);
+    public <T extends RLPItem> T wrap(byte[] buffer) {
+        return wrap(buffer, 0);
     }
 
     public <T extends RLPItem> T wrap(byte[] buffer, int index) {
