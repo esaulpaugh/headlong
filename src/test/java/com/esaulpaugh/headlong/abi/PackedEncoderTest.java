@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
+import com.esaulpaugh.headlong.abi.util.BizarroInts;
 import com.esaulpaugh.headlong.abi.util.Uint;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
@@ -263,7 +264,7 @@ public class PackedEncoderTest {
     @Test
     public void testSignExtendInt() {
         byte[] bytes = Strings.decode("8FFFFF");
-        int expected = BizarroIntegers.getInt(bytes, 0, 3);
+        int expected = BizarroInts.getInt(bytes, 0, 3);
         int result = PackedDecoder.decodeBigInteger(bytes, 0, 3).intValue();
         assertTrue(result < 0);
         assertEquals(expected, result);
@@ -272,7 +273,7 @@ public class PackedEncoderTest {
     @Test
     public void testSignExtendLong() {
         byte[] bytes = Strings.decode("8FFFFFFFFF");
-        long expectedL = BizarroIntegers.getLong(bytes, 0, 5);
+        long expectedL = BizarroInts.getLong(bytes, 0, 5);
         long resultL = PackedDecoder.decodeBigInteger(bytes, 0, 5).longValue();
         assertTrue(resultL < 0);
         assertEquals(expectedL, resultL);

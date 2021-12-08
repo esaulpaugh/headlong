@@ -31,19 +31,19 @@ public class BizarroIntegersTest {
     public void toBytes() {
         StringBuilder sb = new StringBuilder();
         for (byte i = -5; i < 5; i++)
-            sb.append(Strings.encode(BizarroIntegers.toBytes(i), Strings.HEX)).append(',');
+            sb.append(Strings.encode(BizarroInts.toBytes(i), Strings.HEX)).append(',');
         assertEquals("fb,fc,fd,fe,,00,01,02,03,04,", sb.toString());
         TestUtils.printAndReset(sb);
         for (short i = -5; i < 5; i++)
-            sb.append(Strings.encode(BizarroIntegers.toBytes(i), Strings.HEX)).append(',');
+            sb.append(Strings.encode(BizarroInts.toBytes(i), Strings.HEX)).append(',');
         assertEquals("fb,fc,fd,fe,,0000,0001,0002,0003,0004,", sb.toString());
         TestUtils.printAndReset(sb);
         for (int i = -5; i < 5; i++)
-            sb.append(Strings.encode(BizarroIntegers.toBytes(i), Strings.HEX)).append(',');
+            sb.append(Strings.encode(BizarroInts.toBytes(i), Strings.HEX)).append(',');
         assertEquals("fb,fc,fd,fe,,00000000,00000001,00000002,00000003,00000004,", sb.toString());
         TestUtils.printAndReset(sb);
         for (long i = -5; i < 5; i++)
-            sb.append(Strings.encode(BizarroIntegers.toBytes(i), Strings.HEX)).append(',');
+            sb.append(Strings.encode(BizarroInts.toBytes(i), Strings.HEX)).append(',');
         assertEquals("fb,fc,fd,fe,,0000000000000000,0000000000000001,0000000000000002,0000000000000003,0000000000000004,", sb.toString());
         TestUtils.printAndReset(sb);
     }
@@ -53,8 +53,8 @@ public class BizarroIntegersTest {
         byte[] one = new byte[1];
         for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
             byte b = (byte) i;
-            int n = BizarroIntegers.putByte(b, one, 0);
-            byte r = BizarroIntegers.getByte(one, 0, n);
+            int n = BizarroInts.putByte(b, one, 0);
+            byte r = BizarroInts.getByte(one, 0, n);
             assertEquals(b, r);
         }
     }
@@ -64,8 +64,8 @@ public class BizarroIntegersTest {
         byte[] two = new byte[2];
         for (int i = Short.MIN_VALUE; i <= Short.MAX_VALUE; i++) {
             short s = (short) i;
-            int n = BizarroIntegers.putShort(s, two, 0);
-            short r = BizarroIntegers.getShort(two, 0, n);
+            int n = BizarroInts.putShort(s, two, 0);
+            short r = BizarroInts.getShort(two, 0, n);
             assertEquals(s, r);
         }
     }
@@ -81,8 +81,8 @@ public class BizarroIntegersTest {
         byte[] eight = new byte[8];
         for (long i = 0; i < 20_000; i++) {
             long lo = TestUtils.pickRandom(rand);
-            int n = BizarroIntegers.putLong(lo, eight, 0);
-            long r = BizarroIntegers.getLong(eight, 0, n);
+            int n = BizarroInts.putLong(lo, eight, 0);
+            long r = BizarroInts.getLong(eight, 0, n);
             if(lo != r) {
                 throw new AssertionError(lo + " != " + r);
             }
@@ -93,7 +93,7 @@ public class BizarroIntegersTest {
     public void lenByte() {
         for (int i = Byte.MIN_VALUE; i <= Byte.MAX_VALUE; i++) {
             byte b = (byte) i;
-            int len = BizarroIntegers.len(b);
+            int len = BizarroInts.len(b);
             assertEquals(b == -1 ? 0 : 1, len);
         }
     }
@@ -105,7 +105,7 @@ public class BizarroIntegersTest {
             int expectedLen = s >= 0 || s < -256 ? 2
                     : s != -1 ? 1
                     : 0;
-            int len = BizarroIntegers.len(s);
+            int len = BizarroInts.len(s);
             if(expectedLen != len) {
                 throw new AssertionError(expectedLen + " != " + len);
             }
@@ -150,8 +150,8 @@ public class BizarroIntegersTest {
             final long end = this.end;
             for (long lo = this.start; lo <= end; lo++) {
                 int i = (int) lo;
-                int len = BizarroIntegers.putInt(i, four, 0);
-                int r = BizarroIntegers.getInt(four, 0, len);
+                int len = BizarroInts.putInt(i, four, 0);
+                int r = BizarroInts.getInt(four, 0, len);
                 assertEquals(i, r);
             }
         }
