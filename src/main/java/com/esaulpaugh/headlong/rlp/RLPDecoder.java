@@ -106,6 +106,14 @@ public final class RLPDecoder {
         return wrapString(buffer, 0);
     }
 
+    public RLPList wrapList(byte[] buffer) {
+        return wrapList(buffer, 0);
+    }
+
+    public RLPItem wrapItem(byte[] buffer) {
+        return wrapItem(buffer, 0);
+    }
+
     public RLPString wrapString(byte[] buffer, int index) {
         byte lead = buffer[index];
         DataType type = DataType.type(lead);
@@ -115,10 +123,6 @@ public final class RLPDecoder {
         case ORDINAL_STRING_LONG: return newLongItem(buffer, index, lead - type.offset, buffer.length, type.isString);
         default: throw new IllegalArgumentException("item is not a string");
         }
-    }
-
-    public RLPList wrapList(byte[] buffer) {
-        return wrapList(buffer, 0);
     }
 
     public RLPList wrapList(byte[] buffer, int index) {
@@ -131,8 +135,8 @@ public final class RLPDecoder {
         }
     }
 
-    public RLPItem wrapItem(byte[] buffer) {
-        return wrap(buffer);
+    public RLPItem wrapItem(byte[] buffer, int index) {
+        return wrap(buffer, index);
     }
 
     /**
