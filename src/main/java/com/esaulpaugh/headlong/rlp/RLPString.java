@@ -45,6 +45,7 @@ public final class RLPString extends RLPItem {
     /** @see RLPItem#duplicate() */
     @Override
     public RLPString duplicate() {
-        return new RLPString(buffer, index, dataIndex, dataLength, endIndex);
+        final byte[] enc = encoding();
+        return new RLPString(enc, 0, enc.length - dataLength, dataLength, enc.length);
     }
 }

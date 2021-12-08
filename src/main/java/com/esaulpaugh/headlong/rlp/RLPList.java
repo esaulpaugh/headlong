@@ -53,7 +53,8 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
     /** @see RLPItem#duplicate() */
     @Override
     public RLPList duplicate() {
-        return new RLPList(buffer, index, dataIndex, dataLength, endIndex);
+        final byte[] enc = encoding();
+        return new RLPList(enc, 0, enc.length - dataLength, dataLength, enc.length);
     }
 
     /**

@@ -258,14 +258,33 @@ public class RLPDecoderTest {
     }
 
     @Test
-    public void duplicate() {
-        RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
-        assertEquals(rlpList, rlpList.duplicate());
-        RLPString rlpString = RLP_STRICT.wrapString(new byte[] { (byte) 0x00 });
-        assertEquals(rlpString, rlpString.duplicate());
+    public void duplicateString() {
+        RLPString str = RLP_STRICT.wrap(LONG_LIST_BYTES, 13);
+        RLPString dup = str.duplicate();
+        assertEquals(0, dup.index);
+        assertEquals(str.dataIndex - str.index, dup.dataIndex);
+        assertEquals(str.encodingLength(), dup.encodingLength());
+        assertEquals(str.dataLength, dup.dataLength);
+        assertEquals(str.endIndex - str.index, dup.endIndex);
+        assertEquals(str, dup);
+        assertTrue(str.isString());
+        assertFalse(str.isList());
+    }
 
-        assertTrue(rlpString.isString());
-        assertFalse(rlpString.isList());
+    @Test
+    public void duplicateList() {
+        byte[] buffer = new byte[7 + LONG_LIST_BYTES.length];
+        System.arraycopy(LONG_LIST_BYTES, 0, buffer, 7, LONG_LIST_BYTES.length);
+        RLPList list = RLP_STRICT.wrapList(buffer, 7);
+        RLPList dup = list.duplicate();
+        assertEquals(0, dup.index);
+        assertEquals(list.dataIndex - list.index, dup.dataIndex);
+        assertEquals(list.encodingLength(), dup.encodingLength());
+        assertEquals(list.dataLength, dup.dataLength);
+        assertEquals(LONG_LIST_BYTES.length, dup.endIndex);
+        assertEquals(list, dup);
+        assertFalse(list.isString());
+        assertTrue(list.isList());
     }
 
     @Test
