@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.util.SuperSerial;
@@ -362,8 +361,7 @@ public class MonteCarloTestCase implements Serializable {
 
     static long generateLong(Random r, UnitType<? extends Number> unitType) {
         long x = TestUtils.pickRandom(r, 1 + r.nextInt(unitType.bitLength / Byte.SIZE), unitType.unsigned);
-        if (!unitType.unsigned
-                && (x < 0 ? BizarroIntegers.bitLen(x) : Integers.bitLen(x)) >= unitType.bitLength) {
+        if (!unitType.unsigned && Integers.bitLen(x < 0 ? ~x : x) >= unitType.bitLength) {
             x >>= 1;
         }
         return x;

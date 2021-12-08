@@ -131,7 +131,7 @@ public class BizarroIntegersTest {
                     : lo < -256 ? 2
                     : lo != -1 ? 1
                     : 0;
-            int len = BizarroIntegers.len(lo);
+            int len = BizarroInts.len(lo);
             if(expectedLen != len) {
                 throw new AssertionError(expectedLen + " != " + len);
             }
@@ -165,12 +165,12 @@ public class BizarroIntegersTest {
 
         @Override
         protected int len(int val) {
-            return BizarroIntegers.len(val);
+            return BizarroInts.len(val);
         }
     }
 
     @Test
     public void testReturnValues() {
-        IntegersTest.testReturnValues(BizarroIntegers::len, BizarroIntegers::putLong);
+        IntegersTest.testReturnValues(BizarroInts::len, BizarroInts::putLong);
     }
 }

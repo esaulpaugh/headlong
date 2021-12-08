@@ -420,7 +420,7 @@ public final class Integers {
     }
 
     /**
-     * NOTE: will always return {@link Long#SIZE} for negative integers. See also abi.util.BizarroIntegers.bitLen(long).
+     * NOTE: will always return {@link Long#SIZE} for negative integers.
      *
      * @param val the long value
      * @return the bit length of the input

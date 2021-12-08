@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.util.Integers;
 
 import java.math.BigInteger;
@@ -87,10 +86,9 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
             if(unsigned) {
                 throw new IllegalArgumentException("signed value given for unsigned type");
             }
-            checkBitLen(BizarroIntegers.bitLen(longVal));
-        } else {
-            checkBitLen(Integers.bitLen(longVal));
+            longVal = ~longVal;
         }
+        checkBitLen(Integers.bitLen(longVal));
         return UNIT_LENGTH_BYTES;
     }
 

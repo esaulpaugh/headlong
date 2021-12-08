@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.abi.util.BizarroInts;
 import com.esaulpaugh.headlong.abi.util.Uint;
 import com.esaulpaugh.headlong.util.Strings;

@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.BizarroIntegers;
 import com.esaulpaugh.headlong.util.Integers;
 
 import java.nio.ByteBuffer;
@@ -53,8 +52,55 @@ public final class LongType extends UnitType<Long> {
             Encoding.insert00Padding(byteLen - Integers.len(value), dest);
             Integers.putLong(value, dest);
         } else {
-            Encoding.insertFFPadding(byteLen - BizarroIntegers.len(value), dest);
-            BizarroIntegers.putLong(value, dest);
+            Encoding.insertFFPadding(byteLen - lenNegative(value), dest);
+            putLongNegative(value, dest);
         }
+    }
+
+    private static int lenNegative(long val) {
+        if (val != -1)
+            if ((val >>= Byte.SIZE) != -1)
+                if ((val >>= Byte.SIZE) != -1)
+                    if ((val >>= Byte.SIZE) != -1)
+                        if ((val >>= Byte.SIZE) != -1)
+                            if ((val >>= Byte.SIZE) != -1)
+                                if ((val >>= Byte.SIZE) != -1)
+                                    if (val >> Byte.SIZE != -1)
+                                        return 8;
+                                    else return 7;
+                                else return 6;
+                            else return 5;
+                        else return 4;
+                    else return 3;
+                else return 2;
+            else return 1;
+        return 0;
+    }
+
+    private static int putLongNegative(long val, ByteBuffer o) {
+        if (val != -1) {
+            byte h = (byte) val;
+            if ((val >>= Byte.SIZE) != -1) {
+                byte g = (byte) val;
+                if ((val >>= Byte.SIZE) != -1) {
+                    byte f = (byte) val;
+                    if ((val >>= Byte.SIZE) != -1) {
+                        byte e = (byte) val;
+                        if ((val >>= Byte.SIZE) != -1) {
+                            byte d = (byte) val;
+                            if ((val >>= Byte.SIZE) != -1) {
+                                byte c = (byte) val;
+                                if ((val >>= Byte.SIZE) != -1) {
+                                    byte b = (byte) val;
+                                    if ((val >>= Byte.SIZE) != -1) {
+                                        o.put((byte) val).put(b).put(c).put(d).put(e).put(f).put(g).put(h); return 8;
+                                    } else o.put(b).put(c).put(d).put(e).put(f).put(g).put(h); return 7;
+                                } else o.put(c).put(d).put(e).put(f).put(g).put(h); return 6;
+                            } else o.put(d).put(e).put(f).put(g).put(h); return 5;
+                        } else o.put(e).put(f).put(g).put(h); return 4;
+                    } else o.put(f).put(g).put(h); return 3;
+                } else o.put(g).put(h); return 2;
+            } else o.put(h); return 1;
+        } else return 0;
     }
 }

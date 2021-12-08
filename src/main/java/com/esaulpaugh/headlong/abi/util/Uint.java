@@ -89,7 +89,7 @@ public final class Uint {
 
     public long toUnsignedLong(long signed) {
         if(maskLong != ZERO) {
-            final int bitLen = signed < 0 ? BizarroIntegers.bitLen(signed) : Integers.bitLen(signed);
+            final int bitLen = Integers.bitLen(signed < 0 ? ~signed : signed);
             if(bitLen < numBits) {
                 return signed & maskLong;
             }
