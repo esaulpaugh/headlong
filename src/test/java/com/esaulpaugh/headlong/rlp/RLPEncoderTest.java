@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.rlp.util.FloatingPoint;
+import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
@@ -106,16 +107,13 @@ public class RLPEncoderTest {
                 0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,
         };
 
-        RLPList longList = RLPDecoder.RLP_STRICT.wrapList(bytes);
+        RLPList orig = RLPDecoder.RLP_STRICT.wrapList(bytes);
+        RLPList rebuilt = RLPEncoder.toList(orig.elements(RLPDecoder.RLP_STRICT));
 
-        List<RLPItem> elements = longList.elements(RLPDecoder.RLP_STRICT);
+        assertEquals(rebuilt.toString(), Notation.forObjects(Notation.parse(rebuilt.toString())).toString());
+        assertEquals(orig.encodingString(Strings.HEX), rebuilt.encodingString(Strings.HEX));
 
-        RLPList rebuilt = RLPEncoder.toList(elements);
-
-//        System.out.println(longList.toString(Strings.HEX));
-//        System.out.println(rebuilt.toString(Strings.HEX));
-
-        assertEquals(longList, rebuilt);
+        assertEquals(orig, rebuilt);
     }
 
     @Test
