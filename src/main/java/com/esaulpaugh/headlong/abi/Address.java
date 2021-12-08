@@ -29,8 +29,8 @@ import java.nio.charset.StandardCharsets;
 public final class Address {
 
     private static final int PREFIX_LEN = 2;
-    private static final int ADDRESS_HEX_CHARS = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
-    private static final int ADDRESS_LEN_CHARS = PREFIX_LEN + ADDRESS_HEX_CHARS;
+    private static final int ADDRESS_DATA_BYTES = TypeFactory.ADDRESS_BIT_LEN / Byte.SIZE;
+    private static final int ADDRESS_LEN_CHARS = PREFIX_LEN + ADDRESS_DATA_BYTES * FastHex.CHARS_PER_BYTE;
     private static final int HEX_RADIX = 16;
 
     private final BigInteger value;
@@ -110,11 +110,11 @@ public final class Address {
     @SuppressWarnings("deprecation")
     private static String doChecksum(final byte[] addressBytes) {
         final Keccak keccak256 = new Keccak(256);
-        keccak256.update(addressBytes, PREFIX_LEN, ADDRESS_HEX_CHARS);
+        keccak256.update(addressBytes, PREFIX_LEN, ADDRESS_DATA_BYTES * FastHex.CHARS_PER_BYTE);
         final int offset = PREFIX_LEN / FastHex.CHARS_PER_BYTE; // offset by one byte so the indices of the hex-encoded hash and the address ascii line up
-        final ByteBuffer digest = ByteBuffer.wrap(new byte[offset + 256 / Byte.SIZE], offset, 32);
-        keccak256.digest(digest);
-        final byte[] hash = FastHex.encodeToBytes(digest.array());
+        final byte[] buffer = new byte[offset + ADDRESS_DATA_BYTES];
+        keccak256.digest(ByteBuffer.wrap(buffer, offset, ADDRESS_DATA_BYTES));
+        final byte[] hash = FastHex.encodeToBytes(buffer);
         for (int i = PREFIX_LEN; i < addressBytes.length; i++) {
             final int c = addressBytes[i];
             switch (hash[i]) {
