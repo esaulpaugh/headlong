@@ -77,7 +77,7 @@ public final class LongType extends UnitType<Long> {
         return 0;
     }
 
-    private static int putLongNegative(long val, ByteBuffer o) {
+    private static void putLongNegative(long val, ByteBuffer o) {
         if (val != -1) {
             byte h = (byte) val;
             if ((val >>= Byte.SIZE) != -1) {
@@ -93,14 +93,14 @@ public final class LongType extends UnitType<Long> {
                                 if ((val >>= Byte.SIZE) != -1) {
                                     byte b = (byte) val;
                                     if ((val >>= Byte.SIZE) != -1) {
-                                        o.put((byte) val).put(b).put(c).put(d).put(e).put(f).put(g).put(h); return 8;
-                                    } else o.put(b).put(c).put(d).put(e).put(f).put(g).put(h); return 7;
-                                } else o.put(c).put(d).put(e).put(f).put(g).put(h); return 6;
-                            } else o.put(d).put(e).put(f).put(g).put(h); return 5;
-                        } else o.put(e).put(f).put(g).put(h); return 4;
-                    } else o.put(f).put(g).put(h); return 3;
-                } else o.put(g).put(h); return 2;
-            } else o.put(h); return 1;
-        } else return 0;
+                                        o.put((byte) val).put(b).put(c).put(d).put(e).put(f).put(g).put(h);
+                                    } else o.put(b).put(c).put(d).put(e).put(f).put(g).put(h);
+                                } else o.put(c).put(d).put(e).put(f).put(g).put(h);
+                            } else o.put(d).put(e).put(f).put(g).put(h);
+                        } else o.put(e).put(f).put(g).put(h);
+                    } else o.put(f).put(g).put(h);
+                } else o.put(g).put(h);
+            } else o.put(h);
+        }
     }
 }
