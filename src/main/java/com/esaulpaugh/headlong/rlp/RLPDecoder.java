@@ -118,7 +118,7 @@ public final class RLPDecoder {
         byte lead = buffer[index];
         DataType type = DataType.type(lead);
         switch (type.ordinal()) {
-        case ORDINAL_SINGLE_BYTE: return new RLPString(buffer, index, index, 1, requireInBounds(index + 1L, buffer.length, buffer, index));
+        case ORDINAL_SINGLE_BYTE: return newSingleByte(buffer, index, buffer.length);
         case ORDINAL_STRING_SHORT: return newStringShort(buffer, index, lead, buffer.length);
         case ORDINAL_STRING_LONG: return newLongItem(buffer, index, lead - type.offset, buffer.length, type.isString);
         default: throw new IllegalArgumentException("item is not a string");
@@ -164,13 +164,18 @@ public final class RLPDecoder {
         byte lead = buffer[index];
         DataType type = DataType.type(lead);
         switch (type.ordinal()) {
-        case ORDINAL_SINGLE_BYTE: return (T) new RLPString(buffer, index, index, 1, requireInBounds(index + 1L, containerEnd, buffer, index));
+        case ORDINAL_SINGLE_BYTE: return (T) newSingleByte(buffer, index, containerEnd);
         case ORDINAL_STRING_SHORT: return (T) newStringShort(buffer, index, lead, containerEnd);
         case ORDINAL_LIST_SHORT: return (T) newListShort(buffer, index, lead, containerEnd);
         case ORDINAL_STRING_LONG:
         case ORDINAL_LIST_LONG: return newLongItem(buffer, index, lead - type.offset, containerEnd, type.isString);
         default: throw new AssertionError();
         }
+    }
+
+    private static RLPString newSingleByte(byte[] buffer, int index, int containerEnd) {
+        final int endIndex = requireInBounds(index + 1L, containerEnd, buffer, index);
+        return new RLPString(buffer, index, index, 1, endIndex);
     }
 
     private RLPString newStringShort(byte[] buffer, int index, byte lead, int containerEnd) {
@@ -183,7 +188,7 @@ public final class RLPDecoder {
         return new RLPString(buffer, index, dataIndex, dataLength, endIndex);
     }
 
-    private RLPList newListShort(byte[] buffer, int index, byte lead, int containerEnd) {
+    private static RLPList newListShort(byte[] buffer, int index, byte lead, int containerEnd) {
         final int dataIndex = index + 1;
         final int dataLength = lead - LIST_SHORT_OFFSET;
         final int endIndex = requireInBounds((long) dataIndex + dataLength, containerEnd, buffer, index);
