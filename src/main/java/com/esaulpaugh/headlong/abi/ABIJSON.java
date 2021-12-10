@@ -321,7 +321,7 @@ public final class ABIJSON {
         @Override
         public void write(int c) {
             if (count + 1 > buf.length) {
-                buf = Arrays.copyOf(buf, buf.length << 1);
+                buf = Arrays.copyOf(buf, buf.length << 1); // expects buf.length to be non-zero
             }
             buf[count++] = (char) c;
         }
