@@ -330,10 +330,13 @@ public class MonteCarloTest {
         final Random r = TestUtils.seededRandom();
         final Keccak k = new Keccak(256);
         final Gson ugly = new GsonBuilder().create();
-        final JsonPrimitive version = new JsonPrimitive("1.4.4+commit.3ad2258");
+        final JsonPrimitive version = new JsonPrimitive("5.6.0+commit.6447409");
         final JsonArray array = new JsonArray();
         for(int i = 0; i < 250; i++) {
-            MonteCarloTestCase testCase = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
+            MonteCarloTestCase testCase;
+            do {
+                testCase = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
+            } while (testCase.argsTuple.isEmpty());
             array.add(testCase.toJsonElement(ugly, "headlong_" + i++, version));
         }
         System.out.println(JsonUtils.toPrettyPrint(array));
