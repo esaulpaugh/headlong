@@ -157,6 +157,8 @@
   <target name="clean.module.headlong" description="cleanup module">
     <delete dir="${headlong.output.dir}"/>
     <delete dir="${headlong.testoutput.dir}"/>
+    <delete dir="${basedir}/build/lib"/>
+    <delete dir="${basedir}/build/classes"/>
   </target>
   
   
