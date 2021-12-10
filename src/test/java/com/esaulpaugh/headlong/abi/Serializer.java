@@ -75,6 +75,11 @@ public class Serializer {
             object.add("type", new JsonPrimitive("buffer"));
             object.add("value", new JsonPrimitive((String) val));
             return object;
+        } else if(val instanceof Address) {
+            JsonObject object = new JsonObject();
+            object.add("type", new JsonPrimitive("string"));
+            object.add("value", new JsonPrimitive(val.toString()));
+            return object;
         } else if(val instanceof boolean[]) {
             JsonArray array = new JsonArray();
             for(boolean e : (boolean[]) val) {
