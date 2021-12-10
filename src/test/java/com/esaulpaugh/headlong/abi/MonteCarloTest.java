@@ -330,7 +330,7 @@ public class MonteCarloTest {
         final Random r = TestUtils.seededRandom();
         final Keccak k = new Keccak(256);
         final Gson ugly = new GsonBuilder().create();
-        final JsonPrimitive version = new JsonPrimitive("5.6.0+commit.6447409");
+        final JsonPrimitive version = new JsonPrimitive("5.6.0+commit.c786693");
         final JsonArray array = new JsonArray();
         for(int i = 0; i < 250; i++) {
             MonteCarloTestCase testCase;
