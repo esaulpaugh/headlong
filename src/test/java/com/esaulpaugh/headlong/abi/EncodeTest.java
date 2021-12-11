@@ -229,6 +229,8 @@ public class EncodeTest {
     @Test
     public void testIllegalSignatures() throws Throwable {
 
+        assertThrownMessageMatch(ClassCastException.class, CLASS_CAST_MESSAGES, () -> Function.parse("f()[]"));
+
         assertThrown(ILLEGAL, "unrecognized type: ", () -> TupleType.parse(""));
         assertThrown(ILLEGAL, "unrecognized type: \"(\"", () -> TupleType.parse("("));
         assertThrown(ILLEGAL, "unrecognized type: \")\"", () -> TupleType.parse(")"));
@@ -245,10 +247,6 @@ public class EncodeTest {
         assertThrown(ILLEGAL, "unrecognized type: \"(()\"", () -> Function.parse("(()"));
         assertThrown(ILLEGAL, "unrecognized type: \"(())...\"", () -> Function.parse("(())..."));
         assertThrown(ILLEGAL, "unrecognized type: \"((((()))\"", () -> Function.parse("((((()))"));
-
-        TestUtils.CustomRunnable r = () -> Function.parse("f()[]");
-
-        assertThrownMessageMatch(ClassCastException.class, CLASS_CAST_MESSAGES, r);
     }
 
     private static void testSIOOBE(String signature) throws Throwable {
