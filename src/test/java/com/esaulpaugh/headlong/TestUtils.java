@@ -78,7 +78,7 @@ public class TestUtils {
         case 6: val &= 0xFFFFFFFFFFFFL; break;
         case 7: val &= 0xFFFFFFFFFFFFFFL; break;
         case 8: break;
-        default: throw new Error();
+        default: throw new IllegalArgumentException("byteLen out of range");
         }
         return unsigned && val < 0 ? ~val : val;
     }
