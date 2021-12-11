@@ -29,6 +29,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RecursiveAction;
@@ -254,6 +255,19 @@ public class TestUtils {
         } catch (Throwable t) {
             if(clazz.isInstance(t)
                     && (t.getMessage() == null || t.getMessage().contains(substr))) {
+                return;
+            }
+            throw t;
+        }
+        throw new AssertionError("no " + clazz.getName() + " thrown");
+    }
+
+    public static void assertThrownMessageMatch(Class<? extends Throwable> clazz, List<String> messages, CustomRunnable r) throws Throwable {
+        try {
+            r.run();
+        } catch (Throwable t) {
+            if(clazz.isInstance(t)
+                    && messages.contains(t.getMessage())) {
                 return;
             }
             throw t;

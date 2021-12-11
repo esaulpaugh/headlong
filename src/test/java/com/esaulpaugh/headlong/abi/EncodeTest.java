@@ -40,6 +40,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
+import static com.esaulpaugh.headlong.TestUtils.assertThrownMessageMatch;
 import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
 import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -217,6 +218,14 @@ public class EncodeTest {
         return sb.toString();
     }
 
+    private static final List<String> CLASS_CAST_MESSAGES = Arrays.asList(
+            "com.esaulpaugh.headlong.abi.ArrayType cannot be cast to com.esaulpaugh.headlong.abi.TupleType",
+            "class com.esaulpaugh.headlong.abi.ArrayType cannot be cast to class com.esaulpaugh.headlong.abi.TupleType",
+            "Cannot cast com.esaulpaugh.headlong.abi.ArrayType to com.esaulpaugh.headlong.abi.TupleType",
+            "Cannot cast class com.esaulpaugh.headlong.abi.ArrayType to class com.esaulpaugh.headlong.abi.TupleType",
+            "com.esaulpaugh.headlong.abi.ArrayType incompatible with com.esaulpaugh.headlong.abi.TupleType" // IBM semeru 1.8.0
+    );
+
     @Test
     public void testIllegalSignatures() throws Throwable {
 
@@ -238,40 +247,21 @@ public class EncodeTest {
         assertThrown(ILLEGAL, "unrecognized type: \"((((()))\"", () -> Function.parse("((((()))"));
 
         TestUtils.CustomRunnable r = () -> Function.parse("f()[]");
-        try {
-            assertThrown(ClassCastException.class, "class com.esaulpaugh.headlong.abi.ArrayType cannot be cast to class com.esaulpaugh.headlong.abi.TupleType", r);
-        } catch (ClassCastException cce) {
-            try {
-                assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.ArrayType cannot be cast to com.esaulpaugh.headlong.abi.TupleType", r);
-            } catch (ClassCastException cce2) {
-                try {
-                    assertThrown(ClassCastException.class, "Cannot cast class com.esaulpaugh.headlong.abi.ArrayType to class com.esaulpaugh.headlong.abi.TupleType", r);
-                } catch(ClassCastException cce3) {
-                    try {
-                        assertThrown(ClassCastException.class, "Cannot cast com.esaulpaugh.headlong.abi.ArrayType to com.esaulpaugh.headlong.abi.TupleType", r);
-                    } catch (ClassCastException cce4) {
-                        assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.ArrayType incompatible with com.esaulpaugh.headlong.abi.TupleType", r);
-                    }
-                }
-            }
-        }
+
+        assertThrownMessageMatch(ClassCastException.class, CLASS_CAST_MESSAGES, r);
     }
 
     private static void testSIOOBE(String signature) throws Throwable {
-        final TestUtils.CustomRunnable closeFn = () -> Function.parse(signature);
-        try {
-            assertThrown(SIOOBE, "begin 0, end -1, length " + signature.length(), closeFn);
-        } catch (StringIndexOutOfBoundsException sioobe) {
-            try {
-                assertThrown(SIOOBE, "String index out of range: -1", closeFn);
-            } catch (StringIndexOutOfBoundsException sioobe2) {
-                try {
-                    assertThrown(SIOOBE, "String index out of range: 0", closeFn);
-                } catch (StringIndexOutOfBoundsException sioobe3) {
-                    assertThrown(SIOOBE, "Range [0, -1) out of bounds for length " + signature.length(), closeFn); // JDK 18
-                }
-            }
-        }
+        assertThrownMessageMatch(
+                SIOOBE,
+                Arrays.asList(
+                        "begin 0, end -1, length " + signature.length(),
+                        "String index out of range: -1",
+                        "String index out of range: 0",
+                        "Range [0, -1) out of bounds for length " + signature.length() // JDK 18
+                ),
+                () -> Function.parse(signature)
+        );
     }
 
     @Test
