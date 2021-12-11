@@ -565,6 +565,7 @@ public class ABIJSONTest {
     private static void testEqualNotSame(ContractError a, ContractError b) {
         assertNotSame(a, b);
         assertEquals(a.hashCode(), b.hashCode());
+        assertEquals(a.toString(), b.toString());
         assertEquals(a, b);
     }
 
