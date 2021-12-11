@@ -1,1 +1,1 @@
-There is none -- and there never will be. Contributors can follow their own personal code of conduct. Similar to real life!
+There is none — and there never will be. Contributors can follow their own personal code of conduct. Similar to real life!
