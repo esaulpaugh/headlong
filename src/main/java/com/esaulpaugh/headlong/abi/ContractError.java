@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 
 import java.util.Objects;
 
-public class ContractError implements ABIObject {
+public final class ContractError implements ABIObject {
 
     private final String name;
     private final TupleType inputs;
