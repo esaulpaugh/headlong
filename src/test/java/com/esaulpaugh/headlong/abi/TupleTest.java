@@ -31,25 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TupleTest {
 
-    private static final Object[] OBJECTS = new Object[] {
-            new byte[0],
-            new int[0],
-            new short[0],
-            new long[0],
-            new boolean[0],
-            new Throwable() {},
-            new BigInteger[0],
-            new BigDecimal[0],
-            true,
-            5,
-            9L,
-            "aha",
-            '\0',
-            Tuple.EMPTY,
-            0.1f,
-            1.9d
-    };
-
     @Disabled("meta test")
     @Test
     public void metaTest1() {
@@ -102,35 +83,52 @@ public class TupleTest {
         assertFalse(new Tuple((Object) null).isEmpty());
     }
 
+    private static final Object[] OBJECTS = new Object[] {
+            new byte[0],
+            new int[0],
+            new short[0],
+            new long[0],
+            new boolean[0],
+            new Throwable() {},
+            new BigInteger[0],
+            new BigDecimal[0],
+            true,
+            5,
+            9L,
+            "aha",
+            '\0',
+            Tuple.EMPTY,
+            0.1f,
+            1.9d
+    };
+
     @Test
     public void testTypeSafety() throws Throwable {
 
         final Random r = TestUtils.seededRandom();
         final Keccak k = new Keccak(256);
+        final int maxTupleLen = 3;
+        final Object defaultObj = new Object();
 
-        for (int i = 0; i < 1000; i++) {
+        long seed = r.nextLong();
+        for (int idx = 0; idx < maxTupleLen; idx++) {
+            for (int i = 0; i < 25; i++, seed++) {
+                r.setSeed(seed);
 
-            r.setSeed(i);
-
-            MonteCarloTestCase testCase = new MonteCarloTestCase(i, 3, 3, 3, 3, r, k);
-
-            Object[] elements = testCase.argsTuple.elements;
-
-            final int idx = 0;
-            if(elements.length > idx) {
-                Object e = elements[idx];
-                Object replacement = OBJECTS[r.nextInt(OBJECTS.length)];
-                if(e.getClass() != replacement.getClass()) {
-                    elements[idx] = replacement;
-                } else {
-                    elements[idx] = new Object();
-                }
-                try {
-                    TestUtils.assertThrown(IllegalArgumentException.class, " but found ", () -> testCase.function.encodeCall(Tuple.of(elements)));
-                } catch (AssertionError ae) {
-                    System.err.println(i);
-                    ae.printStackTrace();
-                    throw ae;
+                final MonteCarloTestCase testCase = new MonteCarloTestCase(seed, maxTupleLen, 3, 3, 3, r, k);
+                final Object[] elements = testCase.argsTuple.elements;
+                if (idx < elements.length) {
+                    Object replacement = OBJECTS[r.nextInt(OBJECTS.length)];
+                    elements[idx] = elements[idx].getClass() != replacement.getClass()
+                            ? replacement
+                            : defaultObj;
+                    try {
+                        TestUtils.assertThrown(IllegalArgumentException.class, " but found ", () -> testCase.function.encodeCall(Tuple.of(elements)));
+                    } catch (AssertionError ae) {
+                        System.err.println("seed = " + seed);
+                        ae.printStackTrace();
+                        throw ae;
+                    }
                 }
             }
         }
