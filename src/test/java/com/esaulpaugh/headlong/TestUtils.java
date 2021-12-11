@@ -80,7 +80,7 @@ public class TestUtils {
         case 8: break;
         default: throw new Error();
         }
-        return unsigned && val < 0 ? -(val + 1) : val;
+        return unsigned && val < 0 ? ~val : val;
     }
 
     public static void shuffle(Object[] arr, Random rand) {
