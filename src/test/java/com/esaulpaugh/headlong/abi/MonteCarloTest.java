@@ -47,8 +47,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.TimeoutException;
 
-import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
+import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 
 public class MonteCarloTest {
 
@@ -169,7 +169,7 @@ public class MonteCarloTest {
 //                        .append(testCase.function.getCanonicalSignature().substring(testCase.function.getCanonicalSignature().indexOf('('))) // print function params
 //                        .append('\n');
             } catch (Throwable t) {
-                System.out.println(log.toString());
+                System.out.println(log);
                 sleep();
                 System.err.println("#" + i + " failed for " + testCase);
                 System.err.println(desc);
@@ -178,7 +178,7 @@ public class MonteCarloTest {
             }
         }
 
-        if(log.length() > 0) System.out.println(log.toString());
+        if(log.length() > 0) System.out.println(log);
         System.out.println(desc);
     }
 

@@ -243,9 +243,9 @@ public class ABIJSONTest {
     }
 
     private static void printTupleType(TupleType tupleType) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder("RECURSIVE = ");
         toString(tupleType, sb);
-        System.out.println("RECURSIVE = " + sb.toString());
+        System.out.println(sb);
     }
 
     @Test

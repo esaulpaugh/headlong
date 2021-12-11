@@ -54,7 +54,7 @@ public class RLPJsonDecodeTest {
                 throwable = t;
             }
             if(!(throwable instanceof IllegalArgumentException)) {
-                System.err.println(Notation.forEncoding(invalidRLP).toString());
+                System.err.println(Notation.forEncoding(invalidRLP));
                 throw new RuntimeException("no decode exception! " + e.getKey() + " " + e.getValue());
             }
         }
