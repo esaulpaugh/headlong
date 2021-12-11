@@ -266,9 +266,11 @@ public class TestUtils {
         try {
             r.run();
         } catch (Throwable t) {
-            if(clazz.isInstance(t)
-                    && messages.contains(t.getMessage())) {
-                return;
+            if(clazz.isInstance(t)) {
+                final String msg = t.getMessage();
+                for(String m : messages) {
+                    if (msg.contains(m)) return;
+                }
             }
             throw t;
         }
