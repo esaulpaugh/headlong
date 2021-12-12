@@ -267,6 +267,7 @@ public final class ABIJSON {
                 tupleType(out, INPUTS, o.getInputs(), null);
             }
             out.endObject();
+            out.close();
             return stringOut.toString();
         } catch (IOException io) {
             throw new RuntimeException(io);
