@@ -244,7 +244,7 @@ public final class ABIJSON {
             out.beginObject();
             if(o.isFunction()) {
                 final Function f = o.asFunction();
-                final TypeEnum t = f.getType();
+                final TypeEnum t = o.getType();
                 type(out, t.toString());
                 if (t != TypeEnum.FALLBACK) {
                     name(out, o.getName());
@@ -257,17 +257,16 @@ public final class ABIJSON {
                 }
                 stateMutability(out, f.getStateMutability());
             } else if (o.isEvent()) {
-                Event e = o.asEvent();
                 type(out, EVENT);
                 name(out, o.getName());
-                tupleType(out, INPUTS, o.getInputs(), e.getIndexManifest());
+                tupleType(out, INPUTS, o.getInputs(), o.asEvent().getIndexManifest());
             } else {
                 type(out, ERROR);
                 name(out, o.getName());
                 tupleType(out, INPUTS, o.getInputs(), null);
             }
-            out.endObject();
-            out.close();
+            out.endObject()
+                    .close();
             return stringOut.toString();
         } catch (IOException io) {
             throw new RuntimeException(io);
