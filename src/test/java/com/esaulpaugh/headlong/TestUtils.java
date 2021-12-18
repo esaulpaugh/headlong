@@ -80,7 +80,10 @@ public class TestUtils {
         case 8: break;
         default: throw new IllegalArgumentException("byteLen out of range");
         }
-        return unsigned && val < 0 ? ~val : val;
+        if(unsigned) {
+            return val < 0 ? ~val : val;
+        }
+        return r.nextBoolean() ? val : ~val;
     }
 
     public static void shuffle(Object[] arr, Random rand) {
