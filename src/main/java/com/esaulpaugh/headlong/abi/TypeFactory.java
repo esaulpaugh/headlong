@@ -185,29 +185,26 @@ public final class TypeFactory {
         try {
             int argStart = 1; // after opening '('
             int argEnd = 1; // inital value important for empty params case: "()"
-            char prevTerminator = ')'; // inital value important for empty params case
+            char terminator = ')'; // inital value important for empty params case
             final int last = rawTypeStr.length() - 1; // must be >= 0
             while (argStart <= last) {
                 char c = rawTypeStr.charAt(argStart);
-                if(c == ',' || (c == ')' && prevTerminator == ',')) {
+                if(c == ',' || (c == ')' && terminator == ',')) {
                     throw new IllegalArgumentException("empty parameter");
                 } else if(c != ')') {
                     argEnd = findArgEnd(rawTypeStr, argStart, c);
                     elements.add(_build(rawTypeStr.substring(argStart, argEnd), null));
-                    prevTerminator = rawTypeStr.charAt(argEnd);
+                    terminator = rawTypeStr.charAt(argEnd);
                 }
-                if(prevTerminator == ')') {
-                    break;
+                if(terminator == ')') {
+                    return argEnd == last ? TupleType.wrap(elements.toArray(EMPTY_ARRAY)) : null;
                 }
                 argStart = argEnd + 1; // jump over terminator
             }
-            if(argEnd == last && prevTerminator == ')') {
-                return TupleType.wrap(elements.toArray(EMPTY_ARRAY));
-            }
+            return null;
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);
         }
-        return null;
     }
 
     private static int findArgEnd(String rawTypeStr, int argStart, char c) {
