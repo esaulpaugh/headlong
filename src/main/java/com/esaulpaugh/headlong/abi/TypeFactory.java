@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static com.esaulpaugh.headlong.abi.ABIType.EMPTY_ARRAY;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_ARRAY_CLASS;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
@@ -183,23 +182,29 @@ public final class TypeFactory {
     private static TupleType parseTupleType(final String rawTypeStr) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final ArrayList<ABIType<?>> elements = new ArrayList<>();
         try {
+            final int len = rawTypeStr.length(); // must be >= 1
             int argStart = 1; // after opening '('
-            int argEnd = 1; // inital value important for empty params case: "()"
-            char terminator = ')'; // inital value important for empty params case
-            final int last = rawTypeStr.length() - 1; // must be >= 0
-            while (argStart <= last) {
-                char c = rawTypeStr.charAt(argStart);
-                if(c == ',' || (c == ')' && terminator == ',')) {
-                    throw new IllegalArgumentException("empty parameter");
-                } else if(c != ')') {
-                    argEnd = findArgEnd(rawTypeStr, argStart, c);
-                    elements.add(_build(rawTypeStr.substring(argStart, argEnd), null));
-                    terminator = rawTypeStr.charAt(argEnd);
+            WHILE:
+            while (argStart < len) {
+                int argEnd;
+                switch (rawTypeStr.charAt(argStart)) {
+                case '(': argEnd = findSubtupleEnd(rawTypeStr, argStart); break;
+                case ')': if("()".equals(rawTypeStr)) return TupleType.empty(); // return new instance, not TupleType.EMPTY
+                case ',': throw new IllegalArgumentException("empty parameter");
+                default: argEnd = argStart;
                 }
-                if(terminator == ')') {
-                    return argEnd == last ? TupleType.wrap(elements.toArray(EMPTY_ARRAY)) : null;
+                for( ; argEnd < len; argEnd++) {
+                    char c = rawTypeStr.charAt(argEnd);
+                    if(c == ',') {
+                        elements.add(_build(rawTypeStr.substring(argStart, argEnd), null));
+                        argStart = argEnd + 1; // jump over terminator
+                        continue WHILE;
+                    } else if(c == ')') {
+                        elements.add(_build(rawTypeStr.substring(argStart, argEnd), null));
+                        return argEnd == len - 1 ? TupleType.wrap(elements) : null;
+                    }
                 }
-                argStart = argEnd + 1; // jump over terminator
+                break;
             }
             return null;
         } catch (IllegalArgumentException iae) {

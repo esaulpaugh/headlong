@@ -335,11 +335,11 @@ public class MonteCarloTestCase implements Serializable {
         return TypeFactory.create(sb.toString());
     }
 
-    private Tuple generateTuple(ABIType<?>[] elementTypes, Random r) {
-        final int size = elementTypes.length;
+    private Tuple generateTuple(List<ABIType<?>> elementTypes, Random r) {
+        final int size = elementTypes.size();
         Object[] args = new Object[size];
         for (int i = 0; i < size; i++) {
-            args[i] = generateValue(elementTypes[i], r);
+            args[i] = generateValue(elementTypes.get(i), r);
         }
         return new Tuple(args);
     }

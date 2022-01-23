@@ -19,6 +19,7 @@ import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.function.IntFunction;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -206,7 +207,7 @@ public abstract class ABIType<J> {
 
     @SuppressWarnings("unchecked")
     public final J decodePacked(byte[] buffer) {
-        return (J) PackedDecoder.decode(TupleType.wrap(this), buffer).get(0);
+        return (J) PackedDecoder.decode(TupleType.wrap(Collections.singletonList(this)), buffer).get(0);
     }
 
     /**

@@ -179,11 +179,11 @@ public final class ABIJSON {
         final JsonArray inputs = getArray(event, INPUTS);
         if (inputs != null) {
             final int inputsLen = inputs.size();
-            final ABIType<?>[] types = new ABIType<?>[inputsLen];
+            final List<ABIType<?>> types = new ArrayList<>(inputsLen);
             final boolean[] indexed = new boolean[inputsLen];
             for (int i = 0; i < inputsLen; i++) {
                 JsonObject inputObj = inputs.get(i).getAsJsonObject();
-                types[i] = parseType(inputObj);
+                types.add(parseType(inputObj));
                 indexed[i] = getBoolean(inputObj, INDEXED);
             }
             return new Event(
@@ -206,9 +206,9 @@ public final class ABIJSON {
         if (array == null || (size = array.size()) <= 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
             return TupleType.EMPTY;
         }
-        final ABIType<?>[] elements = new ABIType[size];
+        final List<ABIType<?>> elements = new ArrayList<>(size);
         for(int i = 0; i < size; i++) {
-            elements[i] = parseType(array.get(i).getAsJsonObject());
+            elements.add(parseType(array.get(i).getAsJsonObject()));
         }
         return TupleType.wrap(elements);
     }
