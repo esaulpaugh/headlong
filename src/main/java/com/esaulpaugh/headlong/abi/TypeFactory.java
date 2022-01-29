@@ -101,15 +101,11 @@ public final class TypeFactory {
 
     @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T create(String rawType, String name) {
-        return (T) build(rawType, null, name);
-    }
-
-    static ABIType<?> build(String rawType, TupleType baseType, String name) {
-        return _build(rawType, baseType)
+        return (T) _build(rawType, null)
                 .setName(name);
     }
 
-    private static ABIType<?> _build(final String rawType, ABIType<?> baseType) {
+    static ABIType<?> _build(final String rawType, ABIType<?> baseType) {
         try {
             final int lastCharIdx = rawType.length() - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array

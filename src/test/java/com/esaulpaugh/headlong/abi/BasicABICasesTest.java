@@ -81,7 +81,7 @@ public class BasicABICasesTest {
             final int size = types.size();
             final ABIType<?>[] arr = new ABIType<?>[size];
             for (int i = 0; i < size; i++) {
-                arr[i] = TypeFactory.build(types.get(i).getAsString(), null, null);
+                arr[i] = TypeFactory.create(types.get(i).getAsString());
             }
             TupleType tt = TupleType.wrap(arr);
 
