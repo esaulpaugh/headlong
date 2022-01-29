@@ -27,6 +27,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TupleTest {
@@ -246,5 +248,27 @@ public class TupleTest {
     @Test
     public void testElementTypes() throws Throwable {
         TestUtils.assertThrown(UnsupportedOperationException.class, () -> TupleType.parse("(bool)").elementTypes().clear());
+    }
+
+    @Test
+    public void testNameOverwrites() {
+        testNameOverwrite("bool", "moo", "jumbo");
+        testNameOverwrite("()", "zZz", "Jumb0");
+    }
+
+    private static void testNameOverwrite(String typeStr, String aName, String cName) {
+        assertNotEquals(aName, cName);
+
+        final ABIType<?> a = TypeFactory.create(typeStr, aName);
+        assertEquals(aName, a.getName());
+
+        final ABIType<?> b = TypeFactory.create(typeStr);
+        assertEquals(aName, a.getName());
+        assertNull(b.getName());
+
+        final ABIType<?> c = TypeFactory.create(typeStr, cName);
+        assertEquals(aName, a.getName());
+        assertNull(b.getName());
+        assertEquals(cName, c.getName());
     }
 }
