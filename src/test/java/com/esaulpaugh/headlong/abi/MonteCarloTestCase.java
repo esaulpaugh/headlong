@@ -140,8 +140,10 @@ public class MonteCarloTestCase implements Serializable {
             baseTypes[FIXED_START_INDEX + i] = FIXED_LIST.get(rng.nextInt(size));
         }
 
-        this.rawSignature = generateFunctionName(rng) + generateTupleTypeString(baseTypes, rng, 0);
-        this.function = new Function(rawSignature);
+        final String name = generateFunctionName(rng);
+        final String params = generateTupleTypeString(baseTypes, rng, 0);
+        this.rawSignature = name + params;
+        this.function = new Function(TypeEnum.FUNCTION, name, TupleType.parse(params), TupleType.EMPTY, null, md);
         this.argsTuple = generateTuple(function.getInputs().elementTypes, rng);
     }
 
