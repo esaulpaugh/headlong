@@ -218,7 +218,7 @@ public final class ABIJSON {
         final String name = getName(object);
         if(type.startsWith(TUPLE)) {
             TupleType baseType = parseTupleType(object, COMPONENTS);
-            return TypeFactory._build(baseType.canonicalType + type.substring(TUPLE.length()), baseType)
+            return TypeFactory.build(baseType.canonicalType + type.substring(TUPLE.length()), baseType)
                     .setName(name);
         }
         return TypeFactory.create(type, name);
