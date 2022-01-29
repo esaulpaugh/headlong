@@ -76,8 +76,8 @@
     <pathelement location="${path.variable.maven_repository}/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar"/>
   </path>
   
-  <path id="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.69.classpath">
-    <pathelement location="${path.variable.maven_repository}/org/bouncycastle/bcprov-jdk15on/1.69/bcprov-jdk15on-1.69.jar"/>
+  <path id="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.70.classpath">
+    <pathelement location="${path.variable.maven_repository}/org/bouncycastle/bcprov-jdk15on/1.70/bcprov-jdk15on-1.70.jar"/>
   </path>
 
   <path id="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.8.2.classpath">
@@ -183,26 +183,26 @@
   <path id="headlong.main.module.production.classpath">
     <path refid="${module.jdk.classpath.headlong.main}"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.8.9.classpath"/>
-    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.69.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.70.classpath"/>
   </path>
   
   <path id="headlong.main.runtime.production.module.classpath">
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.8.9.classpath"/>
-    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.69.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.70.classpath"/>
   </path>
   
   <path id="headlong.main.module.classpath">
     <path refid="${module.jdk.classpath.headlong.main}"/>
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.8.9.classpath"/>
-    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.69.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.70.classpath"/>
   </path>
   
   <path id="headlong.main.runtime.module.classpath">
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.8.9.classpath"/>
-    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.69.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.70.classpath"/>
   </path>
   
   
@@ -271,14 +271,14 @@
     <path refid="${module.jdk.classpath.headlong.jmh}"/>
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.8.9.classpath"/>
-    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.69.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.70.classpath"/>
   </path>
   
   <path id="headlong.jmh.runtime.production.module.classpath">
     <pathelement location="${headlong.jmh.output.dir}"/>
     <path refid="headlong.main.runtime.production.module.classpath"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.8.9.classpath"/>
-    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.69.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.70.classpath"/>
   </path>
   
   <path id="headlong.jmh.module.classpath">
@@ -286,14 +286,14 @@
     <pathelement location="${headlong.jmh.output.dir}"/>
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.8.9.classpath"/>
-    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.69.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.70.classpath"/>
   </path>
   
   <path id="headlong.jmh.runtime.module.classpath">
     <pathelement location="${headlong.jmh.output.dir}"/>
     <path refid="headlong.main.runtime.module.classpath"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.8.9.classpath"/>
-    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.69.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.70.classpath"/>
   </path>
   
   
@@ -340,7 +340,7 @@
     <path refid="${module.jdk.classpath.headlong.test}"/>
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.8.9.classpath"/>
-    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.69.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.70.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.8.1.classpath"/>
     <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.8.2.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-engine:1.8.1.classpath"/>
@@ -351,7 +351,7 @@
   <path id="headlong.test.runtime.production.module.classpath">
     <path refid="headlong.main.runtime.production.module.classpath"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.8.9.classpath"/>
-    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.69.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.70.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.8.1.classpath"/>
     <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.8.2.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-engine:1.8.1.classpath"/>
@@ -364,7 +364,7 @@
     <path refid="${module.jdk.classpath.headlong.test}"/>
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.8.9.classpath"/>
-    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.69.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.70.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.8.1.classpath"/>
     <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.8.2.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-engine:1.8.1.classpath"/>
@@ -377,7 +377,7 @@
     <pathelement location="${headlong.test.testoutput.dir}"/>
     <path refid="headlong.main.runtime.module.classpath"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.8.9.classpath"/>
-    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.69.classpath"/>
+    <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk15on:1.70.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.8.1.classpath"/>
     <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.8.2.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-engine:1.8.1.classpath"/>
