@@ -140,10 +140,7 @@ public class EncodeTest {
         final int size = map.size();
         System.out.println("\nsize=" + size);
 
-        List<String> list = new ArrayList<>();
-        for(Map.Entry<String, String> e : map.entrySet()) {
-            list.add(e.getKey());
-        }
+        List<String> list = Collections.list(map.keys());
         Collections.sort(list);
 
         list.forEach(System.out::println);
