@@ -27,7 +27,7 @@ public final class JsonUtils {
     private JsonUtils() {}
 
     public static JsonElement parse(String json) {
-        return JsonParser.parseString(json);
+        return new JsonParser().parse(json); // JsonParser.parseString(json);
     }
 
     public static JsonObject parseObject(String json) {
