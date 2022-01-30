@@ -36,10 +36,6 @@ public class RLPOutputStream extends OutputStream {
         this.out = Objects.requireNonNull(out);
     }
 
-    public ByteArrayOutputStream getByteArrayOutputStream() {
-        return (ByteArrayOutputStream) out;
-    }
-
     @Override
     public void write(int b) throws IOException {
         writeOut(RLPEncoder.encodeString((byte) b));

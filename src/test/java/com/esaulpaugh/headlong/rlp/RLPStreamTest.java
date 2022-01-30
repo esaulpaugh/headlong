@@ -71,26 +71,25 @@ public class RLPStreamTest {
 				new Object[] { new byte[] { 0x77, 0x61 } }
 		};
 		TestUtils.assertThrown(NullPointerException.class, () -> {try(RLPOutputStream ros = new RLPOutputStream(null)){}});
-		try (RLPOutputStream ros = new RLPOutputStream(new Baos())) {
+		try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos)) {
 			ros.write(0xc0);
 			ros.write(new byte[] { (byte) 0x7f, (byte) 0x20 });
 			ros.writeAll(new byte[] { 0x01 }, new byte[] { 0x02 });
 			ros.writeAll(Collections.singletonList(new byte[] { 0x03 }));
 			ros.writeList(new byte[] { 0x04 }, new byte[] { 0x05 }, new byte[] { 0x06 });
-			byte[] bytes = ros.getByteArrayOutputStream().toByteArray();
+			byte[] bytes = baos.toByteArray();
 			assertEquals("81c0827f20010203c3040506", Strings.encode(bytes));
 		}
-		try (RLPOutputStream ros = new RLPOutputStream(new Baos())) {
+		try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos)) {
 			Notation notation = Notation.forObjects(objects);
 			ros.writeAll(objects);
-			byte[] bytes = ros.getByteArrayOutputStream().toByteArray();
+			byte[] bytes = baos.toByteArray();
 			assertEquals(notation, Notation.forEncoding(bytes));
 		}
 		try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos)) {
 			ros.writeList(Arrays.asList(objects));
-			byte[] bytes = ros.getByteArrayOutputStream().toByteArray();
+			byte[] bytes = baos.toByteArray();
 			assertEquals(Notation.forObjects(new Object[] { objects }), Notation.forEncoding(bytes));
-			assertEquals("ce880573490923738490c0c3827761", ros.getByteArrayOutputStream().toString());
 			assertEquals("ce880573490923738490c0c3827761", baos.toString());
 			assertEquals("ce880573490923738490c0c3827761", ros.toString());
 		}
