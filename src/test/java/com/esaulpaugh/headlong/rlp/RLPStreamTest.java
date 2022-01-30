@@ -99,7 +99,8 @@ public class RLPStreamTest {
     public void testObjectRLPStream() throws IOException {
 
         // write RLP
-        RLPOutputStream ros = new RLPOutputStream(new Baos());
+        Baos baos = new Baos();
+        RLPOutputStream ros = new RLPOutputStream(baos);
 		try (ObjectOutputStream oos = new ObjectOutputStream(ros)) {
 			oos.writeUTF("hello");
 //        oos.flush();
@@ -109,7 +110,7 @@ public class RLPStreamTest {
 		}
 
         // decode RLP
-        Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(ros.getByteArrayOutputStream().toByteArray());
+        Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(baos.toByteArray());
         ByteArrayOutputStream decoded = new ByteArrayOutputStream();
         int count = 0;
         while (iter.hasNext()) {
