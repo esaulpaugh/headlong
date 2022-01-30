@@ -53,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MonteCarloTestCase implements Serializable {
+public class MonteCarloTestCase {
 
     private static final int DEFAULT_MAX_TUPLE_DEPTH = 3;
     private static final int DEFAULT_MAX_TUPLE_LENGTH = 3;
