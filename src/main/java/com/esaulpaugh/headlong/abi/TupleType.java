@@ -65,10 +65,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return elementTypes[index];
     }
 
-    public List<ABIType<?>> elementTypes() {
-        return Collections.unmodifiableList(Arrays.asList(elementTypes));
-    }
-
     @Override
     Class<?> arrayClass() {
         return Tuple[].class;

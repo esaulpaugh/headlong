@@ -22,9 +22,11 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -125,7 +127,7 @@ public class TupleTest {
                             ? replacement
                             : defaultObj;
                     try {
-                        TestUtils.assertThrown(IllegalArgumentException.class, " but found ", () -> testCase.function.encodeCall(Tuple.of(elements)));
+                        assertThrown(IllegalArgumentException.class, " but found ", () -> testCase.function.encodeCall(Tuple.of(elements)));
                     } catch (AssertionError ae) {
                         System.err.println("seed = " + seed);
                         ae.printStackTrace();
@@ -146,7 +148,7 @@ public class TupleTest {
             if(args.elements.length > 0) {
                 int idx = r.nextInt(args.elements.length);
                 replace(args.elements, idx);
-                TestUtils.assertThrown(IllegalArgumentException.class, "null", () -> mctc.function.encodeCall(args));
+                assertThrown(IllegalArgumentException.class, "null", () -> mctc.function.encodeCall(args));
             }
         }
     }
@@ -200,7 +202,7 @@ public class TupleTest {
 
         int start = 1 + rand.nextInt(len);
         int end = rand.nextInt(start);
-        TestUtils.assertThrown(IllegalArgumentException.class, start + " > " + end, () -> tuple.subtuple(start, end));
+        assertThrown(IllegalArgumentException.class, start + " > " + end, () -> tuple.subtuple(start, end));
 
         for (int i = 0; i <= len; i++) {
             for (int j = len; j >= i; j--) {
@@ -229,8 +231,8 @@ public class TupleTest {
         assertEquals(TupleType.of("bytes3", "uint16[]"), tt.subTupleType(true, true, false));
         assertEquals(TupleType.of("bytes3", "uint16[]", "string"), tt.subTupleType(true, true, true));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(true, true));
-        TestUtils.assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(false, false, false, false));
+        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(true, true));
+        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(false, false, false, false));
 
         assertEquals(TupleType.of("bytes3", "uint16[]", "string"), tt.subTupleTypeNegative(false, false, false));
         assertEquals(TupleType.of("bytes3", "uint16[]"), tt.subTupleTypeNegative(false, false, true));
@@ -241,13 +243,8 @@ public class TupleTest {
         assertEquals(TupleType.of("string"), tt.subTupleTypeNegative(true, true, false));
         assertEquals(TupleType.EMPTY, tt.subTupleTypeNegative(true, true, true));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(new boolean[0]));
-        TestUtils.assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(new boolean[5]));
-    }
-
-    @Test
-    public void testElementTypes() throws Throwable {
-        TestUtils.assertThrown(UnsupportedOperationException.class, () -> TupleType.parse("(bool)").elementTypes().clear());
+        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(new boolean[0]));
+        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(new boolean[5]));
     }
 
     @Test
@@ -270,5 +267,28 @@ public class TupleTest {
         assertEquals(aName, a.getName());
         assertNull(b.getName());
         assertEquals(cName, c.getName());
+    }
+
+    @Test
+    public void testTupleImmutability() throws Throwable {
+        Object[] args = new Object[] { "a", "b", "c" };
+        Tuple t = new Tuple((Object[]) args);
+
+        args[1] = 'x';
+        assertEquals("a", t.get(0));
+        assertEquals("b", t.get(1));
+        assertEquals("c", t.get(2));
+
+        testRemove(t.iterator());
+    }
+
+    @Test
+    public void testTupleTypeImmutability() throws Throwable {
+        testRemove(TupleType.parse("(bool,int,string)").iterator());
+    }
+
+    private static void testRemove(Iterator<?> iter) throws Throwable {
+        iter.next();
+        assertThrown(UnsupportedOperationException.class, iter::remove);
     }
 }
