@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<verification-metadata>
+    <configuration>
+        <verify-metadata>true</verify-metadata>
+        <verify-signatures>false</verify-signatures>
+        <!--        <trusted-keys>-->
+        <!--            <trusted-key id="d2ea6bcd43b3663cdf6222c135ae09fd38f0cfae" group="com.esaulpaugh"/>-->
+        <!--        </trusted-keys>-->
+    </configuration>
+    <components>
+        <component group="org.sonatype.oss" name="oss-parent" version="7">
+            <artifact name="oss-parent-7.pom">
+                <sha256 value="b51f8867c92b6a722499557fc3a1fdea77bdf9ef574722fe90ce436a29559454" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="com.google.code.gson" name="gson" version="2.8.9">
+            <artifact name="gson-2.8.9.jar">
+                <sha256 value="d3999291855de495c94c743761b8ab5176cfeabe281a5ab0d8e8d45326fd703e" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="gson-2.8.9.pom">
+                <sha256 value="afded6e6a690fbf3ad4ae65ada397f0a90a5f630b303d1b741b9c97926fdd4de" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="com.google.code.gson" name="gson-parent" version="2.8.9">
+            <artifact name="gson-parent-2.8.9.pom">
+                <sha256 value="b16e026e63427c1972ad0fc68703ec379b1576e411ba49c32fa9a31ab0bbcffb" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.bouncycastle" name="bcprov-jdk15on" version="1.70">
+            <artifact name="bcprov-jdk15on-1.70.jar">
+                <sha256 value="8f3c20e3e2d565d26f33e8d4857a37d0d7f8ac39b62a7026496fcab1bdac30d4" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="bcprov-jdk15on-1.70.pom">
+                <sha256 value="6df4b5b76d9062017664ad0ca285e57154ae803607cb89c970b39cc0e016abb0" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="net.sf.jopt-simple" name="jopt-simple" version="5.0.4">
+            <artifact name="jopt-simple-5.0.4.jar">
+                <sha256 value="df26cc58f235f477db07f753ba5a3ab243ebe5789d9f89ecf68dd62ea9a66c28" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="jopt-simple-5.0.4.pom">
+                <sha256 value="6a67763b76afcd9c80b95e5c5e24782d18cc1b0e3d9b454ad3f8754c76b76815" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.apache.commons" name="commons-math3" version="3.2">
+            <artifact name="commons-math3-3.2.jar">
+                <sha256 value="6268a9a0ea3e769fc493a21446664c0ef668e48c93d126791f6f3f757978fee2" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="commons-math3-3.2.pom">
+                <sha256 value="2cd0db7bce370c1404025cc013c11f8fd49f3f3c340a6d2dcf99d363d7948a69" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.apache" name="apache" version="13">
+            <artifact name="apache-13.pom">
+                <sha256 value="ff513db0361fd41237bef4784968bc15aae478d4ec0a9496f811072ccaf3841d" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.apache.commons" name="commons-math3" version="3.2">
+            <artifact name="commons-math3-3.2.jar">
+                <sha256 value="6268a9a0ea3e769fc493a21446664c0ef668e48c93d126791f6f3f757978fee2" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="commons-math3-3.2.pom">
+                <sha256 value="2cd0db7bce370c1404025cc013c11f8fd49f3f3c340a6d2dcf99d363d7948a69" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="commons-codec" name="commons-codec" version="1.15">
+            <artifact name="commons-codec-1.15.jar">
+                <sha256 value="b3e9f6d63a790109bf0d056611fbed1cf69055826defeb9894a71369d246ed63" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="commons-codec-1.15.pom">
+                <sha256 value="c86ee198a35a3715487860f419cbf642e7e4d9e8714777947dbe6a4e3a20ab58" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.apache.commons" name="commons-parent" version="28">
+            <artifact name="commons-parent-28.pom">
+                <sha256 value="14733a68e8b120b69de60cd96d222146dcf32f03c1c6cc6a750b1269bafe86c7" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.openjdk.jmh" name="jmh-core" version="1.34">
+            <artifact name="jmh-core-1.34.jar">
+                <sha256 value="904384762d2ffeca8005aa9b432a7891a0e60c888bfd36f61dfcfa97c3a1d1b3" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="jmh-core-1.34.pom">
+                <sha256 value="7e98fca63afd63414749659deef53ac0eb683f371e0ef68c6165aec09006b81b" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.apache" name="apache" version="23">
+            <artifact name="apache-23.pom">
+                <sha256 value="bc10624e0623f36577fac5639ca2936d3240ed152fb6d8d533ab4d270543491c" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.openjdk.jmh" name="jmh-parent" version="1.34">
+            <artifact name="jmh-parent-1.34.pom">
+                <sha256 value="22f51244a06286746774c7fcbea013b0ccef8e2be782edecdc824cec9aeebfa0" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.apache.commons" name="commons-parent" version="52">
+            <artifact name="commons-parent-52.pom">
+                <sha256 value="75dbe8f34e98e4c3ff42daae4a2f9eb4cbcd3b5f1047d54460ace906dbb4502e" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.openjdk.jmh" name="jmh-generator-annprocess" version="1.34">
+            <artifact name="jmh-generator-annprocess-1.34.jar">
+                <sha256 value="aa0feeefc0da59427b14c50139cba6deba211750e0033fdc39a5b3b8008b2900" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="jmh-generator-annprocess-1.34.pom">
+                <sha256 value="38ffffdcdc69cf30a8b1aa9d90f5bce743aecaa81e6c4e7d7efdd57bc28e4812" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.junit.platform" name="junit-platform-commons" version="1.8.2">
+            <artifact name="junit-platform-commons-1.8.2.jar">
+                <sha256 value="d2e015fca7130e79af2f4608dc54415e4b10b592d77333decb4b1a274c185050" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="junit-platform-commons-1.8.2.module">
+                <sha256 value="342847d3046fea435595692db4f05d5f039e0e1d1e204f4d5755902557082626" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.apiguardian" name="apiguardian-api" version="1.1.2">
+            <artifact name="apiguardian-api-1.1.2.jar">
+                <sha256 value="b509448ac506d607319f182537f0b35d71007582ec741832a1f111e5b5b70b38" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="apiguardian-api-1.1.2.module">
+                <sha256 value="e08028131375b357d1d28734e9a4fb4216da84b240641cb3ef7e7c7d628223fc" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.junit.jupiter" name="junit-jupiter-api" version="5.8.2">
+            <artifact name="junit-jupiter-api-5.8.2.jar">
+                <sha256 value="1808ee87e0f718cd6e25f3b75afc17956ac8a3edc48c7e9bab9f19f9a79e3801" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="junit-jupiter-api-5.8.2.module">
+                <sha256 value="7e9af4dfff6267acddd157d9e11ba0d5dc91b332fa74bc4c65939e4517a1b770" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.junit" name="junit-bom" version="5.8.2">
+            <artifact name="junit-bom-5.8.2.module">
+                <sha256 value="40cfad993fa70ecdf2af74d0c56da1484ee220964be8f932cfe632be9a2733fa" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.opentest4j" name="opentest4j" version="1.2.0">
+            <artifact name="opentest4j-1.2.0.jar">
+                <sha256 value="58812de60898d976fb81ef3b62da05c6604c18fd4a249f5044282479fc286af2" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="opentest4j-1.2.0.pom">
+                <sha256 value="a96e671816c1ff8803bdec74c9241f025bdfb277da5d2b4ee02266405936f994" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.junit.platform" name="junit-platform-engine" version="1.8.2">
+            <artifact name="junit-platform-engine-1.8.2.jar">
+                <sha256 value="0b7d000f8c3e8e5f7d6b819649936e7b9938314e87c8f983805218ea57567e59" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="junit-platform-engine-1.8.2.module">
+                <sha256 value="eba77b36efdf75a67f46438333825f9e448f550d521e7249d950358580ee636b" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.junit.jupiter" name="junit-jupiter-engine" version="5.8.2">
+            <artifact name="junit-jupiter-engine-5.8.2.jar">
+                <sha256 value="753b7726cdd158bb34cedb94c161e2291896f47832a1e9eda53d970020a8184e" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="junit-jupiter-engine-5.8.2.module">
+                <sha256 value="a56204c716c2379970ca8e3fe2a72e3a030cd9027328d3ce1457dd10c0150e7e" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+    </components>
+</verification-metadata>
