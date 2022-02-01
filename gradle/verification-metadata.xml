@@ -155,6 +155,9 @@
             <artifact name="junit-bom-5.8.2.module">
                 <sha256 value="40cfad993fa70ecdf2af74d0c56da1484ee220964be8f932cfe632be9a2733fa" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
+            <artifact name="junit-bom-5.8.2.pom">
+                <sha256 value="836069ca9e8ee3c56e48376222da291263f137bd3fd16d84fdd47efcc3f286e2" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
         </component>
 
         <component group="org.bouncycastle" name="bcprov-jdk15on" version="1.70">
