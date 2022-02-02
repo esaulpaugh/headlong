@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.assertThrownMessageMatch;
@@ -54,6 +55,9 @@ public class EncodeTest {
     private static final Class<StringIndexOutOfBoundsException> SIOOBE = StringIndexOutOfBoundsException.class;
 
     private static final String EMPTY_PARAMETER = "empty parameter";
+
+    private static final Pattern TYPE_PATTERN = Pattern.compile("[()a-z0-9\\[\\]]+[\\[0-9*\\]]*");
+    private static final Pattern TUPLE_TYPE_PATTERN = Pattern.compile("^\\((" + TYPE_PATTERN + ")*(," + TYPE_PATTERN + ")*\\)$");
 
     @Disabled("may take minutes to run")
     @Test
@@ -118,6 +122,14 @@ public class EncodeTest {
                         String canon = tt.canonicalType;
                         map.put(sig, canon);
                         System.out.println("\t\t\t" + len + ' ' + sig + (sig.equals(canon) ? "" : " --> " + canon));
+                        if(!TUPLE_TYPE_PATTERN.matcher(sig).matches() || !TUPLE_TYPE_PATTERN.matcher(canon).matches()) {
+                            throw new RuntimeException(sig + " " + canon);
+                        }
+                        for (ABIType<?> t : tt) {
+                            if(!TYPE_PATTERN.matcher(t.canonicalType).matches()) {
+                                throw new RuntimeException(t.canonicalType);
+                            }
+                        }
                     } catch (IllegalArgumentException | ClassCastException ignored) {
                         /* do nothing */
                     } catch (Throwable t) {
