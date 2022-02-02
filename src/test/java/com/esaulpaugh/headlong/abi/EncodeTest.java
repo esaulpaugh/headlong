@@ -56,7 +56,7 @@ public class EncodeTest {
 
     private static final String EMPTY_PARAMETER = "empty parameter";
 
-    private static final Pattern TYPE_PATTERN = Pattern.compile("[()a-z0-9\\[\\]]+[\\[0-9*\\]]*");
+    private static final Pattern TYPE_PATTERN = Pattern.compile("[(,)a-z0-9\\[\\]]+[\\[0-9*\\]]*");
     private static final Pattern TUPLE_TYPE_PATTERN = Pattern.compile("^\\((" + TYPE_PATTERN + ")*(," + TYPE_PATTERN + ")*\\)$");
 
     @Disabled("may take minutes to run")
@@ -122,13 +122,16 @@ public class EncodeTest {
                         String canon = tt.canonicalType;
                         map.put(sig, canon);
                         System.out.println("\t\t\t" + len + ' ' + sig + (sig.equals(canon) ? "" : " --> " + canon));
-                        if(!TUPLE_TYPE_PATTERN.matcher(sig).matches() || !TUPLE_TYPE_PATTERN.matcher(canon).matches()) {
-                            throw new RuntimeException(sig + " " + canon);
+                        if(!TYPE_PATTERN.matcher(sig).matches() || !TYPE_PATTERN.matcher(canon).matches()) {
+                            throw new RuntimeException("tuple fails TYPE_PATTERN: " + sig + " " + canon);
                         }
                         for (ABIType<?> t : tt) {
                             if(!TYPE_PATTERN.matcher(t.canonicalType).matches()) {
-                                throw new RuntimeException(t.canonicalType);
+                                throw new RuntimeException("element fails TYPE_PATTERN: " + t.canonicalType);
                             }
+                        }
+                        if(!TUPLE_TYPE_PATTERN.matcher(sig).matches() || !TUPLE_TYPE_PATTERN.matcher(canon).matches()) {
+                            throw new RuntimeException("tuple fails TUPLE_TYPE_PATTERN: " + sig + " " + canon);
                         }
                     } catch (IllegalArgumentException | ClassCastException ignored) {
                         /* do nothing */
