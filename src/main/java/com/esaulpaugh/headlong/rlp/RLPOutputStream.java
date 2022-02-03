@@ -32,20 +32,8 @@ public class RLPOutputStream extends OutputStream {
 
     private final OutputStream out;
 
-    public RLPOutputStream() {
-        this.out = new Baos();
-    }
-
     public RLPOutputStream(OutputStream out) {
         this.out = Objects.requireNonNull(out);
-    }
-
-    public ByteArrayOutputStream getByteArrayOutputStream() {
-        return (ByteArrayOutputStream) out;
-    }
-
-    public OutputStream getOutputStream() {
-        return out;
     }
 
     @Override
@@ -88,7 +76,7 @@ public class RLPOutputStream extends OutputStream {
         return out.toString();
     }
     
-    private static class Baos extends ByteArrayOutputStream {
+    public static class Baos extends ByteArrayOutputStream {
 
         Baos() {}
     	

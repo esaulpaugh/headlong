@@ -27,17 +27,16 @@ import org.opentest4j.AssertionFailedError;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.assertThrownMessageMatch;
@@ -56,6 +55,13 @@ public class EncodeTest {
     private static final Class<StringIndexOutOfBoundsException> SIOOBE = StringIndexOutOfBoundsException.class;
 
     private static final String EMPTY_PARAMETER = "empty parameter";
+
+    private static final String LETTERS     = "abcdefgilmnorstuxy";
+    private static final String BASE_TYPE   = "[(" + LETTERS + "]+[" + LETTERS + ")0-9]+";
+    private static final String SUFFIX      = "(\\)|\\[[0-9]*])*";
+    private static final String SINGLE_TYPE = BASE_TYPE + SUFFIX;
+    private static final Pattern TYPE_PATTERN       = Pattern.compile("(" + SINGLE_TYPE + ")*(," + SINGLE_TYPE + ")*");
+    private static final Pattern TUPLE_TYPE_PATTERN = Pattern.compile("^\\(" + TYPE_PATTERN + "\\)$");
 
     @Disabled("may take minutes to run")
     @Test
@@ -120,6 +126,17 @@ public class EncodeTest {
                         String canon = tt.canonicalType;
                         map.put(sig, canon);
                         System.out.println("\t\t\t" + len + ' ' + sig + (sig.equals(canon) ? "" : " --> " + canon));
+                        if(!TYPE_PATTERN.matcher(sig).matches() || !TYPE_PATTERN.matcher(canon).matches()) {
+                            throw new RuntimeException("tuple fails TYPE_PATTERN: " + sig + " " + canon);
+                        }
+                        for (ABIType<?> t : tt) {
+                            if(!TYPE_PATTERN.matcher(t.canonicalType).matches()) {
+                                throw new RuntimeException("element fails TYPE_PATTERN: " + t.canonicalType);
+                            }
+                        }
+                        if(!TUPLE_TYPE_PATTERN.matcher(sig).matches() || !TUPLE_TYPE_PATTERN.matcher(canon).matches()) {
+                            throw new RuntimeException("tuple fails TUPLE_TYPE_PATTERN: " + sig + " " + canon);
+                        }
                     } catch (IllegalArgumentException | ClassCastException ignored) {
                         /* do nothing */
                     } catch (Throwable t) {
@@ -140,10 +157,7 @@ public class EncodeTest {
         final int size = map.size();
         System.out.println("\nsize=" + size);
 
-        List<String> list = new ArrayList<>();
-        for(Map.Entry<String, String> e : map.entrySet()) {
-            list.add(e.getKey());
-        }
+        List<String> list = Collections.list(map.keys());
         Collections.sort(list);
 
         list.forEach(System.out::println);

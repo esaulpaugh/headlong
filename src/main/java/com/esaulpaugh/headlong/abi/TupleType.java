@@ -20,7 +20,6 @@ import com.esaulpaugh.headlong.util.SuperSerial;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.IntFunction;
@@ -63,10 +62,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     public ABIType<?> get(int index) {
         return elementTypes[index];
-    }
-
-    public List<ABIType<?>> elementTypes() {
-        return Collections.unmodifiableList(Arrays.asList(elementTypes));
     }
 
     @Override

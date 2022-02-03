@@ -218,12 +218,10 @@ public final class ABIJSON {
         final String name = getName(object);
         if(type.startsWith(TUPLE)) {
             TupleType baseType = parseTupleType(object, COMPONENTS);
-            return TypeFactory.build(
-                    baseType.canonicalType + type.substring(TUPLE.length()), // + suffix e.g. "[4][]"
-                    baseType,
-                    name);
+            return TypeFactory.build(baseType.canonicalType + type.substring(TUPLE.length()), baseType)
+                    .setName(name);
         }
-        return TypeFactory.build(type, null, name);
+        return TypeFactory.create(type, name);
     }
 
     private static String getType(JsonObject obj) {

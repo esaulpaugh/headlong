@@ -35,14 +35,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
-import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
+import static com.esaulpaugh.headlong.rlp.RLPOutputStream.Baos;
+import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -71,27 +71,26 @@ public class RLPStreamTest {
 				new Object[] { new byte[] { 0x77, 0x61 } }
 		};
 		TestUtils.assertThrown(NullPointerException.class, () -> {try(RLPOutputStream ros = new RLPOutputStream(null)){}});
-		try (RLPOutputStream ros = new RLPOutputStream()) {
+		try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos)) {
 			ros.write(0xc0);
 			ros.write(new byte[] { (byte) 0x7f, (byte) 0x20 });
 			ros.writeAll(new byte[] { 0x01 }, new byte[] { 0x02 });
 			ros.writeAll(Collections.singletonList(new byte[] { 0x03 }));
 			ros.writeList(new byte[] { 0x04 }, new byte[] { 0x05 }, new byte[] { 0x06 });
-			byte[] bytes = ros.getByteArrayOutputStream().toByteArray();
+			byte[] bytes = baos.toByteArray();
 			assertEquals("81c0827f20010203c3040506", Strings.encode(bytes));
 		}
-		try (RLPOutputStream ros = new RLPOutputStream()) {
+		try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos)) {
 			Notation notation = Notation.forObjects(objects);
 			ros.writeAll(objects);
-			byte[] bytes = ros.getByteArrayOutputStream().toByteArray();
+			byte[] bytes = baos.toByteArray();
 			assertEquals(notation, Notation.forEncoding(bytes));
 		}
-		try (RLPOutputStream ros = new RLPOutputStream()) {
+		try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos)) {
 			ros.writeList(Arrays.asList(objects));
-			byte[] bytes = ros.getByteArrayOutputStream().toByteArray();
+			byte[] bytes = baos.toByteArray();
 			assertEquals(Notation.forObjects(new Object[] { objects }), Notation.forEncoding(bytes));
-			assertEquals("ce880573490923738490c0c3827761", ros.getByteArrayOutputStream().toString());
-			assertEquals("ce880573490923738490c0c3827761", ros.getOutputStream().toString());
+			assertEquals("ce880573490923738490c0c3827761", baos.toString());
 			assertEquals("ce880573490923738490c0c3827761", ros.toString());
 		}
 	}
@@ -100,7 +99,8 @@ public class RLPStreamTest {
     public void testObjectRLPStream() throws IOException {
 
         // write RLP
-        RLPOutputStream ros = new RLPOutputStream();
+        Baos baos = new Baos();
+        RLPOutputStream ros = new RLPOutputStream(baos);
 		try (ObjectOutputStream oos = new ObjectOutputStream(ros)) {
 			oos.writeUTF("hello");
 //        oos.flush();
@@ -110,7 +110,7 @@ public class RLPStreamTest {
 		}
 
         // decode RLP
-        Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(ros.getByteArrayOutputStream().toByteArray());
+        Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(baos.toByteArray());
         ByteArrayOutputStream decoded = new ByteArrayOutputStream();
         int count = 0;
         while (iter.hasNext()) {

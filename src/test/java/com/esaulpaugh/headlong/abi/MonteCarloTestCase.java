@@ -24,7 +24,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -53,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MonteCarloTestCase implements Serializable {
+public class MonteCarloTestCase {
 
     private static final int DEFAULT_MAX_TUPLE_DEPTH = 3;
     private static final int DEFAULT_MAX_TUPLE_LENGTH = 3;
@@ -140,8 +139,10 @@ public class MonteCarloTestCase implements Serializable {
             baseTypes[FIXED_START_INDEX + i] = FIXED_LIST.get(rng.nextInt(size));
         }
 
-        this.rawSignature = generateFunctionName(rng) + generateTupleTypeString(baseTypes, rng, 0);
-        this.function = new Function(rawSignature);
+        final String name = generateFunctionName(rng);
+        final String params = generateTupleTypeString(baseTypes, rng, 0);
+        this.rawSignature = name + params;
+        this.function = new Function(TypeEnum.FUNCTION, name, TupleType.parse(params), TupleType.EMPTY, null, md);
         this.argsTuple = generateTuple(function.getInputs().elementTypes, rng);
     }
 

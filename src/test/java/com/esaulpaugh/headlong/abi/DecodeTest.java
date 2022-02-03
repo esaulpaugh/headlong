@@ -30,7 +30,6 @@ import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class DecodeTest {
 
@@ -294,21 +293,6 @@ public class DecodeTest {
         array[array.length - 1] = (byte) 0xFE;
 
         assertThrown(IllegalArgumentException.class, "illegal boolean value @ 68", () -> f.decodeCall(array));
-    }
-
-    @Test
-    public void testNameOverwrite() {
-        BooleanType t = TypeFactory.create("bool", "moo");
-        assertEquals("moo", t.getName());
-
-        BooleanType q = TypeFactory.create("bool");
-        assertEquals("moo", t.getName());
-        assertNull(q.getName());
-
-        BooleanType z = TypeFactory.create("bool", "jumbo");
-        assertEquals("moo", t.getName());
-        assertNull(q.getName());
-        assertEquals("jumbo", z.getName());
     }
 
     @Test
