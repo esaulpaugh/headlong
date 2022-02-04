@@ -93,19 +93,20 @@ public final class FastHex {
         return decodeNibble(extractor.applyAsInt(offset), offset) << BITS_PER_CHAR | decodeNibble(extractor.applyAsInt(++offset), offset);
     }
 
-    public static void decode(final String in, int offset, final int len, final byte[] out, int outOffset) {
+    public static void decode(final String src, int offset, final int len, final byte[] dest, int destOffset) {
         if (!Integers.isMultiple(len, CHARS_PER_BYTE)) {
             throw new IllegalArgumentException("len must be a multiple of two");
         }
-        if(offset + len > in.length()) {
-            throw new IllegalArgumentException("len exceeds input");
+        final int srcEnd = offset + len;
+        if(srcEnd > src.length()) {
+            throw new IllegalArgumentException("last src index exceeds src length: " + srcEnd + " > " + src.length());
         }
-        final int end = outOffset + len / 2;
-        if(end > out.length) {
-            throw new IllegalArgumentException("exceeds output length");
+        final int destEnd = destOffset + len / 2;
+        if(destEnd > dest.length) {
+            throw new IllegalArgumentException("last dest index exceeds dest length: " + destEnd + " > " + dest.length);
         }
-        while (outOffset < end) {
-            out[outOffset++] = (byte) (decodeNibble(in.charAt(offset), offset) << BITS_PER_CHAR | decodeNibble(in.charAt(++offset), offset++));
+        while (destOffset < destEnd) {
+            dest[destOffset++] = (byte) (decodeNibble(src.charAt(offset), offset) << BITS_PER_CHAR | decodeNibble(src.charAt(++offset), offset++));
         }
     }
 

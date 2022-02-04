@@ -21,9 +21,11 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.function.Supplier;
 
+import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
 import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
@@ -137,16 +139,33 @@ public class StringsTest {
 
     @Test
     public void testHexExceptions() throws Throwable {
-        TestUtils.assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode("0"));
+        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode("0"));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "illegal hex val @ 0", () -> FastHex.decode("(0"));
+        assertThrown(IllegalArgumentException.class, "illegal hex val @ 0", () -> FastHex.decode("(0"));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "illegal hex val @ 1", () -> FastHex.decode("0'"));
+        assertThrown(IllegalArgumentException.class, "illegal hex val @ 1", () -> FastHex.decode("0'"));
     }
 
     @Test
     public void testSingleByteHex() {
         assertEquals("02", FastHex.encodeToString((byte) 0b0000_0010));
+    }
+
+    @Test
+    public void testHexWithDestination() throws Throwable {
+        final String hex = "aab1ccd2eee3";
+        final byte[] buffer = new byte[5];
+
+        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode(hex, 1, 3, buffer, 0));
+        assertThrown(IllegalArgumentException.class, "last src index exceeds src length: 13 > 12", () -> FastHex.decode(hex, 1, hex.length(), buffer, 0));
+        assertThrown(IllegalArgumentException.class, "last dest index exceeds dest length: 6 > 5", () -> FastHex.decode(hex, 0, hex.length(), buffer, 0));
+
+        FastHex.decode(hex, 0, hex.length() - 2, buffer, 0);
+        assertArrayEquals(Hex.decode(hex.substring(0, 10)), buffer);
+
+        Arrays.fill(buffer, (byte) 0xff);
+        FastHex.decode(hex, 1, 6, buffer, 1);
+        assertEquals("ffab1ccdff", Hex.toHexString(buffer));
     }
 
     @Disabled("slow")
