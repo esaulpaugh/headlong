@@ -288,6 +288,7 @@ public class TupleTest {
     }
 
     private static void testRemove(Iterator<?> iter) throws Throwable {
+        assertTrue(iter.hasNext());
         iter.next();
         assertThrown(UnsupportedOperationException.class, iter::remove);
     }
