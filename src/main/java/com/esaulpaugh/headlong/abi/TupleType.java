@@ -37,12 +37,12 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY);
 
     final ABIType<?>[] elementTypes;
-//    private final int staticByteLen;
+    private final int staticByteLen;
 
     private TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes) {
         super(canonicalType, Tuple.class, dynamic);
         this.elementTypes = elementTypes;
-//        this.staticByteLen = dynamic ? OFFSET_LENGTH_BYTES : staticTupleLen(this);
+        this.staticByteLen = dynamic ? OFFSET_LENGTH_BYTES : staticTupleLen(this);
     }
 
     static TupleType wrap(ABIType<?>... elements) {
@@ -90,7 +90,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     int byteLength(Object value) {
-//        if(!dynamic) return staticByteLen;
+        if(!dynamic) return staticByteLen;
         Tuple tuple = (Tuple) value;
         return countBytes(false, size(), 0, i -> measureObject(get(i), tuple.get(i)));
 //        return dynamic ? dynamicByteLength(value) : staticByteLength();
