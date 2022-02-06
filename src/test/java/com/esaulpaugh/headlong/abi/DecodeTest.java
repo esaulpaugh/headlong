@@ -29,7 +29,9 @@ import java.nio.ByteBuffer;
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DecodeTest {
 
@@ -351,10 +353,14 @@ public class DecodeTest {
 
     @Test
     public void testDecodeCallIndex() {
-        final String arg = "false";
-        Function f = new Function("(int8,bool,string)");
-        ByteBuffer bb = f.encodeCall(Tuple.of(127, true, arg));
-        String s = f.decodeCallIndex(bb.array(), 2);
-        assertEquals(arg, s);
+        Function f = new Function("()", "(int8,bool,string)");
+
+        ByteBuffer bb = f.getOutputs().encode(Tuple.of(127, true, "two"));
+        boolean b = f.decodeReturnIndex(bb.array(), 1);
+        assertTrue(b);
+
+        bb = f.getOutputs().encode(Tuple.of(127, false, "two"));
+        b = f.decodeReturnIndex(bb.array(), 1);
+        assertFalse(b);
     }
 }
