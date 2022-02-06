@@ -87,15 +87,15 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return TYPE_CODE_ARRAY;
     }
 
-//    @Override
-//    int staticByteLength() {
-//        return staticByteLen;
-//    }
-//
-//    @Override
-//    int dynamicByteLength(Object value) {
-//        return totalLen(calcElementsLen(value), length == DYNAMIC_LENGTH);
-//    }
+    @Override
+    int staticByteLength() {
+        return staticByteLen;
+    }
+
+    @Override
+    int dynamicByteLength(Object value) {
+        return totalLen(calcElementsLen(value), length == DYNAMIC_LENGTH);
+    }
 
     @Override
     int byteLength(Object value) {
@@ -249,7 +249,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private void encodeObjects(Object[] arr, ByteBuffer dest) {
         encodeArrayLen(arr.length, dest);
-        TupleType.encodeObjects(dynamic, arr, i -> elementType, dest);
+        TupleType.encodeObjects(dynamic, arr, i -> elementType, dest, OFFSET_LENGTH_BYTES * arr.length);
     }
 
     private void encodeArrayLen(int len, ByteBuffer dest) {

@@ -86,11 +86,13 @@ public abstract class ABIType<J> {
      */
     public abstract int typeCode();
 
-//    abstract int staticByteLength();
-//
-//    int dynamicByteLength(Object value) {
-//        return UNIT_LENGTH_BYTES;
-//    }
+    int staticByteLength() {
+        return UNIT_LENGTH_BYTES;
+    }
+
+    int dynamicByteLength(Object value) {
+        return UNIT_LENGTH_BYTES;
+    }
 
     /**
      * @param value the value to measure
@@ -154,7 +156,7 @@ public abstract class ABIType<J> {
             return offset;
         }
         Encoding.insertIntUnsigned(offset, dest); // insert offset
-        return offset + byteLength(value); // return next offset
+        return offset + dynamicByteLength(value); // return next offset
     }
 
     abstract void encodeTail(Object value, ByteBuffer dest);

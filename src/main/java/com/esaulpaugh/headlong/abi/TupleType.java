@@ -77,16 +77,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return TYPE_CODE_TUPLE;
     }
 
-//    @Override
-//    int staticByteLength() {
-//        return byteLength(null);
-//    }
-//
-//    @Override
-//    int dynamicByteLength(Object value) {
-//        Tuple tuple = (Tuple) value;
-//        return countBytes(false, size(), 0, i -> measureObject(get(i), tuple.get(i)));
-//    }
+    @Override
+    int staticByteLength() {
+        return staticByteLen;
+    }
+
+    @Override
+    int dynamicByteLength(Object value) {
+        Tuple tuple = (Tuple) value;
+        return countBytes(false, size(), 0, i -> measureObject(get(i), tuple.get(i)));
+    }
 
     @Override
     int byteLength(Object value) {
@@ -144,7 +144,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     void encodeTail(Object value, ByteBuffer dest) {
-        encodeObjects(dynamic, ((Tuple) value).elements, TupleType.this::get, dest);
+        Object[] vals = ((Tuple) value).elements;
+        encodeObjects(dynamic, vals, TupleType.this::get, dest, dynamic ? headLength(vals) : -1);
     }
 
     @Override
@@ -155,25 +156,24 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
     }
 
-    static void encodeObjects(boolean dynamic, Object[] values, IntFunction<ABIType<?>> getType, ByteBuffer dest) {
-        int offset = !dynamic ? 0 : headLength(values, getType);
+    static void encodeObjects(boolean dynamic, Object[] values, IntFunction<ABIType<?>> getType, ByteBuffer dest, int offset) {
         for (int i = 0; i < values.length; i++) {
             offset = getType.apply(i).encodeHead(values[i], dest, offset);
         }
-        for (int i = 0; i < values.length; i++) {
-            ABIType<?> t = getType.apply(i);
-            if(t.dynamic) {
-                t.encodeTail(values[i], dest);
+        if(dynamic) {
+            for (int i = 0; i < values.length; i++) {
+                ABIType<?> t = getType.apply(i);
+                if (t.dynamic) {
+                    t.encodeTail(values[i], dest);
+                }
             }
         }
     }
 
-    private static int headLength(Object[] elements, IntFunction<ABIType<?>> getType) {
+    private int headLength(Object[] elements) {
         int sum = 0;
         for (int i = 0; i < elements.length; i++) {
-            ABIType<?> type = getType.apply(i);
-            sum += type.dynamic ? OFFSET_LENGTH_BYTES : type.byteLength(elements[i]);
-//            sum += getType.apply(i).staticByteLength();
+            sum += get(i).staticByteLength();
         }
         return sum;
     }
