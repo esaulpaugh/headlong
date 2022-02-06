@@ -60,14 +60,14 @@ public class MeasureFunction {
         blackhole.consume(f.encodeCall(args));
     }
 
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.AverageTime)
-    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
-    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
-    public void decode_call(Blackhole blackhole) {
-        blackhole.consume(f.decodeCall(encodedCall));
-    }
+//    @Benchmark
+//    @Fork(value = 1, warmups = 1)
+//    @BenchmarkMode(Mode.AverageTime)
+//    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
+//    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
+//    public void decode_call(Blackhole blackhole) {
+//        blackhole.consume(f.decodeCall(encodedCall));
+//    }
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
@@ -75,7 +75,7 @@ public class MeasureFunction {
     @Warmup(batchSize = BATCH_SIZE, iterations = 1)
     @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
     public void decode_index_old(Blackhole blackhole) {
-        blackhole.consume(tt.decode(encodedTuple).get(2));
+        blackhole.consume(f.decodeCall(encodedCall).get(2));
     }
 
     @Benchmark
@@ -83,8 +83,8 @@ public class MeasureFunction {
     @BenchmarkMode(Mode.AverageTime)
     @Warmup(batchSize = BATCH_SIZE, iterations = 1)
     @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
-    public void decode_index(Blackhole blackhole) {
-        blackhole.consume(tt.decodeIndex(encodedTuple, 2));
+    public void decode_call_index(Blackhole blackhole) {
+        blackhole.consume(f.decodeCallIndex(encodedCall, 2));
     }
 
     @Benchmark

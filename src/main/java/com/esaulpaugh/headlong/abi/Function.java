@@ -214,8 +214,8 @@ public final class Function implements ABIObject {
         return this;
     }
 
-    public Tuple decodeCall(byte[] array) {
-        return decodeCall(ByteBuffer.wrap(array));
+    public Tuple decodeCall(byte[] call) {
+        return decodeCall(ByteBuffer.wrap(call));
     }
 
     /**
@@ -234,6 +234,10 @@ public final class Function implements ABIObject {
             }
         }
         return inputTypes.decode(abiBuffer, unitBuffer); // unitBuffer contents are ignored, overwritten during decode
+    }
+
+    public <T> T decodeCallIndex(byte[] call, int index) {
+        return inputTypes.decodeIndex(ByteBuffer.wrap(call, SELECTOR_LEN, call.length - SELECTOR_LEN), index);
     }
 
     public Tuple decodeReturn(byte[] returnVals) {

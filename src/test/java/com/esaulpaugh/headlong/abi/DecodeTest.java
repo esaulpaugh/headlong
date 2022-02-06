@@ -348,4 +348,13 @@ public class DecodeTest {
 
         assertArrayEquals(array, type.decode(abi.array()));
     }
+
+    @Test
+    public void testDecodeCallIndex() {
+        final String arg = "false";
+        Function f = new Function("(int8,bool,string)");
+        ByteBuffer bb = f.encodeCall(Tuple.of(127, true, arg));
+        String s = f.decodeCallIndex(bb.array(), 2);
+        assertEquals(arg, s);
+    }
 }

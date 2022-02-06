@@ -177,18 +177,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     <T> T decodeIndex(ByteBuffer bb, int index) {
         final byte[] unitBuffer = newUnitBuffer();
-        final int pos = bb.position(); // what if pos is not at the beginning?
+        final int pos = bb.position();
         int skipBytes = 0;
         for (int i = 0; i < index; i++) {
             final ABIType<?> et = elementTypes[i];
             switch (et.typeCode()) {
             case TYPE_CODE_ARRAY:
-                final ArrayType<?, ?> at = (ArrayType<?, ?>) et;
-                skipBytes += at.dynamic ? OFFSET_LENGTH_BYTES : staticArrLen(at);
+                skipBytes += et.dynamic ? OFFSET_LENGTH_BYTES : staticArrLen(et);
                 continue;
             case TYPE_CODE_TUPLE:
-                final TupleType tt = (TupleType) et;
-                skipBytes += tt.dynamic ? OFFSET_LENGTH_BYTES : staticTupleLen(tt);
+                skipBytes += et.dynamic ? OFFSET_LENGTH_BYTES : staticTupleLen(et);
                 continue;
             default:
                 skipBytes += UNIT_LENGTH_BYTES;
@@ -198,16 +196,14 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         @SuppressWarnings("unchecked")
         final ABIType<T> t = (ABIType<T>) elementTypes[index];
         if(t.dynamic) {
-            bb.position(UINT31.decode(bb, unitBuffer));
-            return t.decode(bb, unitBuffer);
+            bb.position(pos + UINT31.decode(bb, unitBuffer));
         }
         return t.decode(bb, unitBuffer);
     }
 
-    private static int staticArrLen(final ArrayType<?, ?> arrayType) {
+    private static int staticArrLen(ABIType<?> type) {
         final List<Integer> lengths = new ArrayList<>();
         ArrayType<?, ?> at;
-        ABIType<?> type = arrayType;
         do {
             at = (ArrayType<?, ?>) type;
             if(at.getElementType() instanceof ByteType) {
@@ -222,15 +218,15 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             product = product * e;
         }
         final ABIType<?> baseType = ArrayType.baseType(type);
-        return product * (baseType instanceof UnitType ? UNIT_LENGTH_BYTES : staticTupleLen((TupleType) baseType));
+        return product * (baseType instanceof UnitType ? UNIT_LENGTH_BYTES : staticTupleLen(baseType));
     }
 
-    private static int staticTupleLen(TupleType tt) {
+    private static int staticTupleLen(ABIType<?> tt) {
         int len = 0;
-        for (ABIType<?> e : tt) {
+        for (ABIType<?> e : (TupleType) tt) {
             if (e instanceof UnitType) len += UNIT_LENGTH_BYTES;
-            else if (e instanceof TupleType) len += staticTupleLen((TupleType) e);
-            else if (e instanceof ArrayType) len += staticArrLen((ArrayType<?, ?>) e);
+            else if (e instanceof TupleType) len += staticTupleLen(e);
+            else if (e instanceof ArrayType) len += staticArrLen(e);
             else throw new AssertionError();
         }
         return len;
