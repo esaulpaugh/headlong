@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.SuperSerial;
 
 import java.nio.ByteBuffer;
@@ -25,7 +26,9 @@ import java.util.List;
 import java.util.function.IntFunction;
 import java.util.function.IntUnaryOperator;
 
+import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.Encoding.UINT31;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
 /** @see ABIType */
@@ -168,6 +171,71 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return new Tuple(elements);
     }
 
+    public <T> T decodeIndex(byte[] encoded, int index) {
+        return decodeIndex(ByteBuffer.wrap(encoded), index);
+    }
+
+    <T> T decodeIndex(ByteBuffer bb, int index) {
+        final byte[] unitBuffer = newUnitBuffer();
+        final int pos = bb.position(); // what if pos is not at the beginning?
+        int skipBytes = 0;
+        for (int i = 0; i < index; i++) {
+            final ABIType<?> et = elementTypes[i];
+            switch (et.typeCode()) {
+            case TYPE_CODE_ARRAY:
+                final ArrayType<?, ?> at = (ArrayType<?, ?>) et;
+                skipBytes += at.dynamic ? OFFSET_LENGTH_BYTES : staticArrLen(at);
+                continue;
+            case TYPE_CODE_TUPLE:
+                final TupleType tt = (TupleType) et;
+                skipBytes += tt.dynamic ? OFFSET_LENGTH_BYTES : staticTupleLen(tt);
+                continue;
+            default:
+                skipBytes += UNIT_LENGTH_BYTES;
+            }
+        }
+        bb.position(pos + skipBytes);
+        @SuppressWarnings("unchecked")
+        final ABIType<T> t = (ABIType<T>) elementTypes[index];
+        if(t.dynamic) {
+            bb.position(UINT31.decode(bb, unitBuffer));
+            return t.decode(bb, unitBuffer);
+        }
+        return t.decode(bb, unitBuffer);
+    }
+
+    private static int staticArrLen(final ArrayType<?, ?> arrayType) {
+        final List<Integer> lengths = new ArrayList<>();
+        ArrayType<?, ?> at;
+        ABIType<?> type = arrayType;
+        do {
+            at = (ArrayType<?, ?>) type;
+            if(at.getElementType() instanceof ByteType) {
+                lengths.add(Integers.roundLengthUp(at.getLength(), UNIT_LENGTH_BYTES) / UNIT_LENGTH_BYTES);
+            } else {
+                lengths.add(at.getLength());
+            }
+        } while((type = at.getElementType()) instanceof ArrayType<?, ?>);
+        int product = 1;
+        for (Integer e : lengths) {
+            if(e == DYNAMIC_LENGTH) throw new AssertionError();
+            product = product * e;
+        }
+        final ABIType<?> baseType = ArrayType.baseType(type);
+        return product * (baseType instanceof UnitType ? UNIT_LENGTH_BYTES : staticTupleLen((TupleType) baseType));
+    }
+
+    private static int staticTupleLen(TupleType tt) {
+        int len = 0;
+        for (ABIType<?> e : tt) {
+            if (e instanceof UnitType) len += UNIT_LENGTH_BYTES;
+            else if (e instanceof TupleType) len += staticTupleLen((TupleType) e);
+            else if (e instanceof ArrayType) len += staticArrLen((ArrayType<?, ?>) e);
+            else throw new AssertionError();
+        }
+        return len;
+    }
+
     static void decodeObjects(ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects) {
         final int start = bb.position(); // save this value before offsets are decoded
         final int[] offsets = new int[objects.length];
@@ -176,7 +244,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             if(!t.dynamic) {
                 objects[i] = t.decode(bb, unitBuffer);
             } else {
-                offsets[i] = Encoding.UINT31.decode(bb, unitBuffer);
+                offsets[i] = UINT31.decode(bb, unitBuffer);
             }
         }
         for (int i = 0; i < objects.length; i++) {

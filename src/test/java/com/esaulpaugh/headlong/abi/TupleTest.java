@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.util.FastHex;
 import com.joemelsha.crypto.hash.Keccak;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -291,5 +293,54 @@ public class TupleTest {
         assertTrue(iter.hasNext());
         iter.next();
         assertThrown(UnsupportedOperationException.class, iter::remove);
+    }
+
+    @Test
+    public void testDecodeIndex0() {
+        TupleType tt = TupleType.parse("(bool,(bool,int24[2],(bool,bool)[2])[1],string)");
+        Tuple args = Tuple.of(true, new Tuple[] { Tuple.of(true, new int[] { 1, 2 }, new Tuple[] { Tuple.of(true, false), Tuple.of(true, false) }) }, "ya");
+        byte[] arr = tt.encode(args).array();
+        System.out.println(FastHex.encodeToString(arr));
+        String ya = tt.decodeIndex(arr, 2);
+        assertEquals("ya", ya);
+    }
+
+    @Test
+    public void testDecodeIndex1() {
+        TupleType tt = TupleType.parse("(bool,bool[3][2],string[][])");
+        Tuple args = Tuple.of(true, new boolean[][] { new boolean[] { true, false, true }, new boolean[] { false, false, true } }, new String[][] { new String[] { "wooo", "moo" } });
+        byte[] arr = tt.encode(args).array();
+        System.out.println(FastHex.encodeToString(arr));
+        String[][] s = tt.decodeIndex(arr, 2);
+        assertTrue(Objects.deepEquals(new String[][] { new String[] { "wooo", "moo" } }, s));
+    }
+
+    @Test
+    public void testDecodeIndex2() {
+        TupleType tt = TupleType.parse("(bool,uint16,address,int64,uint64,address,string[][])");
+        Tuple args = new Tuple(
+                true,
+                90,
+                Address.wrap("0x0000000000000000000000000000000000000000"),
+                100L,
+                BigInteger.valueOf(110L),
+                Address.wrap("0x0000110000111100001111110000111111110000"),
+                new String[][] { new String[] { "yabba", "dabba", "doo" }, new String[] { "" } }
+        );
+        final byte[] arr = tt.encode(args).array();
+        boolean bool = tt.decodeIndex(arr, 0);
+        assertTrue(bool);
+        int uint16 = tt.decodeIndex(arr, 1);
+        assertEquals(90, uint16);
+        Address address = tt.decodeIndex(arr, 2);
+        assertEquals(Address.wrap("0x0000000000000000000000000000000000000000"), address);
+        long int64 = tt.decodeIndex(arr, 3);
+        assertEquals(100L, int64);
+        BigInteger uint64 = tt.decodeIndex(arr, 4);
+        assertEquals(new BigInteger("110"), uint64);
+        Address address2 = tt.decodeIndex(arr, 5);
+        assertEquals(Address.wrap("0x0000110000111100001111110000111111110000"), address2);
+        String[][] arrs = tt.decodeIndex(arr, 6);
+        assertTrue(Objects.deepEquals(new String[][] { new String[] { "yabba", "dabba", "doo" }, new String[] { "" } }, arrs));
     }
 }
