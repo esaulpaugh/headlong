@@ -86,6 +86,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     static int staticArrLen(ABIType<?> type) {
+        int product = 1;
         ArrayType<?, ?> at;
         do {
             at = (ArrayType<?, ?>) type;
