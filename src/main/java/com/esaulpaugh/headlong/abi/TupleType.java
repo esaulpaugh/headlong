@@ -93,7 +93,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         if(!dynamic) return staticByteLen;
         Tuple tuple = (Tuple) value;
         return countBytes(false, size(), 0, i -> measureObject(get(i), tuple.get(i)));
-//        return dynamic ? dynamicByteLength(value) : staticByteLength();
     }
 
     private static int measureObject(ABIType<?> type, Object value) {

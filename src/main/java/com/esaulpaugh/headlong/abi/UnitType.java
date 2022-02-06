@@ -52,16 +52,6 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
                 .subtract(BigInteger.ONE);
     }
 
-//    @Override
-//    final int staticByteLength() {
-//        return UNIT_LENGTH_BYTES;
-//    }
-
-    @Override
-    final int byteLength(Object value) {
-        return UNIT_LENGTH_BYTES;
-    }
-
     @Override
     int byteLengthPacked(Object value) {
         return bitLength / Byte.SIZE;
