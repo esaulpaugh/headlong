@@ -37,10 +37,12 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY);
 
     final ABIType<?>[] elementTypes;
+//    private final int staticByteLen;
 
     private TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes) {
         super(canonicalType, Tuple.class, dynamic);
         this.elementTypes = elementTypes;
+//        this.staticByteLen = dynamic ? OFFSET_LENGTH_BYTES : staticTupleLen(this);
     }
 
     static TupleType wrap(ABIType<?>... elements) {
@@ -75,10 +77,23 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return TYPE_CODE_TUPLE;
     }
 
+//    @Override
+//    int staticByteLength() {
+//        return byteLength(null);
+//    }
+//
+//    @Override
+//    int dynamicByteLength(Object value) {
+//        Tuple tuple = (Tuple) value;
+//        return countBytes(false, size(), 0, i -> measureObject(get(i), tuple.get(i)));
+//    }
+
     @Override
     int byteLength(Object value) {
+//        if(!dynamic) return staticByteLen;
         Tuple tuple = (Tuple) value;
         return countBytes(false, size(), 0, i -> measureObject(get(i), tuple.get(i)));
+//        return dynamic ? dynamicByteLength(value) : staticByteLength();
     }
 
     private static int measureObject(ABIType<?> type, Object value) {
@@ -157,7 +172,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         int sum = 0;
         for (int i = 0; i < elements.length; i++) {
             ABIType<?> type = getType.apply(i);
-            sum += !type.dynamic ? type.byteLength(elements[i]) : OFFSET_LENGTH_BYTES;
+            sum += type.dynamic ? OFFSET_LENGTH_BYTES : type.byteLength(elements[i]);
+//            sum += getType.apply(i).staticByteLength();
         }
         return sum;
     }
@@ -181,7 +197,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             final ABIType<?> et = elementTypes[i];
             switch (et.typeCode()) {
             case TYPE_CODE_ARRAY:
-                skipBytes += et.dynamic ? OFFSET_LENGTH_BYTES : staticArrLen(et);
+                skipBytes += et.dynamic ? OFFSET_LENGTH_BYTES : ArrayType.staticArrLen(et);
                 continue;
             case TYPE_CODE_TUPLE:
                 skipBytes += et.dynamic ? OFFSET_LENGTH_BYTES : staticTupleLen(et);

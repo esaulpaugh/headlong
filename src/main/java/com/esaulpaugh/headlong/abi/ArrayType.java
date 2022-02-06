@@ -47,6 +47,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private final E elementType;
     private final int length;
     private final Class<?> arrayClass;
+    private final int staticByteLen;
 
     ArrayType(String canonicalType, Class<J> clazz, E elementType, int length, Class<?> arrayClass) {
         super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic);
@@ -54,6 +55,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         this.elementType = elementType;
         this.length = length;
         this.arrayClass = arrayClass;
+        this.staticByteLen = dynamic ? OFFSET_LENGTH_BYTES : staticArrLen(this);
     }
 
     public E getElementType() {
@@ -85,6 +87,22 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return TYPE_CODE_ARRAY;
     }
 
+//    @Override
+//    int staticByteLength() {
+//        return staticByteLen;
+//    }
+//
+//    @Override
+//    int dynamicByteLength(Object value) {
+//        return totalLen(calcElementsLen(value), length == DYNAMIC_LENGTH);
+//    }
+
+    @Override
+    int byteLength(Object value) {
+        if(!dynamic) return staticByteLen;
+        return totalLen(calcElementsLen(value), length == DYNAMIC_LENGTH);
+    }
+
     static int staticArrLen(ABIType<?> type) {
         int product = 1;
         ArrayType<?, ?> at;
@@ -93,19 +111,10 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
             final int len = at.getLength();
             product = product *
                     (at.getElementType() instanceof ByteType
-                        ? Integers.roundLengthUp(len, UNIT_LENGTH_BYTES) / UNIT_LENGTH_BYTES
-                        : len);
+                            ? Integers.roundLengthUp(len, UNIT_LENGTH_BYTES) / UNIT_LENGTH_BYTES
+                            : len);
         } while((type = at.getElementType()) instanceof ArrayType<?, ?>);
         return product * (type instanceof UnitType ? UNIT_LENGTH_BYTES : TupleType.staticTupleLen(type));
-    }
-
-    /**
-     * @param value the value to measure
-     * @return the length in bytes of this array when encoded
-     */
-    @Override
-    int byteLength(Object value) {
-        return totalLen(calcElementsLen(value), length == DYNAMIC_LENGTH);
     }
 
     private int calcElementsLen(Object value) {
