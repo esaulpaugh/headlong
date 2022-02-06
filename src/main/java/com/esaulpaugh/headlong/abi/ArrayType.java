@@ -85,6 +85,19 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return TYPE_CODE_ARRAY;
     }
 
+    static int staticArrLen(ABIType<?> type) {
+        ArrayType<?, ?> at;
+        do {
+            at = (ArrayType<?, ?>) type;
+            final int len = at.getLength();
+            product = product *
+                    (at.getElementType() instanceof ByteType
+                        ? Integers.roundLengthUp(len, UNIT_LENGTH_BYTES) / UNIT_LENGTH_BYTES
+                        : len);
+        } while((type = at.getElementType()) instanceof ArrayType<?, ?>);
+        return product * (type instanceof UnitType ? UNIT_LENGTH_BYTES : TupleType.staticTupleLen(type));
+    }
+
     /**
      * @param value the value to measure
      * @return the length in bytes of this array when encoded

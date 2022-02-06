@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.SuperSerial;
 
 import java.nio.ByteBuffer;
@@ -26,7 +25,6 @@ import java.util.List;
 import java.util.function.IntFunction;
 import java.util.function.IntUnaryOperator;
 
-import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.Encoding.UINT31;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -201,33 +199,14 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return t.decode(bb, unitBuffer);
     }
 
-    private static int staticArrLen(ABIType<?> type) {
-        final List<Integer> lengths = new ArrayList<>();
-        ArrayType<?, ?> at;
-        do {
-            at = (ArrayType<?, ?>) type;
-            if(at.getElementType() instanceof ByteType) {
-                lengths.add(Integers.roundLengthUp(at.getLength(), UNIT_LENGTH_BYTES) / UNIT_LENGTH_BYTES);
-            } else {
-                lengths.add(at.getLength());
-            }
-        } while((type = at.getElementType()) instanceof ArrayType<?, ?>);
-        int product = 1;
-        for (Integer e : lengths) {
-            if(e == DYNAMIC_LENGTH) throw new AssertionError();
-            product = product * e;
-        }
-        final ABIType<?> baseType = ArrayType.baseType(type);
-        return product * (baseType instanceof UnitType ? UNIT_LENGTH_BYTES : staticTupleLen(baseType));
-    }
-
-    private static int staticTupleLen(ABIType<?> tt) {
+    static int staticTupleLen(ABIType<?> tt) {
         int len = 0;
         for (ABIType<?> e : (TupleType) tt) {
-            if (e instanceof UnitType) len += UNIT_LENGTH_BYTES;
-            else if (e instanceof TupleType) len += staticTupleLen(e);
-            else if (e instanceof ArrayType) len += staticArrLen(e);
-            else throw new AssertionError();
+            switch (e.typeCode()) {
+            case TYPE_CODE_ARRAY: len += ArrayType.staticArrLen(e); continue;
+            case TYPE_CODE_TUPLE: len += staticTupleLen(e); continue;
+            default: len += UNIT_LENGTH_BYTES;
+            }
         }
         return len;
     }
