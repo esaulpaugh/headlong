@@ -247,7 +247,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             if (result.dynamic) {
                 bb.position(pos + UINT31.decode(bb, unitBuffer));
                 results[index] = result.decode(bb, unitBuffer);
-                skipBytes = startElement + OFFSET_LENGTH_BYTES;
+                skipBytes += OFFSET_LENGTH_BYTES;
             } else {
                 results[index] = result.decode(bb, unitBuffer);
                 skipBytes = bb.position() - pos;
