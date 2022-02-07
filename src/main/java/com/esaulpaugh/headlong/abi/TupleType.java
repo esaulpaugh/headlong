@@ -188,64 +188,68 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return new Tuple(elements);
     }
 
-    <T> T decodeIndex(ByteBuffer bb, int index) {
-        if (index < 0 || index >= elementTypes.length) {
-            throw new IllegalArgumentException("bad index");
-        }
-        final int pos = bb.mark().position();
+    @SuppressWarnings("unchecked")
+    public <T> T decode(ByteBuffer bb, int... indices) {
+        bb.mark();
         try {
-            int skipBytes = 0;
-            for (int j = 0; j < index; j++) {
-                skipBytes += calcSkipBytes(elementTypes[j]);
-            }
-            bb.position(pos + skipBytes);
-            @SuppressWarnings("unchecked")
-            final ABIType<T> resultType = (ABIType<T>) elementTypes[index];
-            final byte[] unitBuffer = newUnitBuffer();
-            if (resultType.dynamic) {
-                bb.position(pos + UINT31.decode(bb, unitBuffer));
-            }
-            return resultType.decode(bb, unitBuffer);
+            return (T) (indices.length == 1
+                        ? decodeIndex(bb, indices[0]) // decodes and returns specified element
+                        : indices.length == 0
+                            ? decode(bb) // decodes and returns all elements
+                            : decodeIndices(bb, indices)); // decodes and returns specified elements
         } finally {
             bb.reset();
         }
     }
 
-    @SuppressWarnings("unchecked")
-    <T> T decodeIndices(ByteBuffer bb, int... indices) {
-        if(indices.length <= 0) {
-            return (T) Tuple.EMPTY;
+    private void ensureIndexInBounds(int index) {
+        if (index < 0 || index >= elementTypes.length) {
+            throw new IllegalArgumentException("bad index: " + index);
         }
-        final Object[] results = new Object[elementTypes.length];
-        final int pos = bb.mark().position();
+    }
+
+    private <T> T decodeIndex(ByteBuffer bb, int index) {
+        ensureIndexInBounds(index);
+        final int pos = bb.position();
+        int skipBytes = 0;
+        for (int j = 0; j < index; j++) {
+            skipBytes += calcSkipBytes(elementTypes[j]);
+        }
+        bb.position(pos + skipBytes);
+        @SuppressWarnings("unchecked")
+        final ABIType<T> resultType = (ABIType<T>) elementTypes[index];
         final byte[] unitBuffer = newUnitBuffer();
-        try {
-            int i = 0, j = 0, index, skipBytes = 0;
-            do {
-                index = indices[i++];
-                if (index < 0 || index >= elementTypes.length) {
-                    throw new IllegalArgumentException("bad index");
-                }
-                for (; j < index; j++) {
-                    skipBytes += calcSkipBytes(elementTypes[j]);
-                    results[j] = Tuple.ABSENT;
-                }
-                final ABIType<?> result = elementTypes[index];
-                bb.position(pos + skipBytes);
-                if (result.dynamic) {
-                    bb.position(pos + UINT31.decode(bb, unitBuffer));
-                }
-                results[index] = result.decode(bb, unitBuffer);
-                skipBytes = bb.position() - pos;
-                j = index + 1;
-            } while (i < indices.length);
-            for (; j < results.length; j++) {
+        if (resultType.dynamic) {
+            bb.position(pos + UINT31.decode(bb, unitBuffer));
+        }
+        return resultType.decode(bb, unitBuffer);
+    }
+
+    private Tuple decodeIndices(ByteBuffer bb, int... indices) {
+        final Object[] results = new Object[elementTypes.length];
+        final int pos = bb.position();
+        final byte[] unitBuffer = newUnitBuffer();
+        int i = 0, j = 0, index, skipBytes = 0;
+        do {
+            index = indices[i++];
+            ensureIndexInBounds(index);
+            for (; j < index; j++) {
+                skipBytes += calcSkipBytes(elementTypes[j]);
                 results[j] = Tuple.ABSENT;
             }
-            return (T) new Tuple(results);
-        } finally {
-            bb.reset();
+            final ABIType<?> result = elementTypes[index];
+            bb.position(pos + skipBytes);
+            if (result.dynamic) {
+                bb.position(pos + UINT31.decode(bb, unitBuffer));
+            }
+            results[index] = result.decode(bb, unitBuffer);
+            skipBytes = bb.position() - pos;
+            j = index + 1;
+        } while (i < indices.length);
+        for (; j < results.length; j++) {
+            results[j] = Tuple.ABSENT;
         }
+        return new Tuple(results);
     }
 
     private int calcSkipBytes(ABIType<?> skipped) {

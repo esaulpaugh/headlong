@@ -303,7 +303,7 @@ public class TupleTest {
         Tuple args = Tuple.of(true, new Tuple[] { Tuple.of(true, new int[] { 1, 2 }, new Tuple[] { Tuple.of(true, false), Tuple.of(true, false) }) }, "ya");
         ByteBuffer bb = tt.encode(args);
         System.out.println(Strings.encode(bb));
-        String ya = tt.decodeIndex((ByteBuffer) bb.flip(), 2);
+        String ya = tt.decode((ByteBuffer) bb.flip(), 2);
         assertEquals("ya", ya);
     }
 
@@ -313,7 +313,7 @@ public class TupleTest {
         Tuple args = Tuple.of(true, new boolean[][] { new boolean[] { true, false, true }, new boolean[] { false, false, true } }, new String[][] { new String[] { "wooo", "moo" } });
         ByteBuffer bb = tt.encode(args);
         System.out.println(Strings.encode(bb));
-        String[][] s = tt.decodeIndex((ByteBuffer) bb.flip(), 2);
+        String[][] s = tt.decode((ByteBuffer) bb.flip(), 2);
         assertTrue(Objects.deepEquals(new String[][] { new String[] { "wooo", "moo" } }, s));
     }
 
@@ -330,19 +330,19 @@ public class TupleTest {
                 new String[][] { new String[] { "yabba", "dabba", "doo" }, new String[] { "" } }
         );
         final ByteBuffer bb = (ByteBuffer) tt.encode(args).flip();
-        boolean bool = tt.decodeIndex(bb, 0);
+        boolean bool = tt.decode(bb, 0);
         assertTrue(bool);
-        int uint16 = tt.decodeIndex(bb, 1);
+        int uint16 = tt.decode(bb, 1);
         assertEquals(90, uint16);
-        Address address = tt.decodeIndex(bb, 2);
+        Address address = tt.decode(bb, 2);
         assertEquals(Address.wrap("0x0000000000000000000000000000000000000000"), address);
-        long int64 = tt.decodeIndex(bb, 3);
+        long int64 = tt.decode(bb, 3);
         assertEquals(100L, int64);
-        BigInteger uint64 = tt.decodeIndex(bb, 4);
+        BigInteger uint64 = tt.decode(bb, 4);
         assertEquals(new BigInteger("110"), uint64);
-        Address address2 = tt.decodeIndex(bb, 5);
+        Address address2 = tt.decode(bb, 5);
         assertEquals(Address.wrap("0x0000110000111100001111110000111111110000"), address2);
-        String[][] arrs = tt.decodeIndex(bb, 6);
+        String[][] arrs = tt.decode(bb, 6);
         assertTrue(Objects.deepEquals(new String[][] { new String[] { "yabba", "dabba", "doo" }, new String[] { "" } }, arrs));
     }
 }

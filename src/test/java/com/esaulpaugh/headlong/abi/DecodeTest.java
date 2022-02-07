@@ -98,7 +98,7 @@ public class DecodeTest {
         int val = (int) (Math.pow(2, 8)) - 1;
         byte[] _byte = Strings.decode("00000000000000000000000000000000000000000000000000000000000000FF");
 
-        assertEquals(val, foo.decodeReturn(_byte).get(0));
+        assertEquals(val, (int) foo.decodeReturn(_byte, 0));
         int i = foo.decodeSingletonReturn(_byte);
         assertEquals(val, i);
 
@@ -116,7 +116,7 @@ public class DecodeTest {
         BigInteger expected = BigInteger.valueOf(2L).pow(256).subtract(BigInteger.ONE);
         BigInteger bi = ((UnitType<?>) foo2.getOutputs().get(0)).maxValue();
         assertEquals(expected, bi);
-        assertEquals(expected, foo2.decodeReturn(_big_).get(0));
+        assertEquals(expected, foo2.decodeReturn(_big_, 0));
         BigInteger n = foo2.decodeSingletonReturn(_big_);
         assertEquals(expected, n);
     }
@@ -358,22 +358,20 @@ public class DecodeTest {
         Function f = new Function("()", "(int8,bool,string)");
 
         final ByteBuffer bb = f.getOutputs().encode(Tuple.of(127, true, "two"));
-        final boolean b = f.decodeReturnIndex(bb.array(), 1);
+        final boolean b = f.decodeReturn(bb.array(), 1);
         assertTrue(b);
-        System.out.println(Strings.encode(bb));
 
-        final byte[] bigger = new byte[10 + bb.capacity()];
+        final byte[] bigger = new byte[7 + bb.capacity()];
         Arrays.fill(bigger, (byte) 0xff);
         final ByteBuffer bb2 = ByteBuffer.wrap(bigger);
-        bb2.position(10);
+        bb2.position(7);
         bb2.put(bb.array());
-        final ByteBuffer bb3 = (ByteBuffer) ByteBuffer.wrap(bb2.array()).position(10);
-        System.out.println(Strings.encode(bb3));
-        final boolean b2 = f.decodeReturnIndex(bb3, 1);
+        bb2.position(7);
+        final boolean b2 = f.decodeReturn(bb2, 1);
         assertTrue(b2);
 
         final ByteBuffer bb4 = f.getOutputs().encode(Tuple.of(127, false, "two"));
-        final boolean b3 = f.decodeReturnIndex(bb4.array(), 1);
+        final boolean b3 = f.decodeReturn(bb4.array(), 1);
         assertFalse(b3);
     }
 
@@ -382,12 +380,66 @@ public class DecodeTest {
         Function f = new Function("()", "(int8,bool,int8[],bool)");
 
         byte[] arr = f.getOutputs().encode(Tuple.of(1, true, new int[] { 3, 6 } , false)).array();
-        Tuple t = f.decodeReturnIndices(arr, 1, 3);
-        assertThrown(NoSuchElementException.class, () -> t.getElement(0));
+        Tuple t = f.decodeReturn(arr, 1, 3);
+        assertThrown(NoSuchElementException.class, "not present because index was not specified for decoding: 0", () -> t.getElement(0));
         boolean one = t.getElement(1);
         assertTrue(one);
-        assertThrown(NoSuchElementException.class, () -> t.getElement(2));
+        assertThrown(NoSuchElementException.class, "not present because index was not specified for decoding: 2", () -> t.getElement(2));
         boolean three = t.getElement(3);
         assertFalse(three);
+    }
+
+    // TupleType.parse("(int,string,bool,int64)").encodeElements(BigInteger.valueOf(550L), "weow", true, -41L):
+    private static final String TUPLE_HEX =
+            "0000000000000000000000000000000000000000000000000000000000000226" +
+            "0000000000000000000000000000000000000000000000000000000000000080" +
+            "0000000000000000000000000000000000000000000000000000000000000001" +
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd7" +
+            "0000000000000000000000000000000000000000000000000000000000000004" +
+            "77656f7700000000000000000000000000000000000000000000000000000000";
+
+    @Test
+    public void testTupleDecodeTypeInference() {
+        TupleType tt = TupleType.parse("(int,string,bool,int64)");
+        ByteBuffer bb = tt.encodeElements(BigInteger.valueOf(550L), "weow", true, -41L);
+        assertEquals(TUPLE_HEX, Strings.encode(bb));
+        bb.flip();
+        final BigInteger zero = tt.decode(bb, 0);
+        final String one = tt.decode(bb, 1);
+        final boolean two = tt.decode(bb, 2);
+        final long three = tt.decode(bb, 3);
+        Tuple t = tt.decode(bb, 2, 3);
+        System.out.println("tuple: " + zero + " " + one + " " + two + " " + three + " " + t);
+        assertEquals(two, t.getElement(2));
+        long three2 = t.getElement(3);
+        assertEquals(three, three2);
+        assertEquals(tt.decode(bb, new int[0]), tt.decode(bb));
+    }
+
+    @Test
+    public void testFunctionDecodeTypeInference() {
+        Function f = Function.parse("f()", "(int,string,bool,int64)");
+        ByteBuffer bb = f.getOutputs().encodeElements(BigInteger.valueOf(550L), "weow", true, -41L);
+        assertEquals(TUPLE_HEX, Strings.encode(bb));
+        bb.flip();
+        final BigInteger zero = f.decodeReturn(bb, 0);
+        final String one = f.decodeReturn(bb, 1);
+        final boolean two = f.decodeReturn(bb, 2);
+        final long three = f.decodeReturn(bb, 3);
+        Tuple t = f.decodeReturn(bb, 0, 3);
+        System.out.println("function: " + zero + " " + one + " " + two + " " + three + " " + t);
+        assertEquals(zero, t.getElement(0));
+        long three2 = t.getElement(3);
+        assertEquals(three, three2);
+    }
+
+    @Test
+    public void testBadIndex() throws Throwable {
+        TupleType tt = TupleType.parse("(int,string,bool,int64)");
+        ByteBuffer bb = ByteBuffer.wrap(FastHex.decode(TUPLE_HEX));
+        assertThrown(IllegalArgumentException.class, "bad index: -571", () -> tt.decode(bb, -571));
+        assertThrown(IllegalArgumentException.class, "bad index: -1", () -> tt.decode(bb, -1));
+        assertThrown(IllegalArgumentException.class, "bad index: 4", () -> tt.decode(bb, 4));
+        assertThrown(IllegalArgumentException.class, "bad index: 64", () -> tt.decode(bb, 64));
     }
 }

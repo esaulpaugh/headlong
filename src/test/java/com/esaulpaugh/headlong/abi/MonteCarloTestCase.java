@@ -177,7 +177,7 @@ public class MonteCarloTestCase {
         TupleType tt = function.getInputs();
         if(tt.size() > 0) {
             int idx = r.nextInt(tt.size());
-            assertTrue(Objects.deepEquals(argsTuple.get(idx), tt.decodeIndex(bb, idx)));
+            assertTrue(Objects.deepEquals(argsTuple.get(idx), tt.decode(bb, idx)));
         }
     }
 

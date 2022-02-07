@@ -44,7 +44,7 @@ public final class Tuple extends AbstractList<Object> implements RandomAccess {
     public Object get(int index) {
         Object val = elements[index];
         if(val == ABSENT) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException("not present because index was not specified for decoding: " + index);
         }
         return val;
     }

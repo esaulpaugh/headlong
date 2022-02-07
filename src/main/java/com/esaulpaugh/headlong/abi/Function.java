@@ -236,28 +236,12 @@ public final class Function implements ABIObject {
         return inputTypes.decode(abiBuffer, unitBuffer); // unitBuffer contents are ignored, overwritten during decode
     }
 
-    public <T> T decodeReturnIndex(byte[] returnVals, int index) {
-        return decodeReturnIndex(ByteBuffer.wrap(returnVals), index);
+    public <T> T decodeReturn(byte[] returnVals, int... indices) {
+        return decodeReturn(ByteBuffer.wrap(returnVals), indices);
     }
 
-    public <T> T decodeReturnIndices(byte[] returnVals, int... indices) {
-        return decodeReturnIndices(ByteBuffer.wrap(returnVals), indices);
-    }
-
-    public <T> T decodeReturnIndex(ByteBuffer buf, int index) {
-        return outputTypes.decodeIndex(buf, index);
-    }
-
-    public <T> T decodeReturnIndices(ByteBuffer buf, int... indices) {
-        return outputTypes.decodeIndices(buf, indices);
-    }
-
-    public Tuple decodeReturn(byte[] returnVals) {
-        return outputTypes.decode(returnVals);
-    }
-
-    public Tuple decodeReturn(ByteBuffer returnVals) {
-        return outputTypes.decode(returnVals);
+    public <T> T decodeReturn(ByteBuffer buf, int... indices) {
+        return outputTypes.decode(buf, indices);
     }
 
     @SuppressWarnings("unchecked")
