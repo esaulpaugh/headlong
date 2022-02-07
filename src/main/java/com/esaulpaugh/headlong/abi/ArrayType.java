@@ -47,7 +47,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private final E elementType;
     private final int length;
     private final Class<?> arrayClass;
-    private final int staticByteLen;
+    private final int headLength;
 
     ArrayType(String canonicalType, Class<J> clazz, E elementType, int length, Class<?> arrayClass) {
         super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic);
@@ -55,7 +55,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         this.elementType = elementType;
         this.length = length;
         this.arrayClass = arrayClass;
-        this.staticByteLen = dynamic ? OFFSET_LENGTH_BYTES : staticArrLen(this);
+        this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticArrLen(this);
     }
 
     public E getElementType() {
@@ -88,8 +88,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    int staticByteLength() {
-        return staticByteLen;
+    int headLength() {
+        return headLength;
     }
 
     @Override
@@ -99,7 +99,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     @Override
     int byteLength(Object value) {
-        if(!dynamic) return staticByteLen;
+        if(!dynamic) return headLength;
         return totalLen(calcElementsLen(value), length == DYNAMIC_LENGTH);
     }
 

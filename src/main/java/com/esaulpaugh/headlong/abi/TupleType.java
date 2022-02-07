@@ -37,12 +37,12 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY);
 
     final ABIType<?>[] elementTypes;
-    private final int staticByteLen;
+    private final int headLength;
 
     private TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes) {
         super(canonicalType, Tuple.class, dynamic);
         this.elementTypes = elementTypes;
-        this.staticByteLen = dynamic ? OFFSET_LENGTH_BYTES : staticTupleLen(this);
+        this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticTupleLen(this);
     }
 
     static TupleType wrap(ABIType<?>... elements) {
@@ -78,8 +78,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    int staticByteLength() {
-        return staticByteLen;
+    int headLength() {
+        return headLength;
     }
 
     @Override
@@ -90,7 +90,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     int byteLength(Object value) {
-        if(!dynamic) return staticByteLen;
+        if(!dynamic) return headLength;
         final Object[] elements = ((Tuple) value).elements;
         return countBytes(i -> measureObject(get(i), elements[i]));
     }
@@ -151,6 +151,14 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         encodeObjects(dynamic, vals, TupleType.this::get, dest, dynamic ? headLength(vals) : -1);
     }
 
+    private int headLength(Object[] elements) {
+        int sum = 0;
+        for (int i = 0; i < elements.length; i++) {
+            sum += get(i).headLength();
+        }
+        return sum;
+    }
+
     @Override
     void encodePackedUnchecked(Tuple value, ByteBuffer dest) {
         final int size = size();
@@ -171,14 +179,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 }
             }
         }
-    }
-
-    private int headLength(Object[] elements) {
-        int sum = 0;
-        for (int i = 0; i < elements.length; i++) {
-            sum += get(i).staticByteLength();
-        }
-        return sum;
     }
 
     @Override

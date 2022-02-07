@@ -86,7 +86,7 @@ public abstract class ABIType<J> {
      */
     public abstract int typeCode();
 
-    int staticByteLength() {
+    int headLength() {
         return UNIT_LENGTH_BYTES;
     }
 
