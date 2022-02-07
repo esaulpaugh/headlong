@@ -237,7 +237,7 @@ public final class Function implements ABIObject {
     }
 
     public Tuple decodeReturn(byte[] returnVals) {
-        return decodeReturn(ByteBuffer.wrap(returnVals));
+        return outputTypes.decode(returnVals);
     }
 
     public <T> T decodeReturn(byte[] returnVals, int... indices) {
