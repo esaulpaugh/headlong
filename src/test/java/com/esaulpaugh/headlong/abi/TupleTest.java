@@ -348,22 +348,25 @@ public class TupleTest {
 
     @Test
     public void testSelectExclude() {
-        TupleType uintBool = TupleType.parse("(uint,bool)");
-        TupleType uint = TupleType.parse("(uint)");
-        TupleType bool = TupleType.parse("(bool)");
+        TupleType _uintBool_ = TupleType.parse("(uint,bool)");
+        TupleType _uint_ = TupleType.parse("(uint)");
+        TupleType _bool_ = TupleType.parse("(bool)");
 
-        assertEquals(bool, uintBool.select(false, true));
-        assertEquals(uint, uintBool.select(true, false));
-        assertEquals(uintBool, uintBool.select(true, true));
-        assertEquals(TupleType.EMPTY, uintBool.select(false, false));
+        assertEquals(TupleType.EMPTY,   _uintBool_.select(false, false));
+        assertEquals(_bool_,            _uintBool_.select(false, true));
+        assertEquals(_uint_,            _uintBool_.select(true, false));
+        assertEquals(_uintBool_,        _uintBool_.select(true, true));
 
-        assertEquals(TupleType.EMPTY, uintBool.exclude(true, true));
-        assertEquals(bool, uintBool.exclude(true, false));
-        assertEquals(uint, uintBool.exclude(false, true));
-        assertEquals(uintBool, uintBool.exclude(false, false));
-
+        assertEquals(_uintBool_,        _uintBool_.exclude(false, false));
+        assertEquals(_uint_,            _uintBool_.exclude(false, true));
+        assertEquals(_bool_,            _uintBool_.exclude(true, false));
+        assertEquals(TupleType.EMPTY,   _uintBool_.exclude(true, true));
+        
         TupleType tt2 = TupleType.parse("((int,bool))");
         assertEquals(tt2, tt2.select(true));
         assertEquals(TupleType.EMPTY, tt2.exclude(true));
+
+        assertEquals(TupleType.EMPTY, TupleType.EMPTY.select());
+        assertEquals(TupleType.EMPTY, TupleType.EMPTY.exclude());
     }
 }
