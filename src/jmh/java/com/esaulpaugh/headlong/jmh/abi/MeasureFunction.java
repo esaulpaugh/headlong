@@ -40,7 +40,7 @@ public class MeasureFunction {
 
     private static final int BATCH_SIZE = 100_000;
 
-    private final Function f = new Function("sam(bytes,bool,uint256[])");
+    private final Function f = new Function("sam(bytes,bool,uint256[])", "(bytes,bool,uint256[])");
     private final TupleType tt = f.getInputs();
     private final Tuple args = Tuple.of(
             Strings.decode("dave", Strings.UTF_8),
@@ -60,14 +60,14 @@ public class MeasureFunction {
         blackhole.consume(f.encodeCall(args));
     }
 
-//    @Benchmark
-//    @Fork(value = 1, warmups = 1)
-//    @BenchmarkMode(Mode.AverageTime)
-//    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
-//    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
-//    public void decode_call(Blackhole blackhole) {
-//        blackhole.consume(f.decodeCall(encodedCall));
-//    }
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.AverageTime)
+    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
+    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
+    public void decode_call(Blackhole blackhole) {
+        blackhole.consume(f.decodeCall(encodedCall));
+    }
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
@@ -84,7 +84,7 @@ public class MeasureFunction {
     @Warmup(batchSize = BATCH_SIZE, iterations = 1)
     @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
     public void decode_call_index(Blackhole blackhole) {
-        blackhole.consume(f.decodeCallIndex(encodedCall, 2));
+        blackhole.consume(f.decodeReturn(encodedTuple, 2));
     }
 
     @Benchmark
