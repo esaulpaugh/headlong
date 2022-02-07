@@ -261,6 +261,9 @@ public final class Function implements ABIObject {
 
     @SuppressWarnings("unchecked")
     public <J> J decodeSingletonReturn(byte[] singleton) {
+        if(outputTypes.elementTypes.length != 1) {
+            throw new IllegalArgumentException("return type not a singleton: " + outputTypes.canonicalType);
+        }
         return (J) outputTypes.get(0).decode(singleton);
     }
 

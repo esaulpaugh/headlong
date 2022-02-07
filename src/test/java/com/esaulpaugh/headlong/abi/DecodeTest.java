@@ -449,4 +449,13 @@ public class DecodeTest {
         assertThrown(IllegalArgumentException.class, "index out of order: 0", () -> tt.decode(bb, 1, 2, 0));
         assertThrown(IllegalArgumentException.class, "index out of order: 1", () -> tt.decode(bb, 1, 1));
     }
+
+    @Test
+    public void testSingletonReturn() throws Throwable {
+        assertThrown(IllegalArgumentException.class, "return type not a singleton: ()", () -> Function.parse("bar()", "()").decodeSingletonReturn(new byte[0]));
+        assertThrown(IllegalArgumentException.class, "return type not a singleton: (decimal,uint256)", () -> Function.parse("bar()", "(decimal,uint)").decodeSingletonReturn(new byte[0]));
+        Function bar = Function.parse("bar()", "(bool)");
+        boolean b = bar.decodeSingletonReturn(Strings.decode("0000000000000000000000000000000000000000000000000000000000000001"));
+        assertTrue(b);
+    }
 }
