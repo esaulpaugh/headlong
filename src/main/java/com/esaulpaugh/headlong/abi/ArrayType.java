@@ -55,7 +55,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         this.elementType = elementType;
         this.length = length;
         this.arrayClass = arrayClass;
-        this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticArrLen(this);
+        this.headLength = dynamic ? OFFSET_LENGTH_BYTES : calcArrayHeadLength(this);
     }
 
     public E getElementType() {
@@ -103,7 +103,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return totalLen(calcElementsLen(value), length == DYNAMIC_LENGTH);
     }
 
-    static int staticArrLen(ABIType<?> type) {
+    static int calcArrayHeadLength(ABIType<?> type) {
         int product = 1;
         ArrayType<?, ?> at;
         do {
@@ -114,7 +114,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                             ? Integers.roundLengthUp(len, UNIT_LENGTH_BYTES) / UNIT_LENGTH_BYTES
                             : len);
         } while((type = at.getElementType()) instanceof ArrayType<?, ?>);
-        return product * (type instanceof UnitType ? UNIT_LENGTH_BYTES : TupleType.staticTupleLen(type));
+        return product * (type instanceof UnitType ? UNIT_LENGTH_BYTES : TupleType.calcTupleHeadLength((TupleType) type));
     }
 
     private int calcElementsLen(Object value) {
