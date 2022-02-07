@@ -35,6 +35,11 @@ public final class Tuple extends AbstractList<Object> implements RandomAccess {
         this.elements = Arrays.copyOf(elements, elements.length); // shallow copy
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> T getElement(int index) {
+        return (T) get(index);
+    }
+
     @Override
     public Object get(int index) {
         Object val = elements[index];

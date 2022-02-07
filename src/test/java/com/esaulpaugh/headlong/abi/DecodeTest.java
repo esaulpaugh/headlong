@@ -383,9 +383,11 @@ public class DecodeTest {
 
         byte[] arr = f.getOutputs().encode(Tuple.of(1, true, new int[] { 3, 6 } , false)).array();
         Tuple t = f.decodeReturnIndices(arr, 1, 3);
-        assertThrown(NoSuchElementException.class, () -> t.get(0));
-        assertTrue((boolean) t.get(1));
-        assertThrown(NoSuchElementException.class, () -> t.get(2));
-        assertFalse((boolean) t.get(3));
+        assertThrown(NoSuchElementException.class, () -> t.getElement(0));
+        boolean one = t.getElement(1);
+        assertTrue(one);
+        assertThrown(NoSuchElementException.class, () -> t.getElement(2));
+        boolean three = t.getElement(3);
+        assertFalse(three);
     }
 }
