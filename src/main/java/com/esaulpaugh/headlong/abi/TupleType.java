@@ -192,11 +192,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     public <T> T decode(ByteBuffer bb, int... indices) {
         bb.mark();
         try {
-            return (T) (indices.length == 1
-                        ? decodeIndex(bb, indices[0]) // decodes and returns specified element
-                        : indices.length == 0
-                            ? decode(bb) // decodes and returns all elements
-                            : decodeIndices(bb, indices)); // decodes and returns specified elements
+            if(indices.length == 1) {
+                return decodeIndex(bb, indices[0]); // decodes and returns specified element
+            }
+            if(indices.length == 0) {
+                throw new IllegalArgumentException("must specify at least one index");
+            }
+            return (T) decodeIndices(bb, indices); // decodes and returns specified elements
         } finally {
             bb.reset();
         }

@@ -399,7 +399,7 @@ public class DecodeTest {
             "77656f7700000000000000000000000000000000000000000000000000000000";
 
     @Test
-    public void testTupleDecodeTypeInference() {
+    public void testTupleDecodeTypeInference() throws Throwable {
         TupleType tt = TupleType.parse("(int,string,bool,int64)");
         ByteBuffer bb = tt.encodeElements(BigInteger.valueOf(550L), "weow", true, -41L);
         assertEquals(TUPLE_HEX, Strings.encode(bb));
@@ -413,7 +413,6 @@ public class DecodeTest {
         assertEquals(two, t.getElement(2));
         long three2 = t.getElement(3);
         assertEquals(three, three2);
-        assertEquals(tt.decode(bb, new int[0]), tt.decode(bb));
     }
 
     @Test
@@ -434,20 +433,19 @@ public class DecodeTest {
     }
 
     @Test
-    public void testBadIndex() throws Throwable {
+    public void testBadIndices() throws Throwable {
         TupleType tt = TupleType.parse("(int,string,bool,int64)");
         ByteBuffer bb = ByteBuffer.wrap(FastHex.decode(TUPLE_HEX));
+
+        assertThrown(IllegalArgumentException.class, "must specify at least one index", () -> tt.decode(bb, new int[0]));
+
         assertThrown(IllegalArgumentException.class, "bad index: -571", () -> tt.decode(bb, -571));
         assertThrown(IllegalArgumentException.class, "bad index: -1", () -> tt.decode(bb, -1));
         assertThrown(IllegalArgumentException.class, "bad index: 4", () -> tt.decode(bb, 4));
         assertThrown(IllegalArgumentException.class, "bad index: 64", () -> tt.decode(bb, 64));
-    }
 
-    @Test
-    public void testIndexOutOfOrder() throws Throwable {
-        TupleType tt = TupleType.parse("(int,string,bool,int64)");
-        ByteBuffer bb = ByteBuffer.wrap(FastHex.decode(TUPLE_HEX));
-        tt.decode(bb, 1, 2);
+        Tuple t = tt.decode(bb, 1, 2);
+        System.out.println(t);
         assertThrown(IllegalArgumentException.class, "index out of order: 0", () -> tt.decode(bb, 1, 2, 0));
     }
 }

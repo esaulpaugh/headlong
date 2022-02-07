@@ -27,7 +27,12 @@ import java.util.RandomAccess;
 public final class Tuple extends AbstractList<Object> implements RandomAccess {
 
     public static final Tuple EMPTY = new Tuple();
-    public static final Object ABSENT = new Object();
+    public static final Object ABSENT = new Object() {
+        @Override
+        public String toString() {
+            return "-ABSENT-";
+        }
+    };
 
     final Object[] elements;
 
