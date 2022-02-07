@@ -236,10 +236,25 @@ public final class Function implements ABIObject {
         return inputTypes.decode(abiBuffer, unitBuffer); // unitBuffer contents are ignored, overwritten during decode
     }
 
+    public Tuple decodeReturn(byte[] returnVals) {
+        return decodeReturn(ByteBuffer.wrap(returnVals));
+    }
+
     public <T> T decodeReturn(byte[] returnVals, int... indices) {
         return decodeReturn(ByteBuffer.wrap(returnVals), indices);
     }
 
+    public Tuple decodeReturn(ByteBuffer buf) {
+        return outputTypes.decode(buf);
+    }
+
+    /**
+     * NOTE: This method does not advance the {@link ByteBuffer}'s {@code position}.
+     * @param buf   the buffer containing the return values
+     * @param indices   the positions of the elements to decode
+     * @param <T>   {@link Tuple} if decoding multiple elements
+     * @return
+     */
     public <T> T decodeReturn(ByteBuffer buf, int... indices) {
         return outputTypes.decode(buf, indices);
     }

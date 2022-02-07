@@ -442,4 +442,12 @@ public class DecodeTest {
         assertThrown(IllegalArgumentException.class, "bad index: 4", () -> tt.decode(bb, 4));
         assertThrown(IllegalArgumentException.class, "bad index: 64", () -> tt.decode(bb, 64));
     }
+
+    @Test
+    public void testIndexOutOfOrder() throws Throwable {
+        TupleType tt = TupleType.parse("(int,string,bool,int64)");
+        ByteBuffer bb = ByteBuffer.wrap(FastHex.decode(TUPLE_HEX));
+        tt.decode(bb, 1, 2);
+        assertThrown(IllegalArgumentException.class, "index out of order: 0", () -> tt.decode(bb, 1, 2, 0));
+    }
 }

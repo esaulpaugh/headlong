@@ -188,18 +188,22 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return new Tuple(elements);
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T decode(ByteBuffer bb, int... indices) {
         bb.mark();
         try {
-            return (T) (indices.length == 1
-                        ? decodeIndex(bb, indices[0]) // decodes and returns specified element
-                        : indices.length == 0
-                            ? decode(bb) // decodes and returns all elements
-                            : decodeIndices(bb, indices)); // decodes and returns specified elements
+            return decodeNoMark(bb, indices);
         } finally {
             bb.reset();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T decodeNoMark(ByteBuffer bb, int... indices) {
+        return (T) (indices.length == 1
+                    ? decodeIndex(bb, indices[0]) // decodes and returns specified element
+                    : indices.length == 0
+                        ? decode(bb) // decodes and returns all elements
+                        : decodeIndices(bb, indices)); // decodes and returns specified elements
     }
 
     private void ensureIndexInBounds(int index) {
@@ -230,21 +234,28 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         final int pos = bb.position();
         final byte[] unitBuffer = newUnitBuffer();
         int i = 0, j = 0, index, skipBytes = 0;
+        int prevIdx = -1;
         do {
             index = indices[i++];
             ensureIndexInBounds(index);
+            if(index <= prevIdx) throw new IllegalArgumentException("index out of order: " + index);
             for (; j < index; j++) {
                 skipBytes += calcSkipBytes(elementTypes[j]);
                 results[j] = Tuple.ABSENT;
             }
             final ABIType<?> result = elementTypes[index];
-            bb.position(pos + skipBytes);
+            final int startElement = pos + skipBytes;
+            bb.position(startElement);
             if (result.dynamic) {
                 bb.position(pos + UINT31.decode(bb, unitBuffer));
+                results[index] = result.decode(bb, unitBuffer);
+                skipBytes = startElement + OFFSET_LENGTH_BYTES;
+            } else {
+                results[index] = result.decode(bb, unitBuffer);
+                skipBytes = bb.position() - pos;
             }
-            results[index] = result.decode(bb, unitBuffer);
-            skipBytes = bb.position() - pos;
             j = index + 1;
+            prevIdx = index;
         } while (i < indices.length);
         for (; j < results.length; j++) {
             results[j] = Tuple.ABSENT;
