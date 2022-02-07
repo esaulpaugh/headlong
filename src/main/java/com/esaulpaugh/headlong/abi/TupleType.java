@@ -214,7 +214,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         ensureIndexInBounds(index);
         int skipBytes = 0;
         for (int j = 0; j < index; j++) {
-            skipBytes += calcSkipBytes(elementTypes[j]);
+            skipBytes += elementTypes[j].headLength();
         }
         final int pos = bb.position();
         bb.position(pos + skipBytes);
@@ -238,7 +238,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             ensureIndexInBounds(index);
             if(index <= prevIdx) throw new IllegalArgumentException("index out of order: " + index);
             for (; j < index; j++) {
-                skipBytes += calcSkipBytes(elementTypes[j]);
+                skipBytes += elementTypes[j].headLength();
                 results[j] = Tuple.ABSENT;
             }
             final ABIType<?> result = elementTypes[j++];
@@ -258,14 +258,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             results[j] = Tuple.ABSENT;
         }
         return new Tuple(results);
-    }
-
-    private int calcSkipBytes(ABIType<?> skipped) {
-        switch (skipped.typeCode()) {
-        case TYPE_CODE_ARRAY: return skipped.dynamic ? OFFSET_LENGTH_BYTES : ArrayType.staticArrLen(skipped);
-        case TYPE_CODE_TUPLE: return skipped.dynamic ? OFFSET_LENGTH_BYTES : staticTupleLen(skipped);
-        default: return UNIT_LENGTH_BYTES;
-        }
     }
 
     static int staticTupleLen(ABIType<?> tt) {

@@ -114,7 +114,7 @@ public class MonteCarloTest {
         return x;
     }
 
-    private static final int N = 64_000;
+    private static final int N = 32_000;
 
     @Test
     public void gambleGamble() throws InterruptedException, TimeoutException {
