@@ -338,7 +338,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
      * @return  the new {@link TupleType}
      */
     public TupleType select(boolean... manifest) {
-        return subTupleType(manifest, false);
+        return selectElements(manifest, false);
     }
 
     /**
@@ -350,10 +350,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
      * @return  the new {@link TupleType}
      */
     public TupleType exclude(boolean... manifest) {
-        return subTupleType(manifest, true);
+        return selectElements(manifest, true);
     }
 
-    private TupleType subTupleType(final boolean[] manifest, final boolean negate) {
+    private TupleType selectElements(final boolean[] manifest, final boolean negate) {
         final int size = size();
         if(manifest.length == size) {
             final StringBuilder canonicalBuilder = new StringBuilder("(");
