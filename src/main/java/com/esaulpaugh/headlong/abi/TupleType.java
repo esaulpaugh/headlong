@@ -188,22 +188,18 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return new Tuple(elements);
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T decode(ByteBuffer bb, int... indices) {
         bb.mark();
         try {
-            return decodeNoMark(bb, indices);
+            return (T) (indices.length == 1
+                        ? decodeIndex(bb, indices[0]) // decodes and returns specified element
+                        : indices.length == 0
+                            ? decode(bb) // decodes and returns all elements
+                            : decodeIndices(bb, indices)); // decodes and returns specified elements
         } finally {
             bb.reset();
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> T decodeNoMark(ByteBuffer bb, int... indices) {
-        return (T) (indices.length == 1
-                    ? decodeIndex(bb, indices[0]) // decodes and returns specified element
-                    : indices.length == 0
-                        ? decode(bb) // decodes and returns all elements
-                        : decodeIndices(bb, indices)); // decodes and returns specified elements
     }
 
     private void ensureIndexInBounds(int index) {
@@ -214,11 +210,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     private <T> T decodeIndex(ByteBuffer bb, int index) {
         ensureIndexInBounds(index);
-        final int pos = bb.position();
         int skipBytes = 0;
         for (int j = 0; j < index; j++) {
             skipBytes += calcSkipBytes(elementTypes[j]);
         }
+        final int pos = bb.position();
         bb.position(pos + skipBytes);
         @SuppressWarnings("unchecked")
         final ABIType<T> resultType = (ABIType<T>) elementTypes[index];
@@ -243,7 +239,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 skipBytes += calcSkipBytes(elementTypes[j]);
                 results[j] = Tuple.ABSENT;
             }
-            final ABIType<?> result = elementTypes[index];
+            final ABIType<?> result = elementTypes[j++];
             final int startElement = pos + skipBytes;
             bb.position(startElement);
             if (result.dynamic) {
@@ -254,7 +250,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 results[index] = result.decode(bb, unitBuffer);
                 skipBytes = bb.position() - pos;
             }
-            j = index + 1;
             prevIdx = index;
         } while (i < indices.length);
         for (; j < results.length; j++) {
