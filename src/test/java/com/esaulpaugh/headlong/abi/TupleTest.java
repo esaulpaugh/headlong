@@ -17,12 +17,14 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Strings;
 import com.joemelsha.crypto.hash.Keccak;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Random;
@@ -299,9 +301,9 @@ public class TupleTest {
     public void testDecodeIndex0() {
         TupleType tt = TupleType.parse("(bool,(bool,int24[2],(bool,bool)[2])[1],string)");
         Tuple args = Tuple.of(true, new Tuple[] { Tuple.of(true, new int[] { 1, 2 }, new Tuple[] { Tuple.of(true, false), Tuple.of(true, false) }) }, "ya");
-        byte[] arr = tt.encode(args).array();
-        System.out.println(FastHex.encodeToString(arr));
-        String ya = tt.decodeIndex(arr, 2);
+        ByteBuffer bb = tt.encode(args);
+        System.out.println(Strings.encode(bb));
+        String ya = tt.decodeIndex((ByteBuffer) bb.flip(), 2);
         assertEquals("ya", ya);
     }
 
@@ -309,9 +311,9 @@ public class TupleTest {
     public void testDecodeIndex1() {
         TupleType tt = TupleType.parse("(bool,bool[3][2],string[][])");
         Tuple args = Tuple.of(true, new boolean[][] { new boolean[] { true, false, true }, new boolean[] { false, false, true } }, new String[][] { new String[] { "wooo", "moo" } });
-        byte[] arr = tt.encode(args).array();
-        System.out.println(FastHex.encodeToString(arr));
-        String[][] s = tt.decodeIndex(arr, 2);
+        ByteBuffer bb = tt.encode(args);
+        System.out.println(Strings.encode(bb));
+        String[][] s = tt.decodeIndex((ByteBuffer) bb.flip(), 2);
         assertTrue(Objects.deepEquals(new String[][] { new String[] { "wooo", "moo" } }, s));
     }
 
@@ -327,20 +329,20 @@ public class TupleTest {
                 Address.wrap("0x0000110000111100001111110000111111110000"),
                 new String[][] { new String[] { "yabba", "dabba", "doo" }, new String[] { "" } }
         );
-        final byte[] arr = tt.encode(args).array();
-        boolean bool = tt.decodeIndex(arr, 0);
+        final ByteBuffer bb = (ByteBuffer) tt.encode(args).flip();
+        boolean bool = tt.decodeIndex(bb, 0);
         assertTrue(bool);
-        int uint16 = tt.decodeIndex(arr, 1);
+        int uint16 = tt.decodeIndex(bb, 1);
         assertEquals(90, uint16);
-        Address address = tt.decodeIndex(arr, 2);
+        Address address = tt.decodeIndex(bb, 2);
         assertEquals(Address.wrap("0x0000000000000000000000000000000000000000"), address);
-        long int64 = tt.decodeIndex(arr, 3);
+        long int64 = tt.decodeIndex(bb, 3);
         assertEquals(100L, int64);
-        BigInteger uint64 = tt.decodeIndex(arr, 4);
+        BigInteger uint64 = tt.decodeIndex(bb, 4);
         assertEquals(new BigInteger("110"), uint64);
-        Address address2 = tt.decodeIndex(arr, 5);
+        Address address2 = tt.decodeIndex(bb, 5);
         assertEquals(Address.wrap("0x0000110000111100001111110000111111110000"), address2);
-        String[][] arrs = tt.decodeIndex(arr, 6);
+        String[][] arrs = tt.decodeIndex(bb, 6);
         assertTrue(Objects.deepEquals(new String[][] { new String[] { "yabba", "dabba", "doo" }, new String[] { "" } }, arrs));
     }
 }

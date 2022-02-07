@@ -84,15 +84,15 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     int dynamicByteLength(Object value) {
-        Tuple tuple = (Tuple) value;
-        return countBytes(false, size(), 0, i -> measureObject(get(i), tuple.get(i)));
+        final Object[] elements = ((Tuple) value).elements;
+        return countBytes(i -> measureObject(get(i), elements[i]));
     }
 
     @Override
     int byteLength(Object value) {
         if(!dynamic) return staticByteLen;
-        Tuple tuple = (Tuple) value;
-        return countBytes(false, size(), 0, i -> measureObject(get(i), tuple.get(i)));
+        final Object[] elements = ((Tuple) value).elements;
+        return countBytes(i -> measureObject(get(i), elements[i]));
     }
 
     private static int measureObject(ABIType<?> type, Object value) {
@@ -106,7 +106,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     public int byteLengthPacked(Object value) {
         final Object[] elements = value != null ? ((Tuple) value).elements : new Object[size()];
-        return countBytes(false, size(), 0, i -> get(i).byteLengthPacked(elements[i]));
+        return countBytes(i -> get(i).byteLengthPacked(elements[i]));
+    }
+
+    private int countBytes(IntUnaryOperator counter) {
+        return countBytes(false, elementTypes.length, 0, counter);
     }
 
     static int countBytes(boolean array, int len, int count, IntUnaryOperator counter) {
@@ -124,7 +128,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     public int validate(final Tuple value) {
         if (value.size() == this.size()) {
-            return countBytes(false, this.size(), 0, i -> validateObject(get(i), value.get(i)));
+            return countBytes(i -> validateObject(get(i), value.elements[i]));
         }
         throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + value.size() + " != " + this.size());
     }
@@ -151,7 +155,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     void encodePackedUnchecked(Tuple value, ByteBuffer dest) {
         final int size = size();
         for (int i = 0; i < size; i++) {
-            get(i).encodeObjectPackedUnchecked(value.get(i), dest);
+            get(i).encodeObjectPackedUnchecked(value.elements[i], dest);
         }
     }
 
@@ -184,34 +188,72 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return new Tuple(elements);
     }
 
-    public <T> T decodeIndex(byte[] encoded, int index) {
-        return decodeIndex(ByteBuffer.wrap(encoded), index);
+    <T> T decodeIndex(ByteBuffer bb, int index) {
+        if (index < 0 || index >= elementTypes.length) {
+            throw new IllegalArgumentException("bad index");
+        }
+        final int pos = bb.mark().position();
+        try {
+            int skipBytes = 0;
+            for (int j = 0; j < index; j++) {
+                skipBytes += calcSkipBytes(elementTypes[j]);
+            }
+            bb.position(pos + skipBytes);
+            @SuppressWarnings("unchecked")
+            final ABIType<T> resultType = (ABIType<T>) elementTypes[index];
+            final byte[] unitBuffer = newUnitBuffer();
+            if (resultType.dynamic) {
+                bb.position(pos + UINT31.decode(bb, unitBuffer));
+            }
+            return resultType.decode(bb, unitBuffer);
+        } finally {
+            bb.reset();
+        }
     }
 
-    <T> T decodeIndex(ByteBuffer bb, int index) {
+    @SuppressWarnings("unchecked")
+    <T> T decodeIndices(ByteBuffer bb, int... indices) {
+        if(indices.length <= 0) {
+            return (T) Tuple.EMPTY;
+        }
+        final Object[] results = new Object[elementTypes.length];
+        final int pos = bb.mark().position();
         final byte[] unitBuffer = newUnitBuffer();
-        final int pos = bb.position();
-        int skipBytes = 0;
-        for (int i = 0; i < index; i++) {
-            final ABIType<?> et = elementTypes[i];
-            switch (et.typeCode()) {
-            case TYPE_CODE_ARRAY:
-                skipBytes += et.dynamic ? OFFSET_LENGTH_BYTES : ArrayType.staticArrLen(et);
-                continue;
-            case TYPE_CODE_TUPLE:
-                skipBytes += et.dynamic ? OFFSET_LENGTH_BYTES : staticTupleLen(et);
-                continue;
-            default:
-                skipBytes += UNIT_LENGTH_BYTES;
+        try {
+            int i = 0, j = 0, index, skipBytes = 0;
+            do {
+                index = indices[i++];
+                if (index < 0 || index >= elementTypes.length) {
+                    throw new IllegalArgumentException("bad index");
+                }
+                for (; j < index; j++) {
+                    skipBytes += calcSkipBytes(elementTypes[j]);
+                    results[j] = Tuple.ABSENT;
+                }
+                final ABIType<?> result = elementTypes[index];
+                bb.position(pos + skipBytes);
+                if (result.dynamic) {
+                    bb.position(pos + UINT31.decode(bb, unitBuffer));
+                }
+                results[index] = result.decode(bb, unitBuffer);
+                skipBytes = bb.position() - pos;
+                j = index + 1;
+            } while (i < indices.length);
+            for (; j < results.length; j++) {
+                results[j] = Tuple.ABSENT;
             }
+            return (T) new Tuple(results);
+        } finally {
+            bb.reset();
         }
-        bb.position(pos + skipBytes);
-        @SuppressWarnings("unchecked")
-        final ABIType<T> t = (ABIType<T>) elementTypes[index];
-        if(t.dynamic) {
-            bb.position(pos + UINT31.decode(bb, unitBuffer));
+    }
+
+    private int calcSkipBytes(ABIType<?> skipped) {
+        switch (skipped.typeCode()) {
+        case TYPE_CODE_ARRAY: return skipped.dynamic ? OFFSET_LENGTH_BYTES : ArrayType.staticArrLen(skipped);
+        case TYPE_CODE_TUPLE: return skipped.dynamic ? OFFSET_LENGTH_BYTES : staticTupleLen(skipped);
+        default: return UNIT_LENGTH_BYTES;
         }
-        return t.decode(bb, unitBuffer);
     }
 
     static int staticTupleLen(ABIType<?> tt) {

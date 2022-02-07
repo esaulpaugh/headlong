@@ -164,22 +164,20 @@ public class MonteCarloTestCase {
 
     void runAll(Random instance) {
         instance.setSeed(seed + 512);
-        byte[] encoded = runStandard().array();
-        runDecodeIndex(instance);
-        runFuzzDecode(encoded, instance);
+        ByteBuffer encoded = runStandard();
+        runDecodeIndex((ByteBuffer) encoded.position(Function.SELECTOR_LEN), instance);
+        runFuzzDecode(encoded.array(), instance);
         runSuperSerial();
         runPacked();
         runFuzzPackedDecode(instance);
         runJson(instance);
     }
 
-    void runDecodeIndex(Random r) {
+    void runDecodeIndex(ByteBuffer bb, Random r) {
         TupleType tt = function.getInputs();
         if(tt.size() > 0) {
             int idx = r.nextInt(tt.size());
-            byte[] enc = tt.encode(argsTuple).array();
-            Object val = tt.decodeIndex(enc, idx);
-            assertTrue(Objects.deepEquals(argsTuple.get(idx), val));
+            assertTrue(Objects.deepEquals(argsTuple.get(idx), tt.decodeIndex(bb, idx)));
         }
     }
 

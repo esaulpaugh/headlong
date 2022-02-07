@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import java.util.AbstractList;
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.RandomAccess;
 
 /**
@@ -26,6 +27,7 @@ import java.util.RandomAccess;
 public final class Tuple extends AbstractList<Object> implements RandomAccess {
 
     public static final Tuple EMPTY = new Tuple();
+    public static final Object ABSENT = new Object();
 
     final Object[] elements;
 
@@ -35,7 +37,11 @@ public final class Tuple extends AbstractList<Object> implements RandomAccess {
 
     @Override
     public Object get(int index) {
-        return elements[index];
+        Object val = elements[index];
+        if(val == ABSENT) {
+            throw new NoSuchElementException();
+        }
+        return val;
     }
 
     @Override

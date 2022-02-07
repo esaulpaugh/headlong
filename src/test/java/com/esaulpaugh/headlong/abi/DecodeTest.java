@@ -25,6 +25,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.NoSuchElementException;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -355,12 +357,35 @@ public class DecodeTest {
     public void testDecodeCallIndex() {
         Function f = new Function("()", "(int8,bool,string)");
 
-        ByteBuffer bb = f.getOutputs().encode(Tuple.of(127, true, "two"));
-        boolean b = f.decodeReturnIndex(bb.array(), 1);
+        final ByteBuffer bb = f.getOutputs().encode(Tuple.of(127, true, "two"));
+        final boolean b = f.decodeReturnIndex(bb.array(), 1);
         assertTrue(b);
+        System.out.println(Strings.encode(bb));
 
-        bb = f.getOutputs().encode(Tuple.of(127, false, "two"));
-        b = f.decodeReturnIndex(bb.array(), 1);
-        assertFalse(b);
+        final byte[] bigger = new byte[10 + bb.capacity()];
+        Arrays.fill(bigger, (byte) 0xff);
+        final ByteBuffer bb2 = ByteBuffer.wrap(bigger);
+        bb2.position(10);
+        bb2.put(bb.array());
+        final ByteBuffer bb3 = (ByteBuffer) ByteBuffer.wrap(bb2.array()).position(10);
+        System.out.println(Strings.encode(bb3));
+        final boolean b2 = f.decodeReturnIndex(bb3, 1);
+        assertTrue(b2);
+
+        final ByteBuffer bb4 = f.getOutputs().encode(Tuple.of(127, false, "two"));
+        final boolean b3 = f.decodeReturnIndex(bb4.array(), 1);
+        assertFalse(b3);
+    }
+
+    @Test
+    public void testDecodeCallIndices() throws Throwable {
+        Function f = new Function("()", "(int8,bool,int8[],bool)");
+
+        byte[] arr = f.getOutputs().encode(Tuple.of(1, true, new int[] { 3, 6 } , false)).array();
+        Tuple t = f.decodeReturnIndices(arr, 1, 3);
+        assertThrown(NoSuchElementException.class, () -> t.get(0));
+        assertTrue((boolean) t.get(1));
+        assertThrown(NoSuchElementException.class, () -> t.get(2));
+        assertFalse((boolean) t.get(3));
     }
 }

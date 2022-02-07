@@ -237,7 +237,19 @@ public final class Function implements ABIObject {
     }
 
     public <T> T decodeReturnIndex(byte[] returnVals, int index) {
-        return outputTypes.decodeIndex(ByteBuffer.wrap(returnVals), index);
+        return decodeReturnIndex(ByteBuffer.wrap(returnVals), index);
+    }
+
+    public <T> T decodeReturnIndices(byte[] returnVals, int... indices) {
+        return decodeReturnIndices(ByteBuffer.wrap(returnVals), indices);
+    }
+
+    public <T> T decodeReturnIndex(ByteBuffer buf, int index) {
+        return outputTypes.decodeIndex(buf, index);
+    }
+
+    public <T> T decodeReturnIndices(ByteBuffer buf, int... indices) {
+        return outputTypes.decodeIndices(buf, indices);
     }
 
     public Tuple decodeReturn(byte[] returnVals) {
