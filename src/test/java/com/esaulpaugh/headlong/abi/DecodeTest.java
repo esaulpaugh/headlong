@@ -447,5 +447,6 @@ public class DecodeTest {
         Tuple t = tt.decode(bb, 1, 2);
         System.out.println(t);
         assertThrown(IllegalArgumentException.class, "index out of order: 0", () -> tt.decode(bb, 1, 2, 0));
+        assertThrown(IllegalArgumentException.class, "index out of order: 1", () -> tt.decode(bb, 1, 1));
     }
 }
