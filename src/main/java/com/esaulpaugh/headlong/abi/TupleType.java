@@ -238,20 +238,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             ensureIndexInBounds(index);
             if(index <= prevIdx) throw new IllegalArgumentException("index out of order: " + index);
             for (; j < index; j++) {
-                skipBytes += elementTypes[j].headLength();
                 results[j] = Tuple.ABSENT;
+                skipBytes += elementTypes[j].headLength();
             }
-            final ABIType<?> result = elementTypes[j++];
-            final int startElement = pos + skipBytes;
-            bb.position(startElement);
-            if (result.dynamic) {
+            bb.position(pos + skipBytes);
+            final ABIType<?> resultType = elementTypes[j++];
+            if (resultType.dynamic) {
                 bb.position(pos + UINT31.decode(bb, unitBuffer));
-                results[index] = result.decode(bb, unitBuffer);
-                skipBytes += OFFSET_LENGTH_BYTES;
-            } else {
-                results[index] = result.decode(bb, unitBuffer);
-                skipBytes = bb.position() - pos;
             }
+            results[index] = resultType.decode(bb, unitBuffer);
+            skipBytes += resultType.headLength();
             prevIdx = index;
         } while (i < indices.length);
         for (; j < results.length; j++) {
