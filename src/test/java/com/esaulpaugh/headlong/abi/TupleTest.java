@@ -226,29 +226,29 @@ public class TupleTest {
     public void testSubtubleType() throws Throwable {
         TupleType tt = TupleType.parse("(bytes3,uint16[],string)");
 
-        assertEquals(TupleType.EMPTY, tt.subTupleType(false, false, false));
-        assertEquals(TupleType.of("string"), tt.subTupleType(false, false, true));
-        assertEquals(TupleType.of("uint16[]"), tt.subTupleType(false, true, false));
-        assertEquals(TupleType.of("uint16[]", "string"), tt.subTupleType(false, true, true));
-        assertEquals(TupleType.of("bytes3"), tt.subTupleType(true, false, false));
-        assertEquals(TupleType.of("bytes3", "string"), tt.subTupleType(true, false, true));
-        assertEquals(TupleType.of("bytes3", "uint16[]"), tt.subTupleType(true, true, false));
-        assertEquals(TupleType.of("bytes3", "uint16[]", "string"), tt.subTupleType(true, true, true));
+        assertEquals(TupleType.EMPTY, tt.select(false, false, false));
+        assertEquals(TupleType.of("string"), tt.select(false, false, true));
+        assertEquals(TupleType.of("uint16[]"), tt.select(false, true, false));
+        assertEquals(TupleType.of("uint16[]", "string"), tt.select(false, true, true));
+        assertEquals(TupleType.of("bytes3"), tt.select(true, false, false));
+        assertEquals(TupleType.of("bytes3", "string"), tt.select(true, false, true));
+        assertEquals(TupleType.of("bytes3", "uint16[]"), tt.select(true, true, false));
+        assertEquals(TupleType.of("bytes3", "uint16[]", "string"), tt.select(true, true, true));
 
-        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(true, true));
-        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(false, false, false, false));
+        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.select(true, true));
+        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.select(false, false, false, false));
 
-        assertEquals(TupleType.of("bytes3", "uint16[]", "string"), tt.subTupleTypeNegative(false, false, false));
-        assertEquals(TupleType.of("bytes3", "uint16[]"), tt.subTupleTypeNegative(false, false, true));
-        assertEquals(TupleType.of("bytes3", "string"), tt.subTupleTypeNegative(false, true, false));
-        assertEquals(TupleType.of("bytes3"), tt.subTupleTypeNegative(false, true, true));
-        assertEquals(TupleType.of("uint16[]", "string"), tt.subTupleTypeNegative(true, false, false));
-        assertEquals(TupleType.of("uint16[]"), tt.subTupleTypeNegative(true, false, true));
-        assertEquals(TupleType.of("string"), tt.subTupleTypeNegative(true, true, false));
-        assertEquals(TupleType.EMPTY, tt.subTupleTypeNegative(true, true, true));
+        assertEquals(TupleType.of("bytes3", "uint16[]", "string"), tt.exclude(false, false, false));
+        assertEquals(TupleType.of("bytes3", "uint16[]"), tt.exclude(false, false, true));
+        assertEquals(TupleType.of("bytes3", "string"), tt.exclude(false, true, false));
+        assertEquals(TupleType.of("bytes3"), tt.exclude(false, true, true));
+        assertEquals(TupleType.of("uint16[]", "string"), tt.exclude(true, false, false));
+        assertEquals(TupleType.of("uint16[]"), tt.exclude(true, false, true));
+        assertEquals(TupleType.of("string"), tt.exclude(true, true, false));
+        assertEquals(TupleType.EMPTY, tt.exclude(true, true, true));
 
-        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(new boolean[0]));
-        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.subTupleType(new boolean[5]));
+        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.select(new boolean[0]));
+        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.select(new boolean[5]));
     }
 
     @Test
@@ -344,5 +344,26 @@ public class TupleTest {
         assertEquals(Address.wrap("0x0000110000111100001111110000111111110000"), address2);
         String[][] arrs = tt.decode(bb, 6);
         assertTrue(Objects.deepEquals(new String[][] { new String[] { "yabba", "dabba", "doo" }, new String[] { "" } }, arrs));
+    }
+
+    @Test
+    public void testSelectExclude() {
+        TupleType uintBool = TupleType.parse("(uint,bool)");
+        TupleType uint = TupleType.parse("(uint)");
+        TupleType bool = TupleType.parse("(bool)");
+
+        assertEquals(bool, uintBool.select(false, true));
+        assertEquals(uint, uintBool.select(true, false));
+        assertEquals(uintBool, uintBool.select(true, true));
+        assertEquals(TupleType.EMPTY, uintBool.select(false, false));
+
+        assertEquals(TupleType.EMPTY, uintBool.exclude(true, true));
+        assertEquals(bool, uintBool.exclude(true, false));
+        assertEquals(uint, uintBool.exclude(false, true));
+        assertEquals(uintBool, uintBool.exclude(false, false));
+
+        TupleType tt2 = TupleType.parse("((int,bool))");
+        assertEquals(tt2, tt2.select(true));
+        assertEquals(TupleType.EMPTY, tt2.exclude(true));
     }
 }

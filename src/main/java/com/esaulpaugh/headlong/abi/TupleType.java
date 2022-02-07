@@ -324,11 +324,27 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return Arrays.asList(elementTypes).iterator();
     }
 
-    public TupleType subTupleType(boolean... manifest) {
+    /**
+     * Returns a new {@link TupleType} containing only the elements in this {@link TupleType} whose position is
+     * specified with a {@code true} value in the {@code manifest}. Aside from eliminating items not selected, order is
+     * preserved.
+     *
+     * @param manifest  the booleans specifying which elements to select
+     * @return  the new {@link TupleType}
+     */
+    public TupleType select(boolean... manifest) {
         return subTupleType(manifest, false);
     }
 
-    public TupleType subTupleTypeNegative(boolean... manifest) {
+    /**
+     * Returns the inverse of {@link TupleType#select(boolean...)}, which means a new {@link TupleType} containing only
+     * the elements which are *not* specified with {@code true} values. Aside from eliminating excluded items, order is
+     * preserved.
+     *
+     * @param manifest  the booleans specifying which elements to exclude
+     * @return  the new {@link TupleType}
+     */
+    public TupleType exclude(boolean... manifest) {
         return subTupleType(manifest, true);
     }
 
