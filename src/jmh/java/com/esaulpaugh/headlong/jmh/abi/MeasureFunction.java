@@ -22,11 +22,9 @@ import com.esaulpaugh.headlong.util.Strings;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
-import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
@@ -40,16 +38,21 @@ public class MeasureFunction {
 
     private static final int BATCH_SIZE = 100_000;
 
-    private final Function f = new Function("sam(bytes,bool,uint256[])", "(bytes,bool,uint256[])");
-    private final TupleType tt = f.getInputs();
-    private final Tuple args = Tuple.of(
+    private static final Function F = new Function("sam(bytes,bool,uint256[])", "(bytes,uint256[3],bool)");
+    private static final TupleType T = F.getInputs();
+    private static final Tuple ARGS = Tuple.of(
             Strings.decode("dave", Strings.UTF_8),
             true,
             new BigInteger[] { BigInteger.ONE, BigInteger.valueOf(2), BigInteger.valueOf(3) }
     );
 
-    private final byte[] encodedCall = Strings.decode("a5643bf20000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000464617665000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003");
-    private final byte[] encodedTuple = Strings.decode("0000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000464617665000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003");
+//    static {
+//        System.out.println(Strings.encode(F.getOutputs().encode(ARGS)));
+//    }
+
+    private static final byte[] CALL = Strings.decode("a5643bf20000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000464617665000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003");
+    private static final byte[] RETURN = Strings.decode("00000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000046461766500000000000000000000000000000000000000000000000000000000");
+    private static final byte[] INPUTS = Strings.decode("0000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000464617665000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003");
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
@@ -57,7 +60,25 @@ public class MeasureFunction {
     @Warmup(batchSize = BATCH_SIZE, iterations = 1)
     @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
     public void encode_call(Blackhole blackhole) {
-        blackhole.consume(f.encodeCall(args));
+        blackhole.consume(F.encodeCall(ARGS));
+    }
+
+//    @Benchmark
+//    @Fork(value = 1, warmups = 1)
+//    @BenchmarkMode(Mode.AverageTime)
+//    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
+//    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
+//    public void decode_call(Blackhole blackhole) {
+//        blackhole.consume(F.decodeCall(CALL));
+//    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.AverageTime)
+    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
+    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
+    public void decode_index_slow(Blackhole blackhole) {
+        blackhole.consume(F.decodeReturn(RETURN).get(2));
     }
 
     @Benchmark
@@ -65,26 +86,8 @@ public class MeasureFunction {
     @BenchmarkMode(Mode.AverageTime)
     @Warmup(batchSize = BATCH_SIZE, iterations = 1)
     @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
-    public void decode_call(Blackhole blackhole) {
-        blackhole.consume(f.decodeCall(encodedCall));
-    }
-
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.AverageTime)
-    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
-    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
-    public void decode_index_old(Blackhole blackhole) {
-        blackhole.consume(f.decodeCall(encodedCall).get(2));
-    }
-
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.AverageTime)
-    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
-    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
-    public void decode_call_index(Blackhole blackhole) {
-        blackhole.consume(f.decodeReturn(encodedTuple, 2));
+    public void decode_index_fast(Blackhole blackhole) {
+        blackhole.consume(F.decodeReturn(RETURN, 2));
     }
 
     @Benchmark

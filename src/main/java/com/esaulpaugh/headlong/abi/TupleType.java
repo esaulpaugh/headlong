@@ -231,26 +231,27 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         final Object[] results = new Object[elementTypes.length];
         final int pos = bb.position();
         final byte[] unitBuffer = newUnitBuffer();
-        int i = 0, j = 0, index, skipBytes = 0;
-        int prevIdx = -1;
+        int i = 0, index, skipBytes = 0, prevIndex = -1;
         do {
             index = indices[i++];
             ensureIndexInBounds(index);
-            if(index <= prevIdx) throw new IllegalArgumentException("index out of order: " + index);
-            for (; j < index; j++) {
+            if(index <= prevIndex) {
+                throw new IllegalArgumentException("index out of order: " + index);
+            }
+            for (int j = prevIndex + 1; j < index; j++) {
                 results[j] = Tuple.ABSENT;
                 skipBytes += elementTypes[j].headLength();
             }
             bb.position(pos + skipBytes);
-            final ABIType<?> resultType = elementTypes[j++];
+            final ABIType<?> resultType = elementTypes[index];
             if (resultType.dynamic) {
                 bb.position(pos + UINT31.decode(bb, unitBuffer));
             }
             results[index] = resultType.decode(bb, unitBuffer);
             skipBytes += resultType.headLength();
-            prevIdx = index;
+            prevIndex = index;
         } while (i < indices.length);
-        for (; j < results.length; j++) {
+        for (int j = prevIndex + 1; j < elementTypes.length; j++) {
             results[j] = Tuple.ABSENT;
         }
         return new Tuple(results);
