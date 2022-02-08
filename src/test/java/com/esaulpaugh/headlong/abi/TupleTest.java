@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -282,7 +283,14 @@ public class TupleTest {
         assertEquals("b", t.get(1));
         assertEquals("c", t.get(2));
 
+        List<Object> list = t.toList();
+        final int size = list.size();
+        assertEquals(args.length, size);
+        assertEquals(t.size(), size);
+        assertEquals(t.elements.length, size);
+
         testRemove(t.iterator());
+        testRemove(list.iterator());
     }
 
     @Test
