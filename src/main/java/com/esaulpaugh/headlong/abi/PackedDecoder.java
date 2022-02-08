@@ -59,11 +59,11 @@ final class PackedDecoder {
     static int countDynamicsTupleType(TupleType tupleType) {
         int numDynamic = 0;
         for (ABIType<?> e : tupleType.elementTypes) {
-            numDynamic += !e.dynamic
-                    ? 0
-                    : TYPE_CODE_TUPLE == e.typeCode()
+            if(e.dynamic) {
+                numDynamic += e instanceof TupleType
                         ? countDynamicsTupleType((TupleType) e)
                         : countDynamicsArrayType(e); // assume ArrayType bc currently only TupleType and ArrayType can be dynamic
+            }
         }
         return numDynamic;
     }
@@ -71,7 +71,7 @@ final class PackedDecoder {
     private static int countDynamicsArrayType(ABIType<?> type) {
         int numDynamic = 0;
         do {
-            ArrayType<?, ?> at = (ArrayType<? extends ABIType<?>, ?>) type;
+            ArrayType<?, ?> at = (ArrayType<?, ?>) type;
             if(DYNAMIC_LENGTH == at.getLength()) {
                 numDynamic++;
             }
