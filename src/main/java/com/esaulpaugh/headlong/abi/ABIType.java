@@ -147,10 +147,9 @@ public abstract class ABIType<J> {
         return dest;
     }
 
-    public final ABIType<J> encode(J value, ByteBuffer dest) {
+    public final void encode(J value, ByteBuffer dest) {
         validate(value);
         encodeTail(value, dest);
-        return this;
     }
 
     final int encodeHead(Object value, ByteBuffer dest, int offset) {
