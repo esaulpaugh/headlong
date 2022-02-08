@@ -28,7 +28,7 @@ public final class Tuple implements Iterable<Object> {
 
     public static final Tuple EMPTY = new Tuple();
 
-    public static final Object ABSENT = new Object() {
+    static final Object ABSENT = new Object() {
         @Override
         public String toString() {
             return "-ABSENT-";
