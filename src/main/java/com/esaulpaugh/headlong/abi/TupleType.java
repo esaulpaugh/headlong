@@ -342,8 +342,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     /**
-     * Returns the inverse of {@link TupleType#select(boolean...)}, which means a new {@link TupleType} containing only
-     * the elements which are *not* specified with {@code true} values. Aside from eliminating excluded items, order is
+     * Returns the complement of {@link TupleType#select(boolean...)} -- a new {@link TupleType} containing only the
+     * elements which are *not* specified with {@code true} values. Aside from eliminating excluded items, order is
      * preserved.
      *
      * @param manifest  the booleans specifying which elements to exclude
