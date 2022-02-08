@@ -38,9 +38,9 @@ public class ABIStudent implements ABIEncodeable {
 
     public ABIStudent(Tuple values) {
         this(
-                (String) values.get(0),
+                values.get(0),
                 ((BigDecimal) values.get(1)).floatValue(),
-                (byte[]) values.get(2),
+                values.get(2),
                 new BigDecimal(new BigInteger((byte[]) values.get(3)), (int) values.get(4))
         );
     }
