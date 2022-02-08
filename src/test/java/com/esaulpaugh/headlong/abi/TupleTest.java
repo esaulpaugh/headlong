@@ -381,5 +381,9 @@ public class TupleTest {
         Tuple t = Tuple.of("iii");
         String iii = t.getElement(0);
         assertEquals("iii", iii);
+
+        TupleType outer = TupleType.parse("((address,int256))");
+        TupleType inner = outer.get(0);
+        assertEquals(TupleType.parse("(address,int)"), inner);
     }
 }
