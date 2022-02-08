@@ -15,8 +15,8 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import java.util.AbstractList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.RandomAccess;
 
@@ -24,7 +24,7 @@ import java.util.RandomAccess;
  * An ordered list of objects whose types should correspond to some {@link TupleType}. {@link Function}s encode/decode
  * {@link Tuple}s containing arguments/return values. {@link Tuple}s can contain other tuples.
  */
-public final class Tuple extends AbstractList<Object> implements RandomAccess {
+public final class Tuple implements Iterable<Object>, RandomAccess {
 
     public static final Tuple EMPTY = new Tuple();
     public static final Object ABSENT = new Object() {
@@ -41,22 +41,20 @@ public final class Tuple extends AbstractList<Object> implements RandomAccess {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getElement(int index) {
-        return (T) get(index);
-    }
-
-    @Override
-    public Object get(int index) {
+    public <T> T get(int index) {
         Object val = elements[index];
         if(val == ABSENT) {
             throw new NoSuchElementException("not present because index was not specified for decoding: " + index);
         }
-        return val;
+        return (T) val;
     }
 
-    @Override
     public int size() {
         return elements.length;
+    }
+
+    public boolean isEmpty() {
+        return size() == 0;
     }
 
     @Override
@@ -84,5 +82,10 @@ public final class Tuple extends AbstractList<Object> implements RandomAccess {
 
     public static Tuple singleton(Object element) {
         return new Tuple(element);
+    }
+
+    @Override
+    public Iterator<Object> iterator() {
+        return Arrays.asList(elements).iterator();
     }
 }

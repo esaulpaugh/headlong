@@ -70,7 +70,7 @@ public class SuperSerialTest {
 
         Tuple tuple = tt.parseArgument("(\n" + boolArrStr + "\n)");
 
-        boolean[] arr0 = tuple.getElement(0);
+        boolean[] arr0 = tuple.get(0);
 
         assertArrayEquals(new boolean[] { false, true, true}, arr0);
 

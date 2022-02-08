@@ -380,11 +380,11 @@ public class DecodeTest {
 
         byte[] arr = f.getOutputs().encode(Tuple.of(1, true, new int[] { 3, 6 } , false)).array();
         Tuple t = f.decodeReturn(arr, 1, 3);
-        assertThrown(NoSuchElementException.class, "not present because index was not specified for decoding: 0", () -> t.getElement(0));
-        boolean one = t.getElement(1);
+        assertThrown(NoSuchElementException.class, "not present because index was not specified for decoding: 0", () -> t.get(0));
+        boolean one = t.get(1);
         assertTrue(one);
-        assertThrown(NoSuchElementException.class, "not present because index was not specified for decoding: 2", () -> t.getElement(2));
-        boolean three = t.getElement(3);
+        assertThrown(NoSuchElementException.class, "not present because index was not specified for decoding: 2", () -> t.get(2));
+        boolean three = t.get(3);
         assertFalse(three);
     }
 
@@ -409,8 +409,8 @@ public class DecodeTest {
         final long three = tt.decode(bb, 3);
         Tuple t = tt.decode(bb, 2, 3);
         System.out.println("tuple: " + zero + " " + one + " " + two + " " + three + " " + t);
-        assertEquals(two, t.getElement(2));
-        long three2 = t.getElement(3);
+        assertEquals(two, t.get(2));
+        long three2 = t.get(3);
         assertEquals(three, three2);
 
         ByteBuffer buffer = ByteBuffer.allocate(192);
@@ -434,8 +434,8 @@ public class DecodeTest {
         final long three = f.decodeReturn(bb, 3);
         Tuple t = f.decodeReturn(bb, 0, 3);
         System.out.println("function: " + zero + " " + one + " " + two + " " + three + " " + t);
-        assertEquals(zero, t.getElement(0));
-        long three2 = t.getElement(3);
+        assertEquals(zero, t.get(0));
+        long three2 = t.get(3);
         assertEquals(three, three2);
     }
 

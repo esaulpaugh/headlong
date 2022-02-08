@@ -279,9 +279,9 @@ public class TupleTest {
         Tuple t = new Tuple((Object[]) args);
 
         args[1] = 'x';
-        assertEquals("a", t.getElement(0));
-        assertEquals("b", t.getElement(1));
-        assertEquals("c", t.getElement(2));
+        assertEquals("a", t.get(0));
+        assertEquals("b", t.get(1));
+        assertEquals("c", t.get(2));
 
         testRemove(t.iterator());
     }
@@ -379,7 +379,7 @@ public class TupleTest {
         assertEquals("decimal", decimal.getCanonicalType());
 
         Tuple t = Tuple.of("iii");
-        String iii = t.getElement(0);
+        String iii = t.get(0);
         assertEquals("iii", iii);
 
         TupleType outer = TupleType.parse("((address,int256))");
