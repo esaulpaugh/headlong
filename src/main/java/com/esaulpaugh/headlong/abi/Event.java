@@ -116,4 +116,40 @@ public final class Event implements ABIObject {
     public boolean isEvent() {
         return true;
     }
+
+    /**
+     * Decodes Event arguments
+     * @param topics indexed parameters to decode. If the event is anonymous, the first element is a Keccak hash of the
+     *               canonical signature of the event (see https://docs.soliditylang.org/en/v0.8.11/abi-spec.html#events)
+     * @param data non-indexed parameters to decode
+     * @return
+     */
+    public Tuple decodeArgs(byte[][] topics, byte[] data) {
+        int offsetIsAnonymous = isAnonymous() ? 0 : 1;
+        TupleType indexedParams = getIndexedParams();
+        Object[] decodedTopics = new Object[indexedParams.size()];
+        for (int i = 0; i < indexedParams.size(); i++) {
+            ABIType<?> abiType = indexedParams.get(i);
+            byte[] topic = topics[i + offsetIsAnonymous];
+            if (abiType.isDynamic()) {
+                // Dynamic indexed types are not decodable in Events. Only a special hash is stored for fast querying of records
+                // See https://docs.soliditylang.org/en/v0.8.11/abi-spec.html#indexed-event-encoding
+                decodedTopics[i] = TypeFactory.create("bytes32").decode(topic);
+            } else {
+                decodedTopics[i] = abiType.decode(topic);
+            }
+        }
+        Tuple decodedTopicsTuple = Tuple.of(decodedTopics);
+        TupleType nonIndexedParams = getNonIndexedParams();
+        Tuple decodedData = nonIndexedParams.decode(data);
+        Object[] result = new Object[inputs.size()];
+        for (int i = 0, topicIndex = 0, dataIndex = 0; i < indexManifest.length; i++) {
+            if (indexManifest[i]) {
+                result[i] = decodedTopicsTuple.get(topicIndex++);
+            } else {
+                result[i] = decodedData.get(dataIndex++);
+            }
+        }
+        return Tuple.of(result);
+    }
 }
