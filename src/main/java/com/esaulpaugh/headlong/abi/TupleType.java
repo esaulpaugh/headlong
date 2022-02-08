@@ -210,8 +210,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     private void ensureIndexInBounds(int index) {
-        if (index < 0 || index >= elementTypes.length) {
-            throw new IllegalArgumentException("bad index: " + index);
+        if(index < 0) {
+            throw new IllegalArgumentException("negative index: " + index);
+        }
+        if (index >= elementTypes.length) {
+            throw new IllegalArgumentException("index " + index + " out of bounds for tuple type of length " + elementTypes.length);
         }
     }
 

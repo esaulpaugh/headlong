@@ -446,10 +446,13 @@ public class DecodeTest {
 
         assertThrown(IllegalArgumentException.class, "must specify at least one index", () -> tt.decode(bb, new int[0]));
 
-        assertThrown(IllegalArgumentException.class, "bad index: -571", () -> tt.decode(bb, -571));
-        assertThrown(IllegalArgumentException.class, "bad index: -1", () -> tt.decode(bb, -1));
-        assertThrown(IllegalArgumentException.class, "bad index: 4", () -> tt.decode(bb, 4));
-        assertThrown(IllegalArgumentException.class, "bad index: 64", () -> tt.decode(bb, 64));
+        assertThrown(IllegalArgumentException.class, "negative index: -571", () -> tt.decode(bb, -571));
+        assertThrown(IllegalArgumentException.class, "negative index: -1", () -> tt.decode(bb, -1));
+        for (int i = 0; i < 4; i++) {
+            tt.decode(bb, i);
+        }
+        assertThrown(IllegalArgumentException.class, "index 4 out of bounds for tuple type of length 4", () -> tt.decode(bb, 4));
+        assertThrown(IllegalArgumentException.class, "index 64 out of bounds for tuple type of length 4", () -> tt.decode(bb, 64));
 
         Tuple t = tt.decode(bb, 1, 2);
         System.out.println(t);
