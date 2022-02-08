@@ -369,4 +369,17 @@ public class TupleTest {
         assertEquals(TupleType.EMPTY, TupleType.EMPTY.select());
         assertEquals(TupleType.EMPTY, TupleType.EMPTY.exclude());
     }
+
+    @Test
+    public void testGetElement() {
+        TupleType tt = TupleType.parse("(bytes8,decimal)");
+        ArrayType<ByteType, byte[]> at = tt.getElement(0);
+        assertEquals(8, at.getLength());
+        BigDecimalType decimal = tt.getElement(1);
+        assertEquals("decimal", decimal.getCanonicalType());
+
+        Tuple t = Tuple.of("iii");
+        String iii = t.getElement(0);
+        assertEquals("iii", iii);
+    }
 }
