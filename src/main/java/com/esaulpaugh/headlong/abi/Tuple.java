@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -86,7 +87,7 @@ public final class Tuple implements Iterable<Object> {
     }
 
     public List<Object> toList() {
-        return Arrays.asList(elements);
+        return Collections.unmodifiableList(Arrays.asList(elements));
     }
 
     @Override

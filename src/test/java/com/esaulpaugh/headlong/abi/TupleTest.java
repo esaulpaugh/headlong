@@ -289,6 +289,9 @@ public class TupleTest {
         assertEquals(t.size(), size);
         assertEquals(t.elements.length, size);
 
+        assertThrown(UnsupportedOperationException.class, () -> list.set(0, "d"));
+        assertThrown(UnsupportedOperationException.class, () -> list.replaceAll(s -> ""));
+
         testRemove(t.iterator());
         testRemove(list.iterator());
     }
