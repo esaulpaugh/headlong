@@ -204,6 +204,7 @@ public final class Function implements ABIObject {
         ByteBuffer dest = ByteBuffer.allocate(validatedCallLength(args)); // ByteOrder.BIG_ENDIAN by default
         dest.put(selector);
         inputTypes.encodeTail(args, dest);
+        dest.flip();
         return dest;
     }
 

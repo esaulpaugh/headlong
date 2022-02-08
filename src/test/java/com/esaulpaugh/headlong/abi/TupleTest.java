@@ -303,7 +303,7 @@ public class TupleTest {
         Tuple args = Tuple.of(true, new Tuple[] { Tuple.of(true, new int[] { 1, 2 }, new Tuple[] { Tuple.of(true, false), Tuple.of(true, false) }) }, "ya");
         ByteBuffer bb = tt.encode(args);
         System.out.println(Strings.encode(bb));
-        String ya = tt.decode((ByteBuffer) bb.flip(), 2);
+        String ya = tt.decode(bb, 2);
         assertEquals("ya", ya);
     }
 
@@ -313,7 +313,7 @@ public class TupleTest {
         Tuple args = Tuple.of(true, new boolean[][] { new boolean[] { true, false, true }, new boolean[] { false, false, true } }, new String[][] { new String[] { "wooo", "moo" } });
         ByteBuffer bb = tt.encode(args);
         System.out.println(Strings.encode(bb));
-        String[][] s = tt.decode((ByteBuffer) bb.flip(), 2);
+        String[][] s = tt.decode(bb, 2);
         assertTrue(Objects.deepEquals(new String[][] { new String[] { "wooo", "moo" } }, s));
     }
 
@@ -329,7 +329,7 @@ public class TupleTest {
                 Address.wrap("0x0000110000111100001111110000111111110000"),
                 new String[][] { new String[] { "yabba", "dabba", "doo" }, new String[] { "" } }
         );
-        final ByteBuffer bb = (ByteBuffer) tt.encode(args).flip();
+        final ByteBuffer bb = tt.encode(args);
         boolean bool = tt.decode(bb, 0);
         assertTrue(bool);
         int uint16 = tt.decode(bb, 1);

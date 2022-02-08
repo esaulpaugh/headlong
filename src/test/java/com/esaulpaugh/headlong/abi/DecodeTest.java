@@ -403,7 +403,6 @@ public class DecodeTest {
         TupleType tt = TupleType.parse("(int,string,bool,int64)");
         ByteBuffer bb = tt.encodeElements(BigInteger.valueOf(550L), "weow", true, -41L);
         assertEquals(TUPLE_HEX, Strings.encode(bb));
-        bb.flip();
         final BigInteger zero = tt.decode(bb, 0);
         final String one = tt.decode(bb, 1);
         final boolean two = tt.decode(bb, 2);
@@ -420,7 +419,6 @@ public class DecodeTest {
         Function f = Function.parse("f()", "(int,string,bool,int64)");
         ByteBuffer bb = f.getOutputs().encodeElements(BigInteger.valueOf(550L), "weow", true, -41L);
         assertEquals(TUPLE_HEX, Strings.encode(bb));
-        bb.flip();
         final BigInteger zero = f.decodeReturn(bb, 0);
         final String one = f.decodeReturn(bb, 1);
         final boolean two = f.decodeReturn(bb, 2);

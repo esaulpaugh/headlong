@@ -137,7 +137,7 @@ public class EqualsTest {
 
         assertTrue(Function.formatCall(abi.array()).contains("18       000000000000000000000000" + addressHex));
 
-        final Tuple tupleOut = f.decodeCall((ByteBuffer) abi.flip());
+        final Tuple tupleOut = f.decodeCall(abi);
 
         assertTrue(Arrays.deepEquals(argsIn, tupleOut.elements));
     }
@@ -158,7 +158,7 @@ public class EqualsTest {
 
         ByteBuffer bb = foo.encodeCall(Tuple.singleton(unsigneds));
 
-        Tuple dec = foo.decodeCall((ByteBuffer) bb.flip());
+        Tuple dec = foo.decodeCall(bb);
 
         long[] decoded = (long[]) dec.get(0);
 
@@ -181,7 +181,7 @@ public class EqualsTest {
 
         ByteBuffer bb = foo.encodeCall(Tuple.singleton(unsigneds));
 
-        Tuple dec = foo.decodeCall((ByteBuffer) bb.flip());
+        Tuple dec = foo.decodeCall(bb);
 
         BigInteger[] decoded = (BigInteger[]) dec.get(0);
 

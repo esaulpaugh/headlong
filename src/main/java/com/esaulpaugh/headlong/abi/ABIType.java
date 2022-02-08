@@ -143,6 +143,7 @@ public abstract class ABIType<J> {
     public final ByteBuffer encode(J value) {
         ByteBuffer dest = ByteBuffer.allocate(validate(value));
         encodeTail(value, dest);
+        dest.flip();
         return dest;
     }
 

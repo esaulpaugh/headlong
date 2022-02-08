@@ -56,7 +56,7 @@ public class SuperSerialTest {
 
         ByteBuffer bb = f.getInputs().encode(decoded);
 
-        Tuple dd = f.getInputs().decode((ByteBuffer) bb.flip());
+        Tuple dd = f.getInputs().decode(bb);
 
         assertEquals(decoded, dd);
     }
