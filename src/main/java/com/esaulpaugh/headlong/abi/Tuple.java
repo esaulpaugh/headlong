@@ -18,15 +18,15 @@ package com.esaulpaugh.headlong.abi;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.RandomAccess;
 
 /**
  * An ordered list of objects whose types should correspond to some {@link TupleType}. {@link Function}s encode/decode
  * {@link Tuple}s containing arguments/return values. {@link Tuple}s can contain other tuples.
  */
-public final class Tuple implements Iterable<Object>, RandomAccess {
+public final class Tuple implements Iterable<Object> {
 
     public static final Tuple EMPTY = new Tuple();
+
     public static final Object ABSENT = new Object() {
         @Override
         public String toString() {
