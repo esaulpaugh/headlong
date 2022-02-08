@@ -55,7 +55,20 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         this.elementType = elementType;
         this.length = length;
         this.arrayClass = arrayClass;
-        this.headLength = dynamic ? OFFSET_LENGTH_BYTES : calcArrayHeadLength(this);
+        this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticArrayHeadLength(this);
+    }
+
+    static int staticArrayHeadLength(ABIType<?> type) {
+        int length = 1;
+        do {
+            ArrayType<?, ?> at = (ArrayType<?, ?>) type;
+            type = at.elementType;
+            if(type instanceof ByteType) {
+                return length * Integers.roundLengthUp(at.length, UNIT_LENGTH_BYTES);
+            }
+            length *= at.length;
+        } while(type instanceof ArrayType<?, ?>);
+        return length * (type instanceof UnitType ? UNIT_LENGTH_BYTES : TupleType.staticTupleHeadLength((TupleType) type));
     }
 
     public E getElementType() {
@@ -101,20 +114,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     int byteLength(Object value) {
         if(!dynamic) return headLength;
         return totalLen(calcElementsLen(value), length == DYNAMIC_LENGTH);
-    }
-
-    static int calcArrayHeadLength(ABIType<?> type) {
-        int product = 1;
-        ArrayType<?, ?> at;
-        do {
-            at = (ArrayType<?, ?>) type;
-            final int len = at.getLength();
-            product = product *
-                    (at.getElementType() instanceof ByteType
-                            ? Integers.roundLengthUp(len, UNIT_LENGTH_BYTES) / UNIT_LENGTH_BYTES
-                            : len);
-        } while((type = at.getElementType()) instanceof ArrayType<?, ?>);
-        return product * (type instanceof UnitType ? UNIT_LENGTH_BYTES : TupleType.calcTupleHeadLength((TupleType) type));
     }
 
     private int calcElementsLen(Object value) {
@@ -411,7 +410,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     public static ABIType<?> baseType(ABIType<?> type) {
-        while (type.typeCode() == ABIType.TYPE_CODE_ARRAY) {
+        while (type instanceof ArrayType<?, ?>) {
             type = ((ArrayType<? extends ABIType<?>, ?>) type).getElementType();
         }
         return type;
