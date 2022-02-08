@@ -373,9 +373,9 @@ public class TupleTest {
     @Test
     public void testGetElement() {
         TupleType tt = TupleType.parse("(bytes8,decimal)");
-        ArrayType<ByteType, byte[]> at = tt.getElement(0);
+        ArrayType<ByteType, byte[]> at = tt.get(0);
         assertEquals(8, at.getLength());
-        BigDecimalType decimal = tt.getElement(1);
+        BigDecimalType decimal = tt.get(1);
         assertEquals("decimal", decimal.getCanonicalType());
 
         Tuple t = Tuple.of("iii");
