@@ -92,6 +92,6 @@ public final class Tuple implements Iterable<Object> {
 
     @Override
     public Iterator<Object> iterator() {
-        return toList().iterator();
+        return Arrays.asList(elements).iterator();
     }
 }
