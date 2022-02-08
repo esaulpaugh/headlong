@@ -30,7 +30,7 @@ ByteBuffer one = f.encodeCall(args);
 ByteBuffer two = f.encodeCallWithArgs(69L, true);
 
 System.out.println(Function.formatCall(one.array())); // a multi-line hex representation
-System.out.println(f.decodeCall((ByteBuffer) two.flip()).equals(args));
+System.out.println(f.decodeCall(two).equals(args));
 ```
 
 #### Decoding Return Values

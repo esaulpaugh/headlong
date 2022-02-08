@@ -401,7 +401,8 @@ public class DecodeTest {
     @Test
     public void testTupleDecodeTypeInference() throws Throwable {
         TupleType tt = TupleType.parse("(int,string,bool,int64)");
-        ByteBuffer bb = tt.encodeElements(BigInteger.valueOf(550L), "weow", true, -41L);
+        Object[] elements = { BigInteger.valueOf(550L), "weow", true, -41L };
+        ByteBuffer bb = tt.encodeElements(elements);
         assertEquals(TUPLE_HEX, Strings.encode(bb));
         final BigInteger zero = tt.decode(bb, 0);
         final String one = tt.decode(bb, 1);
@@ -412,6 +413,15 @@ public class DecodeTest {
         assertEquals(two, t.getElement(2));
         long three2 = t.getElement(3);
         assertEquals(three, three2);
+
+        ByteBuffer buffer = ByteBuffer.allocate(192);
+        tt.encode(new Tuple(elements), buffer);
+        assertThrown(BufferUnderflowException.class, buffer::get);
+
+        ByteBuffer z = ByteBuffer.allocate(192);
+        int pos = z.position();
+        z.put(buffer);
+        assertEquals(pos, z.position());
     }
 
     @Test
