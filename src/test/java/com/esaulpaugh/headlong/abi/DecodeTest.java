@@ -192,8 +192,7 @@ public class DecodeTest {
         decoded = TupleType.parse(FUNCTION.getOutputs().toString()).decode(ByteBuffer.wrap(RETURN_BYTES));
         assertEquals(RETURN_VALS, decoded);
 
-        TupleType tt = TupleType.parseElements("ufixed,string,");
-        assertEquals(TupleType.parseElements("ufixed,string"), tt);
+        TupleType tt = TupleType.parse("(ufixed,string)");
         decoded = tt.decode(ByteBuffer.wrap(RETURN_BYTES));
         assertEquals(RETURN_VALS, decoded);
 
