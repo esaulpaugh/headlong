@@ -4,7 +4,7 @@
 [![Java CI](https://github.com/esaulpaugh/headlong/workflows/Java%20CI/badge.svg)](https://github.com/esaulpaugh/headlong/actions?query=workflow%3A"Java+CI")
 [![Gitter](https://badges.gitter.im/esaulpaugh-headlong/community.svg)](https://gitter.im/esaulpaugh-headlong/community)
 
-Contract ABI (v2) and Recursive Length Prefix made easy for the JVM. Everything heavily optimized for maximum throughput (ABI function call encoding up to 500x faster than a popular competitor. One function init plus one encode up to 50x faster (run benchmarks with `gradle jmh` or run the maven-generated benchmarks jar)).
+Contract ABI and Recursive Length Prefix made easy for the JVM.
 
 ABI spec: https://solidity.readthedocs.io/en/latest/abi-spec.html
 
