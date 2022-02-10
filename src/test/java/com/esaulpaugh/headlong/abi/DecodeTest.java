@@ -29,11 +29,7 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DecodeTest {
 
@@ -525,6 +521,142 @@ public class DecodeTest {
         assertEquals(new BigInteger("160000000000000000"), result.get(4));
         assertEquals("0000000000000000000000000000000000000000000000000000000000000000",
                 Strings.encode((byte[]) result.get(5)));
+    }
 
+    @Test
+    public void testDecodeAnonymousEvent() {
+        Event event = Event.fromJson("{\n" +
+                "    \"anonymous\": true,\n" +
+                "    \"inputs\": [\n" +
+                "      {\n" +
+                "        \"indexed\": true,\n" +
+                "        \"name\": \"maker\",\n" +
+                "        \"type\": \"address\"\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"indexed\": true,\n" +
+                "        \"name\": \"taker\",\n" +
+                "        \"type\": \"address\"\n" +
+                "      }\n" +
+                "    ],\n" +
+                "    \"name\": \"TestEvent\",\n" +
+                "    \"type\": \"event\"\n" +
+                "  }");
+        byte[][] topics = {
+                FastHex.decode("000000000000000000000000bbb677a94eda9660832e9944353dd6e814a45705"),
+                FastHex.decode("000000000000000000000000bcead8896acb7a045c38287e433d896eefb40f6c")
+        };
+        Tuple result = event.decodeArgs(topics, new byte[0]);
+        assertEquals("0xbbb677a94eda9660832e9944353dd6e814a45705", result.get(0).toString().toLowerCase());
+        assertEquals("0xbcead8896acb7a045c38287e433d896eefb40f6c", result.get(1).toString().toLowerCase());
+    }
+
+    @Test
+    public void testDecodeEmptyTopicsEvent() {
+        Event event = Event.fromJson("{\n" +
+                "    \"anonymous\": true,\n" +
+                "    \"inputs\": [\n" +
+                "      {\n" +
+                "        \"indexed\": false,\n" +
+                "        \"name\": \"maker\",\n" +
+                "        \"type\": \"address\"\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"indexed\": false,\n" +
+                "        \"name\": \"taker\",\n" +
+                "        \"type\": \"address\"\n" +
+                "      }\n" +
+                "    ],\n" +
+                "    \"name\": \"TestEvent\",\n" +
+                "    \"type\": \"event\"\n" +
+                "  }");
+        byte[] data = FastHex.decode("000000000000000000000000bbb677a94eda9660832e9944353dd6e814a45705000000000000000000000000bcead8896acb7a045c38287e433d896eefb40f6c");
+        Tuple result = event.decodeArgs(new byte[0][0], data);
+        assertEquals("0xbbb677a94eda9660832e9944353dd6e814a45705", result.get(0).toString().toLowerCase());
+        assertEquals("0xbcead8896acb7a045c38287e433d896eefb40f6c", result.get(1).toString().toLowerCase());
+    }
+
+    @Test
+    public void testDecodeIndexedDynamicType() {
+        Event event = Event.fromJson("{\n" +
+                "        \"anonymous\": false,\n" +
+                "        \"inputs\": [\n" +
+                "          {\n" +
+                "            \"indexed\": true,\n" +
+                "            \"internalType\": \"uint256[]\",\n" +
+                "            \"name\": \"nums\",\n" +
+                "            \"type\": \"uint256[]\"\n" +
+                "          },\n" +
+                "          {\n" +
+                "            \"indexed\": true,\n" +
+                "            \"internalType\": \"uint8\",\n" +
+                "            \"name\": \"random\",\n" +
+                "            \"type\": \"uint8\"\n" +
+                "          }\n" +
+                "        ],\n" +
+                "        \"name\": \"Stored\",\n" +
+                "        \"type\": \"event\"\n" +
+                "      }");
+        IntType int8 = TypeFactory.create("int8");
+        byte[][] topics = {
+                FastHex.decode("d78fe195906f002940f4b32985f1daa40764f8481c05447b6751db32e70d744b"),
+                FastHex.decode("392791df626408017a264f53fde61065d5a93a32b60171df9d8a46afdf82992d"),
+                int8.encode(12).array()
+        };
+        Tuple result = event.decodeArgs(topics, new byte[0]);
+        assertEquals("392791df626408017a264f53fde61065d5a93a32b60171df9d8a46afdf82992d", Strings.encode((byte[]) result.get(0)));
+        assertEquals(12, (Integer) result.get(1));
+    }
+
+    @Test
+    public void testDecodeArgsNullTopicShouldFail() {
+        Event event = Event.fromJson("{\n" +
+                "        \"anonymous\": false,\n" +
+                "        \"inputs\": [\n" +
+                "          {\n" +
+                "            \"indexed\": true,\n" +
+                "            \"internalType\": \"uint256[]\",\n" +
+                "            \"name\": \"nums\",\n" +
+                "            \"type\": \"uint256[]\"\n" +
+                "          },\n" +
+                "          {\n" +
+                "            \"indexed\": true,\n" +
+                "            \"internalType\": \"uint8\",\n" +
+                "            \"name\": \"random\",\n" +
+                "            \"type\": \"uint8\"\n" +
+                "          }\n" +
+                "        ],\n" +
+                "        \"name\": \"Stored\",\n" +
+                "        \"type\": \"event\"\n" +
+                "      }");
+        assertThrows(NullPointerException.class, () -> {
+            event.decodeArgs(null, new byte[0]);
+        });
+    }
+
+    @Test
+    public void testDecodeArgsNullDataShouldFail() {
+        Event event = Event.fromJson("{\n" +
+                "        \"anonymous\": false,\n" +
+                "        \"inputs\": [\n" +
+                "          {\n" +
+                "            \"indexed\": true,\n" +
+                "            \"internalType\": \"uint256[]\",\n" +
+                "            \"name\": \"nums\",\n" +
+                "            \"type\": \"uint256[]\"\n" +
+                "          },\n" +
+                "          {\n" +
+                "            \"indexed\": true,\n" +
+                "            \"internalType\": \"uint8\",\n" +
+                "            \"name\": \"random\",\n" +
+                "            \"type\": \"uint8\"\n" +
+                "          }\n" +
+                "        ],\n" +
+                "        \"name\": \"Stored\",\n" +
+                "        \"type\": \"event\"\n" +
+                "      }");
+        assertThrows(NullPointerException.class, () -> {
+            event.decodeArgs(new byte[0][0], null);
+        });
     }
 }

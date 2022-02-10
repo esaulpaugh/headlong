@@ -24,10 +24,13 @@ import java.util.Objects;
 /** Represents an event in Ethereum. */
 public final class Event implements ABIObject {
 
+    private static final ArrayType<ByteType, byte[]> BYTES_32 = TypeFactory.create("bytes32");
+
     private final String name;
     private final boolean anonymous;
     private final TupleType inputs;
     private final boolean[] indexManifest;
+
 
     public static Event create(String name, TupleType inputs, boolean... indexed) {
         return new Event(name, false, inputs, indexed);
@@ -125,6 +128,9 @@ public final class Event implements ABIObject {
      * @return
      */
     public Tuple decodeArgs(byte[][] topics, byte[] data) {
+        Objects.requireNonNull(topics, "topics must not be null");
+        Objects.requireNonNull(data, "data must not be null");
+
         int offsetIsAnonymous = isAnonymous() ? 0 : 1;
         TupleType indexedParams = getIndexedParams();
         Object[] decodedTopics = new Object[indexedParams.size()];
@@ -134,18 +140,17 @@ public final class Event implements ABIObject {
             if (abiType.isDynamic()) {
                 // Dynamic indexed types are not decodable in Events. Only a special hash is stored for fast querying of records
                 // See https://docs.soliditylang.org/en/v0.8.11/abi-spec.html#indexed-event-encoding
-                decodedTopics[i] = TypeFactory.create("bytes32").decode(topic);
+                decodedTopics[i] = BYTES_32.decode(topic);
             } else {
                 decodedTopics[i] = abiType.decode(topic);
             }
         }
-        Tuple decodedTopicsTuple = Tuple.of(decodedTopics);
         TupleType nonIndexedParams = getNonIndexedParams();
         Tuple decodedData = nonIndexedParams.decode(data);
         Object[] result = new Object[inputs.size()];
         for (int i = 0, topicIndex = 0, dataIndex = 0; i < indexManifest.length; i++) {
             if (indexManifest[i]) {
-                result[i] = decodedTopicsTuple.get(topicIndex++);
+                result[i] = decodedTopics[topicIndex++];
             } else {
                 result[i] = decodedData.get(dataIndex++);
             }
