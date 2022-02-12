@@ -380,9 +380,14 @@ public class TupleTest {
         assertEquals(TupleType.EMPTY, TupleType.EMPTY.select());
         assertEquals(TupleType.EMPTY, TupleType.EMPTY.exclude());
 
-        ABIType<?> x = _uintBool_.get(0);
-        ABIType<?> y = _uintBool_.select(true, true).get(0);
-        assertSame(x, y);
+        TupleType clone0 = _uintBool_.select(true, true);
+        assertSame(_uintBool_.get(0), clone0.get(0));
+        assertSame(_uintBool_.get(1), clone0.get(1));
+
+        TupleType clone1 = _uintBool_.exclude(false, false);
+        assertSame(_uintBool_.get(0), clone1.get(0));
+        assertSame(_uintBool_.get(1), clone1.get(1));
+
         assertSame(_uintBool_.get(0), _uintBool_.select(true, false).get(0));
         assertSame(_uintBool_.get(1), _uintBool_.select(false, true).get(0));
     }
