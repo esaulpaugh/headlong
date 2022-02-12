@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TupleTest {
@@ -378,6 +379,12 @@ public class TupleTest {
 
         assertEquals(TupleType.EMPTY, TupleType.EMPTY.select());
         assertEquals(TupleType.EMPTY, TupleType.EMPTY.exclude());
+
+        ABIType<?> x = _uintBool_.get(0);
+        ABIType<?> y = _uintBool_.select(true, true).get(0);
+        assertSame(x, y);
+        assertSame(_uintBool_.get(0), _uintBool_.select(true, false).get(0));
+        assertSame(_uintBool_.get(1), _uintBool_.select(false, true).get(0));
     }
 
     @Test
