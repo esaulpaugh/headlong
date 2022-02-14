@@ -16,7 +16,10 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.JsonUtils;
+import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonObject;
+import com.joemelsha.crypto.hash.Keccak;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -29,7 +32,10 @@ public final class Event implements ABIObject {
     private final String name;
     private final boolean anonymous;
     private final TupleType inputs;
+    private final TupleType indexedParams;
+    private final TupleType nonIndexedParams;
     private final boolean[] indexManifest;
+    private final byte[] signatureHash;
 
 
     public static Event create(String name, TupleType inputs, boolean... indexed) {
@@ -47,7 +53,10 @@ public final class Event implements ABIObject {
             throw new IllegalArgumentException("indexed.length doesn't match number of inputs");
         }
         this.indexManifest = Arrays.copyOf(indexed, indexed.length);
+        this.indexedParams = inputs.select(indexManifest);
+        this.nonIndexedParams = inputs.exclude(indexManifest);
         this.anonymous = anonymous;
+        this.signatureHash = new Keccak(256).digest(Strings.decode(getCanonicalSignature(), Strings.ASCII));
     }
 
     @Override
@@ -79,11 +88,11 @@ public final class Event implements ABIObject {
     }
 
     public TupleType getIndexedParams() {
-        return inputs.select(indexManifest);
+        return indexedParams;
     }
 
     public TupleType getNonIndexedParams() {
-        return inputs.exclude(indexManifest);
+        return nonIndexedParams;
     }
 
     @Override
