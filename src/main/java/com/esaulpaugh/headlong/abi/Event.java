@@ -186,7 +186,7 @@ public final class Event implements ABIObject {
         if (!Arrays.equals(decodedSignatureHash, signatureHash)) {
             String message = String.format("Decoded Event signature hash %s does not match the one from ABI %s",
                     FastHex.encodeToString(decodedSignatureHash), FastHex.encodeToString(signatureHash));
-            throw new RuntimeException(message);
+            throw new IllegalArgumentException(message);
         }
     }
 }
