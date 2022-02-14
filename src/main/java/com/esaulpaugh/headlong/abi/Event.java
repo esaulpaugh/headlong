@@ -140,8 +140,20 @@ public final class Event implements ABIObject {
         Objects.requireNonNull(topics, "topics must not be null");
         Objects.requireNonNull(data, "data must not be null");
 
-        int offsetIsAnonymous = isAnonymous() ? 0 : 1;
+        if (!isAnonymous() && topics.length >= 1) {
+            checkSignatureHash(topics);
+        }
+
         TupleType indexedParams = getIndexedParams();
+        Object[] decodedTopics = decodeTopics(topics, indexedParams);
+        TupleType nonIndexedParams = getNonIndexedParams();
+        Tuple decodedData = nonIndexedParams.decode(data);
+        Object[] mergedArgs = mergeDecodedArgs(decodedTopics, decodedData);
+        return Tuple.of(mergedArgs);
+    }
+
+    private Object[] decodeTopics(byte[][] topics, TupleType indexedParams) {
+        int offsetIsAnonymous = isAnonymous() ? 0 : 1;
         Object[] decodedTopics = new Object[indexedParams.size()];
         for (int i = 0; i < indexedParams.size(); i++) {
             ABIType<?> abiType = indexedParams.get(i);
@@ -154,8 +166,10 @@ public final class Event implements ABIObject {
                 decodedTopics[i] = abiType.decode(topic);
             }
         }
-        TupleType nonIndexedParams = getNonIndexedParams();
-        Tuple decodedData = nonIndexedParams.decode(data);
+        return decodedTopics;
+    }
+
+    private Object[] mergeDecodedArgs(Object[] decodedTopics, Tuple decodedData) {
         Object[] result = new Object[inputs.size()];
         for (int i = 0, topicIndex = 0, dataIndex = 0; i < indexManifest.length; i++) {
             if (indexManifest[i]) {
@@ -164,6 +178,15 @@ public final class Event implements ABIObject {
                 result[i] = decodedData.get(dataIndex++);
             }
         }
-        return Tuple.of(result);
+        return result;
+    }
+
+    private void checkSignatureHash(byte[][] topics) {
+        byte[] decodedSignatureHash = BYTES_32.decode(topics[0]);
+        if (!Arrays.equals(decodedSignatureHash, signatureHash)) {
+            String message = String.format("Decoded Event signature hash %s does not match the one from ABI %s",
+                    FastHex.encodeToString(decodedSignatureHash), FastHex.encodeToString(signatureHash));
+            throw new RuntimeException(message);
+        }
     }
 }

@@ -19,6 +19,7 @@ import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
+import com.sun.tools.javac.util.List;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -26,9 +27,11 @@ import java.math.BigInteger;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.NoSuchElementException;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
+import static com.esaulpaugh.headlong.TestUtils.assertThrownMessageMatch;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DecodeTest {
@@ -521,6 +524,58 @@ public class DecodeTest {
         assertEquals(new BigInteger("160000000000000000"), result.get(4));
         assertEquals("0000000000000000000000000000000000000000000000000000000000000000",
                 Strings.encode((byte[]) result.get(5)));
+    }
+
+    @Test
+    public void testDecodeEventWithWrongSignatureHashShouldFail() throws Throwable {
+        Event event = Event.fromJson("{\n" +
+                "    \"anonymous\": false,\n" +
+                "    \"inputs\": [\n" +
+                "      {\n" +
+                "        \"indexed\": false,\n" +
+                "        \"name\": \"buyHash\",\n" +
+                "        \"type\": \"bytes32\"\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"indexed\": false,\n" +
+                "        \"name\": \"sellHash\",\n" +
+                "        \"type\": \"bytes32\"\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"indexed\": true,\n" +
+                "        \"name\": \"maker\",\n" +
+                "        \"type\": \"address\"\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"indexed\": true,\n" +
+                "        \"name\": \"taker\",\n" +
+                "        \"type\": \"address\"\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"indexed\": false,\n" +
+                "        \"name\": \"price\",\n" +
+                "        \"type\": \"uint256\"\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"indexed\": true,\n" +
+                "        \"name\": \"metadata\",\n" +
+                "        \"type\": \"bytes32\"\n" +
+                "      }\n" +
+                "    ],\n" +
+                "    \"name\": \"OrdersMatched\",\n" +
+                "    \"type\": \"event\"\n" +
+                "  }");
+        byte[][] topics = {
+                FastHex.decode("a4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006d9"),
+                FastHex.decode("000000000000000000000000bbb677a94eda9660832e9944353dd6e814a45705"),
+                FastHex.decode("000000000000000000000000bcead8896acb7a045c38287e433d896eefb40f6c"),
+                FastHex.decode("0000000000000000000000000000000000000000000000000000000000000000")
+        };
+        byte[] data = FastHex.decode("00000000000000000000000000000000000000000000000000000000000000009b5de4f892fe73b139777ff15eb165f359a0ea9ea1c687f8e8dc5748249ca5f200000000000000000000000000000000000000000000000002386f26fc100000");
+        assertThrownMessageMatch(RuntimeException.class, Collections.singletonList("Decoded Event signature hash " +
+                        "a4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006d9 does not match the one from ABI " +
+                        "c4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006c9"),
+                () -> event.decodeArgs(topics, data));
     }
 
     @Test
