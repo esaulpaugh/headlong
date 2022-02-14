@@ -19,7 +19,6 @@ import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
-import com.sun.tools.javac.util.List;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
