@@ -222,7 +222,6 @@ public abstract class ABIType<J> {
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
 
-    @SuppressWarnings("unchecked")
     public final J decodePacked(byte[] buffer) {
         return PackedDecoder.decode(TupleType.wrap(this), buffer).get(0);
     }
