@@ -389,7 +389,9 @@ public class EncodeTest {
 
         byte[] aEncoding = a.encode(aArgs).array();
         ByteBuffer bDest = ByteBuffer.allocate(b.measureEncodedLength(bArgs));
+        assertEquals(0, bDest.position());
         b.encode(bArgs, bDest);
+        assertEquals(bDest.limit(), bDest.position());
         byte[] bEncoding = bDest.array();
 
 //        System.out.println(ABIType.format(aEncoding));

@@ -136,13 +136,15 @@ public class PackedEncoderTest {
 
         Tuple test = new Tuple(-1, new byte[] { 0x42 }, 0x03, "Hello, world!");
 
-        int packedLen = tupleType.byteLengthPacked(test);
-
-        assertEquals(Strings.decode("ffff42000348656c6c6f2c20776f726c6421").length, packedLen);
+        final int packedLen = tupleType.byteLengthPacked(test);
+        final byte[] in = Strings.decode("ffff42000348656c6c6f2c20776f726c6421");
+        assertEquals(18, in.length);
+        assertEquals(in.length, packedLen);
 
         ByteBuffer bb = ByteBuffer.allocate(packedLen);
 
         tupleType.encodePacked(test, bb);
+        assertEquals(in.length, bb.position());
 
         assertEquals(packedLen, bb.position());
 
