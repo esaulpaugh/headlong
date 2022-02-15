@@ -152,6 +152,18 @@ public final class Event implements ABIObject {
         return mergeDecodedArgs(decodeTopicsArray(topics), decodeData(data));
     }
 
+    private Tuple mergeDecodedArgs(Object[] decodedTopics, Tuple decodedData) {
+        Object[] result = new Object[inputs.size()];
+        for (int i = 0, topicIndex = 0, dataIndex = 0; i < indexManifest.length; i++) {
+            if (indexManifest[i]) {
+                result[i] = decodedTopics[topicIndex++];
+            } else {
+                result[i] = decodedData.get(dataIndex++);
+            }
+        }
+        return new Tuple(result);
+    }
+
     private Object[] decodeTopicsArray(byte[][] topics) {
         if(anonymous) {
             checkAnonymousTopics(topics);
@@ -174,6 +186,13 @@ public final class Event implements ABIObject {
         return decodedTopics;
     }
 
+    private void checkAnonymousTopics(byte[][] topics) {
+        topics = indexedParams.isEmpty() && topics == null
+                ? EMPTY_TOPICS
+                : Objects.requireNonNull(topics, "non-null topics expected");
+        checkTopicsLength(topics.length, 0);
+    }
+
     private void checkNonAnonymousTopics(byte[][] topics) {
         Objects.requireNonNull(topics, "non-null topics expected");
         checkTopicsLength(topics.length, 1);
@@ -185,29 +204,10 @@ public final class Event implements ABIObject {
         }
     }
 
-    private void checkAnonymousTopics(byte[][] topics) {
-        topics = indexedParams.isEmpty() && topics == null
-                ? EMPTY_TOPICS
-                : Objects.requireNonNull(topics, "non-null topics expected");
-        checkTopicsLength(topics.length, 0);
-    }
-
     private void checkTopicsLength(int len, int offset) {
         final int expectedTopics = indexedParams.size() + offset;
         if(len != expectedTopics) {
             throw new IllegalArgumentException("expected topics.length == " + expectedTopics + " but found length " + len);
         }
-    }
-
-    private Tuple mergeDecodedArgs(Object[] decodedTopics, Tuple decodedData) {
-        Object[] result = new Object[inputs.size()];
-        for (int i = 0, topicIndex = 0, dataIndex = 0; i < indexManifest.length; i++) {
-            if (indexManifest[i]) {
-                result[i] = decodedTopics[topicIndex++];
-            } else {
-                result[i] = decodedData.get(dataIndex++);
-            }
-        }
-        return new Tuple(result);
     }
 }
