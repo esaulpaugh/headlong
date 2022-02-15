@@ -430,7 +430,9 @@ public class EncodeTest {
                 new byte[] { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 }
         );
 
-        final int len = f.measureCallLength(args) + 7 + 8;
+        final int prefixBytes = 7;
+        final int trailingBytes = 8;
+        final int len = prefixBytes + f.measureCallLength(args) + trailingBytes;
 
         byte[] ffff = new byte[len];
         Arrays.fill(ffff, (byte) 0xff);
@@ -438,8 +440,10 @@ public class EncodeTest {
         ByteBuffer full = (ByteBuffer) ByteBuffer.wrap(ffff).position(7);
         ByteBuffer empty = (ByteBuffer) ByteBuffer.allocate(len).position(7);
 
-        f.encodeCall(args, full)
-                .encodeCall(args, empty);
+        f.encodeCall(args, full);
+        assertEquals(len - trailingBytes, full.position());
+        f.encodeCall(args, empty);
+        assertEquals(len - trailingBytes, empty.position());
 
         byte[] fullBytes = full.array();
         byte[] emptyBytes = empty.array();
