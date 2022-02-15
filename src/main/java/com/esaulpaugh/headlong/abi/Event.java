@@ -141,11 +141,12 @@ public final class Event implements ABIObject {
     }
 
     /**
-     * Decodes Event arguments
+     * Decodes Event arguments.
+     *
      * @param topics indexed parameters to decode. If the event is anonymous, the first element is a Keccak hash of the
      *               canonical signature of the event (see https://docs.soliditylang.org/en/v0.8.11/abi-spec.html#events)
      * @param data non-indexed parameters to decode
-     * @return
+     * @return  the decoded arguments
      */
     public Tuple decodeArgs(byte[][] topics, byte[] data) {
         return mergeDecodedArgs(decodeTopicsArray(topics), decodeData(data));
