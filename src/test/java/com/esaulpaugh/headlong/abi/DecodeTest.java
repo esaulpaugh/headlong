@@ -402,6 +402,7 @@ public class DecodeTest {
         TupleType tt = TupleType.parse("(int,string,bool,int64)");
         Object[] elements = { BigInteger.valueOf(550L), "weow", true, -41L };
         ByteBuffer bb = tt.encodeElements(elements);
+        assertEquals(0, bb.position());
         assertEquals(TUPLE_HEX, Strings.encode(bb));
         final BigInteger zero = tt.decode(bb, 0);
         final String one = tt.decode(bb, 1);
@@ -720,11 +721,12 @@ public class DecodeTest {
         byte[][] badTopics1 = {
                 badTopics0[0],
                 badTopics0[1],
-                TypeFactory.createType("int8").encode(12).array(),
+                TypeFactory.createNonCapturing("int8").encode(12).array(),
                 Strings.EMPTY_BYTE_ARRAY
         };
         assertThrown(IllegalArgumentException.class, "expected topics.length == 3 but found length 4", () -> event.decodeArgs(badTopics1, null));
     }
+
     @Test
     public void testDecodeTrailingBytes() throws Throwable {
         assertThrown(IllegalArgumentException.class,
@@ -732,8 +734,8 @@ public class DecodeTest {
                 () -> Function.parse("foo(int8)")
                         .decodeCall(FastHex.decode("e4a6bf78000000000000000000000000000000000000000000000000000000000000000100")));
         assertThrown(IllegalArgumentException.class,
-                "unconsumed bytes: 1 remaining",
-                () -> TupleType.parse("(int8)")
-                        .decode(FastHex.decode("000000000000000000000000000000000000000000000000000000000000000100")));
+                "unconsumed bytes: 3 remaining",
+                () -> TupleType.parse("(uint32)")
+                        .decode(FastHex.decode("000000000000000000000000000000000000000000000000000000000000000e000000")));
     }
 }

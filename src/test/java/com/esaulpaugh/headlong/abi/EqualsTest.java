@@ -134,6 +134,7 @@ public class EqualsTest {
         };
 
         final ByteBuffer abi = f.encodeCallWithArgs(argsIn);
+        assertEquals(0, abi.position());
 
         assertTrue(Function.formatCall(abi.array()).contains("18       000000000000000000000000" + addressHex));
 
@@ -180,6 +181,7 @@ public class EqualsTest {
         Function foo = Function.parse("foo(uint64[6])");
 
         ByteBuffer bb = foo.encodeCall(Tuple.singleton(unsigneds));
+        assertEquals(0, bb.position());
 
         Tuple dec = foo.decodeCall(bb);
 
