@@ -603,9 +603,10 @@ public class DecodeTest {
                 FastHex.decode("000000000000000000000000bbb677a94eda9660832e9944353dd6e814a45705"),
                 FastHex.decode("000000000000000000000000bcead8896acb7a045c38287e433d896eefb40f6c")
         };
-        Tuple result = event.decodeArgs(topics, new byte[0]);
+        Tuple result = event.decodeTopics(topics);
         assertEquals("0xbbb677a94eda9660832e9944353dd6e814a45705", result.get(0).toString().toLowerCase());
         assertEquals("0xbcead8896acb7a045c38287e433d896eefb40f6c", result.get(1).toString().toLowerCase());
+        assertEquals(result, event.decodeArgs(topics, null));
     }
 
     @Test
@@ -628,9 +629,12 @@ public class DecodeTest {
                 "    \"type\": \"event\"\n" +
                 "  }");
         byte[] data = FastHex.decode("000000000000000000000000bbb677a94eda9660832e9944353dd6e814a45705000000000000000000000000bcead8896acb7a045c38287e433d896eefb40f6c");
-        Tuple result = event.decodeArgs(new byte[0][0], data);
+        Tuple result = event.decodeData(data);
         assertEquals("0xbbb677a94eda9660832e9944353dd6e814a45705", result.get(0).toString().toLowerCase());
         assertEquals("0xbcead8896acb7a045c38287e433d896eefb40f6c", result.get(1).toString().toLowerCase());
+        assertEquals(result, event.decodeArgs(null, data));
+        assertEquals(result, event.decodeArgs(new byte[0][0], data));
+        assertEquals(result, event.decodeArgs(Event.EMPTY_TOPICS, data));
     }
 
     @Test
@@ -659,13 +663,13 @@ public class DecodeTest {
                 FastHex.decode("392791df626408017a264f53fde61065d5a93a32b60171df9d8a46afdf82992d"),
                 TypeFactory.createType("int8").encode(12).array()
         };
-        Tuple result = event.decodeArgs(topics, new byte[0]);
+        Tuple result = event.decodeArgs(topics, Strings.EMPTY_BYTE_ARRAY);
         assertEquals("392791df626408017a264f53fde61065d5a93a32b60171df9d8a46afdf82992d", Strings.encode((byte[]) result.get(0)));
         assertEquals(12, (Integer) result.get(1));
     }
 
     @Test
-    public void testDecodeArgsNullTopicShouldFail() {
+    public void testDecodeArgsNullTopicShouldFail() throws Throwable {
         Event event = Event.fromJson("{\n" +
                 "        \"anonymous\": false,\n" +
                 "        \"inputs\": [\n" +
@@ -685,13 +689,11 @@ public class DecodeTest {
                 "        \"name\": \"Stored\",\n" +
                 "        \"type\": \"event\"\n" +
                 "      }");
-        assertThrows(NullPointerException.class, () -> {
-            event.decodeArgs(null, new byte[0]);
-        });
+        assertThrown(NullPointerException.class, "non-null topics expected", () -> event.decodeArgs(null, null));
     }
 
     @Test
-    public void testDecodeArgsNullDataShouldFail() {
+    public void testBadTopics() throws Throwable {
         Event event = Event.fromJson("{\n" +
                 "        \"anonymous\": false,\n" +
                 "        \"inputs\": [\n" +
@@ -711,8 +713,17 @@ public class DecodeTest {
                 "        \"name\": \"Stored\",\n" +
                 "        \"type\": \"event\"\n" +
                 "      }");
-        assertThrows(NullPointerException.class, () -> {
-            event.decodeArgs(new byte[0][0], null);
-        });
+        byte[][] badTopics0 = {
+                FastHex.decode("d78fe195906f002940f4b32985f1daa40764f8481c05447b6751db32e70d744b"),
+                FastHex.decode("392791df626408017a264f53fde61065d5a93a32b60171df9d8a46afdf82992d")
+        };
+        assertThrown(IllegalArgumentException.class, "expected topics.length == 3 but found length 2", () -> event.decodeArgs(badTopics0, new byte[0]));
+        byte[][] badTopics1 = {
+                badTopics0[0],
+                badTopics0[1],
+                TypeFactory.createType("int8").encode(12).array(),
+                Strings.EMPTY_BYTE_ARRAY
+        };
+        assertThrown(IllegalArgumentException.class, "expected topics.length == 3 but found length 4", () -> event.decodeArgs(badTopics1, null));
     }
 }

@@ -28,6 +28,7 @@ import java.util.Objects;
 public final class Event implements ABIObject {
 
     private static final ArrayType<ByteType, byte[]> BYTES_32 = TypeFactory.create("bytes32");
+    public static final byte[][] EMPTY_TOPICS = new byte[0][];
 
     private final String name;
     private final boolean anonymous;
@@ -129,6 +130,16 @@ public final class Event implements ABIObject {
         return true;
     }
 
+    public Tuple decodeTopics(byte[][] topics) {
+        return new Tuple(decodeTopicsArray(topics));
+    }
+
+    public Tuple decodeData(byte[] data) {
+        return data == null && nonIndexedParams.isEmpty()
+                ? Tuple.EMPTY
+                : nonIndexedParams.decode(Objects.requireNonNull(data));
+    }
+
     /**
      * Decodes Event arguments
      * @param topics indexed parameters to decode. If the event is anonymous, the first element is a Keccak hash of the
@@ -137,27 +148,46 @@ public final class Event implements ABIObject {
      * @return
      */
     public Tuple decodeArgs(byte[][] topics, byte[] data) {
-        Objects.requireNonNull(topics, "topics must not be null");
-        Objects.requireNonNull(data, "data must not be null");
-
-        if (!isAnonymous() && topics.length >= 1) {
-            checkSignatureHash(topics);
-        }
-
-        TupleType indexedParams = getIndexedParams();
-        Object[] decodedTopics = decodeTopics(topics, indexedParams);
-        TupleType nonIndexedParams = getNonIndexedParams();
-        Tuple decodedData = nonIndexedParams.decode(data);
-        Object[] mergedArgs = mergeDecodedArgs(decodedTopics, decodedData);
-        return Tuple.of(mergedArgs);
+        return new Tuple(mergeDecodedArgs(decodeTopicsArray(topics), decodeData(data)));
     }
 
-    private Object[] decodeTopics(byte[][] topics, TupleType indexedParams) {
-        int offsetIsAnonymous = isAnonymous() ? 0 : 1;
+    private Object[] decodeTopicsArray(byte[][] topics) {
+        return decodeTopicsUnchecked(anonymous ? checkAnonymousTopics(topics) : checkNonAnonymousTopics(topics));
+    }
+
+    private byte[][] checkNonAnonymousTopics(byte[][] topics) {
+        Objects.requireNonNull(topics, "non-null topics expected");
+        checkTopicsLength(topics.length, 1);
+        byte[] decodedSignatureHash = BYTES_32.decode(topics[0]);
+        if (!Arrays.equals(signatureHash, decodedSignatureHash)) {
+            throw new IllegalArgumentException("unexpected topics[0]: event " + getCanonicalSignature()
+                    + " expects " + FastHex.encodeToString(signatureHash)
+                    + " but found " + FastHex.encodeToString(decodedSignatureHash));
+        }
+        return topics;
+    }
+
+    private byte[][] checkAnonymousTopics(byte[][] topics) {
+        topics = indexedParams.isEmpty() && topics == null
+                ? EMPTY_TOPICS
+                : Objects.requireNonNull(topics, "non-null topics expected");
+        checkTopicsLength(topics.length, 0);
+        return topics;
+    }
+
+    private void checkTopicsLength(int len, int offset) {
+        final int expectedTopics = indexedParams.size() + offset;
+        if(len != expectedTopics) {
+            throw new IllegalArgumentException("expected topics.length == " + expectedTopics + " but found length " + len);
+        }
+    }
+
+    private Object[] decodeTopicsUnchecked(byte[][] topics) {
+        final int offset = anonymous ? 0 : 1;
         Object[] decodedTopics = new Object[indexedParams.size()];
-        for (int i = 0; i < indexedParams.size(); i++) {
+        for (int i = 0; i < decodedTopics.length; i++) {
             ABIType<?> abiType = indexedParams.get(i);
-            byte[] topic = topics[i + offsetIsAnonymous];
+            byte[] topic = topics[i + offset];
             if (abiType.isDynamic()) {
                 // Dynamic indexed types are not decodable in Events. Only a special hash is stored for fast querying of records
                 // See https://docs.soliditylang.org/en/v0.8.11/abi-spec.html#indexed-event-encoding
@@ -179,14 +209,5 @@ public final class Event implements ABIObject {
             }
         }
         return result;
-    }
-
-    private void checkSignatureHash(byte[][] topics) {
-        byte[] decodedSignatureHash = BYTES_32.decode(topics[0]);
-        if (!Arrays.equals(decodedSignatureHash, signatureHash)) {
-            throw new IllegalArgumentException("unexpected topics[0]: event " + getCanonicalSignature()
-                    + " expects " + FastHex.encodeToString(signatureHash)
-                    + " but found " + FastHex.encodeToString(decodedSignatureHash));
-        }
     }
 }
