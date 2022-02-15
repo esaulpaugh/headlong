@@ -97,17 +97,25 @@ public final class Address {
      * @return  the same address with the correct EIP-55 checksum casing
      */
     public static String toChecksumAddress(final String address) {
-        if(address.length() != ADDRESS_LEN_CHARS) {
-            throw new IllegalArgumentException("expected address length " + ADDRESS_LEN_CHARS + "; actual is " + address.length());
+        if(address.length() == ADDRESS_LEN_CHARS) {
+            checkPrefix(address);
+            final byte[] addressBytes = "0x0000000000000000000000000000000000000000".getBytes(StandardCharsets.US_ASCII);
+            for (int i = PREFIX_LEN; i < addressBytes.length; i++) {
+                addressBytes[i] = (byte) getLowercaseHex(address, i);
+            }
+            return doChecksum(addressBytes);
+
         }
+        if(address.length() >= PREFIX_LEN) {
+            checkPrefix(address);
+        }
+        throw new IllegalArgumentException("expected address length " + ADDRESS_LEN_CHARS + "; actual is " + address.length());
+    }
+
+    private static void checkPrefix(String address) {
         if(address.charAt(0) != '0' || address.charAt(1) != 'x') {
             throw new IllegalArgumentException("missing 0x prefix");
         }
-        final byte[] addressBytes = "0x0000000000000000000000000000000000000000".getBytes(StandardCharsets.US_ASCII);
-        for (int i = PREFIX_LEN; i < addressBytes.length; i++) {
-            addressBytes[i] = (byte) getLowercaseHex(address, i);
-        }
-        return doChecksum(addressBytes);
     }
 
     @SuppressWarnings("deprecation")

@@ -246,7 +246,7 @@ public class AddressTest {
                 () -> Address.wrap("0x0000000000000000000082095cafebabecafeba+")
         );
         assertThrown(IllegalArgumentException.class,
-                "expected address length 42; actual is 7",
+                "missing 0x prefix",
                 () -> Address.wrap("0yaaaaa")
         );
         assertThrown(IllegalArgumentException.class,
