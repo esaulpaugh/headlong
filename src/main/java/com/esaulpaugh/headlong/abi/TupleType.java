@@ -68,6 +68,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return (T) elementTypes[index];
     }
 
+    @SuppressWarnings("unchecked")
+    public ABIType<Object> getType(int index) {
+        return (ABIType<Object>) elementTypes[index];
+    }
+
     @Override
     Class<?> arrayClass() {
         return Tuple[].class;

@@ -105,6 +105,11 @@ public final class TypeFactory {
                 .setName(name);
     }
 
+    @SuppressWarnings("unchecked")
+    public static ABIType<Object> createType(String rawType) {
+        return (ABIType<Object>) build(rawType, null);
+    }
+
     static ABIType<?> build(final String rawType, ABIType<?> baseType) {
         try {
             final int lastCharIdx = rawType.length() - 1;

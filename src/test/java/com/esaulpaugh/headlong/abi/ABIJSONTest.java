@@ -293,6 +293,8 @@ public class ABIJSONTest {
         final TupleType out = f.getOutputs();
         final ABIType<?> out0 = out.get(0);
 
+        out.getType(0).encode(40L);
+
         System.out.println(f.getName() + " : " + f.getCanonicalSignature() + " : " + out0);
         assertEquals(1, in.elementTypes.length);
         assertEquals(1, out.elementTypes.length);
