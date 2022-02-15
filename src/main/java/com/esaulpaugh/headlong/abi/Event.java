@@ -153,39 +153,13 @@ public final class Event implements ABIObject {
     }
 
     private Object[] decodeTopicsArray(byte[][] topics) {
-        return decodeTopicsUnchecked(anonymous ? checkAnonymousTopics(topics) : checkNonAnonymousTopics(topics));
-    }
-
-    private byte[][] checkNonAnonymousTopics(byte[][] topics) {
-        Objects.requireNonNull(topics, "non-null topics expected");
-        checkTopicsLength(topics.length, 1);
-        byte[] decodedSignatureHash = BYTES_32.decode(topics[0]);
-        if (!Arrays.equals(signatureHash, decodedSignatureHash)) {
-            throw new IllegalArgumentException("unexpected topics[0]: event " + getCanonicalSignature()
-                    + " expects " + FastHex.encodeToString(signatureHash)
-                    + " but found " + FastHex.encodeToString(decodedSignatureHash));
+        if(anonymous) {
+            checkAnonymousTopics(topics);
+        } else {
+            checkNonAnonymousTopics(topics);
         }
-        return topics;
-    }
-
-    private byte[][] checkAnonymousTopics(byte[][] topics) {
-        topics = indexedParams.isEmpty() && topics == null
-                ? EMPTY_TOPICS
-                : Objects.requireNonNull(topics, "non-null topics expected");
-        checkTopicsLength(topics.length, 0);
-        return topics;
-    }
-
-    private void checkTopicsLength(int len, int offset) {
-        final int expectedTopics = indexedParams.size() + offset;
-        if(len != expectedTopics) {
-            throw new IllegalArgumentException("expected topics.length == " + expectedTopics + " but found length " + len);
-        }
-    }
-
-    private Object[] decodeTopicsUnchecked(byte[][] topics) {
         final int offset = anonymous ? 0 : 1;
-        Object[] decodedTopics = new Object[indexedParams.size()];
+        final Object[] decodedTopics = new Object[indexedParams.size()];
         for (int i = 0; i < decodedTopics.length; i++) {
             ABIType<?> abiType = indexedParams.get(i);
             byte[] topic = topics[i + offset];
@@ -198,6 +172,31 @@ public final class Event implements ABIObject {
             }
         }
         return decodedTopics;
+    }
+
+    private void checkNonAnonymousTopics(byte[][] topics) {
+        Objects.requireNonNull(topics, "non-null topics expected");
+        checkTopicsLength(topics.length, 1);
+        byte[] decodedSignatureHash = BYTES_32.decode(topics[0]);
+        if (!Arrays.equals(signatureHash, decodedSignatureHash)) {
+            throw new IllegalArgumentException("unexpected topics[0]: event " + getCanonicalSignature()
+                    + " expects " + FastHex.encodeToString(signatureHash)
+                    + " but found " + FastHex.encodeToString(decodedSignatureHash));
+        }
+    }
+
+    private void checkAnonymousTopics(byte[][] topics) {
+        topics = indexedParams.isEmpty() && topics == null
+                ? EMPTY_TOPICS
+                : Objects.requireNonNull(topics, "non-null topics expected");
+        checkTopicsLength(topics.length, 0);
+    }
+
+    private void checkTopicsLength(int len, int offset) {
+        final int expectedTopics = indexedParams.size() + offset;
+        if(len != expectedTopics) {
+            throw new IllegalArgumentException("expected topics.length == " + expectedTopics + " but found length " + len);
+        }
     }
 
     private Tuple mergeDecodedArgs(Object[] decodedTopics, Tuple decodedData) {
