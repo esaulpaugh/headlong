@@ -21,6 +21,7 @@ import com.esaulpaugh.headlong.abi.Function;
 import com.esaulpaugh.headlong.abi.IntType;
 import com.esaulpaugh.headlong.abi.Tuple;
 import com.esaulpaugh.headlong.abi.TupleType;
+import com.esaulpaugh.headlong.abi.TypeFactory;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -78,17 +79,20 @@ public class SuperSerialTest {
 
         assertArrayEquals(arr0, arr1);
 
-        IntType int32 = (IntType) TupleType.parse("(int32)").get(0);
+        IntType int32 = TupleType.parse("(int32)").get(0);
 
         assertEquals(Integer.MIN_VALUE, int32.parseArgument(Integer.toString(Integer.MIN_VALUE)));
         assertEquals(Integer.MAX_VALUE, int32.parseArgument(Integer.toString(Integer.MAX_VALUE)));
 
-        IntType int8 = (IntType) TupleType.parse("(int8)").get(0);
+        IntType int8 = TupleType.parse("(int8)").get(0);
 
         TestUtils.assertThrown(IllegalArgumentException.class, "signed val exceeds bit limit: 8 >= 8", () -> int8.parseArgument("-129"));
         TestUtils.assertThrown(IllegalArgumentException.class, "signed val exceeds bit limit: 8 >= 8", () -> int8.parseArgument("128"));
 
-        BooleanType bool = (BooleanType) TupleType.parse("(bool)").get(0);
+        BooleanType bool = TupleType.parse("(bool)").get(0);
+        BooleanType bool2 = (BooleanType) TypeFactory.createRaw("bool");
+        assertEquals(bool, bool2);
+        assertEquals(bool, TypeFactory.createNonCapturing("bool"));
 
         assertEquals(true, bool.parseArgument("true"));
         assertEquals(true, bool.parseArgument("TRUE"));

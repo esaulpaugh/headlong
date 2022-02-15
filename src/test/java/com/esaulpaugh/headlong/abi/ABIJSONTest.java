@@ -293,7 +293,11 @@ public class ABIJSONTest {
         final TupleType out = f.getOutputs();
         final ABIType<?> out0 = out.get(0);
 
-        out.getType(0).encode(BigInteger.valueOf(40L));
+        BigInteger val = BigInteger.valueOf(40L);
+        Object a = out.getNonCapturing(0).encode(val);
+        @SuppressWarnings("unchecked")
+        Object b = out.getRaw(0).encode(val);
+        assertEquals(a, b);
 
         System.out.println(f.getName() + " : " + f.getCanonicalSignature() + " : " + out0);
         assertEquals(1, in.elementTypes.length);

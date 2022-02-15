@@ -160,7 +160,7 @@ public class EqualsTest {
 
         Tuple dec = foo.decodeCall(bb);
 
-        long[] decoded = (long[]) dec.get(0);
+        long[] decoded = dec.get(0);
 
         assertArrayEquals(unsigneds, decoded);
     }
@@ -183,7 +183,7 @@ public class EqualsTest {
 
         Tuple dec = foo.decodeCall(bb);
 
-        BigInteger[] decoded = (BigInteger[]) dec.get(0);
+        BigInteger[] decoded = dec.get(0);
 
         assertArrayEquals(unsigneds, decoded);
     }

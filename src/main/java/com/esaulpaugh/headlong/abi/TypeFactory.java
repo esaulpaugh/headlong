@@ -101,13 +101,22 @@ public final class TypeFactory {
 
     @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T create(String rawType, String name) {
-        return (T) build(rawType, null)
+        return (T) build(rawType)
                 .setName(name);
     }
 
     @SuppressWarnings("unchecked")
-    public static ABIType<Object> createType(String rawType) {
-        return (ABIType<Object>) build(rawType, null);
+    public static ABIType<Object> createNonCapturing(String rawType) {
+        return (ABIType<Object>) build(rawType);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static ABIType createRaw(String rawType) {
+        return build(rawType);
+    }
+
+    private static ABIType<?> build(String rawType) {
+        return build(rawType, null);
     }
 
     static ABIType<?> build(final String rawType, ABIType<?> baseType) {
