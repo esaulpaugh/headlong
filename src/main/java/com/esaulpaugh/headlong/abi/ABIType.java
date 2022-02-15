@@ -195,7 +195,11 @@ public abstract class ABIType<J> {
     abstract void encodePackedUnchecked(J value, ByteBuffer dest);
 
     public final J decode(byte[] array) {
-        ByteBuffer bb = ByteBuffer.wrap(array);
+        return decode(array, 0, array.length);
+    }
+
+    J decode(byte[] buffer, int offset, int len) {
+        ByteBuffer bb = ByteBuffer.wrap(buffer, offset, len);
         J decoded = decode(bb);
         final int remaining = bb.remaining();
         if(remaining == 0) {

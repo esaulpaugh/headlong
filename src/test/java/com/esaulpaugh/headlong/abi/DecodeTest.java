@@ -726,4 +726,15 @@ public class DecodeTest {
         };
         assertThrown(IllegalArgumentException.class, "expected topics.length == 3 but found length 4", () -> event.decodeArgs(badTopics1, null));
     }
+    @Test
+    public void testDecodeTrailingBytes() throws Throwable {
+        assertThrown(IllegalArgumentException.class,
+                "unconsumed bytes: 1 remaining",
+                () -> Function.parse("foo(int8)")
+                        .decodeCall(FastHex.decode("e4a6bf78000000000000000000000000000000000000000000000000000000000000000100")));
+        assertThrown(IllegalArgumentException.class,
+                "unconsumed bytes: 1 remaining",
+                () -> TupleType.parse("(int8)")
+                        .decode(FastHex.decode("000000000000000000000000000000000000000000000000000000000000000100")));
+    }
 }
