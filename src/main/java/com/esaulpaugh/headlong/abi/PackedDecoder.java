@@ -40,17 +40,17 @@ final class PackedDecoder {
 
     private PackedDecoder() {}
 
-    static Tuple decode(TupleType types, byte[] buffer) {
-        return decode(types, buffer, 0, buffer.length);
-    }
-
-    static Tuple decode(TupleType tupleType, byte[] buffer, int from, int to) {
+    static Tuple decode(TupleType tupleType, byte[] buffer) {
         final int count = countDynamicsTupleType(tupleType);
         if (count <= 1) {
             final Tuple[] elements = new Tuple[1];
-            decodeTuple(tupleType, buffer, from, to, elements, 0); // can also call decodeTupleStatic if numDynamic == 0
+            decodeTuple(tupleType, buffer, 0, buffer.length, elements, 0); // can also call decodeTupleStatic if numDynamic == 0
             final Tuple tuple = elements[0];
             tupleType.validate(tuple);
+            int decodedLen = tupleType.byteLengthPacked(tuple);
+            if(decodedLen != buffer.length) {
+                throw new IllegalArgumentException("unconsumed bytes: " + (buffer.length - decodedLen) + " remaining");
+            }
             return tuple;
         }
         throw new IllegalArgumentException("multiple dynamic elements: " + count);
