@@ -148,7 +148,7 @@ public final class Event implements ABIObject {
      * @return
      */
     public Tuple decodeArgs(byte[][] topics, byte[] data) {
-        return new Tuple(mergeDecodedArgs(decodeTopicsArray(topics), decodeData(data)));
+        return mergeDecodedArgs(decodeTopicsArray(topics), decodeData(data));
     }
 
     private Object[] decodeTopicsArray(byte[][] topics) {
@@ -199,7 +199,7 @@ public final class Event implements ABIObject {
         return decodedTopics;
     }
 
-    private Object[] mergeDecodedArgs(Object[] decodedTopics, Tuple decodedData) {
+    private Tuple mergeDecodedArgs(Object[] decodedTopics, Tuple decodedData) {
         Object[] result = new Object[inputs.size()];
         for (int i = 0, topicIndex = 0, dataIndex = 0; i < indexManifest.length; i++) {
             if (indexManifest[i]) {
@@ -208,6 +208,6 @@ public final class Event implements ABIObject {
                 result[i] = decodedData.get(dataIndex++);
             }
         }
-        return result;
+        return new Tuple(result);
     }
 }
