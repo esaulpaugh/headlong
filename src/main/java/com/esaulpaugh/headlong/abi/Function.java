@@ -255,11 +255,14 @@ public final class Function implements ABIObject {
     }
 
     /**
+     * Decodes and returns the elements at the specified indices.
      * NOTE: This method does not advance the {@link ByteBuffer}'s {@code position}.
+     *
      * @param buf   the buffer containing the return values
-     * @param indices   the positions of the elements to decode
+     * @param indices   the index of each of the elements to decode, in ascending order and between 0 (inclusive) and
+     *                  {@code getOutputs().size()} (exclusive)
      * @param <T>   {@link Tuple} if decoding multiple elements
-     * @return
+     * @return  the decoded elements
      */
     public <T> T decodeReturn(ByteBuffer buf, int... indices) {
         return outputTypes.decode(buf, indices);
