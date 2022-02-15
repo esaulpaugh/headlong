@@ -26,12 +26,15 @@ import java.math.BigInteger;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.NoSuchElementException;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.TestUtils.assertThrownMessageMatch;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DecodeTest {
 
@@ -571,9 +574,9 @@ public class DecodeTest {
                 FastHex.decode("0000000000000000000000000000000000000000000000000000000000000000")
         };
         byte[] data = FastHex.decode("00000000000000000000000000000000000000000000000000000000000000009b5de4f892fe73b139777ff15eb165f359a0ea9ea1c687f8e8dc5748249ca5f200000000000000000000000000000000000000000000000002386f26fc100000");
-        assertThrownMessageMatch(RuntimeException.class, Collections.singletonList("Decoded Event signature hash " +
-                        "a4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006d9 does not match the one from ABI " +
-                        "c4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006c9"),
+        assertThrown(IllegalArgumentException.class, "unexpected topics[0]: event OrdersMatched(bytes32,bytes32,address,address,uint256,bytes32) " +
+                        "expects c4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006c9 " +
+                        "but found a4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006d9",
                 () -> event.decodeArgs(topics, data));
     }
 

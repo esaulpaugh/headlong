@@ -184,9 +184,9 @@ public final class Event implements ABIObject {
     private void checkSignatureHash(byte[][] topics) {
         byte[] decodedSignatureHash = BYTES_32.decode(topics[0]);
         if (!Arrays.equals(decodedSignatureHash, signatureHash)) {
-            String message = String.format("Decoded Event signature hash %s does not match the one from ABI %s",
-                    FastHex.encodeToString(decodedSignatureHash), FastHex.encodeToString(signatureHash));
-            throw new IllegalArgumentException(message);
+            throw new IllegalArgumentException("unexpected topics[0]: event " + getCanonicalSignature()
+                    + " expects " + FastHex.encodeToString(signatureHash)
+                    + " but found " + FastHex.encodeToString(decodedSignatureHash));
         }
     }
 }
