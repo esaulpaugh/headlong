@@ -265,14 +265,14 @@ public class TestUtils {
         throw new AssertionError("no " + clazz.getName() + " thrown");
     }
 
-    public static void assertThrownMessageMatch(Class<? extends Throwable> clazz, List<String> messages, CustomRunnable r) throws Throwable {
+    public static void assertThrownMessageMatch(Class<? extends Throwable> clazz, List<String> substrings, CustomRunnable r) throws Throwable {
         try {
             r.run();
         } catch (Throwable t) {
             if(clazz.isInstance(t)) {
                 final String msg = t.getMessage();
-                for(String m : messages) {
-                    if (msg.contains(m)) return;
+                for(String substr : substrings) {
+                    if (msg.contains(substr)) return;
                 }
             }
             throw t;
