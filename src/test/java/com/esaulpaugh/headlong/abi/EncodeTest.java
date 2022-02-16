@@ -298,7 +298,7 @@ public class EncodeTest {
 
     @Test
     public void simpleFunctionTest() {
-        Function f = new Function("baz(uint32,bool)"); // canonicalizes and parses any signature automatically
+        Function f = new Function("baz(uint32,bool)", "(uint32,bool)"); // canonicalizes and parses any signature automatically
         Tuple args = new Tuple(69L, true);
 
         // Two equivalent styles:
@@ -313,6 +313,11 @@ public class EncodeTest {
         assertEquals(two.limit(), two.position());
 
         assertEquals(decoded, args);
+
+        one.position(Function.SELECTOR_LEN);
+        Tuple dec = f.decodeReturn(one);
+        assertEquals(one.limit(), one.position());
+        assertEquals(decoded, dec);
     }
 
     @SuppressWarnings("unchecked")
