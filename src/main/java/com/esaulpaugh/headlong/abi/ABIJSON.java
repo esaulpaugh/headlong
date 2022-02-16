@@ -214,14 +214,13 @@ public final class ABIJSON {
     }
 
     private static ABIType<?> parseType(JsonObject object) {
-        final String type = getType(object);
-        final String name = getName(object);
+        String type = getType(object);
+        TupleType baseType = null;
         if(type.startsWith(TUPLE)) {
-            TupleType baseType = parseTupleType(object, COMPONENTS);
-            return TypeFactory.build(baseType.canonicalType + type.substring(TUPLE.length()), baseType)
-                    .setName(name);
+            baseType = parseTupleType(object, COMPONENTS);
+            type = baseType.canonicalType + type.substring(TUPLE.length());
         }
-        return TypeFactory.create(type, name);
+        return TypeFactory.build(type, getName(object), baseType);
     }
 
     private static String getType(JsonObject obj) {

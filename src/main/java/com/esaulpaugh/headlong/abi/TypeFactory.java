@@ -104,11 +104,14 @@ public final class TypeFactory {
     }
 
     public static <T extends ABIType<?>> T create(String rawType, String name) {
-        return build(rawType, null)
-                .setName(name);
+        return build(rawType, name, null);
     }
 
-    static ABIType<?> build(final String rawType, ABIType<?> baseType) {
+    static <T extends ABIType<?>> T build(String rawType, String name, ABIType<?> baseType) {
+        return build(rawType, baseType).setName(name);
+    }
+
+    private static ABIType<?> build(final String rawType, ABIType<?> baseType) {
         try {
             final int lastCharIdx = rawType.length() - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array
