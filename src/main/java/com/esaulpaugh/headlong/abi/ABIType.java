@@ -72,9 +72,10 @@ public abstract class ABIType<J> {
     }
 
     /* don't expose this; cached (nameless) instances are shared and must be immutable */
-    final ABIType<J> setName(String name) {
+    @SuppressWarnings("unchecked")
+    final <T> T setName(String name) {
         this.name = name;
-        return this;
+        return (T) this;
     }
 
     abstract Class<?> arrayClass();
