@@ -738,4 +738,16 @@ public class DecodeTest {
                 () -> TupleType.parse("(uint32)")
                         .decode(FastHex.decode("000000000000000000000000000000000000000000000000000000000000000e000000")));
     }
+
+    @Test
+    public void testSelectorMismatch() throws Throwable {
+        byte[] call = FastHex.decode("e4b6bf780000000000000000000000000000000000000000000000000000000000000001");
+        Function f= Function.parse("foo(int8)");
+        assertThrown(IllegalArgumentException.class,
+                "given selector does not match: expected: e4a6bf78, found: e4b6bf78",
+                () -> f.decodeCall(call));
+        assertThrown(IllegalArgumentException.class,
+                "given selector does not match: expected: e4a6bf78, found: e4b6bf78",
+                () -> f.decodeCall(ByteBuffer.wrap(call)));
+    }
 }
