@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.abi.ABIType;
 import com.esaulpaugh.headlong.abi.BooleanType;
 import com.esaulpaugh.headlong.abi.Function;
 import com.esaulpaugh.headlong.abi.IntType;
@@ -90,9 +91,9 @@ public class SuperSerialTest {
         TestUtils.assertThrown(IllegalArgumentException.class, "signed val exceeds bit limit: 8 >= 8", () -> int8.parseArgument("128"));
 
         BooleanType bool = TupleType.parse("(bool)").get(0);
-        BooleanType bool2 = (BooleanType) TypeFactory.createRaw("bool");
+        Object bool2 = TypeFactory.create("bool");
         assertEquals(bool, bool2);
-        assertEquals(bool, TypeFactory.createNonCapturing("bool"));
+        TypeFactory.createNonCapturing("bool").encode(true);
 
         assertEquals(true, bool.parseArgument("true"));
         assertEquals(true, bool.parseArgument("TRUE"));

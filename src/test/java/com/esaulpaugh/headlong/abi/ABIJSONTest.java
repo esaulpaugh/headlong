@@ -294,10 +294,13 @@ public class ABIJSONTest {
         final ABIType<?> out0 = out.get(0);
 
         BigInteger val = BigInteger.valueOf(40L);
+        Object obj = val;
         Object a = out.getNonCapturing(0).encode(val);
-        @SuppressWarnings("unchecked")
-        Object b = out.getRaw(0).encode(val);
+        Object b = out.getNonCapturing(0).encode(obj);
         assertEquals(a, b);
+        ABIType<? super Object> type = out.getNonCapturing(0);
+        assertEquals(a, type.encode(obj));
+        assertEquals(a, type.encode(val));
 
         System.out.println(f.getName() + " : " + f.getCanonicalSignature() + " : " + out0);
         assertEquals(1, in.elementTypes.length);

@@ -110,11 +110,6 @@ public final class TypeFactory {
         return (ABIType<Object>) build(rawType);
     }
 
-    @SuppressWarnings("rawtypes")
-    public static ABIType createRaw(String rawType) {
-        return build(rawType);
-    }
-
     private static ABIType<?> build(String rawType) {
         return build(rawType, null);
     }
