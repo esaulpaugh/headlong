@@ -35,13 +35,24 @@ public final class Address {
     private static final int HEX_RADIX = 16;
 
     private final BigInteger value;
+    private final String label; // an optional String identifying or describing this Address
 
     Address(BigInteger value) {
         this.value = value;
+        this.label = null;
+    }
+
+    private Address(BigInteger value, String label) {
+        this.value = value;
+        this.label = label;
     }
 
     public BigInteger value() {
         return value;
+    }
+
+    public String getLabel() {
+        return label;
     }
 
     @Override
@@ -68,6 +79,20 @@ public final class Address {
         byte[] bytes = new byte[1 + ADDRESS_DATA_BYTES];
         FastHex.decode(checksumAddress, PREFIX_LEN, ADDRESS_HEX_CHARS, bytes, 1);
         return new Address(new BigInteger(bytes));
+    }
+
+    public static Address wrap(final String checksumAddress, final String label) {
+        validateChecksumAddress(checksumAddress);
+        byte[] bytes = new byte[1 + ADDRESS_DATA_BYTES];
+        FastHex.decode(checksumAddress, PREFIX_LEN, ADDRESS_HEX_CHARS, bytes, 1);
+        return new Address(new BigInteger(bytes), label);
+    }
+
+    public Address withLabel(final String label) {
+        if(this.label != null) {
+            throw new IllegalArgumentException("labeling aborted because existing label not null");
+        }
+        return Address.wrap(this.toString(), label);
     }
 
     public static void validateChecksumAddress(final String checksumAddress) {

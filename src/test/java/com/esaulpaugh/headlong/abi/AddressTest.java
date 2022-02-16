@@ -281,4 +281,21 @@ public class AddressTest {
         String s = null;
         assertThrown(NullPointerException.class, () -> Address.toChecksumAddress(s));
     }
+
+    @Test
+    public void testLabel() throws Throwable {
+        Address someAddr = Address.wrap("0x5cafEBaBEcafEBabE7570ad8AC11f8d812ee0606", "Cafe Babe's hot wallet");
+        assertEquals("Cafe Babe's hot wallet", someAddr.getLabel());
+        assertThrown(IllegalArgumentException.class,
+                "labeling aborted because existing label not null",
+                () -> someAddr.withLabel("Cafe Joe's wallet"));
+        Address joesAddr = Address.wrap(someAddr.toString(), "Cafe Joe's wallet");
+        assertEquals("Cafe Joe's wallet", joesAddr.getLabel());
+
+        Address anon = Address.wrap("0x0000000000000000000082095CafEBABEcAFebAB").withLabel("unknown");
+        assertEquals("unknown", anon.getLabel());
+
+        Address anon2 = Address.wrap("0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF", "unknown2");
+        assertEquals("unknown2", anon2.getLabel());
+    }
 }
