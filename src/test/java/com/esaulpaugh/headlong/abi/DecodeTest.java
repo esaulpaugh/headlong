@@ -638,7 +638,7 @@ public class DecodeTest {
     }
 
     @Test
-    public void testDecodeIndexedDynamicType() {
+    public void testDecodeIndexedDynamicType() throws Throwable {
         Event event = Event.fromJson("{\n" +
                 "        \"anonymous\": false,\n" +
                 "        \"inputs\": [\n" +
@@ -666,6 +666,11 @@ public class DecodeTest {
         Tuple result = event.decodeArgs(topics, Strings.EMPTY_BYTE_ARRAY);
         assertEquals("392791df626408017a264f53fde61065d5a93a32b60171df9d8a46afdf82992d", Strings.encode((byte[]) result.get(0)));
         assertEquals(12, (Integer) result.get(1));
+
+        byte[] tooLong = new byte[35];
+        System.arraycopy(topics[2], 0, tooLong, 0, 32);
+        topics[2] = tooLong;
+        assertThrown(IllegalArgumentException.class, "unconsumed bytes: 3 remaining", () -> event.decodeArgs(topics, Strings.EMPTY_BYTE_ARRAY));
     }
 
     @Test
@@ -742,7 +747,7 @@ public class DecodeTest {
     @Test
     public void testSelectorMismatch() throws Throwable {
         byte[] call = FastHex.decode("e4b6bf780000000000000000000000000000000000000000000000000000000000000001");
-        Function f= Function.parse("foo(int8)");
+        Function f = Function.parse("foo(int8)");
         assertThrown(IllegalArgumentException.class,
                 "given selector does not match: expected: e4a6bf78, found: e4b6bf78",
                 () -> f.decodeCall(call));

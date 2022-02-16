@@ -307,7 +307,10 @@ public class EncodeTest {
 
         System.out.println(Function.formatCall(one.array())); // a multi-line hex representation
 
+        assertEquals(0, two.position());
         Tuple decoded = f.decodeCall(two);
+        assertEquals(Function.SELECTOR_LEN + UNIT_LENGTH_BYTES * 2, two.position());
+        assertEquals(two.limit(), two.position());
 
         assertEquals(decoded, args);
     }
