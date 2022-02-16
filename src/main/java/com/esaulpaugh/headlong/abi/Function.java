@@ -216,7 +216,7 @@ public final class Function implements ABIObject {
     }
 
     public Tuple decodeCall(byte[] call) {
-        checkSelector(Arrays.copyOfRange(call, 0, SELECTOR_LEN));
+        checkSelector(call);
         return inputTypes.decode(call, SELECTOR_LEN, call.length - SELECTOR_LEN);
     }
 
@@ -233,11 +233,11 @@ public final class Function implements ABIObject {
         return inputTypes.decode(abiBuffer, unitBuffer); // unitBuffer contents are ignored, overwritten during decode
     }
 
-    private void checkSelector(byte[] unitBuffer) {
+    private void checkSelector(byte[] buffer) {
         for(int i = 0; i < SELECTOR_LEN; i++) {
-            if(unitBuffer[i] != selector[i]) {
+            if(buffer[i] != selector[i]) {
                 throw new IllegalArgumentException("given selector does not match: expected: " + selectorHex()
-                        + ", found: " + Strings.encode(unitBuffer, 0, SELECTOR_LEN, Strings.HEX));
+                        + ", found: " + Strings.encode(buffer, 0, SELECTOR_LEN, Strings.HEX));
             }
         }
     }
