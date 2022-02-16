@@ -75,10 +75,7 @@ public final class Address {
     }
 
     public static Address wrap(final String checksumAddress) {
-        validateChecksumAddress(checksumAddress);
-        byte[] bytes = new byte[1 + ADDRESS_DATA_BYTES];
-        FastHex.decode(checksumAddress, PREFIX_LEN, ADDRESS_HEX_CHARS, bytes, 1);
-        return new Address(new BigInteger(bytes));
+        return wrap(checksumAddress, null);
     }
 
     public static Address wrap(final String checksumAddress, final String label) {
