@@ -39,14 +39,10 @@ public final class Address {
     private final String label; // an optional String identifying or describing this Address
 
     Address(BigInteger value) {
-        this.value = value;
-        this.label = null;
+        this(value, null);
     }
 
     private Address(BigInteger value, String label) {
-        if(label != null && label.length() > MAX_LABEL_LEN) {
-            throw new IllegalArgumentException("label length exceeds maximum: " + label.length() + " > " + MAX_LABEL_LEN);
-        }
         this.value = value;
         this.label = label;
     }
@@ -83,6 +79,9 @@ public final class Address {
     }
 
     public static Address wrap(final String checksumAddress, final String label) {
+        if(label != null && label.length() > MAX_LABEL_LEN) {
+            throw new IllegalArgumentException("label length exceeds maximum: " + label.length() + " > " + MAX_LABEL_LEN);
+        }
         return new Address(decodeAddress(validateChecksumAddress(checksumAddress)), label);
     }
 
