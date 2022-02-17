@@ -46,24 +46,24 @@ public class AddressTest {
     @Test
     public void testVectorChecksums() {
         for(String vector : VECTORS) {
-            testAddress(vector);
+            testAddress(vector, vector.substring(0, 12));
         }
     }
 
     @Test
     public void testGeneratedChecksums() {
         final Random r = TestUtils.seededRandom();
-        testAddress(new Address(BigInteger.valueOf(TestUtils.pickRandom(r, 1 + r.nextInt(Long.BYTES), true))).toString());
-        testAddress(MonteCarloTestCase.generateAddress(r).toString());
-        testAddress(MonteCarloTestCase.generateAddress(r).toString());
+        testAddress(new Address(BigInteger.valueOf(TestUtils.pickRandom(r, 1 + r.nextInt(Long.BYTES), true))).toString(), null);
+        testAddress(MonteCarloTestCase.generateAddress(r).toString(), null);
+        testAddress(MonteCarloTestCase.generateAddress(r).toString(), "a label");
     }
 
-    private static void testAddress(final String in) {
+    private static void testAddress(final String in, final String label) {
         assertTrue(ADDRESS_PATTERN.matcher(in).matches());
         assertEquals(in, Address.validateChecksumAddress(in));
         final String checksummedStr = Address.toChecksumAddress(in);
         assertEquals(in, checksummedStr);
-        final Address checksummed = Address.wrap(checksummedStr);
+        final Address checksummed = Address.wrap(checksummedStr, label);
         assertEquals(in, checksummed.toString());
         final BigInteger checksummedVal = checksummed.value();
         assertEquals(checksummedVal, Address.wrap(in).value());
@@ -88,12 +88,12 @@ public class AddressTest {
     public void testStringAddrs() {
         final Random r = TestUtils.seededRandom();
 
-        testAddress(Address.toChecksumAddress(BigInteger.ZERO));
-        testAddress(Address.toChecksumAddress(BigInteger.ONE));
-        testAddress(Address.toChecksumAddress(BigInteger.TEN));
-        testAddress(Address.toChecksumAddress(BigInteger.valueOf(2L)));
-        testAddress(generateAddressString(r));
-        testAddress(generateAddressString(r));
+        testAddress(Address.toChecksumAddress(BigInteger.ZERO), "LABEL");
+        testAddress(Address.toChecksumAddress(BigInteger.ONE), "0x0x0x0x0x0x\0\0\0\\\"\u0009xzzzzzzzzzz");
+        testAddress(Address.toChecksumAddress(BigInteger.TEN), null);
+        testAddress(Address.toChecksumAddress(BigInteger.valueOf(2L)), null);
+        testAddress(generateAddressString(r), TestUtils.generateASCIIString(36, r));
+        testAddress(generateAddressString(r), TestUtils.generateASCIIString(36, r));
 
         BigInteger _FFff = Address.wrap("0x000000000000000000000000000000000000FFff").value();
         assertEquals(BigInteger.valueOf(65535L), _FFff);
@@ -299,7 +299,7 @@ public class AddressTest {
         assertEquals("unknown2", anon2.getLabel());
 
         assertThrown(IllegalArgumentException.class,
-                "label length exceeds maximum: 176 > 128",
+                "label length exceeds maximum: 176 > 36",
                 () -> Address.wrap(
                         "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
                         "Four score and seven years ago our fathers brought forth on this continent, a new nation, " +

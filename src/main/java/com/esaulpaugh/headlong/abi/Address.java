@@ -33,7 +33,7 @@ public final class Address {
     private static final int ADDRESS_HEX_CHARS = ADDRESS_DATA_BYTES * FastHex.CHARS_PER_BYTE;
     private static final int ADDRESS_LEN_CHARS = PREFIX_LEN + ADDRESS_HEX_CHARS;
     private static final int HEX_RADIX = 16;
-    public static final int MAX_LABEL_LEN = 128;
+    public static final int MAX_LABEL_LEN = 36;
 
     private final BigInteger value;
     private final String label; // an optional String identifying or describing this Address
@@ -75,17 +75,18 @@ public final class Address {
     }
 
     public static Address wrap(final String checksumAddress) {
-        return new Address(decodeAddress(validateChecksumAddress(checksumAddress)));
+        return new Address(validatedAndDecodeAddress(checksumAddress));
     }
 
     public static Address wrap(final String checksumAddress, final String label) {
         if(label != null && label.length() > MAX_LABEL_LEN) {
             throw new IllegalArgumentException("label length exceeds maximum: " + label.length() + " > " + MAX_LABEL_LEN);
         }
-        return new Address(decodeAddress(validateChecksumAddress(checksumAddress)), label);
+        return new Address(validatedAndDecodeAddress(checksumAddress), label);
     }
 
-    private static BigInteger decodeAddress(final String checksumAddress) {
+    private static BigInteger validatedAndDecodeAddress(final String checksumAddress) {
+        validateChecksumAddress(checksumAddress);
         byte[] bytes = new byte[1 + ADDRESS_DATA_BYTES];
         FastHex.decode(checksumAddress, PREFIX_LEN, ADDRESS_HEX_CHARS, bytes, 1);
         return new BigInteger(bytes);
