@@ -60,7 +60,7 @@ public class AddressTest {
 
     private static void testAddress(final String in) {
         assertTrue(ADDRESS_PATTERN.matcher(in).matches());
-        Address.validateChecksumAddress(in);
+        assertEquals(in, Address.validateChecksumAddress(in));
         final String checksummedStr = Address.toChecksumAddress(in);
         assertEquals(in, checksummedStr);
         final Address checksummed = Address.wrap(checksummedStr);
@@ -297,5 +297,13 @@ public class AddressTest {
 
         Address anon2 = Address.wrap("0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF", "unknown2");
         assertEquals("unknown2", anon2.getLabel());
+
+        assertThrown(IllegalArgumentException.class,
+                "label length exceeds maximum: 176 > 128",
+                () -> Address.wrap(
+                        "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
+                        "Four score and seven years ago our fathers brought forth on this continent, a new nation, " +
+                        "conceived in Liberty, and dedicated to the proposition that all men are created equal.")
+        );
     }
 }

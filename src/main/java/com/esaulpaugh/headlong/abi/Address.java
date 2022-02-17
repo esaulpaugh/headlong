@@ -33,6 +33,7 @@ public final class Address {
     private static final int ADDRESS_HEX_CHARS = ADDRESS_DATA_BYTES * FastHex.CHARS_PER_BYTE;
     private static final int ADDRESS_LEN_CHARS = PREFIX_LEN + ADDRESS_HEX_CHARS;
     private static final int HEX_RADIX = 16;
+    private static final int MAX_LABEL_LEN = 128;
 
     private final BigInteger value;
     private final String label; // an optional String identifying or describing this Address
@@ -43,6 +44,9 @@ public final class Address {
     }
 
     private Address(BigInteger value, String label) {
+        if(label != null && label.length() > MAX_LABEL_LEN) {
+            throw new IllegalArgumentException("label length exceeds maximum: " + label.length() + " > " + MAX_LABEL_LEN);
+        }
         this.value = value;
         this.label = label;
     }
@@ -75,14 +79,17 @@ public final class Address {
     }
 
     public static Address wrap(final String checksumAddress) {
-        return wrap(checksumAddress, null);
+        return new Address(decodeAddress(validateChecksumAddress(checksumAddress)));
     }
 
     public static Address wrap(final String checksumAddress, final String label) {
-        validateChecksumAddress(checksumAddress);
+        return new Address(decodeAddress(validateChecksumAddress(checksumAddress)), label);
+    }
+
+    private static BigInteger decodeAddress(final String checksumAddress) {
         byte[] bytes = new byte[1 + ADDRESS_DATA_BYTES];
         FastHex.decode(checksumAddress, PREFIX_LEN, ADDRESS_HEX_CHARS, bytes, 1);
-        return new Address(new BigInteger(bytes), label);
+        return new BigInteger(bytes);
     }
 
     public Address withLabel(final String label) {
@@ -92,9 +99,9 @@ public final class Address {
         return Address.wrap(this.toString(), label);
     }
 
-    public static void validateChecksumAddress(final String checksumAddress) {
+    public static String validateChecksumAddress(final String checksumAddress) {
         if(toChecksumAddress(checksumAddress).equals(checksumAddress)) {
-            return;
+            return checksumAddress;
         }
         throw new IllegalArgumentException("invalid checksum");
     }
