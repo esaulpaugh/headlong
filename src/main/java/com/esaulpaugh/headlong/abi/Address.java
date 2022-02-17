@@ -33,7 +33,7 @@ public final class Address {
     private static final int ADDRESS_HEX_CHARS = ADDRESS_DATA_BYTES * FastHex.CHARS_PER_BYTE;
     private static final int ADDRESS_LEN_CHARS = PREFIX_LEN + ADDRESS_HEX_CHARS;
     private static final int HEX_RADIX = 16;
-    private static final int MAX_LABEL_LEN = 128;
+    public static final int MAX_LABEL_LEN = 128;
 
     private final BigInteger value;
     private final String label; // an optional String identifying or describing this Address
