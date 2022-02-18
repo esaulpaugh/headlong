@@ -103,9 +103,9 @@ public final class Address {
         return Address.wrap(this.toString(), label);
     }
 
-    public static String validateChecksumAddress(final String checksumAddress) {
+    public static void validateChecksumAddress(final String checksumAddress) {
         if(toChecksumAddress(checksumAddress).equals(checksumAddress)) {
-            return checksumAddress;
+            return;
         }
         throw new IllegalArgumentException("invalid checksum");
     }

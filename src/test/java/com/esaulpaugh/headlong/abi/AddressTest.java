@@ -60,7 +60,7 @@ public class AddressTest {
 
     private static void testAddress(final String in, final String label) {
         assertTrue(ADDRESS_PATTERN.matcher(in).matches());
-        assertEquals(in, Address.validateChecksumAddress(in));
+        Address.validateChecksumAddress(in);
         final String checksummedStr = Address.toChecksumAddress(in);
         assertEquals(in, checksummedStr);
         final Address checksummed = Address.wrap(checksummedStr, label);
