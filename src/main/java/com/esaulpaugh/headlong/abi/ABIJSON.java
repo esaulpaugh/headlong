@@ -220,7 +220,7 @@ public final class ABIJSON {
             baseType = parseTupleType(object, COMPONENTS);
             type = baseType.canonicalType + type.substring(TUPLE.length());
         }
-        return TypeFactory.build(type, baseType, getName(object));
+        return TypeFactory.createWithBase(type, getName(object), baseType);
     }
 
     private static String getType(JsonObject obj) {

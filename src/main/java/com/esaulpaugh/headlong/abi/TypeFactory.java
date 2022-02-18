@@ -105,10 +105,14 @@ public final class TypeFactory {
 
     @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T create(String rawType, String name) {
-        return (T) build(rawType, null, name);
+        return (T) build(rawType, name, null);
     }
 
-    static ABIType<?> build(final String rawType, ABIType<?> baseType, final String name) {
+    static ABIType<?> createWithBase(String rawType, String name, ABIType<?> baseType) {
+        return build(rawType, name, baseType);
+    }
+
+    private static ABIType<?> build(final String rawType, final String name, ABIType<?> baseType) {
         try {
             final int lastCharIdx = rawType.length() - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array
@@ -116,7 +120,7 @@ public final class TypeFactory {
                 final int secondToLastCharIdx = lastCharIdx - 1;
                 final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIdx);
 
-                final ABIType<?> elementType = build(rawType.substring(0, arrayOpenIndex), baseType, null);
+                final ABIType<?> elementType = build(rawType.substring(0, arrayOpenIndex), null, baseType);
                 final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
                 final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType.substring(arrayOpenIndex + 1, lastCharIdx));
                 return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null, name);
