@@ -19,8 +19,8 @@ import java.nio.ByteBuffer;
 
 public final class IntType extends UnitType<Integer> {
 
-    IntType(String canonicalType, int bitLength, boolean unsigned) {
-        super(canonicalType, Integer.class, bitLength, unsigned);
+    IntType(String canonicalType, int bitLength, boolean unsigned, String name) {
+        super(canonicalType, Integer.class, bitLength, unsigned, name);
     }
 
     @Override

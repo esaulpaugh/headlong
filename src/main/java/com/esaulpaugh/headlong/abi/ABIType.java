@@ -47,12 +47,13 @@ public abstract class ABIType<J> {
     final Class<J> clazz;
     final boolean dynamic;
 
-    private String name;
+    private final String name;
 
-    ABIType(String canonicalType, Class<J> clazz, boolean dynamic) {
+    ABIType(String canonicalType, Class<J> clazz, boolean dynamic, String name) {
         this.canonicalType = canonicalType; // .intern() to save memory and allow == comparison?
         this.clazz = clazz;
         this.dynamic = dynamic;
+        this.name = name;
     }
 
     public final String getCanonicalType() {
@@ -69,13 +70,6 @@ public abstract class ABIType<J> {
 
     public final String getName() {
         return name;
-    }
-
-    /* don't expose this; cached (nameless) instances are shared and must be immutable */
-    @SuppressWarnings("unchecked")
-    final <T> T setName(String name) {
-        this.name = name;
-        return (T) this;
     }
 
     abstract Class<?> arrayClass();
@@ -224,7 +218,7 @@ public abstract class ABIType<J> {
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
 
     public final J decodePacked(byte[] buffer) {
-        return PackedDecoder.decode(TupleType.wrap(this), buffer).get(0);
+        return PackedDecoder.decode(TupleType.wrap(null, this), buffer).get(0);
     }
 
     /**

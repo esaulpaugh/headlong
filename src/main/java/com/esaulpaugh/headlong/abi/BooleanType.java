@@ -28,8 +28,8 @@ public final class BooleanType extends UnitType<Boolean> {
         BOOLEAN_TRUE[BOOLEAN_TRUE.length-1] = 1;
     }
 
-    BooleanType() {
-        super("bool", Boolean.class, 1, true);
+    BooleanType(String name) {
+        super("bool", Boolean.class, 1, true, name);
     }
 
     @Override

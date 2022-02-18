@@ -55,7 +55,7 @@ public class TupleTest {
 
         boolean[] bools = new boolean[pow];
 
-        BigIntegerType type = new BigIntegerType("int" + bits, bits, false);
+        BigIntegerType type = new BigIntegerType("int" + bits, bits, false, null);
 //        BooleanType type = new BooleanType();
 
         for (int i = 0; i < 1_579_919_999; i++) {

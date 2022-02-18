@@ -34,25 +34,25 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     private static final String EMPTY_TUPLE_STRING = "()";
 
-    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY);
+    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null);
 
     final ABIType<?>[] elementTypes;
     private final int headLength;
 
-    private TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes) {
-        super(canonicalType, Tuple.class, dynamic);
+    private TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String name) {
+        super(canonicalType, Tuple.class, dynamic, name);
         this.elementTypes = elementTypes;
         this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticTupleHeadLength(this);
     }
 
-    static TupleType wrap(ABIType<?>... elements) {
+    static TupleType wrap(String name, ABIType<?>... elements) {
         StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
         for (ABIType<?> e : elements) {
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
         }
-        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements); // TODO .intern() string?
+        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements, name); // TODO .intern() string?
     }
 
     public int size() {
@@ -371,7 +371,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     selected.add(e);
                 }
             }
-            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected.toArray(EMPTY_ARRAY));
+            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected.toArray(EMPTY_ARRAY), null);
         }
         throw new IllegalArgumentException("manifest.length != size(): " + manifest.length + " != " + size);
     }

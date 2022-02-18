@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import static com.esaulpaugh.headlong.abi.ABIType.EMPTY_ARRAY;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
@@ -43,10 +43,10 @@ public final class TypeFactory {
 
     private static final int FUNCTION_BYTE_LEN = 24;
 
-    static final Map<String, Supplier<ABIType<?>>> SUPPLIER_MAP;
+    static final Map<String, Function<String, ABIType<?>>> SUPPLIER_MAP;
 
     static {
-        final Map<String, Supplier<ABIType<?>>> lambdaMap = new HashMap<>(256);
+        final Map<String, Function<String, ABIType<?>>> lambdaMap = new HashMap<>(256);
 
         for(int n = 8; n <= 32; n += 8) mapInt(lambdaMap, "int" + n, n, false);
         for(int n = 40; n <= 64; n += 8) mapLong(lambdaMap, "int" + n, n, false);
@@ -63,11 +63,11 @@ public final class TypeFactory {
         lambdaMap.put("address", AddressType::new);
         mapByteArray(lambdaMap, "function", FUNCTION_BYTE_LEN);
         mapByteArray(lambdaMap, "bytes", DYNAMIC_LENGTH);
-        lambdaMap.put("string", () -> new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS));
+        lambdaMap.put("string", name -> new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, name));
 
-        lambdaMap.put("fixed128x18", () -> new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
-        lambdaMap.put("ufixed128x18", () -> new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
-        lambdaMap.put("decimal", () -> new BigDecimalType("decimal", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
+        lambdaMap.put("fixed128x18", name -> new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false, name));
+        lambdaMap.put("ufixed128x18", name -> new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true, name));
+        lambdaMap.put("decimal", name -> new BigDecimalType("decimal", DECIMAL_BIT_LEN, DECIMAL_SCALE, false, name));
 
         lambdaMap.put("int", lambdaMap.get("int256"));
         lambdaMap.put("uint", lambdaMap.get("uint256"));
@@ -79,20 +79,20 @@ public final class TypeFactory {
         SUPPLIER_MAP = Collections.unmodifiableMap(lambdaMap);
     }
 
-    private static void mapInt(Map<String, Supplier<ABIType<?>>> map, String type, int bitLen, boolean unsigned) {
-        map.put(type, () -> new IntType(type, bitLen, unsigned));
+    private static void mapInt(Map<String, Function<String, ABIType<?>>> map, String type, int bitLen, boolean unsigned) {
+        map.put(type, name -> new IntType(type, bitLen, unsigned, name));
     }
 
-    private static void mapLong(Map<String, Supplier<ABIType<?>>> map, String type, int bitLen, boolean unsigned) {
-        map.put(type, () -> new LongType(type, bitLen, unsigned));
+    private static void mapLong(Map<String, Function<String, ABIType<?>>> map, String type, int bitLen, boolean unsigned) {
+        map.put(type, name -> new LongType(type, bitLen, unsigned, name));
     }
 
-    private static void mapBigInteger(Map<String, Supplier<ABIType<?>>> map, String type, int bitLen, boolean unsigned) {
-        map.put(type, () -> new BigIntegerType(type, bitLen, unsigned));
+    private static void mapBigInteger(Map<String, Function<String, ABIType<?>>> map, String type, int bitLen, boolean unsigned) {
+        map.put(type, name -> new BigIntegerType(type, bitLen, unsigned, name));
     }
 
-    private static void mapByteArray(Map<String, Supplier<ABIType<?>>> map, String type, int arrayLen) {
-        map.put(type, () -> new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class));
+    private static void mapByteArray(Map<String, Function<String, ABIType<?>>> map, String type, int arrayLen) {
+        map.put(type, name -> new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class, name));
     }
 
     public static <T extends ABIType<?>> T create(String rawType) {
@@ -103,15 +103,12 @@ public final class TypeFactory {
         return create(rawType, null);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T create(String rawType, String name) {
-        return build(rawType, name, null);
+        return (T) build(rawType, null, name);
     }
 
-    static <T extends ABIType<?>> T build(String rawType, String name, ABIType<?> baseType) {
-        return build(rawType, baseType).setName(name);
-    }
-
-    private static ABIType<?> build(final String rawType, ABIType<?> baseType) {
+    static ABIType<?> build(final String rawType, ABIType<?> baseType, final String name) {
         try {
             final int lastCharIdx = rawType.length() - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array
@@ -119,12 +116,12 @@ public final class TypeFactory {
                 final int secondToLastCharIdx = lastCharIdx - 1;
                 final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIdx);
 
-                final ABIType<?> elementType = build(rawType.substring(0, arrayOpenIndex), baseType);
+                final ABIType<?> elementType = build(rawType.substring(0, arrayOpenIndex), baseType, null);
                 final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
                 final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType.substring(arrayOpenIndex + 1, lastCharIdx));
-                return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null);
+                return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null, name);
             }
-            if(baseType != null || (baseType = resolveBaseType(rawType)) != null) {
+            if(baseType != null || (baseType = resolveBaseType(rawType, name)) != null) {
                 return baseType;
             }
         } catch (StringIndexOutOfBoundsException ignored) { // e.g. type equals "" or "82]" or "[]" or "[1]"
@@ -148,15 +145,15 @@ public final class TypeFactory {
         throw new IllegalArgumentException("bad array length");
     }
 
-    private static ABIType<?> resolveBaseType(final String baseTypeStr) {
+    private static ABIType<?> resolveBaseType(final String baseTypeStr, final String name) {
         if(baseTypeStr.charAt(0) == '(') {
-            return parseTupleType(baseTypeStr);
+            return parseTupleType(baseTypeStr, name);
         }
-        Supplier<ABIType<?>> supplier = SUPPLIER_MAP.get(baseTypeStr);
-        return supplier != null ? supplier.get() : tryParseFixed(baseTypeStr);
+        Function<String, ABIType<?>> init = SUPPLIER_MAP.get(baseTypeStr);
+        return init != null ? init.apply(name) : tryParseFixed(baseTypeStr, name);
     }
 
-    private static BigDecimalType tryParseFixed(final String type) {
+    private static BigDecimalType tryParseFixed(final String type, String name) {
         final int idx = type.indexOf("fixed");
         boolean unsigned = false;
         if (idx == 0 || (unsigned = (idx == 1 && type.charAt(0) == 'u'))) {
@@ -168,7 +165,7 @@ public final class TypeFactory {
                     final int M = Integer.parseInt(mStr); // no parseUnsignedInt on older Android versions?
                     final int N = Integer.parseInt(nStr);
                     if (Integers.isMultiple(M, 8) && M <= 256 && N <= 80) { // no multiples of 8 less than 8 except 0
-                        return new BigDecimalType((unsigned ? "ufixed" : "fixed") + M + 'x' + N, M, N, unsigned);
+                        return new BigDecimalType((unsigned ? "ufixed" : "fixed") + M + 'x' + N, M, N, unsigned, name);
                     }
                 }
             } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
@@ -182,7 +179,7 @@ public final class TypeFactory {
         return c > '0' && c <= '9';
     }
 
-    private static TupleType parseTupleType(final String rawTypeStr) { /* assumes that rawTypeStr.charAt(0) == '(' */
+    private static TupleType parseTupleType(final String rawTypeStr, final String name) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final ArrayList<ABIType<?>> elements = new ArrayList<>();
         try {
             int argStart = 1; // after opening '('
@@ -195,11 +192,11 @@ public final class TypeFactory {
                     throw new IllegalArgumentException("empty parameter");
                 } else if(c != ')') {
                     argEnd = findArgEnd(rawTypeStr, argStart, c);
-                    elements.add(build(rawTypeStr.substring(argStart, argEnd), null));
+                    elements.add(build(rawTypeStr.substring(argStart, argEnd), null, null));
                     terminator = rawTypeStr.charAt(argEnd);
                 }
                 if(terminator == ')') {
-                    return argEnd == last ? TupleType.wrap(elements.toArray(EMPTY_ARRAY)) : null;
+                    return argEnd == last ? TupleType.wrap(name, elements.toArray(EMPTY_ARRAY)) : null;
                 }
                 argStart = argEnd + 1; // jump over terminator
             }

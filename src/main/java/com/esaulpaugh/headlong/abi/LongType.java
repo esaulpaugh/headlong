@@ -21,8 +21,8 @@ import java.nio.ByteBuffer;
 
 public final class LongType extends UnitType<Long> {
 
-    LongType(String canonicalType, int bitLength, boolean unsigned) {
-        super(canonicalType, Long.class, bitLength, unsigned);
+    LongType(String canonicalType, int bitLength, boolean unsigned, String name) {
+        super(canonicalType, Long.class, bitLength, unsigned, name);
     }
 
     @Override

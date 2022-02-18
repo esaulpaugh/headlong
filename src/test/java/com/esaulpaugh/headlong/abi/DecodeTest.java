@@ -341,7 +341,7 @@ public class DecodeTest {
             final TupleType n = TypeFactory.create("(bool)");
             m.encode(new BigInteger[] {});
 
-            TupleType.wrap(TypeFactory.create("int"), TypeFactory.create("bytes[7]"));
+            TupleType.wrap(null, TypeFactory.create("int"), TypeFactory.create("bytes[7]"));
         }
 
         assertEquals("nam", type.getName());
