@@ -79,17 +79,17 @@ public final class Address {
     }
 
     public static Address wrap(final String checksumAddress) {
-        return new Address(validatedAndDecodeAddress(checksumAddress));
+        return new Address(validateAndDecodeAddress(checksumAddress));
     }
 
     public static Address wrap(final String checksumAddress, final String label) {
         if(label != null && label.length() > MAX_LABEL_LEN) {
             throw new IllegalArgumentException("label length exceeds maximum: " + label.length() + " > " + MAX_LABEL_LEN);
         }
-        return new Address(validatedAndDecodeAddress(checksumAddress), label);
+        return new Address(validateAndDecodeAddress(checksumAddress), label);
     }
 
-    private static BigInteger validatedAndDecodeAddress(final String checksumAddress) {
+    private static BigInteger validateAndDecodeAddress(final String checksumAddress) {
         validateChecksumAddress(checksumAddress);
         byte[] bytes = new byte[1 + ADDRESS_DATA_BYTES];
         FastHex.decode(checksumAddress, PREFIX_LEN, ADDRESS_HEX_CHARS, bytes, 1);
