@@ -36,7 +36,11 @@ public final class Address {
     public static final int MAX_LABEL_LEN = 36;
 
     private final BigInteger value;
-    private final String label; // an optional String identifying or describing this Address
+
+    /**
+     * An informational String identifying or describing this Address.
+     */
+    private final String label;
 
     Address(BigInteger value) {
         this(value, null);
