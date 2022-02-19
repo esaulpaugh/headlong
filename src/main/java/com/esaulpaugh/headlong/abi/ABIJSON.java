@@ -205,7 +205,7 @@ public final class ABIJSON {
     }
 
     private static TupleType parseTupleType(JsonObject parent, String arrayName, String name) {
-        JsonArray array = getArray(parent, arrayName);
+        final JsonArray array = getArray(parent, arrayName);
         final int size;
         if (array == null || (size = array.size()) <= 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
             return TupleType.EMPTY;
