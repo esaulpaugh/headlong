@@ -190,7 +190,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
         Object[] elements = new Object[size()];
-        decodeObjects(bb, unitBuffer, TupleType.this::get, elements);
+        decodeObjects(dynamic, bb, unitBuffer, TupleType.this::get, elements);
         return new Tuple(elements);
     }
 
@@ -278,7 +278,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return len;
     }
 
-    static void decodeObjects(ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects) {
+    static void decodeObjects(boolean dynamic, ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects) {
+        if(!dynamic) {
+            for(int i = 0; i < objects.length; i++) {
+                objects[i] = getType.apply(i).decode(bb, unitBuffer);
+            }
+            return;
+        }
         final int start = bb.position(); // save this value before offsets are decoded
         final int[] offsets = new int[objects.length];
         for(int i = 0; i < objects.length; i++) {
@@ -291,12 +297,12 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
         for (int i = 0; i < objects.length; i++) {
             final int offset = offsets[i];
-            if(offset > 0) {
+            if (offset > 0) {
                 final int jump = start + offset;
                 final int pos = bb.position();
-                if(jump != pos) {
+                if (jump != pos) {
                     /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-                    if(jump < pos) {
+                    if (jump < pos) {
                         throw new IllegalArgumentException("illegal backwards jump: (" + start + "+" + offset + "=" + jump + ")<" + pos);
                     }
                     bb.position(jump); // leniently jump to specified offset

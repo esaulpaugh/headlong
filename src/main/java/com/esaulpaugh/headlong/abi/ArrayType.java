@@ -392,7 +392,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private Object decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer) {
         Object[] elements = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
-        TupleType.decodeObjects(bb, unitBuffer, i -> elementType, elements);
+        TupleType.decodeObjects(dynamic, bb, unitBuffer, i -> elementType, elements);
         return elements;
     }
 
