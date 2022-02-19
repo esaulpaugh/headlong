@@ -289,6 +289,7 @@ public class ABIJSONTest {
     public void testParseFunctionA() throws Throwable {
         final JsonObject object = JsonUtils.parseObject(FUNCTION_A_JSON);
         final Function f = Function.fromJsonObject(object);
+        assertEquals(FUNCTION_A_JSON, f.toJson(true));
         final TupleType in = f.getInputs();
         final TupleType out = f.getOutputs();
         final ABIType<?> out0 = out.get(0);
@@ -333,6 +334,7 @@ public class ABIJSONTest {
     @Test
     public void testParseFunctionB() {
         final Function f = Function.fromJson(FUNCTION_B_JSON);
+        assertEquals(FUNCTION_B_JSON, f.toJson(true));
         System.out.println(f.getName() + " : " + f.getCanonicalSignature());
         assertEquals(TupleType.EMPTY, f.getOutputs());
         assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.getCanonicalSignature());

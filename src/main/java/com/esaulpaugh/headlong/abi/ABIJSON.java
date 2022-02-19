@@ -201,6 +201,10 @@ public final class ABIJSON {
     }
 
     private static TupleType parseTupleType(JsonObject parent, String arrayName) {
+        return parseTupleType(parent, arrayName, getName(parent));
+    }
+
+    private static TupleType parseTupleType(JsonObject parent, String arrayName, String name) {
         JsonArray array = getArray(parent, arrayName);
         final int size;
         if (array == null || (size = array.size()) <= 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
@@ -210,17 +214,21 @@ public final class ABIJSON {
         for(int i = 0; i < size; i++) {
             elements[i] = parseType(array.get(i).getAsJsonObject());
         }
-        return TupleType.wrap(getName(parent), elements);
+        return TupleType.wrap(name, elements);
     }
 
     private static ABIType<?> parseType(JsonObject object) {
-        String type = getType(object);
-        TupleType baseType = null;
+        final String name = getName(object);
+        final String type = getType(object);
         if(type.startsWith(TUPLE)) {
-            baseType = parseTupleType(object, COMPONENTS);
-            type = baseType.canonicalType + type.substring(TUPLE.length());
+            if(type.length() == TUPLE.length()) {
+                return parseTupleType(object, COMPONENTS, name);
+            } else {
+                TupleType baseType = parseTupleType(object, COMPONENTS, null); // set TupleType name null because name belongs to ArrayType
+                return TypeFactory.createWithBase(baseType.canonicalType + type.substring(TUPLE.length()), name, baseType);
+            }
         }
-        return TypeFactory.createWithBase(type, getName(object), baseType);
+        return TypeFactory.create(type, name);
     }
 
     private static String getType(JsonObject obj) {
