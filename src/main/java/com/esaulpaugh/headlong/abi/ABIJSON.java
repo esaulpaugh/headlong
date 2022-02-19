@@ -189,7 +189,7 @@ public final class ABIJSON {
             return new Event(
                     getName(event),
                     getBoolean(event, ANONYMOUS, false),
-                    TupleType.wrap(types),
+                    TupleType.wrap(INPUTS, types),
                     indexed
             );
         }
@@ -210,7 +210,7 @@ public final class ABIJSON {
         for(int i = 0; i < size; i++) {
             elements[i] = parseType(array.get(i).getAsJsonObject());
         }
-        return TupleType.wrap(elements);
+        return TupleType.wrap(getName(parent), elements);
     }
 
     private static ABIType<?> parseType(JsonObject object) {
@@ -220,7 +220,7 @@ public final class ABIJSON {
             baseType = parseTupleType(object, COMPONENTS);
             type = baseType.canonicalType + type.substring(TUPLE.length());
         }
-        return TypeFactory.build(type, getName(object), baseType);
+        return TypeFactory.createWithBase(type, getName(object), baseType);
     }
 
     private static String getType(JsonObject obj) {
@@ -317,7 +317,7 @@ public final class ABIJSON {
 
         @Override
         public void write(int c) {
-            if (count + 1 > buf.length) {
+            if (count >= buf.length) {
                 buf = Arrays.copyOf(buf, buf.length << 1); // expects buf.length to be non-zero
             }
             buf[count++] = (char) c;

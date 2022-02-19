@@ -83,7 +83,7 @@ public class BasicABICasesTest {
             for (int i = 0; i < size; i++) {
                 arr[i] = TypeFactory.create(types.get(i).getAsString());
             }
-            TupleType tt = TupleType.wrap(arr);
+            TupleType tt = TupleType.wrap(null, arr);
 
             System.out.println(tt.canonicalType);
 

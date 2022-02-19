@@ -34,25 +34,25 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     private static final String EMPTY_TUPLE_STRING = "()";
 
-    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY);
+    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null);
 
     final ABIType<?>[] elementTypes;
     private final int headLength;
 
-    private TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes) {
-        super(canonicalType, Tuple.class, dynamic);
+    private TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String name) {
+        super(canonicalType, Tuple.class, dynamic, name);
         this.elementTypes = elementTypes;
         this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticTupleHeadLength(this);
     }
 
-    static TupleType wrap(ABIType<?>... elements) {
+    static TupleType wrap(String name, ABIType<?>... elements) {
         StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
         for (ABIType<?> e : elements) {
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
         }
-        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements); // TODO .intern() string?
+        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements, name); // TODO .intern() string?
     }
 
     public int size() {
@@ -190,7 +190,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
         Object[] elements = new Object[size()];
-        decodeObjects(bb, unitBuffer, TupleType.this::get, elements);
+        decodeObjects(dynamic, bb, unitBuffer, TupleType.this::get, elements);
         return new Tuple(elements);
     }
 
@@ -278,7 +278,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return len;
     }
 
-    static void decodeObjects(ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects) {
+    static void decodeObjects(boolean dynamic, ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects) {
+        if(!dynamic) {
+            for(int i = 0; i < objects.length; i++) {
+                objects[i] = getType.apply(i).decode(bb, unitBuffer);
+            }
+            return;
+        }
         final int start = bb.position(); // save this value before offsets are decoded
         final int[] offsets = new int[objects.length];
         for(int i = 0; i < objects.length; i++) {
@@ -291,12 +297,12 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
         for (int i = 0; i < objects.length; i++) {
             final int offset = offsets[i];
-            if(offset > 0) {
+            if (offset > 0) {
                 final int jump = start + offset;
                 final int pos = bb.position();
-                if(jump != pos) {
+                if (jump != pos) {
                     /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-                    if(jump < pos) {
+                    if (jump < pos) {
                         throw new IllegalArgumentException("illegal backwards jump: (" + start + "+" + offset + "=" + jump + ")<" + pos);
                     }
                     bb.position(jump); // leniently jump to specified offset
@@ -371,7 +377,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     selected.add(e);
                 }
             }
-            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected.toArray(EMPTY_ARRAY));
+            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected.toArray(EMPTY_ARRAY), null);
         }
         throw new IllegalArgumentException("manifest.length != size(): " + manifest.length + " != " + size);
     }

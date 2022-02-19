@@ -23,7 +23,7 @@ public final class ByteType extends UnitType<Byte> {
     static final ByteType SIGNED = new ByteType();
 
     private ByteType() {
-        super("int8", Byte.class, Byte.SIZE, false);
+        super("int8", Byte.class, Byte.SIZE, false, null);
     }
 
     @Override

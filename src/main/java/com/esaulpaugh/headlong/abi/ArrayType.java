@@ -49,8 +49,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private final Class<?> arrayClass;
     private final int headLength;
 
-    ArrayType(String canonicalType, Class<J> clazz, E elementType, int length, Class<?> arrayClass) {
-        super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic);
+    ArrayType(String canonicalType, Class<J> clazz, E elementType, int length, Class<?> arrayClass, String name) {
+        super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic, name);
         this.isString = STRING_CLASS == clazz;
         this.elementType = elementType;
         this.length = length;
@@ -392,7 +392,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private Object decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer) {
         Object[] elements = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
-        TupleType.decodeObjects(bb, unitBuffer, i -> elementType, elements);
+        TupleType.decodeObjects(dynamic, bb, unitBuffer, i -> elementType, elements);
         return elements;
     }
 
