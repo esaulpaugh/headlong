@@ -157,7 +157,7 @@ public final class TypeFactory {
         return init != null ? init.apply(name) : tryParseFixed(baseTypeStr, name);
     }
 
-    private static BigDecimalType tryParseFixed(final String type, String name) {
+    private static BigDecimalType tryParseFixed(final String type, final String name) {
         final int idx = type.indexOf("fixed");
         boolean unsigned = false;
         if (idx == 0 || (unsigned = (idx == 1 && type.charAt(0) == 'u'))) {
