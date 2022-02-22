@@ -46,11 +46,10 @@ public final class Keccak extends MessageDigest {
     protected Keccak(String variantPrefix, int digestSizeBits) {
         super((variantPrefix + digestSizeBits).intern());
         int rateSizeBits = rateSizeBitsFor(digestSizeBits);
-        if (rateSizeBits + digestSizeBits * 2 != MAX_STATE_SIZE)
-            throw new IllegalArgumentException("Invalid rateSizeBits + digestSizeBits * 2: " + rateSizeBits + " + " + digestSizeBits + " * 2 != " + MAX_STATE_SIZE);
-        if (rateSizeBits <= 0 || (rateSizeBits & 0x3f) != 0)
-            throw new IllegalArgumentException("Invalid rateSizeBits: " + rateSizeBits);
-
+//        if (rateSizeBits + digestSizeBits * 2 != MAX_STATE_SIZE)
+//            throw new IllegalArgumentException("Invalid rateSizeBits + digestSizeBits * 2: " + rateSizeBits + " + " + digestSizeBits + " * 2 != " + MAX_STATE_SIZE);
+//        if (rateSizeBits <= 0 || (rateSizeBits & 0x3f) != 0)
+//            throw new IllegalArgumentException("Invalid rateSizeBits: " + rateSizeBits);
         this.digestSizeBytes = digestSizeBits >>> 3;
 
         this.rateSizeBits = rateSizeBits;
