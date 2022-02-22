@@ -58,7 +58,7 @@ public final class Notation {
     }
 
     public static Notation forEncoding(byte[] rlp) {
-        return new Notation(encodeToString(rlp, 0, rlp.length));
+        return new Notation(encodeToString(rlp));
     }
 
     public static String encodeToString(byte[] rlp) {
