@@ -57,29 +57,18 @@ public final class Notation {
         return Notation.parse(value);
     }
 
-    public static Notation forEncoding(byte[] encoding) {
-        return forEncoding(encoding, 0, encoding.length);
-    }
-
-    public static Notation forEncoding(byte[] buffer, int index, int end) {
-        return new Notation(encodeToString(buffer, index, end));
+    public static Notation forEncoding(byte[] rlp) {
+        return new Notation(encodeToString(rlp, 0, rlp.length));
     }
 
     public static String encodeToString(byte[] rlp) {
         return encodeToString(rlp, 0, rlp.length);
     }
 
-    public static String encodeToString(final byte[] buffer, final int index, int end) {
-        if(index >= 0) {
-            end = Math.min(buffer.length, end);
-            if (index <= end) {
-                StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
-                buildLongList(sb, buffer, index, end, 0);
-                return sb.append(END_NOTATION).toString();
-            }
-            throw new IllegalArgumentException("index > end: " + index + " > " + end);
-        }
-        throw new ArrayIndexOutOfBoundsException(index);
+    static String encodeToString(final byte[] buffer, final int index, int end) {
+        StringBuilder sb = new StringBuilder(BEGIN_NOTATION);
+        buildLongList(sb, buffer, index, end, 0);
+        return sb.append(END_NOTATION).toString();
     }
 
     public static Notation forObjects(Object... objects) {

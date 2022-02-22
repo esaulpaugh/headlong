@@ -13,16 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.rlp.util;
+package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.Notation;
-import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -61,9 +58,8 @@ public class NotationTest {
     public void test() {
 
         String notation = Notation.encodeToString(ENCODING); // Arrays.copyOfRange(rlp, 10, rlp.length)
-        assertEquals(notation, Notation.encodeToString(ENCODING, 0, ENCODING.length));
+        assertEquals(notation, Notation.encodeToString(ENCODING));
         assertEquals(notation, Notation.forEncoding(ENCODING).toString());
-        assertEquals(notation, Notation.forEncoding(ENCODING, 0, ENCODING.length).toString());
 
         System.out.println(notation);
 
@@ -84,12 +80,5 @@ public class NotationTest {
     @Test
     public void testLongListEndingInShortList() {
         assertEquals(NOTATION_2, Notation.forEncoding(LONG_LIST_ENDING_IN_SHORT_LIST).toString());
-    }
-
-    @Test
-    public void testBadOffset() throws Throwable {
-        assertEquals("(\n)", Notation.encodeToString(Strings.EMPTY_BYTE_ARRAY, 0, 1));
-        assertThrown(ArrayIndexOutOfBoundsException.class, () -> Notation.encodeToString(Strings.EMPTY_BYTE_ARRAY, -4, 1));
-        assertThrown(IllegalArgumentException.class, "index > end: 1 > 0", () -> Notation.encodeToString(Strings.EMPTY_BYTE_ARRAY, 1, 20));
     }
 }
