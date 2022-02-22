@@ -408,4 +408,16 @@ public class TupleTest {
         TupleType inner = outer.get(0);
         assertEquals(TupleType.parse("(address,int)"), inner);
     }
+
+    @Test
+    public void testTupleLengthMismatch() throws Throwable {
+        TupleType tt = TupleType.parse("(bool)");
+        assertThrown(IllegalArgumentException.class, "tuple length mismatch: actual != expected: 0 != 1", () -> tt.validate(Tuple.EMPTY));
+        assertThrown(IllegalArgumentException.class, "tuple length mismatch: actual != expected: 2 != 1", () -> tt.validate(Tuple.of(null, null)));
+    }
+
+    @Test
+    public void testParseBadFixed() throws Throwable {
+        assertThrown(IllegalArgumentException.class, "unrecognized type: \"fixed45\"", () -> TypeFactory.create("fixed45"));
+    }
 }
