@@ -424,4 +424,9 @@ public class EIP778Test {
 
         assertEquals(RECORD_HEX, Strings.encode(bb));
     }
+
+    @Test
+    public void testMissingPrefix() throws Throwable {
+        assertThrown(IllegalArgumentException.class, "prefix \"enr:\" not found", () -> Record.parse("abcd", VERIFIER));
+    }
 }

@@ -168,6 +168,13 @@ public class StringsTest {
         assertEquals("ffab1ccdff", Hex.toHexString(buffer));
     }
 
+    @Test
+    public void testFastHexDecode() {
+        byte[] hexBytes = new byte[] { '9', 'a', 'f', '0', '1', 'E' };
+        byte[] data = FastHex.decode(hexBytes, 1, hexBytes.length - 2);
+        assertArrayEquals(new byte[] { -81, 1 }, data);
+    }
+
     @Disabled("slow")
     @Test
     public void testHexDecode() {
