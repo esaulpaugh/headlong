@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.rlp.util.Notation;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonElement;
 import org.junit.jupiter.api.Test;

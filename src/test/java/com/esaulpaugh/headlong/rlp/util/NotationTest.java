@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.rlp.util;
 
+import com.esaulpaugh.headlong.rlp.Notation;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;

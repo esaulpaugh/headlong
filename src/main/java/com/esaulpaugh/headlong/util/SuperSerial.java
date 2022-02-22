@@ -27,7 +27,7 @@ import com.esaulpaugh.headlong.abi.UnitType;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
-import com.esaulpaugh.headlong.rlp.util.Notation;
+import com.esaulpaugh.headlong.rlp.Notation;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;

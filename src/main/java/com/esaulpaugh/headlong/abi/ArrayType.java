@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.rlp.Notation;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.util.SuperSerial;
@@ -397,11 +398,11 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     /**
-     * Parses RLP Object {@link com.esaulpaugh.headlong.rlp.util.Notation} as a {@link J}.
+     * Parses RLP Object {@link Notation} as a {@link J}.
      *
      * @param s the array's RLP object notation
      * @return  the parsed array
-     * @see com.esaulpaugh.headlong.rlp.util.Notation
+     * @see Notation
      */
     @Override
     @SuppressWarnings("unchecked")

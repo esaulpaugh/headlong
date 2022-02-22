@@ -13,10 +13,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.rlp.util;
+package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.rlp.DataType;
-import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
