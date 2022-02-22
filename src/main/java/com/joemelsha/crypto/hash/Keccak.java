@@ -40,11 +40,7 @@ public final class Keccak extends MessageDigest {
     private transient ByteBuffer out;
 
     public Keccak(int digestSizeBits) {
-        this("Keccak-", digestSizeBits);
-    }
-
-    protected Keccak(String variantPrefix, int digestSizeBits) {
-        super((variantPrefix + digestSizeBits).intern());
+        super(getAlgName(digestSizeBits));
         int rateSizeBits = rateSizeBitsFor(digestSizeBits);
 //        if (rateSizeBits + digestSizeBits * 2 != MAX_STATE_SIZE)
 //            throw new IllegalArgumentException("Invalid rateSizeBits + digestSizeBits * 2: " + rateSizeBits + " + " + digestSizeBits + " * 2 != " + MAX_STATE_SIZE);
@@ -56,7 +52,19 @@ public final class Keccak extends MessageDigest {
         this.rateSizeWords = rateSizeBits >>> 6;
     }
 
-    protected int rateSizeBitsFor(int digestSizeBits) {
+    private static String getAlgName(int digestSizeBits) {
+        switch (digestSizeBits) {
+        case 128: return "Keccak-128";
+        case 224: return "Keccak-224";
+        case 256: return "Keccak-256";
+        case 288: return "Keccak-288";
+        case 384: return "Keccak-384";
+        case 512: return "Keccak-512";
+        default: throw new AssertionError();
+        }
+    }
+
+    private int rateSizeBitsFor(int digestSizeBits) {
         switch (digestSizeBits) {
         case 128: return 1344;
         case 224: return 1152;
@@ -264,7 +272,7 @@ public final class Keccak extends MessageDigest {
         }
     }
 
-    protected void pad() {
+    private void pad() {
         updateBits(0x1L, 1); // Keccak padding: 1
 //        updateBits(0x6L, 3); // SHA-3 padding:011 (little-endian) = 0x6
         if (rateBits >= rateSizeBits) {
