@@ -227,10 +227,20 @@ public final class Function implements ABIObject {
      * @return  the decoded arguments
      */
     public Tuple decodeCall(ByteBuffer abiBuffer) {
+        return inputTypes.decode(abiBuffer, checkSelector(abiBuffer));
+    }
+
+    public <T> T decodeCall(byte[] call, int... indices) {
+        ByteBuffer bb = ByteBuffer.wrap(call);
+        checkSelector(bb);
+        return inputTypes.decode(bb, indices);
+    }
+
+    private byte[] checkSelector(ByteBuffer bb) {
         final byte[] unitBuffer = ABIType.newUnitBuffer();
-        abiBuffer.get(unitBuffer, 0, SELECTOR_LEN);
+        bb.get(unitBuffer, 0, SELECTOR_LEN);
         checkSelector(unitBuffer);
-        return inputTypes.decode(abiBuffer, unitBuffer); // unitBuffer contents are ignored, overwritten during decode
+        return unitBuffer; // unitBuffer contents are ignored, overwritten during decode
     }
 
     private void checkSelector(byte[] buffer) {
