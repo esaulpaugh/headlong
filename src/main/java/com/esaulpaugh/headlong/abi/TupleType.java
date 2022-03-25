@@ -304,7 +304,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 if (jump != pos) {
                     /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
                     if (jump < pos) {
-                        throw new IllegalArgumentException("illegal backwards jump: (" + start + "+" + offset + "=" + jump + ")<" + pos);
+                        boolean shared = false;
+                        for (int j = 0; j < i; j++) {
+                            if (offsets[j] == offset) {
+                                shared = true;
+                                break;
+                            }
+                        }
+                        if(!shared) {
+                            throw new IllegalArgumentException("illegal backwards jump: (" + start + "+" + offset + "=" + jump + ")<" + pos);
+                        }
                     }
                     bb.position(jump); // leniently jump to specified offset
                 }
