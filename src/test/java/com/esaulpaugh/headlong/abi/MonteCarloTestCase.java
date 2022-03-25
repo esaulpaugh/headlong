@@ -166,7 +166,7 @@ public class MonteCarloTestCase {
         instance.setSeed(seed + 512);
         ByteBuffer encoded = runStandard();
         runDecodeIndex((ByteBuffer) encoded.position(Function.SELECTOR_LEN), instance);
-        runFuzzDecode(encoded.array(), instance);
+//        runFuzzDecode(encoded.array(), instance);
         runSuperSerial();
         runPacked();
         runFuzzPackedDecode(instance);
