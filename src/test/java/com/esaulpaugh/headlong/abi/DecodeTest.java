@@ -376,15 +376,28 @@ public class DecodeTest {
 
     @Test
     public void testDecodeCallIndices() throws Throwable {
-        Function f = new Function("()", "(int8,bool,int8[],bool)");
+        Function f = new Function("(int8,bool,int8[],bool)");
+        Tuple args = Tuple.of(1, true, new int[] { 3, 6 } , false);
+        byte[] encoded = f.encodeCall(args).array();
+        testIndicesDecode(f.decodeCall(encoded, 1, 3));
+        encoded[0]++;
+        assertThrown(IllegalArgumentException.class, "given selector does not match: expected: 804f47e7, found: 814f47e7", () -> f.decodeCall(encoded, 1, 3));
+    }
 
-        byte[] arr = f.getOutputs().encode(Tuple.of(1, true, new int[] { 3, 6 } , false)).array();
-        Tuple t = f.decodeReturn(arr, 1, 3);
-        assertThrown(NoSuchElementException.class, "not present because index was not specified for decoding: 0", () -> t.get(0));
-        boolean one = t.get(1);
+    @Test
+    public void testDecodeReturnIndices() throws Throwable {
+        Function f = new Function("()", "(int8,bool,int8[],bool)");
+        Tuple args = Tuple.of(1, true, new int[] { 3, 6 } , false);
+        byte[] encoded = f.getOutputs().encode(args).array();
+        testIndicesDecode(f.decodeReturn(encoded, 1, 3));
+    }
+
+    private static void testIndicesDecode(Tuple decoded) throws Throwable {
+        assertThrown(NoSuchElementException.class, "not present because index was not specified for decoding: 0", () -> decoded.get(0));
+        boolean one = decoded.get(1);
         assertTrue(one);
-        assertThrown(NoSuchElementException.class, "not present because index was not specified for decoding: 2", () -> t.get(2));
-        boolean three = t.get(3);
+        assertThrown(NoSuchElementException.class, "not present because index was not specified for decoding: 2", () -> decoded.get(2));
+        boolean three = decoded.get(3);
         assertFalse(three);
     }
 
