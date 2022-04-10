@@ -82,28 +82,28 @@
             </artifact>
         </component>
 
-        <component group="org.openjdk.jmh" name="jmh-core" version="1.34">
-            <artifact name="jmh-core-1.34.jar">
-                <sha256 value="904384762d2ffeca8005aa9b432a7891a0e60c888bfd36f61dfcfa97c3a1d1b3" origin="repo.maven.apache.org/maven2/"/>
+        <component group="org.openjdk.jmh" name="jmh-core" version="1.35">
+            <artifact name="jmh-core-1.35.jar">
+                <sha256 value="d4177ad2d5265ef86f134beea4a89484bcd92e6792339693bafcd64841e73111" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="jmh-core-1.34.pom">
-                <sha256 value="7e98fca63afd63414749659deef53ac0eb683f371e0ef68c6165aec09006b81b" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="jmh-core-1.35.pom">
+                <sha256 value="cbf68737362b26dd929adfe9c042fe7d1e1beeff35fa1827bb75e6e9ef10dea8" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="jmh-core-1.34-sources.jar">
-                <sha256 value="2b194951872f7b501f31fbf4805c4ea89b358d4889bd3b5d8a11100da4bb1939" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-        </component>
-        <component group="org.openjdk.jmh" name="jmh-parent" version="1.34">
-            <artifact name="jmh-parent-1.34.pom">
-                <sha256 value="22f51244a06286746774c7fcbea013b0ccef8e2be782edecdc824cec9aeebfa0" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="jmh-core-1.35-sources.jar">
+                <sha256 value="3f37af1cd29e920939697ae86904e7a7a2f82f35fc7c2aa2c2aa00f72f7610d2" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
-        <component group="org.openjdk.jmh" name="jmh-generator-annprocess" version="1.34">
-            <artifact name="jmh-generator-annprocess-1.34.jar">
-                <sha256 value="aa0feeefc0da59427b14c50139cba6deba211750e0033fdc39a5b3b8008b2900" origin="repo.maven.apache.org/maven2/"/>
+        <component group="org.openjdk.jmh" name="jmh-parent" version="1.35">
+            <artifact name="jmh-parent-1.35.pom">
+                <sha256 value="dedbeedd73a5a705e80cd52ee19a1f03d3a25a4530d2b1b4a1b1cbbd9cdf8434" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="jmh-generator-annprocess-1.34.pom">
-                <sha256 value="38ffffdcdc69cf30a8b1aa9d90f5bce743aecaa81e6c4e7d7efdd57bc28e4812" origin="repo.maven.apache.org/maven2/"/>
+        </component>
+        <component group="org.openjdk.jmh" name="jmh-generator-annprocess" version="1.35">
+            <artifact name="jmh-generator-annprocess-1.35.jar">
+                <sha256 value="dae09db1ff8cd7e31155350be07647353dcbebbb25c9e2f1c523dadc91b1fb28" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="jmh-generator-annprocess-1.35.pom">
+                <sha256 value="03ac68a087fb931b396618f3b714bb9274162a1be874ef70beda5023d8c139d5" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
 
