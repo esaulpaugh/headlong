@@ -35,7 +35,7 @@ public final class TypeFactory {
 
     static final int ADDRESS_BIT_LEN = 160;
 
-    private static final int DECIMAL_BIT_LEN = 128;
+    private static final int DECIMAL_BIT_LEN = 168;
     private static final int DECIMAL_SCALE = 10;
 
     private static final int FIXED_BIT_LEN = 128;
@@ -67,7 +67,7 @@ public final class TypeFactory {
 
         lambdaMap.put("fixed128x18", name -> new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false, name));
         lambdaMap.put("ufixed128x18", name -> new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true, name));
-        lambdaMap.put("decimal", name -> new BigDecimalType("decimal", DECIMAL_BIT_LEN, DECIMAL_SCALE, false, name));
+        lambdaMap.put("decimal", name -> new BigDecimalType("fixed168x10", DECIMAL_BIT_LEN, DECIMAL_SCALE, false, name));
 
         lambdaMap.put("int", lambdaMap.get("int256"));
         lambdaMap.put("uint", lambdaMap.get("uint256"));

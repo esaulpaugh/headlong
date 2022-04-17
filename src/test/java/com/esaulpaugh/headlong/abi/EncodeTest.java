@@ -609,13 +609,14 @@ public class EncodeTest {
     @Test
     public void testDecimalMinMax() throws Throwable {
         BigDecimalType decimal = TypeFactory.create("decimal");
-        BigDecimal decimalMin = new BigDecimal(new BigInteger("-170141183460469231731687303715884105728"), 10);
-        BigDecimal decimalMax = new BigDecimal(new BigInteger("170141183460469231731687303715884105727"), 10);
 
-        assertThrown(ILLEGAL, "signed val exceeds bit limit: 128 >= 128", () -> decimal.validate(decimalMin.subtract(O_1)));
+        BigDecimal decimalMin = new BigDecimal("-18707220957835557353007165858768422651595.9365500928");
+        BigDecimal decimalMax = new BigDecimal("18707220957835557353007165858768422651595.9365500927");
+
+        assertThrown(ILLEGAL, "signed val exceeds bit limit: 168 >= 168", () -> decimal.validate(decimalMin.subtract(O_1)));
         decimal.validate(decimalMin);
         decimal.validate(decimalMax);
-        assertThrown(ILLEGAL, "signed val exceeds bit limit: 128 >= 128", () -> decimal.validate(decimalMax.add(O_1)));
+        assertThrown(ILLEGAL, "signed val exceeds bit limit: 168 >= 168", () -> decimal.validate(decimalMax.add(O_1)));
 
         BigDecimalType ufixed = TypeFactory.create("ufixed");
         BigDecimal u128Max = new BigDecimal(new BigInteger("340282366920938463463374607431768211455"), 18);

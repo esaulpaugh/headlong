@@ -398,7 +398,7 @@ public class TupleTest {
         ArrayType<ByteType, byte[]> at = tt.get(0);
         assertEquals(8, at.getLength());
         BigDecimalType decimal = tt.get(1);
-        assertEquals("decimal", decimal.getCanonicalType());
+        assertEquals("fixed168x10", decimal.getCanonicalType());
 
         Tuple t = Tuple.of("iii");
         String iii = t.get(0);

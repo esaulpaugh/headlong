@@ -52,11 +52,11 @@ public class ABIJSONTest {
             "      \"components\": [\n" +
             "        {\n" +
             "          \"name\": \"real\",\n" +
-            "          \"type\": \"decimal\"\n" +
+            "          \"type\": \"fixed168x10\"\n" +
             "        },\n" +
             "        {\n" +
             "          \"name\": \"imaginary\",\n" +
-            "          \"type\": \"decimal\"\n" +
+            "          \"type\": \"fixed168x10\"\n" +
             "        }\n" +
             "      ]\n" +
             "    }\n" +
@@ -80,7 +80,7 @@ public class ABIJSONTest {
             "      \"components\": [\n" +
             "        {\n" +
             "          \"name\": \"aa_d\",\n" +
-            "          \"type\": \"decimal\"\n" +
+            "          \"type\": \"fixed168x10\"\n" +
             "        },\n" +
             "        {\n" +
             "          \"name\": \"aa_f\",\n" +
@@ -151,7 +151,7 @@ public class ABIJSONTest {
             "        \"components\": [\n" +
             "          {\n" +
             "            \"name\": \"aa_d\",\n" +
-            "            \"type\": \"decimal\"\n" +
+            "            \"type\": \"fixed168x10\"\n" +
             "          },\n" +
             "          {\n" +
             "            \"name\": \"aa_f\",\n" +
@@ -308,7 +308,7 @@ public class ABIJSONTest {
         assertEquals(1, in.elementTypes.length);
         assertEquals(1, out.elementTypes.length);
 
-        assertEquals("foo((decimal,decimal)[][])", f.getCanonicalSignature());
+        assertEquals("foo((fixed168x10,fixed168x10)[][])", f.getCanonicalSignature());
         assertEquals("uint64", out0.getCanonicalType());
 
         assertFalse(out0.isDynamic());
@@ -338,7 +338,7 @@ public class ABIJSONTest {
         assertEquals(FUNCTION_B_JSON, f.toJson(true));
         System.out.println(f.getName() + " : " + f.getCanonicalSignature());
         assertEquals(TupleType.EMPTY, f.getOutputs());
-        assertEquals("func((decimal,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.getCanonicalSignature());
+        assertEquals("func((fixed168x10,fixed128x18),fixed128x18[],(uint256,int256[],(int8,uint40)[]))", f.getCanonicalSignature());
         assertEquals("view", f.getStateMutability());
 
         printTupleType(f.getInputs());
