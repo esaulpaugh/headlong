@@ -609,6 +609,8 @@ public class EncodeTest {
     @Test
     public void testDecimalMinMax() throws Throwable {
         BigDecimalType decimal = TypeFactory.create("decimal");
+        BigDecimalType fixed168x10 = TypeFactory.create("fixed168x10");
+        assertEquals(decimal, fixed168x10);
 
         BigDecimal decimalMin = new BigDecimal("-18707220957835557353007165858768422651595.9365500928");
         BigDecimal decimalMax = new BigDecimal("18707220957835557353007165858768422651595.9365500927");
