@@ -603,46 +603,45 @@ public class EncodeTest {
     }
 
     private static final double DELTA = 0.000000000000000001d;
-    private static final BigDecimal O_1 = new BigDecimal("0.1");
+    private static final BigDecimal O_0000000001 = new BigDecimal("0.0000000001");
     private static final BigDecimal O_000000000000000001 = new BigDecimal("0.000000000000000001");
 
     @Test
     public void testDecimalMinMax() throws Throwable {
-        BigDecimalType decimal = TypeFactory.create("decimal");
-        BigDecimalType fixed168x10 = TypeFactory.create("fixed168x10");
-        assertEquals(decimal, fixed168x10);
+        final BigDecimalType decimal = TypeFactory.create("decimal");
+        assertEquals(decimal, TypeFactory.create("fixed168x10"));
 
-        BigDecimal decimalMin = new BigDecimal("-18707220957835557353007165858768422651595.9365500928");
-        BigDecimal decimalMax = new BigDecimal("18707220957835557353007165858768422651595.9365500927");
+        final BigDecimal decimalMin = new BigDecimal("-18707220957835557353007165858768422651595.9365500928");
+        final BigDecimal decimalMax = new BigDecimal("18707220957835557353007165858768422651595.9365500927");
 
-        assertThrown(ILLEGAL, "signed val exceeds bit limit: 168 >= 168", () -> decimal.validate(decimalMin.subtract(O_1)));
+        assertThrown(ILLEGAL, "signed val exceeds bit limit: 168 >= 168", () -> decimal.validate(decimalMin.subtract(O_0000000001)));
         decimal.validate(decimalMin);
         decimal.validate(decimalMax);
-        assertThrown(ILLEGAL, "signed val exceeds bit limit: 168 >= 168", () -> decimal.validate(decimalMax.add(O_1)));
+        assertThrown(ILLEGAL, "signed val exceeds bit limit: 168 >= 168", () -> decimal.validate(decimalMax.add(O_0000000001)));
+    }
 
-        BigDecimalType ufixed = TypeFactory.create("ufixed");
-        BigDecimal u128Max = new BigDecimal(new BigInteger("340282366920938463463374607431768211455"), 18);
+    @Test
+    public void testFixedUFixedMinMax() throws Throwable {
+        final BigDecimalType fixed = TypeFactory.create("fixed");
+        assertEquals(((UnitType<?>) TypeFactory.create("int128")).maxValue(), fixed.maxValue());
+        assertEquals(((UnitType<?>) TypeFactory.create("int128")).minValue(), fixed.minValue());
 
-        System.out.println(ufixed.minDecimal() + " " + ufixed.maxDecimal());
+        final BigDecimalType ufixed = TypeFactory.create("ufixed");
+        final BigDecimal u128Max = new BigDecimal(new BigInteger("340282366920938463463374607431768211455"), 18);
 
         assertEquals(0.0d, ufixed.minDecimal().doubleValue(), DELTA);
         assertEquals(u128Max.doubleValue(), ufixed.maxDecimal().doubleValue(), DELTA);
 
         ufixed.validate(new BigDecimal(BigInteger.ZERO, 18));
-        assertThrown(ILLEGAL, "BigDecimal scale mismatch: actual != expected: 1 != 18", () -> ufixed.validate(O_1.negate()));
+        assertThrown(ILLEGAL, "BigDecimal scale mismatch: actual != expected: 10 != 18", () -> ufixed.validate(O_0000000001.negate()));
         ufixed.validate(O_000000000000000001);
         assertThrown(ILLEGAL, "signed value given for unsigned type", () -> ufixed.validate(O_000000000000000001.negate()));
 
         ufixed.validate(u128Max);
         assertThrown(ILLEGAL, "unsigned val exceeds bit limit: 129 > 128", () -> ufixed.validate(u128Max.add(BigDecimal.ONE)));
-        assertThrown(ILLEGAL, "unsigned val exceeds bit limit: 129 > 128", () -> ufixed.validate(u128Max.add(O_1)));
-
-        BigDecimalType fixed = TypeFactory.create("fixed");
+        assertThrown(ILLEGAL, "unsigned val exceeds bit limit: 129 > 128", () -> ufixed.validate(u128Max.add(O_0000000001)));
 
         assertEquals(((UnitType<?>) TypeFactory.create("uint128")).maxValue(), ufixed.maxValue());
         assertEquals(((UnitType<?>) TypeFactory.create("uint128")).minValue(), ufixed.minValue());
-
-        assertEquals(((UnitType<?>) TypeFactory.create("int128")).maxValue(), fixed.maxValue());
-        assertEquals(((UnitType<?>) TypeFactory.create("int128")).minValue(), fixed.minValue());
     }
 }
