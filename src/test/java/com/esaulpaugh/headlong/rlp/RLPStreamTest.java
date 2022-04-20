@@ -201,9 +201,8 @@ public class RLPStreamTest {
         @Override
         public void run() {
             Thread senderThread = new Thread(senderTask);
-            try (Stream<RLPItem> stream = RLP_STRICT.stream(new PipedInputStream(pos, 512))) {
-
-                Iterator<RLPItem> iter = stream.iterator();
+            try {
+                Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(new PipedInputStream(pos, 512));
 
                 senderThread.setPriority(Thread.MAX_PRIORITY);
                 Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
@@ -359,8 +358,8 @@ public class RLPStreamTest {
     }
 
     private static String timestamp(long startTime) {
-        double elapsed = (System.nanoTime() - startTime) / 1000000.0;
-        String tString = String.valueOf(elapsed);
+        double elapsedMillis = (System.nanoTime() - startTime) / 1000000.0;
+        String tString = String.valueOf(elapsedMillis);
         StringBuilder sb = new StringBuilder("t=");
         sb.append(tString);
         int n = 10 - tString.length();
