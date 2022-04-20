@@ -190,11 +190,11 @@ public class RLPStreamTest {
 
     private static class ReceiveStreamTask implements Runnable {
 
-        private final long zero = System.nanoTime();
+        private final long startTime = System.nanoTime();
         private final PipedOutputStream pos = new PipedOutputStream();
         private final CyclicBarrier receiveBarrier = new CyclicBarrier(2);
         private final CyclicBarrier sendBarrier = new CyclicBarrier(2);
-        private final SendStreamTask senderTask = new SendStreamTask(zero, pos, receiveBarrier, sendBarrier);
+        private final SendStreamTask senderTask = new SendStreamTask(startTime, pos, receiveBarrier, sendBarrier);
 
         Throwable throwable;
 
@@ -253,26 +253,26 @@ public class RLPStreamTest {
 
         private void assertNoNext(Iterator<RLPItem> iter) throws RuntimeException {
             try {
-                RLPStreamTest.assertNoNext(zero, iter);
+                RLPStreamTest.assertNoNext(startTime, iter);
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
         }
 
         private void assertHasNext(Iterator<RLPItem> iter) {
-            RLPStreamTest.assertHasNext(zero, iter);
+            RLPStreamTest.assertHasNext(startTime, iter);
         }
     }
 
     private static class SendStreamTask implements Runnable {
 
-        private final long zero;
+        private final long startTime;
         private final OutputStream os;
         private final CyclicBarrier receiveBarrier;
         private final CyclicBarrier sendBarrier;
 
-        SendStreamTask(long zero, OutputStream os, CyclicBarrier receiveBarrier, CyclicBarrier sendBarrier) {
-            this.zero = zero;
+        SendStreamTask(long startTime, OutputStream os, CyclicBarrier receiveBarrier, CyclicBarrier sendBarrier) {
+            this.startTime = startTime;
             this.os = os;
             this.sendBarrier = sendBarrier;
             this.receiveBarrier = receiveBarrier;
@@ -314,7 +314,7 @@ public class RLPStreamTest {
         private void write(byte b) throws RuntimeException {
             try {
                 os.write(b);
-                logWrite(zero, "'" + (char) b + "' (0x" + Strings.encode(b) +")");
+                logWrite(startTime, "'" + (char) b + "' (0x" + Strings.encode(b) +")");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -350,17 +350,17 @@ public class RLPStreamTest {
         logReceipt(zero, false);
     }
 
-    private static void logWrite(long zero, String message) {
-        System.out.println(timestamp(zero) + "\u0009write " + message);
+    private static void logWrite(long startTime, String message) {
+        System.out.println(timestamp(startTime) + "\u0009write " + message);
     }
 
-    private static void logReceipt(long zero, boolean hasNext) {
-        System.out.println(timestamp(zero) + '\u0009' + (hasNext ? "hasNext" : "no next"));
+    private static void logReceipt(long startTime, boolean hasNext) {
+        System.out.println(timestamp(startTime) + '\u0009' + (hasNext ? "hasNext" : "no next"));
     }
 
-    private static String timestamp(long zero) {
-        double t = (System.nanoTime() - zero) / 1000000.0;
-        String tString = String.valueOf(t);
+    private static String timestamp(long startTime) {
+        double elapsed = (System.nanoTime() - startTime) / 1000000.0;
+        String tString = String.valueOf(elapsed);
         StringBuilder sb = new StringBuilder("t=");
         sb.append(tString);
         int n = 10 - tString.length();
