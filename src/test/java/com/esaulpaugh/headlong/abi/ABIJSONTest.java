@@ -216,7 +216,6 @@ public class ABIJSONTest {
             "  },\n" +
             "  {\n" +
             "    \"type\": \"receive\",\n" +
-            "    \"name\": \"receive\",\n" +
             "    \"stateMutability\": \"payable\",\n" +
             "    \"constant\": false\n" +
             "  }\n" +
