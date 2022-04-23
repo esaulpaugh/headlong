@@ -137,7 +137,6 @@ public final class Address {
                 addressBytes[i] = (byte) getLowercaseHex(address, i);
             }
             return doChecksum(addressBytes);
-
         }
         if(address.length() >= PREFIX_LEN) {
             checkPrefix(address);
