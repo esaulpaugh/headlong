@@ -41,7 +41,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 
 def junitVersion = '5.8.2'
 def jmhVersion = '1.35'
-def bcVersion = '1.70'
+def bcVersion = '1.71'
 
 static def todayUTC() {
     SimpleDateFormat sdf = new SimpleDateFormat("MMMMM d yyyy")
@@ -93,12 +93,12 @@ dependencies {
     test.useJUnitPlatform()
     testImplementation 'org.junit.jupiter:junit-jupiter-api:' + junitVersion
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:' + junitVersion
-    testImplementation 'org.bouncycastle:bcprov-jdk15on:' + bcVersion
+    testImplementation 'org.bouncycastle:bcprov-jdk15to18:' + bcVersion
 
     jmhImplementation 'commons-codec:commons-codec:1.15'
     jmhImplementation 'org.openjdk.jmh:jmh-core:' + jmhVersion
     jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:' + jmhVersion
-    jmhImplementation 'org.bouncycastle:bcprov-jdk15on:' + bcVersion
+    jmhImplementation 'org.bouncycastle:bcprov-jdk15to18:' + bcVersion
 }
 
 task jmh(type: JavaExec, dependsOn: jmhClasses) { // run benchmarks with `gradle jmh`
