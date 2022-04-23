@@ -58,6 +58,6 @@ public enum TypeEnum {
     }
 
     static IllegalArgumentException unexpectedType(String t) {
-        return new IllegalArgumentException("unexpected type: " + (t == null ? null : "\"" + t + "\""));
+        return new IllegalArgumentException("unexpected type: " + (t == null ? null : "\"" + t + '"'));
     }
 }
