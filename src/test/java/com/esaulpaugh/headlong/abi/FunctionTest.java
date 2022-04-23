@@ -71,11 +71,12 @@ public class FunctionTest {
         assertNull(f.getName());
         assertEquals("Keccak-256", f.getHashAlgorithm());
 
+        TestUtils.assertThrown(err, "unexpected name on receive function: \"receive_ether\"", () -> new Function(TypeEnum.RECEIVE, "receive_ether", inputs, outputs, null, md));
         TestUtils.assertThrown(err, "type is \"receive\"; functions of this type must define stateMutability as \"payable\"", () -> new Function(TypeEnum.RECEIVE, "receive", inputs, outputs, null, md));
         TestUtils.assertThrown(err, "type is \"receive\"; functions of this type must define no inputs", () -> new Function(TypeEnum.RECEIVE, "receive", inputs, outputs, "payable", md));
         TestUtils.assertThrown(err, "type is \"receive\"; functions of this type must define no outputs", () -> new Function(TypeEnum.RECEIVE, "receive", TupleType.EMPTY, outputs, "payable", md));
-        f = new Function(TypeEnum.RECEIVE, "receive", TupleType.EMPTY, TupleType.EMPTY, "payable", new WrappedKeccak(256));
-        assertEquals("receive", f.getName());
+        f = new Function(TypeEnum.RECEIVE, null, TupleType.EMPTY, TupleType.EMPTY, "payable", new WrappedKeccak(256));
+        assertNull(f.getName());
         assertEquals("payable", f.getStateMutability());
         assertEquals("Keccak-256", f.getHashAlgorithm());
 
