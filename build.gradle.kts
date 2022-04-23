@@ -10,7 +10,7 @@
 //}
 //
 //group = "com.esaulpaugh"
-//version = "6.0.3-SNAPSHOT"
+//version = "6.2.1-SNAPSHOT"
 //
 //project.ext.set("archivesBaseName", "headlong")
 //
@@ -80,14 +80,14 @@
 //}
 //
 //val junitVersion = "5.8.2"
-//val bcVersion = "1.70"
+//val bcVersion = "1.71"
 //
 //dependencies {
-//    implementation("com.google.code.gson:gson:2.8.9")
+//    implementation("com.google.code.gson:gson:2.9.0")
 //
 //    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
 //    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
-//    testImplementation("org.bouncycastle:bcprov-jdk15on:$bcVersion")
+//    testImplementation("org.bouncycastle:bcprov-jdk15to18:$bcVersion")
 //
 //    jmhImplementation("commons-codec:commons-codec:1.15")
 //}
