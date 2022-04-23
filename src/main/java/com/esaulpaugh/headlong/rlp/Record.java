@@ -32,7 +32,7 @@ import java.util.function.BiConsumer;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
 
-/** Implementation of EIP-778: Ethereum Node Records (ENR), https://eips.ethereum.org/EIPS/eip-778 */
+/** Implementation of <a href="https://eips.ethereum.org/EIPS/eip-778">EIP-778: Ethereum Node Records (ENR)</a> */
 public final class Record {
 
     private static final long MAX_RECORD_LEN = 300;
