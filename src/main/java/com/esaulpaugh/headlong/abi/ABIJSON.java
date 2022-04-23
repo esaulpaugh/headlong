@@ -241,7 +241,7 @@ public final class ABIJSON {
 // ---------------------------------------------------------------------------------------------------------------------
     static String toJson(ABIObject o, boolean pretty) {
         try {
-            Writer stringOut = new NonSyncWriter();
+            Writer stringOut = new NonSyncWriter(); // can also use StringWriter or CharArrayWriter, but this is faster
             JsonWriter out = new JsonWriter(stringOut);
             if (pretty) {
                 out.setIndent("  ");
