@@ -144,7 +144,7 @@ public final class Event implements ABIObject {
      * Decodes Event arguments.
      *
      * @param topics indexed parameters to decode. If the event is anonymous, the first element is a Keccak hash of the
-     *               canonical signature of the event (see https://docs.soliditylang.org/en/v0.8.11/abi-spec.html#events)
+     *               canonical signature of the event (see <a href="https://docs.soliditylang.org/en/v0.8.11/abi-spec.html#events">https://docs.soliditylang.org/en/v0.8.11/abi-spec.html#events</a>)
      * @param data non-indexed parameters to decode
      * @return  the decoded arguments
      */
