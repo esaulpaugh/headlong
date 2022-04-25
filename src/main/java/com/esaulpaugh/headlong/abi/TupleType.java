@@ -257,13 +257,15 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 bb.position(start + UINT31.decode(bb, unitBuffer));
             }
             results[index] = resultType.decode(bb, unitBuffer);
+            if (n >= indices.length) {
+                while (r < elementTypes.length) {
+                    results[r++] = Tuple.ABSENT;
+                }
+                return new Tuple(results);
+            }
             skipBytes += resultType.headLength();
             prevIndex = index;
-        } while (n < indices.length);
-        for (; r < elementTypes.length; r++) {
-            results[r] = Tuple.ABSENT;
-        }
-        return new Tuple(results);
+        } while (true);
     }
 
     static int staticTupleHeadLength(TupleType tt) {
