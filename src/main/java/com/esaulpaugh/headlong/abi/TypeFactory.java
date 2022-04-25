@@ -191,11 +191,11 @@ public final class TypeFactory {
             char terminator = ')'; // inital value important for empty params case
             final int last = rawTypeStr.length() - 1; // must be >= 0
             while (argStart <= last) {
-                char c = rawTypeStr.charAt(argStart);
-                if(c == ',' || (c == ')' && terminator == ',')) {
+                final char first = rawTypeStr.charAt(argStart);
+                if(first == ',' || (first == ')' && terminator == ',')) {
                     throw new IllegalArgumentException("empty parameter");
-                } else if(c != ')') {
-                    argEnd = findArgEnd(rawTypeStr, argStart, c);
+                } else if(first != ')') {
+                    argEnd = findArgEnd(rawTypeStr, argStart, first);
                     elements.add(build(rawTypeStr.substring(argStart, argEnd), null, null));
                     terminator = rawTypeStr.charAt(argEnd);
                 }
@@ -210,8 +210,8 @@ public final class TypeFactory {
         }
     }
 
-    private static int findArgEnd(String rawTypeStr, int argStart, char c) {
-        return nextTerminator(rawTypeStr, c == '(' ? findSubtupleEnd(rawTypeStr, argStart) : argStart);
+    private static int findArgEnd(String rawTypeStr, int argStart, char first) {
+        return nextTerminator(rawTypeStr, first == '(' ? findSubtupleEnd(rawTypeStr, argStart) : argStart);
     }
 
     private static int findSubtupleEnd(String parentTypeString, int i) {
