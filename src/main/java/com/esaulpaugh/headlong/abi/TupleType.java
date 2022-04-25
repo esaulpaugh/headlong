@@ -238,30 +238,30 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     private Tuple decodeIndices(ByteBuffer bb, int... indices) {
         final Object[] results = new Object[elementTypes.length];
-        final int pos = bb.position();
+        final int start = bb.position();
         final byte[] unitBuffer = newUnitBuffer();
-        int i = 0, j = 0, skipBytes = 0, prevIndex = -1;
+        int n = 0, r = 0, skipBytes = 0, prevIndex = -1;
         do {
-            final int index = indices[i++];
+            final int index = indices[n++];
             ensureIndexInBounds(index);
             if(index <= prevIndex) {
                 throw new IllegalArgumentException("index out of order: " + index);
             }
-            for (; j < index; j++) {
-                results[j] = Tuple.ABSENT;
-                skipBytes += elementTypes[j].headLength();
+            for (; r < index; r++) {
+                results[r] = Tuple.ABSENT;
+                skipBytes += elementTypes[r].headLength();
             }
-            bb.position(pos + skipBytes);
-            final ABIType<?> resultType = elementTypes[j++];
+            bb.position(start + skipBytes);
+            final ABIType<?> resultType = elementTypes[r++];
             if (resultType.dynamic) {
-                bb.position(pos + UINT31.decode(bb, unitBuffer));
+                bb.position(start + UINT31.decode(bb, unitBuffer));
             }
             results[index] = resultType.decode(bb, unitBuffer);
             skipBytes += resultType.headLength();
             prevIndex = index;
-        } while (i < indices.length);
-        for (; j < elementTypes.length; j++) {
-            results[j] = Tuple.ABSENT;
+        } while (n < indices.length);
+        for (; r < elementTypes.length; r++) {
+            results[r] = Tuple.ABSENT;
         }
         return new Tuple(results);
     }
