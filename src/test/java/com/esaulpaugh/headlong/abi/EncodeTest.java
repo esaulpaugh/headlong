@@ -618,6 +618,9 @@ public class EncodeTest {
         decimal.validate(decimalMin);
         decimal.validate(decimalMax);
         assertThrown(ILLEGAL, "signed val exceeds bit limit: 168 >= 168", () -> decimal.validate(decimalMax.add(O_0000000001)));
+
+        assertEquals(decimalMin, decimal.minDecimal());
+        assertEquals(decimalMax, decimal.maxDecimal());
     }
 
     @Test
