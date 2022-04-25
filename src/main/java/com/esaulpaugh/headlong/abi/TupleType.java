@@ -258,7 +258,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             }
             results[index] = resultType.decode(bb, unitBuffer);
             if (n >= indices.length) {
-                while (r < elementTypes.length) {
+                while (r < results.length) {
                     results[r++] = Tuple.ABSENT;
                 }
                 return new Tuple(results);
