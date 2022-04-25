@@ -199,7 +199,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         bb.mark();
         try {
             if(indices.length == 1) {
-                return decodeIndex(bb, indices[0]); // decodes and returns specified element
+                return (T) decodeIndex(bb, indices[0]); // decodes and returns specified element
             }
             if(indices.length == 0) {
                 throw new IllegalArgumentException("must specify at least one index");
@@ -219,7 +219,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
     }
 
-    private <T> T decodeIndex(ByteBuffer bb, int index) {
+    private Object decodeIndex(ByteBuffer bb, int index) {
         ensureIndexInBounds(index);
         int skipBytes = 0;
         for (int j = 0; j < index; j++) {
@@ -227,8 +227,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
         final int pos = bb.position();
         bb.position(pos + skipBytes);
-        @SuppressWarnings("unchecked")
-        final ABIType<T> resultType = (ABIType<T>) elementTypes[index];
+        final ABIType<?> resultType = elementTypes[index];
         final byte[] unitBuffer = newUnitBuffer();
         if (resultType.dynamic) {
             bb.position(pos + UINT31.decode(bb, unitBuffer));
