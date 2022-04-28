@@ -57,8 +57,8 @@ public class EncodeTest {
     private static final String EMPTY_PARAMETER = "empty parameter";
 
     private static final String LETTERS     = "abcdefgilmnorstuxy";
-    private static final String BASE_TYPE   = "[(" + LETTERS + "]+[" + LETTERS + ")0-9]+";
-    private static final String SUFFIX      = "(\\)|\\[[0-9]*])*";
+    private static final String BASE_TYPE   = "[(" + LETTERS + "]+[" + LETTERS + ")\\d]+";
+    private static final String SUFFIX      = "(\\)|\\[\\d*])*";
     private static final String SINGLE_TYPE = BASE_TYPE + SUFFIX;
     private static final Pattern TYPE_PATTERN       = Pattern.compile("(" + SINGLE_TYPE + ")*(," + SINGLE_TYPE + ")*");
     private static final Pattern TUPLE_TYPE_PATTERN = Pattern.compile("^\\(" + TYPE_PATTERN + "\\)$");
