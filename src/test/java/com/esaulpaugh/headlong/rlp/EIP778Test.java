@@ -33,7 +33,15 @@ import java.util.Random;
 import java.util.Set;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.rlp.KVP.*;
+import static com.esaulpaugh.headlong.rlp.KVP.EMPTY_ARRAY;
+import static com.esaulpaugh.headlong.rlp.KVP.ID;
+import static com.esaulpaugh.headlong.rlp.KVP.IP;
+import static com.esaulpaugh.headlong.rlp.KVP.IP6;
+import static com.esaulpaugh.headlong.rlp.KVP.SECP256K1;
+import static com.esaulpaugh.headlong.rlp.KVP.TCP;
+import static com.esaulpaugh.headlong.rlp.KVP.TCP6;
+import static com.esaulpaugh.headlong.rlp.KVP.UDP;
+import static com.esaulpaugh.headlong.rlp.KVP.UDP6;
 import static com.esaulpaugh.headlong.util.Strings.ASCII;
 import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
 import static com.esaulpaugh.headlong.util.Strings.EMPTY_BYTE_ARRAY;
