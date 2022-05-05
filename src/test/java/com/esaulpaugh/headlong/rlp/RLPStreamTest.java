@@ -320,9 +320,9 @@ public class RLPStreamTest {
         }
     }
     
-    private static void doWait(CyclicBarrier ours) throws InterruptedException {
+    private static void doWait(CyclicBarrier barrier) throws InterruptedException {
         try {
-            ours.await();
+            barrier.await();
         } catch (BrokenBarrierException bbe) {
             throw new RuntimeException(bbe);
         }
