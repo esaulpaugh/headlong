@@ -70,7 +70,7 @@ public class DecodeTest {
     private static final Tuple RETURN_VALS = Tuple.of(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
 
     @Test
-    public void testLenient() throws Throwable {
+    public void testLenient() {
         final byte[] lenientBytes = Strings.decode(
                 "0000000000000000000000000000000000000000000000000000000000000045"
               + "00000000000000000000000000000000000000000000000000000000000000a3"
@@ -82,14 +82,6 @@ public class DecodeTest {
 
         assertEquals(RETURN_VALS, FUNCTION.decodeReturn(lenientBytes));
         assertEquals(RETURN_VALS, FUNCTION.decodeReturn(ByteBuffer.wrap(lenientBytes)));
-
-        final byte[] tooSmallOffset = Strings.decode(
-                "0000000000000000000000000000000000000000000000000000000000000045"
-              + "000000000000000000000000000000000000000000000000000000000000003f"
-              + "0000000000000000000000000000000000000000000000000000000000000004"
-              + "7730307400000000000000000000000000000000000000000000000000000000");
-
-        assertThrown(IllegalArgumentException.class, "illegal backwards jump: (0+63=63)<64", () -> FUNCTION.decodeReturn(tooSmallOffset));
     }
 
     @Test
