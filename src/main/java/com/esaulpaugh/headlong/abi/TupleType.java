@@ -300,8 +300,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             final int offset = offsets[i];
             if (offset > 0) {
                 final int jump = start + offset;
-                final int pos = bb.position();
-                if (jump != pos) {
+                if (jump != bb.position()) {
                     /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
                     bb.position(jump); // leniently jump to specified offset
                 }
