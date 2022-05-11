@@ -18,7 +18,7 @@
 //
 //tasks.withType<JavaCompile> {
 //    if (javaVersion > JavaVersion.VERSION_1_8) {
-//        System.out.println("setting release 8")
+//        println("setting release 8")
 //        options.compilerArgs.addAll(arrayOf("--release", "8"))
 //    }
 //    options.encoding = "UTF-8"
