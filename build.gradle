@@ -44,7 +44,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 final String junitVersion = "5.8.2"
 final String jmhVersion = "1.35"
 final String bcVersion = "1.71"
-final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d yyyy").withZone(ZoneId.of("UTC"))
+final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneId.of("UTC"))
 
 jar {
     manifest {
