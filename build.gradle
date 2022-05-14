@@ -44,10 +44,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 def junitVersion = '5.8.2'
 def jmhVersion = '1.35'
 def bcVersion = '1.71'
-
-static String todayUTC() {
-    return DateTimeFormatter.ofPattern("MMMM d yyyy").withZone(ZoneId.of("UTC")).format(Instant.now())
-}
+def dateFormatter = DateTimeFormatter.ofPattern("MMMM d yyyy").withZone(ZoneId.of("UTC"))
 
 jar {
     manifest {
@@ -55,7 +52,7 @@ jar {
                 'Implementation-Title': project.name,
                 'Implementation-Version': project.version,
                 'Automatic-Module-Name': project.name,
-                'Build-Date': todayUTC()
+                'Build-Date': dateFormatter.format(Instant.now())
         )
     }
     finalizedBy(sourcesJar)
