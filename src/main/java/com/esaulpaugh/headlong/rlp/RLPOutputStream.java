@@ -28,7 +28,7 @@ import java.util.Objects;
  * Each call to {@link #write(int)}, {@link #write(byte[])}, or {@link #write(byte[], int, int)} will write one RLP string item.
  * Buffered or otherwise unpredictably-sized writes to an {@link RLPOutputStream} will result in an unpredictable RLP structure.
  */
-public class RLPOutputStream extends OutputStream {
+public final class RLPOutputStream extends OutputStream {
 
     private final OutputStream out;
 
