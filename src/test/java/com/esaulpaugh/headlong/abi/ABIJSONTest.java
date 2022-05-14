@@ -66,8 +66,7 @@ public class ABIJSONTest {
             "      \"name\": \"count\",\n" +
             "      \"type\": \"uint64\"\n" +
             "    }\n" +
-            "  ],\n" +
-            "  \"constant\": false\n" +
+            "  ]\n" +
             "}";
 
     private static final String FUNCTION_B_JSON = "{\n" +
@@ -120,8 +119,7 @@ public class ABIJSONTest {
             "    }\n" +
             "  ],\n" +
             "  \"outputs\": [],\n" +
-            "  \"stateMutability\": \"view\",\n" +
-            "  \"constant\": true\n" +
+            "  \"stateMutability\": \"view\"\n" +
             "}";
 
     private static final String CONTRACT_JSON = "[\n" +
@@ -192,16 +190,14 @@ public class ABIJSONTest {
             "        ]\n" +
             "      }\n" +
             "    ],\n" +
-            "    \"outputs\": [],\n" +
-            "    \"constant\": false\n" +
+            "    \"outputs\": []\n" +
             "  }\n" +
             "]";
 
     private static final String FALLBACK_CONSTRUCTOR_RECEIVE = "[\n" +
             "  {\n" +
             "    \"type\": \"fallback\",\n" +
-            "    \"stateMutability\": \"pure\",\n" +
-            "    \"constant\": true\n" +
+            "    \"stateMutability\": \"pure\"\n" +
             "  },\n" +
             "  {\n" +
             "    \"type\": \"constructor\",\n" +
@@ -211,13 +207,11 @@ public class ABIJSONTest {
             "        \"type\": \"bool\"\n" +
             "      }\n" +
             "    ],\n" +
-            "    \"stateMutability\": \"nonpayable\",\n" +
-            "    \"constant\": false\n" +
+            "    \"stateMutability\": \"nonpayable\"\n" +
             "  },\n" +
             "  {\n" +
             "    \"type\": \"receive\",\n" +
-            "    \"stateMutability\": \"payable\",\n" +
-            "    \"constant\": false\n" +
+            "    \"stateMutability\": \"payable\"\n" +
             "  }\n" +
             "]";
 

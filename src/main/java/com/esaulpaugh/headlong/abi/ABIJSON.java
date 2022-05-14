@@ -66,7 +66,6 @@ public final class ABIJSON {
     private static final String VIEW = "view";
     static final String PAYABLE = "payable";
 //    private static final String NONPAYABLE = "nonpayable";// to mark as nonpayable, do not specify any stateMutability
-    private static final String CONSTANT = "constant"; // deprecated
 
     public static Function parseFunction(String objectJson) {
         return parseFunction(parseObject(objectJson));
@@ -292,7 +291,6 @@ public final class ABIJSON {
         if(stateMutability != null) {
             out.name(STATE_MUTABILITY).value(stateMutability);
         }
-        out.name(CONSTANT).value(VIEW.equals(stateMutability) || PURE.equals(stateMutability));
     }
 
     private static void tupleType(JsonWriter out, String name, TupleType tupleType, boolean[] indexedManifest) throws IOException {
