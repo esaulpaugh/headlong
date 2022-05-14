@@ -24,10 +24,10 @@ import com.esaulpaugh.headlong.abi.LongType;
 import com.esaulpaugh.headlong.abi.Tuple;
 import com.esaulpaugh.headlong.abi.TupleType;
 import com.esaulpaugh.headlong.abi.UnitType;
+import com.esaulpaugh.headlong.rlp.Notation;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
-import com.esaulpaugh.headlong.rlp.Notation;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ADDRESS;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_DECIMAL;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_INTEGER;
@@ -44,8 +45,6 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BYTE;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ADDRESS;
-import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.EMPTY_BYTE_ARRAY;
 
@@ -162,21 +161,11 @@ public final class SuperSerial {
     }
 
     private static BigInteger deserializeBigInteger(UnitType<?> ut, RLPItem item) {
-        if(ut.isUnsigned()) {
-            return item.asBigInt(true);
-        }
-        if(item.dataLength != 0) {
-            if (item.dataLength * Byte.SIZE < ut.getBitLength()) {
-                byte[] padded = new byte[item.dataLength + 1];
-                item.exportData(padded, 1);
-                return new BigInteger(padded);
-            }
-            if(item.dataLength > UNIT_LENGTH_BYTES) {
-                throw new IllegalArgumentException("integer data cannot exceed " + UNIT_LENGTH_BYTES + " bytes");
-            }
-            return item.asBigIntSigned();
-        }
-        return BigInteger.ZERO;
+        return ut.isUnsigned()
+                ? item.asBigInt(true)
+                : item.dataLength * Byte.SIZE < ut.getBitLength()
+                    ? item.asBigInt(false)
+                    : item.asBigIntSigned();
     }
 
     private static Object serializeArray(ArrayType<? extends ABIType<?>, ?> type, Object arr) {
