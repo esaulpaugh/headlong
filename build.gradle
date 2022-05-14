@@ -1,6 +1,8 @@
 import org.gradle.internal.jvm.Jvm
 
-import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 plugins {
     id 'java-library'
@@ -43,10 +45,8 @@ def junitVersion = '5.8.2'
 def jmhVersion = '1.35'
 def bcVersion = '1.71'
 
-static def todayUTC() {
-    SimpleDateFormat sdf = new SimpleDateFormat("MMMMM d yyyy")
-    sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
-    return sdf.format(new Date())
+static String todayUTC() {
+    return DateTimeFormatter.ofPattern("MMMM d yyyy").withZone(ZoneId.of("UTC")).format(Instant.now())
 }
 
 jar {
