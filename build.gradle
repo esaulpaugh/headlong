@@ -41,10 +41,10 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     finalizedBy(javadocJar)
 }
 
-def junitVersion = '5.8.2'
-def jmhVersion = '1.35'
-def bcVersion = '1.71'
-def dateFormatter = DateTimeFormatter.ofPattern("MMMM d yyyy").withZone(ZoneId.of("UTC"))
+final String junitVersion = "5.8.2"
+final String jmhVersion = "1.35"
+final String bcVersion = "1.71"
+final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d yyyy").withZone(ZoneId.of("UTC"))
 
 jar {
     manifest {
