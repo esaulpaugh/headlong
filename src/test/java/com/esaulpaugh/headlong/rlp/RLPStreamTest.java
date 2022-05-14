@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
-import static com.esaulpaugh.headlong.rlp.RLPOutputStream.Baos;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -367,5 +366,15 @@ public class RLPStreamTest {
             sb.append('0');
         }
         return sb.toString();
+    }
+
+    public static class Baos extends ByteArrayOutputStream {
+
+        Baos() {}
+
+        @Override
+        public synchronized String toString() {
+            return Strings.encode(buf, 0, count, Strings.HEX);
+        }
     }
 }

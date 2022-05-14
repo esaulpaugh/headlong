@@ -75,14 +75,4 @@ public final class RLPOutputStream extends OutputStream {
     public String toString() {
         return out.toString();
     }
-    
-    public static class Baos extends ByteArrayOutputStream {
-
-        Baos() {}
-    	
-    	@Override
-        public synchronized String toString() {
-            return Strings.encode(buf, 0, count, Strings.HEX);
-        }
-    }
 }
