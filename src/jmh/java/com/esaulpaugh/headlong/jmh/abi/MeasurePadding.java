@@ -81,8 +81,11 @@ public class MeasurePadding {
     }
 
     private static void putN(byte val, int n, ByteBuffer dest) {
-        for (int i = 0; i < n; i++) {
-            dest.put(val);
+        int i = dest.position();
+        final int end = i + n;
+        while (i < end) {
+            dest.put(i++, val);
         }
+        dest.position(end);
     }
 }
