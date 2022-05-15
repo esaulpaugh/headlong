@@ -62,8 +62,8 @@ public final class ABIJSON {
     private static final String ANONYMOUS = "anonymous";
     private static final String INDEXED = "indexed";
     private static final String STATE_MUTABILITY = "stateMutability";
-    private static final String PURE = "pure";
-    private static final String VIEW = "view";
+//    private static final String PURE = "pure";
+//    private static final String VIEW = "view";
     static final String PAYABLE = "payable";
 //    private static final String NONPAYABLE = "nonpayable";// to mark as nonpayable, do not specify any stateMutability
 
