@@ -30,7 +30,7 @@ public final class Keccak extends MessageDigest {
     private static final int MAX_STATE_SIZE = 1600;
     private static final int MAX_STATE_SIZE_WORDS = MAX_STATE_SIZE / Long.SIZE;
 
-    private final transient int digestSizeBytes;
+    private final int digestSizeBytes;
     private final transient int rateSizeBits;
     private final transient int rateSizeWords;
 
