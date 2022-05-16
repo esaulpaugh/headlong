@@ -39,7 +39,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.TestUtils.assertThrownMessageMatch;
+import static com.esaulpaugh.headlong.TestUtils.assertThrownWithAnySubstring;
 import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
 import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -243,7 +243,7 @@ public class EncodeTest {
     @Test
     public void testIllegalSignatures() throws Throwable {
 
-        assertThrownMessageMatch(ClassCastException.class, CLASS_CAST_MESSAGES, () -> Function.parse("f()[]"));
+        assertThrownWithAnySubstring(ClassCastException.class, CLASS_CAST_MESSAGES, () -> Function.parse("f()[]"));
 
         assertThrown(ILLEGAL, "unrecognized type: ", () -> TupleType.parse(""));
         assertThrown(ILLEGAL, "unrecognized type: \"(\"", () -> TupleType.parse("("));
@@ -264,7 +264,7 @@ public class EncodeTest {
     }
 
     private static void testSIOOBE(String signature) throws Throwable {
-        assertThrownMessageMatch(
+        assertThrownWithAnySubstring(
                 SIOOBE,
                 Arrays.asList(
                         "begin 0, end -1, length " + signature.length(),
