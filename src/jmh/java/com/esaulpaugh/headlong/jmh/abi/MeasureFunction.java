@@ -24,19 +24,19 @@ import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
 import java.math.BigInteger;
+import java.util.concurrent.TimeUnit;
 
 import static com.esaulpaugh.headlong.jmh.Main.THREE;
 
 @State(Scope.Benchmark)
 public class MeasureFunction {
-
-    private static final int BATCH_SIZE = 100_000;
 
     private static final Function F = new Function("sam(bytes,bool,uint256[])", "(bytes,uint256[3],bool)");
     private static final TupleType T = F.getInputs();
@@ -57,26 +57,29 @@ public class MeasureFunction {
     @Benchmark
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.AverageTime)
-    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
-    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void encode_call(Blackhole blackhole) {
         blackhole.consume(F.encodeCall(ARGS));
     }
 
-//    @Benchmark
-//    @Fork(value = 1, warmups = 1)
-//    @BenchmarkMode(Mode.AverageTime)
-//    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
-//    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
-//    public void decode_call(Blackhole blackhole) {
-//        blackhole.consume(F.decodeCall(CALL));
-//    }
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.AverageTime)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public void decode_call(Blackhole blackhole) {
+        blackhole.consume(F.decodeCall(CALL));
+    }
 
     @Benchmark
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.AverageTime)
-    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
-    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void decode_index_slow(Blackhole blackhole) {
         blackhole.consume(F.decodeReturn(RETURN).get(2));
     }
@@ -84,8 +87,9 @@ public class MeasureFunction {
     @Benchmark
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.AverageTime)
-    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
-    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void decode_index_fast(Blackhole blackhole) {
         blackhole.consume(F.decodeReturn(RETURN, 2));
     }
@@ -93,8 +97,9 @@ public class MeasureFunction {
     @Benchmark
     @Fork(value = 1, warmups = 1)
     @BenchmarkMode(Mode.AverageTime)
-    @Warmup(batchSize = BATCH_SIZE, iterations = 1)
-    @Measurement(batchSize = BATCH_SIZE, iterations = THREE)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void init_with_keccak(Blackhole blackhole) {
         blackhole.consume(Function.parse("sam(bytes,bool,uint256[])"));
     }
