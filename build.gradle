@@ -11,7 +11,7 @@ plugins {
 
 group 'com.esaulpaugh'
 archivesBaseName = "headlong"
-version '6.3.2-SNAPSHOT'
+version '6.3.3-SNAPSHOT'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
