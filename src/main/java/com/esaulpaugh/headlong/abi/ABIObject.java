@@ -57,11 +57,11 @@ public interface ABIObject {
         return (ContractError) this;
     }
 
-    static ABIObject fromJson(String json) {
+    static <T extends ABIObject> T fromJson(String json) {
         return ABIJSON.parseABIObject(JsonUtils.parseObject(json));
     }
 
-    static ABIObject fromJsonObject(JsonObject object) {
+    static <T extends ABIObject> T fromJsonObject(JsonObject object) {
         return ABIJSON.parseABIObject(object);
     }
 }
