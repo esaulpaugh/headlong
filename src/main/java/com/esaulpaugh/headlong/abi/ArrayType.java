@@ -405,9 +405,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
      * @see Notation
      */
     @Override
-    @SuppressWarnings("unchecked")
     public J parseArgument(String s) { // expects RLP object notation such as "['00', '01', '01']"
-        return (J) SuperSerial.deserializeArray(this, s, false);
+        return SuperSerial.deserializeArray(this, s, false);
     }
 
     public static ABIType<?> baseType(ABIType<?> type) {
