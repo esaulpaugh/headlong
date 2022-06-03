@@ -94,8 +94,9 @@ public final class ABIJSON {
         throw TypeEnum.unexpectedType(getType(error));
     }
 
-    public static ABIObject parseABIObject(JsonObject object) {
-        return parseABIObject(TypeEnum.parse(getType(object)), object, Function.newDefaultDigest());
+    @SuppressWarnings("unchecked")
+    public static <T extends ABIObject> T parseABIObject(JsonObject object) {
+        return (T) parseABIObject(TypeEnum.parse(getType(object)), object, Function.newDefaultDigest());
     }
 
     /**
