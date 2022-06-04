@@ -137,10 +137,10 @@ public final class ABIJSON {
     public static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types) {
         final List<T> selected = new ArrayList<>();
         final MessageDigest digest = Function.newDefaultDigest();
-        for (JsonElement e : parseArray(arrayJson)) {
+        for (final JsonElement e : parseArray(arrayJson)) {
             if (e.isJsonObject()) {
-                JsonObject object = e.getAsJsonObject();
-                TypeEnum t = TypeEnum.parse(getType(object));
+                final JsonObject object = e.getAsJsonObject();
+                final TypeEnum t = TypeEnum.parse(getType(object));
                 if(types.contains(t)) {
                     selected.add((T) parseABIObject(t, object, digest));
                 }
