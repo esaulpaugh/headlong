@@ -60,26 +60,28 @@ public class UnsignedTest {
                 () -> uint64.toUnsignedLong(Long.MIN_VALUE)
         );
 
+        final Uint uint8 = new Uint(8);
+
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
                 "signed has too many bits: 8 is not less than 8",
-                () -> new Uint(8).toUnsignedLong(128)
+                () -> uint8.toUnsignedLong(128)
         );
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
                 "signed has too many bits: 8 is not less than 8",
-                () -> new Uint(8).toUnsigned(BigInteger.valueOf(128))
+                () -> uint8.toUnsigned(BigInteger.valueOf(128))
         );
 
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
                 "unsigned has too many bits: 9 > 8",
-                () -> new Uint(8).toSignedLong(256)
+                () -> uint8.toSignedLong(256)
         );
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
                 "unsigned has too many bits: 9 > 8",
-                () -> new Uint(8).toSigned(BigInteger.valueOf(256))
+                () -> uint8.toSigned(BigInteger.valueOf(256))
         );
     }
 
