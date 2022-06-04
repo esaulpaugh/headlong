@@ -51,7 +51,7 @@ public final class JsonUtils {
     }
 
     public static String getString(JsonObject object, String key, String defaultVal) {
-        JsonElement element = object.get(key);
+        final JsonElement element = object.get(key);
         if(isNull(element)) {
             return defaultVal;
         }
@@ -62,7 +62,7 @@ public final class JsonUtils {
     }
 
     public static Boolean getBoolean(JsonObject object, String key, Boolean defaultVal) {
-        JsonElement element = object.get(key);
+        final JsonElement element = object.get(key);
         if(isNull(element)) {
             return defaultVal;
         }
@@ -73,7 +73,7 @@ public final class JsonUtils {
     }
 
     public static JsonArray getArray(JsonObject object, String key, JsonArray defaultVal) {
-        JsonElement element = object.get(key);
+        final JsonElement element = object.get(key);
         if(isNull(element)) {
             return defaultVal;
         }
