@@ -52,7 +52,7 @@ final class Encoding {
     }
 
     static void insertInt(BigInteger signed, int paddedLen, ByteBuffer dest) {
-        byte[] arr = signed.toByteArray();
+        final byte[] arr = signed.toByteArray();
         if(arr.length <= paddedLen) {
             insertPadding(paddedLen - arr.length, signed.signum() < 0, dest);
             dest.put(arr, 0 ,arr.length);
