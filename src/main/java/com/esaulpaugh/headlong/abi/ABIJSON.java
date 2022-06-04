@@ -179,7 +179,7 @@ public final class ABIJSON {
             final ABIType<?>[] types = new ABIType<?>[inputsLen];
             final boolean[] indexed = new boolean[inputsLen];
             for (int i = 0; i < inputsLen; i++) {
-                JsonObject inputObj = inputs.get(i).getAsJsonObject();
+                final JsonObject inputObj = inputs.get(i).getAsJsonObject();
                 types[i] = parseType(inputObj);
                 indexed[i] = getBoolean(inputObj, INDEXED);
             }
@@ -238,8 +238,8 @@ public final class ABIJSON {
 // ---------------------------------------------------------------------------------------------------------------------
     static String toJson(ABIObject o, boolean pretty) {
         try {
-            Writer stringOut = new NonSyncWriter(); // can also use StringWriter or CharArrayWriter, but this is faster
-            JsonWriter out = new JsonWriter(stringOut);
+            final Writer stringOut = new NonSyncWriter(); // can also use StringWriter or CharArrayWriter, but this is faster
+            final JsonWriter out = new JsonWriter(stringOut);
             if (pretty) {
                 out.setIndent("  ");
             }
@@ -294,7 +294,7 @@ public final class ABIJSON {
     private static void tupleType(JsonWriter out, String name, TupleType tupleType, boolean[] indexedManifest) throws IOException {
         out.name(name).beginArray();
         int i = 0;
-        for (ABIType<?> e : tupleType.elementTypes) {
+        for (final ABIType<?> e : tupleType.elementTypes) {
             out.beginObject();
             name(out, e.getName());
             final String type = e.canonicalType;
