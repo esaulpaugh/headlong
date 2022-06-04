@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -292,6 +293,7 @@ public class TupleTest {
 
         assertThrown(UnsupportedOperationException.class, () -> list.set(0, "d"));
         assertThrown(UnsupportedOperationException.class, () -> list.replaceAll(s -> ""));
+        assertThrown(UnsupportedOperationException.class, () -> Collections.fill(list, ""));
 
         testRemove(t.iterator());
         testRemove(list.iterator());
