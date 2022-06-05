@@ -136,8 +136,7 @@ public final class ABIJSON {
     }
 // ---------------------------------------------------------------------------------------------------------------------
     static Function parseFunction(JsonObject function) {
-        final TypeEnum type = checkType(function, FUNCTIONS::contains);
-        return parseFunctionUnchecked(type, function, Function.newDefaultDigest());
+        return parseFunctionUnchecked(checkType(function, FUNCTIONS::contains), function, Function.newDefaultDigest());
     }
 
     static Event parseEvent(JsonObject event) {
