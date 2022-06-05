@@ -22,6 +22,7 @@ import com.esaulpaugh.headlong.util.Strings;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
@@ -88,9 +89,17 @@ public abstract class RLPItem {
         return destIndex + len;
     }
 
+    public final void copy(ByteBuffer dest) {
+        dest.put(buffer, index, encodingLength());
+    }
+
     public final int copyData(byte[] dest, int destIndex) {
         System.arraycopy(buffer, dataIndex, dest, destIndex, dataLength);
         return destIndex + dataLength;
+    }
+
+    public final void copyData(ByteBuffer dest) {
+        dest.put(buffer, dataIndex, dataLength);
     }
 
     public final void copyData(OutputStream dest) throws IOException {

@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -770,6 +771,48 @@ public class RLPDecoderTest {
 
         assertEquals(item.dataLength, item.copyData(out, 0));
         assertArrayEquals(new byte[] { 0, 1, 2, 3, (byte) 0xc0 }, out);
+
+        final byte[] out2 = new byte[6];
+        assertEquals(item.encodingLength(), item.copy(out2, 0));
+        assertArrayEquals(new byte[] { (byte) 0xc5, 0, 1, 2, 3, (byte) 0xc0 }, out2);
+
+        final byte[] longString = new byte[58];
+        longString[0] = (byte) 0xb8;
+        longString[1] = 56;
+        longString[50] = 10;
+        longString[57] = -3;
+
+        final byte[] out3 = new byte[60];
+        assertEquals(2 + longString.length, RLP_STRICT.wrap(longString).copy(out3, 2));
+        final byte[] expected = new byte[60];
+        expected[2] = (byte) 0xb8;
+        expected[3] = 56;
+        expected[52] = 10;
+        expected[59] = -3;
+        assertArrayEquals(expected, out3);
+    }
+
+    @Test
+    public void testExports2() {
+        RLPItem item = RLP_STRICT.wrapString(new byte[] { (byte)0x83,1,3,5 });
+        final ByteBuffer out = ByteBuffer.allocate(5);
+        out.position(1);
+        item.copyData(out);
+        assertEquals(1 + item.dataLength, out.position());
+        assertArrayEquals(new byte[] {0,1,3,5,0}, out.array());
+
+        out.position(1);
+        item.copy(out);
+        assertEquals(1 + item.encodingLength(), out.position());
+        assertArrayEquals(new byte[] {0,(byte)0x83,1,3,5}, out.array());
+
+        final byte[] in2 = new byte[] { 0, 0, (byte) 0xc5, 0, 1, 2, 3, (byte) 0xc0 };
+        item = RLP_STRICT.wrapList(in2, 2);
+
+        out.position(0);
+        item.copyData(out);
+        assertEquals(item.dataLength, out.position());
+        assertArrayEquals(new byte[] { 0, 1, 2, 3, (byte) 0xc0 }, out.array());
 
         final byte[] out2 = new byte[6];
         assertEquals(item.encodingLength(), item.copy(out2, 0));
