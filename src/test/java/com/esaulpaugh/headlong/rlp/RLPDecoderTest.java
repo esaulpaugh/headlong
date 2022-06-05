@@ -678,12 +678,12 @@ public class RLPDecoderTest {
         RLPList list = RLP_STRICT.wrapList(LONG_LIST_BYTES);
 
         byte[] buffer = new byte[list.encodingLength()];
-        int idx = list.export(buffer, 0);
+        int idx = list.copy(buffer, 0);
         assertEquals(list.encodingLength(), idx);
         assertArrayEquals(buffer, list.encoding());
 
         buffer = new byte[list.dataLength];
-        idx = list.exportData(buffer, 0);
+        idx = list.copyData(buffer, 0);
         assertEquals(list.dataLength, idx);
         assertArrayEquals(buffer, list.data());
     }
@@ -757,23 +757,22 @@ public class RLPDecoderTest {
 
     @Test
     public void testExports() {
-        final byte[] in = new byte[] { (byte)0x83,1,3,5 };
-        RLPItem item = RLP_STRICT.wrapString(in);
+        RLPItem item = RLP_STRICT.wrapString(new byte[] { (byte)0x83,1,3,5 });
         final byte[] out = new byte[] { 0,0,0,0,0 };
-        assertEquals(1 + item.dataLength, item.exportData(out, 1));
+        assertEquals(1 + item.dataLength, item.copyData(out, 1));
         assertArrayEquals(new byte[] {0,1,3,5,0}, out);
 
-        assertEquals(1 + item.encodingLength(), item.export(out, 1));
+        assertEquals(1 + item.encodingLength(), item.copy(out, 1));
         assertArrayEquals(new byte[] {0,(byte)0x83,1,3,5}, out);
 
         final byte[] in2 = new byte[] { 0, 0, (byte) 0xc5, 0, 1, 2, 3, (byte) 0xc0 };
         item = RLP_STRICT.wrapList(in2, 2);
 
-        assertEquals(item.dataLength, item.exportData(out, 0));
+        assertEquals(item.dataLength, item.copyData(out, 0));
         assertArrayEquals(new byte[] { 0, 1, 2, 3, (byte) 0xc0 }, out);
 
         final byte[] out2 = new byte[6];
-        assertEquals(item.encodingLength(), item.export(out2, 0));
+        assertEquals(item.encodingLength(), item.copy(out2, 0));
         assertArrayEquals(new byte[] { (byte) 0xc5, 0, 1, 2, 3, (byte) 0xc0 }, out2);
 
         final byte[] longString = new byte[58];
@@ -783,7 +782,7 @@ public class RLPDecoderTest {
         longString[57] = -3;
 
         final byte[] out3 = new byte[60];
-        assertEquals(2 + longString.length, RLP_STRICT.wrap(longString).export(out3, 2));
+        assertEquals(2 + longString.length, RLP_STRICT.wrap(longString).copy(out3, 2));
         final byte[] expected = new byte[60];
         expected[2] = (byte) 0xb8;
         expected[3] = 56;

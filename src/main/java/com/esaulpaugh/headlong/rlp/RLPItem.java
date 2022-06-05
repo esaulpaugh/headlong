@@ -82,19 +82,19 @@ public abstract class RLPItem {
         return Arrays.copyOfRange(buffer, dataIndex, endIndex);
     }
 
-    public final int export(byte[] dest, int destIndex) {
+    public final int copy(byte[] dest, int destIndex) {
         int len = encodingLength();
         System.arraycopy(buffer, index, dest, destIndex, len);
         return destIndex + len;
     }
 
-    public final int exportData(byte[] dest, int destIndex) {
+    public final int copyData(byte[] dest, int destIndex) {
         System.arraycopy(buffer, dataIndex, dest, destIndex, dataLength);
         return destIndex + dataLength;
     }
 
-    public final void exportData(OutputStream os) throws IOException {
-        os.write(buffer, dataIndex, dataLength);
+    public final void copyData(OutputStream dest) throws IOException {
+        dest.write(buffer, dataIndex, dataLength);
     }
 
     /**

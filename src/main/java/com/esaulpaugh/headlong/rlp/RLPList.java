@@ -91,7 +91,7 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
 
     private static void copyElements(Iterable<RLPItem> elements, byte[] dest, int destIndex) {
         for (RLPItem e : elements) {
-            destIndex = e.export(dest, destIndex);
+            destIndex = e.copy(dest, destIndex);
         }
     }
 

@@ -113,7 +113,7 @@ public class RLPStreamTest {
         int count = 0;
         while (iter.hasNext()) {
             RLPItem item = iter.next();
-            item.exportData(decoded);
+            item.copyData(decoded);
             count++;
         }
 
