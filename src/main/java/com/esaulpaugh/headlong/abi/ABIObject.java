@@ -58,7 +58,7 @@ public interface ABIObject {
     }
 
     static <T extends ABIObject> T fromJson(String json) {
-        return ABIJSON.parseABIObject(JsonUtils.parseObject(json));
+        return ABIJSON.parseABIObject(json);
     }
 
     static <T extends ABIObject> T fromJsonObject(JsonObject object) {
