@@ -93,6 +93,10 @@ public abstract class RLPItem {
         dest.put(buffer, index, encodingLength());
     }
 
+    public final void copy(OutputStream dest) throws IOException {
+        dest.write(buffer, index, encodingLength());
+    }
+
     public final int copyData(byte[] dest, int destIndex) {
         System.arraycopy(buffer, dataIndex, dest, destIndex, dataLength);
         return destIndex + dataLength;
