@@ -151,33 +151,25 @@ public final class ABIJSON {
     }
 // ---------------------------------------------------------------------------------------------------------------------
     static Function parseFunction(JsonObject function, MessageDigest digest) {
-        return parseFunctionUnchecked(getFunctionType(function), function, digest);
+        final TypeEnum t = TypeEnum.parse(getType(function));
+        if (FUNCTIONS.contains(t)) {
+            return parseFunctionUnchecked(t, function, digest);
+        }
+        throw TypeEnum.unexpectedType(getType(function));
     }
 
     static Event parseEvent(JsonObject event) {
-        checkType(EVENT, event);
+        if(!EVENT.equals(getType(event))) {
+            throw TypeEnum.unexpectedType(getType(event));
+        }
         return parseEventUnchecked(event);
     }
 
     static ContractError parseError(JsonObject error) {
-        checkType(ERROR, error);
+        if(!ERROR.equals(getType(error))) {
+            throw TypeEnum.unexpectedType(getType(error));
+        }
         return parseErrorUnchecked(error);
-    }
-
-    private static void checkType(String expected, JsonObject object) {
-        final String typeStr = getType(object);
-        if(!expected.equals(typeStr)) {
-            throw TypeEnum.unexpectedType(typeStr);
-        }
-    }
-
-    private static TypeEnum getFunctionType(JsonObject function) {
-        final String typeStr = getType(function);
-        final TypeEnum t = TypeEnum.parse(typeStr);
-        if (FUNCTIONS.contains(t)) {
-            return t;
-        }
-        throw TypeEnum.unexpectedType(typeStr);
     }
 
     private static Function parseFunctionUnchecked(TypeEnum type, JsonObject function, MessageDigest digest) {
