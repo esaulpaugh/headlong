@@ -269,12 +269,7 @@ public class ABIJSONTest {
 
             assertEquals(orig, reconstructed);
             assertEquals(originalJson, reconstructed.toString());
-
-            if(orig instanceof Function) {
-                assertEquals(orig, ABIJSON.parseFunction(newJson));
-            } else {
-                assertEquals(orig, ABIJSON.parseEvent(newJson));
-            }
+            assertEquals(orig, ABIJSON.parseABIObject(newJson));
         }
     }
 
@@ -537,7 +532,7 @@ public class ABIJSONTest {
         JsonObject object = JsonUtils.parseObject(ERROR_JSON);
 
         ContractError error0 = ABIJSON.parseErrors(ERROR_JSON_ARRAY).get(0);
-        ContractError error1 = ABIJSON.parseError(object);
+        ContractError error1 = ABIJSON.parseABIObject(object);
 
         testError(error0, ERROR_JSON, object);
         testError(error1, ERROR_JSON, object);

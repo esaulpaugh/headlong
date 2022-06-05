@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.getArray;
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.getBoolean;
@@ -64,39 +65,42 @@ public final class ABIJSON {
     private static final String STATE_MUTABILITY = "stateMutability";
     static final String PAYABLE = "payable"; // to mark as nonpayable, do not specify any stateMutability
 
-    public static Function parseFunction(String objectJson) {
-        return parseFunction(parseObject(objectJson));
+//    public static Function parseFunction(String objectJson) {
+//        return parseFunction(parseObject(objectJson));
+//    }
+//
+//    public static Function parseFunction(JsonObject function) {
+//        return parseFunction(function, Function.newDefaultDigest());
+//    }
+//
+//    public static Function parseFunction(JsonObject function, MessageDigest messageDigest) {
+//        return _parseFunction(TypeEnum.parse(getType(function)), function, messageDigest);
+//    }
+//
+//    public static Event parseEvent(String objectJson) {
+//        return parseEvent(parseObject(objectJson));
+//    }
+//
+//    public static Event parseEvent(JsonObject event) {
+//        if(EVENT.equals(getType(event))) {
+//            return _parseEvent(event);
+//        }
+//        throw TypeEnum.unexpectedType(getType(event));
+//    }
+//
+//    public static ContractError parseError(JsonObject error) {
+//        if(ERROR.equals(getType(error))) {
+//            return _parseError(error);
+//        }
+//        throw TypeEnum.unexpectedType(getType(error));
+//    }
+
+    public static <T extends ABIObject> T parseABIObject(String objectJson) {
+        return parseABIObject(parseObject(objectJson));
     }
 
-    public static Function parseFunction(JsonObject function) {
-        return parseFunction(function, Function.newDefaultDigest());
-    }
-
-    public static Function parseFunction(JsonObject function, MessageDigest messageDigest) {
-        return _parseFunction(TypeEnum.parse(getType(function)), function, messageDigest);
-    }
-
-    public static Event parseEvent(String objectJson) {
-        return parseEvent(parseObject(objectJson));
-    }
-
-    public static Event parseEvent(JsonObject event) {
-        if(EVENT.equals(getType(event))) {
-            return _parseEvent(event);
-        }
-        throw TypeEnum.unexpectedType(getType(event));
-    }
-
-    public static ContractError parseError(JsonObject error) {
-        if(ERROR.equals(getType(error))) {
-            return _parseError(error);
-        }
-        throw TypeEnum.unexpectedType(getType(error));
-    }
-
-    @SuppressWarnings("unchecked")
     public static <T extends ABIObject> T parseABIObject(JsonObject object) {
-        return (T) parseABIObject(TypeEnum.parse(getType(object)), object, Function.newDefaultDigest());
+        return parseABIObject(TypeEnum.parse(getType(object)), object, Function.newDefaultDigest());
     }
 
     /**
@@ -133,7 +137,6 @@ public final class ABIJSON {
         return parseElements(arrayJson, ALL);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types) {
         final List<T> selected = new ArrayList<>();
         final MessageDigest digest = Function.newDefaultDigest();
@@ -142,26 +145,51 @@ public final class ABIJSON {
                 final JsonObject object = e.getAsJsonObject();
                 final TypeEnum t = TypeEnum.parse(getType(object));
                 if(types.contains(t)) {
-                    selected.add((T) parseABIObject(t, object, digest));
+                    selected.add(parseABIObject(t, object, digest));
                 }
             }
         }
         return selected;
     }
 
-    private static ABIObject parseABIObject(TypeEnum t, JsonObject object, MessageDigest digest) {
+    @SuppressWarnings("unchecked")
+    private static <T extends ABIObject> T parseABIObject(TypeEnum t, JsonObject object, MessageDigest digest) {
         switch (t.ordinal()) {
         case TypeEnum.ORDINAL_FUNCTION:
         case TypeEnum.ORDINAL_RECEIVE:
         case TypeEnum.ORDINAL_FALLBACK:
-        case TypeEnum.ORDINAL_CONSTRUCTOR: return _parseFunction(t, object, digest);
-        case TypeEnum.ORDINAL_EVENT: return _parseEvent(object);
-        case TypeEnum.ORDINAL_ERROR: return _parseError(object);
+        case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) parseFunctionUnchecked(t, object, digest);
+        case TypeEnum.ORDINAL_EVENT: return (T) parseEventUnchecked(object);
+        case TypeEnum.ORDINAL_ERROR: return (T) parseErrorUnchecked(object);
         default: throw new AssertionError();
         }
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    private static Function _parseFunction(TypeEnum type, JsonObject function, MessageDigest digest) {
+    static Function parseFunction(JsonObject function) {
+        final TypeEnum type = checkType(function, FUNCTIONS::contains);
+        return parseFunctionUnchecked(type, function, Function.newDefaultDigest());
+    }
+
+    static Event parseEvent(JsonObject event) {
+        checkType(event, t -> t == TypeEnum.EVENT);
+        return parseEventUnchecked(event);
+    }
+
+    static ContractError parseError(JsonObject error) {
+        checkType(error, t -> t == TypeEnum.ERROR);
+        return parseErrorUnchecked(error);
+    }
+
+    private static TypeEnum checkType(JsonObject object, Predicate<TypeEnum> p) {
+        final String typeStr = getType(object);
+        final TypeEnum t = TypeEnum.parse(typeStr);
+        if (p.test(t)) {
+            return t;
+        }
+        throw TypeEnum.unexpectedType(typeStr);
+    }
+
+    private static Function parseFunctionUnchecked(TypeEnum type, JsonObject function, MessageDigest digest) {
         return new Function(
                 type,
                 getName(function),
@@ -172,7 +200,7 @@ public final class ABIJSON {
         );
     }
 
-    private static Event _parseEvent(JsonObject event) {
+    private static Event parseEventUnchecked(JsonObject event) {
         final JsonArray inputs = getArray(event, INPUTS);
         if (inputs != null) {
             final int inputsLen = inputs.size();
@@ -193,7 +221,7 @@ public final class ABIJSON {
         throw new IllegalArgumentException("array \"" + INPUTS + "\" null or not found");
     }
 
-    private static ContractError _parseError(JsonObject error) {
+    private static ContractError parseErrorUnchecked(JsonObject error) {
         return new ContractError(getName(error), parseTupleType(error, INPUTS));
     }
 
