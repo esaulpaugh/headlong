@@ -136,23 +136,30 @@ public final class ABIJSON {
     }
 // ---------------------------------------------------------------------------------------------------------------------
     static Function parseFunction(JsonObject function) {
-        return parseFunctionUnchecked(checkType(function, FUNCTIONS::contains), function, Function.newDefaultDigest());
+        return parseFunctionUnchecked(getFunctionType(function), function, Function.newDefaultDigest());
     }
 
     static Event parseEvent(JsonObject event) {
-        checkType(event, t -> t == TypeEnum.EVENT);
+        checkType(EVENT, event);
         return parseEventUnchecked(event);
     }
 
     static ContractError parseError(JsonObject error) {
-        checkType(error, t -> t == TypeEnum.ERROR);
+        checkType(ERROR, error);
         return parseErrorUnchecked(error);
     }
 
-    private static TypeEnum checkType(JsonObject object, Predicate<TypeEnum> p) {
+    private static void checkType(String expected, JsonObject object) {
         final String typeStr = getType(object);
+        if(!expected.equals(typeStr)) {
+            throw TypeEnum.unexpectedType(typeStr);
+        }
+    }
+
+    private static TypeEnum getFunctionType(JsonObject function) {
+        final String typeStr = getType(function);
         final TypeEnum t = TypeEnum.parse(typeStr);
-        if (p.test(t)) {
+        if (FUNCTIONS.contains(t)) {
             return t;
         }
         throw TypeEnum.unexpectedType(typeStr);
