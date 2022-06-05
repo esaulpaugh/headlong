@@ -239,10 +239,9 @@ public final class ABIJSON {
         if(type.startsWith(TUPLE)) {
             if(type.length() == TUPLE.length()) {
                 return parseTupleType(object, COMPONENTS, name);
-            } else {
-                TupleType baseType = parseTupleType(object, COMPONENTS, null); // set TupleType name null because name belongs to ArrayType
-                return TypeFactory.createWithBase(baseType.canonicalType + type.substring(TUPLE.length()), name, baseType);
             }
+            TupleType baseType = parseTupleType(object, COMPONENTS, null); // set TupleType name null because name belongs to ArrayType
+            return TypeFactory.createWithBase(baseType.canonicalType + type.substring(TUPLE.length()), name, baseType);
         }
         return TypeFactory.create(type, name);
     }
