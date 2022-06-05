@@ -65,36 +65,6 @@ public final class ABIJSON {
     private static final String STATE_MUTABILITY = "stateMutability";
     static final String PAYABLE = "payable"; // to mark as nonpayable, do not specify any stateMutability
 
-//    public static Function parseFunction(String objectJson) {
-//        return parseFunction(parseObject(objectJson));
-//    }
-//
-//    public static Function parseFunction(JsonObject function) {
-//        return parseFunction(function, Function.newDefaultDigest());
-//    }
-//
-//    public static Function parseFunction(JsonObject function, MessageDigest messageDigest) {
-//        return _parseFunction(TypeEnum.parse(getType(function)), function, messageDigest);
-//    }
-//
-//    public static Event parseEvent(String objectJson) {
-//        return parseEvent(parseObject(objectJson));
-//    }
-//
-//    public static Event parseEvent(JsonObject event) {
-//        if(EVENT.equals(getType(event))) {
-//            return _parseEvent(event);
-//        }
-//        throw TypeEnum.unexpectedType(getType(event));
-//    }
-//
-//    public static ContractError parseError(JsonObject error) {
-//        if(ERROR.equals(getType(error))) {
-//            return _parseError(error);
-//        }
-//        throw TypeEnum.unexpectedType(getType(error));
-//    }
-
     public static <T extends ABIObject> T parseABIObject(String objectJson) {
         return parseABIObject(parseObject(objectJson));
     }
