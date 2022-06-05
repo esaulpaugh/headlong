@@ -142,6 +142,22 @@ public class RLPStreamTest {
     }
 
     @Test
+    public void testCopyToRLPOutputStream() throws IOException {
+        final byte[] encoding = new byte[]{(byte) 0x87, 0, 1, 2, 3, 4, 5, 6};
+        final RLPString y = RLP_STRICT.wrapString(encoding);
+        {
+            final Baos b = new Baos();
+            final RLPOutputStream rlpOut = new RLPOutputStream(b);
+            y.copyData(rlpOut);
+            assertArrayEquals(encoding, b.toByteArray());
+        }
+        final Baos b = new Baos();
+        final RLPOutputStream rlpOut = new RLPOutputStream(b);
+        y.copy(rlpOut);
+        assertArrayEquals(new byte[] { (byte) 0x88, (byte) 0x87, 0, 1, 2, 3, 4, 5, 6 }, b.toByteArray());
+    }
+
+    @Test
     public void testStreamEasy() throws Throwable {
         RLPItem[] collected = RLPDecoderTest.collectAll(RLP_BYTES).toArray(RLPItem.EMPTY_ARRAY);
         Stream<RLPItem> stream = RLP_STRICT.stream(RLP_BYTES, 0);
