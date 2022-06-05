@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.getArray;
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.getBoolean;
