@@ -39,7 +39,7 @@ public final class FastBase64 {
         final byte[] bytes = Strings.decode(alphabet, Strings.ASCII);
         final short[] table = new short[1 << 12];
         for (int i = 0, offset = 0; i < bytes.length; i++, offset += bytes.length) {
-            int leftBits = bytes[i] << Byte.SIZE;
+            final int leftBits = bytes[i] << Byte.SIZE;
             for (int j = 0; j < bytes.length; j++) {
                 table[offset + j] = (short) (leftBits | (bytes[j] & 0xFF));
             }
@@ -72,11 +72,11 @@ public final class FastBase64 {
     }
 
     private static byte[] encodeMain(byte[] buffer, int i, short[] table, int end, int len) {
-        byte[] out = new byte[len];
+        final byte[] out = new byte[len];
         for (int o = 0; i < end; ) {
-            int _24bits = (buffer[i++] & 0xff) << Short.SIZE | (buffer[i++] & 0xff) << Byte.SIZE | (buffer[i++] & 0xff);
-            int ab = table[_24bits >>> 12];
-            int cd = table[_24bits & 0xfff];
+            final int _24bits = (buffer[i++] & 0xff) << Short.SIZE | (buffer[i++] & 0xff) << Byte.SIZE | (buffer[i++] & 0xff);
+            final int ab = table[_24bits >>> 12];
+            final int cd = table[_24bits & 0xfff];
             out[o++] = (byte) (ab >>> Byte.SIZE);
             out[o++] = (byte) ab;
             out[o++] = (byte) (cd >>> Byte.SIZE);
@@ -86,7 +86,7 @@ public final class FastBase64 {
     }
 
     private static byte[] encodeMainLineSep(byte[] buffer, int i, short[] table, int end, int len) {
-        byte[] out = new byte[len];
+        final byte[] out = new byte[len];
         int quadruples = 0;
         final int lineSepLimit = out.length - LINE_SEP_LEN;
         for (int o = 0; i < end; ) {
