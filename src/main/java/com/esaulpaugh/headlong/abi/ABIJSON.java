@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.getArray;
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.getBoolean;
@@ -85,7 +86,7 @@ public final class ABIJSON {
      * @param <T>
      */
     public static <T extends ABIObject> T parseABIObject(JsonObject object) {
-        return parseABIObject(TypeEnum.parse(getType(object)), object, Function.newDefaultDigest());
+        return parseABIObject(TypeEnum.parse(getType(object)), object, Function::newDefaultDigest);
     }
 
     /**
@@ -130,7 +131,7 @@ public final class ABIJSON {
                 final JsonObject object = e.getAsJsonObject();
                 final TypeEnum t = TypeEnum.parse(getType(object));
                 if(types.contains(t)) {
-                    selected.add(parseABIObject(t, object, digest));
+                    selected.add(parseABIObject(t, object, () -> digest));
                 }
             }
         }
@@ -138,12 +139,12 @@ public final class ABIJSON {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends ABIObject> T parseABIObject(TypeEnum t, JsonObject object, MessageDigest digest) {
+    private static <T extends ABIObject> T parseABIObject(TypeEnum t, JsonObject object, Supplier<MessageDigest> digest) {
         switch (t.ordinal()) {
         case TypeEnum.ORDINAL_FUNCTION:
         case TypeEnum.ORDINAL_RECEIVE:
         case TypeEnum.ORDINAL_FALLBACK:
-        case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) parseFunctionUnchecked(t, object, digest);
+        case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) parseFunctionUnchecked(t, object, digest.get());
         case TypeEnum.ORDINAL_EVENT: return (T) parseEventUnchecked(object);
         case TypeEnum.ORDINAL_ERROR: return (T) parseErrorUnchecked(object);
         default: throw new AssertionError();
