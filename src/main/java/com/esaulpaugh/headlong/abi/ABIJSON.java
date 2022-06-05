@@ -150,8 +150,8 @@ public final class ABIJSON {
         }
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    static Function parseFunction(JsonObject function) {
-        return parseFunctionUnchecked(getFunctionType(function), function, Function.newDefaultDigest());
+    static Function parseFunction(JsonObject function, MessageDigest digest) {
+        return parseFunctionUnchecked(getFunctionType(function), function, digest);
     }
 
     static Event parseEvent(JsonObject event) {

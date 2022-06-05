@@ -342,7 +342,11 @@ public final class Function implements ABIObject {
     }
 
     public static Function fromJsonObject(JsonObject function) {
-        return ABIJSON.parseFunction(function);
+        return fromJsonObject(function, Function.newDefaultDigest());
+    }
+
+    public static Function fromJsonObject(JsonObject function, MessageDigest digest) {
+        return ABIJSON.parseFunction(function, digest);
     }
 
     /**
