@@ -98,8 +98,7 @@ public class RLPStreamTest {
 
         // write RLP
         Baos baos = new Baos();
-        RLPOutputStream ros = new RLPOutputStream(baos);
-		try (ObjectOutputStream oos = new ObjectOutputStream(ros)) {
+		try (ObjectOutputStream oos = new ObjectOutputStream(new RLPOutputStream(baos))) {
 			oos.writeUTF("hello");
 //        oos.flush();
 			oos.writeChar('Z');
