@@ -283,12 +283,12 @@ public class ABIJSONTest {
         final TupleType out = f.getOutputs();
         final ABIType<?> out0 = out.get(0);
 
-        BigInteger val = BigInteger.valueOf(40L);
-        Object obj = val;
-        Object a = out.getNonCapturing(0).encode(val);
-        Object b = out.getNonCapturing(0).encode(obj);
+        final BigInteger val = BigInteger.valueOf(40L);
+        final Object obj = val;
+        final Object a = out.getNonCapturing(0).encode(val);
+        final Object b = out.getNonCapturing(0).encode(obj);
         assertEquals(a, b);
-        ABIType<? super Object> type = out.getNonCapturing(0);
+        final ABIType<? super Object> type = out.getNonCapturing(0);
         assertEquals(a, type.encode(obj));
         assertEquals(a, type.encode(val));
 
