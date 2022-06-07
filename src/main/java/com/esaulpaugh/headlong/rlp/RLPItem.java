@@ -71,41 +71,78 @@ public abstract class RLPItem {
      */
     public abstract RLPItem duplicate();
 
+    /**
+     * Returns the length of this item's RLP encoding, including prefix, in bytes.
+     *
+     * @return  the byte-length of the encoding
+     */
     public final int encodingLength() {
         return endIndex - index;
     }
 
+    /**
+     * Returns this item's RLP encoding.
+     *
+     * @return  this item's bytes, including prefix
+     */
     public final byte[] encoding() {
         return Arrays.copyOfRange(buffer, index, endIndex);
     }
 
+    /**
+     * Returns the payload portion of this item only, and not the prefix.
+     *
+     * @return  the data part of the encoding
+     */
     public final byte[] data() {
         return Arrays.copyOfRange(buffer, dataIndex, endIndex);
     }
 
+    /**
+     * Inserts this item's RLP encoding into the specified buffer, starting at {@code destIndex} (inclusive) and ending
+     * at {code destIndex} plus {@link RLPItem#encodingLength()} (exclusive).
+     *
+     * @param dest  the destination array into which the bytes will be copied
+     * @param destIndex the index into the destination array
+     * @return  the index into {@code dest} immediately after the last byte of the copied encoding
+     * @see RLPItem#encoding()
+     */
     public final int copy(byte[] dest, int destIndex) {
         int len = encodingLength();
         System.arraycopy(buffer, index, dest, destIndex, len);
         return destIndex + len;
     }
 
+    /** Inserts this item's RLP encoding into the specified {@link ByteBuffer} at its current position. */
     public final void copy(ByteBuffer dest) {
         dest.put(buffer, index, encodingLength());
     }
 
+    /** Inserts this item's RLP encoding into the specified {@link OutputStream} at its current position. */
     public final void copy(OutputStream dest) throws IOException {
         dest.write(buffer, index, encodingLength());
     }
 
+    /**
+     * Inserts this item's data into the specified buffer, starting at {@code destIndex} (inclusive) and ending at
+     * {code destIndex} plus {@link RLPItem#dataLength} (exclusive).
+     *
+     * @param dest  the destination array into which the bytes will be copied
+     * @param destIndex the index into the destination array
+     * @return  the index into {@code dest} immediately after the last byte of the copied data
+     * @see RLPItem#data()
+     */
     public final int copyData(byte[] dest, int destIndex) {
         System.arraycopy(buffer, dataIndex, dest, destIndex, dataLength);
         return destIndex + dataLength;
     }
 
+    /** Inserts this item's data into the specified {@link ByteBuffer} at its current position. */
     public final void copyData(ByteBuffer dest) {
         dest.put(buffer, dataIndex, dataLength);
     }
 
+    /** Inserts this item's data into the specified {@link OutputStream} at its current position. */
     public final void copyData(OutputStream dest) throws IOException {
         dest.write(buffer, dataIndex, dataLength);
     }
