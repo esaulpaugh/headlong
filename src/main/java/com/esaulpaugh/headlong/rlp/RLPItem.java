@@ -211,6 +211,13 @@ public abstract class RLPItem {
         return result;
     }
 
+    /**
+     * Indicates whether this item's RLP encoding (including prefix) is byte-for-byte identical to another item's. If
+     * the argument object is not an {@link RLPItem}, this method returns {@code false}.
+     *
+     * @param o the object with which to compare this item
+     * @return  {@code true} if the argument is an {@link RLPItem} with an identical encoding; {@code false} otherwise.
+     */
     @Override
     public final boolean equals(Object o) {
         if(o == this) return true;
