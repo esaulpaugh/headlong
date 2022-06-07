@@ -29,13 +29,6 @@ public final class Tuple implements Iterable<Object> {
 
     public static final Tuple EMPTY = new Tuple();
 
-    static final Object ABSENT = new Object() {
-        @Override
-        public String toString() {
-            return "-ABSENT-";
-        }
-    };
-
     final Object[] elements;
 
     public Tuple(Object... elements) {
@@ -45,8 +38,8 @@ public final class Tuple implements Iterable<Object> {
     @SuppressWarnings("unchecked")
     public <T> T get(int index) {
         Object val = elements[index];
-        if(val == ABSENT) {
-            throw new NoSuchElementException("not present because index was not specified for decoding: " + index);
+        if(val == null) {
+            throw new NoSuchElementException("" + index); // are you getting an index which wasn't specified for decoding?
         }
         return (T) val;
     }

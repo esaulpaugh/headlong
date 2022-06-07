@@ -247,7 +247,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 throw new IllegalArgumentException("index out of order: " + index);
             }
             for (; r < index; r++) {
-                results[r] = Tuple.ABSENT;
                 skipBytes += elementTypes[r].headLength();
             }
             bb.position(start + skipBytes);
@@ -257,9 +256,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             }
             results[index] = resultType.decode(bb, unitBuffer);
             if (n >= indices.length) {
-                while (r < results.length) {
-                    results[r++] = Tuple.ABSENT;
-                }
                 return new Tuple(results);
             }
             skipBytes += resultType.headLength();

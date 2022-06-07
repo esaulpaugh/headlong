@@ -385,10 +385,10 @@ public class DecodeTest {
     }
 
     private static void testIndicesDecode(Tuple decoded) throws Throwable {
-        assertThrown(NoSuchElementException.class, "not present because index was not specified for decoding: 0", () -> decoded.get(0));
+        assertThrown(NoSuchElementException.class, "0", () -> decoded.get(0));
         boolean one = decoded.get(1);
         assertTrue(one);
-        assertThrown(NoSuchElementException.class, "not present because index was not specified for decoding: 2", () -> decoded.get(2));
+        assertThrown(NoSuchElementException.class, "2", () -> decoded.get(2));
         boolean three = decoded.get(3);
         assertFalse(three);
     }
