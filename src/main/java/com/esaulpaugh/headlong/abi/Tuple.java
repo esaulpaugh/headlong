@@ -35,6 +35,14 @@ public final class Tuple implements Iterable<Object> {
         this.elements = Arrays.copyOf(elements, elements.length); // shallow copy
     }
 
+    /**
+     * Returns the element at the specified position in this tuple.
+     *
+     * @param index index of the element to return
+     * @return  the element at the specified position
+     * @param <T>   the element's type
+     * @throws NoSuchElementException if this method would return null
+     */
     @SuppressWarnings("unchecked")
     public <T> T get(int index) {
         Object val = elements[index];
