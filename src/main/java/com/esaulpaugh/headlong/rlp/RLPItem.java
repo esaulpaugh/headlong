@@ -220,16 +220,12 @@ public abstract class RLPItem {
 //                this.buffer, this.index, this.endIndex,
 //                other.buffer, other.index, other.endIndex
 //        );
-        return equals(other.buffer, other.index, other.endIndex);
+        return other.encodingLength() == encodingLength() && contentEquals(other.buffer, other.index);
     }
 
-    private boolean equals(byte[] b, int bIdx, int bEnd) {
-        final int len = this.endIndex - this.index;
-        if(len != bEnd - bIdx) {
-            return false;
-        }
-        for (int i = 0; i < len; i++) {
-            if (this.buffer[this.index + i] != b[bIdx + i])
+    private boolean contentEquals(byte[] b, int bIdx) {
+        for (int i = this.index; i < this.endIndex; i++) {
+            if (this.buffer[i] != b[bIdx++])
                 return false;
         }
         return true;
