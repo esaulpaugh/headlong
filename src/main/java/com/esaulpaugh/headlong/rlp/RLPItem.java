@@ -118,7 +118,7 @@ public abstract class RLPItem {
         dest.put(buffer, index, encodingLength());
     }
 
-    /** Inserts this item's RLP encoding into the specified {@link OutputStream} at its current position. */
+    /** Writes this item's RLP encoding to the specified {@link OutputStream}. */
     public final void copy(OutputStream dest) throws IOException {
         dest.write(buffer, index, encodingLength());
     }
@@ -142,7 +142,7 @@ public abstract class RLPItem {
         dest.put(buffer, dataIndex, dataLength);
     }
 
-    /** Inserts this item's data into the specified {@link OutputStream} at its current position. */
+    /** Writes this item's data to the specified {@link OutputStream}. */
     public final void copyData(OutputStream dest) throws IOException {
         dest.write(buffer, dataIndex, dataLength);
     }
