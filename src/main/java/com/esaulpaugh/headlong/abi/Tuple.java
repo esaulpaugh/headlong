@@ -87,10 +87,6 @@ public final class Tuple implements Iterable<Object> {
         return new Tuple(element);
     }
 
-    public List<Object> toList() {
-        return Collections.unmodifiableList(Arrays.asList(elements));
-    }
-
     @Override
     public Iterator<Object> iterator() {
         return Arrays.asList(elements).iterator();

@@ -285,18 +285,18 @@ public class TupleTest {
         assertEquals("b", t.get(1));
         assertEquals("c", t.get(2));
 
-        List<Object> list = t.toList();
-        final int size = list.size();
-        assertEquals(args.length, size);
-        assertEquals(t.size(), size);
-        assertEquals(t.elements.length, size);
-
-        assertThrown(UnsupportedOperationException.class, () -> list.set(0, "d"));
-        assertThrown(UnsupportedOperationException.class, () -> list.replaceAll(s -> ""));
-        assertThrown(UnsupportedOperationException.class, () -> Collections.fill(list, ""));
+//        List<Object> list = t.toList();
+//        final int size = list.size();
+//        assertEquals(args.length, size);
+//        assertEquals(t.size(), size);
+//        assertEquals(t.elements.length, size);
+//
+//        assertThrown(UnsupportedOperationException.class, () -> list.set(0, "d"));
+//        assertThrown(UnsupportedOperationException.class, () -> list.replaceAll(s -> ""));
+//        assertThrown(UnsupportedOperationException.class, () -> Collections.fill(list, ""));
 
         testRemove(t.iterator());
-        testRemove(list.iterator());
+//        testRemove(list.iterator());
     }
 
     @Test
