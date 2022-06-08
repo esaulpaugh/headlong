@@ -1,7 +1,5 @@
 import org.gradle.internal.jvm.Jvm
 
-import java.time.Instant
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 plugins {
@@ -11,7 +9,7 @@ plugins {
 
 group 'com.esaulpaugh'
 archivesBaseName = "headlong"
-version '6.3.3-SNAPSHOT'
+version '6.4.1-SNAPSHOT'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
