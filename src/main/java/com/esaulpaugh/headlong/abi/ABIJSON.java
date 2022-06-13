@@ -65,27 +65,13 @@ public final class ABIJSON {
     private static final String STATE_MUTABILITY = "stateMutability";
     static final String PAYABLE = "payable"; // to mark as nonpayable, do not specify any stateMutability
 
-    /**
-     * @see Function#fromJson(String)
-     * @see Event#fromJson(String)
-     * @see ContractError#fromJson(String)
-     * @param objectJson
-     * @return
-     * @param <T>
-     */
-    public static <T extends ABIObject> T parseABIObject(String objectJson) {
+    /** @see ABIObject#fromJson(String) */
+    static <T extends ABIObject> T parseABIObject(String objectJson) {
         return parseABIObject(parseObject(objectJson));
     }
 
-    /**
-     * @see Function#fromJsonObject(JsonObject)
-     * @see Event#fromJsonObject(JsonObject)
-     * @see ContractError#fromJsonObject(JsonObject)
-     * @param object
-     * @return
-     * @param <T>
-     */
-    public static <T extends ABIObject> T parseABIObject(JsonObject object) {
+    /** @see ABIObject#fromJsonObject(JsonObject) */
+    static <T extends ABIObject> T parseABIObject(JsonObject object) {
         return parseABIObject(TypeEnum.parse(getType(object)), object, Function::newDefaultDigest);
     }
 

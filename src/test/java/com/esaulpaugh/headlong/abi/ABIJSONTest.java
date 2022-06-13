@@ -261,15 +261,15 @@ public class ABIJSONTest {
         }
 
         for (String originalJson : jsons) {
-            ABIObject orig = ABIJSON.parseABIObject(JsonUtils.parseObject(originalJson));
+            ABIObject orig = ABIObject.fromJsonObject(JsonUtils.parseObject(originalJson));
             String newJson = orig.toJson(false);
             assertNotEquals(originalJson, newJson);
 
-            ABIObject reconstructed = ABIJSON.parseABIObject(JsonUtils.parseObject(newJson));
+            ABIObject reconstructed = ABIObject.fromJsonObject(JsonUtils.parseObject(newJson));
 
             assertEquals(orig, reconstructed);
             assertEquals(originalJson, reconstructed.toString());
-            assertEquals(orig, ABIJSON.parseABIObject(newJson));
+            assertEquals(orig, ABIObject.fromJson(newJson));
         }
     }
 
@@ -532,7 +532,7 @@ public class ABIJSONTest {
         JsonObject object = JsonUtils.parseObject(ERROR_JSON);
 
         ContractError error0 = ABIJSON.parseErrors(ERROR_JSON_ARRAY).get(0);
-        ContractError error1 = ABIJSON.parseABIObject(object);
+        ContractError error1 = ABIObject.fromJsonObject(object);
 
         testError(error0, ERROR_JSON, object);
         testError(error1, ERROR_JSON, object);
