@@ -113,12 +113,21 @@ public abstract class RLPItem {
         return destIndex + len;
     }
 
-    /** Inserts this item's RLP encoding into the specified {@link ByteBuffer} at its current position. */
+    /**
+     * Inserts this item's RLP encoding into the specified {@link ByteBuffer} at its current position.
+     *
+     * @param dest  the data's destination
+     */
     public final void copy(ByteBuffer dest) {
         dest.put(buffer, index, encodingLength());
     }
 
-    /** Writes this item's RLP encoding to the specified {@link OutputStream}. */
+    /**
+     * Writes this item's RLP encoding to the specified {@link OutputStream}.
+     *
+     * @param dest  the data's destination
+     * @throws IOException  if an I/O error occurs
+     */
     public final void copy(OutputStream dest) throws IOException {
         dest.write(buffer, index, encodingLength());
     }
@@ -137,12 +146,21 @@ public abstract class RLPItem {
         return destIndex + dataLength;
     }
 
-    /** Inserts this item's data into the specified {@link ByteBuffer} at its current position. */
+    /**
+     * Inserts this item's data into the specified {@link ByteBuffer} at its current position.
+     *
+     * @param dest  the data's destination
+     */
     public final void copyData(ByteBuffer dest) {
         dest.put(buffer, dataIndex, dataLength);
     }
 
-    /** Writes this item's data to the specified {@link OutputStream}. */
+    /**
+     * Writes this item's data to the specified {@link OutputStream}.
+     *
+     * @param dest  the data's destination
+     * @throws IOException  if an I/O error occurs
+     */
     public final void copyData(OutputStream dest) throws IOException {
         dest.write(buffer, dataIndex, dataLength);
     }
