@@ -47,8 +47,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         if(dynamic) {
             this.headLength = OFFSET_LENGTH_BYTES;
             int sum = 0;
-            for (int i = 0; i < elementTypes.length; i++) {
-                sum += get(i).headLength();
+            for (ABIType<?> elementType : elementTypes) {
+                sum += elementType.headLength();
             }
             this.firstOffset = sum;
         } else {
