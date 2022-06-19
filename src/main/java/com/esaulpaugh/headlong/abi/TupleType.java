@@ -39,11 +39,22 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     final ABIType<?>[] elementTypes;
     private final int headLength;
+    private final int firstOffset;
 
     private TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String name) {
         super(canonicalType, Tuple.class, dynamic, name);
         this.elementTypes = elementTypes;
-        this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticTupleHeadLength(this);
+        if(dynamic) {
+            this.headLength = OFFSET_LENGTH_BYTES;
+            int sum = 0;
+            for (int i = 0; i < elementTypes.length; i++) {
+                sum += get(i).headLength();
+            }
+            this.firstOffset = sum;
+        } else {
+            this.headLength = staticTupleHeadLength(this);
+            this.firstOffset = -1;
+        }
     }
 
     static TupleType wrap(String name, ABIType<?>... elements) {
@@ -154,15 +165,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     void encodeTail(Object value, ByteBuffer dest) {
         Object[] vals = ((Tuple) value).elements;
-        encodeObjects(dynamic, vals, TupleType.this::get, dest, dynamic ? headLength(vals) : -1);
-    }
-
-    private int headLength(Object[] elements) {
-        int sum = 0;
-        for (int i = 0; i < elements.length; i++) {
-            sum += get(i).headLength();
-        }
-        return sum;
+        encodeObjects(dynamic, vals, TupleType.this::get, dest, firstOffset);
     }
 
     @Override
