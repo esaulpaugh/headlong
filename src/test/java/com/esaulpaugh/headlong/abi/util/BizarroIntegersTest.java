@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -71,9 +72,12 @@ public class BizarroIntegersTest {
     }
 
     @Test
-    public void putGetInt() {
-        try (ForkJoinPool fjp = new ForkJoinPool()) {
+    public void putGetInt() throws InterruptedException, TimeoutException {
+        ForkJoinPool fjp = new ForkJoinPool();
+        try {
             fjp.invoke(new BizarroIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        } finally {
+            TestUtils.requireNoTimeout(TestUtils.shutdownAwait(fjp, 10L));
         }
     }
 
@@ -115,9 +119,12 @@ public class BizarroIntegersTest {
     }
 
     @Test
-    public void lenInt() {
-        try (ForkJoinPool fjp = new ForkJoinPool()) {
+    public void lenInt() throws InterruptedException, TimeoutException {
+        ForkJoinPool fjp = new ForkJoinPool();
+        try {
             fjp.invoke(new BizarroLenIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        } finally {
+            TestUtils.requireNoTimeout(TestUtils.shutdownAwait(fjp, 10L));
         }
     }
 

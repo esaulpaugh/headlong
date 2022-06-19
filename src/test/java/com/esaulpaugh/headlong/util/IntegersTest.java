@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeoutException;
 import java.util.function.ToIntBiFunction;
 import java.util.function.ToIntFunction;
 
@@ -79,12 +80,12 @@ public class IntegersTest {
     }
 
     @Test
-    public void putGetInt() {
+    public void putGetInt() throws InterruptedException, TimeoutException {
         ForkJoinPool pool = new ForkJoinPool();
         try {
             pool.invoke(new TestUtils.IntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
         } finally {
-            pool.close();
+            TestUtils.requireNoTimeout(TestUtils.shutdownAwait(pool, 10L));
         }
     }
 
@@ -145,12 +146,12 @@ public class IntegersTest {
     }
 
     @Test
-    public void lenInt() {
+    public void lenInt() throws InterruptedException, TimeoutException {
         ForkJoinPool pool = new ForkJoinPool();
         try {
             pool.invoke(new TestUtils.LenIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
         } finally {
-            pool.close();
+            TestUtils.requireNoTimeout(TestUtils.shutdownAwait(pool, 10L));
         }
     }
 
