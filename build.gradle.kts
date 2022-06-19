@@ -1,7 +1,8 @@
-//import java.time.ZoneId
-//import java.time.ZonedDateTime
+//import org.gradle.internal.jvm.Jvm
+//import java.time.Instant
 //import java.time.format.DateTimeFormatter
-//import org.gradle.internal.jvm.Jvm;
+//import java.util.Locale
+//import java.time.ZoneId
 //
 //plugins {
 //    id("java-library")
@@ -49,7 +50,7 @@
 //    }
 //}
 //
-//val buildDate : String = ZonedDateTime.now(ZoneId.of("UTC")).format(DateTimeFormatter.ofPattern("MMMM d yyyy z"))
+//val dateFormatter : DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneId.of("UTC"))
 //
 //tasks.withType<Jar> {
 //    manifest {
@@ -57,7 +58,7 @@
 //            Pair<String, Any?>("Implementation-Title", project.name),
 //            Pair<String, Any?>("Implementation-Version", project.version),
 //            Pair<String, Any?>("Automatic-Module-Name", project.name),
-//            Pair<String, Any?>("Build-Date", buildDate)
+//            Pair<String, Any?>("Build-Date", dateFormatter.format(Instant.now()))
 //        )
 //    }
 //}
