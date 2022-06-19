@@ -116,21 +116,23 @@ public class MonteCarloTest {
     }
 
     private static final int N = 32_000;
+    private static final int MAX_TUPLE_DEPTH = 4;
+    private static final int MAX_TUPLE_LEN = 3;
+    private static final int MAX_ARRAY_DEPTH = 3;
+    private static final int MAX_ARRAY_LEN = 4;
 
     @Test
     public void gambleGamble() throws InterruptedException, TimeoutException {
 
         final long masterSeed = TestUtils.getSeed(); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
-        System.out.println("MASTER SEED: " + masterSeed + "L");
-
-        final int numProcessors = Runtime.getRuntime().availableProcessors();
-        final GambleGambleRunnable[] runnables = new GambleGambleRunnable[numProcessors];
-        final int workPerProcessor = N / numProcessors;
-        final ExecutorService pool = Executors.newFixedThreadPool(numProcessors);
+        final int parallelism = Runtime.getRuntime().availableProcessors();
+        final GambleGambleRunnable[] runnables = new GambleGambleRunnable[parallelism];
+        final int workPerProcessor = N / parallelism;
+        final ExecutorService pool = Executors.newFixedThreadPool(parallelism);
         int i = 0;
         while (i < runnables.length) {
-            pool.submit(runnables[i] = new GambleGambleRunnable(masterSeed + (i++), workPerProcessor));
+            pool.submit(runnables[i] = new GambleGambleRunnable(parallelism, masterSeed, masterSeed + (i++), workPerProcessor, MAX_TUPLE_DEPTH, MAX_TUPLE_LEN, MAX_ARRAY_DEPTH, MAX_ARRAY_LEN));
         }
         boolean noTimeout = TestUtils.shutdownAwait(pool, 600L);
 
@@ -141,25 +143,37 @@ public class MonteCarloTest {
         }
 
         requireNoTimeout(noTimeout);
-        System.out.println((workPerProcessor * i) + " done");
+        System.out.println("gambleGamble " + (workPerProcessor * i) + " done with " + masterSeed + "L," + MAX_TUPLE_DEPTH + ',' + MAX_TUPLE_LEN + ',' + MAX_ARRAY_DEPTH + ',' + MAX_ARRAY_LEN);
     }
 
-    static void doMonteCarlo(long threadSeed, int n) {
+    static void doMonteCarlo(final int parallelism,
+                             final long masterSeed,
+                             final long threadSeed,
+                             final int n,
+                             final int maxTupleDepth,
+                             final int maxTupleLen,
+                             final int maxArrayDepth,
+                             final int maxArrayLen) {
 
         final StringBuilder log = new StringBuilder();
 
         final Random r = new Random(threadSeed);
         final Keccak k = new Keccak(256);
 
-        final String desc = "thread-" + Thread.currentThread().getId() + " seed: " + threadSeed + "L";
+        final String desc = "thread-" + Thread.currentThread().getId() + " seed: " + threadSeed + "L\nMASTER SEED: " + masterSeed + "\nparallelism: " + parallelism;
 
         final Random instance = new Random();
 
         int i = 0;
         MonteCarloTestCase testCase = null;
-        for (; i < n; i++) {
+        boolean initialized;
+        long caseSeed = -1;
+        do {
+            initialized = false;
             try {
-                testCase = new MonteCarloTestCase(r.nextLong(), 4, 3, 3, 4, r, k);
+                caseSeed = r.nextLong();
+                testCase = new MonteCarloTestCase(caseSeed, maxTupleDepth, maxTupleLen, maxArrayDepth, maxArrayLen, r, k);
+                initialized = true;
 //                if(testCase.function.getCanonicalSignature().contains("int[")) throw new Error("canonicalization failed!");
                 testCase.runAll(instance);
 //                if(System.nanoTime() % 50_000_000 == 0) throw new Error("simulated random error");
@@ -172,32 +186,53 @@ public class MonteCarloTest {
             } catch (Throwable t) {
                 System.out.println(log);
                 sleep();
-                System.err.println("#" + i + " failed for " + testCase);
-                System.err.println(desc);
-                repro(testCase, false);
+                if (!initialized) {
+                    System.err.println("#" + i + " failed to initialize with seed " + caseSeed + "\n" + desc);
+                } else {
+                    System.err.println("#" + i + " failed for " + testCase + "\n" + desc);
+                    repro(testCase, false);
+                }
                 throw t;
             }
-        }
+        } while(++i < n);
 
         if(log.length() > 0) System.out.println(log);
-        System.out.println(desc);
     }
 
     private static class GambleGambleRunnable implements Runnable {
 
-        GambleGambleRunnable(long seed, int n) {
+        GambleGambleRunnable(final int parallelism,
+                             final long masterSeed,
+                             final long seed,
+                             final int n,
+                             final int maxTupleDepth,
+                             final int maxTupleLen,
+                             final int maxArrayDepth,
+                             final int maxArrayLen) {
+            this.parallelism = parallelism;
+            this.masterSeed = masterSeed;
             this.seed = seed;
             this.n = n;
+            this.maxTupleDepth = maxTupleDepth;
+            this.maxTupleLen = maxTupleLen;
+            this.maxArrayDepth = maxArrayDepth;
+            this.maxArrayLen = maxArrayLen;
         }
 
+        private final int parallelism;
+        private final long masterSeed;
         private final long seed;
         private final int n;
+        private final int maxTupleDepth;
+        private final int maxTupleLen;
+        private final int maxArrayDepth;
+        private final int maxArrayLen;
         Throwable thrown = null;
 
         @Override
         public void run() {
             try {
-                doMonteCarlo(seed, n);
+                doMonteCarlo(parallelism, masterSeed, seed, n, maxTupleDepth, maxTupleLen, maxArrayDepth, maxArrayLen);
             } catch (Throwable t) {
                 thrown = t;
             }
