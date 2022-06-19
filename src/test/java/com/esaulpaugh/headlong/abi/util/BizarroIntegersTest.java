@@ -72,7 +72,9 @@ public class BizarroIntegersTest {
 
     @Test
     public void putGetInt() {
-        new ForkJoinPool().invoke(new BizarroIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        try (ForkJoinPool fjp = new ForkJoinPool()) {
+            fjp.invoke(new BizarroIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        }
     }
 
     @Test
@@ -114,7 +116,9 @@ public class BizarroIntegersTest {
 
     @Test
     public void lenInt() {
-        new ForkJoinPool().invoke(new BizarroLenIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        try (ForkJoinPool fjp = new ForkJoinPool()) {
+            fjp.invoke(new BizarroLenIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        }
     }
 
     @Test

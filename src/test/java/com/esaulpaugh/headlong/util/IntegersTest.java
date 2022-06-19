@@ -80,7 +80,12 @@ public class IntegersTest {
 
     @Test
     public void putGetInt() {
-        new ForkJoinPool().invoke(new TestUtils.IntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        ForkJoinPool pool = new ForkJoinPool();
+        try {
+            pool.invoke(new TestUtils.IntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        } finally {
+            pool.close();
+        }
     }
 
     @Test
@@ -141,7 +146,12 @@ public class IntegersTest {
 
     @Test
     public void lenInt() {
-        new ForkJoinPool().invoke(new TestUtils.LenIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        ForkJoinPool pool = new ForkJoinPool();
+        try {
+            pool.invoke(new TestUtils.LenIntTask(Integer.MIN_VALUE, Integer.MAX_VALUE));
+        } finally {
+            pool.close();
+        }
     }
 
     @Test
