@@ -58,7 +58,12 @@ public class MonteCarloTest {
     public void testRepro() { // (245781902350714877L,5,5,5,4
         Random instance = new Random(); // (1847095625529912080L,5,5,5,4
         MessageDigest md = Function.newDefaultDigest(); // (-2049532359701068182L,4,4,4,4
-        MonteCarloTestCase testCase = new MonteCarloTestCase(3239653448104147572L,4,3,5,4, instance, md);
+        MonteCarloTestCase testCase = new MonteCarloTestCase(
+                3239653448104147572L,
+                new MonteCarloTestCase.Limits(4, 3, 5, 4),
+                instance,
+                md
+        );
         repro(testCase, true); // (3239653448104147572L,4,3,5,4)
     }
 
@@ -124,6 +129,7 @@ public class MonteCarloTest {
     @Test
     public void gambleGamble() throws InterruptedException, TimeoutException {
 
+        final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(MAX_TUPLE_DEPTH, MAX_TUPLE_LEN, MAX_ARRAY_DEPTH, MAX_ARRAY_LEN);
         final long masterSeed = TestUtils.getSeed(); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
         final int parallelism = Runtime.getRuntime().availableProcessors();
@@ -132,7 +138,7 @@ public class MonteCarloTest {
         final ExecutorService pool = Executors.newFixedThreadPool(parallelism);
         int i = 0;
         while (i < runnables.length) {
-            pool.submit(runnables[i] = new GambleGambleRunnable(parallelism, masterSeed, masterSeed + (i++), workPerProcessor, MAX_TUPLE_DEPTH, MAX_TUPLE_LEN, MAX_ARRAY_DEPTH, MAX_ARRAY_LEN));
+            pool.submit(runnables[i] = new GambleGambleRunnable(parallelism, masterSeed, masterSeed + (i++), workPerProcessor, limits));
         }
         boolean noTimeout = TestUtils.shutdownAwait(pool, 600L);
 
@@ -150,10 +156,7 @@ public class MonteCarloTest {
                              final long masterSeed,
                              final long threadSeed,
                              final int n,
-                             final int maxTupleDepth,
-                             final int maxTupleLen,
-                             final int maxArrayDepth,
-                             final int maxArrayLen) {
+                             final MonteCarloTestCase.Limits limits) {
 
         final StringBuilder log = new StringBuilder();
 
@@ -172,7 +175,7 @@ public class MonteCarloTest {
             initialized = false;
             try {
                 caseSeed = r.nextLong();
-                testCase = new MonteCarloTestCase(caseSeed, maxTupleDepth, maxTupleLen, maxArrayDepth, maxArrayLen, r, k);
+                testCase = new MonteCarloTestCase(caseSeed, limits, r, k);
                 initialized = true;
 //                if(testCase.function.getCanonicalSignature().contains("int[")) throw new Error("canonicalization failed!");
                 testCase.runAll(instance);
@@ -201,38 +204,29 @@ public class MonteCarloTest {
 
     private static class GambleGambleRunnable implements Runnable {
 
-        GambleGambleRunnable(final int parallelism,
-                             final long masterSeed,
-                             final long seed,
-                             final int n,
-                             final int maxTupleDepth,
-                             final int maxTupleLen,
-                             final int maxArrayDepth,
-                             final int maxArrayLen) {
-            this.parallelism = parallelism;
-            this.masterSeed = masterSeed;
-            this.seed = seed;
-            this.n = n;
-            this.maxTupleDepth = maxTupleDepth;
-            this.maxTupleLen = maxTupleLen;
-            this.maxArrayDepth = maxArrayDepth;
-            this.maxArrayLen = maxArrayLen;
-        }
-
         private final int parallelism;
         private final long masterSeed;
         private final long seed;
         private final int n;
-        private final int maxTupleDepth;
-        private final int maxTupleLen;
-        private final int maxArrayDepth;
-        private final int maxArrayLen;
+        private final MonteCarloTestCase.Limits limits;
         Throwable thrown = null;
+
+        GambleGambleRunnable(final int parallelism,
+                             final long masterSeed,
+                             final long seed,
+                             final int n,
+                             final MonteCarloTestCase.Limits limits) {
+            this.parallelism = parallelism;
+            this.masterSeed = masterSeed;
+            this.seed = seed;
+            this.n = n;
+            this.limits = limits;
+        }
 
         @Override
         public void run() {
             try {
-                doMonteCarlo(parallelism, masterSeed, seed, n, maxTupleDepth, maxTupleLen, maxArrayDepth, maxArrayLen);
+                doMonteCarlo(parallelism, masterSeed, seed, n, limits);
             } catch (Throwable t) {
                 thrown = t;
             }
@@ -341,12 +335,12 @@ public class MonteCarloTest {
     private static MonteCarloTestCase newComplexTestCase(Random r, Keccak k) {
         long seed = TestUtils.getSeed();
         final long origSeed = seed;
-
+        final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(4, 4, 2, 2);
         MonteCarloTestCase testCase;
         String sig;
         do {
             seed++;
-            testCase = new MonteCarloTestCase(seed, 4, 4, 2, 2, r, k);
+            testCase = new MonteCarloTestCase(seed, limits, r, k);
             sig = testCase.function.getCanonicalSignature();
         } while (
                 sig.endsWith("()")
@@ -363,6 +357,7 @@ public class MonteCarloTest {
     @Disabled("run if you need to generate random test cases")
     @Test
     public void printNewTestCases() {
+        final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(3, 3, 3, 3);
         final Random r = TestUtils.seededRandom();
         final Keccak k = new Keccak(256);
         final Gson ugly = new GsonBuilder().create();
@@ -371,7 +366,7 @@ public class MonteCarloTest {
         for(int i = 0; i < 250; i++) {
             MonteCarloTestCase testCase;
             do {
-                testCase = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
+                testCase = new MonteCarloTestCase(r.nextLong(), limits, r, k);
             } while (testCase.argsTuple.isEmpty());
             array.add(testCase.toJsonElement(ugly, "headlong_" + i, version));
         }

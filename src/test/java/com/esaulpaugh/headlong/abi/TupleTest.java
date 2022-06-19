@@ -113,9 +113,10 @@ public class TupleTest {
     @Test
     public void testTypeSafety() throws Throwable {
 
+        final int maxTupleLen = 3;
+        final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(maxTupleLen, 3, 3, 3);
         final Random r = TestUtils.seededRandom();
         final Keccak k = new Keccak(256);
-        final int maxTupleLen = 3;
         final Object defaultObj = new Object();
 
         long seed = r.nextLong();
@@ -123,7 +124,7 @@ public class TupleTest {
             for (int i = 0; i < 25; i++, seed++) {
                 r.setSeed(seed);
 
-                final MonteCarloTestCase testCase = new MonteCarloTestCase(seed, maxTupleLen, 3, 3, 3, r, k);
+                final MonteCarloTestCase testCase = new MonteCarloTestCase(seed, limits, r, k);
                 final Object[] elements = testCase.argsTuple.elements;
                 if (idx < elements.length) {
                     Object replacement = OBJECTS[r.nextInt(OBJECTS.length)];
@@ -144,10 +145,11 @@ public class TupleTest {
 
     @Test
     public void fuzzNulls() throws Throwable {
+        final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(3, 3, 3, 3);
         final Random r = TestUtils.seededRandom();
         final Keccak k = new Keccak(256);
         for (int i = 0; i < 1000; i++) {
-            MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
+            MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong(), limits, r, k);
             Tuple args = mctc.argsTuple;
             if(args.elements.length > 0) {
                 int idx = r.nextInt(args.elements.length);

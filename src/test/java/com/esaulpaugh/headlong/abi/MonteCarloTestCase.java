@@ -108,26 +108,24 @@ public class MonteCarloTestCase {
 
     private final long seed;
 
-    private final int maxTupleDepth;
-    private final int maxTupleLen;
-
-    private final int maxArrayDepth;
-    private final int maxArrayLen;
+    private final Limits limits;
 
     final String rawSignature;
     final Function function;
     final Tuple argsTuple;
 
     MonteCarloTestCase(long seed) {
-        this(seed, DEFAULT_MAX_TUPLE_DEPTH, DEFAULT_MAX_TUPLE_LENGTH, DEFAULT_MAX_ARRAY_DEPTH, DEFAULT_MAX_ARRAY_LENGTH, new Random(), Function.newDefaultDigest());
+        this(
+                seed,
+                new Limits(DEFAULT_MAX_TUPLE_DEPTH, DEFAULT_MAX_TUPLE_LENGTH, DEFAULT_MAX_ARRAY_DEPTH, DEFAULT_MAX_ARRAY_LENGTH),
+                new Random(),
+                Function.newDefaultDigest()
+        );
     }
 
-    MonteCarloTestCase(long seed, int maxTupleDepth, int maxTupleLen, int maxArrayDepth, int maxArrayLen, Random rng, MessageDigest md) {
+    MonteCarloTestCase(long seed, Limits limits, Random rng, MessageDigest md) {
         this.seed = seed;
-        this.maxTupleDepth = maxTupleDepth;
-        this.maxTupleLen = maxTupleLen;
-        this.maxArrayDepth = maxArrayDepth;
-        this.maxArrayLen = maxArrayLen;
+        this.limits = limits;
 
         rng.setSeed(seed);
 
@@ -140,9 +138,9 @@ public class MonteCarloTestCase {
         }
 
         final String name = generateFunctionName(rng);
-        final String params = generateTupleTypeString(baseTypes, rng, 0);
-        this.rawSignature = name + params;
-        this.function = new Function(TypeEnum.FUNCTION, name, TupleType.parse(params), TupleType.EMPTY, null, md);
+        final String inputs = generateTupleTypeString(baseTypes, rng, 0);
+        this.rawSignature = name + inputs;
+        this.function = new Function(TypeEnum.FUNCTION, name, TupleType.parse(inputs), TupleType.EMPTY, null, md);
         this.argsTuple = generateTuple(function.getInputs().elementTypes, rng);
     }
 
@@ -297,7 +295,7 @@ public class MonteCarloTestCase {
     }
 
     private String generateTupleTypeString(String[] baseTypes, Random r, int tupleDepth) {
-        final int len = r.nextInt(1 + maxTupleLen);
+        final int len = r.nextInt(1 + limits.maxTupleLength);
         StringBuilder signature = new StringBuilder("(");
         for (int i = 0; i < len; i++) {
             String typeStr = generateType(baseTypes, r, tupleDepth).canonicalType;
@@ -325,7 +323,7 @@ public class MonteCarloTestCase {
         String baseTypeString = canonicalBaseTypes[r.nextInt(canonicalBaseTypes.length)];
 
         if(baseTypeString.equals(TUPLE_KEY)) {
-            baseTypeString = tupleDepth < maxTupleDepth
+            baseTypeString = tupleDepth < limits.maxTupleDepth
                     ? generateTupleTypeString(canonicalBaseTypes, r, tupleDepth + 1)
                     : "uint256";
         }
@@ -333,11 +331,11 @@ public class MonteCarloTestCase {
         StringBuilder sb = new StringBuilder(baseTypeString);
         boolean isElement = r.nextBoolean() && r.nextBoolean();
         if(isElement) {
-            int arrayDepth = 1 + r.nextInt(maxArrayDepth);
+            int arrayDepth = 1 + r.nextInt(limits.maxArrayDepth);
             for (int i = 0; i < arrayDepth; i++) {
                 sb.append('[');
                 if(r.nextBoolean()) {
-                    sb.append(r.nextInt(maxArrayLen + 1));
+                    sb.append(r.nextInt(limits.maxArrayLength + 1));
                 }
                 sb.append(']');
             }
@@ -415,7 +413,7 @@ public class MonteCarloTestCase {
         final ABIType<?> elementType = arrayType.getElementType();
         final int typeLen = arrayType.getLength();
         final int len = DYNAMIC_LENGTH == typeLen
-                ? r.nextInt(maxArrayLen + 1) // [0,max]
+                ? r.nextInt(limits.maxArrayLength + 1) // [0,max]
                 : typeLen;
 
         switch (elementType.typeCode()) {
@@ -511,7 +509,7 @@ public class MonteCarloTestCase {
     // ------------------------------------------------------------------------
     @Override
     public int hashCode() {
-        return Objects.hash(seed, maxTupleDepth, maxTupleLen, maxArrayDepth, maxArrayLen, function, argsTuple);
+        return Objects.hash(seed, limits.maxTupleDepth, limits.maxTupleLength, limits.maxArrayDepth, limits.maxArrayLength, function, argsTuple);
     }
 
     @Override
@@ -519,17 +517,17 @@ public class MonteCarloTestCase {
         if(!getClass().isInstance(o)) return false;
         MonteCarloTestCase other = (MonteCarloTestCase) o;
         return other.seed == this.seed
-                && other.maxTupleDepth == this.maxTupleDepth
-                && other.maxTupleLen == this.maxTupleLen
-                && other.maxArrayDepth == this.maxArrayDepth
-                && other.maxArrayLen == this.maxArrayLen
+                && other.limits.maxTupleDepth == this.limits.maxTupleDepth
+                && other.limits.maxTupleLength == this.limits.maxTupleLength
+                && other.limits.maxArrayDepth == this.limits.maxArrayDepth
+                && other.limits.maxArrayLength == this.limits.maxArrayLength
                 && Objects.equals(other.function, this.function)
                 && Objects.equals(other.argsTuple, this.argsTuple);
     }
 
     @Override
     public String toString() {
-        return "(" + seed + "L," + maxTupleDepth + ',' + maxTupleLen + ',' + maxArrayDepth + ',' + maxArrayLen + ") --> " + function.getCanonicalSignature();
+        return "(" + seed + "L," + limits.maxTupleDepth + ',' + limits.maxTupleLength + ',' + limits.maxArrayDepth + ',' + limits.maxArrayLength + ") --> " + function.getCanonicalSignature();
     }
 
     private static List<String> genOrderedFixedKeys() {
@@ -545,5 +543,20 @@ public class MonteCarloTestCase {
         }
         Collections.sort(ordered);
         return ordered;
+    }
+
+    static class Limits {
+
+        final int maxTupleDepth;
+        final int maxTupleLength;
+        final int maxArrayDepth;
+        final int maxArrayLength;
+
+        Limits(int maxTupleDepth, int maxTupleLength, int maxArrayDepth, int maxArrayLength) {
+            this.maxTupleDepth = maxTupleDepth;
+            this.maxTupleLength = maxTupleLength;
+            this.maxArrayDepth = maxArrayDepth;
+            this.maxArrayLength = maxArrayLength;
+        }
     }
 }

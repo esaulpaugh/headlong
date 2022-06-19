@@ -39,6 +39,7 @@ public class EqualsTest {
     @Test
     public void testEquals() {
 
+        final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(3, 3, 3, 3);
         final Random r = TestUtils.seededRandom();
         final Keccak k = new Keccak(256);
 
@@ -47,7 +48,7 @@ public class EqualsTest {
         int n = 0;
         do {
 
-            final MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong(), 3, 3, 3, 3, r, k);
+            final MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong(), limits, r, k);
 
             final String canonical = mctc.function.getCanonicalSignature();
             if(mctc.rawSignature.equals(canonical)) {
