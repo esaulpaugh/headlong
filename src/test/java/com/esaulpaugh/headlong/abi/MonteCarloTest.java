@@ -45,6 +45,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
@@ -268,7 +269,7 @@ public class MonteCarloTest {
         final int parallelism = Runtime.getRuntime().availableProcessors();
         final ExecutorService threadPool = Executors.newFixedThreadPool(parallelism);
 
-        ForkJoinPool fjPool = new ForkJoinPool();
+        ForkJoinPool fjPool = ForkJoinPool.commonPool();
         fjPool.invoke(oneTask);
 
         for (int i = 0; i < parallelism; i++) {
@@ -283,7 +284,7 @@ public class MonteCarloTest {
         }
 
         requireNoTimeout(shutdownAwait(threadPool, 20L));
-        requireNoTimeout(shutdownAwait(fjPool, 10L));
+        requireNoTimeout(fjPool.awaitQuiescence(10L, TimeUnit.SECONDS));
     }
 
     @Test
