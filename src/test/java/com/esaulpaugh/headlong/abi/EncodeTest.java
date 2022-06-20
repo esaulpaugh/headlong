@@ -486,7 +486,7 @@ public class EncodeTest {
         Object b = 9L;
         Object c = new boolean[0];
 
-        ByteBuffer ee = tt.encodeElements(a, b, c);
+        ByteBuffer ee = tt.encode(Tuple.of(a, b, c));
 
         assertArrayEquals(tt.encode(Tuple.of(a, b, c)).array(), ee.array());
         assertEquals(

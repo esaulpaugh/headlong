@@ -406,7 +406,7 @@ public class DecodeTest {
     public void testTupleDecodeTypeInference() throws Throwable {
         TupleType tt = TupleType.parse("(int,string,bool,int64)");
         Object[] elements = { BigInteger.valueOf(550L), "weow", true, -41L };
-        ByteBuffer bb = tt.encodeElements(elements);
+        ByteBuffer bb = tt.encode(new Tuple(elements));
         assertEquals(0, bb.position());
         assertEquals(TUPLE_HEX, Strings.encode(bb));
         final BigInteger zero = tt.decode(bb, 0);
@@ -432,7 +432,7 @@ public class DecodeTest {
     @Test
     public void testFunctionDecodeTypeInference() {
         Function f = Function.parse("f()", "(int,string,bool,int64)");
-        ByteBuffer bb = f.getOutputs().encodeElements(BigInteger.valueOf(550L), "weow", true, -41L);
+        ByteBuffer bb = f.getOutputs().encode(new Tuple(BigInteger.valueOf(550L), "weow", true, -41L));
         assertEquals(TUPLE_HEX, Strings.encode(bb));
         final BigInteger zero = f.decodeReturn(bb, 0);
         final String one = f.decodeReturn(bb, 1);

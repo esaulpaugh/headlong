@@ -319,16 +319,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return SuperSerial.deserialize(this, s, false);
     }
 
-    /**
-     * Gives the ABI encoding of the input values according to this {@link TupleType}'s element types.
-     *
-     * @param elements  values corresponding to this {@link TupleType}'s element types
-     * @return  the encoding
-     */
-    public ByteBuffer encodeElements(Object... elements) {
-        return encode(new Tuple(elements));
-    }
-
     @Override
     public Iterator<ABIType<?>> iterator() {
         return Arrays.asList(elementTypes).iterator();
