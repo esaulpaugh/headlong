@@ -483,6 +483,8 @@ public class ABIJSONTest {
         assertEquals(TupleType.parse("(bytes)"), event.getIndexedParams());
         assertEquals(TupleType.parse("(uint256)"), event.getNonIndexedParams());
         assertArrayEquals(new boolean[] { true, false }, event.getIndexManifest());
+        assertTrue(event.isElementIndexed(0));
+        assertFalse(event.isElementIndexed(1));
 
         assertEquals("a", event.getInputs().get(0).getName());
         assertEquals("b", event.getInputs().get(1).getName());

@@ -36,6 +36,9 @@ public class EventTest {
         assertEquals(name, event.getName());
         assertEquals(TupleType.parse(paramsString), event.getInputs());
         assertArrayEquals(indexed, event.getIndexManifest());
+        for (int i = 0; i < indexed.length; i++) {
+            assertEquals(indexed[i], event.isElementIndexed(i));
+        }
         assertFalse(event.isAnonymous());
 
         assertEquals(TupleType.parse("((),ufixed256x10)"), event.getIndexedParams());

@@ -79,6 +79,10 @@ public final class Event implements ABIObject {
         return Arrays.copyOf(indexManifest, indexManifest.length);
     }
 
+    public boolean isElementIndexed(int position) {
+        return indexManifest[position];
+    }
+
     public boolean isAnonymous() {
         return anonymous;
     }
