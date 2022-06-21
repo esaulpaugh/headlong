@@ -208,11 +208,10 @@ public final class Function implements ABIObject {
         return dest;
     }
 
-    public Function encodeCall(Tuple args, ByteBuffer dest) {
+    public void encodeCall(Tuple args, ByteBuffer dest) {
         inputTypes.validate(args);
         dest.put(selector);
         inputTypes.encodeTail(args, dest);
-        return this;
     }
 
     public Tuple decodeCall(byte[] call) {
