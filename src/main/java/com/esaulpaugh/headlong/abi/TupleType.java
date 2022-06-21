@@ -127,12 +127,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     private int countBytes(IntUnaryOperator counter) {
-        return countBytes(false, elementTypes.length, 0, counter);
+        return countBytes(false, elementTypes.length, counter);
     }
 
-    static int countBytes(boolean array, int len, int count, IntUnaryOperator counter) {
+    static int countBytes(boolean array, int len, IntUnaryOperator counter) {
         int i = 0;
         try {
+            int count = 0;
             for ( ; i < len; i++) {
                 count += counter.applyAsInt(i);
             }

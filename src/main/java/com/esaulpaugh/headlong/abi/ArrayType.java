@@ -22,6 +22,7 @@ import com.esaulpaugh.headlong.util.SuperSerial;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
+import java.util.function.IntUnaryOperator;
 
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
 import static com.esaulpaugh.headlong.abi.TupleType.countBytes;
@@ -198,28 +199,30 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return Integers.roundLengthUp(checkLength(byteCount(arr), arr), UNIT_LENGTH_BYTES);
     }
 
-    private int offsetsLen(int len) {
-        return elementType.dynamic ? OFFSET_LENGTH_BYTES * len : 0;
+    private int measureArrayElements(int n, IntUnaryOperator measurer) {
+        return elementType.dynamic
+                ? OFFSET_LENGTH_BYTES * n + countBytes(true, n, measurer)
+                : countBytes(true, n, measurer);
     }
 
     private int validateInts(int[] arr, IntType type) {
-        return countBytes(true, checkLength(arr.length, arr), offsetsLen(arr.length), i -> type.validatePrimitive(arr[i]));
+        return measureArrayElements(checkLength(arr.length, arr), i -> type.validatePrimitive(arr[i]));
     }
 
     private int validateLongs(long[] arr, LongType type) {
-        return countBytes(true, checkLength(arr.length, arr), offsetsLen(arr.length), i -> type.validatePrimitive(arr[i]));
+        return measureArrayElements(checkLength(arr.length, arr), i -> type.validatePrimitive(arr[i]));
     }
 
     private int validateObjects(Object[] arr) {
-        return countBytes(true, checkLength(arr.length, arr), offsetsLen(arr.length), i -> elementType._validate(arr[i]));
+        return measureArrayElements(checkLength(arr.length, arr), i -> elementType._validate(arr[i]));
     }
 
     private int measureByteLength(Object[] arr) {
-        return countBytes(true, arr.length, offsetsLen(arr.length), i -> elementType.byteLength(arr[i]));
+        return measureArrayElements(arr.length, i -> elementType.byteLength(arr[i]));
     }
 
     private int measureByteLengthPacked(Object[] arr) { // don't count offsets
-        return countBytes(true, arr.length, 0, i -> elementType.byteLengthPacked(arr[i]));
+        return countBytes(true, arr.length, i -> elementType.byteLengthPacked(arr[i]));
     }
 
     private int checkLength(final int valueLen, Object value) {
