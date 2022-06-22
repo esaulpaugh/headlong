@@ -262,14 +262,22 @@ public class RLPDecoderTest {
     public void duplicateString() {
         RLPString str = RLP_STRICT.wrap(LONG_LIST_BYTES, 13);
         RLPString dup = str.duplicate();
+
+        assertEquals(str, dup);
+        assertEquals(str.hashCode(), dup.hashCode());
+        assertEquals(str.toString(), dup.toString());
+        assertEquals(str.type(), dup.type());
+
         assertEquals(0, dup.index);
         assertEquals(str.dataIndex - str.index, dup.dataIndex);
         assertEquals(str.encodingLength(), dup.encodingLength());
         assertEquals(str.dataLength, dup.dataLength);
         assertEquals(str.endIndex - str.index, dup.endIndex);
-        assertEquals(str, dup);
         assertTrue(str.isString());
         assertFalse(str.isList());
+
+        assertArrayEquals(str.encoding(), dup.encoding());
+        assertArrayEquals(str.data(), dup.data());
     }
 
     @Test
@@ -278,14 +286,23 @@ public class RLPDecoderTest {
         System.arraycopy(LONG_LIST_BYTES, 0, buffer, 7, LONG_LIST_BYTES.length);
         RLPList list = RLP_STRICT.wrapList(buffer, 7);
         RLPList dup = list.duplicate();
+
+        assertEquals(list, dup);
+        assertEquals(list.hashCode(), dup.hashCode());
+        assertEquals(list.toString(), dup.toString());
+        assertEquals(list.type(), dup.type());
+
         assertEquals(0, dup.index);
         assertEquals(list.dataIndex - list.index, dup.dataIndex);
         assertEquals(list.encodingLength(), dup.encodingLength());
         assertEquals(list.dataLength, dup.dataLength);
         assertEquals(LONG_LIST_BYTES.length, dup.endIndex);
-        assertEquals(list, dup);
         assertFalse(list.isString());
         assertTrue(list.isList());
+
+        assertArrayEquals(list.encoding(), dup.encoding());
+        assertArrayEquals(list.data(), dup.data());
+        assertArrayEquals(list.elements().toArray(RLPItem.EMPTY_ARRAY), dup.elements().toArray(RLPItem.EMPTY_ARRAY));
     }
 
     @Test
