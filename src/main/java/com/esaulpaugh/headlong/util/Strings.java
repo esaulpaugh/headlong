@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.util;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 /** Utility for encoding and decoding hexadecimal, Base64, and UTF-8-encoded {@link String}s. */
 public final class Strings {
@@ -69,7 +70,7 @@ public final class Strings {
         switch (encoding) {
         case HEX: return FastHex.decode(string, 0, string.length());
         case UTF_8: return string.getBytes(StandardCharsets.UTF_8);
-        case BASE_64_URL_SAFE: return java.util.Base64.getUrlDecoder().decode(string);
+        case BASE_64_URL_SAFE: return Base64.getUrlDecoder().decode(string);
         case ASCII: return string.getBytes(StandardCharsets.US_ASCII);
         default: throw new UnsupportedOperationException();
         }
