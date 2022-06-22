@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.util;
 
+import java.nio.charset.StandardCharsets;
 import java.util.function.IntUnaryOperator;
 
 /** Hexadecimal codec optimized for small inputs. */
@@ -31,12 +32,12 @@ public final class FastHex {
     private static final short[] ENCODE_TABLE = new short[1 << Byte.SIZE];
 
     static {
-        final char[] chars = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+        final byte[] chars = "0123456789abcdef".getBytes(StandardCharsets.US_ASCII);
         final int leftNibbleMask = 0xF0;
         final int rightNibbleMask = 0x0F;
         for (int i = 0; i < ENCODE_TABLE.length; i++) {
-            char leftChar = chars[(i & leftNibbleMask) >>> BITS_PER_CHAR];
-            char rightChar = chars[i & rightNibbleMask];
+            byte leftChar = chars[(i & leftNibbleMask) >>> BITS_PER_CHAR];
+            byte rightChar = chars[i & rightNibbleMask];
             ENCODE_TABLE[i] = (short) ((leftChar << Byte.SIZE) | rightChar);
         }
     }
