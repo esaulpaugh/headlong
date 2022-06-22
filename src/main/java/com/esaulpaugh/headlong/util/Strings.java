@@ -59,19 +59,19 @@ public final class Strings {
         }
     }
 
-    public static byte[] decode(String encoded) {
-        return decode(encoded, HEX);
+    public static byte[] decode(String hex) {
+        return decode(hex, HEX);
     }
 
-    public static byte[] decode(String string, int encoding) {
-        if(string.isEmpty()) {
+    public static byte[] decode(String str, int encoding) {
+        if(str.isEmpty()) {
             return EMPTY_BYTE_ARRAY;
         }
         switch (encoding) {
-        case HEX: return FastHex.decode(string, 0, string.length());
-        case UTF_8: return string.getBytes(StandardCharsets.UTF_8);
-        case BASE_64_URL_SAFE: return Base64.getUrlDecoder().decode(string);
-        case ASCII: return string.getBytes(StandardCharsets.US_ASCII);
+        case HEX: return FastHex.decode(str, 0, str.length());
+        case UTF_8: return str.getBytes(StandardCharsets.UTF_8);
+        case BASE_64_URL_SAFE: return Base64.getUrlDecoder().decode(str);
+        case ASCII: return str.getBytes(StandardCharsets.US_ASCII);
         default: throw new UnsupportedOperationException();
         }
     }
