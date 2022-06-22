@@ -369,7 +369,7 @@ public class DecodeTest {
     @Test
     public void testDecodeCallIndices() throws Throwable {
         Function f = new Function("(int8,bool,int8[],bool)");
-        Tuple args = Tuple.of(1, true, new int[] { 3, 6 } , false);
+        Tuple args = Tuple.of(1, true, new int[] { 3, 6 }, false);
         byte[] encoded = f.encodeCall(args).array();
         testIndicesDecode(f.decodeCall(encoded, 1, 3));
         encoded[0]++;
@@ -379,7 +379,7 @@ public class DecodeTest {
     @Test
     public void testDecodeReturnIndices() throws Throwable {
         Function f = new Function("()", "(int8,bool,int8[],bool)");
-        Tuple args = Tuple.of(1, true, new int[] { 3, 6 } , false);
+        Tuple args = Tuple.of(1, true, new int[] { 3, 6 }, false);
         byte[] encoded = f.getOutputs().encode(args).array();
         testIndicesDecode(f.decodeReturn(encoded, 1, 3));
     }

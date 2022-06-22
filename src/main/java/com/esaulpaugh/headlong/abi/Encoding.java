@@ -55,7 +55,7 @@ final class Encoding {
         final byte[] arr = signed.toByteArray();
         if(arr.length <= paddedLen) {
             insertPadding(paddedLen - arr.length, signed.signum() < 0, dest);
-            dest.put(arr, 0 ,arr.length);
+            dest.put(arr, 0, arr.length);
         } else {
             dest.put(arr, 1, paddedLen);
         }
