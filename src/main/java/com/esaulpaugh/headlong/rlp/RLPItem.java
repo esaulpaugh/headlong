@@ -67,7 +67,6 @@ public abstract class RLPItem {
      * Clones this object.
      *
      * @return an independent and exact copy
-     * @throws IllegalArgumentException if a problem in re-decoding the item occurs
      */
     public abstract RLPItem duplicate();
 
