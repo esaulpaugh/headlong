@@ -151,9 +151,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + value.size() + " != " + this.size());
     }
 
-    private static int validateObject(ABIType<?> type, Object value) {
+    private static <T> int validateObject(ABIType<T> type, T value) {
         try {
-            return totalLen(type._validate(value), type.dynamic);
+            return totalLen(type.validate(type.validateClass(value)), type.dynamic);
         } catch (NullPointerException npe) {
             throw new IllegalArgumentException("null", npe);
         }

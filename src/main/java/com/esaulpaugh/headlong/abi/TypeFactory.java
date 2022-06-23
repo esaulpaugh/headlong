@@ -63,7 +63,7 @@ public final class TypeFactory {
         lambdaMap.put("address", AddressType::new);
         mapByteArray(lambdaMap, "function", FUNCTION_BYTE_LEN);
         mapByteArray(lambdaMap, "bytes", DYNAMIC_LENGTH);
-        lambdaMap.put("string", name -> new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, name));
+        lambdaMap.put("string", name -> new ArrayType<String, Byte, ByteType>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, name));
 
         lambdaMap.put("fixed128x18", name -> new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false, name));
         lambdaMap.put("ufixed128x18", name -> new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true, name));
@@ -92,7 +92,7 @@ public final class TypeFactory {
     }
 
     private static void mapByteArray(Map<String, Function<String, ABIType<?>>> map, String type, int arrayLen) {
-        map.put(type, name -> new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class, name));
+        map.put(type, name -> new ArrayType<byte[], Byte, ByteType>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class, name));
     }
 
     public static <T extends ABIType<?>> T create(String rawType) {

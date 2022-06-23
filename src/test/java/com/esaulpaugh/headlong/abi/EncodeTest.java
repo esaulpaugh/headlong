@@ -328,7 +328,7 @@ public class EncodeTest {
 
         assertThrown(ILLEGAL, "@ index 0, bad array length", () -> Function.parse("zaba(()[04])"));
 
-        assertEquals(4, ((ArrayType<TupleType, Tuple[]>) Function.parse("yaba(()[4])").getInputs().get(0)).getLength());
+        assertEquals(4, ((ArrayType<Tuple[], Tuple, TupleType>) Function.parse("yaba(()[4])").getInputs().get(0)).getLength());
     }
 
     @Test

@@ -33,10 +33,11 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
  * Represents static array types such as bytes3 or uint16[3][2] and dynamic array types such as decimal[5][] or
  * string[4].
  *
- * @param <E> the {@link ABIType} for the elements of the array
- * @param <J> this {@link ArrayType}'s corresponding Java type
+ * @param <J> the Java type on which this {@link ArrayType} is meant to operate
+ * @param <JE> the Java type of the elements of {@link J}
+ * @param <ET> the {@link ABIType} for the elements of {@link J}, which operates on objects of type {@link JE}
  */
-public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
+public final class ArrayType<J, JE, ET extends ABIType<JE>> extends ABIType<J> {
 
     private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
 
@@ -46,12 +47,12 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     public static final int DYNAMIC_LENGTH = -1;
 
     private final boolean isString;
-    private final E elementType;
+    private final ET elementType;
     private final int length;
     private final Class<?> arrayClass;
     private final int headLength;
 
-    ArrayType(String canonicalType, Class<J> clazz, E elementType, int length, Class<?> arrayClass, String name) {
+    ArrayType(String canonicalType, Class<J> clazz, ET elementType, int length, Class<?> arrayClass, String name) {
         super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic, name);
         this.isString = STRING_CLASS == clazz;
         this.elementType = elementType;
@@ -63,7 +64,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     static int staticArrayHeadLength(ABIType<?> type) {
         int length = 1;
         do {
-            final ArrayType<?, ?> at = (ArrayType<?, ?>) type;
+            final ArrayType<?, ?, ?> at = (ArrayType<?, ?, ?>) type;
             switch (at.elementType.typeCode()) {
             case TYPE_CODE_BYTE: return length * Integers.roundLengthUp(at.length, UNIT_LENGTH_BYTES);
             case TYPE_CODE_ARRAY: length *= at.length; type = at.elementType; continue;
@@ -73,7 +74,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         } while(true);
     }
 
-    public E getElementType() {
+    public ET getElementType() {
         return elementType;
     }
 
@@ -176,6 +177,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return totalLen(validateElements(validateClass(value)), length == DYNAMIC_LENGTH); // validateClass to disallow Object[] etc
     }
 
+    @SuppressWarnings("unchecked")
     private int validateElements(J value) {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return validateBooleans((boolean[]) value);
@@ -186,7 +188,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
-        case TYPE_CODE_ADDRESS: return validateObjects((Object[]) value);
+        case TYPE_CODE_ADDRESS: return validateObjects((JE[]) value);
         default: throw new AssertionError();
         }
     }
@@ -213,8 +215,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return measureArrayElements(checkLength(arr.length, arr), i -> type.validatePrimitive(arr[i]));
     }
 
-    private int validateObjects(Object[] arr) {
-        return measureArrayElements(checkLength(arr.length, arr), i -> elementType._validate(arr[i]));
+    private int validateObjects(JE[] arr) {
+        return measureArrayElements(checkLength(arr.length, arr), i -> elementType.validate(arr[i]));
     }
 
     private int measureByteLength(Object[] arr) {
@@ -413,8 +415,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     public static ABIType<?> baseType(ABIType<?> type) {
-        while (type instanceof ArrayType<?, ?>) {
-            type = ((ArrayType<? extends ABIType<?>, ?>) type).getElementType();
+        while (type instanceof ArrayType<?, ?, ?>) {
+            type = ((ArrayType<?, ?, ? extends ABIType<?>>) type).getElementType();
         }
         return type;
     }

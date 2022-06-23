@@ -107,12 +107,7 @@ public abstract class ABIType<J> {
      */
     public abstract int validate(J value);
 
-    public final int _validate(Object value) {
-        return validate(validateClass(value));
-    }
-
-    @SuppressWarnings("unchecked")
-    final J validateClass(Object value) {
+    final J validateClass(J value) {
         if(!clazz.isInstance(value)) {
             if(value == null) {
                 throw new NullPointerException();
@@ -121,7 +116,7 @@ public abstract class ABIType<J> {
                     value.getClass().getName(), clazz.getName(),
                     friendlyClassName(clazz, -1), friendlyClassName(value.getClass(), -1));
         }
-        return (J) value;
+        return value;
     }
 
     final IllegalArgumentException mismatchErr(String prefix, String a, String e, String r, String f) {
