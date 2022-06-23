@@ -156,7 +156,7 @@ public final class Address {
         keccak256.update(addressBytes, PREFIX_LEN, ADDRESS_HEX_CHARS);
         final int offset = PREFIX_LEN / FastHex.CHARS_PER_BYTE; // offset by one byte so the indices of the hex-encoded hash and the address ascii line up
         final byte[] buffer = new byte[offset + ADDRESS_DATA_BYTES];
-        keccak256.digest(ByteBuffer.wrap(buffer, offset, ADDRESS_DATA_BYTES));
+        keccak256.digest(ByteBuffer.wrap(buffer, offset, ADDRESS_DATA_BYTES)); // only get the first 20 bytes of the hash
         final byte[] hash = FastHex.encodeToBytes(buffer);
         for (int i = PREFIX_LEN; i < addressBytes.length; i++) {
             switch (hash[i]) {
