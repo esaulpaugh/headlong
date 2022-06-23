@@ -237,7 +237,8 @@ public final class ArrayType<J, JE, ET extends ABIType<JE>> extends ABIType<J> {
     }
 
     @Override
-    void encodeTail(Object value, ByteBuffer dest) {
+    @SuppressWarnings("unchecked")
+    void encodeTail(J value, ByteBuffer dest) {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: encodeBooleans((boolean[]) value, dest); return;
         case TYPE_CODE_BYTE: encodeBytes(decodeIfString(value), dest); return;
@@ -247,12 +248,12 @@ public final class ArrayType<J, JE, ET extends ABIType<JE>> extends ABIType<J> {
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
-        case TYPE_CODE_ADDRESS: encodeObjects((Object[]) value, dest); return;
+        case TYPE_CODE_ADDRESS: encodeObjects((JE[]) value, dest); return;
         default: throw new AssertionError();
         }
     }
 
-    private void encodeObjects(Object[] arr, ByteBuffer dest) {
+    private void encodeObjects(JE[] arr, ByteBuffer dest) {
         encodeArrayLen(arr.length, dest);
         TupleType.encodeObjects(dynamic, arr, i -> elementType, dest, OFFSET_LENGTH_BYTES * arr.length);
     }

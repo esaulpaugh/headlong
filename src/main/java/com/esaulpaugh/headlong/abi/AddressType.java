@@ -42,8 +42,8 @@ public final class AddressType extends UnitType<Address> {
     }
 
     @Override
-    void encodeTail(Object value, ByteBuffer dest) {
-        ADDRESS_INNER.encodeTail(((Address) value).value(), dest);
+    void encodeTail(Address value, ByteBuffer dest) {
+        ADDRESS_INNER.encodeTail(value.value(), dest);
     }
 
     @Override

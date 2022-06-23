@@ -60,8 +60,8 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     }
 
     @Override
-    void encodeTail(Object value, ByteBuffer dest) {
-        Encoding.insertInt(((BigDecimal) value).unscaledValue(), UNIT_LENGTH_BYTES, dest);
+    void encodeTail(BigDecimal value, ByteBuffer dest) {
+        Encoding.insertInt(value.unscaledValue(), UNIT_LENGTH_BYTES, dest);
     }
 
     @Override

@@ -142,7 +142,7 @@ public abstract class ABIType<J> {
         encodeTail(value, dest);
     }
 
-    final int encodeHead(Object value, ByteBuffer dest, int offset) {
+    final int encodeHead(J value, ByteBuffer dest, int offset) {
         if (!dynamic) {
             encodeTail(value, dest);
             return offset;
@@ -151,7 +151,7 @@ public abstract class ABIType<J> {
         return offset + dynamicByteLength(value); // return next offset
     }
 
-    abstract void encodeTail(Object value, ByteBuffer dest);
+    abstract void encodeTail(J value, ByteBuffer dest);
 
     /**
      * Returns the non-standard-packed encoding of {@code values}.
