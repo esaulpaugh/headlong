@@ -468,11 +468,30 @@ public class DecodeTest {
 
     @Test
     public void testSingletonReturn() throws Throwable {
-        assertThrown(IllegalArgumentException.class, "return type not a singleton: ()", () -> Function.parse("bar()", "()").decodeSingletonReturn(new byte[0]));
-        assertThrown(IllegalArgumentException.class, "return type not a singleton: (fixed168x10,uint256)", () -> Function.parse("bar()", "(decimal,uint)").decodeSingletonReturn(new byte[0]));
+        assertThrown(
+                IllegalArgumentException.class,
+                "return type not a singleton: ()",
+                () -> Function.parse("bi()", "()").decodeSingletonReturn(new byte[0])
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                "return type not a singleton: (fixed168x10,uint256)",
+                () -> Function.parse("bim()", "(decimal,uint)").decodeSingletonReturn(new byte[0])
+        );
         Function bar = Function.parse("bar()", "(bool)");
         boolean b = bar.decodeSingletonReturn(Strings.decode("0000000000000000000000000000000000000000000000000000000000000001"));
         assertTrue(b);
+
+        assertThrown(
+                IllegalArgumentException.class,
+                "return type not a singleton: (bool,string,bool)",
+                () -> Function.parse("bap()", "(bool,string,bool)").decodeSingletonReturn(ByteBuffer.allocate(0))
+        );
+
+        final byte[] singletonPlus2 = Strings.decode("00000000000000000000000000000000000000000000000000000000000000010000");
+        assertThrown(IllegalArgumentException.class, "unconsumed bytes: 2 remaining", () -> bar.decodeSingletonReturn(singletonPlus2));
+        boolean b2 = bar.decodeSingletonReturn(ByteBuffer.wrap(singletonPlus2));
+        assertTrue(b2);
     }
 
     @Test
