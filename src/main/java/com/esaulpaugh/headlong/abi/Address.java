@@ -158,7 +158,7 @@ public final class Address {
         final byte[] buffer = new byte[offset + ADDRESS_DATA_BYTES];
         keccak256.digest(ByteBuffer.wrap(buffer, offset, ADDRESS_DATA_BYTES)); // only get the first 20 bytes of the hash
         final byte[] hash = FastHex.encodeToBytes(buffer);
-        for (int i = PREFIX_LEN; i < addressBytes.length; i++) {
+        for (int i = PREFIX_LEN; i < addressBytes.length; i++) { // hash and addressBytes both length 42
             switch (hash[i]) {
             case'8':case'9':case'a':case'b':case'c':case'd':case'e':case'f': addressBytes[i] = (byte) Character.toUpperCase(addressBytes[i]);
             }
