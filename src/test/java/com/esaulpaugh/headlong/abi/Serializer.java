@@ -28,12 +28,11 @@ import java.math.BigInteger;
 public class Serializer {
 
     public static JsonPrimitive serializeTypes(TupleType tupleType, Gson gson) {
-        JsonArray array = new JsonArray();
-
+        JsonArray typesArray = new JsonArray();
         for(ABIType<?> type : tupleType.elementTypes) {
-            array.add(new JsonPrimitive(type.canonicalType.replace("(", "tuple(")));
+            typesArray.add(new JsonPrimitive(type.canonicalType.replace("(", "tuple(")));
         }
-        return new JsonPrimitive(gson.toJson(array));
+        return new JsonPrimitive(gson.toJson(typesArray));
     }
 
     public static JsonPrimitive serializeValues(Tuple tuple, Gson gson) {
