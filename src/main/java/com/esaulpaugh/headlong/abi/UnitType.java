@@ -53,7 +53,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     }
 
     @Override
-    int byteLengthPacked(Object value) {
+    int byteLengthPacked(J value) {
         return bitLength / Byte.SIZE;
     }
 

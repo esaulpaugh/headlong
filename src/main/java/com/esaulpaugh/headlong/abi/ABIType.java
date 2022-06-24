@@ -97,7 +97,7 @@ public abstract class ABIType<J> {
         return UNIT_LENGTH_BYTES;
     }
 
-    abstract int byteLengthPacked(Object value);
+    abstract int byteLengthPacked(J value);
 
     /**
      * Checks whether the given object is a valid argument for this {@link ABIType}. Requires an instance of type J.

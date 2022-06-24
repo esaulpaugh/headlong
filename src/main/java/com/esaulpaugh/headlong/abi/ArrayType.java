@@ -142,6 +142,7 @@ public final class ArrayType<J, JE, ET extends ABIType<JE>> extends ABIType<J> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     int byteLengthPacked(Object value) {
         if(value == null) {
             return staticByteLengthPacked();
@@ -155,7 +156,7 @@ public final class ArrayType<J, JE, ET extends ABIType<JE>> extends ABIType<J> {
         case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
-        case TYPE_CODE_ADDRESS: return measureByteLengthPacked((Object[]) value);
+        case TYPE_CODE_ADDRESS: return measureByteLengthPacked((JE[]) value);
         default: throw new AssertionError();
         }
     }
@@ -223,7 +224,7 @@ public final class ArrayType<J, JE, ET extends ABIType<JE>> extends ABIType<J> {
         return measureArrayElements(arr.length, i -> elementType.byteLength(arr[i]));
     }
 
-    private int measureByteLengthPacked(Object[] arr) { // don't count offsets
+    private int measureByteLengthPacked(JE[] arr) { // don't count offsets
         return countBytes(true, arr.length, i -> elementType.byteLengthPacked(arr[i]));
     }
 

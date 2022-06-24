@@ -121,9 +121,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
      * @return the length in bytes of the non-standard packed encoding
      */
     @Override
-    public int byteLengthPacked(Object value) {
-        final Object[] elements = value != null ? ((Tuple) value).elements : new Object[size()];
-        return countBytes(i -> get(i).byteLengthPacked(elements[i]));
+    public int byteLengthPacked(Tuple value) {
+        final Object[] elements = value != null ? value.elements : new Object[size()];
+        return countBytes(i -> getNonCapturing(i).byteLengthPacked(elements[i]));
     }
 
     private int countBytes(IntUnaryOperator counter) {

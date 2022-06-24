@@ -43,7 +43,7 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    int byteLengthPacked(Object value) {
+    int byteLengthPacked(Boolean value) {
         return Byte.BYTES;
     }
 
