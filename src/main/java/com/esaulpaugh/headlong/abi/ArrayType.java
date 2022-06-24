@@ -295,6 +295,7 @@ public final class ArrayType<J, JE, ET extends ABIType<JE>> extends ABIType<J> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     void encodePackedUnchecked(J value, ByteBuffer dest) {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: encodeBooleansPacked((boolean[]) value, dest); return;
@@ -306,8 +307,8 @@ public final class ArrayType<J, JE, ET extends ABIType<JE>> extends ABIType<J> {
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
         case TYPE_CODE_ADDRESS:
-            for(Object e : (Object[]) value) {
-                elementType.encodeObjectPackedUnchecked(e, dest);
+            for(JE e : (JE[]) value) {
+                elementType.encodePackedUnchecked(e, dest);
             }
             return;
         default: throw new AssertionError();

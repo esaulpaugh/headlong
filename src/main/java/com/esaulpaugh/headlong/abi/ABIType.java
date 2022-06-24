@@ -177,11 +177,6 @@ public abstract class ABIType<J> {
         encodePackedUnchecked(value, dest);
     }
 
-    @SuppressWarnings("unchecked")
-    final void encodeObjectPackedUnchecked(Object value, ByteBuffer dest) {
-        encodePackedUnchecked((J) value, dest);
-    }
-
     abstract void encodePackedUnchecked(J value, ByteBuffer dest);
 
     public final J decode(byte[] array) {
