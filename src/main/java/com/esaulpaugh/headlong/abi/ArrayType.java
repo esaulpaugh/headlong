@@ -113,17 +113,17 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    int dynamicByteLength(Object value) {
+    int dynamicByteLength(J value) {
         return totalLen(calcElementsLen(value), length == DYNAMIC_LENGTH);
     }
 
     @Override
-    int byteLength(Object value) {
+    int byteLength(J value) {
         if(!dynamic) return headLength;
         return totalLen(calcElementsLen(value), length == DYNAMIC_LENGTH);
     }
 
-    private int calcElementsLen(Object value) {
+    private int calcElementsLen(J value) {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return ((boolean[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_BYTE: return Integers.roundLengthUp(byteCount(value), UNIT_LENGTH_BYTES);
@@ -146,7 +146,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     @Override
-    int byteLengthPacked(Object value) {
+    int byteLengthPacked(J value) {
         if(value == null) {
             return staticByteLengthPacked();
         }
