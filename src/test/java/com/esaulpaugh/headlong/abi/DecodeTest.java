@@ -292,7 +292,7 @@ public class DecodeTest {
 
     @Test
     public void testStringArray() throws Throwable {
-        final ArrayType<String[], String, ArrayType<String, Byte, ByteType>> type = TypeFactory.create("string[]", "nam");
+        final ArrayType<ArrayType<ByteType, String>, String[]> type = TypeFactory.create("string[]", "nam");
         final String[] array = new String[] { "Hello, world!", "world! Hello," };
         final ByteBuffer abi = ByteBuffer.wrap(
                 Strings.decode(
@@ -322,14 +322,14 @@ public class DecodeTest {
             final ABIType<?>                  e = TypeFactory.create("string[]");
             final ABIType<? extends String[]> f = TypeFactory.create("string[]");
 
-            final ArrayType<?, ?, ?>        g = TypeFactory.create("string[]");
-            final ArrayType<?, ?, ?>        h = TypeFactory.create("string[]");
-            final ArrayType<String[], ?, ?> i = TypeFactory.create("string[]");
-            final ArrayType<String[], String, ArrayType<String, Byte, ByteType>> j = TypeFactory.create("string[]");
+            final ArrayType<?, ?>        g = TypeFactory.create("string[]");
+            final ArrayType<?, ?>        h = TypeFactory.create("string[]");
+            final ArrayType<?, String[]> i = TypeFactory.create("string[]");
+            final ArrayType<ArrayType<ByteType, String>, String[]> j = TypeFactory.create("string[]");
             final ABIType<? extends String[]> k = TypeFactory.create("string[]");
 
             final IntType l = TypeFactory.create("int16");
-            final ArrayType<BigInteger[], BigInteger, BigIntegerType> m = TypeFactory.create("int[]");
+            final ArrayType<BigIntegerType, BigInteger[]> m = TypeFactory.create("int[]");
             final TupleType n = TypeFactory.create("(bool)");
             m.encode(new BigInteger[] {});
 

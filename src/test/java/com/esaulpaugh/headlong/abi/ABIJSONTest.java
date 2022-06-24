@@ -219,7 +219,7 @@ public class ABIJSONTest {
         switch (type.typeCode()) {
         case TYPE_CODE_ARRAY:
             sb.append('[');
-            toString(((ArrayType<?, ? extends ABIType<?>, ?>) type).getElementType(), sb);
+            toString(((ArrayType<?, ?>) type).getElementType(), sb);
             sb.append(']');
             break;
         case TYPE_CODE_TUPLE:
@@ -619,8 +619,8 @@ public class ABIJSONTest {
             for(ABIType<?> e : (TupleType) type) {
                 checkElementTypeNames(e);
             }
-        } else if(type instanceof ArrayType<?, ?, ?>) {
-            ABIType<?> elementType = ((ArrayType<?, ?, ?>) type).getElementType();
+        } else if(type instanceof ArrayType<?, ?>) {
+            ABIType<?> elementType = ((ArrayType<?, ?>) type).getElementType();
             assertNull(elementType.getName());
             checkElementTypeNames(elementType);
         }

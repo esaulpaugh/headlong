@@ -73,7 +73,7 @@ public final class SuperSerial {
     }
 
     @SuppressWarnings("unchecked")
-    public static <J> J deserializeArray(ArrayType<J, ?, ? extends ABIType<?>> arrayType, String str, boolean machine) {
+    public static <J> J deserializeArray(ArrayType<? extends ABIType<Object>, J> arrayType, String str, boolean machine) {
         byte[] rlp = machine ? Strings.decode(str) : RLPEncoder.encodeSequentially(Notation.parse(str));
         J array = (J) deserializeArray(arrayType, RLP_STRICT.wrap(rlp));
         arrayType.validate(array);
@@ -108,7 +108,7 @@ public final class SuperSerial {
         case TYPE_CODE_LONG: return serializeBigInteger((UnitType<?>) type, BigInteger.valueOf(((Number) obj).longValue()));
         case TYPE_CODE_BIG_INTEGER: return serializeBigInteger((UnitType<?>) type, (BigInteger) obj);
         case TYPE_CODE_BIG_DECIMAL: return serializeBigInteger((UnitType<?>) type, ((BigDecimal) obj).unscaledValue());
-        case TYPE_CODE_ARRAY: return serializeArray((ArrayType<?, ? extends ABIType<?>, ?>) type, obj);
+        case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?>) type, obj);
         case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, (Tuple) obj);
         case TYPE_CODE_ADDRESS: return serializeBigInteger((UnitType<?>) type, ((Address) obj).value());
         default: throw new AssertionError();
@@ -132,7 +132,7 @@ public final class SuperSerial {
         case TYPE_CODE_BIG_DECIMAL:
             BigDecimalType bdt = (BigDecimalType) type;
             return new BigDecimal(deserializeBigInteger(bdt, item), bdt.getScale());
-        case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<?, ?, ?>) type, item);
+        case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<?, ?>) type, item);
         case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());
         case TYPE_CODE_ADDRESS: return Address.wrap(Address.toChecksumAddress(deserializeBigInteger((UnitType<?>) type, item)));
         default: throw new AssertionError();
@@ -169,7 +169,7 @@ public final class SuperSerial {
                     : item.asBigIntSigned();
     }
 
-    private static Object serializeArray(ArrayType<?, ? extends ABIType<?>, ?> type, Object arr) {
+    private static Object serializeArray(ArrayType<? extends ABIType<?>, ?> type, Object arr) {
         switch (type.getElementType().typeCode()) {
         case TYPE_CODE_BOOLEAN: return serializeBooleanArray((boolean[]) arr);
         case TYPE_CODE_BYTE: return serializeByteArray(arr, type.isString());
@@ -184,7 +184,7 @@ public final class SuperSerial {
         }
     }
 
-    private static Object deserializeArray(ArrayType<?, ?, ?> type, RLPItem item) {
+    private static Object deserializeArray(ArrayType<?, ?> type, RLPItem item) {
         switch (type.getElementType().typeCode()) {
         case TYPE_CODE_BOOLEAN: return deserializeBooleanArray((RLPList) item);
         case TYPE_CODE_BYTE: return deserializeByteArray(item, type.isString());

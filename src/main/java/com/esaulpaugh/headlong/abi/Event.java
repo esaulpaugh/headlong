@@ -27,7 +27,7 @@ import java.util.Objects;
 /** Represents an event in Ethereum. */
 public final class Event implements ABIObject {
 
-    private static final ArrayType<byte[], Byte, ByteType> BYTES_32 = TypeFactory.create("bytes32");
+    private static final ArrayType<ByteType, byte[]> BYTES_32 = TypeFactory.create("bytes32");
     public static final byte[][] EMPTY_TOPICS = new byte[0][];
 
     private final String name;

@@ -176,13 +176,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
     }
 
-    static <JE> void encodeObjects(boolean dynamic, JE[] values, IntFunction<ABIType<JE>> getType, ByteBuffer dest, int offset) {
+    static void encodeObjects(boolean dynamic, Object[] values, IntFunction<ABIType<Object>> getType, ByteBuffer dest, int offset) {
         for (int i = 0; i < values.length; i++) {
             offset = getType.apply(i).encodeHead(values[i], dest, offset);
         }
         if(dynamic) {
             for (int i = 0; i < values.length; i++) {
-                ABIType<JE> t = getType.apply(i);
+                ABIType<Object> t = getType.apply(i);
                 if (t.dynamic) {
                     t.encodeTail(values[i], dest);
                 }
