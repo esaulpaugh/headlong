@@ -136,6 +136,9 @@ public class MonteCarloTest {
         final GambleGambleRunnable[] runnables = new GambleGambleRunnable[parallelism];
         final int workPerProcessor = N / parallelism;
         final ExecutorService pool = Executors.newFixedThreadPool(parallelism);
+        final int totalWork = workPerProcessor * parallelism;
+        final String initialConditions = "(" + masterSeed + "L," + MAX_TUPLE_DEPTH + ',' + MAX_TUPLE_LEN + ',' + MAX_ARRAY_DEPTH + ',' + MAX_ARRAY_LEN + ")";
+        System.out.println("Running\t\t" + totalWork + "\t" + initialConditions + " ...");
         int i = 0;
         while (i < runnables.length) {
             pool.submit(runnables[i] = new GambleGambleRunnable(parallelism, masterSeed, masterSeed + (i++), workPerProcessor, limits));
@@ -149,7 +152,7 @@ public class MonteCarloTest {
         }
 
         requireNoTimeout(noTimeout);
-        System.out.println("gambleGamble " + (workPerProcessor * i) + " done with " + masterSeed + "L," + MAX_TUPLE_DEPTH + ',' + MAX_TUPLE_LEN + ',' + MAX_ARRAY_DEPTH + ',' + MAX_ARRAY_LEN);
+        System.out.println("Finished\t" + totalWork + "\t" + initialConditions);
     }
 
     static void doMonteCarlo(final int parallelism,
