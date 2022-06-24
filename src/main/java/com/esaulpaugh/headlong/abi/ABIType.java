@@ -93,7 +93,7 @@ public abstract class ABIType<J> {
      * @param value the value to measure
      * @return the length in bytes of the value when encoded
      */
-    int byteLength(Object value) {
+    int byteLength(J value) {
         return UNIT_LENGTH_BYTES;
     }
 

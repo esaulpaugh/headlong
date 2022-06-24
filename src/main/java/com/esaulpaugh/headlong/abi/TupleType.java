@@ -106,13 +106,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    int byteLength(Object value) {
+    int byteLength(Tuple value) {
         if(!dynamic) return headLength;
-        final Object[] elements = ((Tuple) value).elements;
+        final Object[] elements = value.elements;
         return countBytes(i -> measureObject(get(i), elements[i]));
     }
 
-    private static int measureObject(ABIType<?> type, Object value) {
+    private static int measureObject(ABIType<Object> type, Object value) {
         return totalLen(type.byteLength(value), type.dynamic);
     }
 

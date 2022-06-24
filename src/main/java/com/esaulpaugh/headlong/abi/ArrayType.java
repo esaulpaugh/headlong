@@ -220,7 +220,7 @@ public final class ArrayType<J, JE, ET extends ABIType<JE>> extends ABIType<J> {
         return measureArrayElements(checkLength(arr.length, arr), i -> elementType.validate(arr[i]));
     }
 
-    private int measureByteLength(Object[] arr) {
+    private int measureByteLength(JE[] arr) {
         return measureArrayElements(arr.length, i -> elementType.byteLength(arr[i]));
     }
 
