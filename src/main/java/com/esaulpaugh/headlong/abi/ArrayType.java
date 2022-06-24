@@ -109,17 +109,18 @@ public final class ArrayType<J, JE, ET extends ABIType<JE>> extends ABIType<J> {
     }
 
     @Override
-    int dynamicByteLength(Object value) {
+    int dynamicByteLength(J value) {
         return totalLen(calcElementsLen(value), length == DYNAMIC_LENGTH);
     }
 
     @Override
-    int byteLength(Object value) {
+    int byteLength(J value) {
         if(!dynamic) return headLength;
         return totalLen(calcElementsLen(value), length == DYNAMIC_LENGTH);
     }
 
-    private int calcElementsLen(Object value) {
+    @SuppressWarnings("unchecked")
+    private int calcElementsLen(J value) {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return ((boolean[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_BYTE: return Integers.roundLengthUp(byteCount(value), UNIT_LENGTH_BYTES);
@@ -128,7 +129,7 @@ public final class ArrayType<J, JE, ET extends ABIType<JE>> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return measureByteLength((Object[]) value);
+        case TYPE_CODE_TUPLE: return measureByteLength((JE[]) value);
         case TYPE_CODE_ADDRESS: return ((Address[]) value).length * UNIT_LENGTH_BYTES;
         default: throw new AssertionError();
         }

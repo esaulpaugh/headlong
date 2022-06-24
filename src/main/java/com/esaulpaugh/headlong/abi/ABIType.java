@@ -85,7 +85,7 @@ public abstract class ABIType<J> {
         return UNIT_LENGTH_BYTES;
     }
 
-    int dynamicByteLength(Object value) {
+    int dynamicByteLength(J value) {
         return UNIT_LENGTH_BYTES;
     }
 
