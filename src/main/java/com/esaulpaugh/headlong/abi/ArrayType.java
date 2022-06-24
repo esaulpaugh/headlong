@@ -144,7 +144,7 @@ public final class ArrayType<J, JE, ET extends ABIType<JE>> extends ABIType<J> {
 
     @Override
     @SuppressWarnings("unchecked")
-    int byteLengthPacked(Object value) {
+    int byteLengthPacked(J value) {
         if(value == null) {
             return staticByteLengthPacked();
         }
@@ -384,7 +384,7 @@ public final class ArrayType<J, JE, ET extends ABIType<JE>> extends ABIType<J> {
         return encodeIfString(data);
     }
 
-    private static Object decodeInts(int len, ByteBuffer bb, IntType intType, byte[] unitBuffer) {
+    private static int[] decodeInts(int len, ByteBuffer bb, IntType intType, byte[] unitBuffer) {
         int[] ints = new int[len];
         for (int i = 0; i < len; i++) {
             ints[i] = intType.decode(bb, unitBuffer);
@@ -392,7 +392,7 @@ public final class ArrayType<J, JE, ET extends ABIType<JE>> extends ABIType<J> {
         return ints;
     }
 
-    private static Object decodeLongs(int len, ByteBuffer bb, LongType longType, byte[] unitBuffer) {
+    private static long[] decodeLongs(int len, ByteBuffer bb, LongType longType, byte[] unitBuffer) {
         long[] longs = new long[len];
         for (int i = 0; i < len; i++) {
             longs[i] = longType.decode(bb, unitBuffer);
@@ -400,7 +400,7 @@ public final class ArrayType<J, JE, ET extends ABIType<JE>> extends ABIType<J> {
         return longs;
     }
 
-    private Object decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer) {
+    private Object[] decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer) {
         Object[] elements = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
         TupleType.decodeObjects(dynamic, bb, unitBuffer, i -> elementType, elements);
         return elements;
