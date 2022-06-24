@@ -85,7 +85,7 @@ public abstract class ABIType<J> {
         return UNIT_LENGTH_BYTES;
     }
 
-    int dynamicByteLength(Object value) {
+    int dynamicByteLength(J value) {
         return UNIT_LENGTH_BYTES;
     }
 
@@ -93,11 +93,11 @@ public abstract class ABIType<J> {
      * @param value the value to measure
      * @return the length in bytes of the value when encoded
      */
-    int byteLength(Object value) {
+    int byteLength(J value) {
         return UNIT_LENGTH_BYTES;
     }
 
-    abstract int byteLengthPacked(Object value);
+    abstract int byteLengthPacked(J value);
 
     /**
      * Checks whether the given object is a valid argument for this {@link ABIType}. Requires an instance of type J.
@@ -107,12 +107,7 @@ public abstract class ABIType<J> {
      */
     public abstract int validate(J value);
 
-    public final int _validate(Object value) {
-        return validate(validateClass(value));
-    }
-
-    @SuppressWarnings("unchecked")
-    final J validateClass(Object value) {
+    final void validateClass(J value) {
         if(!clazz.isInstance(value)) {
             if(value == null) {
                 throw new NullPointerException();
@@ -121,7 +116,6 @@ public abstract class ABIType<J> {
                     value.getClass().getName(), clazz.getName(),
                     friendlyClassName(clazz, -1), friendlyClassName(value.getClass(), -1));
         }
-        return (J) value;
     }
 
     final IllegalArgumentException mismatchErr(String prefix, String a, String e, String r, String f) {
@@ -147,7 +141,7 @@ public abstract class ABIType<J> {
         encodeTail(value, dest);
     }
 
-    final int encodeHead(Object value, ByteBuffer dest, int offset) {
+    final int encodeHead(J value, ByteBuffer dest, int offset) {
         if (!dynamic) {
             encodeTail(value, dest);
             return offset;
@@ -156,7 +150,7 @@ public abstract class ABIType<J> {
         return offset + dynamicByteLength(value); // return next offset
     }
 
-    abstract void encodeTail(Object value, ByteBuffer dest);
+    abstract void encodeTail(J value, ByteBuffer dest);
 
     /**
      * Returns the non-standard-packed encoding of {@code values}.
@@ -180,11 +174,6 @@ public abstract class ABIType<J> {
     public final void encodePacked(J value, ByteBuffer dest) {
         validate(value);
         encodePackedUnchecked(value, dest);
-    }
-
-    @SuppressWarnings("unchecked")
-    final void encodeObjectPackedUnchecked(Object value, ByteBuffer dest) {
-        encodePackedUnchecked((J) value, dest);
     }
 
     abstract void encodePackedUnchecked(J value, ByteBuffer dest);

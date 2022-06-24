@@ -85,6 +85,11 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return isString;
     }
 
+    @SuppressWarnings("unchecked")
+    private ABIType<Object> elementTypeNonCapturing() {
+        return (ABIType<Object>) elementType;
+    }
+
     @Override
     Class<?> arrayClass() {
         if(arrayClass != null) {
@@ -173,7 +178,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     @Override
     public int validate(J value) {
-        return totalLen(validateElements(validateClass(value)), length == DYNAMIC_LENGTH); // validateClass to disallow Object[] etc
+        validateClass(value);
+        return totalLen(validateElements(value), length == DYNAMIC_LENGTH); // validateClass to disallow Object[] etc
     }
 
     private int validateElements(J value) {
@@ -214,15 +220,18 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private int validateObjects(Object[] arr) {
-        return measureArrayElements(checkLength(arr.length, arr), i -> elementType._validate(arr[i]));
+        final ABIType<Object> et = elementTypeNonCapturing();
+        return measureArrayElements(checkLength(arr.length, arr), i -> et.validate(arr[i]));
     }
 
     private int measureByteLength(Object[] arr) {
-        return measureArrayElements(arr.length, i -> elementType.byteLength(arr[i]));
+        final ABIType<Object> et = elementTypeNonCapturing();
+        return measureArrayElements(arr.length, i -> et.byteLength(arr[i]));
     }
 
     private int measureByteLengthPacked(Object[] arr) { // don't count offsets
-        return countBytes(true, arr.length, i -> elementType.byteLengthPacked(arr[i]));
+        final ABIType<Object> et = elementTypeNonCapturing();
+        return countBytes(true, arr.length, i -> et.byteLengthPacked(arr[i]));
     }
 
     private int checkLength(final int valueLen, Object value) {
@@ -252,7 +261,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private void encodeObjects(Object[] arr, ByteBuffer dest) {
         encodeArrayLen(arr.length, dest);
-        TupleType.encodeObjects(dynamic, arr, i -> elementType, dest, OFFSET_LENGTH_BYTES * arr.length);
+        final ABIType<Object> et = elementTypeNonCapturing();
+        TupleType.encodeObjects(dynamic, arr, i -> et, dest, OFFSET_LENGTH_BYTES * arr.length);
     }
 
     private void encodeArrayLen(int len, ByteBuffer dest) {
@@ -301,8 +311,9 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
         case TYPE_CODE_ADDRESS:
+            final ABIType<Object> et = elementTypeNonCapturing();
             for(Object e : (Object[]) value) {
-                elementType.encodeObjectPackedUnchecked(e, dest);
+                et.encodePackedUnchecked(e, dest);
             }
             return;
         default: throw new AssertionError();

@@ -100,19 +100,17 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    int dynamicByteLength(Object value) {
-        final Object[] elements = ((Tuple) value).elements;
-        return countBytes(i -> measureObject(get(i), elements[i]));
+    int dynamicByteLength(Tuple value) {
+        return countBytes(i -> measureObject(getNonCapturing(i), value.elements[i]));
     }
 
     @Override
-    int byteLength(Object value) {
+    int byteLength(Tuple value) {
         if(!dynamic) return headLength;
-        final Object[] elements = ((Tuple) value).elements;
-        return countBytes(i -> measureObject(get(i), elements[i]));
+        return countBytes(i -> measureObject(getNonCapturing(i), value.elements[i]));
     }
 
-    private static int measureObject(ABIType<?> type, Object value) {
+    private static int measureObject(ABIType<Object> type, Object value) {
         return totalLen(type.byteLength(value), type.dynamic);
     }
 
@@ -121,9 +119,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
      * @return the length in bytes of the non-standard packed encoding
      */
     @Override
-    public int byteLengthPacked(Object value) {
-        final Object[] elements = value != null ? ((Tuple) value).elements : new Object[size()];
-        return countBytes(i -> get(i).byteLengthPacked(elements[i]));
+    public int byteLengthPacked(Tuple value) {
+        final Object[] elements = value != null ? value.elements : new Object[size()];
+        return countBytes(i -> getNonCapturing(i).byteLengthPacked(elements[i]));
     }
 
     private int countBytes(IntUnaryOperator counter) {
@@ -146,14 +144,15 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     public int validate(final Tuple value) {
         if (value.size() == this.size()) {
-            return countBytes(i -> validateObject(get(i), value.elements[i]));
+            return countBytes(i -> validateObject(getNonCapturing(i), value.elements[i]));
         }
         throw new IllegalArgumentException("tuple length mismatch: actual != expected: " + value.size() + " != " + this.size());
     }
 
-    private static int validateObject(ABIType<?> type, Object value) {
+    private static int validateObject(ABIType<Object> type, Object value) {
         try {
-            return totalLen(type._validate(value), type.dynamic);
+            type.validateClass(value);
+            return totalLen(type.validate(value), type.dynamic);
         } catch (NullPointerException npe) {
             throw new IllegalArgumentException("null", npe);
         }
@@ -164,25 +163,25 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    void encodeTail(Object value, ByteBuffer dest) {
-        encodeObjects(dynamic, ((Tuple) value).elements, TupleType.this::get, dest, firstOffset);
+    void encodeTail(Tuple value, ByteBuffer dest) {
+        encodeObjects(dynamic, value.elements, TupleType.this::getNonCapturing, dest, firstOffset);
     }
 
     @Override
     void encodePackedUnchecked(Tuple value, ByteBuffer dest) {
         final int size = size();
         for (int i = 0; i < size; i++) {
-            get(i).encodeObjectPackedUnchecked(value.elements[i], dest);
+            getNonCapturing(i).encodePackedUnchecked(value.elements[i], dest);
         }
     }
 
-    static void encodeObjects(boolean dynamic, Object[] values, IntFunction<ABIType<?>> getType, ByteBuffer dest, int offset) {
+    static void encodeObjects(boolean dynamic, Object[] values, IntFunction<ABIType<Object>> getType, ByteBuffer dest, int offset) {
         for (int i = 0; i < values.length; i++) {
             offset = getType.apply(i).encodeHead(values[i], dest, offset);
         }
         if(dynamic) {
             for (int i = 0; i < values.length; i++) {
-                ABIType<?> t = getType.apply(i);
+                ABIType<Object> t = getType.apply(i);
                 if (t.dynamic) {
                     t.encodeTail(values[i], dest);
                 }

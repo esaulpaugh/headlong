@@ -43,7 +43,7 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    int byteLengthPacked(Object value) {
+    int byteLengthPacked(Boolean value) {
         return Byte.BYTES;
     }
 
@@ -53,8 +53,8 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     @Override
-    void encodeTail(Object value, ByteBuffer dest) {
-        encodeBoolean((boolean) value, dest);
+    void encodeTail(Boolean value, ByteBuffer dest) {
+        encodeBoolean(value, dest);
     }
 
     @Override

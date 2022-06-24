@@ -41,8 +41,8 @@ public final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
-    void encodeTail(Object value, ByteBuffer dest) {
-        Encoding.insertInt((BigInteger) value, UNIT_LENGTH_BYTES, dest);
+    void encodeTail(BigInteger value, ByteBuffer dest) {
+        Encoding.insertInt(value, UNIT_LENGTH_BYTES, dest);
     }
 
     @Override
