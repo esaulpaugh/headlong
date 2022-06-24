@@ -165,7 +165,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     void encodeTail(Tuple value, ByteBuffer dest) {
-        encodeObjects(dynamic, value.elements, TupleType.this::get, dest, firstOffset);
+        encodeObjects(dynamic, value.elements, TupleType.this::getNonCapturing, dest, firstOffset);
     }
 
     @Override
