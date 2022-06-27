@@ -42,5 +42,46 @@
 	"bytesShouldBeSingleByte7F": {
 		"in": "INVALID",
 		"out": "0x817F"
+	},
+
+	"leadingZerosInLongLengthArray1": {
+		"in": "INVALID",
+		"out": "b90040000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
+	},
+
+	"leadingZerosInLongLengthArray2": {
+		"in": "INVALID",
+		"out": "b800"
+	},
+
+	"leadingZerosInLongLengthList1": {
+		"in": "INVALID",
+		"out": "fb00000040000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
+	},
+
+	"leadingZerosInLongLengthList2": {
+		"in": "INVALID",
+		"out": "f800"
+	},
+
+	"nonOptimalLongLengthArray1": {
+		"in": "INVALID",
+		"out": "b81000112233445566778899aabbccddeeff"
+	},
+
+	"nonOptimalLongLengthArray2": {
+		"in": "INVALID",
+		"out": "b801ff"
+	},
+
+	"nonOptimalLongLengthList1": {
+		"in": "INVALID",
+		"out": "f810000102030405060708090a0b0c0d0e0f"
+	},
+
+	"nonOptimalLongLengthList2": {
+		"in": "INVALID",
+		"out": "f803112233"
 	}
+
 }

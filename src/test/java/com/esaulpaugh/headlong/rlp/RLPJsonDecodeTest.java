@@ -43,11 +43,10 @@ public class RLPJsonDecodeTest {
         String testCasesJson = TestUtils.readFileResourceAsString("tests/ethereum/RLPTests/invalidRLPTest.json");
 
         for (Map.Entry<String, JsonElement> e : RLPJsonEncodeTest.parseEntrySet(testCasesJson)) {
-
-            byte[] invalidRLP = RLPJsonEncodeTest.parseOut(e.getValue().getAsJsonObject());
-
+            byte[] invalidRLP = null;
             Throwable throwable = null;
             try {
+                invalidRLP = RLPJsonEncodeTest.parseOut(e.getValue().getAsJsonObject());
                 decodeRecursively(invalidRLP);
             } catch (Throwable t) {
                 throwable = t;
