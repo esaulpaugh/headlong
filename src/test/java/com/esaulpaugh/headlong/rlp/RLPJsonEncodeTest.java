@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.util.JsonUtils;
+import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonElement;
@@ -79,9 +80,8 @@ public class RLPJsonEncodeTest {
         JsonElement out = value.get("out");
         System.out.println(out);
         String outString = out.getAsString();
-        if(outString.startsWith("0x")) {
-            return Strings.decode(outString.substring(outString.indexOf("0x") + "0x".length()));
-        }
-        return Strings.decode(outString);
+        return outString.startsWith("0x")
+                ? FastHex.decode(outString, 2, outString.length() - 2)
+                : FastHex.decode(outString);
     }
 }
