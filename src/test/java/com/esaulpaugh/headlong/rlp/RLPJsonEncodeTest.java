@@ -79,6 +79,9 @@ public class RLPJsonEncodeTest {
         JsonElement out = value.get("out");
         System.out.println(out);
         String outString = out.getAsString();
-        return Strings.decode(outString.substring(outString.indexOf("0x") + "0x".length()));
+        if(outString.startsWith("0x")) {
+            return Strings.decode(outString.substring(outString.indexOf("0x") + "0x".length()));
+        }
+        return Strings.decode(outString);
     }
 }
