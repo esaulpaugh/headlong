@@ -296,7 +296,7 @@ public final class ABIJSON {
             name(out, e.getName());
             final String type = e.canonicalType;
             if(type.charAt(0) == '(') {
-                type(out, type.replace(type.substring(0, type.lastIndexOf(')') + 1), TUPLE));
+                type(out, TUPLE + type.substring(type.lastIndexOf(')') + 1));
                 tupleType(out, COMPONENTS, (TupleType) ArrayType.baseType(e), null);
             } else {
                 type(out, type);
