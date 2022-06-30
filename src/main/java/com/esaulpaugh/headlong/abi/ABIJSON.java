@@ -195,12 +195,12 @@ public final class ABIJSON {
         return new ContractError(getName(error), parseTupleType(error, INPUTS));
     }
 
-    private static TupleType parseTupleType(JsonObject parent, String arrayName) {
-        return parseTupleType(parent, arrayName, getName(parent));
+    private static TupleType parseTupleType(JsonObject object, String arrayKey) {
+        return parseTupleType(object, getName(object), arrayKey);
     }
 
-    private static TupleType parseTupleType(JsonObject parent, String arrayName, String name) {
-        final JsonArray array = getArray(parent, arrayName);
+    private static TupleType parseTupleType(JsonObject object, String nameValue, String arrayKey) {
+        final JsonArray array = getArray(object, arrayKey);
         final int size;
         if (array == null || (size = array.size()) <= 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
             return TupleType.EMPTY;
@@ -209,7 +209,7 @@ public final class ABIJSON {
         for(int i = 0; i < size; i++) {
             elements[i] = parseType(array.get(i).getAsJsonObject());
         }
-        return TupleType.wrap(name, elements);
+        return TupleType.wrap(nameValue, elements);
     }
 
     private static ABIType<?> parseType(JsonObject object) {
@@ -217,9 +217,9 @@ public final class ABIJSON {
         final String type = getType(object);
         if(type.startsWith(TUPLE)) {
             if(type.length() == TUPLE.length()) {
-                return parseTupleType(object, COMPONENTS, name);
+                return parseTupleType(object, name, COMPONENTS);
             }
-            TupleType baseType = parseTupleType(object, COMPONENTS, null); // set TupleType name null because name belongs to ArrayType
+            TupleType baseType = parseTupleType(object, null, COMPONENTS); // set TupleType name null because name belongs to ArrayType
             return TypeFactory.build(baseType.canonicalType + type.substring(TUPLE.length()), name, baseType);
         }
         return TypeFactory.create(type, name);
