@@ -88,12 +88,12 @@ dependencies {
     test.useJUnitPlatform()
     testImplementation("org.junit.jupiter:junit-jupiter-api:" + junitVersion)
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:" + junitVersion)
-    testImplementation("org.bouncycastle:bcprov-jdk15to18:" + bcVersion)
+    testImplementation("org.bouncycastle:bcprov-jdk14:" + bcVersion)
 
     jmhImplementation("commons-codec:commons-codec:1.15")
     jmhImplementation("org.openjdk.jmh:jmh-core:" + jmhVersion)
     jmhAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:" + jmhVersion)
-    jmhImplementation("org.bouncycastle:bcprov-jdk15to18:" + bcVersion)
+    jmhImplementation("org.bouncycastle:bcprov-jdk14:" + bcVersion)
 }
 
 task jmh(type: JavaExec, dependsOn: jmhClasses) { // run benchmarks with `gradle jmh`
