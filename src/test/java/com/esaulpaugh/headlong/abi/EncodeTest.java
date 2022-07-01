@@ -305,6 +305,8 @@ public class EncodeTest {
         ByteBuffer one = f.encodeCall(args);
         ByteBuffer two = f.encodeCallWithArgs(69L, true);
 
+        assertArrayEquals(one.array(), two.array());
+
         System.out.println(Function.formatCall(one.array())); // a multi-line hex representation
 
         assertEquals(0, two.position());
