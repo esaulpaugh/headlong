@@ -87,9 +87,8 @@ public final class FastBase64 {
 
     private static byte[] encodeMainLineSep(byte[] buffer, int i, short[] table, int end, int len) {
         final byte[] out = new byte[len];
-        int quadruples = 0;
         final int lineSepLimit = out.length - LINE_SEP_LEN;
-        for (int o = 0; i < end; ) {
+        for (int o = 0, quadruples = 0; i < end; ) {
             int _24bits = (buffer[i++] & 0xff) << Short.SIZE | (buffer[i++] & 0xff) << Byte.SIZE | (buffer[i++] & 0xff);
             int ab = table[_24bits >>> 12];
             int cd = table[_24bits & 0xfff];
