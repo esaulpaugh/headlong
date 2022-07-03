@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
 /** Superclass for any 256-bit ("unit") Contract ABI type. Usually numbers or boolean. Not for arrays or tuples. */
 public abstract class UnitType<J> extends ABIType<J> { // J generally extends Number or is Boolean
 
-    public static final int UNIT_LENGTH_BYTES = 32;
+    public static final int UNIT_LENGTH_BYTES = 256 / Byte.SIZE;
 
     final int bitLength;
     final boolean unsigned;
