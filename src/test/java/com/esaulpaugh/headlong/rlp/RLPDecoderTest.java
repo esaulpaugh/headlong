@@ -415,9 +415,9 @@ public class RLPDecoderTest {
 
         long[] dataLengths = new long[] {
                 56,
-                Integer.MAX_VALUE / (((int) Math.pow(2, 23)) - 1),
-                Integer.MAX_VALUE / (((int) Math.pow(2, 15)) - 1),
-                Integer.MAX_VALUE / (((int) Math.pow(2, 7)) - 1)
+                1L << 8,
+                1L << 16,
+                1L << 24
         };
 
         for (int k = 0; k < dataLengths.length; k++) {
