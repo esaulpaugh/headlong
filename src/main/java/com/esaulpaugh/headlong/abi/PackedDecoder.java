@@ -41,7 +41,7 @@ final class PackedDecoder {
     private PackedDecoder() {}
 
     static Tuple decode(TupleType tupleType, byte[] buffer) {
-        final int count = countDynamicsTupleType(tupleType);
+        final int count = countDynamics(tupleType);
         if (count <= 1) {
             final Tuple[] elements = new Tuple[1];
             decodeTuple(tupleType, buffer, 0, buffer.length, elements, 0); // can also call decodeTupleStatic if numDynamic == 0
@@ -56,28 +56,23 @@ final class PackedDecoder {
         throw new IllegalArgumentException("multiple dynamic elements: " + count);
     }
 
-    static int countDynamicsTupleType(TupleType tupleType) {
-        int numDynamic = 0;
-        for (ABIType<?> e : tupleType.elementTypes) {
-            if(e.dynamic) {
-                numDynamic += e instanceof TupleType
-                        ? countDynamicsTupleType((TupleType) e)
-                        : countDynamicsArrayType(e); // assume ArrayType bc currently only TupleType and ArrayType can be dynamic
+    static int countDynamics(ABIType<?> type) {
+        if(type.dynamic) {
+            switch (type.typeCode()) {
+            case TYPE_CODE_ARRAY:
+                ArrayType<?, ?> at = (ArrayType<?, ?>) type;
+                return DYNAMIC_LENGTH == at.getLength()
+                        ? 1 + countDynamics(at.getElementType())
+                        : countDynamics(at.getElementType());
+            case TYPE_CODE_TUPLE:
+                int numDynamic = 0;
+                for (ABIType<?> e : ((TupleType) type).elementTypes) {
+                    numDynamic += countDynamics(e);
+                }
+                return numDynamic;
             }
         }
-        return numDynamic;
-    }
-
-    private static int countDynamicsArrayType(ABIType<?> type) {
-        int numDynamic = 0;
-        do {
-            ArrayType<?, ?> at = (ArrayType<?, ?>) type;
-            if(DYNAMIC_LENGTH == at.getLength()) {
-                numDynamic++;
-            }
-            type = at.getElementType();
-        } while (type instanceof ArrayType<?, ?>); // loop until type is the base type
-        return type instanceof TupleType ? numDynamic + countDynamicsTupleType((TupleType) type) : numDynamic;
+        return 0; // default case
     }
 
     private static int decodeTuple(TupleType tupleType, byte[] buffer, int start, int end, Object[] parentElements, int pei) {

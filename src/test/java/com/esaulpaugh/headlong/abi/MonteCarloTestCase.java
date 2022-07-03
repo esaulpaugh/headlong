@@ -273,7 +273,7 @@ public class MonteCarloTestCase {
             final String msg = iae.getMessage();
             if(msg.contains("multiple dynamic elements: ")) {
                 final int parsed = Integer.parseInt(msg.substring(msg.lastIndexOf(' ') + 1));
-                assertTrue(parsed > 1 && parsed == PackedDecoder.countDynamicsTupleType(tt));
+                assertTrue(parsed > 1 && parsed == PackedDecoder.countDynamics(tt));
             } else if(!msg.endsWith("array of dynamic elements")
                     && !"can't decode dynamic number of zero-length elements".equals(msg)) {
                 throw new RuntimeException(tt.canonicalType + " " + msg, iae);
