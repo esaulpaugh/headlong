@@ -61,17 +61,14 @@ final class PackedDecoder {
             switch (type.typeCode()) {
             case TYPE_CODE_ARRAY:
                 ArrayType<?, ?> at = (ArrayType<?, ?>) type;
-                int num = DYNAMIC_LENGTH == at.getLength()
+                return DYNAMIC_LENGTH == at.getLength()
                         ? 1 + countDynamics(at.getElementType())
                         : countDynamics(at.getElementType());
-//                if(num <= 0) throw new AssertionError();
-                return num;
             case TYPE_CODE_TUPLE:
                 int numDynamic = 0;
                 for (ABIType<?> e : ((TupleType) type).elementTypes) {
                     numDynamic += countDynamics(e);
                 }
-//                if(numDynamic <= 0) throw new AssertionError();
                 return numDynamic;
             default: throw new AssertionError();
             }
