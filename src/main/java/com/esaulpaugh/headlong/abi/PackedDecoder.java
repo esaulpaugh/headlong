@@ -69,10 +69,12 @@ final class PackedDecoder {
                 for (ABIType<?> e : ((TupleType) type).elementTypes) {
                     numDynamic += countDynamics(e);
                 }
+//                if(numDynamic <= 0) throw new AssertionError();
                 return numDynamic;
+            default: throw new AssertionError();
             }
         }
-        return 0; // default case
+        return 0;
     }
 
     private static int decodeTuple(TupleType tupleType, byte[] buffer, int start, int end, Object[] parentElements, int pei) {
