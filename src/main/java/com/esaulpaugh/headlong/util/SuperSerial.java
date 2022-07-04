@@ -120,10 +120,11 @@ public final class SuperSerial {
     }
 
     private static Object deserialize(ABIType<?> type, RLPItem item) {
-        if(type.typeCode() < TYPE_CODE_ARRAY && item.isList()) {
+        final int typeCode = type.typeCode();
+        if(item.isList() && typeCode != TYPE_CODE_ARRAY && typeCode != TYPE_CODE_TUPLE) {
             throw new IllegalArgumentException("RLPList not allowed for this type: " + type);
         }
-        switch (type.typeCode()) {
+        switch (typeCode) {
         case TYPE_CODE_BOOLEAN: return item.asBoolean();
         case TYPE_CODE_BYTE: return item.asByte(); // case currently goes unused
         case TYPE_CODE_INT: return deserializeBigInteger((UnitType<?>) type, item).intValueExact();
