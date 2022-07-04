@@ -24,6 +24,7 @@ import com.esaulpaugh.headlong.abi.TupleType;
 import com.esaulpaugh.headlong.abi.TypeFactory;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -39,7 +40,8 @@ public class SuperSerialTest {
                 () -> SuperSerial.deserialize(TupleType.parse("(int256)"), "('0092030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2020')", false)
         );
 
-        SuperSerial.deserialize(TupleType.parse("(uint256)"), "('0092030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2020')", false);
+        Tuple x = SuperSerial.deserialize(TupleType.parse("(uint256)"), "('92030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2020')", false);
+        assertEquals(new BigInteger("92030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2020", 16), x.get(0));
 
         TestUtils.assertThrown(IllegalArgumentException.class, "RLPList not allowed for this type: int8",
                 () -> SuperSerial.deserialize(TupleType.of("int8"), "(['90', '80', '77'])", false)
