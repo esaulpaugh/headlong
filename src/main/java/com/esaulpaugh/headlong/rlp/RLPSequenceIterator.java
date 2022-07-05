@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.util.Strings;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
@@ -64,7 +66,7 @@ class RLPSequenceIterator implements Iterator<RLPItem> {
         final InputStream is;
 
         StreamRLPSequenceIterator(InputStream is, RLPDecoder decoder) {
-            super(decoder, new byte[0], 0); // make sure index == buffer.length
+            super(decoder, Strings.EMPTY_BYTE_ARRAY, 0); // make sure index == buffer.length
             this.is = is;
         }
 
