@@ -163,11 +163,9 @@ public final class SuperSerial {
     }
 
     private static BigInteger deserializeBigInteger(UnitType<?> ut, RLPItem item) {
-        return ut.isUnsigned()
+        return ut.isUnsigned() || item.dataLength * Byte.SIZE < ut.getBitLength()
                 ? item.asBigInt()
-                : item.dataLength * Byte.SIZE < ut.getBitLength()
-                    ? item.asBigInt(false)
-                    : item.asBigIntSigned();
+                : item.asBigIntSigned();
     }
 
     private static Object serializeArray(ArrayType<? extends ABIType<?>, ?> type, Object arr) {
