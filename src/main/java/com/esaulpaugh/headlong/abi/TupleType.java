@@ -238,17 +238,17 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         final Object[] results = new Object[elementTypes.length];
         final int start = bb.position();
         final byte[] unitBuffer = newUnitBuffer();
-        int r = 0, skipBytes = 0, prevIndex = -1;
+        int pos = 0, skipBytes = 0, prevIndex = -1;
         for (int index : indices) {
             ensureIndexInBounds(index);
             if(index <= prevIndex) {
                 throw new IllegalArgumentException("index out of order: " + index);
             }
-            for (; r < index; r++) {
-                skipBytes += elementTypes[r].headLength();
+            for (; pos < index; pos++) {
+                skipBytes += elementTypes[pos].headLength();
             }
             bb.position(start + skipBytes);
-            final ABIType<?> resultType = elementTypes[r++];
+            final ABIType<?> resultType = elementTypes[pos++];
             if (resultType.dynamic) {
                 bb.position(start + UINT31.decode(bb, unitBuffer));
             }
