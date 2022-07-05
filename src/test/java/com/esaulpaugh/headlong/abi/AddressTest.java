@@ -45,9 +45,13 @@ public class AddressTest {
             "0xD1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb" };
 
     @Test
-    public void testVectorChecksums() {
+    public void testVectorChecksums() throws Throwable {
         for(String vector : VECTORS) {
             testAddress(vector, vector.substring(0, 12));
+        }
+        for(String address : VECTORS) {
+            final String corrupted = address.replace('F', 'f').replace('b', 'B');
+            assertThrown(IllegalArgumentException.class, "invalid checksum", () -> Address.validateChecksumAddress(corrupted));
         }
     }
 
@@ -69,14 +73,6 @@ public class AddressTest {
         final BigInteger checksummedVal = checksummed.value();
         assertEquals(checksummedVal, Address.wrap(in).value());
         assertTrue(checksummedVal.bitLength() <= 160);
-    }
-
-    @Test
-    public void testCorruptedVectors() throws Throwable {
-        for(String address : VECTORS) {
-            final String corrupted = address.replace('F', 'f').replace('b', 'B');
-            assertThrown(IllegalArgumentException.class, "invalid checksum", () -> Address.validateChecksumAddress(corrupted));
-        }
     }
 
     private static String generateAddressString(Random r) {
