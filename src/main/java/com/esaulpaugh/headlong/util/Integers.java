@@ -436,6 +436,7 @@ public final class Integers {
             }
             byte[] arr = new byte[len];
             System.arraycopy(buffer, offset, arr, 0, len);
+//            return new BigInteger(1, buffer, offset, len); // Java 9+
             return new BigInteger(1, arr);
         }
         return BigInteger.ZERO;
