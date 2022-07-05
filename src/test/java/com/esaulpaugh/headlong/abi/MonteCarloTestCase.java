@@ -188,7 +188,7 @@ public class MonteCarloTestCase {
     ByteBuffer runStandard() {
         final Tuple args = this.argsTuple;
         ByteBuffer bb = function.encodeCall(args);
-        if (!args.equals(function.decodeCall(bb))) {
+        if (!args.equals(function.decodeCall(bb.array()))) {
             throw new IllegalArgumentException(seed + " " + function.getCanonicalSignature() + " " + args);
         }
         return bb;
