@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.abi.util.Uint;
+import com.esaulpaugh.headlong.util.Integers;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -152,9 +153,7 @@ final class PackedDecoder {
 
     private static int insertBigInteger(BigIntegerType type, int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
         if(type.unsigned) {
-            byte[] copy = new byte[1 + elementLen];
-            System.arraycopy(buffer, idx, copy, 1, elementLen);
-            dest[destIdx] = new BigInteger(copy);
+            dest[destIdx] = Integers.getBigInt(buffer, idx, elementLen, true);
         } else {
 //            dest[destIdx] = new BigInteger(buffer, idx, elementLen); // Java 9+
             dest[destIdx] = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));
@@ -163,18 +162,14 @@ final class PackedDecoder {
     }
 
     private static int insertAddress(int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        byte[] copy = new byte[1 + elementLen];
-        System.arraycopy(buffer, idx, copy, 1, elementLen);
-        dest[destIdx] = new Address(new BigInteger(copy));
+        dest[destIdx] = new Address(Integers.getBigInt(buffer, idx, elementLen, true));
         return elementLen;
     }
 
     private static int insertBigDecimal(BigDecimalType type, int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
         BigInteger unscaled;
         if(type.unsigned) {
-            byte[] copy = new byte[1 + elementLen];
-            System.arraycopy(buffer, idx, copy, 1, elementLen);
-            unscaled = new BigInteger(copy);
+            unscaled = Integers.getBigInt(buffer, idx, elementLen, true);
         } else {
 //            unscaled = new BigInteger(buffer, idx, elementLen); // Java 9+
             unscaled = new BigInteger(Arrays.copyOfRange(buffer, idx, idx + elementLen));

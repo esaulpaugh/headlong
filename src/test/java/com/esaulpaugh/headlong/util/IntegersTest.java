@@ -261,12 +261,13 @@ public class IntegersTest {
 
         final String aioobe = "ArrayIndexOutOfBoundsException|";
         final String illegal = "IllegalArgumentException|deserialized integers with leading zeroes are invalid; index: 0, len: ";
+        final String negative = "NegativeArraySizeException|-1";
 
         int i = 0;
         assertTrue(errs[i++].contains(aioobe));
         assertNull(errs[i++]);
         assertTrue(errs[i++].contains(aioobe));
-        assertTrue(errs[i++].contains(aioobe));
+        assertTrue(errs[i++].contains(negative));
         assertNull(errs[i++]);
         assertNull(errs[i++]);
 
@@ -287,7 +288,7 @@ public class IntegersTest {
         assertTrue(errs[i++].contains(aioobe));
         assertNull(errs[i++]);
         assertTrue(errs[i++].contains(aioobe));
-        assertTrue(errs[i++].contains(aioobe));
+        assertTrue(errs[i++].contains(negative));
         assertNull(errs[i++]);
         assertNull(errs[i++]);
         assertTrue(errs[i++].contains(aioobe));

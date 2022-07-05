@@ -434,9 +434,9 @@ public final class Integers {
             if(!lenient && buffer[offset] == 0x00) {
                 throw leadingZeroException(offset, len);
             }
-            byte[] arr = new byte[Byte.BYTES + len]; // a leading zero byte
-            System.arraycopy(buffer, offset, arr, Byte.BYTES, len);
-            return new BigInteger(arr);
+            byte[] arr = new byte[len];
+            System.arraycopy(buffer, offset, arr, 0, len);
+            return new BigInteger(1, arr);
         }
         return BigInteger.ZERO;
     }
