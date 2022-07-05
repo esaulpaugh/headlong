@@ -26,6 +26,7 @@ import java.util.Random;
 import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
+import static com.esaulpaugh.headlong.abi.Address.MAX_LABEL_LEN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -92,8 +93,9 @@ public class AddressTest {
         testAddress(Address.toChecksumAddress(BigInteger.ONE), "0x0x0x0x0x0x\0\0\0\\\"\u0009xzzzzzzzzzz");
         testAddress(Address.toChecksumAddress(BigInteger.TEN), null);
         testAddress(Address.toChecksumAddress(BigInteger.valueOf(2L)), null);
-        testAddress(generateAddressString(r), TestUtils.generateASCIIString(36, r));
-        testAddress(generateAddressString(r), TestUtils.generateASCIIString(36, r));
+        for (int i = 0; i < 10; i++) {
+            testAddress(generateAddressString(r), TestUtils.generateASCIIString(r.nextInt(MAX_LABEL_LEN + 1), r));
+        }
 
         BigInteger _FFff = Address.wrap("0x000000000000000000000000000000000000FFff").value();
         assertEquals(BigInteger.valueOf(65535L), _FFff);
@@ -308,6 +310,8 @@ public class AddressTest {
                         "Four score and seven years ago our fathers brought forth on this continent, a new nation, " +
                         "conceived in Liberty, and dedicated to the proposition that all men are created equal.")
         );
-        assertTrue(Address.MAX_LABEL_LEN < 40);
+        final int addrDataChars = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
+        assertEquals(40, addrDataChars);
+        assertTrue(MAX_LABEL_LEN < addrDataChars);
     }
 }
