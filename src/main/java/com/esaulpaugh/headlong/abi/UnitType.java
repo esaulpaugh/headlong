@@ -115,13 +115,8 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     }
 
     final BigInteger decodeValid(ByteBuffer bb, byte[] unitBuffer) {
-        int idx = 0;
-        if(unsigned) {
-            unitBuffer = new byte[1 + UNIT_LENGTH_BYTES]; // a leading zero byte
-            idx = 1;
-        }
-        bb.get(unitBuffer, idx, UNIT_LENGTH_BYTES);
-        BigInteger bi = new BigInteger(unitBuffer);
+        bb.get(unitBuffer, 0, UNIT_LENGTH_BYTES);
+        BigInteger bi = unsigned ? new BigInteger(1, unitBuffer) : new BigInteger(unitBuffer);
         validateBigInt(bi);
         return bi;
     }
