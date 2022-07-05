@@ -230,12 +230,10 @@ public final class Function implements ABIObject {
     }
 
     public <T> T decodeCall(byte[] call, int... indices) {
-        ByteBuffer bb = ByteBuffer.wrap(call);
-        checkSelector(bb);
-        return inputTypes.decode(bb, indices);
+        return decodeCall(ByteBuffer.wrap(call), indices);
     }
 
-    public Tuple decodeCall(ByteBuffer abiBuffer, int... indices) {
+    public <T> T decodeCall(ByteBuffer abiBuffer, int... indices) {
         checkSelector(abiBuffer);
         return inputTypes.decode(abiBuffer, indices);
     }
