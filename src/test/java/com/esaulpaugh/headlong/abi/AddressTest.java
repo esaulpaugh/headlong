@@ -46,11 +46,9 @@ public class AddressTest {
 
     @Test
     public void testVectorChecksums() throws Throwable {
-        for(String vector : VECTORS) {
+        for(final String vector : VECTORS) {
             testAddress(vector, vector.substring(0, 12));
-        }
-        for(String address : VECTORS) {
-            final String corrupted = address.replace('F', 'f').replace('b', 'B');
+            final String corrupted = vector.replace('F', 'f').replace('b', 'B');
             assertThrown(IllegalArgumentException.class, "invalid checksum", () -> Address.validateChecksumAddress(corrupted));
         }
     }
