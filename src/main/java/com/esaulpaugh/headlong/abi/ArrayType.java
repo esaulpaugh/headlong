@@ -423,10 +423,11 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return SuperSerial.deserializeArray(this, s, false);
     }
 
-    public static ABIType<?> baseType(ABIType<?> type) {
+    @SuppressWarnings("unchecked")
+    public static <T extends ABIType<?>> T baseType(ABIType<?> type) {
         while (type instanceof ArrayType<?, ?>) {
             type = ((ArrayType<? extends ABIType<?>, ?>) type).getElementType();
         }
-        return type;
+        return (T) type;
     }
 }
