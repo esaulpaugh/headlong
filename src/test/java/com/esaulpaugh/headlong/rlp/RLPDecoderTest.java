@@ -191,7 +191,7 @@ public class RLPDecoderTest {
                     case "c0":
                     case "80":
                     case "00":
-                        throw exception(buffer);
+                        throw exception(buffer, null);
                     default:
                     }
                 } else {
@@ -201,10 +201,10 @@ public class RLPDecoderTest {
                     case "00":
                         break;
                     default:
-                        throw exception(buffer);
+                        throw exception(buffer, null);
                     }
                     if (item.asChar(true) != '\u0000') {
-                        throw exception(buffer);
+                        throw exception(buffer, null);
                     }
                 }
             } catch (IllegalArgumentException iae) {
@@ -214,20 +214,20 @@ public class RLPDecoderTest {
                     if(!decoder.lenient && DataType.isSingleByte(buffer[1])) {
                         break;
                     }
-                    throw exception(buffer);
+                    throw exception(buffer, iae);
                 case "b8": case "b9": case "ba": case "bb": case "bc": case "bd": case "be": case "bf":
                 case "f8": case "f9": case "fa": case "fb": case "fc": case "fd": case "fe": case "ff":
                     break;
                 default:
-                    throw exception(buffer);
+                    throw exception(buffer, iae);
                 }
             }
         }
         System.out.println("valid: " + valid + " / " + n + " (" + invalid + " invalid) lenient=" + decoder.lenient);
     }
 
-    private static RuntimeException exception(byte[] buffer) {
-        return new RuntimeException(Strings.encode(buffer));
+    private static RuntimeException exception(byte[] buffer, Throwable cause) {
+        return new RuntimeException(Strings.encode(buffer), cause);
     }
 
     @Test

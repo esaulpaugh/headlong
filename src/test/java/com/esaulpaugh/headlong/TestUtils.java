@@ -159,8 +159,8 @@ public class TestUtils {
         }
     }
 
-    public static ArrayList<Object> parseArrayToBytesHierarchy(final JsonArray array) {
-        ArrayList<Object> arrayList = new ArrayList<>();
+    public static List<Object> parseArrayToBytesHierarchy(final JsonArray array) {
+        List<Object> arrayList = new ArrayList<>();
         for (JsonElement element : array) {
             if(element.isJsonArray()) {
                 arrayList.add(parseArrayToBytesHierarchy(element.getAsJsonArray()));
