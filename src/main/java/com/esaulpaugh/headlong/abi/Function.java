@@ -258,12 +258,12 @@ public final class Function implements ABIObject {
         return outputTypes.decode(returnVals);
     }
 
-    public <T> T decodeReturn(byte[] returnVals, int... indices) {
-        return decodeReturn(ByteBuffer.wrap(returnVals), indices);
-    }
-
     public Tuple decodeReturn(ByteBuffer buf) {
         return outputTypes.decode(buf);
+    }
+
+    public <T> T decodeReturn(byte[] returnVals, int... indices) {
+        return decodeReturn(ByteBuffer.wrap(returnVals), indices);
     }
 
     /**
