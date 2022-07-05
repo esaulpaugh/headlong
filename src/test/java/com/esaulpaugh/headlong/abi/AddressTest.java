@@ -212,10 +212,10 @@ public class AddressTest {
         return new BigInteger(x);
     }
 
-    private static BigInteger computeValue6(final String addr) {
-        return parseAndShift(addr, 27, 42)
-                .add(parseAndShift(addr, 12, 27))
-                .add(parseAndShift(addr, 2, 12));
+    private static BigInteger computeValue6(final String checksumAddress) {
+        return parseAndShift(checksumAddress, 27, 42)
+                .add(parseAndShift(checksumAddress, 12, 27))
+                .add(parseAndShift(checksumAddress, 2, 12));
     }
 
     private static BigInteger parseAndShift(String addr, int start, int end) {
