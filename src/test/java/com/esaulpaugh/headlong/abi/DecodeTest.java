@@ -90,9 +90,10 @@ public class DecodeTest {
         int val = (int) (Math.pow(2, 8)) - 1;
         byte[] _byte = Strings.decode("00000000000000000000000000000000000000000000000000000000000000FF");
 
+        assertEquals(val, (int) foo.decodeSingletonReturn(_byte));
+        assertEquals(val, (int) foo.decodeSingletonReturn(ByteBuffer.wrap(_byte)));
         assertEquals(val, (int) foo.decodeReturn(_byte, 0));
-        int i = foo.decodeSingletonReturn(_byte);
-        assertEquals(val, i);
+        assertEquals(val, (int) foo.decodeReturn(ByteBuffer.wrap(_byte), 0));
 
         byte[] _int_ = Strings.decode("000000000000000000000000000000000000000000000000000000000000FFFF");
         assertEquals((int) (Math.pow(2, 16)) - 1, (int) new Function("()", "(uint16)").decodeSingletonReturn(_int_));
