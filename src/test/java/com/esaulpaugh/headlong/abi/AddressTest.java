@@ -190,9 +190,12 @@ public class AddressTest {
 
     private static BigInteger computeValue4(final String checksumAddress) {
         BigInteger sum = BigInteger.ZERO;
-        int shiftAmt = 42 / 2 - 2;
-        for (int i = 2; i < 42; i+=2, shiftAmt--) {
-            sum = sum.add(new BigInteger(zeroPad(Integer.parseInt(checksumAddress.substring(i, i+2), 16), shiftAmt)));
+        int begin = 2, end = 4;
+        int shiftAmt = 42 / FastHex.CHARS_PER_BYTE - 2;
+        while (begin < 42) {
+            sum = sum.add(new BigInteger(zeroPad(Integer.parseInt(checksumAddress.substring(begin, end), 16), shiftAmt--)));
+            begin += 2;
+            end += 2;
         }
         return sum;
     }
