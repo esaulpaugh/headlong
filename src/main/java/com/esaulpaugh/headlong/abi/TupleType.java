@@ -201,12 +201,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         bb.mark();
         try {
             if(indices.length == 1) {
-                return (T) decodeIndex(bb, indices[0]); // decodes and returns specified element
+                return (T) decodeIndex(bb, indices[0]); // specified element
             }
-            if(indices.length == 0) {
-                throw new IllegalArgumentException("must specify at least one index");
-            }
-            return (T) decodeIndices(bb, indices); // decodes and returns specified elements
+            return (T) decodeIndices(bb, indices); // Tuple with specified elements populated
         } finally {
             bb.reset();
         }
@@ -241,9 +238,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         final Object[] results = new Object[elementTypes.length];
         final int start = bb.position();
         final byte[] unitBuffer = newUnitBuffer();
-        int n = 0, r = 0, skipBytes = 0, prevIndex = -1;
-        do {
-            final int index = indices[n++];
+        int r = 0, skipBytes = 0, prevIndex = -1;
+        for (int index : indices) {
             ensureIndexInBounds(index);
             if(index <= prevIndex) {
                 throw new IllegalArgumentException("index out of order: " + index);
@@ -257,12 +253,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 bb.position(start + UINT31.decode(bb, unitBuffer));
             }
             results[index] = resultType.decode(bb, unitBuffer);
-            if (n >= indices.length) {
-                return new Tuple(results);
-            }
             skipBytes += resultType.headLength();
             prevIndex = index;
-        } while (true);
+        }
+        return new Tuple(results);
     }
 
     static int staticTupleHeadLength(TupleType tt) {
