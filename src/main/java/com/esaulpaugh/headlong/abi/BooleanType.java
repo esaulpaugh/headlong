@@ -65,7 +65,7 @@ public final class BooleanType extends UnitType<Boolean> {
     @Override
     Boolean decode(ByteBuffer bb, byte[] unitBuffer) {
         bb.get(unitBuffer);
-        BigInteger bi = new BigInteger(unitBuffer);
+        BigInteger bi = new BigInteger(1, unitBuffer);
         validateBigInt(bi);
         return decodeBoolean(bi.byteValue());
     }
