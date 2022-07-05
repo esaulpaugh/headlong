@@ -235,6 +235,11 @@ public final class Function implements ABIObject {
         return inputTypes.decode(bb, indices);
     }
 
+    public Tuple decodeCall(ByteBuffer abiBuffer, int... indices) {
+        checkSelector(abiBuffer);
+        return inputTypes.decode(abiBuffer, indices);
+    }
+
     private byte[] checkSelector(ByteBuffer bb) {
         final byte[] unitBuffer = ABIType.newUnitBuffer();
         bb.get(unitBuffer, 0, SELECTOR_LEN);

@@ -372,6 +372,8 @@ public class DecodeTest {
         Tuple args = Tuple.of(1, true, new int[] { 3, 6 }, false);
         byte[] encoded = f.encodeCall(args).array();
         testIndicesDecode(f.decodeCall(encoded, 1, 3));
+        testIndicesDecode(f.decodeCall(ByteBuffer.wrap(encoded), 1, 3));
+        testIndicesDecode(f.decodeCall(ByteBuffer.wrap(encoded), new int[] { 1, 3 }));
         encoded[0]++;
         assertThrown(IllegalArgumentException.class, "given selector does not match: expected: 804f47e7, found: 814f47e7", () -> f.decodeCall(encoded, 1, 3));
     }
