@@ -94,23 +94,6 @@ public final class FastHex {
         return decodeNibble(extractor.applyAsInt(offset), offset) << BITS_PER_CHAR | decodeNibble(extractor.applyAsInt(++offset), offset);
     }
 
-    public static void decode(final String src, int offset, final int len, final byte[] dest, int destOffset) {
-        if (!Integers.isMultiple(len, CHARS_PER_BYTE)) {
-            throw new IllegalArgumentException("len must be a multiple of two");
-        }
-        final int srcEnd = offset + len;
-        if(srcEnd > src.length()) {
-            throw new IllegalArgumentException("last src index exceeds src length: " + srcEnd + " > " + src.length());
-        }
-        final int destEnd = destOffset + len / 2;
-        if(destEnd > dest.length) {
-            throw new IllegalArgumentException("last dest index exceeds dest length: " + destEnd + " > " + dest.length);
-        }
-        while (destOffset < destEnd) {
-            dest[destOffset++] = (byte) (decodeNibble(src.charAt(offset), offset) << BITS_PER_CHAR | decodeNibble(src.charAt(++offset), offset++));
-        }
-    }
-
     private static int decodeNibble(int c, int offset) {
         switch (c) {
         case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9': return c - '0';

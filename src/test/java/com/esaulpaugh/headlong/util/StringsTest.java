@@ -152,23 +152,6 @@ public class StringsTest {
     }
 
     @Test
-    public void testHexWithDestination() throws Throwable {
-        final String hex = "aab1ccd2eee3";
-        final byte[] buffer = new byte[5];
-
-        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode(hex, 1, 3, buffer, 0));
-        assertThrown(IllegalArgumentException.class, "last src index exceeds src length: 13 > 12", () -> FastHex.decode(hex, 1, hex.length(), buffer, 0));
-        assertThrown(IllegalArgumentException.class, "last dest index exceeds dest length: 6 > 5", () -> FastHex.decode(hex, 0, hex.length(), buffer, 0));
-
-        FastHex.decode(hex, 0, hex.length() - 2, buffer, 0);
-        assertArrayEquals(Hex.decode(hex.substring(0, 10)), buffer);
-
-        Arrays.fill(buffer, (byte) 0xff);
-        FastHex.decode(hex, 1, 6, buffer, 1);
-        assertEquals("ffab1ccdff", Hex.toHexString(buffer));
-    }
-
-    @Test
     public void testFastHexDecode() {
         byte[] hexBytes = new byte[] { '9', 'a', 'f', '0', '1', 'E' };
         byte[] data = FastHex.decode(hexBytes, 1, hexBytes.length - 2);

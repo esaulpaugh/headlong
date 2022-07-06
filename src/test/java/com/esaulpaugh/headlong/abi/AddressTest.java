@@ -169,15 +169,11 @@ public class AddressTest {
         assertEquals(addrVal, computeValue1(checksumAddress));
         assertEquals(addrVal, computeValue2(checksumAddress));
         assertEquals(addrVal, computeValue4(checksumAddress));
-        assertEquals(addrVal, computeValue5(checksumAddress));
         assertEquals(addrVal, computeValue6(checksumAddress));
     }
 
     private static BigInteger computeValue1(final String checksumAddress) {
-        final int numDataBytes = (checksumAddress.length() - 2) / FastHex.CHARS_PER_BYTE;
-        final byte[] bytes = new byte[1 + numDataBytes];
-        System.arraycopy(FastHex.decode(checksumAddress, 2, checksumAddress.length() - 2), 0, bytes, 1, numDataBytes);
-        return new BigInteger(bytes);
+        return new BigInteger(1, FastHex.decode(checksumAddress, 2, checksumAddress.length() - 2));
     }
 
     private static BigInteger computeValue2(final String checksumAddress) {
@@ -200,12 +196,6 @@ public class AddressTest {
         byte[] bytes = new byte[2 + n];
         bytes[1] = (byte) c;
         return bytes;
-    }
-
-    private static BigInteger computeValue5(final String checksumAddress) {
-        byte[] x = new byte[21];
-        FastHex.decode(checksumAddress, 2, 40, x, 1);
-        return new BigInteger(x);
     }
 
     private static BigInteger computeValue6(final String checksumAddress) {
