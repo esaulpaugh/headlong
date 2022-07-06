@@ -91,9 +91,7 @@ public final class Address {
 
     private static BigInteger validateAndDecodeAddress(final String checksumAddress) {
         validateChecksumAddress(checksumAddress);
-        byte[] bytes = new byte[1 + ADDRESS_DATA_BYTES];
-        FastHex.decode(checksumAddress, PREFIX_LEN, ADDRESS_HEX_CHARS, bytes, 1);
-        return new BigInteger(bytes);
+        return new BigInteger(1, FastHex.decode(checksumAddress, PREFIX_LEN, ADDRESS_HEX_CHARS));
     }
 
     public Address withLabel(final String label) {
