@@ -72,18 +72,18 @@ public class SuperSerialTest {
         assertTrue((boolean) t.get(0));
         t = SuperSerial.deserialize(TupleType.parse("(bool)"), "('')", false);
         assertFalse((boolean) t.get(0));
-        assertThrown(IllegalArgumentException.class, "invalid boolean syntax: 00. Expected 01 for true or empty string for false",
+        assertThrown(IllegalArgumentException.class, "invalid boolean syntax: 00. Expected RLP 0x01 or 0x80",
                 () -> SuperSerial.deserialize(TupleType.parse("(bool)"), "('00')", false));
-        assertThrown(IllegalArgumentException.class, "invalid boolean syntax: fcd1. Expected 01 for true or empty string for false",
+        assertThrown(IllegalArgumentException.class, "invalid boolean syntax: fcd1. Expected RLP 0x01 or 0x80",
                 () -> SuperSerial.deserialize(TupleType.parse("(bool)"), "('fcd1')", false));
 
         t = SuperSerial.deserialize(TupleType.parse("(bool)"), "01", true);
         assertTrue((boolean) t.get(0));
         t = SuperSerial.deserialize(TupleType.parse("(bool)"), "80", true);
         assertFalse((boolean) t.get(0));
-        assertThrown(IllegalArgumentException.class, "invalid boolean syntax: 00. Expected 01 for true or empty string for false",
+        assertThrown(IllegalArgumentException.class, "invalid boolean syntax: 00. Expected RLP 0x01 or 0x80",
                 () -> SuperSerial.deserialize(TupleType.parse("(bool)"), "00", true));
-        assertThrown(IllegalArgumentException.class, "invalid boolean syntax: fcd1. Expected 01 for true or empty string for false",
+        assertThrown(IllegalArgumentException.class, "invalid boolean syntax: fcd1. Expected RLP 0x01 or 0x80",
                 () -> SuperSerial.deserialize(TupleType.parse("(bool)"), "82fcd1", true));
     }
 
