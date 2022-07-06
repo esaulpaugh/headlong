@@ -177,6 +177,7 @@ public class StringsTest {
                 }
             }
         }
+        assertEquals((int) Math.pow("0123456789ABCDEFabcdef".length(), 3), 256 * 256 * 256 - count);
         assertEquals("0123456789ABCDEFabcdef".length(), (int) Math.cbrt(256 * 256 * 256 - count));
     }
 }
