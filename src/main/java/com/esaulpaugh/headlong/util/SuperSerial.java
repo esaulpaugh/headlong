@@ -125,7 +125,7 @@ public final class SuperSerial {
             throw new IllegalArgumentException("RLPList not allowed for this type: " + type);
         }
         switch (typeCode) {
-        case TYPE_CODE_BOOLEAN: return item.asBoolean();
+        case TYPE_CODE_BOOLEAN: return deserializeBoolean(item);
         case TYPE_CODE_BYTE: return item.asByte(); // case currently goes unused
         case TYPE_CODE_INT: return deserializeBigInteger((UnitType<?>) type, item).intValueExact();
         case TYPE_CODE_LONG: return deserializeBigInteger((UnitType<?>) type, item).longValueExact();
@@ -138,6 +138,13 @@ public final class SuperSerial {
         case TYPE_CODE_ADDRESS: return Address.wrap(Address.toChecksumAddress(deserializeBigInteger((UnitType<?>) type, item)));
         default: throw new AssertionError();
         }
+    }
+
+    private static boolean deserializeBoolean(RLPItem item) {
+        String hex = item.asString(Strings.HEX);
+        if("01".equals(hex)) return true;
+        if("".equals(hex)) return false;
+        throw new IllegalArgumentException("invalid boolean syntax: " + hex + ". Expected 01 for true or empty string for false");
     }
 
     private static byte[] serializeBigInteger(UnitType<?> ut, BigInteger val) {
@@ -207,7 +214,7 @@ public final class SuperSerial {
         final List<RLPItem> elements = list.elements(RLP_STRICT);
         boolean[] in = new boolean[elements.size()];
         for (int i = 0; i < in.length; i++) {
-            in[i] = elements.get(i).asBoolean();
+            in[i] = deserializeBoolean(elements.get(i));
         }
         return in;
     }
