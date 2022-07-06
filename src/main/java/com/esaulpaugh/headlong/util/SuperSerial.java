@@ -104,8 +104,8 @@ public final class SuperSerial {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return serializeBoolean((boolean) obj);
         case TYPE_CODE_BYTE: return Integers.toBytes((byte) obj); // case currently goes unused
-        case TYPE_CODE_INT:
-        case TYPE_CODE_LONG: return serializeBigInteger((UnitType<?>) type, BigInteger.valueOf(((Number) obj).longValue()));
+        case TYPE_CODE_INT: return serializeBigInteger((UnitType<?>) type, BigInteger.valueOf((int) obj));
+        case TYPE_CODE_LONG: return serializeBigInteger((UnitType<?>) type, BigInteger.valueOf((long) obj));
         case TYPE_CODE_BIG_INTEGER: return serializeBigInteger((UnitType<?>) type, (BigInteger) obj);
         case TYPE_CODE_BIG_DECIMAL: return serializeBigInteger((UnitType<?>) type, ((BigDecimal) obj).unscaledValue());
         case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?>) type, obj);
