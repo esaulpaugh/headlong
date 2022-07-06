@@ -90,7 +90,7 @@ public class SuperSerialTest {
     @Test
     public void testParseArgs() throws Throwable {
 
-        String boolArrStr = "['00', '01', '01']";
+        String boolArrStr = "['', '01', '01']";
 
         TupleType tt = TupleType.parse("(bool[])");
 
