@@ -141,9 +141,6 @@ public final class SuperSerial {
     }
 
     private static byte[] serializeBigInteger(UnitType<?> ut, BigInteger val) {
-        if(ut.isUnsigned()) {
-            return Integers.toBytesUnsigned(val);
-        }
         if(val.signum() != 0) {
             final byte[] bytes = val.toByteArray();
             return val.signum() < 0
