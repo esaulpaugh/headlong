@@ -82,35 +82,35 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
                 throw new IllegalArgumentException("signed value given for unsigned type");
             }
             longVal = ~longVal;
+        } else if (unsigned) {
+            checkUnsignedBitLen(Integers.bitLen(longVal));
+            return UNIT_LENGTH_BYTES;
         }
-        checkBitLen(Integers.bitLen(longVal));
+        checkSignedBitLen(Integers.bitLen(longVal));
         return UNIT_LENGTH_BYTES;
     }
 
     final int validateBigInt(BigInteger bigIntVal) {
-        final int foundBitLen = bigIntVal.bitLength();
         if(unsigned) {
             if(bigIntVal.signum() < 0) {
                 throw new IllegalArgumentException("signed value given for unsigned type");
             }
-            if(foundBitLen > bitLength) {
-                throw new IllegalArgumentException("unsigned val exceeds bit limit: " + foundBitLen + " > " + bitLength);
-            }
-        } else if (foundBitLen >= bitLength) {
-            throw new IllegalArgumentException("signed val exceeds bit limit: " + foundBitLen + " >= " + bitLength);
+            checkUnsignedBitLen(bigIntVal.bitLength());
+        } else {
+            checkSignedBitLen(bigIntVal.bitLength());
         }
         return UNIT_LENGTH_BYTES;
     }
 
-    private void checkBitLen(int actual) {
-        if(unsigned) {
-            if(actual > bitLength) {
-                throw new IllegalArgumentException("unsigned val exceeds bit limit: " + actual + " > " + bitLength);
-            }
-        } else {
-            if (actual >= bitLength) {
-                throw new IllegalArgumentException("signed val exceeds bit limit: " + actual + " >= " + bitLength);
-            }
+    private void checkUnsignedBitLen(int actual) {
+        if(actual > bitLength) {
+            throw new IllegalArgumentException("unsigned val exceeds bit limit: " + actual + " > " + bitLength);
+        }
+    }
+
+    private void checkSignedBitLen(int actual) {
+        if (actual >= bitLength) {
+            throw new IllegalArgumentException("signed val exceeds bit limit: " + actual + " >= " + bitLength);
         }
     }
 
