@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 /** Unsigned 0 or 1. */
