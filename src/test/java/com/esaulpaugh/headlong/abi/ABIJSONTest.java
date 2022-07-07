@@ -281,6 +281,8 @@ public class ABIJSONTest {
         assertEquals(FUNCTION_A_JSON, f.toJson(true));
         final TupleType in = f.getInputs();
         final TupleType out = f.getOutputs();
+        assertNull(in.getName());
+        assertNull(out.getName());
         final ABIType<?> out0 = out.get(0);
 
         final BigInteger val = BigInteger.valueOf(40L);
@@ -432,6 +434,8 @@ public class ABIJSONTest {
             List<Function> f2 = ABIJSON.parseFunctions(CONTRACT_JSON.replace("    \"type\": \"function\",\n", ""));
             assertEquals(1, f2.size());
             assertEquals(functions.get(0), f2.get(0));
+            assertNull(f2.get(0).getInputs().getName());
+            assertNull(f2.get(0).getOutputs().getName());
         }
 
         Function func = functions.get(0);
@@ -459,6 +463,9 @@ public class ABIJSONTest {
         Function fallback = functions.get(0);
         Function constructor = functions.get(1);
 
+        assertNull(fallback.getInputs().getName());
+        assertNull(fallback.getOutputs().getName());
+
         assertEquals(TypeEnum.FALLBACK, fallback.getType());
         assertEquals(TupleType.EMPTY, fallback.getInputs());
         assertEquals(TupleType.EMPTY, fallback.getOutputs());
@@ -485,6 +492,8 @@ public class ABIJSONTest {
         assertArrayEquals(new boolean[] { true, false }, event.getIndexManifest());
         assertTrue(event.isElementIndexed(0));
         assertFalse(event.isElementIndexed(1));
+
+        assertNull(event.getInputs().getName());
 
         assertEquals("a", event.getInputs().get(0).getName());
         assertEquals("b", event.getInputs().get(1).getName());

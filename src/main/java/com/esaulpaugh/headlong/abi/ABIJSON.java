@@ -163,8 +163,8 @@ public final class ABIJSON {
         return new Function(
                 type,
                 getName(function),
-                parseTupleType(function, INPUTS),
-                parseTupleType(function, OUTPUTS),
+                parseTupleType(function, null, INPUTS),
+                parseTupleType(function, null, OUTPUTS),
                 getString(function, STATE_MUTABILITY),
                 digest
         );
@@ -184,7 +184,7 @@ public final class ABIJSON {
             return new Event(
                     getName(event),
                     getBoolean(event, ANONYMOUS, false),
-                    TupleType.wrap(INPUTS, types),
+                    TupleType.wrap(null, types),
                     indexed
             );
         }
@@ -192,11 +192,7 @@ public final class ABIJSON {
     }
 
     private static ContractError parseErrorUnchecked(JsonObject error) {
-        return new ContractError(getName(error), parseTupleType(error, INPUTS));
-    }
-
-    private static TupleType parseTupleType(JsonObject object, String arrayKey) {
-        return parseTupleType(object, getName(object), arrayKey);
+        return new ContractError(getName(error), parseTupleType(error, null, INPUTS));
     }
 
     private static TupleType parseTupleType(JsonObject object, String nameValue, String arrayKey) {
