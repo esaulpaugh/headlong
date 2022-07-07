@@ -58,9 +58,14 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     }
 
     @Override
-    public int validate(J value) {
+    public final int validate(J value) {
         validateClass(value);
-        return validatePrimitive(toLong(value));
+        validateInternal(value);
+        return UNIT_LENGTH_BYTES;
+    }
+
+    void validateInternal(J value) {
+        validatePrimitive(toLong(value));
     }
 
     @Override
@@ -97,7 +102,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         return UNIT_LENGTH_BYTES;
     }
 
-    final int validateBigInt(BigInteger bigIntVal) {
+    final void validateBigInt(BigInteger bigIntVal) {
         if(unsigned) {
             if(bigIntVal.signum() < 0) {
                 throw new IllegalArgumentException("signed value given for unsigned type");
@@ -106,7 +111,6 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         } else {
             checkSignedBitLen(bigIntVal.bitLength());
         }
-        return UNIT_LENGTH_BYTES;
     }
 
     private void checkUnsignedBitLen(int actual) {

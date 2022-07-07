@@ -698,16 +698,10 @@ public class EncodeTest {
     @Test
     public void testCasts2() throws Throwable {
         final ABIType<?> a = ByteType.SIGNED;
-        testCast2(Integer.class, (ABIType<Object>) a, 10);
-        testCast2(Byte.class, TypeFactory.createNonCapturing("bool"), (byte) 11);
-        testCast2(BigInteger.class, TypeFactory.createNonCapturing("address"), BigInteger.valueOf(12L));
-        testCast2(Double.class, TypeFactory.createNonCapturing("int96"), 13.2d);
-        testCast2(Long.class, TypeFactory.createNonCapturing("fixed"), 14L);
-    }
-
-    private static void testCast2(Class<?> from, ABIType<Object> t, Object arg) throws Throwable {
-        final String expectedMsg = "class " + from .getName() + " cannot be cast to class " + t.clazz.getName();
-        assertThrown(ClassCastException.class, expectedMsg, () -> t.validate(arg));
-        assertThrown(ClassCastException.class, expectedMsg, () -> t.encode(arg));
+        testCast(Integer.class, (ABIType<Object>) a, 10);
+        testCast(Byte.class, TypeFactory.createNonCapturing("bool"), (byte) 11);
+        testCast(BigInteger.class, TypeFactory.createNonCapturing("address"), BigInteger.valueOf(12L));
+        testCast(Double.class, TypeFactory.createNonCapturing("int96"), 13.2d);
+        testCast(Long.class, TypeFactory.createNonCapturing("fixed"), 14L);
     }
 }
