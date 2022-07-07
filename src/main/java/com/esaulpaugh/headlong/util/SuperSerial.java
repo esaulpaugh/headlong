@@ -144,7 +144,7 @@ public final class SuperSerial {
         String hex = item.asString(Strings.HEX);
         if("01".equals(hex)) return Boolean.TRUE;
         if("".equals(hex)) return Boolean.FALSE;
-        throw new IllegalArgumentException("invalid boolean syntax: 0x" + hex + ". Expected RLP 0x01 or 0x80");
+        throw new IllegalArgumentException("illegal boolean RLP: 0x" + item.encodingString(Strings.HEX) + ". Expected 0x01 or 0x80");
     }
 
     private static byte[] serializeBigInteger(UnitType<?> ut, BigInteger val) {
