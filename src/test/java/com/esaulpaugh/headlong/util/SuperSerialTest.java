@@ -68,6 +68,16 @@ public class SuperSerialTest {
 
     @Test
     public void testBoolean() throws Throwable {
+
+        TupleType tt = TupleType.parse("(bool)");
+        Tuple _true = Tuple.of(true);
+        Tuple _false = Tuple.of(false);
+
+        assertEquals("01", SuperSerial.serialize(tt, _true, true));
+        assertEquals("80", SuperSerial.serialize(tt, _false, true));
+        assertEquals("(\n  '01'\n)", SuperSerial.serialize(tt, _true, false));
+        assertEquals("(\n  ''\n)", SuperSerial.serialize(tt, _false, false));
+
         Tuple t = SuperSerial.deserialize(TupleType.parse("(bool)"), "('01')", false);
         assertTrue((boolean) t.get(0));
         t = SuperSerial.deserialize(TupleType.parse("(bool)"), "('')", false);
