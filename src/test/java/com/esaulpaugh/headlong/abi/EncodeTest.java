@@ -35,6 +35,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -648,5 +650,39 @@ public class EncodeTest {
 
         assertEquals(((UnitType<?>) TypeFactory.create("uint128")).maxValue(), ufixed.maxValue());
         assertEquals(((UnitType<?>) TypeFactory.create("uint128")).minValue(), ufixed.minValue());
+    }
+
+    @Test
+    public void testValidateClass() throws Throwable {
+
+        final ABIType<Object> intType = TypeFactory.createNonCapturing("int8");
+
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.lang.Byte != java.lang.Integer (int8 requires Integer but found Byte)",
+                () -> intType.encode((byte) -1));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.lang.Short != java.lang.Integer (int8 requires Integer but found Short)",
+                () -> intType.encode((short) 10));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.lang.Long != java.lang.Integer (int8 requires Integer but found Long)",
+                () -> intType.encode(10L));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.math.BigInteger != java.lang.Integer (int8 requires Integer but found BigInteger)",
+                () -> intType.encode(BigInteger.valueOf(10L)));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.math.BigDecimal != java.lang.Integer (int8 requires Integer but found BigDecimal)",
+                () -> intType.encode(new BigDecimal(BigInteger.valueOf(57L), 1)));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.lang.Double != java.lang.Integer (int8 requires Integer but found Double)",
+                () -> intType.encode(Double.valueOf("1.3")));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.lang.Float != java.lang.Integer (int8 requires Integer but found Float)",
+                () -> intType.encode(Float.valueOf("7.4")));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.util.concurrent.atomic.AtomicInteger != java.lang.Integer (int8 requires Integer but found AtomicInteger)",
+                () -> intType.encode(new AtomicInteger()));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.util.concurrent.atomic.AtomicLong != java.lang.Integer (int8 requires Integer but found AtomicLong)",
+                () -> intType.encode(new AtomicLong(98L)));
     }
 }

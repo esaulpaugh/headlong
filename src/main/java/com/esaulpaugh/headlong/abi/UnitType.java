@@ -64,6 +64,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
     @Override
     void encodeTail(J value, ByteBuffer dest) {
+        validateClass(value);
         Encoding.insertInt(toLong(value), dest);
     }
 
