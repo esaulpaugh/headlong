@@ -65,45 +65,45 @@ public class MeasureFunction {
         blackhole.consume(F.encodeCall(ARGS));
     }
 
-//    @Benchmark
-//    @Fork(value = 1, warmups = 1)
-//    @BenchmarkMode(Mode.AverageTime)
-//    @Warmup(iterations = 1)
-//    @Measurement(iterations = THREE)
-//    @OutputTimeUnit(TimeUnit.NANOSECONDS)
-//    public void decode_call(Blackhole blackhole) {
-//        blackhole.consume(F.decodeCall(CALL));
-//    }
-//
-//    @Benchmark
-//    @Fork(value = 1, warmups = 1)
-//    @BenchmarkMode(Mode.AverageTime)
-//    @Warmup(iterations = 1)
-//    @Measurement(iterations = THREE)
-//    @OutputTimeUnit(TimeUnit.NANOSECONDS)
-//    public void decode_index_slow(Blackhole blackhole) {
-//        blackhole.consume(F.decodeReturn(RETURN).get(2));
-//    }
-//
-//    @Benchmark
-//    @Fork(value = 1, warmups = 1)
-//    @BenchmarkMode(Mode.AverageTime)
-//    @Warmup(iterations = 1)
-//    @Measurement(iterations = THREE)
-//    @OutputTimeUnit(TimeUnit.NANOSECONDS)
-//    public void decode_index_fast(Blackhole blackhole) {
-//        blackhole.consume(F.decodeReturn(RETURN, 2));
-//    }
-//
-//    @Benchmark
-//    @Fork(value = 1, warmups = 1)
-//    @BenchmarkMode(Mode.AverageTime)
-//    @Warmup(iterations = 1)
-//    @Measurement(iterations = THREE)
-//    @OutputTimeUnit(TimeUnit.NANOSECONDS)
-//    public void init_with_keccak(Blackhole blackhole) {
-//        blackhole.consume(Function.parse("sam(bytes,bool,uint256[])"));
-//    }
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.AverageTime)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public void decode_call(Blackhole blackhole) {
+        blackhole.consume(F.decodeCall(CALL));
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.AverageTime)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public void decode_index_slow(Blackhole blackhole) {
+        blackhole.consume(F.decodeReturn(RETURN).get(2));
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.AverageTime)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public void decode_index_fast(Blackhole blackhole) {
+        blackhole.consume(F.decodeReturn(RETURN, 2));
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.AverageTime)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public void init_with_keccak(Blackhole blackhole) {
+        blackhole.consume(Function.parse("sam(bytes,bool,uint256[])"));
+    }
 
 //    @Benchmark
 //    @Fork(value = 1, warmups = 1)
