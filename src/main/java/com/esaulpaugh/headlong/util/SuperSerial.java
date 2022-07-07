@@ -140,10 +140,10 @@ public final class SuperSerial {
         return val ? TRUE : FALSE;
     }
 
-    private static boolean deserializeBoolean(RLPItem item) {
+    private static Boolean deserializeBoolean(RLPItem item) {
         String hex = item.asString(Strings.HEX);
-        if("01".equals(hex)) return true;
-        if("".equals(hex)) return false;
+        if("01".equals(hex)) return Boolean.TRUE;
+        if("".equals(hex)) return Boolean.FALSE;
         throw new IllegalArgumentException("invalid boolean syntax: 0x" + hex + ". Expected RLP 0x01 or 0x80");
     }
 
