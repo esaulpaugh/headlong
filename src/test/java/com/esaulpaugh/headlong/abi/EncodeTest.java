@@ -673,16 +673,44 @@ public class EncodeTest {
                 "class mismatch: java.math.BigDecimal != java.lang.Integer (int8 requires Integer but found BigDecimal)",
                 () -> intType.encode(new BigDecimal(BigInteger.valueOf(57L), 1)));
         assertThrown(IllegalArgumentException.class,
-                "class mismatch: java.lang.Double != java.lang.Integer (int8 requires Integer but found Double)",
-                () -> intType.encode(Double.valueOf("1.3")));
-        assertThrown(IllegalArgumentException.class,
                 "class mismatch: java.lang.Float != java.lang.Integer (int8 requires Integer but found Float)",
                 () -> intType.encode(Float.valueOf("7.4")));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.lang.Double != java.lang.Integer (int8 requires Integer but found Double)",
+                () -> intType.encode(Double.valueOf("1.3")));
         assertThrown(IllegalArgumentException.class,
                 "class mismatch: java.util.concurrent.atomic.AtomicInteger != java.lang.Integer (int8 requires Integer but found AtomicInteger)",
                 () -> intType.encode(new AtomicInteger()));
         assertThrown(IllegalArgumentException.class,
                 "class mismatch: java.util.concurrent.atomic.AtomicLong != java.lang.Integer (int8 requires Integer but found AtomicLong)",
                 () -> intType.encode(new AtomicLong(98L)));
+
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.lang.Byte != java.lang.Integer (int8 requires Integer but found Byte)",
+                () -> intType.validate((byte) 5900));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.lang.Short != java.lang.Integer (int8 requires Integer but found Short)",
+                () -> intType.validate((short) -9199));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.lang.Long != java.lang.Integer (int8 requires Integer but found Long)",
+                () -> intType.validate(1000L));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.math.BigInteger != java.lang.Integer (int8 requires Integer but found BigInteger)",
+                () -> intType.validate(BigInteger.valueOf(810L)));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.math.BigDecimal != java.lang.Integer (int8 requires Integer but found BigDecimal)",
+                () -> intType.validate(new BigDecimal(BigInteger.valueOf(57L), 1)));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.lang.Float != java.lang.Integer (int8 requires Integer but found Float)",
+                () -> intType.validate(7.1f));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.lang.Double != java.lang.Integer (int8 requires Integer but found Double)",
+                () -> intType.validate(1.9d));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.util.concurrent.atomic.AtomicInteger != java.lang.Integer (int8 requires Integer but found AtomicInteger)",
+                () -> intType.validate(new AtomicInteger(1)));
+        assertThrown(IllegalArgumentException.class,
+                "class mismatch: java.util.concurrent.atomic.AtomicLong != java.lang.Integer (int8 requires Integer but found AtomicLong)",
+                () -> intType.validate(new AtomicLong(0L)));
     }
 }
