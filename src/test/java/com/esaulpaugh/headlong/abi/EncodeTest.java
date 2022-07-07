@@ -654,7 +654,6 @@ public class EncodeTest {
 
     @Test
     public void testCasts() throws Throwable {
-
         final Object[] args = new Object[] { (byte) -1, (short) 10, BigInteger.valueOf(10L), new BigDecimal(BigInteger.valueOf(57L), 1), 0f, -2.1d, new AtomicInteger(), new AtomicLong(98L) };
         {
             final ABIType<Object> int8 = TypeFactory.createNonCapturing("int8");
@@ -694,5 +693,21 @@ public class EncodeTest {
         final String expectedMsg = "class mismatch: " + from.getName() + " != " + type.clazz.getName() + " (" + type + " requires " + type.clazz.getSimpleName() + " but found " + from.getSimpleName();
         assertThrown(IllegalArgumentException.class, expectedMsg, () -> type.validate(arg));
         assertThrown(IllegalArgumentException.class, expectedMsg, () -> type.encode(arg));
+    }
+
+    @Test
+    public void testCasts2() throws Throwable {
+        final ABIType<?> a = ByteType.SIGNED;
+        testCast2(Integer.class, (ABIType<Object>) a, 10);
+        testCast2(Byte.class, TypeFactory.createNonCapturing("bool"), (byte) 11);
+        testCast2(BigInteger.class, TypeFactory.createNonCapturing("address"), BigInteger.valueOf(12L));
+        testCast2(Double.class, TypeFactory.createNonCapturing("int96"), 13.2d);
+        testCast2(Long.class, TypeFactory.createNonCapturing("fixed"), 14L);
+    }
+
+    private static void testCast2(Class<?> from, ABIType<Object> t, Object arg) throws Throwable {
+        final String expectedMsg = "class " + from .getName() + " cannot be cast to class " + t.clazz.getName();
+        assertThrown(ClassCastException.class, expectedMsg, () -> t.validate(arg));
+        assertThrown(ClassCastException.class, expectedMsg, () -> t.encode(arg));
     }
 }
