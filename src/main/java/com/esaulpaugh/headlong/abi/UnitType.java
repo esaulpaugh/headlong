@@ -59,7 +59,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
     @Override
     int dynamicByteLength(J value) {
-        return UNIT_LENGTH_BYTES;
+        throw new UnsupportedOperationException();
     }
 
     @Override
