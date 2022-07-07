@@ -173,31 +173,33 @@ public final class SuperSerial {
     }
 
     private static Object serializeArray(ArrayType<? extends ABIType<?>, ?> type, Object arr) {
-        switch (type.getElementType().typeCode()) {
+        final ABIType<?> et = type.getElementType();
+        switch (et.typeCode()) {
         case TYPE_CODE_BOOLEAN: return serializeBooleanArray((boolean[]) arr);
         case TYPE_CODE_BYTE: return serializeByteArray(arr, type.isString());
-        case TYPE_CODE_INT: return serializeIntArray((UnitType<?>) type.getElementType(), (int[]) arr);
-        case TYPE_CODE_LONG: return serializeLongArray((UnitType<?>) type.getElementType(), (long[]) arr);
+        case TYPE_CODE_INT: return serializeIntArray((UnitType<?>) et, (int[]) arr);
+        case TYPE_CODE_LONG: return serializeLongArray((UnitType<?>) et, (long[]) arr);
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
-        case TYPE_CODE_ADDRESS: return serializeObjectArray(type.getElementType(), (Object[]) arr);
+        case TYPE_CODE_ADDRESS: return serializeObjectArray(et, (Object[]) arr);
         default: throw new AssertionError();
         }
     }
 
     private static Object deserializeArray(ArrayType<? extends ABIType<?>,?> type, RLPItem item) {
-        switch (type.getElementType().typeCode()) {
+        final ABIType<?> et = type.getElementType();
+        switch (et.typeCode()) {
         case TYPE_CODE_BOOLEAN: return deserializeBooleanArray((RLPList) item);
         case TYPE_CODE_BYTE: return deserializeByteArray(item, type.isString());
-        case TYPE_CODE_INT: return deserializeIntArray((IntType) type.getElementType(), (RLPList) item);
-        case TYPE_CODE_LONG: return deserializeLongArray((LongType) type.getElementType(), (RLPList) item);
+        case TYPE_CODE_INT: return deserializeIntArray((IntType) et, (RLPList) item);
+        case TYPE_CODE_LONG: return deserializeLongArray((LongType) et, (RLPList) item);
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
-        case TYPE_CODE_ADDRESS: return deserializeObjectArray(type.getElementType(), (RLPList) item);
+        case TYPE_CODE_ADDRESS: return deserializeObjectArray(et, (RLPList) item);
         default: throw new AssertionError();
         }
     }
