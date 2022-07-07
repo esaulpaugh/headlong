@@ -178,8 +178,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     @Override
     public int validate(J value) {
-        validateClass(value);
-        return totalLen(validateElements(value), length == DYNAMIC_LENGTH); // validateClass to disallow Object[] etc
+        validateClass(value); // validateClass to disallow Object[] etc
+        return totalLen(validateElements(value), length == DYNAMIC_LENGTH);
     }
 
     private int validateElements(J value) {
