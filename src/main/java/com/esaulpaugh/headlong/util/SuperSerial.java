@@ -115,10 +115,6 @@ public final class SuperSerial {
         }
     }
 
-    private static byte[] serializeBoolean(boolean val) {
-        return val ? TRUE : FALSE;
-    }
-
     private static Object deserialize(ABIType<?> type, RLPItem item) {
         final int typeCode = type.typeCode();
         if(item.isList() && typeCode != TYPE_CODE_ARRAY && typeCode != TYPE_CODE_TUPLE) {
@@ -138,6 +134,10 @@ public final class SuperSerial {
         case TYPE_CODE_ADDRESS: return Address.wrap(Address.toChecksumAddress(deserializeBigInteger((UnitType<?>) type, item)));
         default: throw new AssertionError();
         }
+    }
+
+    private static byte[] serializeBoolean(boolean val) {
+        return val ? TRUE : FALSE;
     }
 
     private static boolean deserializeBoolean(RLPItem item) {
