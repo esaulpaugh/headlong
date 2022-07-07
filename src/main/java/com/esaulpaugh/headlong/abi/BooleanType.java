@@ -48,6 +48,7 @@ public final class BooleanType extends UnitType<Boolean> {
 
     @Override
     void validateInternal(Boolean value) {
+        // all Booleans are a valid bool
     }
 
     @Override

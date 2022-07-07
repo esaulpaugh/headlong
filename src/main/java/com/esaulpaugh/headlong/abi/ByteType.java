@@ -43,6 +43,7 @@ public final class ByteType extends UnitType<Byte> {
 
     @Override
     void validateInternal(Byte value) {
+        // all Bytes are a valid int8
     }
 
     @Override
