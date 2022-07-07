@@ -81,21 +81,15 @@ public abstract class ABIType<J> {
      */
     public abstract int typeCode();
 
-    int headLength() {
-        return UNIT_LENGTH_BYTES;
-    }
+    abstract int headLength();
 
-    int dynamicByteLength(J value) {
-        return UNIT_LENGTH_BYTES;
-    }
+    abstract int dynamicByteLength(J value);
 
     /**
      * @param value the value to measure
      * @return the length in bytes of the value when encoded
      */
-    int byteLength(J value) {
-        return UNIT_LENGTH_BYTES;
-    }
+    abstract int byteLength(J value);
 
     abstract int byteLengthPacked(J value);
 
