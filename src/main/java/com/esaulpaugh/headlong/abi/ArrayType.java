@@ -61,15 +61,12 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     static int staticArrayHeadLength(ArrayType<?, ?> at) {
-        int length = 1;
-        do {
-            switch (at.elementType.typeCode()) {
-            case TYPE_CODE_BYTE: return length * UNIT_LENGTH_BYTES; // all static byte arrays round up to exactly 32 bytes and not more
-            case TYPE_CODE_ARRAY: length *= at.length; at = (ArrayType<?, ?>) at.elementType; continue;
-            case TYPE_CODE_TUPLE: return length * at.length * TupleType.staticTupleHeadLength((TupleType) at.elementType);
-            default: return length * at.length * UNIT_LENGTH_BYTES;
-            }
-        } while(true);
+        switch (at.elementType.typeCode()) {
+        case TYPE_CODE_BYTE: return UNIT_LENGTH_BYTES; // all static byte arrays round up to exactly 32 bytes and not more
+        case TYPE_CODE_ARRAY: return at.length * staticArrayHeadLength((ArrayType<?, ?>) at.elementType);
+        case TYPE_CODE_TUPLE: return at.length * TupleType.staticTupleHeadLength((TupleType) at.elementType);
+        default: return at.length * UNIT_LENGTH_BYTES;
+        }
     }
 
     public E getElementType() {
