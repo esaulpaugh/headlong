@@ -56,6 +56,17 @@ public final class SuperSerial {
     private static final byte[] TRUE = new byte[] { 0x1 };
     private static final byte[] FALSE = EMPTY_BYTE_ARRAY;
 
+    public static byte[] toRLP(TupleType schema, Tuple vals) {
+        schema.validate(vals);
+        return RLPEncoder.encodeSequentially(serializeTuple(schema, vals));
+    }
+
+    public static Tuple fromRLP(TupleType schema, byte[] rlp) {
+        Tuple in = deserializeTuple(schema, rlp);
+        schema.validate(in);
+        return in;
+    }
+
     public static String serialize(TupleType tupleType, Tuple tuple, boolean machine) {
         tupleType.validate(tuple);
         Object[] objects = serializeTuple(tupleType, tuple);
