@@ -263,7 +263,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         int len = 0;
         for (ABIType<?> e : tt) {
             switch (e.typeCode()) {
-            case TYPE_CODE_ARRAY: len += ArrayType.staticArrayHeadLength(e); continue;
+            case TYPE_CODE_ARRAY: len += ArrayType.staticArrayHeadLength((ArrayType<?, ?>) e); continue;
             case TYPE_CODE_TUPLE: len += staticTupleHeadLength((TupleType) e); continue;
             default: len += UNIT_LENGTH_BYTES;
             }

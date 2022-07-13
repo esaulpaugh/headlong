@@ -60,13 +60,12 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticArrayHeadLength(this);
     }
 
-    static int staticArrayHeadLength(ABIType<?> type) {
+    static int staticArrayHeadLength(ArrayType<?, ?> at) {
         int length = 1;
         do {
-            final ArrayType<?, ?> at = (ArrayType<?, ?>) type;
             switch (at.elementType.typeCode()) {
             case TYPE_CODE_BYTE: return length * UNIT_LENGTH_BYTES; // all static byte arrays round up to exactly 32 bytes and not more
-            case TYPE_CODE_ARRAY: length *= at.length; type = at.elementType; continue;
+            case TYPE_CODE_ARRAY: length *= at.length; at = (ArrayType<?, ?>) at.elementType; continue;
             case TYPE_CODE_TUPLE: return length * at.length * TupleType.staticTupleHeadLength((TupleType) at.elementType);
             default: return length * at.length * UNIT_LENGTH_BYTES;
             }
