@@ -140,4 +140,13 @@ public class SuperSerialTest {
         assertEquals(127, int8.parseArgument("0127"));
         assertEquals(127, int8.parseArgument("00127"));
     }
+
+    @Test
+    public void testToFromRLP() {
+        final Tuple t = Tuple.of(false, new int[] { 0, 1, 2, 3 }, new byte[][] { new byte[0], new byte[1], new byte[] { -1 } });
+        final TupleType tt = TupleType.parse("(bool,int8[],bytes[])");
+        final byte[] x = SuperSerial.toRLP(tt, t);
+        Tuple t_ = SuperSerial.fromRLP(tt, x);
+        assertEquals(t, t_);
+    }
 }
