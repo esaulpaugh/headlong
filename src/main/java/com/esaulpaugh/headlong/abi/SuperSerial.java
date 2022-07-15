@@ -132,10 +132,10 @@ public final class SuperSerial {
         case TYPE_CODE_BIG_INTEGER: return deserializeBigInteger((UnitType<?>) type, item);
         case TYPE_CODE_BIG_DECIMAL:
             BigDecimalType bdt = (BigDecimalType) type;
-            return new BigDecimal(deserializeBigInteger(bdt, item), bdt.getScale());
+            return new BigDecimal(deserializeBigInteger(bdt, item), bdt.scale);
         case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<? extends ABIType<?>, ?>) type, item);
         case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());
-        case TYPE_CODE_ADDRESS: return Address.wrap(Address.toChecksumAddress(deserializeBigInteger((UnitType<?>) type, item)));
+        case TYPE_CODE_ADDRESS: return new Address(deserializeBigInteger((UnitType<?>) type, item));
         default: throw new AssertionError();
         }
     }
@@ -155,7 +155,7 @@ public final class SuperSerial {
         if(val.signum() != 0) {
             final byte[] bytes = val.toByteArray();
             return val.signum() < 0
-                    ? signExtendNegative(bytes, ut.getBitLength() / Byte.SIZE)
+                    ? signExtendNegative(bytes, ut.bitLength / Byte.SIZE)
                     : bytes[0] != 0
                     ? bytes
                     : Arrays.copyOfRange(bytes, 1, bytes.length);
@@ -171,7 +171,7 @@ public final class SuperSerial {
     }
 
     private static BigInteger deserializeBigInteger(UnitType<?> ut, RLPItem item) {
-        return ut.isUnsigned() || item.dataLength * Byte.SIZE < ut.getBitLength()
+        return ut.unsigned || item.dataLength * Byte.SIZE < ut.bitLength
                 ? item.asBigInt()
                 : item.asBigIntSigned();
     }
@@ -277,7 +277,7 @@ public final class SuperSerial {
 
     private static Object[] deserializeObjectArray(ABIType<?> elementType, RLPList list) {
         final List<RLPItem> elements = list.elements(RLP_STRICT);
-        Object[] in = (Object[]) Array.newInstance(elementType.clazz(), elements.size()); // reflection ftw
+        Object[] in = (Object[]) Array.newInstance(elementType.clazz, elements.size()); // reflection ftw
         for (int i = 0; i < in.length; i++) {
             in[i] = deserialize(elementType, elements.get(i));
         }
