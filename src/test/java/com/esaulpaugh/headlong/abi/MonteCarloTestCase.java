@@ -18,7 +18,6 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
-import com.esaulpaugh.headlong.util.SuperSerial;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.rlp.Notation;
-import com.esaulpaugh.headlong.util.SuperSerial;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

@@ -13,21 +13,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.util;
+package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.ABIType;
-import com.esaulpaugh.headlong.abi.Address;
-import com.esaulpaugh.headlong.abi.ArrayType;
-import com.esaulpaugh.headlong.abi.BigDecimalType;
-import com.esaulpaugh.headlong.abi.IntType;
-import com.esaulpaugh.headlong.abi.LongType;
-import com.esaulpaugh.headlong.abi.Tuple;
-import com.esaulpaugh.headlong.abi.TupleType;
-import com.esaulpaugh.headlong.abi.UnitType;
 import com.esaulpaugh.headlong.rlp.Notation;
 import com.esaulpaugh.headlong.rlp.RLPEncoder;
 import com.esaulpaugh.headlong.rlp.RLPItem;
 import com.esaulpaugh.headlong.rlp.RLPList;
+import com.esaulpaugh.headlong.util.Integers;
+import com.esaulpaugh.headlong.util.Strings;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -71,7 +64,7 @@ public final class SuperSerial {
         tupleType.validate(tuple);
         Object[] objects = serializeTuple(tupleType, tuple);
         return machine ? Strings.encode(RLPEncoder.encodeSequentially(objects))
-                       : Notation.forObjects(objects).toString();
+                : Notation.forObjects(objects).toString();
     }
 
     public static Tuple deserialize(TupleType tupleType, String str, boolean machine) {
@@ -164,8 +157,8 @@ public final class SuperSerial {
             return val.signum() < 0
                     ? signExtendNegative(bytes, ut.getBitLength() / Byte.SIZE)
                     : bytes[0] != 0
-                        ? bytes
-                        : Arrays.copyOfRange(bytes, 1, bytes.length);
+                    ? bytes
+                    : Arrays.copyOfRange(bytes, 1, bytes.length);
         }
         return EMPTY_BYTE_ARRAY;
     }

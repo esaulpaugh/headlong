@@ -13,14 +13,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.util;
+package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.BooleanType;
-import com.esaulpaugh.headlong.abi.Function;
-import com.esaulpaugh.headlong.abi.IntType;
-import com.esaulpaugh.headlong.abi.Tuple;
-import com.esaulpaugh.headlong.abi.TupleType;
-import com.esaulpaugh.headlong.abi.TypeFactory;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
