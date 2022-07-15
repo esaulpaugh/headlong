@@ -91,4 +91,7 @@
 //    testImplementation("org.bouncycastle:bcprov-jdk15to18:$bcVersion")
 //
 //    jmhImplementation("commons-codec:commons-codec:1.15")
+//
+//    jmh("org.openjdk.jmh:jmh-core:1.35")
+//    jmh("org.openjdk.jmh:jmh-generator-annprocess:1.35")
 //}
