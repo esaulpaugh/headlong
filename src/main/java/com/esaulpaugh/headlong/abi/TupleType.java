@@ -34,13 +34,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     private static final String EMPTY_TUPLE_STRING = "()";
 
-    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null);
+    public static final TupleType EMPTY = newEmpty(null);
 
     final ABIType<?>[] elementTypes;
     private final int headLength;
     private final int firstOffset;
 
-    private TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String name) {
+    TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String name) {
         super(canonicalType, Tuple.class, dynamic, name);
         this.elementTypes = elementTypes;
         if(dynamic) {
@@ -54,6 +54,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             this.headLength = staticTupleHeadLength(this);
             this.firstOffset = -1;
         }
+    }
+
+    static TupleType newEmpty(String name) {
+        return new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, name);
     }
 
     static TupleType wrap(String name, ABIType<?>... elements) {
