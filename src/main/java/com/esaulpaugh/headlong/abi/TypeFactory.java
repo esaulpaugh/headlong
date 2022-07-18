@@ -188,19 +188,19 @@ public final class TypeFactory {
             final int last = rawTypeStr.length() - 1; // must be >= 0
             while (argStart <= last) {
                 final char first = rawTypeStr.charAt(argStart);
-                if(first == ',' || (first == ')' && terminator == ',')) {
-                    throw new IllegalArgumentException("empty parameter");
-                } else if(first != ')') {
-                    argEnd = findArgEnd(rawTypeStr, argStart, first);
-                    elements.add(build(rawTypeStr.substring(argStart, argEnd), null, null));
-                    terminator = rawTypeStr.charAt(argEnd);
+                if(first != ',') {
+                    if(first != ')') {
+                        argEnd = findArgEnd(rawTypeStr, argStart, first);
+                        elements.add(build(rawTypeStr.substring(argStart, argEnd), null, null));
+                        terminator = rawTypeStr.charAt(argEnd);
+                        argStart = argEnd + 1; // jump over terminator
+                        continue;
+                    }
+                    break;
                 }
-                if(terminator == ')') {
-                    return argEnd == last ? TupleType.wrap(name, elements.toArray(EMPTY_ARRAY)) : null;
-                }
-                argStart = argEnd + 1; // jump over terminator
+                return null;
             }
-            return null;
+            return terminator == ')' && argEnd == last ? TupleType.wrap(name, elements.toArray(EMPTY_ARRAY)) : null;
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);
         }

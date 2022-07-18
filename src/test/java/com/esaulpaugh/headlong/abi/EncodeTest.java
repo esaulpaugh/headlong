@@ -56,8 +56,6 @@ public class EncodeTest {
 
     private static final Class<StringIndexOutOfBoundsException> SIOOBE = StringIndexOutOfBoundsException.class;
 
-    private static final String EMPTY_PARAMETER = "empty parameter";
-
     private static final String LETTERS     = "abcdefgilmnorstuxy";
     private static final String BASE_TYPE   = "[(" + LETTERS + "]+[" + LETTERS + ")\\d]+";
     private static final String SUFFIX      = "(\\)|\\[\\d*])*";
@@ -280,13 +278,13 @@ public class EncodeTest {
 
     @Test
     public void emptyParamTest() throws Throwable {
-        assertThrown(ILLEGAL, EMPTY_PARAMETER, () -> Function.parse("(,"));
+        assertThrown(ILLEGAL, "unrecognized type: \"(,\"", () -> Function.parse("(,"));
 
-        assertThrown(ILLEGAL, "@ index 0, " + EMPTY_PARAMETER, () -> new Function("baz(,)"));
+        assertThrown(ILLEGAL, "unrecognized type: \"(,)\"", () -> new Function("baz(,)"));
 
-        assertThrown(ILLEGAL, "@ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,)"));
+        assertThrown(ILLEGAL, "unrecognized type: \"(bool,)\"", () -> new Function("baz(bool,)"));
 
-        assertThrown(ILLEGAL, "@ index 1, @ index 1, " + EMPTY_PARAMETER, () -> new Function("baz(bool,(int,,))"));
+        assertThrown(ILLEGAL, "@ index 1, unrecognized type: \"(int,,)\"", () -> new Function("baz(bool,(int,,))"));
     }
 
     @Test
