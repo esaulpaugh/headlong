@@ -191,8 +191,7 @@ public final class TypeFactory {
                     if (first != ')') {
                         argEnd = findArgEnd(rawTypeStr, argStart, first);
                         elements.add(build(rawTypeStr.substring(argStart, argEnd), null, null));
-                        final char terminator = rawTypeStr.charAt(argEnd);
-                        if (terminator == ')') {
+                        if (rawTypeStr.charAt(argEnd) == ')') {
                             return argEnd == last ? TupleType.wrap(name, elements.toArray(EMPTY_ARRAY)) : null;
                         }
                         argStart = argEnd + 1; // jump over terminator
