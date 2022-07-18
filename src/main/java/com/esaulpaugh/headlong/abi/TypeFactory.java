@@ -184,22 +184,20 @@ public final class TypeFactory {
         try {
             int argStart = 1; // after opening '('
             int argEnd = 1; // inital value important for empty params case: "()"
-            char terminator = ')'; // inital value important for empty params case
             final int last = rawTypeStr.length() - 1; // must be >= 0
             while (argStart <= last) {
                 final char first = rawTypeStr.charAt(argStart);
                 if(first != ',') {
-                    if(first != ')') {
+                    if (first != ')') {
                         argEnd = findArgEnd(rawTypeStr, argStart, first);
                         elements.add(build(rawTypeStr.substring(argStart, argEnd), null, null));
-                        terminator = rawTypeStr.charAt(argEnd);
-                        if(terminator == ')') {
+                        final char terminator = rawTypeStr.charAt(argEnd);
+                        if (terminator == ')') {
                             return argEnd == last ? TupleType.wrap(name, elements.toArray(EMPTY_ARRAY)) : null;
                         }
                         argStart = argEnd + 1; // jump over terminator
                         continue;
-                    }
-                    if(argEnd == last) {
+                    } else if (argEnd == last) {
                         return TupleType.wrap(name, EMPTY_ARRAY);
                     }
                 }
