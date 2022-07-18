@@ -185,8 +185,8 @@ public final class TypeFactory {
             int argStart = 1; // after opening '('
             int argEnd = 1; // inital value important for empty params case: "()"
             final int last = rawTypeStr.length() - 1; // must be >= 0
-            while (true) {
-                switch(rawTypeStr.charAt(argStart)) {
+            do {
+                switch (rawTypeStr.charAt(argStart)) {
                 case ',': return null;
                 case '(': argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart)); break;
                 case ')': return argEnd == last ? TupleType.wrap(name, EMPTY_ARRAY) : null;
@@ -197,7 +197,7 @@ public final class TypeFactory {
                     return argEnd == last ? TupleType.wrap(name, elements.toArray(EMPTY_ARRAY)) : null;
                 }
                 argStart = argEnd + 1; // jump over terminator
-            }
+            } while (true);
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);
         }
