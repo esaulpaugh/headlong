@@ -180,24 +180,22 @@ public final class TypeFactory {
     }
 
     private static TupleType parseTupleType(final String rawTypeStr, final String name) { /* assumes that rawTypeStr.charAt(0) == '(' */
+        final int len = rawTypeStr.length();
+        if (len == 2 && "()".equals(rawTypeStr)) return TupleType.wrap(name, EMPTY_ARRAY);
         final ArrayList<ABIType<?>> elements = new ArrayList<>();
         try {
-            int argStart = 1; // after opening '('
-            int argEnd = 1; // inital value important for empty params case: "()"
-            final int last = rawTypeStr.length() - 1; // must be >= 0
+            int argEnd = 1;
             do {
+                final int argStart = argEnd;
                 switch (rawTypeStr.charAt(argStart)) {
+                case ')':
                 case ',': return null;
                 case '(': argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart)); break;
-                case ')': return argEnd == last ? TupleType.wrap(name, EMPTY_ARRAY) : null;
                 default: argEnd = nextTerminator(rawTypeStr, argStart);
                 }
                 elements.add(build(rawTypeStr.substring(argStart, argEnd), null, null));
-                if (rawTypeStr.charAt(argEnd) == ')') {
-                    return argEnd == last ? TupleType.wrap(name, elements.toArray(EMPTY_ARRAY)) : null;
-                }
-                argStart = argEnd + 1; // jump over terminator
-            } while (true);
+            } while (rawTypeStr.charAt(argEnd++) != ')');
+            return argEnd == len ? TupleType.wrap(name, elements.toArray(EMPTY_ARRAY)) : null;
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);
         }
