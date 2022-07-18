@@ -193,14 +193,19 @@ public final class TypeFactory {
                         argEnd = findArgEnd(rawTypeStr, argStart, first);
                         elements.add(build(rawTypeStr.substring(argStart, argEnd), null, null));
                         terminator = rawTypeStr.charAt(argEnd);
+                        if(terminator == ')') {
+                            return argEnd == last ? TupleType.wrap(name, elements.toArray(EMPTY_ARRAY)) : null;
+                        }
                         argStart = argEnd + 1; // jump over terminator
                         continue;
                     }
-                    break;
+                    if(argEnd == last) {
+                        return TupleType.wrap(name, EMPTY_ARRAY);
+                    }
                 }
-                return null;
+                break;
             }
-            return terminator == ')' && argEnd == last ? TupleType.wrap(name, elements.toArray(EMPTY_ARRAY)) : null;
+            return null;
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);
         }

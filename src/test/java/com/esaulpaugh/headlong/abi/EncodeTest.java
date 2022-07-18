@@ -243,6 +243,9 @@ public class EncodeTest {
     @Test
     public void testIllegalSignatures() throws Throwable {
 
+        assertThrown(ILLEGAL, "unrecognized type: \"(())int)\"", () -> TupleType.parse("(())int)"));
+        assertThrown(ILLEGAL, "unrecognized type: \"(int)())\"", () -> TupleType.parse("(int)())"));
+
         assertThrownWithAnySubstring(ClassCastException.class, CLASS_CAST_MESSAGES, () -> Function.parse("f()[]"));
 
         assertThrown(ILLEGAL, "unrecognized type: ", () -> TupleType.parse(""));
