@@ -202,12 +202,11 @@ public final class TypeFactory {
     }
 
     private static int nextTerminator(String signature, int i) {
-        final int len = signature.length();
-        for( ; i < len; i++) {
-            char c = signature.charAt(i);
-            if(c == ',' || c == ')') return i;
-        }
-        return -1;
+        char c;
+        do {
+            c = signature.charAt(++i);
+        } while (c != ',' && c != ')');
+        return i;
     }
 
     private static int findSubtupleEnd(String parentTypeString, int i) {
@@ -216,12 +215,13 @@ public final class TypeFactory {
             char x = parentTypeString.charAt(++i);
             if(x <= ')') {
                 if(x == ')') {
-                    depth--;
+                    if(--depth <= 0) {
+                        return i;
+                    }
                 } else if(x == '(') {
                     depth++;
                 }
             }
-        } while(depth > 0);
-        return i + 1;
+        } while(true);
     }
 }
