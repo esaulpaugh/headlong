@@ -18,6 +18,7 @@ package com.esaulpaugh.headlong.jmh.abi;
 import com.esaulpaugh.headlong.abi.Function;
 import com.esaulpaugh.headlong.abi.Tuple;
 import com.esaulpaugh.headlong.abi.TupleType;
+import com.esaulpaugh.headlong.abi.TypeFactory;
 import com.esaulpaugh.headlong.util.Strings;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -103,6 +104,16 @@ public class MeasureFunction {
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void init_with_keccak(Blackhole blackhole) {
         blackhole.consume(Function.parse("sam(bytes,bool,uint256[])"));
+    }
+
+    @Benchmark
+    @Fork(value = 1, warmups = 1)
+    @BenchmarkMode(Mode.AverageTime)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = THREE)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public void parse_tuple_type(Blackhole blackhole) {
+        blackhole.consume(TypeFactory.create("(int,bool,string,uint8,bytes5,fixed)"));
     }
 
 //    @Benchmark
