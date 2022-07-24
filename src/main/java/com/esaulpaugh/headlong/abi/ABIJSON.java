@@ -293,7 +293,7 @@ public final class ABIJSON {
         int i = 0;
         for (final ABIType<?> e : tupleType.elementTypes) {
             out.beginObject();
-            name(out, tupleType.getElementName(i));
+            name(out, tupleType.elementNameUnchecked(i));
             final String type = e.canonicalType;
             if(type.charAt(0) == '(') {
                 type(out, TUPLE + type.substring(type.lastIndexOf(')') + 1));
