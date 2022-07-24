@@ -332,7 +332,7 @@ public class DecodeTest {
 
             final IntType l = TypeFactory.create("int16");
             final ArrayType<?, BigInteger[]> m = TypeFactory.create("int[]");
-            final TupleType n = TypeFactory.create("(bool)", new String[] { "nam" });
+            final TupleType n = TypeFactory.createTupleType("(bool)", "nam");
             assertEquals("nam", n.getElementName(0));
             m.encode(new BigInteger[] {});
 

@@ -30,6 +30,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
+import static com.esaulpaugh.headlong.abi.TupleType.EMPTY_NAME_ARRAY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -258,10 +259,10 @@ public class TupleTest {
         testNameOverwrite("(bool)", "moo", "jumbo");
         testNameOverwrite("(())", "zZz", "Jumb0");
         assertThrown(IllegalArgumentException.class, "expected name array length 3. found: 0",
-                () -> TypeFactory.create("(bool,string,int)", new String[0]));
+                () -> TypeFactory.createTupleType("(bool,string,int)", EMPTY_NAME_ARRAY));
         assertThrown(IllegalArgumentException.class, "expected name array length 2. found: 4",
-                () -> TypeFactory.create("(bool,string)", new String[4]));
-        TupleType tt = TypeFactory.create("(bool,string)", new String[] { "a", "b" });
+                () -> TypeFactory.createTupleType("(bool,string)", new String[4]));
+        TupleType tt = TypeFactory.createTupleType("(bool,string)", "a", "b");
         assertEquals("a", tt.getElementName(0));
         assertEquals("b", tt.getElementName(1));
     }
@@ -269,14 +270,14 @@ public class TupleTest {
     private static void testNameOverwrite(String typeStr, String aName, String cName) {
         assertNotEquals(aName, cName);
 
-        final TupleType a = TypeFactory.create(typeStr, new String[] { aName });
+        final TupleType a = TypeFactory.createTupleType(typeStr, aName);
         assertEquals(aName, a.getElementName(0));
 
-        final TupleType b = TypeFactory.create(typeStr, null);
+        final TupleType b = TypeFactory.createTupleType(typeStr);
         assertEquals(aName, a.getElementName(0));
         assertNull(b.getElementName(0));
 
-        final TupleType c = TypeFactory.create(typeStr, new String[] { cName });
+        final TupleType c = TypeFactory.createTupleType(typeStr, cName);
         assertEquals(aName, a.getElementName(0));
         assertNull(b.getElementName(0));
         assertEquals(cName, c.getElementName(0));

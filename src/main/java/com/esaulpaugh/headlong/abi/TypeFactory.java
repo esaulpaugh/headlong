@@ -97,17 +97,22 @@ public final class TypeFactory {
         BASE_TYPE_MAP.put(type, new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class));
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T create(String rawType) {
-        return create(rawType, null);
-    }
-
-    public static ABIType<Object> createNonCapturing(String rawType) {
-        return create(rawType, null);
+        return (T) build(rawType, null, null);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends ABIType<?>> T create(String rawType, String[] elementNames) {
-        return (T) build(rawType, elementNames, null);
+    public static ABIType<Object> createNonCapturing(String rawType) {
+        return (ABIType<Object>) build(rawType, null, null);
+    }
+
+    public static TupleType createTupleType(String rawType) {
+        return (TupleType) build(rawType, null, null);
+    }
+
+    public static TupleType createTupleType(String rawType, String... elementNames) {
+        return (TupleType) build(rawType, elementNames, null);
     }
 
     static ABIType<?> build(final String rawType, final String[] elementNames, ABIType<?> baseType) {
