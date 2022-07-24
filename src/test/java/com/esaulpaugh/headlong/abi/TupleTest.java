@@ -263,8 +263,10 @@ public class TupleTest {
         assertThrown(IllegalArgumentException.class, "expected name array length 2. found: 4",
                 () -> TypeFactory.createTupleType("(bool,string)", new String[4]));
         TupleType tt = TypeFactory.createTupleType("(bool,string)", "a", "b");
+        assertThrown(IllegalArgumentException.class, "index out of bounds: -1", () -> tt.getElementName(-1));
         assertEquals("a", tt.getElementName(0));
         assertEquals("b", tt.getElementName(1));
+        assertThrown(IllegalArgumentException.class, "index out of bounds: 2", () -> tt.getElementName(2));
     }
 
     private static void testNameOverwrite(String typeStr, String aName, String cName) {
