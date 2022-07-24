@@ -18,6 +18,7 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.util.Integers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,7 @@ public final class TypeFactory {
 
     private static final int FUNCTION_BYTE_LEN = 24;
 
-    static final Map<String, ABIType<?>> BASE_TYPE_MAP;
+    private static final Map<String, ABIType<?>> BASE_TYPE_MAP;
 
     static {
         BASE_TYPE_MAP = new HashMap<>(256);
@@ -74,6 +75,10 @@ public final class TypeFactory {
         BASE_TYPE_MAP.put("ufixed", BASE_TYPE_MAP.get("ufixed128x18"));
 
         BASE_TYPE_MAP.put("bool", new BooleanType());
+    }
+
+    static Map<String, ABIType<?>> getBaseTypeMap() {
+        return Collections.unmodifiableMap(BASE_TYPE_MAP);
     }
 
     private static void mapInt(String type, int bitLen, boolean unsigned) {
