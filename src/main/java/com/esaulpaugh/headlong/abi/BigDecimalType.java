@@ -24,8 +24,8 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
 
     final int scale;
 
-    BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean unsigned, String name) {
-        super(canonicalTypeString, BigDecimal.class, bitLength, unsigned, name);
+    BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean unsigned) {
+        super(canonicalTypeString, BigDecimal.class, bitLength, unsigned);
         this.scale = scale;
     }
 

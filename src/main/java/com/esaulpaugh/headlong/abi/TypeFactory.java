@@ -20,6 +20,7 @@ import com.esaulpaugh.headlong.util.Integers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -43,12 +44,12 @@ public final class TypeFactory {
 
     private static final int FUNCTION_BYTE_LEN = 24;
 
-    static final Map<String, Function<String, ABIType<?>>> SUPPLIER_MAP;
+//    static final Map<String, Function<String, ABIType<?>>> SUPPLIER_MAP;
 
-    private static final Map<String, ABIType<?>> NAMELESS_CACHE;
+    static final Map<String, ABIType<?>> NAMELESS_CACHE;
 
     static {
-        Map<String, Function<String, ABIType<?>>> lambdaMap = new HashMap<>(256);
+        Map<String, Function<String, ABIType<?>>> lambdaMap = null;
         NAMELESS_CACHE = new HashMap<>(256);
 
         for(int n = 8; n <= 32; n += 8) mapInt(lambdaMap, NAMELESS_CACHE, "int" + n, n, false);
@@ -63,54 +64,54 @@ public final class TypeFactory {
             mapByteArray(lambdaMap, NAMELESS_CACHE, "bytes" + n, n);
         }
 
-        lambdaMap.put("address", AddressType::new);
-        NAMELESS_CACHE.put("address", new AddressType(null));
+//        lambdaMap.put("address", AddressType::new);
+        NAMELESS_CACHE.put("address", new AddressType());
         mapByteArray(lambdaMap, NAMELESS_CACHE, "function", FUNCTION_BYTE_LEN);
         mapByteArray(lambdaMap, NAMELESS_CACHE, "bytes", DYNAMIC_LENGTH);
-        lambdaMap.put("string", name -> new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, name));
-        NAMELESS_CACHE.put("string", new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, null));
+//        lambdaMap.put("string", name -> new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS));
+        NAMELESS_CACHE.put("string", new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS));
 
-        lambdaMap.put("fixed128x18", name -> new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false, name));
-        NAMELESS_CACHE.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false, null));
-        lambdaMap.put("ufixed128x18", name -> new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true, name));
-        NAMELESS_CACHE.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true, null));
-        lambdaMap.put("decimal", name -> new BigDecimalType("fixed168x10", DECIMAL_BIT_LEN, DECIMAL_SCALE, false, name));
-        NAMELESS_CACHE.put("decimal", new BigDecimalType("fixed168x10", DECIMAL_BIT_LEN, DECIMAL_SCALE, false, null));
+//        lambdaMap.put("fixed128x18", name -> new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false, name));
+        NAMELESS_CACHE.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
+//        lambdaMap.put("ufixed128x18", name -> new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true, name));
+        NAMELESS_CACHE.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
+//        lambdaMap.put("decimal", name -> new BigDecimalType("fixed168x10", DECIMAL_BIT_LEN, DECIMAL_SCALE, false, name));
+        NAMELESS_CACHE.put("decimal", new BigDecimalType("fixed168x10", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
 
-        lambdaMap.put("int", lambdaMap.get("int256"));
-        lambdaMap.put("uint", lambdaMap.get("uint256"));
-        lambdaMap.put("fixed", lambdaMap.get("fixed128x18"));
-        lambdaMap.put("ufixed", lambdaMap.get("ufixed128x18"));
+//        lambdaMap.put("int", lambdaMap.get("int256"));
+//        lambdaMap.put("uint", lambdaMap.get("uint256"));
+//        lambdaMap.put("fixed", lambdaMap.get("fixed128x18"));
+//        lambdaMap.put("ufixed", lambdaMap.get("ufixed128x18"));
 
         NAMELESS_CACHE.put("int", NAMELESS_CACHE.get("int256"));
         NAMELESS_CACHE.put("uint", NAMELESS_CACHE.get("uint256"));
         NAMELESS_CACHE.put("fixed", NAMELESS_CACHE.get("fixed128x18"));
         NAMELESS_CACHE.put("ufixed", NAMELESS_CACHE.get("ufixed128x18"));
 
-        lambdaMap.put("bool", BooleanType::new);
-        NAMELESS_CACHE.put("bool", new BooleanType(null));
+//        lambdaMap.put("bool", BooleanType::new);
+        NAMELESS_CACHE.put("bool", new BooleanType());
 
-        SUPPLIER_MAP = Collections.unmodifiableMap(lambdaMap);
+//        SUPPLIER_MAP = Collections.unmodifiableMap(lambdaMap);
     }
 
     private static void mapInt(Map<String, Function<String, ABIType<?>>> map, Map<String, ABIType<?>> namelessMap, String type, int bitLen, boolean unsigned) {
-        map.put(type, name -> new IntType(type, bitLen, unsigned, name));
-        namelessMap.put(type, new IntType(type, bitLen, unsigned, null));
+//        map.put(type, name -> new IntType(type, bitLen, unsigned, name));
+        namelessMap.put(type, new IntType(type, bitLen, unsigned));
     }
 
     private static void mapLong(Map<String, Function<String, ABIType<?>>> map, Map<String, ABIType<?>> namelessMap, String type, int bitLen, boolean unsigned) {
-        map.put(type, name -> new LongType(type, bitLen, unsigned, name));
-        namelessMap.put(type, new LongType(type, bitLen, unsigned, null));
+//        map.put(type, name -> new LongType(type, bitLen, unsigned, name));
+        namelessMap.put(type, new LongType(type, bitLen, unsigned));
     }
 
     private static void mapBigInteger(Map<String, Function<String, ABIType<?>>> map, Map<String, ABIType<?>> namelessMap, String type, int bitLen, boolean unsigned) {
-        map.put(type, name -> new BigIntegerType(type, bitLen, unsigned, name));
-        namelessMap.put(type, new BigIntegerType(type, bitLen, unsigned, null));
+//        map.put(type, name -> new BigIntegerType(type, bitLen, unsigned, name));
+        namelessMap.put(type, new BigIntegerType(type, bitLen, unsigned));
     }
 
     private static void mapByteArray(Map<String, Function<String, ABIType<?>>> map, Map<String, ABIType<?>> namelessMap, String type, int arrayLen) {
-        map.put(type, name -> new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class, name));
-        namelessMap.put(type, new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class, null));
+//        map.put(type, name -> new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class, name));
+        namelessMap.put(type, new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class));
     }
 
     public static <T extends ABIType<?>> T create(String rawType) {
@@ -122,11 +123,11 @@ public final class TypeFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends ABIType<?>> T create(String rawType, String name) {
-        return (T) build(rawType, name, null);
+    public static <T extends ABIType<?>> T create(String rawType, String[] elementNames) {
+        return (T) build(rawType, elementNames, null);
     }
 
-    static ABIType<?> build(final String rawType, final String name, ABIType<?> baseType) {
+    static ABIType<?> build(final String rawType, final String[] elementNames, ABIType<?> baseType) {
         try {
             final int lastCharIdx = rawType.length() - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array
@@ -137,9 +138,9 @@ public final class TypeFactory {
                 final ABIType<?> elementType = build(rawType.substring(0, arrayOpenIndex), null, baseType);
                 final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
                 final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType.substring(arrayOpenIndex + 1, lastCharIdx));
-                return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null, name);
+                return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null);
             }
-            if(baseType != null || (baseType = resolveBaseType(rawType, name)) != null) {
+            if(baseType != null || (baseType = resolveBaseType(rawType, elementNames)) != null) {
                 return baseType;
             }
         } catch (StringIndexOutOfBoundsException ignored) { // e.g. type equals "" or "82]" or "[]" or "[1]"
@@ -163,22 +164,18 @@ public final class TypeFactory {
         throw new IllegalArgumentException("bad array length");
     }
 
-    private static ABIType<?> resolveBaseType(final String baseTypeStr, final String name) {
-        if(baseTypeStr.charAt(0) == '(') {
-            return parseTupleType(baseTypeStr, name);
+    private static ABIType<?> resolveBaseType(final String baseTypeStr, final String[] elementNames) {
+        if (baseTypeStr.charAt(0) == '(') {
+            return parseTupleType(baseTypeStr, elementNames);
         }
-        if(name == null) {
-            ABIType<?> ret = NAMELESS_CACHE.get(baseTypeStr);
-            if(ret != null) {
-                return ret;
-            }
-            return tryParseFixed(baseTypeStr, null);
+        ABIType<?> ret = NAMELESS_CACHE.get(baseTypeStr);
+        if (ret != null) {
+            return ret;
         }
-        Function<String, ABIType<?>> init = SUPPLIER_MAP.get(baseTypeStr);
-        return init != null ? init.apply(name) : tryParseFixed(baseTypeStr, name);
+        return tryParseFixed(baseTypeStr);
     }
 
-    private static BigDecimalType tryParseFixed(final String type, final String name) {
+    private static BigDecimalType tryParseFixed(final String type) {
         final int idx = type.indexOf("fixed");
         boolean unsigned = false;
         if (idx == 0 || (unsigned = (idx == 1 && type.charAt(0) == 'u'))) {
@@ -190,7 +187,7 @@ public final class TypeFactory {
                     final int M = Integer.parseInt(mStr); // no parseUnsignedInt on older Android versions?
                     final int N = Integer.parseInt(nStr);
                     if (Integers.isMultiple(M, 8) && M <= 256 && N <= 80) { // no multiples of 8 less than 8 except 0
-                        return new BigDecimalType((unsigned ? "ufixed" : "fixed") + M + 'x' + N, M, N, unsigned, name);
+                        return new BigDecimalType((unsigned ? "ufixed" : "fixed") + M + 'x' + N, M, N, unsigned);
                     }
                 }
             } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
@@ -204,10 +201,10 @@ public final class TypeFactory {
         return c > '0' && c <= '9';
     }
 
-    private static TupleType parseTupleType(final String rawTypeStr, final String name) { /* assumes that rawTypeStr.charAt(0) == '(' */
+    private static TupleType parseTupleType(final String rawTypeStr, final String[] elementNames) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawTypeStr.length();
-        if (len == 2 && rawTypeStr.equals("()")) return TupleType.newEmpty(name);
-        final ArrayList<ABIType<?>> elements = new ArrayList<>();
+        if (len == 2 && rawTypeStr.equals("()")) return TupleType.newEmpty();
+        final List<ABIType<?>> elements = new ArrayList<>();
         try {
             int argEnd = 1;
             final StringBuilder canonicalBuilder = new StringBuilder("(");
@@ -229,8 +226,8 @@ public final class TypeFactory {
                     ? new TupleType(
                         canonicalBuilder.deleteCharAt(canonicalBuilder.length() - 1).append(')').toString(),
                         dynamic,
-                        elements.toArray(EMPTY_ARRAY),
-                        name
+                        elementNames,
+                        elements.toArray(EMPTY_ARRAY)
                     )
                     : null;
         } catch (IllegalArgumentException iae) {

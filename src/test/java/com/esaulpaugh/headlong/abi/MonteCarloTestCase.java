@@ -86,7 +86,7 @@ public class MonteCarloTestCase {
                 "uint88", "uint96",
         };
 
-        final String[] fromFactory = TypeFactory.SUPPLIER_MAP.keySet().toArray(new String[0]);
+        final String[] fromFactory = TypeFactory.NAMELESS_CACHE.keySet().toArray(new String[0]);
         Arrays.sort(fromFactory);
         assertArrayEquals(orderedKeys, fromFactory);
 

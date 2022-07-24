@@ -54,7 +54,7 @@ public class TupleTest {
 
         boolean[] bools = new boolean[pow];
 
-        BigIntegerType type = new BigIntegerType("int" + bits, bits, false, null);
+        BigIntegerType type = new BigIntegerType("int" + bits, bits, false);
 //        BooleanType type = new BooleanType();
 
         for (int i = 0; i < 1_579_919_999; i++) {
@@ -255,24 +255,38 @@ public class TupleTest {
 
     @Test
     public void testNameOverwrites() {
-        testNameOverwrite("bool", "moo", "jumbo");
-        testNameOverwrite("()", "zZz", "Jumb0");
+        testNameOverwrite("(bool)", "moo", "jumbo");
+        testNameOverwrite("(())", "zZz", "Jumb0");
     }
 
     private static void testNameOverwrite(String typeStr, String aName, String cName) {
         assertNotEquals(aName, cName);
 
-        final ABIType<?> a = TypeFactory.create(typeStr, aName);
-        assertEquals(aName, a.getName());
+        final TupleType a = TypeFactory.create(typeStr, new String[] { aName });
+        assertEquals(aName, a.getElementName(0));
 
-        final ABIType<?> b = TypeFactory.create(typeStr);
-        assertEquals(aName, a.getName());
-        assertNull(b.getName());
+        final TupleType b = TypeFactory.create(typeStr, null);
+        assertEquals(aName, a.getElementName(0));
+        assertNull(b.getElementName(0));
 
-        final ABIType<?> c = TypeFactory.create(typeStr, cName);
-        assertEquals(aName, a.getName());
-        assertNull(b.getName());
-        assertEquals(cName, c.getName());
+        final TupleType c = TypeFactory.create(typeStr, new String[] { cName });
+        assertEquals(aName, a.getElementName(0));
+        assertNull(b.getElementName(0));
+        assertEquals(cName, c.getElementName(0));
+
+        assertNotEquals(aName, cName);
+
+        final TupleType x = TupleType.wrap(new String[] { aName }, a.get(0));
+        assertEquals(aName, x.getElementName(0));
+
+        final TupleType y = TupleType.wrap(null, b.get(0));
+        assertEquals(aName, x.getElementName(0));
+        assertNull(y.getElementName(0));
+
+        final TupleType z = TupleType.wrap(new String[] { cName }, c.get(0));
+        assertEquals(aName, x.getElementName(0));
+        assertNull(y.getElementName(0));
+        assertEquals(cName, z.getElementName(0));
     }
 
     @Test

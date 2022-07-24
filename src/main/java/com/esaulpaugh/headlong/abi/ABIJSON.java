@@ -163,8 +163,8 @@ public final class ABIJSON {
         return new Function(
                 type,
                 getName(function),
-                parseTupleType(function, null, INPUTS),
-                parseTupleType(function, null, OUTPUTS),
+                parseTupleType(function, INPUTS),
+                parseTupleType(function, OUTPUTS),
                 getString(function, STATE_MUTABILITY),
                 digest
         );
@@ -174,17 +174,19 @@ public final class ABIJSON {
         final JsonArray inputs = getArray(event, INPUTS);
         if (inputs != null) {
             final int inputsLen = inputs.size();
+            final String[] elementNames = new String[inputsLen];
             final ABIType<?>[] types = new ABIType<?>[inputsLen];
             final boolean[] indexed = new boolean[inputsLen];
             for (int i = 0; i < inputsLen; i++) {
                 final JsonObject inputObj = inputs.get(i).getAsJsonObject();
+                elementNames[i] = getName(inputObj);
                 types[i] = parseType(inputObj);
                 indexed[i] = getBoolean(inputObj, INDEXED);
             }
             return new Event(
                     getName(event),
                     getBoolean(event, ANONYMOUS, false),
-                    TupleType.wrap(null, types),
+                    TupleType.wrap(elementNames, types),
                     indexed
             );
         }
@@ -192,33 +194,35 @@ public final class ABIJSON {
     }
 
     private static ContractError parseErrorUnchecked(JsonObject error) {
-        return new ContractError(getName(error), parseTupleType(error, null, INPUTS));
+        return new ContractError(getName(error), parseTupleType(error, INPUTS));
     }
 
-    private static TupleType parseTupleType(JsonObject object, String nameValue, String arrayKey) {
+    private static TupleType parseTupleType(JsonObject object, String arrayKey) {
         final JsonArray array = getArray(object, arrayKey);
         final int size;
         if (array == null || (size = array.size()) <= 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
             return TupleType.EMPTY;
         }
+        final String[] elementNames = new String[size];
         final ABIType<?>[] elements = new ABIType[size];
         for(int i = 0; i < size; i++) {
-            elements[i] = parseType(array.get(i).getAsJsonObject());
+            JsonObject obj = array.get(i).getAsJsonObject();
+            elementNames[i] = getName(obj);
+            elements[i] = parseType(obj);
         }
-        return TupleType.wrap(nameValue, elements);
+        return TupleType.wrap(elementNames, elements);
     }
 
     private static ABIType<?> parseType(JsonObject object) {
-        final String name = getName(object);
         final String type = getType(object);
         if(type.startsWith(TUPLE)) {
             if(type.length() == TUPLE.length()) {
-                return parseTupleType(object, name, COMPONENTS);
+                return parseTupleType(object, COMPONENTS);
             }
-            TupleType baseType = parseTupleType(object, null, COMPONENTS); // set TupleType name null because name belongs to ArrayType
-            return TypeFactory.build(baseType.canonicalType + type.substring(TUPLE.length()), name, baseType);
+            TupleType baseType = parseTupleType(object, COMPONENTS); // set TupleType name null because name belongs to ArrayType
+            return TypeFactory.build(baseType.canonicalType + type.substring(TUPLE.length()), null, baseType);
         }
-        return TypeFactory.create(type, name);
+        return TypeFactory.create(type);
     }
 
     private static String getType(JsonObject obj) {
@@ -289,7 +293,7 @@ public final class ABIJSON {
         int i = 0;
         for (final ABIType<?> e : tupleType.elementTypes) {
             out.beginObject();
-            name(out, e.getName());
+            name(out, tupleType.getElementName(i));
             final String type = e.canonicalType;
             if(type.charAt(0) == '(') {
                 type(out, TUPLE + type.substring(type.lastIndexOf(')') + 1));
