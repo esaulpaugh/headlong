@@ -185,10 +185,10 @@ public final class TypeFactory {
         final int len = rawTypeStr.length();
         if (len == 2 && rawTypeStr.equals("()")) return TupleType.newEmpty();
         final List<ABIType<?>> elements = new ArrayList<>();
+        int argEnd = 1;
+        final StringBuilder canonicalBuilder = new StringBuilder("(");
+        boolean dynamic = false;
         try {
-            int argEnd = 1;
-            final StringBuilder canonicalBuilder = new StringBuilder("(");
-            boolean dynamic = false;
             do {
                 final int argStart = argEnd;
                 switch (rawTypeStr.charAt(argStart)) {
@@ -202,17 +202,20 @@ public final class TypeFactory {
                 dynamic |= e.dynamic;
                 elements.add(e);
             } while (rawTypeStr.charAt(argEnd++) != ')');
-            return argEnd == len
-                    ? new TupleType(
-                        canonicalBuilder.deleteCharAt(canonicalBuilder.length() - 1).append(')').toString(),
-                        dynamic,
-                        elementNames,
-                        elements.toArray(EMPTY_ARRAY)
-                    )
-                    : null;
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);
         }
+        if(elementNames != null && elementNames.length != elements.size()) {
+            throw new IllegalArgumentException("expected name array length " + elements.size() + ". found: " + elementNames.length);
+        }
+        return argEnd == len
+                ? new TupleType(
+                    canonicalBuilder.deleteCharAt(canonicalBuilder.length() - 1).append(')').toString(),
+                    dynamic,
+                    elementNames,
+                    elements.toArray(EMPTY_ARRAY)
+                )
+                : null;
     }
 
     private static int nextTerminator(String signature, int i) {

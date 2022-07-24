@@ -254,9 +254,16 @@ public class TupleTest {
     }
 
     @Test
-    public void testNameOverwrites() {
+    public void testNameOverwrites() throws Throwable {
         testNameOverwrite("(bool)", "moo", "jumbo");
         testNameOverwrite("(())", "zZz", "Jumb0");
+        assertThrown(IllegalArgumentException.class, "expected name array length 3. found: 0",
+                () -> TypeFactory.create("(bool,string,int)", new String[0]));
+        assertThrown(IllegalArgumentException.class, "expected name array length 2. found: 4",
+                () -> TypeFactory.create("(bool,string)", new String[4]));
+        TupleType tt = TypeFactory.create("(bool,string)", new String[] { "a", "b" });
+        assertEquals("a", tt.getElementName(0));
+        assertEquals("b", tt.getElementName(1));
     }
 
     private static void testNameOverwrite(String typeStr, String aName, String cName) {
