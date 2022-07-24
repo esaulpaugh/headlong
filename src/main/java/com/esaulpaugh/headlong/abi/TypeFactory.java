@@ -42,10 +42,10 @@ public final class TypeFactory {
 
     private static final int FUNCTION_BYTE_LEN = 24;
 
-    static final Map<String, ABIType<?>> NAMELESS_CACHE;
+    static final Map<String, ABIType<?>> BASE_TYPE_MAP;
 
     static {
-        NAMELESS_CACHE = new HashMap<>(256);
+        BASE_TYPE_MAP = new HashMap<>(256);
 
         for(int n = 8; n <= 32; n += 8) mapInt("int" + n, n, false);
         for(int n = 40; n <= 64; n += 8) mapLong("int" + n, n, false);
@@ -59,37 +59,37 @@ public final class TypeFactory {
             mapByteArray("bytes" + n, n);
         }
 
-        NAMELESS_CACHE.put("address", new AddressType());
+        BASE_TYPE_MAP.put("address", new AddressType());
         mapByteArray("function", FUNCTION_BYTE_LEN);
         mapByteArray("bytes", DYNAMIC_LENGTH);
-        NAMELESS_CACHE.put("string", new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS));
+        BASE_TYPE_MAP.put("string", new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS));
 
-        NAMELESS_CACHE.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
-        NAMELESS_CACHE.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
-        NAMELESS_CACHE.put("decimal", new BigDecimalType("fixed168x10", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
+        BASE_TYPE_MAP.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
+        BASE_TYPE_MAP.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
+        BASE_TYPE_MAP.put("decimal", new BigDecimalType("fixed168x10", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
 
-        NAMELESS_CACHE.put("int", NAMELESS_CACHE.get("int256"));
-        NAMELESS_CACHE.put("uint", NAMELESS_CACHE.get("uint256"));
-        NAMELESS_CACHE.put("fixed", NAMELESS_CACHE.get("fixed128x18"));
-        NAMELESS_CACHE.put("ufixed", NAMELESS_CACHE.get("ufixed128x18"));
+        BASE_TYPE_MAP.put("int", BASE_TYPE_MAP.get("int256"));
+        BASE_TYPE_MAP.put("uint", BASE_TYPE_MAP.get("uint256"));
+        BASE_TYPE_MAP.put("fixed", BASE_TYPE_MAP.get("fixed128x18"));
+        BASE_TYPE_MAP.put("ufixed", BASE_TYPE_MAP.get("ufixed128x18"));
 
-        NAMELESS_CACHE.put("bool", new BooleanType());
+        BASE_TYPE_MAP.put("bool", new BooleanType());
     }
 
     private static void mapInt(String type, int bitLen, boolean unsigned) {
-        NAMELESS_CACHE.put(type, new IntType(type, bitLen, unsigned));
+        BASE_TYPE_MAP.put(type, new IntType(type, bitLen, unsigned));
     }
 
     private static void mapLong(String type, int bitLen, boolean unsigned) {
-        NAMELESS_CACHE.put(type, new LongType(type, bitLen, unsigned));
+        BASE_TYPE_MAP.put(type, new LongType(type, bitLen, unsigned));
     }
 
     private static void mapBigInteger(String type, int bitLen, boolean unsigned) {
-        NAMELESS_CACHE.put(type, new BigIntegerType(type, bitLen, unsigned));
+        BASE_TYPE_MAP.put(type, new BigIntegerType(type, bitLen, unsigned));
     }
 
     private static void mapByteArray(String type, int arrayLen) {
-        NAMELESS_CACHE.put(type, new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class));
+        BASE_TYPE_MAP.put(type, new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class));
     }
 
     public static <T extends ABIType<?>> T create(String rawType) {
@@ -146,11 +146,8 @@ public final class TypeFactory {
         if (baseTypeStr.charAt(0) == '(') {
             return parseTupleType(baseTypeStr, elementNames);
         }
-        ABIType<?> ret = NAMELESS_CACHE.get(baseTypeStr);
-        if (ret != null) {
-            return ret;
-        }
-        return tryParseFixed(baseTypeStr);
+        final ABIType<?> ret = BASE_TYPE_MAP.get(baseTypeStr);
+        return ret != null ? ret : tryParseFixed(baseTypeStr);
     }
 
     private static BigDecimalType tryParseFixed(final String type) {
