@@ -30,7 +30,6 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.abi.TupleType.EMPTY_NAME_ARRAY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -258,10 +257,15 @@ public class TupleTest {
     public void testNameOverwrites() throws Throwable {
         testNameOverwrite("(bool)", "moo", "jumbo");
         testNameOverwrite("(())", "zZz", "Jumb0");
-        assertThrown(IllegalArgumentException.class, "expected name array length 3. found: 0",
-                () -> TypeFactory.createTupleType("(bool,string,int)", EMPTY_NAME_ARRAY));
-        assertThrown(IllegalArgumentException.class, "expected name array length 2. found: 4",
+
+        TypeFactory.createTupleType("(bool,string,int)");
+
+        assertThrown(IllegalArgumentException.class, "expected 3 element names but found 2",
+                () -> TypeFactory.createTupleType("(bool,string,int)", "a", "b"));
+
+        assertThrown(IllegalArgumentException.class, "expected 2 element names but found 4",
                 () -> TypeFactory.createTupleType("(bool,string)", new String[4]));
+
         TupleType tt = TypeFactory.createTupleType("(bool,string)", "a", "b");
         assertThrown(IllegalArgumentException.class, "index out of bounds: -1", () -> tt.getElementName(-1));
         assertEquals("a", tt.getElementName(0));

@@ -33,7 +33,7 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
     private static final String EMPTY_TUPLE_STRING = "()";
-    static final String[] EMPTY_NAME_ARRAY = new String[0];
+    private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     public static final TupleType EMPTY = newEmpty();
 
@@ -371,7 +371,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     selected.add(e);
                 }
             }
-            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selectedNames.toArray(EMPTY_NAME_ARRAY), selected.toArray(EMPTY_ARRAY));
+            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selectedNames.toArray(EMPTY_STRING_ARRAY), selected.toArray(EMPTY_ARRAY));
         }
         throw new IllegalArgumentException("manifest.length != size(): " + manifest.length + " != " + size);
     }

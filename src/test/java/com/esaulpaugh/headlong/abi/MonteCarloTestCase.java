@@ -46,7 +46,6 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
-import static com.esaulpaugh.headlong.abi.TupleType.EMPTY_NAME_ARRAY;
 import static com.esaulpaugh.headlong.abi.TypeFactory.ADDRESS_BIT_LEN;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -87,7 +86,7 @@ public class MonteCarloTestCase {
                 "uint88", "uint96",
         };
 
-        final String[] fromFactory = TypeFactory.getBaseTypeMap().keySet().toArray(EMPTY_NAME_ARRAY);
+        final String[] fromFactory = TypeFactory.getBaseTypeMap().keySet().toArray(new String[0]);
         Arrays.sort(fromFactory);
         assertArrayEquals(orderedKeys, fromFactory);
 

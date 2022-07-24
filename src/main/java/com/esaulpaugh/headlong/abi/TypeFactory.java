@@ -211,7 +211,7 @@ public final class TypeFactory {
             throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);
         }
         if(elementNames != null && elementNames.length != elements.size()) {
-            throw new IllegalArgumentException("expected name array length " + elements.size() + ". found: " + elementNames.length);
+            throw new IllegalArgumentException("expected " + elements.size() + " element names but found " + elementNames.length);
         }
         return argEnd == len
                 ? new TupleType(
