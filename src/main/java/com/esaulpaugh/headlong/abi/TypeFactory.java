@@ -27,6 +27,7 @@ import static com.esaulpaugh.headlong.abi.ABIType.EMPTY_ARRAY;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_ARRAY_CLASS;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
+import static com.esaulpaugh.headlong.abi.TupleType.EMPTY_TUPLE_STRING;
 
 /** Creates the appropriate {@link ABIType} object for a given type string. */
 public final class TypeFactory {
@@ -188,7 +189,7 @@ public final class TypeFactory {
 
     private static TupleType parseTupleType(final String rawTypeStr, final String[] elementNames) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawTypeStr.length();
-        if (len == 2 && rawTypeStr.equals("()")) return TupleType.newEmpty();
+        if (len == 2 && rawTypeStr.equals(EMPTY_TUPLE_STRING)) return TupleType.EMPTY;
         final List<ABIType<?>> elements = new ArrayList<>();
         int argEnd = 1;
         final StringBuilder canonicalBuilder = new StringBuilder("(");

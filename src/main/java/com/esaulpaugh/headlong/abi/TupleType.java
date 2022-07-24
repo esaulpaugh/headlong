@@ -32,10 +32,10 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 /** @see ABIType */
 public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
-    private static final String EMPTY_TUPLE_STRING = "()";
+    static final String EMPTY_TUPLE_STRING = "()";
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    public static final TupleType EMPTY = newEmpty();
+    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, null, EMPTY_ARRAY);
 
     final String[] elementNames;
     final ABIType<?>[] elementTypes;
@@ -57,10 +57,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             this.headLength = staticTupleHeadLength(this);
             this.firstOffset = -1;
         }
-    }
-
-    static TupleType newEmpty() {
-        return new TupleType(EMPTY_TUPLE_STRING, false, null, EMPTY_ARRAY);
     }
 
     static TupleType wrap(String[] elementNames, ABIType<?>... elements) {
