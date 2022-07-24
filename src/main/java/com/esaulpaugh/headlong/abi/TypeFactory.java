@@ -18,11 +18,9 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.util.Integers;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import static com.esaulpaugh.headlong.abi.ABIType.EMPTY_ARRAY;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
@@ -49,21 +47,21 @@ public final class TypeFactory {
     static {
         NAMELESS_CACHE = new HashMap<>(256);
 
-        for(int n = 8; n <= 32; n += 8) mapInt(NAMELESS_CACHE, "int" + n, n, false);
-        for(int n = 40; n <= 64; n += 8) mapLong(NAMELESS_CACHE, "int" + n, n, false);
-        for(int n = 72; n <= 256; n += 8) mapBigInteger(NAMELESS_CACHE, "int" + n, n, false);
+        for(int n = 8; n <= 32; n += 8) mapInt("int" + n, n, false);
+        for(int n = 40; n <= 64; n += 8) mapLong("int" + n, n, false);
+        for(int n = 72; n <= 256; n += 8) mapBigInteger("int" + n, n, false);
 
-        for(int n = 8; n <= 24; n += 8) mapInt(NAMELESS_CACHE, "uint" + n, n, true);
-        for(int n = 32; n <= 56; n += 8) mapLong(NAMELESS_CACHE, "uint" + n, n, true);
-        for(int n = 64; n <= 256; n += 8) mapBigInteger(NAMELESS_CACHE, "uint" + n, n, true);
+        for(int n = 8; n <= 24; n += 8) mapInt("uint" + n, n, true);
+        for(int n = 32; n <= 56; n += 8) mapLong("uint" + n, n, true);
+        for(int n = 64; n <= 256; n += 8) mapBigInteger("uint" + n, n, true);
 
         for (int n = 1; n <= 32; n++) {
-            mapByteArray(NAMELESS_CACHE, "bytes" + n, n);
+            mapByteArray("bytes" + n, n);
         }
 
         NAMELESS_CACHE.put("address", new AddressType());
-        mapByteArray(NAMELESS_CACHE, "function", FUNCTION_BYTE_LEN);
-        mapByteArray(NAMELESS_CACHE, "bytes", DYNAMIC_LENGTH);
+        mapByteArray("function", FUNCTION_BYTE_LEN);
+        mapByteArray("bytes", DYNAMIC_LENGTH);
         NAMELESS_CACHE.put("string", new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS));
 
         NAMELESS_CACHE.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
@@ -78,20 +76,20 @@ public final class TypeFactory {
         NAMELESS_CACHE.put("bool", new BooleanType());
     }
 
-    private static void mapInt(Map<String, ABIType<?>> namelessMap, String type, int bitLen, boolean unsigned) {
-        namelessMap.put(type, new IntType(type, bitLen, unsigned));
+    private static void mapInt(String type, int bitLen, boolean unsigned) {
+        NAMELESS_CACHE.put(type, new IntType(type, bitLen, unsigned));
     }
 
-    private static void mapLong(Map<String, ABIType<?>> namelessMap, String type, int bitLen, boolean unsigned) {
-        namelessMap.put(type, new LongType(type, bitLen, unsigned));
+    private static void mapLong(String type, int bitLen, boolean unsigned) {
+        NAMELESS_CACHE.put(type, new LongType(type, bitLen, unsigned));
     }
 
-    private static void mapBigInteger(Map<String, ABIType<?>> namelessMap, String type, int bitLen, boolean unsigned) {
-        namelessMap.put(type, new BigIntegerType(type, bitLen, unsigned));
+    private static void mapBigInteger(String type, int bitLen, boolean unsigned) {
+        NAMELESS_CACHE.put(type, new BigIntegerType(type, bitLen, unsigned));
     }
 
-    private static void mapByteArray(Map<String, ABIType<?>> namelessMap, String type, int arrayLen) {
-        namelessMap.put(type, new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class));
+    private static void mapByteArray(String type, int arrayLen) {
+        NAMELESS_CACHE.put(type, new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class));
     }
 
     public static <T extends ABIType<?>> T create(String rawType) {
