@@ -37,7 +37,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     public static final TupleType EMPTY = newEmpty();
 
-    private final String[] elementNames;
+    final String[] elementNames;
     final ABIType<?>[] elementTypes;
     private final int headLength;
     private final int firstOffset;
@@ -85,10 +85,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         if(index < 0 || index >= size()) {
             throw new IllegalArgumentException("index out of bounds: " + index);
         }
-        return elementNameUnchecked(index);
-    }
-
-    String elementNameUnchecked(int index) {
         return elementNames == null ? null : elementNames[index];
     }
 
@@ -371,7 +367,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     ABIType<?> e = get(i);
                     canonicalBuilder.append(e.canonicalType).append(',');
                     dynamic |= e.dynamic;
-                    selectedNames.add(elementNameUnchecked(i));
+                    selectedNames.add(elementNames == null ? null : elementNames[i]);
                     selected.add(e);
                 }
             }
