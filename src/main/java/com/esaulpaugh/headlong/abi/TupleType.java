@@ -357,18 +357,18 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         if(manifest.length == size) {
             final StringBuilder canonicalBuilder = new StringBuilder("(");
             boolean dynamic = false;
-            final List<String> names = new ArrayList<>(size);
+            final List<String> selectedNames = new ArrayList<>(size);
             final List<ABIType<?>> selected = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 if (negate ^ manifest[i]) {
                     ABIType<?> e = get(i);
                     canonicalBuilder.append(e.canonicalType).append(',');
                     dynamic |= e.dynamic;
-                    names.add(getElementName(i));
+                    selectedNames.add(getElementName(i));
                     selected.add(e);
                 }
             }
-            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, names.toArray(EMPTY_NAME_ARRAY), selected.toArray(EMPTY_ARRAY));
+            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selectedNames.toArray(EMPTY_NAME_ARRAY), selected.toArray(EMPTY_ARRAY));
         }
         throw new IllegalArgumentException("manifest.length != size(): " + manifest.length + " != " + size);
     }
