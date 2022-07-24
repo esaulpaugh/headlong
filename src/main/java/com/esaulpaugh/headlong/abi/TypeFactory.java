@@ -44,73 +44,53 @@ public final class TypeFactory {
 
     private static final int FUNCTION_BYTE_LEN = 24;
 
-//    static final Map<String, Function<String, ABIType<?>>> SUPPLIER_MAP;
-
     static final Map<String, ABIType<?>> NAMELESS_CACHE;
 
     static {
-        Map<String, Function<String, ABIType<?>>> lambdaMap = null;
         NAMELESS_CACHE = new HashMap<>(256);
 
-        for(int n = 8; n <= 32; n += 8) mapInt(lambdaMap, NAMELESS_CACHE, "int" + n, n, false);
-        for(int n = 40; n <= 64; n += 8) mapLong(lambdaMap, NAMELESS_CACHE, "int" + n, n, false);
-        for(int n = 72; n <= 256; n += 8) mapBigInteger(lambdaMap, NAMELESS_CACHE, "int" + n, n, false);
+        for(int n = 8; n <= 32; n += 8) mapInt(NAMELESS_CACHE, "int" + n, n, false);
+        for(int n = 40; n <= 64; n += 8) mapLong(NAMELESS_CACHE, "int" + n, n, false);
+        for(int n = 72; n <= 256; n += 8) mapBigInteger(NAMELESS_CACHE, "int" + n, n, false);
 
-        for(int n = 8; n <= 24; n += 8) mapInt(lambdaMap, NAMELESS_CACHE, "uint" + n, n, true);
-        for(int n = 32; n <= 56; n += 8) mapLong(lambdaMap, NAMELESS_CACHE, "uint" + n, n, true);
-        for(int n = 64; n <= 256; n += 8) mapBigInteger(lambdaMap, NAMELESS_CACHE, "uint" + n, n, true);
+        for(int n = 8; n <= 24; n += 8) mapInt(NAMELESS_CACHE, "uint" + n, n, true);
+        for(int n = 32; n <= 56; n += 8) mapLong(NAMELESS_CACHE, "uint" + n, n, true);
+        for(int n = 64; n <= 256; n += 8) mapBigInteger(NAMELESS_CACHE, "uint" + n, n, true);
 
         for (int n = 1; n <= 32; n++) {
-            mapByteArray(lambdaMap, NAMELESS_CACHE, "bytes" + n, n);
+            mapByteArray(NAMELESS_CACHE, "bytes" + n, n);
         }
 
-//        lambdaMap.put("address", AddressType::new);
         NAMELESS_CACHE.put("address", new AddressType());
-        mapByteArray(lambdaMap, NAMELESS_CACHE, "function", FUNCTION_BYTE_LEN);
-        mapByteArray(lambdaMap, NAMELESS_CACHE, "bytes", DYNAMIC_LENGTH);
-//        lambdaMap.put("string", name -> new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS));
+        mapByteArray(NAMELESS_CACHE, "function", FUNCTION_BYTE_LEN);
+        mapByteArray(NAMELESS_CACHE, "bytes", DYNAMIC_LENGTH);
         NAMELESS_CACHE.put("string", new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS));
 
-//        lambdaMap.put("fixed128x18", name -> new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false, name));
         NAMELESS_CACHE.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
-//        lambdaMap.put("ufixed128x18", name -> new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true, name));
         NAMELESS_CACHE.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
-//        lambdaMap.put("decimal", name -> new BigDecimalType("fixed168x10", DECIMAL_BIT_LEN, DECIMAL_SCALE, false, name));
         NAMELESS_CACHE.put("decimal", new BigDecimalType("fixed168x10", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
-
-//        lambdaMap.put("int", lambdaMap.get("int256"));
-//        lambdaMap.put("uint", lambdaMap.get("uint256"));
-//        lambdaMap.put("fixed", lambdaMap.get("fixed128x18"));
-//        lambdaMap.put("ufixed", lambdaMap.get("ufixed128x18"));
 
         NAMELESS_CACHE.put("int", NAMELESS_CACHE.get("int256"));
         NAMELESS_CACHE.put("uint", NAMELESS_CACHE.get("uint256"));
         NAMELESS_CACHE.put("fixed", NAMELESS_CACHE.get("fixed128x18"));
         NAMELESS_CACHE.put("ufixed", NAMELESS_CACHE.get("ufixed128x18"));
 
-//        lambdaMap.put("bool", BooleanType::new);
         NAMELESS_CACHE.put("bool", new BooleanType());
-
-//        SUPPLIER_MAP = Collections.unmodifiableMap(lambdaMap);
     }
 
-    private static void mapInt(Map<String, Function<String, ABIType<?>>> map, Map<String, ABIType<?>> namelessMap, String type, int bitLen, boolean unsigned) {
-//        map.put(type, name -> new IntType(type, bitLen, unsigned, name));
+    private static void mapInt(Map<String, ABIType<?>> namelessMap, String type, int bitLen, boolean unsigned) {
         namelessMap.put(type, new IntType(type, bitLen, unsigned));
     }
 
-    private static void mapLong(Map<String, Function<String, ABIType<?>>> map, Map<String, ABIType<?>> namelessMap, String type, int bitLen, boolean unsigned) {
-//        map.put(type, name -> new LongType(type, bitLen, unsigned, name));
+    private static void mapLong(Map<String, ABIType<?>> namelessMap, String type, int bitLen, boolean unsigned) {
         namelessMap.put(type, new LongType(type, bitLen, unsigned));
     }
 
-    private static void mapBigInteger(Map<String, Function<String, ABIType<?>>> map, Map<String, ABIType<?>> namelessMap, String type, int bitLen, boolean unsigned) {
-//        map.put(type, name -> new BigIntegerType(type, bitLen, unsigned, name));
+    private static void mapBigInteger(Map<String, ABIType<?>> namelessMap, String type, int bitLen, boolean unsigned) {
         namelessMap.put(type, new BigIntegerType(type, bitLen, unsigned));
     }
 
-    private static void mapByteArray(Map<String, Function<String, ABIType<?>>> map, Map<String, ABIType<?>> namelessMap, String type, int arrayLen) {
-//        map.put(type, name -> new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class, name));
+    private static void mapByteArray(Map<String, ABIType<?>> namelessMap, String type, int arrayLen) {
         namelessMap.put(type, new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class));
     }
 
