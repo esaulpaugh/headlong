@@ -6,7 +6,7 @@
 
     <groupId>com.esaulpaugh</groupId>
     <artifactId>headlong</artifactId>
-    <version>6.6.3-SNAPSHOT</version>
+    <version>7.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>headlong</name>
