@@ -47,13 +47,10 @@ public abstract class ABIType<J> {
     final Class<J> clazz;
     final boolean dynamic;
 
-    private final String name;
-
-    ABIType(String canonicalType, Class<J> clazz, boolean dynamic, String name) {
+    ABIType(String canonicalType, Class<J> clazz, boolean dynamic) {
         this.canonicalType = canonicalType; // .intern() to save memory and allow == comparison?
         this.clazz = clazz;
         this.dynamic = dynamic;
-        this.name = name;
     }
 
     public final String getCanonicalType() {
@@ -66,10 +63,6 @@ public abstract class ABIType<J> {
 
     public final boolean isDynamic() {
         return dynamic;
-    }
-
-    public final String getName() {
-        return name;
     }
 
     abstract Class<?> arrayClass();

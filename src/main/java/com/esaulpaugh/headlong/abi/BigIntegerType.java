@@ -21,8 +21,8 @@ import java.nio.ByteBuffer;
 /** Represents an integer type such as uint64 or int256. */
 public final class BigIntegerType extends UnitType<BigInteger> {
 
-    BigIntegerType(String canonicalType, int bitLength, boolean unsigned, String name) {
-        super(canonicalType, BigInteger.class, bitLength, unsigned, name);
+    BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {
+        super(canonicalType, BigInteger.class, bitLength, unsigned);
     }
 
     @Override

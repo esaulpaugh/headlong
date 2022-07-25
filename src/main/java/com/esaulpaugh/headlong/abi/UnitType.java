@@ -28,8 +28,8 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     final int bitLength;
     final boolean unsigned;
 
-    UnitType(String canonicalType, Class<J> clazz, int bitLength, boolean unsigned, String name) {
-        super(canonicalType, clazz, false, name);
+    UnitType(String canonicalType, Class<J> clazz, int bitLength, boolean unsigned) {
+        super(canonicalType, clazz, false);
         this.bitLength = bitLength;
         this.unsigned = unsigned;
     }

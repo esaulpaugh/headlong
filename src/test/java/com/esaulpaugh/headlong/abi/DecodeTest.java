@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DecodeTest {
@@ -293,7 +294,7 @@ public class DecodeTest {
 
     @Test
     public void testStringArray() throws Throwable {
-        final ArrayType<ArrayType<ByteType, String>, String[]> type = TypeFactory.create("string[]", "nam");
+        final ArrayType<ArrayType<ByteType, String>, String[]> type = TypeFactory.create("string[]");
         final String[] array = new String[] { "Hello, world!", "world! Hello," };
         final ByteBuffer abi = ByteBuffer.wrap(
                 Strings.decode(
@@ -331,13 +332,12 @@ public class DecodeTest {
 
             final IntType l = TypeFactory.create("int16");
             final ArrayType<?, BigInteger[]> m = TypeFactory.create("int[]");
-            final TupleType n = TypeFactory.create("(bool)");
+            final TupleType n = TypeFactory.createTupleType("(bool)", "nam");
+            assertEquals("nam", n.getElementName(0));
             m.encode(new BigInteger[] {});
 
             TupleType.wrap(null, TypeFactory.create("int"), TypeFactory.create("bytes[7]"));
         }
-
-        assertEquals("nam", type.getName());
 
         Object decoded0 = Function.parse("()", "(string[])").getOutputs().get(0).decode(abi, new byte[32]);
         assertArrayEquals(array, (Object[]) decoded0);

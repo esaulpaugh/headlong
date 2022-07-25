@@ -54,7 +54,7 @@ public class TupleTest {
 
         boolean[] bools = new boolean[pow];
 
-        BigIntegerType type = new BigIntegerType("int" + bits, bits, false, null);
+        BigIntegerType type = new BigIntegerType("int" + bits, bits, false);
 //        BooleanType type = new BooleanType();
 
         for (int i = 0; i < 1_579_919_999; i++) {
@@ -254,25 +254,53 @@ public class TupleTest {
     }
 
     @Test
-    public void testNameOverwrites() {
-        testNameOverwrite("bool", "moo", "jumbo");
-        testNameOverwrite("()", "zZz", "Jumb0");
+    public void testNameOverwrites() throws Throwable {
+        testNameOverwrite("(bool)", "moo", "jumbo");
+        testNameOverwrite("(())", "zZz", "Jumb0");
+
+        TypeFactory.createTupleType("(bool,string,int)");
+
+        assertThrown(IllegalArgumentException.class, "expected 3 element names but found 2",
+                () -> TypeFactory.createTupleType("(bool,string,int)", "a", "b"));
+
+        assertThrown(IllegalArgumentException.class, "expected 2 element names but found 4",
+                () -> TypeFactory.createTupleType("(bool,string)", new String[4]));
+
+        TupleType tt = TypeFactory.createTupleType("(bool,string)", "a", "b");
+        assertThrown(IllegalArgumentException.class, "index out of bounds: -1", () -> tt.getElementName(-1));
+        assertEquals("a", tt.getElementName(0));
+        assertEquals("b", tt.getElementName(1));
+        assertThrown(IllegalArgumentException.class, "index out of bounds: 2", () -> tt.getElementName(2));
     }
 
     private static void testNameOverwrite(String typeStr, String aName, String cName) {
         assertNotEquals(aName, cName);
 
-        final ABIType<?> a = TypeFactory.create(typeStr, aName);
-        assertEquals(aName, a.getName());
+        final TupleType a = TypeFactory.createTupleType(typeStr, aName);
+        assertEquals(aName, a.getElementName(0));
 
-        final ABIType<?> b = TypeFactory.create(typeStr);
-        assertEquals(aName, a.getName());
-        assertNull(b.getName());
+        final TupleType b = TypeFactory.createTupleType(typeStr);
+        assertEquals(aName, a.getElementName(0));
+        assertNull(b.getElementName(0));
 
-        final ABIType<?> c = TypeFactory.create(typeStr, cName);
-        assertEquals(aName, a.getName());
-        assertNull(b.getName());
-        assertEquals(cName, c.getName());
+        final TupleType c = TypeFactory.createTupleType(typeStr, cName);
+        assertEquals(aName, a.getElementName(0));
+        assertNull(b.getElementName(0));
+        assertEquals(cName, c.getElementName(0));
+
+        assertNotEquals(aName, cName);
+
+        final TupleType x = TupleType.wrap(new String[] { aName }, a.get(0));
+        assertEquals(aName, x.getElementName(0));
+
+        final TupleType y = TupleType.wrap(null, b.get(0));
+        assertEquals(aName, x.getElementName(0));
+        assertNull(y.getElementName(0));
+
+        final TupleType z = TupleType.wrap(new String[] { cName }, c.get(0));
+        assertEquals(aName, x.getElementName(0));
+        assertNull(y.getElementName(0));
+        assertEquals(cName, z.getElementName(0));
     }
 
     @Test

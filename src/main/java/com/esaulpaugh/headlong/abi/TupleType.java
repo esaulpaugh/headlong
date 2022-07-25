@@ -32,16 +32,19 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 /** @see ABIType */
 public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
 
-    private static final String EMPTY_TUPLE_STRING = "()";
+    static final String EMPTY_TUPLE_STRING = "()";
+    private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    public static final TupleType EMPTY = newEmpty(null);
+    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, null, EMPTY_ARRAY);
 
+    final String[] elementNames;
     final ABIType<?>[] elementTypes;
     private final int headLength;
     private final int firstOffset;
 
-    TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String name) {
-        super(canonicalType, Tuple.class, dynamic, name);
+    TupleType(String canonicalType, boolean dynamic, String[] elementNames, ABIType<?>[] elementTypes) {
+        super(canonicalType, Tuple.class, dynamic);
+        this.elementNames = elementNames;
         this.elementTypes = elementTypes;
         if(dynamic) {
             this.headLength = OFFSET_LENGTH_BYTES;
@@ -56,18 +59,14 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
     }
 
-    static TupleType newEmpty(String name) {
-        return new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, name);
-    }
-
-    static TupleType wrap(String name, ABIType<?>... elements) {
+    static TupleType wrap(String[] elementNames, ABIType<?>... elements) {
         StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
         for (ABIType<?> e : elements) {
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
         }
-        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements, name); // TODO .intern() string?
+        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elementNames, elements); // TODO .intern() string?
     }
 
     public int size() {
@@ -76,6 +75,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     public boolean isEmpty() {
         return size() == 0;
+    }
+
+    public String getElementName(int index) {
+        if(index < 0 || index >= size()) {
+            throw new IllegalArgumentException("index out of bounds: " + index);
+        }
+        return elementNames == null ? null : elementNames[index];
     }
 
     @SuppressWarnings("unchecked")
@@ -350,16 +356,18 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         if(manifest.length == size) {
             final StringBuilder canonicalBuilder = new StringBuilder("(");
             boolean dynamic = false;
+            final List<String> selectedNames = new ArrayList<>(size);
             final List<ABIType<?>> selected = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 if (negate ^ manifest[i]) {
                     ABIType<?> e = get(i);
                     canonicalBuilder.append(e.canonicalType).append(',');
                     dynamic |= e.dynamic;
+                    selectedNames.add(elementNames == null ? null : elementNames[i]);
                     selected.add(e);
                 }
             }
-            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected.toArray(EMPTY_ARRAY), null);
+            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selectedNames.toArray(EMPTY_STRING_ARRAY), selected.toArray(EMPTY_ARRAY));
         }
         throw new IllegalArgumentException("manifest.length != size(): " + manifest.length + " != " + size);
     }

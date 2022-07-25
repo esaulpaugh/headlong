@@ -20,10 +20,10 @@ import java.nio.ByteBuffer;
 /** The {@link ABIType} for {@link Address}. Corresponds to the "address" type. */
 public final class AddressType extends UnitType<Address> {
 
-    private static final BigIntegerType ADDRESS_INNER = new BigIntegerType("ADDRESS_INNER", TypeFactory.ADDRESS_BIT_LEN, true, null);
+    private static final BigIntegerType ADDRESS_INNER = new BigIntegerType("ADDRESS_INNER", TypeFactory.ADDRESS_BIT_LEN, true);
 
-    AddressType(String name) {
-        super("address", Address.class, TypeFactory.ADDRESS_BIT_LEN, true, name);
+    AddressType() {
+        super("address", Address.class, TypeFactory.ADDRESS_BIT_LEN, true);
     }
 
     @Override
