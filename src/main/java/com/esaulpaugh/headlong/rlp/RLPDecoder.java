@@ -104,10 +104,6 @@ public final class RLPDecoder {
         return wrapList(buffer, index).iterator(this);
     }
 
-    public <T extends RLPItem> T wrapBits(int bits) {
-        return wrap(bits == 0 ? ZERO_RLP : Integers.toBytes(bits), 0);
-    }
-
     public <T extends RLPItem> T wrapBits(long bits) {
         return wrap(bits == 0L ? ZERO_RLP : Integers.toBytes(bits), 0);
     }
