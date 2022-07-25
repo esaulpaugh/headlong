@@ -258,15 +258,16 @@ public class TupleTest {
         testNameOverwrite("(bool)", "moo", "jumbo");
         testNameOverwrite("(())", "zZz", "Jumb0");
 
-        TypeFactory.createTupleType("(bool,string,int)");
+        assertThrown(IllegalArgumentException.class, "expected 2 element names but found 0",
+                () -> TypeFactory.createTupleTypeWithNames("(bool,string)"));
 
         assertThrown(IllegalArgumentException.class, "expected 3 element names but found 2",
-                () -> TypeFactory.createTupleType("(bool,string,int)", "a", "b"));
+                () -> TypeFactory.createTupleTypeWithNames("(bool,string,int)", "a", "b"));
 
         assertThrown(IllegalArgumentException.class, "expected 2 element names but found 4",
-                () -> TypeFactory.createTupleType("(bool,string)", new String[4]));
+                () -> TypeFactory.createTupleTypeWithNames("(bool,string)", new String[4]));
 
-        TupleType tt = TypeFactory.createTupleType("(bool,string)", "a", "b");
+        TupleType tt = TypeFactory.createTupleTypeWithNames("(bool,string)", "a", "b");
         assertThrown(IllegalArgumentException.class, "index out of bounds: -1", () -> tt.getElementName(-1));
         assertEquals("a", tt.getElementName(0));
         assertEquals("b", tt.getElementName(1));
@@ -276,14 +277,14 @@ public class TupleTest {
     private static void testNameOverwrite(String typeStr, String aName, String cName) {
         assertNotEquals(aName, cName);
 
-        final TupleType a = TypeFactory.createTupleType(typeStr, aName);
+        final TupleType a = TypeFactory.createTupleTypeWithNames(typeStr, aName);
         assertEquals(aName, a.getElementName(0));
 
-        final TupleType b = TypeFactory.createTupleType(typeStr);
+        final TupleType b = TypeFactory.create(typeStr);
         assertEquals(aName, a.getElementName(0));
         assertNull(b.getElementName(0));
 
-        final TupleType c = TypeFactory.createTupleType(typeStr, cName);
+        final TupleType c = TypeFactory.createTupleTypeWithNames(typeStr, cName);
         assertEquals(aName, a.getElementName(0));
         assertNull(b.getElementName(0));
         assertEquals(cName, c.getElementName(0));
