@@ -539,10 +539,6 @@ public class RLPDecoderTest {
 
     @Test
     public void collect() {
-
-//        for (int i = 0x820000; i < 0x82ffff; i++) {
-//            System.out.println(RLP_STRICT.wrap(i));
-//        }
         
         Set<Object> objectSet = new HashSet<>();
         int numAdded = collectUntil(LONG_LIST_BYTES, 0, LONG_LIST_BYTES.length, objectSet);
