@@ -108,7 +108,7 @@ public final class TypeFactory {
         return (ABIType<Object>) build(rawType, null, null);
     }
 
-    /** If you don't need any elementNames, use {@link TypeFactory#create(String)}. */
+    /** If you don't need any {@code elementNames}, use {@link TypeFactory#create(String)}. */
     public static TupleType createTupleTypeWithNames(String rawType, String... elementNames) {
         return (TupleType) build(rawType, elementNames, null);
     }
