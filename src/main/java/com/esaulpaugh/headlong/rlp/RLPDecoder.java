@@ -39,6 +39,8 @@ public final class RLPDecoder {
     public static final RLPDecoder RLP_STRICT = new RLPDecoder(false);
     public static final RLPDecoder RLP_LENIENT = new RLPDecoder(true);
 
+    private static final byte[] ZERO_RLP = new byte[1];
+
     public final boolean lenient;
 
     private RLPDecoder(boolean lenient) {
@@ -102,6 +104,14 @@ public final class RLPDecoder {
         return wrapList(buffer, index).iterator(this);
     }
 
+    public <T extends RLPItem> T wrapBits(int bits) {
+        return wrap(bits == 0 ? ZERO_RLP : Integers.toBytes(bits), 0);
+    }
+
+    public <T extends RLPItem> T wrapBits(long bits) {
+        return wrap(bits == 0L ? ZERO_RLP : Integers.toBytes(bits), 0);
+    }
+
     public RLPString wrapString(byte[] buffer) {
         return wrapString(buffer, 0);
     }
@@ -137,18 +147,6 @@ public final class RLPDecoder {
 
     public RLPItem wrapItem(byte[] buffer, int index) {
         return wrap(buffer, index);
-    }
-
-    /**
-     * Returns an {@link RLPItem} for a length-one encoding (e.g. 0xc0)
-     *
-     * @param lengthOneRLP the encoding
-     * @param <T>   the desired return type
-     * @return  the item
-     * @throws IllegalArgumentException if the byte fails to decode
-     */
-    public <T extends RLPItem> T wrap(byte lengthOneRLP) {
-        return wrap(new byte[] { lengthOneRLP }, 0);
     }
 
     public <T extends RLPItem> T wrap(byte[] buffer) {
