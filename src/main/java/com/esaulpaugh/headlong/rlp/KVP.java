@@ -18,7 +18,6 @@ package com.esaulpaugh.headlong.rlp;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 
@@ -40,10 +39,9 @@ public final class KVP implements Comparable<KVP> {
     public static final String TCP6 = "tcp6";
     public static final String UDP6 = "udp6";
 
-    private final byte[] k;
-    private final byte[] v;
+    final byte[] rlp;
     private final int keyDataIdx;
-    final int length;
+    private final int keyEnd;
 
     public KVP(String keyUtf8, String val, int valEncoding) {
         this(keyUtf8, Strings.decode(val, valEncoding));
@@ -54,21 +52,19 @@ public final class KVP implements Comparable<KVP> {
     }
 
     public KVP(byte[] key, byte[] value) {
-        this.k = RLPEncoder.encodeString(key);
-        this.v = RLPEncoder.encodeString(value);
-        this.keyDataIdx = key().dataIndex;
-        this.length = k.length + v.length;
+        this.rlp = RLPEncoder.encodeSequentially(key, value);
+        RLPItem k = key();
+        this.keyDataIdx = k.dataIndex;
+        this.keyEnd = k.endIndex;
     }
 
     public KVP(RLPItem key, RLPItem value) {
-        this(key.encoding(), value.encoding(), key.dataIndex);
-    }
-
-    private KVP(byte[] k, byte[] v, int i) {
-        this.k = k;
-        this.v = v;
-        this.keyDataIdx = i;
-        this.length = k.length + v.length;
+        final int keyLen = key.encodingLength();
+        this.rlp = new byte[keyLen + value.encodingLength()];
+        key.copy(rlp, 0);
+        value.copy(rlp, keyLen);
+        this.keyDataIdx = key.dataIndex;
+        this.keyEnd = keyLen;
     }
 
     public KVP withValue(String val, int valEncoding) {
@@ -76,29 +72,46 @@ public final class KVP implements Comparable<KVP> {
     }
 
     public KVP withValue(byte[] value) {
-        return new KVP(this.k, RLPEncoder.encodeString(value), this.keyDataIdx);
+        return new KVP(this.key(), RLP_STRICT.wrapString(RLPEncoder.encodeString(value)));
     }
 
     public RLPString key() {
-        return RLP_STRICT.wrapString(k);
+        return RLP_STRICT.wrapString(rlp);
     }
 
     public RLPString value() {
-        return RLP_STRICT.wrapString(v);
+        return RLP_STRICT.wrapString(rlp, keyEnd);
     }
 
     void export(ByteBuffer bb) {
-        bb.put(k).put(v);
+        bb.put(rlp);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(k);
+        int hash = 1;
+        for (int i = 0; i < keyEnd; i++) {
+            hash = 31 * hash + rlp[i];
+        }
+        return hash;
     }
 
     @Override
     public boolean equals(Object o) {
-        return o == this || (o instanceof KVP && Arrays.equals(((KVP) o).k, this.k));
+        if(o == this) return true;
+        if(o instanceof KVP) {
+            KVP a = (KVP) o;
+            return equal(a.rlp, a.keyEnd, this.rlp, this.keyEnd);
+        }
+        return false;
+    }
+
+    private boolean equal(byte[] a, int aKeyEnd, byte[] b, int bKeyEnd) {
+        if(aKeyEnd != bKeyEnd) return false;
+        for (int i = 0; i < aKeyEnd; i++) {
+            if(a[i] != b[i]) return false;
+        }
+        return true;
     }
 
     @Override
@@ -116,21 +129,19 @@ public final class KVP implements Comparable<KVP> {
     }
 
     private static int compare(KVP pa, KVP pb) {
-        byte[] a = pa.k;
-        byte[] b = pb.k;
         int aOff = pa.keyDataIdx;
         int bOff = pb.keyDataIdx;
-        final int aLen = a.length - aOff;
-        final int bLen = b.length - bOff;
-        final int end = aOff + Math.min(aLen, bLen);
+        final int aDataLen = pa.keyEnd - aOff;
+        final int bDataLen = pb.keyEnd - bOff;
+        final int end = aOff + Math.min(aDataLen, bDataLen);
         while(aOff < end) {
-            int av = a[aOff++];
-            int bv = b[bOff++];
+            int av = pa.rlp[aOff++];
+            int bv = pb.rlp[bOff++];
             if (av != bv) {
                 return av - bv;
             }
         }
-        return aLen - bLen;
+        return aDataLen - bDataLen;
     }
 
     IllegalArgumentException duplicateKeyErr() {
