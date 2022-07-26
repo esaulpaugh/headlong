@@ -98,20 +98,17 @@ public final class KVP implements Comparable<KVP> {
 
     @Override
     public boolean equals(Object o) {
-        if(o == this) return true;
         if(o instanceof KVP) {
             KVP a = (KVP) o;
-            return equal(a.rlp, a.keyEnd, this.rlp, this.keyEnd);
+            if(a.keyEnd == this.keyEnd) {
+                for (int i = 0; i < this.keyEnd; i++) {
+                    if (a.rlp[i] != this.rlp[i])
+                        return false;
+                }
+                return true;
+            }
         }
         return false;
-    }
-
-    private boolean equal(byte[] a, int aKeyEnd, byte[] b, int bKeyEnd) {
-        if(aKeyEnd != bKeyEnd) return false;
-        for (int i = 0; i < aKeyEnd; i++) {
-            if(a[i] != b[i]) return false;
-        }
-        return true;
     }
 
     @Override
