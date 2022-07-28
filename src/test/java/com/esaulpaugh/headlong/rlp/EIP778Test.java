@@ -261,6 +261,21 @@ public class EIP778Test {
         assertEquals(ENR_STRING, record.toString());
 
         assertEquals(record, Record.parse(record.toString(), VERIFIER));
+
+        record.visitAll(new BiConsumer<RLPString, RLPString>() {
+
+            RLPString prevKey = null;
+
+            @Override
+            public void accept(RLPString k, RLPString v) {
+                if(prevKey != null) {
+                    int c = k.compareTo(prevKey);
+                    assertTrue(c > 0);
+                    assertEquals(new KVP(k, v).compareTo(new KVP(prevKey, v)), c);
+                }
+                prevKey = k;
+            }
+        });
     }
 
     private static void testEqual(KVP a, KVP b) {
