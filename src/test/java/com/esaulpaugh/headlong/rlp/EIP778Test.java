@@ -454,4 +454,13 @@ public class EIP778Test {
     public void testMissingPrefix() throws Throwable {
         assertThrown(IllegalArgumentException.class, "prefix \"enr:\" not found", () -> Record.parse("abcd", VERIFIER));
     }
+
+    @Test
+    public void testOutOfOrder() throws Throwable {
+        String enr =    "enr:-IS4QHCYrYZbAKWCBRlAy5zzaDZXJBGkcnh4MHcBFZntXNFrdvJjX04jRzjzCBOonrkTfj499SZuOh8R33Ls8RRc" +
+                        "y5wBgmlwhH8AAAGDdWRwgnZfgmlkgnY0iXNlY3AyNTZrMaEDymNMrg1JrLQB2KTGtv6MVbcNEVv0AHacwUAPMljNMTg";
+        assertThrown(IllegalArgumentException.class,
+                "key out of order: id",
+                () -> Record.parse(enr, VERIFIER));
+    }
 }

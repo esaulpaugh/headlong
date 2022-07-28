@@ -31,6 +31,7 @@ import java.util.function.BiConsumer;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
+import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 /** Implementation of <a href="https://eips.ethereum.org/EIPS/eip-778">EIP-778: Ethereum Node Records (ENR)</a> */
 public final class Record {
@@ -122,6 +123,17 @@ public final class Record {
         RLPString signatureItem = record.getSignature();
         byte[] content = record.content(signatureItem.endIndex);
         verifier.verify(signatureItem.asBytes(), content); // verify signature
+        record.visitAll(new BiConsumer<RLPString, RLPString>() {
+
+            RLPString prevKey = null;
+
+            @Override
+            public void accept(RLPString k, RLPString v) {
+                if (prevKey != null && k.compareTo(prevKey) <= 0) {
+                    throw new IllegalArgumentException("key out of order: " + k.asString(UTF_8));
+                }
+                prevKey = k;
+            }
         return record;
     }
 
