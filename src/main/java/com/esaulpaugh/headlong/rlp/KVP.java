@@ -63,7 +63,7 @@ public final class KVP implements Comparable<KVP> {
         this.rlp = new byte[keyLen + value.encodingLength()];
         key.copy(rlp, 0);
         value.copy(rlp, keyLen);
-        this.keyDataIdx = key.dataIndex;
+        this.keyDataIdx = keyLen - key.dataLength;
         this.keyEnd = keyLen;
     }
 
