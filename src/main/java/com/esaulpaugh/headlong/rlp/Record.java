@@ -134,6 +134,7 @@ public final class Record {
                 }
                 prevKey = k;
             }
+        });
         return record;
     }
 
