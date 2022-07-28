@@ -40,6 +40,7 @@ public final class Record {
 
     private static final String ENR_PREFIX = "enr:";
 
+    private final long seq;
     private final RLPList rlp;
 
     public static ByteBuffer encode(Signer signer, long seq, KVP... pairs) {
@@ -79,10 +80,12 @@ public final class Record {
     }
 
     public Record(Signer signer, long seq, List<KVP> pairs) {
+        this.seq = seq;
         this.rlp = RLP_STRICT.wrapList(encode(signer, seq, pairs).array());
     }
 
-    private Record(RLPList recordRLP) { // validate before calling
+    private Record(long seq, RLPList recordRLP) { // validate before calling
+        this.seq = seq;
         this.rlp = recordRLP;
     }
 
@@ -114,16 +117,14 @@ public final class Record {
 
     public static Record decode(byte[] bytes, Verifier verifier) throws SignatureException {
         checkRecordLen(bytes.length);
-        RLPList rlpList = RLP_STRICT.wrapList(bytes)
+        final RLPList rlpList = RLP_STRICT.wrapList(bytes)
                 .duplicate(); // defensive copy
         if(rlpList.encodingLength() != bytes.length) {
             throw new IllegalArgumentException("unconsumed trailing bytes");
         }
-        Record record = new Record(rlpList);
-        RLPString signatureItem = record.getSignature();
-        byte[] content = record.content(signatureItem.endIndex);
-        verifier.verify(signatureItem.asBytes(), content); // verify signature
-        record.visitAll(new BiConsumer<RLPString, RLPString>() {
+        final RLPString signatureItem = Record.getSignature(rlpList);
+        verifier.verify(signatureItem.asBytes(), Record.content(rlpList, signatureItem.endIndex)); // verify signature
+        final long seq = Record.visitAll(rlpList, new BiConsumer<RLPString, RLPString>() {
 
             RLPString prevKey = null;
 
@@ -135,7 +136,7 @@ public final class Record {
                 prevKey = k;
             }
         });
-        return record;
+        return new Record(seq, rlpList);
     }
 
     public RLPList getRLP() {
@@ -143,15 +144,15 @@ public final class Record {
     }
 
     public RLPString getSignature() {
-        return rlp.iterator(RLP_STRICT).next().asRLPString();
+        return Record.getSignature(this.rlp);
     }
 
     public RLPList getContent() {
-        return RLP_STRICT.wrapList(content(getSignature().endIndex));
+        return RLP_STRICT.wrapList(Record.content(this.rlp, getSignature().endIndex));
     }
 
     public long getSeq() {
-        return visitAll(null);
+        return seq;
     }
 
     public List<KVP> getPairs() {
@@ -171,25 +172,7 @@ public final class Record {
      * @return seq
      * */
     public long visitAll(BiConsumer<RLPString, RLPString> visitor) {
-        Iterator<RLPItem> iter = rlp.iterator();
-        iter.next().asRLPString(); // skip signature
-        long seq = iter.next().asRLPString().asLong();
-        if (visitor != null) {
-            while (iter.hasNext()) {
-                visitor.accept(iter.next().asRLPString(), iter.next().asRLPString());
-            }
-        }
-        return seq;
-    }
-
-    private byte[] content(int index) {
-        // reconstruct the content list from the content data
-        final int contentDataLen = rlp.encodingLength() - index;
-        final ByteBuffer bb = ByteBuffer.allocate(RLPEncoder.itemLen(contentDataLen));
-        RLPEncoder.insertListPrefix(contentDataLen, bb);
-        final byte[] arr = bb.array();
-        System.arraycopy(rlp.buffer, index, arr, bb.position(), contentDataLen);
-        return arr;
+        return Record.visitAll(this.rlp, visitor);
     }
 
     public interface Signer {
@@ -215,5 +198,31 @@ public final class Record {
     @Override
     public String toString() {
         return ENR_PREFIX + rlp.encodingString(BASE_64_URL_SAFE);
+    }
+
+    private static RLPString getSignature(RLPList rlpList) {
+        return rlpList.iterator(RLP_STRICT).next().asRLPString();
+    }
+
+    private static long visitAll(RLPList list, BiConsumer<RLPString, RLPString> visitor) {
+        Iterator<RLPItem> iter = list.iterator();
+        iter.next().asRLPString(); // skip signature
+        long seq = iter.next().asRLPString().asLong();
+        if (visitor != null) {
+            while (iter.hasNext()) {
+                visitor.accept(iter.next().asRLPString(), iter.next().asRLPString());
+            }
+        }
+        return seq;
+    }
+
+    private static byte[] content(RLPList rlpList, int index) {
+        // reconstruct the content list from the content data
+        final int contentDataLen = rlpList.encodingLength() - index;
+        final ByteBuffer bb = ByteBuffer.allocate(RLPEncoder.itemLen(contentDataLen));
+        RLPEncoder.insertListPrefix(contentDataLen, bb);
+        final byte[] arr = bb.array();
+        System.arraycopy(rlpList.buffer, index, arr, bb.position(), contentDataLen);
+        return arr;
     }
 }
