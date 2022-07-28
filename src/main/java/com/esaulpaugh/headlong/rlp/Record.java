@@ -122,20 +122,17 @@ public final class Record {
         if(rlpList.encodingLength() != bytes.length) {
             throw new IllegalArgumentException("unconsumed trailing bytes");
         }
-        final RLPString signatureItem = Record.getSignature(rlpList);
-        verifier.verify(signatureItem.asBytes(), Record.content(rlpList, signatureItem.endIndex)); // verify signature
-        final long seq = Record.visitAll(rlpList, new BiConsumer<RLPString, RLPString>() {
+        final long seq = Record.traverse(rlpList, verifier, new BiConsumer<RLPString, RLPString>() {
+                    RLPString prevKey = null;
 
-            RLPString prevKey = null;
-
-            @Override
-            public void accept(RLPString k, RLPString v) {
-                if (prevKey != null && k.compareTo(prevKey) <= 0) {
-                    throw new IllegalArgumentException("key out of order: " + k.asString(UTF_8));
-                }
-                prevKey = k;
-            }
-        });
+                    @Override
+                    public void accept(RLPString k, RLPString v) {
+                        if (prevKey != null && k.compareTo(prevKey) <= 0) {
+                            throw new IllegalArgumentException("key out of order: " + k.asString(UTF_8));
+                        }
+                        prevKey = k;
+                    }
+                });
         return new Record(seq, rlpList);
     }
 
@@ -172,7 +169,11 @@ public final class Record {
      * @return seq
      * */
     public long visitAll(BiConsumer<RLPString, RLPString> visitor) {
-        return Record.visitAll(this.rlp, visitor);
+        try {
+            return Record.traverse(this.rlp, null, visitor);
+        } catch (SignatureException se) { // not possible with null verifier
+            throw new AssertionError(se);
+        }
     }
 
     public interface Signer {
@@ -204,9 +205,12 @@ public final class Record {
         return rlpList.iterator(RLP_STRICT).next().asRLPString();
     }
 
-    private static long visitAll(RLPList list, BiConsumer<RLPString, RLPString> visitor) {
-        Iterator<RLPItem> iter = list.iterator();
-        iter.next().asRLPString(); // skip signature
+    private static long traverse(RLPList rlpList, Verifier verifier, BiConsumer<RLPString, RLPString> visitor) throws SignatureException {
+        Iterator<RLPItem> iter = rlpList.iterator();
+        final RLPString signatureItem = iter.next().asRLPString();
+        if(verifier != null) {
+            verifier.verify(signatureItem.asBytes(), Record.content(rlpList, signatureItem.endIndex));
+        }
         long seq = iter.next().asRLPString().asLong();
         if (visitor != null) {
             while (iter.hasNext()) {
