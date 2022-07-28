@@ -207,12 +207,12 @@ public final class Record {
     }
 
     private static long traverse(RLPList rlpList, Verifier verifier, BiConsumer<RLPString, RLPString> visitor) throws SignatureException {
-        Iterator<RLPItem> iter = rlpList.iterator();
+        final Iterator<RLPItem> iter = rlpList.iterator();
         final RLPString signatureItem = iter.next().asRLPString();
         if(verifier != null) {
             verifier.verify(signatureItem.asBytes(), Record.content(rlpList, signatureItem.endIndex));
         }
-        long seq = iter.next().asRLPString().asLong();
+        final long seq = iter.next().asRLPString().asLong();
         if (visitor != null) {
             while (iter.hasNext()) {
                 visitor.accept(iter.next().asRLPString(), iter.next().asRLPString());
