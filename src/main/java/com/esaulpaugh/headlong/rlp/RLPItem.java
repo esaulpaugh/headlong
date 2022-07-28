@@ -32,7 +32,7 @@ import java.util.Arrays;
  *
  * Created by Evo on 1/19/2017.
  */
-public abstract class RLPItem {
+public abstract class RLPItem implements Comparable<RLPItem> {
 
     public static final RLPItem[] EMPTY_ARRAY = new RLPItem[0];
 
@@ -303,5 +303,20 @@ public abstract class RLPItem {
      */
     public final String encodingString(int encoding) {
         return Strings.encode(buffer, index, encodingLength(), encoding);
+    }
+
+    @Override
+    public final int compareTo(RLPItem other) {
+        int aOff = this.dataIndex;
+        int bOff = other.dataIndex;
+        final int end = aOff + Math.min(this.dataLength, other.dataLength);
+        while(aOff < end) {
+            int av = other.buffer[aOff++];
+            int bv = other.buffer[bOff++];
+            if (av != bv) {
+                return av - bv;
+            }
+        }
+        return this.dataLength - other.dataLength;
     }
 }
