@@ -53,12 +53,12 @@ public final class KVP implements Comparable<KVP> {
 
     public KVP(byte[] key, byte[] value) {
         this.rlp = RLPEncoder.encodeSequentially(key, value);
-        RLPItem k = key();
+        RLPString k = key();
         this.keyDataIdx = k.dataIndex;
         this.keyEnd = k.endIndex;
     }
 
-    public KVP(RLPItem key, RLPItem value) {
+    public KVP(RLPString key, RLPString value) {
         final int keyLen = key.encodingLength();
         this.rlp = new byte[keyLen + value.encodingLength()];
         key.copy(rlp, 0);

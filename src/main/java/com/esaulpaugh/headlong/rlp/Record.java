@@ -157,13 +157,13 @@ public final class Record {
      * @param visitor   pair-consuming code
      * @return seq
      * */
-    public long visitAll(BiConsumer<RLPItem, RLPItem> visitor) {
+    public long visitAll(BiConsumer<RLPString, RLPString> visitor) {
         Iterator<RLPItem> iter = rlp.iterator();
-        iter.next(); // skip signature
-        long seq = iter.next().asLong();
+        iter.next().asRLPString(); // skip signature
+        long seq = iter.next().asRLPString().asLong();
         if (visitor != null) {
             while (iter.hasNext()) {
-                visitor.accept(iter.next(), iter.next());
+                visitor.accept(iter.next().asRLPString(), iter.next().asRLPString());
             }
         }
         return seq;
