@@ -31,7 +31,6 @@ import java.util.function.BiConsumer;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
-import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 /** Implementation of <a href="https://eips.ethereum.org/EIPS/eip-778">EIP-778: Ethereum Node Records (ENR)</a> */
 public final class Record {
@@ -100,7 +99,7 @@ public final class Record {
         final HashSet<KVP> pairSet = new HashSet<>();
         for (KVP pair : newPairs) {
             if(!pairSet.add(pair)) {
-                throw pair.duplicateKeyErr();
+                throw KVP.duplicateKeyErr(pair.key());
             }
         }
         visitAll((k, v) -> pairSet.add(new KVP(k, v)));
@@ -128,7 +127,9 @@ public final class Record {
                     @Override
                     public void accept(RLPString k, RLPString v) {
                         if (prevKey != null && k.compareTo(prevKey) <= 0) {
-                            throw new IllegalArgumentException("key out of order: " + k.asString(UTF_8));
+                            throw k.compareTo(prevKey) == 0
+                                    ? KVP.duplicateKeyErr(k)
+                                    : new IllegalArgumentException("key out of order: " + k.asString(Strings.UTF_8));
                         }
                         prevKey = k;
                     }

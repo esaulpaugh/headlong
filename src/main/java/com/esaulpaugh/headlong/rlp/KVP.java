@@ -120,7 +120,7 @@ public final class KVP implements Comparable<KVP> {
     public int compareTo(KVP other) {
         int result = compare(this, other);
         if (result == 0) {
-            throw duplicateKeyErr();
+            throw duplicateKeyErr(key());
         }
         return result;
     }
@@ -141,7 +141,7 @@ public final class KVP implements Comparable<KVP> {
         return aDataLen - bDataLen;
     }
 
-    IllegalArgumentException duplicateKeyErr() {
-        return new IllegalArgumentException("duplicate key: " + key().asString(Strings.UTF_8));
+    static IllegalArgumentException duplicateKeyErr(RLPString key) {
+        return new IllegalArgumentException("duplicate key: " + key.asString(Strings.UTF_8));
     }
 }
