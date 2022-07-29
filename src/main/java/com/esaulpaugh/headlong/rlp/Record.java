@@ -116,8 +116,7 @@ public final class Record {
 
     public static Record decode(byte[] bytes, Verifier verifier) throws SignatureException {
         checkRecordLen(bytes.length);
-        final RLPList rlpList = RLP_STRICT.wrapList(bytes)
-                .duplicate(); // defensive copy
+        final RLPList rlpList = RLP_STRICT.wrapList(Arrays.copyOf(bytes, bytes.length)); // defensive copy
         if(rlpList.encodingLength() != bytes.length) {
             throw new IllegalArgumentException("unconsumed trailing bytes");
         }
