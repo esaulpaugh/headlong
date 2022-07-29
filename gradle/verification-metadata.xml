@@ -107,56 +107,56 @@
             </artifact>
         </component>
 
-        <component group="org.junit.jupiter" name="junit-jupiter-api" version="5.8.2">
-            <artifact name="junit-jupiter-api-5.8.2.module">
-                <sha256 value="7e9af4dfff6267acddd157d9e11ba0d5dc91b332fa74bc4c65939e4517a1b770" origin="repo.maven.apache.org/maven2/"/>
+        <component group="org.junit.platform" name="junit-platform-commons" version="1.9.0">
+            <artifact name="junit-platform-commons-1.9.0.module">
+                <sha256 value="4b20333f8aee54e830458d81d045eb8d17dc0424d313328db509a9cc2499b17a" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="junit-jupiter-api-5.8.2.jar">
-                <sha256 value="1808ee87e0f718cd6e25f3b75afc17956ac8a3edc48c7e9bab9f19f9a79e3801" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="junit-platform-commons-1.9.0.jar">
+                <sha256 value="e5894b710094b4caafc6280b8829a439fb764901ea0ae18d06ed80388b309b7a" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="junit-jupiter-api-5.8.2-sources.jar">
-                <sha256 value="cb38569ae9005eb54c7cbc181b842e6eb01be57ae0d785f9167d9e019b44a670" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-        </component>
-        <component group="org.junit.jupiter" name="junit-jupiter-engine" version="5.8.2">
-            <artifact name="junit-jupiter-engine-5.8.2.module">
-                <sha256 value="a56204c716c2379970ca8e3fe2a72e3a030cd9027328d3ce1457dd10c0150e7e" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-            <artifact name="junit-jupiter-engine-5.8.2.jar">
-                <sha256 value="753b7726cdd158bb34cedb94c161e2291896f47832a1e9eda53d970020a8184e" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-            <artifact name="junit-jupiter-engine-5.8.2-sources.jar">
-                <sha256 value="9ed4edf417cbc6028c634a0b407061433327c9ef4235fca35b9183da855e2e8f" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="junit-platform-commons-1.9.0-sources.jar">
+                <sha256 value="bcae1e81de07a6fb9068df4cc0d23c91a7b1985837f32b69c101556852639489" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
-        <component group="org.junit.platform" name="junit-platform-engine" version="1.8.2">
-            <artifact name="junit-platform-engine-1.8.2.module">
-                <sha256 value="eba77b36efdf75a67f46438333825f9e448f550d521e7249d950358580ee636b" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-            <artifact name="junit-platform-engine-1.8.2.jar">
-                <sha256 value="0b7d000f8c3e8e5f7d6b819649936e7b9938314e87c8f983805218ea57567e59" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-            <artifact name="junit-platform-engine-1.8.2-sources.jar">
-                <sha256 value="4cfda26b1dc0812fcf0a14b0bb5612b7c697e50afd79819d2e07b1faef9c239b" origin="repo.maven.apache.org/maven2/"/>
+        <component group="org.junit.platform" name="junit-platform-engine" version="1.9.0">
+            <artifact name="junit-platform-engine-1.9.0.module">
+                <sha256 value="ff75f1d6113f45d5b25f2529504ded883986a012c9b43d21ad42398e49d71063" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
-        <component group="org.junit.platform" name="junit-platform-commons" version="1.8.2">
-            <artifact name="junit-platform-commons-1.8.2.module">
-                <sha256 value="342847d3046fea435595692db4f05d5f039e0e1d1e204f4d5755902557082626" origin="repo.maven.apache.org/maven2/"/>
+        <component group="org.junit.jupiter" name="junit-jupiter-api" version="5.9.0">
+            <artifact name="junit-jupiter-api-5.9.0.module">
+                <sha256 value="9f92cf179575c4df698294704d10f12e8cc715d682fb20edcd8adbc41fc7f0f4" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="junit-platform-commons-1.8.2.jar">
-                <sha256 value="d2e015fca7130e79af2f4608dc54415e4b10b592d77333decb4b1a274c185050" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="junit-jupiter-api-5.9.0.jar">
+                <sha256 value="3e370bcbb1e857fda5f0b203724116d02b05e788faa1eb2518814accf9cfb5b1" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="junit-platform-commons-1.8.2-sources.jar">
-                <sha256 value="7ae3683c452ee4259b2d205d56c7172fd178180b02d20b4430368ef6ee501c3b" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="junit-jupiter-api-5.9.0-sources.jar">
+                <sha256 value="fa61dac36eb90a3bc30e00d77eb033bcf4b1f921be0f637c460b53ee69b8439e" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
-        <component group="org.junit" name="junit-bom" version="5.8.2">
-            <artifact name="junit-bom-5.8.2.module">
-                <sha256 value="40cfad993fa70ecdf2af74d0c56da1484ee220964be8f932cfe632be9a2733fa" origin="repo.maven.apache.org/maven2/"/>
+
+        <component group="org.junit.platform" name="junit-platform-engine" version="1.9.0">
+            <artifact name="junit-platform-engine-1.9.0.jar">
+                <sha256 value="aaec735f7444a9fc055e206598de3d829c24e9c7a8eea6efdeeb1962087fe811" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="junit-bom-5.8.2.pom">
-                <sha256 value="836069ca9e8ee3c56e48376222da291263f137bd3fd16d84fdd47efcc3f286e2" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="junit-platform-engine-1.9.0-sources.jar">
+                <sha256 value="1e6b32b1c01edbe23ce929f778b304296a698618bd53f04d9039167c0a63f8fb" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.junit.jupiter" name="junit-jupiter-engine" version="5.9.0">
+            <artifact name="junit-jupiter-engine-5.9.0.jar">
+                <sha256 value="db86cbb3352719fa0a97800edfd09c20463c7f2ab4a04699244430bd8954583b" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="junit-jupiter-engine-5.9.0.module">
+                <sha256 value="b159e5b5b62622238fd6fd2864f8a012c1df6db2bb26f10ca80e1d22acce2f1d" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="junit-jupiter-engine-5.9.0-sources.jar">
+                <sha256 value="9ec3a8efe69155c965a885af66ee7b0f898cb8b41ed6c8703c2f4a3705f9f367" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.junit" name="junit-bom" version="5.9.0">
+            <artifact name="junit-bom-5.9.0.module">
+                <sha256 value="a054eaf5016b58bbcde86660444a7c0dd3e2caf84d2a1ad5fc4cb525979c19b9" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
 
