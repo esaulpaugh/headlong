@@ -31,7 +31,7 @@ public final class Strings {
     public static final int BASE_64_URL_SAFE = 2; // 64
     public static final int ASCII = 3; // 128
 
-    public static final int URL_SAFE_FLAGS = FastBase64.URL_SAFE_CHARS | FastBase64.NO_LINE_SEP | FastBase64.NO_PADDING;
+    private static final int URL_SAFE_FLAGS = FastBase64.URL_SAFE_CHARS | FastBase64.NO_LINE_SEP | FastBase64.NO_PADDING;
 
     public static String encode(byte b) {
         return encode(new byte[] { b });
