@@ -803,6 +803,8 @@ public class DecodeTest {
 
         testNotSame("fixed16x5");
         testNotSame("ufixed88x51");
+        testNotSame("int8[]");
+        testNotSame("(int)");
     }
 
     private static void testSame(String typeStr) {
