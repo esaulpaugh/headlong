@@ -806,19 +806,19 @@ public class DecodeTest {
     }
 
     private static void testSame(String typeStr) {
-        testSameness(typeStr, true);
-    }
-
-    private static void testNotSame(String typeStr) {
         testSameness(typeStr, false);
     }
 
-    private static void testSameness(String typeStr, boolean same) {
+    private static void testNotSame(String typeStr) {
+        testSameness(typeStr, true);
+    }
+
+    private static void testSameness(String typeStr, boolean notSame) {
         final ABIType<?> t = TypeFactory.create(typeStr);
         final String tupleTypeStr = "(" + typeStr + ")";
-        assertTrue(same ^ t != TupleType.parse(tupleTypeStr).get(0));
-        assertTrue(same ^ t != TypeFactory.createTupleTypeWithNames(tupleTypeStr, "a").get(0));
-        assertTrue(same ^ t != TupleType.of(typeStr).get(0));
-        assertTrue(same ^ t != Function.parse(tupleTypeStr).getInputs().get(0));
+        assertTrue(notSame ^ t == TupleType.parse(tupleTypeStr).get(0));
+        assertTrue(notSame ^ t == TypeFactory.createTupleTypeWithNames(tupleTypeStr, "a").get(0));
+        assertTrue(notSame ^ t == TupleType.of(typeStr).get(0));
+        assertTrue(notSame ^ t == Function.parse(tupleTypeStr).getInputs().get(0));
     }
 }
