@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.jmh.util;
 
 import com.esaulpaugh.headlong.util.FastBase64;
-import com.esaulpaugh.headlong.util.Strings;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;

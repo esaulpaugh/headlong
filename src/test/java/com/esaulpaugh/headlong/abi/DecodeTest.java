@@ -27,13 +27,14 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+import java.util.Random;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DecodeTest {
@@ -781,5 +782,46 @@ public class DecodeTest {
         assertThrown(IllegalArgumentException.class,
                 "given selector does not match: expected: e4a6bf78, found: e4b6bf78",
                 () -> f.decodeCall(ByteBuffer.wrap(call)));
+    }
+
+    @Test
+    public void testSame() {
+        testSame("address");
+        testSame("function");
+        testSame("bytes");
+        testSame("string");
+        testSame("fixed128x18");
+        testSame("ufixed128x18");
+        testSame("decimal");
+        testSame("bool");
+
+        final Random r = TestUtils.seededRandom();
+        for (int i = 8; i <= 256; i+=8) {
+            testSame("int" + i);
+            testSame("uint" + i);
+        }
+        for (int i = 1; i <= 32; i++) {
+            testSame("bytes" + i);
+        }
+
+        testNotSame("fixed16x5");
+        testNotSame("ufixed88x51");
+    }
+
+    private static void testSame(String typeStr) {
+        testSameness(typeStr, true);
+    }
+
+    private static void testNotSame(String typeStr) {
+        testSameness(typeStr, false);
+    }
+
+    private static void testSameness(String typeStr, boolean same) {
+        final ABIType<?> t = TypeFactory.create(typeStr);
+        final String tupleTypeStr = "(" + typeStr + ")";
+        assertTrue(same ^ t != TupleType.parse(tupleTypeStr).get(0));
+        assertTrue(same ^ t != TypeFactory.createTupleTypeWithNames(tupleTypeStr, "a").get(0));
+        assertTrue(same ^ t != TupleType.of(typeStr).get(0));
+        assertTrue(same ^ t != Function.parse(tupleTypeStr).getInputs().get(0));
     }
 }
