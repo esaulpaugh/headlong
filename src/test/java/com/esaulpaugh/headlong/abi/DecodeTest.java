@@ -27,14 +27,12 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
-import java.util.Random;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DecodeTest {
@@ -795,7 +793,6 @@ public class DecodeTest {
         testSame("decimal");
         testSame("bool");
 
-        final Random r = TestUtils.seededRandom();
         for (int i = 8; i <= 256; i+=8) {
             testSame("int" + i);
             testSame("uint" + i);
