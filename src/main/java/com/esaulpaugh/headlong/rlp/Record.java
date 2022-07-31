@@ -99,7 +99,7 @@ public final class Record {
         final HashSet<KVP> pairSet = new HashSet<>();
         for (KVP pair : newPairs) {
             if(!pairSet.add(pair)) {
-                throw KVP.duplicateKeyErr(pair.key());
+                throw KVP.duplicateKeyErr(pair.key);
             }
         }
         visitAll((k, v) -> pairSet.add(new KVP(k, v)));

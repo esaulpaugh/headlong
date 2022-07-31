@@ -40,8 +40,7 @@ public final class KVP implements Comparable<KVP> {
     public static final String UDP6 = "udp6";
 
     final byte[] rlp;
-    private final int keyDataIdx;
-    private final int keyEnd;
+    final RLPString key;
 
     public KVP(String keyUtf8, String val, int valEncoding) {
         this(keyUtf8, Strings.decode(val, valEncoding));
@@ -53,9 +52,7 @@ public final class KVP implements Comparable<KVP> {
 
     public KVP(byte[] key, byte[] value) {
         this.rlp = RLPEncoder.encodeSequentially(key, value);
-        RLPString k = key();
-        this.keyDataIdx = k.dataIndex;
-        this.keyEnd = k.endIndex;
+        this.key = RLP_STRICT.wrapString(rlp);
     }
 
     public KVP(RLPString key, RLPString value) {
@@ -63,8 +60,7 @@ public final class KVP implements Comparable<KVP> {
         this.rlp = new byte[keyLen + value.encodingLength()];
         key.copy(rlp, 0);
         value.copy(rlp, keyLen);
-        this.keyDataIdx = keyLen - key.dataLength;
-        this.keyEnd = keyLen;
+        this.key = RLP_STRICT.wrapString(rlp);
     }
 
     public KVP withValue(String val, int valEncoding) {
@@ -72,7 +68,7 @@ public final class KVP implements Comparable<KVP> {
     }
 
     public KVP withValue(byte[] value) {
-        return new KVP(this.key(), RLP_STRICT.wrapString(RLPEncoder.encodeString(value)));
+        return new KVP(key, RLP_STRICT.wrapString(RLPEncoder.encodeString(value)));
     }
 
     public RLPString key() {
@@ -80,7 +76,7 @@ public final class KVP implements Comparable<KVP> {
     }
 
     public RLPString value() {
-        return RLP_STRICT.wrapString(rlp, keyEnd);
+        return RLP_STRICT.wrapString(rlp, key.endIndex);
     }
 
     void export(ByteBuffer bb) {
@@ -89,56 +85,26 @@ public final class KVP implements Comparable<KVP> {
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        for (int i = 0; i < keyEnd; i++) {
-            hash = 31 * hash + rlp[i];
-        }
-        return hash;
+        return key.hashCode();
     }
 
     @Override
     public boolean equals(Object o) {
-        if(o instanceof KVP) {
-            KVP a = (KVP) o;
-            if(a.keyEnd == this.keyEnd) {
-                for (int i = 0; i < this.keyEnd; i++) {
-                    if (a.rlp[i] != this.rlp[i])
-                        return false;
-                }
-                return true;
-            }
-        }
-        return false;
+        return o instanceof KVP && key.equals(((KVP) o).key);
     }
 
     @Override
     public String toString() {
-        return key().asString(Strings.UTF_8) + " --> " + value().asString(Strings.HEX);
+        return key.asString(Strings.UTF_8) + " --> " + value().asString(Strings.HEX);
     }
 
     @Override
     public int compareTo(KVP other) {
-        int result = compare(this, other);
+        int result = this.key.compareTo(other.key);
         if (result == 0) {
-            throw duplicateKeyErr(key());
+            throw duplicateKeyErr(key);
         }
         return result;
-    }
-
-    private static int compare(KVP pa, KVP pb) {
-        int aOff = pa.keyDataIdx;
-        int bOff = pb.keyDataIdx;
-        final int aDataLen = pa.keyEnd - aOff;
-        final int bDataLen = pb.keyEnd - bOff;
-        final int end = aOff + Math.min(aDataLen, bDataLen);
-        while(aOff < end) {
-            int av = pa.rlp[aOff++];
-            int bv = pb.rlp[bOff++];
-            if (av != bv) {
-                return av - bv;
-            }
-        }
-        return aDataLen - bDataLen;
     }
 
     static IllegalArgumentException duplicateKeyErr(RLPString key) {
