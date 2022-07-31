@@ -258,11 +258,11 @@ public abstract class RLPItem implements Comparable<RLPItem> {
      */
     @Override
     public final int hashCode() {
-        int result = 1;
+        int hash = 1;
         for (int i = index; i < endIndex; i++) {
-            result = 31 * result + buffer[i];
+            hash = 31 * hash + buffer[i];
         }
-        return result;
+        return hash;
     }
 
     /**
