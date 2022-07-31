@@ -311,7 +311,7 @@ public abstract class RLPItem implements Comparable<RLPItem> {
         int bOff = other.dataIndex;
         final int end = aOff + Math.min(this.dataLength, other.dataLength);
         while(aOff < end) {
-            int av = other.buffer[aOff++];
+            int av = this.buffer[aOff++];
             int bv = other.buffer[bOff++];
             if (av != bv) {
                 return av - bv;
