@@ -306,17 +306,17 @@ public abstract class RLPItem implements Comparable<RLPItem> {
     }
 
     @Override
-    public final int compareTo(RLPItem other) {
-        int aOff = this.dataIndex;
-        int bOff = other.dataIndex;
-        final int end = aOff + Math.min(this.dataLength, other.dataLength);
-        while(aOff < end) {
-            int av = this.buffer[aOff++];
-            int bv = other.buffer[bOff++];
+    public final int compareTo(RLPItem othr) {
+        int thisOffset = this.dataIndex;
+        int othrOffset = othr.dataIndex;
+        final int end = thisOffset + Math.min(this.dataLength, othr.dataLength);
+        while(thisOffset < end) {
+            int av = this.buffer[thisOffset++];
+            int bv = othr.buffer[othrOffset++];
             if (av != bv) {
                 return av - bv;
             }
         }
-        return this.dataLength - other.dataLength;
+        return this.dataLength - othr.dataLength;
     }
 }
