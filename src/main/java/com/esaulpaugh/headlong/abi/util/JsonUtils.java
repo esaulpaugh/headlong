@@ -26,6 +26,7 @@ public final class JsonUtils {
 
     private JsonUtils() {}
 
+    @SuppressWarnings("deprecation")
     public static JsonElement parse(String json) {
         return new JsonParser().parse(json); // JsonParser.parseString(json);
     }
