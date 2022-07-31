@@ -250,6 +250,7 @@ public class EIP778Test {
         int i = 0;
         while (contentIter.hasNext() || listIter.hasNext() || mapIter.hasNext()) {
             final KVP e = array[i];
+            assertEquals(e.key, e.key());
             testEqual(e, new KVP(contentIter.next().asRLPString(), contentIter.next().asRLPString()));
             testEqual(e, listIter.next());
             Map.Entry<String, byte[]> entry = mapIter.next();

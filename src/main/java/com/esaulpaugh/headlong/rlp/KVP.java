@@ -72,7 +72,7 @@ public final class KVP implements Comparable<KVP> {
     }
 
     public RLPString key() {
-        return RLP_STRICT.wrapString(rlp);
+        return key;
     }
 
     public RLPString value() {
