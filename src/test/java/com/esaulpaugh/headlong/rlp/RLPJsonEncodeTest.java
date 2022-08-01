@@ -56,7 +56,7 @@ public class RLPJsonEncodeTest {
     static byte[] parseIn(JsonObject value) {
         JsonElement in = value.get("in");
         if(in.isJsonArray()) {
-            return RLPEncoder.encodeAsList(parseArrayToBytesHierarchy(in.getAsJsonArray()));
+            return RLPEncoder.list(parseArrayToBytesHierarchy(in.getAsJsonArray()));
         } else if(in.isJsonPrimitive()) {
             try {
                 return RLPEncoder.encodeString(Integers.toBytes(parseLong(in)));

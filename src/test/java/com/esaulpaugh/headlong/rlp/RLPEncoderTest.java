@@ -25,6 +25,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,7 +48,7 @@ public class RLPEncoderTest {
         };
         assertArrayEquals(
                 new byte[] { (byte)0xc0, (byte)0x80 },
-                RLPEncoder.encodeSequentially(objects)
+                RLPEncoder.sequence(objects)
         );
     }
 
@@ -59,10 +61,10 @@ public class RLPEncoderTest {
 
         byte[] expectedRLP = new byte[] { (byte)0xc2, (byte)0xc0, (byte)0x80 };
 
-        assertArrayEquals(expectedRLP, RLPEncoder.encodeAsList(objects));
+        assertArrayEquals(expectedRLP, RLPEncoder.list(objects));
 
         ByteBuffer dest = ByteBuffer.allocate(expectedRLP.length);
-        RLPEncoder.encodeAsList(objects, dest);
+        RLPEncoder.putList(Arrays.asList(objects), dest);
         assertArrayEquals(expectedRLP, dest.array());
     }
 
@@ -73,7 +75,7 @@ public class RLPEncoderTest {
         RLPString item1 = RLPDecoder.RLP_STRICT.wrapString(new byte[] {(byte) 0x7e });
         RLPList item2 = RLPDecoder.RLP_STRICT.wrapList(new byte[] {(byte) 0xc1, (byte) 0x80 });
 
-        RLPList rlpList = RLPEncoder.toList(item0, item1, item2);
+        RLPList rlpList = RLPList.wrap(item0, item1, item2);
         List<RLPItem> elements = rlpList.elements(RLPDecoder.RLP_STRICT);
 
         assertEquals(3, elements.size());
@@ -107,7 +109,7 @@ public class RLPEncoderTest {
         };
 
         RLPList orig = RLPDecoder.RLP_STRICT.wrapList(bytes);
-        RLPList rebuilt = RLPEncoder.toList(orig.elements(RLPDecoder.RLP_STRICT));
+        RLPList rebuilt = RLPList.wrap(orig.elements(RLPDecoder.RLP_STRICT));
 
         assertEquals(rebuilt.toString(), Notation.forObjects(Notation.parse(rebuilt.toString())).toString());
         assertEquals(orig.encodingString(Strings.HEX), rebuilt.encodingString(Strings.HEX));
@@ -144,7 +146,7 @@ public class RLPEncoderTest {
 
             byte[] skippedItem = new byte[rando.nextInt(75)];
 
-            final byte[] rlp = RLPEncoder.encodeSequentially(
+            final byte[] rlp = RLPEncoder.sequence(
                     skippedItem,
                     Integers.toBytes((short) c),
                     Strings.decode(str, Strings.UTF_8),
@@ -187,29 +189,29 @@ public class RLPEncoderTest {
     @Test
     public void testExceptions() throws Throwable {
 
-        TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.encodeSequentially(new byte[0], null, new byte[]{-1}));
+        TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.sequence(new byte[0], null, new byte[]{-1}));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type: java.lang.String", () -> RLPEncoder.encodeSequentially((Object) new String[]{"00"}));
+        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type: java.lang.String", () -> RLPEncoder.sequence((Object) new String[]{"00"}));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type: java.lang.String", () -> RLPEncoder.encodeSequentially(new Object[]{new ArrayList<>(), "00"}));
+        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type: java.lang.String", () -> RLPEncoder.sequence(new Object[]{new ArrayList<>(), "00"}));
     }
 
     @Test
     public void testEncodeToByteBuffer() throws Throwable {
-        RLPEncoder.encodeSequentially(new HashSet<>(), ByteBuffer.allocate(0));
-        RLPEncoder.encodeSequentially(new ArrayList<>(), ByteBuffer.allocate(0));
-        RLPEncoder.encodeSequentially(new Object[0], ByteBuffer.allocate(0));
+        RLPEncoder.putSequence(new HashSet<>(), ByteBuffer.allocate(0));
+        RLPEncoder.putSequence(new ArrayList<>(), ByteBuffer.allocate(0));
+        RLPEncoder.putSequence(Collections.emptyList(), ByteBuffer.allocate(0));
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
                 "unsupported object type: java.util.HashMap",
-                () -> RLPEncoder.encodeSequentially(new HashMap<>(), ByteBuffer.allocate(0))
+                () -> RLPEncoder.sequence(new HashMap<>(), ByteBuffer.allocate(0))
         );
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
                 "unsupported object type: java.nio.HeapByteBuffer",
-                () -> RLPEncoder.encodeSequentially(new byte[0], ByteBuffer.allocate(0))
+                () -> RLPEncoder.sequence(new byte[0], ByteBuffer.allocate(0))
         );
-        RLPEncoder.encodeSequentially(() -> new Iterator<Object>() {
+        RLPEncoder.putSequence(() -> new Iterator<Object>() {
             @Override
             public boolean hasNext() {
                 return false;
@@ -221,10 +223,10 @@ public class RLPEncoderTest {
             }
         }, ByteBuffer.allocate(0));
 
-        TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.encodeSequentially(() -> null, ByteBuffer.allocate(0)));
+        TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.putSequence(() -> null, ByteBuffer.allocate(0)));
 
         byte[] dest = new byte[6];
-        int idx = RLPEncoder.encodeSequentially(new Object[] { new byte[] { 0, 1, 2 } }, dest, 2);
+        int idx = RLPEncoder.putSequence(Collections.singletonList(new byte[]{0, 1, 2}), dest, 2);
         assertArrayEquals(new byte[] { 0, 0, (byte) 0x83, 0, 1, 2 }, dest);
         assertEquals(dest.length, idx);
     }

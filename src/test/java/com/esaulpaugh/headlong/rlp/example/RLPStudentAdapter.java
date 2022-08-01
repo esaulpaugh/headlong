@@ -49,6 +49,6 @@ public class RLPStudentAdapter implements RLPAdapter<RLPStudent> {
 
     @Override
     public byte[] encode(RLPStudent student) {
-        return RLPEncoder.encodeAsList(student.toObjectArray());
+        return RLPEncoder.list(student.toObjectArray());
     }
 }

@@ -18,6 +18,7 @@ package com.esaulpaugh.headlong.rlp;
 import com.esaulpaugh.headlong.util.Integers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -57,10 +58,14 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         return new RLPList(enc, 0, enc.length - dataLength, dataLength, enc.length);
     }
 
+    public static RLPList wrap(RLPItem... elements) {
+        return wrap(Arrays.asList(elements));
+    }
+
     /**
      * @param elements pre-encoded top-level elements of the list
      */
-    static RLPList withElements(Iterable<RLPItem> elements) {
+    public static RLPList wrap(Iterable<RLPItem> elements) {
         int dataLen = 0;
         for (RLPItem e : elements) {
             dataLen += e.encodingLength();

@@ -112,11 +112,11 @@ public class RLPStudent implements RLPEncodeable {
 
     @Override
     public byte[] toRLP() {
-        return RLPEncoder.encodeSequentially(toObjectArray());
+        return RLPEncoder.sequence(toObjectArray());
     }
 
     @Override
     public void toRLP(ByteBuffer dest) {
-        RLPEncoder.encodeSequentially(toObjectArray(), dest);
+        RLPEncoder.putSequence(Arrays.asList(toObjectArray()), dest);
     }
 }

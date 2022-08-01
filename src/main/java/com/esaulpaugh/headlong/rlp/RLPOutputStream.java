@@ -48,20 +48,16 @@ public final class RLPOutputStream extends OutputStream {
         writeOut(RLPEncoder.encodeString(Arrays.copyOfRange(buffer, offset, offset + len)));
     }
 
-    public void writeAll(Object... rawObjects) throws IOException {
-        writeOut(RLPEncoder.encodeSequentially(rawObjects));
+    public void writeSequence(Object... rawObjects) throws IOException {
+        writeOut(RLPEncoder.sequence(rawObjects));
     }
 
-    public void writeAll(Iterable<?> rawObjects) throws IOException {
-        writeOut(RLPEncoder.encodeSequentially(rawObjects));
-    }
-
-    public void writeList(Object... rawElements) throws IOException {
-        writeOut(RLPEncoder.encodeAsList(rawElements));
+    public void writeSequence(Iterable<?> rawObjects) throws IOException {
+        writeOut(RLPEncoder.sequence(rawObjects));
     }
 
     public void writeList(Iterable<?> rawElements) throws IOException {
-        writeOut(RLPEncoder.encodeAsList(rawElements));
+        writeOut(RLPEncoder.list(rawElements));
     }
 
     private void writeOut(byte[] rlp) throws IOException {
