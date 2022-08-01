@@ -51,7 +51,7 @@ public final class SuperSerial {
 
     public static byte[] toRLP(TupleType schema, Tuple vals) {
         schema.validate(vals);
-        return RLPEncoder.encodeSequentially(serializeTuple(schema, vals));
+        return RLPEncoder.sequence(serializeTuple(schema, vals));
     }
 
     public static Tuple fromRLP(TupleType schema, byte[] rlp) {
@@ -63,7 +63,7 @@ public final class SuperSerial {
     public static String serialize(TupleType tupleType, Tuple tuple, boolean machine) {
         tupleType.validate(tuple);
         Object[] objects = serializeTuple(tupleType, tuple);
-        return machine ? Strings.encode(RLPEncoder.encodeSequentially(objects))
+        return machine ? Strings.encode(RLPEncoder.sequence(objects))
                 : Notation.forObjects(objects).toString();
     }
 
@@ -71,14 +71,14 @@ public final class SuperSerial {
         Tuple in = deserializeTuple(
                 tupleType,
                 machine ? Strings.decode(str)
-                        : RLPEncoder.encodeSequentially(Notation.parse(str)));
+                        : RLPEncoder.sequence(Notation.parse(str)));
         tupleType.validate(in);
         return in;
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T deserializeArray(ArrayType<? extends ABIType<?>, T> arrayType, String str, boolean machine) {
-        byte[] rlp = machine ? Strings.decode(str) : RLPEncoder.encodeSequentially(Notation.parse(str));
+        byte[] rlp = machine ? Strings.decode(str) : RLPEncoder.sequence(Notation.parse(str));
         T array = (T) deserializeArray(arrayType, RLP_STRICT.wrap(rlp));
         arrayType.validate(array);
         return array;

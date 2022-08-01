@@ -63,7 +63,7 @@ public class NotationTest {
 
         System.out.println(notation);
 
-        Notation n = Notation.forEncoding(RLPEncoder.encodeSequentially(Notation.parse(NOTATION)));
+        Notation n = Notation.forEncoding(RLPEncoder.sequence(Notation.parse(NOTATION)));
         assertEquals(notation, n.toString());
         assertEquals(NOTATION, n.toString());
 
@@ -71,7 +71,7 @@ public class NotationTest {
 
         assertEquals(n, Notation.forObjects(objects));
 
-        byte[] rlp2 = RLPEncoder.encodeSequentially(objects);
+        byte[] rlp2 = RLPEncoder.sequence(objects);
         System.out.println(Strings.encode(rlp2));
 
         assertArrayEquals(ENCODING, rlp2);

@@ -644,7 +644,7 @@ public class RLPDecoderTest {
         byte[] c = new byte[0];
 
         byte[] list = new byte[4];
-        assertEquals(list.length, RLPEncoder.encodeAsList(new Object[] { a, b, c }, list, 0));
+        assertEquals(list.length, RLPEncoder.putList(Arrays.asList(a, b, c), list, 0));
         Iterator<RLPItem> listIter = RLP_STRICT.listIterator(list);
 
         for (RLPItem item : RLP_STRICT.wrapList(list)) {
@@ -661,7 +661,7 @@ public class RLPDecoderTest {
         assertFalse(listIter.hasNext());
         assertThrown(NoSuchElementException.class, listIter::next);
 
-        byte[] sequence = RLPEncoder.encodeSequentially(c, a, b);
+        byte[] sequence = RLPEncoder.sequence(c, a, b);
         Iterator<RLPItem> seqIter = RLP_STRICT.sequenceIterator(sequence);
 
         assertTrue(seqIter.hasNext());

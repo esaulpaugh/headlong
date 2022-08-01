@@ -72,11 +72,11 @@ public final class Notation {
     }
 
     public static Notation forObjects(Object... objects) {
-        return forEncoding(RLPEncoder.encodeSequentially(objects));
+        return forEncoding(RLPEncoder.sequence(objects));
     }
 
     public static Notation forObjects(Iterable<Object> objects) {
-        return forEncoding(RLPEncoder.encodeSequentially(objects));
+        return forEncoding(RLPEncoder.sequence(objects));
     }
 
     private static IllegalArgumentException exceedsContainer(int index, long end, int containerEnd) {

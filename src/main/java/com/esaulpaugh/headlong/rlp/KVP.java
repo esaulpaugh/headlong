@@ -51,7 +51,7 @@ public final class KVP implements Comparable<KVP> {
     }
 
     public KVP(byte[] key, byte[] value) {
-        this.rlp = RLPEncoder.encodeSequentially(key, value);
+        this.rlp = RLPEncoder.sequence(key, value);
         this.key = RLP_STRICT.wrapString(rlp);
     }
 
