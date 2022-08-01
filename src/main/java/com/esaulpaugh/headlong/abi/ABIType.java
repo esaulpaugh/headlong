@@ -76,7 +76,9 @@ public abstract class ABIType<J> {
 
     abstract int headLength();
 
-    abstract int dynamicByteLength(J value);
+    int dynamicByteLength(J value) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * @param value the value to measure

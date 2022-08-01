@@ -42,11 +42,6 @@ public final class ByteType extends ABIType<Byte> {
     }
 
     @Override
-    int dynamicByteLength(Byte value) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     int byteLength(Byte value) {
         return 1;
     }
