@@ -59,9 +59,9 @@ public class RLPJsonEncodeTest {
             return RLPEncoder.list(parseArrayToBytesHierarchy(in.getAsJsonArray()));
         } else if(in.isJsonPrimitive()) {
             try {
-                return RLPEncoder.encodeString(Integers.toBytes(parseLong(in)));
+                return RLPEncoder.string(Integers.toBytes(parseLong(in)));
             } catch (NumberFormatException nfe) {
-                return RLPEncoder.encodeString(
+                return RLPEncoder.string(
                         in.getAsString().startsWith("#")
                                 ? parseBigIntegerStringPoundSign(in).toByteArray()
                                 : Strings.decode(parseString(in), Strings.UTF_8)

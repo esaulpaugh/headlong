@@ -89,7 +89,7 @@ public class RLPDecoderTest {
                 new byte[] { (byte) 0x82, 0, 99 },
                 new byte[] { (byte) 0x84, 0, -128, 2, 1 },
                 new byte[] { (byte) 0x88, 0, -1, 6, 5, 4, 3, 2, 1 },
-                RLPEncoder.encodeString(new byte[] { 0, 0, -50, 90, 12, 4, 13, 21, 89, -120 })
+                RLPEncoder.string(new byte[] { 0, 0, -50, 90, 12, 4, 13, 21, 89, -120 })
         };
 
         TestUtils.assertThrown(IllegalArgumentException.class, errPrefix + "0, len: 1", RLP_STRICT.wrap(vectors[0])::asByte);

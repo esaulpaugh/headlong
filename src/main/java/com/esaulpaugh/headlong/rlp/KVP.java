@@ -68,7 +68,7 @@ public final class KVP implements Comparable<KVP> {
     }
 
     public KVP withValue(byte[] value) {
-        return new KVP(key, RLP_STRICT.wrapString(RLPEncoder.encodeString(value)));
+        return new KVP(key, RLP_STRICT.wrapString(RLPEncoder.string(value)));
     }
 
     public RLPString key() {

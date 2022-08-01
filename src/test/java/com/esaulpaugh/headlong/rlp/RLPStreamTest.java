@@ -308,7 +308,7 @@ public class RLPStreamTest {
         @Override
         public void run() {
             try {
-                final byte[] rlpString = RLPEncoder.encodeString(Strings.decode(TEST_STRING, UTF_8));
+                final byte[] rlpString = RLPEncoder.string(Strings.decode(TEST_STRING, UTF_8));
                 Runnable[] subtasks = new Runnable[] {
                         () -> write(TEST_BYTE),
                         () -> {
