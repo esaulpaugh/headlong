@@ -91,7 +91,7 @@ public Object[] toObjectArray() {
 
 @Override
 public byte[] toRLP() {
-    return RLPEncoder.encodeSequentially(toObjectArray());
+    return RLPEncoder.sequence(toObjectArray());
 }
 ```
 
