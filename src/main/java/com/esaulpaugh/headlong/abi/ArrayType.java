@@ -337,6 +337,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     @SuppressWarnings("unchecked")
     J decode(ByteBuffer bb, byte[] unitBuffer) {
         final int arrayLen = length == DYNAMIC_LENGTH ? Encoding.UINT17.decode(bb, unitBuffer) : length;
+        checkNoDecodePossible(bb.remaining(), arrayLen);
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return (J) decodeBooleans(arrayLen, bb, unitBuffer);
         case TYPE_CODE_BYTE: return (J) decodeBytes(arrayLen, bb);
@@ -348,6 +349,22 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_TUPLE:
         case TYPE_CODE_ADDRESS: return (J) decodeObjects(arrayLen, bb, unitBuffer);
         default: throw new AssertionError();
+        }
+    }
+
+    /**
+     * Abort early if the input is obviously too short. Best effort to fail fast before allocating memory for the array.
+     */
+    private void checkNoDecodePossible(int remaining, int arrayLen) {
+        final int minByteLen = !dynamic
+                                    ? headLength
+                                    : elementType.dynamic
+                                        ? arrayLen * OFFSET_LENGTH_BYTES
+                                        : elementType instanceof ByteType
+                                            ? Integers.roundLengthUp(arrayLen, UNIT_LENGTH_BYTES)
+                                            : arrayLen * elementType.headLength();
+        if(remaining < minByteLen) {
+            throw new IllegalArgumentException("not enough bytes remaining: " + remaining + " < " + minByteLen);
         }
     }
 

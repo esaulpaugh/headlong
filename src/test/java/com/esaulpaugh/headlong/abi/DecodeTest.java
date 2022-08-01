@@ -115,6 +115,22 @@ public class DecodeTest {
     }
 
     @Test
+    public void testDoS() throws Throwable {
+        final String[] strings = new String[3];
+        Arrays.fill(strings, "");
+        final TupleType tt = TupleType.parse("(string[])");
+        final Tuple args = Tuple.singleton(strings);
+        final ByteBuffer bb = tt.encode(args);
+        final ByteBuffer tooShort = ByteBuffer.wrap(Arrays.copyOf(bb.array(), 32 + 32 + (32 * strings.length)));
+        assertThrown(BufferUnderflowException.class, () -> tt.decode(tooShort));
+        assertEquals(0, tooShort.remaining());
+        assertEquals(tooShort.limit(), tooShort.position());
+        tooShort.flip();
+        tooShort.limit(tooShort.limit() - 1);
+        assertThrown(IllegalArgumentException.class, "not enough bytes remaining: 95 < 96", () -> tt.decode(tooShort));
+    }
+
+    @Test
     public void testDoSLimit() throws Throwable {
         final long _2_17 = (long) Math.pow(2, 17);
         final String hex17 = Long.toHexString(_2_17);
@@ -127,14 +143,14 @@ public class DecodeTest {
         final String hex31min1 = Long.toHexString(_2_31min1);
         System.out.println(hex31 + " " + hex31min1);
 
-        final String bigLength =
+        final byte[] bigLength = new byte[32 + 32 + 131072];
+        final byte[] beginning = FastHex.decode(
                 "0000000000000000000000000000000000000000000000000000000000000020" +
                 "000000000000000000000000000000000000000000000000000000000001ffff" +
-                "aa00000000000000000000000000000000000000000000000000000000000000";
-        assertThrown(
-                BufferUnderflowException.class,
-                () -> Function.parse("()", "(bytes)").decodeReturn(Strings.decode(bigLength))
-        );
+                "aa00000000000000000000000000000000000000000000000000000000000000");
+        System.arraycopy(beginning, 0, bigLength, 0, beginning.length);
+        Function.parse("()", "(bytes)").decodeReturn(bigLength);
+
         final String tooBigLength =
                 "0000000000000000000000000000000000000000000000000000000000000020" +
                 "0000000000000000000000000000000000000000000000000000000000020000" +
