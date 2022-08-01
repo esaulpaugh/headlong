@@ -85,7 +85,7 @@ public final class JsonUtils {
         return element == null || element.isJsonNull();
     }
 
-    public static String toPrettyPrint(JsonElement element) {
-        return new GsonBuilder().setPrettyPrinting().create().toJson(element);
-    }
+//    public static String toPrettyPrint(JsonElement element) {
+//        return new GsonBuilder().setPrettyPrinting().create().toJson(element);
+//    }
 }

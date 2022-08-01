@@ -373,7 +373,7 @@ public class MonteCarloTest {
             } while (testCase.argsTuple.isEmpty());
             array.add(testCase.toJsonElement(ugly, "headlong_" + i, version));
         }
-        System.out.println(JsonUtils.toPrettyPrint(array));
+        System.out.println(TestUtils.toPrettyPrint(array));
     }
 
     private static void sleep() {

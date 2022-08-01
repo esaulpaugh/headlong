@@ -18,6 +18,7 @@ package com.esaulpaugh.headlong;
 import com.esaulpaugh.headlong.abi.Address;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import org.junit.jupiter.api.Assertions;
@@ -382,5 +383,9 @@ public class TestUtils {
         case 0: return n;
         default: throw new IllegalArgumentException("n is out of range: " + n);
         }
+    }
+
+    public static String toPrettyPrint(JsonElement element) {
+        return new GsonBuilder().setPrettyPrinting().create().toJson(element);
     }
 }
