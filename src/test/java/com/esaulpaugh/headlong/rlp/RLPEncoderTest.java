@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -224,7 +225,7 @@ public class RLPEncoderTest {
         TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.encodeSequentially(() -> null, ByteBuffer.allocate(0)));
 
         byte[] dest = new byte[6];
-        int idx = RLPEncoder.encodeSequentially(new Object[] { new byte[] { 0, 1, 2 } }, dest, 2);
+        int idx = RLPEncoder.encodeSequentially(Arrays.asList(new Object[] { new byte[] { 0, 1, 2 } }), dest, 2);
         assertArrayEquals(new byte[] { 0, 0, (byte) 0x83, 0, 1, 2 }, dest);
         assertEquals(dest.length, idx);
     }

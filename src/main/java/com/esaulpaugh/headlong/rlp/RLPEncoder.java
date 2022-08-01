@@ -198,19 +198,6 @@ public final class RLPEncoder {
     }
 
     /**
-     * Inserts into the destination array at the given index the concatenation of the encodings of the given objects in
-     * the given order. The array containing the objects is not itself encoded.
-     *
-     * @param objects   the raw objects to be encoded
-     * @param dest      the destination for the sequence of RLP encodings
-     * @param destIndex the index into {@code dest} for the sequence
-     * @return the index into {@code dest} marking the end of the sequence
-     */
-    public static int encodeSequentially(Object[] objects, byte[] dest, int destIndex) {
-        return encodeSequentially(Arrays.asList(objects), dest, destIndex);
-    }
-
-    /**
      * Puts into the destination buffer at its current position the concatenation of the encodings of the given objects
      * in the given order. The array containing the objects is not itself encoded.
      *
