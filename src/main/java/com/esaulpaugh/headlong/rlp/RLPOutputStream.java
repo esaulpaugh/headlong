@@ -35,7 +35,7 @@ public final class RLPOutputStream extends OutputStream {
 
     @Override
     public void write(int b) throws IOException {
-        writeOut(RLPEncoder.encodeBits(b));
+        writeOut(RLPEncoder.string(b));
     }
 
     @Override

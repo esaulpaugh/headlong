@@ -157,7 +157,7 @@ public final class RLPEncoder {
      * @param bits the bits to be encoded
      * @return the encoding
      */
-    public static byte[] encodeBits(long bits) {
+    public static byte[] string(long bits) {
         return encodeString(bitsToBytes(bits));
     }
 
