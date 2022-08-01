@@ -75,7 +75,7 @@ public class RLPEncoderTest {
         RLPString item1 = RLPDecoder.RLP_STRICT.wrapString(new byte[] {(byte) 0x7e });
         RLPList item2 = RLPDecoder.RLP_STRICT.wrapList(new byte[] {(byte) 0xc1, (byte) 0x80 });
 
-        RLPList rlpList = RLPEncoder.toList(item0, item1, item2);
+        RLPList rlpList = RLPList.wrap(item0, item1, item2);
         List<RLPItem> elements = rlpList.elements(RLPDecoder.RLP_STRICT);
 
         assertEquals(3, elements.size());
@@ -109,7 +109,7 @@ public class RLPEncoderTest {
         };
 
         RLPList orig = RLPDecoder.RLP_STRICT.wrapList(bytes);
-        RLPList rebuilt = RLPEncoder.toList(orig.elements(RLPDecoder.RLP_STRICT));
+        RLPList rebuilt = RLPList.wrap(orig.elements(RLPDecoder.RLP_STRICT));
 
         assertEquals(rebuilt.toString(), Notation.forObjects(Notation.parse(rebuilt.toString())).toString());
         assertEquals(orig.encodingString(Strings.HEX), rebuilt.encodingString(Strings.HEX));

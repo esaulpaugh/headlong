@@ -286,24 +286,4 @@ public final class RLPEncoder {
     public static void putList(Iterable<?> elements, ByteBuffer dest) {
         encodeList(sumEncodedLen(elements), elements, dest);
     }
-//----------------------------------------------------------------------------------------------------------------------
-    /**
-     * Wraps n encodings in an {@link RLPList}.
-     *
-     * @param encodings the RLP-encoded elements of the new RLPList
-     * @return the RLPList containing the given elements
-     */
-    public static RLPList toList(RLPItem... encodings) {
-        return toList(Arrays.asList(encodings));
-    }
-
-    /**
-     * Wraps n encodings in an {@link RLPList}.
-     *
-     * @param encodings the RLP-encoded elements of the new RLPList
-     * @return the RLPList containing the given elements
-     */
-    public static RLPList toList(Iterable<RLPItem> encodings) {
-        return RLPList.withElements(encodings);
-    }
 }
