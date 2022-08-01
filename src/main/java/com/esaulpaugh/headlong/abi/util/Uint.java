@@ -24,7 +24,8 @@ import java.math.BigInteger;
  */
 public final class Uint {
 
-    private static final int MAX_BIT_LEN = 4096; // DoS protection
+    /* denial-of-service protection. prevent huge allocations in case numBits is untrusted. */
+    private static final int MAX_BIT_LEN = 4096;
 
     private static final long ZERO = 0L;
 
