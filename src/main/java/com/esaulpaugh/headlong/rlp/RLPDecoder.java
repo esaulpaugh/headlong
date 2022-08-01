@@ -39,8 +39,6 @@ public final class RLPDecoder {
     public static final RLPDecoder RLP_STRICT = new RLPDecoder(false);
     public static final RLPDecoder RLP_LENIENT = new RLPDecoder(true);
 
-    static final byte[] ZERO_RLP = new byte[1];
-
     public final boolean lenient;
 
     private RLPDecoder(boolean lenient) {
@@ -105,7 +103,7 @@ public final class RLPDecoder {
     }
 
     public <T extends RLPItem> T wrapBits(long bits) {
-        return wrap(bits == 0L ? ZERO_RLP : Integers.toBytes(bits), 0);
+        return wrap(RLPEncoder.bitsToBytes(bits), 0);
     }
 
     public RLPString wrapString(byte[] buffer) {
