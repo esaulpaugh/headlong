@@ -67,7 +67,7 @@ public final class RLPEncoder {
         byte[] arr = new byte[itemLen(dataLen)];
         ByteBuffer bb = ByteBuffer.wrap(arr);
         insertListPrefix(dataLen, bb);
-        encodeString(Integers.toBytes(seq), bb);
+        putString(Integers.toBytes(seq), bb);
         for (KVP pair : pairs) {
             pair.export(bb);
         }
@@ -120,7 +120,7 @@ public final class RLPEncoder {
 
     private static void encodeItem(Object raw, ByteBuffer bb) {
         if (raw instanceof byte[]) {
-            encodeString((byte[]) raw, bb);
+            putString((byte[]) raw, bb);
         } else if (raw instanceof Iterable<?>) {
             Iterable<?> elements = (Iterable<?>) raw;
             encodeList(sumEncodedLen(elements), elements, bb);
@@ -169,7 +169,7 @@ public final class RLPEncoder {
      */
     public static byte[] encodeString(byte[] byteString) {
         ByteBuffer bb = ByteBuffer.allocate(stringEncodedLen(byteString));
-        encodeString(byteString, bb);
+        putString(byteString, bb);
         return bb.array();
     }
 
@@ -179,7 +179,7 @@ public final class RLPEncoder {
      * @param byteString the byte string to be encoded
      * @param dest    the destination for the sequence of RLP encodings
      */
-    public static void encodeString(byte[] byteString, ByteBuffer dest) {
+    public static void putString(byte[] byteString, ByteBuffer dest) {
         final int dataLen = byteString.length;
         if (isShort(dataLen)) {
             if (dataLen == 1) {

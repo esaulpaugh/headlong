@@ -70,7 +70,7 @@ public final class Record {
 
         final ByteBuffer bb = ByteBuffer.wrap(record);
         RLPEncoder.insertListPrefix(recordDataLen, bb);
-        RLPEncoder.encodeString(signature, bb);
+        RLPEncoder.putString(signature, bb);
         return bb;
     }
 
