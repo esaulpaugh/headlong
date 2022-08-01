@@ -18,12 +18,12 @@ package com.esaulpaugh.headlong.abi;
 import java.nio.ByteBuffer;
 
 /** Currently used only as the element type for some {@link ArrayType}s. */
-public final class ByteType extends UnitType<Byte> {
+public final class ByteType extends ABIType<Byte> {
 
     static final ByteType SIGNED = new ByteType();
 
     private ByteType() {
-        super("int8", Byte.class, Byte.SIZE, false);
+        super("BYTE", Byte.class, false);
     }
 
     @Override
@@ -37,18 +37,43 @@ public final class ByteType extends UnitType<Byte> {
     }
 
     @Override
-    int byteLengthPacked(Byte value) {
-        return Byte.BYTES;
+    int headLength() {
+        return 1;
     }
 
     @Override
-    void validateInternal(Byte value) {
-        // all Bytes are a valid int8
+    int dynamicByteLength(Byte value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    int byteLength(Byte value) {
+        return 1;
+    }
+
+    @Override
+    int byteLengthPacked(Byte value) {
+        return 1;
+    }
+
+    @Override
+    public int validate(Byte value) { // gives ClassCastException for non-Byte types
+        return 1;
+    }
+
+    @Override
+    void encodeTail(Byte value, ByteBuffer dest) {
+        dest.put(value);
+    }
+
+    @Override
+    void encodePackedUnchecked(Byte value, ByteBuffer dest) {
+        dest.put(value);
     }
 
     @Override
     Byte decode(ByteBuffer bb, byte[] unitBuffer) {
-        return decodeValid(bb, unitBuffer).byteValue();
+        return bb.get();
     }
 
     @Override
