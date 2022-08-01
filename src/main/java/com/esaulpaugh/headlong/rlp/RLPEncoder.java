@@ -146,6 +146,10 @@ public final class RLPEncoder {
         putSequence(elements, bb);
     }
 // ---------------------------------------------------------------------------------------------------------------------
+    static byte[] bitsToBytes(int bits) {
+        return bits == 0 ? ZERO_RLP : Integers.toBytes(bits);
+    }
+
     static byte[] bitsToBytes(long bits) {
         return bits == 0L ? ZERO_RLP : Integers.toBytes(bits);
     }
@@ -157,7 +161,7 @@ public final class RLPEncoder {
      * @param bits the bits to be encoded
      * @return the encoding
      */
-    public static byte[] string(long bits) {
+    public static byte[] string(int bits) {
         return string(bitsToBytes(bits));
     }
 
