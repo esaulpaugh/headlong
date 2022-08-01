@@ -508,7 +508,7 @@ public class RLPDecoderTest {
     public void chars() {
         byte[][] burma17 = new byte[256][];
         for (int i = 0; i < burma17.length; i++) {
-            burma17[i] = RLPEncoder.encodeString((byte) i);
+            burma17[i] = RLPEncoder.encodeBits(i);
         }
 
         HashSet<Character> chars = new HashSet<>(512);

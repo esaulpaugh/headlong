@@ -39,7 +39,7 @@ public final class RLPDecoder {
     public static final RLPDecoder RLP_STRICT = new RLPDecoder(false);
     public static final RLPDecoder RLP_LENIENT = new RLPDecoder(true);
 
-    private static final byte[] ZERO_RLP = new byte[1];
+    static final byte[] ZERO_RLP = new byte[1];
 
     public final boolean lenient;
 

@@ -145,13 +145,13 @@ public final class RLPEncoder {
     }
 // ---------------------------------------------------------------------------------------------------------------------
     /**
-     * Returns the RLP encoding of the given byte.
+     * Returns the RLP encoding of the given bits.
      *
-     * @param b the byte to be encoded
+     * @param bits the bits to be encoded
      * @return the encoding
      */
-    public static byte[] encodeString(byte b) {
-        return encodeString(new byte[] { b });
+    public static byte[] encodeBits(long bits) {
+        return encodeString(bits == 0L ? RLPDecoder.ZERO_RLP : Integers.toBytes(bits));
     }
 
     /**
