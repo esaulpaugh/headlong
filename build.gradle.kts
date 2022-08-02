@@ -84,7 +84,7 @@
 //val bcVersion = "1.71"
 //
 //dependencies {
-//    implementation("com.google.code.gson:gson:2.9.0")
+//    implementation("com.google.code.gson:gson:2.9.1")
 //
 //    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
 //    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
