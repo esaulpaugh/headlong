@@ -12,6 +12,9 @@
             <artifact name="gson-2.9.1.jar">
                 <sha256 value="378534e339e6e6d50b1736fb3abb76f1c15d1be3f4c13cec6d536412e23da603" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
+            <artifact name="gson-2.9.1-sources.jar">
+                <sha256 value="2a5e4bc49e34643467e9a595f32d8982408c9825f2959af2ae2bf79b57ba306c" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
             <artifact name="gson-2.9.1.pom">
                 <sha256 value="e5966323d7142570b37a4be979e21bc2dae848107e4dc416d8f44d9aa3f02903" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
