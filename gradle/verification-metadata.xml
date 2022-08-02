@@ -8,20 +8,17 @@
         <!--        </trusted-keys>-->
     </configuration>
     <components>
-        <component group="com.google.code.gson" name="gson" version="2.9.0">
-            <artifact name="gson-2.9.0.pom">
-                <sha256 value="7190d0b07f278e9f4c603f44e543940f81cf1a2559f851c6f298c9bb2be2978c" origin="repo.maven.apache.org/maven2/"/>
+        <component group="com.google.code.gson" name="gson" version="2.9.1">
+            <artifact name="gson-2.9.1.jar">
+                <sha256 value="378534e339e6e6d50b1736fb3abb76f1c15d1be3f4c13cec6d536412e23da603" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="gson-2.9.0.jar">
-                <sha256 value="c96d60551331a196dac54b745aa642cd078ef89b6f267146b705f2c2cbef052d" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-            <artifact name="gson-2.9.0-sources.jar">
-                <sha256 value="75429446e9d9e90c5b6a84aa06d8d27783f29c70b3de65a6c2d50d27cece64dc" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="gson-2.9.1.pom">
+                <sha256 value="e5966323d7142570b37a4be979e21bc2dae848107e4dc416d8f44d9aa3f02903" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
-        <component group="com.google.code.gson" name="gson-parent" version="2.9.0">
-            <artifact name="gson-parent-2.9.0.pom">
-                <sha256 value="af781c9a5766ffea311a0df0536576a64decc661aa110c4de5c73ac8bf434424" origin="repo.maven.apache.org/maven2/"/>
+        <component group="com.google.code.gson" name="gson-parent" version="2.9.1">
+            <artifact name="gson-parent-2.9.1.pom">
+                <sha256 value="7ca0845e73685618de3e46bd3434d03a4a373d520fab93a680318ad6c8cb2a79" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
 
@@ -190,6 +187,11 @@
         <component group="org.sonatype.oss" name="oss-parent" version="7">
             <artifact name="oss-parent-7.pom">
                 <sha256 value="b51f8867c92b6a722499557fc3a1fdea77bdf9ef574722fe90ce436a29559454" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.sonatype.oss" name="oss-parent" version="9">
+            <artifact name="oss-parent-9.pom">
+                <sha256 value="fb40265f982548212ff82e362e59732b2187ec6f0d80182885c14ef1f982827a" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
 
