@@ -83,8 +83,4 @@ public final class JsonUtils {
     private static boolean isNull(JsonElement element) {
         return element == null || element.isJsonNull();
     }
-
-//    public static String toPrettyPrint(JsonElement element) {
-//        return new GsonBuilder().setPrettyPrinting().create().toJson(element);
-//    }
 }
