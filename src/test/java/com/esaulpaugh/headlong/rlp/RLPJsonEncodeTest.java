@@ -48,7 +48,7 @@ public class RLPJsonEncodeTest {
     }
 
     static Set<Map.Entry<String, JsonElement>> parseEntrySet(String json) {
-        return JsonUtils.parse(json)
+        return JsonUtils.parseElement(json)
                 .getAsJsonObject()
                 .entrySet();
     }

@@ -26,16 +26,16 @@ public final class JsonUtils {
     private JsonUtils() {}
 
     @SuppressWarnings("deprecation")
-    public static JsonElement parse(String json) {
+    public static JsonElement parseElement(String json) {
         return new JsonParser().parse(json); // JsonParser.parseString(json);
     }
 
     public static JsonObject parseObject(String json) {
-        return parse(json).getAsJsonObject();
+        return parseElement(json).getAsJsonObject();
     }
 
     public static JsonArray parseArray(String json) {
-        return parse(json).getAsJsonArray();
+        return parseElement(json).getAsJsonArray();
     }
 
     public static String getString(JsonObject object, String key) {
