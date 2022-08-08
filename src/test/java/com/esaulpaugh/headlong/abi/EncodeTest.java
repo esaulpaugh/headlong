@@ -699,7 +699,7 @@ public class EncodeTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCasts2() throws Throwable {
-        assertThrown(ClassCastException.class, () -> ((ABIType<Object>) (ABIType<?>) ByteType.SIGNED).encode(7));
+        assertThrown(ClassCastException.class, () -> ((ABIType<Object>) (ABIType<?>) ByteType.INSTANCE).encode(7));
         testCast(Integer.class, TypeFactory.createNonCapturing("uint64"), 10);
         testCast(Byte.class, TypeFactory.createNonCapturing("bool"), (byte) 11);
         testCast(BigInteger.class, TypeFactory.createNonCapturing("address"), BigInteger.valueOf(12L));
@@ -709,15 +709,15 @@ public class EncodeTest {
 
     @Test
     public void testByteType() {
-        assertEquals("BYTE", ByteType.SIGNED.canonicalType);
-        assertEquals("BYTE", ByteType.SIGNED.getCanonicalType());
-        assertEquals(Byte.class, ByteType.SIGNED.clazz);
-        assertEquals(Byte.class, ByteType.SIGNED.clazz());
-        assertFalse(ByteType.SIGNED.dynamic);
-        assertFalse(ByteType.SIGNED.isDynamic());
+        assertEquals("BYTE", ByteType.INSTANCE.canonicalType);
+        assertEquals("BYTE", ByteType.INSTANCE.getCanonicalType());
+        assertEquals(Byte.class, ByteType.INSTANCE.clazz);
+        assertEquals(Byte.class, ByteType.INSTANCE.clazz());
+        assertFalse(ByteType.INSTANCE.dynamic);
+        assertFalse(ByteType.INSTANCE.isDynamic());
 
-        assertEquals(byte[].class, ByteType.SIGNED.arrayClass());
-        assertEquals(1, ByteType.SIGNED.typeCode());
+        assertEquals(byte[].class, ByteType.INSTANCE.arrayClass());
+        assertEquals(1, ByteType.INSTANCE.typeCode());
         assertEquals(1, ABIType.TYPE_CODE_BYTE);
     }
 }

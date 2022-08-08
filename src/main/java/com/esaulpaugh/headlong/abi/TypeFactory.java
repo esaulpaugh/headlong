@@ -64,7 +64,7 @@ public final class TypeFactory {
         BASE_TYPE_MAP.put("address", new AddressType());
         mapByteArray("function", FUNCTION_BYTE_LEN);
         mapByteArray("bytes", DYNAMIC_LENGTH);
-        BASE_TYPE_MAP.put("string", new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.SIGNED, DYNAMIC_LENGTH, STRING_ARRAY_CLASS));
+        BASE_TYPE_MAP.put("string", new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS));
 
         BASE_TYPE_MAP.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
         BASE_TYPE_MAP.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
@@ -95,7 +95,7 @@ public final class TypeFactory {
     }
 
     private static void mapByteArray(String type, int arrayLen) {
-        BASE_TYPE_MAP.put(type, new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.SIGNED, arrayLen, byte[][].class));
+        BASE_TYPE_MAP.put(type, new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class));
     }
 
     @SuppressWarnings("unchecked")

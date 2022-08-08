@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
 /** Currently used only as the element type for some {@link ArrayType}s. */
 public final class ByteType extends ABIType<Byte> {
 
-    static final ByteType SIGNED = new ByteType();
+    static final ByteType INSTANCE = new ByteType();
 
     private ByteType() {
         super("BYTE", Byte.class, false);
