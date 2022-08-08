@@ -17,9 +17,11 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
+import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.security.MessageDigest;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -141,5 +143,15 @@ public class FunctionTest {
         }, 4, 36);
         System.out.println(f);
         assertEquals("ID       45137903\n0        2221201f2221201f2221201f2221201f2221201f2221201f2221201f2221201f", f);
+    }
+
+    @Test
+    public void testNameTooLong() throws Throwable {
+        final byte[] b = new byte[2096];
+        Arrays.fill(b, (byte) 'a');
+        b[b.length - 2] = '(';
+        b[b.length - 1] = ')';
+        final String sig = Strings.encode(b, Strings.ASCII);
+        TestUtils.assertThrown(IllegalArgumentException.class, "function name is too long: 2094 > 2048", () -> Function.parse(sig));
     }
 }

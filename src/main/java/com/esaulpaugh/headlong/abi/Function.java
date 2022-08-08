@@ -49,6 +49,7 @@ public final class Function implements ABIObject {
     private static final Pattern OPEN_PAREN_OR_NON_ASCII = Pattern.compile("[([^\\p{ASCII}]]");
 
     public static final int SELECTOR_LEN = 4;
+    private static final int MAX_NAME_CHARS = 2048;
 
     private final TypeEnum type;
     private final String name;
@@ -327,6 +328,9 @@ public final class Function implements ABIObject {
     }
 
     private static String validateName(String input) {
+        if(input.length() > MAX_NAME_CHARS) {
+            throw new IllegalArgumentException("function name is too long: " + input.length() + " > " + MAX_NAME_CHARS);
+        }
         if(ALL_ASCII_NO_OPEN_PAREN.matcher(input).matches()) {
             return input;
         }
