@@ -47,7 +47,11 @@ public final class JsonUtils {
     }
 
     public static JsonArray getArray(JsonObject object, String key) {
-        return getArray(object, key, null);
+        final JsonElement element = object.get(key);
+        if(isNull(element)) {
+            return null;
+        }
+        return element.getAsJsonArray();
     }
 
     public static String getString(JsonObject object, String key, String defaultVal) {
@@ -70,14 +74,6 @@ public final class JsonUtils {
             return element.getAsBoolean();
         }
         throw new IllegalArgumentException(key + " is not a boolean");
-    }
-
-    public static JsonArray getArray(JsonObject object, String key, JsonArray defaultVal) {
-        final JsonElement element = object.get(key);
-        if(isNull(element)) {
-            return defaultVal;
-        }
-        return element.getAsJsonArray();
     }
 
     private static boolean isNull(JsonElement element) {
