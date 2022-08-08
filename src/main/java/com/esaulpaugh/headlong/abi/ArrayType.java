@@ -355,7 +355,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     /**
      * Abort early if the input is obviously too short. Best effort to fail fast before allocating memory for the array.
      */
-    private void checkNoDecodePossible(int remaining, int arrayLen) {
+    private void checkNoDecodePossible(final int remaining, final int arrayLen) {
         final int minByteLen = !dynamic
                                     ? headLength
                                     : elementType.dynamic
