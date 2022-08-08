@@ -44,6 +44,8 @@ public final class TypeFactory {
 
     private static final int FUNCTION_BYTE_LEN = 24;
 
+    private static final int MAX_CHARS = 2000;
+
     private static final Map<String, ABIType<?>> BASE_TYPE_MAP;
 
     static {
@@ -113,7 +115,14 @@ public final class TypeFactory {
         return (TupleType) build(rawType, elementNames, null);
     }
 
-    static ABIType<?> build(final String rawType, final String[] elementNames, ABIType<?> baseType) {
+    static ABIType<?> build(String rawType, String[] elementNames, ABIType<?> baseType) {
+        if(rawType.length() > MAX_CHARS) {
+            throw new IllegalArgumentException("type length exceeds maximum: " + rawType.length() + " > " + MAX_CHARS);
+        }
+        return buildUnchecked(rawType, elementNames, baseType);
+    }
+
+    private static ABIType<?> buildUnchecked(final String rawType, final String[] elementNames, ABIType<?> baseType) {
         try {
             final int lastCharIdx = rawType.length() - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array
@@ -121,7 +130,7 @@ public final class TypeFactory {
                 final int secondToLastCharIdx = lastCharIdx - 1;
                 final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIdx);
 
-                final ABIType<?> elementType = build(rawType.substring(0, arrayOpenIndex), null, baseType);
+                final ABIType<?> elementType = buildUnchecked(rawType.substring(0, arrayOpenIndex), null, baseType);
                 final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
                 final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType.substring(arrayOpenIndex + 1, lastCharIdx));
                 return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null);
@@ -200,7 +209,7 @@ public final class TypeFactory {
                 case '(': argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart)); break;
                 default: argEnd = nextTerminator(rawTypeStr, argStart);
                 }
-                final ABIType<?> e = build(rawTypeStr.substring(argStart, argEnd), null, null);
+                final ABIType<?> e = buildUnchecked(rawTypeStr.substring(argStart, argEnd), null, null);
                 canonicalBuilder.append(e.canonicalType).append(',');
                 dynamic |= e.dynamic;
                 elements.add(e);

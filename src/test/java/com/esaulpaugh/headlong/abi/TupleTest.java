@@ -451,4 +451,32 @@ public class TupleTest {
     public void testParseBadFixed() throws Throwable {
         assertThrown(IllegalArgumentException.class, "unrecognized type: \"fixed45\"", () -> TypeFactory.create("fixed45"));
     }
+
+    @Test
+    public void testLengthLimit() throws Throwable {
+        final byte[] typeBytes = new byte[2610];
+        final int midpoint = typeBytes.length / 2;
+        int i = 0;
+        while (i < midpoint) {
+            typeBytes[i++] = '(';
+        }
+        while (i < typeBytes.length) {
+            typeBytes[i++] = ')';
+        }
+        final String ascii = Strings.encode(typeBytes, Strings.ASCII);
+        assertThrown(IllegalArgumentException.class, "type length exceeds maximum: 2610 > 2000" , () -> TupleType.parse(ascii));
+
+        final Random r = TestUtils.seededRandom();
+        final StringBuilder sb = new StringBuilder(r.nextBoolean() ? "string" : "bool");
+        for (int j = 0; j < 1000; j++) {
+            if(r.nextBoolean()) {
+                sb.append("[]");
+            } else {
+                sb.append('[').append(r.nextInt(5000)).append(']');
+            }
+        }
+        final String arrType = sb.toString();
+        final int len = arrType.length();
+        assertThrown(IllegalArgumentException.class, "type length exceeds maximum: " + len + " > 2000" , () -> TypeFactory.create(arrType));
+    }
 }
