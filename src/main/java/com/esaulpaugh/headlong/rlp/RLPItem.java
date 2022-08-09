@@ -55,9 +55,13 @@ public abstract class RLPItem implements Comparable<RLPItem> {
         return DataType.type(buffer[index]);
     }
 
-    public abstract boolean isString();
+    public boolean isString() {
+        return false;
+    }
 
-    public abstract boolean isList();
+    public boolean isList() {
+        return false;
+    }
 
     public RLPString asRLPString() {
         return (RLPString) this;

@@ -28,11 +28,6 @@ public final class RLPString extends RLPItem {
     }
 
     @Override
-    public boolean isList() {
-        return false;
-    }
-
-    @Override
     public RLPString asRLPString() {
         return this;
     }

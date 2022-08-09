@@ -32,11 +32,6 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
     }
 
     @Override
-    public boolean isString() {
-        return false;
-    }
-
-    @Override
     public boolean isList() {
         return true;
     }
