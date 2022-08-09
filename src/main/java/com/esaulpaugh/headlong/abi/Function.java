@@ -223,21 +223,21 @@ public final class Function implements ABIObject {
     /**
      * The inverse of {@link #encodeCall}.
      *
-     * @param abiBuffer the encoded function call
+     * @param buffer the encoded function call
      * @return  the decoded arguments
      */
-    public Tuple decodeCall(ByteBuffer abiBuffer) {
-        checkSelector(abiBuffer);
-        return inputTypes.decode(abiBuffer);
+    public Tuple decodeCall(ByteBuffer buffer) {
+        checkSelector(buffer);
+        return inputTypes.decode(buffer);
     }
 
     public <T> T decodeCall(byte[] call, int... indices) {
         return decodeCall(ByteBuffer.wrap(call), indices);
     }
 
-    public <T> T decodeCall(ByteBuffer abiBuffer, int... indices) {
-        checkSelector(abiBuffer);
-        return inputTypes.decode(abiBuffer, indices);
+    public <T> T decodeCall(ByteBuffer buffer, int... indices) {
+        checkSelector(buffer);
+        return inputTypes.decode(buffer, indices);
     }
 
     private void checkSelector(ByteBuffer bb) {
@@ -368,8 +368,8 @@ public final class Function implements ABIObject {
         return new Keccak(256); // replace this with your preferred impl
     }
 
-    public static String formatCall(byte[] abiCall) {
-        return formatCall(abiCall, 0, abiCall.length);
+    public static String formatCall(byte[] call) {
+        return formatCall(call, 0, call.length);
     }
 
     public static String formatCall(byte[] buffer, int offset, final int length) {
