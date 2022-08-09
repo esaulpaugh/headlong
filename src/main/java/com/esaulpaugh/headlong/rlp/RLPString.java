@@ -37,11 +37,6 @@ public final class RLPString extends RLPItem {
         return this;
     }
 
-    @Override
-    public RLPList asRLPList() {
-        throw new ClassCastException("not an " + RLPList.class.getSimpleName());
-    }
-
     /** @see RLPItem#duplicate() */
     @Override
     public RLPString duplicate() {

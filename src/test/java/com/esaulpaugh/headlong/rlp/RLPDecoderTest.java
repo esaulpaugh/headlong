@@ -880,11 +880,11 @@ public class RLPDecoderTest {
     public void testCasts() throws Throwable {
         final RLPItem item0 = RLP_STRICT.wrapBits(0x7f);
         final RLPString str0 = item0.asRLPString();
-        assertThrown(ClassCastException.class, "not an RLPList", str0::asRLPList);
+        assertThrown(ClassCastException.class, "RLPString", str0::asRLPList);
 
 
         final RLPItem item1 = RLP_STRICT.wrapBits(0xc0);
-        assertThrown(ClassCastException.class, "not an RLPString", item1::asRLPString);
+        assertThrown(ClassCastException.class, "RLPList", item1::asRLPString);
         RLPList list = item1.asRLPList();
 
         RLPString s = RLP_STRICT.wrapBits(0x70);

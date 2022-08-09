@@ -59,9 +59,13 @@ public abstract class RLPItem implements Comparable<RLPItem> {
 
     public abstract boolean isList();
 
-    public abstract RLPString asRLPString();
+    public RLPString asRLPString() {
+        return (RLPString) this;
+    }
 
-    public abstract RLPList asRLPList();
+    public RLPList asRLPList() {
+        return (RLPList) this;
+    }
 
     /**
      * Clones this object.

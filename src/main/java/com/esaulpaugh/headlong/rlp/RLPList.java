@@ -42,11 +42,6 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
     }
 
     @Override
-    public RLPString asRLPString() {
-        throw new ClassCastException("not an " + RLPString.class.getSimpleName());
-    }
-
-    @Override
     public RLPList asRLPList() {
         return this;
     }
