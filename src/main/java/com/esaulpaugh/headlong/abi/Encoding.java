@@ -27,7 +27,7 @@ final class Encoding {
 
     static final int OFFSET_LENGTH_BYTES = UNIT_LENGTH_BYTES;
 
-    static final IntType UINT17 = new IntType("uint17", 17, true); // small bit length for Denial-of-Service protection
+    static final IntType UINT19 = new IntType("uint19", 19, true); // small bit length for Denial-of-Service protection
 
     static final IntType UINT31 = new IntType("uint31", 31, true);
 
