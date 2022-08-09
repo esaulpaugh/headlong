@@ -79,8 +79,7 @@ public final class Record {
     }
 
     public Record(Signer signer, long seq, List<KVP> pairs) {
-        this.seq = seq;
-        this.rlp = RLP_STRICT.wrapList(encode(signer, seq, pairs).array());
+        this(seq, RLP_STRICT.wrapList(encode(signer, seq, pairs).array()));
     }
 
     private Record(long seq, RLPList recordRLP) { // validate before calling
