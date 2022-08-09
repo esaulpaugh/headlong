@@ -216,7 +216,7 @@ public final class Function implements ABIObject {
     }
 
     public Tuple decodeCall(byte[] call) {
-        checkSelector(call);
+        checkSelector(Arrays.copyOf(call, SELECTOR_LEN));
         return inputTypes.decode(call, SELECTOR_LEN, call.length - SELECTOR_LEN);
     }
 
@@ -227,7 +227,8 @@ public final class Function implements ABIObject {
      * @return  the decoded arguments
      */
     public Tuple decodeCall(ByteBuffer abiBuffer) {
-        return inputTypes.decode(abiBuffer, checkSelector(abiBuffer));
+        checkSelector(abiBuffer);
+        return inputTypes.decode(abiBuffer, ABIType.newUnitBuffer());
     }
 
     public <T> T decodeCall(byte[] call, int... indices) {
@@ -239,19 +240,16 @@ public final class Function implements ABIObject {
         return inputTypes.decode(abiBuffer, indices);
     }
 
-    private byte[] checkSelector(ByteBuffer bb) {
-        final byte[] unitBuffer = ABIType.newUnitBuffer();
-        bb.get(unitBuffer, 0, SELECTOR_LEN);
-        checkSelector(unitBuffer);
-        return unitBuffer; // unitBuffer contents are ignored, overwritten during decode
+    private void checkSelector(ByteBuffer bb) {
+        final byte[] four = new byte[SELECTOR_LEN];
+        bb.get(four, 0, four.length);
+        checkSelector(four);
     }
 
-    private void checkSelector(byte[] buffer) {
-        for(int i = 0; i < SELECTOR_LEN; i++) {
-            if(buffer[i] != selector[i]) {
+    private void checkSelector(byte[] found) {
+        if(!MessageDigest.isEqual(found, selector)) {
                 throw new IllegalArgumentException("given selector does not match: expected: " + selectorHex()
-                        + ", found: " + Strings.encode(buffer, 0, SELECTOR_LEN, Strings.HEX));
-            }
+                        + ", found: " + Strings.encode(found));
         }
     }
 
@@ -314,7 +312,7 @@ public final class Function implements ABIObject {
                 other.outputTypes.equals(this.outputTypes) &&
                 Objects.equals(other.stateMutability, this.stateMutability) &&
                 other.hashAlgorithm.equals(this.hashAlgorithm) &&
-                Arrays.equals(other.selector, this.selector);
+                MessageDigest.isEqual(other.selector, this.selector);
     }
 
     @Override
