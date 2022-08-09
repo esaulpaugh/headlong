@@ -273,7 +273,7 @@ public final class RLPEncoder {
      * @param elements  the raw elements to be encoded as an RLP list item
      * @param dest      the destination for the encoded RLP list
      * @param destIndex the index into the destination for the list
-     * @return the index into {@code dest} marking the end of the sequence
+     * @return the index into {@code dest} marking the end of the list
      */
     public static int putList(Iterable<?> elements, byte[] dest, int destIndex) {
         ByteBuffer bb = ByteBuffer.wrap(dest, destIndex, dest.length - destIndex);
