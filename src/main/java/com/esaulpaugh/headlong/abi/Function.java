@@ -228,7 +228,7 @@ public final class Function implements ABIObject {
      */
     public Tuple decodeCall(ByteBuffer abiBuffer) {
         checkSelector(abiBuffer);
-        return inputTypes.decode(abiBuffer, ABIType.newUnitBuffer());
+        return inputTypes.decode(abiBuffer);
     }
 
     public <T> T decodeCall(byte[] call, int... indices) {
