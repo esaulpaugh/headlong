@@ -21,6 +21,7 @@ import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonObject;
 import com.joemelsha.crypto.hash.Keccak;
 
+import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -201,7 +202,7 @@ public final class Event implements ABIObject {
         Objects.requireNonNull(topics, "non-null topics expected");
         checkTopicsLength(topics.length, 1);
         byte[] decodedSignatureHash = BYTES_32.decode(topics[0]);
-        if (!Arrays.equals(signatureHash, decodedSignatureHash)) {
+        if (!MessageDigest.isEqual(signatureHash, decodedSignatureHash)) {
             throw new IllegalArgumentException("unexpected topics[0]: event " + getCanonicalSignature()
                     + " expects " + FastHex.encodeToString(signatureHash)
                     + " but found " + FastHex.encodeToString(decodedSignatureHash));
