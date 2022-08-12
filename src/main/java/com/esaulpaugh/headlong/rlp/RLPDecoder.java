@@ -135,7 +135,7 @@ public final class RLPDecoder {
         switch (type.ordinal()) {
         case ORDINAL_LIST_SHORT: return newListShort(buffer, index, lead, buffer.length);
         case ORDINAL_LIST_LONG: return newLongItem(lead, type, buffer, index, buffer.length, lenient);
-        default: throw new IllegalArgumentException("item is not a string");
+        default: throw new IllegalArgumentException("item is not a list");
         }
     }
 
