@@ -30,24 +30,21 @@
 //    useJUnitPlatform()
 //}
 //
-//tasks {
-//    val sourcesJar by creating(Jar::class) {
-//        dependsOn(JavaPlugin.CLASSES_TASK_NAME)
-//        archiveClassifier.set("sources")
-//        from(sourceSets["main"].allSource)
-//    }
+//val sourcesJar by tasks.registering(Jar::class) {
+//    dependsOn(JavaPlugin.CLASSES_TASK_NAME)
+//    archiveClassifier.set("sources")
+//    from(sourceSets.main.get().allSource)
+//}
 //
-//    val javadocJar by creating(Jar::class) {
-//        dependsOn(JavaPlugin.JAVADOC_TASK_NAME)
-//        archiveClassifier.set("javadoc")
-//        from(JavaPlugin.JAVADOC_TASK_NAME)
-//        finalizedBy("sourcesJar")
-//    }
+//val javadocJar by tasks.registering(Jar::class) {
+//    dependsOn(JavaPlugin.JAVADOC_TASK_NAME)
+//    archiveClassifier.set("javadoc")
+//    from(sourceSets.main.get().allSource)
+//}
 //
-//    artifacts {
-//        add("archives", sourcesJar)
-//        add("archives", javadocJar)
-//    }
+//artifacts {
+//    add("archives", sourcesJar)
+//    add("archives", javadocJar)
 //}
 //
 //val dateFormatter : DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneId.of("UTC"))
@@ -65,13 +62,10 @@
 //
 //publishing {
 //    publications {
-//        create<MavenPublication>("maven") {
-//            groupId = "com.esaulpaugh"
-//            artifactId = "headlong"
-//            version = "5.6.2-SNAPSHOT"
+//        register("mavenJava", MavenPublication::class) {
 //            from(components["java"])
-//            artifact("sourcesJar")
-//            artifact("javadocJar")
+//            artifact(sourcesJar.get())
+//            artifact(javadocJar.get())
 //        }
 //    }
 //}
