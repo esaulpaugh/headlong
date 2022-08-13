@@ -40,7 +40,7 @@
 //    dependsOn(JavaPlugin.JAVADOC_TASK_NAME)
 //    archiveClassifier.set("javadoc")
 //    from(sourceSets.main.get().allSource)
-//    finalizedBy("sourcesJar")
+//    finalizedBy(sourcesJar)
 //}
 //
 //artifacts {
