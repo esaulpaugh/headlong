@@ -17,7 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import java.nio.ByteBuffer;
 
-/** Currently used only as the element type for some {@link ArrayType}s. */
+/** Currently used only as the element type for some {@link ArrayType}s which are base types. */
 public final class ByteType extends ABIType<Byte> {
 
     static final ByteType INSTANCE = new ByteType();
