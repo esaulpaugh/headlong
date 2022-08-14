@@ -211,7 +211,7 @@ public final class Notation {
         return topLevelObjects;
     }
 
-    private static int parse(String notation, int i, int nextArrayEnd, final int end, List<Object> parent) {
+    private static int parse(final String notation, int i, int nextArrayEnd, final int end, final List<Object> parent) {
 
         while (i < end) {
             int nextObjectIndex = findNextObject(notation, i);
