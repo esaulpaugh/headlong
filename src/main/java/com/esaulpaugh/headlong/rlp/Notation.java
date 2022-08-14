@@ -206,7 +206,7 @@ public final class Notation {
      * @return the hierarchy of objects
      */
     public static List<Object> parse(String notation) {
-        List<Object> topLevelObjects = new ArrayList<>(); // a sequence (as in encodeSequentially)
+        List<Object> topLevelObjects = new ArrayList<>(); // a sequence (as in RLPEncoder.sequence)
         parse(notation, 0, -1, notation.length(), topLevelObjects);
         return topLevelObjects;
     }
