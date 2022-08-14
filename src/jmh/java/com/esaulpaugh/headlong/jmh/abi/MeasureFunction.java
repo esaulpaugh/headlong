@@ -102,7 +102,7 @@ public class MeasureFunction {
     @Warmup(iterations = 1)
     @Measurement(iterations = THREE)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
-    public void init_with_keccak(Blackhole blackhole) {
+    public void init_function(Blackhole blackhole) {
         blackhole.consume(Function.parse("sam(bytes,bool,uint256[])"));
     }
 
