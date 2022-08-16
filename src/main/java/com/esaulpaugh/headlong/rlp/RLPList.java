@@ -53,7 +53,8 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
     }
 
     /**
-     * @param elements pre-encoded top-level elements of the list
+     * @param elements the RLP-encoded elements of the list
+     * @return the list
      */
     public static RLPList wrap(Iterable<RLPItem> elements) {
         int dataLen = 0;
