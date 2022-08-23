@@ -65,16 +65,6 @@ public final class ABIJSON {
     private static final String STATE_MUTABILITY = "stateMutability";
     static final String PAYABLE = "payable"; // to mark as nonpayable, do not specify any stateMutability
 
-    /** @see ABIObject#fromJson(String) */
-    static <T extends ABIObject> T parseABIObject(String objectJson) {
-        return parseABIObject(parseObject(objectJson));
-    }
-
-    /** @see ABIObject#fromJsonObject(JsonObject) */
-    static <T extends ABIObject> T parseABIObject(JsonObject object) {
-        return parseABIObject(TypeEnum.parse(getType(object)), object, Function::newDefaultDigest);
-    }
-
     /**
      * Selects all objects with type {@link TypeEnum#FUNCTION}.
      *
@@ -122,6 +112,11 @@ public final class ABIJSON {
             }
         }
         return selected;
+    }
+
+    /** @see ABIObject#fromJsonObject(JsonObject) */
+    static <T extends ABIObject> T parseABIObject(JsonObject object) {
+        return parseABIObject(TypeEnum.parse(getType(object)), object, Function::newDefaultDigest);
     }
 
     @SuppressWarnings("unchecked")
