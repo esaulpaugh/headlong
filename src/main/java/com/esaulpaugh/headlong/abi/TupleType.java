@@ -294,7 +294,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             for(i = 0; i < objects.length; i++) {
                 objects[i] = getType.apply(i).decode(bb, unitBuffer);
             }
-        } catch(IllegalArgumentException cause) {
+        } catch (IllegalArgumentException cause) {
             throw decodeException(tuple, i, cause);
         }
     }
