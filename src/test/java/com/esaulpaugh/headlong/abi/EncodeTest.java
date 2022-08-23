@@ -302,7 +302,7 @@ public class EncodeTest {
     @Test
     public void simpleFunctionTest() {
         Function f = new Function("baz(uint32,bool)", "(uint32,bool)"); // canonicalizes and parses any signature automatically
-        Tuple args = new Tuple(69L, true);
+        Tuple args = Tuple.of(69L, true);
 
         // Two equivalent styles:
         ByteBuffer one = f.encodeCall(args);
@@ -353,7 +353,7 @@ public class EncodeTest {
         Function f = new Function("((int16)[2][][1])");
 
         Object[] argsIn = new Object[] {
-                new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple(9), new Tuple(-11) } } }
+                new Tuple[][][] { new Tuple[][] { new Tuple[] { Tuple.singleton(9), Tuple.singleton(-11) } } }
         };
 
         ByteBuffer buf = f.encodeCallWithArgs(argsIn);
@@ -397,8 +397,8 @@ public class EncodeTest {
             args[i] = supplier.get();
         }
 
-        Tuple aArgs = new Tuple((Object) args);
-        Tuple bArgs = new Tuple(new Tuple((Object[]) args));
+        Tuple aArgs = Tuple.singleton(args);
+        Tuple bArgs = Tuple.singleton(Tuple.of(args));
 
         byte[] aEncoding = a.encode(aArgs).array();
         ByteBuffer bDest = ByteBuffer.allocate(b.measureEncodedLength(bArgs));
@@ -432,7 +432,7 @@ public class EncodeTest {
         }
         Assertions.assertEquals("BooleanType,IntType,LongType,BigIntegerType,AddressType,BigDecimalType,ArrayType,TupleType,ArrayType,ArrayType,", sb.toString());
 
-        Tuple args = new Tuple(
+        Tuple args = Tuple.of(
                 true,
                 1,
                 1L,

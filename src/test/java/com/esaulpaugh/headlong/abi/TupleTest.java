@@ -77,7 +77,7 @@ public class TupleTest {
     @Test
     public void testTuple() {
         final Tuple emptyA = new Tuple();
-        final Tuple emptyB = new Tuple((Object[]) new Object[] {});
+        final Tuple emptyB = Tuple.of();
 
         assertEquals(Tuple.EMPTY, emptyA);
         assertEquals(Tuple.EMPTY, emptyB);
@@ -86,9 +86,9 @@ public class TupleTest {
         assertTrue(emptyA.isEmpty());
         assertTrue(emptyB.isEmpty());
 
-        assertFalse(new Tuple(0).isEmpty());
-        assertFalse(new Tuple(false).isEmpty());
-        assertFalse(new Tuple((Object) null).isEmpty());
+        assertFalse(Tuple.singleton(0).isEmpty());
+        assertFalse(Tuple.singleton(false).isEmpty());
+        assertFalse(Tuple.singleton(new Object()).isEmpty());
     }
 
     private static final Object[] OBJECTS = new Object[] {
@@ -370,7 +370,7 @@ public class TupleTest {
     @Test
     public void testDecodeIndex2() {
         TupleType tt = TupleType.parse("(bool,uint16,address,int64,uint64,address,string[][])");
-        Tuple args = new Tuple(
+        Tuple args = Tuple.of(
                 true,
                 90,
                 Address.wrap("0x0000000000000000000000000000000000000000"),

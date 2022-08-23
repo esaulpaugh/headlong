@@ -125,13 +125,13 @@ public class EqualsTest {
                 new String[0][],
                 new Address[] { addr },
                 BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(Byte.MAX_VALUE << 2)),
-                new Tuple(7),
-                new Tuple[][][] { new Tuple[][] { new Tuple[] { new Tuple(9), new Tuple(-11) } } },
-                new Tuple[] { new Tuple(13), new Tuple(-15) },
-                new Tuple[] { new Tuple(17), new Tuple(-19) },
+                Tuple.singleton(7),
+                new Tuple[][][] { new Tuple[][] { new Tuple[] { Tuple.singleton(9), Tuple.singleton(-11) } } },
+                new Tuple[] { Tuple.singleton(13), Tuple.singleton(-15) },
+                new Tuple[] { Tuple.singleton(17), Tuple.singleton(-19) },
                 Long.MAX_VALUE / 8_500_000,
-                new Tuple[] { new Tuple((long) 0x7e), new Tuple((long) -0x7e) },
-                new Tuple(BigInteger.TEN)
+                new Tuple[] { Tuple.singleton((long) 0x7e), Tuple.singleton((long) -0x7e) },
+                Tuple.singleton(BigInteger.TEN)
         };
 
         final ByteBuffer abi = f.encodeCallWithArgs(argsIn);

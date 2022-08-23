@@ -256,7 +256,7 @@ public class DecodeTest {
     @Test
     public void testCorruptBoolean() throws Throwable {
         Function f = new Function("baz(uint32,bool)");
-        Tuple argsTuple = new Tuple(69L, true);
+        Tuple argsTuple = Tuple.of(69L, true);
         ByteBuffer one = f.encodeCall(argsTuple);
 
         final byte[] array = one.array();
@@ -283,7 +283,7 @@ public class DecodeTest {
     @Test
     public void testCorruptBooleanArray() throws Throwable {
         Function f = new Function("baz(bool[])");
-        Tuple argsTuple = new Tuple((Object) new boolean[] { true });
+        Tuple argsTuple = Tuple.singleton(new boolean[] { true });
         ByteBuffer one = f.encodeCall(argsTuple);
 
         final byte[] array = one.array();
@@ -436,7 +436,7 @@ public class DecodeTest {
     public void testTupleDecodeTypeInference() throws Throwable {
         TupleType tt = TupleType.parse("(int,string,bool,int64)");
         Object[] elements = { BigInteger.valueOf(550L), "weow", true, -41L };
-        ByteBuffer bb = tt.encode(new Tuple(elements));
+        ByteBuffer bb = tt.encode(Tuple.of(elements));
         assertEquals(0, bb.position());
         assertEquals(TUPLE_HEX, Strings.encode(bb));
         final BigInteger zero = tt.decode(bb, 0);
@@ -450,7 +450,7 @@ public class DecodeTest {
         assertEquals(three, three2);
 
         ByteBuffer buffer = ByteBuffer.allocate(192);
-        tt.encode(new Tuple(elements), buffer);
+        tt.encode(Tuple.of(elements), buffer);
         assertThrown(BufferUnderflowException.class, buffer::get);
 
         ByteBuffer z = ByteBuffer.allocate(192);
@@ -462,7 +462,7 @@ public class DecodeTest {
     @Test
     public void testFunctionDecodeTypeInference() {
         Function f = Function.parse("f()", "(int,string,bool,int64)");
-        ByteBuffer bb = f.getOutputs().encode(new Tuple(BigInteger.valueOf(550L), "weow", true, -41L));
+        ByteBuffer bb = f.getOutputs().encode(Tuple.of(BigInteger.valueOf(550L), "weow", true, -41L));
         assertEquals(TUPLE_HEX, Strings.encode(bb));
         final BigInteger zero = f.decodeReturn(bb, 0);
         final String one = f.decodeReturn(bb, 1);
