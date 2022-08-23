@@ -307,11 +307,19 @@ public class TupleTest {
     @Test
     public void testTupleImmutability() throws Throwable {
         Object[] args = new Object[] { "a", "b", "c" };
-        Tuple t = new Tuple((Object[]) args);
+        Tuple t = Tuple.of((Object[]) args); // shallow copy
 
         args[1] = 'x';
         assertEquals("a", t.get(0));
         assertEquals("b", t.get(1));
+        assertEquals("c", t.get(2));
+
+        args = new Object[] { "a", "b", "c" };
+        t = new Tuple((Object[]) args); // no shallow copy
+
+        args[1] = 'x';
+        assertEquals("a", t.get(0));
+        assertEquals(Character.valueOf('x'), t.get(1));
         assertEquals("c", t.get(2));
 
 //        List<Object> list = t.toList();
@@ -444,7 +452,7 @@ public class TupleTest {
     public void testTupleLengthMismatch() throws Throwable {
         TupleType tt = TupleType.parse("(bool)");
         assertThrown(IllegalArgumentException.class, "tuple length mismatch: actual != expected: 0 != 1", () -> tt.validate(Tuple.EMPTY));
-        assertThrown(IllegalArgumentException.class, "tuple length mismatch: actual != expected: 2 != 1", () -> tt.validate(Tuple.of(null, null)));
+        assertThrown(IllegalArgumentException.class, "tuple length mismatch: actual != expected: 2 != 1", () -> tt.validate(Tuple.of("", "")));
     }
 
     @Test

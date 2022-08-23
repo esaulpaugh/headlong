@@ -83,6 +83,6 @@ public class ABIStudent implements ABIEncodeable {
 
     @Override
     public Tuple toTuple() {
-        return new Tuple(name, BigDecimal.valueOf(gpa), publicKey, balance.unscaledValue().toByteArray(), balance.scale());
+        return Tuple.of(name, BigDecimal.valueOf(gpa), publicKey, balance.unscaledValue().toByteArray(), balance.scale());
     }
 }

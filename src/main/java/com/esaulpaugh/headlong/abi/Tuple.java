@@ -29,8 +29,8 @@ public final class Tuple implements Iterable<Object> {
 
     final Object[] elements;
 
-    public Tuple(Object... elements) {
-        this.elements = Arrays.copyOf(elements, elements.length); // shallow copy
+    Tuple(Object... elements) {
+        this.elements = elements;
     }
 
     /**
@@ -82,14 +82,28 @@ public final class Tuple implements Iterable<Object> {
 
     public static Tuple of(Object... elements) {
         return new Tuple(elements);
+        final Object[] shallowCopy = new Object[elements.length];
+        for (int i = 0; i < elements.length; i++) {
+            Object e = elements[i];
+            checkNotNull(e, i);
+            shallowCopy[i] = e;
+        }
+        return new Tuple(shallowCopy);
     }
 
     public static Tuple singleton(Object element) {
+        checkNotNull(element, 0);
         return new Tuple(element);
     }
 
     @Override
     public Iterator<Object> iterator() {
         return Arrays.asList(elements).iterator();
+    }
+
+    private static void checkNotNull(Object e, int index) {
+        if (e == null) {
+            throw new IllegalArgumentException("tuple index " + index + " is null");
+        }
     }
 }

@@ -473,7 +473,8 @@ public class DecodeTest {
         TupleType tt = TupleType.parse("(int,string,bool,int64)");
         ByteBuffer bb = ByteBuffer.wrap(FastHex.decode(TUPLE_HEX));
 
-        assertEquals(Tuple.of(null, null, null, null), tt.decode(bb, new int[0]));
+        assertThrown(IllegalArgumentException.class, "tuple index 2 is null", () -> Tuple.of("", "", null, null));
+        assertEquals(new Tuple(null, null, null, null), tt.decode(bb, new int[0]));
 
         assertThrown(IllegalArgumentException.class, "negative index: -571", () -> tt.decode(bb, -571));
         assertThrown(IllegalArgumentException.class, "negative index: -1", () -> tt.decode(bb, -1));

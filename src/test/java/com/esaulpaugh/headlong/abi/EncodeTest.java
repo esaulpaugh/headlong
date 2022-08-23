@@ -520,6 +520,14 @@ public class EncodeTest {
 
     @Test
     public void testTypeSafety() throws Throwable {
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0 is null",
+                () -> Tuple.singleton(null)
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1 is null",
+                () -> Tuple.of(true, null, true)
+        );
+
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1: null",
                 () -> Function.parse("foo(bool,int32)").encodeCallWithArgs(true, null)
         );
