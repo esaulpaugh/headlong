@@ -284,27 +284,14 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     static void decodeObjects(boolean dynamic, ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects, boolean tuple) {
-        if(!dynamic) {
-            decodeObjectsStatic(bb, unitBuffer, getType, objects, tuple);
-        } else {
-            decodeObjectsDynamic(bb, unitBuffer, getType, objects, tuple);
-        }
-    }
-
-    private static void decodeObjectsStatic(ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects, boolean tuple) {
         int i = 0;
         try {
-            for(i = 0; i < objects.length; i++) {
-                objects[i] = getType.apply(i).decode(bb, unitBuffer);
+            if (!dynamic) {
+                for (i = 0; i < objects.length; i++) {
+                    objects[i] = getType.apply(i).decode(bb, unitBuffer);
+                }
+                return;
             }
-        } catch (IllegalArgumentException cause) {
-            throw decodeException(tuple, i, cause);
-        }
-    }
-
-    private static void decodeObjectsDynamic(ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects, boolean tuple) {
-        int i = 0;
-        try {
             final int start = bb.position(); // save this value before offsets are decoded
             final int[] offsets = new int[objects.length];
             for (i = 0; i < objects.length; i++) {
