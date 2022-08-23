@@ -71,7 +71,7 @@ public Student(byte[] rlp) {
     Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(rlp);
     
     this.name = iter.next().asString(UTF_8);
-    this.gpa = iter.next().asFloat();
+    this.gpa = iter.next().asFloat(false);
     this.publicKey = iter.next().asBytes();
     this.balance = new BigDecimal(iter.next().asBigInt(), iter.next().asInt());
 }
