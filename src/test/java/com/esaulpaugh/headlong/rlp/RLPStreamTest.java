@@ -102,7 +102,7 @@ public class RLPStreamTest {
 			oos.writeUTF("hello");
 //        oos.flush();
 			oos.writeChar('Z');
-//			oos.writeObject(new Tuple("jinro", new byte[] { (byte) 0xc0 }, new Boolean[] { false, true }));
+//			oos.writeObject(Tuple.of("jinro", new byte[] { (byte) 0xc0 }, new Boolean[] { false, true }));
 			oos.flush();
 		}
 
@@ -123,7 +123,7 @@ public class RLPStreamTest {
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(decoded.toByteArray()));
         assertEquals("hello", ois.readUTF());
         assertEquals('Z', ois.readChar());
-//        assertEquals(new Tuple("jinro", new byte[] { (byte) 0xc0 }, new Boolean[] { false, true }), ois.readObject());
+//        assertEquals(Tuple.of("jinro", new byte[] { (byte) 0xc0 }, new Boolean[] { false, true }), ois.readObject());
     }
 
     @Test

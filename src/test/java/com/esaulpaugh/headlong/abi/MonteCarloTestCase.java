@@ -355,7 +355,7 @@ public class MonteCarloTestCase {
         for (int i = 0; i < size; i++) {
             args[i] = generateValue(elementTypes[i], r);
         }
-        return new Tuple(args);
+        return Tuple.of(args);
     }
 
     private Object generateValue(ABIType<?> type, Random r) {
