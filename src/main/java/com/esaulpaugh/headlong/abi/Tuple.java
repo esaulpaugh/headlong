@@ -44,8 +44,11 @@ public final class Tuple implements Iterable<Object> {
     @SuppressWarnings("unchecked")
     public <T> T get(int index) {
         Object val = elements[index];
-        if(val == null) {
-            throw new NoSuchElementException("" + index); // are you getting an index which wasn't specified for decoding?
+        if (val == null) {
+            // only call get for indices which have a value.
+            // if this Tuple is the result of a decode with indices,
+            // make sure index was one of the indices specified for decoding.
+            throw new NoSuchElementException("" + index);
         }
         return (T) val;
     }
