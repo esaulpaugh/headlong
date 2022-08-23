@@ -229,12 +229,12 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     private Object decodeIndex(ByteBuffer bb, int index) {
         ensureIndexInBounds(index);
-        int skipBytes = 0;
-        for (int j = 0; j < index; j++) {
-            skipBytes += elementTypes[j].headLength();
-        }
         final int start = bb.position();
-        bb.position(start + skipBytes);
+        int position = start, curr = -1;
+        while (++curr < index) {
+            position += elementTypes[curr].headLength();
+        }
+        bb.position(position);
         return decodeObject(elementTypes[index], bb, start, newUnitBuffer(), index);
     }
 
@@ -242,18 +242,18 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         final Object[] results = new Object[elementTypes.length];
         final int start = bb.position();
         final byte[] unitBuffer = newUnitBuffer();
-        for (int i = 0, position = start, currIdx = -1; i < indices.length; i++) {
+        for (int position = start, curr = -1, i = 0; i < indices.length; i++) {
             final int index = indices[i];
             ensureIndexInBounds(index);
-            if(index <= currIdx) {
+            if(index <= curr) {
                 throw new IllegalArgumentException("index out of order: " + index);
             }
-            while (++currIdx < index) {
-                position += elementTypes[currIdx].headLength();
+            while (++curr < index) {
+                position += elementTypes[curr].headLength();
             }
             bb.position(position);
-            final ABIType<?> resultType = elementTypes[currIdx];
-            results[currIdx] = decodeObject(resultType, bb, start, unitBuffer, currIdx);
+            final ABIType<?> resultType = elementTypes[curr];
+            results[curr] = decodeObject(resultType, bb, start, unitBuffer, curr);
             position += resultType.headLength();
         }
         return new Tuple(results);
