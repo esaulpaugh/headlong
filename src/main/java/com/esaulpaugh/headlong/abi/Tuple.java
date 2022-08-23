@@ -34,6 +34,27 @@ public final class Tuple implements Iterable<Object> {
         this.elements = elements;
     }
 
+    public static Tuple of(Object... elements) {
+        final Object[] shallowCopy = new Object[elements.length];
+        for (int i = 0; i < elements.length; i++) {
+            Object e = elements[i];
+            checkNotNull(e, i);
+            shallowCopy[i] = e;
+        }
+        return new Tuple(shallowCopy);
+    }
+
+    public static Tuple singleton(Object element) {
+        checkNotNull(element, 0);
+        return new Tuple(element);
+    }
+
+    private static void checkNotNull(Object e, int index) {
+        if (e == null) {
+            throw new IllegalArgumentException("tuple index " + index + " is null");
+        }
+    }
+
     /**
      * Returns the element at the specified position in this tuple.
      *
@@ -97,29 +118,8 @@ public final class Tuple implements Iterable<Object> {
         return SKIPPED.equals(element.toString()) ? '"' + SKIPPED + '"' : element;
     }
 
-    public static Tuple of(Object... elements) {
-        final Object[] shallowCopy = new Object[elements.length];
-        for (int i = 0; i < elements.length; i++) {
-            Object e = elements[i];
-            checkNotNull(e, i);
-            shallowCopy[i] = e;
-        }
-        return new Tuple(shallowCopy);
-    }
-
-    public static Tuple singleton(Object element) {
-        checkNotNull(element, 0);
-        return new Tuple(element);
-    }
-
     @Override
     public Iterator<Object> iterator() {
         return Arrays.asList(elements).iterator();
-    }
-
-    private static void checkNotNull(Object e, int index) {
-        if (e == null) {
-            throw new IllegalArgumentException("tuple index " + index + " is null");
-        }
     }
 }
