@@ -321,18 +321,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return new IllegalArgumentException((tuple ? "tuple index " : "array index ") + i + ": " + cause.getMessage(), cause);
     }
 
-    /**
-     * Parses RLP Object {@link Notation} as a {@link Tuple}.
-     *
-     * @param s the tuple's RLP object notation
-     * @return  the parsed tuple
-     * @see Notation
-     */
-    @Override
-    public Tuple parseArgument(String s) { // expects RLP object notation
-        return SuperSerial.deserialize(this, s, false);
-    }
-
     @Override
     public Iterator<ABIType<?>> iterator() {
         return Arrays.asList(elementTypes).iterator();

@@ -70,10 +70,4 @@ public final class ByteType extends ABIType<Byte> {
     Byte decode(ByteBuffer bb, byte[] unitBuffer) {
         return bb.get();
     }
-
-    @Override
-    public Byte parseArgument(String s) {
-        return Byte.parseByte(s);
-//        validate(b);
-    }
 }

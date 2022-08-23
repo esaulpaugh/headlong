@@ -199,14 +199,6 @@ public abstract class ABIType<J> {
         return PackedDecoder.decode(TupleType.wrap(null, this), buffer).get(0);
     }
 
-    /**
-     * Parses and validates a string representation of J.
-     *
-     * @param s the object's string representation
-     * @return  the object
-     */
-    public abstract J parseArgument(String s);
-
     static byte[] newUnitBuffer() {
         return new byte[UNIT_LENGTH_BYTES];
     }

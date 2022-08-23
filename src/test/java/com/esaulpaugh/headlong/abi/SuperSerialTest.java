@@ -92,50 +92,6 @@ public class SuperSerialTest {
     }
 
     @Test
-    public void testParseArgs() throws Throwable {
-
-        String boolArrStr = "['', '01', '01']";
-
-        TupleType tt = TupleType.parse("(bool[])");
-
-        Tuple tuple = tt.parseArgument("(\n" + boolArrStr + "\n)");
-
-        boolean[] arr0 = tuple.get(0);
-
-        assertArrayEquals(new boolean[] { false, true, true}, arr0);
-
-        boolean[] arr1 = (boolean[]) tt.get(0).parseArgument(boolArrStr);
-
-        assertArrayEquals(arr0, arr1);
-
-        IntType int32 = TupleType.parse("(int32)").get(0);
-
-        assertEquals(Integer.MIN_VALUE, int32.parseArgument(Integer.toString(Integer.MIN_VALUE)));
-        assertEquals(Integer.MAX_VALUE, int32.parseArgument(Integer.toString(Integer.MAX_VALUE)));
-
-        IntType int8 = TupleType.parse("(int8)").get(0);
-
-        assertThrown(IllegalArgumentException.class, "signed val exceeds bit limit: 8 >= 8", () -> int8.parseArgument("-129"));
-        assertThrown(IllegalArgumentException.class, "signed val exceeds bit limit: 8 >= 8", () -> int8.parseArgument("128"));
-
-        BooleanType bool = TupleType.parse("(bool)").get(0);
-        Object bool2 = TypeFactory.create("bool");
-        assertEquals(bool, bool2);
-        TypeFactory.createNonCapturing("bool").encode(true);
-
-        assertEquals(true, bool.parseArgument("true"));
-        assertEquals(true, bool.parseArgument("TRUE"));
-        assertEquals(true, bool.parseArgument("tRUe"));
-        assertEquals(false, bool.parseArgument("false"));
-        assertEquals(false, bool.parseArgument(""));
-        assertEquals(false, bool.parseArgument("?\t*jjgHJge"));
-
-        assertEquals(127, int8.parseArgument("127"));
-        assertEquals(127, int8.parseArgument("0127"));
-        assertEquals(127, int8.parseArgument("00127"));
-    }
-
-    @Test
     public void testToFromRLP() {
         final Tuple t = Tuple.of(false, new int[] { 0, 1, 2, 3 }, new byte[][] { new byte[0], new byte[1], new byte[] { -1 } });
         final TupleType tt = TupleType.parse("(bool,int8[],bytes[])");

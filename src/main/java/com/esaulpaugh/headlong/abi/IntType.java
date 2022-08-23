@@ -37,11 +37,4 @@ public final class IntType extends UnitType<Integer> {
     Integer decode(ByteBuffer bb, byte[] unitBuffer) {
         return decodeValid(bb, unitBuffer).intValue();
     }
-
-    @Override
-    public Integer parseArgument(String s) {
-        Integer in = Integer.parseInt(s);
-        validate(in);
-        return in;
-    }
 }

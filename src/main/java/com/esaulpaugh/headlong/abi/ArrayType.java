@@ -438,18 +438,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return elements;
     }
 
-    /**
-     * Parses RLP Object {@link Notation} as a {@link J}.
-     *
-     * @param s the array's RLP object notation
-     * @return  the parsed array
-     * @see Notation
-     */
-    @Override
-    public J parseArgument(String s) { // expects RLP object notation such as "['00', '01', '01']"
-        return SuperSerial.deserializeArray(this, s, false);
-    }
-
     @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T baseType(ABIType<?> type) {
         while (type instanceof ArrayType<?, ?>) {

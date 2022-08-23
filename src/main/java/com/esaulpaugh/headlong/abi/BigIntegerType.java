@@ -54,11 +54,4 @@ public final class BigIntegerType extends UnitType<BigInteger> {
     BigInteger decode(ByteBuffer bb, byte[] unitBuffer) {
         return decodeValid(bb, unitBuffer);
     }
-
-    @Override
-    public BigInteger parseArgument(String s) {
-        BigInteger bigInt = new BigInteger(s);
-        validate(bigInt);
-        return bigInt;
-    }
 }

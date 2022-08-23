@@ -55,11 +55,4 @@ public final class AddressType extends UnitType<Address> {
     void encodePackedUnchecked(Address value, ByteBuffer dest) {
         ADDRESS_INNER.encodePackedUnchecked(value.value(), dest);
     }
-
-    @Override
-    public Address parseArgument(String s) {
-        Address address = Address.wrap(s);
-        validate(address);
-        return address;
-    }
 }

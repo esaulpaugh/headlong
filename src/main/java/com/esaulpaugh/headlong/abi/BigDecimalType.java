@@ -73,11 +73,4 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
     BigDecimal decode(ByteBuffer bb, byte[] unitBuffer) {
         return new BigDecimal(decodeValid(bb, unitBuffer), scale);
     }
-
-    @Override
-    public BigDecimal parseArgument(String s) {
-        BigDecimal bigDec = new BigDecimal(new BigInteger(s, 10), scale);
-        validate(bigDec);
-        return bigDec;
-    }
 }

@@ -81,10 +81,4 @@ public final class BooleanType extends UnitType<Boolean> {
             default: throw new IllegalArgumentException("illegal boolean value: " + b);
         }
     }
-
-    @Override
-    public Boolean parseArgument(String s) {
-        return Boolean.parseBoolean(s);
-//        validate(bool);
-    }
 }

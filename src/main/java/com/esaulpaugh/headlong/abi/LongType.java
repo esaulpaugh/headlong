@@ -40,13 +40,6 @@ public final class LongType extends UnitType<Long> {
         return decodeValid(bb, unitBuffer).longValue();
     }
 
-    @Override
-    public Long parseArgument(String s) {
-        Long lo = Long.parseLong(s);
-        validate(lo);
-        return lo;
-    }
-
     static void encodeLong(long value, int byteLen, ByteBuffer dest) {
         if(value >= 0) {
             Encoding.insert00Padding(byteLen - Integers.len(value), dest);
