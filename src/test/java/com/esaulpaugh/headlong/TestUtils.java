@@ -257,8 +257,7 @@ public class TestUtils {
         try {
             r.run();
         } catch (Throwable t) {
-            if(clazz.isInstance(t)
-                    && (t.getMessage() == null || t.getMessage().contains(substr))) {
+            if(clazz.isInstance(t) && t.getMessage() != null && t.getMessage().contains(substr)) {
                 return;
             }
             throw t;
