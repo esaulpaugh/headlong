@@ -371,18 +371,23 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private static boolean[] decodeBooleans(int len, ByteBuffer bb, byte[] unitBuffer) {
         final boolean[] booleans = new boolean[len]; // elements are false by default
         final int valOffset = UNIT_LENGTH_BYTES - Byte.BYTES;
-        for(int i = 0; i < len; i++) {
-            bb.get(unitBuffer);
-            for (int j = 0; j < valOffset; j++) {
-                if (unitBuffer[j] != Encoding.ZERO_BYTE) {
-                    throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
+        int i = 0;
+        try {
+            for(; i < len; i++) {
+                bb.get(unitBuffer);
+                for (int j = 0; j < valOffset; j++) {
+                    if (unitBuffer[j] != Encoding.ZERO_BYTE) {
+                        throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
+                    }
+                }
+                switch (unitBuffer[valOffset]) {
+                case 1: booleans[i] = true;
+                case 0: continue;
+                default: throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
                 }
             }
-            switch (unitBuffer[valOffset]) {
-            case 1: booleans[i] = true;
-            case 0: continue;
-            default: throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
-            }
+        } catch (IllegalArgumentException cause) {
+            throw TupleType.decodeException(false, i, cause);
         }
         return booleans;
     }
@@ -403,23 +408,33 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private static int[] decodeInts(int len, ByteBuffer bb, IntType intType, byte[] unitBuffer) {
         int[] ints = new int[len];
-        for (int i = 0; i < len; i++) {
-            ints[i] = intType.decode(bb, unitBuffer);
+        int i = 0;
+        try {
+            for (; i < len; i++) {
+                ints[i] = intType.decode(bb, unitBuffer);
+            }
+        } catch (IllegalArgumentException cause) {
+            throw TupleType.decodeException(false, i, cause);
         }
         return ints;
     }
 
     private static long[] decodeLongs(int len, ByteBuffer bb, LongType longType, byte[] unitBuffer) {
         long[] longs = new long[len];
-        for (int i = 0; i < len; i++) {
-            longs[i] = longType.decode(bb, unitBuffer);
+        int i = 0;
+        try {
+            for (; i < len; i++) {
+                longs[i] = longType.decode(bb, unitBuffer);
+            }
+        } catch (IllegalArgumentException cause) {
+            throw TupleType.decodeException(false, i, cause);
         }
         return longs;
     }
 
     private Object[] decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer) {
         Object[] elements = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
-        TupleType.decodeObjects(dynamic, bb, unitBuffer, i -> elementType, elements);
+        TupleType.decodeObjects(dynamic, bb, unitBuffer, i -> elementType, elements, false);
         return elements;
     }
 

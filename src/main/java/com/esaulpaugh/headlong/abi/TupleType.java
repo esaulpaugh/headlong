@@ -201,7 +201,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
         Object[] elements = new Object[size()];
-        decodeObjects(dynamic, bb, unitBuffer, TupleType.this::get, elements);
+        decodeObjects(dynamic, bb, unitBuffer, TupleType.this::get, elements, true);
         return new Tuple(elements);
     }
 
@@ -280,34 +280,56 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return len;
     }
 
-    static void decodeObjects(boolean dynamic, ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects) {
+    static void decodeObjects(boolean dynamic, ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects, boolean tuple) {
         if(!dynamic) {
-            for(int i = 0; i < objects.length; i++) {
+            decodeObjectsStatic(bb, unitBuffer, getType, objects, tuple);
+        } else {
+            decodeObjectsDynamic(bb, unitBuffer, getType, objects, tuple);
+        }
+    }
+
+    private static void decodeObjectsStatic(ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects, boolean tuple) {
+        int i = 0;
+        try {
+            for(i = 0; i < objects.length; i++) {
                 objects[i] = getType.apply(i).decode(bb, unitBuffer);
             }
-            return;
+        } catch(IllegalArgumentException cause) {
+            throw decodeException(tuple, i, cause);
         }
-        final int start = bb.position(); // save this value before offsets are decoded
-        final int[] offsets = new int[objects.length];
-        for(int i = 0; i < objects.length; i++) {
-            ABIType<?> t = getType.apply(i);
-            if(!t.dynamic) {
-                objects[i] = t.decode(bb, unitBuffer);
-            } else {
-                offsets[i] = UINT31.decode(bb, unitBuffer);
-            }
-        }
-        for (int i = 0; i < objects.length; i++) {
-            final int offset = offsets[i];
-            if (offset > 0) {
-                final int jump = start + offset;
-                if (jump != bb.position()) {
-                    /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-                    bb.position(jump); // leniently jump to specified offset
+    }
+
+    private static void decodeObjectsDynamic(ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects, boolean tuple) {
+        int i = 0;
+        try {
+            final int start = bb.position(); // save this value before offsets are decoded
+            final int[] offsets = new int[objects.length];
+            for (i = 0; i < objects.length; i++) {
+                ABIType<?> t = getType.apply(i);
+                if (!t.dynamic) {
+                    objects[i] = t.decode(bb, unitBuffer);
+                } else {
+                    offsets[i] = UINT31.decode(bb, unitBuffer);
                 }
-                objects[i] = getType.apply(i).decode(bb, unitBuffer);
             }
+            for (i = 0; i < objects.length; i++) {
+                final int offset = offsets[i];
+                if (offset > 0) {
+                    final int jump = start + offset;
+                    if (jump != bb.position()) {
+                        /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
+                        bb.position(jump); // leniently jump to specified offset
+                    }
+                    objects[i] = getType.apply(i).decode(bb, unitBuffer);
+                }
+            }
+        } catch (IllegalArgumentException cause) {
+            throw decodeException(tuple, i, cause);
         }
+    }
+
+    static IllegalArgumentException decodeException(boolean tuple, int i, IllegalArgumentException cause) {
+        return new IllegalArgumentException((tuple ? "tuple index " : "array index ") + i + ": " + cause.getMessage(), cause);
     }
 
     /**

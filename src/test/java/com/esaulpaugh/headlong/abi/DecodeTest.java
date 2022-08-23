@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
+import static com.esaulpaugh.headlong.TestUtils.assertThrownWithAnySubstring;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -166,9 +167,12 @@ public class DecodeTest {
                 "000000000000000000000000000000000000000000000000000000007FFFFFFF" +
                 "0000000000000000000000000000000000000000000000000000000000000001" +
                 "aa00000000000000000000000000000000000000000000000000000000000000";
-        assertThrown(
+        assertThrownWithAnySubstring(
                 IllegalArgumentException.class,
-                "newPosition > limit: (2147483647 > 96)",
+                Arrays.asList(
+                        "tuple index 0: newPosition > limit: (2147483647 > 96)",
+                        "tuple index 0: null"
+                ),
                 () -> Function.parse("()", "(bytes)").decodeReturn(Strings.decode(bigOffset))
         );
         final String tooBigOffset =
@@ -839,5 +843,45 @@ public class DecodeTest {
         assertTrue(notSame ^ t == TypeFactory.createTupleTypeWithNames(tupleTypeStr, "a").get(0));
         assertTrue(notSame ^ t == TupleType.of(typeStr).get(0));
         assertTrue(notSame ^ t == Function.parse(tupleTypeStr).getInputs().get(0));
+    }
+
+    @Test
+    public void testErrors() throws Throwable {
+        assertThrown(IllegalArgumentException.class, "tuple index 0: array index 2: illegal boolean value @ 64",
+                () -> TypeFactory.createNonCapturing("(bool[3])").decode(
+                        FastHex.decode(
+                                "0000000000000000000000000000000000000000000000000000000000000001" +
+                                "0000000000000000000000000000000000000000000000000000000000000000" +
+                                "000000000000000000000000000000000000000000000000000000000000000c"
+                        )
+                )
+        );
+        assertThrown(IllegalArgumentException.class, "tuple index 0: array index 0: signed val exceeds bit limit: 8 >= 8",
+                () -> TypeFactory.createNonCapturing("(int8[1])").decode(
+                        FastHex.decode(
+                                "0000000000000000000000000000000000000000000000000000000000000080"
+                        )
+                )
+        );
+        assertThrown(IllegalArgumentException.class, "tuple index 0: array index 1: unsigned val exceeds bit limit: 33 > 32",
+                () -> TypeFactory.createNonCapturing("(uint32[2])").decode(
+                        FastHex.decode(
+                                "00000000000000000000000000000000000000000000000000000000fffffff1" +
+                                "0000000000000000000000000000000000000000000000000000000100000000" +
+                                "000000000000000000000000000000000000000000000000000000000000000c"
+                        )
+                )
+        );
+        assertThrown(IllegalArgumentException.class, "tuple index 1: array index 1: signed val exceeds bit limit: 255 >= 248",
+                () -> TypeFactory.createNonCapturing("(bool,int248[])").decode(
+                        FastHex.decode(
+                                "0000000000000000000000000000000000000000000000000000000000000001" +
+                                "0000000000000000000000000000000000000000000000000000000000000040" +
+                                "0000000000000000000000000000000000000000000000000000000000000002" +
+                                "00030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2020" +
+                                "92030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2020"
+                        )
+                )
+        );
     }
 }
