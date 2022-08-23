@@ -26,6 +26,7 @@ import java.util.NoSuchElementException;
 public final class Tuple implements Iterable<Object> {
 
     public static final Tuple EMPTY = new Tuple();
+    private static final String SKIPPED = "_";
 
     final Object[] elements;
 
@@ -39,18 +40,29 @@ public final class Tuple implements Iterable<Object> {
      * @param index index of the element to return
      * @return  the element at the specified position
      * @param <T>   the element's type
-     * @throws NoSuchElementException if this method would return null
+     * @throws NoSuchElementException if the element is absent due to being skipped during decode
      */
     @SuppressWarnings("unchecked")
     public <T> T get(int index) {
         Object val = elements[index];
         if (val == null) {
-            // only call get for indices which have a value.
-            // if this Tuple is the result of a decode with indices,
-            // make sure index was one of the indices specified for decoding.
+            // an element should only be null as a result of a decode-with-indices in which this index wasn't specified
             throw new NoSuchElementException("" + index);
         }
         return (T) val;
+    }
+
+    /**
+     * Returns true if and only if the given index is populated with a value. This should always return true except if
+     * this {@link Tuple} is a result of a decode-with-indices (such as {@link TupleType#decode(java.nio.ByteBuffer,int...)}), in
+     * which case the only elements not present will be those which were deliberately skipped. It is advised to rely on
+     * this method only when the populated indices cannot be divined by other means.
+     *
+     * @param index the position of the element in the Tuple
+     * @return  false if the element is absent due to being skipped during decode, true otherwise
+     */
+    public boolean elementIsPresent(int index) {
+        return elements[index] != null;
     }
 
     public int size() {
@@ -73,7 +85,17 @@ public final class Tuple implements Iterable<Object> {
 
     @Override
     public String toString() {
-        return Arrays.deepToString(elements);
+        final Object[] copy = new Object[elements.length];
+        for (int i = 0; i < elements.length; i++) {
+            copy[i] = normalize(elements[i]);
+        }
+        return Arrays.deepToString(copy);
+    }
+
+    private static Object normalize(Object element) {
+        if(element == null) return SKIPPED;
+        String str = element.toString();
+        return SKIPPED.equals(str) ? '"' + SKIPPED + '"' : element;
     }
 
     public Tuple subtuple(int startIndex, int endIndex) {

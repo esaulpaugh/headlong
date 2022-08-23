@@ -408,10 +408,17 @@ public class DecodeTest {
     }
 
     private static void testIndicesDecode(Tuple decoded) throws Throwable {
+        assertFalse(decoded.elementIsPresent(0));
         assertThrown(NoSuchElementException.class, "0", () -> decoded.get(0));
+
+        assertTrue(decoded.elementIsPresent(1));
         boolean one = decoded.get(1);
         assertTrue(one);
+
+        assertFalse(decoded.elementIsPresent(2));
         assertThrown(NoSuchElementException.class, "2", () -> decoded.get(2));
+
+        assertTrue(decoded.elementIsPresent(3));
         boolean three = decoded.get(3);
         assertFalse(three);
     }
@@ -474,7 +481,14 @@ public class DecodeTest {
         ByteBuffer bb = ByteBuffer.wrap(FastHex.decode(TUPLE_HEX));
 
         assertThrown(IllegalArgumentException.class, "tuple index 2 is null", () -> Tuple.of("", "", null, null));
-        assertEquals(new Tuple(null, null, null, null), tt.decode(bb, new int[0]));
+        final Tuple decoded = tt.decode(bb, new int[0]);
+        assertEquals(new Tuple(null, null, null, null), decoded);
+        assertEquals("[_, _, _, _]", decoded.toString());
+        assertEquals("[_, _, \"_\", \"_\"]", new Tuple(null, null, "_", '_').toString());
+        final int size = decoded.size();
+        for (int i = 0; i < size; i++) {
+            assertFalse(decoded.elementIsPresent(i));
+        }
 
         assertThrown(IllegalArgumentException.class, "negative index: -571", () -> tt.decode(bb, -571));
         assertThrown(IllegalArgumentException.class, "negative index: -1", () -> tt.decode(bb, -1));
@@ -485,7 +499,7 @@ public class DecodeTest {
         assertThrown(IllegalArgumentException.class, "index 64 out of bounds for tuple type of length 4", () -> tt.decode(bb, 64));
 
         Tuple t = tt.decode(bb, 1, 2);
-        System.out.println(t);
+        assertEquals("[_, weow, true, _]", t.toString());
         assertThrown(IllegalArgumentException.class, "index out of order: 0", () -> tt.decode(bb, 1, 2, 0));
         assertThrown(IllegalArgumentException.class, "index out of order: 1", () -> tt.decode(bb, 1, 1));
     }
