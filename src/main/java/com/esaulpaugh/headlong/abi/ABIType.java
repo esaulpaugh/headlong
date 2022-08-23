@@ -142,7 +142,7 @@ public abstract class ABIType<J> {
     abstract void encodeTail(J value, ByteBuffer dest);
 
     /**
-     * Returns the non-standard-packed encoding of {@code values}.
+     * Returns the non-standard packed encoding of {@code value}.
      *
      * @param value the argument to be encoded
      * @return the encoding
