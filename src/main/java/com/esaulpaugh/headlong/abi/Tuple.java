@@ -94,8 +94,7 @@ public final class Tuple implements Iterable<Object> {
 
     private static Object normalize(Object element) {
         if(element == null) return SKIPPED;
-        String str = element.toString();
-        return SKIPPED.equals(str) ? '"' + SKIPPED + '"' : element;
+        return SKIPPED.equals(element.toString()) ? '"' + SKIPPED + '"' : element;
     }
 
     public Tuple subtuple(int startIndex, int endIndex) {
