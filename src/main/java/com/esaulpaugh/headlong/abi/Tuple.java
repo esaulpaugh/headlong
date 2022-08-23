@@ -81,7 +81,6 @@ public final class Tuple implements Iterable<Object> {
     }
 
     public static Tuple of(Object... elements) {
-        return new Tuple(elements);
         final Object[] shallowCopy = new Object[elements.length];
         for (int i = 0; i < elements.length; i++) {
             Object e = elements[i];
