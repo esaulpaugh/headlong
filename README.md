@@ -23,7 +23,7 @@ Function f = new Function("baz(uint32,bool)"); // canonicalizes and parses any s
 // or
 Function f2 = Function.fromJson("{\"type\":\"function\",\"name\":\"foo\",\"inputs\":[{\"name\":\"complex_nums\",\"type\":\"tuple[]\",\"components\":[{\"name\":\"real\",\"type\":\"fixed168x10\"},{\"name\":\"imaginary\",\"type\":\"fixed168x10\"}]}]}");
 
-Tuple args = new Tuple(69L, true);
+Tuple args = Tuple.of(69L, true);
 
 // Two equivalent styles:
 ByteBuffer one = f.encodeCall(args);
@@ -47,8 +47,8 @@ Tuple decoded = foo.decodeReturn(
               + "59616f62616e6745696768747939000000000000000000000000000000000000"
         )
 );
-        
-System.out.println(decoded.equals(new Tuple(new BigDecimal(BigInteger.valueOf(69L), 18), "YaobangEighty9")));
+
+System.out.println(decoded.equals(Tuple.of(new BigDecimal(BigInteger.valueOf(69L), 18), "YaobangEighty9")));
 ```
 
 ```java
