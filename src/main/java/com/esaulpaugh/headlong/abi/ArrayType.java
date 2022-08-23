@@ -28,8 +28,8 @@ import static com.esaulpaugh.headlong.abi.TupleType.totalLen;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
 /**
- * Represents static array types such as bytes3 or uint16[3][2] and dynamic array types such as decimal[5][] or
- * string[4].
+ * Represents static array types such as uint16[3][2] or bytes3 and dynamic array types such as fixed168x10[5][],
+ * bytes[4], or string.
  *
  * @param <E> the {@link ABIType} for the elements of the array
  * @param <J> this {@link ArrayType}'s corresponding Java type

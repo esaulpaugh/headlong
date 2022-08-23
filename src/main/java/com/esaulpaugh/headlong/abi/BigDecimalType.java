@@ -18,7 +18,7 @@ package com.esaulpaugh.headlong.abi;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 
-/** Represents a decimal type such as fixed, ufixed, or decimal. */
+/** Represents a decimal type such as fixed or ufixed. */
 public final class BigDecimalType extends UnitType<BigDecimal> {
 
     final int scale;

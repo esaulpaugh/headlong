@@ -53,8 +53,8 @@ public final class Tuple implements Iterable<Object> {
     }
 
     /**
-     * Returns true if and only if the given index is populated with a value. This should always return true except if
-     * this {@link Tuple} is a result of a decode-with-indices (such as {@link TupleType#decode(java.nio.ByteBuffer,int...)}), in
+     * Returns true if and only if the given index is populated with a value. This should always return true unless this
+     * {@link Tuple} is the result of a decode-with-indices (such as {@link TupleType#decode(java.nio.ByteBuffer,int...)}), in
      * which case the only elements not present will be those which were deliberately skipped. It is advised to rely on
      * this method only when the populated indices cannot be divined by other means.
      *
