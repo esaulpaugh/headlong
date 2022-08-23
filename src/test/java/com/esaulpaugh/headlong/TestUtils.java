@@ -31,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RecursiveAction;
@@ -254,6 +255,7 @@ public class TestUtils {
     }
 
     public static void assertThrown(Class<? extends Throwable> clazz, String substr, CustomRunnable r) throws Throwable {
+        Objects.requireNonNull(substr);
         try {
             r.run();
         } catch (Throwable t) {
@@ -266,6 +268,7 @@ public class TestUtils {
     }
 
     public static void assertThrownWithAnySubstring(Class<? extends Throwable> clazz, List<String> substrings, CustomRunnable r) throws Throwable {
+        Objects.requireNonNull(substrings);
         try {
             r.run();
         } catch (Throwable t) {
