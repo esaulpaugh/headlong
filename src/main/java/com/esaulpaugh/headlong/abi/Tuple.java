@@ -97,10 +97,6 @@ public final class Tuple implements Iterable<Object> {
         return SKIPPED.equals(element.toString()) ? '"' + SKIPPED + '"' : element;
     }
 
-    public Tuple subtuple(int startIndex, int endIndex) {
-        return new Tuple(Arrays.copyOfRange(elements, startIndex, endIndex));
-    }
-
     public static Tuple of(Object... elements) {
         final Object[] shallowCopy = new Object[elements.length];
         for (int i = 0; i < elements.length; i++) {

@@ -180,51 +180,6 @@ public class TupleTest {
     }
 
     @Test
-    public void testSubtuple() throws Throwable {
-
-        Object[] master = new Object[] {
-                null,
-                true,
-                (short) 77,
-                new Object[] {},
-                new byte[0],
-                9f,
-                1.11d,
-                'X',
-                0b0,
-                1,
-                10L,
-                BigInteger.valueOf(3405691582L),
-                BigDecimal.valueOf(120.997)
-        };
-
-        final int len = master.length;
-
-        Random rand = TestUtils.seededRandom();
-
-        TestUtils.shuffle(master, rand);
-
-        Tuple tuple = new Tuple(master);
-
-        int start = 1 + rand.nextInt(len);
-        int end = rand.nextInt(start);
-        assertThrown(IllegalArgumentException.class, start + " > " + end, () -> tuple.subtuple(start, end));
-
-        for (int i = 0; i <= len; i++) {
-            for (int j = len; j >= i; j--) {
-                final int n = j - i;
-                Object[] elements = new Object[n];
-                System.arraycopy(master, i, elements, 0, n);
-                assertEquals(tuple.subtuple(i, j), new Tuple(elements));
-//                for (int k = i; k < j; k++) {
-//                    System.out.print((char) (k + 48));
-//                }
-//                System.out.println();
-            }
-        }
-    }
-
-    @Test
     public void testSubtubleType() throws Throwable {
         TupleType tt = TupleType.parse("(bytes3,uint16[],string)");
 
