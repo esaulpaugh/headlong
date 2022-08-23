@@ -233,14 +233,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         for (int j = 0; j < index; j++) {
             skipBytes += elementTypes[j].headLength();
         }
-        final int pos = bb.position();
-        bb.position(pos + skipBytes);
-        final ABIType<?> resultType = elementTypes[index];
-        final byte[] unitBuffer = newUnitBuffer();
-        if (resultType.dynamic) {
-            bb.position(pos + UINT31.decode(bb, unitBuffer));
-        }
-        return resultType.decode(bb, unitBuffer);
+        final int start = bb.position();
+        bb.position(start + skipBytes);
+        return decodeObject(elementTypes[index], bb, start, newUnitBuffer(), index);
     }
 
     private Tuple decodeIndices(ByteBuffer bb, int... indices) {
@@ -258,14 +253,22 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             }
             bb.position(start + skipBytes);
             final ABIType<?> resultType = elementTypes[pos++];
-            if (resultType.dynamic) {
-                bb.position(start + UINT31.decode(bb, unitBuffer));
-            }
-            results[index] = resultType.decode(bb, unitBuffer);
+            results[index] = decodeObject(resultType, bb, start, unitBuffer, index);
             skipBytes += resultType.headLength();
             prevIndex = index;
         }
         return new Tuple(results);
+    }
+
+    private static Object decodeObject(ABIType<?> type, ByteBuffer bb, int start, byte[] unitBuffer, int index) {
+        try {
+            if (type.dynamic) {
+                bb.position(start + UINT31.decode(bb, unitBuffer));
+            }
+            return type.decode(bb, unitBuffer);
+        } catch (IllegalArgumentException cause) {
+            throw decodeException(true, index, cause);
+        }
     }
 
     static int staticTupleHeadLength(TupleType tt) {

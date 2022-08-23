@@ -847,15 +847,14 @@ public class DecodeTest {
 
     @Test
     public void testErrors() throws Throwable {
-        assertThrown(IllegalArgumentException.class, "tuple index 0: array index 2: illegal boolean value @ 64",
-                () -> TypeFactory.create("(bool[3])").decode(
-                        FastHex.decode(
-                                "0000000000000000000000000000000000000000000000000000000000000001" +
-                                "0000000000000000000000000000000000000000000000000000000000000000" +
-                                "000000000000000000000000000000000000000000000000000000000000000c"
-                        )
-                )
-        );
+        final TupleType originalType = TypeFactory.create("(bytes1,int8[3])");
+        final ByteBuffer encoded = originalType.encode(Tuple.of(new byte[1], new int[] { 1, 0, 2 }));
+        final TupleType newType = TypeFactory.create("(bytes1,bool[3])");
+        final String msg = "tuple index 1: array index 2: illegal boolean value @ 96";
+        assertThrown(IllegalArgumentException.class, msg, () -> newType.decode(encoded, 1));
+        assertThrown(IllegalArgumentException.class, msg, () -> newType.decode(encoded, 0, 1));
+        assertThrown(IllegalArgumentException.class, msg, () -> newType.decode(encoded.array()));
+
         assertThrown(IllegalArgumentException.class, "tuple index 0: array index 0: signed val exceeds bit limit: 8 >= 8",
                 () -> TypeFactory.create("(int8[1])").decode(
                         FastHex.decode(
@@ -863,6 +862,7 @@ public class DecodeTest {
                         )
                 )
         );
+
         assertThrown(IllegalArgumentException.class, "tuple index 0: array index 1: unsigned val exceeds bit limit: 33 > 32",
                 () -> TypeFactory.create("(uint32[2])").decode(
                         FastHex.decode(
@@ -872,6 +872,7 @@ public class DecodeTest {
                         )
                 )
         );
+
         assertThrown(IllegalArgumentException.class, "tuple index 1: array index 1: signed val exceeds bit limit: 255 >= 248",
                 () -> TypeFactory.create("(bool,int248[])").decode(
                         FastHex.decode(
