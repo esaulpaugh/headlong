@@ -36,7 +36,6 @@ import static com.esaulpaugh.headlong.abi.util.JsonUtils.getArray;
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.getBoolean;
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.getString;
 import static com.esaulpaugh.headlong.abi.util.JsonUtils.parseArray;
-import static com.esaulpaugh.headlong.abi.util.JsonUtils.parseObject;
 
 /** For parsing JSON representations of {@link ABIObject}s according to the ABI specification. */
 public final class ABIJSON {

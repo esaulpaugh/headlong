@@ -21,7 +21,6 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

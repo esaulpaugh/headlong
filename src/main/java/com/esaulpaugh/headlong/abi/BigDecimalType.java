@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 /** Represents a decimal type such as fixed, ufixed, or decimal. */
