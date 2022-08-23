@@ -848,7 +848,7 @@ public class DecodeTest {
     @Test
     public void testErrors() throws Throwable {
         assertThrown(IllegalArgumentException.class, "tuple index 0: array index 2: illegal boolean value @ 64",
-                () -> TypeFactory.createNonCapturing("(bool[3])").decode(
+                () -> TypeFactory.create("(bool[3])").decode(
                         FastHex.decode(
                                 "0000000000000000000000000000000000000000000000000000000000000001" +
                                 "0000000000000000000000000000000000000000000000000000000000000000" +
@@ -857,14 +857,14 @@ public class DecodeTest {
                 )
         );
         assertThrown(IllegalArgumentException.class, "tuple index 0: array index 0: signed val exceeds bit limit: 8 >= 8",
-                () -> TypeFactory.createNonCapturing("(int8[1])").decode(
+                () -> TypeFactory.create("(int8[1])").decode(
                         FastHex.decode(
                                 "0000000000000000000000000000000000000000000000000000000000000080"
                         )
                 )
         );
         assertThrown(IllegalArgumentException.class, "tuple index 0: array index 1: unsigned val exceeds bit limit: 33 > 32",
-                () -> TypeFactory.createNonCapturing("(uint32[2])").decode(
+                () -> TypeFactory.create("(uint32[2])").decode(
                         FastHex.decode(
                                 "00000000000000000000000000000000000000000000000000000000fffffff1" +
                                 "0000000000000000000000000000000000000000000000000000000100000000" +
@@ -873,7 +873,7 @@ public class DecodeTest {
                 )
         );
         assertThrown(IllegalArgumentException.class, "tuple index 1: array index 1: signed val exceeds bit limit: 255 >= 248",
-                () -> TypeFactory.createNonCapturing("(bool,int248[])").decode(
+                () -> TypeFactory.create("(bool,int248[])").decode(
                         FastHex.decode(
                                 "0000000000000000000000000000000000000000000000000000000000000001" +
                                 "0000000000000000000000000000000000000000000000000000000000000040" +
