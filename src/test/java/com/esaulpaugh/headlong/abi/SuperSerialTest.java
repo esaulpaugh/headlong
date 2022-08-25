@@ -62,32 +62,32 @@ public class SuperSerialTest {
     @Test
     public void testBoolean() throws Throwable {
 
-        TupleType tt = TupleType.parse("(bool)");
+        TupleType _bool_ = TupleType.parse("(bool)");
         Tuple _true = Tuple.singleton(true);
         Tuple _false = Tuple.singleton(false);
 
-        assertEquals("01", SuperSerial.serialize(tt, _true, true));
-        assertEquals("80", SuperSerial.serialize(tt, _false, true));
-        assertEquals("(\n  '01'\n)", SuperSerial.serialize(tt, _true, false));
-        assertEquals("(\n  ''\n)", SuperSerial.serialize(tt, _false, false));
+        assertEquals("01", SuperSerial.serialize(_bool_, _true, true));
+        assertEquals("80", SuperSerial.serialize(_bool_, _false, true));
+        assertEquals("(\n  '01'\n)", SuperSerial.serialize(_bool_, _true, false));
+        assertEquals("(\n  ''\n)", SuperSerial.serialize(_bool_, _false, false));
 
-        Tuple t = SuperSerial.deserialize(TupleType.parse("(bool)"), "('01')", false);
+        Tuple t = SuperSerial.deserialize(_bool_, "('01')", false);
         assertTrue((boolean) t.get(0));
-        t = SuperSerial.deserialize(TupleType.parse("(bool)"), "('')", false);
+        t = SuperSerial.deserialize(_bool_, "('')", false);
         assertFalse((boolean) t.get(0));
         assertThrown(IllegalArgumentException.class, "illegal boolean RLP: 0x00. Expected 0x01 or 0x80",
-                () -> SuperSerial.deserialize(TupleType.parse("(bool)"), "('00')", false));
+                () -> SuperSerial.deserialize(_bool_, "('00')", false));
         assertThrown(IllegalArgumentException.class, "illegal boolean RLP: 0x82fcd1. Expected 0x01 or 0x80",
-                () -> SuperSerial.deserialize(TupleType.parse("(bool)"), "('fcd1')", false));
+                () -> SuperSerial.deserialize(_bool_, "('fcd1')", false));
 
-        t = SuperSerial.deserialize(TupleType.parse("(bool)"), "01", true);
+        t = SuperSerial.deserialize(_bool_, "01", true);
         assertTrue((boolean) t.get(0));
-        t = SuperSerial.deserialize(TupleType.parse("(bool)"), "80", true);
+        t = SuperSerial.deserialize(_bool_, "80", true);
         assertFalse((boolean) t.get(0));
         assertThrown(IllegalArgumentException.class, "illegal boolean RLP: 0x00. Expected 0x01 or 0x80",
-                () -> SuperSerial.deserialize(TupleType.parse("(bool)"), "00", true));
+                () -> SuperSerial.deserialize(_bool_, "00", true));
         assertThrown(IllegalArgumentException.class, "illegal boolean RLP: 0x82fcd1. Expected 0x01 or 0x80",
-                () -> SuperSerial.deserialize(TupleType.parse("(bool)"), "82fcd1", true));
+                () -> SuperSerial.deserialize(_bool_, "82fcd1", true));
     }
 
     @Test
