@@ -138,9 +138,8 @@ public class MonteCarloTest {
         final int totalWork = workPerProcessor * parallelism;
         final String initialConditions = "(" + masterSeed + "L," + MAX_TUPLE_DEPTH + ',' + MAX_TUPLE_LEN + ',' + MAX_ARRAY_DEPTH + ',' + MAX_ARRAY_LEN + ")";
         System.out.println("Running\t\t" + totalWork + "\t" + initialConditions + " ...");
-        int i = 0;
-        while (i < runnables.length) {
-            pool.submit(runnables[i] = new GambleGambleRunnable(parallelism, masterSeed, masterSeed + (i++), workPerProcessor, limits));
+        for (int i = 0; i < runnables.length; i++) {
+            pool.submit(runnables[i] = new GambleGambleRunnable(parallelism, masterSeed, masterSeed + i, workPerProcessor, limits));
         }
         boolean noTimeout = TestUtils.shutdownAwait(pool, 600L);
 
@@ -164,8 +163,6 @@ public class MonteCarloTest {
 
         final Random r = new Random(threadSeed);
         final Keccak k = new Keccak(256);
-
-        final String desc = "thread-" + Thread.currentThread().getId() + " seed: " + threadSeed + "L\nMASTER SEED: " + masterSeed + "\nparallelism: " + parallelism;
 
         final Random instance = new Random();
 
@@ -191,6 +188,10 @@ public class MonteCarloTest {
             } catch (Throwable t) {
                 System.out.println(log);
                 sleep();
+                final String desc = "thread-" + Thread.currentThread().getId()
+                                    + " seed: " + threadSeed
+                                    + "L\nMASTER SEED: " + masterSeed
+                                    + "\nparallelism: " + parallelism;
                 if (!initialized) {
                     System.err.println("#" + i + " failed to initialize with seed " + caseSeed + "\n" + desc);
                 } else {
