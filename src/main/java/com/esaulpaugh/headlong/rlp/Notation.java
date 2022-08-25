@@ -142,7 +142,8 @@ public final class Notation {
 
     private static void buildListContent(StringBuilder sb, final int dataIndex, final int end, byte[] data, boolean shortList, final int elementDepth) {
         final String elementPrefix = shortList ? null : getLinePadding(elementDepth);
-        for (int i = dataIndex; i < end; ) {
+        int i = dataIndex;
+        while (i < end) {
             if(!shortList) {
                 sb.append(elementPrefix);
             }
