@@ -64,6 +64,7 @@ public class EncodeTest {
     private static final Pattern TUPLE_TYPE_PATTERN = Pattern.compile("^\\(" + TYPE_PATTERN + "\\)$");
 
     @Disabled("may take minutes to run")
+    @SuppressWarnings("deprecation")
     @Test
     public void fuzzSignatures() throws InterruptedException, TimeoutException {
 
