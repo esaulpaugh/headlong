@@ -198,7 +198,12 @@ public final class ABIJSON {
                 indexed[i] = getBoolean(inputObj, INDEXED);
             }
         }
-        return new TupleType(TupleType.completeTupleTypeString(canonicalBuilder), dynamic, names, elements);
+        return new TupleType(
+                canonicalBuilder.deleteCharAt(canonicalBuilder.length() - 1).append(')').toString(),
+                dynamic,
+                names,
+                elements
+        );
     }
 
     private static ContractError parseErrorUnchecked(JsonObject error) {
