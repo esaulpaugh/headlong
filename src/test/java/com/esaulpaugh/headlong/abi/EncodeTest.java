@@ -138,7 +138,7 @@ public class EncodeTest {
                         if(!TUPLE_TYPE_PATTERN.matcher(sig).matches() || !TUPLE_TYPE_PATTERN.matcher(canon).matches()) {
                             throw new RuntimeException("tuple fails TUPLE_TYPE_PATTERN: " + sig + " " + canon);
                         }
-                    } catch (IllegalArgumentException | ClassCastException ignored) {
+                    } catch (IllegalArgumentException ignored) {
                         /* do nothing */
                     } catch (Throwable t) {
                         System.err.println(sig);
