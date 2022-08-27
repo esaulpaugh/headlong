@@ -167,24 +167,38 @@ public final class ABIJSON {
     private static Event parseEventUnchecked(JsonObject event) {
         final JsonArray inputs = getArray(event, INPUTS);
         if (inputs != null) {
-            final int inputsLen = inputs.size();
-            final String[] elementNames = new String[inputsLen];
-            final ABIType<?>[] types = new ABIType<?>[inputsLen];
-            final boolean[] indexed = new boolean[inputsLen];
-            for (int i = 0; i < inputsLen; i++) {
-                final JsonObject inputObj = inputs.get(i).getAsJsonObject();
-                elementNames[i] = getName(inputObj);
-                types[i] = parseType(inputObj);
-                indexed[i] = getBoolean(inputObj, INDEXED);
-            }
+            final boolean[] indexed = new boolean[inputs.size()];
             return new Event(
                     getName(event),
                     getBoolean(event, ANONYMOUS, false),
-                    TupleType.wrap(elementNames, types),
+                    parseTupleType(inputs, indexed),
                     indexed
             );
         }
         throw new IllegalArgumentException("array \"" + INPUTS + "\" null or not found");
+    }
+
+    private static TupleType parseTupleType(final JsonArray array, final boolean[] indexed) {
+        int size;
+        if (array == null || (size = array.size()) <= 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
+            return TupleType.EMPTY;
+        }
+        final ABIType<?>[] elements = new ABIType<?>[size];
+        final String[] names = new String[size];
+        final StringBuilder canonicalBuilder = new StringBuilder("(");
+        boolean dynamic = false;
+        for (int i = 0; i < elements.length; i++) {
+            final JsonObject inputObj = array.get(i).getAsJsonObject();
+            final ABIType<?> e = parseType(inputObj);
+            canonicalBuilder.append(e.canonicalType).append(',');
+            dynamic |= e.dynamic;
+            elements[i] = e;
+            names[i] = getName(inputObj);
+            if(indexed != null) {
+                indexed[i] = getBoolean(inputObj, INDEXED);
+            }
+        }
+        return new TupleType(TupleType.completeTupleTypeString(canonicalBuilder), dynamic, names, elements);
     }
 
     private static ContractError parseErrorUnchecked(JsonObject error) {
@@ -192,19 +206,7 @@ public final class ABIJSON {
     }
 
     private static TupleType parseTupleType(JsonObject object, String arrayKey) {
-        final JsonArray array = getArray(object, arrayKey);
-        final int size;
-        if (array == null || (size = array.size()) <= 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
-            return TupleType.EMPTY;
-        }
-        final String[] elementNames = new String[size];
-        final ABIType<?>[] elements = new ABIType[size];
-        for(int i = 0; i < size; i++) {
-            JsonObject obj = array.get(i).getAsJsonObject();
-            elementNames[i] = getName(obj);
-            elements[i] = parseType(obj);
-        }
-        return TupleType.wrap(elementNames, elements);
+        return parseTupleType(getArray(object, arrayKey), null);
     }
 
     private static ABIType<?> parseType(JsonObject object) {

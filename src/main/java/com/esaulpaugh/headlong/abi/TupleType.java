@@ -57,16 +57,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
     }
 
-    static TupleType wrap(String[] elementNames, ABIType<?>... elements) {
-        StringBuilder canonicalBuilder = new StringBuilder("(");
-        boolean dynamic = false;
-        for (ABIType<?> e : elements) {
-            canonicalBuilder.append(e.canonicalType).append(',');
-            dynamic |= e.dynamic;
-        }
-        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elementNames, elements); // TODO .intern() string?
-    }
-
     public int size() {
         return elementTypes.length;
     }
@@ -369,7 +359,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         throw new IllegalArgumentException("manifest.length != size(): " + manifest.length + " != " + size);
     }
 
-    private static String completeTupleTypeString(StringBuilder sb) {
+    static String completeTupleTypeString(StringBuilder sb) {
         final int len = sb.length();
         return len != 1
                 ? sb.deleteCharAt(len - 1).append(')').toString() // replace trailing comma

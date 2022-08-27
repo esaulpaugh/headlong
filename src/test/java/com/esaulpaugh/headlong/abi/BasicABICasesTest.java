@@ -80,10 +80,10 @@ public class BasicABICasesTest {
 
             final int size = types.size();
             final ABIType<?>[] arr = new ABIType<?>[size];
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < arr.length; i++) {
                 arr[i] = TypeFactory.create(types.get(i).getAsString());
             }
-            TupleType tt = TupleType.wrap(null, arr);
+            TupleType tt = wrap(arr);
 
             System.out.println(tt.canonicalType);
 
@@ -100,6 +100,16 @@ public class BasicABICasesTest {
 
             assertArrayEquals(Strings.decode(result), Arrays.copyOfRange(bb.array(), Function.SELECTOR_LEN, bb.limit()));
         }
+    }
+
+    static TupleType wrap(ABIType<?>... elements) {
+        final StringBuilder canonicalBuilder = new StringBuilder("(");
+        boolean dynamic = false;
+        for (ABIType<?> e : elements) {
+            canonicalBuilder.append(e.canonicalType).append(',');
+            dynamic |= e.dynamic;
+        }
+        return new TupleType(TupleType.completeTupleTypeString(canonicalBuilder), dynamic, null, elements);
     }
 
     @Test

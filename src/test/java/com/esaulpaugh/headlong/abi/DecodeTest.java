@@ -355,8 +355,6 @@ public class DecodeTest {
             final TupleType n = TypeFactory.createTupleTypeWithNames("(bool)", "nam");
             assertEquals("nam", n.getElementName(0));
             m.encode(new BigInteger[] {});
-
-            TupleType.wrap(null, TypeFactory.create("int"), TypeFactory.create("bytes[7]"));
         }
 
         Object decoded0 = Function.parse("()", "(string[])").getOutputs().get(0).decode(abi, new byte[32]);

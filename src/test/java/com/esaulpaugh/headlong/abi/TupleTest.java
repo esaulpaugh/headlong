@@ -246,17 +246,27 @@ public class TupleTest {
 
         assertNotEquals(aName, cName);
 
-        final TupleType x = TupleType.wrap(new String[] { aName }, a.get(0));
+        final TupleType x = wrap(new String[] { aName }, a.get(0));
         assertEquals(aName, x.getElementName(0));
 
-        final TupleType y = TupleType.wrap(null, b.get(0));
+        final TupleType y = wrap(null, b.get(0));
         assertEquals(aName, x.getElementName(0));
         assertNull(y.getElementName(0));
 
-        final TupleType z = TupleType.wrap(new String[] { cName }, c.get(0));
+        final TupleType z = wrap(new String[] { cName }, c.get(0));
         assertEquals(aName, x.getElementName(0));
         assertNull(y.getElementName(0));
         assertEquals(cName, z.getElementName(0));
+    }
+
+    static TupleType wrap(String[] elementNames, ABIType<?>... elements) {
+        final StringBuilder canonicalBuilder = new StringBuilder("(");
+        boolean dynamic = false;
+        for (ABIType<?> e : elements) {
+            canonicalBuilder.append(e.canonicalType).append(',');
+            dynamic |= e.dynamic;
+        }
+        return new TupleType(TupleType.completeTupleTypeString(canonicalBuilder), dynamic, elementNames, elements);
     }
 
     @Test
