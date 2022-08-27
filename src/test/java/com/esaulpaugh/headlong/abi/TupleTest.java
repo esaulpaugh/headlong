@@ -259,14 +259,21 @@ public class TupleTest {
         assertEquals(cName, z.getElementName(0));
     }
 
-    static TupleType wrap(String[] elementNames, ABIType<?>... elements) {
+    private static TupleType wrap(String[] elementNames, ABIType<?>... elements) {
         final StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
         for (ABIType<?> e : elements) {
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
         }
-        return new TupleType(TupleType.completeTupleTypeString(canonicalBuilder), dynamic, elementNames, elements);
+        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elementNames, elements);
+    }
+
+    private static String completeTupleTypeString(StringBuilder sb) {
+        final int len = sb.length();
+        return len != 1
+                ? sb.deleteCharAt(len - 1).append(')').toString() // replace trailing comma
+                : "()";
     }
 
     @Test
