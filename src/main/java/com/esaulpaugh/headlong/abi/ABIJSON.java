@@ -178,6 +178,10 @@ public final class ABIJSON {
         throw new IllegalArgumentException("array \"" + INPUTS + "\" null or not found");
     }
 
+    private static ContractError parseErrorUnchecked(JsonObject error) {
+        return new ContractError(getName(error), parseTupleType(error, INPUTS));
+    }
+
     private static TupleType parseTupleType(final JsonArray array, final boolean[] indexed) {
         int size;
         if (array == null || (size = array.size()) <= 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
@@ -204,10 +208,6 @@ public final class ABIJSON {
                 elements,
                 names
         );
-    }
-
-    private static ContractError parseErrorUnchecked(JsonObject error) {
-        return new ContractError(getName(error), parseTupleType(error, INPUTS));
     }
 
     private static TupleType parseTupleType(JsonObject object, String arrayKey) {
