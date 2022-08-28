@@ -224,8 +224,8 @@ public final class TypeFactory {
                 ? new TupleType(
                     canonicalBuilder.deleteCharAt(canonicalBuilder.length() - 1).append(')').toString(),
                     dynamic,
-                    elementNames,
-                    elements.toArray(EMPTY_ARRAY)
+                    elements.toArray(EMPTY_ARRAY),
+                    elementNames
                 )
                 : null;
     }

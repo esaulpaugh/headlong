@@ -201,8 +201,8 @@ public final class ABIJSON {
         return new TupleType(
                 canonicalBuilder.deleteCharAt(canonicalBuilder.length() - 1).append(')').toString(),
                 dynamic,
-                names,
-                elements
+                elements,
+                names
         );
     }
 

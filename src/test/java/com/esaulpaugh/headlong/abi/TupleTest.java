@@ -266,7 +266,7 @@ public class TupleTest {
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
         }
-        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elementNames, elements);
+        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements, elementNames);
     }
 
     private static String completeTupleTypeString(StringBuilder sb) {

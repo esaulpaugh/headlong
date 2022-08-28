@@ -33,17 +33,17 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     static final String EMPTY_TUPLE_STRING = "()";
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, null, EMPTY_ARRAY);
+    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null);
 
-    final String[] elementNames;
     final ABIType<?>[] elementTypes;
+    final String[] elementNames;
     private final int headLength;
     private final int firstOffset;
 
-    TupleType(String canonicalType, boolean dynamic, String[] elementNames, ABIType<?>[] elementTypes) {
+    TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String[] elementNames) {
         super(canonicalType, Tuple.class, dynamic);
-        this.elementNames = elementNames;
         this.elementTypes = elementTypes;
+        this.elementNames = elementNames;
         if(dynamic) {
             this.headLength = OFFSET_LENGTH_BYTES;
             int sum = 0;
@@ -343,18 +343,18 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         if(manifest.length == size) {
             final StringBuilder canonicalBuilder = new StringBuilder("(");
             boolean dynamic = false;
-            final List<String> selectedNames = new ArrayList<>(size);
             final List<ABIType<?>> selected = new ArrayList<>(size);
+            final List<String> selectedNames = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 if (negate ^ manifest[i]) {
                     ABIType<?> e = get(i);
                     canonicalBuilder.append(e.canonicalType).append(',');
                     dynamic |= e.dynamic;
-                    selectedNames.add(elementNames == null ? null : elementNames[i]);
                     selected.add(e);
+                    selectedNames.add(elementNames == null ? null : elementNames[i]);
                 }
             }
-            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selectedNames.toArray(EMPTY_STRING_ARRAY), selected.toArray(EMPTY_ARRAY));
+            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected.toArray(EMPTY_ARRAY), selectedNames.toArray(EMPTY_STRING_ARRAY));
         }
         throw new IllegalArgumentException("manifest.length != size(): " + manifest.length + " != " + size);
     }
