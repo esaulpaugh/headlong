@@ -27,7 +27,6 @@ import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,39 +38,71 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TupleTest {
 
+    private static final long[] MASKS;
+
+    static {
+        MASKS = new long[64];
+        for (int i = 0; i < MASKS.length; i++) {
+            MASKS[i] = 1L << (63 - i);
+        }
+    }
+
     @Disabled("meta test")
     @Test
     public void metaTest1() {
-        Random r = ThreadLocalRandom.current();
+        final Random r = TestUtils.seededRandom();
 
-        int bits = 24;
+        for (int j = 0; j < 27; j++) {
+            final long pow = (int) Math.pow(2.0, j);
+            final long powMinus1 = pow - 1;
+            System.out.println(Long.toHexString(powMinus1) + ", " + pow);
 
-        final int pow = (int) Math.pow(2.0, bits);
-        final int powMinus1 = pow - 1;
-        System.out.println(Long.toHexString(powMinus1));
+            final long[] longs = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
 
-        System.out.println(pow);
+            final BigIntegerType type = new BigIntegerType("int" + j, j, false);
+//            final BooleanType type = new BooleanType();
 
-        boolean[] bools = new boolean[pow];
+            final long lim = pow * (j / 2 + 28);
+            System.out.println("j=" + j + ",lim=" + lim);
+            for (long i = 0; i < lim; i++) {
+                final BigInteger val = MonteCarloTestCase.generateBigInteger(r, type);
+                final long z = val.longValue() & powMinus1;
+                final long chunkIdx = z / Long.SIZE;
+                final long bitIdx = z % Long.SIZE;
+                final long bit = MASKS[(int) bitIdx];
+                if(bit == 0) throw new IllegalArgumentException("bit " + bit);
+                longs[(int) chunkIdx] |= bit;
+//                bools[x & powMinus1] = true;
+//                bools[(int) MonteCarloTestCase.generateLong(r, type) & powMinus1] = true;
+            }
 
-        BigIntegerType type = new BigIntegerType("int" + bits, bits, false);
-//        BooleanType type = new BooleanType();
+            int missed = 0;
+            int missedChunks = 0;
+            final int fullChunks = (int) (pow / Long.SIZE);
+            for (int i = 0; i < fullChunks; i++) {
+                final long val = longs[i];
+                if(val != 0xFFFFFFFF_FFFFFFFFL) {
+                    final int zeroes = Long.SIZE - Long.bitCount(val);
+                    missed += zeroes;
+                    missedChunks++;
+                    System.err.println("chunk " + i + " value " + Long.toBinaryString(val));
+                }
+            }
+            final int lastBits = (int) (pow % Long.SIZE);
+            final long last = longs[longs.length - 1];
+            for (int i = 0; i < lastBits; i++) {
+                final long bit = last & MASKS[i];
+                if(bit == 0) {
+                    missed++;
+                    System.err.println(i);
+                }
+            }
 
-        for (int i = 0; i < 1_579_919_999; i++) {
-            bools[MonteCarloTestCase.generateBigInteger(r, type).intValue() & powMinus1] = true;
-//            bools[(int) MonteCarloTestCase.generateLong(r, type) & powMinus1] = true;
-        }
-
-        int count = 0;
-        for (int i = 0; i < pow; i++) {
-            if(!bools[i]) {
-                count++;
-                System.err.println(i);
+            System.out.println(pow - missed + " / " + pow + " " + (1 - ((double) missed / pow)) + '\n');
+            if(missedChunks != 0 || missed != 0) {
+                throw new IllegalArgumentException("missed " + missed + ", missedChunks=" + missedChunks);
             }
         }
-
-        System.out.println("missed " + count);
-        System.out.println(pow - count + " / " + pow + " " + (1 - ((double) count / pow)));
     }
 
     @Test
