@@ -30,7 +30,7 @@ public final class Tuple implements Iterable<Object> {
 
     final Object[] elements;
 
-    Tuple(Object... elements) {
+    Tuple(Object... elements) { // use Tuple.of and Tuple.singleton instead
         this.elements = elements;
     }
 
