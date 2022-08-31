@@ -52,7 +52,7 @@ public class TupleTest {
     public void metaTest1() {
         final Random r = TestUtils.seededRandom();
 
-        for (int j = 0; j < 27; j++) {
+        for (int j = 0; j < 26; j++) {
             final int pow = (int) Math.pow(2.0, j);
             final int powMinus1 = pow - 1;
             System.out.println(Long.toHexString(powMinus1) + ", " + pow);
@@ -60,10 +60,10 @@ public class TupleTest {
             final BigIntegerType type = new BigIntegerType("int" + j, j, false);
 //            final BooleanType type = new BooleanType();
 
-            final long lim = (long) pow * (j / 2 + 28);
-            System.out.println("j=" + j + ",lim=" + lim);
+            final long samples = (long) pow * (j / 2 + 8);
+            System.out.println("j=" + j + ", samples=" + samples);
             final long[] longs = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
-            for (long i = 0; i < lim; i++) {
+            for (long i = 0; i < samples; i++) {
                 final BigInteger val = MonteCarloTestCase.generateBigInteger(r, type);
                 final int z = val.intValue() & powMinus1;
                 longs[z / Long.SIZE] |= MASKS[z & 63];
