@@ -76,7 +76,7 @@ public class TupleTest {
             final int fullChunks = pow / Long.SIZE;
             for (int i = 0; i < fullChunks; i++) {
                 final long val = longs[i];
-                if(val != 0xFFFFFFFF_FFFFFFFFL) {
+                if(val != 0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111L) {
                     final int zeroes = Long.SIZE - Long.bitCount(val);
                     missed += zeroes;
                     missedChunks++;
