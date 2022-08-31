@@ -53,32 +53,27 @@ public class TupleTest {
         final Random r = TestUtils.seededRandom();
 
         for (int j = 0; j < 27; j++) {
-            final long pow = (int) Math.pow(2.0, j);
-            final long powMinus1 = pow - 1;
+            final int pow = (int) Math.pow(2.0, j);
+            final int powMinus1 = pow - 1;
             System.out.println(Long.toHexString(powMinus1) + ", " + pow);
-
-            final long[] longs = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
 
             final BigIntegerType type = new BigIntegerType("int" + j, j, false);
 //            final BooleanType type = new BooleanType();
 
-            final long lim = pow * (j / 2 + 28);
+            final long lim = (long) pow * (j / 2 + 28);
             System.out.println("j=" + j + ",lim=" + lim);
+            final long[] longs = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
             for (long i = 0; i < lim; i++) {
                 final BigInteger val = MonteCarloTestCase.generateBigInteger(r, type);
-                final long z = val.longValue() & powMinus1;
-                final long chunkIdx = z / Long.SIZE;
-                final long bitIdx = z % Long.SIZE;
-                final long bit = MASKS[(int) bitIdx];
-                if(bit == 0) throw new IllegalArgumentException("bit " + bit);
-                longs[(int) chunkIdx] |= bit;
+                final int z = val.intValue() & powMinus1;
+                longs[z / Long.SIZE] |= MASKS[z & 63];
 //                bools[x & powMinus1] = true;
 //                bools[(int) MonteCarloTestCase.generateLong(r, type) & powMinus1] = true;
             }
 
             int missed = 0;
             int missedChunks = 0;
-            final int fullChunks = (int) (pow / Long.SIZE);
+            final int fullChunks = pow / Long.SIZE;
             for (int i = 0; i < fullChunks; i++) {
                 final long val = longs[i];
                 if(val != 0xFFFFFFFF_FFFFFFFFL) {
@@ -88,18 +83,19 @@ public class TupleTest {
                     System.err.println("chunk " + i + " value " + Long.toBinaryString(val));
                 }
             }
-            final int lastBits = (int) (pow % Long.SIZE);
-            final long last = longs[longs.length - 1];
-            for (int i = 0; i < lastBits; i++) {
-                final long bit = last & MASKS[i];
-                if(bit == 0) {
-                    missed++;
-                    System.err.println(i);
+            final int finalBits = pow % Long.SIZE;
+            if (finalBits > 0) {
+                final int shift = 64 - finalBits;
+                final long last = longs[longs.length - 1];
+                final long expected = -1L << shift;
+                if(last != expected) {
+                    missed += finalBits - Long.bitCount(last >>> shift);
+                    System.err.println("last = " + Long.toBinaryString(last));
                 }
             }
 
             System.out.println(pow - missed + " / " + pow + " " + (1 - ((double) missed / pow)) + '\n');
-            if(missedChunks != 0 || missed != 0) {
+            if (missedChunks != 0 || missed != 0) {
                 throw new IllegalArgumentException("missed " + missed + ", missedChunks=" + missedChunks);
             }
         }
