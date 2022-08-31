@@ -76,14 +76,6 @@ public final class SuperSerial {
         return in;
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> T deserializeArray(ArrayType<? extends ABIType<?>, T> arrayType, String str, boolean machine) {
-        byte[] rlp = machine ? Strings.decode(str) : RLPEncoder.sequence(Notation.parse(str));
-        T array = (T) deserializeArray(arrayType, RLP_STRICT.wrap(rlp));
-        arrayType.validate(array);
-        return array;
-    }
-
     private static Object[] serializeTuple(TupleType tupleType, Tuple tuple) {
         Object[] out = new Object[tupleType.size()];
         for(int i = 0; i < out.length; i++) {
