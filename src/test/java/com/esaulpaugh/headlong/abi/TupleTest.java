@@ -318,7 +318,7 @@ public class TupleTest {
 
         args[1] = 'x';
         assertEquals("a", t.get(0));
-        assertEquals(Character.valueOf('x'), t.get(1));
+        assertEquals("b", t.get(1)); // assertEquals(Character.valueOf('x'), t.get(1));
         assertEquals("c", t.get(2));
 
 //        List<Object> list = t.toList();

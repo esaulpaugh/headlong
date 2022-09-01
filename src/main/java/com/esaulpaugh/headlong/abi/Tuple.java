@@ -30,18 +30,27 @@ public final class Tuple implements Iterable<Object> {
 
     final Object[] elements;
 
-    Tuple(Object... elements) { // use Tuple.of and Tuple.singleton instead
-        this.elements = elements;
+    /**
+     * @deprecated Will become inaccessible in version 9.0.0. Use {@link Tuple#of} and {@link Tuple#singleton} instead.
+     *
+     * @param elements  the values
+     */
+    @Deprecated
+    public Tuple(Object... elements) {
+        this.elements = Arrays.copyOf(elements, elements.length); // shallow copy
     }
 
     public static Tuple of(Object... elements) {
-        final Object[] shallowCopy = new Object[elements.length];
+//        final Object[] shallowCopy = new Object[elements.length];
+//        for (int i = 0; i < elements.length; i++) {
+//            Object e = elements[i];
+//            checkNotNull(e, i);
+//            shallowCopy[i] = e;
+//        }
         for (int i = 0; i < elements.length; i++) {
-            Object e = elements[i];
-            checkNotNull(e, i);
-            shallowCopy[i] = e;
+            checkNotNull(elements[i], i);
         }
-        return new Tuple(shallowCopy);
+        return new Tuple(elements);
     }
 
     public static Tuple singleton(Object element) {
