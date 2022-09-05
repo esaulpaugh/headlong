@@ -196,7 +196,7 @@ public final class Tuple implements Iterable<Object> {
                 final long[] longs = (long[]) e;
                 return Arrays.copyOf(longs, longs.length);
             }
-            throw new AssertionError(); // float, double, char, short
+            throw new IllegalArgumentException(); // float, double, char, short
         }
         return e instanceof Tuple ? ((Tuple) e).deepCopy() : e;
     }
