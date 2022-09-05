@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import java.lang.reflect.Array;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -130,5 +132,72 @@ public final class Tuple implements Iterable<Object> {
     @Override
     public Iterator<Object> iterator() {
         return Arrays.asList(elements).iterator();
+    }
+
+    /**
+     * Returns a deep copy of this tuple. Non-array, non-tuple objects are assumed to be immutable and are copied via
+     * reference.
+     *
+     * @return  an independent copy of this tuple
+     */
+    public Tuple deepCopy() {
+        final Object[] deepCopy = new Object[elements.length];
+        for (int i = 0; i < elements.length; i++) {
+            deepCopy[i] = deepCopyElement(elements[i]);
+        }
+        return new Tuple(deepCopy);
+    }
+
+    private static Object[] deepCopy(Object[] original) {
+        final Object[] copy = (Object[]) Array.newInstance(elementClass(original.getClass()), original.length);
+        for (int i = 0; i < copy.length; i++) {
+            copy[i] = deepCopyElement(original[i]);
+        }
+        return copy;
+    }
+
+    private static Class<?> elementClass(Class<? extends Object[]> arrClazz) {
+        try {
+            if (arrClazz == BigInteger[].class) return BigInteger.class;
+            if (arrClazz == Address[].class) return Address.class;
+            if (arrClazz == Tuple[].class) return Tuple.class;
+            final String name = arrClazz.getName();
+            if (name.charAt(0) == '[') {
+                return Class.forName(
+                        name.charAt(1) == 'L'
+                            ? name.substring(2, name.length() - 1)
+                            : name.substring(1)
+                );
+            }
+        } catch (ClassNotFoundException ignored) {
+            /* fall through */
+        }
+        throw new AssertionError();
+    }
+
+    private static Object deepCopyElement(Object e) {
+        if(e.getClass().isArray()) {
+            if (e instanceof Object[]) {
+                return deepCopy((Object[]) e);
+            }
+            if (e instanceof byte[]) {
+                final byte[] bytes = (byte[]) e;
+                return Arrays.copyOf(bytes, bytes.length);
+            }
+            if (e instanceof boolean[]) {
+                final boolean[] booleans = (boolean[]) e;
+                return Arrays.copyOf(booleans, booleans.length);
+            }
+            if (e instanceof int[]) {
+                final int[] ints = (int[]) e;
+                return Arrays.copyOf(ints, ints.length);
+            }
+            if (e instanceof long[]) {
+                final long[] longs = (long[]) e;
+                return Arrays.copyOf(longs, longs.length);
+            }
+            throw new AssertionError(); // float, double, char, short
+        }
+        return e instanceof Tuple ? ((Tuple) e).deepCopy() : e;
     }
 }
