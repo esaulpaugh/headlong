@@ -173,7 +173,9 @@ public class MonteCarloTestCase {
                 }
             } else {
                 assertEquals(tElement, t2Element);
-                if (c != Tuple.class) {
+                if (c == Tuple.class) {
+                    assertNotSame(tElement, t2Element);
+                } else {
                     assertSame(tElement, t2Element);
                 }
             }
