@@ -67,7 +67,7 @@ public class MonteCarloTest {
     }
 
     private static void repro(MonteCarloTestCase testCase, boolean run) {
-        System.out.println(testCase.rawSignature);
+        System.out.println(testCase.rawSignature());
         System.out.println(count(testCase.argsTuple));
         if (run) {
             testCase.runAll(new Random());

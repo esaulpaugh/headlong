@@ -109,7 +109,7 @@ public class MonteCarloTestCase {
 
     private final Limits limits;
 
-    final String rawSignature;
+    final String rawInputsStr;
     final Function function;
     final Tuple argsTuple;
 
@@ -132,15 +132,16 @@ public class MonteCarloTestCase {
 
         // insert random elements from FIXED_LIST
         final int size = FIXED_LIST.size();
-        for (int i = 0; i < NUM_FIXED_ADDED; i++) {
-            baseTypes[FIXED_START_INDEX + i] = FIXED_LIST.get(rng.nextInt(size));
+        for (int i = FIXED_START_INDEX; i < baseTypes.length; i++) {
+            baseTypes[i] = FIXED_LIST.get(rng.nextInt(size));
         }
-
-        final String name = generateFunctionName(rng);
-        final String inputs = generateTupleTypeString(baseTypes, rng, 0);
-        this.rawSignature = name + inputs;
-        this.function = new Function(TypeEnum.FUNCTION, name, TupleType.parse(inputs), TupleType.EMPTY, null, md);
+        this.rawInputsStr = generateTupleTypeString(baseTypes, rng, 0);
+        this.function = new Function(TypeEnum.FUNCTION, generateFunctionName(rng), TupleType.parse(rawInputsStr), TupleType.EMPTY, null, md);
         this.argsTuple = generateTuple(function.getInputs().elementTypes, rng);
+    }
+
+    String rawSignature() {
+        return function.getName() + rawInputsStr;
     }
 
     JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) {

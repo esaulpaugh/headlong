@@ -51,11 +51,11 @@ public class EqualsTest {
             final MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong(), limits, r, k);
 
             final String canonical = mctc.function.getCanonicalSignature();
-            if(mctc.rawSignature.equals(canonical)) {
+            if (mctc.rawSignature().equals(canonical)) {
                 i++;
                 continue;
             }
-            if(i > maxIters) {
+            if (i > maxIters) {
                 maxIters = i;
             }
             i = 0;
