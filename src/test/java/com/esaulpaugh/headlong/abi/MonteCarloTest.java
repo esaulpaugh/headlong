@@ -53,17 +53,17 @@ import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 public class MonteCarloTest {
 
     @Disabled("high memory")
-    @Test // (88642710261245591L,4,4,4,4
-    public void testRepro() { // (245781902350714877L,5,5,5,4
-        Random instance = new Random(); // (1847095625529912080L,5,5,5,4
-        MessageDigest md = Function.newDefaultDigest(); // (-2049532359701068182L,4,4,4,4
+    @Test
+    public void testRepro() {
+        Random instance = new Random();
+        MessageDigest md = Function.newDefaultDigest();
         MonteCarloTestCase testCase = new MonteCarloTestCase(
                 3239653448104147572L,
                 new MonteCarloTestCase.Limits(4, 3, 5, 4),
                 instance,
                 md
         );
-        repro(testCase, true); // (3239653448104147572L,4,3,5,4)
+        repro(testCase, true);
     }
 
     private static void repro(MonteCarloTestCase testCase, boolean run) {
