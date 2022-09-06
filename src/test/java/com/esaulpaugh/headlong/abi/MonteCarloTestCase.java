@@ -49,6 +49,8 @@ import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.TypeFactory.ADDRESS_BIT_LEN;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MonteCarloTestCase {
@@ -138,10 +140,44 @@ public class MonteCarloTestCase {
         this.rawInputsStr = generateTupleTypeString(baseTypes, rng, 0);
         this.function = new Function(TypeEnum.FUNCTION, generateFunctionName(rng), TupleType.parse(rawInputsStr), TupleType.EMPTY, null, md);
         this.argsTuple = generateTuple(function.getInputs().elementTypes, rng);
+        testDeepCopy(argsTuple);
     }
 
     String rawSignature() {
         return function.getName() + rawInputsStr;
+    }
+
+    private static void testDeepCopy(Tuple values) {
+        final Tuple copy = values.deepCopy();
+        assertNotSame(values, copy);
+        assertEquals(values, copy);
+        for (int i = 0; i < values.elements.length; i++) {
+            final Object tElement = values.elements[i];
+            final Object t2Element = copy.elements[i];
+            assertSame(tElement.getClass(), t2Element.getClass());
+            final Class<?> c = tElement.getClass();
+            if (c.isArray()) {
+                assertNotSame(tElement, t2Element);
+                if (tElement instanceof Object[]) {
+                    assertTrue(Arrays.deepEquals((Object[]) tElement, (Object[]) t2Element));
+                } else if (c == byte[].class) {
+                    assertArrayEquals((byte[]) tElement, (byte[]) t2Element);
+                } else if (c == boolean[].class) {
+                    assertArrayEquals((boolean[]) tElement, (boolean[]) t2Element);
+                } else if (c == int[].class) {
+                    assertArrayEquals((int[]) tElement, (int[]) t2Element);
+                } else if (c == long[].class) {
+                    assertArrayEquals((long[]) tElement, (long[]) t2Element);
+                } else {
+                    throw new AssertionError();
+                }
+            } else {
+                assertEquals(tElement, t2Element);
+                if (c != Tuple.class) {
+                    assertSame(tElement, t2Element);
+                }
+            }
+        }
     }
 
     JsonElement toJsonElement(Gson gson, String name, JsonPrimitive version) {
