@@ -32,13 +32,7 @@ public final class Tuple implements Iterable<Object> {
 
     final Object[] elements;
 
-    /**
-     * @deprecated Will become inaccessible in version 9.0.0. Use {@link Tuple#of} and {@link Tuple#singleton} instead.
-     *
-     * @param elements  the values
-     */
-    @Deprecated
-    public Tuple(Object... elements) {
+    Tuple(Object... elements) {
         this.elements = Arrays.copyOf(elements, elements.length); // shallow copy
     }
 
