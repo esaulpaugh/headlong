@@ -33,20 +33,17 @@ public final class Tuple implements Iterable<Object> {
     final Object[] elements;
 
     Tuple(Object... elements) {
-        this.elements = Arrays.copyOf(elements, elements.length); // shallow copy
+        this.elements = elements;
     }
 
     public static Tuple of(Object... elements) {
-//        final Object[] shallowCopy = new Object[elements.length];
-//        for (int i = 0; i < elements.length; i++) {
-//            Object e = elements[i];
-//            checkNotNull(e, i);
-//            shallowCopy[i] = e;
-//        }
+        final Object[] shallowCopy = new Object[elements.length];
         for (int i = 0; i < elements.length; i++) {
-            checkNotNull(elements[i], i);
+            Object e = elements[i];
+            checkNotNull(e, i);
+            shallowCopy[i] = e;
         }
-        return new Tuple(elements);
+        return new Tuple(shallowCopy);
     }
 
     public static Tuple singleton(Object element) {
