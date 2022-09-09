@@ -70,7 +70,9 @@ public final class TypeFactory {
 
         BASE_TYPE_MAP.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
         BASE_TYPE_MAP.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
-        BASE_TYPE_MAP.put("decimal", new BigDecimalType("fixed168x10", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
+        BASE_TYPE_MAP.put("fixed168x10", new BigDecimalType("fixed168x10", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
+
+        BASE_TYPE_MAP.put("decimal", BASE_TYPE_MAP.get("fixed168x10"));
 
         BASE_TYPE_MAP.put("int", BASE_TYPE_MAP.get("int256"));
         BASE_TYPE_MAP.put("uint", BASE_TYPE_MAP.get("uint256"));
