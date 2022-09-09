@@ -27,6 +27,8 @@ import java.math.BigInteger;
 
 public class Serializer {
 
+    private Serializer() {}
+
     public static JsonPrimitive serializeTypes(TupleType tupleType, Gson gson) {
         JsonArray typesArray = new JsonArray();
         for(ABIType<?> type : tupleType.elementTypes) {

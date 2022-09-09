@@ -34,6 +34,8 @@ import java.util.Iterator;
 
 public class Deserializer {
 
+    private Deserializer() {}
+
     public static TupleType parseTupleType(String ttStr) {
         return parseTupleType(JsonUtils.parseArray(ttStr));
     }
