@@ -142,7 +142,7 @@ public final class Event implements ABIObject {
     public Tuple decodeData(byte[] data) {
         return data == null && nonIndexedParams.isEmpty()
                 ? Tuple.EMPTY
-                : nonIndexedParams.decode(Objects.requireNonNull(data));
+                : nonIndexedParams.decode(data);
     }
 
     /**
