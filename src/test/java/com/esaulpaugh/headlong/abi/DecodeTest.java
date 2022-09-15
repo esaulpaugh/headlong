@@ -220,7 +220,7 @@ public class DecodeTest {
         Tuple decoded = new Function("foo()", "(()[])").decodeReturn(
                 FastHex.decode(
                         "0000000000000000000000000000000000000000000000000000000000000020" +
-                                "0000000000000000000000000000000000000000000000000000000000000002"
+                        "0000000000000000000000000000000000000000000000000000000000000002"
                 )
         );
         assertEquals(Tuple.singleton(new Tuple[] { Tuple.EMPTY, Tuple.EMPTY }), decoded);
@@ -319,12 +319,12 @@ public class DecodeTest {
         final ByteBuffer abi = ByteBuffer.wrap(
                 Strings.decode(
                         "0000000000000000000000000000000000000000000000000000000000000002" +
-                                "0000000000000000000000000000000000000000000000000000000000000040" +
-                                "0000000000000000000000000000000000000000000000000000000000000080" +
-                                "000000000000000000000000000000000000000000000000000000000000000d" +
-                                "48656c6c6f2c20776f726c642100000000000000000000000000000000000000" +
-                                "000000000000000000000000000000000000000000000000000000000000000d" +
-                                "776f726c64212048656c6c6f2c00000000000000000000000000000000000000"
+                        "0000000000000000000000000000000000000000000000000000000000000040" +
+                        "0000000000000000000000000000000000000000000000000000000000000080" +
+                        "000000000000000000000000000000000000000000000000000000000000000d" +
+                        "48656c6c6f2c20776f726c642100000000000000000000000000000000000000" +
+                        "000000000000000000000000000000000000000000000000000000000000000d" +
+                        "776f726c64212048656c6c6f2c00000000000000000000000000000000000000"
                 )
         );
 
@@ -577,15 +577,12 @@ public class DecodeTest {
         };
         byte[] data = FastHex.decode("00000000000000000000000000000000000000000000000000000000000000009b5de4f892fe73b139777ff15eb165f359a0ea9ea1c687f8e8dc5748249ca5f200000000000000000000000000000000000000000000000002386f26fc100000");
         Tuple result = event.decodeArgs(topics, data);
-        assertEquals("0000000000000000000000000000000000000000000000000000000000000000",
-                Strings.encode((byte[]) result.get(0)));
-        assertEquals("9b5de4f892fe73b139777ff15eb165f359a0ea9ea1c687f8e8dc5748249ca5f2",
-                Strings.encode((byte[]) result.get(1)));
+        assertEquals("0000000000000000000000000000000000000000000000000000000000000000", Strings.encode((byte[]) result.get(0)));
+        assertEquals("9b5de4f892fe73b139777ff15eb165f359a0ea9ea1c687f8e8dc5748249ca5f2", Strings.encode((byte[]) result.get(1)));
         assertEquals("0xbbb677a94eda9660832e9944353dd6e814a45705", result.get(2).toString().toLowerCase());
         assertEquals("0xbcead8896acb7a045c38287e433d896eefb40f6c", result.get(3).toString().toLowerCase());
         assertEquals(new BigInteger("160000000000000000"), result.get(4));
-        assertEquals("0000000000000000000000000000000000000000000000000000000000000000",
-                Strings.encode((byte[]) result.get(5)));
+        assertEquals("0000000000000000000000000000000000000000000000000000000000000000", Strings.encode((byte[]) result.get(5)));
     }
 
     @Test
@@ -634,10 +631,13 @@ public class DecodeTest {
                 FastHex.decode("0000000000000000000000000000000000000000000000000000000000000000")
         };
         byte[] data = FastHex.decode("00000000000000000000000000000000000000000000000000000000000000009b5de4f892fe73b139777ff15eb165f359a0ea9ea1c687f8e8dc5748249ca5f200000000000000000000000000000000000000000000000002386f26fc100000");
-        assertThrown(IllegalArgumentException.class, "unexpected topics[0]: event OrdersMatched(bytes32,bytes32,address,address,uint256,bytes32) " +
-                        "expects c4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006c9 " +
-                        "but found a4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006d9",
-                () -> event.decodeArgs(topics, data));
+        assertThrown(
+                IllegalArgumentException.class,
+                "unexpected topics[0]: event OrdersMatched(bytes32,bytes32,address,address,uint256,bytes32) " +
+                    "expects c4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006c9 " +
+                    "but found a4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006d9",
+                () -> event.decodeArgs(topics, data)
+        );
     }
 
     @Test
