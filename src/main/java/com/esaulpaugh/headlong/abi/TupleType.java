@@ -206,42 +206,32 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
     }
 
-    private void ensureIndexInBounds(int index) {
-        if(index < 0) {
-            throw new IllegalArgumentException("negative index: " + index);
-        }
-        if (index >= elementTypes.length) {
-            throw new IllegalArgumentException("index " + index + " out of bounds for tuple type of length " + elementTypes.length);
-        }
-    }
-
     private Object decodeIndex(ByteBuffer bb, int index) {
-        ensureIndexInBounds(index);
+        final ABIType<?> type = elementTypes[index]; // implicit bounds check up front
         final int start = bb.position();
-        int position = start, curr = -1;
-        while (++curr < index) {
-            position += elementTypes[curr].headLength();
+        int position = start, current = 0;
+        while (current < index) {
+            position += elementTypes[current++].headLength();
         }
         bb.position(position);
-        return decodeObject(elementTypes[index], bb, start, newUnitBuffer(), index);
+        return decodeObject(type, bb, start, newUnitBuffer(), index);
     }
 
     private Tuple decodeIndices(ByteBuffer bb, int... indices) {
         final Object[] results = new Object[elementTypes.length];
         final int start = bb.position();
         final byte[] unitBuffer = newUnitBuffer();
-        for (int position = start, curr = -1, i = 0; i < indices.length; i++) {
+        for (int position = start, current = -1, i = 0; i < indices.length; i++) {
             final int index = indices[i];
-            ensureIndexInBounds(index);
-            if(index <= curr) {
+            final ABIType<?> resultType = elementTypes[index]; // implicit bounds check up front
+            if (index <= current) {
                 throw new IllegalArgumentException("index out of order: " + index);
             }
-            while (++curr < index) {
-                position += elementTypes[curr].headLength();
+            while (++current < index) {
+                position += elementTypes[current].headLength();
             }
             bb.position(position);
-            final ABIType<?> resultType = elementTypes[curr];
-            results[curr] = decodeObject(resultType, bb, start, unitBuffer, curr);
+            results[index] = decodeObject(resultType, bb, start, unitBuffer, index);
             position += resultType.headLength();
         }
         return new Tuple(results);
