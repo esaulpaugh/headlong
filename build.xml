@@ -80,12 +80,12 @@
     <pathelement location="${path.variable.maven_repository}/org/bouncycastle/bcprov-jdk14/1.71/bcprov-jdk14-1.71.jar"/>
   </path>
 
-  <path id="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.9.0.classpath">
-    <pathelement location="${path.variable.maven_repository}/org/junit/jupiter/junit-jupiter-api/5.9.0/junit-jupiter-api-5.9.0.jar"/>
+  <path id="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.9.1.classpath">
+    <pathelement location="${path.variable.maven_repository}/org/junit/jupiter/junit-jupiter-api/5.9.1/junit-jupiter-api-5.9.1.jar"/>
   </path>
 
-  <path id="lib.mvn:_org.junit.jupiter:junit-jupiter-engine:5.9.0.classpath">
-    <pathelement location="${path.variable.maven_repository}/org/junit/jupiter/junit-jupiter-engine/5.9.0/junit-jupiter-engine-5.9.0.jar"/>
+  <path id="lib.mvn:_org.junit.jupiter:junit-jupiter-engine:5.9.1.classpath">
+    <pathelement location="${path.variable.maven_repository}/org/junit/jupiter/junit-jupiter-engine/5.9.1/junit-jupiter-engine-5.9.1.jar"/>
   </path>
 
   <path id="lib.mvn:_org.junit.platform:junit-platform-commons:1.8.2.classpath">
@@ -342,7 +342,7 @@
     <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.8.2.classpath"/>
-    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.9.0.classpath"/>
+    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.9.1.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-engine:1.8.2.classpath"/>
     <path refid="lib.mvn:_org.apiguardian:apiguardian-api:1.1.2.classpath"/>
     <path refid="lib.mvn:_org.opentest4j:opentest4j:1.2.0.classpath"/>
@@ -353,11 +353,11 @@
     <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.8.2.classpath"/>
-    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.9.0.classpath"/>
+    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.9.1.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-engine:1.8.2.classpath"/>
     <path refid="lib.mvn:_org.apiguardian:apiguardian-api:1.1.2.classpath"/>
     <path refid="lib.mvn:_org.opentest4j:opentest4j:1.2.0.classpath"/>
-    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-engine:5.9.0.classpath"/>
+    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-engine:5.9.1.classpath"/>
   </path>
   
   <path id="headlong.test.module.classpath">
@@ -366,11 +366,11 @@
     <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.8.2.classpath"/>
-    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.9.0.classpath"/>
+    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.9.1.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-engine:1.8.2.classpath"/>
     <path refid="lib.mvn:_org.apiguardian:apiguardian-api:1.1.2.classpath"/>
     <path refid="lib.mvn:_org.opentest4j:opentest4j:1.2.0.classpath"/>
-    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-engine:5.9.0.classpath"/>
+    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-engine:5.9.1.classpath"/>
   </path>
   
   <path id="headlong.test.runtime.module.classpath">
@@ -379,11 +379,11 @@
     <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.8.2.classpath"/>
-    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.9.0.classpath"/>
+    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.9.1.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-engine:1.8.2.classpath"/>
     <path refid="lib.mvn:_org.apiguardian:apiguardian-api:1.1.2.classpath"/>
     <path refid="lib.mvn:_org.opentest4j:opentest4j:1.2.0.classpath"/>
-    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-engine:5.9.0.classpath"/>
+    <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-engine:5.9.1.classpath"/>
   </path>
   
   
