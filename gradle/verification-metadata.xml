@@ -133,6 +133,9 @@
             <artifact name="junit-bom-5.9.1.module">
                 <sha256 value="9026c1656690fa145ad75ece83674211aa12ad8930a91b107c2f5cdece2f1b1c" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
+            <artifact name="junit-bom-5.9.1.pom">
+                <sha256 value="b163c1cfc8fc1fd58b457a00d586c04c46e986d75904e9ca54c03a97d65b496c" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
         </component>
 
         <component group="org.junit.platform" name="junit-platform-engine" version="1.9.1">
