@@ -79,7 +79,7 @@ public final class TypeFactory {
         BASE_TYPE_MAP.put("fixed", BASE_TYPE_MAP.get("fixed128x18"));
         BASE_TYPE_MAP.put("ufixed", BASE_TYPE_MAP.get("ufixed128x18"));
 
-        BASE_TYPE_MAP.put("bool", new BooleanType());
+        BASE_TYPE_MAP.put("bool", BooleanType.INSTANCE);
     }
 
     static Map<String, ABIType<?>> getBaseTypeMap() {
