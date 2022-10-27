@@ -68,8 +68,8 @@
   
   <!-- Project Libraries -->
   
-  <path id="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath">
-    <pathelement location="${path.variable.maven_repository}/com/google/code/gson/gson/2.9.1/gson-2.9.1.jar"/>
+  <path id="lib.mvn:_com.google.code.gson:gson:2.10.classpath">
+    <pathelement location="${path.variable.maven_repository}/com/google/code/gson/gson/2.10/gson-2.10.jar"/>
   </path>
 
   <path id="lib.mvn:_org.apiguardian:apiguardian-api:1.1.2.classpath">
@@ -182,26 +182,26 @@
   
   <path id="headlong.main.module.production.classpath">
     <path refid="${module.jdk.classpath.headlong.main}"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
   </path>
   
   <path id="headlong.main.runtime.production.module.classpath">
     <pathelement location="${headlong.main.output.dir}"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
   </path>
   
   <path id="headlong.main.module.classpath">
     <path refid="${module.jdk.classpath.headlong.main}"/>
     <pathelement location="${headlong.main.output.dir}"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
   </path>
   
   <path id="headlong.main.runtime.module.classpath">
     <pathelement location="${headlong.main.output.dir}"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
   </path>
   
@@ -270,14 +270,14 @@
   <path id="headlong.jmh.module.production.classpath">
     <path refid="${module.jdk.classpath.headlong.jmh}"/>
     <pathelement location="${headlong.main.output.dir}"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
   </path>
   
   <path id="headlong.jmh.runtime.production.module.classpath">
     <pathelement location="${headlong.jmh.output.dir}"/>
     <path refid="headlong.main.runtime.production.module.classpath"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
   </path>
   
@@ -285,14 +285,14 @@
     <path refid="${module.jdk.classpath.headlong.jmh}"/>
     <pathelement location="${headlong.jmh.output.dir}"/>
     <pathelement location="${headlong.main.output.dir}"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
   </path>
   
   <path id="headlong.jmh.runtime.module.classpath">
     <pathelement location="${headlong.jmh.output.dir}"/>
     <path refid="headlong.main.runtime.module.classpath"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
   </path>
   
@@ -339,7 +339,7 @@
   <path id="headlong.test.module.production.classpath">
     <path refid="${module.jdk.classpath.headlong.test}"/>
     <pathelement location="${headlong.main.output.dir}"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.8.2.classpath"/>
     <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.9.1.classpath"/>
@@ -350,7 +350,7 @@
   
   <path id="headlong.test.runtime.production.module.classpath">
     <path refid="headlong.main.runtime.production.module.classpath"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.8.2.classpath"/>
     <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.9.1.classpath"/>
@@ -363,7 +363,7 @@
   <path id="headlong.test.module.classpath">
     <path refid="${module.jdk.classpath.headlong.test}"/>
     <pathelement location="${headlong.main.output.dir}"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.8.2.classpath"/>
     <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.9.1.classpath"/>
@@ -376,7 +376,7 @@
   <path id="headlong.test.runtime.module.classpath">
     <pathelement location="${headlong.test.testoutput.dir}"/>
     <path refid="headlong.main.runtime.module.classpath"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.9.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.71.classpath"/>
     <path refid="lib.mvn:_org.junit.platform:junit-platform-commons:1.8.2.classpath"/>
     <path refid="lib.mvn:_org.junit.jupiter:junit-jupiter-api:5.9.1.classpath"/>
