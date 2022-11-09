@@ -170,7 +170,7 @@ public class MonteCarloTest {
         MonteCarloTestCase testCase = null;
         boolean initialized;
         long caseSeed = -1;
-        do {
+        while (i < n) {
             initialized = false;
             try {
                 caseSeed = r.nextLong();
@@ -199,8 +199,10 @@ public class MonteCarloTest {
                     repro(testCase, false);
                 }
                 throw t;
+            } finally {
+                i++;
             }
-        } while(++i < n);
+        }
 
         if(log.length() > 0) System.out.println(log);
     }
