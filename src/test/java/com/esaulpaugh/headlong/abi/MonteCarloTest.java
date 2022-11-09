@@ -317,8 +317,8 @@ public class MonteCarloTest {
             two.runStandard();
         }
 
-        requireNoTimeout(shutdownAwait(threadPool, 1L));
-        requireNoTimeout(fjPool.awaitQuiescence(1L, TimeUnit.SECONDS));
+        requireNoTimeout(shutdownAwait(threadPool, 2L));
+        requireNoTimeout(fjPool.awaitQuiescence(2L, TimeUnit.SECONDS));
     }
 
     @Test
