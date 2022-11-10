@@ -427,7 +427,7 @@ public class TupleTest {
         BigDecimalType decimal = tt.get(1);
         assertEquals("fixed168x10", decimal.getCanonicalType());
 
-        Tuple t = Tuple.of("iii");
+        Tuple t = Tuple.singleton("iii");
         String iii = t.get(0);
         assertEquals("iii", iii);
 

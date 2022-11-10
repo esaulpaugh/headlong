@@ -39,7 +39,7 @@ public class PackedEncoderTest {
         Arrays.fill(bytes, (byte) -1);
         ByteBuffer bb = ByteBuffer.wrap(bytes);
         TupleType tt = TupleType.parse("(uint40)");
-        tt.encodePacked(Tuple.of(63L), bb);
+        tt.encodePacked(Tuple.singleton(63L), bb);
 
         assertEquals("000000003fff", Strings.encode(bb));
     }
@@ -62,7 +62,13 @@ public class PackedEncoderTest {
     public void testTupleArray() {
         TupleType tupleType = TupleType.parse("((bool)[])");
 
-        Tuple test = Tuple.singleton((new Tuple[] { Tuple.of(true), Tuple.of(false), Tuple.of(true) }));
+        Tuple test = Tuple.singleton(
+                new Tuple[] {
+                        Tuple.singleton(true),
+                        Tuple.singleton(false),
+                        Tuple.singleton(true)
+                }
+        );
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
@@ -88,7 +94,7 @@ public class PackedEncoderTest {
     public void testHard() {
         final TupleType tupleType = TupleType.parse("((bytes,(uint8[2][2])))");
 
-        final Tuple test = Tuple.of(Tuple.of(new byte[0], Tuple.singleton(new int[][] { new int[] {1,2}, new int[] {3,4} })));
+        final Tuple test = Tuple.singleton(Tuple.of(new byte[0], Tuple.singleton(new int[][] { new int[] {1,2}, new int[] {3,4} })));
 
         final ByteBuffer bb = tupleType.encodePacked(test);
 

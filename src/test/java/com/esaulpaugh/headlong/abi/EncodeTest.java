@@ -506,7 +506,7 @@ public class EncodeTest {
         assertThrown(
                 IllegalArgumentException.class,
                 "BigDecimal scale mismatch: actual != expected: 1 != 9",
-                () -> Function.parse("(fixed56x9)").encodeCall(Tuple.of(new BigDecimal("0.2")))
+                () -> Function.parse("(fixed56x9)").encodeCall(Tuple.singleton(new BigDecimal("0.2")))
         );
     }
 
