@@ -86,22 +86,18 @@ public class PackedEncoderTest {
 
     @Test
     public void testHard() {
-        TupleType tupleType = TupleType.parse("((bytes,(uint8[2][2])))");
+        final TupleType tupleType = TupleType.parse("((bytes,(uint8[2][2])))");
 
-        Tuple test = Tuple.of(Tuple.of(new byte[0], Tuple.singleton(new int[][] { new int[] {1,2}, new int[] {3,4} })));
+        final Tuple test = Tuple.of(Tuple.of(new byte[0], Tuple.singleton(new int[][] { new int[] {1,2}, new int[] {3,4} })));
 
-        ByteBuffer bb = tupleType.encodePacked(test);
+        final ByteBuffer bb = tupleType.encodePacked(test);
 
         assertEquals("01020304", Strings.encode(bb));
 
-        byte[] packed = Strings.decode("01020304");
+        final byte[] packed = Strings.decode("01020304");
 
-        ByteBuffer buf = ByteBuffer.allocate(100);
-        buf.put(new byte[17]);
-        buf.put(packed);
-        buf.put((byte) 0xff);
-
-//        assertEquals(test, PackedDecoder.decode(tupleType, buf.array(), 17, 17 + packed.length));
+        assertEquals(test, PackedDecoder.decode(tupleType, packed));
+        assertEquals(test, tupleType.decodePacked(packed));
     }
 
     @Test
