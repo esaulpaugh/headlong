@@ -450,7 +450,7 @@ public class TupleTest {
 
     @Test
     public void testLengthLimit() throws Throwable {
-        final byte[] typeBytes = new byte[2610];
+        final byte[] typeBytes = new byte[2002];
         final int midpoint = typeBytes.length / 2;
         int i = 0;
         while (i < midpoint) {
@@ -460,11 +460,11 @@ public class TupleTest {
             typeBytes[i++] = ')';
         }
         final String ascii = Strings.encode(typeBytes, Strings.ASCII);
-        assertThrown(IllegalArgumentException.class, "type length exceeds maximum: 2610 > 2000" , () -> TupleType.parse(ascii));
+        assertThrown(IllegalArgumentException.class, "type length exceeds maximum: 2002 > 2000" , () -> TupleType.parse(ascii));
 
         final Random r = TestUtils.seededRandom();
         final StringBuilder sb = new StringBuilder(r.nextBoolean() ? "string" : "bool");
-        for (int j = 0; j < 1000; j++) {
+        for (int j = 0; j < 1_000; j++) {
             if(r.nextBoolean()) {
                 sb.append("[]");
             } else {
