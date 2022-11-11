@@ -44,7 +44,9 @@ public final class TypeFactory {
 
     private static final int FUNCTION_BYTE_LEN = 24;
 
-    private static final int MAX_CHARS = 2000;
+    private static final int DEPTH_CHECK_THRESHOLD_CHARS = 1_000;
+    private static final int MAX_LENGTH_CHARS = 10_000;
+    private static final int MAX_TUPLE_DEPTH = 500;
 
     private static final Map<String, ABIType<?>> BASE_TYPE_MAP;
 
@@ -118,8 +120,14 @@ public final class TypeFactory {
     }
 
     static ABIType<?> build(String rawType, String[] elementNames, ABIType<?> baseType) {
-        if(rawType.length() > MAX_CHARS) {
-            throw new IllegalArgumentException("type length exceeds maximum: " + rawType.length() + " > " + MAX_CHARS);
+        if(rawType.length() > DEPTH_CHECK_THRESHOLD_CHARS) {
+            if(rawType.length() > MAX_LENGTH_CHARS) {
+                throw new IllegalArgumentException("type length exceeds maximum: " + rawType.length() + " > " + MAX_LENGTH_CHARS);
+            }
+            final int maxDepth = maxDepth(rawType);
+            if(maxDepth > MAX_TUPLE_DEPTH) {
+                throw new IllegalArgumentException("tuple depth exceeds maximum: " + maxDepth + " > " + MAX_TUPLE_DEPTH);
+            }
         }
         return buildUnchecked(rawType, elementNames, baseType);
     }
@@ -254,5 +262,24 @@ public final class TypeFactory {
                 }
             }
         } while(true);
+    }
+
+    private static int maxDepth(String rawType) {
+        int maxDepth = 1;
+        int depth = 1;
+        final int len = rawType.length();
+        for (int i = 0; i < len; i++) {
+            char x = rawType.charAt(i);
+            if(x <= ')') {
+                if(x == ')') {
+                    depth--;
+                } else if(x == '(') {
+                    if (++depth > maxDepth) {
+                        maxDepth = depth;
+                    }
+                }
+            }
+        }
+        return maxDepth;
     }
 }
