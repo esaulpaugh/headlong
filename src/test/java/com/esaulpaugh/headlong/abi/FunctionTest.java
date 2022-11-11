@@ -49,7 +49,7 @@ public class FunctionTest {
             assertEquals(
                     "ID       00000000\n" +
                     "0        0000000000000000000000000000000000000000000000000000000000000000",
-                    Function.formatCall(buffer, i, len)
+                    Function.formatCall(buffer, i, len, (int row) -> ABIType.pad(0, Integer.toString(row)))
             );
         }
     }
@@ -140,7 +140,7 @@ public class FunctionTest {
                 34, 33, 32, 31,
                 34, 33, 32, 31,
                 34, 33, 32, 31,
-        }, 4, 36);
+        }, 4, 36, (int row) -> ABIType.pad(0, Integer.toString(row)));
         System.out.println(f);
         assertEquals("ID       45137903\n0        2221201f2221201f2221201f2221201f2221201f2221201f2221201f2221201f", f);
     }
