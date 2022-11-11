@@ -7,7 +7,7 @@
 //plugins {
 //    id("java-library")
 //    id("maven-publish")
-//    id("me.champeau.jmh").version("0.6.6")
+//    id("me.champeau.jmh").version("0.6.8")
 //}
 //
 //group = "com.esaulpaugh"
@@ -83,7 +83,7 @@
 //
 //    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
 //    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
-//    testImplementation("org.bouncycastle:bcprov-jdk15to18:$bcVersion")
+//    testImplementation("org.bouncycastle:bcprov-jdk14:$bcVersion")
 //
 //    jmhImplementation("commons-codec:commons-codec:1.15")
 //
