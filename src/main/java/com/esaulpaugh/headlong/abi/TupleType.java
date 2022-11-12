@@ -52,8 +52,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             }
             this.firstOffset = sum;
         } else {
-            this.headLength = staticTupleHeadLength(this);
             this.firstOffset = -1;
+            this.headLength = staticTupleHeadLength(this);
         }
     }
 
