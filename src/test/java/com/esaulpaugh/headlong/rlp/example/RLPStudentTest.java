@@ -49,7 +49,7 @@ public class RLPStudentTest {
         RLPStudentAdapter adapter = new RLPStudentAdapter();
 
         final byte[] studentRlp = Strings.decode(STUDENT_RLP_LIST, HEX);
-        RLPStudent plato = adapter.decode(studentRlp, 0);
+        RLPStudent plato = adapter.decode(studentRlp);
 
         assertEquals(STUDENT_TO_STRING, plato.toString());
 

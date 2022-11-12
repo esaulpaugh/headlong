@@ -18,9 +18,9 @@ package com.esaulpaugh.headlong.rlp.example;
 public interface RLPAdapter<T> {
 
     // default interface methods not supported on Android except Android N+
-//    default T decode(byte[] rlp) {
-//        return decode(rlp, 0);
-//    }
+    default T decode(byte[] rlp) {
+        return decode(rlp, 0);
+    }
 
     T decode(byte[] rlp, int index);
 
