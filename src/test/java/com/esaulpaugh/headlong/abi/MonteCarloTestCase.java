@@ -442,13 +442,14 @@ public class MonteCarloTestCase {
         for (byte b : magnitude) {
             zero &= b == 0;
         }
-        final BigInteger val = new BigInteger(zero ? 0 : r.nextBoolean() ? 1 : -1, magnitude);
+        if (zero) {
+            return BigInteger.ZERO;
+        }
+        final BigInteger val = new BigInteger(r.nextBoolean() ? 1 : -1, magnitude);
         final int bitLen = val.bitLength();
         return bitLen < type.bitLength
                 ? val
-                : bitLen == 0
-                    ? val.shiftRight(1)
-                    : val.xor(BigInteger.ONE.shiftLeft(bitLen - 1));
+                : val.xor(BigInteger.ONE.shiftLeft(bitLen - 1));
     }
 
     private static BigDecimal generateBigDecimal(Random r, BigDecimalType type) {
