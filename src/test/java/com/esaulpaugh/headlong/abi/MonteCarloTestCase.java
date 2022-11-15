@@ -420,30 +420,14 @@ public class MonteCarloTestCase {
         return x;
     }
 
-    private static final BigInteger[] MASKS = new BigInteger[257];
-
-    static {
-        for (int i = 0; i < MASKS.length; i++) {
-            MASKS[i] = BigInteger.ONE.shiftLeft(i - 1);
-        }
-    }
-
     static BigInteger generateBigInteger(Random r, UnitType<?> type) {
-        final BigInteger unsigned = new BigInteger(type.bitLength, r);
         if (type.unsigned) {
-            return unsigned;
+            return new BigInteger(type.bitLength, r);
         }
-        if (r.nextBoolean()) {
-            final int bitLen = unsigned.bitLength();
-            return bitLen < type.bitLength
-                    ? unsigned
-                    : unsigned.subtract(MASKS[type.bitLength]);
-        }
-        final BigInteger signed = unsigned.negate();
-        final int bitLen = signed.bitLength();
-        return bitLen < type.bitLength
-                ? signed
-                : signed.add(MASKS[type.bitLength]);
+        final BigInteger unsigned = type.bitLength <= 1
+                                        ? new BigInteger(1, r)
+                                        : new BigInteger(type.bitLength - 1, r);
+        return r.nextBoolean() ? unsigned : unsigned.not();
     }
 
     private static BigDecimal generateBigDecimal(Random r, BigDecimalType type) {
