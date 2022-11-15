@@ -413,21 +413,11 @@ public class MonteCarloTestCase {
     }
 
     private static long generateLong(Random r, UnitType<? extends Number> unitType) {
-        long x = TestUtils.pickLong(r, 1 + r.nextInt(unitType.bitLength / Byte.SIZE), unitType.unsigned);
-        if (!unitType.unsigned && Integers.bitLen(x < 0 ? ~x : x) >= unitType.bitLength) {
-            x >>= 1;
-        }
-        return x;
+        return TestUtils.wildLong(r, unitType.unsigned, unitType.bitLength);
     }
 
     static BigInteger generateBigInteger(Random r, UnitType<?> type) {
-        if (type.unsigned) {
-            return new BigInteger(type.bitLength, r);
-        }
-        final BigInteger unsigned = type.bitLength <= 1
-                                        ? new BigInteger(1, r)
-                                        : new BigInteger(type.bitLength - 1, r);
-        return r.nextBoolean() ? unsigned : unsigned.not();
+        return TestUtils.wildBigInteger(r, type.unsigned, type.bitLength);
     }
 
     private static BigDecimal generateBigDecimal(Random r, BigDecimalType type) {

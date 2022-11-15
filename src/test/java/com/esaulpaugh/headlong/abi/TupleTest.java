@@ -64,7 +64,7 @@ public class TupleTest {
             System.out.println("j=" + j + ", samples=" + samples);
             final long[] longs = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
             for (long i = 0; i < samples; i++) {
-                final BigInteger val = MonteCarloTestCase.generateBigInteger(r, type);
+                final BigInteger val = BigInteger.valueOf(TestUtils.uniformLong(r, type.unsigned, type.bitLength)); // uniformBigInteger
                 final int z = val.intValue() & powMinus1;
                 longs[z / Long.SIZE] |= MASKS[z & 63];
 //                bools[x & powMinus1] = true;
