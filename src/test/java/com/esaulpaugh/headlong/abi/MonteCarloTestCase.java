@@ -420,36 +420,30 @@ public class MonteCarloTestCase {
         return x;
     }
 
+    private static final BigInteger[] MASKS = new BigInteger[257];
+
+    static {
+        for (int i = 0; i < MASKS.length; i++) {
+            MASKS[i] = BigInteger.ONE.shiftLeft(i - 1);
+        }
+    }
+
     static BigInteger generateBigInteger(Random r, UnitType<?> type) {
-        if(type.unsigned) {
-            return new BigInteger(type.bitLength, r);
+        final BigInteger unsigned = new BigInteger(type.bitLength, r);
+        if (type.unsigned) {
+            return unsigned;
         }
-        final byte[] magnitude = new byte[(int) ((type.bitLength + 7L) / Byte.SIZE)];
-        r.nextBytes(magnitude);
-        final int mod = Integers.mod(type.bitLength, Byte.SIZE);
-        if(mod != 0) {
-            switch (mod) {
-            case 1: magnitude[0] &= 0b0000_0001; break;
-            case 2: magnitude[0] &= 0b0000_0011; break;
-            case 3: magnitude[0] &= 0b0000_0111; break;
-            case 4: magnitude[0] &= 0b0000_1111; break;
-            case 5: magnitude[0] &= 0b0001_1111; break;
-            case 6: magnitude[0] &= 0b0011_1111; break;
-            case 7: magnitude[0] &= 0b0111_1111;
-            }
+        if (r.nextBoolean()) {
+            final int bitLen = unsigned.bitLength();
+            return bitLen < type.bitLength
+                    ? unsigned
+                    : unsigned.subtract(MASKS[type.bitLength]);
         }
-        boolean zero = true;
-        for (byte b : magnitude) {
-            zero &= b == 0;
-        }
-        if (zero) {
-            return BigInteger.ZERO;
-        }
-        final BigInteger val = new BigInteger(r.nextBoolean() ? 1 : -1, magnitude);
-        final int bitLen = val.bitLength();
+        final BigInteger signed = unsigned.negate();
+        final int bitLen = signed.bitLength();
         return bitLen < type.bitLength
-                ? val
-                : val.xor(BigInteger.ONE.shiftLeft(bitLen - 1));
+                ? signed
+                : signed.add(MASKS[type.bitLength]);
     }
 
     private static BigDecimal generateBigDecimal(Random r, BigDecimalType type) {
