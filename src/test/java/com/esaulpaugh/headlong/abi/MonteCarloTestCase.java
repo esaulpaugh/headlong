@@ -413,7 +413,7 @@ public class MonteCarloTestCase {
     }
 
     static long generateLong(Random r, UnitType<? extends Number> unitType) {
-        long x = TestUtils.pickRandom(r, 1 + r.nextInt(unitType.bitLength / Byte.SIZE), unitType.unsigned);
+        long x = TestUtils.pickLong(r, 1 + r.nextInt(unitType.bitLength / Byte.SIZE), unitType.unsigned);
         if (!unitType.unsigned && Integers.bitLen(x < 0 ? ~x : x) >= unitType.bitLength) {
             x >>= 1;
         }

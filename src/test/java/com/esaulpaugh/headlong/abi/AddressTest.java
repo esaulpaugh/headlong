@@ -56,7 +56,7 @@ public class AddressTest {
     @Test
     public void testGeneratedChecksums() {
         final Random r = TestUtils.seededRandom();
-        testAddress(new Address(BigInteger.valueOf(TestUtils.pickRandom(r, 1 + r.nextInt(Long.BYTES), true))).toString(), null);
+        testAddress(new Address(BigInteger.valueOf(TestUtils.pickLong(r, 1 + r.nextInt(Long.BYTES), true))).toString(), null);
         testAddress(MonteCarloTestCase.generateAddress(r).toString(), null);
         testAddress(MonteCarloTestCase.generateAddress(r).toString(), "a label");
     }

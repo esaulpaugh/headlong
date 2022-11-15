@@ -65,11 +65,11 @@ public class TestUtils {
         return c ^ (c << 33);
     }
 
-    public static long pickRandom(Random r) {
-        return pickRandom(r, 1 + r.nextInt(Long.BYTES), false);
+    public static long pickLong(Random r) {
+        return pickLong(r, 1 + r.nextInt(Long.BYTES), false);
     }
 
-    public static long pickRandom(Random r, int byteLen, boolean unsigned) {
+    public static long pickLong(Random r, int byteLen, boolean unsigned) {
         long val = r.nextLong();
         switch (byteLen) {
         case 1: val &= 0xFFL; break;

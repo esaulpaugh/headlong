@@ -86,7 +86,7 @@ public class BizarroIntegersTest {
         Random rand = TestUtils.seededRandom();
         byte[] eight = new byte[8];
         for (long i = 0; i < 20_000; i++) {
-            long lo = TestUtils.pickRandom(rand);
+            long lo = TestUtils.pickLong(rand);
             int n = BizarroInts.putLong(lo, eight, 0);
             long r = BizarroInts.getLong(eight, 0, n);
             if(lo != r) {
@@ -132,7 +132,7 @@ public class BizarroIntegersTest {
     public void lenLong() {
         Random rand = TestUtils.seededRandom();
         for (int i = 0; i < 30_000; i++) {
-            long lo = TestUtils.pickRandom(rand);
+            long lo = TestUtils.pickLong(rand);
             int expectedLen = lo >= 0 || lo < -72_057_594_037_927_936L ? 8
                     : lo < -281_474_976_710_656L ? 7
                     : lo < -1_099_511_627_776L ? 6
