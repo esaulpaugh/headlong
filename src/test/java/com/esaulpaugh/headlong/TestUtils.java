@@ -88,7 +88,21 @@ public class TestUtils {
         return r.nextBoolean() ? val : ~val;
     }
 
-    public static BigInteger pickBigInteger(Random r, boolean unsigned, int bitLength) {
+    public static long wildLong(Random r, boolean unsigned, int bitLength) {
+        if(bitLength > Long.SIZE) {
+            throw new IllegalArgumentException("bitLength > 64: " + bitLength);
+        }
+        return wildBigInteger(r, unsigned, bitLength).longValueExact();
+    }
+
+    public static long uniformLong(Random r, boolean unsigned, int bitLength) {
+        if(bitLength > Long.SIZE) {
+            throw new IllegalArgumentException("bitLength > 64: " + bitLength);
+        }
+        return uniformBigInteger(r, unsigned, bitLength).longValueExact();
+    }
+
+    public static BigInteger wildBigInteger(Random r, boolean unsigned, int bitLength) {
         if (unsigned) {
             return new BigInteger(1 + r.nextInt(bitLength), r);
         }
