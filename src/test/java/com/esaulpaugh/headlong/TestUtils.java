@@ -88,6 +88,26 @@ public class TestUtils {
         return r.nextBoolean() ? val : ~val;
     }
 
+    public static BigInteger pickBigInteger(Random r, boolean unsigned, int bitLength) {
+        if (unsigned) {
+            return new BigInteger(1 + r.nextInt(bitLength), r);
+        }
+        final BigInteger unsignedVal = bitLength <= 1
+                ? new BigInteger(1, r)
+                : new BigInteger(1 + r.nextInt(bitLength - 1), r);
+        return r.nextBoolean() ? unsignedVal : unsignedVal.not();
+    }
+
+    public static BigInteger uniformBigInteger(Random r, boolean unsigned, int bitLength) {
+        if (unsigned) {
+            return new BigInteger(bitLength, r);
+        }
+        final BigInteger unsignedVal = bitLength <= 1
+                ? new BigInteger(1, r)
+                : new BigInteger(bitLength - 1, r);
+        return r.nextBoolean() ? unsignedVal : unsignedVal.not();
+    }
+
     public static void shuffle(Object[] arr, Random rand) {
         for (int i = arr.length; i > 0; ) {
             int idx = rand.nextInt(i);
