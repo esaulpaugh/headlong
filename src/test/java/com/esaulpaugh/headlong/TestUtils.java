@@ -93,32 +93,12 @@ public class TestUtils {
     }
 
     public static long uniformLong(Random r, boolean unsigned, int bitLength) {
-        if(bitLength == 0) {
-            return 0L;
-        }
-        if(bitLength == Long.SIZE) {
-            if(unsigned) {
-                throw new IllegalArgumentException("exceeds long range");
-            }
-            return r.nextLong();
-        }
-        if(unsigned) {
-            if (bitLength == 63) {
-                long val = r.nextLong();
-                return val < 0 ? ~val : val;
-            }
-            return r.nextLong(1L << bitLength);
-        }
-        long val = r.nextLong(1L << (bitLength - 1));
-        return r.nextBoolean() ? ~val : val;
-    }
-
-    private static void checkBitLen(boolean unsigned, int bitLength) {
         if (unsigned && bitLength > Long.SIZE - 1) {
             throw new IllegalArgumentException("too many bits for unsigned: " + bitLength);
         } else if(bitLength > Long.SIZE) {
             throw new IllegalArgumentException("too many bits for signed: " + bitLength);
         }
+        return uniformBigInteger(r, unsigned, bitLength).longValueExact();
     }
 
     public static BigInteger wildBigInteger(Random r, boolean unsigned, int bitLength) {
