@@ -38,15 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TupleTest {
 
-    private static final long[] MASKS;
-
-    static {
-        MASKS = new long[64];
-        for (int i = 0; i < MASKS.length; i++) {
-            MASKS[i] = 1L << (63 - i);
-        }
-    }
-
     @Disabled("meta test")
     @Test
     public void metaTest1() {
@@ -66,7 +57,7 @@ public class TupleTest {
             for (long i = 0; i < samples; i++) {
                 final BigInteger val = BigInteger.valueOf(TestUtils.uniformLong(r, type.unsigned, type.bitLength)); // uniformBigInteger
                 final int z = val.intValue() & powMinus1;
-                longs[z / Long.SIZE] |= MASKS[z & 63];
+                longs[z / Long.SIZE] |= 0x80000000_00000000L >> (z & 63);
 //                bools[x & powMinus1] = true;
 //                bools[(int) MonteCarloTestCase.generateLong(r, type) & powMinus1] = true;
             }
