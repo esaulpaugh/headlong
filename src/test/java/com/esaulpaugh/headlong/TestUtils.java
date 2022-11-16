@@ -88,6 +88,10 @@ public class TestUtils {
         return r.nextBoolean() ? val : ~val;
     }
 
+    public static long wildLong(Random r) {
+        return wildLong(r, false, Long.SIZE);
+    }
+
     public static long wildLong(Random r, boolean unsigned, int bitLength) {
         return uniformLong(r, unsigned, r.nextInt(bitLength + 1));
     }
