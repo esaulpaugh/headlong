@@ -55,7 +55,7 @@ public class TupleTest {
             System.out.println("j=" + j + ", samples=" + samples);
             final long[] longs = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
             for (long i = 0; i < samples; i++) {
-                final BigInteger val = BigInteger.valueOf(TestUtils.uniformLong(r, type.unsigned, type.bitLength)); // uniformBigInteger
+                final BigInteger val = TestUtils.uniformBigInteger(r, type.unsigned, type.bitLength);
                 final int z = val.intValue() & powMinus1;
                 longs[z / Long.SIZE] |= 0x80000000_00000000L >> (z & 63);
 //                bools[x & powMinus1] = true;

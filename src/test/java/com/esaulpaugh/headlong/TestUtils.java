@@ -35,6 +35,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -93,16 +94,37 @@ public class TestUtils {
     }
 
     public static long wildLong(Random r, boolean unsigned, int bitLength) {
-        return uniformLong(r, unsigned, r.nextInt(bitLength + 1));
-    }
-
-    public static long uniformLong(Random r, boolean unsigned, int bitLength) {
         if (unsigned && bitLength > Long.SIZE - 1) {
             throw new IllegalArgumentException("too many bits for unsigned: " + bitLength);
         } else if(bitLength > Long.SIZE) {
             throw new IllegalArgumentException("too many bits for signed: " + bitLength);
         }
         return uniformBigInteger(r, unsigned, bitLength).longValueExact();
+    }
+
+    public static long uniformLong(boolean unsigned, int bitLength) {
+        return uniformLong(ThreadLocalRandom.current(), unsigned, bitLength);
+    }
+
+    public static long uniformLong(ThreadLocalRandom tlr, boolean unsigned, int bitLength) {
+        if(bitLength == 0) {
+            return 0L;
+        }
+        if(bitLength == Long.SIZE) {
+            if(unsigned) {
+                throw new IllegalArgumentException("exceeds long range");
+            }
+            return tlr.nextLong();
+        }
+        if(unsigned) {
+            if (bitLength == 63) {
+                final long val = tlr.nextLong();
+                return val < 0 ? ~val : val;
+            }
+            return tlr.nextLong(1L << bitLength);
+        }
+        final long val = tlr.nextLong(1L << (bitLength - 1));
+        return tlr.nextBoolean() ? ~val : val;
     }
 
     public static BigInteger wildBigInteger(Random r, boolean unsigned, int bitLength) {
