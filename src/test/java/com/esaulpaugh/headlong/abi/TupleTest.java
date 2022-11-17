@@ -44,19 +44,19 @@ public class TupleTest {
         final Random r = TestUtils.seededRandom();
 
         for (int j = 0; j < 26; j++) {
-            final int pow = (int) Math.pow(2.0, j);
-            final int powMinus1 = pow - 1;
+            final long pow = (long) Math.pow(2.0, j);
+            final long powMinus1 = pow - 1;
             System.out.println(Long.toHexString(powMinus1) + ", " + pow);
 
             final BigIntegerType type = new BigIntegerType("int" + j, j, false);
 //            final BooleanType type = new BooleanType();
 
-            final long samples = (long) pow * (j / 2 + 8);
+            final long samples = pow * (j / 2 + 8);
             System.out.println("j=" + j + ", samples=" + samples);
             final long[] longs = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
             for (long i = 0; i < samples; i++) {
                 final BigInteger val = TestUtils.uniformBigInteger(r, type.unsigned, type.bitLength);
-                final int z = val.intValue() & powMinus1;
+                final int z = (int) (val.longValue() & powMinus1);
                 longs[z / Long.SIZE] |= 0x80000000_00000000L >> (z & 63);
 //                bools[x & powMinus1] = true;
 //                bools[(int) MonteCarloTestCase.generateLong(r, type) & powMinus1] = true;
@@ -64,7 +64,7 @@ public class TupleTest {
 
             int missed = 0;
             int missedChunks = 0;
-            final int fullChunks = pow / Long.SIZE;
+            final int fullChunks = (int) (pow / Long.SIZE);
             for (int i = 0; i < fullChunks; i++) {
                 final long val = longs[i];
                 if(val != 0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111L) {
@@ -74,8 +74,8 @@ public class TupleTest {
                     System.err.println("chunk " + i + " value " + Long.toBinaryString(val));
                 }
             }
-            final int finalBits = pow % Long.SIZE;
-            if (finalBits > 0) {
+            final int finalBits = (int) (pow % Long.SIZE);
+            if (finalBits > 0L) {
                 final int shift = 64 - finalBits;
                 final long last = longs[longs.length - 1];
                 final long expected = -1L << shift;
