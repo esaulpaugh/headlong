@@ -49,7 +49,6 @@ public class TupleTest {
             System.out.println(Long.toHexString(powMinus1) + ", " + pow);
 
             final BigIntegerType type = new BigIntegerType("int" + j, j, false);
-//            final BooleanType type = new BooleanType();
 
             final long samples = pow * (j / 2 + 8);
             System.out.println("j=" + j + ", samples=" + samples);
@@ -57,9 +56,7 @@ public class TupleTest {
             for (long i = 0; i < samples; i++) {
                 final BigInteger val = TestUtils.uniformBigInteger(r, type.unsigned, type.bitLength);
                 final int z = (int) (val.longValue() & powMinus1);
-                longs[z / Long.SIZE] |= 0x80000000_00000000L >> (z & 63);
-//                bools[x & powMinus1] = true;
-//                bools[(int) MonteCarloTestCase.generateLong(r, type) & powMinus1] = true;
+                longs[z / Long.SIZE] |= 0x80000000_00000000L >>> (z & 63);
             }
 
             int missed = 0;
