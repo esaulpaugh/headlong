@@ -132,12 +132,13 @@ public class TestUtils {
     }
 
     public static BigInteger uniformBigInteger(Random r, boolean unsigned, int bitLength) {
+        if(bitLength == 0) {
+            return BigInteger.ZERO;
+        }
         if (unsigned) {
             return new BigInteger(bitLength, r);
         }
-        final BigInteger unsignedVal = bitLength <= 1
-                ? new BigInteger(1, r)
-                : new BigInteger(bitLength - 1, r);
+        final BigInteger unsignedVal = new BigInteger(bitLength - 1, r);
         return r.nextBoolean() ? unsignedVal : unsignedVal.not();
     }
 
