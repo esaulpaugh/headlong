@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@latest
+      - uses: actions/checkout@v3
       - uses: DeLaGuardo/setup-graalvm@5.0
         with:
           graalvm: '21.2.0'
