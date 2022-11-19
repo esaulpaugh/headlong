@@ -23,3 +23,6 @@ jobs:
 
       - name: Build with Gradle
         run: gradle build
+
+      - name: Build with Ant
+        run: ant -noinput -buildfile ant-gradle.xml clean all build-jar
