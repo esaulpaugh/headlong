@@ -87,6 +87,6 @@
 //
 //    jmhImplementation("commons-codec:commons-codec:1.15")
 //
-//    jmh("org.openjdk.jmh:jmh-core:1.35")
-//    jmh("org.openjdk.jmh:jmh-generator-annprocess:1.35")
+//    jmh("org.openjdk.jmh:jmh-core:1.36")
+//    jmh("org.openjdk.jmh:jmh-generator-annprocess:1.36")
 //}
