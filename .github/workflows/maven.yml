@@ -5,7 +5,7 @@ on: [push]
 jobs:
   build:
 
-    runs-on: ubuntu-22.04
+    runs-on: windows-2022
 
     steps:
       - uses: actions/checkout@v3
@@ -16,7 +16,7 @@ jobs:
           distribution: 'corretto'
           java-version: '8'
           java-package: jdk
-          architecture: aarch64
+          architecture: x86
           cache: 'maven'
 
       - name: Build with Maven
