@@ -1,19 +1,16 @@
 name: Java CI maven
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
-      - uses: DeLaGuardo/setup-graalvm@5.0
+      - uses: graalvm/setup-graalvm@v1
         with:
-          graalvm: '21.2.0'
-          java: 'java8'
-          arch: 'amd64'
+          version: '21.2.0'
+          java-version: '8'
       - run: |
           mvn -B package --file pom.xml
           ant -noinput -buildfile build.xml clean all build-jar
