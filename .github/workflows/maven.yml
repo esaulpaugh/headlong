@@ -16,7 +16,7 @@ jobs:
           distribution: 'temurin'
           java-version: '8.0.352+8'
           java-package: jdk
-          architecture: ppc64le
+          architecture: armv7
           cache: 'maven'
 
       - name: Build with Maven
