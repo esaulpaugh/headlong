@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="headlong" default="all">
+
+    <property file="headlong.properties"/>
+
+    <property name="compiler.debug" value="on"/>
+    <property name="compiler.generate.no.warnings" value="off"/>
+    <property name="compiler.args" value=""/><!--release 8 -source 8 -target 8 -->
+    <property name="compiler.max.memory" value="700m"/>
+    <patternset id="ignored.files">
+        <exclude name="**/*.hprof/**"/>
+        <exclude name="**/*.pyc/**"/>
+        <exclude name="**/*.pyo/**"/>
+        <exclude name="**/*.rbc/**"/>
+        <exclude name="**/*.yarb/**"/>
+        <exclude name="**/*~/**"/>
+        <exclude name="**/.DS_Store/**"/>
+        <exclude name="**/.git/**"/>
+        <exclude name="**/.hg/**"/>
+        <exclude name="**/.svn/**"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/__pycache__/**"/>
+        <exclude name="**/_svn/**"/>
+        <exclude name="**/vssver.scc/**"/>
+        <exclude name="**/vssver2.scc/**"/>
+    </patternset>
+    <patternset id="library.patterns">
+        <include name="*.war"/>
+        <include name="*.swc"/>
+        <include name="*.apk"/>
+        <include name="*.zip"/>
+        <include name="*.egg"/>
+        <include name="*.ear"/>
+        <include name="*.ane"/>
+        <include name="*.jar"/>
+        <include name="*.klib"/>
+    </patternset>
+    <patternset id="compiler.resources">
+        <exclude name="**/?*.java"/>
+        <exclude name="**/?*.form"/>
+        <exclude name="**/?*.class"/>
+        <exclude name="**/?*.groovy"/>
+        <exclude name="**/?*.scala"/>
+        <exclude name="**/?*.flex"/>
+        <exclude name="**/?*.kt"/>
+        <exclude name="**/?*.clj"/>
+        <exclude name="**/?*.aj"/>
+    </patternset>
+
+    <!-- JDK definitions -->
+
+    <property name="project.jdk.classpath" value="jdk.classpath"/>
+
+    <!-- Project Libraries -->
+
+    <path id="lib.mvn:_com.google.code.gson:gson:2.10.classpath">
+        <pathelement location="${user.home}\.gradle\caches\modules-2\files-2.1\com.google.code.gson\gson\2.10\dd9b193aef96e973d5a11ab13cd17430c2e4306b\gson-2.10.jar"/>
+    </path>
+
+    <!-- Modules -->
+
+    <!-- Module headlong -->
+
+    <dirname property="module.headlong.basedir" file="${ant.file}"/>
+
+    <property name="module.jdk.classpath.headlong" value="${project.jdk.classpath}"/>
+
+    <property name="compiler.args.headlong" value="-encoding UTF-8 ${compiler.args}"/>
+
+    <property name="headlong.output.dir" value="${module.headlong.basedir}/classes/production/headlong"/>
+    <property name="headlong.testoutput.dir" value="${module.headlong.basedir}/classes/test/headlong"/>
+
+    <path id="headlong.module.bootclasspath">
+        <!-- Paths to be included in compilation bootclasspath -->
+    </path>
+
+    <path id="headlong.runtime.production.module.classpath">
+        <pathelement location="${headlong.output.dir}"/>
+    </path>
+
+    <path id="headlong.module.classpath">
+        <pathelement location="${headlong.output.dir}"/>
+    </path>
+
+    <path id="headlong.runtime.module.classpath">
+        <pathelement location="${headlong.testoutput.dir}"/>
+        <pathelement location="${headlong.output.dir}"/>
+    </path>
+
+
+    <patternset id="excluded.from.module.headlong">
+        <patternset refid="ignored.files"/>
+    </patternset>
+
+    <patternset id="excluded.from.compilation.headlong">
+        <patternset refid="excluded.from.module.headlong"/>
+    </patternset>
+
+
+    <target name="compile.module.headlong" depends="compile.module.headlong.production" description="Compile module headlong"/>
+
+    <target name="compile.module.headlong.production" description="Compile module headlong; production classes"/>
+
+    <target name="clean.module.headlong" description="cleanup module">
+        <delete dir="${headlong.output.dir}"/>
+        <delete dir="${headlong.testoutput.dir}"/>
+        <delete dir="${basedir}/build/lib"/>
+        <delete dir="${basedir}/build/classes"/>
+    </target>
+
+
+    <!-- Module headlong.main -->
+
+    <dirname property="module.headlong.main.basedir" file="${ant.file}"/>
+
+
+    <property name="module.jdk.classpath.headlong.main" value="${project.jdk.classpath}"/>
+
+    <property name="compiler.args.headlong.main" value="-encoding UTF-8 ${compiler.args}"/>
+
+    <property name="headlong.main.output.dir" value="${module.headlong.main.basedir}/build/classes/java/main"/>
+    <property name="headlong.main.testoutput.dir" value="${module.headlong.main.basedir}/build/classes/java/main"/>
+
+    <path id="headlong.main.module.bootclasspath">
+        <!-- Paths to be included in compilation bootclasspath -->
+    </path>
+
+    <path id="headlong.main.module.production.classpath">
+        <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
+    </path>
+
+    <path id="headlong.main.runtime.production.module.classpath">
+        <pathelement location="${headlong.main.output.dir}"/>
+        <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
+    </path>
+
+    <path id="headlong.main.module.classpath">
+        <pathelement location="${headlong.main.output.dir}"/>
+        <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
+    </path>
+
+    <path id="headlong.main.runtime.module.classpath">
+        <pathelement location="${headlong.main.output.dir}"/>
+        <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
+    </path>
+
+
+    <patternset id="excluded.from.module.headlong.main">
+        <patternset refid="ignored.files"/>
+    </patternset>
+
+    <patternset id="excluded.from.compilation.headlong.main">
+        <patternset refid="excluded.from.module.headlong.main"/>
+    </patternset>
+
+    <path id="headlong.main.module.sourcepath">
+        <dirset dir="${module.headlong.main.basedir}/src/main">
+            <include name="java"/>
+        </dirset>
+    </path>
+
+
+    <target name="compile.module.headlong.main" depends="compile.module.headlong.main.production" description="Compile module headlong.main"/>
+
+    <target name="compile.module.headlong.main.production" description="Compile module headlong.main; production classes">
+        <mkdir dir="${headlong.main.output.dir}"/>
+        <javac destdir="${headlong.main.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
+            <compilerarg line="${compiler.args.headlong.main}"/>
+            <bootclasspath refid="headlong.main.module.bootclasspath"/>
+            <classpath refid="headlong.main.module.production.classpath"/>
+            <src refid="headlong.main.module.sourcepath"/>
+            <patternset refid="excluded.from.compilation.headlong.main"/>
+        </javac>
+
+        <copy todir="${headlong.main.output.dir}">
+            <fileset dir="${module.headlong.main.basedir}/src/main/java">
+                <patternset refid="compiler.resources"/>
+                <type type="file"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="clean.module.headlong.main" description="cleanup module">
+        <delete dir="${headlong.main.output.dir}"/>
+        <delete dir="${headlong.main.testoutput.dir}"/>
+    </target>
+
+    <target name = "build-jar">
+        <jar destfile = "${basedir}/build/lib/headlong-${project.version}.jar"
+             basedir = "${basedir}/build/classes/java/main">
+            <manifest>
+                <attribute name = "Implementation-Title" value = "${project.name}"/>
+                <attribute name = "Implementation-Version" value = "${project.version}"/>
+                <attribute name= "Automatic-Module-Name" value="${project.name}"/>
+                <attribute name= "Created-By" value="com.esaulpaugh"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="init" description="Build initialization">
+        <!-- Perform any build initialization in this target -->
+    </target>
+
+    <target name="clean" depends="clean.module.headlong, clean.module.headlong.main" description="cleanup all"/>
+
+    <target name="build.modules" depends="init, clean, compile.module.headlong, compile.module.headlong.main" description="build all modules"/>
+
+    <target name="all" depends="build.modules" description="build all"/>
+</project>
