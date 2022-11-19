@@ -56,16 +56,9 @@
   
   <!-- JDK definitions -->
 
-  <property name="jdk.bin" value="${jdk.home}/bin"/>
-  <path id="jdk.classpath">
-    <fileset dir="${jdk.home}"/>
-  </path>
-  
-  <property name="project.jdk.home" value="${jdk.home}"/>
-  <property name="project.jdk.bin" value="${jdk.bin}"/>
   <property name="project.jdk.classpath" value="jdk.classpath"/>
-  
-  
+
+
   <!-- Project Libraries -->
   
   <path id="lib.mvn:_com.google.code.gson:gson:2.10.classpath">
@@ -106,9 +99,7 @@
   
   <dirname property="module.headlong.basedir" file="${ant.file}"/>
   
-  
-  <property name="module.jdk.home.headlong" value="${project.jdk.home}"/>
-  <property name="module.jdk.bin.headlong" value="${project.jdk.bin}"/>
+
   <property name="module.jdk.classpath.headlong" value="${project.jdk.classpath}"/>
   
   <property name="compiler.args.headlong" value="-encoding UTF-8 ${compiler.args}"/>
@@ -120,16 +111,11 @@
     <!-- Paths to be included in compilation bootclasspath -->
   </path>
   
-  <path id="headlong.module.production.classpath">
-    <path refid="${module.jdk.classpath.headlong}"/>
-  </path>
-  
   <path id="headlong.runtime.production.module.classpath">
     <pathelement location="${headlong.output.dir}"/>
   </path>
   
   <path id="headlong.module.classpath">
-    <path refid="${module.jdk.classpath.headlong}"/>
     <pathelement location="${headlong.output.dir}"/>
   </path>
   
@@ -166,9 +152,7 @@
   
   <dirname property="module.headlong.main.basedir" file="${ant.file}"/>
   
-  
-  <property name="module.jdk.home.headlong.main" value="${project.jdk.home}"/>
-  <property name="module.jdk.bin.headlong.main" value="${project.jdk.bin}"/>
+
   <property name="module.jdk.classpath.headlong.main" value="${project.jdk.classpath}"/>
   
   <property name="compiler.args.headlong.main" value="-encoding UTF-8 ${compiler.args}"/>
@@ -181,7 +165,6 @@
   </path>
   
   <path id="headlong.main.module.production.classpath">
-    <path refid="${module.jdk.classpath.headlong.main}"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.72.classpath"/>
   </path>
@@ -193,7 +176,6 @@
   </path>
   
   <path id="headlong.main.module.classpath">
-    <path refid="${module.jdk.classpath.headlong.main}"/>
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.72.classpath"/>
@@ -225,7 +207,7 @@
   
   <target name="compile.module.headlong.main.production" description="Compile module headlong.main; production classes">
     <mkdir dir="${headlong.main.output.dir}"/>
-    <javac destdir="${headlong.main.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.headlong.main}/javac">
+    <javac destdir="${headlong.main.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
       <compilerarg line="${compiler.args.headlong.main}"/>
       <bootclasspath refid="headlong.main.module.bootclasspath"/>
       <classpath refid="headlong.main.module.production.classpath"/>
@@ -253,9 +235,7 @@
   
   <dirname property="module.headlong.jmh.basedir" file="${ant.file}"/>
   
-  
-  <property name="module.jdk.home.headlong.jmh" value="${project.jdk.home}"/>
-  <property name="module.jdk.bin.headlong.jmh" value="${project.jdk.bin}"/>
+
   <property name="module.jdk.classpath.headlong.jmh" value="${project.jdk.classpath}"/>
   
   <property name="compiler.args.headlong.jmh" value="-encoding UTF-8 ${compiler.args}"/>
@@ -268,7 +248,6 @@
   </path>
   
   <path id="headlong.jmh.module.production.classpath">
-    <path refid="${module.jdk.classpath.headlong.jmh}"/>
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.72.classpath"/>
@@ -282,7 +261,6 @@
   </path>
   
   <path id="headlong.jmh.module.classpath">
-    <path refid="${module.jdk.classpath.headlong.jmh}"/>
     <pathelement location="${headlong.jmh.output.dir}"/>
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
@@ -322,9 +300,7 @@
   
   <dirname property="module.headlong.test.basedir" file="${ant.file}"/>
   
-  
-  <property name="module.jdk.home.headlong.test" value="${project.jdk.home}"/>
-  <property name="module.jdk.bin.headlong.test" value="${project.jdk.bin}"/>
+
   <property name="module.jdk.classpath.headlong.test" value="${project.jdk.classpath}"/>
   
   <property name="compiler.args.headlong.test" value="-encoding UTF-8 ${compiler.args}"/>
@@ -337,7 +313,6 @@
   </path>
   
   <path id="headlong.test.module.production.classpath">
-    <path refid="${module.jdk.classpath.headlong.test}"/>
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.72.classpath"/>
@@ -361,7 +336,6 @@
   </path>
   
   <path id="headlong.test.module.classpath">
-    <path refid="${module.jdk.classpath.headlong.test}"/>
     <pathelement location="${headlong.main.output.dir}"/>
     <path refid="lib.mvn:_com.google.code.gson:gson:2.10.classpath"/>
     <path refid="lib.mvn:_org.bouncycastle:bcprov-jdk14:1.72.classpath"/>
@@ -409,7 +383,7 @@
   
   <target name="compile.module.headlong.test.tests" depends="compile.module.headlong.test.production" description="compile module headlong.test; test classes" unless="skip.tests">
     <mkdir dir="${headlong.test.testoutput.dir}"/>
-    <javac destdir="${headlong.test.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.headlong.test}/javac">
+    <javac destdir="${headlong.test.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
       <compilerarg line="${compiler.args.headlong.test}"/>
       <bootclasspath refid="headlong.test.module.bootclasspath"/>
       <classpath refid="headlong.test.module.classpath"/>
