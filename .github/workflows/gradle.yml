@@ -5,7 +5,7 @@ on: [push]
 jobs:
   build:
 
-    runs-on: ubuntu-22.04
+    runs-on: windows-2019
 
     steps:
       - uses: actions/checkout@v3
@@ -19,6 +19,7 @@ jobs:
           java-version: '8.0.345+1'
           java-package: jdk
           architecture: x86
+          cache: 'gradle'
 
       - name: Build with Gradle
         run: gradle build
