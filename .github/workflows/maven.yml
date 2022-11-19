@@ -16,6 +16,7 @@ jobs:
           java-version: '8'
           cache: 'maven'
 
+      - name: Run maven and ant builds
       - run: |
           mvn -B package --file pom.xml
           ant -noinput -buildfile build.xml clean all build-jar
