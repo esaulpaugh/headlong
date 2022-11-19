@@ -19,7 +19,6 @@ jobs:
           java-version: '8.0.181+13.openj9-0.9.0'
           java-package: jdk
           architecture: x86
-          cache: 'gradle'
 
       - name: Build with Gradle
         run: gradle build
