@@ -22,7 +22,7 @@ jobs:
           distribution: 'microsoft'
           java-version: '17.0.3'
           java-package: jdk
-          architecture: x86
+          architecture: x64
           cache: 'gradle'
 
       - name: Build with Gradle
