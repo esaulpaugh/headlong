@@ -25,4 +25,4 @@ jobs:
         run: gradle build
 
       - name: Build with Ant
-        run: ant -noinput -buildfile ant-gradle.xml clean all build-jar
+        run: ant -noinput -buildfile build.xml -Drepository="/.gradle/caches/modules-2/files-2.1" -Dgson_location="/com.google.code.gson/gson/2.10/dd9b193aef96e973d5a11ab13cd17430c2e4306b" clean all build-jar
