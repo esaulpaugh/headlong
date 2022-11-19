@@ -43,7 +43,7 @@ public class TupleTest {
     public void metaTest1() {
         final Random r = TestUtils.seededRandom();
 
-        for (int j = 0; j < 26; j++) {
+        for (int j = 0; j < 27; j++) {
             final long pow = (long) Math.pow(2.0, j);
             final long powMinus1 = pow - 1;
             System.out.println(Long.toHexString(powMinus1) + ", " + pow);
