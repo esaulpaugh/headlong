@@ -12,11 +12,11 @@ jobs:
 
       - uses: gradle/wrapper-validation-action@v1
 
-      - name: Set up JDK 8.0.332
+      - name: Set up JDK 8.0.345+1
         uses: actions/setup-java@v3
         with:
           distribution: 'adopt-openj9'
-          java-version: '8.0.332'
+          java-version: '8.0.345+1'
           java-package: jdk
           architecture: x86
 
