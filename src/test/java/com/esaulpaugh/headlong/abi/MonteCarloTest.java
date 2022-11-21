@@ -291,7 +291,7 @@ public class MonteCarloTest {
     @Test
     public void testThreadSafety() throws InterruptedException, TimeoutException {
 
-        final Random r = TestUtils.seededRandom();
+        final Random r = new Random(TestUtils.getSeed());
         final Keccak k = new Keccak(256);
         final MonteCarloTestCase one = newComplexTestCase(r, k);
         final MonteCarloTestCase two = newComplexTestCase(r, k);
@@ -324,7 +324,7 @@ public class MonteCarloTest {
     @Test
     public void testNotSerializable() throws Throwable {
         final Keccak k = new Keccak(256);
-        final MonteCarloTask original = new MonteCarloTask(newComplexTestCase(TestUtils.seededRandom(), k), 0, 1);
+        final MonteCarloTask original = new MonteCarloTask(newComplexTestCase(new Random(TestUtils.getSeed()), k), 0, 1);
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         TestUtils.assertThrown(NotSerializableException.class, "com.esaulpaugh.headlong.abi.MonteCarloTestCase", () -> new ObjectOutputStream(baos)

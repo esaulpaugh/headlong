@@ -53,7 +53,7 @@ public class TestUtils {
     }
 
     public static Random seededRandom() {
-        return new Random(getSeed());
+        return ThreadLocalRandom.current();
     }
 
     public static long getSeed() {

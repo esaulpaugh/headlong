@@ -130,7 +130,7 @@ public class TupleTest {
 
         final int maxTupleLen = 3;
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(maxTupleLen, 3, 3, 3);
-        final Random r = TestUtils.seededRandom();
+        final Random r = new Random(TestUtils.getSeed());
         final Keccak k = new Keccak(256);
         final Object defaultObj = new Object();
 
@@ -161,7 +161,7 @@ public class TupleTest {
     @Test
     public void fuzzNulls() throws Throwable {
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(3, 3, 3, 3);
-        final Random r = TestUtils.seededRandom();
+        final Random r = new Random(TestUtils.getSeed());
         final Keccak k = new Keccak(256);
         for (int i = 0; i < 1000; i++) {
             MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong(), limits, r, k);
