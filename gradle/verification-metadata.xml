@@ -89,6 +89,9 @@
             <artifact name="jmh-core-1.36.pom">
                 <sha256 value="981234265ac041f166b17c5adc6b1d459e894cabffeaf6b09c0074f0f40382e4" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
+            <artifact name="jmh-core-1.36-sources.jar">
+                <sha256 value="c4c206faef912536a337cf6342afbb62901b6e3c3dd7ba4e08907c5202137661" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
         </component>
         <component group="org.openjdk.jmh" name="jmh-parent" version="1.36">
             <artifact name="jmh-parent-1.36.pom">
