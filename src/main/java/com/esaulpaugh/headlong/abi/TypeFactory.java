@@ -246,9 +246,10 @@ public final class TypeFactory {
             char x = parentTypeString.charAt(++i);
             if(x <= ')') {
                 if(x == ')') {
-                    if(--depth <= 0) {
+                    if(depth <= 1) {
                         return i;
                     }
+                    depth--;
                 } else if(x == '(') {
                     depth++;
                 }
