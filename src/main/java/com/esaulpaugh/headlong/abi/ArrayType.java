@@ -256,7 +256,36 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private void encodeObjects(Object[] arr, ByteBuffer dest) {
         encodeArrayLen(arr.length, dest);
         final ABIType<Object> et = elementTypeNonCapturing();
-        TupleType.encodeObjects(dynamic, arr, i -> et, dest, OFFSET_LENGTH_BYTES * arr.length);
+        if (et.dynamic) {
+            encodeDynamic(arr, et, dest, OFFSET_LENGTH_BYTES * arr.length);
+        } else {
+            encodeStatic(arr, et, dest);
+        }
+    }
+
+    private static void encodeStatic(Object[] values, ABIType<Object> et, ByteBuffer dest) {
+        for (Object value : values) {
+            et.encodeHead(value, dest, -1);
+        }
+    }
+
+    private static void encodeDynamic(Object[] values, ABIType<Object> et, ByteBuffer dest, int offset) {
+        if (values.length == 0) {
+            return;
+        }
+        int i = 0;
+        final int last = values.length - 1;
+        while (true) {
+            Encoding.insertIntUnsigned(offset, dest); // insert offset
+            if (i >= last) {
+                break;
+            }
+            offset = offset + et.dynamicByteLength(values[i]); // return next offset
+            i++;
+        }
+        for (i = 0; i < values.length; i++) {
+            et.encodeTail(values[i], dest);
+        }
     }
 
     private void encodeArrayLen(int len, ByteBuffer dest) {

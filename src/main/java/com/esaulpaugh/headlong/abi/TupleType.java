@@ -161,7 +161,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     void encodeTail(Tuple value, ByteBuffer dest) {
-        encodeObjects(dynamic, value.elements, TupleType.this::getNonCapturing, dest, firstOffset);
+        if (dynamic) {
+            encodeDynamic(value.elements, dest);
+        } else {
+            encodeStatic(value.elements, dest);
+        }
     }
 
     @Override
@@ -172,16 +176,39 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
     }
 
-    static void encodeObjects(boolean dynamic, Object[] values, IntFunction<ABIType<Object>> getType, ByteBuffer dest, int offset) {
+    private void encodeStatic(Object[] values, ByteBuffer dest) { // 169.492 ns/op temurin 1.8.0_352
         for (int i = 0; i < values.length; i++) {
-            offset = getType.apply(i).encodeHead(values[i], dest, offset);
+            getNonCapturing(i).encodeTail(values[i], dest);
         }
-        if(dynamic) {
-            for (int i = 0; i < values.length; i++) {
-                ABIType<Object> t = getType.apply(i);
-                if (t.dynamic) {
-                    t.encodeTail(values[i], dest);
+    }
+
+    private void encodeDynamic(Object[] values, ByteBuffer dest) { // 58.999 // 53.867
+        if (values.length == 0) {
+            return;
+        }
+        int i = 0;
+        final int last = values.length - 1;
+        int offset = firstOffset;
+        while (true) {
+            final ABIType<Object> t = getNonCapturing(i);
+            if (!t.dynamic) {
+                t.encodeTail(values[i], dest);
+                if (i >= last) {
+                    break;
                 }
+            } else {
+                Encoding.insertIntUnsigned(offset, dest); // insert offset
+                if (i >= last) {
+                    break;
+                }
+                offset = offset + t.dynamicByteLength(values[i]); // return next offset
+            }
+            i++;
+        }
+        for (i = 0; i < values.length; i++) {
+            final ABIType<Object> t = getNonCapturing(i);
+            if (t.dynamic) {
+                t.encodeTail(values[i], dest);
             }
         }
     }
