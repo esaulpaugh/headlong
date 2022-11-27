@@ -176,20 +176,20 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
     }
 
-    private void encodeStatic(Object[] values, ByteBuffer dest) { // 169.492 ns/op temurin 1.8.0_352
+    private void encodeStatic(Object[] values, ByteBuffer dest) {
         for (int i = 0; i < values.length; i++) {
             getNonCapturing(i).encodeTail(values[i], dest);
         }
     }
 
-    private void encodeDynamic(Object[] values, ByteBuffer dest) { // 58.999 // 53.867
+    private void encodeDynamic(Object[] values, ByteBuffer dest) {
         if (values.length == 0) {
             return;
         }
         int i = 0;
         final int last = values.length - 1;
         int offset = firstOffset;
-        while (true) {
+        do {
             final ABIType<Object> t = getNonCapturing(i);
             if (!t.dynamic) {
                 t.encodeTail(values[i], dest);
@@ -201,10 +201,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 if (i >= last) {
                     break;
                 }
-                offset = offset + t.dynamicByteLength(values[i]); // return next offset
+                offset += t.dynamicByteLength(values[i]); // return next offset
             }
             i++;
-        }
+        } while (true);
         for (i = 0; i < values.length; i++) {
             final ABIType<Object> t = getNonCapturing(i);
             if (t.dynamic) {

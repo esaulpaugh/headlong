@@ -265,7 +265,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private static void encodeStatic(Object[] values, ABIType<Object> et, ByteBuffer dest) {
         for (Object value : values) {
-            et.encodeHead(value, dest, -1);
+            et.encodeTail(value, dest);
         }
     }
 
@@ -275,17 +275,17 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         }
         int i = 0;
         final int last = values.length - 1;
-        while (true) {
+        do {
             Encoding.insertIntUnsigned(offset, dest); // insert offset
             if (i >= last) {
-                break;
+                for (Object value : values) {
+                    et.encodeTail(value, dest);
+                }
+                return;
             }
-            offset = offset + et.dynamicByteLength(values[i]); // return next offset
+            offset += et.dynamicByteLength(values[i]); // return next offset
             i++;
-        }
-        for (i = 0; i < values.length; i++) {
-            et.encodeTail(values[i], dest);
-        }
+        } while (true);
     }
 
     private void encodeArrayLen(int len, ByteBuffer dest) {
