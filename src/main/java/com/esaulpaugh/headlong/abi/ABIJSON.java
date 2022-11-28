@@ -292,7 +292,7 @@ public final class ABIJSON {
     private static void tupleType(JsonWriter out, String name, TupleType tupleType, boolean[] indexedManifest) throws IOException {
         out.name(name).beginArray();
         int i = 0;
-        for (final ABIType<?> e : tupleType.elementTypes) {
+        for (final ABIType<?> e : tupleType) {
             out.beginObject();
             if(tupleType.elementNames != null) {
                 name(out, tupleType.elementNames[i]);

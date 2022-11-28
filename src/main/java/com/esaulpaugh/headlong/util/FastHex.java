@@ -33,11 +33,9 @@ public final class FastHex {
 
     static {
         final byte[] chars = "0123456789abcdef".getBytes(StandardCharsets.US_ASCII);
-        final int leftNibbleMask = 0xF0;
-        final int rightNibbleMask = 0x0F;
         for (int i = 0; i < ENCODE_TABLE.length; i++) {
-            byte leftChar = chars[(i & leftNibbleMask) >>> BITS_PER_CHAR];
-            byte rightChar = chars[i & rightNibbleMask];
+            byte leftChar = chars[(i & 0xF0) >>> BITS_PER_CHAR];
+            byte rightChar = chars[i & 0x0F];
             ENCODE_TABLE[i] = (short) ((leftChar << Byte.SIZE) | rightChar);
         }
     }

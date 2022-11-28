@@ -47,7 +47,6 @@ public final class SuperSerial {
     private SuperSerial() {}
 
     private static final byte[] TRUE = new byte[] { 0x1 };
-    private static final byte[] FALSE = EMPTY_BYTE_ARRAY;
 
     public static byte[] toRLP(TupleType schema, Tuple vals) {
         schema.validate(vals);
@@ -78,7 +77,7 @@ public final class SuperSerial {
 
     private static Object[] serializeTuple(TupleType tupleType, Tuple tuple) {
         Object[] out = new Object[tupleType.size()];
-        for(int i = 0; i < out.length; i++) {
+        for (int i = 0; i < out.length; i++) {
             out[i] = serialize(tupleType.get(i), tuple.get(i));
         }
         return out;
@@ -87,7 +86,7 @@ public final class SuperSerial {
     private static Tuple deserializeTuple(TupleType tupleType, byte[] sequence) {
         Iterator<RLPItem> sequenceIterator = RLP_STRICT.sequenceIterator(sequence);
         Object[] elements = new Object[tupleType.size()];
-        for(int i = 0; i < elements.length; i++) {
+        for (int i = 0; i < elements.length; i++) {
             elements[i] = deserialize(tupleType.get(i), sequenceIterator.next());
         }
         if(sequenceIterator.hasNext()) {
@@ -113,7 +112,7 @@ public final class SuperSerial {
 
     private static Object deserialize(ABIType<?> type, RLPItem item) {
         final int typeCode = type.typeCode();
-        if(item.isList() && typeCode != TYPE_CODE_ARRAY && typeCode != TYPE_CODE_TUPLE) {
+        if (item.isList() && typeCode != TYPE_CODE_ARRAY && typeCode != TYPE_CODE_TUPLE) {
             throw new IllegalArgumentException("RLPList not allowed for this type: " + type);
         }
         switch (typeCode) {
@@ -133,18 +132,18 @@ public final class SuperSerial {
     }
 
     private static byte[] serializeBoolean(boolean val) {
-        return val ? TRUE : FALSE;
+        return val ? TRUE : EMPTY_BYTE_ARRAY;
     }
 
     private static Boolean deserializeBoolean(RLPItem item) {
         final String enc = item.encodingString(Strings.HEX);
-        if("01".equals(enc)) return Boolean.TRUE;
-        if("80".equals(enc)) return Boolean.FALSE;
+        if ("01".equals(enc)) return Boolean.TRUE;
+        if ("80".equals(enc)) return Boolean.FALSE;
         throw new IllegalArgumentException("illegal boolean RLP: 0x" + enc + ". Expected 0x01 or 0x80");
     }
 
     private static byte[] serializeBigInteger(UnitType<?> ut, BigInteger val) {
-        if(val.signum() != 0) {
+        if (val.signum() != 0) {
             final byte[] bytes = val.toByteArray();
             return val.signum() < 0
                     ? signExtendNegative(bytes, ut.bitLength / Byte.SIZE)

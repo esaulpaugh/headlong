@@ -144,7 +144,7 @@ public final class Function implements ABIObject {
     private void validateFunction() {
         switch (type.ordinal()) {
         case ORDINAL_FUNCTION:
-            if(name == null) {
+            if (name == null) {
                 throw validationErr("define name");
             }
             return;
@@ -281,7 +281,7 @@ public final class Function implements ABIObject {
 
     @SuppressWarnings("unchecked")
     public <J> J decodeSingletonReturn(byte[] singleton) {
-        if(outputTypes.size() == 1) {
+        if (outputTypes.size() == 1) {
             return (J) outputTypes.get(0).decode(singleton);
         }
         throw new IllegalArgumentException("return type not a singleton: " + outputTypes.canonicalType);
@@ -289,7 +289,7 @@ public final class Function implements ABIObject {
 
     @SuppressWarnings("unchecked")
     public <J> J decodeSingletonReturn(ByteBuffer buf) {
-        if(outputTypes.size() == 1) {
+        if (outputTypes.size() == 1) {
             return (J) outputTypes.get(0).decode(buf);
         }
         throw new IllegalArgumentException("return type not a singleton: " + outputTypes.canonicalType);

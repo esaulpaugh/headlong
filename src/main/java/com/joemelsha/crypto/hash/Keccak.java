@@ -3,6 +3,7 @@ package com.joemelsha.crypto.hash;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.MessageDigest;
+import java.util.Arrays;
 
 /**
  * @author Joseph Robert Melsha (joe.melsha@live.com)
@@ -28,13 +29,12 @@ import java.security.MessageDigest;
 public final class Keccak extends MessageDigest {
 
     private static final int MAX_STATE_SIZE = 1600;
-    private static final int MAX_STATE_SIZE_WORDS = MAX_STATE_SIZE / Long.SIZE;
 
     private final int digestSizeBytes;
     private final transient int rateSizeBits;
     private final transient int rateSizeWords;
 
-    private final long[] state = new long[MAX_STATE_SIZE_WORDS];
+    private final long[] state = new long[MAX_STATE_SIZE / Long.SIZE];
     private int rateBits; // = 0
 
     private transient ByteBuffer out;
@@ -72,9 +72,7 @@ public final class Keccak extends MessageDigest {
 
     @Override
     protected void engineReset() {
-        for (int i = 0; i < MAX_STATE_SIZE_WORDS; i++) {
-            state[i] = 0L;
-        }
+        Arrays.fill(state, 0L);
         rateBits = 0;
         out = null; // very important to avoid leaking memory
     }
