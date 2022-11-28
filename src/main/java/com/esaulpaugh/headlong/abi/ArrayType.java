@@ -55,15 +55,15 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         this.elementType = elementType;
         this.length = length;
         this.arrayClass = arrayClass;
-        this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticArrayHeadLength(this);
+        this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticArrayHeadLength();
     }
 
-    static int staticArrayHeadLength(ArrayType<?, ?> at) {
-        switch (at.elementType.typeCode()) {
+    int staticArrayHeadLength() {
+        switch (elementType.typeCode()) {
         case TYPE_CODE_BYTE: return UNIT_LENGTH_BYTES; // all static byte arrays round up to exactly 32 bytes and not more
-        case TYPE_CODE_ARRAY: return at.length * staticArrayHeadLength((ArrayType<?, ?>) at.elementType);
-        case TYPE_CODE_TUPLE: return at.length * TupleType.staticTupleHeadLength((TupleType) at.elementType);
-        default: return at.length * UNIT_LENGTH_BYTES;
+        case TYPE_CODE_ARRAY: return length * ((ArrayType<?, ?>) elementType).staticArrayHeadLength();
+        case TYPE_CODE_TUPLE: return length * ((TupleType) elementType).staticTupleHeadLength();
+        default: return length * UNIT_LENGTH_BYTES;
         }
     }
 

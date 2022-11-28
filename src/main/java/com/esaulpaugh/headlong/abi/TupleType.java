@@ -37,6 +37,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     final ABIType<?>[] elementTypes;
     final String[] elementNames;
+    private final int[] elementHeadOffsets;
     private final int headLength;
     private final int firstOffset;
 
@@ -44,16 +45,18 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         super(canonicalType, Tuple.class, dynamic);
         this.elementTypes = elementTypes;
         this.elementNames = elementNames;
+        this.elementHeadOffsets = new int[elementTypes.length];
         if(dynamic) {
             this.headLength = OFFSET_LENGTH_BYTES;
             int sum = 0;
-            for (ABIType<?> elementType : elementTypes) {
-                sum += elementType.headLength();
+            for (int i = 0; i < elementTypes.length; i++) {
+                this.elementHeadOffsets[i] = sum;
+                sum += elementTypes[i].headLength();
             }
             this.firstOffset = sum;
         } else {
+            this.headLength = staticTupleHeadLength();
             this.firstOffset = -1;
-            this.headLength = staticTupleHeadLength(this);
         }
     }
 
@@ -236,11 +239,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     private Object decodeIndex(ByteBuffer bb, int index) {
         final ABIType<?> type = elementTypes[index]; // implicit bounds check up front
         final int start = bb.position();
-        int position = start, current = 0;
-        while (current < index) {
-            position += elementTypes[current++].headLength();
-        }
-        bb.position(position);
+        bb.position(start + elementHeadOffsets[index]);
         return decodeObject(type, bb, start, newUnitBuffer(), index);
     }
 
@@ -248,18 +247,15 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         final Object[] results = new Object[elementTypes.length];
         final int start = bb.position();
         final byte[] unitBuffer = newUnitBuffer();
-        for (int position = start, current = -1, i = 0; i < indices.length; i++) {
-            final int index = indices[i];
+        int prev = -1;
+        for (final int index : indices) {
             final ABIType<?> resultType = elementTypes[index]; // implicit bounds check up front
-            if (index <= current) {
+            if (index <= prev) {
                 throw new IllegalArgumentException("index out of order: " + index);
             }
-            while (++current < index) {
-                position += elementTypes[current].headLength();
-            }
-            bb.position(position);
+            bb.position(start + elementHeadOffsets[index]);
             results[index] = decodeObject(resultType, bb, start, unitBuffer, index);
-            position += resultType.headLength();
+            prev = index;
         }
         return new Tuple(results);
     }
@@ -275,12 +271,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         }
     }
 
-    static int staticTupleHeadLength(TupleType tt) {
+    int staticTupleHeadLength() {
         int len = 0;
-        for (ABIType<?> e : tt) {
+        int sum = 0;
+        for (int i = 0; i < elementTypes.length; i++) {
+            elementHeadOffsets[i] = sum;
+            final ABIType<?> e = elementTypes[i];
+            sum += e.headLength();
             switch (e.typeCode()) {
-            case TYPE_CODE_ARRAY: len += ArrayType.staticArrayHeadLength((ArrayType<?, ?>) e); continue;
-            case TYPE_CODE_TUPLE: len += staticTupleHeadLength((TupleType) e); continue;
+            case TYPE_CODE_ARRAY: len += ((ArrayType<?, ?>) e).staticArrayHeadLength(); continue;
+            case TYPE_CODE_TUPLE: len += ((TupleType) e).staticTupleHeadLength(); continue;
             default: len += UNIT_LENGTH_BYTES;
             }
         }
