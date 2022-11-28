@@ -9,7 +9,7 @@ plugins {
 
 group 'com.esaulpaugh'
 archivesBaseName = "headlong"
-version '9.0.0-SNAPSHOT'
+version '9.0.1-SNAPSHOT'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -97,7 +97,7 @@ dependencies {
 }
 
 task jmh(type: JavaExec, dependsOn: jmhClasses) { // run benchmarks with `gradle jmh`
-    main = 'org.openjdk.jmh.Main' // deprecated
+    getMainClass().set("org.openjdk.jmh.Main");
     classpath = sourceSets.jmh.compileClasspath + sourceSets.jmh.runtimeClasspath
 }
 
