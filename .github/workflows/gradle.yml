@@ -21,9 +21,9 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: ${{ matrix.distribution }}
-          java-version: '16.0.2+7'
+          java-version: '15.0.2'
           java-package: jdk
-          architecture: x86
+          architecture: x64
           cache: 'gradle'
 
       - name: Run gradle and ant builds
