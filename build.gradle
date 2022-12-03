@@ -103,7 +103,7 @@ task jmh(type: JavaExec, dependsOn: jmhClasses) { // run benchmarks with `gradle
 
 classes.finalizedBy(jmhClasses)
 
-tasks.withType(AbstractArchiveTask) {
+tasks.withType(AbstractArchiveTask).configureEach {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
 }
