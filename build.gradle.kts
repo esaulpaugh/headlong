@@ -90,3 +90,8 @@
 //    jmh("org.openjdk.jmh:jmh-core:1.36")
 //    jmh("org.openjdk.jmh:jmh-generator-annprocess:1.36")
 //}
+//
+//tasks.withType<AbstractArchiveTask>().configureEach {
+//    isPreserveFileTimestamps = false
+//    isReproducibleFileOrder = true
+//}
