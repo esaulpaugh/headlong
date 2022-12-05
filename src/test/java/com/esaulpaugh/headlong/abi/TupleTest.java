@@ -57,9 +57,9 @@ public class TupleTest {
 
         @Override
         public void run() {
-//            final Random r = ThreadLocalRandom.current();
+            final ThreadLocalRandom r = ThreadLocalRandom.current();
             for (long i = 0; i < taskSamples; i++) {
-                final int z = (int) (TestUtils.uniformLong(unsigned, bitLen) & powMinus1);
+                final int z = (int) (TestUtils.uniformLong(r, unsigned, bitLen) & powMinus1);
                 final int idx = z / Long.SIZE;
                 final long x = dest[idx];
                 if (x != -1L) {
@@ -72,19 +72,18 @@ public class TupleTest {
         }
     }
 
-    @Disabled("meta test")
     @Test
     public void metaTest1() throws InterruptedException {
         final int parallelism = 24;
-        final boolean unsigned = true;
+        final boolean unsigned = false;
 
-        for (int j = 0; j < 27; j++) {
+        for (int j = 0; j < 23; j++) {
             final long pow = (long) Math.pow(2.0, j);
             final long powMinus1 = pow - 1;
-            System.out.println(Long.toHexString(powMinus1) + ", " + pow);
-            final long samples = pow * (j / 2 + 8);
+//            System.out.println(Long.toHexString(powMinus1) + ", " + pow);
+            final long samples = pow * (j / 2 + 11);
             final long taskSamples = 1 + samples / parallelism;
-            System.out.println("j=" + j + ", samples=" + samples);
+//            System.out.println("j=" + j + ", samples=" + samples);
             final long[] a = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
             final long[] b = new long[a.length];
 
@@ -126,7 +125,7 @@ public class TupleTest {
                 }
             }
 
-            System.out.println(pow - missed + " / " + pow + " " + (1 - ((double) missed / pow)) + '\n');
+//            System.out.println(pow - missed + " / " + pow + " " + (1 - ((double) missed / pow)) + '\n');
             if (missedChunks != 0 || missed != 0) {
                 throw new IllegalArgumentException("missed " + missed + ", missedChunks=" + missedChunks);
             }
