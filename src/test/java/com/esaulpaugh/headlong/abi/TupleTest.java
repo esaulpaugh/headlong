@@ -18,7 +18,6 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.Strings;
 import com.joemelsha.crypto.hash.Keccak;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -59,8 +58,8 @@ public class TupleTest {
         public void run() {
             final ThreadLocalRandom r = ThreadLocalRandom.current();
             for (long i = 0; i < taskSamples; i++) {
-                final int z = (int) (TestUtils.uniformLong(r, unsigned, bitLen) & powMinus1);
-                final int idx = z / Long.SIZE;
+                final long z = TestUtils.uniformLong(r, unsigned, bitLen) & powMinus1;
+                final int idx = (int) (z / Long.SIZE);
                 final long x = dest[idx];
                 if (x != -1L) {
                     final long y = x | (0x80000000_00000000L >>> (z & 63));
@@ -75,7 +74,7 @@ public class TupleTest {
     @Test
     public void metaTest1() throws InterruptedException {
         final int parallelism = 24;
-        final boolean unsigned = false;
+        final boolean unsigned = true;
 
         for (int j = 0; j < 23; j++) {
             final long pow = (long) Math.pow(2.0, j);
@@ -83,7 +82,7 @@ public class TupleTest {
 //            System.out.println(Long.toHexString(powMinus1) + ", " + pow);
             final long samples = pow * (j / 2 + 11);
             final long taskSamples = 1 + samples / parallelism;
-//            System.out.println("j=" + j + ", samples=" + samples);
+            System.out.println("j=" + j + ", samples=" + samples);
             final long[] a = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
             final long[] b = new long[a.length];
 
