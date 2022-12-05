@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,25 +39,68 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TupleTest {
 
+    private static class T extends Thread {
+
+        final long taskSamples;
+        final boolean unsigned;
+        final int bitLen;
+        final long powMinus1;
+        final long[] dest;
+
+        private T(long taskSamples, boolean unsigned, int bitLen, long powMinus1, long[] dest) {
+            this.taskSamples = taskSamples;
+            this.unsigned = unsigned;
+            this.bitLen = bitLen;
+            this.powMinus1 = powMinus1;
+            this.dest = dest;
+        }
+
+        @Override
+        public void run() {
+//            final Random r = ThreadLocalRandom.current();
+            for (long i = 0; i < taskSamples; i++) {
+                final int z = (int) (TestUtils.uniformLong(unsigned, bitLen) & powMinus1);
+                final int idx = z / Long.SIZE;
+                final long x = dest[idx];
+                if (x != -1L) {
+                    final long y = x | (0x80000000_00000000L >>> (z & 63));
+                    if (y != x) {
+                        dest[idx] = y;
+                    }
+                }
+            }
+        }
+    }
+
     @Disabled("meta test")
     @Test
-    public void metaTest1() {
-        final Random r = TestUtils.seededRandom();
+    public void metaTest1() throws InterruptedException {
+        final int parallelism = 24;
+        final boolean unsigned = true;
 
         for (int j = 0; j < 27; j++) {
             final long pow = (long) Math.pow(2.0, j);
             final long powMinus1 = pow - 1;
             System.out.println(Long.toHexString(powMinus1) + ", " + pow);
-
-            final BigIntegerType type = new BigIntegerType("int" + j, j, false);
-
             final long samples = pow * (j / 2 + 8);
+            final long taskSamples = 1 + samples / parallelism;
             System.out.println("j=" + j + ", samples=" + samples);
-            final long[] longs = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
-            for (long i = 0; i < samples; i++) {
-                final BigInteger val = TestUtils.uniformBigInteger(r, type.unsigned, type.bitLength);
-                final int z = (int) (val.longValue() & powMinus1);
-                longs[z / Long.SIZE] |= 0x80000000_00000000L >>> (z & 63);
+            final long[] a = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
+            final long[] b = new long[a.length];
+
+            final Thread[] threads = new Thread[parallelism - 1];
+            for (int i = 0; i < threads.length; i++) {
+                Thread t = new T(taskSamples, unsigned, j, powMinus1, i % 2 == 0 ? a : b);
+                t.start();
+                threads[i] = t;
+            }
+            new T(taskSamples, unsigned, j, powMinus1, a).run();
+            for (Thread t : threads) {
+                t.join();
+            }
+            final long[] longs = new long[a.length];
+            for (int i = 0; i < longs.length; i++) {
+                longs[i] = a[i] | b[i];
             }
 
             int missed = 0;
@@ -64,7 +108,7 @@ public class TupleTest {
             final int fullChunks = (int) (pow / Long.SIZE);
             for (int i = 0; i < fullChunks; i++) {
                 final long val = longs[i];
-                if(val != 0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111L) {
+                if (val != 0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111L) {
                     final int zeroes = Long.SIZE - Long.bitCount(val);
                     missed += zeroes;
                     missedChunks++;
@@ -76,7 +120,7 @@ public class TupleTest {
                 final int shift = 64 - finalBits;
                 final long last = longs[longs.length - 1];
                 final long expected = -1L << shift;
-                if(last != expected) {
+                if (last != expected) {
                     missed += finalBits - Long.bitCount(last >>> shift);
                     System.err.println("last = " + Long.toBinaryString(last));
                 }
