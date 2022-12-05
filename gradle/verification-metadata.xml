@@ -8,6 +8,7 @@
       </ignored-keys>
       <trusted-keys>
 <!--         <trusted-key id="d6f1bc78607808ec8e9f69437a8860944fad5f62" group="org.apache.commons" name="commons-parent" version="28"/>-->
+          <trusted-key id="b6e73d84ea4fcc47166087253faad2cd5ecbb314" group="org.apache.commons"/>
          <trusted-key id="f254b35617dc255d9344bcfa873a8e86b4372146" group="org.apache" name="apache" version="13"/>
          <trusted-key id="019082bc00e0324e2aef4cf00d3b328562a119a7" group="org.openjdk.jmh"/>
          <trusted-key id="08f0aab4d0c1a4bdde340765b341ddb020fcb6ab" group="org.bouncycastle" name="bcprov-jdk14" version="1.72"/>
