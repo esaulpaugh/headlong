@@ -1,29 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<verification-metadata>
-    <configuration>
-        <verify-metadata>true</verify-metadata>
-        <verify-signatures>true</verify-signatures>
-        <trusted-keys>
-            <trusted-key id="d2ea6bcd43b3663cdf6222c135ae09fd38f0cfae" group="com.esaulpaugh"/>
-            <trusted-key id="c7be5bcc9fec15518cfda882b0f3710fa64900e7" group="com.google.code.gson"/>
-            
-            <trusted-key id="f254b35617dc255d9344bcfa873a8e86b4372146" group="org.apache"/>
-            <trusted-key id="fa77dcfef2ee6eb2debedd2c012579464d01c06a" group="org.apache"/>
-            <trusted-key id="08f0aab4d0c1a4bdde340765b341ddb020fcb6ab" group="org.bouncycastle"/>
-            <trusted-key id="bc87a3fd0a54480f0badbebd21939ff0ca2a6567" group="commons-codec"/>
-            <trusted-key id="12d16069219c90212a974d119ae296fd02e9f65b" group="org.apache.commons"/>
-            <trusted-key id="d6f1bc78607808ec8e9f69437a8860944fad5f62" group="org.apache.commons"/>
-            <trusted-key id="b6e73d84ea4fcc47166087253faad2cd5ecbb314" group="org.apache.commons"/>
-            <trusted-key id="019082bc00e0324e2aef4cf00d3b328562a119a7" group="org.openjdk.jmh"/>
-            <trusted-key id="517b94f8d0a46317a28d8ab30da8a5ec02d11ead" group="net.sf.jopt-simple"/>
-            
-            <trusted-key id="ff6e2c001948c5f2f38b0cc385911f425ec61b51" group="org.apiguardian"/>
-            <trusted-key id="ff6e2c001948c5f2f38b0cc385911f425ec61b51" group="org.junit"/>
-            <trusted-key id="ff6e2c001948c5f2f38b0cc385911f425ec61b51" group="org.junit.jupiter"/>
-            <trusted-key id="ff6e2c001948c5f2f38b0cc385911f425ec61b51" group="org.junit.platform"/>
-            <trusted-key id="ff6e2c001948c5f2f38b0cc385911f425ec61b51" group="org.opentest4j"/>
-        </trusted-keys>
-    </configuration>
+<verification-metadata xmlns="https://schema.gradle.org/dependency-verification" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://schema.gradle.org/dependency-verification https://schema.gradle.org/dependency-verification/dependency-verification-1.1.xsd">
+   <configuration>
+      <verify-metadata>true</verify-metadata>
+      <verify-signatures>true</verify-signatures>
+      <ignored-keys>
+         <ignored-key id="7a8860944fad5f62" reason="Key couldn't be downloaded from any key server"/> <!-- d6f1bc78607808ec8e9f69437a8860944fad5f62 -->
+      </ignored-keys>
+      <trusted-keys>
+<!--         <trusted-key id="d6f1bc78607808ec8e9f69437a8860944fad5f62" group="org.apache.commons" name="commons-parent" version="28"/>-->
+         <trusted-key id="f254b35617dc255d9344bcfa873a8e86b4372146" group="org.apache" name="apache" version="13"/>
+         <trusted-key id="019082bc00e0324e2aef4cf00d3b328562a119a7" group="org.openjdk.jmh"/>
+         <trusted-key id="08f0aab4d0c1a4bdde340765b341ddb020fcb6ab" group="org.bouncycastle" name="bcprov-jdk14" version="1.72"/>
+         <trusted-key id="12d16069219c90212a974d119ae296fd02e9f65b" group="org.apache.commons" name="commons-math3" version="3.2"/>
+         <trusted-key id="517b94f8d0a46317a28d8ab30da8a5ec02d11ead" group="net.sf.jopt-simple" name="jopt-simple" version="5.0.4"/>
+         <trusted-key id="bc87a3fd0a54480f0badbebd21939ff0ca2a6567" group="commons-codec" name="commons-codec" version="1.15"/>
+         <trusted-key id="c7be5bcc9fec15518cfda882b0f3710fa64900e7" group="com.google.code.gson"/>
+         <trusted-key id="fa77dcfef2ee6eb2debedd2c012579464d01c06a" group="org.apache" name="apache" version="23"/>
+         <trusted-key id="ff6e2c001948c5f2f38b0cc385911f425ec61b51">
+            <trusting group="junit"/>
+            <trusting group="org.apiguardian"/>
+            <trusting group="org.junit.jupiter"/>
+            <trusting group="org.junit.platform"/>
+            <trusting group="org.opentest4j"/>
+            <trusting group="^org[.]junit($|([.].*))" regex="true"/>
+         </trusted-key>
+      </trusted-keys>
+   </configuration>
     <components>
         <component group="com.google.code.gson" name="gson-parent" version="2.10">
             <artifact name="gson-parent-2.10.pom">
