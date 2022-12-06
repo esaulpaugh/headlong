@@ -57,12 +57,7 @@ public class MonteCarloTest {
     public void testRepro() {
         Random instance = new Random();
         MessageDigest md = Function.newDefaultDigest();
-        MonteCarloTestCase testCase = new MonteCarloTestCase(
-                3239653448104147572L,
-                new MonteCarloTestCase.Limits(4, 3, 5, 4),
-                instance,
-                md
-        );
+        MonteCarloTestCase testCase = new MonteCarloTestCase("(2629380117031542455L,5,9,5,5)", instance, md);
         repro(testCase, true);
     }
 

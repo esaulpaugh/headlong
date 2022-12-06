@@ -123,6 +123,10 @@ public class MonteCarloTestCase {
         );
     }
 
+    MonteCarloTestCase(String init, Random rng, MessageDigest md) {
+        this(parseSeed(init), parseLimits(init), rng, md);
+    }
+
     MonteCarloTestCase(long seed, Limits limits, Random rng, MessageDigest md) {
         this.seed = seed;
         this.limits = limits;
@@ -140,6 +144,17 @@ public class MonteCarloTestCase {
         this.function = new Function(TypeEnum.FUNCTION, generateFunctionName(rng), TupleType.parse(rawInputsStr), TupleType.EMPTY, null, md);
         this.argsTuple = generateTuple(function.getInputs().elementTypes, rng);
         testDeepCopy(argsTuple);
+    }
+
+    private static long parseSeed(String init) {
+        final String sub = init.substring(init.indexOf('(') + 1, init.indexOf("L,"));
+        return Long.parseLong(sub);
+    }
+
+    private static MonteCarloTestCase.Limits parseLimits(String init) {
+        final String sub = init.substring(init.indexOf(',') + 1, init.lastIndexOf(')'));
+        final String[] tokens = sub.split(",");
+        return new MonteCarloTestCase.Limits(Integer.parseInt(tokens[0]), Integer.parseInt(tokens[1]), Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]));
     }
 
     String rawSignature() {
