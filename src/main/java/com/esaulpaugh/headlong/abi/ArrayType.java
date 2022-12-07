@@ -472,7 +472,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
             } else {
                 final int start = bb.position(); // save this value before offsets are decoded
                 int saved = start;
-                for (; i < elements.length; i++) {
+                for ( ; i < elements.length; i++) {
                     bb.position(saved);
                     final int jump = start + UINT31.decode(bb, unitBuffer);
                     /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
