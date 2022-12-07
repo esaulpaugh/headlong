@@ -219,7 +219,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
         Object[] elements = new Object[size()];
-        decodeObjects(dynamic, bb, unitBuffer, TupleType.this::get, elements, true);
+        decodeObjects(bb, unitBuffer, TupleType.this::get, elements, true);
         return new Tuple(elements);
     }
 
@@ -287,15 +287,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return len;
     }
 
-    static void decodeObjects(boolean dynamic, ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects, boolean tuple) {
+    static void decodeObjects(ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects, boolean tuple) {
         int i = 0;
         try {
-            if (!dynamic) {
-                for (i = 0; i < objects.length; i++) {
-                    objects[i] = getType.apply(i).decode(bb, unitBuffer);
-                }
-                return;
-            }
             final int start = bb.position(); // save this value before offsets are decoded
             final int[] offsets = new int[objects.length];
             for (i = 0; i < objects.length; i++) {
