@@ -218,8 +218,34 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
-        Object[] elements = new Object[size()];
-        decodeObjects(bb, unitBuffer, TupleType.this::get, elements, true);
+        final Object[] elements = new Object[size()];
+        int i = 0;
+        try {
+            final int start = bb.position(); // save this value before offsets are decoded
+            final int[] offsets = new int[elements.length];
+            for ( ; i < elements.length; i++) {
+                ABIType<?> t = elementTypes[i];
+                if (!t.dynamic) {
+                    elements[i] = t.decode(bb, unitBuffer);
+                } else {
+                    final int offset = UINT31.decode(bb, unitBuffer);
+                    offsets[i] = offset == 0 ? -1 : offset;
+                }
+            }
+            for (i = 0; i < elements.length; i++) {
+                final int offset = offsets[i];
+                if (offset != 0) {
+                    final int jump = start + offset;
+                    if (jump != bb.position()) {
+                        /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
+                        bb.position(offset == -1 ? start : jump); // leniently jump to specified offset
+                    }
+                    elements[i] = elementTypes[i].decode(bb, unitBuffer);
+                }
+            }
+        } catch (IllegalArgumentException cause) {
+            throw decodeException(true, i, cause);
+        }
         return new Tuple(elements);
     }
 
@@ -285,35 +311,6 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             }
         }
         return len;
-    }
-
-    static void decodeObjects(ByteBuffer bb, byte[] unitBuffer, IntFunction<ABIType<?>> getType, Object[] objects, boolean tuple) {
-        int i = 0;
-        try {
-            final int start = bb.position(); // save this value before offsets are decoded
-            final int[] offsets = new int[objects.length];
-            for (i = 0; i < objects.length; i++) {
-                ABIType<?> t = getType.apply(i);
-                if (!t.dynamic) {
-                    objects[i] = t.decode(bb, unitBuffer);
-                } else {
-                    offsets[i] = UINT31.decode(bb, unitBuffer);
-                }
-            }
-            for (i = 0; i < objects.length; i++) {
-                final int offset = offsets[i];
-                if (offset > 0) {
-                    final int jump = start + offset;
-                    if (jump != bb.position()) {
-                        /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-                        bb.position(jump); // leniently jump to specified offset
-                    }
-                    objects[i] = getType.apply(i).decode(bb, unitBuffer);
-                }
-            }
-        } catch (IllegalArgumentException cause) {
-            throw decodeException(tuple, i, cause);
-        }
     }
 
     static IllegalArgumentException decodeException(boolean tuple, int i, IllegalArgumentException cause) {

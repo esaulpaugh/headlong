@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import java.util.function.IntUnaryOperator;
 
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
+import static com.esaulpaugh.headlong.abi.Encoding.UINT31;
 import static com.esaulpaugh.headlong.abi.TupleType.countBytes;
 import static com.esaulpaugh.headlong.abi.TupleType.totalLen;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -461,8 +462,28 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private Object[] decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer) {
-        Object[] elements = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
-        TupleType.decodeObjects(bb, unitBuffer, i -> elementType, elements, false);
+        final Object[] elements = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
+        int i = 0;
+        try {
+            if (!elementType.dynamic) {
+                for ( ; i < elements.length; i++) {
+                    elements[i] = elementType.decode(bb, unitBuffer);
+                }
+            } else {
+                final int start = bb.position(); // save this value before offsets are decoded
+                int saved = start;
+                for (; i < elements.length; i++) {
+                    bb.position(saved);
+                    final int jump = start + UINT31.decode(bb, unitBuffer);
+                    /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
+                    saved = bb.position();
+                    bb.position(jump); // leniently jump to specified offset
+                    elements[i] = elementType.decode(bb, unitBuffer);
+                }
+            }
+        } catch (IllegalArgumentException cause) {
+            throw TupleType.decodeException(false, i, cause);
+        }
         return elements;
     }
 
