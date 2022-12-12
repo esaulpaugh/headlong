@@ -115,7 +115,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     @Override
     int byteLength(J value) {
         if(!dynamic) return headLength;
-        return totalLen(calcElementsLen(value), length == DYNAMIC_LENGTH);
+        return dynamicByteLength(value);
     }
 
     private int calcElementsLen(J value) {

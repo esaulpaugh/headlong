@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.IntFunction;
 import java.util.function.IntUnaryOperator;
 
 import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
@@ -107,7 +106,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     int byteLength(Tuple value) {
         if(!dynamic) return headLength;
-        return countBytes(i -> measureObject(getNonCapturing(i), value.elements[i]));
+        return dynamicByteLength(value);
     }
 
     private static int measureObject(ABIType<Object> type, Object value) {

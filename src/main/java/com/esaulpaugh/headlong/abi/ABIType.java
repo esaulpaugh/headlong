@@ -130,15 +130,6 @@ public abstract class ABIType<J> {
         encodeTail(value, dest);
     }
 
-    final int encodeHead(J value, ByteBuffer dest, int offset) {
-        if (!dynamic) {
-            encodeTail(value, dest);
-            return offset;
-        }
-        Encoding.insertIntUnsigned(offset, dest); // insert offset
-        return offset + dynamicByteLength(value); // return next offset
-    }
-
     abstract void encodeTail(J value, ByteBuffer dest);
 
     /**
