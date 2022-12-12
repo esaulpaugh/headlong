@@ -95,7 +95,7 @@ public class TestUtils {
 
     public static long wildLong(Random r, boolean unsigned, int bitLength) {
         checkBitLength(unsigned, bitLength);
-        return uniformBigInteger(r, unsigned, bitLength).longValueExact();
+        return wildBigInteger(r, unsigned, bitLength).longValueExact();
     }
 
     public static long uniformLong(boolean unsigned, int bitLength) {
@@ -135,6 +135,9 @@ public class TestUtils {
     }
 
     public static BigInteger wildBigInteger(Random r, boolean unsigned, int bitLength) {
+        if(bitLength == 0) {
+            return BigInteger.ZERO;
+        }
         return uniformBigInteger(r, unsigned, 1 + r.nextInt(bitLength));
     }
 
