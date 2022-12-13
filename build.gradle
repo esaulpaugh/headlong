@@ -97,7 +97,7 @@ dependencies {
 }
 
 task jmh(type: JavaExec, dependsOn: jmhClasses) { // run benchmarks with `gradle jmh`
-    getMainClass().set("org.openjdk.jmh.Main");
+    getMainClass().set("org.openjdk.jmh.Main")
     classpath = sourceSets.jmh.compileClasspath + sourceSets.jmh.runtimeClasspath
 }
 
