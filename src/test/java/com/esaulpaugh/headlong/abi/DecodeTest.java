@@ -725,7 +725,7 @@ public class DecodeTest {
         };
         Tuple result = event.decodeArgs(topics, Strings.EMPTY_BYTE_ARRAY);
         assertEquals("392791df626408017a264f53fde61065d5a93a32b60171df9d8a46afdf82992d", Strings.encode((byte[]) result.get(0)));
-        assertEquals(12, (Integer) result.get(1));
+        assertEquals(12, (int) result.get(1));
 
         byte[] tooLong = new byte[35];
         System.arraycopy(topics[2], 0, tooLong, 0, 32);
