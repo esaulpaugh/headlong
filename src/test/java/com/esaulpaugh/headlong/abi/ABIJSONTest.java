@@ -419,22 +419,10 @@ public class ABIJSONTest {
         assertEquals(a, c);
         assertEquals(a.hashCode(), b.hashCode());
         assertEquals(a.hashCode(), c.hashCode());
+        assertEquals(a.toString(), b.toString());
 
-        assertEquals(a, Event.fromJson(a.toJson(true)));
-        assertEquals(a, Event.fromJson(a.toJson(false)));
-        assertEquals(a, Event.fromJson(a.toString()));
-
-        assertEquals(a, Event.fromJson(b.toJson(true)));
-        assertEquals(a, Event.fromJson(b.toJson(false)));
-        assertEquals(a, Event.fromJson(b.toString()));
-
-        assertEquals(b, Event.fromJson(a.toJson(true)));
-        assertEquals(b, Event.fromJson(a.toJson(false)));
-        assertEquals(b, Event.fromJson(a.toString()));
-
-        assertEquals(b, Event.fromJson(b.toJson(true)));
-        assertEquals(b, Event.fromJson(b.toJson(false)));
-        assertEquals(b, Event.fromJson(b.toString()));
+        assertEquals(a.toJson(true), b.toJson(true));
+        assertEquals(a.toJson(false), b.toJson(false));
     }
 
     @Test
