@@ -257,9 +257,11 @@ public final class ABIJSON {
                 }
                 stateMutability(out, f.getStateMutability());
             } else if (o.isEvent()) {
+                final Event e = o.asEvent();
                 type(out, EVENT);
                 name(out, o.getName());
-                tupleType(out, INPUTS, o.getInputs(), o.asEvent().getIndexManifest());
+                tupleType(out, INPUTS, o.getInputs(), e.getIndexManifest());
+                out.name(ANONYMOUS).value(e.isAnonymous());
             } else {
                 type(out, ERROR);
                 name(out, o.getName());

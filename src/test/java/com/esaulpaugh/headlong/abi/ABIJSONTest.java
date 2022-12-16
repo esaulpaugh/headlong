@@ -137,7 +137,8 @@ public class ABIJSONTest {
             "        \"type\": \"uint256\",\n" +
             "        \"indexed\": false\n" +
             "      }\n" +
-            "    ]\n" +
+            "    ],\n" +
+            "    \"anonymous\": true\n" +
             "  },\n" +
             "  {\n" +
             "    \"type\": \"function\",\n" +
@@ -418,6 +419,22 @@ public class ABIJSONTest {
         assertEquals(a, c);
         assertEquals(a.hashCode(), b.hashCode());
         assertEquals(a.hashCode(), c.hashCode());
+
+        assertEquals(a, Event.fromJson(a.toJson(true)));
+        assertEquals(a, Event.fromJson(a.toJson(false)));
+        assertEquals(a, Event.fromJson(a.toString()));
+
+        assertEquals(a, Event.fromJson(b.toJson(true)));
+        assertEquals(a, Event.fromJson(b.toJson(false)));
+        assertEquals(a, Event.fromJson(b.toString()));
+
+        assertEquals(b, Event.fromJson(a.toJson(true)));
+        assertEquals(b, Event.fromJson(a.toJson(false)));
+        assertEquals(b, Event.fromJson(a.toString()));
+
+        assertEquals(b, Event.fromJson(b.toJson(true)));
+        assertEquals(b, Event.fromJson(b.toJson(false)));
+        assertEquals(b, Event.fromJson(b.toString()));
     }
 
     @Test
@@ -507,7 +524,8 @@ public class ABIJSONTest {
                 "      \"type\": \"uint256\",\n" +
                 "      \"indexed\": false\n" +
                 "    }\n" +
-                "  ]\n" +
+                "  ],\n" +
+                "  \"anonymous\": true\n" +
                 "}";
 
         assertEquals(eventJson, event.toJson(true));
