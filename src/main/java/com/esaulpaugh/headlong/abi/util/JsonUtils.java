@@ -18,16 +18,18 @@ package com.esaulpaugh.headlong.abi.util;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonReader;
+
+import java.io.StringReader;
 
 public final class JsonUtils {
 
     private JsonUtils() {}
 
-    @SuppressWarnings("deprecation")
     public static JsonElement parseElement(String json) {
-        return new JsonParser().parse(json); // JsonParser.parseString(json);
+        return Streams.parse(new JsonReader(new StringReader(json)));
     }
 
     public static JsonObject parseObject(String json) {
