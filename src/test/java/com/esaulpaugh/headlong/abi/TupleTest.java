@@ -153,7 +153,7 @@ public class TupleTest {
             new int[0],
             new short[0],
             new long[0],
-            new boolean[0],
+            new Boolean[0],
             new Throwable() {},
             new BigInteger[0],
             new BigDecimal[0],
@@ -378,7 +378,7 @@ public class TupleTest {
     @Test
     public void testDecodeIndex1() {
         TupleType tt = TupleType.parse("(bool,bool[3][2],string[][])");
-        Tuple args = Tuple.of(true, new boolean[][] { new boolean[] { true, false, true }, new boolean[] { false, false, true } }, new String[][] { new String[] { "wooo", "moo" } });
+        Tuple args = Tuple.of(true, new Boolean[][] { new Boolean[] { true, false, true }, new Boolean[] { false, false, true } }, new String[][] { new String[] { "wooo", "moo" } });
         ByteBuffer bb = tt.encode(args);
         System.out.println(Strings.encode(bb));
         String[][] s = tt.decode(bb, 2);

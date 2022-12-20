@@ -283,7 +283,7 @@ public class DecodeTest {
     @Test
     public void testCorruptBooleanArray() throws Throwable {
         Function f = new Function("baz(bool[])");
-        Tuple argsTuple = Tuple.singleton(new boolean[] { true });
+        Tuple argsTuple = Tuple.singleton(new Boolean[] { true });
         ByteBuffer one = f.encodeCall(argsTuple);
 
         final byte[] array = one.array();

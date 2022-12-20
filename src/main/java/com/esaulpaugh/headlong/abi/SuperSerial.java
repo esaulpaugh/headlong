@@ -170,7 +170,7 @@ public final class SuperSerial {
     private static Object serializeArray(ArrayType<? extends ABIType<?>, ?> type, Object arr) {
         final ABIType<?> et = type.getElementType();
         switch (et.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return serializeBooleanArray((boolean[]) arr);
+        case TYPE_CODE_BOOLEAN: return serializeBooleanArray((Boolean[]) arr);
         case TYPE_CODE_BYTE: return serializeByteArray(arr, type.isString());
         case TYPE_CODE_INT: return serializeIntArray((UnitType<?>) et, (int[]) arr);
         case TYPE_CODE_LONG: return serializeLongArray((UnitType<?>) et, (long[]) arr);
@@ -199,7 +199,7 @@ public final class SuperSerial {
         }
     }
 
-    private static byte[][] serializeBooleanArray(boolean[] booleans) {
+    private static byte[][] serializeBooleanArray(Boolean[] booleans) {
         byte[][] out = new byte[booleans.length][];
         for (int i = 0; i < booleans.length; i++) {
             out[i] = serializeBoolean(booleans[i]);
@@ -207,9 +207,9 @@ public final class SuperSerial {
         return out;
     }
 
-    private static boolean[] deserializeBooleanArray(RLPList list) {
+    private static Boolean[] deserializeBooleanArray(RLPList list) {
         final List<RLPItem> elements = list.elements(RLP_STRICT);
-        boolean[] in = new boolean[elements.size()];
+        Boolean[] in = new Boolean[elements.size()];
         for (int i = 0; i < in.length; i++) {
             in[i] = deserializeBoolean(elements.get(i));
         }

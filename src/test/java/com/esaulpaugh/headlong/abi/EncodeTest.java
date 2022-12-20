@@ -369,18 +369,18 @@ public class EncodeTest {
 
         Supplier<Object> bytesSupplier = () -> TestUtils.randomBytes(rand.nextInt(33), rand);
         Supplier<Object> stringSupplier = () -> { byte[] v = TestUtils.randomBytes(rand.nextInt(33), rand); return Strings.encode(v, Strings.UTF_8); };
-        Supplier<Object> booleanArraySupplier = () -> { boolean[] v = new boolean[rand.nextInt(4)]; Arrays.fill(v, rand.nextBoolean()); return v; };
+        Supplier<Object> booleanArraySupplier = () -> { Boolean[] v = new Boolean[rand.nextInt(4)]; Arrays.fill(v, rand.nextBoolean()); return v; };
         Supplier<Object> intArraySupplier = () -> { BigInteger[] v = new BigInteger[rand.nextInt(4)]; Arrays.fill(v, BigInteger.valueOf(rand.nextInt())); return v; };
 
         testFixedLenDynamicArray("bytes", new byte[1 + rand.nextInt(34)][], bytesSupplier);
         testFixedLenDynamicArray("string", new String[1 + rand.nextInt(34)], stringSupplier);
-        testFixedLenDynamicArray("bool[]", new boolean[1 + rand.nextInt(34)][], booleanArraySupplier);
+        testFixedLenDynamicArray("bool[]", new Boolean[1 + rand.nextInt(34)][], booleanArraySupplier);
         testFixedLenDynamicArray("int[]", new BigInteger[1 + rand.nextInt(34)][], intArraySupplier);
 
         final String msg = "array lengths differ, expected: <32> but was: <0>";
         assertThrown(AssertionFailedError.class, msg, () -> testFixedLenDynamicArray("bytes", new byte[0][], null));
         assertThrown(AssertionFailedError.class, msg, () -> testFixedLenDynamicArray("string", new String[0], null));
-        assertThrown(AssertionFailedError.class, msg, () -> testFixedLenDynamicArray("bool[]", new boolean[0][], null));
+        assertThrown(AssertionFailedError.class, msg, () -> testFixedLenDynamicArray("bool[]", new Boolean[0][], null));
         assertThrown(AssertionFailedError.class, msg, () -> testFixedLenDynamicArray("int[]", new BigInteger[0][], null));
     }
 
@@ -490,7 +490,7 @@ public class EncodeTest {
 
         Object a = BigInteger.valueOf(7L);
         Object b = 9L;
-        Object c = new boolean[0];
+        Object c = new Boolean[0];
 
         ByteBuffer ee = tt.encode(Tuple.of(a, b, c));
 
@@ -549,8 +549,8 @@ public class EncodeTest {
                 () -> Function.parse("foo(address[5])").encodeCallWithArgs("0xaaaaaaaaaaaaaaaaaaa")
         );
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: array length mismatch: boolean[2][][] != boolean[3][][] (bool[][][3] requires length 3 but found 2)",
-                () -> Function.parse("foo(bool[][][3])").encodeCallWithArgs((Object) new boolean[][][] {new boolean[][]{}, new boolean[][]{}})
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: array length mismatch: Boolean[2][][] != Boolean[3][][] (bool[][][3] requires length 3 but found 2)",
+                () -> Function.parse("foo(bool[][][3])").encodeCallWithArgs((Object) new Boolean[][][] {new Boolean[][]{}, new Boolean[][]{}})
         );
 
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: array length mismatch: byte[31] != byte[21] (bytes21 requires length 21 but found 31)",

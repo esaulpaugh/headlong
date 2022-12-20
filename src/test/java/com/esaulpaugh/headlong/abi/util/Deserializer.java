@@ -108,9 +108,9 @@ public class Deserializer {
             final Class<?> clazz = elementType.clazz();
             final Iterator<JsonElement> iter = valArr.iterator();
             if (Boolean.class == clazz) {
-                boolean[] array = (boolean[]) (arrayObj = new boolean[len]);
+                Boolean[] array = (Boolean[]) (arrayObj = new Boolean[len]);
                 for (; i < len; i++) {
-                    array[i] = (boolean) parseValue(elementType, iter.next());
+                    array[i] = (Boolean) parseValue(elementType, iter.next());
                 }
             } else if (Byte.class == clazz) {
                 byte[] array = (byte[]) (arrayObj = new byte[len]);

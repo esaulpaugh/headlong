@@ -242,7 +242,8 @@ public class MonteCarloTestCase {
         ByteBuffer bb = function.encodeCall(args);
         final byte[] bbArr = bb.array();
         final byte[] copy = Arrays.copyOf(bbArr, bbArr.length);
-        if (!args.equals(function.decodeCall(bbArr))) {
+        final Tuple xx = function.decodeCall(bbArr);
+        if (!args.equals(xx)) {
             throw new IllegalArgumentException(seed + " " + function.getCanonicalSignature() + " " + args);
         }
         assertArrayEquals(copy, bbArr);
@@ -507,8 +508,8 @@ public class MonteCarloTestCase {
         return bigDecs;
     }
 
-    private static boolean[] generateBooleanArray(final int len, Random r) {
-        boolean[] booleans = new boolean[len];
+    private static Boolean[] generateBooleanArray(final int len, Random r) {
+        Boolean[] booleans = new Boolean[len];
         for (int i = 0; i < booleans.length; i++) {
             booleans[i] = r.nextBoolean();
         }

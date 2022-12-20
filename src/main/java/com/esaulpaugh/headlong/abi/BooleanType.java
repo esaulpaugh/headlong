@@ -35,7 +35,7 @@ public final class BooleanType extends UnitType<Boolean> {
 
     @Override
     Class<?> arrayClass() {
-        return boolean[].class;
+        return Boolean[].class;
     }
 
     @Override
@@ -68,11 +68,11 @@ public final class BooleanType extends UnitType<Boolean> {
         return decodeBoolean(decodeValid(bb, unitBuffer).byteValue());
     }
 
-    static void encodeBooleanPacked(boolean value, ByteBuffer dest) {
+    static void encodeBooleanPacked(Boolean value, ByteBuffer dest) {
         dest.put(value ? Encoding.ONE_BYTE : Encoding.ZERO_BYTE);
     }
 
-    static void encodeBoolean(boolean val, ByteBuffer dest) {
+    static void encodeBoolean(Boolean val, ByteBuffer dest) {
         dest.put(val ? BOOLEAN_TRUE : BOOLEAN_FALSE);
     }
 

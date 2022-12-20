@@ -120,7 +120,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private int calcElementsLen(J value) {
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return ((boolean[]) value).length * UNIT_LENGTH_BYTES;
+        case TYPE_CODE_BOOLEAN: return ((Boolean[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_BYTE: return Integers.roundLengthUp(byteCount(value), UNIT_LENGTH_BYTES);
         case TYPE_CODE_INT: return ((int[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_LONG: return ((long[]) value).length * UNIT_LENGTH_BYTES;
@@ -146,7 +146,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
             return staticByteLengthPacked();
         }
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return ((boolean[]) value).length; // * 1
+        case TYPE_CODE_BOOLEAN: return ((Boolean[]) value).length; // * 1
         case TYPE_CODE_BYTE: return byteCount(value); // * 1
         case TYPE_CODE_INT: return ((int[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_LONG: return ((long[]) value).length * elementType.byteLengthPacked(null);
@@ -179,7 +179,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private int validateElements(J value) {
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return validateBooleans((boolean[]) value);
+        case TYPE_CODE_BOOLEAN: return validateBooleans((Boolean[]) value);
         case TYPE_CODE_BYTE: return validateBytes(value);
         case TYPE_CODE_INT: return validateInts((int[]) value, (IntType) elementType);
         case TYPE_CODE_LONG: return validateLongs((long[]) value, (LongType) elementType);
@@ -192,7 +192,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         }
     }
 
-    private int validateBooleans(boolean[] arr) {
+    private int validateBooleans(Boolean[] arr) {
         return checkLength(arr.length, arr) * UNIT_LENGTH_BYTES;
     }
 
@@ -241,7 +241,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     @Override
     void encodeTail(J value, ByteBuffer dest) {
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: encodeBooleans((boolean[]) value, dest); return;
+        case TYPE_CODE_BOOLEAN: encodeBooleans((Boolean[]) value, dest); return;
         case TYPE_CODE_BYTE: encodeBytes(decodeIfString(value), dest); return;
         case TYPE_CODE_INT: encodeInts((int[]) value, dest); return;
         case TYPE_CODE_LONG: encodeLongs((long[]) value, dest); return;
@@ -295,9 +295,9 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         }
     }
 
-    private void encodeBooleans(boolean[] arr, ByteBuffer dest) {
+    private void encodeBooleans(Boolean[] arr, ByteBuffer dest) {
         encodeArrayLen(arr.length, dest);
-        for (boolean e : arr) {
+        for (Boolean e : arr) {
             BooleanType.encodeBoolean(e, dest);
         }
     }
@@ -326,7 +326,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     @Override
     void encodePackedUnchecked(J value, ByteBuffer dest) {
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: encodeBooleansPacked((boolean[]) value, dest); return;
+        case TYPE_CODE_BOOLEAN: encodeBooleansPacked((Boolean[]) value, dest); return;
         case TYPE_CODE_BYTE: dest.put(decodeIfString(value)); return;
         case TYPE_CODE_INT: encodeIntsPacked((int[]) value, elementType.byteLengthPacked(null), dest); return;
         case TYPE_CODE_LONG: encodeLongsPacked((long[]) value, elementType.byteLengthPacked(null), dest); return;
@@ -344,8 +344,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         }
     }
 
-    private static void encodeBooleansPacked(boolean[] arr, ByteBuffer dest) {
-        for (boolean bool : arr) {
+    private static void encodeBooleansPacked(Boolean[] arr, ByteBuffer dest) {
+        for (Boolean bool : arr) {
             BooleanType.encodeBooleanPacked(bool, dest);
         }
     }
@@ -397,8 +397,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         }
     }
 
-    private static boolean[] decodeBooleans(int len, ByteBuffer bb, byte[] unitBuffer) {
-        final boolean[] booleans = new boolean[len]; // elements are false by default
+    private static Boolean[] decodeBooleans(int len, ByteBuffer bb, byte[] unitBuffer) {
+        final Boolean[] booleans = new Boolean[len]; // elements are false by default
         final int valOffset = UNIT_LENGTH_BYTES - Byte.BYTES;
         int i = 0;
         try {
@@ -410,8 +410,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                     }
                 }
                 switch (unitBuffer[valOffset]) {
-                case 1: booleans[i] = true;
-                case 0: continue;
+                case 1: booleans[i] = Boolean.TRUE; break;
+                case 0: booleans[i] = Boolean.FALSE; break;
                 default: throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
                 }
             }

@@ -208,8 +208,8 @@ final class PackedDecoder {
         return arrayLen * elementByteLen;
     }
 
-    private static boolean[] decodeBooleanArray(int arrayLen, byte[] buffer, int idx) {
-        boolean[] booleans = new boolean[arrayLen];
+    private static Boolean[] decodeBooleanArray(int arrayLen, byte[] buffer, int idx) {
+        Boolean[] booleans = new Boolean[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
             booleans[i] = BooleanType.decodeBoolean(buffer[idx + i]);
         }
