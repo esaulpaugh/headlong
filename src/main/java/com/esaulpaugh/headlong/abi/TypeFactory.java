@@ -208,7 +208,7 @@ public final class TypeFactory {
                 switch (rawTypeStr.charAt(argStart)) {
                 case ')':
                 case ',': return null;
-                case '(': argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart)); break;
+                case '(': argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart + 1)); break;
                 default: argEnd = nextTerminator(rawTypeStr, argStart);
                 }
                 final ABIType<?> e = buildUnchecked(rawTypeStr.substring(argStart, argEnd), null, null);
@@ -242,8 +242,8 @@ public final class TypeFactory {
 
     private static int findSubtupleEnd(String parentTypeString, int i) {
         int depth = 1;
-        do {
-            char x = parentTypeString.charAt(++i);
+        for (;; i++) {
+            char x = parentTypeString.charAt(i);
             if(x <= ')') {
                 if(x == ')') {
                     if(depth <= 1) {
@@ -254,6 +254,6 @@ public final class TypeFactory {
                     depth++;
                 }
             }
-        } while(true);
+        }
     }
 }

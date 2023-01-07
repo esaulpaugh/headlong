@@ -191,7 +191,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         int i = 0;
         final int last = values.length - 1;
         int offset = firstOffset;
-        do {
+        for (;; i++) {
             final ABIType<Object> t = getNonCapturing(i);
             if (!t.dynamic) {
                 t.encodeTail(values[i], dest);
@@ -205,8 +205,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 }
                 offset += t.dynamicByteLength(values[i]); // return next offset
             }
-            i++;
-        } while (true);
+        }
         for (i = 0; i < values.length; i++) {
             final ABIType<Object> t = getNonCapturing(i);
             if (t.dynamic) {

@@ -276,7 +276,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         }
         int i = 0;
         final int last = values.length - 1;
-        do {
+        for (;; i++) {
             Encoding.insertIntUnsigned(offset, dest); // insert offset
             if (i >= last) {
                 for (Object value : values) {
@@ -285,8 +285,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                 return;
             }
             offset += et.dynamicByteLength(values[i]); // return next offset
-            i++;
-        } while (true);
+        }
     }
 
     private void encodeArrayLen(int len, ByteBuffer dest) {
