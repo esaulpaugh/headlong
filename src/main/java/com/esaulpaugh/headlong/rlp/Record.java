@@ -127,7 +127,7 @@ public final class Record {
                         if (prevKey != null && k.compareTo(prevKey) <= 0) {
                             throw k.compareTo(prevKey) == 0
                                     ? KVP.duplicateKeyErr(k)
-                                    : new IllegalArgumentException("key out of order: " + k.asString(Strings.UTF_8));
+                                    : new IllegalArgumentException("key out of order");
                         }
                         prevKey = k;
                     }

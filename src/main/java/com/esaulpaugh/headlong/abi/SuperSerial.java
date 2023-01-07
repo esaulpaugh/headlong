@@ -139,7 +139,7 @@ public final class SuperSerial {
         final String enc = item.encodingString(Strings.HEX);
         if ("01".equals(enc)) return Boolean.TRUE;
         if ("80".equals(enc)) return Boolean.FALSE;
-        throw new IllegalArgumentException("illegal boolean RLP: 0x" + enc + ". Expected 0x01 or 0x80");
+        throw new IllegalArgumentException("illegal boolean RLP. Expected 0x01 or 0x80.");
     }
 
     private static byte[] serializeBigInteger(UnitType<?> ut, BigInteger val) {

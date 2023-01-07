@@ -75,18 +75,18 @@ public class SuperSerialTest {
         assertTrue((boolean) t.get(0));
         t = SuperSerial.deserialize(_bool_, "('')", false);
         assertFalse((boolean) t.get(0));
-        assertThrown(IllegalArgumentException.class, "illegal boolean RLP: 0x00. Expected 0x01 or 0x80",
+        assertThrown(IllegalArgumentException.class, "illegal boolean RLP. Expected 0x01 or 0x80.",
                 () -> SuperSerial.deserialize(_bool_, "('00')", false));
-        assertThrown(IllegalArgumentException.class, "illegal boolean RLP: 0x82fcd1. Expected 0x01 or 0x80",
+        assertThrown(IllegalArgumentException.class, "illegal boolean RLP. Expected 0x01 or 0x80.",
                 () -> SuperSerial.deserialize(_bool_, "('fcd1')", false));
 
         t = SuperSerial.deserialize(_bool_, "01", true);
         assertTrue((boolean) t.get(0));
         t = SuperSerial.deserialize(_bool_, "80", true);
         assertFalse((boolean) t.get(0));
-        assertThrown(IllegalArgumentException.class, "illegal boolean RLP: 0x00. Expected 0x01 or 0x80",
+        assertThrown(IllegalArgumentException.class, "illegal boolean RLP. Expected 0x01 or 0x80.",
                 () -> SuperSerial.deserialize(_bool_, "00", true));
-        assertThrown(IllegalArgumentException.class, "illegal boolean RLP: 0x82fcd1. Expected 0x01 or 0x80",
+        assertThrown(IllegalArgumentException.class, "illegal boolean RLP. Expected 0x01 or 0x80.",
                 () -> SuperSerial.deserialize(_bool_, "82fcd1", true));
     }
 

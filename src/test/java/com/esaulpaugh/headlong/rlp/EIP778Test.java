@@ -461,7 +461,7 @@ public class EIP778Test {
         String enr =    "enr:-IS4QHCYrYZbAKWCBRlAy5zzaDZXJBGkcnh4MHcBFZntXNFrdvJjX04jRzjzCBOonrkTfj499SZuOh8R33Ls8RRc" +
                         "y5wBgmlwhH8AAAGDdWRwgnZfgmlkgnY0iXNlY3AyNTZrMaEDymNMrg1JrLQB2KTGtv6MVbcNEVv0AHacwUAPMljNMTg";
         assertThrown(IllegalArgumentException.class,
-                "key out of order: id",
+                "key out of order",
                 () -> Record.parse(enr, VERIFIER));
     }
 }
