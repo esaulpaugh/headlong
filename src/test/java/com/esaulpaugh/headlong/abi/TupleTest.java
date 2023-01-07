@@ -84,28 +84,27 @@ public class TupleTest {
             final long taskSamples = 1 + samples / parallelism;
             System.out.println("j=" + j + ", samples=" + samples);
             final long[] a = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
-            final long[] b = new long[a.length];
-
-            final Thread[] threads = new Thread[parallelism - 1];
-            for (int i = 0; i < threads.length; i++) {
-                Thread t = new T(taskSamples, unsigned, j, powMinus1, i % 2 == 0 ? a : b);
-                t.start();
-                threads[i] = t;
-            }
-            new T(taskSamples, unsigned, j, powMinus1, a).run();
-            for (Thread t : threads) {
-                t.join();
-            }
-            final long[] longs = new long[a.length];
-            for (int i = 0; i < longs.length; i++) {
-                longs[i] = a[i] | b[i];
+            {
+                final long[] b = new long[a.length];
+                final Thread[] threads = new Thread[parallelism - 1];
+                for (int i = 0; i < threads.length; i++) {
+                    (threads[i] = new T(taskSamples, unsigned, j, powMinus1, i % 2 == 0 ? a : b))
+                            .start();
+                }
+                new T(taskSamples, unsigned, j, powMinus1, b).run();
+                for (Thread t : threads) {
+                    t.join();
+                }
+                for (int i = 0; i < a.length; i++) {
+                    a[i] |= b[i];
+                }
             }
 
             int missed = 0;
             int missedChunks = 0;
             final int fullChunks = (int) (pow / Long.SIZE);
             for (int i = 0; i < fullChunks; i++) {
-                final long val = longs[i];
+                final long val = a[i];
                 if (val != 0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111L) {
                     final int zeroes = Long.SIZE - Long.bitCount(val);
                     missed += zeroes;
@@ -116,7 +115,7 @@ public class TupleTest {
             final int finalBits = (int) (pow % Long.SIZE);
             if (finalBits > 0L) {
                 final int shift = 64 - finalBits;
-                final long last = longs[longs.length - 1];
+                final long last = a[a.length - 1];
                 final long expected = -1L << shift;
                 if (last != expected) {
                     missed += finalBits - Long.bitCount(last >>> shift);
