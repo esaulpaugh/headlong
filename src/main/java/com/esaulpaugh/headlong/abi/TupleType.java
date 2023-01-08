@@ -203,7 +203,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 if (i >= last) {
                     break;
                 }
-                offset += t.dynamicByteLength(values[i]); // return next offset
+                offset += t.dynamicByteLength(values[i]); // calculate next offset
             }
         }
         for (i = 0; i < values.length; i++) {
