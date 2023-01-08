@@ -274,9 +274,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         if (values.length == 0) {
             return;
         }
-        int i = 0;
         final int last = values.length - 1;
-        for (;; i++) {
+        for (int i = 0; true; i++) {
             Encoding.insertIntUnsigned(offset, dest); // insert offset
             if (i >= last) {
                 for (Object value : values) {
