@@ -41,9 +41,9 @@ final class Encoding {
         Arrays.fill(CACHED_NEG1_PADDING, (byte) 0xFF);
     }
 
-    static void insertIntUnsigned(long val, ByteBuffer dest) {
-        insert00Padding(UNIT_LENGTH_BYTES - Long.BYTES, dest);
-        dest.putLong(val);
+    static void insertIntUnsigned(int val, ByteBuffer dest) {
+        insert00Padding(UNIT_LENGTH_BYTES - Integer.BYTES, dest);
+        dest.putInt(val);
     }
 
     static void insertInt(long val, ByteBuffer dest) {
