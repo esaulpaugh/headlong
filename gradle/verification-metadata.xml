@@ -34,20 +34,20 @@
       </trusted-keys>
    </configuration>
     <components>
-        <component group="com.google.code.gson" name="gson-parent" version="2.10">
-            <artifact name="gson-parent-2.10.pom">
-                <sha256 value="fb53ac0b06c19116ca61ac344b4dfe8a7c29cc4f81b353ce889493a5039004fb" origin="repo.maven.apache.org/maven2/"/>
+        <component group="com.google.code.gson" name="gson-parent" version="2.10.1">
+            <artifact name="gson-parent-2.10.1.pom">
+                <sha256 value="4248e0882426c615182385d6086c3ef3262e769957189e29306280b85482b833" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
-        <component group="com.google.code.gson" name="gson" version="2.10">
-            <artifact name="gson-2.10.pom">
-                <sha256 value="ac69d9f254260caeab3998eaad60f355599c25121e195156bfdffc8a355fc6bd" origin="repo.maven.apache.org/maven2/"/>
+        <component group="com.google.code.gson" name="gson" version="2.10.1">
+            <artifact name="gson-2.10.1.pom">
+                <sha256 value="d2b115634f5c085db4b9c9ffc2658e89e231fdbfbe2242121a1cd95d4d948dd7" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="gson-2.10.jar">
-                <sha256 value="0cdd163ce3598a20fc04eee71b140b24f6f2a3b35f0a499dbbdd9852e83fbfaf" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="gson-2.10.1.jar">
+                <sha256 value="4241c14a7727c34feea6507ec801318a3d4a90f070e4525681079fb94ee4c593" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="gson-2.10-sources.jar">
-                <sha256 value="984c3636c3911185469a2df991da1bb325de391b9215088ce6c26476bdd61f99" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="gson-2.10.1-sources.jar">
+                <sha256 value="eee1cc5c1f4267ee194cc245777e68084738ef390acd763354ce0ff6bfb7bcc1" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
 
