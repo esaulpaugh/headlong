@@ -205,6 +205,9 @@
             <artifact name="junit-bom-5.9.2.module">
                 <sha256 value="ab137ba5a8e32c9b066bf9126a1c76dd5614b724ba5c0b02549772b5e9f4cf1f" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
+            <artifact name="junit-bom-5.9.2.pom">
+                <sha256 value="2ed07d65845131f5336a86476c9a4056b59d0b58b9815ab3679bb0f36f35f705" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
         </component>
         <component group="org.junit.platform" name="junit-platform-engine" version="1.9.2">
             <artifact name="junit-platform-engine-1.9.2.jar">
