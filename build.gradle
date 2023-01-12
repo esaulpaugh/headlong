@@ -39,7 +39,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     finalizedBy(javadocJar)
 }
 
-final String junitVersion = "5.9.1"
+final String junitVersion = "5.9.2"
 final String jmhVersion = "1.36"
 final String bcVersion = "1.72"
 final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneId.of("UTC"))
