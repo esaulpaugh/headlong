@@ -22,6 +22,11 @@ import com.google.gson.JsonObject;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -45,7 +50,6 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
  */
 public final class Function implements ABIObject {
 
-    private static final Pattern ALL_ASCII_NO_OPEN_PAREN = Pattern.compile("^[[^(]&&\\p{ASCII}]*$");
     private static final Pattern OPEN_PAREN_OR_NON_ASCII = Pattern.compile("[([^\\p{ASCII}]]");
 
     public static final int SELECTOR_LEN = 4;
@@ -329,10 +333,18 @@ public final class Function implements ABIObject {
         if(input.length() > MAX_NAME_CHARS) {
             throw new IllegalArgumentException("function name is too long: " + input.length() + " > " + MAX_NAME_CHARS);
         }
-        if(ALL_ASCII_NO_OPEN_PAREN.matcher(input).matches()) {
-            return input;
+        final CharsetEncoder ascii = StandardCharsets.US_ASCII.newEncoder();
+        try {
+            ascii.onUnmappableCharacter(CodingErrorAction.REPORT);
+            ascii.onMalformedInput(CodingErrorAction.REPORT);
+            ascii.encode(CharBuffer.wrap(input));
+            if (input.indexOf('(') == -1) {
+                return input;
+            }
+        } catch (CharacterCodingException cce) {
+            /* fall through */
         }
-        Matcher badChar = OPEN_PAREN_OR_NON_ASCII.matcher(input);
+        final Matcher badChar = OPEN_PAREN_OR_NON_ASCII.matcher(input);
         if (badChar.find()) {
             int idx = badChar.start();
             char c = input.charAt(idx);
