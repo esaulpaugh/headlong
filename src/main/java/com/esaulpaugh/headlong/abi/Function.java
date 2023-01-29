@@ -342,13 +342,13 @@ public final class Function implements ABIObject {
         } catch (CharacterCodingException cce) {
             /* fall through */
         }
-        final Matcher badChar = Pattern.compile("[([^\\p{ASCII}]]").matcher(input);
+        final Matcher badChar = Pattern.compile("[([^\\p{ASCII}]]").matcher(input); // open paren or non-ascii
         if (badChar.find()) {
             int idx = badChar.start();
             char c = input.charAt(idx);
             throw new IllegalArgumentException("illegal char 0x" + Integer.toHexString(c) + " '" + c + "' @ index " + idx);
         }
-        throw new AssertionError("regex mismatch");
+        throw new AssertionError("bad regex");
     }
 // ---------------------------------------------------------------------------------------------------------------------
     public static Function parse(String signature) {
