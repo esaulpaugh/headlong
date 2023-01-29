@@ -50,8 +50,6 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
  */
 public final class Function implements ABIObject {
 
-    private static final Pattern OPEN_PAREN_OR_NON_ASCII = Pattern.compile("[([^\\p{ASCII}]]");
-
     public static final int SELECTOR_LEN = 4;
     private static final int MAX_NAME_CHARS = 2048;
 
@@ -344,7 +342,7 @@ public final class Function implements ABIObject {
         } catch (CharacterCodingException cce) {
             /* fall through */
         }
-        final Matcher badChar = OPEN_PAREN_OR_NON_ASCII.matcher(input);
+        final Matcher badChar = Pattern.compile("[([^\\p{ASCII}]]").matcher(input);
         if (badChar.find()) {
             int idx = badChar.start();
             char c = input.charAt(idx);
