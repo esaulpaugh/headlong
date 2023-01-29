@@ -331,10 +331,8 @@ public final class Function implements ABIObject {
         if(input.length() > MAX_NAME_CHARS) {
             throw new IllegalArgumentException("function name is too long: " + input.length() + " > " + MAX_NAME_CHARS);
         }
-        final CharsetEncoder ascii = StandardCharsets.US_ASCII.newEncoder();
         try {
-            ascii.onUnmappableCharacter(CodingErrorAction.REPORT)
-                    .encode(CharBuffer.wrap(input));
+            StandardCharsets.US_ASCII.newEncoder().encode(CharBuffer.wrap(input));
             if (input.indexOf('(') == -1) {
                 return input;
             }
