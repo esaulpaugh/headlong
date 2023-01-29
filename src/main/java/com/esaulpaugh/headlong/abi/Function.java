@@ -333,9 +333,8 @@ public final class Function implements ABIObject {
         }
         final CharsetEncoder ascii = StandardCharsets.US_ASCII.newEncoder();
         try {
-            ascii.onUnmappableCharacter(CodingErrorAction.REPORT);
-            ascii.onMalformedInput(CodingErrorAction.REPORT);
-            ascii.encode(CharBuffer.wrap(input));
+            ascii.onUnmappableCharacter(CodingErrorAction.REPORT)
+                    .encode(CharBuffer.wrap(input));
             if (input.indexOf('(') == -1) {
                 return input;
             }
