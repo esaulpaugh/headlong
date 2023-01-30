@@ -328,24 +328,17 @@ public final class Function implements ABIObject {
     }
 
     private static String validateName(String input) {
-        if(input.length() > MAX_NAME_CHARS) {
+        final int len = input.length();
+        if(len > MAX_NAME_CHARS) {
             throw new IllegalArgumentException("function name is too long: " + input.length() + " > " + MAX_NAME_CHARS);
         }
-        try {
-            StandardCharsets.US_ASCII.newEncoder().encode(CharBuffer.wrap(input));
-            if (input.indexOf('(') == -1) {
-                return input;
+        for (int i = 0; i < len; i++) {
+            final char c = input.charAt(i);
+            if (c >= 0x80 || c == '(') {
+                throw new IllegalArgumentException("illegal char 0x" + Integer.toHexString(c) + " '" + c + "' @ index " + i);
             }
-        } catch (CharacterCodingException cce) {
-            /* fall through */
         }
-        final Matcher badChar = Pattern.compile("[([^\\p{ASCII}]]").matcher(input); // open paren or non-ascii
-        if (badChar.find()) {
-            int idx = badChar.start();
-            char c = input.charAt(idx);
-            throw new IllegalArgumentException("illegal char 0x" + Integer.toHexString(c) + " '" + c + "' @ index " + idx);
-        }
-        throw new AssertionError("bad regex");
+        return input;
     }
 // ---------------------------------------------------------------------------------------------------------------------
     public static Function parse(String signature) {
