@@ -99,7 +99,7 @@ public class EncodeTest {
 
         final ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
         final Runnable runnable = () -> {
-            final Random rand = new Random(TestUtils.getSeed());
+            final Random rand = TestUtils.seededRandom();
             for (int len = 0; len <= 14; len++) {
                 System.out.println(len + "(" + Thread.currentThread().getId() + ")");
                 final byte[] temp = new byte[len];
