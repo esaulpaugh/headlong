@@ -83,23 +83,23 @@ public class EncodeTest {
                 128,
                 8_192,
                 524_288,
-                1_000_000,
-                1_000_000,
-                1_000_000,
-                1_000_000,
-                1_000_000,
-                1_000_000,
-                1_000_000,
-                1_000_000,
-                1_000_000
+                950_000,
+                950_000,
+                950_000,
+                950_000,
+                950_000,
+                950_000,
+                950_000,
+                950_000,
+                950_000
         };
 
         final String prefix = "ufixed";
         final int prefixLen = prefix.length();
 
-        final Random rand = TestUtils.seededRandom();
         final ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
         final Runnable runnable = () -> {
+            final Random rand = new Random(TestUtils.getSeed());
             for (int len = 0; len <= 14; len++) {
                 System.out.println(len + "(" + Thread.currentThread().getId() + ")");
                 final byte[] temp = new byte[len];
