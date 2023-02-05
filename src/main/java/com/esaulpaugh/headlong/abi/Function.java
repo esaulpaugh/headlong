@@ -144,9 +144,6 @@ public final class Function implements ABIObject {
             }
             return;
         case ORDINAL_RECEIVE:
-            if (name != null && !RECEIVE.equals(name)) {
-                throw new IllegalArgumentException("unexpected name on receive function: \"" + name + '"');
-            }
             if (!ABIJSON.PAYABLE.equals(stateMutability)) {
                 throw validationErr("define stateMutability as \"" + ABIJSON.PAYABLE + '"');
             }
@@ -160,7 +157,7 @@ public final class Function implements ABIObject {
             if(!outputTypes.isEmpty()) {
                 throw validationErr("define no outputs");
             }
-            if (name != null && type != TypeEnum.RECEIVE) {
+            if (name != null) {
                 throw validationErr("not define name");
             }
             return;
