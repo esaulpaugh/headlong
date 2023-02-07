@@ -86,6 +86,27 @@ public class StringsTest {
     }
 
     @Test
+    public void base64NoOptionsBytesWithOffset() {
+        Random rand = TestUtils.seededRandom();
+        java.util.Base64.Encoder mimeEncoder = java.util.Base64.getMimeEncoder();
+        java.util.Base64.Decoder mimeDecoder = java.util.Base64.getMimeDecoder();
+        for(int j = 0; j < 250; j++) {
+            byte[] in = new byte[j];
+            rand.nextBytes(in);
+            final int destOffset = rand.nextInt(180);
+            final int padding = rand.nextInt(180);
+            byte[] dest = new byte[destOffset + FastBase64.encodedSize(in.length, FastBase64.NO_FLAGS) + padding];
+            FastBase64.encodeToBytes(in, 0, in.length, dest, destOffset, FastBase64.NO_FLAGS);
+            @SuppressWarnings("deprecation")
+            String s = new String(dest, 0, destOffset, dest.length - padding - destOffset);
+            String s2 = mimeEncoder.encodeToString(in);
+            assertEquals(base64EncodedLen(j, true, true), s.length());
+            assertEquals(s2, s);
+            assertArrayEquals(in, mimeDecoder.decode(s));
+        }
+    }
+
+    @Test
     public void base64PaddedNoLineSep() {
         Random rand = TestUtils.seededRandom();
         java.util.Base64.Encoder encoder = java.util.Base64.getUrlEncoder();
