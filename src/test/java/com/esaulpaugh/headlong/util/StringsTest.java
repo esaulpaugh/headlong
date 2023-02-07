@@ -146,7 +146,9 @@ public class StringsTest {
         }
 //        return (int) StrictMath.ceil(inputLen * 4 / 3d);
         int estimated = numBytes / 3 * 4;
-        estimated += lineSep ? (estimated - 1) / 76 << 1 : 0;
+        if (lineSep) {
+            estimated += (numBytes - 1) / 57 * 2;
+        }
         int mod = numBytes % 3;
         if(mod == 0) {
             return estimated;
