@@ -293,7 +293,7 @@ public class EncodeTest {
 
     @Test
     public void illegalCharsTest() throws Throwable {
-        assertThrown(ILLEGAL, "illegal char", () -> Function.parse("œ()"));
+        assertThrown(ILLEGAL, "illegal char", () -> Function.parse("\u0153()"));
 
         assertThrown(ILLEGAL, "illegal char 0x2a6 '\u02a6' @ index 2", () -> new Function("ba\u02a6z(uint32,bool)"));
 

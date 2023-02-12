@@ -66,7 +66,7 @@ public final class Keccak extends MessageDigest {
         case 288: return 1024;
         case 384: return  832;
         case 512: return  576;
-        default: throw new IllegalArgumentException("Invalid digestSizeBits: " + digestSizeBits + " ⊄ { 128, 224, 256, 288, 384, 512 }");
+        default: throw new IllegalArgumentException("Invalid digestSizeBits: " + digestSizeBits + " \u2284 { 128, 224, 256, 288, 384, 512 }");
         }
     }
 

@@ -26,12 +26,12 @@ import java.nio.ByteBuffer;
  * <p>Negative integers are stored in a minimal big-endian two's complement representation. Non-negative integers are
  * stored full-length. Negative one is represented by the empty byte array. Numbers are sign-extended on decode.
  *
- * -256L ≡ 0x00
- *  -16L ≡ 0xf0
- *   -1L ≡ 0x
- *    0L ≡ 0x0000000000000000
- *    1L ≡ 0x0000000000000001
- *   16L ≡ 0x0000000000000010
+ * -256L === 0x00
+ *  -16L === 0xf0
+ *   -1L === 0x
+ *    0L === 0x0000000000000000
+ *    1L === 0x0000000000000001
+ *   16L === 0x0000000000000010
  */
 public final class BizarroInts {
 
