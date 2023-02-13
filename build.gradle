@@ -1,6 +1,6 @@
 import org.gradle.internal.jvm.Jvm
 
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
 
 plugins {
     id 'java-library'
@@ -28,13 +28,18 @@ test {
     maxParallelForks = Runtime.runtime.availableProcessors()
 }
 
+final String versionStr = getProject().getGradle().getGradleVersion()
+final int gradleVersion = Integer.parseInt(versionStr.substring(0, versionStr.indexOf('.')))
+
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    getArchiveClassifier().set("javadoc") // classifier = "javadoc"
+    if (gradleVersion >= 6) getArchiveClassifier().set("javadoc")
+    else classifier = "javadoc"
     from javadoc.destinationDir
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-    getArchiveClassifier().set("sources") // classifier = "sources"
+    if (gradleVersion >= 6) getArchiveClassifier().set("sources")
+    else classifier = "sources"
     from sourceSets.main.allSource
     finalizedBy(javadocJar)
 }
@@ -43,13 +48,19 @@ final String junitVersion = "5.9.2"
 final String jmhVersion = "1.36"
 final String bcVersion = "1.72"
 
+static def todayUTC() {
+    SimpleDateFormat sdf = new SimpleDateFormat("MMMMM d yyyy")
+    sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
+    return sdf.format(new Date())
+}
+
 jar {
     manifest {
         attributes(
                 'Implementation-Title': project.name,
                 'Implementation-Version': project.version,
                 'Automatic-Module-Name': project.name,
-                'Build-Date': DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneId.of("UTC")).format(Instant.now())
+                'Build-Date': todayUTC() // DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneId.of("UTC")).format(Instant.now())
         )
     }
     finalizedBy(sourcesJar)
@@ -102,7 +113,8 @@ task jmh(type: JavaExec, dependsOn: jmhClasses) { // run benchmarks with `gradle
 
 classes.finalizedBy(jmhClasses)
 
-tasks.withType(AbstractArchiveTask).configureEach {
+// tasks.withType(AbstractArchiveTask).configureEach {
+tasks.withType(AbstractArchiveTask) {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
 }
