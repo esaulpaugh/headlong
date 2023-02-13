@@ -29,12 +29,12 @@ test {
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    getArchiveClassifier().set("javadoc")
+    getArchiveClassifier().set("javadoc") // classifier = "javadoc"
     from javadoc.destinationDir
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-    getArchiveClassifier().set("sources")
+    getArchiveClassifier().set("sources") // classifier = "sources"
     from sourceSets.main.allSource
     finalizedBy(javadocJar)
 }
@@ -42,7 +42,6 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 final String junitVersion = "5.9.2"
 final String jmhVersion = "1.36"
 final String bcVersion = "1.72"
-final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneId.of("UTC"))
 
 jar {
     manifest {
@@ -50,7 +49,7 @@ jar {
                 'Implementation-Title': project.name,
                 'Implementation-Version': project.version,
                 'Automatic-Module-Name': project.name,
-                'Build-Date': dateFormatter.format(Instant.now())
+                'Build-Date': DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneId.of("UTC")).format(Instant.now())
         )
     }
     finalizedBy(sourcesJar)
@@ -97,7 +96,7 @@ dependencies {
 }
 
 task jmh(type: JavaExec, dependsOn: jmhClasses) { // run benchmarks with `gradle jmh`
-    getMainClass().set("org.openjdk.jmh.Main")
+    getMainClass().set("org.openjdk.jmh.Main") // main = "org.openjdk.jmh.Main"
     classpath = sourceSets.jmh.compileClasspath + sourceSets.jmh.runtimeClasspath
 }
 
