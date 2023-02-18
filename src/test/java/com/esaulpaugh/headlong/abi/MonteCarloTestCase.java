@@ -430,7 +430,7 @@ public class MonteCarloTestCase {
         return TestUtils.wildLong(r, unitType.unsigned, unitType.bitLength);
     }
 
-    static BigInteger generateBigInteger(Random r, UnitType<?> type) {
+    private static BigInteger generateBigInteger(Random r, UnitType<? extends Number> type) {
         return TestUtils.wildBigInteger(r, type.unsigned, type.bitLength);
     }
 
