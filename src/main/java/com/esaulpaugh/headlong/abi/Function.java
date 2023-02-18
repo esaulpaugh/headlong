@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.IntFunction;
 
-import static com.esaulpaugh.headlong.abi.ABIJSON.RECEIVE;
 import static com.esaulpaugh.headlong.abi.TypeEnum.ORDINAL_CONSTRUCTOR;
 import static com.esaulpaugh.headlong.abi.TypeEnum.ORDINAL_ERROR;
 import static com.esaulpaugh.headlong.abi.TypeEnum.ORDINAL_EVENT;
