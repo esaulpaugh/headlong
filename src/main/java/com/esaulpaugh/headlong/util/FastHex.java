@@ -55,16 +55,20 @@ public final class FastHex {
     }
 
     public static byte[] encodeToBytes(byte[] buffer, int offset, int len) {
-        final int end = offset + len;
         byte[] bytes = new byte[len * CHARS_PER_BYTE];
-        for (int j = 0; offset < end; offset++, j += CHARS_PER_BYTE) {
-            int hexPair = ENCODE_TABLE[buffer[offset] & 0xFF];
-            bytes[j] = (byte) (hexPair >>> Byte.SIZE); // left
-            bytes[j+1] = (byte) hexPair; // right
-        }
+        encodeBytes(buffer, offset, len, bytes, 0);
         return bytes;
     }
 
+    public static void encodeBytes(byte[] buffer, int offset, int len, byte[] dest, int destOff) {
+        final int end = offset + len;
+        for (int j = destOff; offset < end; offset++, j += CHARS_PER_BYTE) {
+            int hexPair = ENCODE_TABLE[buffer[offset] & 0xFF];
+            dest[j] = (byte) (hexPair >>> Byte.SIZE); // left
+            dest[j+1] = (byte) hexPair; // right
+        }
+    }
+    
     public static byte[] decode(String hex) {
         return decode(hex, 0, hex.length());
     }
