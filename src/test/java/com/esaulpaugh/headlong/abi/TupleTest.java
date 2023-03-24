@@ -125,7 +125,7 @@ public class TupleTest {
 
 //            System.out.println(pow - missed + " / " + pow + " " + (1 - ((double) missed / pow)) + '\n');
             if (missedChunks != 0 || missed != 0) {
-                throw new IllegalArgumentException("missed " + missed + ", missedChunks=" + missedChunks);
+                throw new AssertionError("missed " + missed + ", missedChunks=" + missedChunks);
             }
         }
     }
