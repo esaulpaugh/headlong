@@ -109,7 +109,7 @@ public class TupleTest {
                     final int zeroes = Long.SIZE - Long.bitCount(val);
                     missed += zeroes;
                     missedChunks++;
-                    System.err.println("chunk " + i + " value " + Long.toBinaryString(val));
+                    System.err.println("chunk " + i + " value " + zeroPad(Long.toBinaryString(val)));
                 }
             }
             final int finalBits = (int) (pow % Long.SIZE);
@@ -128,6 +128,15 @@ public class TupleTest {
                 throw new AssertionError("missed " + missed + ", missedChunks=" + missedChunks);
             }
         }
+    }
+
+    private static String zeroPad(String binary) {
+        final int pad = Long.SIZE - binary.length();
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < pad; i++) {
+            sb.append('0');
+        }
+        return sb.append(binary).toString();
     }
 
     @Test
