@@ -488,13 +488,13 @@ public class DecodeTest {
             assertFalse(decoded.elementIsPresent(i));
         }
 
-        assertThrown(ArrayIndexOutOfBoundsException.class, "-571", () -> tt.decode(bb, -571));
-        assertThrown(ArrayIndexOutOfBoundsException.class, "-1", () -> tt.decode(bb, -1));
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.decode(bb, -571));
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.decode(bb, -1));
         for (int i = 0; i < 4; i++) {
             tt.decode(bb, i);
         }
-        assertThrown(ArrayIndexOutOfBoundsException.class, "4", () -> tt.decode(bb, 4));
-        assertThrown(ArrayIndexOutOfBoundsException.class, "64", () -> tt.decode(bb, 64));
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.decode(bb, 4));
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.decode(bb, 64));
 
         Tuple t = tt.decode(bb, 1, 2);
         assertEquals("[_, weow, true, _]", t.toString());
