@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-2019, ubuntu-20.04, macos-11 ]
-        distribution: [ 'adopt-openj9' ]
+        distribution: [ 'semeru' ]
 
     runs-on: ${{ matrix.os }}
 
@@ -17,11 +17,11 @@ jobs:
 
       - uses: gradle/wrapper-validation-action@v1
 
-      - name: Set up JDK 15.0.2
+      - name: Set up JDK 18.0.2.1
         uses: actions/setup-java@v3
         with:
           distribution: ${{ matrix.distribution }}
-          java-version: '15.0.2'
+          java-version: '18.0.2.1'
           java-package: jdk
           architecture: x64
           cache: 'gradle'
