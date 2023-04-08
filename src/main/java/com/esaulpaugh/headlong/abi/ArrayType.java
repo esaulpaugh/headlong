@@ -367,7 +367,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         checkNoDecodePossible(bb.remaining(), arrayLen);
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return (J) decodeBooleans(arrayLen, bb, unitBuffer);
-        case TYPE_CODE_BYTE: return (J) decodeBytes(arrayLen, bb);
+        case TYPE_CODE_BYTE: return (J) encodeIfString(decodeBytes(arrayLen, bb));
         case TYPE_CODE_INT: return (J) decodeInts(arrayLen, bb, (IntType) elementType, unitBuffer);
         case TYPE_CODE_LONG: return (J) decodeLongs(arrayLen, bb, (LongType) elementType, unitBuffer);
         case TYPE_CODE_BIG_INTEGER:
@@ -419,7 +419,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return booleans;
     }
 
-    private Object decodeBytes(int len, ByteBuffer bb) {
+    private static byte[] decodeBytes(int len, ByteBuffer bb) {
         byte[] data = new byte[len];
         bb.get(data);
         int mod = Integers.mod(len, UNIT_LENGTH_BYTES);
@@ -430,7 +430,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                 if(b != Encoding.ZERO_BYTE) throw new IllegalArgumentException("malformed array: non-zero padding byte");
             }
         }
-        return encodeIfString(data);
+        return data;
     }
 
     private static int[] decodeInts(int len, ByteBuffer bb, IntType intType, byte[] unitBuffer) {
