@@ -397,17 +397,17 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private static boolean[] decodeBooleans(int len, ByteBuffer bb, byte[] unitBuffer) {
         final boolean[] booleans = new boolean[len]; // elements are false by default
-        final int valOffset = UNIT_LENGTH_BYTES - Byte.BYTES;
         int i = 0;
         try {
             for(; i < len; i++) {
                 bb.get(unitBuffer);
-                for (int j = 0; j < valOffset; j++) {
+                int j;
+                for (j = 0; j < UNIT_LENGTH_BYTES - Byte.BYTES; j++) {
                     if (unitBuffer[j] != Encoding.ZERO_BYTE) {
                         throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
                     }
                 }
-                switch (unitBuffer[valOffset]) {
+                switch (unitBuffer[j]) {
                 case 1: booleans[i] = true;
                 case 0: continue;
                 default: throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
