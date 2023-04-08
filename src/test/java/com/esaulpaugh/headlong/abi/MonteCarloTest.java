@@ -131,7 +131,7 @@ public class MonteCarloTest {
         final int workPerProcessor = N / parallelism;
         final ExecutorService pool = Executors.newFixedThreadPool(parallelism);
         final int totalWork = workPerProcessor * parallelism;
-        final String initialConditions = "(" + masterSeed + "L," + MAX_TUPLE_DEPTH + ',' + MAX_TUPLE_LEN + ',' + MAX_ARRAY_DEPTH + ',' + MAX_ARRAY_LEN + ")";
+        final String initialConditions = "(" + masterSeed + "L," + limits.maxTupleDepth + ',' + limits.maxTupleLength + ',' + limits.maxArrayDepth + ',' + limits.maxArrayLength + ")";
         System.out.println("Running\t\t" + totalWork + "\t" + initialConditions + " ...");
         for (int i = 0; i < runnables.length; i++) {
             pool.submit(runnables[i] = new GambleGambleRunnable(parallelism, masterSeed, masterSeed + i, workPerProcessor, limits));
