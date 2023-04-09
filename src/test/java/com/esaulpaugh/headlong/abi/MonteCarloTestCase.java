@@ -30,8 +30,6 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
@@ -63,13 +61,12 @@ public class MonteCarloTestCase {
     private static final int NUM_TUPLES_ADDED = 15; // 17
     private static final int NUM_FIXED_ADDED = 40;
 
-    private static final List<String> FIXED_LIST;
+    private static final String[] FIXED_TYPES = genOrderedFixedKeys();
 
-    private static final ThreadLocal<String[]> BASE_TYPES;
+    private static final String[] BASE_TYPES;
 
     private static final String TUPLE_KEY = new String();
-
-    private static final int FIXED_START_INDEX;
+    private static final String FIXED_KEY = new String();
 
     static {
         final String[] orderedKeys = {
@@ -99,11 +96,10 @@ public class MonteCarloTestCase {
         for (int j = 0; j < NUM_TUPLES_ADDED; j++) {
             arr[i++] = TUPLE_KEY;
         }
-        BASE_TYPES = ThreadLocal.withInitial(() -> Arrays.copyOf(arr, arr.length));
-
-        FIXED_START_INDEX = arr.length - NUM_FIXED_ADDED;
-
-        FIXED_LIST = Collections.unmodifiableList(genOrderedFixedKeys());
+        for (int j = 0; j < NUM_FIXED_ADDED; j++) {
+            arr[i++] = FIXED_KEY;
+        }
+        BASE_TYPES = arr;
     }
 
     private final long seed;
@@ -133,14 +129,7 @@ public class MonteCarloTestCase {
 
         rng.setSeed(seed);
 
-        final String[] baseTypes = BASE_TYPES.get();
-
-        // insert random elements from FIXED_LIST
-        final int size = FIXED_LIST.size();
-        for (int i = FIXED_START_INDEX; i < baseTypes.length; i++) {
-            baseTypes[i] = FIXED_LIST.get(rng.nextInt(size));
-        }
-        this.rawInputsStr = generateTupleTypeString(baseTypes, rng, 0);
+        this.rawInputsStr = generateTupleTypeString(BASE_TYPES, rng, 0);
         this.function = new Function(TypeEnum.FUNCTION, generateFunctionName(rng), TupleType.parse(rawInputsStr), TupleType.EMPTY, null, md);
         this.argsTuple = generateTuple(function.getInputs().elementTypes, rng);
         testDeepCopy(argsTuple);
@@ -215,7 +204,8 @@ public class MonteCarloTestCase {
     void runAll(Random instance) {
         instance.setSeed(seed + 512);
         ByteBuffer encoded = runStandard();
-        runDecodeIndex((ByteBuffer) encoded.position(Function.SELECTOR_LEN), instance);
+        encoded.position(Function.SELECTOR_LEN);
+        runDecodeIndex(encoded, instance);
 //        runFuzzDecode(encoded.array(), instance);
         runSuperSerial();
         runPacked();
@@ -381,10 +371,12 @@ public class MonteCarloTestCase {
     private ABIType<?> generateType(String[] canonicalBaseTypes, Random r, final int tupleDepth) {
         String baseTypeString = canonicalBaseTypes[r.nextInt(canonicalBaseTypes.length)];
 
-        if(baseTypeString == TUPLE_KEY) {
+        if (baseTypeString == TUPLE_KEY) {
             baseTypeString = tupleDepth < limits.maxTupleDepth
                     ? generateTupleTypeString(canonicalBaseTypes, r, tupleDepth + 1)
                     : "uint256";
+        } else if (baseTypeString == FIXED_KEY) {
+            baseTypeString = FIXED_TYPES[r.nextInt(FIXED_TYPES.length)];
         }
 
         StringBuilder sb = new StringBuilder(baseTypeString);
@@ -563,7 +555,7 @@ public class MonteCarloTestCase {
         return "(" + seed + "L," + limits.maxTupleDepth + ',' + limits.maxTupleLength + ',' + limits.maxArrayDepth + ',' + limits.maxArrayLength + ") --> " + function.getCanonicalSignature();
     }
 
-    private static List<String> genOrderedFixedKeys() {
+    private static String[] genOrderedFixedKeys() {
         final ArrayList<String> ordered = new ArrayList<>();
         final String signedStub = "fixed";
         final String unsignedStub = "ufixed";
@@ -574,8 +566,8 @@ public class MonteCarloTestCase {
                 ordered.add(unsignedStub + suffix);
             }
         }
-        Collections.sort(ordered);
-        return ordered;
+//        Collections.sort(ordered);
+        return ordered.toArray(new String[0]);
     }
 
     static class Limits {
