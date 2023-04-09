@@ -67,7 +67,7 @@ public class MonteCarloTestCase {
 
     private static final ThreadLocal<String[]> BASE_TYPES;
 
-    private static final String TUPLE_KEY = "(...)";
+    private static final String TUPLE_KEY = new String();
 
     private static final int FIXED_START_INDEX;
 
@@ -381,7 +381,7 @@ public class MonteCarloTestCase {
     private ABIType<?> generateType(String[] canonicalBaseTypes, Random r, final int tupleDepth) {
         String baseTypeString = canonicalBaseTypes[r.nextInt(canonicalBaseTypes.length)];
 
-        if(baseTypeString.equals(TUPLE_KEY)) {
+        if(baseTypeString == TUPLE_KEY) {
             baseTypeString = tupleDepth < limits.maxTupleDepth
                     ? generateTupleTypeString(canonicalBaseTypes, r, tupleDepth + 1)
                     : "uint256";
