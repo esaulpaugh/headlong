@@ -204,11 +204,11 @@ public class StringsTest {
 
         assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode("0"));
         assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode("00ff", 0, 9));
-        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode("00ff11", 1, 1));
+        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode("00ff11", 2, 1, new byte[10], 0));
 
         assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode(new byte[1]));
         assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode(new byte[4], 0, 9));
-        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode(new byte[6], 1, 1));
+        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode(new byte[6], 2, 1, new byte[10], 0));
     }
 
     @Disabled("slow")
