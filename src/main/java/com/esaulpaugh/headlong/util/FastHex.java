@@ -78,23 +78,27 @@ public final class FastHex {
     }
 
     public static byte[] decode(String hex, int offset, int len) {
-        byte[] dest = new byte[size(len)];
-        decode(hex, offset, len, dest, 0);
+        byte[] dest = new byte[decodedLength(len)];
+        decode(offset, len, hex::charAt, dest, 0);
         return dest;
     }
 
     public static byte[] decode(byte[] hexBytes, int offset, int len) {
-        byte[] dest = new byte[size(len)];
-        decode(hexBytes, offset, len, dest, 0);
+        byte[] dest = new byte[decodedLength(len)];
+        decode(offset, len, o -> hexBytes[o], dest, 0);
         return dest;
     }
 
-    public static void decode(String hex, int offset, int len, byte[] dest, int destOff) {
+    public static int decode(String hex, int offset, int len, byte[] dest, int destOff) {
+        final int decodedLen = decodedLength(len);
         decode(offset, len, hex::charAt, dest, destOff);
+        return destOff + decodedLen;
     }
 
-    public static void decode(byte[] hexBytes, int offset, int len, byte[] dest, int destOff) {
+    public static int decode(byte[] hexBytes, int offset, int len, byte[] dest, int destOff) {
+        final int decodedLen = decodedLength(len);
         decode(offset, len, o -> hexBytes[o], dest, destOff);
+        return destOff + decodedLen;
     }
 
     private static void decode(int offset, int len, IntUnaryOperator extractor, byte[] dest, int destOff) {
@@ -103,11 +107,11 @@ public final class FastHex {
         }
     }
 
-    private static int size(int len) {
-        if (!Integers.isMultiple(len, CHARS_PER_BYTE)) {
+    public static int decodedLength(int encodedLen) {
+        if (!Integers.isMultiple(encodedLen, CHARS_PER_BYTE)) {
             throw new IllegalArgumentException("len must be a multiple of two");
         }
-        return len / CHARS_PER_BYTE;
+        return encodedLen / CHARS_PER_BYTE;
     }
 
     private static int decodeByte(IntUnaryOperator extractor, int offset) {
