@@ -176,24 +176,28 @@ public class StringsTest {
     @Test
     public void testFastHexDecode() throws Throwable {
         final byte[] hexBytes = new byte[] { '9', 'a', 'f', '0', '1', 'E' };
-        byte[] data = FastHex.decode(hexBytes);
-        assertArrayEquals(new byte[] { (byte) 0x9a, (byte) 0xf0, 0x1e }, data);
+        {
+            byte[] data = FastHex.decode(hexBytes);
+            assertArrayEquals(new byte[] { (byte) 0x9a, (byte) 0xf0, 0x1e }, data);
 
-        data = FastHex.decode(hexBytes, 1, hexBytes.length - 2);
-        assertArrayEquals(new byte[] { (byte) 0xaf, 0x01 }, data);
+            data = FastHex.decode(hexBytes, 1, hexBytes.length - 2);
+            assertArrayEquals(new byte[] { (byte) 0xaf, 0x01 }, data);
 
-        FastHex.decode(hexBytes, 2, hexBytes.length - 4, data, 1);
-        assertArrayEquals(new byte[] { (byte) 0xaf, (byte) 0xf0 }, data);
+            final int nextIdx = FastHex.decode(hexBytes, 2, hexBytes.length - 4, data, 1);
+            assertArrayEquals(new byte[] { (byte) 0xaf, (byte) 0xf0 }, data);
+            assertEquals(2, nextIdx);
+        }
 
         final String hex = new String(hexBytes, StandardCharsets.US_ASCII);
-        data = FastHex.decode(hex);
+        byte[] data = FastHex.decode(hex);
         assertArrayEquals(new byte[] { (byte) 0x9a, (byte) 0xf0, 0x1e }, data);
 
         data = FastHex.decode(hex, 1, hex.length() - 2);
         assertArrayEquals(new byte[] { (byte) 0xaf, 0x01 }, data);
 
-        FastHex.decode(hex, 2, hex.length() - 4, data, 1);
+        final int nextIdx = FastHex.decode(hex, 2, hex.length() - 4, data, 1);
         assertArrayEquals(new byte[] { (byte) 0xaf, (byte) 0xf0 }, data);
+        assertEquals(2, nextIdx);
 
         assertEquals(0, FastHex.decodedLength(0));
         assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decodedLength(1));
