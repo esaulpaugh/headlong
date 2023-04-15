@@ -73,23 +73,34 @@ public final class FastHex {
         return decode(hex, 0, hex.length());
     }
 
+    public static byte[] decode(byte[] hexBytes) {
+        return decode(hexBytes, 0, hexBytes.length);
+    }
+
     public static byte[] decode(String hex, int offset, int len) {
-        return decode(offset, len, hex::charAt, new byte[size(len)], 0);
+        byte[] dest = new byte[size(len)];
+        decode(hex, offset, len, dest, 0);
+        return dest;
     }
 
     public static byte[] decode(byte[] hexBytes, int offset, int len) {
-        return decode(hexBytes, offset, len, new byte[size(len)], 0);
+        byte[] dest = new byte[size(len)];
+        decode(hexBytes, offset, len, dest, 0);
+        return dest;
     }
 
-    public static byte[] decode(byte[] hexBytes, int offset, int len, byte[] dest, int destOff) {
-        return decode(offset, len, o -> hexBytes[o], dest, destOff);
+    public static void decode(String hex, int offset, int len, byte[] dest, int destOff) {
+        decode(offset, len, hex::charAt, dest, destOff);
     }
 
-    private static byte[] decode(int offset, int len, IntUnaryOperator extractor, byte[] dest, int destOff) {
+    public static void decode(byte[] hexBytes, int offset, int len, byte[] dest, int destOff) {
+        decode(offset, len, o -> hexBytes[o], dest, destOff);
+    }
+
+    private static void decode(int offset, int len, IntUnaryOperator extractor, byte[] dest, int destOff) {
         for (final int end = offset + len; offset < end; destOff++, offset += CHARS_PER_BYTE) {
             dest[destOff] = (byte) decodeByte(extractor, offset);
         }
-        return dest;
     }
 
     private static int size(int len) {
