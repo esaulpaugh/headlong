@@ -74,22 +74,29 @@ public final class FastHex {
     }
 
     public static byte[] decode(String hex, int offset, int len) {
-        return decode(offset, len, hex::charAt);
+        return decode(offset, len, hex::charAt, new byte[size(len)], 0);
     }
 
     public static byte[] decode(byte[] hexBytes, int offset, int len) {
-        return decode(offset, len, o -> hexBytes[o]);
+        return decode(hexBytes, offset, len, new byte[size(len)], 0);
     }
 
-    private static byte[] decode(int offset, int len, IntUnaryOperator extractor) {
+    public static byte[] decode(byte[] hexBytes, int offset, int len, byte[] dest, int destOff) {
+        return decode(offset, len, o -> hexBytes[o], dest, destOff);
+    }
+
+    private static byte[] decode(int offset, int len, IntUnaryOperator extractor, byte[] dest, int destOff) {
+        for (final int end = offset + len; offset < end; destOff++, offset += CHARS_PER_BYTE) {
+            dest[destOff] = (byte) decodeByte(extractor, offset);
+        }
+        return dest;
+    }
+
+    private static int size(int len) {
         if (!Integers.isMultiple(len, CHARS_PER_BYTE)) {
             throw new IllegalArgumentException("len must be a multiple of two");
         }
-        byte[] dest = new byte[len / CHARS_PER_BYTE];
-        for (int i = 0; i < dest.length; i++, offset += CHARS_PER_BYTE) {
-            dest[i] = (byte) decodeByte(extractor, offset);
-        }
-        return dest;
+        return len / CHARS_PER_BYTE;
     }
 
     private static int decodeByte(IntUnaryOperator extractor, int offset) {
