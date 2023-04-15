@@ -174,10 +174,41 @@ public class StringsTest {
     }
 
     @Test
-    public void testFastHexDecode() {
-        byte[] hexBytes = new byte[] { '9', 'a', 'f', '0', '1', 'E' };
-        byte[] data = FastHex.decode(hexBytes, 1, hexBytes.length - 2);
-        assertArrayEquals(new byte[] { -81, 1 }, data);
+    public void testFastHexDecode() throws Throwable {
+        final byte[] hexBytes = new byte[] { '9', 'a', 'f', '0', '1', 'E' };
+        byte[] data = FastHex.decode(hexBytes);
+        assertArrayEquals(new byte[] { (byte) 0x9a, (byte) 0xf0, 0x1e }, data);
+
+        data = FastHex.decode(hexBytes, 1, hexBytes.length - 2);
+        assertArrayEquals(new byte[] { (byte) 0xaf, 0x01 }, data);
+
+        FastHex.decode(hexBytes, 2, hexBytes.length - 4, data, 1);
+        assertArrayEquals(new byte[] { (byte) 0xaf, (byte) 0xf0 }, data);
+
+        final String hex = new String(hexBytes, StandardCharsets.US_ASCII);
+        data = FastHex.decode(hex);
+        assertArrayEquals(new byte[] { (byte) 0x9a, (byte) 0xf0, 0x1e }, data);
+
+        data = FastHex.decode(hex, 1, hex.length() - 2);
+        assertArrayEquals(new byte[] { (byte) 0xaf, 0x01 }, data);
+
+        FastHex.decode(hex, 2, hex.length() - 4, data, 1);
+        assertArrayEquals(new byte[] { (byte) 0xaf, (byte) 0xf0 }, data);
+
+        assertEquals(0, FastHex.decodedLength(0));
+        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decodedLength(1));
+        assertEquals(1, FastHex.decodedLength(2));
+        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decodedLength(3));
+        assertEquals(2, FastHex.decodedLength(4));
+        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decodedLength(5));
+
+        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode("0"));
+        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode("00ff", 0, 9));
+        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode("00ff11", 1, 1));
+
+        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode(new byte[1]));
+        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode(new byte[4], 0, 9));
+        assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode(new byte[6], 1, 1));
     }
 
     @Disabled("slow")
