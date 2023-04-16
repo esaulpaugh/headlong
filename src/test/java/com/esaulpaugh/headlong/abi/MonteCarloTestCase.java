@@ -61,7 +61,7 @@ public class MonteCarloTestCase {
     private static final int NUM_TUPLES_ADDED = 15; // 17
     private static final int NUM_FIXED_ADDED = 40;
 
-    private static final String[] FIXED_TYPES = genOrderedFixedKeys();
+    private static final String[] FIXED_TYPES = genFixedKeys();
 
     private static final String[] BASE_TYPES;
 
@@ -555,19 +555,18 @@ public class MonteCarloTestCase {
         return "(" + seed + "L," + limits.maxTupleDepth + ',' + limits.maxTupleLength + ',' + limits.maxArrayDepth + ',' + limits.maxArrayLength + ") --> " + function.getCanonicalSignature();
     }
 
-    private static String[] genOrderedFixedKeys() {
-        final ArrayList<String> ordered = new ArrayList<>();
-        final String signedStub = "fixed";
-        final String unsignedStub = "ufixed";
-        for(int M = 8; M <= 256; M += 8) {
+    private static String[] genFixedKeys() {
+        final ArrayList<String> fixedKeys = new ArrayList<>();
+        for (int M = 8; M <= 256; M += 8) {
+            final String Mx = Integer.toString(M) + 'x';
             for (int N = 1; N <= 80; N++) {
-                final String suffix = Integer.toString(M) + 'x' + N;
-                ordered.add(signedStub + suffix);
-                ordered.add(unsignedStub + suffix);
+                final String suffix = Mx + N;
+                fixedKeys.add("fixed" + suffix);
+                fixedKeys.add("ufixed" + suffix);
             }
         }
-//        Collections.sort(ordered);
-        return ordered.toArray(new String[0]);
+//        Collections.sort(fixedKeys);
+        return fixedKeys.toArray(new String[0]);
     }
 
     static class Limits {
