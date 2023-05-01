@@ -20,7 +20,7 @@
     <properties>
         <argLine>-Dfile.encoding=UTF-8</argLine>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>5.9.2</junit.version>
+        <junit.version>5.9.3</junit.version>
         <jmh.version>1.36</jmh.version>
         <maven.build.timestamp.format>MMMMM d yyyy</maven.build.timestamp.format>
     </properties>
