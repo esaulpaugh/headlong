@@ -231,5 +231,77 @@
                 <sha256 value="4d0329cd9e72f2420e5ca15724cbfe6ffa6e5fd2888361516271190fdc342ed7" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
+
+        <component group="me.champeau.jmh" name="jmh-gradle-plugin" version="0.7.1">
+            <artifact name="jmh-gradle-plugin-0.7.1.jar">
+                <sha256 value="15605b30a146a3e6243335db65b91ed658223a650330be68cf0819c354cbee2a" origin="plugins.gradle.org/m2/"/>
+            </artifact>
+            <artifact name="jmh-gradle-plugin-0.7.1.module">
+                <sha256 value="caddafb7ced1ae6bc96a253b67cdd46caf09b41137402443e3708191928eb475" origin="plugins.gradle.org/m2/"/>
+            </artifact>
+            <artifact name="jmh-gradle-plugin-0.7.1-sources.jar">
+                <sha256 value="332411175bae29f718d274386106e3bbc32cf8f3c3d6b65f0a9c024c1c80e5bd" origin="plugins.gradle.org/m2/"/>
+            </artifact>
+        </component>
+        <component group="me.champeau.jmh" name="me.champeau.jmh.gradle.plugin" version="0.7.1">
+            <artifact name="me.champeau.jmh.gradle.plugin-0.7.1.pom">
+                <sha256 value="5009b99203a5f9e7c9e0d4846cac599982189c944fd134b0162edfe85eae8ab2" origin="plugins.gradle.org/m2/"/>
+            </artifact>
+        </component>
+
+        <component group="org.ow2.asm" name="asm" version="9.0">
+            <artifact name="asm-9.0.module">
+                <sha256 value="8af81096ed3affa39a4729fc900a55b663894911d67c4d4bef0ea424393dd3f9" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="asm-9.0.jar">
+                <sha256 value="0df97574914aee92fd349d0cb4e00f3345d45b2c239e0bb50f0a90ead47888e0" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="asm-9.0-sources.jar">
+                <sha256 value="829bc5eb0ccd705a7c8afbf7cdc4b7e9a9f733d3a1a954b9afffd99c8e063366" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.openjdk.jmh" name="jmh-generator-asm" version="1.36">
+            <artifact name="jmh-generator-asm-1.36.pom">
+                <sha256 value="57bbbe878394f8b3fc1b80c41161dd488b42c0d7b3d70a5e474f4271b1ea3a49" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="jmh-generator-asm-1.36.jar">
+                <sha256 value="7460b11b823dee74b3e19617d35d5911b01245303d6e31c30f83417cfc2f54b5" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="jmh-generator-asm-1.36-sources.jar">
+                <sha256 value="2e4104b24a1a89d0070a8f7219da172094245d1c78549b928d4d64e578e17aff" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.openjdk.jmh" name="jmh-generator-reflection" version="1.36">
+            <artifact name="jmh-generator-reflection-1.36.pom">
+                <sha256 value="9ac088332ca9d14713089939e73cda1e7ff443c7c8c77bac885b08a3b7875146" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="jmh-generator-reflection-1.36.jar">
+                <sha256 value="a9c72760e12c199e2a2c28f1a126ebf0cc5b51c0b58d46472596fc32f7f92534" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="jmh-generator-reflection-1.36-sources.jar">
+                <sha256 value="d9fe21440b9cf1b004f5c6cb66e7c5d923c8e95502830564efd2f0f5cc24e01e" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.openjdk.jmh" name="jmh-generator-annprocess" version="1.36">
+            <artifact name="jmh-generator-annprocess-1.36-sources.jar">
+                <sha256 value="d5414524f1f693725dd5763b8b785c61d2fd01ee8c64bf79f71c1ae8f786ee41" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.ow2" name="ow2" version="1.5">
+            <artifact name="ow2-1.5.pom">
+                <sha256 value="0f8a1b116e760b8fe6389c51b84e4b07a70fc11082d4f936e453b583dd50b43b" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+        <component group="org.openjdk.jmh" name="jmh-generator-bytecode" version="1.36">
+            <artifact name="jmh-generator-bytecode-1.36.pom">
+                <sha256 value="5110011d25fb9466b2f009bff7d7ec0a62e8a7abaf06899bfb6b6305b04e2944" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="jmh-generator-bytecode-1.36.jar">
+                <sha256 value="3376542f8950bcd706c516ce0620d1df822309e7092b8f9338917283181d585d" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="jmh-generator-bytecode-1.36-sources.jar">
+                <sha256 value="c427b3ca825e5fd7af38c4279d25e3fd3d60ad91973f744248d9c24e5d4b48d1" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
     </components>
 </verification-metadata>
