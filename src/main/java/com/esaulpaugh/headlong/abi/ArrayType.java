@@ -487,9 +487,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T baseType(ABIType<?> type) {
-        while (type instanceof ArrayType<?, ?>) {
-            type = ((ArrayType<? extends ABIType<?>, ?>) type).getElementType();
-        }
-        return (T) type;
+        return type instanceof ArrayType<?, ?>
+                ? baseType(((ArrayType<? extends ABIType<?>, ?>) type).getElementType())
+                : (T) type;
     }
 }
