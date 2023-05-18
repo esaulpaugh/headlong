@@ -101,7 +101,7 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         return arrayList;
     }
 
-    public void elements(RLPDecoder decoder, Collection<RLPItem> collection) {
+    public void elements(RLPDecoder decoder, Collection<? super RLPItem> collection) {
         Iterator<RLPItem> iter = iterator(decoder);
         while (iter.hasNext()) {
             collection.add(iter.next());
