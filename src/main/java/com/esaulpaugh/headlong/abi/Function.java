@@ -80,7 +80,7 @@ public final class Function implements ABIObject {
      * @param outputs       {@link TupleType} type describing this function's return types
      * @param stateMutability   "pure", "view", "payable" etc.
      * @param messageDigest hash function with which to generate the 4-byte selector
-     * @throws IllegalArgumentException if {@code signature} or {@code outputs} is malformed
+     * @throws IllegalArgumentException if the arguments do not specify a valid function
      */
     public Function(TypeEnum type, String name, TupleType inputs, TupleType outputs, String stateMutability, MessageDigest messageDigest) {
         this.type = Objects.requireNonNull(type);
