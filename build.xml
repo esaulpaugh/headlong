@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="US-ASCII"?>
 <project name="headlong" default="all">
 
   <property file="headlong.properties"/>
@@ -66,7 +66,7 @@
 
   <property name="module.jdk.classpath.headlong" value="${project.jdk.classpath}"/>
   
-  <property name="compiler.args.headlong" value="-encoding UTF-8 ${compiler.args}"/>
+  <property name="compiler.args.headlong" value="-encoding US-ASCII ${compiler.args}"/>
   
   <property name="headlong.output.dir" value="${module.headlong.basedir}/classes/production/headlong"/>
   <property name="headlong.testoutput.dir" value="${module.headlong.basedir}/classes/test/headlong"/>
@@ -119,7 +119,7 @@
 
   <property name="module.jdk.classpath.headlong.main" value="${project.jdk.classpath}"/>
   
-  <property name="compiler.args.headlong.main" value="-encoding UTF-8 ${compiler.args}"/>
+  <property name="compiler.args.headlong.main" value="-encoding US-ASCII ${compiler.args}"/>
   
   <property name="headlong.main.output.dir" value="${module.headlong.main.basedir}/build/classes/java/main"/>
   <property name="headlong.main.testoutput.dir" value="${module.headlong.main.basedir}/build/classes/java/main"/>
