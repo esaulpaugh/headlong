@@ -32,18 +32,20 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     static final String EMPTY_TUPLE_STRING = "()";
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null);
+    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null, null);
 
     final ABIType<?>[] elementTypes;
     final String[] elementNames;
+    final String[] elementInternalTypes;
     private final int[] elementHeadOffsets;
     private final int headLength;
     private final int firstOffset;
 
-    TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String[] elementNames) {
+    TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String[] elementNames, String[] elementInternalTypes) {
         super(canonicalType, Tuple.class, dynamic);
         this.elementTypes = elementTypes;
         this.elementNames = elementNames;
+        this.elementInternalTypes = elementInternalTypes;
         this.elementHeadOffsets = new int[elementTypes.length];
         if(dynamic) {
             this.headLength = OFFSET_LENGTH_BYTES;
@@ -72,6 +74,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             throw new IllegalArgumentException("index out of bounds: " + index);
         }
         return elementNames == null ? null : elementNames[index];
+    }
+
+    public String getElementInternalType(int index) {
+        if(index < 0 || index >= size()) {
+            throw new IllegalArgumentException("index out of bounds: " + index);
+        }
+        return elementInternalTypes == null ? null : elementInternalTypes[index];
     }
 
     @SuppressWarnings("unchecked")
@@ -351,6 +360,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             boolean dynamic = false;
             final List<ABIType<?>> selected = new ArrayList<>(size);
             final List<String> selectedNames = new ArrayList<>(size);
+            final List<String> selectedInternalTypes = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 if (negate ^ manifest[i]) {
                     ABIType<?> e = get(i);
@@ -358,9 +368,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     dynamic |= e.dynamic;
                     selected.add(e);
                     selectedNames.add(elementNames == null ? null : elementNames[i]);
+                    selectedInternalTypes.add(elementInternalTypes == null ? null : elementInternalTypes[i]);
                 }
             }
-            return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, selected.toArray(EMPTY_ARRAY), selectedNames.toArray(EMPTY_STRING_ARRAY));
+            return new TupleType(
+                    completeTupleTypeString(canonicalBuilder),
+                    dynamic,
+                    selected.toArray(EMPTY_ARRAY),
+                    selectedNames.toArray(EMPTY_STRING_ARRAY),
+                    selectedInternalTypes.toArray(EMPTY_STRING_ARRAY)
+            );
         }
         throw new IllegalArgumentException("manifest.length != size(): " + manifest.length + " != " + size);
     }

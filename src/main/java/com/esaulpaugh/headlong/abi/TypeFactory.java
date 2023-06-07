@@ -104,27 +104,27 @@ public final class TypeFactory {
 
     @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T create(String rawType) {
-        return (T) build(rawType, null, null);
+        return (T) build(rawType, null, null, null);
     }
 
     @SuppressWarnings("unchecked")
     public static ABIType<Object> createNonCapturing(String rawType) {
-        return (ABIType<Object>) build(rawType, null, null);
+        return (ABIType<Object>) build(rawType, null, null, null);
     }
 
     /** If you don't need any {@code elementNames}, use {@link TypeFactory#create(String)}. */
     public static TupleType createTupleTypeWithNames(String rawType, String... elementNames) {
-        return (TupleType) build(rawType, elementNames, null);
+        return (TupleType) build(rawType, elementNames, null, null);
     }
 
-    static ABIType<?> build(String rawType, String[] elementNames, ABIType<?> baseType) {
+    static ABIType<?> build(String rawType, String[] elementNames, String[] elementInternalTypes, ABIType<?> baseType) {
         if(rawType.length() > MAX_LENGTH_CHARS) {
             throw new IllegalArgumentException("type length exceeds maximum: " + rawType.length() + " > " + MAX_LENGTH_CHARS);
         }
-        return buildUnchecked(rawType, elementNames, baseType);
+        return buildUnchecked(rawType, elementNames, elementInternalTypes, baseType);
     }
 
-    private static ABIType<?> buildUnchecked(final String rawType, final String[] elementNames, ABIType<?> baseType) {
+    private static ABIType<?> buildUnchecked(final String rawType, final String[] elementNames, final String[] elementInternalTypes, ABIType<?> baseType) {
         try {
             final int lastCharIdx = rawType.length() - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array
@@ -132,12 +132,12 @@ public final class TypeFactory {
                 final int secondToLastCharIdx = lastCharIdx - 1;
                 final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIdx);
 
-                final ABIType<?> elementType = buildUnchecked(rawType.substring(0, arrayOpenIndex), null, baseType);
+                final ABIType<?> elementType = buildUnchecked(rawType.substring(0, arrayOpenIndex), null, null, baseType);
                 final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
                 final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType.substring(arrayOpenIndex + 1, lastCharIdx));
                 return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null);
             }
-            if(baseType != null || (baseType = resolveBaseType(rawType, elementNames)) != null) {
+            if(baseType != null || (baseType = resolveBaseType(rawType, elementNames, elementInternalTypes)) != null) {
                 return baseType;
             }
         } catch (StringIndexOutOfBoundsException ignored) { // e.g. type equals "" or "82]" or "[]" or "[1]"
@@ -161,9 +161,9 @@ public final class TypeFactory {
         throw new IllegalArgumentException("bad array length");
     }
 
-    private static ABIType<?> resolveBaseType(final String baseTypeStr, final String[] elementNames) {
+    private static ABIType<?> resolveBaseType(final String baseTypeStr, final String[] elementNames, final String[] elementInternalTypes) {
         if (baseTypeStr.charAt(0) == '(') {
-            return parseTupleType(baseTypeStr, elementNames);
+            return parseTupleType(baseTypeStr, elementNames, elementInternalTypes);
         }
         final ABIType<?> ret = BASE_TYPE_MAP.get(baseTypeStr);
         return ret != null ? ret : tryParseFixed(baseTypeStr);
@@ -195,7 +195,7 @@ public final class TypeFactory {
         return c > '0' && c <= '9';
     }
 
-    private static TupleType parseTupleType(final String rawTypeStr, final String[] elementNames) { /* assumes that rawTypeStr.charAt(0) == '(' */
+    private static TupleType parseTupleType(final String rawTypeStr, final String[] elementNames, final String[] elementInternalTypes) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawTypeStr.length();
         if (len == 2 && rawTypeStr.equals(EMPTY_TUPLE_STRING)) return TupleType.EMPTY;
         final List<ABIType<?>> elements = new ArrayList<>();
@@ -211,7 +211,7 @@ public final class TypeFactory {
                 case '(': argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart + 1)); break;
                 default: argEnd = nextTerminator(rawTypeStr, argStart);
                 }
-                final ABIType<?> e = buildUnchecked(rawTypeStr.substring(argStart, argEnd), null, null);
+                final ABIType<?> e = buildUnchecked(rawTypeStr.substring(argStart, argEnd), null, null, null);
                 canonicalBuilder.append(e.canonicalType).append(',');
                 dynamic |= e.dynamic;
                 elements.add(e);
@@ -219,15 +219,19 @@ public final class TypeFactory {
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);
         }
-        if(elementNames != null && elementNames.length != elements.size()) {
+        if (elementNames != null && elementNames.length != elements.size()) {
             throw new IllegalArgumentException("expected " + elements.size() + " element names but found " + elementNames.length);
+        }
+        if (elementInternalTypes != null && elementInternalTypes.length != elements.size()) {
+            throw new IllegalArgumentException("expected " + elements.size() + " element names but found " + elementInternalTypes.length);
         }
         return argEnd == len
                 ? new TupleType(
                     canonicalBuilder.deleteCharAt(canonicalBuilder.length() - 1).append(')').toString(),
                     dynamic,
                     elements.toArray(EMPTY_ARRAY),
-                    elementNames
+                    elementNames,
+                    elementInternalTypes
                 )
                 : null;
     }
