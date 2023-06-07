@@ -31,7 +31,7 @@ public enum TypeEnum {
     static final int ORDINAL_EVENT = 4;
     static final int ORDINAL_ERROR = 5;
 
-    final String name;
+    private final String name;
     public final boolean isFunction;
 
     TypeEnum(String name, boolean isFunction) {
