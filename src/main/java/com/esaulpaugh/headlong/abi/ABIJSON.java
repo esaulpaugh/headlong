@@ -229,7 +229,7 @@ public final class ABIJSON {
                 return parseTupleType(object, COMPONENTS);
             }
             TupleType baseType = parseTupleType(object, COMPONENTS);
-            return TypeFactory.build(baseType.canonicalType + type.substring(TUPLE.length()), null, null, baseType); // return ArrayType
+            return TypeFactory.build(baseType.canonicalType + type.substring(TUPLE.length()), null, baseType); // return ArrayType
         }
         return TypeFactory.create(type);
     }
