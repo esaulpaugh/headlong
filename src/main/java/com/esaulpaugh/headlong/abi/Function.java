@@ -162,7 +162,7 @@ public final class Function implements ABIObject {
             return;
         case ORDINAL_EVENT:
         case ORDINAL_ERROR:
-        default: throw TypeEnum.unexpectedType(type.name);
+        default: throw TypeEnum.unexpectedType(type.toString());
         }
     }
 

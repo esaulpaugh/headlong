@@ -17,12 +17,12 @@ package com.esaulpaugh.headlong.abi;
 
 public enum TypeEnum {
 
-    FUNCTION(ABIJSON.FUNCTION),
-    RECEIVE(ABIJSON.RECEIVE),
-    FALLBACK(ABIJSON.FALLBACK),
-    CONSTRUCTOR(ABIJSON.CONSTRUCTOR),
-    EVENT(ABIJSON.EVENT),
-    ERROR(ABIJSON.ERROR);
+    FUNCTION(ABIJSON.FUNCTION, true),
+    RECEIVE(ABIJSON.RECEIVE, true),
+    FALLBACK(ABIJSON.FALLBACK, true),
+    CONSTRUCTOR(ABIJSON.CONSTRUCTOR, true),
+    EVENT(ABIJSON.EVENT, false),
+    ERROR(ABIJSON.ERROR, false);
 
     static final int ORDINAL_FUNCTION = 0;
     static final int ORDINAL_RECEIVE = 1;
@@ -31,10 +31,12 @@ public enum TypeEnum {
     static final int ORDINAL_EVENT = 4;
     static final int ORDINAL_ERROR = 5;
 
-    final String name;
+    private final String name;
+    public final boolean isFunction;
 
-    TypeEnum(String name) {
+    TypeEnum(String name, boolean isFunction) {
         this.name = name;
+        this.isFunction = isFunction;
     }
 
     @Override
