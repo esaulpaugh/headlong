@@ -359,24 +359,28 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             final StringBuilder canonicalBuilder = new StringBuilder("(");
             boolean dynamic = false;
             final List<ABIType<?>> selected = new ArrayList<>(size);
-            final List<String> selectedNames = new ArrayList<>(size);
-            final List<String> selectedInternalTypes = new ArrayList<>(size);
+            final List<String> selectedNames = elementNames == null ? null : new ArrayList<>(size);
+            final List<String> selectedInternalTypes = elementInternalTypes == null ? null : new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 if (negate ^ manifest[i]) {
                     ABIType<?> e = get(i);
                     canonicalBuilder.append(e.canonicalType).append(',');
                     dynamic |= e.dynamic;
                     selected.add(e);
-                    selectedNames.add(elementNames == null ? null : elementNames[i]);
-                    selectedInternalTypes.add(elementInternalTypes == null ? null : elementInternalTypes[i]);
+                    if (selectedNames != null) {
+                        selectedNames.add(elementNames[i]);
+                    }
+                    if (selectedInternalTypes != null) {
+                        selectedInternalTypes.add(elementInternalTypes[i]);
+                    }
                 }
             }
             return new TupleType(
                     completeTupleTypeString(canonicalBuilder),
                     dynamic,
                     selected.toArray(EMPTY_ARRAY),
-                    selectedNames.toArray(EMPTY_STRING_ARRAY),
-                    selectedInternalTypes.toArray(EMPTY_STRING_ARRAY)
+                    selectedNames == null ? null : selectedNames.toArray(EMPTY_STRING_ARRAY),
+                    selectedInternalTypes == null ? null : selectedInternalTypes.toArray(EMPTY_STRING_ARRAY)
             );
         }
         throw new IllegalArgumentException("manifest.length != size(): " + manifest.length + " != " + size);
