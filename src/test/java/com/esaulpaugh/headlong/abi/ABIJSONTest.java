@@ -705,4 +705,43 @@ public class ABIJSONTest {
                     .flatMap(ABIJSONTest::flatten)
                 : Stream.of(type);
     }
+
+    @Test
+    public void testInternalType() {
+        String eventStr =
+                "{\n" +
+                "  \"type\": \"event\",\n" +
+                "  \"name\": \"ManyThings\",\n" +
+                "  \"inputs\": [\n" +
+                "    {\n" +
+                "      \"internalType\": \"struct Thing[]\",\n" +
+                "      \"name\": \"thing\",\n" +
+                "      \"type\": \"tuple[]\",\n" +
+                "      \"components\": [\n" +
+                "        {\n" +
+                "          \"name\": \"thing_string\",\n" +
+                "          \"type\": \"string\"\n" +
+                "        }\n" +
+                "      ],\n" +
+                "      \"indexed\": false\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"anonymous\": false\n" +
+                "}";
+
+        Event e = Event.fromJson(eventStr);
+
+        TupleType in = e.getInputs();
+        assertEquals("struct Thing[]", in.getElementInternalType(0));
+
+        TupleType indexed = e.getIndexedParams();
+        assertEquals(0, indexed.size());
+
+        TupleType nonIndexed = e.getNonIndexedParams();
+        assertEquals("struct Thing[]", nonIndexed.getElementInternalType(0));
+
+        System.out.println(e);
+
+        assertEquals(eventStr, e.toString());
+    }
 }

@@ -297,6 +297,12 @@ public final class ABIJSON {
         }
     }
 
+    private static void internalType(JsonWriter out, String internalType) throws IOException {
+        if(internalType != null) {
+            out.name(INTERNAL_TYPE).value(internalType);
+        }
+    }
+
     private static void stateMutability(JsonWriter out, String stateMutability) throws IOException {
         if(stateMutability != null) {
             out.name(STATE_MUTABILITY).value(stateMutability);
@@ -308,6 +314,9 @@ public final class ABIJSON {
         int i = 0;
         for (final ABIType<?> e : tupleType) {
             out.beginObject();
+            if(tupleType.elementInternalTypes != null) {
+                internalType(out, tupleType.elementInternalTypes[i]);
+            }
             if(tupleType.elementNames != null) {
                 name(out, tupleType.elementNames[i]);
             }
