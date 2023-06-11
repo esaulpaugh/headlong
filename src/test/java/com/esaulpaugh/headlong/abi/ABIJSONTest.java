@@ -744,4 +744,44 @@ public class ABIJSONTest {
 
         assertEquals(eventStr, e.toString());
     }
+
+    @Test
+    public void testUserDefinedValueTypes() {
+        String json = "{\n" +
+                "  \"type\": \"constructor\",\n" +
+                "  \"inputs\": [\n" +
+                "    {\n" +
+                "      \"internalType\": \"MyNamespace.UIntMax\",\n" +
+                "      \"name\": \"unsigned256\",\n" +
+                "      \"type\": \"uint256\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"internalType\": \"CustomType\",\n" +
+                "      \"name\": \"signed24\",\n" +
+                "      \"type\": \"int24\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"internalType\": \"SomeOtherDudesNamespace.Bytes\",\n" +
+                "      \"name\": \"byteArr\",\n" +
+                "      \"type\": \"bytes\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"internalType\": \"contract AContract\",\n" +
+                "      \"name\": \"contractAddr\",\n" +
+                "      \"type\": \"address\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"stateMutability\": \"pure\"\n" +
+                "}";
+
+        Function f = Function.fromJson(json);
+
+        TupleType in = f.getInputs();
+        assertEquals("MyNamespace.UIntMax", in.getElementInternalType(0));
+        assertEquals("CustomType", in.getElementInternalType(1));
+        assertEquals("SomeOtherDudesNamespace.Bytes", in.getElementInternalType(2));
+        assertEquals("contract AContract", in.getElementInternalType(3));
+
+        assertEquals(json, f.toString());
+    }
 }
