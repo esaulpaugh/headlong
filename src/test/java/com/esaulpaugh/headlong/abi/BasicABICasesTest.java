@@ -109,7 +109,7 @@ public class BasicABICasesTest {
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
         }
-        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements, null);
+        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements, null, null);
     }
 
     private static String completeTupleTypeString(StringBuilder sb) {

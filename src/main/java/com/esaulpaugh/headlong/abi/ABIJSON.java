@@ -62,6 +62,7 @@ public final class ABIJSON {
     private static final String INDEXED = "indexed";
     private static final String STATE_MUTABILITY = "stateMutability";
     static final String PAYABLE = "payable"; // to mark as nonpayable, do not specify any stateMutability
+    private static final String INTERNAL_TYPE = "internalType";
 
     /**
      * Selects all objects with type {@link TypeEnum#FUNCTION}.
@@ -189,6 +190,7 @@ public final class ABIJSON {
         }
         final ABIType<?>[] elements = new ABIType<?>[size];
         final String[] names = new String[size];
+        final String[] internalTypes = new String[size];
         final StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
         for (int i = 0; i < elements.length; i++) {
@@ -198,6 +200,11 @@ public final class ABIJSON {
             dynamic |= e.dynamic;
             elements[i] = e;
             names[i] = getName(inputObj);
+            final String internalType = getInternalType(inputObj);
+            if (internalType != null) {
+                final String type = e.canonicalType;
+                internalTypes[i] = internalType.equals(type) ? type : internalType;
+            }
             if(indexed != null) {
                 indexed[i] = getBoolean(inputObj, INDEXED);
             }
@@ -206,7 +213,8 @@ public final class ABIJSON {
                 canonicalBuilder.deleteCharAt(canonicalBuilder.length() - 1).append(')').toString(),
                 dynamic,
                 elements,
-                names
+                names,
+                internalTypes
         );
     }
 
@@ -232,6 +240,10 @@ public final class ABIJSON {
 
     private static String getName(JsonObject obj) {
         return getString(obj, NAME);
+    }
+
+    private static String getInternalType(JsonObject obj) {
+        return getString(obj, INTERNAL_TYPE);
     }
 // ---------------------------------------------------------------------------------------------------------------------
     static String toJson(ABIObject o, boolean pretty) {
@@ -285,6 +297,12 @@ public final class ABIJSON {
         }
     }
 
+    private static void internalType(JsonWriter out, String internalType) throws IOException {
+        if(internalType != null) {
+            out.name(INTERNAL_TYPE).value(internalType);
+        }
+    }
+
     private static void stateMutability(JsonWriter out, String stateMutability) throws IOException {
         if(stateMutability != null) {
             out.name(STATE_MUTABILITY).value(stateMutability);
@@ -296,6 +314,9 @@ public final class ABIJSON {
         int i = 0;
         for (final ABIType<?> e : tupleType) {
             out.beginObject();
+            if(tupleType.elementInternalTypes != null) {
+                internalType(out, tupleType.elementInternalTypes[i]);
+            }
             if(tupleType.elementNames != null) {
                 name(out, tupleType.elementNames[i]);
             }

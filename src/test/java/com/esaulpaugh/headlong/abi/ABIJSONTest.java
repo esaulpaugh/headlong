@@ -705,4 +705,83 @@ public class ABIJSONTest {
                     .flatMap(ABIJSONTest::flatten)
                 : Stream.of(type);
     }
+
+    @Test
+    public void testInternalType() {
+        String eventStr =
+                "{\n" +
+                "  \"type\": \"event\",\n" +
+                "  \"name\": \"ManyThings\",\n" +
+                "  \"inputs\": [\n" +
+                "    {\n" +
+                "      \"internalType\": \"struct Thing[]\",\n" +
+                "      \"name\": \"thing\",\n" +
+                "      \"type\": \"tuple[]\",\n" +
+                "      \"components\": [\n" +
+                "        {\n" +
+                "          \"name\": \"thing_string\",\n" +
+                "          \"type\": \"string\"\n" +
+                "        }\n" +
+                "      ],\n" +
+                "      \"indexed\": false\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"anonymous\": false\n" +
+                "}";
+
+        Event e = Event.fromJson(eventStr);
+
+        TupleType in = e.getInputs();
+        assertEquals("struct Thing[]", in.getElementInternalType(0));
+
+        TupleType indexed = e.getIndexedParams();
+        assertEquals(0, indexed.size());
+
+        TupleType nonIndexed = e.getNonIndexedParams();
+        assertEquals("struct Thing[]", nonIndexed.getElementInternalType(0));
+
+        System.out.println(e);
+
+        assertEquals(eventStr, e.toString());
+    }
+
+    @Test
+    public void testUserDefinedValueTypes() {
+        String json = "{\n" +
+                "  \"type\": \"constructor\",\n" +
+                "  \"inputs\": [\n" +
+                "    {\n" +
+                "      \"internalType\": \"MyNamespace.UIntMax\",\n" +
+                "      \"name\": \"unsigned256\",\n" +
+                "      \"type\": \"uint256\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"internalType\": \"CustomType\",\n" +
+                "      \"name\": \"signed24\",\n" +
+                "      \"type\": \"int24\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"internalType\": \"SomeOtherDudesNamespace.Bytes\",\n" +
+                "      \"name\": \"byteArr\",\n" +
+                "      \"type\": \"bytes\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"internalType\": \"contract AContract\",\n" +
+                "      \"name\": \"contractAddr\",\n" +
+                "      \"type\": \"address\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"stateMutability\": \"pure\"\n" +
+                "}";
+
+        Function f = Function.fromJson(json);
+
+        TupleType in = f.getInputs();
+        assertEquals("MyNamespace.UIntMax", in.getElementInternalType(0));
+        assertEquals("CustomType", in.getElementInternalType(1));
+        assertEquals("SomeOtherDudesNamespace.Bytes", in.getElementInternalType(2));
+        assertEquals("contract AContract", in.getElementInternalType(3));
+
+        assertEquals(json, f.toString());
+    }
 }

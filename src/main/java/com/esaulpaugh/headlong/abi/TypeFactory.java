@@ -219,7 +219,7 @@ public final class TypeFactory {
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);
         }
-        if(elementNames != null && elementNames.length != elements.size()) {
+        if (elementNames != null && elementNames.length != elements.size()) {
             throw new IllegalArgumentException("expected " + elements.size() + " element names but found " + elementNames.length);
         }
         return argEnd == len
@@ -227,7 +227,8 @@ public final class TypeFactory {
                     canonicalBuilder.deleteCharAt(canonicalBuilder.length() - 1).append(')').toString(),
                     dynamic,
                     elements.toArray(EMPTY_ARRAY),
-                    elementNames
+                    elementNames,
+                    null
                 )
                 : null;
     }
