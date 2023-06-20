@@ -46,7 +46,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 
 final String junitVersion = "5.9.3"
 final String jmhVersion = "1.36"
-final String bcVersion = "1.73"
+final String bcVersion = "1.74"
 
 static def todayUTC() {
     SimpleDateFormat sdf = new SimpleDateFormat("MMMMM d yyyy")
