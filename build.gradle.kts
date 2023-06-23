@@ -76,7 +76,7 @@
 //}
 //
 //val junitVersion = "5.9.3"
-//val bcVersion = "1.73"
+//val bcVersion = "1.75"
 //
 //dependencies {
 //    implementation("com.google.code.gson:gson:2.10.1")
