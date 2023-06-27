@@ -39,6 +39,7 @@
                     <include>org/apache/commons/codec/binary/BaseNCodec.class</include>
                     <include>org/apache/commons/codec/binary/BaseNCodec$Context.class</include>
                     <include>org/apache/commons/codec/binary/Hex.class</include>
+                    <include>org/apache/commons/codec/binary/BinaryCodec.class</include>
 
                     <include>org/apache/commons/math3/analysis/UnivariateFunction.class</include>
                     <include>org/apache/commons/math3/analysis/solvers/AbstractUnivariateSolver.class</include>
