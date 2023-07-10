@@ -22,8 +22,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * An ordered list of objects whose types should correspond to some {@link TupleType}. {@link Function}s encode/decode
- * {@link Tuple}s containing arguments/return values. {@link Tuple}s can contain other tuples.
+ * An ordered list of objects whose types should correspond to some {@link TupleType}. {@link Function}s encode/decode {@link Tuple}s
+ * containing arguments/return values. {@link Tuple}s can contain other tuples. Be warned that changes to elements will affect
+ * this {@link Tuple}'s value.
  */
 public final class Tuple implements Iterable<Object> {
 
@@ -56,7 +57,8 @@ public final class Tuple implements Iterable<Object> {
     }
 
     /**
-     * Returns the element at the specified position in this tuple.
+     * Returns the element at the specified position in this tuple. Be warned that changes to elements will affect this
+     * {@link Tuple}'s value. Consider making a {@link #deepCopy()} before calling this method.
      *
      * @param index index of the element to return
      * @return  the element at the specified position
@@ -137,6 +139,12 @@ public final class Tuple implements Iterable<Object> {
         return new Tuple(deepCopy);
     }
 
+    /**
+     * Returns a shallow copy of the underlying array of elements. Be warned that changes to elements will affect this
+     * {@link Tuple}'s value. Consider making a {@link #deepCopy()} before calling this method.
+     *
+     * @return  a shallow copy of the elements array
+     */
     public Object[] toArray() {
         return Arrays.copyOf(elements, elements.length);
     }
