@@ -137,6 +137,10 @@ public final class Tuple implements Iterable<Object> {
         return new Tuple(deepCopy);
     }
 
+    public Object[] toArray() {
+        return Arrays.copyOf(elements, elements.length);
+    }
+
     private static Object deepCopyElement(Object e) {
         if(e.getClass().isArray()) {
             if (e instanceof Object[]) {
