@@ -10,7 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up GraalVM JDK 8
       - uses: graalvm/setup-graalvm@v1
         with:
           version: '21.2.0'
