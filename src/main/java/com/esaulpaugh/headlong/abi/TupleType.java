@@ -256,6 +256,14 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return new Tuple(elements);
     }
 
+    /**
+     * Decodes only the elements at the specified indices.
+     *
+     * @param bb    the buffer containing the encoding
+     * @param indices   the positions of the elements to decode
+     * @return  the decoded data
+     * @param <T>   the type of the decoded element or {@link Tuple} if decoding multiple elements
+     */
     @SuppressWarnings("unchecked")
     public <T> T decode(ByteBuffer bb, int... indices) {
         bb.mark();

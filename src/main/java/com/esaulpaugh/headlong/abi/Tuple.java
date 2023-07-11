@@ -140,8 +140,9 @@ public final class Tuple implements Iterable<Object> {
     }
 
     /**
-     * Returns a shallow copy of the underlying array of elements. Be warned that changes to elements will affect this
-     * {@link Tuple}'s value. Consider making a {@link #deepCopy()} before calling this method.
+     * Returns a shallow copy of the underlying array of elements. Elements may be null if this {@link Tuple} is the result
+     * of a decode-with-indices. Be warned that changes to elements will affect this {@link Tuple}'s value. Consider making
+     * a {@link #deepCopy()} before calling this method.
      *
      * @return  a shallow copy of the elements array
      */
