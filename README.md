@@ -125,9 +125,10 @@ Alternatively:
 
 https://github.com/esaulpaugh/headlong-cli
 
-## Demo app
+## Benchmarks
 
-https://github.com/esaulpaugh/headlong-android
+![Screenshot](https://github.com/esaulpaugh/headlong/blob/master/benchmark_results.jpg)
+GraalVM 20.0.1 on ARM
 
 ## Misc
 
