@@ -521,8 +521,9 @@ public class TupleTest {
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(5, 5, 4, 3);
         final Random r = new Random();
         final MessageDigest md = Function.newDefaultDigest();
+        long seed = TestUtils.getSeed();
         for (int z = 0; z < 10; z++) {
-            final Tuple values = new MonteCarloTestCase(TestUtils.getSeed(), limits, r, md).argsTuple;
+            final Tuple values = new MonteCarloTestCase(seed + z, limits, r, md).argsTuple;
 
             final Tuple deepCopy = values.deepCopy();
             assertNotSame(values, deepCopy);
