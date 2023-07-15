@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.security.MessageDigest;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Random;
@@ -32,6 +33,7 @@ import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -512,5 +514,29 @@ public class TupleTest {
         final String arrType = sb.toString();
         final int len = arrType.length();
         assertThrown(IllegalArgumentException.class, "type length exceeds maximum: " + len + " > 2000" , () -> TypeFactory.create(arrType));
+    }
+
+    @Test
+    public void testToArray() {
+        final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(5, 5, 4, 3);
+        final Random r = new Random();
+        final MessageDigest md = Function.newDefaultDigest();
+        for (int z = 0; z < 10; z++) {
+            final Tuple values = new MonteCarloTestCase(TestUtils.getSeed(), limits, r, md).argsTuple;
+
+            final Tuple deepCopy = values.deepCopy();
+            assertNotSame(values, deepCopy);
+            assertEquals(values, deepCopy);
+
+            final Tuple shallowCopy = Tuple.of(values.toArray());
+            assertEquals(values, shallowCopy);
+
+            final Object[] elements = new Object[values.size()];
+            for (int i = 0; i < elements.length; i++) {
+                elements[i] = values.get(i);
+            }
+            final Tuple nt = new Tuple(elements);
+            assertEquals(values, nt);
+        }
     }
 }
