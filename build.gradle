@@ -44,7 +44,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     finalizedBy(javadocJar)
 }
 
-final String junitVersion = "5.9.3"
+final String junitVersion = "5.10.0"
 final String jmhVersion = "1.36"
 final String bcVersion = "1.75"
 
