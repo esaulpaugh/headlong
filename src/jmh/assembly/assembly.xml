@@ -59,6 +59,8 @@
                     <include>org/apache/commons/math3/exception/ConvergenceException.class</include>
                     <include>org/apache/commons/math3/exception/DimensionMismatchException.class</include>
                     <include>org/apache/commons/math3/exception/NoBracketingException.class</include>
+                    <include>org/apache/commons/math3/exception/NoDataException.class</include>
+                    <include>org/apache/commons/math3/exception/NonMonotonicSequenceException.class</include>
                     <include>org/apache/commons/math3/exception/NotANumberException.class</include>
                     <include>org/apache/commons/math3/exception/NotFiniteNumberException.class</include>
                     <include>org/apache/commons/math3/exception/NotPositiveException.class</include>
@@ -71,9 +73,11 @@
                     <include>org/apache/commons/math3/exception/MathIllegalNumberException.class</include>
                     <include>org/apache/commons/math3/exception/MathIllegalStateException.class</include>
                     <include>org/apache/commons/math3/exception/MathInternalError.class</include>
+                    <include>org/apache/commons/math3/exception/MathUnsupportedOperationException.class</include>
                     <include>org/apache/commons/math3/exception/MaxCountExceededException.class</include>
                     <include>org/apache/commons/math3/exception/OutOfRangeException.class</include>
                     <include>org/apache/commons/math3/exception/TooManyEvaluationsException.class</include>
+                    <include>org/apache/commons/math3/exception/ZeroException.class</include>
                     <include>org/apache/commons/math3/exception/util/ExceptionContextProvider.class</include>
                     <include>org/apache/commons/math3/exception/util/Localizable.class</include>
 
@@ -93,6 +97,19 @@
                     <include>org/apache/commons/math3/stat/descriptive/AbstractUnivariateStatistic.class</include>
                     <include>org/apache/commons/math3/stat/descriptive/StatisticalSummary.class</include>
                     <include>org/apache/commons/math3/stat/descriptive/rank/Percentile.class</include>
+                    <include>org/apache/commons/math3/stat/descriptive/rank/Percentile$1.class</include>
+                    <include>org/apache/commons/math3/stat/descriptive/rank/Percentile$EstimationType.class</include>
+                    <include>org/apache/commons/math3/stat/descriptive/rank/Percentile$EstimationType$1.class</include>
+                    <include>org/apache/commons/math3/stat/descriptive/rank/Percentile$EstimationType$2.class</include>
+                    <include>org/apache/commons/math3/stat/descriptive/rank/Percentile$EstimationType$3.class</include>
+                    <include>org/apache/commons/math3/stat/descriptive/rank/Percentile$EstimationType$4.class</include>
+                    <include>org/apache/commons/math3/stat/descriptive/rank/Percentile$EstimationType$5.class</include>
+                    <include>org/apache/commons/math3/stat/descriptive/rank/Percentile$EstimationType$6.class</include>
+                    <include>org/apache/commons/math3/stat/descriptive/rank/Percentile$EstimationType$7.class</include>
+                    <include>org/apache/commons/math3/stat/descriptive/rank/Percentile$EstimationType$8.class</include>
+                    <include>org/apache/commons/math3/stat/descriptive/rank/Percentile$EstimationType$9.class</include>
+                    <include>org/apache/commons/math3/stat/descriptive/rank/Percentile$EstimationType$10.class</include>
+                    <include>org/apache/commons/math3/stat/ranking/NaNStrategy.class</include>
 
                     <include>org/apache/commons/math3/util/ContinuedFraction.class</include>
                     <include>org/apache/commons/math3/util/FastMath.class</include>
@@ -103,9 +120,17 @@
                     <include>org/apache/commons/math3/util/Incrementor.class</include>
                     <include>org/apache/commons/math3/util/Incrementor$1.class</include>
                     <include>org/apache/commons/math3/util/Incrementor$MaxCountExceededCallback.class</include>
+                    <include>org/apache/commons/math3/util/IntegerSequence$Incrementor.class</include>
+                    <include>org/apache/commons/math3/util/IntegerSequence$Incrementor$1.class</include>
+                    <include>org/apache/commons/math3/util/IntegerSequence$Incrementor$MaxCountExceededCallback.class</include>
+                    <include>org/apache/commons/math3/util/KthSelector.class</include>
+                    <include>org/apache/commons/math3/util/MathArrays.class</include>
+                    <include>org/apache/commons/math3/util/MathArrays$1.class</include>
+                    <include>org/apache/commons/math3/util/MathArrays$2.class</include>
                     <include>org/apache/commons/math3/util/MathArrays$Function.class</include>
                     <include>org/apache/commons/math3/util/MathUtils.class</include>
-
+                    <include>org/apache/commons/math3/util/MedianOf3PivotingStrategy.class</include>
+                    <include>org/apache/commons/math3/util/PivotingStrategyInterface.class</include>
                     <include>org/apache/commons/math3/util/Precision.class</include>
 
                     <include>org/openjdk/jmh/**</include>
