@@ -214,9 +214,10 @@ public class MonteCarloTestCase {
     }
 
     void runDecodeIndex(ByteBuffer bb, Random r) {
-        TupleType tt = function.getInputs();
-        if(tt.size() > 0) {
-            int idx = r.nextInt(tt.size());
+        final TupleType tt = function.getInputs();
+        final int size = tt.size();
+        if (size > 0) {
+            int idx = r.nextInt(size);
             assertTrue(Objects.deepEquals(argsTuple.get(idx), tt.decode(bb, idx)));
         }
     }
