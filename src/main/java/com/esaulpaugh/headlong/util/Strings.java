@@ -38,7 +38,15 @@ public final class Strings {
     }
 
     public static String encode(ByteBuffer buffer) {
-        return encode(buffer.array());
+        final byte[] bytes;
+        if (buffer.isDirect()) {
+            buffer.position(0);
+            bytes = new byte[buffer.remaining()];
+            buffer.get(bytes);
+        } else {
+            bytes = buffer.array();
+        }
+        return encode(bytes);
     }
 
     public static String encode(byte[] bytes) {
