@@ -73,7 +73,7 @@ public final class ContractError implements ABIObject {
     }
 
     public static ContractError fromJsonObject(JsonObject error) {
-        return ABIJSON.parseError(error);
+        return ABIJSON.parseError(error, ArrayType.NO_FLAGS);
     }
 
     @Override

@@ -53,24 +53,35 @@ public final class Function implements ABIObject {
 
     private final String hashAlgorithm;
     private final byte[] selector = new byte[SELECTOR_LEN];
+    private final int flags;
 
     public Function(String signature) {
-        this(signature, signature.indexOf('('), TupleType.EMPTY);
+        this(signature, signature.indexOf('('), TupleType.EMPTY, ArrayType.NO_FLAGS);
     }
 
     public Function(String signature, String outputs) {
-        this(signature, signature.indexOf('('), outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY);
+        this(signature, outputs, ArrayType.NO_FLAGS);
     }
 
-    private Function(final String signature, final int nameLength, final TupleType outputs) {
+    private Function(String signature, String outputs, int flags) {
+        this(signature, signature.indexOf('('), outputs != null ? TupleType.parse(outputs, flags) : TupleType.EMPTY, flags);
+    }
+
+    private Function(final String signature, final int nameLength, final TupleType outputs, final int flags) {
         this(
                 TypeEnum.FUNCTION,
                 signature.substring(0, nameLength),
-                TupleType.parse(signature.substring(nameLength)),
+                TupleType.parse(signature.substring(nameLength), flags),
                 outputs,
                 null,
-                Function.newDefaultDigest()
+                Function.newDefaultDigest(),
+                flags
         );
+    }
+
+
+    public Function(TypeEnum type, String name, TupleType inputs, TupleType outputs, String stateMutability, MessageDigest messageDigest) {
+        this(type, name, inputs, outputs, stateMutability, messageDigest, ArrayType.NO_FLAGS);
     }
 
     /**
@@ -80,15 +91,17 @@ public final class Function implements ABIObject {
      * @param outputs       {@link TupleType} type describing this function's return types
      * @param stateMutability   "pure", "view", "payable" etc.
      * @param messageDigest hash function with which to generate the 4-byte selector
+     * @param flags options such as {@link ArrayType#FLAG_LEGACY} or {@link ArrayType#NO_FLAGS}
      * @throws IllegalArgumentException if the arguments do not specify a valid function
      */
-    public Function(TypeEnum type, String name, TupleType inputs, TupleType outputs, String stateMutability, MessageDigest messageDigest) {
+    public Function(TypeEnum type, String name, TupleType inputs, TupleType outputs, String stateMutability, MessageDigest messageDigest, int flags) {
         this.type = Objects.requireNonNull(type);
         this.name = name != null ? validateName(name) : null;
         this.inputTypes = Objects.requireNonNull(inputs);
         this.outputTypes = Objects.requireNonNull(outputs);
         this.stateMutability = stateMutability;
         this.hashAlgorithm = Objects.requireNonNull(messageDigest.getAlgorithm());
+        this.flags = flags;
         validateFunction();
         generateSelector(messageDigest);
     }
@@ -338,16 +351,24 @@ public final class Function implements ABIObject {
         return new Function(signature, outputs);
     }
 
+    public static Function parse(String signature, String outputs, int flags) {
+        return new Function(signature, outputs, flags);
+    }
+
     public static Function fromJson(String objectJson) {
-        return fromJsonObject(JsonUtils.parseObject(objectJson));
+        return fromJsonObject(JsonUtils.parseObject(objectJson), ArrayType.NO_FLAGS);
     }
 
-    public static Function fromJsonObject(JsonObject function) {
-        return fromJsonObject(function, Function.newDefaultDigest());
+    public static Function fromJson(String objectJson, int flags) {
+        return fromJsonObject(JsonUtils.parseObject(objectJson), flags);
     }
 
-    public static Function fromJsonObject(JsonObject function, MessageDigest digest) {
-        return ABIJSON.parseFunction(function, digest);
+    public static Function fromJsonObject(JsonObject function, int flags) {
+        return fromJsonObject(function, Function.newDefaultDigest(), flags);
+    }
+
+    public static Function fromJsonObject(JsonObject function, MessageDigest digest, int flags) {
+        return ABIJSON.parseFunction(function, digest, flags);
     }
 
     /**

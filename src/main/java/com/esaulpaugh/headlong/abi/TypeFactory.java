@@ -47,6 +47,7 @@ public final class TypeFactory {
     private static final int MAX_LENGTH_CHARS = 2_000;
 
     private static final Map<String, ABIType<?>> BASE_TYPE_MAP;
+    private static final Map<String, ABIType<?>> LEGACY_BASE_TYPE_MAP;
 
     static {
         BASE_TYPE_MAP = new HashMap<>(256);
@@ -66,7 +67,7 @@ public final class TypeFactory {
         BASE_TYPE_MAP.put("address", new AddressType());
         mapByteArray("function", FUNCTION_BYTE_LEN);
         mapByteArray("bytes", DYNAMIC_LENGTH);
-        BASE_TYPE_MAP.put("string", new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS));
+        BASE_TYPE_MAP.put("string", new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ArrayType.NO_FLAGS));
 
         BASE_TYPE_MAP.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
         BASE_TYPE_MAP.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
@@ -80,6 +81,16 @@ public final class TypeFactory {
         BASE_TYPE_MAP.put("ufixed", BASE_TYPE_MAP.get("ufixed128x18"));
 
         BASE_TYPE_MAP.put("bool", BooleanType.INSTANCE);
+
+        LEGACY_BASE_TYPE_MAP = new HashMap<>(256);
+        for (Map.Entry<String, ABIType<?>> e : BASE_TYPE_MAP.entrySet()) {
+            ABIType<?> value = e.getValue();
+            if (value instanceof ArrayType) {
+                final ArrayType<?, ?> at = (ArrayType<?, ?>) value;
+                value = newArrayType(at.canonicalType, at.getLength(), ArrayType.FLAG_LEGACY);
+            }
+            LEGACY_BASE_TYPE_MAP.put(e.getKey(), value);
+        }
     }
 
     static Map<String, ABIType<?>> getBaseTypeMap() {
@@ -99,45 +110,52 @@ public final class TypeFactory {
     }
 
     private static void mapByteArray(String type, int arrayLen) {
-        BASE_TYPE_MAP.put(type, new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class));
+        BASE_TYPE_MAP.put(type, newArrayType(type, arrayLen, ArrayType.NO_FLAGS));
+    }
+
+    private static ArrayType<?, ?> newArrayType(String type, int arrayLen, int flags) {
+        return new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class, flags);
     }
 
     @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T create(String rawType) {
-        return (T) build(rawType, null, null);
+        return create(rawType, ArrayType.NO_FLAGS);
+    }
+
+    public static <T extends ABIType<?>> T create(String rawType, int flags) {
+        return (T) build(rawType, null, null, flags);
     }
 
     @SuppressWarnings("unchecked")
     public static ABIType<Object> createNonCapturing(String rawType) {
-        return (ABIType<Object>) build(rawType, null, null);
+        return (ABIType<Object>) build(rawType, null, null, ArrayType.NO_FLAGS);
     }
 
     /** If you don't need any {@code elementNames}, use {@link TypeFactory#create(String)}. */
     public static TupleType createTupleTypeWithNames(String rawType, String... elementNames) {
-        return (TupleType) build(rawType, elementNames, null);
+        return (TupleType) build(rawType, elementNames, null, ArrayType.NO_FLAGS);
     }
 
-    static ABIType<?> build(String rawType, String[] elementNames, ABIType<?> baseType) {
+    static ABIType<?> build(String rawType, String[] elementNames, ABIType<?> baseType, int flags) {
         if(rawType.length() > MAX_LENGTH_CHARS) {
             throw new IllegalArgumentException("type length exceeds maximum: " + rawType.length() + " > " + MAX_LENGTH_CHARS);
         }
-        return buildUnchecked(rawType, elementNames, baseType);
+        return buildUnchecked(rawType, elementNames, baseType, flags);
     }
 
-    private static ABIType<?> buildUnchecked(final String rawType, final String[] elementNames, ABIType<?> baseType) {
+    private static ABIType<?> buildUnchecked(final String rawType, final String[] elementNames, ABIType<?> baseType, int flags) {
         try {
             final int lastCharIdx = rawType.length() - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array
-
                 final int secondToLastCharIdx = lastCharIdx - 1;
                 final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIdx);
 
-                final ABIType<?> elementType = buildUnchecked(rawType.substring(0, arrayOpenIndex), null, baseType);
+                final ABIType<?> elementType = buildUnchecked(rawType.substring(0, arrayOpenIndex), null, baseType, flags);
                 final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
                 final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType.substring(arrayOpenIndex + 1, lastCharIdx));
-                return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null);
+                return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null, flags);
             }
-            if(baseType != null || (baseType = resolveBaseType(rawType, elementNames)) != null) {
+            if(baseType != null || (baseType = resolveBaseType(rawType, elementNames, flags)) != null) {
                 return baseType;
             }
         } catch (StringIndexOutOfBoundsException ignored) { // e.g. type equals "" or "82]" or "[]" or "[1]"
@@ -161,11 +179,16 @@ public final class TypeFactory {
         throw new IllegalArgumentException("bad array length");
     }
 
-    private static ABIType<?> resolveBaseType(final String baseTypeStr, final String[] elementNames) {
+    private static ABIType<?> resolveBaseType(final String baseTypeStr, final String[] elementNames, final int flags) {
         if (baseTypeStr.charAt(0) == '(') {
-            return parseTupleType(baseTypeStr, elementNames);
+            return parseTupleType(baseTypeStr, elementNames, flags);
         }
-        final ABIType<?> ret = BASE_TYPE_MAP.get(baseTypeStr);
+        final ABIType<?> ret;
+        if ((flags & ArrayType.FLAG_LEGACY) != 0) {
+            ret = LEGACY_BASE_TYPE_MAP.get(baseTypeStr);
+        } else {
+            ret = BASE_TYPE_MAP.get(baseTypeStr);
+        }
         return ret != null ? ret : tryParseFixed(baseTypeStr);
     }
 
@@ -195,7 +218,7 @@ public final class TypeFactory {
         return c > '0' && c <= '9';
     }
 
-    private static TupleType parseTupleType(final String rawTypeStr, final String[] elementNames) { /* assumes that rawTypeStr.charAt(0) == '(' */
+    private static TupleType parseTupleType(final String rawTypeStr, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawTypeStr.length();
         if (len == 2 && rawTypeStr.equals(EMPTY_TUPLE_STRING)) return TupleType.EMPTY;
         final List<ABIType<?>> elements = new ArrayList<>();
@@ -211,7 +234,7 @@ public final class TypeFactory {
                 case '(': argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart + 1)); break;
                 default: argEnd = nextTerminator(rawTypeStr, argStart);
                 }
-                final ABIType<?> e = buildUnchecked(rawTypeStr.substring(argStart, argEnd), null, null);
+                final ABIType<?> e = buildUnchecked(rawTypeStr.substring(argStart, argEnd), null, null, flags);
                 canonicalBuilder.append(e.canonicalType).append(',');
                 dynamic |= e.dynamic;
                 elements.add(e);
