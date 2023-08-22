@@ -208,12 +208,17 @@ public abstract class ABIType<J> {
 
     @Override
     public final int hashCode() {
-        return canonicalType.hashCode();
+        return 31 * canonicalType.hashCode() + flags;
     }
 
     @Override
     public final boolean equals(Object o) {
-        return o == this || (o instanceof ABIType && ((ABIType<?>) o).canonicalType.equals(this.canonicalType));
+        if (o == this) return true;
+        if (o instanceof ABIType) {
+            final ABIType<?> other = (ABIType<?>) o;
+            return other.canonicalType.equals(this.canonicalType) && other.flags == this.flags;
+        }
+        return false;
     }
 
     @Override
