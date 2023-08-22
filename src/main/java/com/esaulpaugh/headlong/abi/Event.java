@@ -122,7 +122,7 @@ public final class Event implements ABIObject {
     }
 
     public static Event fromJsonObject(JsonObject event) {
-        return ABIJSON.parseEvent(event, ArrayType.NO_FLAGS);
+        return ABIJSON.parseEvent(event, ABIType.FLAGS_NONE);
     }
 
     @Override

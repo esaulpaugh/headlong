@@ -43,8 +43,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     static final Class<String[]> STRING_ARRAY_CLASS = String[].class;
 
     public static final int DYNAMIC_LENGTH = -1;
-    static final int NO_FLAGS = 0;
-    static final int FLAG_LEGACY = 1;
 
     private final boolean isString;
     private final E elementType;
@@ -54,13 +52,13 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private final boolean legacy;
 
     ArrayType(String canonicalType, Class<J> clazz, E elementType, int length, Class<?> arrayClass, int flags) {
-        super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic);
+        super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic, flags);
         this.isString = STRING_CLASS == clazz;
         this.elementType = elementType;
         this.length = length;
         this.arrayClass = arrayClass;
         this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticArrayHeadLength();
-        this.legacy = (flags & FLAG_LEGACY) != 0;
+        this.legacy = (flags & ABIType.FLAG_LEGACY_ARRAY) != 0;
     }
 
     int staticArrayHeadLength() {

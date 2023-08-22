@@ -948,7 +948,7 @@ public class DecodeTest {
                 "  ],\n" +
                 "  \"stateMutability\": \"nonpayable\",\n" +
                 "  \"type\": \"function\"\n" +
-                "}", ArrayType.FLAG_LEGACY);
+                "}", ABIType.FLAG_LEGACY_ARRAY);
 
         Tuple result = f.decodeCall(Strings.decode(hex));
         System.out.println(result);

@@ -67,7 +67,7 @@ public final class TypeFactory {
         BASE_TYPE_MAP.put("address", new AddressType());
         mapByteArray("function", FUNCTION_BYTE_LEN);
         mapByteArray("bytes", DYNAMIC_LENGTH);
-        BASE_TYPE_MAP.put("string", new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ArrayType.NO_FLAGS));
+        BASE_TYPE_MAP.put("string", new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAGS_NONE));
 
         BASE_TYPE_MAP.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
         BASE_TYPE_MAP.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
@@ -87,7 +87,7 @@ public final class TypeFactory {
             ABIType<?> value = e.getValue();
             if (value instanceof ArrayType) {
                 final ArrayType<?, ?> at = (ArrayType<?, ?>) value;
-                value = newArrayType(at.canonicalType, at.getLength(), ArrayType.FLAG_LEGACY);
+                value = newArrayType(at.canonicalType, at.getLength(), ABIType.FLAG_LEGACY_ARRAY);
             }
             LEGACY_BASE_TYPE_MAP.put(e.getKey(), value);
         }
@@ -110,7 +110,7 @@ public final class TypeFactory {
     }
 
     private static void mapByteArray(String type, int arrayLen) {
-        BASE_TYPE_MAP.put(type, newArrayType(type, arrayLen, ArrayType.NO_FLAGS));
+        BASE_TYPE_MAP.put(type, newArrayType(type, arrayLen, ABIType.FLAGS_NONE));
     }
 
     private static ArrayType<?, ?> newArrayType(String type, int arrayLen, int flags) {
@@ -119,7 +119,7 @@ public final class TypeFactory {
 
     @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T create(String rawType) {
-        return create(rawType, ArrayType.NO_FLAGS);
+        return create(rawType, ABIType.FLAGS_NONE);
     }
 
     public static <T extends ABIType<?>> T create(String rawType, int flags) {
@@ -128,12 +128,12 @@ public final class TypeFactory {
 
     @SuppressWarnings("unchecked")
     public static ABIType<Object> createNonCapturing(String rawType) {
-        return (ABIType<Object>) build(rawType, null, null, ArrayType.NO_FLAGS);
+        return (ABIType<Object>) build(rawType, null, null, ABIType.FLAGS_NONE);
     }
 
     /** If you don't need any {@code elementNames}, use {@link TypeFactory#create(String)}. */
     public static TupleType createTupleTypeWithNames(String rawType, String... elementNames) {
-        return (TupleType) build(rawType, elementNames, null, ArrayType.NO_FLAGS);
+        return (TupleType) build(rawType, elementNames, null, ABIType.FLAGS_NONE);
     }
 
     static ABIType<?> build(String rawType, String[] elementNames, ABIType<?> baseType, int flags) {
@@ -184,7 +184,7 @@ public final class TypeFactory {
             return parseTupleType(baseTypeStr, elementNames, flags);
         }
         final ABIType<?> ret;
-        if ((flags & ArrayType.FLAG_LEGACY) != 0) {
+        if ((flags & ABIType.FLAG_LEGACY_ARRAY) != 0) {
             ret = LEGACY_BASE_TYPE_MAP.get(baseTypeStr);
         } else {
             ret = BASE_TYPE_MAP.get(baseTypeStr);

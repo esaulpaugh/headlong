@@ -56,11 +56,11 @@ public final class Function implements ABIObject {
     private final int flags;
 
     public Function(String signature) {
-        this(signature, signature.indexOf('('), TupleType.EMPTY, ArrayType.NO_FLAGS);
+        this(signature, signature.indexOf('('), TupleType.EMPTY, ABIType.FLAGS_NONE);
     }
 
     public Function(String signature, String outputs) {
-        this(signature, outputs, ArrayType.NO_FLAGS);
+        this(signature, outputs, ABIType.FLAGS_NONE);
     }
 
     private Function(String signature, String outputs, int flags) {
@@ -81,7 +81,7 @@ public final class Function implements ABIObject {
 
 
     public Function(TypeEnum type, String name, TupleType inputs, TupleType outputs, String stateMutability, MessageDigest messageDigest) {
-        this(type, name, inputs, outputs, stateMutability, messageDigest, ArrayType.NO_FLAGS);
+        this(type, name, inputs, outputs, stateMutability, messageDigest, ABIType.FLAGS_NONE);
     }
 
     /**
@@ -91,7 +91,7 @@ public final class Function implements ABIObject {
      * @param outputs       {@link TupleType} type describing this function's return types
      * @param stateMutability   "pure", "view", "payable" etc.
      * @param messageDigest hash function with which to generate the 4-byte selector
-     * @param flags options such as {@link ArrayType#FLAG_LEGACY} or {@link ArrayType#NO_FLAGS}
+     * @param flags options such as {@link ABIType#FLAG_LEGACY_ARRAY} or {@link ABIType#FLAGS_NONE}
      * @throws IllegalArgumentException if the arguments do not specify a valid function
      */
     public Function(TypeEnum type, String name, TupleType inputs, TupleType outputs, String stateMutability, MessageDigest messageDigest, int flags) {
@@ -356,7 +356,7 @@ public final class Function implements ABIObject {
     }
 
     public static Function fromJson(String objectJson) {
-        return fromJsonObject(JsonUtils.parseObject(objectJson), ArrayType.NO_FLAGS);
+        return fromJsonObject(JsonUtils.parseObject(objectJson), ABIType.FLAGS_NONE);
     }
 
     public static Function fromJson(String objectJson, int flags) {

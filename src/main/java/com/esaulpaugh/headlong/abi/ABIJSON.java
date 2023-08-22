@@ -99,11 +99,7 @@ public final class ABIJSON {
     }
 
     public static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types) {
-        return parseElements(arrayJson, types, ArrayType.NO_FLAGS);
-    }
-
-    public static <T extends ABIObject> List<T> parseElementsLegacy(String arrayJson, Set<TypeEnum> types) {
-        return parseElements(arrayJson, types, ArrayType.FLAG_LEGACY);
+        return parseElements(arrayJson, types, ABIType.FLAGS_NONE);
     }
 
     private static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types, int flags) {
@@ -121,7 +117,7 @@ public final class ABIJSON {
         return selected;
     }
 
-    /** @see ABIObject#fromJsonObject(JsonObject) */
+    /** @see ABIObject#fromJsonObject(JsonObject,int) */
     static <T extends ABIObject> T parseABIObject(JsonObject object, int flags) {
         final TypeEnum typeEnum = TypeEnum.parse(getType(object));
         return parseABIObject(TypeEnum.parse(getType(object)), object, typeEnum.isFunction ? Function.newDefaultDigest() : null, flags);
