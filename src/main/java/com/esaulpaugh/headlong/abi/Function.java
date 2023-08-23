@@ -53,7 +53,6 @@ public final class Function implements ABIObject {
 
     private final String hashAlgorithm;
     private final byte[] selector = new byte[SELECTOR_LEN];
-    private final int flags;
 
     public Function(String signature) {
         this(signature, signature.indexOf('('), TupleType.EMPTY, ABIType.FLAGS_NONE);
@@ -101,7 +100,6 @@ public final class Function implements ABIObject {
         this.outputTypes = Objects.requireNonNull(outputs);
         this.stateMutability = stateMutability;
         this.hashAlgorithm = Objects.requireNonNull(messageDigest.getAlgorithm());
-        this.flags = flags;
         validateFunction();
         generateSelector(messageDigest);
     }
