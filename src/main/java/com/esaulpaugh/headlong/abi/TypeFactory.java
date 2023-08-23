@@ -117,11 +117,11 @@ public final class TypeFactory {
         return new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class, flags);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T create(String rawType) {
         return create(rawType, ABIType.FLAGS_NONE);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T create(String rawType, int flags) {
         return (T) build(rawType, null, null, flags);
     }
