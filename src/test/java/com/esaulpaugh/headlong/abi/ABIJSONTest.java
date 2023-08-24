@@ -279,7 +279,7 @@ public class ABIJSONTest {
     @Test
     public void testParseFunctionA() throws Throwable {
         final JsonObject object = JsonUtils.parseObject(FUNCTION_A_JSON);
-        final Function f = Function.fromJsonObject(object, ABIType.FLAGS_NONE);
+        final Function f = Function.fromJsonObject(ABIType.FLAGS_NONE, object);
         assertEquals(FUNCTION_A_JSON, f.toJson(true));
         final TupleType in = f.getInputs();
         final TupleType out = f.getOutputs();
@@ -338,7 +338,7 @@ public class ABIJSONTest {
     public void testParseFunction2() throws Throwable {
         final JsonObject function = new JsonObject();
 
-        TestUtils.CustomRunnable parse = () -> Function.fromJsonObject(function, ABIType.FLAGS_NONE);
+        TestUtils.CustomRunnable parse = () -> Function.fromJsonObject(ABIType.FLAGS_NONE, function);
 
         TestUtils.assertThrown(IllegalArgumentException.class, "type is \"function\"; functions of this type must define name", parse);
 

@@ -99,10 +99,10 @@ public final class ABIJSON {
     }
 
     public static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types) {
-        return parseElements(arrayJson, types, ABIType.FLAGS_NONE);
+        return parseElements(ABIType.FLAGS_NONE, arrayJson, types);
     }
 
-    public static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types, int flags) {
+    public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
         final List<T> selected = new ArrayList<>();
         final MessageDigest digest = Function.newDefaultDigest();
         for (final JsonElement e : parseArray(arrayJson)) {

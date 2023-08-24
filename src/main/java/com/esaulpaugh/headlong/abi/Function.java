@@ -347,18 +347,18 @@ public final class Function implements ABIObject {
     }
 
     public static Function fromJson(String objectJson) {
-        return fromJsonObject(JsonUtils.parseObject(objectJson), ABIType.FLAGS_NONE);
+        return fromJsonObject(ABIType.FLAGS_NONE, JsonUtils.parseObject(objectJson));
     }
 
-    public static Function fromJson(String objectJson, int flags) {
-        return fromJsonObject(JsonUtils.parseObject(objectJson), flags);
+    public static Function fromJson(int flags, String objectJson) {
+        return fromJsonObject(flags, JsonUtils.parseObject(objectJson));
     }
 
-    public static Function fromJsonObject(JsonObject function, int flags) {
-        return fromJsonObject(function, Function.newDefaultDigest(), flags);
+    public static Function fromJsonObject(int flags, JsonObject function) {
+        return fromJsonObject(flags, function, Function.newDefaultDigest());
     }
 
-    public static Function fromJsonObject(JsonObject function, MessageDigest digest, int flags) {
+    public static Function fromJsonObject(int flags, JsonObject function, MessageDigest digest) {
         return ABIJSON.parseFunction(function, digest, flags);
     }
 
