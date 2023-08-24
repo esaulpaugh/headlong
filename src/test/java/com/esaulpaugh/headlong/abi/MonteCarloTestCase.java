@@ -150,6 +150,10 @@ public class MonteCarloTestCase {
         return function.getName() + rawInputsStr;
     }
 
+    long getSeed() {
+        return seed;
+    }
+
     private static void testDeepCopy(Tuple values) {
         final Tuple copy = values.deepCopy();
         assertNotSame(values, copy);
