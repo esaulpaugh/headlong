@@ -105,18 +105,19 @@ public class BasicABICasesTest {
     private static TupleType wrap(ABIType<?>... elements) {
         final StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
+        int flags = -1;
         for (ABIType<?> e : elements) {
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
+            if (e.flags != flags && e.flags != ABIType.FLAGS_UNSET) {
+                if (flags == -1) {
+                    flags = e.flags;
+                } else {
+                    throw new IllegalArgumentException();
+                }
+            }
         }
-        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements, null, null);
-    }
-
-    private static String completeTupleTypeString(StringBuilder sb) {
-        final int len = sb.length();
-        return len != 1
-                ? sb.deleteCharAt(len - 1).append(')').toString() // replace trailing comma
-                : "()";
+        return new TupleType(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, null, null, flags);
     }
 
     @Test

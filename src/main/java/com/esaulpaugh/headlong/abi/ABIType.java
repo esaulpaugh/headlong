@@ -205,7 +205,7 @@ public abstract class ABIType<J> {
 
     public final J decodePacked(byte[] buffer) {
         return PackedDecoder.decode(
-                    new TupleType('(' + this.canonicalType + ')', dynamic, new ABIType[] { this }, null, null),
+                    new TupleType('(' + this.canonicalType + ')', dynamic, new ABIType[] { this }, null, null, this.flags),
                     buffer
                 ).get(0);
     }

@@ -899,58 +899,48 @@ public class DecodeTest {
         );
     }
 
-    @Test
-    public void testLegacyDecode() {
-        final String hex = "128acb08000000000000000000000000da3a20aad0c34fa742bd9813d45bbf67c787ae0b0000000000000000000000000000000000000000000000000000000000000000fffffffffffffffffffffffffffffffffffffffffdb9328a9ba5635a80846cdf000000000000000000000000fffd8963efd1fc6a506488495d951d5263988d2500000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000016200163301ee63fb29f863f2333bd4466acb46cd8323e620cd9dab5e666de980cecdc180cb31f296733e258700000246cd75645a9ca57f7b9320004bb0641100000000000000beebe34d7e60da18da3a20aad0c34fa742bd9813d45bbf67c787ae0b0000000000000000c34333f9af9c04005800132f152689a72b0a484b49a37fc85a862006f4138f1b000000000000000a31acd25057ef0000000000e17c19c8ee8c58656d0035189628a3e880960bd07f47bdfeb91de21a4c9b431a00000000000000000dbaac192510fe00940106450dee7fd2fb8e39061434babcfc05599a6fb8202a9d2ba41aba912316d16742f259412b681898db00000007f5368cf7b9ce855960c0004bb0641100000000000000475b46c4aab2f8109f5b65fa97d1fd596e9d111d483f90f69cd8102a000000000004ac23d1c23b55042949007118742f53651043cbab06602299064d59deb60a745300000000000000004e3fe9b51a631e";
-        final int len = hex.length();
-        final int roundedDown = len / 32 * 32;
-        System.out.println(len + " === " + roundedDown + " + " + (len - roundedDown));
-        final Function f = Function.fromJson("{\n" +
-                "  \"inputs\": [\n" +
-                "    {\n" +
-                "      \"internalType\": \"address\",\n" +
-                "      \"name\": \"recipient\",\n" +
-                "      \"type\": \"address\"\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"internalType\": \"bool\",\n" +
-                "      \"name\": \"zeroForOne\",\n" +
-                "      \"type\": \"bool\"\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"internalType\": \"int256\",\n" +
-                "      \"name\": \"amountSpecified\",\n" +
-                "      \"type\": \"int256\"\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"internalType\": \"uint160\",\n" +
-                "      \"name\": \"sqrtPriceLimitX96\",\n" +
-                "      \"type\": \"uint160\"\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"internalType\": \"bytes\",\n" +
-                "      \"name\": \"data\",\n" +
-                "      \"type\": \"bytes\"\n" +
-                "    }\n" +
-                "  ],\n" +
-                "  \"name\": \"swap\",\n" +
-                "  \"outputs\": [\n" +
-                "    {\n" +
-                "      \"internalType\": \"int256\",\n" +
-                "      \"name\": \"amount0\",\n" +
-                "      \"type\": \"int256\"\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"internalType\": \"int256\",\n" +
-                "      \"name\": \"amount1\",\n" +
-                "      \"type\": \"int256\"\n" +
-                "    }\n" +
-                "  ],\n" +
-                "  \"stateMutability\": \"nonpayable\",\n" +
-                "  \"type\": \"function\"\n" +
-                "}", ABIType.FLAG_LEGACY_ARRAY);
+    private static final String FN_JSON = "{\n" +
+            "  \"type\": \"function\",\n" +
+            "  \"name\": \"swap\",\n" +
+            "  \"inputs\": [\n" +
+            "    {\n" +
+            "      \"internalType\": \"bytes\",\n" +
+            "      \"name\": \"data\",\n" +
+            "      \"type\": \"bytes\"\n" +
+            "    }\n" +
+            "  ],\n" +
+            "  \"outputs\": [],\n" +
+            "  \"stateMutability\": \"nonpayable\"\n" +
+            "}";
 
-        Tuple result = f.decodeCall(Strings.decode(hex));
-        System.out.println(result);
+    @Test
+    public void testLegacyDecode() throws Throwable {
+        final Function f = Function.fromJson(FN_JSON, ABIType.FLAG_LEGACY_ARRAY);
+
+        checkLegacyFlags(f.getInputs());
+
+        final Tuple args = Tuple.singleton(new byte[] { 9, 100 });
+
+
+        final String hex = "627dd56a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020964";
+        final byte[] hexBytes = Strings.decode(hex);
+        assertEquals(args, f.getInputs().decode(Arrays.copyOfRange(hexBytes, Function.SELECTOR_LEN, hexBytes.length)));
+        assertEquals(args, f.decodeCall(hexBytes));
+    }
+
+    private void checkLegacyFlags(ABIType<?> t) throws Throwable {
+        if (t instanceof TupleType) {
+            assertEquals(ABIType.FLAG_LEGACY_ARRAY, t.flags);
+            for (ABIType<?> e : (TupleType) t) {
+                checkLegacyFlags(e);
+            }
+        } else if (t instanceof ArrayType) {
+            assertTrue(((ArrayType<?, ?>) t).legacy);
+            assertEquals(ABIType.FLAG_LEGACY_ARRAY, t.flags);
+            checkLegacyFlags(((ArrayType<?, ?>) t).getElementType());
+        } else {
+            assertEquals(ABIType.FLAGS_UNSET, t.flags);
+            assertThrown(UnsupportedOperationException.class, t::getFlags);
+        }
     }
 }

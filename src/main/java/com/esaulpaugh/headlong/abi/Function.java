@@ -73,14 +73,8 @@ public final class Function implements ABIObject {
                 TupleType.parse(signature.substring(nameLength), flags),
                 outputs,
                 null,
-                Function.newDefaultDigest(),
-                flags
+                Function.newDefaultDigest()
         );
-    }
-
-
-    public Function(TypeEnum type, String name, TupleType inputs, TupleType outputs, String stateMutability, MessageDigest messageDigest) {
-        this(type, name, inputs, outputs, stateMutability, messageDigest, ABIType.FLAGS_NONE);
     }
 
     /**
@@ -90,10 +84,9 @@ public final class Function implements ABIObject {
      * @param outputs       {@link TupleType} type describing this function's return types
      * @param stateMutability   "pure", "view", "payable" etc.
      * @param messageDigest hash function with which to generate the 4-byte selector
-     * @param flags options such as {@link ABIType#FLAG_LEGACY_ARRAY} or {@link ABIType#FLAGS_NONE}
      * @throws IllegalArgumentException if the arguments do not specify a valid function
      */
-    public Function(TypeEnum type, String name, TupleType inputs, TupleType outputs, String stateMutability, MessageDigest messageDigest, int flags) {
+    public Function(TypeEnum type, String name, TupleType inputs, TupleType outputs, String stateMutability, MessageDigest messageDigest) {
         this.type = Objects.requireNonNull(type);
         this.name = name != null ? validateName(name) : null;
         this.inputTypes = Objects.requireNonNull(inputs);

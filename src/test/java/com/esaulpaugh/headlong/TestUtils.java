@@ -454,4 +454,11 @@ public class TestUtils {
     public static String toPrettyPrint(JsonElement element) {
         return new GsonBuilder().setPrettyPrinting().create().toJson(element);
     }
+
+    public static String completeTupleTypeString(StringBuilder sb) {
+        final int len = sb.length();
+        return len != 1
+                ? sb.deleteCharAt(len - 1).append(')').toString() // replace trailing comma
+                : "()";
+    }
 }

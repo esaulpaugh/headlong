@@ -87,7 +87,7 @@ public final class TypeFactory {
             ABIType<?> value = e.getValue();
             if (value instanceof ArrayType) {
                 final ArrayType<?, ?> at = (ArrayType<?, ?>) value;
-                value = newArrayType(at.canonicalType, at.getLength(), ABIType.FLAG_LEGACY_ARRAY);
+                value = new ArrayType<ByteType, byte[]>(at.canonicalType, byte[].class, ByteType.INSTANCE, at.getLength(), byte[][].class, ABIType.FLAG_LEGACY_ARRAY);
             }
             LEGACY_BASE_TYPE_MAP.put(e.getKey(), value);
         }
@@ -110,11 +110,7 @@ public final class TypeFactory {
     }
 
     private static void mapByteArray(String type, int arrayLen) {
-        BASE_TYPE_MAP.put(type, newArrayType(type, arrayLen, ABIType.FLAGS_NONE));
-    }
-
-    private static ArrayType<?, ?> newArrayType(String type, int arrayLen, int flags) {
-        return new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class, flags);
+        BASE_TYPE_MAP.put(type, new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class, ABIType.FLAGS_NONE));
     }
 
     public static <T extends ABIType<?>> T create(String rawType) {
@@ -251,7 +247,8 @@ public final class TypeFactory {
                     dynamic,
                     elements.toArray(EMPTY_ARRAY),
                     elementNames,
-                    null
+                    null,
+                    flags
                 )
                 : null;
     }

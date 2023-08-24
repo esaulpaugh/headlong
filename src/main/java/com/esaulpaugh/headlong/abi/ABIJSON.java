@@ -218,7 +218,8 @@ public final class ABIJSON {
                 dynamic,
                 elements,
                 names,
-                internalTypes
+                internalTypes,
+                flags
         );
     }
 
