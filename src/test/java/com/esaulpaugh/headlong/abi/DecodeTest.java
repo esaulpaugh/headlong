@@ -916,8 +916,11 @@ public class DecodeTest {
     @Test
     public void testLegacyDecode() throws Throwable {
         final Function f = Function.fromJson(FN_JSON, ABIType.FLAG_LEGACY_DECODE);
-
+        final Function f2 = (Function) ABIJSON.parseElements("[" + FN_JSON + "]", ABIJSON.ALL, ABIType.FLAG_LEGACY_DECODE).get(0);
         checkLegacyFlags(f.getInputs());
+        checkLegacyFlags(f2.getInputs());
+
+        assertEquals(f, f2);
 
         final Tuple args = Tuple.singleton(new byte[] { 9, 100 });
         final ByteBuffer bb = f.encodeCall(args);
