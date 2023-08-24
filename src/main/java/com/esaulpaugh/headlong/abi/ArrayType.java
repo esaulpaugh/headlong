@@ -49,7 +49,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private final int length;
     private final Class<?> arrayClass;
     private final int headLength;
-    private final boolean legacy;
+    final boolean legacy;
 
     ArrayType(String canonicalType, Class<J> clazz, E elementType, int length, Class<?> arrayClass, int flags) {
         super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic, flags);
@@ -204,11 +204,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private int validateBytes(J arr) {
-        final int numBytes = checkLength(byteCount(arr), arr);
-        if (legacy) {
-            return numBytes;
-        }
-        return Integers.roundLengthUp(numBytes, UNIT_LENGTH_BYTES);
+        return Integers.roundLengthUp(checkLength(byteCount(arr), arr), UNIT_LENGTH_BYTES);
     }
 
     private int measureArrayElements(int n, IntUnaryOperator measurer) {
@@ -314,10 +310,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private void encodeBytes(byte[] arr, ByteBuffer dest) {
         encodeArrayLen(arr.length, dest);
         dest.put(arr);
-        if (!legacy) {
-            int rem = Integers.mod(arr.length, UNIT_LENGTH_BYTES);
-            Encoding.insert00Padding(rem != 0 ? UNIT_LENGTH_BYTES - rem : 0, dest);
-        }
+        int rem = Integers.mod(arr.length, UNIT_LENGTH_BYTES);
+        Encoding.insert00Padding(rem != 0 ? UNIT_LENGTH_BYTES - rem : 0, dest);
     }
 
     private void encodeInts(int[] arr, ByteBuffer dest) {
