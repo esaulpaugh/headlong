@@ -954,35 +954,43 @@ public class DecodeTest {
     }
 
     @Test
-    public void testString() {
+    public void testLegacyString() {
         final String json = "{\n" +
-                "\"constant\": false,\n" +
-                "\"inputs\": [\n" +
-                "  {\n" +
-                "    \"internalType\": \"string\",\n" +
-                "    \"name\": \"name\",\n" +
-                "    \"type\": \"string\"\n" +
-                "  }\n" +
-                "],\n" +
-                "\"name\": \"registerWithConfig\",\n" +
-                "\"outputs\": [],\n" +
-                "\"payable\": true,\n" +
-                "\"stateMutability\": \"payable\",\n" +
-                "\"type\": \"function\"\n" +
+                "  \"type\": \"function\",\n" +
+                "  \"name\": \"registerWithConfig\",\n" +
+                "  \"inputs\": [\n" +
+                "    {\n" +
+                "      \"internalType\": \"string\",\n" +
+                "      \"name\": \"name\",\n" +
+                "      \"type\": \"string\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"outputs\": [],\n" +
+                "  \"stateMutability\": \"payable\"\n" +
                 "}";
 
-        final Function f = Function.fromJson(ABIType.FLAG_LEGACY_DECODE, json);
-        final Function f2 = Function.fromJson(ABIType.FLAGS_NONE, json);
+        final Function leg = Function.fromJson(ABIType.FLAG_LEGACY_DECODE, json);
+        final Function norm = Function.fromJson(ABIType.FLAGS_NONE, json);
 
-        System.out.println(Strings.encode(f2.encodeCall(Tuple.singleton("jason566"))));
-
-        final String hex = "d7f3de49000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000085a67336f6e303136000000000000000000000000000000000000000000000000";
+        final String hex =  "d7f3de49" +
+                            "0000000000000000000000000000000000000000000000000000000000000020" +
+                            "0000000000000000000000000000000000000000000000000000000000000008" +
+                            "5a67336f6e303136000000000000000000000000000000000000000000000000";
         final byte[] bytes = Strings.decode(hex);
 
-        final Tuple dec0 = f.decodeCall(ByteBuffer.wrap(bytes));
-        final Tuple dec1 = f2.decodeCall(ByteBuffer.wrap(bytes));
+        final ByteBuffer input = ByteBuffer.wrap(bytes);
 
-        assertEquals("Zg3on016", dec0.get(0));
-        assertEquals("Zg3on016", dec1.get(0));
+        final String expected = "Zg3on016";
+
+        input.mark();
+        final Tuple dec0 = leg.decodeCall(input);
+        assertEquals(UnitType.UNIT_LENGTH_BYTES - expected.length(), input.remaining());
+        assertEquals(expected, dec0.get(0));
+
+        input.reset();
+        final Tuple dec1 = norm.decodeCall(input);
+        assertEquals(input.capacity(), input.position());
+        assertEquals(0, input.remaining());
+        assertEquals(expected, dec1.get(0));
     }
 }
