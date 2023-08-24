@@ -87,7 +87,7 @@ public final class TypeFactory {
             ABIType<?> value = e.getValue();
             if (value instanceof ArrayType) {
                 final ArrayType<?, ?> at = (ArrayType<?, ?>) value;
-                value = new ArrayType<ByteType, byte[]>(at.canonicalType, byte[].class, ByteType.INSTANCE, at.getLength(), byte[][].class, ABIType.FLAG_LEGACY_ARRAY);
+                value = new ArrayType<ByteType, byte[]>(at.canonicalType, byte[].class, ByteType.INSTANCE, at.getLength(), byte[][].class, ABIType.FLAG_LEGACY_DECODE);
             }
             LEGACY_BASE_TYPE_MAP.put(e.getKey(), value);
         }
@@ -180,7 +180,7 @@ public final class TypeFactory {
             return parseTupleType(baseTypeStr, elementNames, flags);
         }
         final ABIType<?> ret;
-        if ((flags & ABIType.FLAG_LEGACY_ARRAY) != 0) {
+        if ((flags & ABIType.FLAG_LEGACY_DECODE) != 0) {
             ret = LEGACY_BASE_TYPE_MAP.get(baseTypeStr);
         } else {
             ret = BASE_TYPE_MAP.get(baseTypeStr);

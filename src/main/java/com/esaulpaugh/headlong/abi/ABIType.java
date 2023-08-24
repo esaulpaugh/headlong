@@ -31,7 +31,7 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 public abstract class ABIType<J> {
 
     public static final int FLAGS_NONE = 0;
-    public static final int FLAG_LEGACY_ARRAY = 1;
+    public static final int FLAG_LEGACY_DECODE = 1;
     static final int FLAGS_UNSET = 0x80000000;
 
     public static final int TYPE_CODE_BOOLEAN = 0;

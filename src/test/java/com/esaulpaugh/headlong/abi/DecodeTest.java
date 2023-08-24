@@ -915,28 +915,30 @@ public class DecodeTest {
 
     @Test
     public void testLegacyDecode() throws Throwable {
-        final Function f = Function.fromJson(FN_JSON, ABIType.FLAG_LEGACY_ARRAY);
+        final Function f = Function.fromJson(FN_JSON, ABIType.FLAG_LEGACY_DECODE);
 
         checkLegacyFlags(f.getInputs());
 
         final Tuple args = Tuple.singleton(new byte[] { 9, 100 });
+        final ByteBuffer bb = f.encodeCall(args);
+        assertArrayEquals(Strings.decode("627dd56a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020964000000000000000000000000000000000000000000000000000000000000"), bb.array());
 
 
-        final String hex = "627dd56a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020964";
-        final byte[] hexBytes = Strings.decode(hex);
-        assertEquals(args, f.getInputs().decode(Arrays.copyOfRange(hexBytes, Function.SELECTOR_LEN, hexBytes.length)));
-        assertEquals(args, f.decodeCall(hexBytes));
+        final String unpaddedHex = "627dd56a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020964";
+        final byte[] unpadded = Strings.decode(unpaddedHex);
+        assertEquals(args, f.getInputs().decode(Arrays.copyOfRange(unpadded, Function.SELECTOR_LEN, unpadded.length)));
+        assertEquals(args, f.decodeCall(unpadded));
     }
 
     private void checkLegacyFlags(ABIType<?> t) throws Throwable {
         if (t instanceof TupleType) {
-            assertEquals(ABIType.FLAG_LEGACY_ARRAY, t.flags);
+            assertEquals(ABIType.FLAG_LEGACY_DECODE, t.flags);
             for (ABIType<?> e : (TupleType) t) {
                 checkLegacyFlags(e);
             }
         } else if (t instanceof ArrayType) {
-            assertTrue(((ArrayType<?, ?>) t).legacy);
-            assertEquals(ABIType.FLAG_LEGACY_ARRAY, t.flags);
+            assertTrue(((ArrayType<?, ?>) t).legacyDecode);
+            assertEquals(ABIType.FLAG_LEGACY_DECODE, t.flags);
             checkLegacyFlags(((ArrayType<?, ?>) t).getElementType());
         } else {
             assertEquals(ABIType.FLAGS_UNSET, t.flags);
