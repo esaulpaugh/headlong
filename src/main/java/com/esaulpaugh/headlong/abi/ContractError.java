@@ -72,8 +72,16 @@ public final class ContractError implements ABIObject {
         return fromJsonObject(JsonUtils.parseObject(errorJson));
     }
 
+    public static ContractError fromJson(int flags, String errorJson) {
+        return fromJsonObject(flags, JsonUtils.parseObject(errorJson));
+    }
+
     public static ContractError fromJsonObject(JsonObject error) {
         return ABIJSON.parseError(error, ABIType.FLAGS_NONE);
+    }
+
+    public static ContractError fromJsonObject(int flags, JsonObject error) {
+        return ABIJSON.parseError(error, flags);
     }
 
     @Override
