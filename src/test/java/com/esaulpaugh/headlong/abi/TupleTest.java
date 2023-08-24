@@ -333,7 +333,7 @@ public class TupleTest {
         for (ABIType<?> e : elements) {
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
-            if (e.flags != flags) {
+            if (e.flags != flags && e.flags != ABIType.FLAGS_UNSET) {
                 if (flags == -1) {
                     flags = e.flags;
                 } else {
