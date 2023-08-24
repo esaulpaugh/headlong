@@ -82,6 +82,11 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return isString;
     }
 
+    @Override
+    public int getFlags() {
+        return flags;
+    }
+
     @SuppressWarnings("unchecked")
     private ABIType<Object> elementTypeNonCapturing() {
         return (ABIType<Object>) elementType;

@@ -74,6 +74,10 @@ public abstract class ABIType<J> {
         return dynamic;
     }
 
+    public int getFlags() {
+        throw new UnsupportedOperationException();
+    }
+
     abstract Class<?> arrayClass();
 
     /**
