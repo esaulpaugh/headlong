@@ -121,8 +121,16 @@ public final class Event implements ABIObject {
         return fromJsonObject(JsonUtils.parseObject(eventJson));
     }
 
+    public static Event fromJson(int flags, String eventJson) {
+        return fromJsonObject(flags, JsonUtils.parseObject(eventJson));
+    }
+
     public static Event fromJsonObject(JsonObject event) {
         return ABIJSON.parseEvent(event, ABIType.FLAGS_NONE);
+    }
+
+    public static Event fromJsonObject(int flags, JsonObject event) {
+        return ABIJSON.parseEvent(event, flags);
     }
 
     @Override
