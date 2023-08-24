@@ -87,7 +87,11 @@ public final class TypeFactory {
             ABIType<?> value = e.getValue();
             if (value instanceof ArrayType) {
                 final ArrayType<?, ?> at = (ArrayType<?, ?>) value;
-                value = new ArrayType<ByteType, byte[]>(at.canonicalType, byte[].class, ByteType.INSTANCE, at.getLength(), byte[][].class, ABIType.FLAG_LEGACY_DECODE);
+                if (at.isString()) {
+                    value = new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAG_LEGACY_DECODE);
+                } else {
+                    value = new ArrayType<ByteType, byte[]>(at.canonicalType, byte[].class, ByteType.INSTANCE, at.getLength(), byte[][].class, ABIType.FLAG_LEGACY_DECODE);
+                }
             }
             LEGACY_BASE_TYPE_MAP.put(e.getKey(), value);
         }
