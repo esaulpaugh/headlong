@@ -63,7 +63,7 @@ public final class Function implements ABIObject {
     }
 
     private Function(int flags, String signature, String outputs) {
-        this(signature, signature.indexOf('('), outputs != null ? TupleType.parse(flags, outputs) : TupleType.EMPTY, flags);
+        this(signature, signature.indexOf('('), outputs != null ? TupleType.parse(flags, outputs) : TupleType.empty(flags), flags);
     }
 
     private Function(final String signature, final int nameLength, final TupleType outputs, final int flags) {
