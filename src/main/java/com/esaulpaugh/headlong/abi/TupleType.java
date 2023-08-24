@@ -406,8 +406,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return TypeFactory.create(rawTupleTypeString);
     }
 
-    public static TupleType parse(String rawTupleTypeString, int flags) {
-        return TypeFactory.create(rawTupleTypeString, flags);
+    public static TupleType parse(int flags, String rawTupleTypeString) {
+        return TypeFactory.create(flags, rawTupleTypeString);
     }
 
     public static TupleType of(String... typeStrings) {
@@ -416,5 +416,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             sb.append(str).append(',');
         }
         return parse(completeTupleTypeString(sb));
+    }
+
+    static TupleType empty(int flags) {
+        return flags == ABIType.FLAGS_NONE ? EMPTY : new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null, null, flags);
     }
 }

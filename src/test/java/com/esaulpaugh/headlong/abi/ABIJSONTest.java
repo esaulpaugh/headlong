@@ -264,15 +264,15 @@ public class ABIJSONTest {
         }
 
         for (String originalJson : jsons) {
-            ABIObject orig = ABIObject.fromJsonObject(JsonUtils.parseObject(originalJson), ABIType.FLAGS_NONE);
+            ABIObject orig = ABIObject.fromJsonObject(JsonUtils.parseObject(originalJson));
             String newJson = orig.toJson(false);
             assertNotEquals(originalJson, newJson);
 
-            ABIObject reconstructed = ABIObject.fromJsonObject(JsonUtils.parseObject(newJson), ABIType.FLAGS_NONE);
+            ABIObject reconstructed = ABIObject.fromJsonObject(JsonUtils.parseObject(newJson));
 
             assertEquals(orig, reconstructed);
             assertEquals(originalJson, reconstructed.toString());
-            assertEquals(orig, ABIObject.fromJson(newJson, ABIType.FLAGS_NONE));
+            assertEquals(orig, ABIObject.fromJson(newJson));
         }
     }
 
@@ -308,9 +308,9 @@ public class ABIJSONTest {
         printTupleType(in);
         printTupleType(out);
 
-        Function f2 = ABIObject.fromJson(FUNCTION_A_JSON, ABIType.FLAGS_NONE);
+        Function f2 = ABIObject.fromJson(FUNCTION_A_JSON);
         assertEquals(f, f2);
-        assertEquals(f, ABIObject.fromJsonObject(object, ABIType.FLAGS_NONE));
+        assertEquals(f, ABIObject.fromJsonObject(object));
 
         TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.ContractError", f2::asContractError);
         TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Event", f2::asEvent);
@@ -395,9 +395,9 @@ public class ABIJSONTest {
         String json = jsonObject.toString();
         assertEquals(expectedA, Event.fromJson(json));
 
-        Event e = ABIObject.fromJson(json, ABIType.FLAGS_NONE);
+        Event e = ABIObject.fromJson(json);
         assertEquals(expectedA, e);
-        assertEquals(e, ABIObject.fromJsonObject(jsonObject, ABIType.FLAGS_NONE));
+        assertEquals(e, ABIObject.fromJsonObject(jsonObject));
 
         TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.ContractError", e::asContractError);
         TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Function", e::asFunction);
@@ -541,7 +541,7 @@ public class ABIJSONTest {
         JsonObject object = JsonUtils.parseObject(ERROR_JSON);
 
         ContractError error0 = ABIJSON.parseErrors(ERROR_JSON_ARRAY).get(0);
-        ContractError error1 = ABIObject.fromJsonObject(object, ABIType.FLAGS_NONE);
+        ContractError error1 = ABIObject.fromJsonObject(object);
 
         testError(error0, ERROR_JSON, object);
         testError(error1, ERROR_JSON, object);
@@ -563,8 +563,8 @@ public class ABIJSONTest {
 
         testEqualNotSame(error, ContractError.fromJson(json));
         testEqualNotSame(error, ContractError.fromJsonObject(object));
-        testEqualNotSame(error, ABIObject.fromJson(json, ABIType.FLAGS_NONE));
-        testEqualNotSame(error, ABIObject.fromJsonObject(object, ABIType.FLAGS_NONE));
+        testEqualNotSame(error, ABIObject.fromJson(json));
+        testEqualNotSame(error, ABIObject.fromJsonObject(object));
 
         assertFalse(error.isFunction());
         assertFalse(error.isEvent());

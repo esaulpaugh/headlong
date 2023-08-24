@@ -117,7 +117,7 @@ public final class ABIJSON {
         return selected;
     }
 
-    /** @see ABIObject#fromJsonObject(JsonObject,int) */
+    /** @see ABIObject#fromJsonObject(int,JsonObject) */
     static <T extends ABIObject> T parseABIObject(JsonObject object, int flags) {
         final TypeEnum typeEnum = TypeEnum.parse(getType(object));
         return parseABIObject(TypeEnum.parse(getType(object)), object, typeEnum.isFunction ? Function.newDefaultDigest() : null, flags);
@@ -236,7 +236,7 @@ public final class ABIJSON {
             TupleType baseType = parseTupleType(object, COMPONENTS, flags);
             return TypeFactory.build(baseType.canonicalType + type.substring(TUPLE.length()), null, baseType, flags); // return ArrayType
         }
-        return TypeFactory.create(type, flags);
+        return TypeFactory.create(flags, type);
     }
 
     private static String getType(JsonObject obj) {

@@ -59,18 +59,18 @@ public final class Function implements ABIObject {
     }
 
     public Function(String signature, String outputs) {
-        this(signature, outputs, ABIType.FLAGS_NONE);
+        this(ABIType.FLAGS_NONE, signature, outputs);
     }
 
-    private Function(String signature, String outputs, int flags) {
-        this(signature, signature.indexOf('('), outputs != null ? TupleType.parse(outputs, flags) : TupleType.EMPTY, flags);
+    private Function(int flags, String signature, String outputs) {
+        this(signature, signature.indexOf('('), outputs != null ? TupleType.parse(flags, outputs) : TupleType.EMPTY, flags);
     }
 
     private Function(final String signature, final int nameLength, final TupleType outputs, final int flags) {
         this(
                 TypeEnum.FUNCTION,
                 signature.substring(0, nameLength),
-                TupleType.parse(signature.substring(nameLength), flags),
+                TupleType.parse(flags, signature.substring(nameLength)),
                 outputs,
                 null,
                 Function.newDefaultDigest()
@@ -342,8 +342,8 @@ public final class Function implements ABIObject {
         return new Function(signature, outputs);
     }
 
-    public static Function parse(String signature, String outputs, int flags) {
-        return new Function(signature, outputs, flags);
+    public static Function parse(int flags, String signature, String outputs) {
+        return new Function(flags, signature, outputs);
     }
 
     public static Function fromJson(String objectJson) {

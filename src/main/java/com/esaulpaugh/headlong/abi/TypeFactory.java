@@ -114,11 +114,11 @@ public final class TypeFactory {
     }
 
     public static <T extends ABIType<?>> T create(String rawType) {
-        return create(rawType, ABIType.FLAGS_NONE);
+        return create(ABIType.FLAGS_NONE, rawType);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends ABIType<?>> T create(String rawType, int flags) {
+    public static <T extends ABIType<?>> T create(int flags, String rawType) {
         return (T) build(rawType, null, null, flags);
     }
 
@@ -216,7 +216,7 @@ public final class TypeFactory {
 
     private static TupleType parseTupleType(final String rawTypeStr, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawTypeStr.length();
-        if (len == 2 && rawTypeStr.equals(EMPTY_TUPLE_STRING)) return TupleType.EMPTY;
+        if (len == 2 && rawTypeStr.equals(EMPTY_TUPLE_STRING)) return TupleType.empty(flags);
         final List<ABIType<?>> elements = new ArrayList<>();
         int argEnd = 1;
         final StringBuilder canonicalBuilder = new StringBuilder("(");

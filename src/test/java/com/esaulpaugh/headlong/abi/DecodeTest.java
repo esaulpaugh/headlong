@@ -926,6 +926,10 @@ public class DecodeTest {
         final ByteBuffer bb = f.encodeCall(args);
         assertArrayEquals(Strings.decode("627dd56a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020964000000000000000000000000000000000000000000000000000000000000"), bb.array());
 
+//        assertThrown(UnsupportedOperationException.class, () -> f.getInputs().encode(args));
+//        assertThrown(UnsupportedOperationException.class, () -> f.getInputs().encode(args, ByteBuffer.allocate(128)));
+//        assertThrown(UnsupportedOperationException.class, () -> f.encodeCall(args));
+//        assertThrown(UnsupportedOperationException.class, () -> f.encodeCallWithArgs((Object)new byte[0]));
 
         final String unpaddedHex = "627dd56a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020964";
         final byte[] unpadded = Strings.decode(unpaddedHex);
