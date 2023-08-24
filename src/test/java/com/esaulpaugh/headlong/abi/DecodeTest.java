@@ -27,6 +27,8 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.assertThrownWithAnySubstring;
@@ -916,9 +918,12 @@ public class DecodeTest {
     @Test
     public void testLegacyDecode() throws Throwable {
         final Function f = Function.fromJson(ABIType.FLAG_LEGACY_DECODE, FN_JSON);
-        final Function f2 = (Function) ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, "[" + FN_JSON + "]", ABIJSON.ALL).get(0);
         checkLegacyFlags(f.getInputs());
+        checkLegacyFlags(f.getOutputs());
+
+        final Function f2 = (Function) ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, "[" + FN_JSON + "]", ABIJSON.ALL).get(0);
         checkLegacyFlags(f2.getInputs());
+        checkLegacyFlags(f2.getOutputs());
 
         assertEquals(f, f2);
 
@@ -954,7 +959,7 @@ public class DecodeTest {
     }
 
     @Test
-    public void testLegacyString() {
+    public void testLegacyString() throws Throwable {
         final String json = "{\n" +
                 "  \"type\": \"function\",\n" +
                 "  \"name\": \"registerWithConfig\",\n" +
@@ -972,25 +977,36 @@ public class DecodeTest {
         final Function leg = Function.fromJson(ABIType.FLAG_LEGACY_DECODE, json);
         final Function norm = Function.fromJson(ABIType.FLAGS_NONE, json);
 
-        final String hex =  "d7f3de49" +
-                            "0000000000000000000000000000000000000000000000000000000000000020" +
-                            "0000000000000000000000000000000000000000000000000000000000000008" +
-                            "5a67336f6e303136000000000000000000000000000000000000000000000000";
-        final byte[] bytes = Strings.decode(hex);
+        checkLegacyFlags(leg.getInputs());
+        checkLegacyFlags(leg.getOutputs());
 
-        final ByteBuffer input = ByteBuffer.wrap(bytes);
+        class StringGenerator {
+            public String generateUtf8String(int len, Random r) {
+                return Strings.encode(TestUtils.randomBytes(len, r), Strings.UTF_8);
+            }
+        }
 
-        final String expected = "Zg3on016";
+        final Random r = ThreadLocalRandom.current();
 
-        input.mark();
-        final Tuple dec0 = leg.decodeCall(input);
-        assertEquals(UnitType.UNIT_LENGTH_BYTES - expected.length(), input.remaining());
-        assertEquals(expected, dec0.get(0));
+        for (int i = 0; i < 20; i++) {
 
-        input.reset();
-        final Tuple dec1 = norm.decodeCall(input);
-        assertEquals(input.capacity(), input.position());
-        assertEquals(0, input.remaining());
-        assertEquals(expected, dec1.get(0));
+            final String inputStr = new StringGenerator().generateUtf8String(r.nextInt(550), r);
+
+            final ByteBuffer encoded = norm.encodeCallWithArgs(inputStr);
+
+            encoded.mark();
+            final Tuple dec0 = leg.decodeCall(encoded);
+            final int strLen = Strings.decode(inputStr, Strings.UTF_8).length;
+            final int expectedRemainder = Integers.roundLengthUp(strLen, UnitType.UNIT_LENGTH_BYTES) - strLen;
+
+            assertEquals(expectedRemainder, encoded.remaining());
+            assertEquals(inputStr, dec0.get(0));
+
+            encoded.reset();
+            final Tuple dec1 = norm.decodeCall(encoded);
+            assertEquals(encoded.capacity(), encoded.position());
+            assertEquals(0, encoded.remaining());
+            assertEquals(inputStr, dec1.get(0));
+        }
     }
 }
