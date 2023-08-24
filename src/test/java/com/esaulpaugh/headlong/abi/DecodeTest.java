@@ -915,7 +915,7 @@ public class DecodeTest {
 
     @Test
     public void testLegacyDecode() throws Throwable {
-        final Function f = Function.fromJson(FN_JSON, ABIType.FLAG_LEGACY_DECODE);
+        final Function f = Function.fromJson(ABIType.FLAG_LEGACY_DECODE, FN_JSON);
         final Function f2 = (Function) ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, "[" + FN_JSON + "]", ABIJSON.ALL).get(0);
         checkLegacyFlags(f.getInputs());
         checkLegacyFlags(f2.getInputs());
