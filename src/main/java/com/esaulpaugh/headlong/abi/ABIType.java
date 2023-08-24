@@ -32,6 +32,7 @@ public abstract class ABIType<J> {
 
     public static final int FLAGS_NONE = 0;
     public static final int FLAG_LEGACY_ARRAY = 1;
+    static final int FLAGS_UNSET = 0x80000000;
 
     public static final int TYPE_CODE_BOOLEAN = 0;
     public static final int TYPE_CODE_BYTE = 1;
@@ -52,7 +53,7 @@ public abstract class ABIType<J> {
     final int flags;
 
     ABIType(String canonicalType, Class<J> clazz, boolean dynamic) {
-        this(canonicalType, clazz, dynamic, FLAGS_NONE);
+        this(canonicalType, clazz, dynamic, FLAGS_UNSET);
     }
 
     ABIType(String canonicalType, Class<J> clazz, boolean dynamic, int flags) {
@@ -74,7 +75,10 @@ public abstract class ABIType<J> {
         return dynamic;
     }
 
-    public int getFlags() {
+    public final int getFlags() {
+        if (this instanceof TupleType || this instanceof ArrayType) {
+            return flags;
+        }
         throw new UnsupportedOperationException();
     }
 
