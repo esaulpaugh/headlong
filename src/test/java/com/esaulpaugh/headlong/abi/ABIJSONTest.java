@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -312,8 +313,8 @@ public class ABIJSONTest {
         assertEquals(f, f2);
         assertEquals(f, ABIObject.fromJsonObject(ABIType.FLAGS_NONE, object));
 
-        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.ContractError", f2::asContractError);
-        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Event", f2::asEvent);
+        assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.ContractError", f2::asContractError);
+        assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Event", f2::asEvent);
 
         assertTrue(f.isFunction());
         assertFalse(f.isEvent());
@@ -340,15 +341,15 @@ public class ABIJSONTest {
 
         TestUtils.CustomRunnable parse = () -> Function.fromJsonObject(ABIType.FLAGS_NONE, function);
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "type is \"function\"; functions of this type must define name", parse);
+        assertThrown(IllegalArgumentException.class, "type is \"function\"; functions of this type must define name", parse);
 
         function.add("type", new JsonPrimitive("event"));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: \"event\"", parse);
+        assertThrown(IllegalArgumentException.class, "unexpected type: \"event\"", parse);
 
         function.add("type", new JsonPrimitive("function"));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "type is \"function\"; functions of this type must define name", parse);
+        assertThrown(IllegalArgumentException.class, "type is \"function\"; functions of this type must define name", parse);
 
         TestUtils.CustomRunnable[] updates = new TestUtils.CustomRunnable[] {
                 () -> function.add("type", new JsonPrimitive("fallback")),
@@ -373,15 +374,15 @@ public class ABIJSONTest {
 
         TestUtils.CustomRunnable runnable = () -> Event.fromJsonObject(ABIType.FLAGS_NONE, jsonObject);
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "unexpected type: null", runnable);
+        assertThrown(IllegalArgumentException.class, "unexpected type: null", runnable);
 
         jsonObject.add("type", new JsonPrimitive("event"));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "array \"inputs\" null or not found", runnable);
+        assertThrown(IllegalArgumentException.class, "array \"inputs\" null or not found", runnable);
 
         jsonObject.add("inputs", new JsonArray());
 
-        TestUtils.assertThrown(NullPointerException.class, runnable);
+        assertThrown(NullPointerException.class, runnable);
 
         jsonObject.add("name", new JsonPrimitive("a_name"));
 
@@ -399,8 +400,8 @@ public class ABIJSONTest {
         assertEquals(expectedA, e);
         assertEquals(e, ABIObject.fromJsonObject(ABIType.FLAGS_NONE, jsonObject));
 
-        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.ContractError", e::asContractError);
-        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Function", e::asFunction);
+        assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.ContractError", e::asContractError);
+        assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Function", e::asFunction);
 
         assertFalse(e.isFunction());
         assertTrue(e.isEvent());
@@ -548,8 +549,8 @@ public class ABIJSONTest {
 
         assertEquals(error0, error1);
 
-        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Function", error0::asFunction);
-        TestUtils.assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Event", error0::asEvent);
+        assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Function", error0::asFunction);
+        assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Event", error0::asEvent);
     }
 
     private static void testError(ContractError error, String json, JsonObject object) {
@@ -615,10 +616,10 @@ public class ABIJSONTest {
         assertEquals(1, errList.size());
         assertTrue(errList.stream().anyMatch(ABIObject::isContractError));
 
-        TestUtils.assertThrown(UnsupportedOperationException.class, () -> ABIJSON.FUNCTIONS.add(TypeEnum.EVENT));
-        TestUtils.assertThrown(UnsupportedOperationException.class, () -> ABIJSON.EVENTS.add(TypeEnum.CONSTRUCTOR));
-        TestUtils.assertThrown(UnsupportedOperationException.class, () -> ABIJSON.ERRORS.add(TypeEnum.EVENT));
-        TestUtils.assertThrown(UnsupportedOperationException.class, () -> ABIJSON.ALL.remove(TypeEnum.EVENT));
+        assertThrown(UnsupportedOperationException.class, () -> ABIJSON.FUNCTIONS.add(TypeEnum.EVENT));
+        assertThrown(UnsupportedOperationException.class, () -> ABIJSON.EVENTS.add(TypeEnum.CONSTRUCTOR));
+        assertThrown(UnsupportedOperationException.class, () -> ABIJSON.ERRORS.add(TypeEnum.EVENT));
+        assertThrown(UnsupportedOperationException.class, () -> ABIJSON.ALL.remove(TypeEnum.EVENT));
     }
 
     @Test
@@ -707,7 +708,7 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testInternalType() {
+    public void testInternalType() throws Throwable {
         String eventStr =
                 "{\n" +
                 "  \"type\": \"event\",\n" +
@@ -739,6 +740,9 @@ public class ABIJSONTest {
 
         TupleType nonIndexed = e.getNonIndexedParams();
         assertEquals("struct Thing[]", nonIndexed.getElementInternalType(0));
+
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> nonIndexed.getElementInternalType(-1));
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> nonIndexed.getElementInternalType(1));
 
         System.out.println(e);
 

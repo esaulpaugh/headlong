@@ -70,16 +70,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public String getElementName(int index) {
-        if(index < 0 || index >= size()) {
-            throw new IllegalArgumentException("index out of bounds: " + index);
-        }
         return elementNames == null ? null : elementNames[index];
     }
 
     public String getElementInternalType(int index) {
-        if(index < 0 || index >= size()) {
-            throw new IllegalArgumentException("index out of bounds: " + index);
-        }
         return elementInternalTypes == null ? null : elementInternalTypes[index];
     }
 

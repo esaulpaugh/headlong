@@ -290,10 +290,10 @@ public class TupleTest {
                 () -> TypeFactory.createTupleTypeWithNames("(bool,string)", new String[4]));
 
         TupleType tt = TypeFactory.createTupleTypeWithNames("(bool,string)", "a", "b");
-        assertThrown(IllegalArgumentException.class, "index out of bounds: -1", () -> tt.getElementName(-1));
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.getElementName(-1));
         assertEquals("a", tt.getElementName(0));
         assertEquals("b", tt.getElementName(1));
-        assertThrown(IllegalArgumentException.class, "index out of bounds: 2", () -> tt.getElementName(2));
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.getElementName(2));
     }
 
     private static void testNameOverwrite(String typeStr, String aName, String cName) {
