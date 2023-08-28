@@ -86,9 +86,10 @@
 //    testImplementation("org.bouncycastle:bcprov-jdk14:$bcVersion")
 //
 //    jmhImplementation("commons-codec:commons-codec:1.16.0")
+//}
 //
-//    jmh("org.openjdk.jmh:jmh-core:1.36")
-//    jmh("org.openjdk.jmh:jmh-generator-annprocess:1.36")
+//jmh {
+//    jmhVersion = "1.37"
 //}
 //
 //tasks.withType<AbstractArchiveTask>().configureEach {
