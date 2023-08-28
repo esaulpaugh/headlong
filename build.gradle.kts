@@ -89,7 +89,7 @@
 //}
 //
 //jmh {
-//    jmhVersion = "1.37"
+//    jmhVersion.set("1.37")
 //}
 //
 //tasks.withType<AbstractArchiveTask>().configureEach {
