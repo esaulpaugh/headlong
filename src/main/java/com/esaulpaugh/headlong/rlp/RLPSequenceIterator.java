@@ -15,10 +15,6 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
-import com.esaulpaugh.headlong.util.Strings;
-
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -59,44 +55,5 @@ class RLPSequenceIterator implements Iterator<RLPItem> {
             return item;
         }
         throw new NoSuchElementException();
-    }
-
-    static final class StreamRLPSequenceIterator extends RLPSequenceIterator {
-
-        final InputStream is;
-
-        StreamRLPSequenceIterator(InputStream is, RLPDecoder decoder) {
-            super(decoder, Strings.EMPTY_BYTE_ARRAY, 0); // make sure index == buffer.length
-            this.is = is;
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (next != null) {
-                return true;
-            }
-            try {
-                final int available = is.available();
-                if (available > 0) {
-                    int keptBytes = buffer.length - index;
-                    byte[] newBuffer = new byte[keptBytes + available];
-                    System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
-                    buffer = newBuffer;
-                    index = 0;
-                    int read = is.read(buffer, keptBytes, available);
-                    if (read != available) {
-                        throw new IOException("read failed: " + read + " != " + available);
-                    }
-                } else if (index >= buffer.length) {
-                    return false;
-                }
-                next = decoder.wrap(buffer, index);
-                return true;
-            } catch (ShortInputException e) {
-                return false;
-            } catch (IOException io) {
-                throw new RuntimeException(io);
-            }
-        }
     }
 }

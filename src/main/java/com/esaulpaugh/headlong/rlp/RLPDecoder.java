@@ -16,7 +16,9 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.util.Integers;
+import com.esaulpaugh.headlong.util.Strings;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -66,8 +68,37 @@ public final class RLPDecoder {
      * @param is    the stream of RLP data
      * @return  an iterator over the items in the stream
      */
-    public Iterator<RLPItem> sequenceIterator(InputStream is) {
-        return new RLPSequenceIterator.StreamRLPSequenceIterator(is, RLPDecoder.this);
+    public Iterator<RLPItem> sequenceIterator(final InputStream is) {
+        return new RLPSequenceIterator(RLPDecoder.this, Strings.EMPTY_BYTE_ARRAY, 0) { // make sure index == buffer.length
+            @Override
+            public boolean hasNext() {
+                if (next != null) {
+                    return true;
+                }
+                try {
+                    final int available = is.available();
+                    if (available > 0) {
+                        int keptBytes = buffer.length - index;
+                        byte[] newBuffer = new byte[keptBytes + available];
+                        System.arraycopy(buffer, index, newBuffer, 0, keptBytes);
+                        buffer = newBuffer;
+                        index = 0;
+                        int read = is.read(buffer, keptBytes, available);
+                        if (read != available) {
+                            throw new IOException("read failed: " + read + " != " + available);
+                        }
+                    } else if (index >= buffer.length) {
+                        return false;
+                    }
+                    next = decoder.wrap(buffer, index);
+                    return true;
+                } catch (ShortInputException e) {
+                    return false;
+                } catch (IOException io) {
+                    throw new RuntimeException(io);
+                }
+            }
+        };
     }
 
     public Stream<RLPItem> stream(byte[] bytes) {
