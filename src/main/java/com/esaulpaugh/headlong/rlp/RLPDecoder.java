@@ -150,24 +150,11 @@ public final class RLPDecoder {
     }
 
     public RLPString wrapString(byte[] buffer, int index) {
-        byte lead = buffer[index];
-        DataType type = DataType.type(lead);
-        switch (type.ordinal()) {
-        case ORDINAL_SINGLE_BYTE: return newSingleByte(buffer, index, buffer.length);
-        case ORDINAL_STRING_SHORT: return newStringShort(buffer, index, lead, buffer.length, lenient);
-        case ORDINAL_STRING_LONG: return newLongItem(lead, type, buffer, index, buffer.length, lenient);
-        default: throw new IllegalArgumentException("item is not a string");
-        }
+        return wrap(buffer, index);
     }
 
     public RLPList wrapList(byte[] buffer, int index) {
-        byte lead = buffer[index];
-        DataType type = DataType.type(lead);
-        switch (type.ordinal()) {
-        case ORDINAL_LIST_SHORT: return newListShort(buffer, index, lead, buffer.length);
-        case ORDINAL_LIST_LONG: return newLongItem(lead, type, buffer, index, buffer.length, lenient);
-        default: throw new IllegalArgumentException("item is not a list");
-        }
+        return wrap(buffer, index);
     }
 
     public RLPItem wrapItem(byte[] buffer, int index) {
@@ -191,7 +178,7 @@ public final class RLPDecoder {
         case ORDINAL_STRING_SHORT: return (T) newStringShort(buffer, index, lead, containerEnd, lenient);
         case ORDINAL_LIST_SHORT: return (T) newListShort(buffer, index, lead, containerEnd);
         case ORDINAL_STRING_LONG:
-        case ORDINAL_LIST_LONG: return newLongItem(lead, type, buffer, index, containerEnd, lenient);
+        case ORDINAL_LIST_LONG: return newLongItem(lead, type.offset, type.isString, buffer, index, containerEnd, lenient);
         default: throw new AssertionError();
         }
     }
@@ -219,8 +206,8 @@ public final class RLPDecoder {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends RLPItem> T newLongItem(byte lead, DataType type, byte[] buffer, int index, int containerEnd, boolean lenient) {
-        final int diff = lead - type.offset;
+    private static <T extends RLPItem> T newLongItem(byte lead, byte offset, boolean isString, byte[] buffer, int index, int containerEnd, boolean lenient) {
+        final int diff = lead - offset;
         final int lengthIndex = index + 1;
         final int dataIndex = requireInBounds((long) lengthIndex + diff, containerEnd, buffer, index);
         final long dataLength = Integers.getLong(buffer, lengthIndex, diff, lenient);
@@ -230,7 +217,7 @@ public final class RLPDecoder {
         }
         final int dataLen = requireInBounds(dataLength, containerEnd, buffer, index);
         final int endIndex = requireInBounds(dataIndex + dataLength, containerEnd, buffer, index);
-        return (T) (type.isString
+        return (T) (isString
                 ? new RLPString(buffer, index, dataIndex, dataLen, endIndex)
                 : new RLPList(buffer, index, dataIndex, dataLen, endIndex)
         );

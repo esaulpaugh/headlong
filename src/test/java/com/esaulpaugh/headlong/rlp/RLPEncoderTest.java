@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
+import static com.esaulpaugh.headlong.TestUtils.assertThrown;
+import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -69,7 +71,9 @@ public class RLPEncoderTest {
     }
 
     @Test
-    public void toList() {
+    public void toList() throws Throwable {
+
+        assertThrown(ClassCastException.class, () -> RLP_LENIENT.wrapList(new byte[] {(byte) 0x81, (byte) 0x80 }));
 
         RLPString item0 = RLPDecoder.RLP_STRICT.wrapString(new byte[] {(byte) 0x81, (byte) 0x80 });
         RLPString item1 = RLPDecoder.RLP_STRICT.wrapString(new byte[] {(byte) 0x7e });

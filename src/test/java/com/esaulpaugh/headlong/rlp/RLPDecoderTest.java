@@ -232,6 +232,7 @@ public class RLPDecoderTest {
 
     @Test
     public void testListIterable() throws Throwable {
+        assertThrown(ClassCastException.class, () -> RLP_LENIENT.wrapString(LONG_LIST_BYTES));
         final RLPList rlpList = RLP_STRICT.wrapList(LONG_LIST_BYTES);
         assertEquals(DataType.LIST_LONG, rlpList.type());
         assertFalse(rlpList.isString());
