@@ -395,7 +395,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                                                 ? arrayLen
                                                 : Integers.roundLengthUp(arrayLen, UNIT_LENGTH_BYTES);
         if(remaining < minByteLen) {
-//            System.err.println("not enough bytes remaining: " + remaining + " < " + minByteLen);
             throw new IllegalArgumentException("not enough bytes remaining: " + remaining + " < " + minByteLen);
         }
     }
