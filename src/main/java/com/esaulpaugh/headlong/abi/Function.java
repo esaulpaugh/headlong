@@ -55,18 +55,22 @@ public final class Function implements ABIObject {
     private final byte[] selector = new byte[SELECTOR_LEN];
 
     public Function(String signature) {
-        this(signature, signature.indexOf('('), TupleType.EMPTY);
+        this(signature, signature.indexOf('('), TupleType.EMPTY, ABIType.FLAGS_NONE);
     }
 
     public Function(String signature, String outputs) {
-        this(signature, signature.indexOf('('), outputs != null ? TupleType.parse(outputs) : TupleType.EMPTY);
+        this(ABIType.FLAGS_NONE, signature, outputs);
     }
 
-    private Function(final String signature, final int nameLength, final TupleType outputs) {
+    private Function(int flags, String signature, String outputs) {
+        this(signature, signature.indexOf('('), outputs != null ? TupleType.parse(flags, outputs) : TupleType.empty(flags), flags);
+    }
+
+    private Function(final String signature, final int nameLength, final TupleType outputs, final int flags) {
         this(
                 TypeEnum.FUNCTION,
                 signature.substring(0, nameLength),
-                TupleType.parse(signature.substring(nameLength)),
+                TupleType.parse(flags, signature.substring(nameLength)),
                 outputs,
                 null,
                 Function.newDefaultDigest()
@@ -338,16 +342,26 @@ public final class Function implements ABIObject {
         return new Function(signature, outputs);
     }
 
+    public static Function parse(int flags, String signature, String outputs) {
+        return new Function(flags, signature, outputs);
+    }
+
     public static Function fromJson(String objectJson) {
-        return fromJsonObject(JsonUtils.parseObject(objectJson));
+        return fromJsonObject(ABIType.FLAGS_NONE, JsonUtils.parseObject(objectJson));
     }
 
-    public static Function fromJsonObject(JsonObject function) {
-        return fromJsonObject(function, Function.newDefaultDigest());
+    /** @see ABIObject#fromJson(int, String) */
+    public static Function fromJson(int flags, String objectJson) {
+        return fromJsonObject(flags, JsonUtils.parseObject(objectJson));
     }
 
-    public static Function fromJsonObject(JsonObject function, MessageDigest digest) {
-        return ABIJSON.parseFunction(function, digest);
+    /** @see ABIObject#fromJsonObject(int, JsonObject) */
+    public static Function fromJsonObject(int flags, JsonObject function) {
+        return fromJsonObject(flags, function, Function.newDefaultDigest());
+    }
+
+    public static Function fromJsonObject(int flags, JsonObject function, MessageDigest digest) {
+        return ABIJSON.parseFunction(function, digest, flags);
     }
 
     /**

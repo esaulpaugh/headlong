@@ -99,6 +99,10 @@ public final class ABIJSON {
     }
 
     public static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types) {
+        return parseElements(ABIType.FLAGS_NONE, arrayJson, types);
+    }
+
+    public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
         final List<T> selected = new ArrayList<>();
         final MessageDigest digest = Function.newDefaultDigest();
         for (final JsonElement e : parseArray(arrayJson)) {
@@ -106,87 +110,87 @@ public final class ABIJSON {
                 final JsonObject object = e.getAsJsonObject();
                 final TypeEnum t = TypeEnum.parse(getType(object));
                 if(types.contains(t)) {
-                    selected.add(parseABIObject(t, object, digest));
+                    selected.add(parseABIObject(t, object, digest, flags));
                 }
             }
         }
         return selected;
     }
 
-    /** @see ABIObject#fromJsonObject(JsonObject) */
-    static <T extends ABIObject> T parseABIObject(JsonObject object) {
+    /** @see ABIObject#fromJsonObject(int,JsonObject) */
+    static <T extends ABIObject> T parseABIObject(JsonObject object, int flags) {
         final TypeEnum typeEnum = TypeEnum.parse(getType(object));
-        return parseABIObject(TypeEnum.parse(getType(object)), object, typeEnum.isFunction ? Function.newDefaultDigest() : null);
+        return parseABIObject(TypeEnum.parse(getType(object)), object, typeEnum.isFunction ? Function.newDefaultDigest() : null, flags);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends ABIObject> T parseABIObject(TypeEnum t, JsonObject object, MessageDigest digest) {
+    private static <T extends ABIObject> T parseABIObject(TypeEnum t, JsonObject object, MessageDigest digest, int flags) {
         switch (t.ordinal()) {
         case TypeEnum.ORDINAL_FUNCTION:
         case TypeEnum.ORDINAL_RECEIVE:
         case TypeEnum.ORDINAL_FALLBACK:
-        case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) parseFunctionUnchecked(t, object, digest);
-        case TypeEnum.ORDINAL_EVENT: return (T) parseEventUnchecked(object);
-        case TypeEnum.ORDINAL_ERROR: return (T) parseErrorUnchecked(object);
+        case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) parseFunctionUnchecked(t, object, digest, flags);
+        case TypeEnum.ORDINAL_EVENT: return (T) parseEventUnchecked(object, flags);
+        case TypeEnum.ORDINAL_ERROR: return (T) parseErrorUnchecked(object, flags);
         default: throw new AssertionError();
         }
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    static Function parseFunction(JsonObject function, MessageDigest digest) {
+    static Function parseFunction(JsonObject function, MessageDigest digest, int flags) {
         final TypeEnum t = TypeEnum.parse(getType(function));
         if (FUNCTIONS.contains(t)) {
-            return parseFunctionUnchecked(t, function, digest);
+            return parseFunctionUnchecked(t, function, digest, flags);
         }
         throw TypeEnum.unexpectedType(getType(function));
     }
 
-    static Event parseEvent(JsonObject event) {
+    static Event parseEvent(JsonObject event, int flags) {
         if(!EVENT.equals(getType(event))) {
             throw TypeEnum.unexpectedType(getType(event));
         }
-        return parseEventUnchecked(event);
+        return parseEventUnchecked(event, flags);
     }
 
-    static ContractError parseError(JsonObject error) {
+    static ContractError parseError(JsonObject error, int flags) {
         if(!ERROR.equals(getType(error))) {
             throw TypeEnum.unexpectedType(getType(error));
         }
-        return parseErrorUnchecked(error);
+        return parseErrorUnchecked(error, flags);
     }
 
-    private static Function parseFunctionUnchecked(TypeEnum type, JsonObject function, MessageDigest digest) {
+    private static Function parseFunctionUnchecked(TypeEnum type, JsonObject function, MessageDigest digest, int flags) {
         return new Function(
                 type,
                 getName(function),
-                parseTupleType(function, INPUTS),
-                parseTupleType(function, OUTPUTS),
+                parseTupleType(function, INPUTS, flags),
+                parseTupleType(function, OUTPUTS, flags),
                 getString(function, STATE_MUTABILITY),
                 digest
         );
     }
 
-    private static Event parseEventUnchecked(JsonObject event) {
+    private static Event parseEventUnchecked(JsonObject event, int flags) {
         final JsonArray inputs = getArray(event, INPUTS);
         if (inputs != null) {
             final boolean[] indexed = new boolean[inputs.size()];
             return new Event(
                     getName(event),
                     getBoolean(event, ANONYMOUS, false),
-                    parseTupleType(inputs, indexed),
+                    parseTupleType(inputs, indexed, flags),
                     indexed
             );
         }
         throw new IllegalArgumentException("array \"" + INPUTS + "\" null or not found");
     }
 
-    private static ContractError parseErrorUnchecked(JsonObject error) {
-        return new ContractError(getName(error), parseTupleType(error, INPUTS));
+    private static ContractError parseErrorUnchecked(JsonObject error, int flags) {
+        return new ContractError(getName(error), parseTupleType(error, INPUTS, flags));
     }
 
-    private static TupleType parseTupleType(final JsonArray array, final boolean[] indexed) {
+    private static TupleType parseTupleType(final JsonArray array, final boolean[] indexed, final int flags) {
         int size;
         if (array == null || (size = array.size()) <= 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
-            return TupleType.EMPTY;
+            return TupleType.empty(flags);
         }
         final ABIType<?>[] elements = new ABIType<?>[size];
         final String[] names = new String[size];
@@ -195,7 +199,7 @@ public final class ABIJSON {
         boolean dynamic = false;
         for (int i = 0; i < elements.length; i++) {
             final JsonObject inputObj = array.get(i).getAsJsonObject();
-            final ABIType<?> e = parseType(inputObj);
+            final ABIType<?> e = parseType(inputObj, flags);
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
             elements[i] = e;
@@ -214,24 +218,25 @@ public final class ABIJSON {
                 dynamic,
                 elements,
                 names,
-                internalTypes
+                internalTypes,
+                flags
         );
     }
 
-    private static TupleType parseTupleType(JsonObject object, String arrayKey) {
-        return parseTupleType(getArray(object, arrayKey), null);
+    private static TupleType parseTupleType(JsonObject object, String arrayKey, int flags) {
+        return parseTupleType(getArray(object, arrayKey), null, flags);
     }
 
-    private static ABIType<?> parseType(JsonObject object) {
+    private static ABIType<?> parseType(JsonObject object, int flags) {
         final String type = getType(object);
         if(type.startsWith(TUPLE)) {
             if(type.length() == TUPLE.length()) {
-                return parseTupleType(object, COMPONENTS);
+                return parseTupleType(object, COMPONENTS, flags);
             }
-            TupleType baseType = parseTupleType(object, COMPONENTS);
-            return TypeFactory.build(baseType.canonicalType + type.substring(TUPLE.length()), null, baseType); // return ArrayType
+            TupleType baseType = parseTupleType(object, COMPONENTS, flags);
+            return TypeFactory.build(baseType.canonicalType + type.substring(TUPLE.length()), null, baseType, flags); // return ArrayType
         }
-        return TypeFactory.create(type);
+        return TypeFactory.create(flags, type);
     }
 
     private static String getType(JsonObject obj) {

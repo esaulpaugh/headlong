@@ -32,7 +32,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     static final String EMPTY_TUPLE_STRING = "()";
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null, null);
+    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null, null, ABIType.FLAGS_NONE);
 
     final ABIType<?>[] elementTypes;
     final String[] elementNames;
@@ -41,8 +41,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     private final int headLength;
     private final int firstOffset;
 
-    TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String[] elementNames, String[] elementInternalTypes) {
-        super(canonicalType, Tuple.class, dynamic);
+    TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String[] elementNames, String[] elementInternalTypes, int flags) {
+        super(canonicalType, Tuple.class, dynamic, flags);
         this.elementTypes = elementTypes;
         this.elementNames = elementNames;
         this.elementInternalTypes = elementInternalTypes;
@@ -70,16 +70,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     public String getElementName(int index) {
-        if(index < 0 || index >= size()) {
-            throw new IllegalArgumentException("index out of bounds: " + index);
-        }
         return elementNames == null ? null : elementNames[index];
     }
 
     public String getElementInternalType(int index) {
-        if(index < 0 || index >= size()) {
-            throw new IllegalArgumentException("index out of bounds: " + index);
-        }
         return elementInternalTypes == null ? null : elementInternalTypes[index];
     }
 
@@ -243,7 +237,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 final int offset = offsets[i];
                 if (offset != 0) {
                     final int jump = start + offset;
-                    if (jump != bb.position()) {
+                    if (jump != bb.position()) { // && (this.flags & ABIType.FLAG_LEGACY_ARRAY) == 0
                         /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
                         bb.position(offset == -1 ? start : jump); // leniently jump to specified offset
                     }
@@ -388,7 +382,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     dynamic,
                     selected.toArray(EMPTY_ARRAY),
                     selectedNames == null ? null : selectedNames.toArray(EMPTY_STRING_ARRAY),
-                    selectedInternalTypes == null ? null : selectedInternalTypes.toArray(EMPTY_STRING_ARRAY)
+                    selectedInternalTypes == null ? null : selectedInternalTypes.toArray(EMPTY_STRING_ARRAY),
+                    this.flags
             );
         }
         throw new IllegalArgumentException("manifest.length != size(): " + manifest.length + " != " + size);
@@ -405,11 +400,19 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return TypeFactory.create(rawTupleTypeString);
     }
 
+    public static TupleType parse(int flags, String rawTupleTypeString) {
+        return TypeFactory.create(flags, rawTupleTypeString);
+    }
+
     public static TupleType of(String... typeStrings) {
         StringBuilder sb = new StringBuilder("(");
         for (String str : typeStrings) {
             sb.append(str).append(',');
         }
         return parse(completeTupleTypeString(sb));
+    }
+
+    static TupleType empty(int flags) {
+        return flags == ABIType.FLAGS_NONE ? EMPTY : new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null, null, flags);
     }
 }

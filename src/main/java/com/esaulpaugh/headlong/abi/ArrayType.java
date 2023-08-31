@@ -49,14 +49,16 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private final int length;
     private final Class<?> arrayClass;
     private final int headLength;
+    final boolean legacyDecode;
 
-    ArrayType(String canonicalType, Class<J> clazz, E elementType, int length, Class<?> arrayClass) {
-        super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic);
+    ArrayType(String canonicalType, Class<J> clazz, E elementType, int length, Class<?> arrayClass, int flags) {
+        super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic, flags);
         this.isString = STRING_CLASS == clazz;
         this.elementType = elementType;
         this.length = length;
         this.arrayClass = arrayClass;
         this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticArrayHeadLength();
+        this.legacyDecode = (flags & ABIType.FLAG_LEGACY_DECODE) != 0;
     }
 
     int staticArrayHeadLength() {
@@ -367,7 +369,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         checkNoDecodePossible(bb.remaining(), arrayLen);
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return (J) decodeBooleans(arrayLen, bb, unitBuffer);
-        case TYPE_CODE_BYTE: return (J) encodeIfString(decodeBytes(arrayLen, bb));
+        case TYPE_CODE_BYTE: return (J) encodeIfString(decodeBytes(arrayLen, bb, legacyDecode));
         case TYPE_CODE_INT: return (J) decodeInts(arrayLen, bb, (IntType) elementType, unitBuffer);
         case TYPE_CODE_LONG: return (J) decodeLongs(arrayLen, bb, (LongType) elementType, unitBuffer);
         case TYPE_CODE_BIG_INTEGER:
@@ -387,9 +389,11 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                                     ? headLength
                                     : elementType.dynamic
                                         ? arrayLen * OFFSET_LENGTH_BYTES
-                                        : elementType instanceof ByteType
-                                            ? Integers.roundLengthUp(arrayLen, UNIT_LENGTH_BYTES)
-                                            : arrayLen * elementType.headLength();
+                                        : !(elementType instanceof ByteType)
+                                            ? arrayLen * elementType.headLength()
+                                            : legacyDecode
+                                                ? arrayLen
+                                                : Integers.roundLengthUp(arrayLen, UNIT_LENGTH_BYTES);
         if(remaining < minByteLen) {
             throw new IllegalArgumentException("not enough bytes remaining: " + remaining + " < " + minByteLen);
         }
@@ -419,11 +423,11 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return booleans;
     }
 
-    private static byte[] decodeBytes(int len, ByteBuffer bb) {
+    private static byte[] decodeBytes(int len, ByteBuffer bb, boolean legacyDecode) {
         byte[] data = new byte[len];
         bb.get(data);
         int mod = Integers.mod(len, UNIT_LENGTH_BYTES);
-        if(mod != 0) {
+        if(mod != 0 && !legacyDecode) {
             byte[] padding = new byte[UNIT_LENGTH_BYTES - mod];
             bb.get(padding);
             for (byte b : padding) {

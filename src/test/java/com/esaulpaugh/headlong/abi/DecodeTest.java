@@ -27,6 +27,8 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.assertThrownWithAnySubstring;
@@ -897,5 +899,114 @@ public class DecodeTest {
                         )
                 )
         );
+    }
+
+    private static final String FN_JSON = "{\n" +
+            "  \"type\": \"function\",\n" +
+            "  \"name\": \"swap\",\n" +
+            "  \"inputs\": [\n" +
+            "    {\n" +
+            "      \"internalType\": \"bytes\",\n" +
+            "      \"name\": \"data\",\n" +
+            "      \"type\": \"bytes\"\n" +
+            "    }\n" +
+            "  ],\n" +
+            "  \"outputs\": [],\n" +
+            "  \"stateMutability\": \"nonpayable\"\n" +
+            "}";
+
+    @Test
+    public void testLegacyDecode() throws Throwable {
+        final Function f = Function.fromJson(ABIType.FLAG_LEGACY_DECODE, FN_JSON);
+        checkLegacyFlags(f.getInputs());
+        checkLegacyFlags(f.getOutputs());
+
+        final Function f2 = (Function) ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, "[" + FN_JSON + "]", ABIJSON.ALL).get(0);
+        checkLegacyFlags(f2.getInputs());
+        checkLegacyFlags(f2.getOutputs());
+
+        assertEquals(f, f2);
+
+        final Tuple args = Tuple.singleton(new byte[] { 9, 100 });
+        final ByteBuffer bb = f.encodeCall(args);
+        assertArrayEquals(Strings.decode("627dd56a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020964000000000000000000000000000000000000000000000000000000000000"), bb.array());
+
+//        assertThrown(UnsupportedOperationException.class, () -> f.getInputs().encode(args));
+//        assertThrown(UnsupportedOperationException.class, () -> f.getInputs().encode(args, ByteBuffer.allocate(128)));
+//        assertThrown(UnsupportedOperationException.class, () -> f.encodeCall(args));
+//        assertThrown(UnsupportedOperationException.class, () -> f.encodeCallWithArgs((Object)new byte[0]));
+
+        final String unpaddedHex = "627dd56a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020964";
+        final byte[] unpadded = Strings.decode(unpaddedHex);
+        assertEquals(args, f.getInputs().decode(Arrays.copyOfRange(unpadded, Function.SELECTOR_LEN, unpadded.length)));
+        assertEquals(args, f.decodeCall(unpadded));
+    }
+
+    private void checkLegacyFlags(ABIType<?> t) throws Throwable {
+        if (t instanceof TupleType) {
+            assertEquals(ABIType.FLAG_LEGACY_DECODE, t.flags);
+            for (ABIType<?> e : (TupleType) t) {
+                checkLegacyFlags(e);
+            }
+        } else if (t instanceof ArrayType) {
+            assertTrue(((ArrayType<?, ?>) t).legacyDecode);
+            assertEquals(ABIType.FLAG_LEGACY_DECODE, t.flags);
+            checkLegacyFlags(((ArrayType<?, ?>) t).getElementType());
+        } else {
+            assertEquals(ABIType.FLAGS_UNSET, t.flags);
+            assertThrown(UnsupportedOperationException.class, t::getFlags);
+        }
+    }
+
+    @Test
+    public void testLegacyString() throws Throwable {
+        final String json = "{\n" +
+                "  \"type\": \"function\",\n" +
+                "  \"name\": \"registerWithConfig\",\n" +
+                "  \"inputs\": [\n" +
+                "    {\n" +
+                "      \"internalType\": \"string\",\n" +
+                "      \"name\": \"name\",\n" +
+                "      \"type\": \"string\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"outputs\": [],\n" +
+                "  \"stateMutability\": \"payable\"\n" +
+                "}";
+
+        final Function leg = Function.fromJson(ABIType.FLAG_LEGACY_DECODE, json);
+        final Function norm = Function.fromJson(ABIType.FLAGS_NONE, json);
+
+        checkLegacyFlags(leg.getInputs());
+        checkLegacyFlags(leg.getOutputs());
+
+        class StringGenerator {
+            public String generateUtf8String(int len, Random r) {
+                return Strings.encode(TestUtils.randomBytes(len, r), Strings.UTF_8);
+            }
+        }
+
+        final Random r = ThreadLocalRandom.current();
+
+        for (int i = 0; i < 20; i++) {
+
+            final String inputStr = new StringGenerator().generateUtf8String(r.nextInt(550), r);
+
+            final ByteBuffer encoded = norm.encodeCallWithArgs(inputStr);
+
+            encoded.mark();
+            final Tuple dec0 = leg.decodeCall(encoded);
+            final int strLen = Strings.decode(inputStr, Strings.UTF_8).length;
+            final int expectedRemainder = Integers.roundLengthUp(strLen, UnitType.UNIT_LENGTH_BYTES) - strLen;
+
+            assertEquals(expectedRemainder, encoded.remaining());
+            assertEquals(inputStr, dec0.get(0));
+
+            encoded.reset();
+            final Tuple dec1 = norm.decodeCall(encoded);
+            assertEquals(encoded.capacity(), encoded.position());
+            assertEquals(0, encoded.remaining());
+            assertEquals(inputStr, dec1.get(0));
+        }
     }
 }

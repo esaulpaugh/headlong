@@ -290,10 +290,10 @@ public class TupleTest {
                 () -> TypeFactory.createTupleTypeWithNames("(bool,string)", new String[4]));
 
         TupleType tt = TypeFactory.createTupleTypeWithNames("(bool,string)", "a", "b");
-        assertThrown(IllegalArgumentException.class, "index out of bounds: -1", () -> tt.getElementName(-1));
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.getElementName(-1));
         assertEquals("a", tt.getElementName(0));
         assertEquals("b", tt.getElementName(1));
-        assertThrown(IllegalArgumentException.class, "index out of bounds: 2", () -> tt.getElementName(2));
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.getElementName(2));
     }
 
     private static void testNameOverwrite(String typeStr, String aName, String cName) {
@@ -329,18 +329,19 @@ public class TupleTest {
     private static TupleType wrap(String[] elementNames, ABIType<?>... elements) {
         final StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
+        int flags = -1;
         for (ABIType<?> e : elements) {
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
+            if (e.flags != flags && e.flags != ABIType.FLAGS_UNSET) {
+                if (flags == -1) {
+                    flags = e.flags;
+                } else {
+                    throw new IllegalArgumentException();
+                }
+            }
         }
-        return new TupleType(completeTupleTypeString(canonicalBuilder), dynamic, elements, elementNames, null);
-    }
-
-    private static String completeTupleTypeString(StringBuilder sb) {
-        final int len = sb.length();
-        return len != 1
-                ? sb.deleteCharAt(len - 1).append(')').toString() // replace trailing comma
-                : "()";
+        return new TupleType(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, elementNames, null, flags);
     }
 
     @Test

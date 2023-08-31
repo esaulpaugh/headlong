@@ -30,6 +30,7 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -189,5 +190,40 @@ public class EqualsTest {
         BigInteger[] decoded = dec.get(0);
 
         assertArrayEquals(unsigneds, decoded);
+    }
+
+    @Test
+    public void testFlagsEquals() {
+        final String typeString = "(bytes[4][],bytes30[],string[])";
+        final TupleType tt_a = TupleType.parse(typeString);
+        final TupleType tt_b = TupleType.parse(ABIType.FLAGS_NONE, typeString);
+        final TupleType tt_c = TupleType.parse(ABIType.FLAG_LEGACY_DECODE, typeString);
+
+        assertEquals(tt_a, tt_b);
+        assertNotEquals(tt_a, tt_c);
+
+        assertEquals(TypeFactory.create(typeString), TypeFactory.create(ABIType.FLAGS_NONE, typeString));
+        assertNotEquals(TypeFactory.create(typeString), TypeFactory.create(ABIType.FLAG_LEGACY_DECODE, typeString));
+
+        assertEquals(TypeFactory.create(typeString), TypeFactory.create(ABIType.FLAGS_NONE, typeString));
+        assertNotEquals(TypeFactory.create(typeString), TypeFactory.create(ABIType.FLAG_LEGACY_DECODE, typeString));
+
+        assertEquals(
+                Function.parse(typeString),
+                Function.parse(ABIType.FLAGS_NONE, typeString, "()")
+        );
+        assertNotEquals(
+                Function.parse(typeString),
+                Function.parse(ABIType.FLAG_LEGACY_DECODE, typeString, "()")
+        );
+
+        assertEquals(
+                new Event("lo", false, tt_a, false, false, false),
+                Event.create("lo", tt_b, false, false, false)
+        );
+        assertNotEquals(
+                new Event("lo", false, tt_a, false, false, false),
+                Event.create("lo", tt_c, false, false, false)
+        );
     }
 }

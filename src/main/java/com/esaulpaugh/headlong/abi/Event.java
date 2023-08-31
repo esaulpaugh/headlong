@@ -118,11 +118,17 @@ public final class Event implements ABIObject {
     }
 
     public static Event fromJson(String eventJson) {
-        return fromJsonObject(JsonUtils.parseObject(eventJson));
+        return fromJsonObject(ABIType.FLAGS_NONE, JsonUtils.parseObject(eventJson));
     }
 
-    public static Event fromJsonObject(JsonObject event) {
-        return ABIJSON.parseEvent(event);
+    /** @see ABIObject#fromJson(int, String) */
+    public static Event fromJson(int flags, String eventJson) {
+        return fromJsonObject(flags, JsonUtils.parseObject(eventJson));
+    }
+
+    /** @see ABIObject#fromJsonObject(int, JsonObject) */
+    public static Event fromJsonObject(int flags, JsonObject event) {
+        return ABIJSON.parseEvent(event, flags);
     }
 
     @Override

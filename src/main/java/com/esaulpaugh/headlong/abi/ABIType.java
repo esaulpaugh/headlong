@@ -30,6 +30,14 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
  */
 public abstract class ABIType<J> {
 
+    public static final int FLAGS_NONE = 0;
+    /**
+     * Experimental flag which enables an incompatible decode mode. Strongly consider using {@link #FLAGS_NONE} instead.
+     * Behavior is subject to change or removal in future versions.
+     */
+    public static final int FLAG_LEGACY_DECODE = 1;
+    static final int FLAGS_UNSET = 0x80000000;
+
     public static final int TYPE_CODE_BOOLEAN = 0;
     public static final int TYPE_CODE_BYTE = 1;
     public static final int TYPE_CODE_INT = 2;
@@ -46,11 +54,17 @@ public abstract class ABIType<J> {
     final String canonicalType;
     final Class<J> clazz;
     final boolean dynamic;
+    final int flags;
 
     ABIType(String canonicalType, Class<J> clazz, boolean dynamic) {
+        this(canonicalType, clazz, dynamic, FLAGS_UNSET);
+    }
+
+    ABIType(String canonicalType, Class<J> clazz, boolean dynamic, int flags) {
         this.canonicalType = canonicalType; // .intern() to save memory and allow == comparison?
         this.clazz = clazz;
         this.dynamic = dynamic;
+        this.flags = flags;
     }
 
     public final String getCanonicalType() {
@@ -63,6 +77,13 @@ public abstract class ABIType<J> {
 
     public final boolean isDynamic() {
         return dynamic;
+    }
+
+    public final int getFlags() {
+        if (this instanceof TupleType || this instanceof ArrayType) {
+            return flags;
+        }
+        throw new UnsupportedOperationException();
     }
 
     abstract Class<?> arrayClass();
@@ -188,7 +209,7 @@ public abstract class ABIType<J> {
 
     public final J decodePacked(byte[] buffer) {
         return PackedDecoder.decode(
-                    new TupleType('(' + this.canonicalType + ')', dynamic, new ABIType[] { this }, null, null),
+                    new TupleType('(' + this.canonicalType + ')', dynamic, new ABIType[] { this }, null, null, this.flags),
                     buffer
                 ).get(0);
     }
@@ -199,12 +220,17 @@ public abstract class ABIType<J> {
 
     @Override
     public final int hashCode() {
-        return canonicalType.hashCode();
+        return 31 * canonicalType.hashCode() + flags;
     }
 
     @Override
     public final boolean equals(Object o) {
-        return o == this || (o instanceof ABIType && ((ABIType<?>) o).canonicalType.equals(this.canonicalType));
+        if (o == this) return true;
+        if (o instanceof ABIType) {
+            final ABIType<?> other = (ABIType<?>) o;
+            return other.canonicalType.equals(this.canonicalType) && other.flags == this.flags;
+        }
+        return false;
     }
 
     @Override
