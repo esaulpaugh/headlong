@@ -114,7 +114,7 @@ public class MonteCarloTest {
         return x;
     }
 
-    private static final int N = 32_000;
+    private static final long N = 32_000L;
     private static final int MAX_TUPLE_DEPTH = 4;
     private static final int MAX_TUPLE_LEN = 3;
     private static final int MAX_ARRAY_DEPTH = 3;
@@ -128,9 +128,9 @@ public class MonteCarloTest {
 
         final int parallelism = Runtime.getRuntime().availableProcessors();
         final GambleGambleRunnable[] runnables = new GambleGambleRunnable[parallelism];
-        final int workPerProcessor = N / parallelism;
+        final int workPerProcessor = (int) (N / parallelism);
         final ExecutorService pool = Executors.newFixedThreadPool(parallelism);
-        final int totalWork = workPerProcessor * parallelism;
+        final long totalWork = workPerProcessor * (long) parallelism;
         final String initialConditions = "(" + masterSeed + "L," + limits.maxTupleDepth + ',' + limits.maxTupleLength + ',' + limits.maxArrayDepth + ',' + limits.maxArrayLength + ")";
         System.out.println("Running\t\t" + totalWork + "\t" + initialConditions + " ...");
         for (int i = 0; i < runnables.length; i++) {
