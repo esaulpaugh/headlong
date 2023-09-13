@@ -114,11 +114,12 @@ public class MonteCarloTest {
         return x;
     }
 
-    private static final long N = 32_000L;
+    private static final long TARGET_ITERATIONS = 128_000L;
     private static final int MAX_TUPLE_DEPTH = 4;
-    private static final int MAX_TUPLE_LEN = 3;
+    private static final int MAX_TUPLE_LEN = 4;
     private static final int MAX_ARRAY_DEPTH = 3;
-    private static final int MAX_ARRAY_LEN = 4;
+    private static final int MAX_ARRAY_LEN = 3;
+    private static final long TIMEOUT_SECONDS = 600L;
 
     @Test
     public void gambleGamble() throws InterruptedException, TimeoutException {
@@ -128,16 +129,15 @@ public class MonteCarloTest {
 
         final int parallelism = Runtime.getRuntime().availableProcessors();
         final GambleGambleRunnable[] runnables = new GambleGambleRunnable[parallelism];
-        final int workPerProcessor = (int) (N / parallelism);
+        final int workPerProcessor = (int) (TARGET_ITERATIONS / parallelism);
         final ExecutorService pool = Executors.newFixedThreadPool(parallelism);
         final long totalWork = workPerProcessor * (long) parallelism;
         final String initialConditions = "(" + masterSeed + "L," + limits.maxTupleDepth + ',' + limits.maxTupleLength + ',' + limits.maxArrayDepth + ',' + limits.maxArrayLength + ")";
-        final long timeoutSeconds = 600L;
-        System.out.println("Running\t\t" + totalWork + "\t" + initialConditions + " with " + timeoutSeconds + "-second timeout ...");
+        System.out.println("Running\t\t" + totalWork + "\t" + initialConditions + " with " + TIMEOUT_SECONDS + "-second timeout ...");
         for (int i = 0; i < runnables.length; i++) {
             pool.submit(runnables[i] = new GambleGambleRunnable(parallelism, masterSeed, masterSeed + i, workPerProcessor, limits));
         }
-        boolean noTimeout = TestUtils.shutdownAwait(pool, timeoutSeconds);
+        boolean noTimeout = TestUtils.shutdownAwait(pool, TIMEOUT_SECONDS);
 
         for (GambleGambleRunnable runnable : runnables) {
             if(runnable.thrown != null) {
