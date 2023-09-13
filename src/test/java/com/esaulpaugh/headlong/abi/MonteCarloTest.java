@@ -132,11 +132,12 @@ public class MonteCarloTest {
         final ExecutorService pool = Executors.newFixedThreadPool(parallelism);
         final long totalWork = workPerProcessor * (long) parallelism;
         final String initialConditions = "(" + masterSeed + "L," + limits.maxTupleDepth + ',' + limits.maxTupleLength + ',' + limits.maxArrayDepth + ',' + limits.maxArrayLength + ")";
-        System.out.println("Running\t\t" + totalWork + "\t" + initialConditions + " ...");
+        final long timeoutSeconds = 600L;
+        System.out.println("Running\t\t" + totalWork + "\t" + initialConditions + " with " + timeoutSeconds + "-second timeout ...");
         for (int i = 0; i < runnables.length; i++) {
             pool.submit(runnables[i] = new GambleGambleRunnable(parallelism, masterSeed, masterSeed + i, workPerProcessor, limits));
         }
-        boolean noTimeout = TestUtils.shutdownAwait(pool, 600L);
+        boolean noTimeout = TestUtils.shutdownAwait(pool, timeoutSeconds);
 
         for (GambleGambleRunnable runnable : runnables) {
             if(runnable.thrown != null) {
