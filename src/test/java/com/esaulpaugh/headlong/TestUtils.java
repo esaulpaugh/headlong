@@ -39,7 +39,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class TestUtils {
+public final class TestUtils {
+    
+    private TestUtils() {}
 
     public static boolean shutdownAwait(ExecutorService exec, long timeoutSeconds) throws InterruptedException {
         exec.shutdown();
