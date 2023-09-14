@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 
@@ -288,7 +289,7 @@ public final class ABIJSON {
                     .close();
             return stringOut.toString();
         } catch (IOException io) {
-            throw new RuntimeException(io);
+            throw new JsonIOException(io);
         }
     }
 
