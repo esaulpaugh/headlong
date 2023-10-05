@@ -47,7 +47,7 @@ public final class FastHex {
     @SuppressWarnings("deprecation")
     public static String encodeToString(byte[] buffer, int offset, int len) {
         byte[] enc = encodeToBytes(buffer, offset, len);
-        return new String(enc, 0, 0, enc.length); // faster on Java 9+ (compact strings on by default)
+        return new String(enc, 0, 0, enc.length); // on Java 9+ (compact strings on by default), faster than creating String from char[]
     }
 
     public static byte[] encodeToBytes(byte... buffer) {
