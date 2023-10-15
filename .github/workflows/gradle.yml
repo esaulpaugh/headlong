@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: ${{ matrix.distribution }}
-          java-version: '17.0.8.1'
+          java-version: '17'
           java-package: jdk
           architecture: x64
           cache: 'gradle'
