@@ -28,6 +28,7 @@ jobs:
 
       - name: Run gradle and ant builds
         run: |
+          java -version
           chmod +x ./gradlew
           ./gradlew build --no-daemon
           ant -noinput -buildfile build.xml -Drepository="/.gradle/caches/modules-2/files-2.1" -Dgson_path="/com.google.code.gson/gson/2.10.1/b3add478d4382b78ea20b1671390a858002feb6c" clean all build-jar
