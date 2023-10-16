@@ -27,6 +27,8 @@ import java.security.MessageDigest;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
@@ -40,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TupleTest {
 
-    private static class T extends Thread {
+    private static class MetaTestTask implements Runnable {
 
         final long taskSamples;
         final boolean unsigned;
@@ -48,7 +50,7 @@ public class TupleTest {
         final long powMinus1;
         final long[] dest;
 
-        private T(long taskSamples, boolean unsigned, int bitLen, long powMinus1, long[] dest) {
+        private MetaTestTask(long taskSamples, boolean unsigned, int bitLen, long powMinus1, long[] dest) {
             this.taskSamples = taskSamples;
             this.unsigned = unsigned;
             this.bitLen = bitLen;
@@ -88,15 +90,11 @@ public class TupleTest {
             final long[] a = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
             {
                 final long[] b = new long[a.length];
-                final Thread[] threads = new Thread[parallelism - 1];
-                for (int i = 0; i < threads.length; i++) {
-                    (threads[i] = new T(taskSamples, unsigned, j, powMinus1, i % 2 == 0 ? a : b))
-                            .start();
+                final ExecutorService es = Executors.newFixedThreadPool(parallelism);
+                for (int i = 0; i < parallelism; i++) {
+                    es.submit(new MetaTestTask(taskSamples, unsigned, j, powMinus1, i % 2 == 0 ? a : b));
                 }
-                new T(taskSamples, unsigned, j, powMinus1, b).run();
-                for (Thread t : threads) {
-                    t.join();
-                }
+                TestUtils.shutdownAwait(es, 1_000L);
                 for (int i = 0; i < a.length; i++) {
                     a[i] |= b[i];
                 }
