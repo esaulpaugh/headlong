@@ -945,12 +945,14 @@ public class DecodeTest {
     private void checkLegacyFlags(ABIType<?> t) throws Throwable {
         if (t instanceof TupleType) {
             assertEquals(ABIType.FLAG_LEGACY_DECODE, t.flags);
+            assertEquals(t.flags, t.getFlags());
             for (ABIType<?> e : (TupleType) t) {
                 checkLegacyFlags(e);
             }
         } else if (t instanceof ArrayType) {
             assertTrue(((ArrayType<?, ?>) t).legacyDecode);
             assertEquals(ABIType.FLAG_LEGACY_DECODE, t.flags);
+            assertEquals(t.flags, t.getFlags());
             checkLegacyFlags(((ArrayType<?, ?>) t).getElementType());
         } else {
             assertEquals(ABIType.FLAGS_UNSET, t.flags);
