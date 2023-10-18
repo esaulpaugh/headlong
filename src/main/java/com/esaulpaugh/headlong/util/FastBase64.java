@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.util;
 
+/** A base64 encoder which accepts offset and length arguments.*/
 public final class FastBase64 {
 
     private FastBase64() {}
