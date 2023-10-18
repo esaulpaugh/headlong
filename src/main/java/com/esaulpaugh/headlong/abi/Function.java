@@ -81,7 +81,7 @@ public final class Function implements ABIObject {
      * @param type          enum denoting one of: function, receive, fallback, constructor
      * @param name          this function's name, being the first part of the function signature
      * @param inputs        {@link TupleType} describing this function's input parameters
-     * @param outputs       {@link TupleType} type describing this function's return types
+     * @param outputs       {@link TupleType} describing this function's return types
      * @param stateMutability   "pure", "view", "payable" etc.
      * @param messageDigest hash function with which to generate the 4-byte selector
      * @throws IllegalArgumentException if the arguments do not specify a valid function
@@ -383,7 +383,7 @@ public final class Function implements ABIObject {
      * @param length the length of the ABI call
      * @param labeler code to generate the row label
      * @return the formatted string
-     * @throws IllegalArgumentException if the input length mod 32 != 4
+     * @throws IllegalArgumentException if {@code length} mod 32 is not equal to four
      */
     public static String formatCall(byte[] buffer, final int offset, final int length, IntFunction<String> labeler) {
         Integers.checkIsMultiple(length - SELECTOR_LEN, UNIT_LENGTH_BYTES);
