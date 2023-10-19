@@ -8,7 +8,7 @@ Contract ABI and Recursive Length Prefix made easy for the JVM.
 
 ABI spec: https://solidity.readthedocs.io/en/latest/abi-spec.html
 
-RLP spec: https://github.com/ethereum/wiki/wiki/RLP
+RLP spec: https://ethereum.org/en/developers/docs/data-structures-and-encoding/rlp
 
 SHA-256 (headlong-10.0.0.jar): 983f36014e6a8a8f7b2c01ced50728a0f72acce27237d1e96b55e9ae7ad66877
 
