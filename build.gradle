@@ -15,7 +15,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 compileJava {
-    if (Jvm.current().getJavaVersion() > JavaVersion.VERSION_1_8) {
+    if (Jvm.current().getJavaVersion() >= JavaVersion.VERSION_1_10) {
         options.compilerArgs.addAll(['--release', '8'])
     }
 }
