@@ -34,14 +34,15 @@ public final class FastBase64 {
     private static volatile short[] standardTable = null;
 
     private static short[] getStandardTable() {
-        if (standardTable == null) {
+        final short[] temp = standardTable;
+        if (temp == null) {
             synchronized (FastBase64.class) {
                 if (standardTable == null) {
-                    standardTable = table("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+                    return (standardTable = table("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"));
                 }
             }
         }
-        return standardTable;
+        return temp;
     }
 
     static short[] table(String alphabet) {
