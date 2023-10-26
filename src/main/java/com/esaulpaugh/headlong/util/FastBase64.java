@@ -59,9 +59,14 @@ public final class FastBase64 {
 
     @SuppressWarnings("deprecation")
     public static String encodeToString(byte[] buffer, int offset, int len, int flags) {
-        final byte[] out = new byte[encodedSize(len, flags)];
-        encodeToBytes(buffer, offset, len, out, 0, flags);
+        final byte[] out = encodeToBytes(buffer, offset, len, flags);
         return new String(out, 0, 0, out.length);
+    }
+
+    public static byte[] encodeToBytes(byte[] buffer, int offset, int len, int flags) {
+        byte[] out = new byte[encodedSize(len, flags)];
+        encodeToBytes(buffer, offset, len, out, 0, flags);
+        return out;
     }
 
     public static int encodedSize(int inputLen, int flags) {
@@ -72,12 +77,6 @@ public final class FastBase64 {
     private static int size(int chunks, int remainder, boolean noPadding, boolean noLineSep) {
         final int chars = (chunks * 4) + (remainder != 0 ? (noPadding ? remainder + 1 : 4) : 0);
         return noLineSep ? chars : chars + (((chars - 1) / LINE_LEN) * 2);
-    }
-
-    public static byte[] encodeToBytes(byte[] buffer, int offset, int len, int flags) {
-        byte[] out = new byte[encodedSize(len, flags)];
-        encodeToBytes(buffer, offset, len, out, 0, flags);
-        return out;
     }
 
     public static void encodeToBytes(byte[] buffer, int offset, int len, byte[] dest, int destOff, int flags) {
