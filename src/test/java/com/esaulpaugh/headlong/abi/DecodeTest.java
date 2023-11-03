@@ -916,7 +916,7 @@ public class DecodeTest {
             "}";
 
     @Test
-    public void testLegacyDecode() throws Throwable {
+    public void testLegacyDecode() {
         final Function f = Function.fromJson(ABIType.FLAG_LEGACY_DECODE, FN_JSON);
         checkLegacyFlags(f.getInputs());
         checkLegacyFlags(f.getOutputs());
@@ -942,26 +942,26 @@ public class DecodeTest {
         assertEquals(args, f.decodeCall(unpadded));
     }
 
-    private void checkLegacyFlags(ABIType<?> t) throws Throwable {
+    private void checkLegacyFlags(ABIType<?> t) {
         if (t instanceof TupleType) {
-            assertEquals(ABIType.FLAG_LEGACY_DECODE, t.flags);
-            assertEquals(t.flags, t.getFlags());
+            assertEquals(ABIType.FLAG_LEGACY_DECODE, t.getFlags());
+            assertEquals(((TupleType) t).flags, t.getFlags());
             for (ABIType<?> e : (TupleType) t) {
                 checkLegacyFlags(e);
             }
         } else if (t instanceof ArrayType) {
-            assertTrue(((ArrayType<?, ?>) t).legacyDecode);
-            assertEquals(ABIType.FLAG_LEGACY_DECODE, t.flags);
-            assertEquals(t.flags, t.getFlags());
-            checkLegacyFlags(((ArrayType<?, ?>) t).getElementType());
+            final ArrayType<?, ?> at = (ArrayType<?, ?>) t;
+            assertTrue(at.legacyDecode);
+            assertEquals(ABIType.FLAG_LEGACY_DECODE, t.getFlags());
+            assertEquals(at.flags, t.getFlags());
+            checkLegacyFlags(at.getElementType());
         } else {
-            assertEquals(ABIType.FLAGS_UNSET, t.flags);
-            assertThrown(UnsupportedOperationException.class, t::getFlags);
+            assertEquals(ABIType.FLAGS_UNSET, t.getFlags());
         }
     }
 
     @Test
-    public void testLegacyString() throws Throwable {
+    public void testLegacyString() {
         final String json = "{\n" +
                 "  \"type\": \"function\",\n" +
                 "  \"name\": \"registerWithConfig\",\n" +

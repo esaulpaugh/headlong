@@ -327,16 +327,15 @@ public class TupleTest {
     private static TupleType wrap(String[] elementNames, ABIType<?>... elements) {
         final StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
-        int flags = -1;
+        int flags = ABIType.FLAGS_UNSET;
         for (ABIType<?> e : elements) {
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
-            if (e.flags != flags && e.flags != ABIType.FLAGS_UNSET) {
-                if (flags == -1) {
-                    flags = e.flags;
-                } else {
+            if (e.getFlags() != flags) {
+                if (flags != ABIType.FLAGS_UNSET) {
                     throw new IllegalArgumentException();
                 }
+                flags = e.getFlags();
             }
         }
         return new TupleType(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, elementNames, null, flags);

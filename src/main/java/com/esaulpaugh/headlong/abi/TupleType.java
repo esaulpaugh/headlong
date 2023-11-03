@@ -40,9 +40,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     private final int[] elementHeadOffsets;
     private final int headLength;
     private final int firstOffset;
+    final int flags;
 
     TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String[] elementNames, String[] elementInternalTypes, int flags) {
-        super(canonicalType, Tuple.class, dynamic, flags);
+        super(canonicalType, Tuple.class, dynamic);
         this.elementTypes = elementTypes;
         this.elementNames = elementNames;
         this.elementInternalTypes = elementInternalTypes;
@@ -59,6 +60,12 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             this.headLength = staticTupleHeadLength();
             this.firstOffset = -1;
         }
+        this.flags = flags;
+    }
+
+    @Override
+    public int getFlags() {
+        return flags;
     }
 
     public int size() {

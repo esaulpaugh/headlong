@@ -54,17 +54,11 @@ public abstract class ABIType<J> {
     final String canonicalType;
     final Class<J> clazz;
     final boolean dynamic;
-    final int flags;
 
     ABIType(String canonicalType, Class<J> clazz, boolean dynamic) {
-        this(canonicalType, clazz, dynamic, FLAGS_UNSET);
-    }
-
-    ABIType(String canonicalType, Class<J> clazz, boolean dynamic, int flags) {
         this.canonicalType = canonicalType; // .intern() to save memory and allow == comparison?
         this.clazz = clazz;
         this.dynamic = dynamic;
-        this.flags = flags;
     }
 
     public final String getCanonicalType() {
@@ -79,11 +73,8 @@ public abstract class ABIType<J> {
         return dynamic;
     }
 
-    public final int getFlags() {
-        if (this instanceof TupleType || this instanceof ArrayType) {
-            return flags;
-        }
-        throw new UnsupportedOperationException();
+    public int getFlags() {
+        return FLAGS_UNSET;
     }
 
     abstract Class<?> arrayClass();
@@ -209,7 +200,7 @@ public abstract class ABIType<J> {
 
     public final J decodePacked(byte[] buffer) {
         return PackedDecoder.decode(
-                    new TupleType('(' + this.canonicalType + ')', dynamic, new ABIType[] { this }, null, null, this.flags),
+                    new TupleType('(' + this.canonicalType + ')', dynamic, new ABIType[] { this }, null, null, this.getFlags()),
                     buffer
                 ).get(0);
     }
@@ -220,7 +211,7 @@ public abstract class ABIType<J> {
 
     @Override
     public final int hashCode() {
-        return 31 * canonicalType.hashCode() + flags;
+        return 31 * canonicalType.hashCode() + getFlags();
     }
 
     @Override
@@ -228,7 +219,7 @@ public abstract class ABIType<J> {
         if (o == this) return true;
         if (o instanceof ABIType) {
             final ABIType<?> other = (ABIType<?>) o;
-            return other.canonicalType.equals(this.canonicalType) && other.flags == this.flags;
+            return other.canonicalType.equals(this.canonicalType) && other.getFlags() == this.getFlags();
         }
         return false;
     }

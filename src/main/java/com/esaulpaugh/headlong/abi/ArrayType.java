@@ -49,15 +49,17 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     private final int length;
     private final Class<?> arrayClass;
     private final int headLength;
+    final int flags;
     final boolean legacyDecode;
 
     ArrayType(String canonicalType, Class<J> clazz, E elementType, int length, Class<?> arrayClass, int flags) {
-        super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic, flags);
+        super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic);
         this.isString = STRING_CLASS == clazz;
         this.elementType = elementType;
         this.length = length;
         this.arrayClass = arrayClass;
         this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticArrayHeadLength();
+        this.flags = flags;
         this.legacyDecode = (flags & ABIType.FLAG_LEGACY_DECODE) != 0;
     }
 
@@ -68,6 +70,11 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_TUPLE: return length * ((TupleType) elementType).staticTupleHeadLength();
         default: return length * UNIT_LENGTH_BYTES;
         }
+    }
+
+    @Override
+    public int getFlags() {
+        return flags;
     }
 
     public E getElementType() {
