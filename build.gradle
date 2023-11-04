@@ -7,9 +7,9 @@ plugins {
     id 'maven-publish'
 }
 
-group 'com.esaulpaugh'
+group = "com.esaulpaugh"
 archivesBaseName = "headlong"
-version '10.0.1-SNAPSHOT'
+version = "10.0.1-SNAPSHOT"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
