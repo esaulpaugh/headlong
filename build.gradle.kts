@@ -7,7 +7,7 @@
 //plugins {
 //    id("java-library")
 //    id("maven-publish")
-//    id("me.champeau.jmh").version("0.7.1")
+//    id("me.champeau.jmh").version("0.7.2")
 //}
 //
 //group = "com.esaulpaugh"
