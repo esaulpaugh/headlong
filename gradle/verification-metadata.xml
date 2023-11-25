@@ -83,15 +83,15 @@
             </artifact>
         </component>
 
-        <component group="org.bouncycastle" name="bcprov-jdk14" version="1.76">
-            <artifact name="bcprov-jdk14-1.76.jar">
-                <sha256 value="098914971e7022a840616722d80fc359ae67f95f2f2e63bf4461d9b401a4eb67" origin="repo.maven.apache.org/maven2/"/>
+        <component group="org.bouncycastle" name="bcprov-jdk14" version="1.77">
+            <artifact name="bcprov-jdk14-1.77.jar">
+                <sha256 value="9b11b262ce547a3ff04a97797fe76fdac0673e3cfb48827fefea85d7e132bcb6" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="bcprov-jdk14-1.76.pom">
-                <sha256 value="1f45d4a3eec99e3d3bf85a96e0a0e73566786bfbaf4bf6537ecd193e006dc5f5" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="bcprov-jdk14-1.77.pom">
+                <sha256 value="e64a221cd4faad8599efaabcc7f472ee88c8b6d08dfcb077ae486ccb8382585a" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="bcprov-jdk14-1.76-sources.jar">
-                <sha256 value="2b4eaf9ae79433d69cc231e649cf23a0c6a38731161f068b92b0868f684bce66" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="bcprov-jdk14-1.77-sources.jar">
+                <sha256 value="11d99f3b41074eb5b77f97272a12022a6f02f81dcf9a15f0fa2e18d260e8b323" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
 
