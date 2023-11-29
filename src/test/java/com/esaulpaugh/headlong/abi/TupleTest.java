@@ -180,15 +180,13 @@ public class TupleTest {
 
         final int maxTupleLen = 3;
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(maxTupleLen, 3, 3, 3);
-        final Random r = new Random(TestUtils.getSeed());
+        final Random r = new Random();
         final Keccak k = new Keccak(256);
         final Object defaultObj = new Object();
 
         long seed = r.nextLong();
         for (int idx = 0; idx < maxTupleLen; idx++) {
             for (int i = 0; i < 25; i++, seed++) {
-                r.setSeed(seed);
-
                 final MonteCarloTestCase testCase = new MonteCarloTestCase(seed, limits, r, k);
                 final Object[] elements = testCase.argsTuple.elements;
                 if (idx < elements.length) {
@@ -517,11 +515,10 @@ public class TupleTest {
     @Test
     public void testToArray() {
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(5, 5, 4, 3);
-        final Random r = new Random();
         final MessageDigest md = Function.newDefaultDigest();
         long seed = TestUtils.getSeed();
         for (int z = 0; z < 10; z++) {
-            final Tuple values = new MonteCarloTestCase(seed + z, limits, r, md).argsTuple;
+            final Tuple values = new MonteCarloTestCase(seed + z, limits, new Random(), md).argsTuple;
 
             final Tuple deepCopy = values.deepCopy();
             assertNotSame(values, deepCopy);

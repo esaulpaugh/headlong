@@ -41,7 +41,7 @@ public class EqualsTest {
     public void testEquals() {
 
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(3, 3, 3, 3);
-        final Random r = new Random(TestUtils.getSeed());
+        final Random r = new Random();
         final Keccak k = new Keccak(256);
 
         int maxIters = -1;

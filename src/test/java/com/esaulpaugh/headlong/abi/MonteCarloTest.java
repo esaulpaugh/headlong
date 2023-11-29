@@ -359,7 +359,7 @@ public class MonteCarloTest {
     @Test
     public void printNewTestCases() {
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(3, 3, 3, 3);
-        final Random r = TestUtils.seededRandom();
+        final Random r = new Random();
         final Keccak k = new Keccak(256);
         final Gson ugly = new GsonBuilder().create();
         final JsonPrimitive version = new JsonPrimitive("5.6.0+commit.c786693");
