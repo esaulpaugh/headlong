@@ -97,14 +97,14 @@ public final class TestUtils {
 
     public static long wildLong(Random r, boolean unsigned, int bitLength) {
         checkBitLength(unsigned, bitLength);
-        return wildBigInteger(r, unsigned, bitLength).longValue();
+        return uniformLong(r, unsigned, r.nextInt(1 + bitLength));
     }
 
     public static long uniformLong(boolean unsigned, int bitLength) {
         return uniformLong(ThreadLocalRandom.current(), unsigned, bitLength);
     }
 
-    public static long uniformLong(ThreadLocalRandom tlr, boolean unsigned, int bitLength) {
+    public static long uniformLong(Random r, boolean unsigned, int bitLength) {
         checkBitLength(unsigned, bitLength);
         if(bitLength == 0) {
             return 0L;
@@ -113,17 +113,17 @@ public final class TestUtils {
             if(unsigned) {
                 throw new IllegalArgumentException("exceeds long range");
             }
-            return tlr.nextLong();
+            return r.nextLong();
         }
         if(unsigned) {
             if (bitLength == 63) {
-                final long val = tlr.nextLong();
+                final long val = r.nextLong();
                 return val < 0 ? ~val : val;
             }
-            return tlr.nextLong(1L << bitLength);
+            return r.nextLong() & ((1L << bitLength) - 1);
         }
-        final long val = tlr.nextLong(1L << (bitLength - 1));
-        return tlr.nextBoolean() ? ~val : val;
+        final long val = r.nextLong() & ((1L << (bitLength - 1)) - 1); // r.nextLong(1L << (bitLength - 1));
+        return r.nextBoolean() ? ~val : val;
     }
 
     private static void checkBitLength(boolean unsigned, int bitLength) {
