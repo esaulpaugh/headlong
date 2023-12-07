@@ -168,7 +168,7 @@ public final class Notation {
             }
         }
         if (/* hasElement */ dataIndex != end) {
-            sb.replace(sb.length() - (shortList ? DELIMITER + ' ' : DELIMITER).length(), sb.length(), ""); // trim
+            sb.setLength(sb.length() - (shortList ? DELIMITER + ' ' : DELIMITER).length()); // trim
         }
     }
 
