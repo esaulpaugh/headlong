@@ -323,7 +323,7 @@ public final class Function implements ABIObject {
     private static String validateName(String input) {
         final int len = input.length();
         if(len > MAX_NAME_CHARS) {
-            throw new IllegalArgumentException("function name is too long: " + input.length() + " > " + MAX_NAME_CHARS);
+            throw new IllegalArgumentException("function name is too long: " + len + " > " + MAX_NAME_CHARS);
         }
         for (int i = 0; i < len; i++) {
             final char c = input.charAt(i);
