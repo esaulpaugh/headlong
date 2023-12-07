@@ -85,10 +85,7 @@ public final class TestUtils {
         case 8: break;
         default: throw new IllegalArgumentException("byteLen out of range");
         }
-        if(unsigned) {
-            return val < 0 ? ~val : val;
-        }
-        return r.nextBoolean() ? val : ~val;
+        return (unsigned && val < 0) || r.nextBoolean() ? ~val : val;
     }
 
     public static long wildLong(Random r) {
@@ -96,7 +93,6 @@ public final class TestUtils {
     }
 
     public static long wildLong(Random r, boolean unsigned, int bitLength) {
-        checkBitLength(unsigned, bitLength);
         return uniformLong(r, unsigned, r.nextInt(1 + bitLength));
     }
 
@@ -109,21 +105,21 @@ public final class TestUtils {
         if(bitLength == 0) {
             return 0L;
         }
+        final long val = r.nextLong();
         if(bitLength == Long.SIZE) {
             if(unsigned) {
                 throw new IllegalArgumentException("exceeds long range");
             }
-            return r.nextLong();
+            return val;
         }
         if(unsigned) {
             if (bitLength == 63) {
-                final long val = r.nextLong();
                 return val < 0 ? ~val : val;
             }
-            return r.nextLong() & ((1L << bitLength) - 1);
+            return val & ((1L << bitLength) - 1);
         }
-        final long val = r.nextLong() & ((1L << (bitLength - 1)) - 1); // r.nextLong(1L << (bitLength - 1));
-        return r.nextBoolean() ? ~val : val;
+        final long maskedUnsigned = val & ((1L << (bitLength - 1)) - 1); // r.nextLong(1L << (bitLength - 1));
+        return r.nextBoolean() ? ~maskedUnsigned : maskedUnsigned;
     }
 
     private static void checkBitLength(boolean unsigned, int bitLength) {
@@ -185,12 +181,13 @@ public final class TestUtils {
         return random;
     }
 
+    @SuppressWarnings("deprecation")
     public static String generateASCIIString(final int len, Random r) {
-        StringBuilder sb = new StringBuilder();
+        byte[] bytes = new byte[len];
         for(int i = 0; i < len; i++) {
-            sb.append((char) (r.nextInt(95) + 32));
+            bytes[i] = (byte) (r.nextInt(95) + 32);
         }
-        return sb.toString();
+        return new String(bytes, 0, 0, len);
     }
 
     public static void printAndReset(StringBuilder sb) {
