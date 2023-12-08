@@ -63,26 +63,45 @@ public final class TestUtils {
         return getSeed(System.nanoTime());
     }
 
+    /**
+     * Use {@link java.security.SecureRandom} instead.
+     *
+     * @param protoseed arbitrary bits
+     * @return  a short (64-bit), low-quality seed suitable for non-cryptographic uses like fuzz testing or monte carlo simulation
+     */
     public static long getSeed(final long protoseed) {
-        final long millis = System.currentTimeMillis();
+        final long s = System.nanoTime() + System.currentTimeMillis();
         final Runtime runtime = Runtime.getRuntime();
-        final long r = runtime.freeMemory() + runtime.maxMemory() + runtime.totalMemory() + runtime.availableProcessors() + runtime.hashCode();
+        final long r = System.nanoTime() + runtime.freeMemory() + runtime.maxMemory() + runtime.totalMemory() + runtime.availableProcessors() + runtime.hashCode();
         final Thread thread = Thread.currentThread();
-        final long t = thread.getId() + thread.hashCode() + thread.getName().hashCode() + thread.getPriority();
+        final long t = System.nanoTime() + thread.getId() + thread.hashCode() + thread.getName().hashCode() + thread.getPriority();
         final ThreadGroup group = thread.getThreadGroup();
-        final int tg = group.hashCode() + group.getName().hashCode() + group.activeCount();
-        final int o = new Object().hashCode() + new Object().hashCode();
-        long c = System.nanoTime()
-                * millis
-                * ~(protoseed << 1)
-                * (r + t + tg + o)
-                * ForkJoinPool.commonPool().getParallelism()
-                * System.nanoTime();
-        if (c == 0L) {
-            throw new AssertionError();
-        }
+        final long tg = System.nanoTime() + group.hashCode() + group.getName().hashCode() + group.activeCount();
+        final Object object = new Object();
+        final long o = System.nanoTime() + new Object().hashCode() + Double.doubleToLongBits(Math.random()) + object.hashCode();
+        long c = ~(protoseed << 1)
+                * (s + r + t)
+                * (tg + o)
+                * ForkJoinPool.commonPool().getParallelism();
         c ^= c >> 32;
         return c ^ (c << 33);
+    }
+
+    /**
+     * Use {@link java.security.SecureRandom} instead, kids.
+     *
+     * @param protoseed arbitrary bits
+     * @return  a short (64-bit), low-quality seed suitable for non-cryptographic uses like fuzz testing or monte carlo simulation
+     */
+    public static long getEnvSeed(final long protoseed) {
+        final Object env = System.getenv();
+        final long e = System.nanoTime() + new Object().hashCode();
+        final long envHash = env.hashCode()
+                + System.identityHashCode(env)
+                + System.getProperty("java.version").hashCode()
+                + System.getProperty("os.arch").hashCode()
+                + System.getProperty("os.version").hashCode();
+        return getSeed(e * envHash + protoseed);
     }
 
     public static long pickLong(Random r) {
