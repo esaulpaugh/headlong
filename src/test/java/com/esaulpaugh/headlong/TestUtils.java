@@ -70,19 +70,23 @@ public final class TestUtils {
      * @return  a short (64-bit), low-quality seed suitable for non-cryptographic uses like fuzz testing or monte carlo simulation
      */
     public static long getSeed(final long protoseed) {
-        final long s = System.nanoTime() + System.currentTimeMillis();
         final Runtime runtime = Runtime.getRuntime();
-        final long r = System.nanoTime() + runtime.freeMemory() + runtime.maxMemory() + runtime.totalMemory() + runtime.availableProcessors() + runtime.hashCode();
         final Thread thread = Thread.currentThread();
-        final long t = System.nanoTime() + thread.getId() + thread.hashCode() + thread.getName().hashCode() + thread.getPriority();
         final ThreadGroup group = thread.getThreadGroup();
-        final long tg = System.nanoTime() + group.hashCode() + group.getName().hashCode() + group.activeCount();
-        final Object object = new Object();
-        final long o = System.nanoTime() + new Object().hashCode() + Double.doubleToLongBits(Math.random()) + object.hashCode();
-        long c = ~(protoseed << 1)
-                * (s + r + t)
-                * (tg + o)
-                * ForkJoinPool.commonPool().getParallelism();
+        final long[] vals = new long[] {
+                new Object().hashCode(),        runtime.maxMemory(),        runtime.hashCode(),
+                new Object().hashCode(),        runtime.freeMemory(),       runtime.availableProcessors(),
+                new Object().hashCode(),        runtime.totalMemory(),      ForkJoinPool.commonPool().getParallelism(),
+                System.nanoTime(),              thread.getId(),             thread.hashCode(),
+                System.currentTimeMillis(),     thread.getPriority(),       thread.getName().hashCode(),
+                new Object().hashCode(),        group.activeCount(),        group.hashCode(),
+                new Object().hashCode(),        protoseed,                  ThreadLocalRandom.current().nextLong(),
+                new Object().hashCode(),        new Throwable().hashCode(), Double.doubleToLongBits(Math.random()),
+        };
+        long c = System.identityHashCode(vals);
+        for (long v : vals) {
+            c = 31 * c + v;
+        }
         c ^= c >> 32;
         return c ^ (c << 33);
     }
