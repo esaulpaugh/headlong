@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -63,7 +64,23 @@ public final class TestUtils {
     }
 
     public static long getSeed(final long protoseed) {
-        long c = protoseed * (System.nanoTime() << 1) * -System.nanoTime();
+        final long millis = System.currentTimeMillis();
+        final Runtime runtime = Runtime.getRuntime();
+        final long r = runtime.freeMemory() + runtime.maxMemory() + runtime.totalMemory() + runtime.availableProcessors() + runtime.hashCode();
+        final Thread thread = Thread.currentThread();
+        final long t = thread.getId() + thread.hashCode() + thread.getName().hashCode() + thread.getPriority();
+        final ThreadGroup group = thread.getThreadGroup();
+        final int tg = group.hashCode() + group.getName().hashCode() + group.activeCount();
+        final int o = new Object().hashCode() + new Object().hashCode();
+        long c = System.nanoTime()
+                * millis
+                * ~(protoseed << 1)
+                * (r + t + tg + o)
+                * ForkJoinPool.commonPool().getParallelism()
+                * System.nanoTime();
+        if (c == 0L) {
+            throw new AssertionError();
+        }
         c ^= c >> 32;
         return c ^ (c << 33);
     }
