@@ -66,7 +66,7 @@ public final class TestUtils {
     /**
      * Use {@link java.security.SecureRandom} instead.
      *
-     * @param protoseed arbitrary bits
+     * @param protoseed arbitrary bits, e.g. {@code ThreadLocalRandom.current().nextLong()}
      * @return  a short (64-bit), low-quality seed suitable for non-cryptographic uses like fuzz testing or monte carlo simulation
      */
     public static long getSeed(final long protoseed) {
@@ -90,7 +90,7 @@ public final class TestUtils {
     /**
      * Use {@link java.security.SecureRandom} instead, kids.
      *
-     * @param protoseed arbitrary bits
+     * @param protoseed arbitrary bits, e.g. {@code ThreadLocalRandom.current().nextLong()}
      * @return  a short (64-bit), low-quality seed suitable for non-cryptographic uses like fuzz testing or monte carlo simulation
      */
     public static long getEnvSeed(final long protoseed) {
