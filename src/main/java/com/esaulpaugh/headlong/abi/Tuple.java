@@ -151,10 +151,11 @@ public final class Tuple implements Iterable<Object> {
     }
 
     private static Object deepCopyElement(Object e) {
-        if(e.getClass().isArray()) {
+        final Class<?> c = e.getClass();
+        if(c.isArray()) {
             if (e instanceof Object[]) {
                 final Object[] original = (Object[]) e;
-                final Object[] copy = (Object[]) Array.newInstance(elementClass(original.getClass()), original.length);
+                final Object[] copy = (Object[]) Array.newInstance(c.getComponentType(), original.length);
                 for (int i = 0; i < copy.length; i++) {
                     copy[i] = deepCopyElement(original[i]);
                 }
@@ -179,24 +180,5 @@ public final class Tuple implements Iterable<Object> {
             throw new IllegalArgumentException(); // float, double, char, short
         }
         return e instanceof Tuple ? ((Tuple) e).deepCopy() : e;
-    }
-
-    private static Class<?> elementClass(Class<? extends Object[]> arrClazz) {
-        try {
-            if (arrClazz == BigInteger[].class) return BigInteger.class;
-            if (arrClazz == Address[].class) return Address.class;
-            if (arrClazz == Tuple[].class) return Tuple.class;
-            final String name = arrClazz.getName();
-            if (name.charAt(0) == '[') {
-                return Class.forName(
-                        name.charAt(1) == 'L'
-                                ? name.substring(2, name.length() - 1)
-                                : name.substring(1)
-                );
-            }
-        } catch (ClassNotFoundException ignored) {
-            /* fall through */
-        }
-        throw new AssertionError();
     }
 }
