@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import java.lang.reflect.Array;
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
