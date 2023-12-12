@@ -69,7 +69,7 @@ public final class BooleanType extends UnitType<Boolean> {
     }
 
     static void encodeBooleanPacked(boolean value, ByteBuffer dest) {
-        dest.put(value ? Encoding.ONE_BYTE : Encoding.ZERO_BYTE);
+        dest.put(value ? ONE_BYTE : ZERO_BYTE);
     }
 
     static void encodeBoolean(boolean val, ByteBuffer dest) {
@@ -78,8 +78,8 @@ public final class BooleanType extends UnitType<Boolean> {
 
     static Boolean decodeBoolean(byte b) {
         switch (b) {
-            case Encoding.ZERO_BYTE: return Boolean.FALSE;
-            case Encoding.ONE_BYTE: return Boolean.TRUE;
+            case ZERO_BYTE: return Boolean.FALSE;
+            case ONE_BYTE: return Boolean.TRUE;
             default: throw new IllegalArgumentException("illegal boolean value: " + b);
         }
     }

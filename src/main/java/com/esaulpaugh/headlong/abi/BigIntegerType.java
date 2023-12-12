@@ -42,12 +42,12 @@ public final class BigIntegerType extends UnitType<BigInteger> {
 
     @Override
     void encodeTail(BigInteger value, ByteBuffer dest) {
-        Encoding.insertInt(value, UNIT_LENGTH_BYTES, dest);
+        insertInt(value, UNIT_LENGTH_BYTES, dest);
     }
 
     @Override
     void encodePackedUnchecked(BigInteger value, ByteBuffer dest) {
-        Encoding.insertInt(value, byteLengthPacked(null), dest);
+        insertInt(value, byteLengthPacked(null), dest);
     }
 
     @Override

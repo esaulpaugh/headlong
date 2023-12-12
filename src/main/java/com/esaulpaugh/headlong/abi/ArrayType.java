@@ -22,8 +22,6 @@ import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.function.IntUnaryOperator;
 
-import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.abi.Encoding.UINT31;
 import static com.esaulpaugh.headlong.abi.TupleType.countBytes;
 import static com.esaulpaugh.headlong.abi.TupleType.totalLen;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -285,7 +283,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         }
         final int last = values.length - 1;
         for (int i = 0; true; i++) {
-            Encoding.insertIntUnsigned(offset, dest); // insert offset
+            insertIntUnsigned(offset, dest); // insert offset
             if (i >= last) {
                 for (Object value : values) {
                     et.encodeTail(value, dest);
@@ -298,7 +296,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     private void encodeArrayLen(int len, ByteBuffer dest) {
         if(length == DYNAMIC_LENGTH) {
-            Encoding.insertIntUnsigned(len, dest);
+            insertIntUnsigned(len, dest);
         }
     }
 
@@ -313,20 +311,20 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         encodeArrayLen(arr.length, dest);
         dest.put(arr);
         int rem = Integers.mod(arr.length, UNIT_LENGTH_BYTES);
-        Encoding.insert00Padding(rem != 0 ? UNIT_LENGTH_BYTES - rem : 0, dest);
+        insert00Padding(rem != 0 ? UNIT_LENGTH_BYTES - rem : 0, dest);
     }
 
     private void encodeInts(int[] arr, ByteBuffer dest) {
         encodeArrayLen(arr.length, dest);
         for (int e : arr) {
-            Encoding.insertInt(e, dest);
+            insertInt(e, dest);
         }
     }
 
     private void encodeLongs(long[] arr, ByteBuffer dest) {
         encodeArrayLen(arr.length, dest);
         for (long e : arr) {
-            Encoding.insertInt(e, dest);
+            insertInt(e, dest);
         }
     }
 
@@ -372,7 +370,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     @Override
     @SuppressWarnings("unchecked")
     J decode(ByteBuffer bb, byte[] unitBuffer) {
-        final int arrayLen = length == DYNAMIC_LENGTH ? Encoding.UINT19.decode(bb, unitBuffer) : length;
+        final int arrayLen = length == DYNAMIC_LENGTH ? IntType.UINT19.decode(bb, unitBuffer) : length;
         checkNoDecodePossible(bb.remaining(), arrayLen);
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return (J) decodeBooleans(arrayLen, bb, unitBuffer);
@@ -414,7 +412,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                 bb.get(unitBuffer);
                 int j;
                 for (j = 0; j < UNIT_LENGTH_BYTES - Byte.BYTES; j++) {
-                    if (unitBuffer[j] != Encoding.ZERO_BYTE) {
+                    if (unitBuffer[j] != ZERO_BYTE) {
                         throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
                     }
                 }
@@ -438,7 +436,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
             byte[] padding = new byte[UNIT_LENGTH_BYTES - mod];
             bb.get(padding);
             for (byte b : padding) {
-                if(b != Encoding.ZERO_BYTE) throw new IllegalArgumentException("malformed array: non-zero padding byte");
+                if(b != ZERO_BYTE) throw new IllegalArgumentException("malformed array: non-zero padding byte");
             }
         }
         return data;
@@ -483,7 +481,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
                 int saved = start;
                 for ( ; i < elements.length; i++) {
                     bb.position(saved);
-                    final int jump = start + UINT31.decode(bb, unitBuffer);
+                    final int jump = start + IntType.UINT31.decode(bb, unitBuffer);
                     /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
                     saved = bb.position();
                     bb.position(jump); // leniently jump to specified offset

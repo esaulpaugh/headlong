@@ -22,8 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.IntUnaryOperator;
 
-import static com.esaulpaugh.headlong.abi.Encoding.OFFSET_LENGTH_BYTES;
-import static com.esaulpaugh.headlong.abi.Encoding.UINT31;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
 /** @see ABIType */
@@ -209,7 +207,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     break;
                 }
             } else {
-                Encoding.insertIntUnsigned(offset, dest); // insert offset
+                insertIntUnsigned(offset, dest); // insert offset
                 if (i >= last) {
                     break;
                 }
@@ -236,7 +234,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 if (!t.dynamic) {
                     elements[i] = t.decode(bb, unitBuffer);
                 } else {
-                    final int offset = UINT31.decode(bb, unitBuffer);
+                    final int offset = IntType.UINT31.decode(bb, unitBuffer);
                     offsets[i] = offset == 0 ? -1 : offset;
                 }
             }
@@ -305,7 +303,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     private static Object decodeObject(ABIType<?> type, ByteBuffer bb, int start, byte[] unitBuffer, int index) {
         try {
             if (type.dynamic) {
-                bb.position(start + UINT31.decode(bb, unitBuffer));
+                bb.position(start + IntType.UINT31.decode(bb, unitBuffer));
             }
             return type.decode(bb, unitBuffer);
         } catch (IllegalArgumentException cause) {

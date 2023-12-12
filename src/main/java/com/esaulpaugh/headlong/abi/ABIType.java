@@ -18,7 +18,9 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.function.IntFunction;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -37,6 +39,16 @@ public abstract class ABIType<J> {
      */
     public static final int FLAG_LEGACY_DECODE = 1;
     static final int FLAGS_UNSET = 0x80000000;
+    static final int OFFSET_LENGTH_BYTES = UNIT_LENGTH_BYTES;
+    static final byte ZERO_BYTE = (byte) 0x00;
+    static final byte ONE_BYTE = (byte) 0x01;
+
+    private static final byte[] CACHED_ZERO_PADDING = new byte[UNIT_LENGTH_BYTES];
+    private static final byte[] CACHED_NEG1_PADDING = new byte[UNIT_LENGTH_BYTES];
+
+    static {
+        Arrays.fill(CACHED_NEG1_PADDING, (byte) 0xFF);
+    }
 
     public static final int TYPE_CODE_BOOLEAN = 0;
     public static final int TYPE_CODE_BYTE = 1;
@@ -227,6 +239,42 @@ public abstract class ABIType<J> {
     @Override
     public final String toString() {
         return canonicalType;
+    }
+
+    static void insertIntUnsigned(int val, ByteBuffer dest) {
+        insert00Padding(UNIT_LENGTH_BYTES - Integer.BYTES, dest);
+        dest.putInt(val);
+    }
+
+    static void insertInt(long val, ByteBuffer dest) {
+        insertPadding(UNIT_LENGTH_BYTES - Long.BYTES, val < 0, dest);
+        dest.putLong(val);
+    }
+
+    static void insertInt(BigInteger signed, int paddedLen, ByteBuffer dest) {
+        final byte[] arr = signed.toByteArray();
+        if(arr.length <= paddedLen) {
+            insertPadding(paddedLen - arr.length, signed.signum() < 0, dest);
+            dest.put(arr, 0, arr.length);
+        } else {
+            dest.put(arr, 1, paddedLen);
+        }
+    }
+
+    private static void insertPadding(int n, boolean negativeOnes, ByteBuffer dest) {
+        if(negativeOnes) {
+            insertFFPadding(n, dest);
+        } else {
+            insert00Padding(n, dest);
+        }
+    }
+
+    static void insert00Padding(int n, ByteBuffer dest) {
+        dest.put(CACHED_ZERO_PADDING, 0, n);
+    }
+
+    static void insertFFPadding(int n, ByteBuffer dest) {
+        dest.put(CACHED_NEG1_PADDING, 0, n);
     }
 
     private static final int LABEL_LEN = 6;
