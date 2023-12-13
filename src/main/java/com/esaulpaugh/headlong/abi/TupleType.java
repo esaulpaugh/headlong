@@ -396,9 +396,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     private static String completeTupleTypeString(StringBuilder sb) {
         final int len = sb.length();
-        return len != 1
-                ? sb.deleteCharAt(len - 1).append(')').toString() // replace trailing comma
-                : EMPTY_TUPLE_STRING;
+        if (len != 1) {
+            sb.setCharAt(len - 1, ')'); // overwrite trailing comma
+            return sb.toString();
+        }
+        return EMPTY_TUPLE_STRING;
     }
 
     public static TupleType parse(String rawTupleTypeString) {
