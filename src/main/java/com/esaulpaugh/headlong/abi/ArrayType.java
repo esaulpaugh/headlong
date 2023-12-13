@@ -429,14 +429,13 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     }
 
     private static byte[] decodeBytes(int len, ByteBuffer bb, boolean legacyDecode) {
-        byte[] data = new byte[len];
+        final byte[] data = new byte[len];
         bb.get(data);
-        int mod = Integers.mod(len, UNIT_LENGTH_BYTES);
-        if(mod != 0 && !legacyDecode) {
-            byte[] padding = new byte[UNIT_LENGTH_BYTES - mod];
-            bb.get(padding);
-            for (byte b : padding) {
-                if(b != ZERO_BYTE) throw new IllegalArgumentException("malformed array: non-zero padding byte");
+        final int mod = Integers.mod(len, UNIT_LENGTH_BYTES);
+        if (mod != 0 && !legacyDecode) {
+            final int padding = UNIT_LENGTH_BYTES - mod;
+            for (int i = 0; i < padding; i++) {
+                if (bb.get() != ZERO_BYTE) throw new IllegalArgumentException("malformed array: non-zero padding byte");
             }
         }
         return data;
