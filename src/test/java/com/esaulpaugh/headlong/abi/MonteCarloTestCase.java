@@ -363,14 +363,7 @@ public class MonteCarloTestCase {
             }
             signature.append(typeStr).append(',');
         }
-        return completeTupleTypeString(signature);
-    }
-
-    private static String completeTupleTypeString(StringBuilder sb) {
-        final int len = sb.length();
-        return len != 1
-                ? sb.deleteCharAt(len - 1).append(')').toString() // replace trailing comma
-                : "()";
+        return TestUtils.completeTupleTypeString(signature);
     }
 
     private ABIType<?> generateType(String[] canonicalBaseTypes, Random r, final int tupleDepth) {
