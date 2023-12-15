@@ -50,7 +50,7 @@ Function foo = Function.parse("foo((fixed[],int8)[1][][5])", "(int,string)");
 
 // decode return type (int256,string)
 Tuple decoded = foo.decodeReturn(
-FastHex.decode(
+    FastHex.decode(
           "000000000000000000000000000000000000000000000000000000000000002A"
         + "0000000000000000000000000000000000000000000000000000000000000040"
         + "000000000000000000000000000000000000000000000000000000000000000e"
@@ -70,9 +70,9 @@ System.out.println(returned);
 #### Using TupleType
 
 ```java
-TupleType tt = TupleType.parse("(bool,int72[][])");
-ByteBuffer b0 = tt.getNonCapturing(0).encode(false);
-ByteBuffer b1 = tt.getNonCapturing(1).encode(new BigInteger[][] { });
+TupleType tt = TupleType.parse("(int72[][],address)");
+ByteBuffer b0 = tt.getNonCapturing(0).encode(new BigInteger[][] { });
+ByteBuffer b1 = tt.getNonCapturing(1).encode(Address.wrap("0x0000..."));
 ByteBuffer b2 = tt.encode(Tuple.of(Address.wrap("0x0000..."), new BigInteger[][] {}));
 ```
 
