@@ -72,8 +72,8 @@ System.out.println(returned);
 ```java
 TupleType tt = TupleType.parse("(int72[][],address)");
 ByteBuffer b0 = tt.getNonCapturing(0).encode(new BigInteger[][] { });
-ByteBuffer b1 = tt.getNonCapturing(1).encode(Address.wrap("0x0000..."));
-ByteBuffer b2 = tt.encode(Tuple.of(Address.wrap("0x0000..."), new BigInteger[][] {}));
+ByteBuffer b1 = tt.getNonCapturing(1).encode(Address.wrap("0x52908400098527886E0F7030069857D2E4169EE7"));
+ByteBuffer b2 = tt.encode(Tuple.of(new BigInteger[][] {}, Address.wrap("0x52908400098527886E0F7030069857D2E4169EE7")));
 ```
 
 #### Misc
