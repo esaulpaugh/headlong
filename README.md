@@ -14,63 +14,89 @@ SHA-256 (headlong-10.0.1.jar): 78a870190445090c5def91eca8b1e71a1ba6b6729a9a8ebab
 
 ## Usage
 
-### ABI codec
+### ABI package
 
 #### Encoding Function Calls
 
 ```java
-Function f = new Function("baz(uint32,bool)"); // canonicalizes and parses any signature
+Function baz = Function.parse("baz(uint32,bool)"); // canonicalizes and parses any signature
 // or
 Function f2 = Function.fromJson("{\"type\":\"function\",\"name\":\"foo\",\"inputs\":[{\"name\":\"complex_nums\",\"type\":\"tuple[]\",\"components\":[{\"name\":\"real\",\"type\":\"fixed168x10\"},{\"name\":\"imaginary\",\"type\":\"fixed168x10\"}]}]}");
 
-Tuple args = Tuple.of(69L, true);
+Tuple bazArgs = Tuple.of(69L, true);
+Tuple complexNums = Tuple.singleton(new Tuple[] { Tuple.of(new BigDecimal("0.0090000000"), new BigDecimal("1.9500000000")) });
 
 // Two equivalent styles:
-ByteBuffer one = f.encodeCall(args);
-ByteBuffer two = f.encodeCallWithArgs(69L, true);
+ByteBuffer one = baz.encodeCall(bazArgs);
+ByteBuffer two = baz.encodeCallWithArgs(69L, true);
 
-System.out.println(Function.formatCall(one.array())); // a multi-line hex representation
-System.out.println(f.decodeCall(two).equals(args));
+System.out.println("baz call hex:\n" + Strings.encode(one) + "\n"); // hexadecimal encoding (without 0x prefix)
+
+Tuple recoveredArgs = baz.decodeCall(two); // decode the encoding back to the original args
+
+System.out.println("baz args:\n" + recoveredArgs + "\n"); // toString()
+System.out.println("equal:\n" + recoveredArgs.equals(bazArgs) + "\n"); // test for equality
+
+System.out.println("baz call debug:\n" + Function.formatCall(one.array()) + "\n"); // human-readable, for debugging function calls (expects input to start with 4-byte selector)
+System.out.println("baz args debug:\n" + ABIType.format(baz.getInputs().encode(bazArgs).array()) + "\n"); // human-readable, for debugging encodings without a selector
+System.out.println("f2 call debug:\n" + Function.formatCall(f2.encodeCall(complexNums).array()) + "\n");
+System.out.println("f2 args debug:\n" + ABIType.format(f2.getInputs().encode(complexNums).array()));
 ```
 
 #### Decoding Return Values
 
 ```java
-Function foo = new Function("foo((fixed[],int8)[1][][5])", "(ufixed,string)");
+Function foo = Function.parse("foo((fixed[],int8)[1][][5])", "(int,string)");
 
-// decode return type (ufixed,string)
+// decode return type (int256,string)
 Tuple decoded = foo.decodeReturn(
-        FastHex.decode(
-                "0000000000000000000000000000000000000000000000000000000000000045"
-              + "0000000000000000000000000000000000000000000000000000000000000040"
-              + "000000000000000000000000000000000000000000000000000000000000000e"
-              + "59616f62616e6745696768747939000000000000000000000000000000000000"
-        )
+FastHex.decode(
+          "000000000000000000000000000000000000000000000000000000000000002A"
+        + "0000000000000000000000000000000000000000000000000000000000000040"
+        + "000000000000000000000000000000000000000000000000000000000000000e"
+        + "59616f62616e6745696768747939000000000000000000000000000000000000"
+    )
 );
 
-System.out.println(decoded.equals(Tuple.of(new BigDecimal(BigInteger.valueOf(69L), 18), "YaobangEighty9")));
+System.out.println(decoded.equals(Tuple.of(BigInteger.valueOf(42L), "YaobangEighty9")));
 ```
 
 ```java
-Function fooTwo = new Function("fooTwo()", "(uint8)");
-int returned = fooTwo.decodeSingletonReturn(FastHex.decode("00000000000000000000000000000000000000000000000000000000000000FF"));
+Function fooTwo = Function.parse("fooTwo()", "(uint8)");
+int returned = fooTwo.decodeSingletonReturn(FastHex.decode("00000000000000000000000000000000000000000000000000000000000000FF")); // uint8 corresponds to int
+System.out.println(returned);
 ```
 
-#### Creating types directly
+#### Using TupleType
 
 ```java
-BooleanType bool = TypeFactory.create("bool");
-IntType uint24 = TypeFactory.create("uint24");
+TupleType tt = TupleType.parse("(bool,int72[][])");
+ByteBuffer b0 = tt.getNonCapturing(0).encode(false);
+ByteBuffer b1 = tt.getNonCapturing(1).encode(new BigInteger[][] { });
+ByteBuffer b2 = tt.encode(Tuple.of(Address.wrap("0x0000..."), new BigInteger[][] {}));
 ```
 
-### RLP codec
+#### Misc
 
 ```java
-// for an example class Student
+Event event = Event.fromJson("{\"type\":\"event\",\"name\":\"an_event\",\"inputs\":[{\"name\":\"a\",\"type\":\"bytes\",\"indexed\":true},{\"name\":\"b\",\"type\":\"uint256\",\"indexed\":false}],\"anonymous\":true}");
+Tuple args = event.decodeArgs(new byte[][] { new byte[32] }, new byte[32]);
+System.out.println(event);
+System.out.println(args);
+
+// create any type directly (advanced)
+ArrayType<ABIType<Object>, Object> at = TypeFactory.create("(address,int)[]");
+ABIType<Object> unknown = TypeFactory.create(at.getCanonicalType());
+```
+
+### RLP package
+
+```java
+// for an example class Student implementing some example interface
 public Student(byte[] rlp) {
-    Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(rlp);
+    Iterator<RLPItem> iter = RLPDecoder.RLP_STRICT.sequenceIterator(rlp);
     
-    this.name = iter.next().asString(UTF_8);
+    this.name = iter.next().asString(Strings.UTF_8);
     this.gpa = iter.next().asFloat(false);
     this.publicKey = iter.next().asBytes();
     this.balance = new BigDecimal(iter.next().asBigInt(), iter.next().asInt());
@@ -80,7 +106,7 @@ public Student(byte[] rlp) {
 public Object[] toObjectArray() {
     return new Object[] {
             // instances of byte[]
-            Strings.decode(name, UTF_8),
+            Strings.decode(name, Strings.UTF_8),
             FloatingPoint.toBytes(gpa),
             publicKey,
             balance.unscaledValue().toByteArray(),
@@ -141,6 +167,6 @@ Also includes optimized implementations of:
 
 headlong depends on gson v2.10.1. Test suite should take less than one minute to run. Test packages require junit. Jar size is ~120 KiB. Java 8+.
 
-See the wiki for more, such as TupleTypes, packed encoding (and decoding), and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
+See the wiki for more, such as packed encoding (and decoding) and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
 Licensed under Apache 2.0 terms
