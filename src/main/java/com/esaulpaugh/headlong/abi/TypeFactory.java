@@ -245,16 +245,18 @@ public final class TypeFactory {
         if (elementNames != null && elementNames.length != elements.size()) {
             throw new IllegalArgumentException("expected " + elements.size() + " element names but found " + elementNames.length);
         }
-        return argEnd == len
-                ? new TupleType(
-                    canonicalBuilder.deleteCharAt(canonicalBuilder.length() - 1).append(')').toString(),
-                    dynamic,
-                    elements.toArray(EMPTY_ARRAY),
-                    elementNames,
-                    null,
-                    flags
-                )
-                : null;
+        if (argEnd != len) {
+            return null;
+        }
+        canonicalBuilder.setCharAt(canonicalBuilder.length() - 1, ')'); // overwrite trailing comma
+        return new TupleType(
+            canonicalBuilder.toString(),
+            dynamic,
+            elements.toArray(EMPTY_ARRAY),
+            elementNames,
+            null,
+            flags
+        );
     }
 
     private static int nextTerminator(String signature, int i) {

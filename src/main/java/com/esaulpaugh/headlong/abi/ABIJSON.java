@@ -214,8 +214,9 @@ public final class ABIJSON {
                 indexed[i] = getBoolean(inputObj, INDEXED);
             }
         }
+        canonicalBuilder.setCharAt(canonicalBuilder.length() - 1, ')');
         return new TupleType(
-                canonicalBuilder.deleteCharAt(canonicalBuilder.length() - 1).append(')').toString(),
+                canonicalBuilder.toString(),
                 dynamic,
                 elements,
                 names,
