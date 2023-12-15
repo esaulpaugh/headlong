@@ -70,10 +70,16 @@ System.out.println(returned);
 #### Using TupleType
 
 ```java
-TupleType tt = TupleType.parse("(int72[][],address)");
-ByteBuffer b0 = tt.getNonCapturing(0).encode(new BigInteger[][] { });
-ByteBuffer b1 = tt.getNonCapturing(1).encode(Address.wrap("0x52908400098527886E0F7030069857D2E4169EE7"));
-ByteBuffer b2 = tt.encode(Tuple.of(new BigInteger[][] {}, Address.wrap("0x52908400098527886E0F7030069857D2E4169EE7")));
+TupleType tt = TupleType.parse("(bool,address,int72[][])");
+ByteBuffer b0 = tt.encode(Tuple.of(false, Address.wrap("0x52908400098527886E0F7030069857D2E4169EE7"), new BigInteger[0][]));
+// Tuple t = tt.decode(b0); // decode the tuple (has the side effect of advancing the ByteBuffer's position)
+// or...
+Address a = tt.decode(b0, 1); // decode only index 1
+System.out.println(a);
+Tuple t2 = tt.decode(b0, 0, 2); // decode only indices 0 and 2
+System.out.println(t2);
+
+ByteBuffer b1 = tt.getNonCapturing(2).encode(new BigInteger[][] {  }); // encode only int72[][]
 ```
 
 #### Misc
