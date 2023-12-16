@@ -505,7 +505,7 @@ public class EncodeTest {
     public void testScaleErr() throws Throwable {
         assertThrown(
                 IllegalArgumentException.class,
-                "BigDecimal scale mismatch: actual != expected: 1 != 9",
+                "BigDecimal scale mismatch: expected scale 9 but found 1",
                 () -> Function.parse("(fixed56x9)").encodeCall(Tuple.singleton(new BigDecimal("0.2")))
         );
     }
@@ -650,7 +650,7 @@ public class EncodeTest {
         assertEquals(u128Max.doubleValue(), ufixed.maxDecimal().doubleValue(), DELTA);
 
         ufixed.validate(new BigDecimal(BigInteger.ZERO, 18));
-        assertThrown(ILLEGAL, "BigDecimal scale mismatch: actual != expected: 10 != 18", () -> ufixed.validate(O_0000000001.negate()));
+        assertThrown(ILLEGAL, "BigDecimal scale mismatch: expected scale 18 but found 10", () -> ufixed.validate(O_0000000001.negate()));
         ufixed.validate(O_000000000000000001);
         assertThrown(ILLEGAL, "signed value given for unsigned type", () -> ufixed.validate(O_000000000000000001.negate()));
 
