@@ -442,10 +442,8 @@ public class MonteCarloTestCase {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return generateBooleanArray(len, r);
         case TYPE_CODE_BYTE:
-            if (arrayType.isString()) {
-                return generateUtf8String(len, r);
-            }
-            return TestUtils.randomBytes(len, r);
+            final byte[] random = TestUtils.randomBytes(len, r);
+            return arrayType.isString() ? Strings.encode(random, Strings.UTF_8) : random;
         case TYPE_CODE_INT: return generateIntArray(len, (IntType) elementType, r);
         case TYPE_CODE_LONG: return generateLongArray(len, (LongType) elementType, r);
         case TYPE_CODE_BIG_INTEGER: return generateBigIntegerArray(len, (BigIntegerType) elementType, r);
@@ -459,10 +457,6 @@ public class MonteCarloTestCase {
 
     private static String generateFunctionName(Random r) {
         return TestUtils.generateASCIIString(r.nextInt(34), r).replace('(', '_');
-    }
-
-    private static String generateUtf8String(int len, Random r) {
-        return Strings.encode(TestUtils.randomBytes(len, r), Strings.UTF_8);
     }
 
     private static int[] generateIntArray(final int len, IntType intType, Random r) {
