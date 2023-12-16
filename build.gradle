@@ -9,7 +9,7 @@ plugins {
 
 group = "com.esaulpaugh"
 archivesBaseName = "headlong"
-version = "10.0.2-SNAPSHOT"
+version = "10.0.3-SNAPSHOT"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -29,7 +29,7 @@ test {
 }
 
 final String versionStr = getProject().getGradle().getGradleVersion()
-final int gradleVersion = Integer.parseInt(versionStr.substring(0, versionStr.indexOf('.')))
+final int gradleVersion = Integer.parseInt(versionStr.substring(0, versionStr.indexOf(".")))
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     if (gradleVersion >= 6) getArchiveClassifier().set("javadoc")
@@ -82,7 +82,7 @@ publishing {
 
 sourceSets {
     jmh {
-        java.srcDirs = ['src/jmh/java']
+        java.srcDirs = ["src/jmh/java"]
         compileClasspath += sourceSets.main.runtimeClasspath
     }
 }
