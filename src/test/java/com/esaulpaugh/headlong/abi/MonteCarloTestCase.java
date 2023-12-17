@@ -380,7 +380,7 @@ public class MonteCarloTestCase {
         StringBuilder sb = new StringBuilder(baseTypeString);
         boolean isElement = r.nextBoolean() && r.nextBoolean();
         if(isElement) {
-            int arrayDepth = 1 + r.nextInt(limits.maxArrayDepth);
+            int arrayDepth = r.nextInt(limits.maxArrayDepth + 1);
             for (int i = 0; i < arrayDepth; i++) {
                 sb.append('[');
                 if(r.nextBoolean()) {
