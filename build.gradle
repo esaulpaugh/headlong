@@ -60,7 +60,7 @@ jar {
                 "Implementation-Title": project.name,
                 "Implementation-Version": project.version,
                 "Automatic-Module-Name": project.name,
-                "Build-Date": todayUTC() // DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneId.of("UTC")).format(Instant.now())
+                "Build-Date": todayUTC() // DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneOffset.UTC).format(Instant.now())
         )
     }
     finalizedBy(sourcesJar)
