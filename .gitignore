@@ -11,3 +11,6 @@
 *.iml
 *.log
 gradle.properties
+
+# macOS
+.DS_Store
