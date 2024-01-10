@@ -326,19 +326,18 @@ public abstract class ABIType<J> {
         final StringBuilder sb = new StringBuilder();
         final String base = hasArraySuffix ? className.substring(split) : className;
         switch (base) {
-            case "B": sb.append("byte"); break;
-            case "S": sb.append("short"); break;
-            case "I": sb.append("int"); break;
-            case "J": sb.append("long"); break;
-            case "F": sb.append("float"); break;
-            case "D": sb.append("double"); break;
-            case "C": sb.append("char"); break;
-            case "Z": sb.append("boolean"); break;
-            default: {
-                int lastDotIndex = base.lastIndexOf('.');
-                if(lastDotIndex != -1) {
-                    sb.append(base, lastDotIndex + 1, base.length() - (base.charAt(0) == 'L' ? 1 : 0));
-                }
+        case "B": sb.append("byte"); break;
+        case "S": sb.append("short"); break;
+        case "I": sb.append("int"); break;
+        case "J": sb.append("long"); break;
+        case "F": sb.append("float"); break;
+        case "D": sb.append("double"); break;
+        case "C": sb.append("char"); break;
+        case "Z": sb.append("boolean"); break;
+        default:
+            int lastDotIndex = base.lastIndexOf('.');
+            if(lastDotIndex != -1) {
+                sb.append(base, lastDotIndex + 1, base.length() - (base.charAt(0) == 'L' ? 1 : 0));
             }
         }
         if(hasArraySuffix) {

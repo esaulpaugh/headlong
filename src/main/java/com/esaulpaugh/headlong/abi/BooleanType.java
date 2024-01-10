@@ -78,9 +78,9 @@ public final class BooleanType extends UnitType<Boolean> {
 
     static Boolean decodeBoolean(byte b) {
         switch (b) {
-            case ZERO_BYTE: return Boolean.FALSE;
-            case ONE_BYTE: return Boolean.TRUE;
-            default: throw new IllegalArgumentException("illegal boolean value: " + b);
+        case ZERO_BYTE: return Boolean.FALSE;
+        case ONE_BYTE: return Boolean.TRUE;
+        default: throw new IllegalArgumentException("illegal boolean value: " + b);
         }
     }
 }

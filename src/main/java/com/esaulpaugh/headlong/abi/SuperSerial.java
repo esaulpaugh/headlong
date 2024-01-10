@@ -148,8 +148,8 @@ public final class SuperSerial {
             return val.signum() < 0
                     ? signExtendNegative(bytes, ut.bitLength / Byte.SIZE)
                     : bytes[0] != 0
-                    ? bytes
-                    : Arrays.copyOfRange(bytes, 1, bytes.length);
+                        ? bytes
+                        : Arrays.copyOfRange(bytes, 1, bytes.length);
         }
         return EMPTY_BYTE_ARRAY;
     }
