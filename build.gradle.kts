@@ -2,7 +2,7 @@
 //import java.time.Instant
 //import java.time.format.DateTimeFormatter
 //import java.util.Locale
-//import java.time.ZoneId
+//import java.time.ZoneOffset
 //
 //plugins {
 //    id("java-library")
@@ -48,7 +48,7 @@
 //    add("archives", javadocJar)
 //}
 //
-//val dateFormatter : DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneId.of("UTC"))
+//val dateFormatter : DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneOffset.UTC)
 //
 //tasks.withType<Jar> {
 //    manifest {
