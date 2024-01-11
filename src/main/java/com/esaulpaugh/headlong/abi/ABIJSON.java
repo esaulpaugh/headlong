@@ -196,7 +196,7 @@ public final class ABIJSON {
         final ABIType<?>[] elements = new ABIType<?>[size];
         final String[] names = new String[size];
         final String[] internalTypes = new String[size];
-        final StringBuilder canonicalBuilder = new StringBuilder("(");
+        final StringBuilder canonicalBuilder = new StringBuilder(40).append('(');
         boolean dynamic = false;
         for (int i = 0; i < elements.length; i++) {
             final JsonObject inputObj = array.get(i).getAsJsonObject();

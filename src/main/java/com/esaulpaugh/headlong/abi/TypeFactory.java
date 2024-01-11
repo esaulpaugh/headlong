@@ -223,7 +223,7 @@ public final class TypeFactory {
         if (len == 2 && rawTypeStr.equals(EMPTY_TUPLE_STRING)) return TupleType.empty(flags);
         final List<ABIType<?>> elements = new ArrayList<>();
         int argEnd = 1;
-        final StringBuilder canonicalBuilder = new StringBuilder("(");
+        final StringBuilder canonicalBuilder = new StringBuilder(40).append('(');
         boolean dynamic = false;
         try {
             do {
