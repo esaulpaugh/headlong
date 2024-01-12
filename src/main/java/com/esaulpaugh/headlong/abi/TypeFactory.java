@@ -218,12 +218,18 @@ public final class TypeFactory {
         return c > '0' && c <= '9';
     }
 
+    private static final int CAPACITY = 40;
+
+    static StringBuilder newTypeBuilder() {
+        return new StringBuilder(CAPACITY).append('(');
+    }
+
     private static TupleType parseTupleType(final String rawTypeStr, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawTypeStr.length();
         if (len == 2 && rawTypeStr.equals(EMPTY_TUPLE_STRING)) return TupleType.empty(flags);
         final List<ABIType<?>> elements = new ArrayList<>();
         int argEnd = 1;
-        final StringBuilder canonicalBuilder = new StringBuilder(40).append('(');
+        final StringBuilder canonicalType = newTypeBuilder();
         boolean dynamic = false;
         try {
             do {
@@ -235,7 +241,7 @@ public final class TypeFactory {
                 default: argEnd = nextTerminator(rawTypeStr, argStart);
                 }
                 final ABIType<?> e = buildUnchecked(rawTypeStr.substring(argStart, argEnd), null, null, flags);
-                canonicalBuilder.append(e.canonicalType).append(',');
+                canonicalType.append(e.canonicalType).append(',');
                 dynamic |= e.dynamic;
                 elements.add(e);
             } while (rawTypeStr.charAt(argEnd++) != ')');
@@ -248,9 +254,9 @@ public final class TypeFactory {
         if (argEnd != len) {
             return null;
         }
-        canonicalBuilder.setCharAt(canonicalBuilder.length() - 1, ')'); // overwrite trailing comma
+        canonicalType.setCharAt(canonicalType.length() - 1, ')'); // overwrite trailing comma
         return new TupleType(
-            canonicalBuilder.toString(),
+            canonicalType.toString(),
             dynamic,
             elements.toArray(EMPTY_ARRAY),
             elementNames,
