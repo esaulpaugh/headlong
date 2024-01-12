@@ -337,9 +337,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     /**
-     * Returns a new {@link TupleType} containing selected elements. Only the elements in this {@link TupleType} whose position is
-     * specified with a {@code true} value in the {@code manifest} are included in the result. The order of the selected elements is
-     * preserved.
+     * Returns a new {@link TupleType} from select elements in this {@link TupleType}. Only elements marked with {@code true} in {@code manifest} are included.
+     * Order is preserved among the selected elements.
      *
      * @param manifest  booleans specifying whether to include the respective elements
      * @return  the new {@link TupleType}
@@ -350,7 +349,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     /**
      * Returns the complement of {@link TupleType#select(boolean...)} -- a new {@link TupleType} containing only the elements which are
-     * *not* specified with {@code true} values. The order of the remaining elements is preserved.
+     * *not* marked for exclusion with a {@code true} value in the manifest. The order of the remaining elements is preserved.
      *
      * @param manifest  booleans specifying whether to exclude the respective elements
      * @return  the new {@link TupleType}
