@@ -341,7 +341,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
      * specified with a {@code true} value in the {@code manifest}. Aside from eliminating items not selected, order is
      * preserved.
      *
-     * @param manifest  the booleans specifying which elements to select
+     * @param manifest  booleans specifying whether to include the respective elements
      * @return  the new {@link TupleType}
      */
     public TupleType select(boolean... manifest) {
@@ -353,7 +353,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
      * elements which are *not* specified with {@code true} values. Aside from eliminating excluded items, order is
      * preserved.
      *
-     * @param manifest  the booleans specifying which elements to exclude
+     * @param manifest  booleans specifying whether to exclude the respective elements
      * @return  the new {@link TupleType}
      */
     public TupleType exclude(boolean... manifest) {
@@ -363,7 +363,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     private TupleType selectElements(final boolean[] manifest, final boolean negate) {
         final int size = size();
         if(manifest.length == size) {
-            final StringBuilder canonicalBuilder = new StringBuilder("(");
+            final StringBuilder canonicalType = new StringBuilder("(");
             boolean dynamic = false;
             final List<ABIType<?>> selected = new ArrayList<>(size);
             final List<String> selectedNames = elementNames == null ? null : new ArrayList<>(size);
@@ -371,7 +371,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             for (int i = 0; i < size; i++) {
                 if (negate ^ manifest[i]) {
                     ABIType<?> e = get(i);
-                    canonicalBuilder.append(e.canonicalType).append(',');
+                    canonicalType.append(e.canonicalType).append(',');
                     dynamic |= e.dynamic;
                     selected.add(e);
                     if (selectedNames != null) {
@@ -383,7 +383,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 }
             }
             return new TupleType(
-                    completeTupleTypeString(canonicalBuilder),
+                    completeTupleTypeString(canonicalType),
                     dynamic,
                     selected.toArray(EMPTY_ARRAY),
                     selectedNames == null ? null : selectedNames.toArray(EMPTY_STRING_ARRAY),
@@ -391,7 +391,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     this.flags
             );
         }
-        throw new IllegalArgumentException("manifest.length != size(): " + manifest.length + " != " + size);
+        throw new IllegalArgumentException("expected manifest length " + size() + " but found length " + manifest.length);
     }
 
     private static String completeTupleTypeString(StringBuilder sb) {
