@@ -255,8 +255,8 @@ public class TupleTest {
         assertEquals(TupleType.of("bytes3", "uint16[]"), tt.select(true, true, false));
         assertEquals(TupleType.of("bytes3", "uint16[]", "string"), tt.select(true, true, true));
 
-        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.select(true, true));
-        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.select(false, false, false, false));
+        assertThrown(IllegalArgumentException.class, "expected manifest length 3 but found length 2", () -> tt.select(true, true));
+        assertThrown(IllegalArgumentException.class, "expected manifest length 3 but found length 4", () -> tt.select(false, false, false, false));
 
         assertEquals(TupleType.of("bytes3", "uint16[]", "string"), tt.exclude(false, false, false));
         assertEquals(TupleType.of("bytes3", "uint16[]"), tt.exclude(false, false, true));
@@ -267,8 +267,8 @@ public class TupleTest {
         assertEquals(TupleType.of("string"), tt.exclude(true, true, false));
         assertEquals(TupleType.EMPTY, tt.exclude(true, true, true));
 
-        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.select(new boolean[0]));
-        assertThrown(IllegalArgumentException.class, "manifest.length != size()", () -> tt.select(new boolean[5]));
+        assertThrown(IllegalArgumentException.class, "expected manifest length 3 but found length 0", () -> tt.select(new boolean[0]));
+        assertThrown(IllegalArgumentException.class, "expected manifest length 3 but found length 5", () -> tt.select(new boolean[5]));
     }
 
     @Test
