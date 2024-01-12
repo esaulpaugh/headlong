@@ -337,8 +337,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     /**
-     * Returns a new {@link TupleType} containing only the elements in this {@link TupleType} whose position is
-     * specified with a {@code true} value in the {@code manifest}. Aside from eliminating items not selected, order is
+     * Returns a new {@link TupleType} containing selected elements. Only the elements in this {@link TupleType} whose position is
+     * specified with a {@code true} value in the {@code manifest} are included in the result. The order of the selected elements is
      * preserved.
      *
      * @param manifest  booleans specifying whether to include the respective elements
@@ -349,9 +349,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     /**
-     * Returns the complement of {@link TupleType#select(boolean...)} -- a new {@link TupleType} containing only the
-     * elements which are *not* specified with {@code true} values. Aside from eliminating excluded items, order is
-     * preserved.
+     * Returns the complement of {@link TupleType#select(boolean...)} -- a new {@link TupleType} containing only the elements which are
+     * *not* specified with {@code true} values. The order of the remaining elements is preserved.
      *
      * @param manifest  booleans specifying whether to exclude the respective elements
      * @return  the new {@link TupleType}
@@ -362,36 +361,36 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     private TupleType selectElements(final boolean[] manifest, final boolean negate) {
         final int size = size();
-        if(manifest.length == size) {
-            final StringBuilder canonicalType = new StringBuilder("(");
-            boolean dynamic = false;
-            final List<ABIType<?>> selected = new ArrayList<>(size);
-            final List<String> selectedNames = elementNames == null ? null : new ArrayList<>(size);
-            final List<String> selectedInternalTypes = elementInternalTypes == null ? null : new ArrayList<>(size);
-            for (int i = 0; i < size; i++) {
-                if (negate ^ manifest[i]) {
-                    ABIType<?> e = get(i);
-                    canonicalType.append(e.canonicalType).append(',');
-                    dynamic |= e.dynamic;
-                    selected.add(e);
-                    if (selectedNames != null) {
-                        selectedNames.add(elementNames[i]);
-                    }
-                    if (selectedInternalTypes != null) {
-                        selectedInternalTypes.add(elementInternalTypes[i]);
-                    }
+        if (manifest.length != size) {
+            throw new IllegalArgumentException("expected manifest length " + size + " but found length " + manifest.length);
+        }
+        final StringBuilder canonicalType = new StringBuilder("(");
+        boolean dynamic = false;
+        final List<ABIType<?>> selected = new ArrayList<>(size);
+        final List<String> selectedNames = elementNames == null ? null : new ArrayList<>(size);
+        final List<String> selectedInternalTypes = elementInternalTypes == null ? null : new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            if (negate ^ manifest[i]) {
+                ABIType<?> e = get(i);
+                canonicalType.append(e.canonicalType).append(',');
+                dynamic |= e.dynamic;
+                selected.add(e);
+                if (selectedNames != null) {
+                    selectedNames.add(elementNames[i]);
+                }
+                if (selectedInternalTypes != null) {
+                    selectedInternalTypes.add(elementInternalTypes[i]);
                 }
             }
-            return new TupleType(
-                    completeTupleTypeString(canonicalType),
-                    dynamic,
-                    selected.toArray(EMPTY_ARRAY),
-                    selectedNames == null ? null : selectedNames.toArray(EMPTY_STRING_ARRAY),
-                    selectedInternalTypes == null ? null : selectedInternalTypes.toArray(EMPTY_STRING_ARRAY),
-                    this.flags
-            );
         }
-        throw new IllegalArgumentException("expected manifest length " + size() + " but found length " + manifest.length);
+        return new TupleType(
+                completeTupleTypeString(canonicalType),
+                dynamic,
+                selected.toArray(EMPTY_ARRAY),
+                selectedNames == null ? null : selectedNames.toArray(EMPTY_STRING_ARRAY),
+                selectedInternalTypes == null ? null : selectedInternalTypes.toArray(EMPTY_STRING_ARRAY),
+                this.flags
+        );
     }
 
     private static String completeTupleTypeString(StringBuilder sb) {
