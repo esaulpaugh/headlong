@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public final class TestUtils {
-    
+
     private TestUtils() {}
 
     public static boolean shutdownAwait(ExecutorService exec, long timeoutSeconds) throws InterruptedException {
@@ -50,7 +50,7 @@ public final class TestUtils {
     }
 
     public static void requireNoTimeout(boolean noTimeout) throws TimeoutException {
-        if(!noTimeout) {
+        if (!noTimeout) {
             throw new TimeoutException("not very Timely!!");
         }
     }
@@ -169,7 +169,7 @@ public final class TestUtils {
     }
 
     public static BigInteger uniformBigInteger(Random r, boolean unsigned, int bitLength) {
-        if(bitLength == 0) {
+        if (bitLength == 0) {
             return BigInteger.ZERO;
         }
         if (unsigned) {
@@ -190,9 +190,9 @@ public final class TestUtils {
 
     public static void sort(int[] arr) {
         int j = 1;
-        while(j < arr.length) {
+        while (j < arr.length) {
             int i = j - 1, v = arr[j], v2;
-            while(i >= 0 && v < (v2 = arr[i])) {
+            while (i >= 0 && v < (v2 = arr[i])) {
                 arr[i-- + 1] = v2;
             }
             arr[i + 1] = v;
@@ -201,7 +201,7 @@ public final class TestUtils {
     }
 
     public static byte[] randomBytes(int n) {
-        return randomBytes(n, TestUtils.seededRandom());
+        return randomBytes(n, seededRandom());
     }
 
     public static byte[] randomBytes(int n, Random r) {
@@ -213,7 +213,7 @@ public final class TestUtils {
     @SuppressWarnings("deprecation")
     public static String generateASCIIString(final int len, Random r) {
         byte[] bytes = new byte[len];
-        for(int i = 0; i < len; i++) {
+        for (int i = 0; i < len; i++) {
             bytes[i] = (byte) (r.nextInt(95) + 32);
         }
         return new String(bytes, 0, 0, len);
@@ -230,7 +230,7 @@ public final class TestUtils {
 
     public static String readFileResourceAsString(ClassLoader classLoader, String resourceName) throws IOException {
         URL url = classLoader.getResource(resourceName);
-        if(url == null) {
+        if (url == null) {
             throw new IOException("resource not found");
         }
         try {
@@ -245,7 +245,7 @@ public final class TestUtils {
             return Integers.toBytes(parseLong(in));
         } catch (NumberFormatException | IllegalStateException e) {
             String inString = in.getAsString();
-            if(inString.startsWith("#")) {
+            if (inString.startsWith("#")) {
                 return parseBigInteger(in).toByteArray();
             } else {
                 return parseBytes(inString);
@@ -256,7 +256,7 @@ public final class TestUtils {
     public static List<Object> parseArrayToBytesHierarchy(final JsonArray array) {
         List<Object> arrayList = new ArrayList<>();
         for (JsonElement element : array) {
-            if(element.isJsonArray()) {
+            if (element.isJsonArray()) {
                 arrayList.add(parseArrayToBytesHierarchy(element.getAsJsonArray()));
             } else if(element.isJsonPrimitive()) {
                 arrayList.add(parsePrimitiveToBytes(element));
@@ -272,7 +272,7 @@ public final class TestUtils {
         long[] longs = new long[size];
         for (int i = 0; i < size; i++) {
             JsonElement element = array.get(i);
-            if(element.isJsonPrimitive()) {
+            if (element.isJsonPrimitive()) {
                 longs[i] = parseLong(element);
             } else {
                 throw new Error("unexpected element type");
@@ -286,7 +286,7 @@ public final class TestUtils {
     }
 
     public static byte[] parseBytesX(String string, int x) {
-        if(string.length() == x) {
+        if (string.length() == x) {
             byte[] bytesX = new byte[x];
             for (int i = 0; i < x; i++) {
                 bytesX[i] = (byte) string.charAt(i);
@@ -364,7 +364,7 @@ public final class TestUtils {
         try {
             r.run();
         } catch (Throwable t) {
-            if(clazz.isInstance(t)) {
+            if (clazz.isInstance(t)) {
                 final String msg = t.getMessage();
                 for(String substr : substrings) {
                     if (msg.contains(substr)) return;
@@ -443,7 +443,7 @@ public final class TestUtils {
     }
 
     public static int insertBytes(int n, byte[] b, int i, byte w, byte x, byte y, byte z) {
-        if(n <= 4) {
+        if (n <= 4) {
             return insertBytes(n, b, i, (byte) 0, (byte) 0, (byte) 0, (byte) 0, w, x, y, z);
         }
         throw new IllegalArgumentException("n must be <= 4");
