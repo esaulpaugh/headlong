@@ -108,7 +108,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     @Override
     int dynamicByteLength(Tuple value) {
-        return countBytes(i -> measureObject(getNonCapturing(i), value.elements[i]));
+        return countBytes(i -> measureObject(get(i), value.elements[i]));
     }
 
     @Override
@@ -151,7 +151,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     @Override
     public int validate(final Tuple value) {
         if (value.size() == this.size()) {
-            return countBytes(i -> validateObject(getNonCapturing(i), value.elements[i]));
+            return countBytes(i -> validateObject(get(i), value.elements[i]));
         }
         throw new IllegalArgumentException("tuple length mismatch: expected length " + this.size() + " but found " + value.size());
     }
@@ -200,7 +200,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         final int last = values.length - 1;
         int offset = firstOffset;
         for (;; i++) {
-            final ABIType<Object> t = getNonCapturing(i);
+            final ABIType<Object> t = get(i);
             if (!t.dynamic) {
                 t.encodeTail(values[i], dest);
                 if (i >= last) {
@@ -215,7 +215,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             }
         }
         for (i = 0; i < values.length; i++) {
-            final ABIType<Object> t = getNonCapturing(i);
+            final ABIType<Object> t = get(i);
             if (t.dynamic) {
                 t.encodeTail(values[i], dest);
             }
