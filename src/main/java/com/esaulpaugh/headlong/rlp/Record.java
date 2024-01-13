@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiConsumer;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
@@ -157,8 +156,8 @@ public final class Record {
         return list;
     }
 
-    public Map<String, byte[]> map() {
-        Map<String, byte[]> map = new LinkedHashMap<>();
+    public LinkedHashMap<String, byte[]> map() {
+        LinkedHashMap<String, byte[]> map = new LinkedHashMap<>();
         visitAll((k, v) -> map.put(k.asString(Strings.UTF_8), v.asBytes()));
         return map;
     }

@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -238,7 +239,7 @@ public class EIP778Test {
 
         assertArrayEquals(array, record.getPairs().toArray(EMPTY_ARRAY));
 
-        Map<String, byte[]> map = record.map();
+        LinkedHashMap<String, byte[]> map = record.map();
         assertArrayEquals(Strings.decode("765f"), record.map().get(UDP));
         assertArrayEquals(Strings.decode("v4", UTF_8), map.get(ID));
         assertArrayEquals(Strings.decode("03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138"), map.get(SECP256K1));
@@ -382,7 +383,7 @@ public class EIP778Test {
     public void testRecordWith() {
         {
             Record with = VECTOR.with(SIGNER, 808L, new KVP(UDP, "0009", HEX));
-            Map<String, byte[]> map = with.map();
+            LinkedHashMap<String, byte[]> map = with.map();
             assertEquals(4, map.size());
             assertEquals(808L, with.getSeq());
             assertArrayEquals(Strings.decode("0009", HEX), map.get(UDP));
@@ -390,7 +391,7 @@ public class EIP778Test {
 
         Record with = VECTOR.with(SIGNER, 4L, new KVP(TCP6, "656934", HEX));
         assertEquals(4L, with.getSeq());
-        Map<String, byte[]> map = with.map();
+        LinkedHashMap<String, byte[]> map = with.map();
         assertEquals(5, map.size());
         assertArrayEquals(Strings.decode("656934", HEX), map.get(TCP6));
     }
@@ -400,7 +401,7 @@ public class EIP778Test {
         assertEquals(4L, VECTOR.map().size());
 
         Record with = VECTOR.with(SIGNER, Long.MAX_VALUE, new KVP(UDP6, "8007", HEX), new KVP(IP6, "ff00ff00", HEX));
-        Map<String, byte[]> map = with.map();
+        LinkedHashMap<String, byte[]> map = with.map();
         assertEquals(6, map.size());
         assertEquals(Long.MAX_VALUE, with.getSeq());
         assertArrayEquals(Strings.decode("8007", HEX), map.get(UDP6));
