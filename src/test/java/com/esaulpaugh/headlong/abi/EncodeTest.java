@@ -189,9 +189,9 @@ public class EncodeTest {
 
     private static void testFormat(boolean func, java.util.function.Function<byte[], String> format) throws Throwable {
         final int expectedMod = func ? 4 : 0;
-        byte[] master = new byte[260];
+        final byte[] master = new byte[260];
         Arrays.fill(master, (byte) 0xff);
-        for (int i = 0; i < 260; i++) {
+        for (int i = 0; i < master.length; i++) {
             byte[] x = Arrays.copyOfRange(master, 0, i);
             int mod = i % UNIT_LENGTH_BYTES;
             if(mod == expectedMod) {
