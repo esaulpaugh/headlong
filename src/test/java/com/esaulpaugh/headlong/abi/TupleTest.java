@@ -140,6 +140,15 @@ public class TupleTest {
     }
 
     @Test
+    public void metaTest2() {
+        final Random r = new Random();
+        assertEquals(BigInteger.ZERO, TestUtils.wildBigInteger(r, true, 0));
+        assertEquals(BigInteger.ZERO, TestUtils.wildBigInteger(r, false, 0));
+        assertEquals(BigInteger.ZERO, TestUtils.uniformBigInteger(null, false, 0));
+        assertEquals(BigInteger.ZERO, TestUtils.uniformBigInteger(null, false, 0));
+    }
+
+    @Test
     public void testTuple() {
         final Tuple emptyA = new Tuple();
         final Tuple emptyB = Tuple.of();

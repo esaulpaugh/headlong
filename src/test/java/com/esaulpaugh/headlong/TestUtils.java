@@ -173,10 +173,7 @@ public final class TestUtils {
     }
 
     public static BigInteger wildBigInteger(Random r, boolean unsigned, int bitLength) {
-        if(bitLength == 0) {
-            return BigInteger.ZERO;
-        }
-        return uniformBigInteger(r, unsigned, 1 + r.nextInt(bitLength));
+        return uniformBigInteger(r, unsigned, r.nextInt(1 + bitLength));
     }
 
     public static BigInteger uniformBigInteger(Random r, boolean unsigned, int bitLength) {
