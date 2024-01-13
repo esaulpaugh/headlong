@@ -144,7 +144,7 @@ public class TupleTest {
         final Random r = new Random();
         assertEquals(BigInteger.ZERO, TestUtils.wildBigInteger(r, true, 0));
         assertEquals(BigInteger.ZERO, TestUtils.wildBigInteger(r, false, 0));
-        assertEquals(BigInteger.ZERO, TestUtils.uniformBigInteger(null, false, 0));
+        assertEquals(BigInteger.ZERO, TestUtils.uniformBigInteger(null, true, 0));
         assertEquals(BigInteger.ZERO, TestUtils.uniformBigInteger(null, false, 0));
     }
 
