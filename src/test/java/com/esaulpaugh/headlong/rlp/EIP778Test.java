@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.BiConsumer;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.rlp.KVP.EMPTY_ARRAY;
@@ -188,7 +187,7 @@ public class EIP778Test {
 
     @Test
     public void testSort() {
-        Random r = TestUtils.seededRandom();
+        final Random r = TestUtils.seededRandom();
         for (int j = 0; j < 50; j++) {
             for (int i = 0; i < 50; i++) {
                 String a = TestUtils.generateASCIIString(j, r);
@@ -202,6 +201,20 @@ public class EIP778Test {
                 }
             }
         }
+        final Record[] records = new Record[] {
+                VECTOR.with(SIGNER, 101L),
+                VECTOR.with(SIGNER, 50L, new KVP(UDP, new byte[0])),
+                VECTOR,
+                VECTOR.with(SIGNER, 99L),
+                VECTOR.with(SIGNER, 0L)
+        };
+        TestUtils.shuffle(records, r);
+        Arrays.sort(records);
+        final StringBuilder sb = new StringBuilder();
+        for (Record e : records) {
+            sb.append(e.getSeq()).append(',');
+        }
+        assertEquals("0,1,50,99,101,", sb.toString());
     }
 
     @Test
@@ -244,8 +257,6 @@ public class EIP778Test {
         assertEquals("v4", map.get(ID).asString(UTF_8));
         assertEquals("03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", map.get(SECP256K1).asString(HEX));
 
-        assertEquals(seq, record.visitAll((k, v) -> {}));
-
         final Iterator<KVP> listIter = pairList.iterator();
         final Iterator<Map.Entry<String, RLPString>> mapIter = map.entrySet().iterator();
         int i = 0;
@@ -266,20 +277,16 @@ public class EIP778Test {
 
         assertEquals(record, Record.parse(record.toString(), VERIFIER));
 
-        record.visitAll(new BiConsumer<RLPString, RLPString>() {
-
-            RLPString prevKey = null;
-
-            @Override
-            public void accept(RLPString k, RLPString v) {
-                if(prevKey != null) {
-                    int c = k.compareTo(prevKey);
-                    assertTrue(c > 0);
-                    assertEquals(new KVP(k, v).compareTo(new KVP(prevKey, v)), c);
-                }
-                prevKey = k;
+        RLPString prevKey = null;
+        final RLPString dummyValue = RLPDecoder.RLP_STRICT.wrapBits(0L);
+        for (KVP pair : record) {
+            if(prevKey != null) {
+                int c = pair.key.compareTo(prevKey);
+                assertTrue(c > 0);
+                assertEquals(pair.compareTo(new KVP(prevKey, dummyValue)), c);
             }
-        });
+            prevKey = pair.key;
+        }
     }
 
     private static void testEqual(KVP a, KVP b) {
