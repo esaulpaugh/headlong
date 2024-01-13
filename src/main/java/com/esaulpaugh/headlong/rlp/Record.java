@@ -156,9 +156,9 @@ public final class Record {
         return list;
     }
 
-    public LinkedHashMap<String, byte[]> map() {
-        LinkedHashMap<String, byte[]> map = new LinkedHashMap<>();
-        visitAll((k, v) -> map.put(k.asString(Strings.UTF_8), v.asBytes()));
+    public LinkedHashMap<String, RLPString> orderedMap() {
+        LinkedHashMap<String, RLPString> map = new LinkedHashMap<>();
+        visitAll((k, v) -> map.put(k.asString(Strings.UTF_8), v));
         return map;
     }
 

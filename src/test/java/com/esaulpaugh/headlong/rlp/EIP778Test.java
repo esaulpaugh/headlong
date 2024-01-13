@@ -239,23 +239,23 @@ public class EIP778Test {
 
         assertArrayEquals(array, record.getPairs().toArray(EMPTY_ARRAY));
 
-        LinkedHashMap<String, byte[]> map = record.map();
-        assertArrayEquals(Strings.decode("765f"), record.map().get(UDP));
-        assertArrayEquals(Strings.decode("v4", UTF_8), map.get(ID));
-        assertArrayEquals(Strings.decode("03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138"), map.get(SECP256K1));
+        final LinkedHashMap<String, RLPString> map = record.orderedMap();
+        assertEquals("765f", map.get(UDP).asString(HEX));
+        assertEquals("v4", map.get(ID).asString(UTF_8));
+        assertEquals("03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", map.get(SECP256K1).asString(HEX));
 
         assertEquals(seq, record.visitAll((k, v) -> {}));
 
         final Iterator<KVP> listIter = pairList.iterator();
-        final Iterator<Map.Entry<String, byte[]>> mapIter = map.entrySet().iterator();
+        final Iterator<Map.Entry<String, RLPString>> mapIter = map.entrySet().iterator();
         int i = 0;
         while (contentIter.hasNext() || listIter.hasNext() || mapIter.hasNext()) {
             final KVP e = array[i];
             assertEquals(e.key, e.key());
             testEqual(e, new KVP(contentIter.next().asRLPString(), contentIter.next().asRLPString()));
             testEqual(e, listIter.next());
-            Map.Entry<String, byte[]> entry = mapIter.next();
-            testEqual(e, new KVP(entry.getKey(), entry.getValue()));
+            Map.Entry<String, RLPString> entry = mapIter.next();
+            testEqual(e, new KVP(entry.getKey(), entry.getValue().asBytes()));
             testEqual(e, e.withValue(e.value().asBytes()));
             testEqual(e, e.withValue(e.value().asString(HEX), HEX));
             testEqual(e, e.withValue(e.value().asString(UTF_8), UTF_8));
@@ -383,28 +383,28 @@ public class EIP778Test {
     public void testRecordWith() {
         {
             Record with = VECTOR.with(SIGNER, 808L, new KVP(UDP, "0009", HEX));
-            LinkedHashMap<String, byte[]> map = with.map();
+            LinkedHashMap<String, RLPString> map = with.orderedMap();
             assertEquals(4, map.size());
             assertEquals(808L, with.getSeq());
-            assertArrayEquals(Strings.decode("0009", HEX), map.get(UDP));
+            assertArrayEquals(Strings.decode("0009", HEX), map.get(UDP).asBytes());
         }
 
         Record with = VECTOR.with(SIGNER, 4L, new KVP(TCP6, "656934", HEX));
         assertEquals(4L, with.getSeq());
-        LinkedHashMap<String, byte[]> map = with.map();
+        LinkedHashMap<String, RLPString> map = with.orderedMap();
         assertEquals(5, map.size());
-        assertArrayEquals(Strings.decode("656934", HEX), map.get(TCP6));
+        assertArrayEquals(Strings.decode("656934", HEX), map.get(TCP6).asBytes());
     }
 
     @Test
     public void testRecordWith2() throws Throwable {
-        assertEquals(4L, VECTOR.map().size());
+        assertEquals(4L, VECTOR.orderedMap().size());
 
         Record with = VECTOR.with(SIGNER, Long.MAX_VALUE, new KVP(UDP6, "8007", HEX), new KVP(IP6, "ff00ff00", HEX));
-        LinkedHashMap<String, byte[]> map = with.map();
+        LinkedHashMap<String, RLPString> map = with.orderedMap();
         assertEquals(6, map.size());
         assertEquals(Long.MAX_VALUE, with.getSeq());
-        assertArrayEquals(Strings.decode("8007", HEX), map.get(UDP6));
+        assertArrayEquals(Strings.decode("8007", HEX), map.get(UDP6).asBytes());
 
         TestUtils.assertThrown(IllegalArgumentException.class, "duplicate key: tcp", () -> with.with(SIGNER, 0L, new KVP(TCP, "blah", ASCII), new KVP(TCP, "bleh", ASCII)));
     }
