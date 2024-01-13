@@ -32,6 +32,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
+import static com.esaulpaugh.headlong.TestUtils.uniformBigInteger;
+import static com.esaulpaugh.headlong.TestUtils.uniformLong;
+import static com.esaulpaugh.headlong.TestUtils.wildBigInteger;
+import static com.esaulpaugh.headlong.TestUtils.wildLong;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -62,7 +66,7 @@ public class TupleTest {
         public void run() {
             final ThreadLocalRandom r = ThreadLocalRandom.current();
             for (long i = 0; i < taskSamples; i++) {
-                final long z = TestUtils.uniformLong(r, unsigned, bitLen) & powMinus1;
+                final long z = uniformLong(r, unsigned, bitLen) & powMinus1;
                 final int idx = (int) (z / Long.SIZE);
                 final long x = dest[idx];
                 if (x != -1L) {
@@ -140,17 +144,26 @@ public class TupleTest {
     }
 
     @Test
-    public void metaTest2() {
+    public void metaTest2() throws Throwable {
         final Random r = new Random();
-        assertEquals(0L, TestUtils.uniformLong(null, true, 0));
-        assertEquals(0L, TestUtils.uniformLong(null, false, 0));
-        assertEquals(0L, TestUtils.wildLong(r, true, 0));
-        assertEquals(0L, TestUtils.wildLong(r, false, 0));
+        assertEquals(0L, uniformLong(null, false, 0));
+        assertEquals(0L, uniformLong(null, true, 0));
+        assertEquals(0L, wildLong(r, false, 0));
+        assertEquals(0L, wildLong(r, true, 0));
 
-        assertEquals(BigInteger.ZERO, TestUtils.uniformBigInteger(null, true, 0));
-        assertEquals(BigInteger.ZERO, TestUtils.uniformBigInteger(null, false, 0));
-        assertEquals(BigInteger.ZERO, TestUtils.wildBigInteger(r, true, 0));
-        assertEquals(BigInteger.ZERO, TestUtils.wildBigInteger(r, false, 0));
+        assertEquals(BigInteger.ZERO, uniformBigInteger(null, false, 0));
+        assertEquals(BigInteger.ZERO, uniformBigInteger(null, true, 0));
+        assertEquals(BigInteger.ZERO, wildBigInteger(r, false, 0));
+        assertEquals(BigInteger.ZERO, wildBigInteger(r, true, 0));
+
+        uniformLong(r, false, 63);
+        uniformLong(r, true, 63);
+
+        uniformLong(r, false, 64);
+        assertThrown(IllegalArgumentException.class, "too many bits for unsigned: 64", () -> uniformLong(r, true, 64));
+
+        assertThrown(IllegalArgumentException.class, "too many bits for signed: 65", () -> uniformLong(r, false, 65));
+        assertThrown(IllegalArgumentException.class, "too many bits for unsigned: 65", () -> uniformLong(r, true, 65));
     }
 
     @Test
