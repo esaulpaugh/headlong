@@ -178,7 +178,7 @@ public class TupleTest {
         assertTrue(emptyA.isEmpty());
         assertTrue(emptyB.isEmpty());
 
-        assertFalse(Tuple.singleton(0).isEmpty());
+        assertFalse(Tuple.of(0).isEmpty());
         assertFalse(Tuple.singleton(false).isEmpty());
         assertFalse(Tuple.singleton(new Object()).isEmpty());
     }
@@ -489,10 +489,7 @@ public class TupleTest {
         assertEquals(8, at.getLength());
         BigDecimalType decimal = tt.get(1);
         assertEquals("fixed168x10", decimal.getCanonicalType());
-
-        Tuple t = Tuple.singleton("iii");
-        String iii = t.get(0);
-        assertEquals("iii", iii);
+        assertEquals("iii", Tuple.singleton("iii").get(0));
 
         TupleType outer = TupleType.parse("((address,int256))");
         TupleType inner = outer.get(0);
@@ -528,24 +525,24 @@ public class TupleTest {
         final Random r = TestUtils.seededRandom();
         final StringBuilder sb = new StringBuilder(r.nextBoolean() ? "string" : "bool");
         for (int j = 0; j < 1_000; j++) {
-            if(r.nextBoolean()) {
+            if (r.nextBoolean()) {
                 sb.append("[]");
             } else {
-                sb.append('[').append(r.nextInt(5000)).append(']');
+                sb.append('[').append(r.nextInt(100)).append(']');
             }
         }
         final String arrType = sb.toString();
-        final int len = arrType.length();
-        assertThrown(IllegalArgumentException.class, "type length exceeds maximum: " + len + " > 2000" , () -> TypeFactory.create(arrType));
+        assertThrown(IllegalArgumentException.class, "type length exceeds maximum: " + arrType.length() + " > 2000" , () -> TypeFactory.create(arrType));
     }
 
     @Test
     public void testToArray() {
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(5, 5, 4, 3);
         final MessageDigest md = Function.newDefaultDigest();
-        long seed = TestUtils.getSeed();
+        final long seed = TestUtils.getSeed();
+        final Random r = new Random();
         for (int z = 0; z < 10; z++) {
-            final Tuple values = new MonteCarloTestCase(seed + z, limits, new Random(), md).argsTuple;
+            final Tuple values = new MonteCarloTestCase(seed + z, limits, r, md).argsTuple;
 
             final Tuple deepCopy = values.deepCopy();
             assertNotSame(values, deepCopy);
@@ -558,8 +555,7 @@ public class TupleTest {
             for (int i = 0; i < elements.length; i++) {
                 elements[i] = values.get(i);
             }
-            final Tuple nt = new Tuple(elements);
-            assertEquals(values, nt);
+            assertEquals(values, new Tuple(elements));
         }
     }
 }
