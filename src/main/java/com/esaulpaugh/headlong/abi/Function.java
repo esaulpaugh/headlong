@@ -386,14 +386,18 @@ public final class Function implements ABIObject {
      * @throws IllegalArgumentException if {@code length} mod 32 is not equal to four
      */
     public static String formatCall(byte[] buffer, final int offset, final int length, IntFunction<String> labeler) {
-        Integers.checkIsMultiple(length - SELECTOR_LEN, UNIT_LENGTH_BYTES);
+        final int bodyLen = length - SELECTOR_LEN;
+        Integers.checkIsMultiple(bodyLen, UNIT_LENGTH_BYTES);
+        final String label = ABIType.pad(0, "ID");
+        final String selectorHex = Strings.encode(buffer, offset, SELECTOR_LEN, Strings.HEX);
         return ABIType.finishFormat(
                 buffer,
                 offset + SELECTOR_LEN,
                 offset + length,
                 labeler,
-                new StringBuilder(ABIType.pad(0, "ID"))
-                        .append(Strings.encode(buffer, offset, SELECTOR_LEN, Strings.HEX))
+                new StringBuilder(label.length() + selectorHex.length() + (bodyLen / UNIT_LENGTH_BYTES) * ABIType.CHARS_PER_LINE)
+                        .append(label)
+                        .append(selectorHex)
         );
     }
 }

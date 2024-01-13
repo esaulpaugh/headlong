@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
@@ -278,7 +279,8 @@ public abstract class ABIType<J> {
     }
 
     private static final int LABEL_LEN = 6;
-    private static final int LABEL_PADDED_LEN = LABEL_LEN + 3;
+    static final int LABEL_PADDED_LEN = LABEL_LEN + 3;
+    static final int CHARS_PER_LINE = "\n".length() + LABEL_PADDED_LEN + (FastHex.CHARS_PER_BYTE * UNIT_LENGTH_BYTES);
 
     public static String format(byte[] abi) {
         return format(abi, (int row) -> {
@@ -289,7 +291,7 @@ public abstract class ABIType<J> {
 
     public static String format(byte[] abi, IntFunction<String> labeler) {
         Integers.checkIsMultiple(abi.length, UNIT_LENGTH_BYTES);
-        return finishFormat(abi, 0, abi.length, labeler, new StringBuilder());
+        return finishFormat(abi, 0, abi.length, labeler, new StringBuilder(abi.length / UNIT_LENGTH_BYTES * CHARS_PER_LINE));
     }
 
     static String finishFormat(byte[] buffer, int offset, int end, IntFunction<String> labeler, StringBuilder sb) {
