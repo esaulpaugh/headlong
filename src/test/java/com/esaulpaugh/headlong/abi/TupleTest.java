@@ -80,7 +80,7 @@ public class TupleTest {
         final int parallelism = 24;
         final boolean unsigned = true;
 
-        for (int j = 0; j < 23; j++) {
+        for (int j = 0; j < 24; j++) {
             final long pow = (long) Math.pow(2.0, j);
             final long powMinus1 = pow - 1;
 //            System.out.println(Long.toHexString(powMinus1) + ", " + pow);
@@ -142,10 +142,15 @@ public class TupleTest {
     @Test
     public void metaTest2() {
         final Random r = new Random();
-        assertEquals(BigInteger.ZERO, TestUtils.wildBigInteger(r, true, 0));
-        assertEquals(BigInteger.ZERO, TestUtils.wildBigInteger(r, false, 0));
+        assertEquals(0L, TestUtils.uniformLong(null, true, 0));
+        assertEquals(0L, TestUtils.uniformLong(null, false, 0));
+        assertEquals(0L, TestUtils.wildLong(r, true, 0));
+        assertEquals(0L, TestUtils.wildLong(r, false, 0));
+
         assertEquals(BigInteger.ZERO, TestUtils.uniformBigInteger(null, true, 0));
         assertEquals(BigInteger.ZERO, TestUtils.uniformBigInteger(null, false, 0));
+        assertEquals(BigInteger.ZERO, TestUtils.wildBigInteger(r, true, 0));
+        assertEquals(BigInteger.ZERO, TestUtils.wildBigInteger(r, false, 0));
     }
 
     @Test

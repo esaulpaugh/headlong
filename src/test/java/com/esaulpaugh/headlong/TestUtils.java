@@ -141,18 +141,20 @@ public final class TestUtils {
     }
 
     public static long uniformLong(Random r, boolean unsigned, int bitLength) {
-        checkBitLength(unsigned, bitLength);
-        if(bitLength == 0) {
+        if (bitLength > Long.SIZE - 1) {
+            if (unsigned) {
+                throw new IllegalArgumentException("too many bits for unsigned: " + bitLength);
+            } else if (bitLength > Long.SIZE) {
+                throw new IllegalArgumentException("too many bits for signed: " + bitLength);
+            }
+        } else if (bitLength == 0) {
             return 0L;
         }
         final long val = r.nextLong();
-        if(bitLength == Long.SIZE) {
-            if(unsigned) {
-                throw new IllegalArgumentException("exceeds long range");
-            }
+        if (bitLength == Long.SIZE) {
             return val;
         }
-        if(unsigned) {
+        if (unsigned) {
             if (bitLength == 63) {
                 return val < 0 ? ~val : val;
             }
@@ -160,16 +162,6 @@ public final class TestUtils {
         }
         final long maskedUnsigned = val & ((1L << (bitLength - 1)) - 1); // r.nextLong(1L << (bitLength - 1));
         return r.nextBoolean() ? ~maskedUnsigned : maskedUnsigned;
-    }
-
-    private static void checkBitLength(boolean unsigned, int bitLength) {
-        if (bitLength > Long.SIZE - 1) {
-            if (unsigned) {
-                throw new IllegalArgumentException("too many bits for unsigned: " + bitLength);
-            } else if (bitLength > Long.SIZE) {
-                throw new IllegalArgumentException("too many bits for signed: " + bitLength);
-            }
-        }
     }
 
     public static BigInteger wildBigInteger(Random r, boolean unsigned, int bitLength) {
