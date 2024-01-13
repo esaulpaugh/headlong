@@ -146,7 +146,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
     }
 
     public RLPString getSignature() {
-        return Record.getSignature(this.rlp);
+        return rlp.iterator(RLP_STRICT).next().asRLPString();
     }
 
     public RLPList getContent() {
@@ -219,10 +219,6 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
     @Override
     public String toString() {
         return ENR_PREFIX + rlp.encodingString(BASE_64_URL_SAFE);
-    }
-
-    private static RLPString getSignature(RLPList rlpList) {
-        return rlpList.iterator(RLP_STRICT).next().asRLPString();
     }
 
     private static byte[] content(RLPList rlpList, int index) {
