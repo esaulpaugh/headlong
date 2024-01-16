@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.Strings;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -419,5 +421,83 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     static TupleType empty(int flags) {
         return flags == ABIType.FLAGS_NONE ? EMPTY : new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null, null, flags);
+    }
+
+    public String annotate(byte[] abi) {
+        return annotate(decode(ByteBuffer.wrap(abi), newUnitBuffer()));
+    }
+
+    public String annotate(Tuple tuple) {
+        if (tuple.elements.length == 0) {
+            return "";
+        }
+        int row = 0;
+        final StringBuilder sb = new StringBuilder();
+        int i = 0;
+        final int last = tuple.elements.length - 1;
+        int offset = firstOffset;
+        for (;; i++) {
+            final ABIType<Object> t = get(i);
+            if (!t.dynamic) {
+                row = encodeTailAnnotated(row, i, t, tuple.elements[i], sb);
+                if (i >= last) {
+                    break;
+                }
+            } else {
+                row = insertOffsetAnnotated(row, i, t, offset, sb);
+                if (i >= last) {
+                    break;
+                }
+                offset += t.dynamicByteLength(tuple.elements[i]); // calculate next offset
+            }
+        }
+        for (i = 0; i < tuple.elements.length; i++) {
+            final ABIType<Object> t = get(i);
+            if (t.dynamic) {
+                row = encodeTailAnnotated(row, i, t, tuple.elements[i], sb);
+            }
+        }
+        return sb.toString();
+    }
+
+    private static int encodeTailAnnotated(int row, int idx, ABIType<Object> t, Object v, StringBuilder sb) {
+        final ByteBuffer dest = ByteBuffer.allocate(t.validate(v));
+        t.encodeTail(v, dest);
+        final int len = dest.position();
+        dest.flip();
+        final byte[] rowData = new byte[UNIT_LENGTH_BYTES];
+        for (int i = 0; i < len; i += UNIT_LENGTH_BYTES) {
+            sb.append(label(row++));
+            dest.get(rowData);
+            sb.append(Strings.encode(rowData));
+            annotate(sb, idx, t, !t.dynamic
+                    ? null
+                    : i == 0 && t instanceof ArrayType && ((ArrayType<?, ?>) t).getLength() == ArrayType.DYNAMIC_LENGTH
+                        ? " length"
+                        : " content");
+        }
+        return row;
+    }
+
+    private static String label(int row) {
+        String unpadded = Integer.toHexString(row * UNIT_LENGTH_BYTES);
+        return ABIType.pad(ABIType.LABEL_LEN - unpadded.length(), unpadded);
+    }
+
+    private static void annotate(StringBuilder sb, int idx, ABIType<?> t, String note) {
+        sb.append("\t[").append(idx).append("]:").append(t);
+        if (note != null) {
+            sb.append(note);
+        }
+        sb.append('\n');
+    }
+
+    private static int insertOffsetAnnotated(int row, int idx, ABIType<Object> t, int offset, StringBuilder sb) {
+        ByteBuffer dest = ByteBuffer.allocate(OFFSET_LENGTH_BYTES);
+        insertIntUnsigned(offset, dest); // insert offset
+        sb.append(label(row++));
+        sb.append(Strings.encode(dest));
+        annotate(sb, idx, t, " offset");
+        return row;
     }
 }

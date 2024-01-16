@@ -278,7 +278,7 @@ public abstract class ABIType<J> {
         dest.put(CACHED_NEG1_PADDING, 0, n);
     }
 
-    private static final int LABEL_LEN = 6;
+    static final int LABEL_LEN = 6;
     static final int LABEL_PADDED_LEN = LABEL_LEN + 3;
     static final int CHARS_PER_LINE = "\n".length() + LABEL_PADDED_LEN + (FastHex.CHARS_PER_BYTE * UNIT_LENGTH_BYTES);
 

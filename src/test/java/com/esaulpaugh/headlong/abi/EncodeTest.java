@@ -170,6 +170,15 @@ public class EncodeTest {
 
     @Test
     public void testFunctionFormat() throws Throwable {
+//        System.out.println(Function.parse("foo(address,string,bytes,bool)").getInputs().annotate(
+//                Tuple.of(
+//                        Address.wrap(Address.toChecksumAddress(BigInteger.TEN.shiftLeft(100))),
+//                        "libertad",
+//                        "carajo".getBytes(),
+//                        true
+//                )
+//        ));
+
         testFormat(true, Function::formatCall);
         testFormatHash(Function::formatCall, "137fe81220baa4ad0300a7a31ac26b0b07549af69af96d436ca3b2a0ebd1b949", "1663cedd" + ABI);
     }
