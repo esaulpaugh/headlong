@@ -470,11 +470,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             sb.append(label(row++));
             dest.get(rowData);
             sb.append(Strings.encode(rowData));
-            annotate(sb, idx, t, !t.dynamic
-                    ? null
-                    : i == 0 && t instanceof ArrayType && ((ArrayType<?, ?>) t).getLength() == ArrayType.DYNAMIC_LENGTH
-                        ? " length"
-                        : " content");
+            annotate(sb, idx, t, t.dynamic && i == 0 && t instanceof ArrayType && ((ArrayType<?, ?>) t).getLength() == ArrayType.DYNAMIC_LENGTH
+                    ? " length"
+                    : i > UNIT_LENGTH_BYTES
+                        ? " ..."
+                        : null);
         }
         return row;
     }
@@ -485,7 +485,12 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     private static void annotate(StringBuilder sb, int idx, ABIType<?> t, String note) {
-        sb.append("\t[").append(idx).append("]:").append(t);
+        sb.append("\t[").append(idx).append("]");
+        if (" ...".equals(note)) {
+            sb.append(note).append('\n');
+            return;
+        }
+        sb.append(' ').append(t.canonicalType);
         if (note != null) {
             sb.append(note);
         }

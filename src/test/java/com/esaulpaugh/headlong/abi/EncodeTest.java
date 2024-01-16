@@ -170,12 +170,12 @@ public class EncodeTest {
 
     @Test
     public void testFunctionFormat() throws Throwable {
-//        System.out.println(Function.parse("foo(address,string,bytes,bool)").getInputs().annotate(
+//        System.out.println(Function.parse("foo(string,address,bytes,uint32)").getInputs().annotate(
 //                Tuple.of(
-//                        Address.wrap(Address.toChecksumAddress(BigInteger.TEN.shiftLeft(100))),
-//                        "libertad",
-//                        "carajo".getBytes(),
-//                        true
+//                        "libertad..........................................................",
+//                        Address.wrap(Address.toChecksumAddress(BigInteger.TEN.shiftLeft(156))),
+//                        "carajo]0]0]0]0]0]0]0]0]0]0]0]0]0]".getBytes(),
+//                        96L
 //                )
 //        ));
 
