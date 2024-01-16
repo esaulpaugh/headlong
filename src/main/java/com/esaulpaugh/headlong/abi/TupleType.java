@@ -472,14 +472,14 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             sb.append(Strings.encode(rowData));
             final boolean dynamicArray = t.dynamic && t instanceof ArrayType && ((ArrayType<?, ?>) t).getLength() == ArrayType.DYNAMIC_LENGTH;
             annotate(sb, idx, t, i > UNIT_LENGTH_BYTES
-                                    ? " ..."
+                                    ? null
                                     : dynamicArray
                                         ? i == 0
                                             ? " length"
-                                            : null
+                                            : ""
                                         : i == 0
-                                            ? null
-                                            : " ..."
+                                            ? ""
+                                            : null
             );
         }
         return row;
@@ -492,15 +492,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     private static void annotate(StringBuilder sb, int idx, ABIType<?> t, String note) {
         sb.append("\t[").append(idx).append("]");
-        if (" ...".equals(note)) {
-            sb.append(note).append('\n');
+        if (note == null) {
+            sb.append(" ...").append('\n');
             return;
         }
-        sb.append(' ').append(t.canonicalType);
-        if (note != null) {
-            sb.append(note);
-        }
-        sb.append('\n');
+        sb.append(' ').append(t.canonicalType).append(note).append('\n');
     }
 
     private static int insertOffsetAnnotated(int row, int idx, ABIType<Object> t, int offset, StringBuilder sb) {
