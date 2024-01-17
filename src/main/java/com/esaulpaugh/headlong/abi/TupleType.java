@@ -444,7 +444,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                     break;
                 }
             } else {
-                row = insertOffsetAnnotated(row, i, t, offset, sb);
+                final ByteBuffer dest = ByteBuffer.allocate(OFFSET_LENGTH_BYTES);
+                insertIntUnsigned(offset, dest); // insert offset
+                sb.append(label(row++)).append(Strings.encode(dest));
+                annotate(sb, i, t, " offset");
                 if (i >= last) {
                     break;
                 }
@@ -484,8 +487,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return row;
     }
 
-    private static void appendAnnotatedRow(int row, StringBuilder sb, ByteBuffer dest, byte[] rowData, int idx, ABIType<Object> t, String note) {
-        dest.get(rowData);
+    private static void appendAnnotatedRow(int row, StringBuilder sb, ByteBuffer bb, byte[] rowData, int idx, ABIType<Object> t, String note) {
+        bb.get(rowData);
         sb.append(label(row)).append(Strings.encode(rowData));
         annotate(sb, idx, t, note);
     }
@@ -502,14 +505,5 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             return;
         }
         sb.append(' ').append(t.canonicalType).append(note).append('\n');
-    }
-
-    private static int insertOffsetAnnotated(int row, int idx, ABIType<Object> t, int offset, StringBuilder sb) {
-        ByteBuffer dest = ByteBuffer.allocate(OFFSET_LENGTH_BYTES);
-        insertIntUnsigned(offset, dest); // insert offset
-        sb.append(label(row++));
-        sb.append(Strings.encode(dest));
-        annotate(sb, idx, t, " offset");
-        return row;
     }
 }
