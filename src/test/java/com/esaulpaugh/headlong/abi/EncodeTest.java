@@ -170,17 +170,17 @@ public class EncodeTest {
 
     @Test
     public void testFunctionFormat() throws Throwable {
-//        System.out.println(Function.parse("foo(string,address,bytes32[2],uint32)").getInputs().annotate(
+//        final TupleType tt = TupleType.parse("(string,address,(bytes,bool))");
+//        final Tuple args = Tuple.of(
+//                "libertad..........................................................",
+//                Address.wrap(Address.toChecksumAddress(BigInteger.TEN.shiftLeft(156))),
 //                Tuple.of(
-//                        "libertad..........................................................",
-//                        Address.wrap(Address.toChecksumAddress(BigInteger.TEN.shiftLeft(156))),
-//                        new byte[][] {
-//                                "carajo]0]0]0]0]0]0]0]0]0]0]0]0]0".getBytes(),
-//                                "carajo]1]1]1]1]1]1]1]1]1]1]1]1]1".getBytes()
-//                        },
-//                        96L
+//                    "carajo]0]0]0]0]0]0]0]0]0]0]0]0]0".getBytes(),
+//                    true
 //                )
-//        ));
+//        );
+//        final ByteBuffer bb = tt.encode(args);
+//        System.out.println(tt.annotate(bb.array()));
 
         testFormat(true, Function::formatCall);
         testFormatHash(Function::formatCall, "137fe81220baa4ad0300a7a31ac26b0b07549af69af96d436ca3b2a0ebd1b949", "1663cedd" + ABI);

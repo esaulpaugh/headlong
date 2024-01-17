@@ -465,24 +465,29 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         t.encodeTail(v, dest);
         final int len = dest.position();
         dest.flip();
-        final byte[] rowData = new byte[UNIT_LENGTH_BYTES];
-        for (int i = 0; i < len; i += UNIT_LENGTH_BYTES) {
-            sb.append(label(row++));
-            dest.get(rowData);
-            sb.append(Strings.encode(rowData));
-            final boolean dynamicArray = t.dynamic && t instanceof ArrayType && ((ArrayType<?, ?>) t).getLength() == ArrayType.DYNAMIC_LENGTH;
-            annotate(sb, idx, t, i > UNIT_LENGTH_BYTES
-                                    ? null
-                                    : dynamicArray
-                                        ? i == 0
-                                            ? " length"
-                                            : ""
-                                        : i == 0
-                                            ? ""
-                                            : null
-            );
+        int i = 0;
+        final boolean dynamicArray = t.dynamic && t instanceof ArrayType && ((ArrayType<?, ?>) t).getLength() == ArrayType.DYNAMIC_LENGTH;
+//        final TupleType tt = t.typeCode() == ABIType.TYPE_CODE_TUPLE ? (TupleType)(ABIType)t : null;
+        final byte[] rowData = newUnitBuffer();
+        if (i < len) {
+            appendAnnotatedRow(row++, sb, dest, rowData, idx, t, dynamicArray ? " length" : ""); // tt != null ? " " + tt.get(0).canonicalType : ""
+            i += UNIT_LENGTH_BYTES;
+            if (i < len) {
+                appendAnnotatedRow(row++, sb, dest, rowData, idx, t, dynamicArray ? "" : null);
+                i += UNIT_LENGTH_BYTES;
+                while (i < len) {
+                    appendAnnotatedRow(row++, sb, dest, rowData, idx, t, null);
+                    i += UNIT_LENGTH_BYTES;
+                }
+            }
         }
         return row;
+    }
+
+    private static void appendAnnotatedRow(int row, StringBuilder sb, ByteBuffer dest, byte[] rowData, int idx, ABIType<Object> t, String note) {
+        dest.get(rowData);
+        sb.append(label(row)).append(Strings.encode(rowData));
+        annotate(sb, idx, t, note);
     }
 
     private static String label(int row) {
