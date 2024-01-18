@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.rlp.util;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.util.FloatingPoint;
 import com.esaulpaugh.headlong.util.Integers;
 import org.junit.jupiter.api.Test;
 
