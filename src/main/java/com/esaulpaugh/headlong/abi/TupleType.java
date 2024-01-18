@@ -478,10 +478,9 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         dest.flip();
         int i = 0;
         final boolean dynamicArray = t.dynamic && t instanceof ArrayType && ((ArrayType<?, ?>) t).getLength() == ArrayType.DYNAMIC_LENGTH;
-//        final TupleType tt = t.typeCode() == ABIType.TYPE_CODE_TUPLE ? (TupleType)(ABIType)t : null;
         final byte[] rowData = newUnitBuffer();
         if (i < len) {
-            appendAnnotatedRow(row++, sb, dest, rowData, idx, t, dynamicArray ? " length" : ""); // tt != null ? " " + tt.get(0).canonicalType : ""
+            appendAnnotatedRow(row++, sb, dest, rowData, idx, t, dynamicArray ? " length" : "");
             i += UNIT_LENGTH_BYTES;
             if (i < len) {
                 appendAnnotatedRow(row++, sb, dest, rowData, idx, t, dynamicArray ? "" : null);
