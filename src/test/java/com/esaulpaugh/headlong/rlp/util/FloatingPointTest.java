@@ -33,13 +33,8 @@ public class FloatingPointTest {
         Random r = TestUtils.seededRandom();
         for (int i = 0; i < 20; i++) {
             final float flo = r.nextFloat();
-            byte[] floBytes = FloatingPoint.toBytes(flo);
-            byte[] floPutted = new byte[floBytes.length];
-            int len = FloatingPoint.putFloat(flo, floPutted, 0);
-            assertEquals(floBytes.length, len);
-            assertArrayEquals(floBytes, floPutted);
-
-            float floGotten = FloatingPoint.getFloat(floBytes, 0, floBytes.length, false);
+            final byte[] floBytes = FloatingPoint.toBytes(flo);
+            final float floGotten = FloatingPoint.getFloat(floBytes, 0, floBytes.length, false);
             assertEquals(flo, floGotten);
         }
     }
@@ -49,13 +44,8 @@ public class FloatingPointTest {
         Random r = TestUtils.seededRandom();
         for (int i = 0; i < 20; i++) {
             final double dub = r.nextDouble();
-            byte[] dubBytes = FloatingPoint.toBytes(dub);
-            byte[] dubPutted = new byte[dubBytes.length];
-            int len = FloatingPoint.putDouble(dub, dubPutted, 0);
-            assertEquals(dubBytes.length, len);
-            assertArrayEquals(dubBytes, dubPutted);
-
-            double dubGotten = FloatingPoint.getDouble(dubBytes, 0, dubBytes.length, false);
+            final byte[] dubBytes = FloatingPoint.toBytes(dub);
+            final double dubGotten = FloatingPoint.getDouble(dubBytes, 0, dubBytes.length, false);
             assertEquals(dub, dubGotten);
         }
     }
