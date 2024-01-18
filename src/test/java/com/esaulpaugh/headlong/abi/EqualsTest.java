@@ -16,7 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
+import com.esaulpaugh.headlong.util.WrappedKeccak;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import com.joemelsha.crypto.hash.Keccak;

@@ -13,11 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.abi.util;
+package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.abi.Tuple;
 import com.esaulpaugh.headlong.abi.TupleType;
+import com.esaulpaugh.headlong.util.Uint;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

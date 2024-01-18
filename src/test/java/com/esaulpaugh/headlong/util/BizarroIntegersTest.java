@@ -13,11 +13,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.abi.util;
+package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.util.IntegersTest;
-import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;

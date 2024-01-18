@@ -16,15 +16,12 @@
 package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.util.FloatingPoint;
-import com.esaulpaugh.headlong.util.Integers;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FloatingPointTest {

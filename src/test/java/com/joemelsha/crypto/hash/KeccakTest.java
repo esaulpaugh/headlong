@@ -16,7 +16,7 @@
 package com.joemelsha.crypto.hash;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.abi.util.WrappedKeccak;
+import com.esaulpaugh.headlong.util.WrappedKeccak;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Disabled;
