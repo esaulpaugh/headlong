@@ -400,4 +400,18 @@ public final class Function implements ABIObject {
                         .append(selectorHex)
         );
     }
+
+    /**
+     * Annotates the given function call and returns a formatted String representation.
+     */
+    public String annotateCall(byte[] call) {
+        return annotateCall(decodeCall(call));
+    }
+
+    /**
+     * Annotates the function call given the {@code args} and returns a formatted String representation.
+     */
+    public String annotateCall(Tuple args) {
+        return name + ":\n" + ABIType.pad(0, "ID") + Strings.encode(selector) + '\n' + inputTypes.annotate(args);
+    }
 }

@@ -170,17 +170,20 @@ public class EncodeTest {
 
     @Test
     public void testFunctionFormat() throws Throwable {
-//        final TupleType tt = TupleType.parse("(string,address,(bytes,bool))");
+//        Function f = Function.parse("f00_TWO(function,(),string,(int8,int8),address,(bool,bytes))");
 //        final Tuple args = Tuple.of(
+//                "ffffffffffffffffffffffff".getBytes(),
+//                Tuple.EMPTY,
 //                "libertad..........................................................",
+//                Tuple.of(9, 10),
 //                Address.wrap(Address.toChecksumAddress(BigInteger.TEN.shiftLeft(156))),
 //                Tuple.of(
-//                    "carajo]0]0]0]0]0]0]0]0]0]0]0]0]0".getBytes(),
-//                    true
+//                        true,
+//                    "carajo]0]0]0]0]0]0]0]0]0]0]0]0]0".getBytes()
 //                )
 //        );
-//        final ByteBuffer bb = tt.encode(args);
-//        System.out.println(tt.annotate(bb.array()));
+//        System.out.println(f.annotateCall(f.encodeCall(args).array()));
+//        System.out.println(f.annotateCall(args));
 
         testFormat(true, Function::formatCall);
         testFormatHash(Function::formatCall, "137fe81220baa4ad0300a7a31ac26b0b07549af69af96d436ca3b2a0ebd1b949", "1663cedd" + ABI);

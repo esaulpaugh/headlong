@@ -423,10 +423,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return flags == ABIType.FLAGS_NONE ? EMPTY : new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null, null, flags);
     }
 
+    /**
+     * Annotates the given ABI encoding and returns a formatted String representation.
+     */
     public String annotate(byte[] abi) {
         return annotate(decode(ByteBuffer.wrap(abi), newUnitBuffer()));
     }
 
+    /**
+     * Annotates the ABI encoding of the given {@link Tuple} and returns a formatted String representation.
+     */
     public String annotate(Tuple tuple) {
         if (tuple.elements.length == 0) {
             return "";
