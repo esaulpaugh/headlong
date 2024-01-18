@@ -424,14 +424,16 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     /**
-     * Annotates the given ABI encoding and returns a formatted String representation.
+     * Experimental. Annotates the given ABI encoding and returns an informational formatted String. This
+     * method is subject to change or removal in a future release.
      */
     public String annotate(byte[] abi) {
         return annotate(decode(ByteBuffer.wrap(abi), newUnitBuffer()));
     }
 
     /**
-     * Annotates the ABI encoding of the given {@link Tuple} and returns a formatted String representation.
+     * Experimental. Annotates the ABI encoding of the given {@link Tuple} and returns an informational formatted String.
+     * This method is subject to change or removal in a future release.
      */
     public String annotate(Tuple tuple) {
         if (tuple.elements.length == 0) {
