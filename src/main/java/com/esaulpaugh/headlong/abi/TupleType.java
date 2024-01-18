@@ -468,6 +468,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 row = encodeTailAnnotated(row, i, t, tuple.elements[i], sb);
             }
         }
+        sb.setLength(sb.length() - 1); // remove trailing newline
         return sb.toString();
     }
 
