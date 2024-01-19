@@ -187,7 +187,7 @@ public class PackedEncoderTest {
         Tuple values = Tuple.of(-2, true, false);
 
         ByteBuffer bb = tupleType.encodePacked(values);
-        assertEquals(bb.capacity(), bb.position());
+        assertEquals(0, bb.position());
 
         assertEquals("fffffe0100", Strings.encode(bb));
 
@@ -201,7 +201,7 @@ public class PackedEncoderTest {
         Tuple test = Tuple.of(new int[] { 3, 5 }, new int[] { 7, 8, 9 }, new byte[0], new long[] { 9L, 0L, 0xFFFFFFFFL }, new boolean[] { true, false, true }, BigInteger.valueOf(6L), BigInteger.valueOf(-1L));
 
         ByteBuffer bb = tupleType.encodePacked(test);
-        assertEquals(bb.capacity(), bb.position());
+        assertEquals(0, bb.position());
 
         assertEquals("000300050000070000080000090000000900000000ffffffff0100010000000000000006ffffffffffffffffff", Strings.encode(bb));
 
@@ -216,7 +216,7 @@ public class PackedEncoderTest {
 
         ByteBuffer bb = tupleType.encodePacked(values);
         byte[] packedArray = bb.array();
-        assertEquals(packedArray.length, bb.position());
+        assertEquals(0, bb.position());
 
         assertEquals("00000000000000010000000000000002000000000000000300000000000000040000000000000000000000000000000000000000000000000000000000000001", Strings.encode(bb));
 
@@ -230,7 +230,7 @@ public class PackedEncoderTest {
         Tuple values = Tuple.of(true, new boolean[] { true, true, true },  new boolean[] { true, false });
 
         ByteBuffer bb = tupleType.encodePacked(values);
-        assertEquals(bb.capacity(), bb.position());
+        assertEquals(0, bb.position());
 
         assertEquals("010101010100", Strings.encode(bb));
 
@@ -244,7 +244,7 @@ public class PackedEncoderTest {
         Tuple values = Tuple.of((int) new Uint(24).toUnsignedLong(Integer.MIN_VALUE / 256));
 
         ByteBuffer bb = tupleType.encodePacked(values);
-        assertEquals(bb.capacity(), bb.position());
+        assertEquals(0, bb.position());
 
         assertEquals("800000", Strings.encode(bb));
 
@@ -259,7 +259,7 @@ public class PackedEncoderTest {
         Tuple values = Tuple.singleton(new BigDecimal[] { val, val });
 
         ByteBuffer bb = tupleType.encodePacked(values);
-        assertEquals(bb.capacity(), bb.position());
+        assertEquals(0, bb.position());
 
         assertEquals("000000800000000000800000", Strings.encode(bb));
 
