@@ -167,6 +167,7 @@ public abstract class ABIType<J> {
         validate(value);
         ByteBuffer dest = ByteBuffer.allocate(byteLengthPacked(value));
         encodePackedUnchecked(value, dest);
+        dest.flip();
         return dest;
     }
 
