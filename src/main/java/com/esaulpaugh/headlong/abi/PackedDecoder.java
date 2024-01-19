@@ -15,7 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.util.Uint;
+import com.esaulpaugh.headlong.util.Uint;
 import com.esaulpaugh.headlong.util.Integers;
 
 import java.lang.reflect.Array;

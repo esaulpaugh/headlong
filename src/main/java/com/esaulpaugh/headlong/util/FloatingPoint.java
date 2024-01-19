@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.rlp.util;
+package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.util.Integers;
 
@@ -28,10 +28,6 @@ public final class FloatingPoint {
         return Float.intBitsToFloat(Integers.getInt(bytes, i, len, lenient));
     }
 
-    public static int putFloat(float val, byte[] bytes, int i) {
-        return Integers.putLong(Float.floatToIntBits(val), bytes, i);
-    }
-
     public static byte[] toBytes(float val) {
         return Integers.toBytes(Float.floatToIntBits(val));
     }
@@ -40,10 +36,6 @@ public final class FloatingPoint {
 
     public static double getDouble(byte[] bytes, int i, int len, boolean lenient) {
         return Double.longBitsToDouble(Integers.getLong(bytes, i, len, lenient));
-    }
-
-    public static int putDouble(double val, byte[] bytes, int i) {
-        return Integers.putLong(Double.doubleToLongBits(val), bytes, i);
     }
 
     public static byte[] toBytes(double val) {

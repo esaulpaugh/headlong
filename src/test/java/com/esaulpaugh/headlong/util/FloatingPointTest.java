@@ -13,17 +13,15 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.rlp.util;
+package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.util.Integers;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FloatingPointTest {
@@ -33,13 +31,8 @@ public class FloatingPointTest {
         Random r = TestUtils.seededRandom();
         for (int i = 0; i < 20; i++) {
             final float flo = r.nextFloat();
-            byte[] floBytes = FloatingPoint.toBytes(flo);
-            byte[] floPutted = new byte[floBytes.length];
-            int len = FloatingPoint.putFloat(flo, floPutted, 0);
-            assertEquals(floBytes.length, len);
-            assertArrayEquals(floBytes, floPutted);
-
-            float floGotten = FloatingPoint.getFloat(floBytes, 0, floBytes.length, false);
+            final byte[] floBytes = FloatingPoint.toBytes(flo);
+            final float floGotten = FloatingPoint.getFloat(floBytes, 0, floBytes.length, false);
             assertEquals(flo, floGotten);
         }
     }
@@ -49,13 +42,8 @@ public class FloatingPointTest {
         Random r = TestUtils.seededRandom();
         for (int i = 0; i < 20; i++) {
             final double dub = r.nextDouble();
-            byte[] dubBytes = FloatingPoint.toBytes(dub);
-            byte[] dubPutted = new byte[dubBytes.length];
-            int len = FloatingPoint.putDouble(dub, dubPutted, 0);
-            assertEquals(dubBytes.length, len);
-            assertArrayEquals(dubBytes, dubPutted);
-
-            double dubGotten = FloatingPoint.getDouble(dubBytes, 0, dubBytes.length, false);
+            final byte[] dubBytes = FloatingPoint.toBytes(dub);
+            final double dubGotten = FloatingPoint.getDouble(dubBytes, 0, dubBytes.length, false);
             assertEquals(dub, dubGotten);
         }
     }
