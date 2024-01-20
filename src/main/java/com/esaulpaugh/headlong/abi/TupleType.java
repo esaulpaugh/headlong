@@ -321,7 +321,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             final ABIType<?> e = elementTypes[i];
             sum += e.headLength();
             switch (e.typeCode()) {
-            case TYPE_CODE_ARRAY: len += ((ArrayType<?, ?>) e).staticArrayHeadLength(); continue;
+            case TYPE_CODE_ARRAY: len += ((ArrayType<?, ?, ?>) e).staticArrayHeadLength(); continue;
             case TYPE_CODE_TUPLE: len += ((TupleType) e).staticTupleHeadLength(); continue;
             default: len += UNIT_LENGTH_BYTES;
             }
@@ -480,7 +480,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         int i = 0;
         if (i < len) {
             final byte[] rowData = newUnitBuffer();
-            final boolean dynamicArray = t.dynamic && t instanceof ArrayType && ((ArrayType<?, ?>) t).getLength() == ArrayType.DYNAMIC_LENGTH;
+            final boolean dynamicArray = t.dynamic && t instanceof ArrayType && ((ArrayType<?, ?, ?>) t).getLength() == ArrayType.DYNAMIC_LENGTH;
             appendAnnotatedRow(row++, sb, dest, rowData, idx, t, dynamicArray ? " length" : "");
             i += UNIT_LENGTH_BYTES;
             if (i < len) {

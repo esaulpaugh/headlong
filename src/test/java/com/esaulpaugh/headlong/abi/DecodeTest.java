@@ -316,7 +316,7 @@ public class DecodeTest {
 
     @Test
     public void testStringArray() throws Throwable {
-        final ArrayType<ArrayType<ByteType, String>, String[]> type = TypeFactory.create("string[]");
+        final ArrayType<ArrayType<ByteType, Byte, String>, String, String[]> type = TypeFactory.create("string[]");
         final String[] array = new String[] { "Hello, world!", "world! Hello," };
         final ByteBuffer abi = ByteBuffer.wrap(
                 Strings.decode(
@@ -346,14 +346,14 @@ public class DecodeTest {
             final ABIType<?>                  e = TypeFactory.create("string[]");
             final ABIType<? extends String[]> f = TypeFactory.create("string[]");
 
-            final ArrayType<?, ?>        g = TypeFactory.create("string[]");
-            final ArrayType<?, ?>        h = TypeFactory.create("string[]");
-            final ArrayType<?, String[]> i = TypeFactory.create("string[]");
-            final ArrayType<ArrayType<ByteType, String>, String[]> j = TypeFactory.create("string[]");
+            final ArrayType<?, ?, ?>        g = TypeFactory.create("string[]");
+            final ArrayType<?, ?, ?>        h = TypeFactory.create("string[]");
+            final ArrayType<?, ?, String[]> i = TypeFactory.create("string[]");
+            final ArrayType<ArrayType<ByteType, Byte, String>, String, String[]> j = TypeFactory.create("string[]");
             final ABIType<? extends String[]> k = TypeFactory.create("string[]");
 
             final IntType l = TypeFactory.create("int16");
-            final ArrayType<?, BigInteger[]> m = TypeFactory.create("int[]");
+            final ArrayType<?, ?, BigInteger[]> m = TypeFactory.create("int[]");
             final TupleType n = TypeFactory.createTupleTypeWithNames("(bool)", "nam");
             assertEquals("nam", n.getElementName(0));
             m.encode(new BigInteger[] {});
@@ -950,7 +950,7 @@ public class DecodeTest {
                 checkLegacyFlags(e);
             }
         } else if (t instanceof ArrayType) {
-            final ArrayType<?, ?> at = (ArrayType<?, ?>) t;
+            final ArrayType<?, ?, ?> at = (ArrayType<?, ?, ?>) t;
             assertTrue(at.legacyDecode);
             assertEquals(ABIType.FLAG_LEGACY_DECODE, t.getFlags());
             assertEquals(at.flags, t.getFlags());

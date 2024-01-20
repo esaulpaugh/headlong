@@ -61,7 +61,7 @@ final class PackedDecoder {
         if(type.dynamic) {
             switch (type.typeCode()) {
             case TYPE_CODE_ARRAY:
-                ArrayType<?, ?> at = (ArrayType<?, ?>) type;
+                ArrayType<?, ?, ?> at = (ArrayType<?, ?, ?>) type;
                 return DYNAMIC_LENGTH == at.getLength()
                         ? 1 + countDynamics(at.getElementType())
                         : countDynamics(at.getElementType());
@@ -91,7 +91,7 @@ final class PackedDecoder {
             // static types only
             switch (type.typeCode()) {
             case TYPE_CODE_ARRAY:
-                final ArrayType<? extends ABIType<?>, ?> arrayType = (ArrayType<? extends ABIType<?>, ?>) type;
+                final ArrayType<? extends ABIType<?>, ?, ?> arrayType = (ArrayType<? extends ABIType<?>, ?, ?>) type;
                 end -= arrayType.getElementType().byteLengthPacked(null) * arrayType.getLength();
                 insertArray(arrayType, buffer, end, end, elements, i);
                 break;
@@ -121,7 +121,7 @@ final class PackedDecoder {
         case TYPE_CODE_LONG: return insertLong((LongType) type, buffer, idx, type.byteLengthPacked(null), elements, i);
         case TYPE_CODE_BIG_INTEGER: return insertBigInteger((BigIntegerType) type, type.byteLengthPacked(null), buffer, idx, elements, i);
         case TYPE_CODE_BIG_DECIMAL: return insertBigDecimal((BigDecimalType) type, type.byteLengthPacked(null), buffer, idx, elements, i);
-        case TYPE_CODE_ARRAY: return insertArray((ArrayType<? extends ABIType<?>, ?>) type, buffer, idx, end, elements, i);
+        case TYPE_CODE_ARRAY: return insertArray((ArrayType<? extends ABIType<?>, ?, ?>) type, buffer, idx, end, elements, i);
         case TYPE_CODE_TUPLE:
             return type.dynamic
                     ? decodeTuple((TupleType) type, buffer, idx, end, elements, i)
@@ -178,7 +178,7 @@ final class PackedDecoder {
         return elementLen;
     }
 
-    private static int insertArray(ArrayType<? extends ABIType<?>, ?> arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) {
+    private static int insertArray(ArrayType<? extends ABIType<?>, ?, ?> arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) {
         final ABIType<?> elementType = arrayType.getElementType();
         final int elementByteLen = elementType.byteLengthPacked(null);
         final int arrayLen;
@@ -216,7 +216,7 @@ final class PackedDecoder {
         return booleans;
     }
 
-    private static Object decodeByteArray(ArrayType<?, ?> arrayType, int arrayLen, byte[] buffer, int idx) {
+    private static Object decodeByteArray(ArrayType<?, ?, ?> arrayType, int arrayLen, byte[] buffer, int idx) {
         byte[] bytes = new byte[arrayLen];
         System.arraycopy(buffer, idx, bytes, 0, arrayLen);
         return arrayType.encodeIfString(bytes);
@@ -265,7 +265,7 @@ final class PackedDecoder {
     }
 
     private static Object[] decodeObjectArray(int arrayLen, ABIType<?> elementType, byte[] buffer, int idx, int end) {
-        Object[] objects = (Object[]) Array.newInstance(elementType.clazz, arrayLen); // reflection ftw
+        final Object[] objects = ArrayType.createArray(elementType.clazz, arrayLen);
         for (int i = 0; i < arrayLen; i++) {
             int len = decode(elementType, buffer, idx, end, objects, i);
             idx += len;

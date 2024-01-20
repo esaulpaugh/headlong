@@ -29,11 +29,11 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 /**
  * Represents static array types such as uint16[3][2] or bytes3 and dynamic array types such as fixed168x10[5][],
  * bytes[4], or string.
- *
- * @param <E> the {@link ABIType} for the elements of the array
- * @param <J> this {@link ArrayType}'s corresponding Java type
+ * @param <E>   the {@link ABIType} for the elements of the array
+ * @param <EJ>  the Java type of the elements of the array
+ * @param <J>   this {@link ArrayType}'s corresponding Java type
  */
-public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
+public final class ArrayType<E extends ABIType<EJ>, EJ, J> extends ABIType<J> {
 
     private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
 
@@ -64,7 +64,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
     int staticArrayHeadLength() {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BYTE: return UNIT_LENGTH_BYTES; // all static byte arrays round up to exactly 32 bytes and not more
-        case TYPE_CODE_ARRAY: return length * ((ArrayType<?, ?>) elementType).staticArrayHeadLength();
+        case TYPE_CODE_ARRAY: return length * ((ArrayType<?, ?, ?>) elementType).staticArrayHeadLength();
         case TYPE_CODE_TUPLE: return length * ((TupleType) elementType).staticTupleHeadLength();
         default: return length * UNIT_LENGTH_BYTES;
         }
@@ -85,11 +85,6 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     public boolean isString() {
         return isString;
-    }
-
-    @SuppressWarnings("unchecked")
-    private ABIType<Object> elementTypeNonCapturing() {
-        return (ABIType<Object>) elementType;
     }
 
     @Override
@@ -134,7 +129,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: return measureByteLength((Object[]) value);
+        case TYPE_CODE_TUPLE: return measureByteLength((EJ[]) value);
         case TYPE_CODE_ADDRESS: return ((Address[]) value).length * UNIT_LENGTH_BYTES;
         default: throw new AssertionError();
         }
@@ -161,7 +156,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * elementType.byteLengthPacked(null);
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
-        case TYPE_CODE_ADDRESS: return measureByteLengthPacked((Object[]) value);
+        case TYPE_CODE_ADDRESS: return measureByteLengthPacked((EJ[]) value);
         default: throw new AssertionError();
         }
     }
@@ -194,7 +189,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
-        case TYPE_CODE_ADDRESS: return validateObjects((Object[]) value);
+        case TYPE_CODE_ADDRESS: return validateObjects((EJ[]) value);
         default: throw new AssertionError();
         }
     }
@@ -221,19 +216,16 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return measureArrayElements(checkLength(arr.length, arr), i -> type.validatePrimitive(arr[i]));
     }
 
-    private int validateObjects(Object[] arr) {
-        final ABIType<Object> et = elementTypeNonCapturing();
-        return measureArrayElements(checkLength(arr.length, arr), i -> et.validate(arr[i]));
+    private int validateObjects(EJ[] arr) {
+        return measureArrayElements(checkLength(arr.length, arr), i -> elementType.validate(arr[i]));
     }
 
-    private int measureByteLength(Object[] arr) {
-        final ABIType<Object> et = elementTypeNonCapturing();
-        return measureArrayElements(arr.length, i -> et.byteLength(arr[i]));
+    private int measureByteLength(EJ[] arr) {
+        return measureArrayElements(arr.length, i -> elementType.byteLength(arr[i]));
     }
 
-    private int measureByteLengthPacked(Object[] arr) { // don't count offsets
-        final ABIType<Object> et = elementTypeNonCapturing();
-        return countBytes(true, arr.length, i -> et.byteLengthPacked(arr[i]));
+    private int measureByteLengthPacked(EJ[] arr) { // don't count offsets
+        return countBytes(true, arr.length, i -> elementType.byteLengthPacked(arr[i]));
     }
 
     private int checkLength(final int valueLen, Object value) {
@@ -256,28 +248,27 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
-        case TYPE_CODE_ADDRESS: encodeObjects((Object[]) value, dest); return;
+        case TYPE_CODE_ADDRESS: encodeObjects((EJ[]) value, dest); return;
         default: throw new AssertionError();
         }
     }
 
-    private void encodeObjects(Object[] arr, ByteBuffer dest) {
+    private void encodeObjects(EJ[] arr, ByteBuffer dest) {
         encodeArrayLen(arr.length, dest);
-        final ABIType<Object> et = elementTypeNonCapturing();
-        if (et.dynamic) {
-            encodeDynamic(arr, et, dest, OFFSET_LENGTH_BYTES * arr.length);
+        if (elementType.dynamic) {
+            encodeDynamic(arr, elementType, dest, OFFSET_LENGTH_BYTES * arr.length);
         } else {
-            encodeStatic(arr, et, dest);
+            encodeStatic(arr, elementType, dest);
         }
     }
 
-    private static void encodeStatic(Object[] values, ABIType<Object> et, ByteBuffer dest) {
-        for (Object value : values) {
+    private void encodeStatic(EJ[] values, E et, ByteBuffer dest) {
+        for (EJ value : values) {
             et.encodeTail(value, dest);
         }
     }
 
-    private static void encodeDynamic(Object[] values, ABIType<Object> et, ByteBuffer dest, int offset) {
+    private void encodeDynamic(EJ[] values, E et, ByteBuffer dest, int offset) {
         if (values.length == 0) {
             return;
         }
@@ -285,7 +276,7 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         for (int i = 0; true; i++) {
             insertIntUnsigned(offset, dest); // insert offset
             if (i >= last) {
-                for (Object value : values) {
+                for (EJ value : values) {
                     et.encodeTail(value, dest);
                 }
                 return;
@@ -340,9 +331,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
         case TYPE_CODE_ADDRESS:
-            final ABIType<Object> et = elementTypeNonCapturing();
-            for(Object e : (Object[]) value) {
-                et.encodePackedUnchecked(e, dest);
+            for(EJ e : (EJ[]) value) {
+                elementType.encodePackedUnchecked(e, dest);
             }
             return;
         default: throw new AssertionError();
@@ -467,8 +457,13 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
         return longs;
     }
 
-    private Object[] decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer) {
-        final Object[] elements = (Object[]) Array.newInstance(elementType.clazz, len); // reflection ftw
+    @SuppressWarnings("unchecked")
+    static <T> T[] createArray(Class<T> elementClass, int len) {
+        return (T[]) Array.newInstance(elementClass, len); // reflection ftw
+    }
+
+    private EJ[] decodeObjects(int len, ByteBuffer bb, byte[] unitBuffer) {
+        final EJ[] elements = createArray(elementType.clazz, len);
         int i = 0;
         try {
             if (!elementType.dynamic) {
@@ -495,8 +490,8 @@ public final class ArrayType<E extends ABIType<?>, J> extends ABIType<J> {
 
     @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T baseType(ABIType<?> type) {
-        return type instanceof ArrayType<?, ?>
-                ? baseType(((ArrayType<? extends ABIType<?>, ?>) type).getElementType())
+        return type instanceof ArrayType<?, ?, ?>
+                ? baseType(((ArrayType<? extends ABIType<?>, ?, ?>) type).getElementType())
                 : (T) type;
     }
 }
