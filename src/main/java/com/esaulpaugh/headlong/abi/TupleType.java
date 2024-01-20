@@ -15,6 +15,8 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.Strings;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -419,5 +421,97 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     static TupleType empty(int flags) {
         return flags == ABIType.FLAGS_NONE ? EMPTY : new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null, null, flags);
+    }
+
+    /**
+     * Experimental. Annotates the given ABI encoding and returns an informational formatted String. This
+     * method is subject to change or removal in a future release.
+     */
+    public String annotate(byte[] abi) {
+        return annotate(decode(ByteBuffer.wrap(abi), newUnitBuffer()));
+    }
+
+    /**
+     * Experimental. Annotates the ABI encoding of the given {@link Tuple} and returns an informational formatted String.
+     * This method is subject to change or removal in a future release.
+     */
+    public String annotate(Tuple tuple) {
+        if (tuple.elements.length == 0) {
+            return "";
+        }
+        int row = 0;
+        final StringBuilder sb = new StringBuilder();
+        int i = 0;
+        final int last = tuple.elements.length - 1;
+        int offset = firstOffset;
+        for (;; i++) {
+            final ABIType<Object> t = get(i);
+            if (!t.dynamic) {
+                row = encodeTailAnnotated(row, i, t, tuple.elements[i], sb);
+                if (i >= last) {
+                    break;
+                }
+            } else {
+                final ByteBuffer dest = ByteBuffer.allocate(OFFSET_LENGTH_BYTES);
+                insertIntUnsigned(offset, dest); // insert offset
+                sb.append(label(row++)).append(Strings.encode(dest));
+                annotate(sb, i, t, " offset");
+                if (i >= last) {
+                    break;
+                }
+                offset += t.dynamicByteLength(tuple.elements[i]); // calculate next offset
+            }
+        }
+        for (i = 0; i < tuple.elements.length; i++) {
+            final ABIType<Object> t = get(i);
+            if (t.dynamic) {
+                row = encodeTailAnnotated(row, i, t, tuple.elements[i], sb);
+            }
+        }
+        sb.setLength(sb.length() - 1); // remove trailing newline
+        return sb.toString();
+    }
+
+    private static int encodeTailAnnotated(int row, int idx, ABIType<Object> t, Object v, StringBuilder sb) {
+        final ByteBuffer dest = ByteBuffer.allocate(t.validate(v));
+        t.encodeTail(v, dest);
+        final int len = dest.position();
+        dest.flip();
+        int i = 0;
+        if (i < len) {
+            final byte[] rowData = newUnitBuffer();
+            final boolean dynamicArray = t.dynamic && t instanceof ArrayType && ((ArrayType<?, ?>) t).getLength() == ArrayType.DYNAMIC_LENGTH;
+            appendAnnotatedRow(row++, sb, dest, rowData, idx, t, dynamicArray ? " length" : "");
+            i += UNIT_LENGTH_BYTES;
+            if (i < len) {
+                appendAnnotatedRow(row++, sb, dest, rowData, idx, t, dynamicArray ? "" : null);
+                i += UNIT_LENGTH_BYTES;
+                while (i < len) {
+                    appendAnnotatedRow(row++, sb, dest, rowData, idx, t, null);
+                    i += UNIT_LENGTH_BYTES;
+                }
+            }
+        }
+        return row;
+    }
+
+    private static void appendAnnotatedRow(int row, StringBuilder sb, ByteBuffer bb, byte[] rowData, int idx, ABIType<Object> t, String note) {
+        bb.get(rowData);
+        sb.append(label(row)).append(Strings.encode(rowData));
+        annotate(sb, idx, t, note);
+    }
+
+    private static String label(int row) {
+        String unpadded = Integer.toHexString(row * UNIT_LENGTH_BYTES);
+        return ABIType.pad(ABIType.LABEL_LEN - unpadded.length(), unpadded);
+    }
+
+    private static void annotate(StringBuilder sb, int idx, ABIType<?> t, String note) {
+        sb.append("\t[").append(idx).append("]");
+        if (note == null) {
+            sb.append(" ...").append('\n');
+            return;
+        }
+        sb.append(' ').append(t.canonicalType).append(note).append('\n');
     }
 }
