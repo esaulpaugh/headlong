@@ -24,7 +24,6 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.Writer;
@@ -254,7 +253,7 @@ public final class ABIJSON {
 // ---------------------------------------------------------------------------------------------------------------------
     static String toJson(ABIObject o, boolean pretty) {
         try {
-            final Writer stringOut = new NonSyncWriter(); // can also use StringWriter or CharArrayWriter, but this is faster
+            final Writer stringOut = new NonSyncWriter(pretty ? 512 : 256); // can also use StringWriter or CharArrayWriter, but this is faster
             final JsonWriter out = new JsonWriter(stringOut);
             if (pretty) {
                 out.setIndent("  ");
@@ -342,27 +341,36 @@ public final class ABIJSON {
         out.endArray();
     }
 
-    private static class NonSyncWriter extends CharArrayWriter {
+    private static class NonSyncWriter extends Writer {
 
-        NonSyncWriter() {
-            super(256); // must be > 0
+        byte[] buffer;
+        int count = 0;
+
+        NonSyncWriter(int initialLen) {
+            this.buffer = new byte[initialLen];
         }
 
         @Override
         public void write(int c) {
-            if (count >= buf.length) {
-                buf = Arrays.copyOf(buf, buf.length << 1); // expects buf.length to be non-zero
+            if (count >= buffer.length) {
+                buffer = Arrays.copyOf(buffer, buffer.length << 1); // expects buf.length to be non-zero
             }
-            buf[count++] = (char) c;
+            buffer[count++] = (byte) c;
         }
 
         @Override
+        public void write(char[] cbuf, int off, int len) throws IOException {
+            write(new String(cbuf, off, len));
+        }
+
+        @SuppressWarnings("deprecation")
+        @Override
         public void write(String str, int off, int len) {
             int newCount = count + len;
-            if (newCount > buf.length) {
-                buf = Arrays.copyOf(buf, Math.max(buf.length << 1, newCount));
+            if (newCount > buffer.length) {
+                buffer = Arrays.copyOf(buffer, Math.max(buffer.length << 1, newCount));
             }
-            str.getChars(off, off + len, buf, count);
+            str.getBytes(off, off + len, buffer, count);
             count = newCount;
         }
 
@@ -374,8 +382,18 @@ public final class ABIJSON {
         }
 
         @Override
+        public void flush() {
+            /* do nothing */
+        }
+
+        @Override
+        public void close() {
+            /* do nothing */
+        }
+
+        @Override
         public String toString() {
-            return new String(buf, 0, count);
+            return new String(buffer, 0, count);
         }
     }
 //-------------------------------------------------------------------------------------
