@@ -165,15 +165,18 @@ public class KeccakTest {
 
     @Test
     public void testRandom() {
-        testRandom(new Keccak(128), new WrappedKeccak(128), 100);
-        testRandom(new Keccak(224), new WrappedKeccak(224), 100);
-        testRandom(new Keccak(256), new WrappedKeccak(256), 200);
-        testRandom(new Keccak(288), new WrappedKeccak(288), 100);
-        testRandom(new Keccak(384), new WrappedKeccak(384), 100);
-        testRandom(new Keccak(512), new WrappedKeccak(512), 100);
+        testRandom(128, 100);
+        testRandom(224, 100);
+        testRandom(256, 200);
+        testRandom(288, 100);
+        testRandom(384, 100);
+        testRandom(512, 100);
     }
 
-    private static void testRandom(MessageDigest md_a, MessageDigest md_b, final int n) {
+    private static void testRandom(int bits, final int n) {
+
+        final MessageDigest md_a = new Keccak(bits);
+        final MessageDigest md_b = new WrappedKeccak(bits);
 
         Random r = TestUtils.seededRandom();
 
