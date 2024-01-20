@@ -581,10 +581,8 @@ public class ABIJSONTest {
     @Test
     public void testJsonUtils() {
         JsonObject empty = new JsonObject();
-        Boolean b = ABIJSON.getBoolean(empty, "constant");
+        Boolean b = ABIJSON.getBoolean(empty, "constant", null);
         assertNull(b);
-        Boolean b2 = ABIJSON.getBoolean(empty, "constant", null);
-        assertNull(b2);
     }
 
     @Test

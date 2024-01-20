@@ -209,7 +209,7 @@ public final class ABIJSON {
                 internalTypes[i] = internalType.equals(type) ? type : internalType;
             }
             if(indexed != null) {
-                indexed[i] = getBoolean(inputObj, INDEXED);
+                indexed[i] = getBoolean(inputObj, INDEXED, null);
             }
         }
         canonicalType.setCharAt(canonicalType.length() - 1, ')');
@@ -359,8 +359,9 @@ public final class ABIJSON {
         }
 
         @Override
-        public void write(char[] cbuf, int off, int len) throws IOException {
-            write(new String(cbuf, off, len));
+        public void write(char[] cbuf, int off, int len) {
+            String str = new String(cbuf, off, len);
+            write(str, 0, str.length());
         }
 
         @SuppressWarnings("deprecation")
@@ -426,10 +427,6 @@ public final class ABIJSON {
             return element.getAsString();
         }
         throw new IllegalArgumentException(key + " is not a string");
-    }
-
-    static Boolean getBoolean(JsonObject object, String key) {
-        return getBoolean(object, key, null);
     }
 
     static Boolean getBoolean(JsonObject object, String key, Boolean defaultVal) {
