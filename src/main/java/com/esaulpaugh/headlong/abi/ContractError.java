@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.JsonObject;
 
 import java.util.Objects;
@@ -69,12 +68,12 @@ public final class ContractError implements ABIObject {
     }
 
     public static ContractError fromJson(String errorJson) {
-        return fromJsonObject(ABIType.FLAGS_NONE, JsonUtils.parseObject(errorJson));
+        return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(errorJson));
     }
 
     /** @see ABIObject#fromJson(int, String) */
     public static ContractError fromJson(int flags, String errorJson) {
-        return fromJsonObject(flags, JsonUtils.parseObject(errorJson));
+        return fromJsonObject(flags, ABIJSON.parseObject(errorJson));
     }
 
     /** @see ABIObject#fromJsonObject(int, JsonObject) */

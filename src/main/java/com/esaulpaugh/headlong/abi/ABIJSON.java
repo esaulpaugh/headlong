@@ -19,10 +19,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.Writer;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -31,11 +35,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-
-import static com.esaulpaugh.headlong.util.JsonUtils.getArray;
-import static com.esaulpaugh.headlong.util.JsonUtils.getBoolean;
-import static com.esaulpaugh.headlong.util.JsonUtils.getString;
-import static com.esaulpaugh.headlong.util.JsonUtils.parseArray;
 
 /** For parsing JSON representations of {@link ABIObject}s according to the ABI specification. */
 public final class ABIJSON {
@@ -378,5 +377,55 @@ public final class ABIJSON {
         public String toString() {
             return new String(buf, 0, count);
         }
+    }
+//-------------------------------------------------------------------------------------
+    private static JsonElement parseElement(String json) {
+        return Streams.parse(new JsonReader(new StringReader(json)));
+    }
+
+    static JsonObject parseObject(String json) {
+        return parseElement(json).getAsJsonObject();
+    }
+
+    static JsonArray parseArray(String json) {
+        return parseElement(json).getAsJsonArray();
+    }
+
+    static JsonArray getArray(JsonObject object, String key) {
+        final JsonElement element = object.get(key);
+        if(isNull(element)) {
+            return null;
+        }
+        return element.getAsJsonArray();
+    }
+
+    static String getString(JsonObject object, String key) {
+        final JsonElement element = object.get(key);
+        if(isNull(element)) {
+            return null;
+        }
+        if(element.isJsonPrimitive() && ((JsonPrimitive) element).isString()) {
+            return element.getAsString();
+        }
+        throw new IllegalArgumentException(key + " is not a string");
+    }
+
+    static Boolean getBoolean(JsonObject object, String key) {
+        return getBoolean(object, key, null);
+    }
+
+    static Boolean getBoolean(JsonObject object, String key, Boolean defaultVal) {
+        final JsonElement element = object.get(key);
+        if(isNull(element)) {
+            return defaultVal;
+        }
+        if(element.isJsonPrimitive() && ((JsonPrimitive) element).isBoolean()) {
+            return element.getAsBoolean();
+        }
+        throw new IllegalArgumentException(key + " is not a boolean");
+    }
+
+    private static boolean isNull(JsonElement element) {
+        return element == null || element.isJsonNull();
     }
 }

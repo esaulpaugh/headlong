@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonObject;
@@ -347,12 +346,12 @@ public final class Function implements ABIObject {
     }
 
     public static Function fromJson(String objectJson) {
-        return fromJsonObject(ABIType.FLAGS_NONE, JsonUtils.parseObject(objectJson));
+        return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(objectJson));
     }
 
     /** @see ABIObject#fromJson(int, String) */
     public static Function fromJson(int flags, String objectJson) {
-        return fromJsonObject(flags, JsonUtils.parseObject(objectJson));
+        return fromJsonObject(flags, ABIJSON.parseObject(objectJson));
     }
 
     /** @see ABIObject#fromJsonObject(int, JsonObject) */

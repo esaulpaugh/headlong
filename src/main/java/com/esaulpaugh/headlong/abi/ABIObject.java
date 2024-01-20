@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.JsonObject;
 
 /** Supertype of json-encodeable types {@link Function}, {@link Event}, and {@link ContractError}.*/
@@ -58,12 +57,12 @@ public interface ABIObject {
     }
 
     static <T extends ABIObject> T fromJson(String json) {
-        return fromJsonObject(ABIType.FLAGS_NONE, JsonUtils.parseObject(json));
+        return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(json));
     }
 
     /** @see #fromJsonObject(int, JsonObject) */
     static <T extends ABIObject> T fromJson(int flags, String json) {
-        return fromJsonObject(flags, JsonUtils.parseObject(json));
+        return fromJsonObject(flags, ABIJSON.parseObject(json));
     }
 
     /**

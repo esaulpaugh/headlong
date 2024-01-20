@@ -15,7 +15,6 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.Deserializer;
 import com.esaulpaugh.headlong.util.FastHex;
-import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -113,12 +112,12 @@ public class AdvancedABICasesTest {
 
     @Test
     public void testAbiV2Cases() throws IOException {
-        runCases(JsonUtils.parseArray(TestUtils.readFileResourceAsString(ABI_V2_CASES_PATH)), false);
+        runCases(ABIJSON.parseArray(TestUtils.readFileResourceAsString(ABI_V2_CASES_PATH)), false);
     }
 
     @Test
     public void testHeadlongCases() throws IOException {
-        runCases(JsonUtils.parseArray(TestUtils.readFileResourceAsString(HEADLONG_CASES_PATH)), true);
+        runCases(ABIJSON.parseArray(TestUtils.readFileResourceAsString(HEADLONG_CASES_PATH)), true);
     }
 
     private static final String HEADLONG_X = "{\n" +
@@ -131,7 +130,7 @@ public class AdvancedABICasesTest {
 
     @Test
     public void testCase() {
-        TestCase tc = new TestCase(JsonUtils.parseObject(HEADLONG_X), true);
+        TestCase tc = new TestCase(ABIJSON.parseObject(HEADLONG_X), true);
         tc.test(true);
     }
 

@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -39,7 +38,7 @@ public class BasicABICasesTest {
 
     static {
         try {
-            TESTS = JsonUtils.parseObject(TestUtils.readFileResourceAsString(RESOURCE)).entrySet();
+            TESTS = ABIJSON.parseObject(TestUtils.readFileResourceAsString(RESOURCE)).entrySet();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -74,9 +73,9 @@ public class BasicABICasesTest {
                 throw new RuntimeException(key + " not found");
             }
 
-            JsonArray args = JsonUtils.getArray(jsonObject, "args");
-            String result = JsonUtils.getString(jsonObject, "result");
-            JsonArray types = JsonUtils.getArray(jsonObject, "types");
+            JsonArray args = ABIJSON.getArray(jsonObject, "args");
+            String result = jsonObject.get("result").getAsString();
+            JsonArray types = ABIJSON.getArray(jsonObject, "types");
 
             final int size = types.size();
             final ABIType<?>[] arr = new ABIType<?>[size];

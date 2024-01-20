@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonObject;
@@ -118,12 +117,12 @@ public final class Event implements ABIObject {
     }
 
     public static Event fromJson(String eventJson) {
-        return fromJsonObject(ABIType.FLAGS_NONE, JsonUtils.parseObject(eventJson));
+        return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(eventJson));
     }
 
     /** @see ABIObject#fromJson(int, String) */
     public static Event fromJson(int flags, String eventJson) {
-        return fromJsonObject(flags, JsonUtils.parseObject(eventJson));
+        return fromJsonObject(flags, ABIJSON.parseObject(eventJson));
     }
 
     /** @see ABIObject#fromJsonObject(int, JsonObject) */

@@ -16,15 +16,17 @@
 package com.esaulpaugh.headlong.rlp;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.util.JsonUtils;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonReader;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,7 +50,7 @@ public class RLPJsonEncodeTest {
     }
 
     static Set<Map.Entry<String, JsonElement>> parseEntrySet(String json) {
-        return JsonUtils.parseElement(json)
+        return Streams.parse(new JsonReader(new StringReader(json)))
                 .getAsJsonObject()
                 .entrySet();
     }

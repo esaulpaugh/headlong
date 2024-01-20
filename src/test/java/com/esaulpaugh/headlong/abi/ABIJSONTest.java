@@ -16,7 +16,6 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.util.JsonUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -253,23 +252,23 @@ public class ABIJSONTest {
         int i = 0;
         jsons[i++] = FUNCTION_A_JSON;
         jsons[i++] = FUNCTION_B_JSON;
-        JsonArray contractArray = JsonUtils.parseArray(CONTRACT_JSON);
+        JsonArray contractArray = ABIJSON.parseArray(CONTRACT_JSON);
         final int n = contractArray.size();
         for (int j = 0; j < n; j++) {
             jsons[i++] = TestUtils.toPrettyPrint(contractArray.get(j).getAsJsonObject());
         }
-        JsonArray fallbackEtc = JsonUtils.parseArray(FALLBACK_CONSTRUCTOR_RECEIVE);
+        JsonArray fallbackEtc = ABIJSON.parseArray(FALLBACK_CONSTRUCTOR_RECEIVE);
         final int n2 = fallbackEtc.size();
         for (int j = 0; j < n2; j++) {
             jsons[i++] = TestUtils.toPrettyPrint(fallbackEtc.get(j).getAsJsonObject());
         }
 
         for (String originalJson : jsons) {
-            ABIObject orig = ABIObject.fromJsonObject(ABIType.FLAGS_NONE, JsonUtils.parseObject(originalJson));
+            ABIObject orig = ABIObject.fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(originalJson));
             String newJson = orig.toJson(false);
             assertNotEquals(originalJson, newJson);
 
-            ABIObject reconstructed = ABIObject.fromJsonObject(ABIType.FLAGS_NONE, JsonUtils.parseObject(newJson));
+            ABIObject reconstructed = ABIObject.fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(newJson));
 
             assertEquals(orig, reconstructed);
             assertEquals(originalJson, reconstructed.toString());
@@ -279,7 +278,7 @@ public class ABIJSONTest {
 
     @Test
     public void testParseFunctionA() throws Throwable {
-        final JsonObject object = JsonUtils.parseObject(FUNCTION_A_JSON);
+        final JsonObject object = ABIJSON.parseObject(FUNCTION_A_JSON);
         final Function f = Function.fromJsonObject(ABIType.FLAGS_NONE, object);
         assertEquals(FUNCTION_A_JSON, f.toJson(true));
         final TupleType in = f.getInputs();
@@ -539,7 +538,7 @@ public class ABIJSONTest {
 
     @Test
     public void testGetErrors() throws Throwable {
-        JsonObject object = JsonUtils.parseObject(ERROR_JSON);
+        JsonObject object = ABIJSON.parseObject(ERROR_JSON);
 
         ContractError error0 = ABIJSON.parseErrors(ERROR_JSON_ARRAY).get(0);
         ContractError error1 = ABIObject.fromJsonObject(ABIType.FLAGS_NONE, object);
@@ -582,9 +581,9 @@ public class ABIJSONTest {
     @Test
     public void testJsonUtils() {
         JsonObject empty = new JsonObject();
-        Boolean b = JsonUtils.getBoolean(empty, "constant");
+        Boolean b = ABIJSON.getBoolean(empty, "constant");
         assertNull(b);
-        Boolean b2 = JsonUtils.getBoolean(empty, "constant", null);
+        Boolean b2 = ABIJSON.getBoolean(empty, "constant", null);
         assertNull(b2);
     }
 
