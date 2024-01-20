@@ -135,10 +135,10 @@ public class DecodeTest {
 
     @Test
     public void testDoSLimit() throws Throwable {
-        final long _2_19 = (long) Math.pow(2, 19);
-        System.out.println(_2_19);
-        final String hex19 = Long.toHexString(_2_19);
-        final String hex19min1 = Strings.encode(Integers.toBytes(_2_19 - 1));
+        final long _2_21 = (long) Math.pow(2, 21);
+        System.out.println(_2_21);
+        final String hex19 = Long.toHexString(_2_21);
+        final String hex19min1 = Strings.encode(Integers.toBytes(_2_21 - 1));
         System.out.println(hex19 + " " + hex19min1);
 
         final long _2_31 = (long) Math.pow(2.0, 31.0);
@@ -147,21 +147,21 @@ public class DecodeTest {
         final String hex31min1 = Long.toHexString(_2_31min1);
         System.out.println(hex31 + " " + hex31min1);
 
-        final byte[] bigLength = new byte[32 + 32 + (int) _2_19];
+        final byte[] bigLength = new byte[32 + 32 + (int) _2_21];
         final byte[] beginning = FastHex.decode(
                 "0000000000000000000000000000000000000000000000000000000000000020" +
-                "000000000000000000000000000000000000000000000000000000000007ffff" +
+                "00000000000000000000000000000000000000000000000000000000001fffff" +
                 "aa00000000000000000000000000000000000000000000000000000000000000");
         System.arraycopy(beginning, 0, bigLength, 0, beginning.length);
         Function.parse("()", "(bytes)").decodeReturn(bigLength);
 
         final String tooBigLength =
                 "0000000000000000000000000000000000000000000000000000000000000020" +
-                "0000000000000000000000000000000000000000000000000000000000080000" +
+                "0000000000000000000000000000000000000000000000000000000000200000" +
                 "aa00000000000000000000000000000000000000000000000000000000000000";
         assertThrown(
                 IllegalArgumentException.class,
-                "exceeds bit limit: 20 > 19",
+                "tuple index 0: unsigned val exceeds bit limit: 22 > 21",
                 () -> Function.parse("()", "(bytes)").decodeReturn(Strings.decode(tooBigLength))
         );
 
