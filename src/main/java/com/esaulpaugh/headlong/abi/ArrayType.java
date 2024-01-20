@@ -120,6 +120,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         return dynamicByteLength(value);
     }
 
+    @SuppressWarnings("unchecked")
     private int calcElementsLen(A value) {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return ((boolean[]) value).length * UNIT_LENGTH_BYTES;
@@ -142,6 +143,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         return length * elementType.byteLengthPacked(null);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     int byteLengthPacked(A value) {
         if(value == null) {
@@ -179,6 +181,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         return totalLen(validateElements(value), length == DYNAMIC_LENGTH);
     }
 
+    @SuppressWarnings("unchecked")
     private int validateElements(A value) {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return validateBooleans((boolean[]) value);
@@ -237,6 +240,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         return valueLen;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     void encodeTail(A value, ByteBuffer dest) {
         switch (elementType.typeCode()) {
@@ -319,6 +323,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     void encodePackedUnchecked(A value, ByteBuffer dest) {
         switch (elementType.typeCode()) {
