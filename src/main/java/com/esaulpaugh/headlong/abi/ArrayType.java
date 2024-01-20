@@ -360,7 +360,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     @Override
     @SuppressWarnings("unchecked")
     A decode(ByteBuffer bb, byte[] unitBuffer) {
-        final int arrayLen = length == DYNAMIC_LENGTH ? IntType.UINT19.decode(bb, unitBuffer) : length;
+        final int arrayLen = length == DYNAMIC_LENGTH ? IntType.UINT21.decode(bb, unitBuffer) : length;
         checkNoDecodePossible(bb.remaining(), arrayLen);
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return (A) decodeBooleans(arrayLen, bb, unitBuffer);
