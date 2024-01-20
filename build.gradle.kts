@@ -11,7 +11,7 @@
 //}
 //
 //group = "com.esaulpaugh"
-//version = "10.0.3-SNAPSHOT"
+//version = "11.0.0-SNAPSHOT"
 //
 //project.ext.set("archivesBaseName", "headlong")
 //
