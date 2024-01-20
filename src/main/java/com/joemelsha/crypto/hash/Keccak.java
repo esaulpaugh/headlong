@@ -37,8 +37,6 @@ public final class Keccak extends MessageDigest {
     private final long[] state = new long[MAX_STATE_SIZE / Long.SIZE];
     private int rateBits; // = 0
 
-    private transient ByteBuffer out;
-
     public Keccak(int digestSizeBits) {
         super(getAlgName(digestSizeBits));
         this.digestSizeBytes = digestSizeBits >>> 3;
@@ -74,7 +72,6 @@ public final class Keccak extends MessageDigest {
     protected void engineReset() {
         Arrays.fill(state, 0L);
         rateBits = 0;
-        out = null; // very important to avoid leaking memory
     }
 
     @Override
@@ -127,7 +124,7 @@ public final class Keccak extends MessageDigest {
 
             state[i] = w;
             this.rateBits = rateBytes << 3;
-            if (remaining <= 0) {
+            if (remaining == 0) {
                 return;
             }
         }
@@ -167,20 +164,13 @@ public final class Keccak extends MessageDigest {
 
         if (remaining > 0) {
             // remaining in [1, 7]
+            this.rateBits += remaining << 3;
             long w = state[rateWords];
             int shiftAmount = 0;
-            switch (remaining) {
-            case 7: w ^= in.get() & 0xFFL; shiftAmount = Byte.SIZE;
-            case 6: w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-            case 5: w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-            case 4: w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-            case 3: w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-            case 2: w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
-            case 1: w ^= (in.get() & 0xFFL) << shiftAmount;
-            }
-
+            do {
+                w ^= (in.get() & 0xFFL) << shiftAmount; shiftAmount += Byte.SIZE;
+            } while (--remaining > 0);
             state[rateWords] = w;
-            this.rateBits += remaining << 3;
         }
     }
 
@@ -192,14 +182,12 @@ public final class Keccak extends MessageDigest {
     }
 
     public void digest(ByteBuffer out) {
-        this.out = out;
-        engineDigest();
+        out.put(engineDigest(), 0, Math.min(engineGetDigestLength(), out.remaining()));
     }
 
     @Override
     protected int engineDigest(byte[] buf, int offset, int len) {
-        out = ByteBuffer.wrap(buf, offset, len);
-        engineDigest();
+        System.arraycopy(engineDigest(), 0, buf, offset, len);
         return len;
     }
 
@@ -208,53 +196,32 @@ public final class Keccak extends MessageDigest {
 
         pad();
 
-        int remaining;
-        if(out != null) {
-            remaining = out.remaining();
-        } else {
-            out = ByteBuffer.allocate(digestSizeBytes);
-            remaining = digestSizeBytes;
-        }
+        int remaining = engineGetDigestLength();
+        final ByteBuffer out = ByteBuffer.allocate(remaining);
 
         int rateWords = 0;
         int outWords = remaining >>> 3;
         if (outWords > 0) {
             out.order(ByteOrder.LITTLE_ENDIAN);
             do {
-                if (rateWords >= rateSizeWords) {
-                    keccak(state); // squeeze
-                    rateWords = 0;
-                }
-                int c = rateSizeWords - rateWords;
-                if (c > outWords)
+                int c = rateSizeWords;
+                if (c > outWords) {
                     c = outWords;
+                }
                 outWords -= c;
-                c += rateWords;
                 do {
-                    out.putLong(state[rateWords]);
-                    rateWords++;
+                    out.putLong(state[rateWords++]);
                 } while (rateWords < c);
             } while (outWords > 0);
             remaining &= 0b111;
         }
 
         if (remaining > 0) {
-            if (rateWords >= rateSizeWords) {
-                keccak(state); // squeeze
-                rateWords = 0;
-            }
             long w = state[rateWords];
-
             int shiftAmount = 0;
-            switch (remaining) {
-            case 7: out.put((byte) w); shiftAmount = Byte.SIZE;
-            case 6: out.put((byte) (w >>> shiftAmount)); shiftAmount += Byte.SIZE;
-            case 5: out.put((byte) (w >>> shiftAmount)); shiftAmount += Byte.SIZE;
-            case 4: out.put((byte) (w >>> shiftAmount)); shiftAmount += Byte.SIZE;
-            case 3: out.put((byte) (w >>> shiftAmount)); shiftAmount += Byte.SIZE;
-            case 2: out.put((byte) (w >>> shiftAmount)); shiftAmount += Byte.SIZE;
-            case 1: out.put((byte) (w >>> shiftAmount));
-            }
+            do {
+                out.put((byte) (w >>> shiftAmount)); shiftAmount += Byte.SIZE;
+            } while (--remaining > 0);
         }
 
         try {
@@ -280,7 +247,7 @@ public final class Keccak extends MessageDigest {
         if (inBits < 0 || inBits > 64)
             throw new IllegalArgumentException("Invalid valueBits: " + 0 + " < " + inBits + " > " + 64);
 
-        if (inBits <= 0)
+        if (inBits == 0)
             return;
 
         int rateBits = this.rateBits;
@@ -289,11 +256,11 @@ public final class Keccak extends MessageDigest {
             int c = 64 - rateBitsWord;
             if (c > inBits)
                 c = inBits;
-//            state[rateBits >>> 6] ^= (in & (-1L >>> -c)) << rateBitsWord;
-            state[rateBits >>> 6] ^= (in & (-1L >>> (64 - c))) << rateBitsWord;
+            state[rateBits >>> 6] ^= (in & (-1L >>> -c)) << rateBitsWord;
+//            state[rateBits >>> 6] ^= (in & (-1L >>> (64 - c))) << rateBitsWord;
             rateBits += c;
             inBits -= c;
-            if (inBits <= 0) {
+            if (inBits == 0) {
                 this.rateBits = rateBits;
                 return;
             }
@@ -305,8 +272,8 @@ public final class Keccak extends MessageDigest {
             this.rateBits = inBits;
             return;
         }
-//        state[rateBits >>> 6] ^= in & (-1L >>> -inBits);
-        state[rateBits >>> 6] ^= in & (-1L >>> (64 - inBits));
+        state[rateBits >>> 6] ^= in & (-1L >>> -inBits);
+//        state[rateBits >>> 6] ^= in & (-1L >>> (64 - inBits));
         this.rateBits = rateBits + inBits;
     }
 
