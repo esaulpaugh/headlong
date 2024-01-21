@@ -15,14 +15,14 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.util.Uint;
 import com.esaulpaugh.headlong.util.Integers;
+import com.esaulpaugh.headlong.util.Uint;
 
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 
+import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ADDRESS;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_DECIMAL;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BIG_INTEGER;
@@ -31,7 +31,6 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BYTE;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
-import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ADDRESS;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 
 /**

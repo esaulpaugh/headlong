@@ -22,7 +22,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.BufferUnderflowException;
@@ -516,7 +515,7 @@ public class MonteCarloTestCase {
     }
 
     private Object[] generateObjectArray(ArrayType<? extends ABIType<?>, ?, ?> arrayType, final int len, Random r) {
-        Object[] dest = (Object[]) Array.newInstance(arrayType.getElementType().clazz, len);
+        Object[] dest = ArrayType.createArray(arrayType.getElementType().clazz, len);
         final ArrayType<? extends ABIType<?>, ?, ?> elementType = (ArrayType<? extends ABIType<?>, ?, ?>) arrayType.getElementType();
         for (int i = 0; i < len; i++) {
             dest[i] = generateArray(elementType, r);

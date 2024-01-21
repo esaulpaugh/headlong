@@ -13,15 +13,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.util;
+package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.ABIType;
-import com.esaulpaugh.headlong.abi.Address;
-import com.esaulpaugh.headlong.abi.ArrayType;
-import com.esaulpaugh.headlong.abi.BigDecimalType;
-import com.esaulpaugh.headlong.abi.BigIntegerType;
-import com.esaulpaugh.headlong.abi.Tuple;
-import com.esaulpaugh.headlong.abi.TupleType;
+import com.esaulpaugh.headlong.util.FastHex;
+import com.esaulpaugh.headlong.util.Uint;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -29,7 +24,6 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 
 import java.io.StringReader;
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Iterator;
@@ -130,7 +124,7 @@ public class Deserializer {
                     array[i] = (long) parseValue(elementType, iter.next());
                 }
             } else {
-                Object[] array = (Object[]) (arrayObj = Array.newInstance(clazz, len));
+                Object[] array = (Object[]) (arrayObj = ArrayType.createArray(clazz, len));
                 for (; i < len; i++) {
                     array[i] = parseValue(elementType, iter.next());
                 }
