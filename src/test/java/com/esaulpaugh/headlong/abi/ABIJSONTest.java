@@ -220,7 +220,7 @@ public class ABIJSONTest {
         switch (type.typeCode()) {
         case TYPE_CODE_ARRAY:
             sb.append('[');
-            toString(null, ((ArrayType<? extends ABIType<?>, ?>) type).getElementType(), sb);
+            toString(null, ((ArrayType<? extends ABIType<?>, ?, ?>) type).getElementType(), sb);
             sb.append(']');
             break;
         case TYPE_CODE_TUPLE:
@@ -581,10 +581,8 @@ public class ABIJSONTest {
     @Test
     public void testJsonUtils() {
         JsonObject empty = new JsonObject();
-        Boolean b = ABIJSON.getBoolean(empty, "constant");
+        Boolean b = ABIJSON.getBoolean(empty, "constant", null);
         assertNull(b);
-        Boolean b2 = ABIJSON.getBoolean(empty, "constant", null);
-        assertNull(b2);
     }
 
     @Test

@@ -67,7 +67,7 @@ public final class TypeFactory {
         BASE_TYPE_MAP.put("address", new AddressType());
         mapByteArray("function", FUNCTION_BYTE_LEN);
         mapByteArray("bytes", DYNAMIC_LENGTH);
-        BASE_TYPE_MAP.put("string", new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAGS_NONE));
+        BASE_TYPE_MAP.put("string", new ArrayType<ByteType, Byte, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAGS_NONE));
 
         BASE_TYPE_MAP.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
         BASE_TYPE_MAP.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
@@ -86,11 +86,11 @@ public final class TypeFactory {
         for (Map.Entry<String, ABIType<?>> e : BASE_TYPE_MAP.entrySet()) {
             ABIType<?> value = e.getValue();
             if (value instanceof ArrayType) {
-                final ArrayType<?, ?> at = (ArrayType<?, ?>) value;
+                final ArrayType<?, ?, ?> at = (ArrayType<?, ?, ?>) value;
                 if (at.isString()) {
-                    value = new ArrayType<ByteType, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAG_LEGACY_DECODE);
+                    value = new ArrayType<ByteType, Byte, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAG_LEGACY_DECODE);
                 } else {
-                    value = new ArrayType<ByteType, byte[]>(at.canonicalType, byte[].class, ByteType.INSTANCE, at.getLength(), byte[][].class, ABIType.FLAG_LEGACY_DECODE);
+                    value = new ArrayType<ByteType, Byte, byte[]>(at.canonicalType, byte[].class, ByteType.INSTANCE, at.getLength(), byte[][].class, ABIType.FLAG_LEGACY_DECODE);
                 }
             }
             LEGACY_BASE_TYPE_MAP.put(e.getKey(), value);
@@ -114,7 +114,7 @@ public final class TypeFactory {
     }
 
     private static void mapByteArray(String type, int arrayLen) {
-        BASE_TYPE_MAP.put(type, new ArrayType<ByteType, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class, ABIType.FLAGS_NONE));
+        BASE_TYPE_MAP.put(type, new ArrayType<ByteType, Byte, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class, ABIType.FLAGS_NONE));
     }
 
     public static <T extends ABIType<?>> T create(String rawType) {

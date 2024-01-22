@@ -22,7 +22,6 @@ import com.esaulpaugh.headlong.rlp.RLPList;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -103,7 +102,7 @@ public final class SuperSerial {
         case TYPE_CODE_LONG: return serializeBigInteger((UnitType<?>) type, BigInteger.valueOf((long) obj));
         case TYPE_CODE_BIG_INTEGER: return serializeBigInteger((UnitType<?>) type, (BigInteger) obj);
         case TYPE_CODE_BIG_DECIMAL: return serializeBigInteger((UnitType<?>) type, ((BigDecimal) obj).unscaledValue());
-        case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?>) type, obj);
+        case TYPE_CODE_ARRAY: return serializeArray((ArrayType<? extends ABIType<?>, ?, ?>) type, obj);
         case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, (Tuple) obj);
         case TYPE_CODE_ADDRESS: return serializeBigInteger((UnitType<?>) type, ((Address) obj).value());
         default: throw new AssertionError();
@@ -124,7 +123,7 @@ public final class SuperSerial {
         case TYPE_CODE_BIG_DECIMAL:
             BigDecimalType bdt = (BigDecimalType) type;
             return new BigDecimal(deserializeBigInteger(bdt, item), bdt.scale);
-        case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<? extends ABIType<?>, ?>) type, item);
+        case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<? extends ABIType<?>, ?, ?>) type, item);
         case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());
         case TYPE_CODE_ADDRESS: return new Address(deserializeBigInteger((UnitType<?>) type, item));
         default: throw new AssertionError();
@@ -167,7 +166,7 @@ public final class SuperSerial {
                 : item.asBigIntSigned();
     }
 
-    private static Object serializeArray(ArrayType<? extends ABIType<?>, ?> type, Object arr) {
+    private static Object serializeArray(ArrayType<? extends ABIType<?>, ?, ?> type, Object arr) {
         final ABIType<?> et = type.getElementType();
         switch (et.typeCode()) {
         case TYPE_CODE_BOOLEAN: return serializeBooleanArray((boolean[]) arr);
@@ -183,7 +182,7 @@ public final class SuperSerial {
         }
     }
 
-    private static Object deserializeArray(ArrayType<? extends ABIType<?>,?> type, RLPItem item) {
+    private static Object deserializeArray(ArrayType<? extends ABIType<?>, ?, ?> type, RLPItem item) {
         final ABIType<?> et = type.getElementType();
         switch (et.typeCode()) {
         case TYPE_CODE_BOOLEAN: return deserializeBooleanArray((RLPList) item);
@@ -268,7 +267,7 @@ public final class SuperSerial {
 
     private static Object[] deserializeObjectArray(ABIType<?> elementType, RLPList list) {
         final List<RLPItem> elements = list.elements(RLP_STRICT);
-        Object[] in = (Object[]) Array.newInstance(elementType.clazz, elements.size()); // reflection ftw
+        final Object[] in = ArrayType.createArray(elementType.clazz, elements.size());
         for (int i = 0; i < in.length; i++) {
             in[i] = deserialize(elementType, elements.get(i));
         }

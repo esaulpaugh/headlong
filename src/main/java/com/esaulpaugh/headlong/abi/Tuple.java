@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -154,7 +153,7 @@ public final class Tuple implements Iterable<Object> {
         if(c.isArray()) {
             if (e instanceof Object[]) {
                 final Object[] original = (Object[]) e;
-                final Object[] copy = (Object[]) Array.newInstance(c.getComponentType(), original.length);
+                final Object[] copy = ArrayType.createArray(c.getComponentType(), original.length);
                 for (int i = 0; i < copy.length; i++) {
                     copy[i] = deepCopyElement(original[i]);
                 }

@@ -22,7 +22,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.BufferUnderflowException;
@@ -409,7 +408,7 @@ public class MonteCarloTestCase {
         case TYPE_CODE_LONG: return generateLong(r, (LongType) type);
         case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (BigIntegerType) type);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
-        case TYPE_CODE_ARRAY: return generateArray((ArrayType<? extends ABIType<?>, ?>) type, r);
+        case TYPE_CODE_ARRAY: return generateArray((ArrayType<? extends ABIType<?>, ?, ?>) type, r);
         case TYPE_CODE_TUPLE: return generateTuple(((TupleType) type).elementTypes, r);
         case TYPE_CODE_ADDRESS: return generateAddress(r);
         default: throw new Error();
@@ -432,7 +431,7 @@ public class MonteCarloTestCase {
         return new Address(new BigInteger(r.nextBoolean() ? ADDRESS_BIT_LEN : ADDRESS_BIT_LEN - r.nextInt(ADDRESS_BIT_LEN), r));
     }
 
-    private Object generateArray(ArrayType<? extends ABIType<?>, ?> arrayType, Random r) {
+    private Object generateArray(ArrayType<? extends ABIType<?>, ?, ?> arrayType, Random r) {
         final ABIType<?> elementType = arrayType.getElementType();
         final int typeLen = arrayType.getLength();
         final int len = DYNAMIC_LENGTH == typeLen
@@ -515,9 +514,9 @@ public class MonteCarloTestCase {
         return addresses;
     }
 
-    private Object[] generateObjectArray(ArrayType<? extends ABIType<?>, ?> arrayType, final int len, Random r) {
-        Object[] dest = (Object[]) Array.newInstance(arrayType.getElementType().clazz, len);
-        final ArrayType<? extends ABIType<?>, ?> elementType = (ArrayType<? extends ABIType<?>, ?>) arrayType.getElementType();
+    private Object[] generateObjectArray(ArrayType<? extends ABIType<?>, ?, ?> arrayType, final int len, Random r) {
+        Object[] dest = ArrayType.createArray(arrayType.getElementType().clazz, len);
+        final ArrayType<? extends ABIType<?>, ?, ?> elementType = (ArrayType<? extends ABIType<?>, ?, ?>) arrayType.getElementType();
         for (int i = 0; i < len; i++) {
             dest[i] = generateArray(elementType, r);
         }

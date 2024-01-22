@@ -205,15 +205,14 @@ public class TupleTest {
     @Test
     public void testTypeSafety() throws Throwable {
 
-        final int maxTupleLen = 3;
-        final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(maxTupleLen, 3, 3, 3);
+        final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(3, 3, 3, 3);
         final Random r = new Random();
         final Keccak k = new Keccak(256);
         final Object defaultObj = new Object();
 
         long seed = r.nextLong();
-        for (int idx = 0; idx < maxTupleLen; idx++) {
-            for (int i = 0; i < 25; i++, seed++) {
+        for (int idx = 0; idx < limits.maxTupleLength; idx++) {
+            for (int i = 0; i < 30; i++, seed++) {
                 final MonteCarloTestCase testCase = new MonteCarloTestCase(seed, limits, r, k);
                 final Object[] elements = testCase.argsTuple.elements;
                 if (idx < elements.length) {
@@ -223,14 +222,53 @@ public class TupleTest {
                             : defaultObj;
                     try {
                         assertThrown(IllegalArgumentException.class, " but found ", () -> testCase.function.encodeCall(Tuple.of(elements)));
-                    } catch (AssertionError ae) {
+                    } catch (ClassCastException | AssertionError e) {
                         System.err.println("seed = " + seed);
-                        ae.printStackTrace();
-                        throw ae;
+                        e.printStackTrace();
+                        throw e;
                     }
                 }
             }
         }
+    }
+
+    @Test
+    public void testTypeSafety2() throws Throwable {
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0 is null",
+                () -> Tuple.singleton(null)
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1 is null",
+                () -> Tuple.of(true, null, true)
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1: null",
+                () -> Function.parse("foo(bool,int32)").encodeCallWithArgs(true, null)
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1: class mismatch: java.lang.Object != java.lang.Integer (int32 requires Integer but found Object)",
+                () -> Function.parse("foo(bool,int32)").encodeCallWithArgs(false, new Object())
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.Long != [I (int32[] requires int[] but found Long)",
+                () -> Function.parse("foo(int32[])").encodeCallWithArgs(10L)
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: [[[[I != [[[[J (uint32[][][7][] requires long[][][][] but found int[][][][])",
+                () -> Function.parse("foo(uint32[][][7][])").encodeCallWithArgs((Object) new int[][][][] {})
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: class mismatch: java.lang.String != [Lcom.esaulpaugh.headlong.abi.Address; (address[5] requires Address[] but found String)",
+                () -> Function.parse("foo(address[5])").encodeCallWithArgs("0xaaaaaaaaaaaaaaaaaaa")
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: array length mismatch: boolean[2][][] != boolean[3][][] (bool[][][3] requires length 3 but found 2)",
+                () -> Function.parse("foo(bool[][][3])").encodeCallWithArgs((Object) new boolean[][][] {new boolean[][]{}, new boolean[][]{}})
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: array length mismatch: byte[31] != byte[21] (bytes21 requires length 21 but found 31)",
+                () -> Function.parse("foo(bytes21)").encodeCallWithArgs((Object) new byte[31])
+        );
     }
 
     @Test
@@ -241,10 +279,10 @@ public class TupleTest {
         for (int i = 0; i < 1000; i++) {
             MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong(), limits, r, k);
             Tuple args = mctc.argsTuple;
-            if(args.elements.length > 0) {
+            if (args.elements.length > 0) {
                 int idx = r.nextInt(args.elements.length);
                 replace(args.elements, idx);
-                assertThrown(IllegalArgumentException.class, "null", () -> mctc.function.encodeCall(args));
+                assertThrown(IllegalArgumentException.class, ": null", () -> mctc.function.encodeCall(args));
             }
         }
     }
@@ -485,7 +523,7 @@ public class TupleTest {
     @Test
     public void testGetElement() {
         TupleType tt = TupleType.parse("(bytes8,decimal)");
-        ArrayType<ByteType, byte[]> at = tt.get(0);
+        ArrayType<ByteType, Byte, byte[]> at = tt.get(0);
         assertEquals(8, at.getLength());
         BigDecimalType decimal = tt.get(1);
         assertEquals("fixed168x10", decimal.getCanonicalType());
