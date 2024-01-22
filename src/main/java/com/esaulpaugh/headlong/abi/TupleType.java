@@ -457,7 +457,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 final ByteBuffer dest = ByteBuffer.allocate(OFFSET_LENGTH_BYTES);
                 insertIntUnsigned(offset, dest); // insert offset
                 sb.append(label(row++)).append(Strings.encode(dest));
-                annotate(sb, i, t, " offset");
+                annotate(sb, i, "offset");
                 if (i >= last) {
                     break;
                 }
@@ -474,7 +474,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return sb.toString();
     }
 
-    private static int encodeTailAnnotated(int row, int idx, ABIType<Object> t, Object v, StringBuilder sb) {
+    private int encodeTailAnnotated(int row, int idx, ABIType<Object> t, Object v, StringBuilder sb) {
         final ByteBuffer dest = ByteBuffer.allocate(t.validate(v));
         t.encodeTail(v, dest);
         final int len = dest.position();
@@ -483,13 +483,13 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         if (i < len) {
             final byte[] rowData = newUnitBuffer();
             final boolean dynamicArray = t.dynamic && t instanceof ArrayType && ((ArrayType<?, ?, ?>) t).getLength() == ArrayType.DYNAMIC_LENGTH;
-            appendAnnotatedRow(row++, sb, dest, rowData, idx, t, dynamicArray ? " length" : "");
+            appendAnnotatedRow(row++, sb, dest, rowData, idx, dynamicArray ? "length" : "");
             i += UNIT_LENGTH_BYTES;
             if (i < len) {
-                appendAnnotatedRow(row++, sb, dest, rowData, idx, t, dynamicArray ? "" : null);
+                appendAnnotatedRow(row++, sb, dest, rowData, idx, dynamicArray ? "" : null);
                 i += UNIT_LENGTH_BYTES;
                 while (i < len) {
-                    appendAnnotatedRow(row++, sb, dest, rowData, idx, t, null);
+                    appendAnnotatedRow(row++, sb, dest, rowData, idx, null);
                     i += UNIT_LENGTH_BYTES;
                 }
             }
@@ -497,23 +497,23 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return row;
     }
 
-    private static void appendAnnotatedRow(int row, StringBuilder sb, ByteBuffer bb, byte[] rowData, int idx, ABIType<Object> t, String note) {
+    private void appendAnnotatedRow(int row, StringBuilder sb, ByteBuffer bb, byte[] rowData, int idx, String note) {
         bb.get(rowData);
         sb.append(label(row)).append(Strings.encode(rowData));
-        annotate(sb, idx, t, note);
+        annotate(sb, idx, note);
     }
 
-    private static String label(int row) {
+    private String label(int row) {
         String unpadded = Integer.toHexString(row * UNIT_LENGTH_BYTES);
         return ABIType.pad(ABIType.LABEL_LEN - unpadded.length(), unpadded);
     }
 
-    private static void annotate(StringBuilder sb, int idx, ABIType<?> t, String note) {
+    private void annotate(StringBuilder sb, int idx, String note) {
         sb.append("\t[").append(idx).append("]");
         if (note == null) {
             sb.append(" ...").append('\n');
             return;
         }
-        sb.append(' ').append(t.canonicalType).append(note).append('\n');
+        sb.append(' ').append(get(idx).canonicalType).append(" \"").append(getElementName(idx)).append("\" ").append(note).append('\n');
     }
 }
