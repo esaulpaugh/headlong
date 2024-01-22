@@ -49,6 +49,7 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EncodeTest {
@@ -171,6 +172,9 @@ public class EncodeTest {
 
     @Test
     public void testFunctionAnnotate() {
+        final Function foo = Function.parse("foo()");
+        assertEquals("foo:\nID       c2985578", foo.annotateCall(Tuple.of()));
+        assertSame("", TupleType.EMPTY.annotate(new byte[0]));
         final Function f = new Function(
                 TypeEnum.FUNCTION,
                 "do_something",
@@ -191,17 +195,17 @@ public class EncodeTest {
         assertEquals(
                 "do_something:\n" +
                         "ID       d88de50f\n" +
-                        "     0   0000000000000000000000000000000000000000000000000000000000000001\t[0] bool \"isFree\" \n" +
+                        "     0   0000000000000000000000000000000000000000000000000000000000000001\t[0] bool \"isFree\"\n" +
                         "    20   00000000000000000000000000000000000000000000000000000000000000c0\t[2] string \"word\" offset\n" +
-                        "    40   ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80\t[3] (int8,uint8) \"pair\" \n" +
+                        "    40   ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80\t[3] (int8,uint8) \"pair\"\n" +
                         "    60   00000000000000000000000000000000000000000000000000000000000000ff\t[3] ...\n" +
-                        "    80   000000000000000000000000a000000000000000000000000000000000000000\t[4] address \"cntct\" \n" +
+                        "    80   000000000000000000000000a000000000000000000000000000000000000000\t[4] address \"cntct\"\n" +
                         "    a0   0000000000000000000000000000000000000000000000000000000000000140\t[5] (uint16,bytes) \"tup\" offset\n" +
                         "    c0   0000000000000000000000000000000000000000000000000000000000000042\t[2] string \"word\" length\n" +
-                        "    e0   6c696265727461642e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e\t[2] string \"word\" \n" +
+                        "    e0   6c696265727461642e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e\t[2] string \"word\"\n" +
                         "   100   2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e\t[2] ...\n" +
                         "   120   2e2e000000000000000000000000000000000000000000000000000000000000\t[2] ...\n" +
-                        "   140   000000000000000000000000000000000000000000000000000000000000ffff\t[5] (uint16,bytes) \"tup\" \n" +
+                        "   140   000000000000000000000000000000000000000000000000000000000000ffff\t[5] (uint16,bytes) \"tup\"\n" +
                         "   160   0000000000000000000000000000000000000000000000000000000000000040\t[5] ...\n" +
                         "   180   0000000000000000000000000000000000000000000000000000000000000020\t[5] ...\n" +
                         "   1a0   636172616a6f5d305d305d305d305d305d305d305d305d305d305d305d305d30\t[5] ...",

@@ -414,6 +414,6 @@ public final class Function implements ABIObject {
      *
      */
     public String annotateCall(Tuple args) {
-        return name + ":\n" + ABIType.pad(0, "ID") + Strings.encode(selector) + '\n' + inputTypes.annotate(args);
+        return name + ":\n" + ABIType.pad(0, "ID") + Strings.encode(selector) + inputTypes.annotate(args);
     }
 }
