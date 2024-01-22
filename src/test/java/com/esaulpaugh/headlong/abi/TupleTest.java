@@ -282,11 +282,7 @@ public class TupleTest {
             if (args.elements.length > 0) {
                 int idx = r.nextInt(args.elements.length);
                 replace(args.elements, idx);
-                try {
-                    assertThrown(IllegalArgumentException.class, () -> mctc.function.encodeCall(args));
-                } catch (NullPointerException npe) {
-                    assertThrown(NullPointerException.class, () -> mctc.function.encodeCall(args));
-                }
+                assertThrown(IllegalArgumentException.class, ": null", () -> mctc.function.encodeCall(args));
             }
         }
     }

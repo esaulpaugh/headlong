@@ -122,8 +122,8 @@ public abstract class ABIType<J> {
     public abstract int validate(J value);
 
     final void validateClass(J value) {
-        if(!clazz.isInstance(value)) {
-            if(value == null) {
+        if (!clazz.isInstance(value)) {
+            if (value == null) {
                 throw new IllegalArgumentException("null");
             }
             throw mismatchErr("class",

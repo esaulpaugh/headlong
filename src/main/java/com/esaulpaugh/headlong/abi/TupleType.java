@@ -164,6 +164,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         } catch (ClassCastException cce) {
             type.validateClass(value); // generates better error message
             throw new AssertionError();
+        } catch (NullPointerException npe) {
+            throw new IllegalArgumentException("null");
         }
     }
 
