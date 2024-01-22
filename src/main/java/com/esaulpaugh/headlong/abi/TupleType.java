@@ -160,10 +160,10 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
 
     private static int validateObject(ABIType<Object> type, Object value) {
         try {
-            type.validateClass(value);
             return totalLen(type.validate(value), type.dynamic);
-        } catch (NullPointerException npe) {
-            throw new IllegalArgumentException("null", npe);
+        } catch (ClassCastException cce) {
+            type.validateClass(value); // generates better error message
+            throw new AssertionError();
         }
     }
 
