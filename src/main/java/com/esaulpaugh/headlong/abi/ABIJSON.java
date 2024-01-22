@@ -119,7 +119,7 @@ public final class ABIJSON {
     /** @see ABIObject#fromJsonObject(int,JsonObject) */
     static <T extends ABIObject> T parseABIObject(JsonObject object, int flags) {
         final TypeEnum typeEnum = TypeEnum.parse(getType(object));
-        return parseABIObject(TypeEnum.parse(getType(object)), object, typeEnum.isFunction ? Function.newDefaultDigest() : null, flags);
+        return parseABIObject(typeEnum, object, typeEnum.isFunction ? Function.newDefaultDigest() : null, flags);
     }
 
     @SuppressWarnings("unchecked")
@@ -137,10 +137,10 @@ public final class ABIJSON {
 // ---------------------------------------------------------------------------------------------------------------------
     static Function parseFunction(JsonObject function, MessageDigest digest, int flags) {
         final TypeEnum t = TypeEnum.parse(getType(function));
-        if (FUNCTIONS.contains(t)) {
-            return parseFunctionUnchecked(t, function, digest, flags);
+        if (!FUNCTIONS.contains(t)) {
+            throw TypeEnum.unexpectedType(getType(function));
         }
-        throw TypeEnum.unexpectedType(getType(function));
+        return parseFunctionUnchecked(t, function, digest, flags);
     }
 
     static Event parseEvent(JsonObject event, int flags) {
@@ -353,7 +353,7 @@ public final class ABIJSON {
         @Override
         public void write(int c) {
             if (count >= buffer.length) {
-                buffer = Arrays.copyOf(buffer, buffer.length << 1); // expects buf.length to be non-zero
+                buffer = Arrays.copyOf(buffer, buffer.length << 1); // expects buffer.length to be non-zero
             }
             buffer[count++] = (byte) c;
         }
