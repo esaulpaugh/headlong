@@ -283,9 +283,9 @@ public class TupleTest {
                 int idx = r.nextInt(args.elements.length);
                 replace(args.elements, idx);
                 try {
-                    assertThrown(IllegalArgumentException.class, "", () -> mctc.function.encodeCall(args));
+                    assertThrown(IllegalArgumentException.class, () -> mctc.function.encodeCall(args));
                 } catch (NullPointerException npe) {
-                    assertThrown(NullPointerException.class, "", () -> mctc.function.encodeCall(args));
+                    assertThrown(NullPointerException.class, () -> mctc.function.encodeCall(args));
                 }
             }
         }
