@@ -90,6 +90,18 @@ public abstract class ABIType<J> {
         return FLAGS_UNSET;
     }
 
+    public final ArrayType<?, ?, J> asArrayType() {
+        return (ArrayType<?, ?, J>) this;
+    }
+
+    public final TupleType asTupleType() {
+        return (TupleType) this;
+    }
+
+    public final UnitType<J> asUnitType() {
+        return (UnitType<J>) this;
+    }
+
     abstract Class<?> arrayClass();
 
     /**

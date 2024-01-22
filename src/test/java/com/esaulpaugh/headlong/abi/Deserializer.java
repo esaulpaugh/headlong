@@ -62,7 +62,7 @@ public class Deserializer {
     private static Object parseValue(final ABIType<?> type, final JsonElement value) {
         final int typeCode = type.typeCode();
         if(typeCode == ABIType.TYPE_CODE_ARRAY) {
-            return parseArrayValue((ArrayType<? extends ABIType<?>, ?, ?>) type, value);
+            return parseArrayValue((ArrayType<?, ?, ?>) type, value);
         }
         final JsonObject valueObj = value.getAsJsonObject();
         final JsonElement valVal = valueObj.get("value");

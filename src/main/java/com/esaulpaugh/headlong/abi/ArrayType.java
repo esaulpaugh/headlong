@@ -496,7 +496,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T baseType(ABIType<?> type) {
         return type instanceof ArrayType<?, ?, ?>
-                ? baseType(((ArrayType<? extends ABIType<?>, ?, ?>) type).getElementType())
+                ? baseType(((ArrayType<?, ?, ?>) type).getElementType())
                 : (T) type;
     }
 }
