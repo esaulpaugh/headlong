@@ -37,7 +37,7 @@ public class Tuple implements Iterable<Object> {
     }
 
     public static <T extends Tuple> T ofAll(Object... elements) {
-        return create(copy(elements, new Object[elements.length], i -> requireNotNull(elements[i], i)));
+        return create(copy(new Object[elements.length], i -> requireNotNull(elements[i], i)));
     }
 
     @SuppressWarnings("unchecked")
@@ -119,15 +119,15 @@ public class Tuple implements Iterable<Object> {
 
     @Override
     public final String toString() {
-        return Arrays.deepToString(copy(elements, new Object[elements.length], i -> {
+        return Arrays.deepToString(copy(new Object[elements.length], i -> {
             Object element = elements[i];
             if (element == null) return SKIPPED;
             return SKIPPED.equals(element.toString()) ? '"' + SKIPPED + '"' : element;
         }));
     }
 
-    private static Object[] copy(Object[] orig, Object[] copy, IntFunction<Object> extractor) {
-        for (int i = 0; i < orig.length; i++) {
+    private static Object[] copy(Object[] copy, IntFunction<Object> extractor) {
+        for (int i = 0; i < copy.length; i++) {
             copy[i] = extractor.apply(i);
         }
         return copy;
@@ -145,7 +145,7 @@ public class Tuple implements Iterable<Object> {
      * @return  an independent copy of this tuple
      */
     public final <T extends Tuple> T deepCopy() {
-        return create(copy(elements, new Object[elements.length], i -> deepCopyElement(elements[i])));
+        return create(copy(new Object[elements.length], i -> deepCopyElement(elements[i])));
     }
 
     /**
@@ -164,7 +164,7 @@ public class Tuple implements Iterable<Object> {
         if(c.isArray()) {
             if (e instanceof Object[]) {
                 final Object[] original = (Object[]) e;
-                return copy(original, ArrayType.createArray(c.getComponentType(), original.length), i -> deepCopyElement(original[i]));
+                return copy(ArrayType.createArray(c.getComponentType(), original.length), i -> deepCopyElement(original[i]));
             }
             if (e instanceof byte[]) {
                 final byte[] bytes = (byte[]) e;
