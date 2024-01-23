@@ -126,13 +126,13 @@ public class EqualsTest {
                 new String[0][],
                 new Address[] { addr },
                 BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(Byte.MAX_VALUE << 2)),
-                Tuple.singleton(7),
-                new Tuple[][][] { new Tuple[][] { new Tuple[] { Tuple.singleton(9), Tuple.singleton(-11) } } },
-                new Tuple[] { Tuple.singleton(13), Tuple.singleton(-15) },
-                new Tuple[] { Tuple.singleton(17), Tuple.singleton(-19) },
+                Singleton.of(7),
+                new Tuple[][][] { new Tuple[][] { new Tuple[] { Singleton.of(9), Singleton.of(-11) } } },
+                new Tuple[] { Singleton.of(13), Singleton.of(-15) },
+                new Tuple[] { Singleton.of(17), Singleton.of(-19) },
                 Long.MAX_VALUE / 8_500_000,
-                new Tuple[] { Tuple.singleton((long) 0x7e), Tuple.singleton((long) -0x7e) },
-                Tuple.singleton(BigInteger.TEN)
+                new Tuple[] { Singleton.of((long) 0x7e), Singleton.of((long) -0x7e) },
+                Singleton.of(BigInteger.TEN)
         };
 
         final ByteBuffer abi = f.encodeCallWithArgs(argsIn);
@@ -159,7 +159,7 @@ public class EqualsTest {
 
         Function foo = Function.parse("foo(uint32[6])");
 
-        ByteBuffer bb = foo.encodeCall(Tuple.singleton(unsigneds));
+        ByteBuffer bb = foo.encodeCall(Singleton.of(unsigneds));
 
         Tuple dec = foo.decodeCall(bb);
 
@@ -182,7 +182,7 @@ public class EqualsTest {
 
         Function foo = Function.parse("foo(uint64[6])");
 
-        ByteBuffer bb = foo.encodeCall(Tuple.singleton(unsigneds));
+        ByteBuffer bb = foo.encodeCall(Singleton.of(unsigneds));
         assertEquals(0, bb.position());
 
         Tuple dec = foo.decodeCall(bb);

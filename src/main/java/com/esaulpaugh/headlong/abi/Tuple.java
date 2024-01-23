@@ -40,10 +40,6 @@ public class Tuple implements Iterable<Object> {
         return create(copy(elements, new Object[elements.length], i -> requireNotNull(elements[i], i)));
     }
 
-    public static Tuple singleton(Object element) {
-        return createNoCopy(element);
-    }
-
     @SuppressWarnings("unchecked")
     private static <T extends Tuple> T create(Object[] elements) {
         switch (elements.length) {

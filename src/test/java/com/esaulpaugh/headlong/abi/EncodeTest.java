@@ -387,7 +387,7 @@ public class EncodeTest {
     public void uint8ArrayTest() {
         Function f = new Function("baz(uint8[])");
 
-        Tuple args = Tuple.singleton(new int[] { 0xFF, 1, 1, 2, 0 });
+        Tuple args = Singleton.of(new int[] { 0xFF, 1, 1, 2, 0 });
         ByteBuffer two = f.encodeCall(args);
 
         Tuple decoded = f.decodeCall(two);
@@ -400,7 +400,7 @@ public class EncodeTest {
         Function f = new Function("((int16)[2][][1])");
 
         Object[] argsIn = new Object[] {
-                new Tuple[][][] { new Tuple[][] { new Tuple[] { Tuple.singleton(9), Tuple.singleton(-11) } } }
+                new Tuple[][][] { new Tuple[][] { new Tuple[] { Singleton.of(9), Singleton.of(-11) } } }
         };
 
         ByteBuffer buf = f.encodeCallWithArgs(argsIn);
@@ -444,8 +444,8 @@ public class EncodeTest {
             args[i] = supplier.get();
         }
 
-        Tuple aArgs = Tuple.singleton(args);
-        Tuple bArgs = Tuple.singleton(Tuple.ofAll(args));
+        Tuple aArgs = Singleton.of(args);
+        Tuple bArgs = Singleton.of(Tuple.ofAll(args));
 
         byte[] aEncoding = a.encode(aArgs).array();
         ByteBuffer bDest = ByteBuffer.allocate(b.measureEncodedLength(bArgs));
@@ -487,7 +487,7 @@ public class EncodeTest {
                 Address.wrap("0x0000000000000000000000000000000000000009"),
                 new BigDecimal(BigInteger.TEN, 18),
                 new byte[] { 1, 0 },
-                Tuple.singleton("\u0002"),
+                Singleton.of("\u0002"),
                 new byte[] { 0x04 },
                 new byte[] { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 }
         );
@@ -552,7 +552,7 @@ public class EncodeTest {
         assertThrown(
                 IllegalArgumentException.class,
                 "BigDecimal scale mismatch: expected scale 9 but found 1",
-                () -> Function.parse("(fixed56x9)").encodeCall(Tuple.singleton(new BigDecimal("0.2")))
+                () -> Function.parse("(fixed56x9)").encodeCall(Singleton.of(new BigDecimal("0.2")))
         );
     }
 
@@ -561,7 +561,7 @@ public class EncodeTest {
         assertThrown(
                 IllegalArgumentException.class,
                 "tuple index 0: array index 1: signed val exceeds bit limit: 9 >= 8",
-                () -> Function.parse("(int8[])").encodeCall(Tuple.singleton(new int[] { 120, 256 }))
+                () -> Function.parse("(int8[])").encodeCall(Singleton.of(new int[] { 120, 256 }))
         );
     }
 

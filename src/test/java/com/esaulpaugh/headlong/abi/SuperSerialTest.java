@@ -63,8 +63,8 @@ public class SuperSerialTest {
     public void testBoolean() throws Throwable {
 
         TupleType _bool_ = TupleType.parse("(bool)");
-        Tuple _true = Tuple.singleton(true);
-        Tuple _false = Tuple.singleton(false);
+        Tuple _true = Singleton.of(true);
+        Tuple _false = Singleton.of(false);
 
         assertEquals("01", SuperSerial.serialize(_bool_, _true, true));
         assertEquals("80", SuperSerial.serialize(_bool_, _false, true));
