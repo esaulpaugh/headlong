@@ -77,7 +77,7 @@ public class Tuple implements Iterable<Object> {
      * @throws NoSuchElementException if the element is absent due to being skipped during decode
      */
     @SuppressWarnings("unchecked")
-    public <T> T get(int index) {
+    public final <T> T get(int index) {
         Object val = elements[index];
         if (val == null) {
             // an element should only be null as a result of a decode-with-indices in which this index wasn't specified
@@ -95,30 +95,30 @@ public class Tuple implements Iterable<Object> {
      * @param index the position of the element in the Tuple
      * @return  false if the element is absent due to being skipped during decode, true otherwise
      */
-    public boolean elementIsPresent(int index) {
+    public final boolean elementIsPresent(int index) {
         return elements[index] != null;
     }
 
-    public int size() {
+    public final int size() {
         return elements.length;
     }
 
-    public boolean isEmpty() {
+    public final boolean isEmpty() {
         return size() == 0;
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return Arrays.deepHashCode(elements);
     }
 
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         return o == this || (o instanceof Tuple && Arrays.deepEquals(this.elements, ((Tuple) o).elements));
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return Arrays.deepToString(copy(elements, new Object[elements.length], i -> {
             Object element = elements[i];
             if (element == null) return SKIPPED;
@@ -134,7 +134,7 @@ public class Tuple implements Iterable<Object> {
     }
 
     @Override
-    public Iterator<Object> iterator() {
+    public final Iterator<Object> iterator() {
         return Arrays.asList(elements).iterator();
     }
 
@@ -144,7 +144,7 @@ public class Tuple implements Iterable<Object> {
      *
      * @return  an independent copy of this tuple
      */
-    public <T extends Tuple> T deepCopy() {
+    public final <T extends Tuple> T deepCopy() {
         return create(copy(elements, new Object[elements.length], i -> deepCopyElement(elements[i])));
     }
 
@@ -155,7 +155,7 @@ public class Tuple implements Iterable<Object> {
      *
      * @return  a shallow copy of the elements array
      */
-    public Object[] toArray() {
+    public final Object[] toArray() {
         return Arrays.copyOf(elements, elements.length);
     }
 
