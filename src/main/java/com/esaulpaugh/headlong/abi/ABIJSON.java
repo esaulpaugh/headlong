@@ -204,7 +204,7 @@ public final class ABIJSON {
             dynamic |= e.dynamic;
             elements[i] = e;
             names[i] = getName(inputObj);
-            final String internalType = getInternalType(inputObj);
+            final String internalType = getString(inputObj, INTERNAL_TYPE);
             if (internalType != null) {
                 final String type = e.canonicalType;
                 internalTypes[i] = internalType.equals(type) ? type : internalType;
@@ -246,10 +246,6 @@ public final class ABIJSON {
 
     private static String getName(JsonObject obj) {
         return getString(obj, NAME);
-    }
-
-    private static String getInternalType(JsonObject obj) {
-        return getString(obj, INTERNAL_TYPE);
     }
 // ---------------------------------------------------------------------------------------------------------------------
     static String toJson(ABIObject o, boolean pretty) {
