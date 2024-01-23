@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.util;
 
-import com.esaulpaugh.headlong.util.Integers;
-
 import java.math.BigInteger;
 
 /**

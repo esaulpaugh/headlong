@@ -56,7 +56,7 @@ public final class Keccak extends MessageDigest {
         }
     }
 
-    private int rateSizeBitsFor(int digestSizeBits) {
+    private static int rateSizeBitsFor(int digestSizeBits) {
         switch (digestSizeBits) {
         case 128: return 1344;
         case 224: return 1152;
@@ -283,7 +283,6 @@ public final class Keccak extends MessageDigest {
         long x0, x1, x2, x3, x4;
         long t0, t1, t2, t3, t4;
         long c0, c1, c2, c3, c4;
-        final long[] rc = RC;
 
         i = 0;
         do {
@@ -346,7 +345,7 @@ public final class Keccak extends MessageDigest {
             } while (c < 25);
 
             //iota
-            a[0] ^= rc[i];
+            a[0] ^= RC[i];
 
             i++;
         } while (i < 24);
