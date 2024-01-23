@@ -18,13 +18,14 @@ package com.esaulpaugh.headlong.abi;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.IntFunction;
 
 /**
  * An ordered list of objects whose types should correspond to some {@link TupleType}. {@link Function}s encode/decode {@link Tuple}s
  * containing arguments/return values. {@link Tuple}s can contain other tuples. Be warned that changes to elements will affect
  * this {@link Tuple}'s value.
  */
-public final class Tuple implements Iterable<Object> {
+public class Tuple implements Iterable<Object> {
 
     public static final Tuple EMPTY = new Tuple();
     private static final String SKIPPED = "_";
@@ -35,16 +36,32 @@ public final class Tuple implements Iterable<Object> {
         this.elements = elements;
     }
 
-    public static Tuple of(Object... elements) {
-        final Object[] shallowCopy = new Object[elements.length];
-        for (int i = 0; i < elements.length; i++) {
-            shallowCopy[i] = requireNotNull(elements[i], i);
-        }
-        return new Tuple(shallowCopy);
+    public static <T extends Tuple> T ofAll(Object... elements) {
+        return create(copy(elements, new Object[elements.length], i -> requireNotNull(elements[i], i)));
     }
 
     public static Tuple singleton(Object element) {
-        return new Tuple(requireNotNull(element, 0));
+        return createNoCopy(element);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Tuple> T create(Object[] elements) {
+        switch (elements.length) {
+        case 1: return (T) new Singleton<>(elements);
+        case 2: return (T) new Pair<>(elements);
+        case 3: return (T) new Triple<>(elements);
+        case 4: return (T) new Quadruple<>(elements);
+        case 5: return (T) new Quintuple<>(elements);
+        case 6: return (T) new Sextuple<>(elements);
+        default: return (T) new Tuple(elements);
+        }
+    }
+
+    static <T extends Tuple> T createNoCopy(Object... elements) {
+        for (int i = 0; i < elements.length; i++) {
+            requireNotNull(elements[i], i);
+        }
+        return create(elements);
     }
 
     private static Object requireNotNull(Object e, int index) {
@@ -101,21 +118,23 @@ public final class Tuple implements Iterable<Object> {
 
     @Override
     public boolean equals(Object o) {
-        return o == this || (o instanceof Tuple && Arrays.deepEquals(((Tuple) o).elements, this.elements));
+        return o == this || (o instanceof Tuple && Arrays.deepEquals(this.elements, ((Tuple) o).elements));
     }
 
     @Override
     public String toString() {
-        final Object[] copy = new Object[elements.length];
-        for (int i = 0; i < elements.length; i++) {
-            copy[i] = normalize(elements[i]);
-        }
-        return Arrays.deepToString(copy);
+        return Arrays.deepToString(copy(elements, new Object[elements.length], i -> {
+            Object element = elements[i];
+            if (element == null) return SKIPPED;
+            return SKIPPED.equals(element.toString()) ? '"' + SKIPPED + '"' : element;
+        }));
     }
 
-    private static Object normalize(Object element) {
-        if (element == null) return SKIPPED;
-        return SKIPPED.equals(element.toString()) ? '"' + SKIPPED + '"' : element;
+    private static Object[] copy(Object[] orig, Object[] copy, IntFunction<Object> extractor) {
+        for (int i = 0; i < orig.length; i++) {
+            copy[i] = extractor.apply(i);
+        }
+        return copy;
     }
 
     @Override
@@ -129,12 +148,8 @@ public final class Tuple implements Iterable<Object> {
      *
      * @return  an independent copy of this tuple
      */
-    public Tuple deepCopy() {
-        final Object[] deepCopy = new Object[elements.length];
-        for (int i = 0; i < elements.length; i++) {
-            deepCopy[i] = deepCopyElement(elements[i]);
-        }
-        return new Tuple(deepCopy);
+    public <T extends Tuple> T deepCopy() {
+        return create(copy(elements, new Object[elements.length], i -> deepCopyElement(elements[i])));
     }
 
     /**
@@ -153,11 +168,7 @@ public final class Tuple implements Iterable<Object> {
         if(c.isArray()) {
             if (e instanceof Object[]) {
                 final Object[] original = (Object[]) e;
-                final Object[] copy = ArrayType.createArray(c.getComponentType(), original.length);
-                for (int i = 0; i < copy.length; i++) {
-                    copy[i] = deepCopyElement(original[i]);
-                }
-                return copy;
+                return copy(original, ArrayType.createArray(c.getComponentType(), original.length), i -> deepCopyElement(original[i]));
             }
             if (e instanceof byte[]) {
                 final byte[] bytes = (byte[]) e;

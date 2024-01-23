@@ -173,7 +173,7 @@ public class EncodeTest {
     @Test
     public void testFunctionAnnotate() {
         final Function foo = Function.parse("foo()");
-        assertEquals("foo:\nID       c2985578", foo.annotateCall(Tuple.of()));
+        assertEquals("foo:\nID       c2985578", foo.annotateCall(Tuple.ofAll()));
         assertSame("", TupleType.EMPTY.annotate(new byte[0]));
         final Function f = new Function(
                 TypeEnum.FUNCTION,
@@ -183,13 +183,13 @@ public class EncodeTest {
                 "payable",
                 Function.newDefaultDigest()
         );
-        final Tuple args = Tuple.of(
+        final Tuple args = Sextuple.of(
                 true,
                 Tuple.EMPTY,
                 "libertad..........................................................",
-                Tuple.of(-128, 255),
+                Pair.of(-128, 255),
                 Address.wrap(Address.toChecksumAddress(BigInteger.TEN.shiftLeft(156))),
-                Tuple.of(65535, "carajo]0]0]0]0]0]0]0]0]0]0]0]0]0".getBytes(StandardCharsets.US_ASCII))
+                Pair.of(65535, "carajo]0]0]0]0]0]0]0]0]0]0]0]0]0".getBytes(StandardCharsets.US_ASCII))
         );
         final String annotated = f.annotateCall(args);
         assertEquals(
@@ -349,7 +349,7 @@ public class EncodeTest {
     @Test
     public void simpleFunctionTest() {
         Function f = new Function("baz(uint32,bool)", "(uint32,bool)"); // canonicalizes and parses any signature automatically
-        Tuple args = Tuple.of(69L, true);
+        Pair<Long, Boolean> args = Pair.of(69L, true);
 
         // Two equivalent styles:
         ByteBuffer one = f.encodeCall(args);
@@ -445,7 +445,7 @@ public class EncodeTest {
         }
 
         Tuple aArgs = Tuple.singleton(args);
-        Tuple bArgs = Tuple.singleton(Tuple.of(args));
+        Tuple bArgs = Tuple.singleton(Tuple.ofAll(args));
 
         byte[] aEncoding = a.encode(aArgs).array();
         ByteBuffer bDest = ByteBuffer.allocate(b.measureEncodedLength(bArgs));
@@ -479,7 +479,7 @@ public class EncodeTest {
         }
         Assertions.assertEquals("BooleanType,IntType,LongType,BigIntegerType,AddressType,BigDecimalType,ArrayType,TupleType,ArrayType,ArrayType,", sb.toString());
 
-        Tuple args = Tuple.of(
+        Tuple args = Tuple.ofAll(
                 true,
                 1,
                 1L,
@@ -538,9 +538,9 @@ public class EncodeTest {
         Object b = 9L;
         Object c = new boolean[0];
 
-        ByteBuffer ee = tt.encode(Tuple.of(a, b, c));
+        ByteBuffer ee = tt.encode(Triple.of(a, b, c));
 
-        assertArrayEquals(tt.encode(Tuple.of(a, b, c)).array(), ee.array());
+        assertArrayEquals(tt.encode(Triple.of(a, b, c)).array(), ee.array());
         assertEquals(
                 "0000000000000000000000000000000000000000000000000000000000000007000000000000000000000000000000000000000000000000000000000000000900000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
                 Strings.encode(ee)

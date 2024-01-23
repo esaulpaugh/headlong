@@ -47,7 +47,7 @@ public class PackedEncoderTest {
     @Test
     public void multipleDynamic() throws Throwable {
         TupleType tupleType = TupleType.parse("(int120[],(int96,ufixed256x47)[])");
-        Tuple test = Tuple.of(new BigInteger[] { BigInteger.TEN }, new Tuple[] { Tuple.of(BigInteger.TEN, new BigDecimal(BigInteger.TEN, 47)) });
+        Pair<BigInteger[], Tuple[]> test = Pair.of(new BigInteger[] { BigInteger.TEN }, new Tuple[] { Pair.of(BigInteger.TEN, new BigDecimal(BigInteger.TEN, 47)) });
         ByteBuffer bb = tupleType.encodePacked(test);
         TestUtils.assertThrown(IllegalArgumentException.class, "multiple dynamic elements", () -> tupleType.decodePacked(bb.array()));
 
@@ -94,7 +94,7 @@ public class PackedEncoderTest {
     public void testHard() {
         final TupleType tupleType = TupleType.parse("((bytes,(uint8[2][2])))");
 
-        final Tuple test = Tuple.singleton(Tuple.of(new byte[0], Tuple.singleton(new int[][] { new int[] {1,2}, new int[] {3,4} })));
+        final Tuple test = Tuple.singleton(Tuple.ofAll(new byte[0], Tuple.singleton(new int[][] { new int[] {1,2}, new int[] {3,4} })));
 
         final ByteBuffer bb = tupleType.encodePacked(test);
 
@@ -110,7 +110,7 @@ public class PackedEncoderTest {
     public void testStaticTupleInsideDynamic() {
         TupleType tupleType = TupleType.parse("((bytes1),bytes)");
 
-        Tuple test = Tuple.of(Tuple.singleton(new byte[] { -1 }), new byte[] { -2, -3 });
+        Tuple test = Pair.of(Tuple.singleton(new byte[] { -1 }), new byte[] { -2, -3 });
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
@@ -123,7 +123,7 @@ public class PackedEncoderTest {
     public void testDynamicInnerTuple() {
         TupleType tupleType = TupleType.parse("((bytes1,bytes,bytes1),bytes1)");
 
-        Tuple test = Tuple.of(Tuple.of(new byte[] { 0 }, new byte[] { -1, -2 }, new byte[] { 1 }), new byte[] { -3 });
+        Tuple test = Pair.of(Triple.of(new byte[] { 0 }, new byte[] { -1, -2 }, new byte[] { 1 }), new byte[] { -3 });
 
         ByteBuffer bb = tupleType.encodePacked(test);
 
@@ -136,7 +136,7 @@ public class PackedEncoderTest {
     public void testPacked() {
         TupleType tupleType = TupleType.parse("(int16,bytes1,uint16,string)");
 
-        Tuple test = Tuple.of(-1, new byte[] { 0x42 }, 0x03, "Hello, world!");
+        Quadruple<Integer, byte[], Integer, String> test = Quadruple.of(-1, new byte[] { 0x42 }, 0x03, "Hello, world!");
 
         final int packedLen = tupleType.byteLengthPacked(test);
         final byte[] in = Strings.decode("ffff42000348656c6c6f2c20776f726c6421");
@@ -184,7 +184,7 @@ public class PackedEncoderTest {
     public void testTest() {
         TupleType tupleType = TupleType.parse("(int24,bool,bool)");
 
-        Tuple values = Tuple.of(-2, true, false);
+        Triple<Integer, Boolean, Boolean> values = Triple.of(-2, true, false);
 
         ByteBuffer bb = tupleType.encodePacked(values);
         assertEquals(0, bb.position());
@@ -198,7 +198,7 @@ public class PackedEncoderTest {
     public void testDecodeA() {
         TupleType tupleType = TupleType.parse("(int16[2],int24[3],bytes,uint32[3],bool[3],uint64,int72)");
 
-        Tuple test = Tuple.of(new int[] { 3, 5 }, new int[] { 7, 8, 9 }, new byte[0], new long[] { 9L, 0L, 0xFFFFFFFFL }, new boolean[] { true, false, true }, BigInteger.valueOf(6L), BigInteger.valueOf(-1L));
+        Tuple test = Tuple.ofAll(new int[] { 3, 5 }, new int[] { 7, 8, 9 }, new byte[0], new long[] { 9L, 0L, 0xFFFFFFFFL }, new boolean[] { true, false, true }, BigInteger.valueOf(6L), BigInteger.valueOf(-1L));
 
         ByteBuffer bb = tupleType.encodePacked(test);
         assertEquals(0, bb.position());
@@ -212,7 +212,7 @@ public class PackedEncoderTest {
     public void testDecodeB() {
         TupleType tupleType = TupleType.parse("(uint64[],int)");
 
-        Tuple values = Tuple.of(new BigInteger[] { BigInteger.ONE, BigInteger.valueOf(2L), BigInteger.valueOf(3L), BigInteger.valueOf(4L) }, BigInteger.ONE);
+        Pair<BigInteger[], BigInteger> values = Pair.of(new BigInteger[] { BigInteger.ONE, BigInteger.valueOf(2L), BigInteger.valueOf(3L), BigInteger.valueOf(4L) }, BigInteger.ONE);
 
         ByteBuffer bb = tupleType.encodePacked(values);
         byte[] packedArray = bb.array();
@@ -227,7 +227,7 @@ public class PackedEncoderTest {
     public void testDecodeC() {
         TupleType tupleType = TupleType.parse("(bool,bool[],bool[2])");
 
-        Tuple values = Tuple.of(true, new boolean[] { true, true, true },  new boolean[] { true, false });
+        Triple<Boolean, boolean[], boolean[]> values = Triple.of(true, new boolean[] { true, true, true },  new boolean[] { true, false });
 
         ByteBuffer bb = tupleType.encodePacked(values);
         assertEquals(0, bb.position());
@@ -241,7 +241,7 @@ public class PackedEncoderTest {
     public void testUint24() {
         TupleType tupleType = TupleType.parse("(uint24)");
 
-        Tuple values = Tuple.of((int) new Uint(24).toUnsignedLong(Integer.MIN_VALUE / 256));
+        Singleton<Integer> values = Singleton.of((int) new Uint(24).toUnsignedLong(Integer.MIN_VALUE / 256));
 
         ByteBuffer bb = tupleType.encodePacked(values);
         assertEquals(0, bb.position());

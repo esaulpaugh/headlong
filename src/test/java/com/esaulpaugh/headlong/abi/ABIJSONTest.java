@@ -303,7 +303,7 @@ public class ABIJSONTest {
 
         assertFalse(out0.isDynamic());
         assertNull(f.getStateMutability());
-        f.encodeCallWithArgs((Object) new Tuple[][] { new Tuple[] { Tuple.of(new BigDecimal(BigInteger.ONE, 10), new BigDecimal(BigInteger.TEN, 10)) } });
+        f.encodeCallWithArgs((Object) new Tuple[][] { new Tuple[] { Tuple.ofAll(new BigDecimal(BigInteger.ONE, 10), new BigDecimal(BigInteger.TEN, 10)) } });
 
         printTupleType(in);
         printTupleType(out);

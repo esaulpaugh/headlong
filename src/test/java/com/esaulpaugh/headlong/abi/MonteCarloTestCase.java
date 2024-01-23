@@ -179,7 +179,7 @@ public class MonteCarloTestCase {
                 }
             } else {
                 assertEquals(tElement, t2Element);
-                if (c == Tuple.class) {
+                if (tElement instanceof Tuple) {
                     assertNotSame(tElement, t2Element);
                 } else {
                     assertSame(tElement, t2Element);
@@ -397,7 +397,7 @@ public class MonteCarloTestCase {
         for (int i = 0; i < size; i++) {
             args[i] = generateValue(elementTypes[i], r);
         }
-        return Tuple.of(args);
+        return Tuple.ofAll(args);
     }
 
     private Object generateValue(ABIType<?> type, Random r) {
