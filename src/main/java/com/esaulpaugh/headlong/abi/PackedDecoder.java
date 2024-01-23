@@ -98,7 +98,7 @@ final class PackedDecoder {
                 end -= decodeTupleStatic((TupleType) type, buffer, end - type.byteLengthPacked(null), end, elements, i);
                 break;
             default:
-                end -= decode(tupleType.get(i), buffer, end - type.byteLengthPacked(null), end, elements, i);
+                end -= decode(type, buffer, end - type.byteLengthPacked(null), end, elements, i);
             }
         }
 
