@@ -343,11 +343,11 @@ public final class ABIJSON {
 
     private static class NonSyncWriter extends Writer {
 
-        byte[] buffer;
+        char[] buffer;
         int count = 0;
 
         NonSyncWriter(int initialLen) {
-            this.buffer = new byte[initialLen];
+            this.buffer = new char[initialLen];
         }
 
         @Override
@@ -355,7 +355,7 @@ public final class ABIJSON {
             if (count >= buffer.length) {
                 buffer = Arrays.copyOf(buffer, buffer.length << 1); // expects buffer.length to be non-zero
             }
-            buffer[count++] = (byte) c;
+            buffer[count++] = (char) c;
         }
 
         @Override
@@ -364,14 +364,13 @@ public final class ABIJSON {
             write(str, 0, str.length());
         }
 
-        @SuppressWarnings("deprecation")
         @Override
         public void write(String str, int off, int len) {
             int newCount = count + len;
             if (newCount > buffer.length) {
                 buffer = Arrays.copyOf(buffer, Math.max(buffer.length << 1, newCount));
             }
-            str.getBytes(off, off + len, buffer, count);
+            str.getChars(off, off + len, buffer, count);
             count = newCount;
         }
 
