@@ -511,11 +511,20 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             sb.append(" ...");
             return;
         }
-        sb.append(' ').append(get(i).canonicalType);
-        String name = getElementName(i);
-        if (name != null) {
-            sb.append(" \"").append(getElementName(i)).append('"');
+        ABIType<?> element = get(i);
+        sb.append(' ').append(element.canonicalType);
+        if (" offset".equals(note) || !element.isDynamic()) {
+            String name = getElementName(i);
+            if (name != null) {
+                sb.append(" \"").append(getElementName(i)).append('"');
+            }
+            sb.append(note);
+            String internalType = getElementInternalType(i);
+            if (internalType != null && !internalType.equals(element.canonicalType)) {
+                sb.append(" \tinternal=").append(internalType);
+            }
+        } else {
+            sb.append(note);
         }
-        sb.append(note);
     }
 }
