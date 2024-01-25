@@ -22,7 +22,7 @@ public final class Singleton<A> extends Tuple {
     }
 
     public static <A> Singleton<A> of(A a) {
-        return createNoCopy(a);
+        return new Singleton<>(new Object[] { Tuple.requireNotNull(a, 0) });
     }
 
     @SuppressWarnings("unchecked")

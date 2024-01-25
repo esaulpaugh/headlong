@@ -21,10 +21,6 @@ public final class Pair<A, B> extends Tuple {
         super(elements);
     }
 
-    public static <A, B> Pair<A, B> of(A a, B b) {
-        return createNoCopy(a, b);
-    }
-
     @SuppressWarnings("unchecked")
     public A get0() {
         return (A) elements[0];

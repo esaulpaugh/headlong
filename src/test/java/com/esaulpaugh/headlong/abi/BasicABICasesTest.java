@@ -91,7 +91,7 @@ public class BasicABICasesTest {
 
         void test(Object[] argsArray) {
 
-            Tuple t = Tuple.ofAll(argsArray);
+            Tuple t = Tuple.from(argsArray);
             ByteBuffer bb = function.encodeCall(t);
 
             System.out.println("expected:   " + result);

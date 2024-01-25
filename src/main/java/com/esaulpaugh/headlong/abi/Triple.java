@@ -21,10 +21,6 @@ public final class Triple<A, B, C> extends Tuple {
         super(elements);
     }
 
-    public static <A, B, C> Triple<A, B, C> of(A a, B b, C c) {
-        return createNoCopy(a, b, c);
-    }
-
     @SuppressWarnings("unchecked")
     public A get0() {
         return (A) elements[0];

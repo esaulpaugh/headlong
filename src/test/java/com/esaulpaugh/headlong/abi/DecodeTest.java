@@ -436,7 +436,7 @@ public class DecodeTest {
     public void testTupleDecodeTypeInference() throws Throwable {
         TupleType tt = TupleType.parse("(int,string,bool,int64)");
         Object[] elements = { BigInteger.valueOf(550L), "weow", true, -41L };
-        ByteBuffer bb = tt.encode(Tuple.ofAll(elements));
+        ByteBuffer bb = tt.encode(Tuple.from(elements));
         assertEquals(0, bb.position());
         assertEquals(TUPLE_HEX, Strings.encode(bb));
         final BigInteger zero = tt.decode(bb, 0);
@@ -450,7 +450,7 @@ public class DecodeTest {
         assertEquals(three, three2);
 
         ByteBuffer buffer = ByteBuffer.allocate(192);
-        tt.encode(Tuple.ofAll(elements), buffer);
+        tt.encode(Tuple.from(elements), buffer);
         assertThrown(BufferUnderflowException.class, buffer::get);
 
         ByteBuffer z = ByteBuffer.allocate(192);
@@ -480,7 +480,7 @@ public class DecodeTest {
         TupleType tt = TupleType.parse("(int,string,bool,int64)");
         ByteBuffer bb = ByteBuffer.wrap(FastHex.decode(TUPLE_HEX));
 
-        assertThrown(IllegalArgumentException.class, "tuple index 2 is null", () -> Tuple.ofAll("", "", null, null));
+        assertThrown(IllegalArgumentException.class, "tuple index 2 is null", () -> Tuple.of("", "", null, null));
         assertThrown(IllegalArgumentException.class, "tuple index 2 is null", () -> Quadruple.of("", "", null, null));
         final Tuple decoded = tt.decode(bb, new int[0]);
         assertEquals(new Tuple(null, null, null, null), decoded);

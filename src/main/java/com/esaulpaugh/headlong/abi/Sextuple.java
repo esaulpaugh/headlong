@@ -21,10 +21,6 @@ public final class Sextuple<A, B, C, D, E, F> extends Tuple {
         super(elements);
     }
 
-    public static <A, B, C, D, E, F> Sextuple<A, B, C, D, E, F> of(A a, B b, C c, D d, E e, F f) {
-        return createNoCopy(a, b, c, d, e, f);
-    }
-
     @SuppressWarnings("unchecked")
     public A get0() {
         return (A) elements[0];

@@ -36,7 +36,31 @@ public class Tuple implements Iterable<Object> {
         this.elements = elements;
     }
 
-    public static <T extends Tuple> T ofAll(Object... elements) {
+    public static Tuple of() {
+        return Tuple.EMPTY;
+    }
+
+    public static <A, B> Pair<A, B> of(A a, B b) {
+        return new Pair<>(requireNoNulls(new Object[] { a, b }));
+    }
+
+    public static <A, B, C> Triple<A, B, C> of(A a, B b, C c) {
+        return new Triple<>(requireNoNulls(new Object[] { a, b, c }));
+    }
+
+    public static <A, B, C, D> Quadruple<A, B, C, D> of(A a, B b, C c, D d) {
+        return new Quadruple<>(requireNoNulls(new Object[] { a, b, c, d }));
+    }
+
+    public static <A, B, C, D, E> Quintuple<A, B, C, D, E> of(A a, B b, C c, D d, E e) {
+        return new Quintuple<>(requireNoNulls(new Object[] { a, b, c, d, e }));
+    }
+
+    public static <A, B, C, D, E, F> Sextuple<A, B, C, D, E, F> of(A a, B b, C c, D d, E e, F f) {
+        return new Sextuple<>(requireNoNulls(new Object[] { a, b, c, d, e, f }));
+    }
+
+    public static Tuple from(Object... elements) {
         return create(copy(new Object[elements.length], i -> requireNotNull(elements[i], i)));
     }
 
@@ -53,14 +77,14 @@ public class Tuple implements Iterable<Object> {
         }
     }
 
-    static <T extends Tuple> T createNoCopy(Object... elements) {
+    private static Object[] requireNoNulls(Object[] elements) {
         for (int i = 0; i < elements.length; i++) {
             requireNotNull(elements[i], i);
         }
-        return create(elements);
+        return elements;
     }
 
-    private static Object requireNotNull(Object e, int index) {
+    static Object requireNotNull(Object e, int index) {
         if (e == null) {
             throw new IllegalArgumentException("tuple index " + index + " is null");
         }

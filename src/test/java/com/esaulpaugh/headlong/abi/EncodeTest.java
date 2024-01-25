@@ -173,7 +173,7 @@ public class EncodeTest {
     @Test
     public void testFunctionAnnotate() {
         final Function foo = Function.parse("foo()");
-        assertEquals("foo:\nID       c2985578", foo.annotateCall(Tuple.ofAll()));
+        assertEquals("foo:\nID       c2985578", foo.annotateCall(Tuple.of()));
         assertSame("", TupleType.EMPTY.annotate(new byte[0]));
         final Function f = new Function(
                 TypeEnum.FUNCTION,
@@ -445,7 +445,7 @@ public class EncodeTest {
         }
 
         Tuple aArgs = Singleton.of(args);
-        Tuple bArgs = Singleton.of(Tuple.ofAll(args));
+        Tuple bArgs = Singleton.of(Tuple.from(args));
 
         byte[] aEncoding = a.encode(aArgs).array();
         ByteBuffer bDest = ByteBuffer.allocate(b.measureEncodedLength(bArgs));
@@ -479,7 +479,7 @@ public class EncodeTest {
         }
         Assertions.assertEquals("BooleanType,IntType,LongType,BigIntegerType,AddressType,BigDecimalType,ArrayType,TupleType,ArrayType,ArrayType,", sb.toString());
 
-        Tuple args = Tuple.ofAll(
+        Tuple args = Tuple.from(
                 true,
                 1,
                 1L,

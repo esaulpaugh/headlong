@@ -21,10 +21,6 @@ public final class Quadruple<A, B, C, D> extends Tuple {
         super(elements);
     }
 
-    public static <A, B, C, D> Quadruple<A, B, C, D> of(A a, B b, C c, D d) {
-        return createNoCopy(a, b, c, d);
-    }
-
     @SuppressWarnings("unchecked")
     public A get0() {
         return (A) elements[0];

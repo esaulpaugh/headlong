@@ -94,7 +94,7 @@ public class PackedEncoderTest {
     public void testHard() {
         final TupleType tupleType = TupleType.parse("((bytes,(uint8[2][2])))");
 
-        final Tuple test = Singleton.of(Tuple.ofAll(new byte[0], Singleton.of(new int[][] { new int[] {1,2}, new int[] {3,4} })));
+        final Tuple test = Singleton.of(Tuple.of(new byte[0], Singleton.of(new int[][] { new int[] {1,2}, new int[] {3,4} })));
 
         final ByteBuffer bb = tupleType.encodePacked(test);
 
@@ -198,7 +198,7 @@ public class PackedEncoderTest {
     public void testDecodeA() {
         TupleType tupleType = TupleType.parse("(int16[2],int24[3],bytes,uint32[3],bool[3],uint64,int72)");
 
-        Tuple test = Tuple.ofAll(new int[] { 3, 5 }, new int[] { 7, 8, 9 }, new byte[0], new long[] { 9L, 0L, 0xFFFFFFFFL }, new boolean[] { true, false, true }, BigInteger.valueOf(6L), BigInteger.valueOf(-1L));
+        Tuple test = Tuple.from(new int[] { 3, 5 }, new int[] { 7, 8, 9 }, new byte[0], new long[] { 9L, 0L, 0xFFFFFFFFL }, new boolean[] { true, false, true }, BigInteger.valueOf(6L), BigInteger.valueOf(-1L));
 
         ByteBuffer bb = tupleType.encodePacked(test);
         assertEquals(0, bb.position());

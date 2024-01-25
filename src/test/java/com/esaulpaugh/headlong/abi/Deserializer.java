@@ -56,7 +56,7 @@ public class Deserializer {
         for (Iterator<JsonElement> iter = valuesArray.iterator(); i < len; i++) {
             elements[i] = parseValue(tupleType.get(i), iter.next());
         }
-        return Tuple.ofAll(elements);
+        return Tuple.from(elements);
     }
 
     private static Object parseValue(final ABIType<?> type, final JsonElement value) {

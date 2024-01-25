@@ -21,10 +21,6 @@ public final class Quintuple<A, B, C, D, E> extends Tuple {
         super(elements);
     }
 
-    public static <A, B, C, D, E> Quintuple<A, B, C, D, E> of(A a, B b, C c, D d, E e) {
-        return createNoCopy(a, b, c, d, e);
-    }
-
     @SuppressWarnings("unchecked")
     public A get0() {
         return (A) elements[0];

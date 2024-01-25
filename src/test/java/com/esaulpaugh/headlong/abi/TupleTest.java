@@ -169,7 +169,7 @@ public class TupleTest {
     @Test
     public void testTuple() {
         final Tuple emptyA = new Tuple();
-        final Tuple emptyB = Tuple.ofAll();
+        final Tuple emptyB = Tuple.of();
 
         assertEquals(Tuple.EMPTY, emptyA);
         assertEquals(Tuple.EMPTY, emptyB);
@@ -221,7 +221,7 @@ public class TupleTest {
                             ? replacement
                             : defaultObj;
                     try {
-                        assertThrown(IllegalArgumentException.class, " but found ", () -> testCase.function.encodeCall(Tuple.ofAll(elements)));
+                        assertThrown(IllegalArgumentException.class, " but found ", () -> testCase.function.encodeCall(Tuple.from(elements)));
                     } catch (ClassCastException | AssertionError e) {
                         System.err.println("seed = " + seed);
                         e.printStackTrace();
@@ -239,7 +239,7 @@ public class TupleTest {
         );
 
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1 is null",
-                () -> Tuple.ofAll(true, null, true)
+                () -> Tuple.of(true, null, true)
         );
 
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1 is null",
@@ -411,7 +411,7 @@ public class TupleTest {
     @Test
     public void testTupleImmutability() throws Throwable {
         Object[] args = new Object[] { "a", "b", "c" };
-        Tuple t = Tuple.ofAll((Object[]) args); // shallow copy
+        Tuple t = Tuple.from(args); // shallow copy
 
         args[1] = 'x';
         assertEquals("a", t.get(0));
@@ -463,7 +463,7 @@ public class TupleTest {
     @Test
     public void testDecodeIndex2() {
         TupleType tt = TupleType.parse("(bool,uint16,address,int64,uint64,address,string[][])");
-        Tuple args = Tuple.ofAll(
+        Tuple args = Tuple.from(
                 true,
                 90,
                 Address.wrap("0x0000000000000000000000000000000000000000"),
@@ -590,7 +590,7 @@ public class TupleTest {
             assertNotSame(values, deepCopy);
             assertEquals(values, deepCopy);
 
-            final Tuple shallowCopy = Tuple.ofAll(values.toArray());
+            final Tuple shallowCopy = Tuple.from(values.toArray());
             assertEquals(values, shallowCopy);
 
             final Object[] elements = new Object[values.size()];
@@ -603,17 +603,21 @@ public class TupleTest {
 
     @Test
     public void testTupleEquals() {
-        final Tuple e = Tuple.ofAll();
+        assertEquals(Tuple.EMPTY, Tuple.of());
+        assertEquals(Tuple.EMPTY, Tuple.from());
+        assertEquals(Tuple.EMPTY, new Tuple());
+
+        final Tuple e = Tuple.of();
         final Singleton<byte[]> s = Singleton.of(new byte[0]);
         final Pair<byte[], String> p = Pair.of(new byte[1], "75");
         final Triple<byte[], String, Long> t = Triple.of(new byte[2], "aaa", 19L);
         final Quadruple<byte[], Object, Number, Throwable> q = Quadruple.of(new byte[3], "bbb", 19L, new Error());
         final Quintuple<Long, Long, Long, Long, Byte> q5 = Quintuple.of(-999L, Long.MAX_VALUE, 0L, -1L, (byte)0);
         final Sextuple<Pair<byte[], String>, Pair<byte[], String>, Pair, Pair, Pair, Pair> s6 = Sextuple.of(p, p, p, p, p, p);
-        final Tuple n = Tuple.ofAll(90, "_", p);
+        final Tuple n = Tuple.of(90, "_", p);
 
         final Tuple t0 = new Tuple();
-        final Tuple t1 = Tuple.ofAll((Object)"".getBytes());
+        final Tuple t1 = new Tuple((Object)"".getBytes());
         final Tuple t2 = new Tuple(new byte[] {0}, new String("75"));
         final Tuple t3 = new Tuple(new byte[2], new String("aaa"), 19L);
         final Tuple t4 = new Tuple(q.elements);
