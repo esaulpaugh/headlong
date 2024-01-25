@@ -146,7 +146,12 @@ public class Tuple implements Iterable<Object> {
         return Arrays.deepToString(copy(new Object[elements.length], i -> {
             Object element = elements[i];
             if (element == null) return SKIPPED;
-            return SKIPPED.equals(element.toString()) ? '"' + SKIPPED + '"' : element;
+            String str = element.toString();
+            return element instanceof String
+                        ? '"' + str + '"'
+                        : SKIPPED.equals(str)
+                            ? '\\' + SKIPPED
+                            : element;
         }));
     }
 

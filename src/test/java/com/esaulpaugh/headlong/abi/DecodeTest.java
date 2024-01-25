@@ -485,7 +485,7 @@ public class DecodeTest {
         final Tuple decoded = tt.decode(bb, new int[0]);
         assertEquals(new Tuple(null, null, null, null), decoded);
         assertEquals("[_, _, _, _]", decoded.toString());
-        assertEquals("[_, _, \"_\", \"_\"]", new Tuple(null, null, "_", '_').toString());
+        assertEquals("[_, _, \"_\", \\_]", new Tuple(null, null, "_", '_').toString());
         final int size = decoded.size();
         for (int i = 0; i < size; i++) {
             assertFalse(decoded.elementIsPresent(i));
@@ -500,7 +500,7 @@ public class DecodeTest {
         assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.decode(bb, 64));
 
         Tuple t = tt.decode(bb, 1, 2);
-        assertEquals("[_, weow, true, _]", t.toString());
+        assertEquals("[_, \"weow\", true, _]", t.toString());
         assertThrown(IllegalArgumentException.class, "index out of order: 0", () -> tt.decode(bb, 1, 2, 0));
         assertThrown(IllegalArgumentException.class, "index out of order: 1", () -> tt.decode(bb, 1, 1));
     }

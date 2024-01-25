@@ -610,55 +610,38 @@ public class TupleTest {
         final Tuple e = Tuple.of();
         final Singleton<byte[]> s = Singleton.of(new byte[0]);
         final Pair<byte[], String> p = Pair.of(new byte[1], "75");
-        final Triple<byte[], String, Long> t = Triple.of(new byte[2], "aaa", 19L);
+        final Triple<byte[], String, Long> t = Triple.of(new byte[2], "75", 75L);
         final Quadruple<byte[], Object, Number, Throwable> q = Quadruple.of(new byte[3], "bbb", 19L, new Error());
         final Quintuple<Long, Long, Long, Long, Byte> q5 = Quintuple.of(-999L, Long.MAX_VALUE, 0L, -1L, (byte)0);
         final Sextuple<Pair<byte[], String>, Pair<byte[], String>, Pair, Pair, Pair, Pair> s6 = Sextuple.of(p, p, p, p, p, p);
-        final Tuple n = Tuple.of(90, "_", p);
+        final Triple<Integer, String, Triple<byte[], String, Long>> n = Tuple.of(90, "_", t);
+        final Triple<byte[], String, Long> x = n.get2();
 
-        final Tuple t0 = new Tuple();
-        final Tuple t1 = new Tuple((Object)"".getBytes());
-        final Tuple t2 = new Tuple(new byte[] {0}, new String("75"));
-        final Tuple t3 = new Tuple(new byte[2], new String("aaa"), 19L);
-        final Tuple t4 = new Tuple(q.elements);
-        final Tuple t5 = new Tuple(-1000L + 1, Long.MAX_VALUE, (long)0, (long)-1, ByteType.ZERO_BYTE);
-        final Tuple t6 = new Tuple(p, p, p, p, p, p);
-        final Tuple t7 = new Tuple(90, new String("_"), p);
+        final Tuple t0 = Tuple.from();
+        final Tuple t1 = Tuple.from((Object)"".getBytes());
+        final Tuple t2 = Tuple.from(new byte[] {0}, new String("75"));
+        final Tuple t3 = Tuple.from(new byte[2], new String("75"), 75L);
+        final Tuple t4 = Tuple.from(q.elements);
+        final Tuple t5 = Tuple.from(-1000L + 1, Long.MAX_VALUE, (long)0, (long)-1, ByteType.ZERO_BYTE);
+        final Tuple t6 = Tuple.from(p, p, p, p, p, p);
+        final Tuple t7 = Tuple.from(90, new String("_"), t);
+        final Tuple t8 = t7.get(2);
 
-        assertEquals(e.hashCode(), t0.hashCode());
-        assertEquals(s.hashCode(), t1.hashCode());
-        assertEquals(p.hashCode(), t2.hashCode());
-        assertEquals(t.hashCode(), t3.hashCode());
-        assertEquals(q.hashCode(), t4.hashCode());
-        assertEquals(q5.hashCode(), t5.hashCode());
-        assertEquals(s6.hashCode(), t6.hashCode());
-        assertEquals(n.hashCode(), t7.hashCode());
+        testEquals(e, t0);
+        testEquals(s, t1);
+        testEquals(p, t2);
+        testEquals(t, t3);
+        testEquals(q, t4);
+        testEquals(q5, t5);
+        testEquals(s6, t6);
+        testEquals(n, t7);
+        testEquals(x, t8);
+    }
 
-        assertEquals(e, t0);
-        assertEquals(s, t1);
-        assertEquals(p, t2);
-        assertEquals(t, t3);
-        assertEquals(q, t4);
-        assertEquals(q5, t5);
-        assertEquals(s6, t6);
-        assertEquals(n, t7);
-
-        assertEquals(e.toString(), t0.toString());
-        assertEquals(s.toString(), t1.toString());
-        assertEquals(p.toString(), t2.toString());
-        assertEquals(t.toString(), t3.toString());
-        assertEquals(q.toString(), t4.toString());
-        assertEquals(q5.toString(), t5.toString());
-        assertEquals(s6.toString(), t6.toString());
-        assertEquals(n.toString(), t7.toString());
-
-        assertEquals(e.deepCopy(), t0.deepCopy());
-        assertEquals(s.deepCopy(), t1.deepCopy());
-        assertEquals(p.deepCopy(), t2.deepCopy());
-        assertEquals(t.deepCopy(), t3.deepCopy());
-        assertEquals(q.deepCopy(), t4.deepCopy());
-        assertEquals(q5.deepCopy(), t5.deepCopy());
-        assertEquals(s6.deepCopy(), t6.deepCopy());
-        assertEquals(n.deepCopy(), t7.deepCopy());
+    private static void testEquals(Tuple a, Tuple b) {
+        assertEquals(a.hashCode(), b.hashCode());
+        assertEquals(a, b);
+        assertEquals(a.toString(), b.toString());
+        assertEquals(a.deepCopy(), b.deepCopy());
     }
 }
