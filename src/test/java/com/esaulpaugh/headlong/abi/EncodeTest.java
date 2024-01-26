@@ -372,22 +372,20 @@ public class EncodeTest {
         assertEquals(decoded, dec);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testArrayLen() throws Throwable {
-
         assertThrown(ILLEGAL, "@ index 0, bad array length", () -> Function.parse("abba(()[-04])"));
 
         assertThrown(ILLEGAL, "@ index 0, bad array length", () -> Function.parse("zaba(()[04])"));
 
-        assertEquals(4, ((ArrayType<TupleType<Tuple>, Tuple, Tuple[]>) Function.parse("yaba(()[4])").getInputs().get(0)).getLength());
+        assertEquals(4, Function.parse("yaba(()[4])").getInputs().get(0).asArrayType().getLength());
     }
 
     @Test
     public void uint8ArrayTest() {
         Function f = new Function("baz(uint8[])");
 
-        Tuple args = Singleton.of(new int[] { 0xFF, 1, 1, 2, 0 });
+        Tuple args = Single.of(new int[] { 0xFF, 1, 1, 2, 0 });
         ByteBuffer two = f.encodeCall(args);
 
         Tuple decoded = f.decodeCall(two);
@@ -400,7 +398,7 @@ public class EncodeTest {
         Function f = new Function("((int16)[2][][1])");
 
         Object[] argsIn = new Object[] {
-                new Tuple[][][] { new Tuple[][] { new Tuple[] { Singleton.of(9), Singleton.of(-11) } } }
+                new Tuple[][][] { new Tuple[][] { new Tuple[] { Single.of(9), Single.of(-11) } } }
         };
 
         ByteBuffer buf = f.encodeCallWithArgs(argsIn);
@@ -444,8 +442,8 @@ public class EncodeTest {
             args[i] = supplier.get();
         }
 
-        Tuple aArgs = Singleton.of(args);
-        Tuple bArgs = Singleton.of(Tuple.from(args));
+        Tuple aArgs = Single.of(args);
+        Tuple bArgs = Single.of(Tuple.from(args));
 
         byte[] aEncoding = a.encode(aArgs).array();
         ByteBuffer bDest = ByteBuffer.allocate(b.measureEncodedLength(bArgs));
@@ -487,7 +485,7 @@ public class EncodeTest {
                 Address.wrap("0x0000000000000000000000000000000000000009"),
                 new BigDecimal(BigInteger.TEN, 18),
                 new byte[] { 1, 0 },
-                Singleton.of("\u0002"),
+                Single.of("\u0002"),
                 new byte[] { 0x04 },
                 new byte[] { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 }
         );
@@ -552,7 +550,7 @@ public class EncodeTest {
         assertThrown(
                 IllegalArgumentException.class,
                 "BigDecimal scale mismatch: expected scale 9 but found 1",
-                () -> Function.parse("(fixed56x9)").encodeCall(Singleton.of(new BigDecimal("0.2")))
+                () -> Function.parse("(fixed56x9)").encodeCall(Single.of(new BigDecimal("0.2")))
         );
     }
 
@@ -561,7 +559,7 @@ public class EncodeTest {
         assertThrown(
                 IllegalArgumentException.class,
                 "tuple index 0: array index 1: signed val exceeds bit limit: 9 >= 8",
-                () -> Function.parse("(int8[])").encodeCall(Singleton.of(new int[] { 120, 256 }))
+                () -> Function.parse("(int8[])").encodeCall(Single.of(new int[] { 120, 256 }))
         );
     }
 

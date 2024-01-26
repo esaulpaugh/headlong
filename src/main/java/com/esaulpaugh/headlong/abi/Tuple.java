@@ -67,7 +67,7 @@ public class Tuple implements Iterable<Object> {
     @SuppressWarnings("unchecked")
     static <T extends Tuple> T create(Object[] elements) {
         switch (elements.length) {
-        case 1: return (T) new Singleton<>(elements);
+        case 1: return (T) new Single<>(elements);
         case 2: return (T) new Pair<>(elements);
         case 3: return (T) new Triple<>(elements);
         case 4: return (T) new Quadruple<>(elements);
@@ -80,7 +80,7 @@ public class Tuple implements Iterable<Object> {
     @SuppressWarnings("unchecked")
     static <T extends Class<? extends Tuple>> T classFor(int len) {
         switch (len) {
-        case 1: return (T) Singleton.class;
+        case 1: return (T) Single.class;
         case 2: return (T) Pair.class;
         case 3: return (T) Triple.class;
         case 4: return (T) Quadruple.class;

@@ -178,9 +178,9 @@ public class TupleTest {
         assertTrue(emptyA.isEmpty());
         assertTrue(emptyB.isEmpty());
 
-        assertFalse(Singleton.of(0).isEmpty());
-        assertFalse(Singleton.of(false).isEmpty());
-        assertFalse(Singleton.of(new Object()).isEmpty());
+        assertFalse(Single.of(0).isEmpty());
+        assertFalse(Single.of(false).isEmpty());
+        assertFalse(Single.of(new Object()).isEmpty());
     }
 
     private static final Object[] OBJECTS = new Object[] {
@@ -235,7 +235,7 @@ public class TupleTest {
     @Test
     public void testTypeSafety2() throws Throwable {
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0 is null",
-                () -> Singleton.of(null)
+                () -> Single.of(null)
         );
 
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1 is null",
@@ -273,6 +273,21 @@ public class TupleTest {
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: array length mismatch: byte[31] != byte[21] (bytes21 requires length 21 but found 31)",
                 () -> Function.parse("foo(bytes21)").encodeCallWithArgs((Object) new byte[31])
         );
+    }
+
+    @Test
+    public void testGenerics() {
+        TupleType<Single<Single<String>>> in = TupleType.parse(ABIType.FLAG_LEGACY_DECODE, "((string))");
+        TupleType<Single<Single<String>>> t = new Function(
+                TypeEnum.FUNCTION,
+                "name",
+                in,
+                in,
+                "",
+                Function.newDefaultDigest()).getOutputs();
+        ByteBuffer bb = t.encode(Single.of(Single.of("")));
+        Single<Single<String>> s = t.decode(bb);
+        System.out.println(s);
     }
 
     @Test
@@ -531,7 +546,7 @@ public class TupleTest {
         assertEquals(8, at.getLength());
         BigDecimalType decimal = tt.get(1);
         assertEquals("fixed168x10", decimal.getCanonicalType());
-        assertEquals("iii", Singleton.of("iii").get0());
+        assertEquals("iii", Single.of("iii").get0());
 
         TupleType<?> outer = TupleType.parse("((address,int256))");
         TupleType<?> inner = outer.get(0);
@@ -608,7 +623,7 @@ public class TupleTest {
         assertEquals(Tuple.EMPTY, new Tuple());
 
         final Tuple e = Tuple.of();
-        final Singleton<byte[]> s = Singleton.of(new byte[0]);
+        final Single<byte[]> s = Single.of(new byte[0]);
         final Pair<byte[], String> p = Pair.of(new byte[1], "75");
         final Triple<byte[], String, Long> t = Triple.of(new byte[2], "75", 75L);
         final Quadruple<byte[], Object, Number, Throwable> q = Quadruple.of(new byte[3], "bbb", 19L, new Error());

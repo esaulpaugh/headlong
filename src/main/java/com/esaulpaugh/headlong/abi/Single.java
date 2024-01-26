@@ -15,14 +15,18 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-public final class Singleton<A> extends Tuple {
+/**
+ * Singleton tuple. One element.
+ * @param <A>   the element's type
+ */
+public final class Single<A> extends Tuple {
 
-    Singleton(Object[] elements) {
+    Single(Object[] elements) {
         super(elements);
     }
 
-    public static <A> Singleton<A> of(A a) {
-        return new Singleton<>(new Object[] { Tuple.requireNotNull(a, 0) });
+    public static <A> Single<A> of(A a) {
+        return new Single<>(new Object[] { Tuple.requireNotNull(a, 0) });
     }
 
     @SuppressWarnings("unchecked")

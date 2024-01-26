@@ -122,7 +122,7 @@ public class DecodeTest {
         final String[] strings = new String[3];
         Arrays.fill(strings, "");
         final TupleType tt = TupleType.parse("(string[])");
-        final Tuple args = Singleton.of(strings);
+        final Tuple args = Single.of(strings);
         final ByteBuffer bb = tt.encode(args);
         final ByteBuffer tooShort = ByteBuffer.wrap(Arrays.copyOf(bb.array(), 32 + 32 + (32 * strings.length)));
         assertThrown(BufferUnderflowException.class, () -> tt.decode(tooShort));
@@ -225,7 +225,7 @@ public class DecodeTest {
                         "0000000000000000000000000000000000000000000000000000000000000002"
                 )
         );
-        assertEquals(Singleton.of(new Tuple[] { Tuple.EMPTY, Tuple.EMPTY }), decoded);
+        assertEquals(Single.of(new Tuple[] { Tuple.EMPTY, Tuple.EMPTY }), decoded);
     }
 
     @Test
@@ -285,7 +285,7 @@ public class DecodeTest {
     @Test
     public void testCorruptBooleanArray() throws Throwable {
         Function f = new Function("baz(bool[])");
-        Tuple argsTuple = Singleton.of(new boolean[] { true });
+        Tuple argsTuple = Single.of(new boolean[] { true });
         ByteBuffer one = f.encodeCall(argsTuple);
 
         final byte[] array = one.array();
@@ -928,7 +928,7 @@ public class DecodeTest {
 
         assertEquals(f, f2);
 
-        final Tuple args = Singleton.of(new byte[] { 9, 100 });
+        final Tuple args = Single.of(new byte[] { 9, 100 });
         final ByteBuffer bb = f.encodeCall(args);
         assertArrayEquals(Strings.decode("627dd56a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020964000000000000000000000000000000000000000000000000000000000000"), bb.array());
 

@@ -16,10 +16,8 @@
 package com.esaulpaugh.headlong.util;
 
 import com.esaulpaugh.headlong.TestUtils;
-import com.esaulpaugh.headlong.abi.Singleton;
-import com.esaulpaugh.headlong.abi.Tuple;
+import com.esaulpaugh.headlong.abi.Single;
 import com.esaulpaugh.headlong.abi.TupleType;
-import com.esaulpaugh.headlong.util.Uint;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -92,13 +90,13 @@ public class UnsignedTest {
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
                 "signed value given for unsigned type",
-                () -> TupleType.parse("(uint)").validate(Singleton.of(BigInteger.valueOf(-1)))
+                () -> TupleType.parse("(uint)").validate(Single.of(BigInteger.valueOf(-1)))
         );
 
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
                 "signed value given for unsigned type",
-                () -> TupleType.parse("(uint48)").validate(Singleton.of(-1L))
+                () -> TupleType.parse("(uint48)").validate(Single.of(-1L))
         );
     }
 
