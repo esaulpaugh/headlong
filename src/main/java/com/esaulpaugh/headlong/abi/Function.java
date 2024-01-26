@@ -65,7 +65,6 @@ public final class Function implements ABIObject {
         this(signature, signature.indexOf('('), outputs != null ? TupleType.parse(flags, outputs) : TupleType.empty(flags), flags);
     }
 
-    @SuppressWarnings("unchecked")
     private Function(final String signature, final int nameLength, final TupleType<?> outputs, final int flags) {
         this(
                 TypeEnum.FUNCTION,

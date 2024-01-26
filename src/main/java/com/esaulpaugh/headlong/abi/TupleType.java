@@ -174,7 +174,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     @Override
-    void encodeTail(J value, ByteBuffer dest) {
+    void encodeTail(Tuple value, ByteBuffer dest) {
         if (dynamic) {
             encodeDynamic(value.elements, dest);
         } else {
@@ -183,7 +183,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     @Override
-    void encodePackedUnchecked(J value, ByteBuffer dest) {
+    void encodePackedUnchecked(Tuple value, ByteBuffer dest) {
         final int size = size();
         for (int i = 0; i < size; i++) {
             getNonCapturing(i).encodePackedUnchecked(value.elements[i], dest);
