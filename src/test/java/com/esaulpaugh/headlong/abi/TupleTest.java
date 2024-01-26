@@ -420,7 +420,7 @@ public class TupleTest {
                 flags = e.getFlags();
             }
         }
-        return new TupleType(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, elementNames, null, flags);
+        return new TupleType<>(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, elementNames, null, flags);
     }
 
     @Test

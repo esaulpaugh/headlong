@@ -281,8 +281,8 @@ public class ABIJSONTest {
         final JsonObject object = ABIJSON.parseObject(FUNCTION_A_JSON);
         final Function f = Function.fromJsonObject(ABIType.FLAGS_NONE, object);
         assertEquals(FUNCTION_A_JSON, f.toJson(true));
-        final TupleType in = f.getInputs();
-        final TupleType out = f.getOutputs();
+        final TupleType<?> in = f.getInputs();
+        final TupleType<?> out = f.getOutputs();
         final ABIType<?> out0 = out.get(0);
 
         final BigInteger val = BigInteger.valueOf(40L);
@@ -409,12 +409,12 @@ public class ABIJSONTest {
 
     @Test
     public void testAnonymousEvent() {
-        TupleType inputs1 = TupleType.parse("(bool[],int,(uint32,string)[])");
-        TupleType inputs2 = TupleType.parse(inputs1.canonicalType);
-        TupleType inputs3 = Function.parse("foo(bool[],int,(uint32,string)[])").getInputs();
-        Event a = Event.createAnonymous("x17", inputs1, true, false, true);
-        Event b = Event.createAnonymous("x17", inputs2, true, false, true);
-        Event c = new Event("x17", true, inputs3, true, false, true);
+        TupleType<?> inputs1 = TupleType.parse("(bool[],int,(uint32,string)[])");
+        TupleType<?> inputs2 = TupleType.parse(inputs1.canonicalType);
+        TupleType<?> inputs3 = Function.parse("foo(bool[],int,(uint32,string)[])").getInputs();
+        Event<?> a = Event.createAnonymous("x17", inputs1, true, false, true);
+        Event<?> b = Event.createAnonymous("x17", inputs2, true, false, true);
+        Event<?> c = new Event<>("x17", true, inputs3, true, false, true);
         assertEquals(a, b);
         assertEquals(a, c);
         assertEquals(a.hashCode(), b.hashCode());

@@ -218,11 +218,11 @@ public class EqualsTest {
         );
 
         assertEquals(
-                new Event("lo", false, tt_a, false, false, false),
+                new Event<>("lo", false, tt_a, false, false, false),
                 Event.create("lo", tt_b, false, false, false)
         );
         assertNotEquals(
-                new Event("lo", false, tt_a, false, false, false),
+                new Event<>("lo", false, tt_a, false, false, false),
                 Event.create("lo", tt_c, false, false, false)
         );
     }

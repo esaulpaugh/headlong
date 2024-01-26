@@ -169,11 +169,11 @@ public final class ABIJSON {
         );
     }
 
-    private static Event parseEventUnchecked(JsonObject event, int flags) {
+    private static Event<?> parseEventUnchecked(JsonObject event, int flags) {
         final JsonArray inputs = getArray(event, INPUTS);
         if (inputs != null) {
             final boolean[] indexed = new boolean[inputs.size()];
-            return new Event(
+            return new Event<>(
                     getName(event),
                     getBoolean(event, ANONYMOUS, false),
                     parseTupleType(inputs, indexed, flags),
@@ -183,8 +183,8 @@ public final class ABIJSON {
         throw new IllegalArgumentException("array \"" + INPUTS + "\" null or not found");
     }
 
-    private static ContractError parseErrorUnchecked(JsonObject error, int flags) {
-        return new ContractError(getName(error), parseTupleType(error, INPUTS, flags));
+    private static ContractError<?> parseErrorUnchecked(JsonObject error, int flags) {
+        return new ContractError<>(getName(error), parseTupleType(error, INPUTS, flags));
     }
 
     private static TupleType<Tuple> parseTupleType(final JsonArray array, final boolean[] indexed, final int flags) {

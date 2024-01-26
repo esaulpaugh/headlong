@@ -121,7 +121,7 @@ public class DecodeTest {
     public void testDoS() throws Throwable {
         final String[] strings = new String[3];
         Arrays.fill(strings, "");
-        final TupleType tt = TupleType.parse("(string[])");
+        final TupleType<Tuple> tt = TupleType.parse("(string[])");
         final Tuple args = Single.of(strings);
         final ByteBuffer bb = tt.encode(args);
         final ByteBuffer tooShort = ByteBuffer.wrap(Arrays.copyOf(bb.array(), 32 + 32 + (32 * strings.length)));
@@ -863,9 +863,9 @@ public class DecodeTest {
 
     @Test
     public void testErrors() throws Throwable {
-        final TupleType originalType = TypeFactory.create("(bytes1,int8[3])");
+        final TupleType<Tuple> originalType = TypeFactory.create("(bytes1,int8[3])");
         final ByteBuffer encoded = originalType.encode(Pair.of(new byte[1], new int[] { 1, 0, 2 }));
-        final TupleType newType = TypeFactory.create("(bytes1,bool[3])");
+        final TupleType<?> newType = TypeFactory.create("(bytes1,bool[3])");
         final String msg = "tuple index 1: array index 2: illegal boolean value @ 96";
         assertThrown(IllegalArgumentException.class, msg, () -> newType.decode(encoded, 1));
         assertThrown(IllegalArgumentException.class, msg, () -> newType.decode(encoded, 0, 1));

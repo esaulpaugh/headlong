@@ -430,11 +430,11 @@ public class EncodeTest {
 
     private static void testFixedLenDynamicArray(String baseType, Object[] args, Supplier<Object> supplier) {
         final int n = args.length;
-        TupleType a = TupleType.of(baseType + "[" + n + "]");
+        TupleType<Tuple> a = TupleType.of(baseType + "[" + n + "]");
 
         String[] types = new String[n];
         Arrays.fill(types, baseType);
-        TupleType b = TupleType.parse("(" + TupleType.of(types) + ")");
+        TupleType<Tuple> b = TupleType.parse("(" + TupleType.of(types) + ")");
 
         System.out.println(a + " vs " + b);
 
@@ -469,7 +469,7 @@ public class EncodeTest {
     @Test
     public void paddingTest() {
         final Function f = new Function("(bool,uint8,int64,uint64,address,ufixed,bytes2,(string),bytes,function)");
-        final TupleType paramTypes = f.getInputs();
+        final TupleType<Tuple> paramTypes = f.getInputs();
 
         StringBuilder sb = new StringBuilder();
         for(ABIType<?> type : paramTypes.elementTypes) {
@@ -530,7 +530,7 @@ public class EncodeTest {
 
     @Test
     public void testEncodeElements() {
-        TupleType tt = TupleType.parse("(uint64,uint32,bool[])");
+        TupleType<Triple<Object, Object, Object>> tt = TupleType.parse("(uint64,uint32,bool[])");
 
         Object a = BigInteger.valueOf(7L);
         Object b = 9L;

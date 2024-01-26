@@ -46,8 +46,8 @@ public final class Function implements ABIObject {
 
     private final TypeEnum type;
     private final String name;
-    private final TupleType inputTypes;
-    private final TupleType outputTypes;
+    private final TupleType<?> inputTypes;
+    private final TupleType<?> outputTypes;
     private final String stateMutability;
 
     private final String hashAlgorithm;

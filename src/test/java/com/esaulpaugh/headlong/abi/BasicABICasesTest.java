@@ -115,7 +115,7 @@ public class BasicABICasesTest {
                 flags = e.getFlags();
             }
         }
-        return new TupleType(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, null, null, flags);
+        return new TupleType<>(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, null, null, flags);
     }
 
     @Test

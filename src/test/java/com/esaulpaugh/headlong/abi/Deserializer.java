@@ -32,15 +32,16 @@ public class Deserializer {
 
     private Deserializer() {}
 
-    public static TupleType parseTupleType(String ttStr) {
-        return parseTupleType(Streams.parse(new JsonReader(new StringReader(ttStr))).getAsJsonArray());
+    @SuppressWarnings("unchecked")
+    public static <T extends TupleType<? extends Tuple>> T parseTupleType(String ttStr) {
+        return (T) parseTupleType(Streams.parse(new JsonReader(new StringReader(ttStr))).getAsJsonArray());
     }
 
-    public static <T extends Tuple> T parseTupleValue(TupleType tupleType, String tupleStr) {
+    public static <T extends Tuple> T parseTupleValue(TupleType<?> tupleType, String tupleStr) {
         return parseTupleValue(tupleType, Streams.parse(new JsonReader(new StringReader(tupleStr))).getAsJsonArray());
     }
 
-    public static TupleType parseTupleType(JsonArray typesArray) {
+    public static TupleType<?> parseTupleType(JsonArray typesArray) {
         final int len = typesArray.size();
         String[] typeStrings = new String[len];
         for (int i = 0; i < len; i++) {
