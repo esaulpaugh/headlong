@@ -442,7 +442,7 @@ public class TupleTest {
 
     @Test
     public void testDecodeIndex0() {
-        TupleType tt = TupleType.parse("(bool,(bool,int24[2],(bool,bool)[2])[1],string)");
+        TupleType<Triple<Boolean, Tuple[], String>> tt = TupleType.parse("(bool,(bool,int24[2],(bool,bool)[2])[1],string)");
         Triple<Boolean, Tuple[], String> args = Triple.of(true, new Tuple[] { Triple.of(true, new int[] { 1, 2 }, new Tuple[] { Pair.of(true, false), Pair.of(true, false) }) }, "ya");
         ByteBuffer bb = tt.encode(args);
         System.out.println(Strings.encode(bb));
@@ -452,7 +452,7 @@ public class TupleTest {
 
     @Test
     public void testDecodeIndex1() {
-        TupleType tt = TupleType.parse("(bool,bool[3][2],string[][])");
+        TupleType<Triple<Boolean, boolean[][], String[][]>> tt = TupleType.parse("(bool,bool[3][2],string[][])");
         Triple<Boolean, boolean[][], String[][]> args = Triple.of(true, new boolean[][] { new boolean[] { true, false, true }, new boolean[] { false, false, true } }, new String[][] { new String[] { "wooo", "moo" } });
         ByteBuffer bb = tt.encode(args);
         System.out.println(Strings.encode(bb));
@@ -462,7 +462,7 @@ public class TupleTest {
 
     @Test
     public void testDecodeIndex2() {
-        TupleType tt = TupleType.parse("(bool,uint16,address,int64,uint64,address,string[][])");
+        TupleType<Tuple> tt = TupleType.parse("(bool,uint16,address,int64,uint64,address,string[][])");
         Tuple args = Tuple.from(
                 true,
                 90,
@@ -491,9 +491,9 @@ public class TupleTest {
 
     @Test
     public void testSelectExclude() {
-        TupleType _uintBool_ = TupleType.parse("(uint,bool)");
-        TupleType _uint_ = TupleType.parse("(uint)");
-        TupleType _bool_ = TupleType.parse("(bool)");
+        TupleType<?> _uintBool_ = TupleType.parse("(uint,bool)");
+        TupleType<?> _uint_ = TupleType.parse("(uint)");
+        TupleType<?> _bool_ = TupleType.parse("(bool)");
 
         assertEquals(TupleType.EMPTY,   _uintBool_.select(false, false));
         assertEquals(_bool_,            _uintBool_.select(false, true));
@@ -505,18 +505,18 @@ public class TupleTest {
         assertEquals(_bool_,            _uintBool_.exclude(true, false));
         assertEquals(TupleType.EMPTY,   _uintBool_.exclude(true, true));
         
-        TupleType tt2 = TupleType.parse("((int,bool))");
+        TupleType<?> tt2 = TupleType.parse("((int,bool))");
         assertEquals(tt2, tt2.select(true));
         assertEquals(TupleType.EMPTY, tt2.exclude(true));
 
         assertEquals(TupleType.EMPTY, TupleType.EMPTY.select());
         assertEquals(TupleType.EMPTY, TupleType.EMPTY.exclude());
 
-        TupleType clone0 = _uintBool_.select(true, true);
+        TupleType<?> clone0 = _uintBool_.select(true, true);
         assertSame(_uintBool_.get(0), clone0.get(0));
         assertSame(_uintBool_.get(1), clone0.get(1));
 
-        TupleType clone1 = _uintBool_.exclude(false, false);
+        TupleType<?> clone1 = _uintBool_.exclude(false, false);
         assertSame(_uintBool_.get(0), clone1.get(0));
         assertSame(_uintBool_.get(1), clone1.get(1));
 
@@ -526,21 +526,21 @@ public class TupleTest {
 
     @Test
     public void testGetElement() {
-        TupleType tt = TupleType.parse("(bytes8,decimal)");
+        TupleType<?> tt = TupleType.parse("(bytes8,decimal)");
         ArrayType<ByteType, Byte, byte[]> at = tt.get(0);
         assertEquals(8, at.getLength());
         BigDecimalType decimal = tt.get(1);
         assertEquals("fixed168x10", decimal.getCanonicalType());
         assertEquals("iii", Singleton.of("iii").get0());
 
-        TupleType outer = TupleType.parse("((address,int256))");
-        TupleType inner = outer.get(0);
+        TupleType<?> outer = TupleType.parse("((address,int256))");
+        TupleType<?> inner = outer.get(0);
         assertEquals(TupleType.parse("(address,int)"), inner);
     }
 
     @Test
     public void testTupleLengthMismatch() throws Throwable {
-        TupleType tt = TupleType.parse("(bool)");
+        TupleType<?> tt = TupleType.parse("(bool)");
         assertThrown(IllegalArgumentException.class, "tuple length mismatch: expected length 1 but found 0", () -> tt.validate(Tuple.EMPTY));
         assertThrown(IllegalArgumentException.class, "tuple length mismatch: expected length 1 but found 2", () -> tt.validate(Pair.of("", "")));
     }

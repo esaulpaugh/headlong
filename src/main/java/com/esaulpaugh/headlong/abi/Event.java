@@ -140,14 +140,16 @@ public final class Event implements ABIObject {
         return true;
     }
 
-    public Tuple decodeTopics(byte[][] topics) {
-        return new Tuple(decodeTopicsArray(topics));
+    @SuppressWarnings("unchecked")
+    public <T extends Tuple> T decodeTopics(byte[][] topics) {
+        return (T) Tuple.create(decodeTopicsArray(topics));
     }
 
-    public Tuple decodeData(byte[] data) {
-        return data == null && nonIndexedParams.isEmpty()
-                ? Tuple.EMPTY
-                : nonIndexedParams.decode(data);
+    @SuppressWarnings("unchecked")
+    public <T extends Tuple> T decodeData(byte[] data) {
+        return (T) (data == null && nonIndexedParams.isEmpty()
+                        ? Tuple.EMPTY
+                        : nonIndexedParams.decode(data));
     }
 
     /**
@@ -158,8 +160,9 @@ public final class Event implements ABIObject {
      * @param data non-indexed parameters to decode
      * @return  the decoded arguments
      */
-    public Tuple decodeArgs(byte[][] topics, byte[] data) {
-        return mergeDecodedArgs(decodeTopicsArray(topics), decodeData(data));
+    @SuppressWarnings("unchecked")
+    public <T extends Tuple> T decodeArgs(byte[][] topics, byte[] data) {
+        return (T) mergeDecodedArgs(decodeTopicsArray(topics), decodeData(data));
     }
 
     private Tuple mergeDecodedArgs(Object[] decodedTopics, Tuple decodedData) {
@@ -171,7 +174,7 @@ public final class Event implements ABIObject {
                 result[i] = decodedData.get(dataIndex++);
             }
         }
-        return new Tuple(result);
+        return Tuple.create(result);
     }
 
     private Object[] decodeTopicsArray(byte[][] topics) {

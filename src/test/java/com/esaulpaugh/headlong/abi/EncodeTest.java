@@ -124,7 +124,7 @@ public class EncodeTest {
                     }
                     String sig = new String(temp, 0, 0, len);
                     try {
-                        TupleType tt = TupleType.parse(sig);
+                        TupleType<?> tt = TupleType.parse(sig);
                         if(map.containsKey(sig)) continue;
                         String canon = tt.canonicalType;
                         map.put(sig, canon);
@@ -380,7 +380,7 @@ public class EncodeTest {
 
         assertThrown(ILLEGAL, "@ index 0, bad array length", () -> Function.parse("zaba(()[04])"));
 
-        assertEquals(4, ((ArrayType<TupleType, Tuple, Tuple[]>) Function.parse("yaba(()[4])").getInputs().get(0)).getLength());
+        assertEquals(4, ((ArrayType<TupleType<Tuple>, Tuple, Tuple[]>) Function.parse("yaba(()[4])").getInputs().get(0)).getLength());
     }
 
     @Test

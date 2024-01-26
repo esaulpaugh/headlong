@@ -82,8 +82,9 @@ public class ABIStudent implements ABIEncodeable {
         return name + ", " + gpa + ", " + new BigInteger(publicKey) + ", $" + balance;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Tuple toTuple() {
-        return Quintuple.of(name, BigDecimal.valueOf(gpa), publicKey, balance.unscaledValue().toByteArray(), balance.scale());
+    public <T extends Tuple> T toTuple() {
+        return (T) Quintuple.of(name, BigDecimal.valueOf(gpa), publicKey, balance.unscaledValue().toByteArray(), balance.scale());
     }
 }

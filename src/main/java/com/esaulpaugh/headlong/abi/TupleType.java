@@ -27,12 +27,12 @@ import java.util.function.IntUnaryOperator;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
 /** @see ABIType */
-public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<?>> {
+public final class TupleType<J extends Tuple> extends ABIType<J> implements Iterable<ABIType<?>> {
 
     static final String EMPTY_TUPLE_STRING = "()";
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    public static final TupleType EMPTY = new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null, null, ABIType.FLAGS_NONE);
+    public static final TupleType<Tuple> EMPTY = new TupleType<>(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null, null, ABIType.FLAGS_NONE);
 
     final ABIType<?>[] elementTypes;
     final String[] elementNames;
@@ -43,7 +43,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     final int flags;
 
     TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String[] elementNames, String[] elementInternalTypes, int flags) {
-        super(canonicalType, Tuple.class, dynamic);
+        super(canonicalType, Tuple.classFor(elementTypes.length), dynamic);
         this.elementTypes = elementTypes;
         this.elementNames = elementNames;
         this.elementInternalTypes = elementInternalTypes;
@@ -227,7 +227,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
     }
 
     @Override
-    Tuple decode(ByteBuffer bb, byte[] unitBuffer) {
+    J decode(ByteBuffer bb, byte[] unitBuffer) {
         final Object[] elements = new Object[size()];
         int i = 0;
         try {
@@ -256,7 +256,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         } catch (IllegalArgumentException cause) {
             throw decodeException(true, i, cause);
         }
-        return new Tuple(elements);
+        return Tuple.create(elements);
     }
 
     /**
@@ -301,7 +301,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             results[index] = decodeObject(resultType, bb, start, unitBuffer, index);
             prev = index;
         }
-        return new Tuple(results);
+        return Tuple.create(results);
     }
 
     private static Object decodeObject(ABIType<?> type, ByteBuffer bb, int start, byte[] unitBuffer, int index) {
@@ -323,8 +323,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
             final ABIType<?> e = elementTypes[i];
             sum += e.headLength();
             switch (e.typeCode()) {
-            case TYPE_CODE_ARRAY: len += ((ArrayType<?, ?, ?>) e).staticArrayHeadLength(); continue;
-            case TYPE_CODE_TUPLE: len += ((TupleType) e).staticTupleHeadLength(); continue;
+            case TYPE_CODE_ARRAY: len += e.asArrayType().staticArrayHeadLength(); continue;
+            case TYPE_CODE_TUPLE: len += e.asTupleType().staticTupleHeadLength(); continue;
             default: len += UNIT_LENGTH_BYTES;
             }
         }
@@ -347,7 +347,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
      * @param manifest  booleans specifying whether to include the respective elements
      * @return  the new {@link TupleType}
      */
-    public TupleType select(boolean... manifest) {
+    public TupleType<J> select(boolean... manifest) {
         return selectElements(manifest, false);
     }
 
@@ -358,11 +358,11 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
      * @param manifest  booleans specifying whether to exclude the respective elements
      * @return  the new {@link TupleType}
      */
-    public TupleType exclude(boolean... manifest) {
+    public TupleType<J> exclude(boolean... manifest) {
         return selectElements(manifest, true);
     }
 
-    private TupleType selectElements(final boolean[] manifest, final boolean negate) {
+    private TupleType<J> selectElements(final boolean[] manifest, final boolean negate) {
         final int size = size();
         if (manifest.length != size) {
             throw new IllegalArgumentException("expected manifest length " + size + " but found length " + manifest.length);
@@ -386,7 +386,7 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
                 }
             }
         }
-        return new TupleType(
+        return new TupleType<>(
                 completeTupleTypeString(canonicalType),
                 dynamic,
                 selected.toArray(EMPTY_ARRAY),
@@ -405,15 +405,15 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return EMPTY_TUPLE_STRING;
     }
 
-    public static TupleType parse(String rawTupleTypeString) {
+    public static <T extends TupleType<? extends Tuple>> T parse(String rawTupleTypeString) {
         return TypeFactory.create(rawTupleTypeString);
     }
 
-    public static TupleType parse(int flags, String rawTupleTypeString) {
+    public static <T extends TupleType<? extends Tuple>> T parse(int flags, String rawTupleTypeString) {
         return TypeFactory.create(flags, rawTupleTypeString);
     }
 
-    public static TupleType of(String... typeStrings) {
+    public static <T extends TupleType<? extends Tuple>> T of(String... typeStrings) {
         StringBuilder sb = new StringBuilder("(");
         for (String str : typeStrings) {
             sb.append(str).append(',');
@@ -421,8 +421,8 @@ public final class TupleType extends ABIType<Tuple> implements Iterable<ABIType<
         return parse(completeTupleTypeString(sb));
     }
 
-    static TupleType empty(int flags) {
-        return flags == ABIType.FLAGS_NONE ? EMPTY : new TupleType(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null, null, flags);
+    static TupleType<Tuple> empty(int flags) {
+        return flags == ABIType.FLAGS_NONE ? EMPTY : new TupleType<>(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null, null, flags);
     }
 
     /**

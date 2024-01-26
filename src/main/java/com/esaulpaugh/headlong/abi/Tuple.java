@@ -60,12 +60,12 @@ public class Tuple implements Iterable<Object> {
         return new Sextuple<>(requireNoNulls(new Object[] { a, b, c, d, e, f }));
     }
 
-    public static Tuple from(Object... elements) {
+    public static <T extends Tuple> T from(Object... elements) {
         return create(copy(new Object[elements.length], i -> requireNotNull(elements[i], i)));
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends Tuple> T create(Object[] elements) {
+    static <T extends Tuple> T create(Object[] elements) {
         switch (elements.length) {
         case 1: return (T) new Singleton<>(elements);
         case 2: return (T) new Pair<>(elements);
@@ -74,6 +74,19 @@ public class Tuple implements Iterable<Object> {
         case 5: return (T) new Quintuple<>(elements);
         case 6: return (T) new Sextuple<>(elements);
         default: return (T) new Tuple(elements);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T extends Class<? extends Tuple>> T classFor(int len) {
+        switch (len) {
+        case 1: return (T) Singleton.class;
+        case 2: return (T) Pair.class;
+        case 3: return (T) Triple.class;
+        case 4: return (T) Quadruple.class;
+        case 5: return (T) Quintuple.class;
+        case 6: return (T) Sextuple.class;
+        default: return (T) Tuple.class;
         }
     }
 

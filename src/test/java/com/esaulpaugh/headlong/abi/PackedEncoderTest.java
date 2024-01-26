@@ -92,9 +92,9 @@ public class PackedEncoderTest {
 
     @Test
     public void testHard() {
-        final TupleType tupleType = TupleType.parse("((bytes,(uint8[2][2])))");
+        final TupleType<Singleton<Tuple>> tupleType = TupleType.parse("((bytes,(uint8[2][2])))");
 
-        final Tuple test = Singleton.of(Tuple.of(new byte[0], Singleton.of(new int[][] { new int[] {1,2}, new int[] {3,4} })));
+        final Singleton<Tuple> test = Singleton.of(Tuple.of(new byte[0], Singleton.of(new int[][] { new int[] {1,2}, new int[] {3,4} })));
 
         final ByteBuffer bb = tupleType.encodePacked(test);
 
@@ -103,14 +103,15 @@ public class PackedEncoderTest {
         final byte[] packed = Strings.decode("01020304");
 
         assertEquals(test, PackedDecoder.decode(tupleType, packed));
-        assertEquals(test, tupleType.decodePacked(packed));
+        Singleton<Tuple> t = tupleType.decodePacked(packed);
+        assertEquals(test, t);
     }
 
     @Test
     public void testStaticTupleInsideDynamic() {
-        TupleType tupleType = TupleType.parse("((bytes1),bytes)");
+        TupleType<Pair<Singleton<byte[]>,byte[]>> tupleType = TupleType.parse("((bytes1),bytes)");
 
-        Tuple test = Pair.of(Singleton.of(new byte[] { -1 }), new byte[] { -2, -3 });
+        Pair<Singleton<byte[]>, byte[]> test = Pair.of(Singleton.of(new byte[] { -1 }), new byte[] { -2, -3 });
 
         ByteBuffer bb = tupleType.encodePacked(test);
 

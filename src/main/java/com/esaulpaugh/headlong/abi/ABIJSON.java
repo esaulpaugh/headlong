@@ -187,7 +187,7 @@ public final class ABIJSON {
         return new ContractError(getName(error), parseTupleType(error, INPUTS, flags));
     }
 
-    private static TupleType parseTupleType(final JsonArray array, final boolean[] indexed, final int flags) {
+    private static TupleType<Tuple> parseTupleType(final JsonArray array, final boolean[] indexed, final int flags) {
         int size;
         if (array == null || (size = array.size()) <= 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
             return TupleType.empty(flags);
@@ -214,7 +214,7 @@ public final class ABIJSON {
             }
         }
         canonicalType.setCharAt(canonicalType.length() - 1, ')');
-        return new TupleType(
+        return new TupleType<>(
                 canonicalType.toString(),
                 dynamic,
                 elements,
@@ -311,7 +311,7 @@ public final class ABIJSON {
         }
     }
 
-    private static void tupleType(JsonWriter out, String name, TupleType tupleType, boolean[] indexedManifest) throws IOException {
+    private static void tupleType(JsonWriter out, String name, TupleType<?> tupleType, boolean[] indexedManifest) throws IOException {
         out.name(name).beginArray();
         int i = 0;
         for (final ABIType<?> e : tupleType) {

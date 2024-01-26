@@ -52,8 +52,8 @@ public final class SuperSerial {
         return RLPEncoder.sequence(serializeTuple(schema, vals));
     }
 
-    public static Tuple fromRLP(TupleType schema, byte[] rlp) {
-        Tuple in = deserializeTuple(schema, rlp);
+    public static <T extends Tuple> T fromRLP(TupleType schema, byte[] rlp) {
+        T in = deserializeTuple(schema, rlp);
         schema.validate(in);
         return in;
     }
@@ -65,8 +65,8 @@ public final class SuperSerial {
                 : Notation.forObjects(objects).toString();
     }
 
-    public static Tuple deserialize(TupleType tupleType, String str, boolean machine) {
-        Tuple in = deserializeTuple(
+    public static <T extends Tuple> T deserialize(TupleType tupleType, String str, boolean machine) {
+        T in = deserializeTuple(
                 tupleType,
                 machine ? Strings.decode(str)
                         : RLPEncoder.sequence(Notation.parse(str)));
@@ -82,7 +82,7 @@ public final class SuperSerial {
         return out;
     }
 
-    private static Tuple deserializeTuple(TupleType tupleType, byte[] sequence) {
+    private static <T extends Tuple> T deserializeTuple(TupleType tupleType, byte[] sequence) {
         Iterator<RLPItem> sequenceIterator = RLP_STRICT.sequenceIterator(sequence);
         Object[] elements = new Object[tupleType.size()];
         for (int i = 0; i < elements.length; i++) {
@@ -91,7 +91,7 @@ public final class SuperSerial {
         if(sequenceIterator.hasNext()) {
             throw new IllegalArgumentException("trailing unconsumed items");
         }
-        return new Tuple(elements);
+        return Tuple.create(elements);
     }
 
     private static Object serialize(ABIType<?> type, Object obj) {

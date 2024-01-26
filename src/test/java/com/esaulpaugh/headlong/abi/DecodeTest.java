@@ -70,7 +70,7 @@ public class DecodeTest {
           + "7730307400000000000000000000000000000000000000000000000000000001"
     );
 
-    private static final Pair<BigDecimal, String> RETURN_VALS = Pair.of(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
+    private static final Tuple RETURN_VALS = Pair.of(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
 
     @Test
     public void testLenient() {
@@ -208,7 +208,7 @@ public class DecodeTest {
         decoded = TupleType.parse(FUNCTION.getOutputs().toString()).decode(ByteBuffer.wrap(RETURN_BYTES));
         assertEquals(RETURN_VALS, decoded);
 
-        TupleType tt = TupleType.parse("(ufixed,string)");
+        TupleType<?> tt = TupleType.parse("(ufixed,string)");
         decoded = tt.decode(ByteBuffer.wrap(RETURN_BYTES));
         assertEquals(RETURN_VALS, decoded);
 
@@ -434,7 +434,7 @@ public class DecodeTest {
 
     @Test
     public void testTupleDecodeTypeInference() throws Throwable {
-        TupleType tt = TupleType.parse("(int,string,bool,int64)");
+        TupleType<?> tt = TupleType.parse("(int,string,bool,int64)");
         Object[] elements = { BigInteger.valueOf(550L), "weow", true, -41L };
         ByteBuffer bb = tt.encode(Tuple.from(elements));
         assertEquals(0, bb.position());
@@ -477,7 +477,7 @@ public class DecodeTest {
 
     @Test
     public void testBadIndices() throws Throwable {
-        TupleType tt = TupleType.parse("(int,string,bool,int64)");
+        TupleType<?> tt = TupleType.parse("(int,string,bool,int64)");
         ByteBuffer bb = ByteBuffer.wrap(FastHex.decode(TUPLE_HEX));
 
         assertThrown(IllegalArgumentException.class, "tuple index 2 is null", () -> Tuple.of("", "", null, null));
@@ -946,8 +946,8 @@ public class DecodeTest {
     private void checkLegacyFlags(ABIType<?> t) {
         if (t instanceof TupleType) {
             assertEquals(ABIType.FLAG_LEGACY_DECODE, t.getFlags());
-            assertEquals(((TupleType) t).flags, t.getFlags());
-            for (ABIType<?> e : (TupleType) t) {
+            assertEquals(((TupleType<?>) t).flags, t.getFlags());
+            for (ABIType<?> e : (TupleType<?>) t) {
                 checkLegacyFlags(e);
             }
         } else if (t instanceof ArrayType) {

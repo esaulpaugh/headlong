@@ -224,7 +224,7 @@ public final class TypeFactory {
         return new StringBuilder(CAPACITY).append('(');
     }
 
-    private static TupleType parseTupleType(final String rawTypeStr, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
+    private static TupleType<?> parseTupleType(final String rawTypeStr, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawTypeStr.length();
         if (len == 2 && rawTypeStr.equals(EMPTY_TUPLE_STRING)) return TupleType.empty(flags);
         final List<ABIType<?>> elements = new ArrayList<>();
@@ -255,7 +255,7 @@ public final class TypeFactory {
             return null;
         }
         canonicalType.setCharAt(canonicalType.length() - 1, ')'); // overwrite trailing comma
-        return new TupleType(
+        return new TupleType<>(
             canonicalType.toString(),
             dynamic,
             elements.toArray(EMPTY_ARRAY),

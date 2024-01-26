@@ -226,7 +226,7 @@ public class ABIJSONTest {
         case TYPE_CODE_TUPLE:
             sb.append('(');
             int i = 0;
-            TupleType tt = (TupleType) type;
+            TupleType<?> tt = (TupleType<?>) type;
             for(ABIType<?> e : tt) {
                 toString(tt.getElementName(i++), e, sb);
             }
@@ -698,8 +698,8 @@ public class ABIJSONTest {
     }
 
     public static Stream<ABIType<?>> flatten(ABIType<?> type) {
-        return type instanceof TupleType
-                ? StreamSupport.stream(((TupleType) type).spliterator(), false)
+        return type instanceof TupleType<?>
+                ? StreamSupport.stream(((TupleType<?>) type).spliterator(), false)
                     .flatMap(ABIJSONTest::flatten)
                 : Stream.of(type);
     }

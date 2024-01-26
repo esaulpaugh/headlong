@@ -40,7 +40,8 @@ final class PackedDecoder {
 
     private PackedDecoder() {}
 
-    static Tuple decode(TupleType tupleType, byte[] buffer) {
+    @SuppressWarnings("unchecked")
+    static <T extends Tuple> T decode(TupleType<T> tupleType, byte[] buffer) {
         final int count = countDynamics(tupleType);
         if (count <= 1) {
             final Tuple[] elements = new Tuple[1];
@@ -51,7 +52,7 @@ final class PackedDecoder {
             if(decodedLen != buffer.length) {
                 throw new IllegalArgumentException("unconsumed bytes: " + (buffer.length - decodedLen) + " remaining");
             }
-            return tuple;
+            return (T) tuple;
         }
         throw new IllegalArgumentException("multiple dynamic elements: " + count);
     }
@@ -107,7 +108,7 @@ final class PackedDecoder {
                 start += decode(tupleType.get(i), buffer, start, end, elements, i);
             }
         }
-        Tuple t = new Tuple(elements);
+        Tuple t = Tuple.create(elements);
         parentElements[pei] = t;
         return tupleType.byteLengthPacked(t);
     }
@@ -135,7 +136,7 @@ final class PackedDecoder {
         for (int i = 0; i < elements.length; i++) {
             idx += decode(tupleType.get(i), buffer, idx, end, elements, i);
         }
-        Tuple t = new Tuple(elements);
+        Tuple t = Tuple.create(elements);
         parentElements[pei] = t;
         return tupleType.byteLengthPacked(t);
     }

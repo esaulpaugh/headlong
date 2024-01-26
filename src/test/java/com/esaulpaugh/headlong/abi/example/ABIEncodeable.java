@@ -19,5 +19,5 @@ import com.esaulpaugh.headlong.abi.Tuple;
 
 public interface ABIEncodeable {
 
-    Tuple toTuple();
+    <T extends Tuple> T toTuple();
 }

@@ -71,7 +71,7 @@ public class SuperSerialTest {
         assertEquals("(\n  '01'\n)", SuperSerial.serialize(_bool_, _true, false));
         assertEquals("(\n  ''\n)", SuperSerial.serialize(_bool_, _false, false));
 
-        Tuple t = SuperSerial.deserialize(_bool_, "('01')", false);
+        Singleton<Boolean> t = SuperSerial.deserialize(_bool_, "('01')", false);
         assertTrue((boolean) t.get(0));
         t = SuperSerial.deserialize(_bool_, "('')", false);
         assertFalse((boolean) t.get(0));

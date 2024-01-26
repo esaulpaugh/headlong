@@ -277,7 +277,7 @@ public class MonteCarloTestCase {
     }
 
     private void runFuzzPackedDecode(Random r) {
-        final TupleType tt = this.function.getInputs();
+        final TupleType<Tuple> tt = this.function.getInputs();
         final Tuple args = this.argsTuple;
         final int packedLen = tt.byteLengthPacked(args);
         if(packedLen == 0) {
@@ -308,7 +308,7 @@ public class MonteCarloTestCase {
 
     void runPacked() {
         final Tuple args = this.argsTuple;
-        final TupleType tt = this.function.getInputs();
+        final TupleType<Tuple> tt = this.function.getInputs();
         final int numDynamics = PackedDecoder.countDynamics(tt);
         if(tt.dynamic ^ (numDynamics != 0)) {
             throw new AssertionError();

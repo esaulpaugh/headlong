@@ -36,7 +36,7 @@ public class Deserializer {
         return parseTupleType(Streams.parse(new JsonReader(new StringReader(ttStr))).getAsJsonArray());
     }
 
-    public static Tuple parseTupleValue(TupleType tupleType, String tupleStr) {
+    public static <T extends Tuple> T parseTupleValue(TupleType tupleType, String tupleStr) {
         return parseTupleValue(tupleType, Streams.parse(new JsonReader(new StringReader(tupleStr))).getAsJsonArray());
     }
 
@@ -49,7 +49,7 @@ public class Deserializer {
         return TupleType.of(typeStrings);
     }
 
-    public static Tuple parseTupleValue(TupleType tupleType, JsonArray valuesArray) {
+    public static <T extends Tuple> T parseTupleValue(TupleType tupleType, JsonArray valuesArray) {
         final int len = tupleType.size();
         Object[] elements = new Object[len];
         int i = 0;
