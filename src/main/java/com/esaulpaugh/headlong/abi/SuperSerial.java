@@ -47,26 +47,26 @@ public final class SuperSerial {
 
     private static final byte[] TRUE = new byte[] { 0x1 };
 
-    public static byte[] toRLP(TupleType schema, Tuple vals) {
+    public static byte[] toRLP(TupleType<?> schema, Tuple vals) {
         schema.validate(vals);
         return RLPEncoder.sequence(serializeTuple(schema, vals));
     }
 
-    public static Tuple fromRLP(TupleType schema, byte[] rlp) {
-        Tuple in = deserializeTuple(schema, rlp);
+    public static <T extends Tuple> T fromRLP(TupleType<?> schema, byte[] rlp) {
+        T in = deserializeTuple(schema, rlp);
         schema.validate(in);
         return in;
     }
 
-    public static String serialize(TupleType tupleType, Tuple tuple, boolean machine) {
+    public static String serialize(TupleType<?> tupleType, Tuple tuple, boolean machine) {
         tupleType.validate(tuple);
         Object[] objects = serializeTuple(tupleType, tuple);
         return machine ? Strings.encode(RLPEncoder.sequence(objects))
                 : Notation.forObjects(objects).toString();
     }
 
-    public static Tuple deserialize(TupleType tupleType, String str, boolean machine) {
-        Tuple in = deserializeTuple(
+    public static <T extends Tuple> T deserialize(TupleType<?> tupleType, String str, boolean machine) {
+        T in = deserializeTuple(
                 tupleType,
                 machine ? Strings.decode(str)
                         : RLPEncoder.sequence(Notation.parse(str)));
@@ -74,7 +74,7 @@ public final class SuperSerial {
         return in;
     }
 
-    private static Object[] serializeTuple(TupleType tupleType, Tuple tuple) {
+    private static Object[] serializeTuple(TupleType<?> tupleType, Tuple tuple) {
         Object[] out = new Object[tupleType.size()];
         for (int i = 0; i < out.length; i++) {
             out[i] = serialize(tupleType.get(i), tuple.get(i));
@@ -82,7 +82,7 @@ public final class SuperSerial {
         return out;
     }
 
-    private static Tuple deserializeTuple(TupleType tupleType, byte[] sequence) {
+    private static <T extends Tuple> T deserializeTuple(TupleType<?> tupleType, byte[] sequence) {
         Iterator<RLPItem> sequenceIterator = RLP_STRICT.sequenceIterator(sequence);
         Object[] elements = new Object[tupleType.size()];
         for (int i = 0; i < elements.length; i++) {
@@ -91,7 +91,7 @@ public final class SuperSerial {
         if(sequenceIterator.hasNext()) {
             throw new IllegalArgumentException("trailing unconsumed items");
         }
-        return new Tuple(elements);
+        return Tuple.create(elements);
     }
 
     private static Object serialize(ABIType<?> type, Object obj) {
@@ -102,8 +102,8 @@ public final class SuperSerial {
         case TYPE_CODE_LONG: return serializeBigInteger((UnitType<?>) type, BigInteger.valueOf((long) obj));
         case TYPE_CODE_BIG_INTEGER: return serializeBigInteger((UnitType<?>) type, (BigInteger) obj);
         case TYPE_CODE_BIG_DECIMAL: return serializeBigInteger((UnitType<?>) type, ((BigDecimal) obj).unscaledValue());
-        case TYPE_CODE_ARRAY: return serializeArray((ArrayType<?, ?, ?>) type, obj);
-        case TYPE_CODE_TUPLE: return serializeTuple((TupleType) type, (Tuple) obj);
+        case TYPE_CODE_ARRAY: return serializeArray(type.asArrayType(), obj);
+        case TYPE_CODE_TUPLE: return serializeTuple(type.asTupleType(), (Tuple) obj);
         case TYPE_CODE_ADDRESS: return serializeBigInteger((UnitType<?>) type, ((Address) obj).value());
         default: throw new AssertionError();
         }
@@ -123,8 +123,8 @@ public final class SuperSerial {
         case TYPE_CODE_BIG_DECIMAL:
             BigDecimalType bdt = (BigDecimalType) type;
             return new BigDecimal(deserializeBigInteger(bdt, item), bdt.scale);
-        case TYPE_CODE_ARRAY: return deserializeArray((ArrayType<?, ?, ?>) type, item);
-        case TYPE_CODE_TUPLE: return deserializeTuple((TupleType) type, item.asBytes());
+        case TYPE_CODE_ARRAY: return deserializeArray(type.asArrayType(), item);
+        case TYPE_CODE_TUPLE: return deserializeTuple(type.asTupleType(), item.asBytes());
         case TYPE_CODE_ADDRESS: return new Address(deserializeBigInteger((UnitType<?>) type, item));
         default: throw new AssertionError();
         }

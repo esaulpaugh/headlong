@@ -89,11 +89,11 @@ public class EqualsTest {
         assertNotSame(Function.parse("(uint)").getInputs().getCanonicalType(), Function.parse("(uint)").getInputs().getCanonicalType());
     }
 
-    private static boolean recursiveEquals(TupleType tt, Object o) {
+    private static boolean recursiveEquals(TupleType<?> tt, Object o) {
         if (tt == o) return true;
         if (o == null || tt.getClass() != o.getClass()) return false;
         if (!tt.equals(o)) return false;
-        TupleType tupleType = (TupleType) o;
+        TupleType<?> tupleType = (TupleType<?>) o;
         return Arrays.equals(tt.elementTypes, tupleType.elementTypes);
     }
 
@@ -126,13 +126,13 @@ public class EqualsTest {
                 new String[0][],
                 new Address[] { addr },
                 BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(Byte.MAX_VALUE << 2)),
-                Tuple.singleton(7),
-                new Tuple[][][] { new Tuple[][] { new Tuple[] { Tuple.singleton(9), Tuple.singleton(-11) } } },
-                new Tuple[] { Tuple.singleton(13), Tuple.singleton(-15) },
-                new Tuple[] { Tuple.singleton(17), Tuple.singleton(-19) },
+                Single.of(7),
+                new Tuple[][][] { new Tuple[][] { new Tuple[] { Single.of(9), Single.of(-11) } } },
+                new Tuple[] { Single.of(13), Single.of(-15) },
+                new Tuple[] { Single.of(17), Single.of(-19) },
                 Long.MAX_VALUE / 8_500_000,
-                new Tuple[] { Tuple.singleton((long) 0x7e), Tuple.singleton((long) -0x7e) },
-                Tuple.singleton(BigInteger.TEN)
+                new Tuple[] { Single.of((long) 0x7e), Single.of((long) -0x7e) },
+                Single.of(BigInteger.TEN)
         };
 
         final ByteBuffer abi = f.encodeCallWithArgs(argsIn);
@@ -159,7 +159,7 @@ public class EqualsTest {
 
         Function foo = Function.parse("foo(uint32[6])");
 
-        ByteBuffer bb = foo.encodeCall(Tuple.singleton(unsigneds));
+        ByteBuffer bb = foo.encodeCall(Single.of(unsigneds));
 
         Tuple dec = foo.decodeCall(bb);
 
@@ -182,7 +182,7 @@ public class EqualsTest {
 
         Function foo = Function.parse("foo(uint64[6])");
 
-        ByteBuffer bb = foo.encodeCall(Tuple.singleton(unsigneds));
+        ByteBuffer bb = foo.encodeCall(Single.of(unsigneds));
         assertEquals(0, bb.position());
 
         Tuple dec = foo.decodeCall(bb);
@@ -218,11 +218,11 @@ public class EqualsTest {
         );
 
         assertEquals(
-                new Event("lo", false, tt_a, false, false, false),
+                new Event<>("lo", false, tt_a, false, false, false),
                 Event.create("lo", tt_b, false, false, false)
         );
         assertNotEquals(
-                new Event("lo", false, tt_a, false, false, false),
+                new Event<>("lo", false, tt_a, false, false, false),
                 Event.create("lo", tt_c, false, false, false)
         );
     }

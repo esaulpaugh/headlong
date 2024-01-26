@@ -1,5 +1,5 @@
 /*
-   Copyright 2019 Evan Saulpaugh
+   Copyright 2024 Evan Saulpaugh
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,11 +13,21 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package com.esaulpaugh.headlong.abi.example;
+package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.abi.Tuple;
+public final class Pair<A, B> extends Tuple {
 
-public interface ABIEncodeable {
+    Pair(Object[] elements) {
+        super(elements);
+    }
 
-    <T extends Tuple> T toTuple();
+    @SuppressWarnings("unchecked")
+    public A get0() {
+        return (A) elements[0];
+    }
+
+    @SuppressWarnings("unchecked")
+    public B get1() {
+        return (B) elements[1];
+    }
 }

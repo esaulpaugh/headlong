@@ -64,8 +64,8 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     int staticArrayHeadLength() {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BYTE: return UNIT_LENGTH_BYTES; // all static byte arrays round up to exactly 32 bytes and not more
-        case TYPE_CODE_ARRAY: return length * ((ArrayType<?, ?, ?>) elementType).staticArrayHeadLength();
-        case TYPE_CODE_TUPLE: return length * ((TupleType) elementType).staticTupleHeadLength();
+        case TYPE_CODE_ARRAY: return length * elementType.asArrayType().staticArrayHeadLength();
+        case TYPE_CODE_TUPLE: return length * elementType.asTupleType().staticTupleHeadLength();
         default: return length * UNIT_LENGTH_BYTES;
         }
     }
@@ -496,7 +496,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T baseType(ABIType<?> type) {
         return type instanceof ArrayType<?, ?, ?>
-                ? baseType(((ArrayType<?, ?, ?>) type).getElementType())
+                ? baseType(type.asArrayType().getElementType())
                 : (T) type;
     }
 }

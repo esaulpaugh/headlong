@@ -40,7 +40,8 @@ final class PackedDecoder {
 
     private PackedDecoder() {}
 
-    static Tuple decode(TupleType tupleType, byte[] buffer) {
+    @SuppressWarnings("unchecked")
+    static <T extends Tuple> T decode(TupleType<T> tupleType, byte[] buffer) {
         final int count = countDynamics(tupleType);
         if (count <= 1) {
             final Tuple[] elements = new Tuple[1];
@@ -51,7 +52,7 @@ final class PackedDecoder {
             if(decodedLen != buffer.length) {
                 throw new IllegalArgumentException("unconsumed bytes: " + (buffer.length - decodedLen) + " remaining");
             }
-            return tuple;
+            return (T) tuple;
         }
         throw new IllegalArgumentException("multiple dynamic elements: " + count);
     }
@@ -60,13 +61,13 @@ final class PackedDecoder {
         if(type.dynamic) {
             switch (type.typeCode()) {
             case TYPE_CODE_ARRAY:
-                ArrayType<?, ?, ?> at = (ArrayType<?, ?, ?>) type;
+                ArrayType<?, ?, ?> at = type.asArrayType();
                 return DYNAMIC_LENGTH == at.getLength()
                         ? 1 + countDynamics(at.getElementType())
                         : countDynamics(at.getElementType());
             case TYPE_CODE_TUPLE:
                 int numDynamic = 0;
-                for (ABIType<?> e : ((TupleType) type).elementTypes) {
+                for (ABIType<?> e : type.asTupleType().elementTypes) {
                     numDynamic += countDynamics(e);
                 }
                 return numDynamic;
@@ -76,7 +77,7 @@ final class PackedDecoder {
         return 0;
     }
 
-    private static int decodeTuple(TupleType tupleType, byte[] buffer, int start, int end, Object[] parentElements, int pei) {
+    private static int decodeTuple(TupleType<?> tupleType, byte[] buffer, int start, int end, Object[] parentElements, int pei) {
         final Object[] elements = new Object[tupleType.size()];
 
         int mark = -1;
@@ -90,12 +91,12 @@ final class PackedDecoder {
             // static types only
             switch (type.typeCode()) {
             case TYPE_CODE_ARRAY:
-                final ArrayType<?, ?, ?> arrayType = (ArrayType<?, ?, ?>) type;
+                final ArrayType<?, ?, ?> arrayType = type.asArrayType();
                 end -= arrayType.getElementType().byteLengthPacked(null) * arrayType.getLength();
                 insertArray(arrayType, buffer, end, end, elements, i);
                 break;
             case TYPE_CODE_TUPLE:
-                end -= decodeTupleStatic((TupleType) type, buffer, end - type.byteLengthPacked(null), end, elements, i);
+                end -= decodeTupleStatic(type.asTupleType(), buffer, end - type.byteLengthPacked(null), end, elements, i);
                 break;
             default:
                 end -= decode(type, buffer, end - type.byteLengthPacked(null), end, elements, i);
@@ -107,7 +108,7 @@ final class PackedDecoder {
                 start += decode(tupleType.get(i), buffer, start, end, elements, i);
             }
         }
-        Tuple t = new Tuple(elements);
+        Tuple t = Tuple.create(elements);
         parentElements[pei] = t;
         return tupleType.byteLengthPacked(t);
     }
@@ -120,22 +121,22 @@ final class PackedDecoder {
         case TYPE_CODE_LONG: return insertLong((LongType) type, buffer, idx, type.byteLengthPacked(null), elements, i);
         case TYPE_CODE_BIG_INTEGER: return insertBigInteger((BigIntegerType) type, type.byteLengthPacked(null), buffer, idx, elements, i);
         case TYPE_CODE_BIG_DECIMAL: return insertBigDecimal((BigDecimalType) type, type.byteLengthPacked(null), buffer, idx, elements, i);
-        case TYPE_CODE_ARRAY: return insertArray((ArrayType<?, ?, ?>) type, buffer, idx, end, elements, i);
+        case TYPE_CODE_ARRAY: return insertArray(type.asArrayType(), buffer, idx, end, elements, i);
         case TYPE_CODE_TUPLE:
             return type.dynamic
-                    ? decodeTuple((TupleType) type, buffer, idx, end, elements, i)
-                    : decodeTupleStatic((TupleType) type, buffer, idx, end, elements, i);
+                    ? decodeTuple(type.asTupleType(), buffer, idx, end, elements, i)
+                    : decodeTupleStatic(type.asTupleType(), buffer, idx, end, elements, i);
         case TYPE_CODE_ADDRESS: return insertAddress(type.byteLengthPacked(null), buffer, idx, elements, i);
         default: throw new AssertionError();
         }
     }
 
-    private static int decodeTupleStatic(TupleType tupleType, byte[] buffer, int idx, int end, Object[] parentElements, int pei) {
+    private static int decodeTupleStatic(TupleType<?> tupleType, byte[] buffer, int idx, int end, Object[] parentElements, int pei) {
         final Object[] elements = new Object[tupleType.size()];
         for (int i = 0; i < elements.length; i++) {
             idx += decode(tupleType.get(i), buffer, idx, end, elements, i);
         }
-        Tuple t = new Tuple(elements);
+        Tuple t = Tuple.create(elements);
         parentElements[pei] = t;
         return tupleType.byteLengthPacked(t);
     }

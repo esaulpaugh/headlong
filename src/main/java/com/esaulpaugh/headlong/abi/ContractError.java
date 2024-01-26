@@ -19,12 +19,12 @@ import com.google.gson.JsonObject;
 
 import java.util.Objects;
 
-public final class ContractError implements ABIObject {
+public final class ContractError<I extends TupleType<?>> implements ABIObject {
 
     private final String name;
-    private final TupleType inputs;
+    private final I inputs;
 
-    public ContractError(String name, TupleType inputs) {
+    public ContractError(String name, I inputs) {
         this.name = Objects.requireNonNull(name);
         this.inputs = Objects.requireNonNull(inputs);
     }
@@ -39,8 +39,9 @@ public final class ContractError implements ABIObject {
         return name;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public TupleType getInputs() {
+    public I getInputs() {
         return inputs;
     }
 
@@ -61,23 +62,24 @@ public final class ContractError implements ABIObject {
     @Override
     public boolean equals(Object o) {
         if (o instanceof ContractError) {
-            ContractError that = (ContractError) o;
+            ContractError<?> that = (ContractError<?>) o;
             return name.equals(that.name) && inputs.equals(that.inputs);
         }
         return false;
     }
 
-    public static ContractError fromJson(String errorJson) {
+    public static <T extends TupleType<?>> ContractError<T> fromJson(String errorJson) {
         return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(errorJson));
     }
 
     /** @see ABIObject#fromJson(int, String) */
-    public static ContractError fromJson(int flags, String errorJson) {
+    public static <T extends TupleType<?>> ContractError<T> fromJson(int flags, String errorJson) {
         return fromJsonObject(flags, ABIJSON.parseObject(errorJson));
     }
 
     /** @see ABIObject#fromJsonObject(int, JsonObject) */
-    public static ContractError fromJsonObject(int flags, JsonObject error) {
+    @SuppressWarnings("unchecked")
+    public static <T extends TupleType<?>> ContractError<T> fromJsonObject(int flags, JsonObject error) {
         return ABIJSON.parseError(error, flags);
     }
 

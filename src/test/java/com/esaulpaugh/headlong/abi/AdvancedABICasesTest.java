@@ -37,7 +37,7 @@ public class AdvancedABICasesTest {
         private final String name;
 
         private final Function function;
-        private final TupleType types;
+        private final TupleType<Tuple> types;
         private final Tuple values;
         private final byte[] result;
 

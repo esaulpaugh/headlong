@@ -70,7 +70,7 @@ public class DecodeTest {
           + "7730307400000000000000000000000000000000000000000000000000000001"
     );
 
-    private static final Tuple RETURN_VALS = Tuple.of(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
+    private static final Tuple RETURN_VALS = Pair.of(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
 
     @Test
     public void testLenient() {
@@ -121,8 +121,8 @@ public class DecodeTest {
     public void testDoS() throws Throwable {
         final String[] strings = new String[3];
         Arrays.fill(strings, "");
-        final TupleType tt = TupleType.parse("(string[])");
-        final Tuple args = Tuple.singleton(strings);
+        final TupleType<Tuple> tt = TupleType.parse("(string[])");
+        final Tuple args = Single.of(strings);
         final ByteBuffer bb = tt.encode(args);
         final ByteBuffer tooShort = ByteBuffer.wrap(Arrays.copyOf(bb.array(), 32 + 32 + (32 * strings.length)));
         assertThrown(BufferUnderflowException.class, () -> tt.decode(tooShort));
@@ -208,7 +208,7 @@ public class DecodeTest {
         decoded = TupleType.parse(FUNCTION.getOutputs().toString()).decode(ByteBuffer.wrap(RETURN_BYTES));
         assertEquals(RETURN_VALS, decoded);
 
-        TupleType tt = TupleType.parse("(ufixed,string)");
+        TupleType<?> tt = TupleType.parse("(ufixed,string)");
         decoded = tt.decode(ByteBuffer.wrap(RETURN_BYTES));
         assertEquals(RETURN_VALS, decoded);
 
@@ -225,7 +225,7 @@ public class DecodeTest {
                         "0000000000000000000000000000000000000000000000000000000000000002"
                 )
         );
-        assertEquals(Tuple.singleton(new Tuple[] { Tuple.EMPTY, Tuple.EMPTY }), decoded);
+        assertEquals(Single.of(new Tuple[] { Tuple.EMPTY, Tuple.EMPTY }), decoded);
     }
 
     @Test
@@ -258,7 +258,7 @@ public class DecodeTest {
     @Test
     public void testCorruptBoolean() throws Throwable {
         Function f = new Function("baz(uint32,bool)");
-        Tuple argsTuple = Tuple.of(69L, true);
+        Pair<Long, Boolean> argsTuple = Pair.of(69L, true);
         ByteBuffer one = f.encodeCall(argsTuple);
 
         final byte[] array = one.array();
@@ -285,7 +285,7 @@ public class DecodeTest {
     @Test
     public void testCorruptBooleanArray() throws Throwable {
         Function f = new Function("baz(bool[])");
-        Tuple argsTuple = Tuple.singleton(new boolean[] { true });
+        Tuple argsTuple = Single.of(new boolean[] { true });
         ByteBuffer one = f.encodeCall(argsTuple);
 
         final byte[] array = one.array();
@@ -369,7 +369,7 @@ public class DecodeTest {
     public void testDecodeCallIndex() {
         Function f = new Function("()", "(int8,bool,string)");
 
-        final ByteBuffer bb = f.getOutputs().encode(Tuple.of(127, true, "two"));
+        final ByteBuffer bb = f.getOutputs().encode(Triple.of(127, true, "two"));
         final boolean b = f.decodeReturn(bb.array(), 1);
         assertTrue(b);
 
@@ -382,7 +382,7 @@ public class DecodeTest {
         final boolean b2 = f.decodeReturn(bb2, 1);
         assertTrue(b2);
 
-        final ByteBuffer bb4 = f.getOutputs().encode(Tuple.of(127, false, "two"));
+        final ByteBuffer bb4 = f.getOutputs().encode(Triple.of(127, false, "two"));
         final boolean b3 = f.decodeReturn(bb4.array(), 1);
         assertFalse(b3);
     }
@@ -390,7 +390,7 @@ public class DecodeTest {
     @Test
     public void testDecodeCallIndices() throws Throwable {
         Function f = new Function("(int8,bool,int8[],bool)");
-        Tuple args = Tuple.of(1, true, new int[] { 3, 6 }, false);
+        Quadruple<Integer, Boolean, int[], Boolean> args = Quadruple.of(1, true, new int[] { 3, 6 }, false);
         byte[] encoded = f.encodeCall(args).array();
         testIndicesDecode(f.decodeCall(encoded, 1, 3));
         testIndicesDecode(f.decodeCall(ByteBuffer.wrap(encoded), 1, 3));
@@ -402,7 +402,7 @@ public class DecodeTest {
     @Test
     public void testDecodeReturnIndices() throws Throwable {
         Function f = new Function("()", "(int8,bool,int8[],bool)");
-        Tuple args = Tuple.of(1, true, new int[] { 3, 6 }, false);
+        Quadruple<Integer, Boolean, int[], Boolean> args = Quadruple.of(1, true, new int[] { 3, 6 }, false);
         byte[] encoded = f.getOutputs().encode(args).array();
         testIndicesDecode(f.decodeReturn(encoded, 1, 3));
     }
@@ -434,9 +434,9 @@ public class DecodeTest {
 
     @Test
     public void testTupleDecodeTypeInference() throws Throwable {
-        TupleType tt = TupleType.parse("(int,string,bool,int64)");
+        TupleType<?> tt = TupleType.parse("(int,string,bool,int64)");
         Object[] elements = { BigInteger.valueOf(550L), "weow", true, -41L };
-        ByteBuffer bb = tt.encode(Tuple.of(elements));
+        ByteBuffer bb = tt.encode(Tuple.from(elements));
         assertEquals(0, bb.position());
         assertEquals(TUPLE_HEX, Strings.encode(bb));
         final BigInteger zero = tt.decode(bb, 0);
@@ -450,7 +450,7 @@ public class DecodeTest {
         assertEquals(three, three2);
 
         ByteBuffer buffer = ByteBuffer.allocate(192);
-        tt.encode(Tuple.of(elements), buffer);
+        tt.encode(Tuple.from(elements), buffer);
         assertThrown(BufferUnderflowException.class, buffer::get);
 
         ByteBuffer z = ByteBuffer.allocate(192);
@@ -462,7 +462,7 @@ public class DecodeTest {
     @Test
     public void testFunctionDecodeTypeInference() {
         Function f = Function.parse("f()", "(int,string,bool,int64)");
-        ByteBuffer bb = f.getOutputs().encode(Tuple.of(BigInteger.valueOf(550L), "weow", true, -41L));
+        ByteBuffer bb = f.getOutputs().encode(Quadruple.of(BigInteger.valueOf(550L), "weow", true, -41L));
         assertEquals(TUPLE_HEX, Strings.encode(bb));
         final BigInteger zero = f.decodeReturn(bb, 0);
         final String one = f.decodeReturn(bb, 1);
@@ -477,14 +477,15 @@ public class DecodeTest {
 
     @Test
     public void testBadIndices() throws Throwable {
-        TupleType tt = TupleType.parse("(int,string,bool,int64)");
+        TupleType<?> tt = TupleType.parse("(int,string,bool,int64)");
         ByteBuffer bb = ByteBuffer.wrap(FastHex.decode(TUPLE_HEX));
 
         assertThrown(IllegalArgumentException.class, "tuple index 2 is null", () -> Tuple.of("", "", null, null));
+        assertThrown(IllegalArgumentException.class, "tuple index 2 is null", () -> Quadruple.of("", "", null, null));
         final Tuple decoded = tt.decode(bb, new int[0]);
         assertEquals(new Tuple(null, null, null, null), decoded);
         assertEquals("[_, _, _, _]", decoded.toString());
-        assertEquals("[_, _, \"_\", \"_\"]", new Tuple(null, null, "_", '_').toString());
+        assertEquals("[_, _, \"_\", \\_]", new Tuple(null, null, "_", '_').toString());
         final int size = decoded.size();
         for (int i = 0; i < size; i++) {
             assertFalse(decoded.elementIsPresent(i));
@@ -499,7 +500,7 @@ public class DecodeTest {
         assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.decode(bb, 64));
 
         Tuple t = tt.decode(bb, 1, 2);
-        assertEquals("[_, weow, true, _]", t.toString());
+        assertEquals("[_, \"weow\", true, _]", t.toString());
         assertThrown(IllegalArgumentException.class, "index out of order: 0", () -> tt.decode(bb, 1, 2, 0));
         assertThrown(IllegalArgumentException.class, "index out of order: 1", () -> tt.decode(bb, 1, 1));
     }
@@ -862,9 +863,9 @@ public class DecodeTest {
 
     @Test
     public void testErrors() throws Throwable {
-        final TupleType originalType = TypeFactory.create("(bytes1,int8[3])");
-        final ByteBuffer encoded = originalType.encode(Tuple.of(new byte[1], new int[] { 1, 0, 2 }));
-        final TupleType newType = TypeFactory.create("(bytes1,bool[3])");
+        final TupleType<Tuple> originalType = TypeFactory.create("(bytes1,int8[3])");
+        final ByteBuffer encoded = originalType.encode(Pair.of(new byte[1], new int[] { 1, 0, 2 }));
+        final TupleType<?> newType = TypeFactory.create("(bytes1,bool[3])");
         final String msg = "tuple index 1: array index 2: illegal boolean value @ 96";
         assertThrown(IllegalArgumentException.class, msg, () -> newType.decode(encoded, 1));
         assertThrown(IllegalArgumentException.class, msg, () -> newType.decode(encoded, 0, 1));
@@ -927,7 +928,7 @@ public class DecodeTest {
 
         assertEquals(f, f2);
 
-        final Tuple args = Tuple.singleton(new byte[] { 9, 100 });
+        final Tuple args = Single.of(new byte[] { 9, 100 });
         final ByteBuffer bb = f.encodeCall(args);
         assertArrayEquals(Strings.decode("627dd56a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020964000000000000000000000000000000000000000000000000000000000000"), bb.array());
 
@@ -945,12 +946,12 @@ public class DecodeTest {
     private void checkLegacyFlags(ABIType<?> t) {
         if (t instanceof TupleType) {
             assertEquals(ABIType.FLAG_LEGACY_DECODE, t.getFlags());
-            assertEquals(((TupleType) t).flags, t.getFlags());
-            for (ABIType<?> e : (TupleType) t) {
+            assertEquals(((TupleType<?>) t).flags, t.getFlags());
+            for (ABIType<?> e : (TupleType<?>) t) {
                 checkLegacyFlags(e);
             }
         } else if (t instanceof ArrayType) {
-            final ArrayType<?, ?, ?> at = (ArrayType<?, ?, ?>) t;
+            final ArrayType<?, ?, ?> at = t.asArrayType();
             assertTrue(at.legacyDecode);
             assertEquals(ABIType.FLAG_LEGACY_DECODE, t.getFlags());
             assertEquals(at.flags, t.getFlags());

@@ -91,7 +91,7 @@ public class BasicABICasesTest {
 
         void test(Object[] argsArray) {
 
-            Tuple t = Tuple.of(argsArray);
+            Tuple t = Tuple.from(argsArray);
             ByteBuffer bb = function.encodeCall(t);
 
             System.out.println("expected:   " + result);
@@ -115,7 +115,7 @@ public class BasicABICasesTest {
                 flags = e.getFlags();
             }
         }
-        return new TupleType(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, null, null, flags);
+        return new TupleType<>(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, null, null, flags);
     }
 
     @Test

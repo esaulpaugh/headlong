@@ -124,7 +124,7 @@ public class EncodeTest {
                     }
                     String sig = new String(temp, 0, 0, len);
                     try {
-                        TupleType tt = TupleType.parse(sig);
+                        TupleType<?> tt = TupleType.parse(sig);
                         if(map.containsKey(sig)) continue;
                         String canon = tt.canonicalType;
                         map.put(sig, canon);
@@ -183,13 +183,13 @@ public class EncodeTest {
                 "payable",
                 Function.newDefaultDigest()
         );
-        final Tuple args = Tuple.of(
+        final Tuple args = Sextuple.of(
                 true,
                 Tuple.EMPTY,
                 "libertad..........................................................",
-                Tuple.of(-128, 255),
+                Pair.of(-128, 255),
                 Address.wrap(Address.toChecksumAddress(BigInteger.TEN.shiftLeft(156))),
-                Tuple.of(65535, "carajo]0]0]0]0]0]0]0]0]0]0]0]0]0".getBytes(StandardCharsets.US_ASCII))
+                Pair.of(65535, "carajo]0]0]0]0]0]0]0]0]0]0]0]0]0".getBytes(StandardCharsets.US_ASCII))
         );
         final String annotated = f.annotateCall(args);
         assertEquals(
@@ -201,11 +201,11 @@ public class EncodeTest {
                         "    60   00000000000000000000000000000000000000000000000000000000000000ff\t[3] ...\n" +
                         "    80   000000000000000000000000a000000000000000000000000000000000000000\t[4] address \"cntct\"\n" +
                         "    a0   0000000000000000000000000000000000000000000000000000000000000140\t[5] (uint16,bytes) \"tup\" offset\n" +
-                        "    c0   0000000000000000000000000000000000000000000000000000000000000042\t[2] string \"word\" length\n" +
-                        "    e0   6c696265727461642e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e\t[2] string \"word\"\n" +
+                        "    c0   0000000000000000000000000000000000000000000000000000000000000042\t[2] string length\n" +
+                        "    e0   6c696265727461642e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e\t[2] string\n" +
                         "   100   2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e\t[2] ...\n" +
                         "   120   2e2e000000000000000000000000000000000000000000000000000000000000\t[2] ...\n" +
-                        "   140   000000000000000000000000000000000000000000000000000000000000ffff\t[5] (uint16,bytes) \"tup\"\n" +
+                        "   140   000000000000000000000000000000000000000000000000000000000000ffff\t[5] (uint16,bytes)\n" +
                         "   160   0000000000000000000000000000000000000000000000000000000000000040\t[5] ...\n" +
                         "   180   0000000000000000000000000000000000000000000000000000000000000020\t[5] ...\n" +
                         "   1a0   636172616a6f5d305d305d305d305d305d305d305d305d305d305d305d305d30\t[5] ...",
@@ -349,7 +349,7 @@ public class EncodeTest {
     @Test
     public void simpleFunctionTest() {
         Function f = new Function("baz(uint32,bool)", "(uint32,bool)"); // canonicalizes and parses any signature automatically
-        Tuple args = Tuple.of(69L, true);
+        Pair<Long, Boolean> args = Pair.of(69L, true);
 
         // Two equivalent styles:
         ByteBuffer one = f.encodeCall(args);
@@ -372,22 +372,20 @@ public class EncodeTest {
         assertEquals(decoded, dec);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testArrayLen() throws Throwable {
-
         assertThrown(ILLEGAL, "@ index 0, bad array length", () -> Function.parse("abba(()[-04])"));
 
         assertThrown(ILLEGAL, "@ index 0, bad array length", () -> Function.parse("zaba(()[04])"));
 
-        assertEquals(4, ((ArrayType<TupleType, Tuple, Tuple[]>) Function.parse("yaba(()[4])").getInputs().get(0)).getLength());
+        assertEquals(4, Function.parse("yaba(()[4])").getInputs().get(0).asArrayType().getLength());
     }
 
     @Test
     public void uint8ArrayTest() {
         Function f = new Function("baz(uint8[])");
 
-        Tuple args = Tuple.singleton(new int[] { 0xFF, 1, 1, 2, 0 });
+        Tuple args = Single.of(new int[] { 0xFF, 1, 1, 2, 0 });
         ByteBuffer two = f.encodeCall(args);
 
         Tuple decoded = f.decodeCall(two);
@@ -400,7 +398,7 @@ public class EncodeTest {
         Function f = new Function("((int16)[2][][1])");
 
         Object[] argsIn = new Object[] {
-                new Tuple[][][] { new Tuple[][] { new Tuple[] { Tuple.singleton(9), Tuple.singleton(-11) } } }
+                new Tuple[][][] { new Tuple[][] { new Tuple[] { Single.of(9), Single.of(-11) } } }
         };
 
         ByteBuffer buf = f.encodeCallWithArgs(argsIn);
@@ -432,11 +430,11 @@ public class EncodeTest {
 
     private static void testFixedLenDynamicArray(String baseType, Object[] args, Supplier<Object> supplier) {
         final int n = args.length;
-        TupleType a = TupleType.of(baseType + "[" + n + "]");
+        TupleType<Tuple> a = TupleType.of(baseType + "[" + n + "]");
 
         String[] types = new String[n];
         Arrays.fill(types, baseType);
-        TupleType b = TupleType.parse("(" + TupleType.of(types) + ")");
+        TupleType<Tuple> b = TupleType.parse("(" + TupleType.of(types) + ")");
 
         System.out.println(a + " vs " + b);
 
@@ -444,8 +442,8 @@ public class EncodeTest {
             args[i] = supplier.get();
         }
 
-        Tuple aArgs = Tuple.singleton(args);
-        Tuple bArgs = Tuple.singleton(Tuple.of(args));
+        Tuple aArgs = Single.of(args);
+        Tuple bArgs = Single.of(Tuple.from(args));
 
         byte[] aEncoding = a.encode(aArgs).array();
         ByteBuffer bDest = ByteBuffer.allocate(b.measureEncodedLength(bArgs));
@@ -471,7 +469,7 @@ public class EncodeTest {
     @Test
     public void paddingTest() {
         final Function f = new Function("(bool,uint8,int64,uint64,address,ufixed,bytes2,(string),bytes,function)");
-        final TupleType paramTypes = f.getInputs();
+        final TupleType<Tuple> paramTypes = f.getInputs();
 
         StringBuilder sb = new StringBuilder();
         for(ABIType<?> type : paramTypes.elementTypes) {
@@ -479,7 +477,7 @@ public class EncodeTest {
         }
         Assertions.assertEquals("BooleanType,IntType,LongType,BigIntegerType,AddressType,BigDecimalType,ArrayType,TupleType,ArrayType,ArrayType,", sb.toString());
 
-        Tuple args = Tuple.of(
+        Tuple args = Tuple.from(
                 true,
                 1,
                 1L,
@@ -487,7 +485,7 @@ public class EncodeTest {
                 Address.wrap("0x0000000000000000000000000000000000000009"),
                 new BigDecimal(BigInteger.TEN, 18),
                 new byte[] { 1, 0 },
-                Tuple.singleton("\u0002"),
+                Single.of("\u0002"),
                 new byte[] { 0x04 },
                 new byte[] { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 }
         );
@@ -532,15 +530,15 @@ public class EncodeTest {
 
     @Test
     public void testEncodeElements() {
-        TupleType tt = TupleType.parse("(uint64,uint32,bool[])");
+        TupleType<Triple<Object, Object, Object>> tt = TupleType.parse("(uint64,uint32,bool[])");
 
         Object a = BigInteger.valueOf(7L);
         Object b = 9L;
         Object c = new boolean[0];
 
-        ByteBuffer ee = tt.encode(Tuple.of(a, b, c));
+        ByteBuffer ee = tt.encode(Triple.of(a, b, c));
 
-        assertArrayEquals(tt.encode(Tuple.of(a, b, c)).array(), ee.array());
+        assertArrayEquals(tt.encode(Triple.of(a, b, c)).array(), ee.array());
         assertEquals(
                 "0000000000000000000000000000000000000000000000000000000000000007000000000000000000000000000000000000000000000000000000000000000900000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
                 Strings.encode(ee)
@@ -552,7 +550,7 @@ public class EncodeTest {
         assertThrown(
                 IllegalArgumentException.class,
                 "BigDecimal scale mismatch: expected scale 9 but found 1",
-                () -> Function.parse("(fixed56x9)").encodeCall(Tuple.singleton(new BigDecimal("0.2")))
+                () -> Function.parse("(fixed56x9)").encodeCall(Single.of(new BigDecimal("0.2")))
         );
     }
 
@@ -561,7 +559,7 @@ public class EncodeTest {
         assertThrown(
                 IllegalArgumentException.class,
                 "tuple index 0: array index 1: signed val exceeds bit limit: 9 >= 8",
-                () -> Function.parse("(int8[])").encodeCall(Tuple.singleton(new int[] { 120, 256 }))
+                () -> Function.parse("(int8[])").encodeCall(Single.of(new int[] { 120, 256 }))
         );
     }
 

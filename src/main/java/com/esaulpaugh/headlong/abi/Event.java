@@ -25,29 +25,29 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /** Represents an event in Ethereum. */
-public final class Event implements ABIObject {
+public final class Event<I extends TupleType<?>> implements ABIObject {
 
     private static final ArrayType<ByteType, Byte, byte[]> BYTES_32 = TypeFactory.create("bytes32");
     public static final byte[][] EMPTY_TOPICS = new byte[0][];
 
     private final String name;
     private final boolean anonymous;
-    private final TupleType inputs;
-    private final TupleType indexedParams;
-    private final TupleType nonIndexedParams;
+    private final I inputs;
+    private final TupleType<?> indexedParams;
+    private final TupleType<?> nonIndexedParams;
     private final boolean[] indexManifest;
     private final byte[] signatureHash;
 
 
-    public static Event create(String name, TupleType inputs, boolean... indexed) {
-        return new Event(name, false, inputs, indexed);
+    public static <T extends TupleType<?>> Event<T> create(String name, T inputs, boolean... indexed) {
+        return new Event<>(name, false, inputs, indexed);
     }
 
-    public static Event createAnonymous(String name, TupleType inputs, boolean... indexed) {
-        return new Event(name, true, inputs, indexed);
+    public static <T extends TupleType<?>> Event<?> createAnonymous(String name, T inputs, boolean... indexed) {
+        return new Event<>(name, true, inputs, indexed);
     }
 
-    public Event(String name, boolean anonymous, TupleType inputs, boolean... indexed) {
+    public Event(String name, boolean anonymous, I inputs, boolean... indexed) {
         this.name = Objects.requireNonNull(name);
         this.inputs = Objects.requireNonNull(inputs);
         if(indexed.length != inputs.size()) {
@@ -70,8 +70,9 @@ public final class Event implements ABIObject {
         return name;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public TupleType getInputs() {
+    public I getInputs() {
         return inputs;
     }
 
@@ -92,12 +93,14 @@ public final class Event implements ABIObject {
         return name + inputs.canonicalType;
     }
 
-    public TupleType getIndexedParams() {
-        return indexedParams;
+    @SuppressWarnings("unchecked")
+    public <T extends Tuple> TupleType<T> getIndexedParams() {
+        return (TupleType<T>) indexedParams;
     }
 
-    public TupleType getNonIndexedParams() {
-        return nonIndexedParams;
+    @SuppressWarnings("unchecked")
+    public <T extends Tuple> TupleType<T> getNonIndexedParams() {
+        return (TupleType<T>) nonIndexedParams;
     }
 
     @Override
@@ -109,24 +112,25 @@ public final class Event implements ABIObject {
     public boolean equals(Object o) {
         if(o == this) return true;
         if(!(o instanceof Event)) return false;
-        Event other = (Event) o;
+        Event<?> other = (Event<?>) o;
         return other.anonymous == this.anonymous
                 && other.name.equals(this.name)
                 && other.inputs.equals(this.inputs)
                 && Arrays.equals(other.indexManifest, this.indexManifest);
     }
 
-    public static Event fromJson(String eventJson) {
+    public static <T extends TupleType<?>> Event<T> fromJson(String eventJson) {
         return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(eventJson));
     }
 
     /** @see ABIObject#fromJson(int, String) */
-    public static Event fromJson(int flags, String eventJson) {
+    public static <T extends TupleType<?>> Event<T> fromJson(int flags, String eventJson) {
         return fromJsonObject(flags, ABIJSON.parseObject(eventJson));
     }
 
     /** @see ABIObject#fromJsonObject(int, JsonObject) */
-    public static Event fromJsonObject(int flags, JsonObject event) {
+    @SuppressWarnings("unchecked")
+    public static <T extends TupleType<?>> Event<T> fromJsonObject(int flags, JsonObject event) {
         return ABIJSON.parseEvent(event, flags);
     }
 
@@ -140,14 +144,16 @@ public final class Event implements ABIObject {
         return true;
     }
 
-    public Tuple decodeTopics(byte[][] topics) {
-        return new Tuple(decodeTopicsArray(topics));
+    @SuppressWarnings("unchecked")
+    public <T extends Tuple> T decodeTopics(byte[][] topics) {
+        return (T) Tuple.create(decodeTopicsArray(topics));
     }
 
-    public Tuple decodeData(byte[] data) {
-        return data == null && nonIndexedParams.isEmpty()
-                ? Tuple.EMPTY
-                : nonIndexedParams.decode(data);
+    @SuppressWarnings("unchecked")
+    public <T extends Tuple> T decodeData(byte[] data) {
+        return (T) (data == null && nonIndexedParams.isEmpty()
+                        ? Tuple.EMPTY
+                        : nonIndexedParams.decode(data));
     }
 
     /**
@@ -158,8 +164,9 @@ public final class Event implements ABIObject {
      * @param data non-indexed parameters to decode
      * @return  the decoded arguments
      */
-    public Tuple decodeArgs(byte[][] topics, byte[] data) {
-        return mergeDecodedArgs(decodeTopicsArray(topics), decodeData(data));
+    @SuppressWarnings("unchecked")
+    public <T extends Tuple> T decodeArgs(byte[][] topics, byte[] data) {
+        return (T) mergeDecodedArgs(decodeTopicsArray(topics), decodeData(data));
     }
 
     private Tuple mergeDecodedArgs(Object[] decodedTopics, Tuple decodedData) {
@@ -171,7 +178,7 @@ public final class Event implements ABIObject {
                 result[i] = decodedData.get(dataIndex++);
             }
         }
-        return new Tuple(result);
+        return Tuple.create(result);
     }
 
     private Object[] decodeTopicsArray(byte[][] topics) {

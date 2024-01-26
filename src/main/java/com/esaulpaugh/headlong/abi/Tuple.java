@@ -18,13 +18,14 @@ package com.esaulpaugh.headlong.abi;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.IntFunction;
 
 /**
  * An ordered list of objects whose types should correspond to some {@link TupleType}. {@link Function}s encode/decode {@link Tuple}s
  * containing arguments/return values. {@link Tuple}s can contain other tuples. Be warned that changes to elements will affect
  * this {@link Tuple}'s value.
  */
-public final class Tuple implements Iterable<Object> {
+public class Tuple implements Iterable<Object> {
 
     public static final Tuple EMPTY = new Tuple();
     private static final String SKIPPED = "_";
@@ -35,19 +36,68 @@ public final class Tuple implements Iterable<Object> {
         this.elements = elements;
     }
 
-    public static Tuple of(Object... elements) {
-        final Object[] shallowCopy = new Object[elements.length];
-        for (int i = 0; i < elements.length; i++) {
-            shallowCopy[i] = requireNotNull(elements[i], i);
+    public static Tuple of() {
+        return Tuple.EMPTY;
+    }
+
+    public static <A, B> Pair<A, B> of(A a, B b) {
+        return new Pair<>(requireNoNulls(new Object[] { a, b }));
+    }
+
+    public static <A, B, C> Triple<A, B, C> of(A a, B b, C c) {
+        return new Triple<>(requireNoNulls(new Object[] { a, b, c }));
+    }
+
+    public static <A, B, C, D> Quadruple<A, B, C, D> of(A a, B b, C c, D d) {
+        return new Quadruple<>(requireNoNulls(new Object[] { a, b, c, d }));
+    }
+
+    public static <A, B, C, D, E> Quintuple<A, B, C, D, E> of(A a, B b, C c, D d, E e) {
+        return new Quintuple<>(requireNoNulls(new Object[] { a, b, c, d, e }));
+    }
+
+    public static <A, B, C, D, E, F> Sextuple<A, B, C, D, E, F> of(A a, B b, C c, D d, E e, F f) {
+        return new Sextuple<>(requireNoNulls(new Object[] { a, b, c, d, e, f }));
+    }
+
+    public static <T extends Tuple> T from(Object... elements) {
+        return create(copy(new Object[elements.length], i -> requireNotNull(elements[i], i)));
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T extends Tuple> T create(Object[] elements) {
+        switch (elements.length) {
+        case 1: return (T) new Single<>(elements);
+        case 2: return (T) new Pair<>(elements);
+        case 3: return (T) new Triple<>(elements);
+        case 4: return (T) new Quadruple<>(elements);
+        case 5: return (T) new Quintuple<>(elements);
+        case 6: return (T) new Sextuple<>(elements);
+        default: return (T) new Tuple(elements);
         }
-        return new Tuple(shallowCopy);
     }
 
-    public static Tuple singleton(Object element) {
-        return new Tuple(requireNotNull(element, 0));
+    @SuppressWarnings("unchecked")
+    static <T extends Class<? extends Tuple>> T classFor(int len) {
+        switch (len) {
+        case 1: return (T) Single.class;
+        case 2: return (T) Pair.class;
+        case 3: return (T) Triple.class;
+        case 4: return (T) Quadruple.class;
+        case 5: return (T) Quintuple.class;
+        case 6: return (T) Sextuple.class;
+        default: return (T) Tuple.class;
+        }
     }
 
-    private static Object requireNotNull(Object e, int index) {
+    private static Object[] requireNoNulls(Object[] elements) {
+        for (int i = 0; i < elements.length; i++) {
+            requireNotNull(elements[i], i);
+        }
+        return elements;
+    }
+
+    static Object requireNotNull(Object e, int index) {
         if (e == null) {
             throw new IllegalArgumentException("tuple index " + index + " is null");
         }
@@ -64,7 +114,7 @@ public final class Tuple implements Iterable<Object> {
      * @throws NoSuchElementException if the element is absent due to being skipped during decode
      */
     @SuppressWarnings("unchecked")
-    public <T> T get(int index) {
+    public final <T> T get(int index) {
         Object val = elements[index];
         if (val == null) {
             // an element should only be null as a result of a decode-with-indices in which this index wasn't specified
@@ -82,44 +132,51 @@ public final class Tuple implements Iterable<Object> {
      * @param index the position of the element in the Tuple
      * @return  false if the element is absent due to being skipped during decode, true otherwise
      */
-    public boolean elementIsPresent(int index) {
+    public final boolean elementIsPresent(int index) {
         return elements[index] != null;
     }
 
-    public int size() {
+    public final int size() {
         return elements.length;
     }
 
-    public boolean isEmpty() {
+    public final boolean isEmpty() {
         return size() == 0;
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return Arrays.deepHashCode(elements);
     }
 
     @Override
-    public boolean equals(Object o) {
-        return o == this || (o instanceof Tuple && Arrays.deepEquals(((Tuple) o).elements, this.elements));
+    public final boolean equals(Object o) {
+        return o == this || (o instanceof Tuple && Arrays.deepEquals(this.elements, ((Tuple) o).elements));
     }
 
     @Override
-    public String toString() {
-        final Object[] copy = new Object[elements.length];
-        for (int i = 0; i < elements.length; i++) {
-            copy[i] = normalize(elements[i]);
+    public final String toString() {
+        return Arrays.deepToString(copy(new Object[elements.length], i -> {
+            Object element = elements[i];
+            if (element == null) return SKIPPED;
+            String str = element.toString();
+            return element instanceof String
+                        ? '"' + str + '"'
+                        : SKIPPED.equals(str)
+                            ? '\\' + SKIPPED
+                            : element;
+        }));
+    }
+
+    private static Object[] copy(Object[] copy, IntFunction<Object> extractor) {
+        for (int i = 0; i < copy.length; i++) {
+            copy[i] = extractor.apply(i);
         }
-        return Arrays.deepToString(copy);
-    }
-
-    private static Object normalize(Object element) {
-        if (element == null) return SKIPPED;
-        return SKIPPED.equals(element.toString()) ? '"' + SKIPPED + '"' : element;
+        return copy;
     }
 
     @Override
-    public Iterator<Object> iterator() {
+    public final Iterator<Object> iterator() {
         return Arrays.asList(elements).iterator();
     }
 
@@ -129,12 +186,8 @@ public final class Tuple implements Iterable<Object> {
      *
      * @return  an independent copy of this tuple
      */
-    public Tuple deepCopy() {
-        final Object[] deepCopy = new Object[elements.length];
-        for (int i = 0; i < elements.length; i++) {
-            deepCopy[i] = deepCopyElement(elements[i]);
-        }
-        return new Tuple(deepCopy);
+    public final <T extends Tuple> T deepCopy() {
+        return create(copy(new Object[elements.length], i -> deepCopyElement(elements[i])));
     }
 
     /**
@@ -144,7 +197,7 @@ public final class Tuple implements Iterable<Object> {
      *
      * @return  a shallow copy of the elements array
      */
-    public Object[] toArray() {
+    public final Object[] toArray() {
         return Arrays.copyOf(elements, elements.length);
     }
 
@@ -153,11 +206,7 @@ public final class Tuple implements Iterable<Object> {
         if(c.isArray()) {
             if (e instanceof Object[]) {
                 final Object[] original = (Object[]) e;
-                final Object[] copy = ArrayType.createArray(c.getComponentType(), original.length);
-                for (int i = 0; i < copy.length; i++) {
-                    copy[i] = deepCopyElement(original[i]);
-                }
-                return copy;
+                return copy(ArrayType.createArray(c.getComponentType(), original.length), i -> deepCopyElement(original[i]));
             }
             if (e instanceof byte[]) {
                 final byte[] bytes = (byte[]) e;

@@ -178,9 +178,9 @@ public class TupleTest {
         assertTrue(emptyA.isEmpty());
         assertTrue(emptyB.isEmpty());
 
-        assertFalse(Tuple.of(0).isEmpty());
-        assertFalse(Tuple.singleton(false).isEmpty());
-        assertFalse(Tuple.singleton(new Object()).isEmpty());
+        assertFalse(Single.of(0).isEmpty());
+        assertFalse(Single.of(false).isEmpty());
+        assertFalse(Single.of(new Object()).isEmpty());
     }
 
     private static final Object[] OBJECTS = new Object[] {
@@ -221,7 +221,7 @@ public class TupleTest {
                             ? replacement
                             : defaultObj;
                     try {
-                        assertThrown(IllegalArgumentException.class, " but found ", () -> testCase.function.encodeCall(Tuple.of(elements)));
+                        assertThrown(IllegalArgumentException.class, " but found ", () -> testCase.function.encodeCall(Tuple.from(elements)));
                     } catch (ClassCastException | AssertionError e) {
                         System.err.println("seed = " + seed);
                         e.printStackTrace();
@@ -235,11 +235,15 @@ public class TupleTest {
     @Test
     public void testTypeSafety2() throws Throwable {
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0 is null",
-                () -> Tuple.singleton(null)
+                () -> Single.of(null)
         );
 
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1 is null",
                 () -> Tuple.of(true, null, true)
+        );
+
+        TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1 is null",
+                () -> Triple.of(true, null, true)
         );
 
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1: null",
@@ -269,6 +273,21 @@ public class TupleTest {
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: array length mismatch: byte[31] != byte[21] (bytes21 requires length 21 but found 31)",
                 () -> Function.parse("foo(bytes21)").encodeCallWithArgs((Object) new byte[31])
         );
+    }
+
+    @Test
+    public void testGenerics() {
+        TupleType<Single<Single<String>>> in = TupleType.parse(ABIType.FLAG_LEGACY_DECODE, "((string))");
+        TupleType<Single<Single<String>>> t = new Function(
+                TypeEnum.FUNCTION,
+                "name",
+                in,
+                in,
+                "",
+                Function.newDefaultDigest()).getOutputs();
+        ByteBuffer bb = t.encode(Single.of(Single.of("")));
+        Single<Single<String>> s = t.decode(bb);
+        System.out.println(s);
     }
 
     @Test
@@ -401,13 +420,13 @@ public class TupleTest {
                 flags = e.getFlags();
             }
         }
-        return new TupleType(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, elementNames, null, flags);
+        return new TupleType<>(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, elementNames, null, flags);
     }
 
     @Test
     public void testTupleImmutability() throws Throwable {
         Object[] args = new Object[] { "a", "b", "c" };
-        Tuple t = Tuple.of((Object[]) args); // shallow copy
+        Tuple t = Tuple.from(args); // shallow copy
 
         args[1] = 'x';
         assertEquals("a", t.get(0));
@@ -438,8 +457,8 @@ public class TupleTest {
 
     @Test
     public void testDecodeIndex0() {
-        TupleType tt = TupleType.parse("(bool,(bool,int24[2],(bool,bool)[2])[1],string)");
-        Tuple args = Tuple.of(true, new Tuple[] { Tuple.of(true, new int[] { 1, 2 }, new Tuple[] { Tuple.of(true, false), Tuple.of(true, false) }) }, "ya");
+        TupleType<Triple<Boolean, Tuple[], String>> tt = TupleType.parse("(bool,(bool,int24[2],(bool,bool)[2])[1],string)");
+        Triple<Boolean, Tuple[], String> args = Triple.of(true, new Tuple[] { Triple.of(true, new int[] { 1, 2 }, new Tuple[] { Pair.of(true, false), Pair.of(true, false) }) }, "ya");
         ByteBuffer bb = tt.encode(args);
         System.out.println(Strings.encode(bb));
         String ya = tt.decode(bb, 2);
@@ -448,8 +467,8 @@ public class TupleTest {
 
     @Test
     public void testDecodeIndex1() {
-        TupleType tt = TupleType.parse("(bool,bool[3][2],string[][])");
-        Tuple args = Tuple.of(true, new boolean[][] { new boolean[] { true, false, true }, new boolean[] { false, false, true } }, new String[][] { new String[] { "wooo", "moo" } });
+        TupleType<Triple<Boolean, boolean[][], String[][]>> tt = TupleType.parse("(bool,bool[3][2],string[][])");
+        Triple<Boolean, boolean[][], String[][]> args = Triple.of(true, new boolean[][] { new boolean[] { true, false, true }, new boolean[] { false, false, true } }, new String[][] { new String[] { "wooo", "moo" } });
         ByteBuffer bb = tt.encode(args);
         System.out.println(Strings.encode(bb));
         String[][] s = tt.decode(bb, 2);
@@ -458,8 +477,8 @@ public class TupleTest {
 
     @Test
     public void testDecodeIndex2() {
-        TupleType tt = TupleType.parse("(bool,uint16,address,int64,uint64,address,string[][])");
-        Tuple args = Tuple.of(
+        TupleType<Tuple> tt = TupleType.parse("(bool,uint16,address,int64,uint64,address,string[][])");
+        Tuple args = Tuple.from(
                 true,
                 90,
                 Address.wrap("0x0000000000000000000000000000000000000000"),
@@ -487,9 +506,9 @@ public class TupleTest {
 
     @Test
     public void testSelectExclude() {
-        TupleType _uintBool_ = TupleType.parse("(uint,bool)");
-        TupleType _uint_ = TupleType.parse("(uint)");
-        TupleType _bool_ = TupleType.parse("(bool)");
+        TupleType<?> _uintBool_ = TupleType.parse("(uint,bool)");
+        TupleType<?> _uint_ = TupleType.parse("(uint)");
+        TupleType<?> _bool_ = TupleType.parse("(bool)");
 
         assertEquals(TupleType.EMPTY,   _uintBool_.select(false, false));
         assertEquals(_bool_,            _uintBool_.select(false, true));
@@ -501,18 +520,18 @@ public class TupleTest {
         assertEquals(_bool_,            _uintBool_.exclude(true, false));
         assertEquals(TupleType.EMPTY,   _uintBool_.exclude(true, true));
         
-        TupleType tt2 = TupleType.parse("((int,bool))");
+        TupleType<?> tt2 = TupleType.parse("((int,bool))");
         assertEquals(tt2, tt2.select(true));
         assertEquals(TupleType.EMPTY, tt2.exclude(true));
 
         assertEquals(TupleType.EMPTY, TupleType.EMPTY.select());
         assertEquals(TupleType.EMPTY, TupleType.EMPTY.exclude());
 
-        TupleType clone0 = _uintBool_.select(true, true);
+        TupleType<?> clone0 = _uintBool_.select(true, true);
         assertSame(_uintBool_.get(0), clone0.get(0));
         assertSame(_uintBool_.get(1), clone0.get(1));
 
-        TupleType clone1 = _uintBool_.exclude(false, false);
+        TupleType<?> clone1 = _uintBool_.exclude(false, false);
         assertSame(_uintBool_.get(0), clone1.get(0));
         assertSame(_uintBool_.get(1), clone1.get(1));
 
@@ -522,23 +541,23 @@ public class TupleTest {
 
     @Test
     public void testGetElement() {
-        TupleType tt = TupleType.parse("(bytes8,decimal)");
+        TupleType<?> tt = TupleType.parse("(bytes8,decimal)");
         ArrayType<ByteType, Byte, byte[]> at = tt.get(0);
         assertEquals(8, at.getLength());
         BigDecimalType decimal = tt.get(1);
         assertEquals("fixed168x10", decimal.getCanonicalType());
-        assertEquals("iii", Tuple.singleton("iii").get(0));
+        assertEquals("iii", Single.of("iii").get0());
 
-        TupleType outer = TupleType.parse("((address,int256))");
-        TupleType inner = outer.get(0);
+        TupleType<?> outer = TupleType.parse("((address,int256))");
+        TupleType<?> inner = outer.get(0);
         assertEquals(TupleType.parse("(address,int)"), inner);
     }
 
     @Test
     public void testTupleLengthMismatch() throws Throwable {
-        TupleType tt = TupleType.parse("(bool)");
+        TupleType<?> tt = TupleType.parse("(bool)");
         assertThrown(IllegalArgumentException.class, "tuple length mismatch: expected length 1 but found 0", () -> tt.validate(Tuple.EMPTY));
-        assertThrown(IllegalArgumentException.class, "tuple length mismatch: expected length 1 but found 2", () -> tt.validate(Tuple.of("", "")));
+        assertThrown(IllegalArgumentException.class, "tuple length mismatch: expected length 1 but found 2", () -> tt.validate(Pair.of("", "")));
     }
 
     @Test
@@ -586,7 +605,7 @@ public class TupleTest {
             assertNotSame(values, deepCopy);
             assertEquals(values, deepCopy);
 
-            final Tuple shallowCopy = Tuple.of(values.toArray());
+            final Tuple shallowCopy = Tuple.from(values.toArray());
             assertEquals(values, shallowCopy);
 
             final Object[] elements = new Object[values.size()];
@@ -595,5 +614,49 @@ public class TupleTest {
             }
             assertEquals(values, new Tuple(elements));
         }
+    }
+
+    @Test
+    public void testTupleEquals() {
+        assertEquals(Tuple.EMPTY, Tuple.of());
+        assertEquals(Tuple.EMPTY, Tuple.from());
+        assertEquals(Tuple.EMPTY, new Tuple());
+
+        final Tuple e = Tuple.of();
+        final Single<byte[]> s = Single.of(new byte[0]);
+        final Pair<byte[], String> p = Pair.of(new byte[1], "75");
+        final Triple<byte[], String, Long> t = Triple.of(new byte[2], "75", 75L);
+        final Quadruple<byte[], Object, Number, Throwable> q = Quadruple.of(new byte[3], "bbb", 19L, new Error());
+        final Quintuple<Long, Long, Long, Long, Byte> q5 = Quintuple.of(-999L, Long.MAX_VALUE, 0L, -1L, (byte)0);
+        final Sextuple<Pair<byte[], String>, Pair<byte[], String>, Pair, Pair, Pair, Pair> s6 = Sextuple.of(p, p, p, p, p, p);
+        final Triple<Integer, String, Triple<byte[], String, Long>> n = Tuple.of(90, "_", t);
+        final Triple<byte[], String, Long> x = n.get2();
+
+        final Tuple t0 = Tuple.from();
+        final Tuple t1 = Tuple.from((Object)"".getBytes());
+        final Tuple t2 = Tuple.from(new byte[] {0}, new String("75"));
+        final Tuple t3 = Tuple.from(new byte[2], new String("75"), 75L);
+        final Tuple t4 = Tuple.from(q.elements);
+        final Tuple t5 = Tuple.from(-1000L + 1, Long.MAX_VALUE, (long)0, (long)-1, ByteType.ZERO_BYTE);
+        final Tuple t6 = Tuple.from(p, p, p, p, p, p);
+        final Tuple t7 = Tuple.from(90, new String("_"), t);
+        final Tuple t8 = t7.get(2);
+
+        testEquals(e, t0);
+        testEquals(s, t1);
+        testEquals(p, t2);
+        testEquals(t, t3);
+        testEquals(q, t4);
+        testEquals(q5, t5);
+        testEquals(s6, t6);
+        testEquals(n, t7);
+        testEquals(x, t8);
+    }
+
+    private static void testEquals(Tuple a, Tuple b) {
+        assertEquals(a.hashCode(), b.hashCode());
+        assertEquals(a, b);
+        assertEquals(a.toString(), b.toString());
+        assertEquals(a.deepCopy(), b.deepCopy());
     }
 }

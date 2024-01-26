@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi.example;
 
+import com.esaulpaugh.headlong.abi.Quintuple;
 import com.esaulpaugh.headlong.abi.Tuple;
 
 import java.math.BigDecimal;
@@ -81,8 +82,9 @@ public class ABIStudent implements ABIEncodeable {
         return name + ", " + gpa + ", " + new BigInteger(publicKey) + ", $" + balance;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Tuple toTuple() {
-        return Tuple.of(name, BigDecimal.valueOf(gpa), publicKey, balance.unscaledValue().toByteArray(), balance.scale());
+    public <T extends Tuple> T toTuple() {
+        return (T) Quintuple.of(name, BigDecimal.valueOf(gpa), publicKey, balance.unscaledValue().toByteArray(), balance.scale());
     }
 }

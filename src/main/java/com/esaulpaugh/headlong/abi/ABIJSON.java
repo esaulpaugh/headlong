@@ -24,6 +24,7 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.Writer;
@@ -168,11 +169,11 @@ public final class ABIJSON {
         );
     }
 
-    private static Event parseEventUnchecked(JsonObject event, int flags) {
+    private static Event<?> parseEventUnchecked(JsonObject event, int flags) {
         final JsonArray inputs = getArray(event, INPUTS);
         if (inputs != null) {
             final boolean[] indexed = new boolean[inputs.size()];
-            return new Event(
+            return new Event<>(
                     getName(event),
                     getBoolean(event, ANONYMOUS, false),
                     parseTupleType(inputs, indexed, flags),
@@ -182,11 +183,11 @@ public final class ABIJSON {
         throw new IllegalArgumentException("array \"" + INPUTS + "\" null or not found");
     }
 
-    private static ContractError parseErrorUnchecked(JsonObject error, int flags) {
-        return new ContractError(getName(error), parseTupleType(error, INPUTS, flags));
+    private static ContractError<?> parseErrorUnchecked(JsonObject error, int flags) {
+        return new ContractError<>(getName(error), parseTupleType(error, INPUTS, flags));
     }
 
-    private static TupleType parseTupleType(final JsonArray array, final boolean[] indexed, final int flags) {
+    private static TupleType<Tuple> parseTupleType(final JsonArray array, final boolean[] indexed, final int flags) {
         int size;
         if (array == null || (size = array.size()) <= 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
             return TupleType.empty(flags);
@@ -203,7 +204,7 @@ public final class ABIJSON {
             dynamic |= e.dynamic;
             elements[i] = e;
             names[i] = getName(inputObj);
-            final String internalType = getInternalType(inputObj);
+            final String internalType = getString(inputObj, INTERNAL_TYPE);
             if (internalType != null) {
                 final String type = e.canonicalType;
                 internalTypes[i] = internalType.equals(type) ? type : internalType;
@@ -213,7 +214,7 @@ public final class ABIJSON {
             }
         }
         canonicalType.setCharAt(canonicalType.length() - 1, ')');
-        return new TupleType(
+        return new TupleType<>(
                 canonicalType.toString(),
                 dynamic,
                 elements,
@@ -245,10 +246,6 @@ public final class ABIJSON {
 
     private static String getName(JsonObject obj) {
         return getString(obj, NAME);
-    }
-
-    private static String getInternalType(JsonObject obj) {
-        return getString(obj, INTERNAL_TYPE);
     }
 // ---------------------------------------------------------------------------------------------------------------------
     static String toJson(ABIObject o, boolean pretty) {
@@ -314,7 +311,7 @@ public final class ABIJSON {
         }
     }
 
-    private static void tupleType(JsonWriter out, String name, TupleType tupleType, boolean[] indexedManifest) throws IOException {
+    private static void tupleType(JsonWriter out, String name, TupleType<?> tupleType, boolean[] indexedManifest) throws IOException {
         out.name(name).beginArray();
         int i = 0;
         for (final ABIType<?> e : tupleType) {
@@ -341,13 +338,13 @@ public final class ABIJSON {
         out.endArray();
     }
 
-    private static class NonSyncWriter extends Writer {
+    private static class NonSyncWriter extends CharArrayWriter {
 
-        byte[] buffer;
+        char[] buffer;
         int count = 0;
 
         NonSyncWriter(int initialLen) {
-            this.buffer = new byte[initialLen];
+            this.buffer = new char[initialLen];
         }
 
         @Override
@@ -355,41 +352,17 @@ public final class ABIJSON {
             if (count >= buffer.length) {
                 buffer = Arrays.copyOf(buffer, buffer.length << 1); // expects buffer.length to be non-zero
             }
-            buffer[count++] = (byte) c;
+            buffer[count++] = (char) c;
         }
 
-        @Override
-        public void write(char[] cbuf, int off, int len) {
-            String str = new String(cbuf, off, len);
-            write(str, 0, str.length());
-        }
-
-        @SuppressWarnings("deprecation")
         @Override
         public void write(String str, int off, int len) {
             int newCount = count + len;
             if (newCount > buffer.length) {
                 buffer = Arrays.copyOf(buffer, Math.max(buffer.length << 1, newCount));
             }
-            str.getBytes(off, off + len, buffer, count);
+            str.getChars(off, off + len, buffer, count);
             count = newCount;
-        }
-
-        @Override
-        public NonSyncWriter append(CharSequence csq) {
-            String str = csq.toString();
-            write(str, 0, str.length());
-            return this;
-        }
-
-        @Override
-        public void flush() {
-            /* do nothing */
-        }
-
-        @Override
-        public void close() {
-            /* do nothing */
         }
 
         @Override

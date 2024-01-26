@@ -94,8 +94,8 @@ public abstract class ABIType<J> {
         return (ArrayType<?, ?, J>) this;
     }
 
-    public final TupleType asTupleType() {
-        return (TupleType) this;
+    public final TupleType<? extends Tuple> asTupleType() {
+        return (TupleType<? extends Tuple>) this;
     }
 
     public final UnitType<J> asUnitType() {
@@ -226,7 +226,7 @@ public abstract class ABIType<J> {
 
     public final J decodePacked(byte[] buffer) {
         return PackedDecoder.decode(
-                    new TupleType('(' + this.canonicalType + ')', dynamic, new ABIType[] { this }, null, null, this.getFlags()),
+                    new TupleType<>('(' + this.canonicalType + ')', dynamic, new ABIType[] { this }, null, null, this.getFlags()),
                     buffer
                 ).get(0);
     }

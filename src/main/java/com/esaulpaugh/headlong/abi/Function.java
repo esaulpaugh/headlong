@@ -46,8 +46,8 @@ public final class Function implements ABIObject {
 
     private final TypeEnum type;
     private final String name;
-    private final TupleType inputTypes;
-    private final TupleType outputTypes;
+    private final TupleType<?> inputTypes;
+    private final TupleType<?> outputTypes;
     private final String stateMutability;
 
     private final String hashAlgorithm;
@@ -65,7 +65,7 @@ public final class Function implements ABIObject {
         this(signature, signature.indexOf('('), outputs != null ? TupleType.parse(flags, outputs) : TupleType.empty(flags), flags);
     }
 
-    private Function(final String signature, final int nameLength, final TupleType outputs, final int flags) {
+    private Function(final String signature, final int nameLength, final TupleType<?> outputs, final int flags) {
         this(
                 TypeEnum.FUNCTION,
                 signature.substring(0, nameLength),
@@ -85,7 +85,7 @@ public final class Function implements ABIObject {
      * @param messageDigest hash function with which to generate the 4-byte selector
      * @throws IllegalArgumentException if the arguments do not specify a valid function
      */
-    public Function(TypeEnum type, String name, TupleType inputs, TupleType outputs, String stateMutability, MessageDigest messageDigest) {
+    public Function(TypeEnum type, String name, TupleType<?> inputs, TupleType<?> outputs, String stateMutability, MessageDigest messageDigest) {
         this.type = Objects.requireNonNull(type);
         this.name = name != null ? validateName(name) : null;
         this.inputTypes = Objects.requireNonNull(inputs);
@@ -106,13 +106,15 @@ public final class Function implements ABIObject {
         return name;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public TupleType getInputs() {
-        return inputTypes;
+    public <T extends Tuple> TupleType<T> getInputs() {
+        return (TupleType<T>) inputTypes;
     }
 
-    public TupleType getOutputs() {
-        return outputTypes;
+    @SuppressWarnings("unchecked")
+    public <T extends Tuple> TupleType<T> getOutputs() {
+        return (TupleType<T>) outputTypes;
     }
 
     public String getStateMutability() {
@@ -209,9 +211,10 @@ public final class Function implements ABIObject {
         inputTypes.encodeTail(args, dest);
     }
 
-    public Tuple decodeCall(byte[] call) {
+    @SuppressWarnings("unchecked")
+    public <T extends Tuple> T decodeCall(byte[] call) {
         checkSelector(Arrays.copyOf(call, SELECTOR_LEN));
-        return inputTypes.decode(call, SELECTOR_LEN, call.length - SELECTOR_LEN);
+        return (T) inputTypes.decode(call, SELECTOR_LEN, call.length - SELECTOR_LEN);
     }
 
     /**
@@ -220,18 +223,20 @@ public final class Function implements ABIObject {
      * @param buffer the encoded function call
      * @return  the decoded arguments
      */
-    public Tuple decodeCall(ByteBuffer buffer) {
+    @SuppressWarnings("unchecked")
+    public <T extends Tuple> T decodeCall(ByteBuffer buffer) {
         checkSelector(buffer);
-        return inputTypes.decode(buffer);
+        return (T) inputTypes.decode(buffer);
     }
 
     public <T> T decodeCall(byte[] call, int... indices) {
         return decodeCall(ByteBuffer.wrap(call), indices);
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T decodeCall(ByteBuffer buffer, int... indices) {
         checkSelector(buffer);
-        return inputTypes.decode(buffer, indices);
+        return (T) inputTypes.decode(buffer, indices);
     }
 
     private void checkSelector(ByteBuffer bb) {
@@ -247,12 +252,14 @@ public final class Function implements ABIObject {
         }
     }
 
-    public Tuple decodeReturn(byte[] returnVals) {
-        return outputTypes.decode(returnVals);
+    @SuppressWarnings("unchecked")
+    public <T extends Tuple> T decodeReturn(byte[] returnVals) {
+        return (T) outputTypes.decode(returnVals);
     }
 
-    public Tuple decodeReturn(ByteBuffer buf) {
-        return outputTypes.decode(buf);
+    @SuppressWarnings("unchecked")
+    public <T extends Tuple> T decodeReturn(ByteBuffer buf) {
+        return (T) outputTypes.decode(buf);
     }
 
     public <T> T decodeReturn(byte[] returnVals, int... indices) {
@@ -269,8 +276,9 @@ public final class Function implements ABIObject {
      * @param <T>   {@link Tuple} if decoding multiple elements
      * @return  the decoded elements
      */
+    @SuppressWarnings("unchecked")
     public <T> T decodeReturn(ByteBuffer buf, int... indices) {
-        return outputTypes.decode(buf, indices);
+        return (T) outputTypes.decode(buf, indices);
     }
 
     @SuppressWarnings("unchecked")

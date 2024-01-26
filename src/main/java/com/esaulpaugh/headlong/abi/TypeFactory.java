@@ -86,7 +86,7 @@ public final class TypeFactory {
         for (Map.Entry<String, ABIType<?>> e : BASE_TYPE_MAP.entrySet()) {
             ABIType<?> value = e.getValue();
             if (value instanceof ArrayType) {
-                final ArrayType<?, ?, ?> at = (ArrayType<?, ?, ?>) value;
+                final ArrayType<?, ?, ?> at = value.asArrayType();
                 if (at.isString()) {
                     value = new ArrayType<ByteType, Byte, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAG_LEGACY_DECODE);
                 } else {
@@ -132,8 +132,10 @@ public final class TypeFactory {
     }
 
     /** If you don't need any {@code elementNames}, use {@link TypeFactory#create(String)}. */
-    public static TupleType createTupleTypeWithNames(String rawType, String... elementNames) {
-        return (TupleType) build(rawType, elementNames, null, ABIType.FLAGS_NONE);
+    @SuppressWarnings("unchecked")
+    public static <T extends TupleType<?>> T createTupleTypeWithNames(String rawType, String... elementNames) {
+        return (T) build(rawType, elementNames, null, ABIType.FLAGS_NONE)
+                .asTupleType();
     }
 
     static ABIType<?> build(String rawType, String[] elementNames, ABIType<?> baseType, int flags) {
@@ -224,7 +226,7 @@ public final class TypeFactory {
         return new StringBuilder(CAPACITY).append('(');
     }
 
-    private static TupleType parseTupleType(final String rawTypeStr, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
+    private static TupleType<?> parseTupleType(final String rawTypeStr, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawTypeStr.length();
         if (len == 2 && rawTypeStr.equals(EMPTY_TUPLE_STRING)) return TupleType.empty(flags);
         final List<ABIType<?>> elements = new ArrayList<>();
@@ -255,7 +257,7 @@ public final class TypeFactory {
             return null;
         }
         canonicalType.setCharAt(canonicalType.length() - 1, ')'); // overwrite trailing comma
-        return new TupleType(
+        return new TupleType<>(
             canonicalType.toString(),
             dynamic,
             elements.toArray(EMPTY_ARRAY),

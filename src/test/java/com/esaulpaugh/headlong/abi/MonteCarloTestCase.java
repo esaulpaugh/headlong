@@ -179,7 +179,7 @@ public class MonteCarloTestCase {
                 }
             } else {
                 assertEquals(tElement, t2Element);
-                if (c == Tuple.class) {
+                if (tElement instanceof Tuple) {
                     assertNotSame(tElement, t2Element);
                 } else {
                     assertSame(tElement, t2Element);
@@ -277,7 +277,7 @@ public class MonteCarloTestCase {
     }
 
     private void runFuzzPackedDecode(Random r) {
-        final TupleType tt = this.function.getInputs();
+        final TupleType<Tuple> tt = this.function.getInputs();
         final Tuple args = this.argsTuple;
         final int packedLen = tt.byteLengthPacked(args);
         if(packedLen == 0) {
@@ -308,7 +308,7 @@ public class MonteCarloTestCase {
 
     void runPacked() {
         final Tuple args = this.argsTuple;
-        final TupleType tt = this.function.getInputs();
+        final TupleType<Tuple> tt = this.function.getInputs();
         final int numDynamics = PackedDecoder.countDynamics(tt);
         if(tt.dynamic ^ (numDynamics != 0)) {
             throw new AssertionError();
@@ -397,7 +397,7 @@ public class MonteCarloTestCase {
         for (int i = 0; i < size; i++) {
             args[i] = generateValue(elementTypes[i], r);
         }
-        return Tuple.of(args);
+        return Tuple.from(args);
     }
 
     private Object generateValue(ABIType<?> type, Random r) {
@@ -408,8 +408,8 @@ public class MonteCarloTestCase {
         case TYPE_CODE_LONG: return generateLong(r, (LongType) type);
         case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (BigIntegerType) type);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
-        case TYPE_CODE_ARRAY: return generateArray((ArrayType<? extends ABIType<?>, ?, ?>) type, r);
-        case TYPE_CODE_TUPLE: return generateTuple(((TupleType) type).elementTypes, r);
+        case TYPE_CODE_ARRAY: return generateArray(type.asArrayType(), r);
+        case TYPE_CODE_TUPLE: return generateTuple(type.asTupleType().elementTypes, r);
         case TYPE_CODE_ADDRESS: return generateAddress(r);
         default: throw new Error();
         }
@@ -448,7 +448,7 @@ public class MonteCarloTestCase {
         case TYPE_CODE_BIG_INTEGER: return generateBigIntegerArray(len, (BigIntegerType) elementType, r);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimalArray(len, (BigDecimalType) elementType, r);
         case TYPE_CODE_ARRAY: return generateObjectArray(arrayType, len, r);
-        case TYPE_CODE_TUPLE: return generateTupleArray((TupleType) elementType, len, r);
+        case TYPE_CODE_TUPLE: return generateTupleArray(elementType.asTupleType(), len, r);
         case TYPE_CODE_ADDRESS: return generateAddressArray(len, r);
         default: throw new Error();
         }
@@ -498,7 +498,7 @@ public class MonteCarloTestCase {
         return booleans;
     }
 
-    private Tuple[] generateTupleArray(TupleType tupleType, final int len, Random r) {
+    private Tuple[] generateTupleArray(TupleType<?> tupleType, final int len, Random r) {
         Tuple[] tuples = new Tuple[len];
         for (int i = 0; i < len; i++) {
             tuples[i] = generateTuple(tupleType.elementTypes, r);

@@ -24,7 +24,7 @@ public interface ABIObject {
 
     String getName();
 
-    TupleType getInputs();
+    <T extends Tuple> TupleType<T> getInputs();
 
     String getCanonicalSignature();
 

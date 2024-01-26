@@ -32,15 +32,16 @@ public class Deserializer {
 
     private Deserializer() {}
 
-    public static TupleType parseTupleType(String ttStr) {
-        return parseTupleType(Streams.parse(new JsonReader(new StringReader(ttStr))).getAsJsonArray());
+    @SuppressWarnings("unchecked")
+    public static <T extends TupleType<? extends Tuple>> T parseTupleType(String ttStr) {
+        return (T) parseTupleType(Streams.parse(new JsonReader(new StringReader(ttStr))).getAsJsonArray());
     }
 
-    public static Tuple parseTupleValue(TupleType tupleType, String tupleStr) {
+    public static <T extends Tuple> T parseTupleValue(TupleType<?> tupleType, String tupleStr) {
         return parseTupleValue(tupleType, Streams.parse(new JsonReader(new StringReader(tupleStr))).getAsJsonArray());
     }
 
-    public static TupleType parseTupleType(JsonArray typesArray) {
+    public static TupleType<?> parseTupleType(JsonArray typesArray) {
         final int len = typesArray.size();
         String[] typeStrings = new String[len];
         for (int i = 0; i < len; i++) {
@@ -49,20 +50,20 @@ public class Deserializer {
         return TupleType.of(typeStrings);
     }
 
-    public static Tuple parseTupleValue(TupleType tupleType, JsonArray valuesArray) {
+    public static <T extends Tuple> T parseTupleValue(TupleType tupleType, JsonArray valuesArray) {
         final int len = tupleType.size();
         Object[] elements = new Object[len];
         int i = 0;
         for (Iterator<JsonElement> iter = valuesArray.iterator(); i < len; i++) {
             elements[i] = parseValue(tupleType.get(i), iter.next());
         }
-        return Tuple.of(elements);
+        return Tuple.from(elements);
     }
 
     private static Object parseValue(final ABIType<?> type, final JsonElement value) {
         final int typeCode = type.typeCode();
         if(typeCode == ABIType.TYPE_CODE_ARRAY) {
-            return parseArrayValue((ArrayType<?, ?, ?>) type, value);
+            return parseArrayValue(type.asArrayType(), value);
         }
         final JsonObject valueObj = value.getAsJsonObject();
         final JsonElement valVal = valueObj.get("value");
@@ -88,7 +89,7 @@ public class Deserializer {
         case ABIType.TYPE_CODE_BIG_DECIMAL: return new BigDecimal(
                 new BigInteger(valVal.getAsString()), ((BigDecimalType) type).getScale()
         );
-        case ABIType.TYPE_CODE_TUPLE: return parseTupleValue((TupleType) type, valVal.getAsJsonArray());
+        case ABIType.TYPE_CODE_TUPLE: return parseTupleValue(type.asTupleType(), valVal.getAsJsonArray());
         case ABIType.TYPE_CODE_ADDRESS: return Address.wrap(valVal.getAsString());
         default: throw new Error();
         }

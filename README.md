@@ -24,7 +24,7 @@ Function baz = Function.parse("baz(uint32,bool)"); // canonicalizes and parses a
 Function f2 = Function.fromJson("{\"type\":\"function\",\"name\":\"foo\",\"inputs\":[{\"name\":\"complex_nums\",\"type\":\"tuple[]\",\"components\":[{\"name\":\"real\",\"type\":\"fixed168x10\"},{\"name\":\"imaginary\",\"type\":\"fixed168x10\"}]}]}");
 
 Tuple bazArgs = Tuple.of(69L, true);
-Tuple complexNums = Tuple.singleton(new Tuple[] { Tuple.of(new BigDecimal("0.0090000000"), new BigDecimal("1.9500000000")) });
+Tuple complexNums = Single.of(new Tuple[] { Tuple.of(new BigDecimal("0.0090000000"), new BigDecimal("1.9500000000")) });
 
 // Two equivalent styles:
 ByteBuffer one = baz.encodeCall(bazArgs);
@@ -70,7 +70,7 @@ System.out.println(returned);
 #### Using TupleType
 
 ```java
-TupleType tt = TupleType.parse("(bool,address,int72[][])");
+TupleType<Tuple> tt = TupleType.parse("(bool,address,int72[][])");
 ByteBuffer b0 = tt.encode(Tuple.of(false, Address.wrap("0x52908400098527886E0F7030069857D2E4169EE7"), new BigInteger[0][]));
 // Tuple t = tt.decode(b0); // decode the tuple (has the side effect of advancing the ByteBuffer's position)
 // or...
@@ -91,7 +91,9 @@ System.out.println(event);
 System.out.println(args);
 
 // create any type directly (advanced)
-ArrayType<ABIType<Object>, Object> at = TypeFactory.create("(address,int)[]");
+ArrayType<ABIType<Object>, ?, Object> at = TypeFactory.create("(address,int)[]");
+ArrayType<TupleType<Tuple>, Tuple, Tuple[]> at2 = TypeFactory.create("(address,int)[]");
+ArrayType<TupleType<Pair<Address, BigInteger>>, Pair<Address, BigInteger>, Pair<Address, BigInteger>[]> at3 = TypeFactory.create("(address,int)[]");
 ABIType<Object> unknown = TypeFactory.create(at.getCanonicalType());
 ```
 

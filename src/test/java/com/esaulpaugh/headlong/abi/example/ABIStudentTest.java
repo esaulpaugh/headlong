@@ -29,7 +29,7 @@ public class ABIStudentTest {
 
     @Test
     public void abiDecodeEncode() {
-        final TupleType tt = TupleType.parse("(string,fixed128x9,bytes,bytes,uint16)");
+        final TupleType<?> tt = TupleType.parse("(string,fixed128x9,bytes,bytes,uint16)");
 
         final ByteBuffer studentAbi = ByteBuffer.wrap(Strings.decode(STUDENT_ABI));
 
