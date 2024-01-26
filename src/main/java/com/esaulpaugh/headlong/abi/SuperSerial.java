@@ -47,25 +47,25 @@ public final class SuperSerial {
 
     private static final byte[] TRUE = new byte[] { 0x1 };
 
-    public static byte[] toRLP(TupleType schema, Tuple vals) {
+    public static byte[] toRLP(TupleType<?> schema, Tuple vals) {
         schema.validate(vals);
         return RLPEncoder.sequence(serializeTuple(schema, vals));
     }
 
-    public static <T extends Tuple> T fromRLP(TupleType schema, byte[] rlp) {
+    public static <T extends Tuple> T fromRLP(TupleType<?> schema, byte[] rlp) {
         T in = deserializeTuple(schema, rlp);
         schema.validate(in);
         return in;
     }
 
-    public static String serialize(TupleType tupleType, Tuple tuple, boolean machine) {
+    public static String serialize(TupleType<?> tupleType, Tuple tuple, boolean machine) {
         tupleType.validate(tuple);
         Object[] objects = serializeTuple(tupleType, tuple);
         return machine ? Strings.encode(RLPEncoder.sequence(objects))
                 : Notation.forObjects(objects).toString();
     }
 
-    public static <T extends Tuple> T deserialize(TupleType tupleType, String str, boolean machine) {
+    public static <T extends Tuple> T deserialize(TupleType<?> tupleType, String str, boolean machine) {
         T in = deserializeTuple(
                 tupleType,
                 machine ? Strings.decode(str)
@@ -74,7 +74,7 @@ public final class SuperSerial {
         return in;
     }
 
-    private static Object[] serializeTuple(TupleType tupleType, Tuple tuple) {
+    private static Object[] serializeTuple(TupleType<?> tupleType, Tuple tuple) {
         Object[] out = new Object[tupleType.size()];
         for (int i = 0; i < out.length; i++) {
             out[i] = serialize(tupleType.get(i), tuple.get(i));
@@ -82,7 +82,7 @@ public final class SuperSerial {
         return out;
     }
 
-    private static <T extends Tuple> T deserializeTuple(TupleType tupleType, byte[] sequence) {
+    private static <T extends Tuple> T deserializeTuple(TupleType<?> tupleType, byte[] sequence) {
         Iterator<RLPItem> sequenceIterator = RLP_STRICT.sequenceIterator(sequence);
         Object[] elements = new Object[tupleType.size()];
         for (int i = 0; i < elements.length; i++) {

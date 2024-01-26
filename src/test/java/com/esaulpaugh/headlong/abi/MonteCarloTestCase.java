@@ -498,7 +498,7 @@ public class MonteCarloTestCase {
         return booleans;
     }
 
-    private Tuple[] generateTupleArray(TupleType tupleType, final int len, Random r) {
+    private Tuple[] generateTupleArray(TupleType<?> tupleType, final int len, Random r) {
         Tuple[] tuples = new Tuple[len];
         for (int i = 0; i < len; i++) {
             tuples[i] = generateTuple(tupleType.elementTypes, r);

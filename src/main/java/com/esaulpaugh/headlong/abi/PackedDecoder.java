@@ -77,7 +77,7 @@ final class PackedDecoder {
         return 0;
     }
 
-    private static int decodeTuple(TupleType tupleType, byte[] buffer, int start, int end, Object[] parentElements, int pei) {
+    private static int decodeTuple(TupleType<?> tupleType, byte[] buffer, int start, int end, Object[] parentElements, int pei) {
         final Object[] elements = new Object[tupleType.size()];
 
         int mark = -1;

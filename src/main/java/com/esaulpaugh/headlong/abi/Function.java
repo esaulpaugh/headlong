@@ -65,7 +65,8 @@ public final class Function implements ABIObject {
         this(signature, signature.indexOf('('), outputs != null ? TupleType.parse(flags, outputs) : TupleType.empty(flags), flags);
     }
 
-    private Function(final String signature, final int nameLength, final TupleType outputs, final int flags) {
+    @SuppressWarnings("unchecked")
+    private Function(final String signature, final int nameLength, final TupleType<?> outputs, final int flags) {
         this(
                 TypeEnum.FUNCTION,
                 signature.substring(0, nameLength),
@@ -109,12 +110,12 @@ public final class Function implements ABIObject {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Tuple> TupleType<T> getInputs() {
-        return inputTypes;
+        return (TupleType<T>) inputTypes;
     }
 
     @SuppressWarnings("unchecked")
     public <T extends Tuple> TupleType<T> getOutputs() {
-        return outputTypes;
+        return (TupleType<T>) outputTypes;
     }
 
     public String getStateMutability() {
