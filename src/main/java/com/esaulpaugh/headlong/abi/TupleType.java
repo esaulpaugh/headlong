@@ -174,7 +174,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     @Override
-    void encodeTail(Tuple value, ByteBuffer dest) {
+    void encodeTail(J value, ByteBuffer dest) {
         if (dynamic) {
             encodeDynamic(value.elements, dest);
         } else {
@@ -183,7 +183,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     @Override
-    void encodePackedUnchecked(Tuple value, ByteBuffer dest) {
+    void encodePackedUnchecked(J value, ByteBuffer dest) {
         final int size = size();
         for (int i = 0; i < size; i++) {
             getNonCapturing(i).encodePackedUnchecked(value.elements[i], dest);
@@ -480,7 +480,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         int n = 0;
         if (n < len) {
             final byte[] rowData = newUnitBuffer();
-            final boolean dynamicArray = t.dynamic && t instanceof ArrayType && ((ArrayType<?, ?, ?>) t).getLength() == ArrayType.DYNAMIC_LENGTH;
+            final boolean dynamicArray = t.dynamic && t instanceof ArrayType && t.asArrayType().getLength() == ArrayType.DYNAMIC_LENGTH;
             appendAnnotatedRow(sb, dest, rowData, row++, i, dynamicArray ? " length" : "");
             n += UNIT_LENGTH_BYTES;
             if (n < len) {

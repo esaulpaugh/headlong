@@ -62,7 +62,7 @@ public class Deserializer {
     private static Object parseValue(final ABIType<?> type, final JsonElement value) {
         final int typeCode = type.typeCode();
         if(typeCode == ABIType.TYPE_CODE_ARRAY) {
-            return parseArrayValue((ArrayType<?, ?, ?>) type, value);
+            return parseArrayValue(type.asArrayType(), value);
         }
         final JsonObject valueObj = value.getAsJsonObject();
         final JsonElement valVal = valueObj.get("value");
@@ -88,7 +88,7 @@ public class Deserializer {
         case ABIType.TYPE_CODE_BIG_DECIMAL: return new BigDecimal(
                 new BigInteger(valVal.getAsString()), ((BigDecimalType) type).getScale()
         );
-        case ABIType.TYPE_CODE_TUPLE: return parseTupleValue((TupleType) type, valVal.getAsJsonArray());
+        case ABIType.TYPE_CODE_TUPLE: return parseTupleValue(type.asTupleType(), valVal.getAsJsonArray());
         case ABIType.TYPE_CODE_ADDRESS: return Address.wrap(valVal.getAsString());
         default: throw new Error();
         }

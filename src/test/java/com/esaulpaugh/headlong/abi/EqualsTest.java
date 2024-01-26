@@ -89,11 +89,11 @@ public class EqualsTest {
         assertNotSame(Function.parse("(uint)").getInputs().getCanonicalType(), Function.parse("(uint)").getInputs().getCanonicalType());
     }
 
-    private static boolean recursiveEquals(TupleType tt, Object o) {
+    private static boolean recursiveEquals(TupleType<?> tt, Object o) {
         if (tt == o) return true;
         if (o == null || tt.getClass() != o.getClass()) return false;
         if (!tt.equals(o)) return false;
-        TupleType tupleType = (TupleType) o;
+        TupleType<?> tupleType = (TupleType<?>) o;
         return Arrays.equals(tt.elementTypes, tupleType.elementTypes);
     }
 

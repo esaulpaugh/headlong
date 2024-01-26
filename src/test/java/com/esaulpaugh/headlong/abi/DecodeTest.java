@@ -951,7 +951,7 @@ public class DecodeTest {
                 checkLegacyFlags(e);
             }
         } else if (t instanceof ArrayType) {
-            final ArrayType<?, ?, ?> at = (ArrayType<?, ?, ?>) t;
+            final ArrayType<?, ?, ?> at = t.asArrayType();
             assertTrue(at.legacyDecode);
             assertEquals(ABIType.FLAG_LEGACY_DECODE, t.getFlags());
             assertEquals(at.flags, t.getFlags());
