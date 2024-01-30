@@ -82,7 +82,7 @@ public class BasicABICasesTest {
             for (int i = 0; i < arr.length; i++) {
                 arr[i] = TypeFactory.create(types.get(i).getAsString());
             }
-            TupleType tt = wrap(arr);
+            TupleType<?> tt = wrap(arr);
 
             System.out.println(tt.canonicalType);
 
@@ -101,7 +101,7 @@ public class BasicABICasesTest {
         }
     }
 
-    private static TupleType wrap(ABIType<?>... elements) {
+    private static TupleType<?> wrap(ABIType<?>... elements) {
         final StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
         int flags = ABIType.FLAGS_UNSET;

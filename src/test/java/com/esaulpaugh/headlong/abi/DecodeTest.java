@@ -230,7 +230,7 @@ public class DecodeTest {
 
     @Test
     public void testBoolean() throws Throwable {
-        TupleType tt = TupleType.parse("(bool)");
+        TupleType<?> tt = TupleType.parse("(bool)");
 
         String[] tooBig = new String[] {
                 "0000000000000000000000000000000000000000000000000000000000000002",
@@ -354,7 +354,7 @@ public class DecodeTest {
 
             final IntType l = TypeFactory.create("int16");
             final ArrayType<?, ?, BigInteger[]> m = TypeFactory.create("int[]");
-            final TupleType n = TypeFactory.createTupleTypeWithNames("(bool)", "nam");
+            final TupleType<?> n = TypeFactory.createTupleTypeWithNames("(bool)", "nam");
             assertEquals("nam", n.getElementName(0));
             m.encode(new BigInteger[] {});
         }
@@ -535,7 +535,7 @@ public class DecodeTest {
 
     @Test
     public void testDecodeEvent() {
-        Event event = Event.fromJson("{\n" +
+        Event<?> event = Event.fromJson("{\n" +
                 "    \"anonymous\": false,\n" +
                 "    \"inputs\": [\n" +
                 "      {\n" +
@@ -590,7 +590,7 @@ public class DecodeTest {
 
     @Test
     public void testDecodeEventWithWrongSignatureHashShouldFail() throws Throwable {
-        Event event = Event.fromJson("{\n" +
+        Event<?> event = Event.fromJson("{\n" +
                 "    \"anonymous\": false,\n" +
                 "    \"inputs\": [\n" +
                 "      {\n" +
@@ -645,7 +645,7 @@ public class DecodeTest {
 
     @Test
     public void testDecodeAnonymousEvent() {
-        Event event = Event.fromJson("{\n" +
+        Event<?> event = Event.fromJson("{\n" +
                 "    \"anonymous\": true,\n" +
                 "    \"inputs\": [\n" +
                 "      {\n" +
@@ -674,7 +674,7 @@ public class DecodeTest {
 
     @Test
     public void testDecodeEmptyTopicsEvent() {
-        Event event = Event.fromJson("{\n" +
+        Event<?> event = Event.fromJson("{\n" +
                 "    \"anonymous\": true,\n" +
                 "    \"inputs\": [\n" +
                 "      {\n" +
@@ -702,7 +702,7 @@ public class DecodeTest {
 
     @Test
     public void testDecodeIndexedDynamicType() throws Throwable {
-        Event event = Event.fromJson("{\n" +
+        Event<?> event = Event.fromJson("{\n" +
                 "        \"anonymous\": false,\n" +
                 "        \"inputs\": [\n" +
                 "          {\n" +
@@ -738,7 +738,7 @@ public class DecodeTest {
 
     @Test
     public void testDecodeArgsNullTopicShouldFail() throws Throwable {
-        Event event = Event.fromJson("{\n" +
+        Event<?> event = Event.fromJson("{\n" +
                 "        \"anonymous\": false,\n" +
                 "        \"inputs\": [\n" +
                 "          {\n" +
@@ -762,7 +762,7 @@ public class DecodeTest {
 
     @Test
     public void testBadTopics() throws Throwable {
-        Event event = Event.fromJson("{\n" +
+        Event<?> event = Event.fromJson("{\n" +
                 "        \"anonymous\": false,\n" +
                 "        \"inputs\": [\n" +
                 "          {\n" +

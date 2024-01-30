@@ -328,7 +328,7 @@ public class TupleTest {
 
     @Test
     public void testSubtubleType() throws Throwable {
-        TupleType tt = TupleType.parse("(bytes3,uint16[],string)");
+        TupleType<?> tt = TupleType.parse("(bytes3,uint16[],string)");
 
         assertEquals(TupleType.EMPTY, tt.select(false, false, false));
         assertEquals(TupleType.of("string"), tt.select(false, false, true));
@@ -369,7 +369,7 @@ public class TupleTest {
         assertThrown(IllegalArgumentException.class, "expected 2 element names but found 4",
                 () -> TypeFactory.createTupleTypeWithNames("(bool,string)", new String[4]));
 
-        TupleType tt = TypeFactory.createTupleTypeWithNames("(bool,string)", "a", "b");
+        TupleType<?> tt = TypeFactory.createTupleTypeWithNames("(bool,string)", "a", "b");
         assertThrown(ArrayIndexOutOfBoundsException.class, () -> tt.getElementName(-1));
         assertEquals("a", tt.getElementName(0));
         assertEquals("b", tt.getElementName(1));
@@ -379,34 +379,34 @@ public class TupleTest {
     private static void testNameOverwrite(String typeStr, String aName, String cName) {
         assertNotEquals(aName, cName);
 
-        final TupleType a = TypeFactory.createTupleTypeWithNames(typeStr, aName);
+        final TupleType<?> a = TypeFactory.createTupleTypeWithNames(typeStr, aName);
         assertEquals(aName, a.getElementName(0));
 
-        final TupleType b = TypeFactory.create(typeStr);
+        final TupleType<?> b = TypeFactory.create(typeStr);
         assertEquals(aName, a.getElementName(0));
         assertNull(b.getElementName(0));
 
-        final TupleType c = TypeFactory.createTupleTypeWithNames(typeStr, cName);
+        final TupleType<?> c = TypeFactory.createTupleTypeWithNames(typeStr, cName);
         assertEquals(aName, a.getElementName(0));
         assertNull(b.getElementName(0));
         assertEquals(cName, c.getElementName(0));
 
         assertNotEquals(aName, cName);
 
-        final TupleType x = wrap(new String[] { aName }, a.get(0));
+        final TupleType<?> x = wrap(new String[] { aName }, a.get(0));
         assertEquals(aName, x.getElementName(0));
 
-        final TupleType y = wrap(null, b.get(0));
+        final TupleType<?> y = wrap(null, b.get(0));
         assertEquals(aName, x.getElementName(0));
         assertNull(y.getElementName(0));
 
-        final TupleType z = wrap(new String[] { cName }, c.get(0));
+        final TupleType<?> z = wrap(new String[] { cName }, c.get(0));
         assertEquals(aName, x.getElementName(0));
         assertNull(y.getElementName(0));
         assertEquals(cName, z.getElementName(0));
     }
 
-    private static TupleType wrap(String[] elementNames, ABIType<?>... elements) {
+    private static TupleType<?> wrap(String[] elementNames, ABIType<?>... elements) {
         final StringBuilder canonicalBuilder = new StringBuilder("(");
         boolean dynamic = false;
         int flags = ABIType.FLAGS_UNSET;
@@ -628,6 +628,7 @@ public class TupleTest {
         final Triple<byte[], String, Long> t = Triple.of(new byte[2], "75", 75L);
         final Quadruple<byte[], Object, Number, Throwable> q = Quadruple.of(new byte[3], "bbb", 19L, new Error());
         final Quintuple<Long, Long, Long, Long, Byte> q5 = Quintuple.of(-999L, Long.MAX_VALUE, 0L, -1L, (byte)0);
+        @SuppressWarnings("rawtypes")
         final Sextuple<Pair<byte[], String>, Pair<byte[], String>, Pair, Pair, Pair, Pair> s6 = Sextuple.of(p, p, p, p, p, p);
         final Triple<Integer, String, Triple<byte[], String, Long>> n = Tuple.of(90, "_", t);
         final Triple<byte[], String, Long> x = n.get2();

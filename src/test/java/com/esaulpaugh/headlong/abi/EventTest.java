@@ -30,7 +30,7 @@ public class EventTest {
         final String name = "ahoy";
         final boolean[] indexed = new boolean[] { false, false, true, false, true };
         final String paramsString ="(int,uint,(),bool[],ufixed256x10)";
-        Event event = Event.create(name, TupleType.parse(paramsString), indexed);
+        Event<?> event = Event.create(name, TupleType.parse(paramsString), indexed);
 
         assertEquals(TypeEnum.EVENT, event.getType());
         assertEquals(name, event.getName());

@@ -50,7 +50,7 @@ public class Deserializer {
         return TupleType.of(typeStrings);
     }
 
-    public static <T extends Tuple> T parseTupleValue(TupleType tupleType, JsonArray valuesArray) {
+    public static <T extends Tuple> T parseTupleValue(TupleType<?> tupleType, JsonArray valuesArray) {
         final int len = tupleType.size();
         Object[] elements = new Object[len];
         int i = 0;

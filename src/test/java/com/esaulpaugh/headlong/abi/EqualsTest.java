@@ -195,9 +195,9 @@ public class EqualsTest {
     @Test
     public void testFlagsEquals() {
         final String typeString = "(bytes[4][],bytes30[],string[])";
-        final TupleType tt_a = TupleType.parse(typeString);
-        final TupleType tt_b = TupleType.parse(ABIType.FLAGS_NONE, typeString);
-        final TupleType tt_c = TupleType.parse(ABIType.FLAG_LEGACY_DECODE, typeString);
+        final TupleType<?> tt_a = TupleType.parse(typeString);
+        final TupleType<?> tt_b = TupleType.parse(ABIType.FLAGS_NONE, typeString);
+        final TupleType<?> tt_c = TupleType.parse(ABIType.FLAG_LEGACY_DECODE, typeString);
 
         assertEquals(tt_a, tt_b);
         assertNotEquals(tt_a, tt_c);

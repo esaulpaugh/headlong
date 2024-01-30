@@ -238,7 +238,7 @@ public class ABIJSONTest {
         sb.append(' ').append(name).append(',');
     }
 
-    private static void printTupleType(TupleType tupleType) {
+    private static void printTupleType(TupleType<?> tupleType) {
         StringBuilder sb = new StringBuilder("RECURSIVE = ");
         toString(null, tupleType, sb);
         System.out.println(sb);
@@ -387,15 +387,15 @@ public class ABIJSONTest {
 
         runnable.run();
 
-        Event expectedA = Event.create("a_name", TupleType.parse("()"));
-        Event expectedB = Event.create("a_name", TupleType.EMPTY);
+        Event<?> expectedA = Event.create("a_name", TupleType.parse("()"));
+        Event<?> expectedB = Event.create("a_name", TupleType.EMPTY);
         assertEquals(expectedA, expectedB);
         assertEquals(expectedA.hashCode(), expectedB.hashCode());
 
         String json = jsonObject.toString();
         assertEquals(expectedA, Event.fromJson(json));
 
-        Event e = ABIObject.fromJson(json);
+        Event<?> e = ABIObject.fromJson(json);
         assertEquals(expectedA, e);
         assertEquals(e, ABIObject.fromJsonObject(ABIType.FLAGS_NONE, jsonObject));
 
@@ -552,7 +552,7 @@ public class ABIJSONTest {
         assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Event", error0::asEvent);
     }
 
-    private static void testError(ContractError error, String json, JsonObject object) {
+    private static void testError(ContractError<?> error, String json, JsonObject object) {
         assertEquals(TypeEnum.ERROR, error.getType());
         assertEquals("InsufficientBalance", error.getName());
         assertEquals(TupleType.parse("(uint,uint)"), error.getInputs());
@@ -571,7 +571,7 @@ public class ABIJSONTest {
         assertTrue(error.isContractError());
     }
 
-    private static void testEqualNotSame(ContractError a, ContractError b) {
+    private static void testEqualNotSame(ContractError<?> a, ContractError<?> b) {
         assertNotSame(a, b);
         assertEquals(a.hashCode(), b.hashCode());
         assertEquals(a.toString(), b.toString());
@@ -609,7 +609,7 @@ public class ABIJSONTest {
         assertEquals(1, fList.size());
         assertTrue(fList.stream().anyMatch(ABIObject::isFunction));
         
-        List<ContractError> errList = ABIJSON.parseElements(ERROR_JSON_ARRAY, ABIJSON.ERRORS);
+        List<ContractError<?>> errList = ABIJSON.parseElements(ERROR_JSON_ARRAY, ABIJSON.ERRORS);
         assertEquals(1, errList.size());
         assertTrue(errList.stream().anyMatch(ABIObject::isContractError));
 
@@ -638,7 +638,7 @@ public class ABIJSONTest {
             assertEquals(1, fList.size());
             assertTrue(fList.stream().anyMatch(ABIObject::isFunction));
 
-            List<ContractError> errList = ABIJSON.parseElements(ERROR_JSON_ARRAY, EnumSet.of(TypeEnum.ERROR));
+            List<ContractError<?>> errList = ABIJSON.parseElements(ERROR_JSON_ARRAY, EnumSet.of(TypeEnum.ERROR));
             assertEquals(1, errList.size());
             assertTrue(errList.stream().anyMatch(ABIObject::isContractError));
         }
@@ -677,7 +677,7 @@ public class ABIJSONTest {
                 .collect(Collectors.toList());
         assertEquals(1, functions.size());
 
-        List<Event> events = objects.stream()
+        List<Event<?>> events = objects.stream()
                 .filter(ABIObject::isEvent)
                 .map(ABIObject::asEvent)
                 .collect(Collectors.toList());
@@ -727,15 +727,15 @@ public class ABIJSONTest {
                 "  \"anonymous\": false\n" +
                 "}";
 
-        Event e = Event.fromJson(eventStr);
+        Event<?> e = Event.fromJson(eventStr);
 
-        TupleType in = e.getInputs();
+        TupleType<?> in = e.getInputs();
         assertEquals("struct Thing[]", in.getElementInternalType(0));
 
-        TupleType indexed = e.getIndexedParams();
+        TupleType<?> indexed = e.getIndexedParams();
         assertEquals(0, indexed.size());
 
-        TupleType nonIndexed = e.getNonIndexedParams();
+        TupleType<?> nonIndexed = e.getNonIndexedParams();
         assertEquals("struct Thing[]", nonIndexed.getElementInternalType(0));
 
         assertThrown(ArrayIndexOutOfBoundsException.class, () -> nonIndexed.getElementInternalType(-1));
@@ -777,7 +777,7 @@ public class ABIJSONTest {
 
         Function f = Function.fromJson(json);
 
-        TupleType in = f.getInputs();
+        TupleType<?> in = f.getInputs();
         assertEquals("MyNamespace.UIntMax", in.getElementInternalType(0));
         assertEquals("CustomType", in.getElementInternalType(1));
         assertEquals("SomeOtherDudesNamespace.Bytes", in.getElementInternalType(2));

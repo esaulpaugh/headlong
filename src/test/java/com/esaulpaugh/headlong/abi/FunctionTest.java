@@ -71,8 +71,8 @@ public class FunctionTest {
         assertNull(f.getName());
         assertEquals("Keccak-256", f.getHashAlgorithm());
 
-        final TupleType inputs = TupleType.of("int");
-        final TupleType outputs = TupleType.of("bool");
+        final TupleType<?> inputs = TupleType.of("int");
+        final TupleType<?> outputs = TupleType.of("bool");
         TestUtils.assertThrown(err, "type is \"receive\"; functions of this type must define stateMutability as \"payable\"", () -> new Function(TypeEnum.RECEIVE, "receive", inputs, outputs, null, md));
         TestUtils.assertThrown(err, "type is \"receive\"; functions of this type must define no inputs", () -> new Function(TypeEnum.RECEIVE, "receive", inputs, outputs, "payable", md));
         TestUtils.assertThrown(err, "type is \"receive\"; functions of this type must define no outputs", () -> new Function(TypeEnum.RECEIVE, "receive", TupleType.EMPTY, outputs, "payable", md));
