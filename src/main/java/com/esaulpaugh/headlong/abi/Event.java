@@ -129,7 +129,6 @@ public final class Event<I extends TupleType<?>> implements ABIObject {
     }
 
     /** @see ABIObject#fromJsonObject(int, JsonObject) */
-    @SuppressWarnings("unchecked")
     public static <T extends TupleType<?>> Event<T> fromJsonObject(int flags, JsonObject event) {
         return ABIJSON.parseEvent(event, flags);
     }

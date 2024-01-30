@@ -78,7 +78,6 @@ public final class ContractError<I extends TupleType<?>> implements ABIObject {
     }
 
     /** @see ABIObject#fromJsonObject(int, JsonObject) */
-    @SuppressWarnings("unchecked")
     public static <T extends TupleType<?>> ContractError<T> fromJsonObject(int flags, JsonObject error) {
         return ABIJSON.parseError(error, flags);
     }

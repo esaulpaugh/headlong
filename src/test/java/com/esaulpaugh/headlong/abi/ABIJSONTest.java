@@ -478,11 +478,11 @@ public class ABIJSONTest {
 
     @Test
     public void testGetEvents() {
-        List<Event> events = ABIJSON.parseEvents(CONTRACT_JSON);
+        List<Event<?>> events = ABIJSON.parseEvents(CONTRACT_JSON);
 
         assertEquals(1, events.size());
 
-        Event event = events.get(0);
+        Event<?> event = events.get(0);
 
         assertEquals("an_event", event.getName());
         assertEquals(TupleType.parse("(bytes,uint256)"), event.getInputs());
@@ -540,8 +540,8 @@ public class ABIJSONTest {
     public void testGetErrors() throws Throwable {
         JsonObject object = ABIJSON.parseObject(ERROR_JSON);
 
-        ContractError error0 = ABIJSON.parseErrors(ERROR_JSON_ARRAY).get(0);
-        ContractError error1 = ABIObject.fromJsonObject(ABIType.FLAGS_NONE, object);
+        ContractError<?> error0 = ABIJSON.parseErrors(ERROR_JSON_ARRAY).get(0);
+        ContractError<?> error1 = ABIObject.fromJsonObject(ABIType.FLAGS_NONE, object);
 
         testError(error0, ERROR_JSON, object);
         testError(error1, ERROR_JSON, object);

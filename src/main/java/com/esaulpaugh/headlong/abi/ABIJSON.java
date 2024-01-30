@@ -24,7 +24,6 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.Writer;
@@ -86,11 +85,11 @@ public final class ABIJSON {
         return parseElements(arrayJson, FUNCTIONS);
     }
 
-    public static List<Event> parseEvents(String arrayJson) {
+    public static List<Event<?>> parseEvents(String arrayJson) {
         return parseElements(arrayJson, EVENTS);
     }
 
-    public static List<ContractError> parseErrors(String arrayJson) {
+    public static List<ContractError<?>> parseErrors(String arrayJson) {
         return parseElements(arrayJson, ERRORS);
     }
 
@@ -144,18 +143,20 @@ public final class ABIJSON {
         return parseFunctionUnchecked(t, function, digest, flags);
     }
 
-    static Event parseEvent(JsonObject event, int flags) {
+    @SuppressWarnings("unchecked")
+    static <T extends TupleType<?>> Event<T> parseEvent(JsonObject event, int flags) {
         if(!EVENT.equals(getType(event))) {
             throw TypeEnum.unexpectedType(getType(event));
         }
-        return parseEventUnchecked(event, flags);
+        return (Event<T>) parseEventUnchecked(event, flags);
     }
 
-    static ContractError parseError(JsonObject error, int flags) {
+    @SuppressWarnings("unchecked")
+    static <T extends TupleType<?>> ContractError<T> parseError(JsonObject error, int flags) {
         if(!ERROR.equals(getType(error))) {
             throw TypeEnum.unexpectedType(getType(error));
         }
-        return parseErrorUnchecked(error, flags);
+        return (ContractError<T>) parseErrorUnchecked(error, flags);
     }
 
     private static Function parseFunctionUnchecked(TypeEnum type, JsonObject function, MessageDigest digest, int flags) {
@@ -224,7 +225,7 @@ public final class ABIJSON {
         );
     }
 
-    private static TupleType parseTupleType(JsonObject object, String arrayKey, int flags) {
+    private static TupleType<?> parseTupleType(JsonObject object, String arrayKey, int flags) {
         return parseTupleType(getArray(object, arrayKey), null, flags);
     }
 
@@ -234,7 +235,7 @@ public final class ABIJSON {
             if(type.length() == TUPLE.length()) {
                 return parseTupleType(object, COMPONENTS, flags);
             }
-            TupleType baseType = parseTupleType(object, COMPONENTS, flags);
+            TupleType<?> baseType = parseTupleType(object, COMPONENTS, flags);
             return TypeFactory.build(baseType.canonicalType + type.substring(TUPLE.length()), null, baseType, flags); // return ArrayType
         }
         return TypeFactory.create(flags, type);
@@ -271,7 +272,7 @@ public final class ABIJSON {
                 }
                 stateMutability(out, f.getStateMutability());
             } else if (o.isEvent()) {
-                final Event e = o.asEvent();
+                final Event<?> e = o.asEvent();
                 type(out, EVENT);
                 name(out, o.getName());
                 tupleType(out, INPUTS, o.getInputs(), e.getIndexManifest());
@@ -338,7 +339,7 @@ public final class ABIJSON {
         out.endArray();
     }
 
-    private static class NonSyncWriter extends CharArrayWriter {
+    private static class NonSyncWriter extends Writer {
 
         char[] buffer;
         int count = 0;
@@ -356,13 +357,31 @@ public final class ABIJSON {
         }
 
         @Override
+        public void write(final char[] cbuf, final int off, final int len) {
+            final int lim = off + len;
+            for (int i = off; i < lim; i++) {
+                write(cbuf[off]);
+            }
+        }
+
+        @Override
         public void write(String str, int off, int len) {
             int newCount = count + len;
             if (newCount > buffer.length) {
-                buffer = Arrays.copyOf(buffer, Math.max(buffer.length << 1, newCount));
+                buffer = Arrays.copyOf(buffer, Math.max(newCount, buffer.length << 1));
             }
             str.getChars(off, off + len, buffer, count);
             count = newCount;
+        }
+
+        @Override
+        public void flush() {
+            // do nothing
+        }
+
+        @Override
+        public void close() {
+            // do nothing
         }
 
         @Override
