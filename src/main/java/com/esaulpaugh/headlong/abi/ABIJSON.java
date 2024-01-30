@@ -360,7 +360,7 @@ public final class ABIJSON {
         public void write(final char[] cbuf, final int off, final int len) {
             final int lim = off + len;
             for (int i = off; i < lim; i++) {
-                write(cbuf[off]);
+                write(cbuf[i]);
             }
         }
 
