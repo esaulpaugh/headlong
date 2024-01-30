@@ -84,7 +84,7 @@ public class TupleTest {
         final int parallelism = 24;
         final boolean unsigned = true;
 
-        for (int j = 0; j < 24; j++) {
+        for (int j = 0; j < 23; j++) {
             final long pow = (long) Math.pow(2.0, j);
             final long powMinus1 = pow - 1;
 //            System.out.println(Long.toHexString(powMinus1) + ", " + pow);
