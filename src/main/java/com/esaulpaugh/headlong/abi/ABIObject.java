@@ -48,12 +48,12 @@ public interface ABIObject {
         return (Function) this;
     }
 
-    default Event asEvent() {
-        return (Event) this;
+    default Event<?> asEvent() {
+        return (Event<?>) this;
     }
 
-    default ContractError asContractError() {
-        return (ContractError) this;
+    default ContractError<?> asContractError() {
+        return (ContractError<?>) this;
     }
 
     static <T extends ABIObject> T fromJson(String json) {

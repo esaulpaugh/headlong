@@ -683,7 +683,7 @@ public class ABIJSONTest {
                 .collect(Collectors.toList());
         assertEquals(1, events.size());
 
-        List<ContractError> errors = objects.stream()
+        List<ContractError<?>> errors = objects.stream()
                 .filter(ABIObject::isContractError)
                 .map(ABIObject::asContractError)
                 .collect(Collectors.toList());
