@@ -24,6 +24,7 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.Writer;
@@ -339,7 +340,7 @@ public final class ABIJSON {
         out.endArray();
     }
 
-    private static class NonSyncWriter extends Writer {
+    private static class NonSyncWriter extends CharArrayWriter {
 
         char[] buffer;
         int count = 0;
@@ -357,14 +358,6 @@ public final class ABIJSON {
         }
 
         @Override
-        public void write(final char[] cbuf, final int off, final int len) {
-            final int lim = off + len;
-            for (int i = off; i < lim; i++) {
-                write(cbuf[i]);
-            }
-        }
-
-        @Override
         public void write(String str, int off, int len) {
             int newCount = count + len;
             if (newCount > buffer.length) {
@@ -372,16 +365,6 @@ public final class ABIJSON {
             }
             str.getChars(off, off + len, buffer, count);
             count = newCount;
-        }
-
-        @Override
-        public void flush() {
-            // do nothing
-        }
-
-        @Override
-        public void close() {
-            // do nothing
         }
 
         @Override
