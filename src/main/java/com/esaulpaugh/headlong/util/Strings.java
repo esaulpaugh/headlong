@@ -39,12 +39,12 @@ public final class Strings {
 
     public static String encode(ByteBuffer buffer) {
         final byte[] bytes;
-        if (buffer.isDirect()) {
-            buffer.position(0);
-            bytes = new byte[buffer.remaining()];
-            buffer.get(bytes);
-        } else {
+        if (buffer.hasArray()) {
             bytes = buffer.array();
+        } else {
+            buffer.position(0);
+            bytes = new byte[buffer.capacity()];
+            buffer.get(bytes);
         }
         return encode(bytes);
     }
