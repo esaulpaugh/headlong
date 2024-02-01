@@ -92,11 +92,8 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         if(arrayClass != null) {
             return arrayClass;
         }
-        try {
-            return Class.forName('[' + clazz.getName(), false, CLASS_LOADER);
-        } catch (ClassNotFoundException cnfe) {
-            throw new AssertionError(cnfe);
-        }
+        return Array.newInstance(clazz, 0)
+                .getClass();
     }
 
     @Override
