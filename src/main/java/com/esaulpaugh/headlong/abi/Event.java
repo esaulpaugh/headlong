@@ -181,11 +181,7 @@ public final class Event<I extends TupleType<?>> implements ABIObject {
     }
 
     private Object[] decodeTopicsArray(byte[][] topics) {
-        if(anonymous) {
-            checkAnonymousTopics(topics);
-        } else {
-            checkNonAnonymousTopics(topics);
-        }
+        checkTopics(topics);
         final int offset = anonymous ? 0 : 1;
         final Object[] decodedTopics = new Object[indexedParams.size()];
         for (int i = 0; i < decodedTopics.length; i++) {
@@ -202,28 +198,25 @@ public final class Event<I extends TupleType<?>> implements ABIObject {
         return decodedTopics;
     }
 
-    private void checkAnonymousTopics(byte[][] topics) {
-        topics = indexedParams.isEmpty() && topics == null
-                ? EMPTY_TOPICS
-                : Objects.requireNonNull(topics, "non-null topics expected");
-        checkTopicsLength(topics.length, 0);
-    }
-
-    private void checkNonAnonymousTopics(byte[][] topics) {
-        Objects.requireNonNull(topics, "non-null topics expected");
-        checkTopicsLength(topics.length, 1);
-        byte[] decodedSignatureHash = BYTES_32.decode(topics[0]);
-        if (!MessageDigest.isEqual(signatureHash, decodedSignatureHash)) {
-            throw new IllegalArgumentException("unexpected topics[0]: event " + getCanonicalSignature()
-                    + " expects " + FastHex.encodeToString(signatureHash)
-                    + " but found " + FastHex.encodeToString(decodedSignatureHash));
+    private void checkTopics(byte[][] topics) {
+        final int size = indexedParams.size();
+        final int expectedTopics;
+        if (anonymous) {
+            if (size == 0 && topics == null) {
+                topics = EMPTY_TOPICS;
+            }
+            expectedTopics = size;
+        } else {
+            final byte[] decodedSignatureHash = BYTES_32.decode(topics[0]);
+            if (!MessageDigest.isEqual(signatureHash, decodedSignatureHash)) {
+                throw new IllegalArgumentException("unexpected topics[0]: event " + getCanonicalSignature()
+                        + " expects " + FastHex.encodeToString(signatureHash)
+                        + " but found " + FastHex.encodeToString(decodedSignatureHash));
+            }
+            expectedTopics = size + 1;
         }
-    }
-
-    private void checkTopicsLength(int len, int offset) {
-        final int expectedTopics = indexedParams.size() + offset;
-        if(len != expectedTopics) {
-            throw new IllegalArgumentException("expected topics.length == " + expectedTopics + " but found length " + len);
+        if (topics.length != expectedTopics) {
+            throw new IllegalArgumentException("expected topics.length " + expectedTopics + " but found length " + topics.length);
         }
     }
 }
