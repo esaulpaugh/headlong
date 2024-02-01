@@ -499,8 +499,10 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         ByteBuffer rowData = ByteBuffer.wrap(rowBuffer);
         insertIntUnsigned(offset, rowData); // insert offset
         rowData.flip();
-        appendAnnotatedRow(sb, rowData, rowBuffer, row, i, " offset");
+        appendAnnotatedRow(sb, rowData, rowBuffer, row, i, OFFSET_NOTE);
     }
+
+    private static final String OFFSET_NOTE = " offset";
 
     private void appendAnnotatedRow(StringBuilder sb, ByteBuffer bb, byte[] rowBuffer, int row, int i, String note) {
         bb.get(rowBuffer);
@@ -513,7 +515,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         }
         ABIType<?> element = get(i);
         sb.append(' ').append(element.canonicalType);
-        if (" offset".equals(note) || !element.isDynamic()) {
+        if (OFFSET_NOTE.equals(note) || !element.isDynamic()) {
             String name = getElementName(i);
             if (name != null) {
                 sb.append(" \"").append(getElementName(i)).append('"');
