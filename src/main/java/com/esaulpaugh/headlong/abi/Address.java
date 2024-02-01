@@ -66,7 +66,7 @@ public final class Address {
 
     @Override
     public boolean equals(Object o) {
-        if(o instanceof Address) {
+        if (o instanceof Address) {
             Address other = (Address) o;
             return value.equals(other.value);
         }
@@ -83,7 +83,7 @@ public final class Address {
     }
 
     public static Address wrap(final String checksumAddress, final String label) {
-        if(label != null && label.length() > MAX_LABEL_LEN) {
+        if (label != null && label.length() > MAX_LABEL_LEN) {
             throw new IllegalArgumentException("label length exceeds maximum: " + label.length() + " > " + MAX_LABEL_LEN);
         }
         return new Address(validateAndDecodeAddress(checksumAddress), label);
@@ -95,14 +95,14 @@ public final class Address {
     }
 
     public Address withLabel(final String label) {
-        if(this.label != null) {
+        if (this.label != null) {
             throw new IllegalArgumentException("labeling aborted because existing label not null");
         }
         return Address.wrap(this.toString(), label);
     }
 
     public static void validateChecksumAddress(final String checksumAddress) {
-        if(toChecksumAddress(checksumAddress).equals(checksumAddress)) {
+        if (toChecksumAddress(checksumAddress).equals(checksumAddress)) {
             return;
         }
         throw new IllegalArgumentException("invalid checksum");
@@ -112,7 +112,7 @@ public final class Address {
     public static String toChecksumAddress(final BigInteger address) {
         final String minimalHex = address.toString(HEX_RADIX);
         final int start = ADDRESS_LEN_CHARS - minimalHex.length();
-        if(start < PREFIX_LEN) {
+        if (start < PREFIX_LEN) {
             throw new IllegalArgumentException("invalid bit length: " + address.bitLength());
         }
         final byte[] addressBytes = "0x0000000000000000000000000000000000000000".getBytes(StandardCharsets.US_ASCII);
@@ -147,7 +147,7 @@ public final class Address {
      * @return  the same address with the correct EIP-55 checksum casing
      */
     public static String toChecksumAddress(final String address) {
-        if(address.length() == ADDRESS_LEN_CHARS) {
+        if (address.length() == ADDRESS_LEN_CHARS) {
             checkPrefix(address);
             final byte[] addressBytes = "0x0000000000000000000000000000000000000000".getBytes(StandardCharsets.US_ASCII);
             for (int i = PREFIX_LEN; i < addressBytes.length; i++) {
@@ -157,14 +157,14 @@ public final class Address {
             }
             return doChecksum(addressBytes);
         }
-        if(address.length() >= PREFIX_LEN) {
+        if (address.length() >= PREFIX_LEN) {
             checkPrefix(address);
         }
         throw new IllegalArgumentException("expected address length " + ADDRESS_LEN_CHARS + "; actual is " + address.length());
     }
 
     private static void checkPrefix(String address) {
-        if(!address.startsWith("0x")) {
+        if (!address.startsWith("0x")) {
             throw new IllegalArgumentException("missing 0x prefix");
         }
     }
