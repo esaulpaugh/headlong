@@ -50,7 +50,7 @@ public final class Event<I extends TupleType<?>> implements ABIObject {
     public Event(String name, boolean anonymous, I inputs, boolean... indexed) {
         this.name = Objects.requireNonNull(name);
         this.inputs = Objects.requireNonNull(inputs);
-        if(indexed.length != inputs.size()) {
+        if (indexed.length != inputs.size()) {
             throw new IllegalArgumentException("indexed.length doesn't match number of inputs");
         }
         this.indexManifest = Arrays.copyOf(indexed, indexed.length);
@@ -110,8 +110,8 @@ public final class Event<I extends TupleType<?>> implements ABIObject {
 
     @Override
     public boolean equals(Object o) {
-        if(o == this) return true;
-        if(!(o instanceof Event)) return false;
+        if (o == this) return true;
+        if (!(o instanceof Event)) return false;
         Event<?> other = (Event<?>) o;
         return other.anonymous == this.anonymous
                 && other.name.equals(this.name)
@@ -143,9 +143,8 @@ public final class Event<I extends TupleType<?>> implements ABIObject {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends Tuple> T decodeTopics(byte[][] topics) {
-        return (T) Tuple.create(decodeTopicsArray(topics));
+        return Tuple.create(decodeTopicsArray(topics));
     }
 
     @SuppressWarnings("unchecked")
