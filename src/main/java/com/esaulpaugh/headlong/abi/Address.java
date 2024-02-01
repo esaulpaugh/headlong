@@ -166,7 +166,7 @@ public final class Address {
     }
 
     private static void checkPrefix(String address) {
-        if(address.charAt(0) != '0' || address.charAt(1) != 'x') {
+        if(!address.startsWith("0x")) {
             throw new IllegalArgumentException("missing 0x prefix");
         }
     }
