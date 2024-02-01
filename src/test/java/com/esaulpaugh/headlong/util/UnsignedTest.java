@@ -34,7 +34,7 @@ public class UnsignedTest {
         TestUtils.assertThrown(IllegalArgumentException.class, "numBits must be non-negative", () -> new Uint(-1));
         TestUtils.assertThrown(IllegalArgumentException.class, "numBits must be non-negative", () -> new Uint(Integer.MIN_VALUE));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "numBits exceeds limit: 4097 > 4096", () -> new Uint(4097));
+        TestUtils.assertThrown(IllegalArgumentException.class, "numBits exceeds limit: 8193 > 8192", () -> new Uint(8193));
 
         Uint uint0 = new Uint(0);
         assertEquals(-1L, uint0.toSignedLong(0L));
