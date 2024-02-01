@@ -35,8 +35,6 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
  */
 public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
 
-    private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
-
     static final Class<String> STRING_CLASS = String.class;
     static final Class<String[]> STRING_ARRAY_CLASS = String[].class;
 
@@ -287,7 +285,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     }
 
     private void encodeArrayLen(int len, ByteBuffer dest) {
-        if(length == DYNAMIC_LENGTH) {
+        if (length == DYNAMIC_LENGTH) {
             insertIntUnsigned(len, dest);
         }
     }
@@ -400,7 +398,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         final boolean[] booleans = new boolean[len]; // elements are false by default
         int i = 0;
         try {
-            for(; i < len; i++) {
+            for( ; i < len; i++) {
                 bb.get(unitBuffer);
                 int j;
                 for (j = 0; j < UNIT_LENGTH_BYTES - Byte.BYTES; j++) {
