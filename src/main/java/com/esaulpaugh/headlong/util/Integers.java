@@ -443,14 +443,14 @@ public final class Integers {
     }
 
     public static int putBigInt(BigInteger val, byte[] dest, int destIdx) {
-        byte[] bytes = val.toByteArray();
-        int srcPos = 0;
+        final byte[] bytes = val.toByteArray();
         int len = bytes.length;
-        if(bytes[0] == 0x00) {
-            srcPos++;
+        if (bytes[0] == 0x00) {
             len--;
+            System.arraycopy(bytes, 1, dest, destIdx, len);
+        } else {
+            System.arraycopy(bytes, 0, dest, destIdx, len);
         }
-        System.arraycopy(bytes, srcPos, dest, destIdx, len);
         return len;
     }
 
