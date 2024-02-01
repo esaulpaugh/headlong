@@ -95,7 +95,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
     public Record with(Signer signer, long seq, KVP... newPairs) {
         final HashSet<KVP> pairSet = new HashSet<>();
         for (KVP pair : newPairs) {
-            if(!pairSet.add(pair)) {
+            if (!pairSet.add(pair)) {
                 throw KVP.duplicateKeyErr(pair.key);
             }
         }

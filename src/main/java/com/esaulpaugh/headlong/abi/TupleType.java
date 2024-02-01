@@ -48,7 +48,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         this.elementNames = elementNames;
         this.elementInternalTypes = elementInternalTypes;
         this.elementHeadOffsets = new int[elementTypes.length];
-        if(dynamic) {
+        if (dynamic) {
             this.headLength = OFFSET_LENGTH_BYTES;
             int sum = 0;
             for (int i = 0; i < elementTypes.length; i++) {
@@ -115,7 +115,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
 
     @Override
     int byteLength(Tuple value) {
-        if(!dynamic) return headLength;
+        if (!dynamic) return headLength;
         return dynamicByteLength(value);
     }
 
@@ -271,7 +271,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     public <T> T decode(ByteBuffer bb, int... indices) {
         bb.mark();
         try {
-            if(indices.length == 1) {
+            if (indices.length == 1) {
                 return (T) decodeIndex(bb, indices[0]); // specified element
             }
             return (T) decodeIndices(bb, indices); // Tuple with specified elements populated

@@ -203,7 +203,7 @@ public class Tuple implements Iterable<Object> {
 
     private static Object deepCopyElement(Object e) {
         final Class<?> c = e.getClass();
-        if(c.isArray()) {
+        if (c.isArray()) {
             if (e instanceof Object[]) {
                 final Object[] original = (Object[]) e;
                 return copy(ArrayType.createArray(c.getComponentType(), original.length), i -> deepCopyElement(original[i]));

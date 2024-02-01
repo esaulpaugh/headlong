@@ -109,7 +109,7 @@ public final class ABIJSON {
             if (e.isJsonObject()) {
                 final JsonObject object = e.getAsJsonObject();
                 final TypeEnum t = TypeEnum.parse(getType(object));
-                if(types.contains(t)) {
+                if (types.contains(t)) {
                     selected.add(parseABIObject(t, object, digest, flags));
                 }
             }
@@ -146,7 +146,7 @@ public final class ABIJSON {
 
     @SuppressWarnings("unchecked")
     static <T extends TupleType<?>> Event<T> parseEvent(JsonObject event, int flags) {
-        if(!EVENT.equals(getType(event))) {
+        if (!EVENT.equals(getType(event))) {
             throw TypeEnum.unexpectedType(getType(event));
         }
         return (Event<T>) parseEventUnchecked(event, flags);
@@ -154,7 +154,7 @@ public final class ABIJSON {
 
     @SuppressWarnings("unchecked")
     static <T extends TupleType<?>> ContractError<T> parseError(JsonObject error, int flags) {
-        if(!ERROR.equals(getType(error))) {
+        if (!ERROR.equals(getType(error))) {
             throw TypeEnum.unexpectedType(getType(error));
         }
         return (ContractError<T>) parseErrorUnchecked(error, flags);
@@ -211,7 +211,7 @@ public final class ABIJSON {
                 final String type = e.canonicalType;
                 internalTypes[i] = internalType.equals(type) ? type : internalType;
             }
-            if(indexed != null) {
+            if (indexed != null) {
                 indexed[i] = getBoolean(inputObj, INDEXED, null);
             }
         }
@@ -232,8 +232,8 @@ public final class ABIJSON {
 
     private static ABIType<?> parseType(JsonObject object, int flags) {
         final String type = getType(object);
-        if(type.startsWith(TUPLE)) {
-            if(type.length() == TUPLE.length()) {
+        if (type.startsWith(TUPLE)) {
+            if (type.length() == TUPLE.length()) {
                 return parseTupleType(object, COMPONENTS, flags);
             }
             TupleType<?> baseType = parseTupleType(object, COMPONENTS, flags);
@@ -258,7 +258,7 @@ public final class ABIJSON {
                 out.setIndent("  ");
             }
             out.beginObject();
-            if(o.isFunction()) {
+            if (o.isFunction()) {
                 final Function f = o.asFunction();
                 final TypeEnum t = o.getType();
                 type(out, t.toString());
@@ -296,19 +296,19 @@ public final class ABIJSON {
     }
 
     private static void name(JsonWriter out, String name) throws IOException {
-        if(name != null) {
+        if (name != null) {
             out.name(NAME).value(name);
         }
     }
 
     private static void internalType(JsonWriter out, String internalType) throws IOException {
-        if(internalType != null) {
+        if (internalType != null) {
             out.name(INTERNAL_TYPE).value(internalType);
         }
     }
 
     private static void stateMutability(JsonWriter out, String stateMutability) throws IOException {
-        if(stateMutability != null) {
+        if (stateMutability != null) {
             out.name(STATE_MUTABILITY).value(stateMutability);
         }
     }
@@ -318,20 +318,20 @@ public final class ABIJSON {
         int i = 0;
         for (final ABIType<?> e : tupleType) {
             out.beginObject();
-            if(tupleType.elementInternalTypes != null) {
+            if (tupleType.elementInternalTypes != null) {
                 internalType(out, tupleType.elementInternalTypes[i]);
             }
-            if(tupleType.elementNames != null) {
+            if (tupleType.elementNames != null) {
                 name(out, tupleType.elementNames[i]);
             }
             final String type = e.canonicalType;
-            if(type.charAt(0) == '(') {
+            if (type.charAt(0) == '(') {
                 type(out, TUPLE + type.substring(type.lastIndexOf(')') + 1));
                 tupleType(out, COMPONENTS, ArrayType.baseType(e), null);
             } else {
                 type(out, type);
             }
-            if(indexedManifest != null) {
+            if (indexedManifest != null) {
                 out.name(INDEXED).value(indexedManifest[i]);
             }
             out.endObject();
@@ -393,7 +393,7 @@ public final class ABIJSON {
 
     static JsonArray getArray(JsonObject object, String key) {
         final JsonElement element = object.get(key);
-        if(isNull(element)) {
+        if (isNull(element)) {
             return null;
         }
         return element.getAsJsonArray();
@@ -401,10 +401,10 @@ public final class ABIJSON {
 
     static String getString(JsonObject object, String key) {
         final JsonElement element = object.get(key);
-        if(isNull(element)) {
+        if (isNull(element)) {
             return null;
         }
-        if(element.isJsonPrimitive() && ((JsonPrimitive) element).isString()) {
+        if (element.isJsonPrimitive() && ((JsonPrimitive) element).isString()) {
             return element.getAsString();
         }
         throw new IllegalArgumentException(key + " is not a string");
@@ -412,10 +412,10 @@ public final class ABIJSON {
 
     static Boolean getBoolean(JsonObject object, String key, Boolean defaultVal) {
         final JsonElement element = object.get(key);
-        if(isNull(element)) {
+        if (isNull(element)) {
             return defaultVal;
         }
-        if(element.isJsonPrimitive() && ((JsonPrimitive) element).isBoolean()) {
+        if (element.isJsonPrimitive() && ((JsonPrimitive) element).isBoolean()) {
             return element.getAsBoolean();
         }
         throw new IllegalArgumentException(key + " is not a boolean");

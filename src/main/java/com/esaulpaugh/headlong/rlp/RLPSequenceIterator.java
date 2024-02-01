@@ -48,7 +48,7 @@ class RLPSequenceIterator implements Iterator<RLPItem> {
 
     @Override
     public RLPItem next() {
-        if(hasNext()) {
+        if (hasNext()) {
             RLPItem item = next;
             next = null;
             index = item.endIndex;

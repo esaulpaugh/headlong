@@ -88,7 +88,7 @@ public final class SuperSerial {
         for (int i = 0; i < elements.length; i++) {
             elements[i] = deserialize(tupleType.get(i), sequenceIterator.next());
         }
-        if(sequenceIterator.hasNext()) {
+        if (sequenceIterator.hasNext()) {
             throw new IllegalArgumentException("trailing unconsumed items");
         }
         return Tuple.create(elements);

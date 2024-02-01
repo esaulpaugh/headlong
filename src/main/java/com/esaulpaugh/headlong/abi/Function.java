@@ -153,12 +153,12 @@ public final class Function implements ABIObject {
             }
             /* fall through */
         case ORDINAL_FALLBACK:
-            if(!inputTypes.isEmpty()) {
+            if (!inputTypes.isEmpty()) {
                 throw validationErr("define no inputs");
             }
             /* fall through */
         case ORDINAL_CONSTRUCTOR:
-            if(!outputTypes.isEmpty()) {
+            if (!outputTypes.isEmpty()) {
                 throw validationErr("define no outputs");
             }
             if (name != null) {
@@ -246,7 +246,7 @@ public final class Function implements ABIObject {
     }
 
     private void checkSelector(byte[] found) {
-        if(!MessageDigest.isEqual(found, selector)) {
+        if (!MessageDigest.isEqual(found, selector)) {
                 throw new IllegalArgumentException("given selector does not match: expected: " + selectorHex()
                         + ", found: " + Strings.encode(found));
         }
@@ -305,8 +305,8 @@ public final class Function implements ABIObject {
 
     @Override
     public boolean equals(Object o) {
-        if(o == this) return true;
-        if(!(o instanceof Function)) return false;
+        if (o == this) return true;
+        if (!(o instanceof Function)) return false;
         Function other = (Function) o;
         return other.type == this.type &&
                 Objects.equals(other.name, this.name) &&
@@ -329,7 +329,7 @@ public final class Function implements ABIObject {
 
     private static String validateName(String input) {
         final int len = input.length();
-        if(len > MAX_NAME_CHARS) {
+        if (len > MAX_NAME_CHARS) {
             throw new IllegalArgumentException("function name is too long: " + len + " > " + MAX_NAME_CHARS);
         }
         for (int i = 0; i < len; i++) {

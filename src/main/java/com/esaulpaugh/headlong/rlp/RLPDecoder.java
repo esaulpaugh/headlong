@@ -211,7 +211,7 @@ public final class RLPDecoder {
         final int lengthIndex = index + 1;
         final int dataIndex = requireInBounds((long) lengthIndex + diff, containerEnd, buffer, index);
         final long dataLength = Integers.getLong(buffer, lengthIndex, diff, lenient);
-        if(dataLength < MIN_LONG_DATA_LEN) {
+        if (dataLength < MIN_LONG_DATA_LEN) {
             throw new IllegalArgumentException("long element data length must be " + MIN_LONG_DATA_LEN
                     + " or greater; found: " + dataLength + " for element @ " + index);
         }

@@ -49,7 +49,7 @@ final class PackedDecoder {
             final Tuple tuple = elements[0];
             tupleType.validate(tuple);
             int decodedLen = tupleType.byteLengthPacked(tuple);
-            if(decodedLen != buffer.length) {
+            if (decodedLen != buffer.length) {
                 throw new IllegalArgumentException("unconsumed bytes: " + (buffer.length - decodedLen) + " remaining");
             }
             return (T) tuple;
@@ -58,7 +58,7 @@ final class PackedDecoder {
     }
 
     static int countDynamics(ABIType<?> type) {
-        if(type.dynamic) {
+        if (type.dynamic) {
             switch (type.typeCode()) {
             case TYPE_CODE_ARRAY:
                 ArrayType<?, ?, ?> at = type.asArrayType();
@@ -152,7 +152,7 @@ final class PackedDecoder {
     }
 
     private static int insertBigInteger(BigIntegerType type, int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
-        if(type.unsigned) {
+        if (type.unsigned) {
             dest[destIdx] = Integers.getBigInt(buffer, idx, elementLen, true);
         } else {
 //            dest[destIdx] = new BigInteger(buffer, idx, elementLen); // Java 9+
@@ -168,7 +168,7 @@ final class PackedDecoder {
 
     private static int insertBigDecimal(BigDecimalType type, int elementLen, byte[] buffer, int idx, Object[] dest, int destIdx) {
         BigInteger unscaled;
-        if(type.unsigned) {
+        if (type.unsigned) {
             unscaled = Integers.getBigInt(buffer, idx, elementLen, true);
         } else {
 //            unscaled = new BigInteger(buffer, idx, elementLen); // Java 9+
@@ -183,7 +183,7 @@ final class PackedDecoder {
         final int elementByteLen = elementType.byteLengthPacked(null);
         final int arrayLen;
         final int typeLen = arrayType.getLength();
-        if(DYNAMIC_LENGTH == typeLen) {
+        if (DYNAMIC_LENGTH == typeLen) {
             if (elementByteLen == 0) {
                 throw new IllegalArgumentException("can't decode dynamic number of zero-length elements");
             }
@@ -233,7 +233,7 @@ final class PackedDecoder {
 
     private static long[] decodeLongArray(UnitType<? extends Number> type, int elementLen, int arrayLen, byte[] buffer, int idx) {
         long[] longs = new long[arrayLen];
-        if(type.unsigned) {
+        if (type.unsigned) {
             Uint uint = new Uint(type.bitLength);
             for (int i = 0; i < arrayLen; i++) {
                 longs[i] = decodeUnsignedLong(uint, buffer, idx, elementLen);

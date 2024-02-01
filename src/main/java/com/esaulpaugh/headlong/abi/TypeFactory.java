@@ -139,7 +139,7 @@ public final class TypeFactory {
     }
 
     static ABIType<?> build(String rawType, String[] elementNames, ABIType<?> baseType, int flags) {
-        if(rawType.length() > MAX_LENGTH_CHARS) {
+        if (rawType.length() > MAX_LENGTH_CHARS) {
             throw new IllegalArgumentException("type length exceeds maximum: " + rawType.length() + " > " + MAX_LENGTH_CHARS);
         }
         return buildUnchecked(rawType, elementNames, baseType, flags);
@@ -157,7 +157,7 @@ public final class TypeFactory {
                 final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType.substring(arrayOpenIndex + 1, lastCharIdx));
                 return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null, flags);
             }
-            if(baseType != null || (baseType = resolveBaseType(rawType, elementNames, flags)) != null) {
+            if (baseType != null || (baseType = resolveBaseType(rawType, elementNames, flags)) != null) {
                 return baseType;
             }
         } catch (StringIndexOutOfBoundsException ignored) { // e.g. type equals "" or "82]" or "[]" or "[1]"
@@ -169,10 +169,10 @@ public final class TypeFactory {
     private static int parseLen(String lenStr) {
         try {
 //            final char first = rawType.charAt(start);
-//            if(leadDigitValid(first) || (first == '0' && end - start == 1)) {
+//            if (leadDigitValid(first) || (first == '0' && end - start == 1)) {
 //                return Integer.parseInt(rawType, start, end, 10); // Java 9+
 //            }
-            if(leadDigitValid(lenStr.charAt(0)) || "0".equals(lenStr)) {
+            if (leadDigitValid(lenStr.charAt(0)) || "0".equals(lenStr)) {
                 return Integer.parseInt(lenStr);
             }
         } catch (NumberFormatException ignored) {
@@ -279,13 +279,13 @@ public final class TypeFactory {
         int depth = 1;
         for (;; i++) {
             char x = parentTypeString.charAt(i);
-            if(x <= ')') {
-                if(x == ')') {
-                    if(depth <= 1) {
+            if (x <= ')') {
+                if (x == ')') {
+                    if (depth <= 1) {
                         return i;
                     }
                     depth--;
-                } else if(x == '(') {
+                } else if (x == '(') {
                     depth++;
                 }
             }

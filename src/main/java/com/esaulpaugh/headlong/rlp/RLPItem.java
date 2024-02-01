@@ -282,8 +282,8 @@ public abstract class RLPItem implements Comparable<RLPItem> {
      */
     @Override
     public final boolean equals(Object o) {
-        if(o == this) return true;
-        if(!(o instanceof RLPItem)) return false;
+        if (o == this) return true;
+        if (!(o instanceof RLPItem)) return false;
         RLPItem other = (RLPItem) o;
 //        return Arrays.equals( // Java 9+ vectorizedMismatch
 //                this.buffer, this.index, this.endIndex,
@@ -318,7 +318,7 @@ public abstract class RLPItem implements Comparable<RLPItem> {
         int thisOffset = this.dataIndex;
         int othrOffset = othr.dataIndex;
         final int end = thisOffset + Math.min(this.dataLength, othr.dataLength);
-        while(thisOffset < end) {
+        while (thisOffset < end) {
             int av = this.buffer[thisOffset++];
             int bv = othr.buffer[othrOffset++];
             if (av != bv) {

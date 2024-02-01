@@ -50,7 +50,7 @@ public final class RLPEncoder {
     }
 
     static void insertListPrefix(int dataLen, ByteBuffer bb) {
-        if(isShort(dataLen)) {
+        if (isShort(dataLen)) {
             bb.put((byte) (LIST_SHORT_OFFSET + dataLen));
         } else {
             bb.put((byte) (LIST_LONG_OFFSET + Integers.len(dataLen)));
@@ -100,10 +100,10 @@ public final class RLPEncoder {
         if (raw instanceof Iterable<?>) {
             return listEncodedLen((Iterable<?>) raw);
         }
-        if(raw instanceof Object[]) {
+        if (raw instanceof Object[]) {
             return listEncodedLen(Arrays.asList((Object[]) raw));
         }
-        if(raw == null) {
+        if (raw == null) {
             throw new NullPointerException();
         }
         throw new IllegalArgumentException("unsupported object type: " + raw.getClass().getName());
@@ -124,10 +124,10 @@ public final class RLPEncoder {
         } else if (raw instanceof Iterable<?>) {
             Iterable<?> elements = (Iterable<?>) raw;
             encodeList(sumEncodedLen(elements), elements, bb);
-        } else if(raw instanceof Object[]) {
+        } else if (raw instanceof Object[]) {
             Iterable<?> elements = Arrays.asList((Object[]) raw);
             encodeList(sumEncodedLen(elements), elements, bb);
-        } else if(raw == null) {
+        } else if (raw == null) {
             throw new NullPointerException();
         } else {
             throw new IllegalArgumentException("unsupported object type: " + raw.getClass().getName());

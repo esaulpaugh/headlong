@@ -52,7 +52,7 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
 
     @Override
     void validateInternal(BigDecimal value) {
-        if(value.scale() != scale) {
+        if (value.scale() != scale) {
             throw new IllegalArgumentException("BigDecimal scale mismatch: expected scale " + scale + " but found " + value.scale());
         }
         validateBigInt(value.unscaledValue());

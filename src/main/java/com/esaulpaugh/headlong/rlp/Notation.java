@@ -112,7 +112,7 @@ public final class Notation {
 
     private static int buildString(StringBuilder sb, byte[] data, int from, int to, boolean addSpace) {
         final int len = to - from;
-        if(!LENIENT && len == 1 && DataType.isSingleByte(data[from])) { // same as (data[from] & 0xFF) < 0x80
+        if (!LENIENT && len == 1 && DataType.isSingleByte(data[from])) { // same as (data[from] & 0xFF) < 0x80
             throw new IllegalArgumentException("invalid rlp for single byte @ " + (from - 1)); // item prefix is 1 byte
         }
         sb.append(BEGIN_STRING).append(Strings.encode(data, from, len, Strings.HEX))
@@ -121,11 +121,11 @@ public final class Notation {
     }
 
     private static int buildLongList(StringBuilder sb, byte[] data, int dataIndex, int end, int depth) {
-        if(depth != 0) {
+        if (depth != 0) {
             sb.append(BEGIN_LIST);
         }
         buildListContent(sb, dataIndex, end, data, false, depth + 1);
-        if(depth != 0) {
+        if (depth != 0) {
             sb.append(getLinePadding(depth)).append(END_LIST + DELIMITER);
         }
         return end;
@@ -144,15 +144,15 @@ public final class Notation {
         final String elementPrefix = shortList ? null : getLinePadding(elementDepth);
         int i = dataIndex;
         while (i < end) {
-            if(!shortList) {
+            if (!shortList) {
                 sb.append(elementPrefix);
             }
             final byte lead = data[i];
             final DataType type = DataType.type(lead);
-            if(type == DataType.SINGLE_BYTE) {
+            if (type == DataType.SINGLE_BYTE) {
                 i = buildString(sb, data, i, i + 1, shortList);
             } else {
-                if(type.isLong && shortList) {
+                if (type.isLong && shortList) {
                     throw new IllegalArgumentException("long element found in short list");
                 }
                 final int diff = lead - type.offset;
@@ -216,25 +216,25 @@ public final class Notation {
 
         while (i < end) {
             int nextObjectIndex = findNextObject(notation, i);
-            if(nextObjectIndex < 0) {
+            if (nextObjectIndex < 0) {
                 return Integer.MAX_VALUE;
             }
 
-            if(i > nextArrayEnd) { // only update nextArrayEnd when i has passed it
+            if (i > nextArrayEnd) { // only update nextArrayEnd when i has passed it
                 nextArrayEnd = notation.indexOf(Notation.END_LIST, i);
-                if(nextArrayEnd < 0) {
+                if (nextArrayEnd < 0) {
                     nextArrayEnd = Integer.MAX_VALUE;
                 }
             }
 
-            if(nextArrayEnd < nextObjectIndex) {
+            if (nextArrayEnd < nextObjectIndex) {
                 return nextArrayEnd + END_LIST.length();
             }
 
-            if(notation.charAt(nextObjectIndex) == '\'') {
+            if (notation.charAt(nextObjectIndex) == '\'') {
                 int datumStart = nextObjectIndex + BEGIN_STRING.length();
                 int datumEnd = notation.indexOf(END_STRING, datumStart);
-                if(datumEnd < 0) {
+                if (datumEnd < 0) {
                     throw new IllegalArgumentException("unterminated string @ " + datumStart);
                 }
                 parent.add(FastHex.decode(notation, datumStart, datumEnd - datumStart));
@@ -250,9 +250,9 @@ public final class Notation {
 
     private static int findNextObject(String notation, int i) {
         final int len = notation.length();
-        for( ; i < len; i++) {
+        for ( ; i < len; i++) {
             char c = notation.charAt(i);
-            if(c == '\'' || c == '[') return i; // char values hardcoded
+            if (c == '\'' || c == '[') return i; // char values hardcoded
         }
         return -1;
     }

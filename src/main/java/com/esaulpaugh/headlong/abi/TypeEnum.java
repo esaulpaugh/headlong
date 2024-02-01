@@ -45,7 +45,7 @@ public enum TypeEnum {
     }
 
     public static TypeEnum parse(String typeString) {
-        if(typeString == null) {
+        if (typeString == null) {
             return FUNCTION;
         }
         switch (typeString) {

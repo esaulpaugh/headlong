@@ -35,16 +35,16 @@ public final class Uint {
     public final long maskLong;
 
     public Uint(int numBits) {
-        if(numBits < 0) {
+        if (numBits < 0) {
             throw new IllegalArgumentException("numBits must be non-negative");
         }
-        if(numBits > MAX_BIT_LEN) {
+        if (numBits > MAX_BIT_LEN) {
             throw new IllegalArgumentException("numBits exceeds limit: " + numBits + " > " + MAX_BIT_LEN);
         }
         this.numBits = numBits;
         this.range = BigInteger.ONE.shiftLeft(numBits); // BigInteger.ONE.pow(numBits)
         long rangeLong = ZERO, halfRangeLong = ZERO, maskLong = ZERO;
-        if(range.bitLength() < Long.SIZE) {
+        if (range.bitLength() < Long.SIZE) {
             rangeLong = range.longValue();
             halfRangeLong = rangeLong >> 1;
             maskLong = rangeLong - 1;
@@ -56,12 +56,12 @@ public final class Uint {
     }
 
     public long toSignedLong(long unsigned) {
-        if(rangeLong != ZERO) {
-            if(unsigned < 0) {
+        if (rangeLong != ZERO) {
+            if (unsigned < 0) {
                 throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
             }
             final int bitLen = Integers.bitLen(unsigned);
-            if(bitLen <= numBits) {
+            if (bitLen <= numBits) {
                 // if in upper half of range, subtract range
                 return unsigned >= halfRangeLong
                         ? unsigned - rangeLong
@@ -73,11 +73,11 @@ public final class Uint {
     }
 
     public BigInteger toSigned(BigInteger unsigned) {
-        if(unsigned.compareTo(BigInteger.ZERO) < 0) {
+        if (unsigned.compareTo(BigInteger.ZERO) < 0) {
             throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
         }
         final int bitLen = unsigned.bitLength();
-        if(bitLen <= numBits) {
+        if (bitLen <= numBits) {
             // if in upper half of range, subtract range
             return unsigned.compareTo(halfRange) >= 0
                     ? unsigned.subtract(range)
@@ -87,9 +87,9 @@ public final class Uint {
     }
 
     public long toUnsignedLong(long signed) {
-        if(maskLong != ZERO) {
+        if (maskLong != ZERO) {
             final int bitLen = Integers.bitLen(signed < 0 ? ~signed : signed);
-            if(bitLen < numBits) {
+            if (bitLen < numBits) {
                 return signed & maskLong;
             }
             throw tooManyBitsException(bitLen, numBits, true);
@@ -103,7 +103,7 @@ public final class Uint {
 
     public BigInteger toUnsigned(BigInteger signed) {
         final int bitLen = signed.bitLength();
-        if(bitLen < numBits) {
+        if (bitLen < numBits) {
             return signed.compareTo(BigInteger.ZERO) >= 0
                     ? signed
                     : signed.add(range);

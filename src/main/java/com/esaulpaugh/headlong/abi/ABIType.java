@@ -204,7 +204,7 @@ public abstract class ABIType<J> {
         ByteBuffer bb = ByteBuffer.wrap(buffer, offset, len);
         J decoded = decode(bb);
         final int remaining = bb.remaining();
-        if(remaining == 0) {
+        if (remaining == 0) {
             return decoded;
         }
         throw new IllegalArgumentException("unconsumed bytes: " + remaining + " remaining");
@@ -267,7 +267,7 @@ public abstract class ABIType<J> {
 
     static void insertInt(BigInteger signed, int paddedLen, ByteBuffer dest) {
         final byte[] arr = signed.toByteArray();
-        if(arr.length <= paddedLen) {
+        if (arr.length <= paddedLen) {
             insertPadding(paddedLen - arr.length, signed.signum() < 0, dest);
             dest.put(arr, 0, arr.length);
         } else {
@@ -276,7 +276,7 @@ public abstract class ABIType<J> {
     }
 
     private static void insertPadding(int n, boolean negativeOnes, ByteBuffer dest) {
-        if(negativeOnes) {
+        if (negativeOnes) {
             insertFFPadding(n, dest);
         } else {
             insert00Padding(n, dest);
@@ -309,8 +309,8 @@ public abstract class ABIType<J> {
 
     static String finishFormat(byte[] buffer, int offset, int end, IntFunction<String> labeler, StringBuilder sb) {
         int row = 0;
-        while(offset < end) {
-            if(offset > 0) {
+        while (offset < end) {
+            if (offset > 0) {
                 sb.append('\n');
             }
             sb.append(labeler.apply(row++))
@@ -345,13 +345,13 @@ public abstract class ABIType<J> {
         case "Z": sb.append("boolean"); break;
         default:
             int lastDotIndex = base.lastIndexOf('.');
-            if(lastDotIndex != -1) {
+            if (lastDotIndex != -1) {
                 sb.append(base, lastDotIndex + 1, base.length() - (base.charAt(0) == 'L' ? 1 : 0));
             }
         }
-        if(hasArraySuffix) {
+        if (hasArraySuffix) {
             int i = 0;
-            if(arrayLen >= 0) {
+            if (arrayLen >= 0) {
                 sb.append('[').append(arrayLen).append(']');
                 i++;
             }

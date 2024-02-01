@@ -111,7 +111,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
 
     @Override
     int byteLength(A value) {
-        if(!dynamic) return headLength;
+        if (!dynamic) return headLength;
         return dynamicByteLength(value);
     }
 
@@ -132,7 +132,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     }
 
     private int staticByteLengthPacked() {
-        if(length == DYNAMIC_LENGTH) {
+        if (length == DYNAMIC_LENGTH) {
             throw new IllegalArgumentException("array of dynamic elements");
         }
         return length * elementType.byteLengthPacked(null);
@@ -141,7 +141,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     @SuppressWarnings("unchecked")
     @Override
     int byteLengthPacked(A value) {
-        if(value == null) {
+        if (value == null) {
             return staticByteLengthPacked();
         }
         switch (elementType.typeCode()) {
@@ -227,7 +227,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     }
 
     private int checkLength(final int valueLen, Object value) {
-        if(length != DYNAMIC_LENGTH && length != valueLen) {
+        if (length != DYNAMIC_LENGTH && length != valueLen) {
             throw mismatchErr("array length",
                     friendlyClassName(value.getClass(), valueLen), friendlyClassName(clazz, length),
                     "length " + length, "" + valueLen);
@@ -331,7 +331,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
         case TYPE_CODE_ADDRESS:
-            for(E e : (E[]) value) {
+            for (E e : (E[]) value) {
                 elementType.encodePackedUnchecked(e, dest);
             }
             return;
@@ -389,7 +389,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
                                             : legacyDecode
                                                 ? arrayLen
                                                 : Integers.roundLengthUp(arrayLen, UNIT_LENGTH_BYTES);
-        if(remaining < minByteLen) {
+        if (remaining < minByteLen) {
             throw new IllegalArgumentException("not enough bytes remaining: " + remaining + " < " + minByteLen);
         }
     }
@@ -398,7 +398,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         final boolean[] booleans = new boolean[len]; // elements are false by default
         int i = 0;
         try {
-            for( ; i < len; i++) {
+            for ( ; i < len; i++) {
                 bb.get(unitBuffer);
                 int j;
                 for (j = 0; j < UNIT_LENGTH_BYTES - Byte.BYTES; j++) {
@@ -435,7 +435,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         int[] ints = new int[len];
         int i = 0;
         try {
-            for (; i < len; i++) {
+            for ( ; i < len; i++) {
                 ints[i] = intType.decode(bb, unitBuffer);
             }
         } catch (IllegalArgumentException cause) {
@@ -448,7 +448,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         long[] longs = new long[len];
         int i = 0;
         try {
-            for (; i < len; i++) {
+            for ( ; i < len; i++) {
                 longs[i] = longType.decode(bb, unitBuffer);
             }
         } catch (IllegalArgumentException cause) {

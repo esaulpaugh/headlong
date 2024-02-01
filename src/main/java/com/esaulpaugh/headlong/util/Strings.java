@@ -72,7 +72,7 @@ public final class Strings {
     }
 
     public static byte[] decode(String str, int encoding) {
-        if(str.isEmpty()) {
+        if (str.isEmpty()) {
             return EMPTY_BYTE_ARRAY;
         }
         switch (encoding) {
