@@ -41,7 +41,7 @@ import static com.esaulpaugh.headlong.jmh.Main.THREE;
 public class MeasureFunction {
 
     private static final Function F = new Function("sam(bytes,bool,uint256[])", "(bytes,uint256[3],bool)");
-    private static final TupleType T = F.getInputs();
+    private static final TupleType<?> T = F.getInputs();
     private static final Triple<byte[], Boolean, BigInteger[]> ARGS = Triple.of(
             Strings.decode("dave", Strings.UTF_8),
             true,
