@@ -108,6 +108,7 @@ public final class Address {
         throw new IllegalArgumentException("invalid checksum");
     }
 
+    @SuppressWarnings("deprecation")
     public static String toChecksumAddress(final BigInteger address) {
         final String minimalHex = address.toString(HEX_RADIX);
         final int start = ADDRESS_LEN_CHARS - minimalHex.length();
@@ -115,10 +116,7 @@ public final class Address {
             throw new IllegalArgumentException("invalid bit length: " + address.bitLength());
         }
         final byte[] addressBytes = "0x0000000000000000000000000000000000000000".getBytes(StandardCharsets.US_ASCII);
-        int i = start;
-        do {
-            addressBytes[i] = (byte) minimalHex.charAt(i - start);
-        } while (++i < addressBytes.length);
+        minimalHex.getBytes(0, minimalHex.length(), addressBytes, start);
         return doChecksum(addressBytes);
     }
 
