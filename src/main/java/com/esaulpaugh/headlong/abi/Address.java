@@ -122,6 +122,27 @@ public final class Address {
         return doChecksum(addressBytes);
     }
 
+    private static final byte[] LOWERCASE = new byte[1 << Byte.SIZE];
+    private static final byte[] UPPERCASE = new byte[1 << Byte.SIZE];
+    static {
+        String lowers = "abcdef";
+        String uppers = "ABCDEF";
+        String nums = "0123456789";
+        for (int i = 0; i < nums.length(); i++) {
+            int d = nums.charAt(i);
+            LOWERCASE[d] = (byte) d;
+            UPPERCASE[d] = (byte) d;
+            if (i < lowers.length()) {
+                int lo = lowers.charAt(i);
+                int hi = uppers.charAt(i);
+                LOWERCASE[lo] = (byte) lo;
+                LOWERCASE[hi] = (byte) lo;
+                UPPERCASE[lo] = (byte) hi;
+                UPPERCASE[hi] = (byte) hi;
+            }
+        }
+    }
+
     /**
      * @see <a href="https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md#implementation">EIP-55</a>
      * @param address   the hexadecimal Ethereum address
@@ -132,7 +153,9 @@ public final class Address {
             checkPrefix(address);
             final byte[] addressBytes = "0x0000000000000000000000000000000000000000".getBytes(StandardCharsets.US_ASCII);
             for (int i = PREFIX_LEN; i < addressBytes.length; i++) {
-                addressBytes[i] = (byte) getLowercaseHex(address, i);
+                final byte val = LOWERCASE[address.charAt(i)];
+                if (val == 0) throw new IllegalArgumentException("illegal hex val @ " + i);
+                addressBytes[i] = val;
             }
             return doChecksum(addressBytes);
         }
@@ -158,19 +181,9 @@ public final class Address {
         final byte[] hash = FastHex.encodeToBytes(buffer);
         for (int i = PREFIX_LEN; i < addressBytes.length; i++) { // hash and addressBytes both length 42
             switch (hash[i]) {
-            case'8':case'9':case'a':case'b':case'c':case'd':case'e':case'f': addressBytes[i] = (byte) Character.toUpperCase(addressBytes[i]);
+            case'8':case'9':case'a':case'b':case'c':case'd':case'e':case'f': addressBytes[i] = UPPERCASE[addressBytes[i]];
             }
         }
         return new String(addressBytes, 0, 0, addressBytes.length);
-    }
-
-    private static int getLowercaseHex(final String address, final int i) {
-        final int c = address.charAt(i);
-        switch (c) {
-        case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
-        case 'a':case 'b':case 'c':case 'd':case 'e':case 'f': return c;
-        case 'A':case 'B':case 'C':case 'D':case 'E':case 'F': return c + ('a' - 'A');
-        default: throw new IllegalArgumentException("illegal hex val @ " + i);
-        }
     }
 }
