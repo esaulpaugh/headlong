@@ -89,10 +89,10 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
 
     @Override
     Class<?> arrayClass() {
-        if(arrayClass != null) {
+        if (arrayClass != null) {
             return arrayClass;
         }
-        return Array.newInstance(clazz, 0)
+        return createArray(clazz, 0)
                 .getClass();
     }
 
