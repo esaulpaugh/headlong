@@ -477,6 +477,7 @@ public class TupleTest {
 
     @Test
     public void testDecodeIndex2() {
+        final String huffy = "One's simple recognition, amidst those in his sphere of existence, of the facts of a situation presents a danger; a man's embodied confrontation of awkward truths demands fortitude, for genuine behaviors may upset the egg-shell equilibrium of ethereal yet ever-present expectations. Violate another man's expectations and he is liable to exact an instantaneous huffy revenge.\n\nConversely, adopting pretense and thoughtlessly treading the socially prescribed path risks immediate agony. No more than the act of swigging, as one might do when faced with compatriots wielding a bottle of particularly loathsome rum, may bring with it (an uncharacteristically timely) divine punishment of sorts \u2014 perchance, the remorse of a misplaced wallet amid inebriated vagaries. And yet, the man in question will feign pleasure while dancing on the precipice of emptying his belly onto the road.";
         TupleType<Tuple> tt = TupleType.parse("(bool,uint16,address,int64,uint64,address,string[][])");
         Tuple args = Tuple.from(
                 true,
@@ -485,7 +486,7 @@ public class TupleTest {
                 100L,
                 BigInteger.valueOf(110L),
                 Address.wrap("0x0000110000111100001111110000111111110000"),
-                new String[][] { new String[] { "yabba", "dabba", "doo" }, new String[] { "" } }
+                new String[][] { new String[] { "yabba", "dabba", "doo" }, new String[] { huffy } }
         );
         final ByteBuffer bb = tt.encode(args);
         boolean bool = tt.decode(bb, 0);
@@ -501,7 +502,7 @@ public class TupleTest {
         Address address2 = tt.decode(bb, 5);
         assertEquals(Address.wrap("0x0000110000111100001111110000111111110000"), address2);
         String[][] arrs = tt.decode(bb, 6);
-        assertTrue(Objects.deepEquals(new String[][] { new String[] { "yabba", "dabba", "doo" }, new String[] { "" } }, arrs));
+        assertTrue(Objects.deepEquals(new String[][] { new String[] { "yabba", "dabba", "doo" }, new String[] { new String(huffy) } }, arrs));
     }
 
     @Test
