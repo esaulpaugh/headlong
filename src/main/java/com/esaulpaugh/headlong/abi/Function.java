@@ -233,10 +233,9 @@ public final class Function implements ABIObject {
         return decodeCall(ByteBuffer.wrap(call), indices);
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T decodeCall(ByteBuffer buffer, int... indices) {
         checkSelector(buffer);
-        return (T) inputTypes.decode(buffer, indices);
+        return inputTypes.decode(buffer, indices);
     }
 
     private void checkSelector(ByteBuffer bb) {
@@ -276,9 +275,8 @@ public final class Function implements ABIObject {
      * @param <T>   {@link Tuple} if decoding multiple elements
      * @return  the decoded elements
      */
-    @SuppressWarnings("unchecked")
     public <T> T decodeReturn(ByteBuffer buf, int... indices) {
-        return (T) outputTypes.decode(buf, indices);
+        return outputTypes.decode(buf, indices);
     }
 
     @SuppressWarnings("unchecked")
