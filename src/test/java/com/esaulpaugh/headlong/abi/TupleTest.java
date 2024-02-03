@@ -36,6 +36,7 @@ import static com.esaulpaugh.headlong.TestUtils.uniformBigInteger;
 import static com.esaulpaugh.headlong.TestUtils.uniformLong;
 import static com.esaulpaugh.headlong.TestUtils.wildBigInteger;
 import static com.esaulpaugh.headlong.TestUtils.wildLong;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -477,7 +478,16 @@ public class TupleTest {
 
     @Test
     public void testDecodeIndex2() {
-        final String huffy = "One's simple recognition, amidst those in his sphere of existence, of the facts of a situation presents a danger; a man's embodied confrontation of awkward truths demands fortitude, for genuine behaviors may upset the egg-shell equilibrium of ethereal yet ever-present expectations. Violate another man's expectations and he is liable to exact an instantaneous huffy revenge.\n\nAdopting pretense and thoughtlessly treading the socially prescribed path likewise risks immediate agony. No more than the act of swigging, as one might do when faced with compatriots wielding a bottle of particularly loathsome rum, may bring with it (an uncharacteristically timely) divine punishment of sorts \u2014 perchance the remorse of a mislaid wallet after inebriated vagaries. And yet, the man in question will persist in feigning pleasure while he dances on the precipice of emptying his belly onto the road.";
+        final String en = "One\u2019s simple recognition, amidst those in his sphere of existence, of the facts of a situation presents a danger; a man\u2019s embodied confrontation of awkward truths demands fortitude, for genuine behaviors may upset the egg-shell equilibrium of ethereal yet ever-present expectations. Violate another man\u2019s expectations and he is liable to exact an instantaneous huffy revenge.\n\nAdopting pretense and thoughtlessly treading the socially prescribed path likewise risks immediate agony. No more than the act of swigging, as one might do when faced with compatriots wielding a bottle of particularly loathsome rum, may bring with it (an uncharacteristically timely) divine punishment of sorts \u2014 perchance the remorse of a mislaid wallet after inebriated vagaries. And yet, the man in question will persist in feigning pleasure while he dances on the precipice of emptying his belly onto the road.";
+        final String[] fr = {
+                "\n\n",
+                "La simple reconnaissance d'un homme, au milieu de ceux dans sa sph\u00E8re d'existence, des faits d'une situation pr\u00E9sente un danger\u00A0; la confrontation incarn\u00E9e d'un homme avec des v\u00E9rit\u00E9s g\u00EAnantes exige du courage, car les comportements authentiques peuvent perturber l'\u00E9quilibre fragile des attentes \u00E9th\u00E9r\u00E9es mais toujours pr\u00E9sentes. Violez les attentes d'un autre homme et il est susceptible d'exiger une vengeance froiss\u00E9e instantan\u00E9e.",
+                "\n\n",
+                "Adopter le faux-semblant et suivre sans r\u00E9fl\u00E9chir le chemin socialement prescrit risque \u00E9galement une agonie imm\u00E9diate. Pas plus que l'acte de boire \u00E0 grandes gorg\u00E9es, comme on pourrait le faire face \u00E0 des compatriotes brandissant une bouteille de rhum particuli\u00E8rement infect, peut apporter avec lui une punition divine (\u00E9tonnamment opportune) \u2014 peut-\u00EAtre le remords d'un portefeuille \u00E9gar\u00E9 apr\u00E8s des vagabondages \u00E9m\u00E9ch\u00E9s. Et pourtant, l'homme en question persistera \u00E0 feindre le plaisir alors qu'il danse sur le pr\u00E9cipice de vider son ventre sur la route.",
+                "\n\n",
+                "N'est-ce pas ainsi\u00A0?\n"
+        };
+//        Arrays.stream(fr).forEach(System.out::print);
         TupleType<Tuple> tt = TupleType.parse("(bool,uint16,address,int64,uint64,address,string[][])");
         Tuple args = Tuple.from(
                 true,
@@ -486,7 +496,7 @@ public class TupleTest {
                 100L,
                 BigInteger.valueOf(110L),
                 Address.wrap("0x0000110000111100001111110000111111110000"),
-                new String[][] { new String[] { "yabba", "dabba", "doo" }, new String[] { huffy } }
+                new String[][] { new String[] { en, fr[5], fr[1] }, new String[] { fr[4], fr[3] }, new String[] { fr[2] } }
         );
         final ByteBuffer bb = tt.encode(args);
         boolean bool = tt.decode(bb, 0);
@@ -502,7 +512,7 @@ public class TupleTest {
         Address address2 = tt.decode(bb, 5);
         assertEquals(Address.wrap("0x0000110000111100001111110000111111110000"), address2);
         String[][] arrs = tt.decode(bb, 6);
-        assertTrue(Objects.deepEquals(new String[][] { new String[] { "yabba", "dabba", "doo" }, new String[] { new String(huffy) } }, arrs));
+        assertArrayEquals(new String[][] { new String[] { en, fr[5], fr[1] }, new String[] { fr[4], fr[3] }, new String[] { fr[2] } }, arrs);
     }
 
     @Test
