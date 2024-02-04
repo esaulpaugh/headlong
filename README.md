@@ -23,24 +23,24 @@ Function baz = Function.parse("baz(uint32,bool)"); // canonicalizes and parses a
 // or
 Function f2 = Function.fromJson("{\"type\":\"function\",\"name\":\"foo\",\"inputs\":[{\"name\":\"complex_nums\",\"type\":\"tuple[]\",\"components\":[{\"name\":\"real\",\"type\":\"fixed168x10\"},{\"name\":\"imaginary\",\"type\":\"fixed168x10\"}]}]}");
 
-Tuple bazArgs = Tuple.of(69L, true);
+Pair<Long, Boolean> bazArgs = Tuple.of(69L, true);
 Tuple complexNums = Single.of(new Tuple[] { Tuple.of(new BigDecimal("0.0090000000"), new BigDecimal("1.9500000000")) });
 
 // Two equivalent styles:
-ByteBuffer one = baz.encodeCall(bazArgs);
-ByteBuffer two = baz.encodeCallWithArgs(69L, true);
+ByteBuffer bazCall = baz.encodeCall(bazArgs);
+ByteBuffer bazCall2 = baz.encodeCallWithArgs(69L, true);
 
-System.out.println("baz call hex:\n" + Strings.encode(one) + "\n"); // hexadecimal encoding (without 0x prefix)
+System.out.println("baz call hex:\n" + Strings.encode(bazCall) + "\n"); // hexadecimal encoding (without 0x prefix)
 
-Tuple recoveredArgs = baz.decodeCall(two); // decode the encoding back to the original args
+Tuple recoveredArgs = baz.decodeCall(bazCall2); // decode the encoding back to the original args
 
 System.out.println("baz args:\n" + recoveredArgs + "\n"); // toString()
 System.out.println("equal:\n" + recoveredArgs.equals(bazArgs) + "\n"); // test for equality
 
-System.out.println("baz call debug:\n" + Function.formatCall(one.array()) + "\n"); // human-readable, for debugging function calls (expects input to start with 4-byte selector)
-System.out.println("baz args debug:\n" + ABIType.format(baz.getInputs().encode(bazArgs).array()) + "\n"); // human-readable, for debugging encodings without a selector
-System.out.println("f2 call debug:\n" + Function.formatCall(f2.encodeCall(complexNums).array()) + "\n");
-System.out.println("f2 args debug:\n" + ABIType.format(f2.getInputs().encode(complexNums).array()));
+System.out.println("baz call debug:\n" + baz.annotateCall(bazCall.array()) + "\n"); // human-readable, for debugging function calls (expects input to start with 4-byte selector)
+System.out.println("baz args debug:\n" + baz.getInputs().annotate(bazArgs) + "\n"); // human-readable, for debugging encodings without a selector
+System.out.println("f2 call debug:\n" + f2.annotateCall(complexNums) + "\n");
+System.out.println("f2 args debug:\n" + f2.getInputs().annotate(complexNums));
 ```
 
 #### Decoding Return Values
@@ -85,7 +85,7 @@ ByteBuffer b1 = tt.getNonCapturing(2).encode(new BigInteger[][] {  }); // encode
 #### Misc
 
 ```java
-Event event = Event.fromJson("{\"type\":\"event\",\"name\":\"an_event\",\"inputs\":[{\"name\":\"a\",\"type\":\"bytes\",\"indexed\":true},{\"name\":\"b\",\"type\":\"uint256\",\"indexed\":false}],\"anonymous\":true}");
+Event<?> event = Event.fromJson("{\"type\":\"event\",\"name\":\"an_event\",\"inputs\":[{\"name\":\"a\",\"type\":\"bytes\",\"indexed\":true},{\"name\":\"b\",\"type\":\"uint256\",\"indexed\":false}],\"anonymous\":true}");
 Tuple args = event.decodeArgs(new byte[][] { new byte[32] }, new byte[32]);
 System.out.println(event);
 System.out.println(args);
