@@ -18,8 +18,10 @@ package com.esaulpaugh.headlong.rlp;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
+import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -55,7 +57,12 @@ public class NotationTest {
             ")";
 
     @Test
-    public void test() {
+    public void test() throws Throwable {
+
+        final byte[] bytes = new byte[770];
+        Arrays.fill(bytes, (byte)'[');
+        final String not = Strings.encode(bytes, Strings.UTF_8);
+        assertThrown(IllegalArgumentException.class, "exceeds max depth: 769", () -> Notation.parse(not));
 
         String notation = Notation.encodeToString(ENCODING); // Arrays.copyOfRange(rlp, 10, rlp.length)
         assertEquals(notation, Notation.encodeToString(ENCODING));

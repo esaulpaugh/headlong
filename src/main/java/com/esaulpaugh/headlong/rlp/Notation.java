@@ -31,12 +31,12 @@ public final class Notation {
 
     private static final String BEGIN_NOTATION = "(";
     private static final String END_NOTATION = "\n)";
-
-    private static final String BEGIN_LIST = "[";
-    private static final String END_LIST = "]";
-    private static final String BEGIN_STRING = "'";
-    private static final String END_STRING = "'";
+    private static final char BEGIN_LIST = '[';
+    private static final char END_LIST = ']';
+    private static final char BEGIN_STRING = '\'';
+    private static final char END_STRING = BEGIN_STRING;
     private static final String DELIMITER = ",";
+    private static final String SPACE = " ";
 
     private static final String[] LINE_PADDING_CACHE;
 
@@ -116,7 +116,7 @@ public final class Notation {
             throw new IllegalArgumentException("invalid rlp for single byte @ " + (from - 1)); // item prefix is 1 byte
         }
         sb.append(BEGIN_STRING).append(Strings.encode(data, from, len, Strings.HEX))
-                .append(addSpace ? END_STRING + DELIMITER + ' ' : END_STRING + DELIMITER);
+                .append(addSpace ? END_STRING + DELIMITER + SPACE : END_STRING + DELIMITER);
         return to;
     }
 
@@ -132,11 +132,11 @@ public final class Notation {
     }
 
     private static int buildShortList(StringBuilder sb, byte[] data, int dataIndex, int end, int depth, boolean addSpace) {
-        sb.append(BEGIN_LIST + ' ');
+        sb.append(BEGIN_LIST + SPACE);
         buildListContent(sb, dataIndex, end, data, true, depth + 1);
         sb.append(addSpace
-                ? ' ' + END_LIST + DELIMITER + ' '
-                : ' ' + END_LIST + DELIMITER);
+                ? SPACE + END_LIST + DELIMITER + SPACE
+                : SPACE + END_LIST + DELIMITER);
         return end;
     }
 
@@ -168,7 +168,7 @@ public final class Notation {
             }
         }
         if (/* hasElement */ dataIndex != end) {
-            sb.setLength(sb.length() - (shortList ? DELIMITER + ' ' : DELIMITER).length()); // trim
+            sb.setLength(sb.length() - (shortList ? DELIMITER + SPACE : DELIMITER).length()); // trim
         }
     }
 
@@ -199,7 +199,6 @@ public final class Notation {
         return value;
     }
 // ---------------------------------------------------------------------------------------------------------------------
-
     /**
      * Returns the object hierarchy represented by the notation.
      *
@@ -208,52 +207,38 @@ public final class Notation {
      */
     public static List<Object> parse(String notation) {
         List<Object> topLevelObjects = new ArrayList<>(); // a sequence (as in RLPEncoder.sequence)
-        parse(notation, 0, -1, notation.length(), topLevelObjects);
+        parse(notation, 0, notation.length(), topLevelObjects, 0);
         return topLevelObjects;
     }
 
-    private static int parse(final String notation, int i, int nextArrayEnd, final int end, final List<Object> parent) {
+    private static final int MAX_DEPTH = 768;
 
+    private static int parse(final String notation, int i, final int end, final List<Object> parent, int depth) {
         while (i < end) {
-            int nextObjectIndex = findNextObject(notation, i);
-            if (nextObjectIndex < 0) {
-                return Integer.MAX_VALUE;
-            }
-
-            if (i > nextArrayEnd) { // only update nextArrayEnd when i has passed it
-                nextArrayEnd = notation.indexOf(Notation.END_LIST, i);
-                if (nextArrayEnd < 0) {
-                    nextArrayEnd = Integer.MAX_VALUE;
+            switch (notation.charAt(i)) {
+            case BEGIN_LIST:
+                if (depth > MAX_DEPTH) {
+                    throw new IllegalArgumentException("exceeds max depth: " + depth);
                 }
-            }
-
-            if (nextArrayEnd < nextObjectIndex) {
-                return nextArrayEnd + END_LIST.length();
-            }
-
-            if (notation.charAt(nextObjectIndex) == '\'') {
-                int datumStart = nextObjectIndex + BEGIN_STRING.length();
-                int datumEnd = notation.indexOf(END_STRING, datumStart);
+                List<Object> childList = new ArrayList<>();
+                i = parse(notation, i + 1, end, childList, depth + 1);
+                parent.add(childList);
+                break;
+            case END_LIST:
+                return i + 1;
+            case BEGIN_STRING:
+                final int datumStart = i + 1;
+                final int datumEnd = notation.indexOf(END_STRING, datumStart);
                 if (datumEnd < 0) {
                     throw new IllegalArgumentException("unterminated string @ " + datumStart);
                 }
                 parent.add(FastHex.decode(notation, datumStart, datumEnd - datumStart));
-                i = datumEnd + END_STRING.length();
-            } else {
-                List<Object> childList = new ArrayList<>();
-                i = parse(notation, nextObjectIndex + BEGIN_LIST.length(), nextArrayEnd, end, childList);
-                parent.add(childList);
+                i = datumEnd + 1;
+                break;
+            default:
+                i++;
             }
         }
         return Integer.MAX_VALUE;
-    }
-
-    private static int findNextObject(String notation, int i) {
-        final int len = notation.length();
-        for ( ; i < len; i++) {
-            char c = notation.charAt(i);
-            if (c == '\'' || c == '[') return i; // char values hardcoded
-        }
-        return -1;
     }
 }
