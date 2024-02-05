@@ -217,8 +217,8 @@ public final class Notation {
         while (i < end) {
             switch (notation.charAt(i)) {
             case BEGIN_LIST:
-                if (depth > MAX_DEPTH) {
-                    throw new IllegalArgumentException("exceeds max depth: " + depth);
+                if (depth >= MAX_DEPTH) {
+                    throw new IllegalArgumentException("exceeds max depth of " + MAX_DEPTH);
                 }
                 List<Object> childList = new ArrayList<>();
                 i = parse(notation, i + 1, end, childList, depth + 1);

@@ -59,10 +59,10 @@ public class NotationTest {
     @Test
     public void test() throws Throwable {
 
-        final byte[] bytes = new byte[770];
+        final byte[] bytes = new byte[769];
         Arrays.fill(bytes, (byte)'[');
         final String not = Strings.encode(bytes, Strings.UTF_8);
-        assertThrown(IllegalArgumentException.class, "exceeds max depth: 769", () -> Notation.parse(not));
+        assertThrown(IllegalArgumentException.class, "exceeds max depth of 768", () -> Notation.parse(not));
 
         String notation = Notation.encodeToString(ENCODING); // Arrays.copyOfRange(rlp, 10, rlp.length)
         assertEquals(notation, Notation.encodeToString(ENCODING));
