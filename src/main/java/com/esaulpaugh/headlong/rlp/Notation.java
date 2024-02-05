@@ -216,16 +216,6 @@ public final class Notation {
     private static int parse(final String notation, int i, final int end, final List<Object> parent, int depth) {
         while (i < end) {
             switch (notation.charAt(i)) {
-            case BEGIN_LIST:
-                if (depth >= MAX_DEPTH) {
-                    throw new IllegalArgumentException("exceeds max depth of " + MAX_DEPTH);
-                }
-                List<Object> childList = new ArrayList<>();
-                i = parse(notation, i + 1, end, childList, depth + 1);
-                parent.add(childList);
-                break;
-            case END_LIST:
-                return i + 1;
             case BEGIN_STRING:
                 final int datumStart = i + 1;
                 final int datumEnd = notation.indexOf(END_STRING, datumStart);
@@ -234,7 +224,17 @@ public final class Notation {
                 }
                 parent.add(FastHex.decode(notation, datumStart, datumEnd - datumStart));
                 i = datumEnd + 1;
-                break;
+                continue;
+            case BEGIN_LIST:
+                if (depth >= MAX_DEPTH) {
+                    throw new IllegalArgumentException("exceeds max depth of " + MAX_DEPTH);
+                }
+                List<Object> childList = new ArrayList<>();
+                i = parse(notation, i + 1, end, childList, depth + 1);
+                parent.add(childList);
+                continue;
+            case END_LIST:
+                return i + 1;
             default:
                 i++;
             }
