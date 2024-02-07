@@ -197,11 +197,8 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     private void encodeDynamic(Object[] values, ByteBuffer dest) {
-        if (values.length == 0) {
-            return;
-        }
         int i = 0;
-        final int last = values.length - 1;
+        final int last = values.length - 1; // dynamic tuples are guaranteed not to be empty
         int offset = firstOffset;
         for (;; i++) {
             final ABIType<Object> t = get(i);
