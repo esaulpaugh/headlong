@@ -215,12 +215,13 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                 offset += t.dynamicByteLength(values[i]); // calculate next offset
             }
         }
-        for (i = 0; i < values.length; i++) {
+        i = 0;
+        do {
             final ABIType<Object> t = get(i);
             if (t.dynamic) {
                 t.encodeTail(values[i], dest);
             }
-        }
+        } while (++i < values.length);
     }
 
     @Override
