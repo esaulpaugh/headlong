@@ -229,18 +229,25 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         final Object[] elements = new Object[size()];
         int i = 0;
         try {
+            if (!dynamic) {
+                for ( ; i < elements.length; i++) {
+                    elements[i] = get(i).decode(bb, unitBuffer);
+                }
+                return Tuple.create(elements);
+            }
             final int start = bb.position(); // save this value before offsets are decoded
             final int[] offsets = new int[elements.length];
-            for ( ; i < elements.length; i++) {
-                ABIType<?> t = elementTypes[i];
+            do {
+                ABIType<?> t = get(i);
                 if (!t.dynamic) {
                     elements[i] = t.decode(bb, unitBuffer);
                 } else {
                     final int offset = IntType.UINT31.decode(bb, unitBuffer);
                     offsets[i] = offset == 0 ? -1 : offset;
                 }
-            }
-            for (i = 0; i < elements.length; i++) {
+            } while (++i < elements.length);
+            i = 0;
+            do {
                 final int offset = offsets[i];
                 if (offset != 0) {
                     final int jump = start + offset;
@@ -248,9 +255,9 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                         /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
                         bb.position(offset == -1 ? start : jump); // leniently jump to specified offset
                     }
-                    elements[i] = elementTypes[i].decode(bb, unitBuffer);
+                    elements[i] = get(i).decode(bb, unitBuffer);
                 }
-            }
+            } while (++i < elements.length);
         } catch (IllegalArgumentException cause) {
             throw decodeException(true, i, cause);
         }
