@@ -155,7 +155,11 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         if (value.size() == this.size()) {
             return countBytes(i -> validateObject(get(i), value.elements[i]));
         }
-        throw new IllegalArgumentException("tuple length mismatch: expected length " + this.size() + " but found " + value.size());
+        throw lengthMismatch(value);
+    }
+
+    private IllegalArgumentException lengthMismatch(Tuple args) {
+        throw new IllegalArgumentException("tuple length mismatch: expected length " + this.size() + " but found " + args.size());
     }
 
     private static int validateObject(ABIType<Object> type, Object value) {
@@ -443,16 +447,19 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
      * This method is subject to change or removal in a future release.
      */
     public String annotate(Tuple tuple) {
-        if (tuple.elements.length == 0) {
+        if (size() != tuple.elements.length) {
+            throw lengthMismatch(tuple);
+        }
+        if (size() == 0) {
             return "";
         }
         int row = 0;
         final StringBuilder sb = new StringBuilder();
         int i = 0;
-        final int last = tuple.elements.length - 1;
+        final int last = size() - 1;
         int offset = firstOffset;
         final byte[] rowBuffer = newUnitBuffer();
-        for (;; i++) {
+        do {
             final ABIType<Object> t = get(i);
             if (!t.dynamic) {
                 row = encodeTailAnnotated(sb, row, i, tuple.elements[i]);
@@ -466,13 +473,15 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                 }
                 offset += t.dynamicByteLength(tuple.elements[i]); // calculate next offset
             }
-        }
-        for (i = 0; i < tuple.elements.length; i++) {
+            i++;
+        } while (true);
+        i = 0;
+        do {
             final ABIType<Object> t = get(i);
             if (t.dynamic) {
                 row = encodeTailAnnotated(sb,  row, i, tuple.elements[i]);
             }
-        }
+        } while (++i < size());
         return sb.toString();
     }
 
