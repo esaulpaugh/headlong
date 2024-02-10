@@ -722,7 +722,7 @@ public class EncodeTest {
     }
 
     @Test
-    public void testByteType() {
+    public void testSingletonTypes() {
         assertEquals("BYTE", ByteType.INSTANCE.canonicalType);
         assertEquals("BYTE", ByteType.INSTANCE.getCanonicalType());
         assertEquals(Byte.class, ByteType.INSTANCE.clazz);
@@ -733,5 +733,16 @@ public class EncodeTest {
         assertEquals(byte[].class, ByteType.INSTANCE.arrayClass());
         assertEquals(1, ByteType.INSTANCE.typeCode());
         assertEquals(1, ABIType.TYPE_CODE_BYTE);
+
+        assertEquals("bool", BooleanType.INSTANCE.canonicalType);
+        assertEquals("bool", BooleanType.INSTANCE.getCanonicalType());
+        assertEquals(Boolean.class, BooleanType.INSTANCE.clazz);
+        assertEquals(Boolean.class, BooleanType.INSTANCE.clazz());
+        assertFalse(BooleanType.INSTANCE.dynamic);
+        assertFalse(BooleanType.INSTANCE.isDynamic());
+
+        assertEquals(boolean[].class, BooleanType.INSTANCE.arrayClass());
+        assertEquals(0, BooleanType.INSTANCE.typeCode());
+        assertEquals(0, BooleanType.TYPE_CODE_BOOLEAN);
     }
 }
