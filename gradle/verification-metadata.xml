@@ -117,12 +117,9 @@
                 <sha256 value="de23b114b3e4119a8fe6eb17bed5a3852816698bace67071579d6d927ebb080a" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
-        <component group="org.junit" name="junit-bom" version="5.9.3">
-            <artifact name="junit-bom-5.9.3.pom">
-                <sha256 value="4d0329cd9e72f2420e5ca15724cbfe6ffa6e5fd2888361516271190fdc342ed7" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-            <artifact name="junit-bom-5.9.3.module">
-                <sha256 value="b401fd25901e582a524aa5343c4b39e28bc56e24961c1069bf2b4bbfcee46b93" origin="repo.maven.apache.org/maven2/"/>
+        <component group="org.junit" name="junit-bom" version="5.10.1">
+            <artifact name="junit-bom-5.10.1.pom">
+                <sha256 value="21c4b0286f4b20069577ff4b20978a85c100ac8a46b6f1c8672fbaab337bc3f2" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
         <component group="org.junit.platform" name="junit-platform-commons" version="1.10.2">
