@@ -68,17 +68,17 @@ public final class ContractError<I extends TupleType<?>> implements ABIObject {
         return false;
     }
 
-    public static <T extends TupleType<?>> ContractError<T> fromJson(String errorJson) {
+    public static <X extends Tuple> ContractError<TupleType<X>> fromJson(String errorJson) {
         return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(errorJson));
     }
 
     /** @see ABIObject#fromJson(int, String) */
-    public static <T extends TupleType<?>> ContractError<T> fromJson(int flags, String errorJson) {
+    public static <X extends Tuple> ContractError<TupleType<X>> fromJson(int flags, String errorJson) {
         return fromJsonObject(flags, ABIJSON.parseObject(errorJson));
     }
 
     /** @see ABIObject#fromJsonObject(int, JsonObject) */
-    public static <T extends TupleType<?>> ContractError<T> fromJsonObject(int flags, JsonObject error) {
+    public static <X extends Tuple> ContractError<TupleType<X>> fromJsonObject(int flags, JsonObject error) {
         return ABIJSON.parseError(error, flags);
     }
 

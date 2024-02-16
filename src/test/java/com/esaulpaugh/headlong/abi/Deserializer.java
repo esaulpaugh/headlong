@@ -33,8 +33,8 @@ public class Deserializer {
     private Deserializer() {}
 
     @SuppressWarnings("unchecked")
-    public static <T extends TupleType<? extends Tuple>> T parseTupleType(String ttStr) {
-        return (T) parseTupleType(Streams.parse(new JsonReader(new StringReader(ttStr))).getAsJsonArray());
+    public static <X extends Tuple> TupleType<X> parseTupleType(String ttStr) {
+        return (TupleType<X>) parseTupleType(Streams.parse(new JsonReader(new StringReader(ttStr))).getAsJsonArray());
     }
 
     public static <T extends Tuple> T parseTupleValue(TupleType<?> tupleType, String tupleStr) {

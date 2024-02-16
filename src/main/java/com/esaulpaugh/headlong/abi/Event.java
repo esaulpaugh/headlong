@@ -39,11 +39,11 @@ public final class Event<I extends TupleType<?>> implements ABIObject {
     private final byte[] signatureHash;
 
 
-    public static <T extends TupleType<?>> Event<T> create(String name, T inputs, boolean... indexed) {
+    public static <X extends Tuple> Event<TupleType<X>> create(String name, TupleType<X> inputs, boolean... indexed) {
         return new Event<>(name, false, inputs, indexed);
     }
 
-    public static <T extends TupleType<?>> Event<?> createAnonymous(String name, T inputs, boolean... indexed) {
+    public static <X extends Tuple> Event<TupleType<X>> createAnonymous(String name, TupleType<X> inputs, boolean... indexed) {
         return new Event<>(name, true, inputs, indexed);
     }
 
@@ -119,17 +119,17 @@ public final class Event<I extends TupleType<?>> implements ABIObject {
                 && Arrays.equals(other.indexManifest, this.indexManifest);
     }
 
-    public static <T extends TupleType<?>> Event<T> fromJson(String eventJson) {
+    public static <X extends Tuple> Event<TupleType<X>> fromJson(String eventJson) {
         return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(eventJson));
     }
 
     /** @see ABIObject#fromJson(int, String) */
-    public static <T extends TupleType<?>> Event<T> fromJson(int flags, String eventJson) {
+    public static <X extends Tuple> Event<TupleType<X>> fromJson(int flags, String eventJson) {
         return fromJsonObject(flags, ABIJSON.parseObject(eventJson));
     }
 
     /** @see ABIObject#fromJsonObject(int, JsonObject) */
-    public static <T extends TupleType<?>> Event<T> fromJsonObject(int flags, JsonObject event) {
+    public static <X extends Tuple> Event<TupleType<X>> fromJsonObject(int flags, JsonObject event) {
         return ABIJSON.parseEvent(event, flags);
     }
 

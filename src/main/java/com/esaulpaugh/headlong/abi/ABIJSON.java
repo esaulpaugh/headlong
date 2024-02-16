@@ -145,19 +145,19 @@ public final class ABIJSON {
     }
 
     @SuppressWarnings("unchecked")
-    static <T extends TupleType<?>> Event<T> parseEvent(JsonObject event, int flags) {
+    static <X extends Tuple> Event<TupleType<X>> parseEvent(JsonObject event, int flags) {
         if (!EVENT.equals(getType(event))) {
             throw TypeEnum.unexpectedType(getType(event));
         }
-        return (Event<T>) parseEventUnchecked(event, flags);
+        return (Event<TupleType<X>>) parseEventUnchecked(event, flags);
     }
 
     @SuppressWarnings("unchecked")
-    static <T extends TupleType<?>> ContractError<T> parseError(JsonObject error, int flags) {
+    static <X extends Tuple> ContractError<TupleType<X>> parseError(JsonObject error, int flags) {
         if (!ERROR.equals(getType(error))) {
             throw TypeEnum.unexpectedType(getType(error));
         }
-        return (ContractError<T>) parseErrorUnchecked(error, flags);
+        return (ContractError<TupleType<X>>) parseErrorUnchecked(error, flags);
     }
 
     private static Function parseFunctionUnchecked(TypeEnum type, JsonObject function, MessageDigest digest, int flags) {

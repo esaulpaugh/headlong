@@ -414,15 +414,15 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         return EMPTY_TUPLE_STRING;
     }
 
-    public static <T extends TupleType<? extends Tuple>> T parse(String rawTupleTypeString) {
+    public static <X extends Tuple> TupleType<X> parse(String rawTupleTypeString) {
         return TypeFactory.create(rawTupleTypeString);
     }
 
-    public static <T extends TupleType<? extends Tuple>> T parse(int flags, String rawTupleTypeString) {
+    public static <X extends Tuple> TupleType<X> parse(int flags, String rawTupleTypeString) {
         return TypeFactory.create(flags, rawTupleTypeString);
     }
 
-    public static <T extends TupleType<? extends Tuple>> T of(String... typeStrings) {
+    public static <X extends Tuple> TupleType<X> of(String... typeStrings) {
         StringBuilder sb = new StringBuilder("(");
         for (String str : typeStrings) {
             sb.append(str).append(',');
