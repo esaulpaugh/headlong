@@ -57,27 +57,27 @@ public class MonteCarloTest {
     public void testRepro() {
         Random instance = new Random();
         MessageDigest md = Function.newDefaultDigest();
-        MonteCarloTestCase testCase = new MonteCarloTestCase("(2629380117031542455L,5,9,5,5)", instance, md);
+        MonteCarloTestCase testCase = new MonteCarloTestCase("(2233608126516027008L,5,5,5,5)", instance, md);
         repro(testCase, true);
     }
 
     private static void repro(MonteCarloTestCase testCase, boolean run) {
         System.out.println(testCase.rawSignature());
-        System.out.println(count(testCase.argsTuple));
+        System.out.println(estimateBytes(testCase.argsTuple));
         if (run) {
             testCase.runAll(new Random());
         }
     }
 
-    private static int count(Object o) {
-        int x = 0;
+    private static int estimateBytes(Object o) {
+        int x = 4; // 32 bits for the reference to the object, usually compressed from 64
         if(o instanceof Object[]) {
             for(Object e : (Object[]) o) {
-                x += count(e);
+                x += estimateBytes(e);
             }
         } else if(o instanceof Iterable) {
             for(Object e : (Iterable<?>) o) {
-                x += count(e);
+                x += estimateBytes(e);
             }
         } else if(o instanceof Number) {
             if(o instanceof BigInteger) {
@@ -106,7 +106,9 @@ public class MonteCarloTest {
             } else if (c == String.class) {
                 x += Strings.decode((String) o, Strings.UTF_8).length;
             } else if (c == Address.class) {
-                x += TypeFactory.ADDRESS_BIT_LEN / Byte.SIZE;
+                Address a = (Address) o;
+                x += estimateBytes(a.value());
+                x += estimateBytes(a.getLabel());
             } else {
                 throw new Error("" + c);
             }
