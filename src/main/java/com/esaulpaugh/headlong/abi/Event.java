@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /** Represents an event in Ethereum. */
-public final class Event<I extends TupleType<?>> implements ABIObject {
+public final class Event<I extends TupleType<? extends Tuple>> implements ABIObject {
 
     private static final ArrayType<ByteType, Byte, byte[]> BYTES_32 = TypeFactory.create("bytes32");
     public static final byte[][] EMPTY_TOPICS = new byte[0][];

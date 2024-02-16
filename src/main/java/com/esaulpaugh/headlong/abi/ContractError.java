@@ -19,7 +19,7 @@ import com.google.gson.JsonObject;
 
 import java.util.Objects;
 
-public final class ContractError<I extends TupleType<?>> implements ABIObject {
+public final class ContractError<I extends TupleType<? extends Tuple>> implements ABIObject {
 
     private final String name;
     private final I inputs;
