@@ -2,6 +2,7 @@
 /build
 /classes
 /out
+/src/jmh/generated
 /target
 /.gradle
 /.idea
