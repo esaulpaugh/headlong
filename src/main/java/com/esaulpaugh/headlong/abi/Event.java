@@ -25,29 +25,29 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /** Represents an event in Ethereum. */
-public final class Event<I extends TupleType<? extends Tuple>> implements ABIObject {
+public final class Event<T extends Tuple> implements ABIObject {
 
     private static final ArrayType<ByteType, Byte, byte[]> BYTES_32 = TypeFactory.create("bytes32");
     public static final byte[][] EMPTY_TOPICS = new byte[0][];
 
     private final String name;
     private final boolean anonymous;
-    private final I inputs;
+    private final TupleType<T> inputs;
     private final TupleType<?> indexedParams;
     private final TupleType<?> nonIndexedParams;
     private final boolean[] indexManifest;
     private final byte[] signatureHash;
 
 
-    public static <X extends Tuple> Event<TupleType<X>> create(String name, TupleType<X> inputs, boolean... indexed) {
+    public static <X extends Tuple> Event<X> create(String name, TupleType<X> inputs, boolean... indexed) {
         return new Event<>(name, false, inputs, indexed);
     }
 
-    public static <X extends Tuple> Event<TupleType<X>> createAnonymous(String name, TupleType<X> inputs, boolean... indexed) {
+    public static <X extends Tuple> Event<X> createAnonymous(String name, TupleType<X> inputs, boolean... indexed) {
         return new Event<>(name, true, inputs, indexed);
     }
 
-    public Event(String name, boolean anonymous, I inputs, boolean... indexed) {
+    public Event(String name, boolean anonymous, TupleType<T> inputs, boolean... indexed) {
         this.name = Objects.requireNonNull(name);
         this.inputs = Objects.requireNonNull(inputs);
         if (indexed.length != inputs.size()) {
@@ -72,7 +72,7 @@ public final class Event<I extends TupleType<? extends Tuple>> implements ABIObj
 
     @SuppressWarnings("unchecked")
     @Override
-    public I getInputs() {
+    public TupleType<T> getInputs() {
         return inputs;
     }
 
@@ -119,17 +119,17 @@ public final class Event<I extends TupleType<? extends Tuple>> implements ABIObj
                 && Arrays.equals(other.indexManifest, this.indexManifest);
     }
 
-    public static <X extends Tuple> Event<TupleType<X>> fromJson(String eventJson) {
+    public static <X extends Tuple> Event<X> fromJson(String eventJson) {
         return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(eventJson));
     }
 
     /** @see ABIObject#fromJson(int, String) */
-    public static <X extends Tuple> Event<TupleType<X>> fromJson(int flags, String eventJson) {
+    public static <X extends Tuple> Event<X> fromJson(int flags, String eventJson) {
         return fromJsonObject(flags, ABIJSON.parseObject(eventJson));
     }
 
     /** @see ABIObject#fromJsonObject(int, JsonObject) */
-    public static <X extends Tuple> Event<TupleType<X>> fromJsonObject(int flags, JsonObject event) {
+    public static <X extends Tuple> Event<X> fromJsonObject(int flags, JsonObject event) {
         return ABIJSON.parseEvent(event, flags);
     }
 

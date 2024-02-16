@@ -19,12 +19,12 @@ import com.google.gson.JsonObject;
 
 import java.util.Objects;
 
-public final class ContractError<I extends TupleType<? extends Tuple>> implements ABIObject {
+public final class ContractError<T extends Tuple> implements ABIObject {
 
     private final String name;
-    private final I inputs;
+    private final TupleType<T> inputs;
 
-    public ContractError(String name, I inputs) {
+    public ContractError(String name, TupleType<T> inputs) {
         this.name = Objects.requireNonNull(name);
         this.inputs = Objects.requireNonNull(inputs);
     }
@@ -41,7 +41,7 @@ public final class ContractError<I extends TupleType<? extends Tuple>> implement
 
     @SuppressWarnings("unchecked")
     @Override
-    public I getInputs() {
+    public TupleType<T> getInputs() {
         return inputs;
     }
 
@@ -68,17 +68,17 @@ public final class ContractError<I extends TupleType<? extends Tuple>> implement
         return false;
     }
 
-    public static <X extends Tuple> ContractError<TupleType<X>> fromJson(String errorJson) {
+    public static <X extends Tuple> ContractError<X> fromJson(String errorJson) {
         return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(errorJson));
     }
 
     /** @see ABIObject#fromJson(int, String) */
-    public static <X extends Tuple> ContractError<TupleType<X>> fromJson(int flags, String errorJson) {
+    public static <X extends Tuple> ContractError<X> fromJson(int flags, String errorJson) {
         return fromJsonObject(flags, ABIJSON.parseObject(errorJson));
     }
 
     /** @see ABIObject#fromJsonObject(int, JsonObject) */
-    public static <X extends Tuple> ContractError<TupleType<X>> fromJsonObject(int flags, JsonObject error) {
+    public static <X extends Tuple> ContractError<X> fromJsonObject(int flags, JsonObject error) {
         return ABIJSON.parseError(error, flags);
     }
 
