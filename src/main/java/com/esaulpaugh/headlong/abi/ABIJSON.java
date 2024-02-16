@@ -86,11 +86,11 @@ public final class ABIJSON {
         return parseElements(arrayJson, FUNCTIONS);
     }
 
-    public static List<Event<?>> parseEvents(String arrayJson) {
+    public static List<Event<Tuple>> parseEvents(String arrayJson) {
         return parseElements(arrayJson, EVENTS);
     }
 
-    public static List<ContractError<?>> parseErrors(String arrayJson) {
+    public static List<ContractError<Tuple>> parseErrors(String arrayJson) {
         return parseElements(arrayJson, ERRORS);
     }
 
