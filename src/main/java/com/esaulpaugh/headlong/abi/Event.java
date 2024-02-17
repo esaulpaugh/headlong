@@ -94,13 +94,13 @@ public final class Event<T extends Tuple> implements ABIObject {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Tuple> TupleType<T> getIndexedParams() {
-        return (TupleType<T>) indexedParams;
+    public <X extends Tuple> TupleType<X> getIndexedParams() {
+        return (TupleType<X>) indexedParams;
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Tuple> TupleType<T> getNonIndexedParams() {
-        return (TupleType<T>) nonIndexedParams;
+    public <X extends Tuple> TupleType<X> getNonIndexedParams() {
+        return (TupleType<X>) nonIndexedParams;
     }
 
     @Override
@@ -143,13 +143,13 @@ public final class Event<T extends Tuple> implements ABIObject {
         return true;
     }
 
-    public <T extends Tuple> T decodeTopics(byte[][] topics) {
+    public <X extends Tuple> X decodeTopics(byte[][] topics) {
         return Tuple.create(decodeTopicsArray(topics));
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Tuple> T decodeData(byte[] data) {
-        return (T) (data == null && nonIndexedParams.isEmpty()
+    public <X extends Tuple> X decodeData(byte[] data) {
+        return (X) (data == null && nonIndexedParams.isEmpty()
                         ? Tuple.EMPTY
                         : nonIndexedParams.decode(data));
     }
@@ -163,8 +163,8 @@ public final class Event<T extends Tuple> implements ABIObject {
      * @return  the decoded arguments
      */
     @SuppressWarnings("unchecked")
-    public <T extends Tuple> T decodeArgs(byte[][] topics, byte[] data) {
-        return (T) mergeDecodedArgs(decodeTopicsArray(topics), decodeData(data));
+    public <X extends Tuple> X decodeArgs(byte[][] topics, byte[] data) {
+        return (X) mergeDecodedArgs(decodeTopicsArray(topics), decodeData(data));
     }
 
     private Tuple mergeDecodedArgs(Object[] decodedTopics, Tuple decodedData) {
