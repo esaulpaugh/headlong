@@ -529,7 +529,7 @@ public class ABIJSONTest {
                 "    },\n" +
                 "    {\n" +
                 "      \"name\": \"required\",\n" +
-                "      \"type\": \"uint256\"\n" +
+                "      \"type\": \"uint24\"\n" +
                 "    }\n" +
                 "  ]\n" +
                 "}";
@@ -541,12 +541,24 @@ public class ABIJSONTest {
         JsonObject object = ABIJSON.parseObject(ERROR_JSON);
 
         ContractError<Tuple> error0 = ABIJSON.parseErrors(ERROR_JSON_ARRAY).get(0);
-        ContractError<?> error1 = ABIObject.fromJsonObject(ABIType.FLAGS_NONE, object);
+        ContractError<?> error1 = ABIObject.fromJson(ERROR_JSON);
+        ContractError<Pair<BigInteger, Integer>> error2 = ABIObject.fromJsonObject(ABIType.FLAGS_NONE, object);
+
+        {
+            TupleType<Pair<BigInteger, Integer>> in = error2.getInputs();
+            Pair<BigInteger, Integer> pair = in.decode(new byte[64]);
+            BigInteger a = pair.get0();
+            Integer b = pair.get1();
+            assertEquals(BigInteger.ZERO, a);
+            assertEquals(0, b);
+        }
 
         testError(error0, ERROR_JSON, object);
         testError(error1, ERROR_JSON, object);
+        testError(error2, ERROR_JSON, object);
 
         assertEquals(error0, error1);
+        assertEquals(error0, error2);
 
         assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Function", error0::asFunction);
         assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Event", error0::asEvent);
@@ -555,9 +567,9 @@ public class ABIJSONTest {
     private static void testError(ContractError<?> error, String json, JsonObject object) {
         assertEquals(TypeEnum.ERROR, error.getType());
         assertEquals("InsufficientBalance", error.getName());
-        assertEquals(TupleType.parse("(uint,uint)"), error.getInputs());
-        assertEquals("InsufficientBalance(uint256,uint256)", error.getCanonicalSignature());
-        assertEquals(Function.parse("InsufficientBalance(uint,uint)"), error.function());
+        assertEquals(TupleType.parse("(uint,uint24)"), error.getInputs());
+        assertEquals("InsufficientBalance(uint256,uint24)", error.getCanonicalSignature());
+        assertEquals(Function.parse("InsufficientBalance(uint,uint24)"), error.function());
         assertEquals(json, error.toJson(true));
         assertEquals(json, error.toString());
 
