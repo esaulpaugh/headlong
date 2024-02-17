@@ -34,14 +34,14 @@ public class Deserializer {
 
     @SuppressWarnings("unchecked")
     public static <X extends Tuple> TupleType<X> parseTupleType(String ttStr) {
-        return (TupleType<X>) parseTupleType(Streams.parse(new JsonReader(new StringReader(ttStr))).getAsJsonArray());
+        return parseTupleType(Streams.parse(new JsonReader(new StringReader(ttStr))).getAsJsonArray());
     }
 
     public static <T extends Tuple> T parseTupleValue(TupleType<?> tupleType, String tupleStr) {
         return parseTupleValue(tupleType, Streams.parse(new JsonReader(new StringReader(tupleStr))).getAsJsonArray());
     }
 
-    public static TupleType<?> parseTupleType(JsonArray typesArray) {
+    public static <X extends Tuple> TupleType<X> parseTupleType(JsonArray typesArray) {
         final int len = typesArray.size();
         String[] typeStrings = new String[len];
         for (int i = 0; i < len; i++) {
