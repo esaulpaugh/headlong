@@ -48,12 +48,14 @@ public interface ABIObject {
         return (Function) this;
     }
 
-    default Event<?> asEvent() {
-        return (Event<?>) this;
+    @SuppressWarnings("unchecked")
+    default <X extends Tuple> Event<X> asEvent() {
+        return (Event<X>) this;
     }
 
-    default ContractError<?> asContractError() {
-        return (ContractError<?>) this;
+    @SuppressWarnings("unchecked")
+    default <X extends Tuple> ContractError<X> asContractError() {
+        return (ContractError<X>) this;
     }
 
     static <T extends ABIObject> T fromJson(String json) {
