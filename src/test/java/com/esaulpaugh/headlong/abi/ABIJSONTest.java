@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.util.FastHex;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -739,9 +740,25 @@ public class ABIJSONTest {
                 "  \"anonymous\": false\n" +
                 "}";
 
-        Event<?> e = Event.fromJson(eventStr);
+        Event<Single<Single<String>[]>> e = Event.fromJson(eventStr);
 
-        TupleType<?> in = e.getInputs();
+        TupleType<Single<Single<String>[]>> in = e.getInputs();
+        Single<Single<String>[]> s = in.decode(
+                FastHex.decode(
+                        "0000000000000000000000000000000000000000000000000000000000000020" +
+                        "0000000000000000000000000000000000000000000000000000000000000001" +
+                        "0000000000000000000000000000000000000000000000000000000000000020" +
+                        "0000000000000000000000000000000000000000000000000000000000000020" +
+                        "0000000000000000000000000000000000000000000000000000000000000006" +
+                        "000a09080c0d0000000000000000000000000000000000000000000000000000"
+                )
+        );
+        final Single<String>[] arr = s.get0();
+        assertEquals(Single[].class, arr.getClass());
+        final Single<String> single = arr[0];
+        final String str = single.get0();
+        assertEquals(String.class, str.getClass());
+        assertEquals("\0\n\t\b\f\r", str);
         assertEquals("struct Thing[]", in.getElementInternalType(0));
 
         TupleType<?> indexed = e.getIndexedParams();
