@@ -171,7 +171,7 @@ public class UnsignedTest {
             final Uint type = new Uint(i);
             final long mask = (long) Math.pow(2, i - 1) - 1L;
             for (int j = 0; j < 25; j++) {
-                long x = TestUtils.pickLong(r);
+                long x = TestUtils.wildLong(r);
                 x &= mask;
                 Assertions.assertEquals(x, type.toSignedLong(type.toUnsignedLong(x)));
                 Assertions.assertEquals(x, type.toUnsignedLong(type.toSignedLong(x)));
@@ -183,7 +183,7 @@ public class UnsignedTest {
         for (int i = 64; i <= 256; i++) {
             final Uint type = new Uint(i);
             for (int j = 0; j < 25; j++) {
-                BigInteger x = BigInteger.valueOf(TestUtils.pickLong(r));
+                BigInteger x = BigInteger.valueOf(TestUtils.wildLong(r));
                 Assertions.assertEquals(x, type.toSigned(type.toUnsigned(x)));
                 x = x.abs();
                 Assertions.assertEquals(x, type.toUnsigned(type.toSigned(x)));

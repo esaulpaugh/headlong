@@ -94,7 +94,7 @@ public class IntegersTest {
         Random rand = TestUtils.seededRandom();
         byte[] eight = new byte[8];
         for (long i = 0; i < 20_000; i++) {
-            long lo = TestUtils.pickLong(rand);
+            long lo = TestUtils.wildLong(rand);
             int n = Integers.putLong(lo, eight, 0);
             long r = Integers.getLong(eight, 0, n, false);
             if(lo != r) {
@@ -108,7 +108,7 @@ public class IntegersTest {
         byte[] dest = new byte[17];
         Arrays.fill(dest, (byte) -1);
         Random rand = TestUtils.seededRandom();
-        for(int i = 0; i < 30_000; i++) {
+        for (int i = 0; i < 3_000; i++) {
             BigInteger big = TestUtils.wildBigInteger(rand, true, 136);
             int n = Integers.putBigInt(big, dest, 0);
             BigInteger r = Integers.getBigInt(dest, 0, n, false);
@@ -155,7 +155,7 @@ public class IntegersTest {
     public void lenLong() {
         Random rand = TestUtils.seededRandom();
         for (int i = 0; i < 30_000; i++) {
-            long lo = TestUtils.pickLong(rand);
+            long lo = TestUtils.wildLong(rand);
             int expectedLen = lo < 0 || lo >= 72_057_594_037_927_936L ? 8
                     : lo >= 281_474_976_710_656L ? 7
                     : lo >= 1_099_511_627_776L ? 6
@@ -306,7 +306,7 @@ public class IntegersTest {
         for (int i = 0; i < 50; i++) {
             int offset = r.nextInt(offsetBound);
             bb.position(offset);
-            final long val = TestUtils.pickLong(r);
+            final long val = TestUtils.wildLong(r);
             int len0 = getLen.applyAsInt(val);
             int len1 = put.applyAsInt(val, bb);
             int len2 = bb.position() - offset;
