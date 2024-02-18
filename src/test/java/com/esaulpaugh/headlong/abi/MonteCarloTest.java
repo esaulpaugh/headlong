@@ -411,16 +411,16 @@ public class MonteCarloTest {
 
         final Random r = TestUtils.seededRandom();
 
-        final char[] lowercase = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-//        final char[] allCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".toCharArray();
+        final char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+//        final char[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".toCharArray();
 
         final String paramsTupleStr = "()";
 
-        for (char first : lowercase) {
+        for (char first : alphabet) {
             final HashMap<String, String> signatureMap = new HashMap<>(n / 20, 0.75f);
             final SortedSet<String> sorted = new TreeSet<>();
             for (int i = 0; i < n; i++) {
-                final String str = generateName(first, lowercase, r) + paramsTupleStr;
+                final String str = generateName(first, alphabet, r) + paramsTupleStr;
                 final Function foo = Function.parse(str);
                 final String selectorHex = foo.selectorHex();
                 final String signature = foo.getCanonicalSignature();
