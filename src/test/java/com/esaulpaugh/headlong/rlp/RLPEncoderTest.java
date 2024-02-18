@@ -36,6 +36,7 @@ import java.util.Random;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
+import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -95,29 +96,84 @@ public class RLPEncoderTest {
 
     @Test
     public void testLongList() {
+        final String note = "(\n" +
+                "  [\n" +
+                "    [ [ '', '00', 'ff', '90', 'b6', '0a' ] ],\n" +
+                "    '0980ff00000000000000244a00000000000000000000000000000000000000000000000000000000000000000000000000000000fdfe0000',\n" +
+                "    [\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '24',\n" +
+                "      '4a',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '00',\n" +
+                "      '24',\n" +
+                "      '4a',\n" +
+                "      '00',\n" +
+                "      '00'\n" +
+                "    ],\n" +
+                "    '63617473',\n" +
+                "    '646f6773',\n" +
+                "    [ '5c0d0a0c', '096f6773' ],\n" +
+                "    '22416c6d696768747920616e64206d6f7374206d6572636966756c204661746865722c2077652068756d626c79206265736565636820546865652c206f662054687920677265617420676f6f646e6573732c20746f20726573747261696e20746865736520696d6d6f646572617465207261696e73207769746820776869636820776520686176652068616420746f20636f6e74656e642e204772616e742075732066616972207765617468657220666f7220426174746c652e2047726163696f75736c7920686561726b656e20746f20757320617320736f6c64696572732077686f2063616c6c205468656520746861742c2061726d656420776974682054687920706f7765722c207765206d617920616476616e63652066726f6d20766963746f727920746f20766963746f72792c20616e6420637275736820746865206f707072657373696f6e20616e64207769636b65646e657373206f66206f757220656e656d6965732c20616e642065737461626c69736820546879206a75737469636520616d6f6e67206d656e20616e64206e6174696f6e732e20416d656e2e22'\n" +
+                "  ]\n" +
+                ")";
 
-        final byte[] bytes = new byte[] {
-                (byte) 0xf9, (byte) 1,
-                (byte) 0xca, (byte) 0xc9, (byte) 0x80, 0x00, (byte) 0x81, (byte) 0xFF, (byte) 0x81, (byte) 0x90, (byte) 0x81, (byte) 0xb6, (byte) '\u230A',
-                (byte) 0xb8, 56, 0x09,(byte)0x80,-1,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, -3, -2, 0, 0,
-                (byte) 0xf8, 0x38, 0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 36, 74, 0, 0,
-                (byte) 0x84, 'c', 'a', 't', 's',
-                (byte) 0x84, 'd', 'o', 'g', 's',
-                (byte) 0xca, (byte) 0x84, 92, '\r', '\n', '\f', (byte) 0x84, '\u0009', 'o', 'g', 's',
-                0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,0,0,36,74,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,
-        };
+        final List<Object> raw = Notation.parse(note);
+        final byte[] enc = RLPEncoder.sequence(raw);
+        System.out.println(Strings.encode(enc));
 
-        RLPList orig = RLPDecoder.RLP_STRICT.wrapList(bytes);
-        RLPList rebuilt = RLPList.wrap(orig.elements(RLPDecoder.RLP_STRICT));
+        final RLPList orig = RLPDecoder.RLP_STRICT.wrapList(enc);
+        final RLPList rebuilt = RLPList.wrap(orig.elements(RLPDecoder.RLP_STRICT));
 
         assertEquals(rebuilt.toString(), Notation.forObjects(Notation.parse(rebuilt.toString())).toString());
         assertEquals(orig.encodingString(Strings.HEX), rebuilt.encodingString(Strings.HEX));
-
         assertEquals(orig, rebuilt);
     }
 
