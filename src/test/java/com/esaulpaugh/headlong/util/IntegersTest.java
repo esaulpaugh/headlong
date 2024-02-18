@@ -109,11 +109,7 @@ public class IntegersTest {
         Arrays.fill(dest, (byte) -1);
         Random rand = TestUtils.seededRandom();
         for(int i = 0; i < 30_000; i++) {
-            BigInteger big = BigInteger.valueOf(TestUtils.pickLong(rand))
-                    .multiply(BigInteger.valueOf(TestUtils.pickLong(rand)));
-            if(big.signum() < 0) {
-                big = big.negate();
-            }
+            BigInteger big = TestUtils.wildBigInteger(rand, true, 136);
             int n = Integers.putBigInt(big, dest, 0);
             BigInteger r = Integers.getBigInt(dest, 0, n, false);
             assertEquals(big, r);
