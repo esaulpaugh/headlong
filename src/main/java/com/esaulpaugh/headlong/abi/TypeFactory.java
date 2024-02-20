@@ -277,7 +277,7 @@ public final class TypeFactory {
 
     private static int findSubtupleEnd(String parentTypeString, int i) {
         int depth = 1;
-        for (;; i++) {
+        do {
             char x = parentTypeString.charAt(i);
             if (x <= ')') {
                 if (x == ')') {
@@ -289,6 +289,7 @@ public final class TypeFactory {
                     depth++;
                 }
             }
-        }
+            i++;
+        } while (true);
     }
 }
