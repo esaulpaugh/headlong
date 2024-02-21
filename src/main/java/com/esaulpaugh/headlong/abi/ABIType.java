@@ -86,7 +86,7 @@ public abstract class ABIType<J> {
         ) {
             return;
         }
-        throw new AssertionError("unexpected subclass " + c.getName());
+        throw new AssertionError("unexpected subclass");
     }
 
     public final String getCanonicalType() {
