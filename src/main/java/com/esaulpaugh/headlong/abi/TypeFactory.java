@@ -50,40 +50,40 @@ public final class TypeFactory {
     private static final Map<String, ABIType<?>> LEGACY_BASE_TYPE_MAP;
 
     static {
-        BASE_TYPE_MAP = new HashMap<>(256);
+        final Map<String, ABIType<?>> local = new HashMap<>(256);
 
-        for(int n = 8; n <= 32; n += 8) mapInt("int" + n, n, false);
-        for(int n = 40; n <= 64; n += 8) mapLong("int" + n, n, false);
-        for(int n = 72; n <= 256; n += 8) mapBigInteger("int" + n, n, false);
+        for(int n = 8; n <= 32; n += 8) mapInt(local, "int" + n, n, false);
+        for(int n = 40; n <= 64; n += 8) mapLong(local, "int" + n, n, false);
+        for(int n = 72; n <= 256; n += 8) mapBigInteger(local, "int" + n, n, false);
 
-        for(int n = 8; n <= 24; n += 8) mapInt("uint" + n, n, true);
-        for(int n = 32; n <= 56; n += 8) mapLong("uint" + n, n, true);
-        for(int n = 64; n <= 256; n += 8) mapBigInteger("uint" + n, n, true);
+        for(int n = 8; n <= 24; n += 8) mapInt(local, "uint" + n, n, true);
+        for(int n = 32; n <= 56; n += 8) mapLong(local, "uint" + n, n, true);
+        for(int n = 64; n <= 256; n += 8) mapBigInteger(local, "uint" + n, n, true);
 
         for (int n = 1; n <= 32; n++) {
-            mapByteArray("bytes" + n, n);
+            mapByteArray(local, "bytes" + n, n);
         }
 
-        BASE_TYPE_MAP.put("address", new AddressType());
-        mapByteArray("function", FUNCTION_BYTE_LEN);
-        mapByteArray("bytes", DYNAMIC_LENGTH);
-        BASE_TYPE_MAP.put("string", new ArrayType<ByteType, Byte, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAGS_NONE));
+        local.put("address", new AddressType());
+        mapByteArray(local, "function", FUNCTION_BYTE_LEN);
+        mapByteArray(local, "bytes", DYNAMIC_LENGTH);
+        local.put("string", new ArrayType<ByteType, Byte, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAGS_NONE));
 
-        BASE_TYPE_MAP.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
-        BASE_TYPE_MAP.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
-        BASE_TYPE_MAP.put("fixed168x10", new BigDecimalType("fixed168x10", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
+        local.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
+        local.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
+        local.put("fixed168x10", new BigDecimalType("fixed168x10", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
 
-        BASE_TYPE_MAP.put("decimal", BASE_TYPE_MAP.get("fixed168x10"));
+        local.put("decimal", local.get("fixed168x10"));
 
-        BASE_TYPE_MAP.put("int", BASE_TYPE_MAP.get("int256"));
-        BASE_TYPE_MAP.put("uint", BASE_TYPE_MAP.get("uint256"));
-        BASE_TYPE_MAP.put("fixed", BASE_TYPE_MAP.get("fixed128x18"));
-        BASE_TYPE_MAP.put("ufixed", BASE_TYPE_MAP.get("ufixed128x18"));
+        local.put("int", local.get("int256"));
+        local.put("uint", local.get("uint256"));
+        local.put("fixed", local.get("fixed128x18"));
+        local.put("ufixed", local.get("ufixed128x18"));
 
-        BASE_TYPE_MAP.put("bool", BooleanType.INSTANCE);
+        local.put("bool", BooleanType.INSTANCE);
 
-        LEGACY_BASE_TYPE_MAP = new HashMap<>(256);
-        for (Map.Entry<String, ABIType<?>> e : BASE_TYPE_MAP.entrySet()) {
+        final Map<String, ABIType<?>> localLegacy = new HashMap<>(256);
+        for (Map.Entry<String, ABIType<?>> e : local.entrySet()) {
             ABIType<?> value = e.getValue();
             if (value instanceof ArrayType) {
                 final ArrayType<?, ?, ?> at = value.asArrayType();
@@ -93,28 +93,31 @@ public final class TypeFactory {
                     value = new ArrayType<ByteType, Byte, byte[]>(at.canonicalType, byte[].class, ByteType.INSTANCE, at.getLength(), byte[][].class, ABIType.FLAG_LEGACY_DECODE);
                 }
             }
-            LEGACY_BASE_TYPE_MAP.put(e.getKey(), value);
+            localLegacy.put(e.getKey(), value);
         }
+
+        BASE_TYPE_MAP = Collections.unmodifiableMap(local);
+        LEGACY_BASE_TYPE_MAP = Collections.unmodifiableMap(localLegacy);
     }
 
     static Map<String, ABIType<?>> getBaseTypeMap() {
         return Collections.unmodifiableMap(BASE_TYPE_MAP);
     }
 
-    private static void mapInt(String type, int bitLen, boolean unsigned) {
-        BASE_TYPE_MAP.put(type, new IntType(type, bitLen, unsigned));
+    private static void mapInt(Map<String, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
+        map.put(type, new IntType(type, bitLen, unsigned));
     }
 
-    private static void mapLong(String type, int bitLen, boolean unsigned) {
-        BASE_TYPE_MAP.put(type, new LongType(type, bitLen, unsigned));
+    private static void mapLong(Map<String, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
+        map.put(type, new LongType(type, bitLen, unsigned));
     }
 
-    private static void mapBigInteger(String type, int bitLen, boolean unsigned) {
-        BASE_TYPE_MAP.put(type, new BigIntegerType(type, bitLen, unsigned));
+    private static void mapBigInteger(Map<String, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
+        map.put(type, new BigIntegerType(type, bitLen, unsigned));
     }
 
-    private static void mapByteArray(String type, int arrayLen) {
-        BASE_TYPE_MAP.put(type, new ArrayType<ByteType, Byte, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class, ABIType.FLAGS_NONE));
+    private static void mapByteArray(Map<String, ABIType<?>> map, String type, int arrayLen) {
+        map.put(type, new ArrayType<ByteType, Byte, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class, ABIType.FLAGS_NONE));
     }
 
     public static <T extends ABIType<?>> T create(String rawType) {
