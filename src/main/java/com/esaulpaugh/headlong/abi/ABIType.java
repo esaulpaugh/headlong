@@ -72,6 +72,21 @@ public abstract class ABIType<J> {
         this.canonicalType = canonicalType; // .intern() to save memory and allow == comparison?
         this.clazz = clazz;
         this.dynamic = dynamic;
+        final Class<?> c = this.getClass();
+        if (
+                c == BigDecimalType.class
+             || c == BooleanType.class
+             || c == ByteType.class
+             || c == IntType.class
+             || c == LongType.class
+             || c == BigIntegerType.class
+             || c == ArrayType.class
+             || c == TupleType.class
+             || c == AddressType.class
+        ) {
+            return;
+        }
+        throw new AssertionError("unexpected subclass " + c.getName());
     }
 
     public final String getCanonicalType() {

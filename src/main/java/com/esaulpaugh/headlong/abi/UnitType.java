@@ -32,6 +32,18 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         super(canonicalType, clazz, false);
         this.bitLength = bitLength;
         this.unsigned = unsigned;
+        final Class<?> c = this.getClass();
+        if (
+               c == BigDecimalType.class
+            || c == BooleanType.class
+            || c == IntType.class
+            || c == LongType.class
+            || c == BigIntegerType.class
+            || c == AddressType.class
+        ) {
+            return;
+        }
+        throw new AssertionError("unexpected subclass");
     }
 
     public final int getBitLength() {
