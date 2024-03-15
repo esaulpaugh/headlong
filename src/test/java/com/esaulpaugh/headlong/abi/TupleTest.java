@@ -485,7 +485,7 @@ public class TupleTest {
                 "\n\n",
                 "Adopter le faux-semblant et suivre sans r\u00E9fl\u00E9chir le chemin socialement prescrit risque \u00E9galement une agonie imm\u00E9diate. Pas plus que l'acte de boire \u00E0 grandes gorg\u00E9es, comme on pourrait le faire face \u00E0 des compatriotes brandissant une bouteille de rhum particuli\u00E8rement infect, peut apporter avec lui une punition divine (\u00E9tonnamment opportune) \u2014 peut-\u00EAtre le remords d'un portefeuille \u00E9gar\u00E9 apr\u00E8s des vagabondages \u00E9m\u00E9ch\u00E9s. Et pourtant, l'homme en question persistera \u00E0 feindre le plaisir alors qu'il danse sur le pr\u00E9cipice de vider son ventre sur la route.",
                 "\n\n",
-                "N'est-ce pas ainsi\u00A0?\n"
+                "N'est-ce point ainsi\u00A0?\n"
         };
 //        Arrays.stream(fr).forEach(System.out::print);
         TupleType<Tuple> tt = TupleType.parse("(bool,uint16,address,int64,uint64,address,string[][])");
