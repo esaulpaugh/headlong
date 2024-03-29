@@ -24,6 +24,9 @@ import java.util.function.IntFunction;
  * An ordered list of objects whose types should correspond to some {@link TupleType}. {@link Function}s encode/decode {@link Tuple}s
  * containing arguments/return values. {@link Tuple}s can contain other tuples. Be warned that changes to elements will affect
  * this {@link Tuple}'s value.
+ * <p>
+ * Use {@link Single#of} to create a singleton (tuple with one element).<br>
+ * Use {@link #from(Object...)} to create a {@code Tuple} with more than six elements.
  */
 public class Tuple implements Iterable<Object> {
 
@@ -40,6 +43,10 @@ public class Tuple implements Iterable<Object> {
         return Tuple.EMPTY;
     }
 
+    /**
+     * @see Single#of(Object)
+     * @return  the pair
+     */
     public static <A, B> Pair<A, B> of(A a, B b) {
         return new Pair<>(requireNoNulls(new Object[] { a, b }));
     }
