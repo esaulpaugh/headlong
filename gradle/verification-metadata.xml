@@ -78,6 +78,9 @@
             <artifact name="commons-math3-3.6.1.pom">
                 <sha256 value="fad72336ea7d7dd06da103144e3740db508fa4b17d9c54d7847737edc24a7e60" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
+            <artifact name="commons-math3-3.6.1-sources.jar">
+                <sha256 value="e2ff85a3c360d56c51a7021614a194f3fbaf224054642ac535016f118322934d" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
         </component>
 
         <component group="org.bouncycastle" name="bcprov-jdk14" version="1.78">
@@ -125,14 +128,7 @@
                 <sha256 value="21b0afcfffe2ecb3770f5eb00ae7a19feaee94e771fa3918173850dae78067b7" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
-        <component group="org.junit" name="junit-bom" version="5.9.3">
-            <artifact name="junit-bom-5.9.3.pom">
-                <sha256 value="4d0329cd9e72f2420e5ca15724cbfe6ffa6e5fd2888361516271190fdc342ed7" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-            <artifact name="junit-bom-5.9.3.module">
-                <sha256 value="b401fd25901e582a524aa5343c4b39e28bc56e24961c1069bf2b4bbfcee46b93" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-        </component>
+
         <component group="org.junit.platform" name="junit-platform-commons" version="1.10.2">
             <artifact name="junit-platform-commons-1.10.2.jar">
                 <sha256 value="b56a5ec000a479df4973b18bba24c98fe0db8faa14c8907d3ef451d8c71fd8ae" origin="repo.maven.apache.org/maven2/"/>
@@ -335,11 +331,6 @@
         <component group="org.apache.commons" name="commons-parent" version="66">
             <artifact name="commons-parent-66.pom">
                 <sha256 value="48fd6dc846e56b1f408660d163e75300f9e384bb63be482a8082a21d72a8db9c" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-        </component>
-        <component group="org.apache.commons" name="commons-math3" version="3.6.1">
-            <artifact name="commons-math3-3.6.1-sources.jar">
-                <sha256 value="e2ff85a3c360d56c51a7021614a194f3fbaf224054642ac535016f118322934d" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
     </components>
