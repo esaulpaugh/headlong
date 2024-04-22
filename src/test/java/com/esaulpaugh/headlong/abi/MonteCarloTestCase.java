@@ -454,7 +454,7 @@ public class MonteCarloTestCase {
         case TYPE_CODE_LONG: return generateLongArray(len, (LongType) elementType, r);
         case TYPE_CODE_BIG_INTEGER: return generateBigIntegerArray(len, (BigIntegerType) elementType, r);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimalArray(len, (BigDecimalType) elementType, r);
-        case TYPE_CODE_ARRAY: return generateObjectArray(arrayType, len, r);
+        case TYPE_CODE_ARRAY: return generateArrayArray(elementType.asArrayType(), len, r);
         case TYPE_CODE_TUPLE: return generateTupleArray(elementType.asTupleType(), len, r);
         case TYPE_CODE_ADDRESS: return generateAddressArray(len, r);
         default: throw new Error();
@@ -463,6 +463,14 @@ public class MonteCarloTestCase {
 
     private static String generateFunctionName(Random r) {
         return TestUtils.generateASCIIString(r.nextInt(34), r).replace('(', '_');
+    }
+
+    private static boolean[] generateBooleanArray(final int len, Random r) {
+        boolean[] booleans = new boolean[len];
+        for (int i = 0; i < booleans.length; i++) {
+            booleans[i] = r.nextBoolean();
+        }
+        return booleans;
     }
 
     private static int[] generateIntArray(final int len, IntType intType, Random r) {
@@ -497,12 +505,12 @@ public class MonteCarloTestCase {
         return bigDecs;
     }
 
-    private static boolean[] generateBooleanArray(final int len, Random r) {
-        boolean[] booleans = new boolean[len];
-        for (int i = 0; i < booleans.length; i++) {
-            booleans[i] = r.nextBoolean();
+    private Object[] generateArrayArray(ArrayType<? extends ABIType<?>, ?, ?> elementType, final int len, Random r) {
+        Object[] dest = ArrayType.createArray(elementType.clazz, len);
+        for (int i = 0; i < len; i++) {
+            dest[i] = generateArray(elementType, r);
         }
-        return booleans;
+        return dest;
     }
 
     private Tuple[] generateTupleArray(TupleType<?> tupleType, final int len, Random r) {
@@ -519,15 +527,6 @@ public class MonteCarloTestCase {
             addresses[i] = generateAddress(r);
         }
         return addresses;
-    }
-
-    private Object[] generateObjectArray(ArrayType<? extends ABIType<?>, ?, ?> arrayType, final int len, Random r) {
-        final ArrayType<? extends ABIType<?>, ?, ?> elementType = arrayType.getElementType().asArrayType();
-        Object[] dest = ArrayType.createArray(elementType.clazz, len);
-        for (int i = 0; i < len; i++) {
-            dest[i] = generateArray(elementType, r);
-        }
-        return dest;
     }
     // ------------------------------------------------------------------------
     @Override
