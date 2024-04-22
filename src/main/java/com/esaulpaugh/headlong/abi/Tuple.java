@@ -219,10 +219,6 @@ public class Tuple implements Iterable<Object> {
                 final byte[] bytes = (byte[]) e;
                 return Arrays.copyOf(bytes, bytes.length);
             }
-            if (e instanceof boolean[]) {
-                final boolean[] booleans = (boolean[]) e;
-                return Arrays.copyOf(booleans, booleans.length);
-            }
             if (e instanceof int[]) {
                 final int[] ints = (int[]) e;
                 return Arrays.copyOf(ints, ints.length);
@@ -230,6 +226,10 @@ public class Tuple implements Iterable<Object> {
             if (e instanceof long[]) {
                 final long[] longs = (long[]) e;
                 return Arrays.copyOf(longs, longs.length);
+            }
+            if (e instanceof boolean[]) {
+                final boolean[] booleans = (boolean[]) e;
+                return Arrays.copyOf(booleans, booleans.length);
             }
             throw new IllegalArgumentException(); // float, double, char, short
         }

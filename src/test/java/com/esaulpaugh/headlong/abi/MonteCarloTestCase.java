@@ -522,8 +522,8 @@ public class MonteCarloTestCase {
     }
 
     private Object[] generateObjectArray(ArrayType<? extends ABIType<?>, ?, ?> arrayType, final int len, Random r) {
-        Object[] dest = ArrayType.createArray(arrayType.getElementType().clazz, len);
-        final ArrayType<? extends ABIType<?>, ?, ?> elementType = (ArrayType<? extends ABIType<?>, ?, ?>) arrayType.getElementType();
+        final ArrayType<? extends ABIType<?>, ?, ?> elementType = arrayType.getElementType().asArrayType();
+        Object[] dest = ArrayType.createArray(elementType.clazz, len);
         for (int i = 0; i < len; i++) {
             dest[i] = generateArray(elementType, r);
         }

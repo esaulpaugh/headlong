@@ -415,10 +415,11 @@ public class TupleTest {
             canonicalBuilder.append(e.canonicalType).append(',');
             dynamic |= e.dynamic;
             if (e.getFlags() != flags) {
-                if (flags != ABIType.FLAGS_UNSET) {
+                if (flags == ABIType.FLAGS_UNSET) {
+                    flags = e.getFlags();
+                } else {
                     throw new IllegalArgumentException();
                 }
-                flags = e.getFlags();
             }
         }
         return new TupleType<>(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, elementNames, null, flags);
