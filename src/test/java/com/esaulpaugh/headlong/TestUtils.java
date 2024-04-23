@@ -60,7 +60,7 @@ public final class TestUtils {
     }
 
     public static long getSeed() {
-        return getSeed(System.nanoTime());
+        return getSeed(31 * System.nanoTime() ^ 0x3636363636363636L);
     }
 
     /**
