@@ -159,7 +159,7 @@ public class MonteCarloTest {
 
         final StringBuilder log = new StringBuilder();
 
-        final Random r = new Random(threadSeed);
+        final Random caseGen = new Random(threadSeed);
         final Keccak k = new Keccak(256);
 
         final Random instance = new Random();
@@ -171,8 +171,8 @@ public class MonteCarloTest {
         while (i < n) {
             initialized = false;
             try {
-                caseSeed = r.nextLong();
-                testCase = new MonteCarloTestCase(caseSeed, limits, r, k);
+                caseSeed = caseGen.nextLong();
+                testCase = new MonteCarloTestCase(caseSeed, limits, instance, k);
                 initialized = true;
 //                if(testCase.function.getInputs().getCanonicalType().contains("int[")) throw new Error("canonicalization failed!");
                 testCase.runAll(instance);

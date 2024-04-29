@@ -70,7 +70,7 @@ public class DecodeTest {
           + "7730307400000000000000000000000000000000000000000000000000000001"
     );
 
-    private static final Tuple RETURN_VALS = Pair.of(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
+    private static final Tuple RETURN_VALS = Tuple.of(new BigDecimal(BigInteger.valueOf(69L), 18), "w00t");
 
     @Test
     public void testLenient() {
@@ -258,7 +258,7 @@ public class DecodeTest {
     @Test
     public void testCorruptBoolean() throws Throwable {
         Function f = new Function("baz(uint32,bool)");
-        Pair<Long, Boolean> argsTuple = Pair.of(69L, true);
+        Pair<Long, Boolean> argsTuple = Tuple.of(69L, true);
         ByteBuffer one = f.encodeCall(argsTuple);
 
         final byte[] array = one.array();
@@ -369,7 +369,7 @@ public class DecodeTest {
     public void testDecodeCallIndex() {
         Function f = new Function("()", "(int8,bool,string)");
 
-        final ByteBuffer bb = f.getOutputs().encode(Triple.of(127, true, "two"));
+        final ByteBuffer bb = f.getOutputs().encode(Tuple.of(127, true, "two"));
         final boolean b = f.decodeReturn(bb.array(), 1);
         assertTrue(b);
 
@@ -382,7 +382,7 @@ public class DecodeTest {
         final boolean b2 = f.decodeReturn(bb2, 1);
         assertTrue(b2);
 
-        final ByteBuffer bb4 = f.getOutputs().encode(Triple.of(127, false, "two"));
+        final ByteBuffer bb4 = f.getOutputs().encode(Tuple.of(127, false, "two"));
         final boolean b3 = f.decodeReturn(bb4.array(), 1);
         assertFalse(b3);
     }
@@ -390,7 +390,7 @@ public class DecodeTest {
     @Test
     public void testDecodeCallIndices() throws Throwable {
         Function f = new Function("(int8,bool,int8[],bool)");
-        Quadruple<Integer, Boolean, int[], Boolean> args = Quadruple.of(1, true, new int[] { 3, 6 }, false);
+        Quadruple<Integer, Boolean, int[], Boolean> args = Tuple.of(1, true, new int[] { 3, 6 }, false);
         byte[] encoded = f.encodeCall(args).array();
         testIndicesDecode(f.decodeCall(encoded, 1, 3));
         testIndicesDecode(f.decodeCall(ByteBuffer.wrap(encoded), 1, 3));
@@ -402,7 +402,7 @@ public class DecodeTest {
     @Test
     public void testDecodeReturnIndices() throws Throwable {
         Function f = new Function("()", "(int8,bool,int8[],bool)");
-        Quadruple<Integer, Boolean, int[], Boolean> args = Quadruple.of(1, true, new int[] { 3, 6 }, false);
+        Quadruple<Integer, Boolean, int[], Boolean> args = Tuple.of(1, true, new int[] { 3, 6 }, false);
         byte[] encoded = f.getOutputs().encode(args).array();
         testIndicesDecode(f.decodeReturn(encoded, 1, 3));
     }
@@ -462,7 +462,7 @@ public class DecodeTest {
     @Test
     public void testFunctionDecodeTypeInference() {
         Function f = Function.parse("f()", "(int,string,bool,int64)");
-        ByteBuffer bb = f.getOutputs().encode(Quadruple.of(BigInteger.valueOf(550L), "weow", true, -41L));
+        ByteBuffer bb = f.getOutputs().encode(Tuple.of(BigInteger.valueOf(550L), "weow", true, -41L));
         assertEquals(TUPLE_HEX, Strings.encode(bb));
         final BigInteger zero = f.decodeReturn(bb, 0);
         final String one = f.decodeReturn(bb, 1);
@@ -481,7 +481,7 @@ public class DecodeTest {
         ByteBuffer bb = ByteBuffer.wrap(FastHex.decode(TUPLE_HEX));
 
         assertThrown(IllegalArgumentException.class, "tuple index 2 is null", () -> Tuple.of("", "", null, null));
-        assertThrown(IllegalArgumentException.class, "tuple index 2 is null", () -> Quadruple.of("", "", null, null));
+        assertThrown(IllegalArgumentException.class, "tuple index 2 is null", () -> Tuple.of("", "", null, null));
         final Tuple decoded = tt.decode(bb, new int[0]);
         assertEquals(new Tuple(null, null, null, null), decoded);
         assertEquals("[_, _, _, _]", decoded.toString());
@@ -864,11 +864,12 @@ public class DecodeTest {
     @Test
     public void testErrors() throws Throwable {
         final TupleType<Tuple> originalType = TypeFactory.create("(bytes1,int8[3])");
-        final ByteBuffer encoded = originalType.encode(Pair.of(new byte[1], new int[] { 1, 0, 2 }));
+        final ByteBuffer encoded = originalType.encode(Tuple.of(new byte[1], new int[] { 1, 0, 2 }));
         final TupleType<?> newType = TypeFactory.create("(bytes1,bool[3])");
         final String msg = "tuple index 1: array index 2: illegal boolean value @ 96";
         assertThrown(IllegalArgumentException.class, msg, () -> newType.decode(encoded, 1));
         assertThrown(IllegalArgumentException.class, msg, () -> newType.decode(encoded, 0, 1));
+        assertThrown(IllegalArgumentException.class, msg, () -> newType.decode(encoded));
         assertThrown(IllegalArgumentException.class, msg, () -> newType.decode(encoded.array()));
 
         assertThrown(IllegalArgumentException.class, "tuple index 0: array index 0: signed val exceeds bit limit: 8 >= 8",
