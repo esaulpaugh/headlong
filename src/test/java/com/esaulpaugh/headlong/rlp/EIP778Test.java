@@ -252,20 +252,20 @@ public class EIP778Test {
 
         assertArrayEquals(array, record.getPairs().toArray(EMPTY_ARRAY));
 
-        final LinkedHashMap<String, RLPString> map = record.orderedMap();
+        final LinkedHashMap<String, RLPItem> map = record.orderedMap();
         assertEquals("765f", map.get(UDP).asString(HEX));
         assertEquals("v4", map.get(ID).asString(UTF_8));
         assertEquals("03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", map.get(SECP256K1).asString(HEX));
 
         final Iterator<KVP> listIter = pairList.iterator();
-        final Iterator<Map.Entry<String, RLPString>> mapIter = map.entrySet().iterator();
+        final Iterator<Map.Entry<String, RLPItem>> mapIter = map.entrySet().iterator();
         int i = 0;
         while (contentIter.hasNext() || listIter.hasNext() || mapIter.hasNext()) {
             final KVP e = array[i];
             assertEquals(e.key, e.key());
             testEqual(e, new KVP(contentIter.next().asRLPString(), contentIter.next().asRLPString()));
             testEqual(e, listIter.next());
-            Map.Entry<String, RLPString> entry = mapIter.next();
+            Map.Entry<String, RLPItem> entry = mapIter.next();
             testEqual(e, new KVP(entry.getKey(), entry.getValue().asBytes()));
             testEqual(e, e.withValue(e.value().asBytes()));
             testEqual(e, e.withValue(e.value().asString(HEX), HEX));
@@ -390,7 +390,7 @@ public class EIP778Test {
     public void testRecordWith() {
         {
             Record with = VECTOR.with(SIGNER, 808L, new KVP(UDP, "0009", HEX));
-            LinkedHashMap<String, RLPString> map = with.orderedMap();
+            LinkedHashMap<String, RLPItem> map = with.orderedMap();
             assertEquals(4, map.size());
             assertEquals(808L, with.getSeq());
             assertArrayEquals(Strings.decode("0009", HEX), map.get(UDP).asBytes());
@@ -398,7 +398,7 @@ public class EIP778Test {
 
         Record with = VECTOR.with(SIGNER, 4L, new KVP(TCP6, "656934", HEX));
         assertEquals(4L, with.getSeq());
-        LinkedHashMap<String, RLPString> map = with.orderedMap();
+        LinkedHashMap<String, RLPItem> map = with.orderedMap();
         assertEquals(5, map.size());
         assertArrayEquals(Strings.decode("656934", HEX), map.get(TCP6).asBytes());
     }
@@ -408,7 +408,7 @@ public class EIP778Test {
         assertEquals(4L, VECTOR.orderedMap().size());
 
         Record with = VECTOR.with(SIGNER, Long.MAX_VALUE, new KVP(UDP6, "8007", HEX), new KVP(IP6, "ff00ff00", HEX));
-        LinkedHashMap<String, RLPString> map = with.orderedMap();
+        LinkedHashMap<String, RLPItem> map = with.orderedMap();
         assertEquals(6, map.size());
         assertEquals(Long.MAX_VALUE, with.getSeq());
         assertArrayEquals(Strings.decode("8007", HEX), map.get(UDP6).asBytes());

@@ -38,6 +38,7 @@ public final class KVP implements Comparable<KVP> {
     public static final String IP6 = "ip6";
     public static final String TCP6 = "tcp6";
     public static final String UDP6 = "udp6";
+    public static final String CLIENT = "client";
 
     final byte[] rlp;
     final RLPString key;
@@ -55,7 +56,7 @@ public final class KVP implements Comparable<KVP> {
         this.key = RLP_STRICT.wrapString(rlp);
     }
 
-    public KVP(RLPString key, RLPString value) {
+    public KVP(RLPString key, RLPItem value) {
         final int keyLen = key.encodingLength();
         this.rlp = new byte[keyLen + value.encodingLength()];
         key.copy(rlp, 0);
@@ -75,8 +76,8 @@ public final class KVP implements Comparable<KVP> {
         return key;
     }
 
-    public RLPString value() {
-        return RLP_STRICT.wrapString(rlp, key.endIndex);
+    public RLPItem value() {
+        return RLP_STRICT.wrap(rlp, key.endIndex);
     }
 
     void export(ByteBuffer bb) {
@@ -95,7 +96,15 @@ public final class KVP implements Comparable<KVP> {
 
     @Override
     public String toString() {
-        return key.asString(Strings.UTF_8) + " --> " + value().asString(Strings.HEX);
+        final RLPItem value = value();
+        if (value.isList()) {
+            StringBuilder sb = new StringBuilder(key.asString(Strings.UTF_8) + " --> [");
+            for (RLPItem e : value.asRLPList()) {
+                sb.append('\"').append(e.asString(Strings.ASCII)).append("\", ");
+            }
+            return sb.replace(sb.length() - 2, sb.length(), "]").toString();
+        }
+        return key.asString(Strings.UTF_8) + " --> " + value.asString(Strings.HEX);
     }
 
     @Override

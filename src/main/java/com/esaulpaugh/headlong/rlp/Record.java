@@ -165,8 +165,8 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
         return list;
     }
 
-    public LinkedHashMap<String, RLPString> orderedMap() {
-        final LinkedHashMap<String, RLPString> map = new LinkedHashMap<>();
+    public LinkedHashMap<String, RLPItem> orderedMap() {
+        final LinkedHashMap<String, RLPItem> map = new LinkedHashMap<>();
         for (KVP pair : this) {
             map.put(pair.key.asString(Strings.UTF_8), pair.value());
         }
@@ -186,7 +186,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
 
             @Override
             public KVP next() {
-                return new KVP((RLPString) rlpIter.next(), (RLPString) rlpIter.next());
+                return new KVP((RLPString) rlpIter.next(), rlpIter.next());
             }
         };
     }
