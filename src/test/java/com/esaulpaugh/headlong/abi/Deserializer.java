@@ -32,7 +32,6 @@ public class Deserializer {
 
     private Deserializer() {}
 
-    @SuppressWarnings("unchecked")
     public static <X extends Tuple> TupleType<X> parseTupleType(String ttStr) {
         return parseTupleType(Streams.parse(new JsonReader(new StringReader(ttStr))).getAsJsonArray());
     }

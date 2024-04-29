@@ -244,7 +244,7 @@ public class TupleTest {
         );
 
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1 is null",
-                () -> Triple.of(true, null, true)
+                () -> Tuple.of(true, null, true)
         );
 
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 1: null",
@@ -460,7 +460,7 @@ public class TupleTest {
     @Test
     public void testDecodeIndex0() {
         TupleType<Triple<Boolean, Tuple[], String>> tt = TupleType.parse("(bool,(bool,int24[2],(bool,bool)[2])[1],string)");
-        Triple<Boolean, Tuple[], String> args = Triple.of(true, new Tuple[] { Triple.of(true, new int[] { 1, 2 }, new Tuple[] { Pair.of(true, false), Pair.of(true, false) }) }, "ya");
+        Triple<Boolean, Tuple[], String> args = Tuple.of(true, new Tuple[] { Tuple.of(true, new int[] { 1, 2 }, new Tuple[] { Tuple.of(true, false), Tuple.of(true, false) }) }, "ya");
         ByteBuffer bb = tt.encode(args);
         System.out.println(Strings.encode(bb));
         String ya = tt.decode(bb, 2);
@@ -470,7 +470,7 @@ public class TupleTest {
     @Test
     public void testDecodeIndex1() {
         TupleType<Triple<Boolean, boolean[][], String[][]>> tt = TupleType.parse("(bool,bool[3][2],string[][])");
-        Triple<Boolean, boolean[][], String[][]> args = Triple.of(true, new boolean[][] { new boolean[] { true, false, true }, new boolean[] { false, false, true } }, new String[][] { new String[] { "wooo", "moo" } });
+        Triple<Boolean, boolean[][], String[][]> args = Tuple.of(true, new boolean[][] { new boolean[] { true, false, true }, new boolean[] { false, false, true } }, new String[][] { new String[] { "wooo", "moo" } });
         ByteBuffer bb = tt.encode(args);
         System.out.println(Strings.encode(bb));
         String[][] s = tt.decode(bb, 2);
@@ -569,7 +569,7 @@ public class TupleTest {
     public void testTupleLengthMismatch() throws Throwable {
         TupleType<?> tt = TupleType.parse("(bool)");
         assertThrown(IllegalArgumentException.class, "tuple length mismatch: expected length 1 but found 0", () -> tt.validate(Tuple.EMPTY));
-        assertThrown(IllegalArgumentException.class, "tuple length mismatch: expected length 1 but found 2", () -> tt.validate(Pair.of("", "")));
+        assertThrown(IllegalArgumentException.class, "tuple length mismatch: expected length 1 but found 2", () -> tt.validate(Tuple.of("", "")));
     }
 
     @Test
@@ -636,12 +636,12 @@ public class TupleTest {
 
         final Tuple e = Tuple.of();
         final Single<byte[]> s = Single.of(new byte[0]);
-        final Pair<byte[], String> p = Pair.of(new byte[1], "75");
-        final Triple<byte[], String, Long> t = Triple.of(new byte[2], "75", 75L);
-        final Quadruple<byte[], Object, Number, Throwable> q = Quadruple.of(new byte[3], "bbb", 19L, new Error());
-        final Quintuple<Long, Long, Long, Long, Byte> q5 = Quintuple.of(-999L, Long.MAX_VALUE, 0L, -1L, (byte)0);
+        final Pair<byte[], String> p = Tuple.of(new byte[1], "75");
+        final Triple<byte[], String, Long> t = Tuple.of(new byte[2], "75", 75L);
+        final Quadruple<byte[], Object, Number, Throwable> q = Tuple.of(new byte[3], "bbb", 19L, new Error());
+        final Quintuple<Long, Long, Long, Long, Byte> q5 = Tuple.of(-999L, Long.MAX_VALUE, 0L, -1L, (byte)0);
         @SuppressWarnings("rawtypes")
-        final Sextuple<Pair<byte[], String>, Pair<byte[], String>, Pair, Pair, Pair, Pair> s6 = Sextuple.of(p, p, p, p, p, p);
+        final Sextuple<Pair<byte[], String>, Pair<byte[], String>, Pair, Pair, Pair, Pair> s6 = Tuple.of(p, p, p, p, p, p);
         final Triple<Integer, String, Triple<byte[], String, Long>> n = Tuple.of(90, "_", t);
         final Triple<byte[], String, Long> x = n.get2();
 

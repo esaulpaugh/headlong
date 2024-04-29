@@ -125,19 +125,19 @@ public class MonteCarloTestCase {
         );
     }
 
-    MonteCarloTestCase(String init, Random rng, MessageDigest md) {
-        this(parseSeed(init), parseLimits(init), rng, md);
+    MonteCarloTestCase(String init, Random instance, MessageDigest md) {
+        this(parseSeed(init), parseLimits(init), instance, md);
     }
 
-    MonteCarloTestCase(long seed, Limits limits, Random rng, MessageDigest md) {
+    MonteCarloTestCase(long seed, Limits limits, Random instance, MessageDigest md) {
         this.seed = seed;
         this.limits = limits;
 
-        rng.setSeed(seed);
+        instance.setSeed(seed);
 
-        this.rawInputsStr = generateTupleTypeString(BASE_TYPES, rng, 0);
-        this.function = new Function(TypeEnum.FUNCTION, generateFunctionName(rng), TupleType.parse(rawInputsStr), TupleType.EMPTY, null, md);
-        this.argsTuple = generateTuple(function.getInputs().elementTypes, rng);
+        this.rawInputsStr = generateTupleTypeString(BASE_TYPES, instance, 0);
+        this.function = new Function(TypeEnum.FUNCTION, generateFunctionName(instance), TupleType.parse(rawInputsStr), TupleType.EMPTY, null, md);
+        this.argsTuple = generateTuple(function.getInputs().elementTypes, instance);
         testDeepCopy(argsTuple);
     }
 

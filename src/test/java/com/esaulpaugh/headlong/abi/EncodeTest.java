@@ -183,13 +183,13 @@ public class EncodeTest {
                 "payable",
                 Function.newDefaultDigest()
         );
-        final Tuple args = Sextuple.of(
+        final Tuple args = Tuple.of(
                 true,
                 Tuple.EMPTY,
                 "libertad..........................................................",
-                Pair.of(-128, 255),
+                Tuple.of(-128, 255),
                 Address.wrap(Address.toChecksumAddress(BigInteger.TEN.shiftLeft(156))),
-                Pair.of(65535, "carajo]0]0]0]0]0]0]0]0]0]0]0]0]0".getBytes(StandardCharsets.US_ASCII))
+                Tuple.of(65535, "carajo]0]0]0]0]0]0]0]0]0]0]0]0]0".getBytes(StandardCharsets.US_ASCII))
         );
         final String annotated = f.annotateCall(args);
         assertEquals(
@@ -349,7 +349,7 @@ public class EncodeTest {
     @Test
     public void simpleFunctionTest() {
         Function f = new Function("baz(uint32,bool)", "(uint32,bool)"); // canonicalizes and parses any signature automatically
-        Pair<Long, Boolean> args = Pair.of(69L, true);
+        Pair<Long, Boolean> args = Tuple.of(69L, true);
 
         // Two equivalent styles:
         ByteBuffer one = f.encodeCall(args);
@@ -536,9 +536,9 @@ public class EncodeTest {
         Object b = 9L;
         Object c = new boolean[0];
 
-        ByteBuffer ee = tt.encode(Triple.of(a, b, c));
+        ByteBuffer ee = tt.encode(Tuple.of(a, b, c));
 
-        assertArrayEquals(tt.encode(Triple.of(a, b, c)).array(), ee.array());
+        assertArrayEquals(tt.encode(Tuple.of(a, b, c)).array(), ee.array());
         assertEquals(
                 "0000000000000000000000000000000000000000000000000000000000000007000000000000000000000000000000000000000000000000000000000000000900000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
                 Strings.encode(ee)

@@ -43,7 +43,7 @@ public class MeasureFunction {
 
     private static final Function F = new Function("sam(bytes,bool,uint256[])", "(bytes,uint256[3],bool)");
     private static final TupleType<Tuple> T = F.getInputs();
-    private static final Triple<byte[], Boolean, BigInteger[]> ARGS = Triple.of(
+    private static final Triple<byte[], Boolean, BigInteger[]> ARGS = Tuple.of(
             Strings.decode("dave", Strings.UTF_8),
             true,
             new BigInteger[] { BigInteger.ONE, BigInteger.valueOf(2), BigInteger.valueOf(3) }
