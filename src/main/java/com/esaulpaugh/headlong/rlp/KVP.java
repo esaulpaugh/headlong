@@ -18,8 +18,12 @@ package com.esaulpaugh.headlong.rlp;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
+import java.util.Iterator;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
+import static com.esaulpaugh.headlong.util.Strings.ASCII;
+import static com.esaulpaugh.headlong.util.Strings.HEX;
+import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 
 /**
  * A key-value pair as per EIP-778.
@@ -48,7 +52,7 @@ public final class KVP implements Comparable<KVP> {
     }
 
     public KVP(String keyUtf8, byte[] rawVal) {
-        this(Strings.decode(keyUtf8, Strings.UTF_8), rawVal);
+        this(Strings.decode(keyUtf8, UTF_8), rawVal);
     }
 
     public KVP(byte[] key, byte[] value) {
@@ -57,7 +61,7 @@ public final class KVP implements Comparable<KVP> {
     }
 
     public KVP(String keyUtf8, RLPItem value) {
-        this(RLP_STRICT.wrapString(RLPEncoder.string(Strings.decode(keyUtf8, Strings.UTF_8))), value);
+        this(RLP_STRICT.wrapString(RLPEncoder.string(Strings.decode(keyUtf8, UTF_8))), value);
     }
 
     public KVP(RLPString key, RLPItem value) {
@@ -100,20 +104,20 @@ public final class KVP implements Comparable<KVP> {
 
     @Override
     public String toString() {
+        final StringBuilder sb = new StringBuilder(key.asString(UTF_8)).append(" --> ");
         final RLPItem value = value();
-        if (value.isList()) {
-            StringBuilder sb = new StringBuilder(key.asString(Strings.UTF_8) + " --> [");
-            boolean empty = true;
-            for (RLPItem e : value.asRLPList()) {
-                empty = false;
-                sb.append('\"').append(e.asString(Strings.ASCII)).append("\", ");
-            }
-            if (!empty) {
-                sb.delete(sb.length() - 2, sb.length());
-            }
-            return sb.append(']').toString();
+        if (value.isString()) {
+            return sb.append(value.asString(HEX)).toString();
         }
-        return key.asString(Strings.UTF_8) + " --> " + value.asString(Strings.HEX);
+        sb.append('[');
+        final Iterator<RLPItem> iter = value.asRLPList().iterator();
+        if (iter.hasNext()) {
+            sb.append('"').append(iter.next().asString(ASCII)).append('"');
+        }
+        while (iter.hasNext()) {
+            sb.append(", ").append('"').append(iter.next().asString(ASCII)).append('"');
+        }
+        return sb.append(']').toString();
     }
 
     @Override
@@ -126,6 +130,6 @@ public final class KVP implements Comparable<KVP> {
     }
 
     static IllegalArgumentException duplicateKeyErr(RLPString key) {
-        return new IllegalArgumentException("duplicate key: " + key.asString(Strings.UTF_8));
+        return new IllegalArgumentException("duplicate key: " + key.asString(UTF_8));
     }
 }
