@@ -56,6 +56,10 @@ public final class KVP implements Comparable<KVP> {
         this.key = RLP_STRICT.wrapString(rlp);
     }
 
+    public KVP(String keyUtf8, RLPItem value) {
+        this(RLP_STRICT.wrapString(RLPEncoder.string(Strings.decode(keyUtf8, Strings.UTF_8))), value);
+    }
+
     public KVP(RLPString key, RLPItem value) {
         final int keyLen = key.encodingLength();
         this.rlp = new byte[keyLen + value.encodingLength()];
@@ -99,10 +103,15 @@ public final class KVP implements Comparable<KVP> {
         final RLPItem value = value();
         if (value.isList()) {
             StringBuilder sb = new StringBuilder(key.asString(Strings.UTF_8) + " --> [");
+            boolean empty = true;
             for (RLPItem e : value.asRLPList()) {
+                empty = false;
                 sb.append('\"').append(e.asString(Strings.ASCII)).append("\", ");
             }
-            return sb.replace(sb.length() - 2, sb.length(), "]").toString();
+            if (!empty) {
+                sb.delete(sb.length() - 2, sb.length());
+            }
+            return sb.append(']').toString();
         }
         return key.asString(Strings.UTF_8) + " --> " + value.asString(Strings.HEX);
     }
