@@ -29,9 +29,11 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.LongSupplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.assertThrownWithAnySubstring;
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -297,21 +299,21 @@ public class DecodeTest {
         assertNotEquals(decoded, argsTuple);
 
         array[array.length - 1] = 2;
-        assertThrown(IllegalArgumentException.class, "illegal boolean value @ 68", () -> f.decodeCall(array));
+        assertThrown(IllegalArgumentException.class, "tuple index 0: array index 0: unsigned val exceeds bit limit: 2 > 1", () -> f.decodeCall(array));
 
         array[array.length - 1] = -1;
-        assertThrown(IllegalArgumentException.class, "illegal boolean value @ 68", () -> f.decodeCall(array));
+        assertThrown(IllegalArgumentException.class, "tuple index 0: array index 0: unsigned val exceeds bit limit: 8 > 1", () -> f.decodeCall(array));
 
         array[array.length - 32] = (byte) 0x80;
 
-        assertThrown(IllegalArgumentException.class, "illegal boolean value @ 68", () -> f.decodeCall(array));
+        assertThrown(IllegalArgumentException.class, "tuple index 0: array index 0: unsigned val exceeds bit limit: 256 > 1", () -> f.decodeCall(array));
 
         for (int i = array.length - 32; i < array.length; i++) {
             array[i] = (byte) 0xFF;
         }
         array[array.length - 1] = (byte) 0xFE;
 
-        assertThrown(IllegalArgumentException.class, "illegal boolean value @ 68", () -> f.decodeCall(array));
+        assertThrown(IllegalArgumentException.class, "tuple index 0: array index 0: unsigned val exceeds bit limit: 256 > 1", () -> f.decodeCall(array));
     }
 
     @Test
@@ -866,7 +868,7 @@ public class DecodeTest {
         final TupleType<Tuple> originalType = TypeFactory.create("(bytes1,int8[3])");
         final ByteBuffer encoded = originalType.encode(Tuple.of(new byte[1], new int[] { 1, 0, 2 }));
         final TupleType<?> newType = TypeFactory.create("(bytes1,bool[3])");
-        final String msg = "tuple index 1: array index 2: illegal boolean value @ 96";
+        final String msg = "tuple index 1: array index 2: unsigned val exceeds bit limit: 2 > 1";
         assertThrown(IllegalArgumentException.class, msg, () -> newType.decode(encoded, 1));
         assertThrown(IllegalArgumentException.class, msg, () -> newType.decode(encoded, 0, 1));
         assertThrown(IllegalArgumentException.class, msg, () -> newType.decode(encoded));
@@ -1011,6 +1013,61 @@ public class DecodeTest {
             assertEquals(encoded.capacity(), encoded.position());
             assertEquals(0, encoded.remaining());
             assertEquals(inputStr, dec1.get(0));
+        }
+    }
+
+    @Test
+    public void testRead() {
+        final Random r = new Random(TestUtils.getSeed());
+        for (int bitWidth = 1; bitWidth <= 64; bitWidth++) {
+            System.out.println("-------- bitWidth " + bitWidth + " --------");
+            final BigIntegerType writer256 = new BigIntegerType("writer256", 256, false);
+            final LongType unsigned = new LongType("unsigned", bitWidth, true);
+            final LongType signed = new LongType("signed", bitWidth, false);
+            final byte[] buffer = ABIType.newUnitBuffer();
+            final ByteBuffer dest = ByteBuffer.allocate(UNIT_LENGTH_BYTES);
+            for (int i = 0; i < 500; i++) {
+                writer256.encode(TestUtils.wildBigInteger(r, false, 256), dest);
+                dest.flip();
+                compare(dest, buffer, signed);
+                if (bitWidth < 64) {
+                    dest.rewind();
+                    compare(dest, buffer, unsigned);
+                }
+                dest.flip();
+            }
+        }
+    }
+
+    private static void compare(ByteBuffer bb, byte[] buffer, UnitType<?> ut) {
+        Object a = decode(() -> ut.decodeValid(bb, buffer).longValueExact());
+        bb.rewind();
+        Object b = decode(
+                () -> ut.unsigned
+                        ? ut.decodeUnsignedLong(bb)
+                        : ut.decodeSignedLong(bb)
+        );
+        if (a instanceof Long) {
+            validate((long) a, ut);
+            validate((long) b, ut);
+        }
+        if (a instanceof RuntimeException && b instanceof RuntimeException) {
+            assertEquals(((RuntimeException) a).getMessage(), ((RuntimeException) b).getMessage());
+        } else {
+            assertEquals(a, b);
+        }
+    }
+
+    private static void validate(long val, UnitType<?> ut) {
+        ut.validatePrimitive(val);
+        ut.validateBigInt(BigInteger.valueOf(val));
+    }
+
+    private static Object decode(LongSupplier decoder) {
+        try {
+            return decoder.getAsLong();
+        } catch (IllegalArgumentException iae) {
+            return iae;
         }
     }
 }

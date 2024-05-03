@@ -37,7 +37,9 @@ public final class LongType extends UnitType<Long> {
 
     @Override
     Long decode(ByteBuffer bb, byte[] unitBuffer) {
-        return decodeValid(bb, unitBuffer).longValue();
+        return unsigned
+                    ? decodeUnsignedLong(bb)
+                    : decodeSignedLong(bb);
     }
 
     static void encodeLong(long value, int byteLen, ByteBuffer dest) {
