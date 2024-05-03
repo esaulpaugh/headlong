@@ -15,7 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi.example;
 
-import com.esaulpaugh.headlong.abi.Quintuple;
 import com.esaulpaugh.headlong.abi.Tuple;
 
 import java.math.BigDecimal;
