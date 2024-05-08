@@ -28,7 +28,10 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeoutException;
 import java.util.function.LongSupplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
@@ -1017,29 +1020,43 @@ public class DecodeTest {
     }
 
     @Test
-    public void testRead() {
-        final Random r = new Random(TestUtils.getSeed());
-        for (int bitWidth = 1; bitWidth <= 64; bitWidth++) {
-            System.out.println("-------- bitWidth " + bitWidth + " --------");
-            final BigIntegerType writer256 = new BigIntegerType("writer256", 256, false);
-            final LongType unsigned = new LongType("unsigned", bitWidth, true);
-            final LongType signed = new LongType("signed", bitWidth, false);
-            final byte[] buffer = ABIType.newUnitBuffer();
-            final ByteBuffer dest = ByteBuffer.allocate(UNIT_LENGTH_BYTES);
-            for (int i = 0; i < 500; i++) {
-                writer256.encode(TestUtils.wildBigInteger(r, false, 256), dest);
-                dest.flip();
-                compare(dest, buffer, signed);
-                if (bitWidth < 64) {
-                    dest.rewind();
-                    compare(dest, buffer, unsigned);
+    public void testDecodeLong() throws InterruptedException, TimeoutException {
+        final Runnable run = () -> {
+            final Random r = ThreadLocalRandom.current();
+            for (int bitWidth = 1; bitWidth <= 64; bitWidth++) {
+                final int bitLen = UNIT_LENGTH_BYTES * Byte.SIZE;
+                final BigIntegerType writer256 = new BigIntegerType("writer" + bitLen, bitLen, false);
+                final LongType unsigned = new LongType("unsigned", bitWidth, true);
+                final LongType signed = new LongType("signed", bitWidth, false);
+                final byte[] buffer = ABIType.newUnitBuffer();
+                final ByteBuffer dest = ByteBuffer.allocate(UNIT_LENGTH_BYTES);
+                int valid = 0, total = 0;
+                for (int i = 0; i < 1_000; i++) {
+                    final BigInteger v = TestUtils.wildBigInteger(r, false, bitLen);
+                    writer256.encode(v, dest);
+                    dest.flip();
+                    valid += compare(dest, buffer, signed, v);
+                    total++;
+                    if (bitWidth != 64) {
+                        dest.rewind();
+                        valid += compare(dest, buffer, unsigned, v);
+                        total++;
+                    }
+                    dest.flip();
                 }
-                dest.flip();
+                System.out.println(bitWidth + ": " + valid + " / " + total + " = " + (valid / (double) total));
             }
+        };
+
+        final int p = 1; // Runtime.getRuntime().availableProcessors() - 1;
+        final ExecutorService es = Executors.newFixedThreadPool(p);
+        for (int i = 0; i < p; i++) {
+            es.submit(run);
         }
+        TestUtils.requireNoTimeout(TestUtils.shutdownAwait(es, 300L));
     }
 
-    private static void compare(ByteBuffer bb, byte[] buffer, UnitType<?> ut) {
+    private static int compare(ByteBuffer bb, byte[] buffer, UnitType<?> ut, BigInteger expected) {
         Object a = decode(() -> ut.decodeValid(bb, buffer).longValueExact());
         bb.rewind();
         Object b = decode(
@@ -1047,20 +1064,20 @@ public class DecodeTest {
                         ? ut.decodeUnsignedLong(bb)
                         : ut.decodeSignedLong(bb)
         );
-        if (a instanceof Long) {
-            validate((long) a, ut);
-            validate((long) b, ut);
-        }
         if (a instanceof RuntimeException && b instanceof RuntimeException) {
             assertEquals(((RuntimeException) a).getMessage(), ((RuntimeException) b).getMessage());
+            return 0;
         } else {
             assertEquals(a, b);
+            final long aLong = (long) a;
+            ut.validatePrimitive(aLong);
+            final BigInteger aBigInt = BigInteger.valueOf(aLong);
+            ut.validateBigInt(aBigInt);
+            if (!aBigInt.equals(expected) || aLong != expected.longValueExact()) {
+                throw new AssertionError();
+            }
+            return 1;
         }
-    }
-
-    private static void validate(long val, UnitType<?> ut) {
-        ut.validatePrimitive(val);
-        ut.validateBigInt(BigInteger.valueOf(val));
     }
 
     private static Object decode(LongSupplier decoder) {
