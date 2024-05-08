@@ -29,6 +29,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +44,10 @@ import java.util.concurrent.TimeoutException;
 public final class TestUtils {
 
     private TestUtils() {}
+
+    private static final class SecureRandomHolder {
+        static final SecureRandom SR = new SecureRandom();
+    }
 
     public static boolean shutdownAwait(ExecutorService exec, long timeoutSeconds) throws InterruptedException {
         exec.shutdown();
@@ -60,7 +65,7 @@ public final class TestUtils {
     }
 
     public static long getSeed() {
-        return getSeed(31 * System.nanoTime() ^ 0x3636363636363636L);
+        return SecureRandomHolder.SR.nextLong();
     }
 
     /**
