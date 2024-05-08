@@ -27,11 +27,21 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
     final int bitLength;
     final boolean unsigned;
+    private final BigInteger min;
+    private final BigInteger max;
+    private final long minLong;
+    private final long maxLong;
+    private final int nLZ;
 
     UnitType(String canonicalType, Class<J> clazz, int bitLength, boolean unsigned) {
         super(canonicalType, clazz, false);
         this.bitLength = bitLength;
         this.unsigned = unsigned;
+        this.nLZ = Long.SIZE - bitLength;
+        this.min = minValue();
+        this.max = maxValue();
+        this.minLong = this.min.longValue();
+        this.maxLong = this.max.longValue();
         final Class<?> c = this.getClass();
         if (
                c == BigDecimalType.class
@@ -104,39 +114,73 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         return ((Number) value).longValue();
     }
 
-    final int validatePrimitive(long longVal) {
-        if (unsigned) {
-            if (longVal < 0) {
-                throw new IllegalArgumentException("signed value given for unsigned type");
+    final long decodeUnsignedLong(ByteBuffer bb) {
+        final long a = bb.getLong(), b = bb.getLong(), c = bb.getLong(), d = bb.getLong();
+        if ((a | b | c) == 0L && d >= 0L && d <= maxLong) {
+            return d;
+        }
+        throw err(bb);
+    }
+
+    final long decodeSignedLong(ByteBuffer bb) {
+        final long a = bb.getLong(), b = bb.getLong(), c = bb.getLong(), d = bb.getLong();
+        if ((a | b | c) == 0L) {
+            if (Long.numberOfLeadingZeros(d) > nLZ) {
+                return d;
             }
-            checkUnsignedBitLen(Integers.bitLen(longVal));
-        } else {
-            checkSignedBitLen(Integers.bitLen(longVal < 0 ? ~longVal : longVal));
+        } else if ((a & b & c) == -1L && Long.numberOfLeadingZeros(~d) > nLZ) {
+            return d;
+        }
+        throw err(bb);
+    }
+
+    final IllegalArgumentException err(ByteBuffer bb) {
+        bb.position(bb.position() - UNIT_LENGTH_BYTES);
+        decodeValid(bb, ABIType.newUnitBuffer());
+        throw new AssertionError();
+    }
+
+    final int validatePrimitive(long longVal) {
+        if (longVal < minLong) {
+            throw negative(Integers.bitLen(~longVal));
+        }
+        if (longVal > maxLong) {
+            throw nonNegative(Integers.bitLen(longVal));
         }
         return UNIT_LENGTH_BYTES;
     }
 
-    final void validateBigInt(BigInteger bigIntVal) {
+    final int validateBigInt(BigInteger bigIntVal) {
+        if (bigIntVal.compareTo(min) < 0) {
+            throw negative(bigIntVal.bitLength());
+        }
+        if (bigIntVal.compareTo(max) > 0) {
+            throw nonNegative(bigIntVal.bitLength());
+        }
+        return UNIT_LENGTH_BYTES;
+    }
+
+    private IllegalArgumentException negative(int actual) {
         if (unsigned) {
-            if (bigIntVal.signum() < 0) {
-                throw new IllegalArgumentException("signed value given for unsigned type");
-            }
-            checkUnsignedBitLen(bigIntVal.bitLength());
-        } else {
-            checkSignedBitLen(bigIntVal.bitLength());
+            return new IllegalArgumentException("signed value given for unsigned type");
         }
-    }
-
-    private void checkUnsignedBitLen(int actual) {
-        if (actual > bitLength) {
-            throw new IllegalArgumentException("unsigned val exceeds bit limit: " + actual + " > " + bitLength);
-        }
-    }
-
-    private void checkSignedBitLen(int actual) {
         if (actual >= bitLength) {
-            throw new IllegalArgumentException("signed val exceeds bit limit: " + actual + " >= " + bitLength);
+            return new IllegalArgumentException("signed val exceeds bit limit: " + actual + " >= " + bitLength);
         }
+        throw new AssertionError();
+    }
+
+    private IllegalArgumentException nonNegative(int actual) {
+        if (unsigned) {
+            if (actual > bitLength) {
+                return new IllegalArgumentException("unsigned val exceeds bit limit: " + actual + " > " + bitLength);
+            }
+            throw new AssertionError();
+        }
+        if (actual >= bitLength) {
+            return new IllegalArgumentException("signed val exceeds bit limit: " + actual + " >= " + bitLength);
+        }
+        throw new AssertionError();
     }
 
     final BigInteger decodeValid(ByteBuffer bb, byte[] unitBuffer) {

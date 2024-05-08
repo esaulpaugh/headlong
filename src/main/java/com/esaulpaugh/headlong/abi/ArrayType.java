@@ -399,18 +399,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         int i = 0;
         try {
             for ( ; i < len; i++) {
-                bb.get(unitBuffer);
-                int j;
-                for (j = 0; j < UNIT_LENGTH_BYTES - Byte.BYTES; j++) {
-                    if (unitBuffer[j] != ZERO_BYTE) {
-                        throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
-                    }
-                }
-                switch (unitBuffer[j]) {
-                case 1: booleans[i] = true;
-                case 0: continue;
-                default: throw new IllegalArgumentException("illegal boolean value @ " + (bb.position() - UNIT_LENGTH_BYTES));
-                }
+                booleans[i] = BooleanType.INSTANCE.decode(bb, unitBuffer);
             }
         } catch (IllegalArgumentException cause) {
             throw TupleType.decodeException(false, i, cause);
@@ -421,11 +410,45 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     private static byte[] decodeBytes(int len, ByteBuffer bb, boolean legacyDecode) {
         final byte[] data = new byte[len];
         bb.get(data);
-        final int mod = Integers.mod(len, UNIT_LENGTH_BYTES);
-        if (mod != 0 && !legacyDecode) {
-            final int padding = UNIT_LENGTH_BYTES - mod;
-            for (int i = 0; i < padding; i++) {
-                if (bb.get() != ZERO_BYTE) throw new IllegalArgumentException("malformed array: non-zero padding byte");
+        if (!legacyDecode) {
+            long p;
+            switch (Integers.mod(len, UNIT_LENGTH_BYTES)) {
+            case 0: return data;
+            case 1:  p = bb.getLong() | bb.getLong() | bb.getLong() | bb.getInt() | bb.getShort() | bb.get(); break;
+            case 2:  p = bb.getLong() | bb.getLong() | bb.getLong() | bb.getInt() | bb.getShort(); break;
+            case 3:  p = bb.getLong() | bb.getLong() | bb.getLong() | bb.getInt() | bb.get(); break;
+            case 4:  p = bb.getLong() | bb.getLong() | bb.getLong() | bb.getInt(); break;
+            case 5:  p = bb.getLong() | bb.getLong() | bb.getLong() | bb.getShort() | bb.get(); break;
+            case 6:  p = bb.getLong() | bb.getLong() | bb.getLong() | bb.getShort(); break;
+            case 7:  p = bb.getLong() | bb.getLong() | bb.getLong() | bb.get(); break;
+            case 8:  p = bb.getLong() | bb.getLong() | bb.getLong(); break;
+            case 9:  p = bb.getLong() | bb.getLong() | bb.getInt() | bb.getShort() | bb.get(); break;
+            case 10: p = bb.getLong() | bb.getLong() | bb.getInt() | bb.getShort(); break;
+            case 11: p = bb.getLong() | bb.getLong() | bb.getInt() | bb.get(); break;
+            case 12: p = bb.getLong() | bb.getLong() | bb.getInt(); break;
+            case 13: p = bb.getLong() | bb.getLong() | bb.getShort() | bb.get(); break;
+            case 14: p = bb.getLong() | bb.getLong() | bb.getShort(); break;
+            case 15: p = bb.getLong() | bb.getLong() | bb.get(); break;
+            case 16: p = bb.getLong() | bb.getLong(); break;
+            case 17: p = bb.getLong() | bb.getInt() | bb.getShort() | bb.get(); break;
+            case 18: p = bb.getLong() | bb.getInt() | bb.getShort(); break;
+            case 19: p = bb.getLong() | bb.getInt() | bb.get(); break;
+            case 20: p = bb.getLong() | bb.getInt(); break;
+            case 21: p = bb.getLong() | bb.getShort() | bb.get(); break;
+            case 22: p = bb.getLong() | bb.getShort(); break;
+            case 23: p = bb.getLong() | bb.get(); break;
+            case 24: p = bb.getLong(); break;
+            case 25: p = bb.getInt() | bb.getShort() | bb.get(); break;
+            case 26: p = bb.getInt() | bb.getShort(); break;
+            case 27: p = bb.getInt() | bb.get(); break;
+            case 28: p = bb.getInt(); break;
+            case 29: p = bb.getShort() | bb.get(); break;
+            case 30: p = bb.getShort(); break;
+            case 31: p = bb.get(); break;
+            default: throw new AssertionError();
+            }
+            if (p != 0L) {
+                throw new IllegalArgumentException("malformed array: non-zero padding byte");
             }
         }
         return data;

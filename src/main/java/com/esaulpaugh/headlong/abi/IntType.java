@@ -38,6 +38,10 @@ public final class IntType extends UnitType<Integer> {
 
     @Override
     Integer decode(ByteBuffer bb, byte[] unitBuffer) {
-        return decodeValid(bb, unitBuffer).intValue();
+        return (int) (
+                    unsigned
+                        ? decodeUnsignedLong(bb)
+                        : decodeSignedLong(bb)
+                );
     }
 }

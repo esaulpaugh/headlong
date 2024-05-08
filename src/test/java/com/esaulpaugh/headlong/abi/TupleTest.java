@@ -294,7 +294,7 @@ public class TupleTest {
     @Test
     public void fuzzNulls() throws Throwable {
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(3, 3, 3, 3);
-        final Random r = new Random(TestUtils.getSeed());
+        final Random r = new Random(TestUtils.getSeed(31 * System.nanoTime() ^ 0x3636363636363636L));
         final Keccak k = new Keccak(256);
         for (int i = 0; i < 1000; i++) {
             MonteCarloTestCase mctc = new MonteCarloTestCase(r.nextLong(), limits, r, k);
