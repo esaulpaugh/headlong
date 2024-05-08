@@ -71,17 +71,19 @@ public final class TestUtils {
      */
     public static long getSeed(final long protoseed) {
         final Runtime runtime = Runtime.getRuntime();
+        final long oldFree = runtime.freeMemory();
         final Thread thread = Thread.currentThread();
         final ThreadGroup group = thread.getThreadGroup();
+        final Object a = new Object();
+        final Object b = new Throwable();
         final long[] vals = new long[] {
-                new Object().hashCode(),        runtime.maxMemory(),        runtime.hashCode(),
-                new Object().hashCode(),        runtime.freeMemory(),       runtime.availableProcessors(),
-                new Object().hashCode(),        runtime.totalMemory(),      ForkJoinPool.commonPool().getParallelism(),
-                System.nanoTime(),              thread.getId(),             thread.hashCode(),
-                System.currentTimeMillis(),     thread.getPriority(),       thread.getName().hashCode(),
-                new Object().hashCode(),        group.activeCount(),        group.hashCode(),
-                new Object().hashCode(),        protoseed,                  ThreadLocalRandom.current().nextLong(),
-                new Object().hashCode(),        new Throwable().hashCode(), Double.doubleToLongBits(Math.random()),
+                runtime.hashCode(),         runtime.totalMemory(),      runtime.availableProcessors(),
+                new Object().hashCode(),    oldFree,                    Double.doubleToLongBits(Math.random()),
+                a.hashCode(),               protoseed,                  ThreadLocalRandom.current().nextLong(),
+                thread.getId(),             thread.hashCode(),          thread.getName().hashCode(),
+                thread.getPriority(),       System.currentTimeMillis(), ForkJoinPool.commonPool().getParallelism(),
+                new Object().hashCode(),    group.activeCount(),        group.hashCode(),
+                b.hashCode(),               runtime.freeMemory(),       System.nanoTime()
         };
         long c = System.identityHashCode(vals);
         for (long v : vals) {
