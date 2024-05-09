@@ -85,15 +85,15 @@ public class Tuple implements Iterable<Object> {
     }
 
     @SuppressWarnings("unchecked")
-    static <T extends Class<? extends Tuple>> T classFor(int len) {
+    static <J extends Tuple> Class<J> classFor(int len) {
         switch (len) {
-        case 1: return (T) Single.class;
-        case 2: return (T) Pair.class;
-        case 3: return (T) Triple.class;
-        case 4: return (T) Quadruple.class;
-        case 5: return (T) Quintuple.class;
-        case 6: return (T) Sextuple.class;
-        default: return (T) Tuple.class;
+        case 1: return (Class<J>) Single.class;
+        case 2: return (Class<J>) Pair.class;
+        case 3: return (Class<J>) Triple.class;
+        case 4: return (Class<J>) Quadruple.class;
+        case 5: return (Class<J>) Quintuple.class;
+        case 6: return (Class<J>) Sextuple.class;
+        default: return (Class<J>) Tuple.class;
         }
     }
 
