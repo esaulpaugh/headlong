@@ -85,7 +85,7 @@
 //    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 //    testImplementation("org.bouncycastle:bcprov-jdk14:$bcVersion")
 //
-//    jmhImplementation("commons-codec:commons-codec:1.16.1")
+//    jmhImplementation("commons-codec:commons-codec:1.17.0")
 //}
 //
 //jmh {

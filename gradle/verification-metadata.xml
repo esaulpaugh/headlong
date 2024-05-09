@@ -18,7 +18,7 @@
          <trusted-key id="08f0aab4d0c1a4bdde340765b341ddb020fcb6ab" group="org.bouncycastle" name="bcprov-jdk14" version="1.78.1"/>
          <trusted-key id="12d16069219c90212a974d119ae296fd02e9f65b" group="org.apache.commons" name="commons-math3" version="3.2"/>
          <trusted-key id="517b94f8d0a46317a28d8ab30da8a5ec02d11ead" group="net.sf.jopt-simple" name="jopt-simple" version="5.0.4"/>
-<!--         <trusted-key id="bc87a3fd0a54480f0badbebd21939ff0ca2a6567" group="commons-codec" name="commons-codec" version="1.16.1"/>-->
+<!--         <trusted-key id="bc87a3fd0a54480f0badbebd21939ff0ca2a6567" group="commons-codec" name="commons-codec" version="1.17.0"/>-->
          <trusted-key id="c7be5bcc9fec15518cfda882b0f3710fa64900e7" group="com.google.code.gson"/>
          <trusted-key id="ff6e2c001948c5f2f38b0cc385911f425ec61b51">
             <trusting group="junit"/>
@@ -274,15 +274,15 @@
             </artifact>
         </component>
 
-        <component group="commons-codec" name="commons-codec" version="1.16.1">
-            <artifact name="commons-codec-1.16.1.jar">
-                <sha256 value="ec87bfb55f22cbd1b21e2190eeda28b2b312ed2a431ee49fbdcc01812d04a5e4" origin="repo.maven.apache.org/maven2/"/>
+        <component group="commons-codec" name="commons-codec" version="1.17.0">
+            <artifact name="commons-codec-1.17.0.jar">
+                <sha256 value="f700de80ac270d0344fdea7468201d8b9c805e5c648331c3619f2ee067ccfc59" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="commons-codec-1.16.1.pom">
-                <sha256 value="b826ddd92f9d7cc64371a02fa0830c154d67c98370ea54a2d196e72eb590ad28" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="commons-codec-1.17.0.pom">
+                <sha256 value="c01c4cda5e408f41ed1d83e4a0a170cf53801b6338aba49f0f904786bc1214fc" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="commons-codec-1.16.1-sources.jar">
-                <sha256 value="1b9d7336bef950cd45dbefd5351222ee88e4efde09a9454e851a458c34f813be" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="commons-codec-1.17.0-sources.jar">
+                <sha256 value="9869277d653510f670039b77945befe71c1ca34ef2e281855bd86e6605aab4a6" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
         <component group="org.ow2.asm" name="asm" version="9.0">
@@ -328,9 +328,9 @@
                 <sha256 value="87cd27e1a02a5c3eb6d85059ce98696bb1b44c2b8b650f0567c86df60fa61da7" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
-        <component group="org.apache.commons" name="commons-parent" version="66">
-            <artifact name="commons-parent-66.pom">
-                <sha256 value="48fd6dc846e56b1f408660d163e75300f9e384bb63be482a8082a21d72a8db9c" origin="repo.maven.apache.org/maven2/"/>
+        <component group="org.apache.commons" name="commons-parent" version="69">
+            <artifact name="commons-parent-69.pom">
+                <sha256 value="d50da9c39bdca823d618d1b4a03b73f196497fcb8616fd0da727c8623592a9bb" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
     </components>
