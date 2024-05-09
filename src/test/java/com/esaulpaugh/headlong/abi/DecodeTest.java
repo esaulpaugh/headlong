@@ -30,6 +30,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
 import java.util.function.LongSupplier;
@@ -1020,40 +1021,58 @@ public class DecodeTest {
     }
 
     @Test
-    public void testDecodeLong() throws InterruptedException, TimeoutException {
-        final Runnable run = () -> {
-            final Random r = ThreadLocalRandom.current();
-            for (int bitWidth = 1; bitWidth <= 64; bitWidth++) {
-                final int bitLen = UNIT_LENGTH_BYTES * Byte.SIZE;
-                final BigIntegerType writer256 = new BigIntegerType("writer" + bitLen, bitLen, false);
-                final LongType unsigned = new LongType("unsigned", bitWidth, true);
-                final LongType signed = new LongType("signed", bitWidth, false);
-                final byte[] buffer = ABIType.newUnitBuffer();
-                final ByteBuffer dest = ByteBuffer.allocate(UNIT_LENGTH_BYTES);
-                int valid = 0, total = 0;
-                for (int i = 0; i < 1_000; i++) {
-                    final BigInteger v = TestUtils.wildBigInteger(r, false, bitLen);
-                    writer256.encode(v, dest);
-                    dest.flip();
-                    valid += compare(dest, buffer, signed, v);
-                    total++;
-                    if (bitWidth != 64) {
-                        dest.rewind();
-                        valid += compare(dest, buffer, unsigned, v);
-                        total++;
-                    }
-                    dest.flip();
-                }
-                System.out.println(bitWidth + ": " + valid + " / " + total + " = " + (valid / (double) total));
-            }
-        };
-
-        final int p = 1; // Runtime.getRuntime().availableProcessors() - 1;
+    public void testDecodeLong() throws Throwable {
+        final int p = 2; // Runtime.getRuntime().availableProcessors() - 1;
+        final LongTester[] runnables = new LongTester[p];
         final ExecutorService es = Executors.newFixedThreadPool(p);
         for (int i = 0; i < p; i++) {
-            es.submit(run);
+            es.submit(runnables[i] = new LongTester());
         }
-        TestUtils.requireNoTimeout(TestUtils.shutdownAwait(es, 300L));
+        final boolean noTimeout = TestUtils.shutdownAwait(es, 600L);
+        for (LongTester e : runnables) {
+            if (e.t != null) {
+                throw e.t;
+            }
+        }
+        TestUtils.requireNoTimeout(noTimeout);
+    }
+
+    private static class LongTester implements Runnable {
+
+        Throwable t;
+
+        @Override
+        public void run() {
+            try {
+                final Random r = ThreadLocalRandom.current();
+                for (int bitWidth = 1; bitWidth <= 64; bitWidth++) {
+                    final int bitLen = UNIT_LENGTH_BYTES * Byte.SIZE;
+                    final BigIntegerType writer256 = new BigIntegerType("writer" + bitLen, bitLen, false);
+                    final LongType unsigned = new LongType("unsigned", bitWidth, true);
+                    final LongType signed = new LongType("signed", bitWidth, false);
+                    final byte[] buffer = ABIType.newUnitBuffer();
+                    final ByteBuffer dest = ByteBuffer.allocate(UNIT_LENGTH_BYTES);
+                    int valid = 0, total = 0;
+                    for (int i = 0; i < 2_000; i++) {
+                        final BigInteger v = TestUtils.wildBigInteger(r, false, bitLen);
+                        writer256.encode(v, dest);
+                        dest.flip();
+                        valid += compare(dest, buffer, signed, v);
+                        total++;
+                        if (bitWidth != 64) {
+                            dest.rewind();
+                            valid += compare(dest, buffer, unsigned, v);
+                            total++;
+                        }
+                        dest.flip();
+                    }
+                    System.out.println(bitWidth + ": " + valid + " / " + total + " = " + (valid / (double) total));
+                }
+            } catch (Throwable t) {
+                this.t = t;
+                throw new RuntimeException(t);
+            }
+        }
     }
 
     private static int compare(ByteBuffer bb, byte[] buffer, UnitType<?> ut, BigInteger expected) {
