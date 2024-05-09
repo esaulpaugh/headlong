@@ -30,9 +30,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeoutException;
 import java.util.function.LongSupplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
