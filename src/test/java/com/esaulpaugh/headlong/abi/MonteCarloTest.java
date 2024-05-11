@@ -165,15 +165,12 @@ public class MonteCarloTest {
         final Random instance = new Random();
 
         int i = 0;
-        MonteCarloTestCase testCase = null;
-        boolean initialized;
+        MonteCarloTestCase testCase;
         long caseSeed = -1;
         while (i < n) {
-            initialized = false;
+            testCase = null;
             try {
-                caseSeed = caseGen.nextLong();
-                testCase = new MonteCarloTestCase(caseSeed, limits, instance, k);
-                initialized = true;
+                testCase = new MonteCarloTestCase(caseSeed = caseGen.nextLong(), limits, instance, k);
 //                if(testCase.function.getInputs().getCanonicalType().contains("int[")) throw new Error("canonicalization failed!");
                 testCase.runAll(instance);
 //                if(System.nanoTime() % 50_000_000 == 0) throw new Error("simulated random error");
@@ -190,7 +187,7 @@ public class MonteCarloTest {
                                     + " seed: " + threadSeed
                                     + "L\nMASTER SEED: " + masterSeed
                                     + "\nparallelism: " + parallelism;
-                if (!initialized) {
+                if (testCase == null) {
                     System.err.println("#" + i + " failed to initialize with seed " + caseSeed + "\n" + desc);
                 } else {
                     System.err.println("#" + i + " failed for " + testCase + "\n" + desc);
