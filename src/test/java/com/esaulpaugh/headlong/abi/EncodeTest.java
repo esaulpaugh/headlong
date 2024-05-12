@@ -592,7 +592,7 @@ public class EncodeTest {
 
             Uint uint = new Uint(i);
             final long mask = uint.maskLong;
-            if(mask != 0) {
+            if (mask != 0) {
                 final long uMax = unsigned.maxValue().longValueExact();
                 final long uMin = unsigned.minValue().longValueExact();
                 final long max = signed.maxValue().longValueExact();
@@ -605,9 +605,12 @@ public class EncodeTest {
                 assertEquals(0L, uMin);
                 assertEquals(Long.SIZE - i, Long.numberOfLeadingZeros(uMax));
                 assertEquals(0, Long.numberOfTrailingZeros(uMax));
+                assertEquals(i, Long.bitCount(uMax));
 
+                assertEquals(0, Long.numberOfLeadingZeros(min));
                 assertEquals(i - 1, Long.numberOfTrailingZeros(min));
                 assertEquals(0, Long.numberOfTrailingZeros(max));
+                assertEquals(i - 1, Long.bitCount(max));
             }
             assertEquals(uint.range, unsigned.maxValue().subtract(unsigned.minValue()).add(BigInteger.ONE));
             assertEquals(uint.halfRange, signed.maxValue().add(BigInteger.ONE));
