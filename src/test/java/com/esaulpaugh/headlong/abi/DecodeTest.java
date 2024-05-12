@@ -1051,20 +1051,20 @@ public class DecodeTest {
                     final LongType signed = new LongType("signed", bitWidth, false);
                     final byte[] buffer = ABIType.newUnitBuffer();
                     final ByteBuffer dest = ByteBuffer.allocate(UNIT_LENGTH_BYTES);
-                    int valid = 0, total = 0;
-                    for (int i = 0; i < 2_000; i++) {
+                    int valid = 0;
+                    final int n = 2_000;
+                    for (int i = 0; i < n; i++) {
                         final BigInteger v = TestUtils.wildBigInteger(r, false, bitLen);
                         writer256.encode(v, dest);
                         dest.flip();
                         valid += compare(dest, buffer, signed, v);
-                        total++;
                         if (bitWidth != 64) {
                             dest.rewind();
                             valid += compare(dest, buffer, unsigned, v);
-                            total++;
                         }
                         dest.flip();
                     }
+                    final int total = bitWidth == 64 ? n : n * 2;
                     System.out.println(bitWidth + ": " + valid + " / " + total + " = " + (valid / (double) total));
                 }
             } catch (Throwable t) {
