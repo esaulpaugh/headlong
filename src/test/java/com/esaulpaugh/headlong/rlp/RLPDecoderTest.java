@@ -113,7 +113,7 @@ public class RLPDecoderTest {
         for (int i = 0; i < tasks.length; i++) {
             System.out.print(i + " -> ");
             tasks[i] = new ExhaustiveFuzzTask(new byte[] { (byte) i, 0, 0, 0 });
-            executorService.submit(tasks[i]);
+            executorService.execute(tasks[i]);
         }
         requireNoTimeout(shutdownAwait(executorService, 2000L));
         long valid = 0, invalid = 0;

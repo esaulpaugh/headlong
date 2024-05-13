@@ -16,9 +16,9 @@
 package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
+import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.util.Uint;
 import com.esaulpaugh.headlong.util.WrappedKeccak;
-import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -33,8 +33,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,6 +45,7 @@ import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.assertThrownWithAnySubstring;
+import static com.esaulpaugh.headlong.TestUtils.getFutures;
 import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
 import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -68,7 +71,7 @@ public class EncodeTest {
     @Disabled("may take minutes to run")
     @SuppressWarnings("deprecation")
     @Test
-    public void fuzzSignatures() throws InterruptedException, TimeoutException {
+    public void fuzzSignatures() throws InterruptedException, TimeoutException, ExecutionException {
 
         final byte[] alphabet = Strings.decode("x0123456789", Strings.ASCII); // new char[128]; // "(),abcdefgilmnorstuxy8[]"
         final int alphabetLen = alphabet.length;
@@ -152,10 +155,12 @@ public class EncodeTest {
         final int parallelism = Runtime.getRuntime().availableProcessors();
         System.out.println("p = " + parallelism);
         final ExecutorService pool = Executors.newFixedThreadPool(parallelism);
+        final Future<?>[] futures = new Future<?>[parallelism];
         for (int k = 0; k < parallelism; k++) {
-            pool.submit(runnable);
+            futures[k] = pool.submit(runnable);
         }
         requireNoTimeout(shutdownAwait(pool, 3600L));
+        getFutures(futures);
 
         final int size = map.size();
         System.out.println("\nsize=" + size);

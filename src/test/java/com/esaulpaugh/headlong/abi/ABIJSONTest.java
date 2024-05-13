@@ -33,6 +33,7 @@ import java.util.stream.StreamSupport;
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ARRAY;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -547,7 +548,7 @@ public class ABIJSONTest {
 
         {
             TupleType<Pair<BigInteger, Integer>> in = error2.getInputs();
-            Pair<BigInteger, Integer> pair = in.decode(new byte[64]);
+            Pair<BigInteger, Integer> pair = in.decode(new byte[UNIT_LENGTH_BYTES * 2]);
             BigInteger a = pair.get0();
             Integer b = pair.get1();
             assertEquals(BigInteger.ZERO, a);

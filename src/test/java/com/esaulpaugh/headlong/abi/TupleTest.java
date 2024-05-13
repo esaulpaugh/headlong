@@ -103,7 +103,7 @@ public class TupleTest {
             }
             final int finalBits = (int) (pow % Long.SIZE);
             if (finalBits > 0L) {
-                final int shift = 64 - finalBits;
+                final int shift = Long.SIZE - finalBits;
                 final long last = a[a.length - 1];
                 final long expected = -1L << shift;
                 if (last != expected) {
