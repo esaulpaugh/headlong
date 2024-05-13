@@ -30,11 +30,15 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.LongSupplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.assertThrownWithAnySubstring;
+import static com.esaulpaugh.headlong.TestUtils.getFutures;
+import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
+import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.abi.ABIType.newUnitBuffer;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -1021,57 +1025,40 @@ public class DecodeTest {
 
     @Test
     public void testDecodeLong() throws Throwable {
-        final int p = 2; // Runtime.getRuntime().availableProcessors() - 1;
-        final LongTester[] runnables = new LongTester[p];
-        final ExecutorService es = Executors.newFixedThreadPool(p);
-        for (int i = 0; i < p; i++) {
-            es.submit(runnables[i] = new LongTester());
-        }
-        final boolean noTimeout = TestUtils.shutdownAwait(es, 600L);
-        for (LongTester e : runnables) {
-            if (e.t != null) {
-                throw e.t;
-            }
-        }
-        TestUtils.requireNoTimeout(noTimeout);
-    }
-
-    private static class LongTester implements Runnable {
-
-        Throwable t;
-
-        @Override
-        public void run() {
-            try {
-                final Random r = ThreadLocalRandom.current();
-                for (int bitWidth = 1; bitWidth <= 64; bitWidth++) {
-                    final int bitLen = UNIT_LENGTH_BYTES * Byte.SIZE;
-                    final BigIntegerType writer256 = new BigIntegerType("writer" + bitLen, bitLen, false);
-                    final LongType unsigned = new LongType("unsigned", bitWidth, true);
-                    final LongType signed = new LongType("signed", bitWidth, false);
-                    final byte[] buffer = ABIType.newUnitBuffer();
-                    final ByteBuffer dest = ByteBuffer.allocate(UNIT_LENGTH_BYTES);
-                    int valid = 0;
-                    final int n = 2_000;
-                    for (int i = 0; i < n; i++) {
-                        final BigInteger v = TestUtils.wildBigInteger(r, false, bitLen);
-                        writer256.encode(v, dest);
-                        dest.flip();
-                        valid += compare(dest, buffer, signed, v);
-                        if (bitWidth != 64) {
-                            dest.rewind();
-                            valid += compare(dest, buffer, unsigned, v);
-                        }
-                        dest.flip();
+        final Runnable runnable = () -> {
+            final Random r = ThreadLocalRandom.current();
+            for (int bitWidth = 1; bitWidth <= 64; bitWidth++) {
+                final int bitLen = UNIT_LENGTH_BYTES * Byte.SIZE;
+                final BigIntegerType writer256 = new BigIntegerType("writer" + bitLen, bitLen, false);
+                final LongType unsigned = new LongType("unsigned", bitWidth, true);
+                final LongType signed = new LongType("signed", bitWidth, false);
+                final byte[] buffer = ABIType.newUnitBuffer();
+                final ByteBuffer dest = ByteBuffer.allocate(UNIT_LENGTH_BYTES);
+                int valid = 0;
+                final int n = 2_000;
+                for (int i = 0; i < n; i++) {
+                    final BigInteger v = TestUtils.wildBigInteger(r, false, bitLen);
+                    writer256.encode(v, dest);
+                    dest.flip();
+                    valid += compare(dest, buffer, signed, v);
+                    if (bitWidth != 64) {
+                        dest.rewind();
+                        valid += compare(dest, buffer, unsigned, v);
                     }
-                    final int total = bitWidth == 64 ? n : n * 2;
-                    System.out.println(bitWidth + ": " + valid + " / " + total + " = " + (valid / (double) total));
+                    dest.flip();
                 }
-            } catch (Throwable t) {
-                this.t = t;
-                throw new RuntimeException(t);
+                final int total = bitWidth == 64 ? n : n * 2;
+                System.out.println(bitWidth + ": " + valid + " / " + total + " = " + (valid / (double) total));
             }
+        };
+        final int p = 2; // Runtime.getRuntime().availableProcessors() - 1;
+        final ExecutorService es = Executors.newFixedThreadPool(p);
+        final Future<?>[] futures = new Future<?>[p];
+        for (int i = 0; i < p; i++) {
+            futures[i] = es.submit(runnable);
         }
+        requireNoTimeout(shutdownAwait(es, 600L));
+        getFutures(futures);
     }
 
     private static int compare(ByteBuffer bb, byte[] buffer, UnitType<?> ut, BigInteger expected) {
