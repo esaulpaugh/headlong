@@ -30,8 +30,11 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeoutException;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
+import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
+import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.TestUtils.uniformBigInteger;
 import static com.esaulpaugh.headlong.TestUtils.uniformLong;
 import static com.esaulpaugh.headlong.TestUtils.wildBigInteger;
@@ -47,59 +50,40 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TupleTest {
 
-    private static class MetaTestTask implements Runnable {
-
-        final long taskSamples;
-        final boolean unsigned;
-        final int bitLen;
-        final long powMinus1;
-        final long[] dest;
-
-        private MetaTestTask(long taskSamples, boolean unsigned, int bitLen, long powMinus1, long[] dest) {
-            this.taskSamples = taskSamples;
-            this.unsigned = unsigned;
-            this.bitLen = bitLen;
-            this.powMinus1 = powMinus1;
-            this.dest = dest;
-        }
-
-        @Override
-        public void run() {
-            final ThreadLocalRandom r = ThreadLocalRandom.current();
-            for (long i = 0; i < taskSamples; i++) {
-                final long z = uniformLong(r, unsigned, bitLen) & powMinus1;
-                final int idx = (int) (z / Long.SIZE);
-                final long x = dest[idx];
-                if (x != -1L) {
-                    final long y = x | (0x80000000_00000000L >>> (z & 63));
-                    if (y != x) {
-                        dest[idx] = y;
-                    }
-                }
-            }
-        }
-    }
-
     @Test
-    public void metaTest1() throws InterruptedException {
+    public void metaTest1() throws InterruptedException, TimeoutException {
         final int parallelism = 24;
         final boolean unsigned = true;
 
-        for (int j = 0; j < 23; j++) {
-            final long pow = (long) Math.pow(2.0, j);
+        for (int bitLen = 0; bitLen < 23; bitLen++) {
+            final long pow = (long) Math.pow(2.0, bitLen);
             final long powMinus1 = pow - 1;
-//            System.out.println(Long.toHexString(powMinus1) + ", " + pow);
-            final long samples = pow * (j / 2 + 11);
+            final long samples = pow * (bitLen / 2 + 11);
             final long taskSamples = 1 + samples / parallelism;
-            System.out.println("j=" + j + ", samples=" + samples);
+            System.out.println("bitLen=" + bitLen + ", samples=" + samples);
             final long[] a = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
             {
                 final long[] b = new long[a.length];
                 final ExecutorService es = Executors.newFixedThreadPool(parallelism);
                 for (int i = 0; i < parallelism; i++) {
-                    es.submit(new MetaTestTask(taskSamples, unsigned, j, powMinus1, i % 2 == 0 ? a : b));
+                    final long[] dest = i % 2 == 0 ? a : b;
+                    final int bits = bitLen;
+                    es.execute(() -> {
+                        final ThreadLocalRandom r = ThreadLocalRandom.current();
+                        for (long s = 0; s < taskSamples; s++) {
+                            final long z = uniformLong(r, unsigned, bits) & powMinus1;
+                            final int idx = (int) (z / Long.SIZE);
+                            final long x = dest[idx];
+                            if (x != -1L) {
+                                final long y = x | (0x80000000_00000000L >>> (z & 63));
+                                if (y != x) {
+                                    dest[idx] = y;
+                                }
+                            }
+                        }
+                    });
                 }
-                TestUtils.shutdownAwait(es, 1_000L);
+                requireNoTimeout(shutdownAwait(es, 1_000L));
                 for (int i = 0; i < a.length; i++) {
                     a[i] |= b[i];
                 }
