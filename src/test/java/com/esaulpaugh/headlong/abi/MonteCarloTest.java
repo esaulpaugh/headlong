@@ -127,30 +127,25 @@ public class MonteCarloTest {
     private static final long TIMEOUT_SECONDS = 600L;
 
     @Test
-    public void gambleGamble() throws InterruptedException, TimeoutException {
+    public void gambleGamble() throws InterruptedException, TimeoutException, ExecutionException {
 
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(MAX_TUPLE_DEPTH, MAX_TUPLE_LEN, MAX_ARRAY_DEPTH, MAX_ARRAY_LEN);
         final long masterSeed = TestUtils.getSeed(); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
         final int parallelism = Runtime.getRuntime().availableProcessors();
-        final GambleGambleRunnable[] runnables = new GambleGambleRunnable[parallelism];
         final int workPerProcessor = (int) (TARGET_ITERATIONS / parallelism);
         final ExecutorService pool = Executors.newFixedThreadPool(parallelism);
         final long totalWork = workPerProcessor * (long) parallelism;
         final String initialConditions = "(" + masterSeed + "L," + limits.maxTupleDepth + ',' + limits.maxTupleLength + ',' + limits.maxArrayDepth + ',' + limits.maxArrayLength + ")";
+        final Future<?>[] futures = new Future<?>[parallelism];
         System.out.println("Running\t\t" + totalWork + "\t" + initialConditions + " with " + TIMEOUT_SECONDS + "-second timeout ...");
-        for (int i = 0; i < runnables.length; i++) {
-            pool.submit(runnables[i] = new GambleGambleRunnable(parallelism, masterSeed, masterSeed + i, workPerProcessor, limits));
-        }
-        boolean noTimeout = TestUtils.shutdownAwait(pool, TIMEOUT_SECONDS);
-
-        for (GambleGambleRunnable runnable : runnables) {
-            if(runnable.thrown != null) {
-                throw new AssertionError(runnable.thrown);
-            }
+        for (int i = 0; i < parallelism; i++) {
+            final long seed = masterSeed + i;
+            futures[i] = pool.submit(() -> doMonteCarlo(parallelism, masterSeed, masterSeed + seed, workPerProcessor, limits));
         }
 
-        requireNoTimeout(noTimeout);
+        requireNoTimeout(shutdownAwait(pool, TIMEOUT_SECONDS));
+        getFutures(futures);
         System.out.println("Finished\t" + totalWork + "\t" + initialConditions);
     }
 
@@ -203,37 +198,6 @@ public class MonteCarloTest {
         }
 
         if(log.length() > 0) System.out.println(log);
-    }
-
-    private static class GambleGambleRunnable implements Runnable {
-
-        private final int parallelism;
-        private final long masterSeed;
-        private final long seed;
-        private final int n;
-        private final MonteCarloTestCase.Limits limits;
-        Throwable thrown = null;
-
-        GambleGambleRunnable(final int parallelism,
-                             final long masterSeed,
-                             final long seed,
-                             final int n,
-                             final MonteCarloTestCase.Limits limits) {
-            this.parallelism = parallelism;
-            this.masterSeed = masterSeed;
-            this.seed = seed;
-            this.n = n;
-            this.limits = limits;
-        }
-
-        @Override
-        public void run() {
-            try {
-                doMonteCarlo(parallelism, masterSeed, seed, n, limits);
-            } catch (Throwable t) {
-                thrown = t;
-            }
-        }
     }
 
     private static class MonteCarloTask extends RecursiveAction {
