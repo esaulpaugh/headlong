@@ -40,13 +40,16 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static com.esaulpaugh.headlong.TestUtils.getFutures;
 import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
 import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 
@@ -284,8 +287,7 @@ public class MonteCarloTest {
     }
 
     @Test
-    public void testThreadSafety() throws InterruptedException, TimeoutException {
-
+    public void testThreadSafety() throws InterruptedException, TimeoutException, ExecutionException {
         final Random r = new Random(TestUtils.getSeed());
         final Keccak k = new Keccak(256);
         final MonteCarloTestCase one = newComplexTestCase(r, k);
@@ -295,25 +297,28 @@ public class MonteCarloTest {
         System.out.println(two);
         final MonteCarloTask oneTask = new MonteCarloTask(one, 0, 308_011);
 
+        final Runnable runnable = () -> {
+            for (int j = 0; j < 500; j++) {
+                two.runStandard();
+            }
+        };
+
         final int parallelism = Runtime.getRuntime().availableProcessors();
         final ExecutorService threadPool = Executors.newFixedThreadPool(parallelism);
 
-        ForkJoinPool fjPool = ForkJoinPool.commonPool();
+        final ForkJoinPool fjPool = ForkJoinPool.commonPool();
         fjPool.invoke(oneTask);
 
+        final Future<?>[] futures = new Future<?>[parallelism];
         for (int i = 0; i < parallelism; i++) {
-            threadPool.submit(() -> {
-                for (int j = 0; j < 500; j++)
-                    two.runStandard();
-            });
+            futures[i] = threadPool.submit(runnable);
         }
 
-        for (int j = 0; j < 500; j++) {
-            two.runStandard();
-        }
+        runnable.run();
 
         requireNoTimeout(shutdownAwait(threadPool, 3L));
         requireNoTimeout(fjPool.awaitQuiescence(3L, TimeUnit.SECONDS));
+        getFutures(futures);
     }
 
     @Test

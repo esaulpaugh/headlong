@@ -34,8 +34,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -57,6 +59,12 @@ public final class TestUtils {
     public static void requireNoTimeout(boolean noTimeout) throws TimeoutException {
         if (!noTimeout) {
             throw new TimeoutException("not very Timely!!");
+        }
+    }
+
+    public static void getFutures(Future<?>[] futures) throws ExecutionException, InterruptedException {
+        for (Future<?> f : futures) {
+            f.get();
         }
     }
 
