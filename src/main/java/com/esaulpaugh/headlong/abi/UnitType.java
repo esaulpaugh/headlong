@@ -19,11 +19,27 @@ import com.esaulpaugh.headlong.util.Integers;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /** Superclass for any 256-bit ("unit") Contract ABI type. Usually numbers or boolean. Not for arrays or tuples. */
 public abstract class UnitType<J> extends ABIType<J> { // J generally extends Number or is Boolean
 
     public static final int UNIT_LENGTH_BYTES = 256 / Byte.SIZE;
+
+    private static final Set<Class<?>> SUBCLASSES;
+
+    static {
+        Set<Class<?>> subclasses = new HashSet<>();
+        subclasses.add(BooleanType.class);
+        subclasses.add(IntType.class);
+        subclasses.add(LongType.class);
+        subclasses.add(BigIntegerType.class);
+        subclasses.add(BigDecimalType.class);
+        subclasses.add(AddressType.class);
+        SUBCLASSES = Collections.unmodifiableSet(subclasses);
+    }
 
     final int bitLength;
     final boolean unsigned;
@@ -42,18 +58,9 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         this.max = maxValue();
         this.minLong = this.min.longValue();
         this.maxLong = this.max.longValue();
-        final Class<?> c = this.getClass();
-        if (
-               c == BigDecimalType.class
-            || c == BooleanType.class
-            || c == IntType.class
-            || c == LongType.class
-            || c == BigIntegerType.class
-            || c == AddressType.class
-        ) {
-            return;
+        if (!SUBCLASSES.contains(this.getClass())) {
+            throw new AssertionError("unexpected subclass");
         }
-        throw new AssertionError("unexpected subclass");
     }
 
     public final int getBitLength() {
