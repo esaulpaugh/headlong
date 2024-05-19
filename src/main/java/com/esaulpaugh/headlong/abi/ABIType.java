@@ -22,9 +22,6 @@ import com.esaulpaugh.headlong.util.Strings;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.IntFunction;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -67,22 +64,6 @@ public abstract class ABIType<J> {
 
     public static final ABIType<?>[] EMPTY_ARRAY = new ABIType<?>[0];
 
-    private static final Set<Class<?>> SUBCLASSES;
-
-    static {
-        Set<Class<?>> subclasses = new HashSet<>();
-        subclasses.add(BooleanType.class);
-        subclasses.add(ByteType.class);
-        subclasses.add(IntType.class);
-        subclasses.add(LongType.class);
-        subclasses.add(BigIntegerType.class);
-        subclasses.add(BigDecimalType.class);
-        subclasses.add(ArrayType.class);
-        subclasses.add(TupleType.class);
-        subclasses.add(AddressType.class);
-        SUBCLASSES = Collections.unmodifiableSet(subclasses);
-    }
-
     final String canonicalType;
     final Class<J> clazz;
     final boolean dynamic;
@@ -91,9 +72,21 @@ public abstract class ABIType<J> {
         this.canonicalType = canonicalType; // .intern() to save memory and allow == comparison?
         this.clazz = clazz;
         this.dynamic = dynamic;
-        if (!SUBCLASSES.contains(this.getClass())) {
-            throw new AssertionError("unexpected subclass");
+        final Class<?> c = this.getClass();
+        if (
+                c == BigDecimalType.class
+                        || c == BooleanType.class
+                        || c == ByteType.class
+                        || c == IntType.class
+                        || c == LongType.class
+                        || c == BigIntegerType.class
+                        || c == ArrayType.class
+                        || c == TupleType.class
+                        || c == AddressType.class
+        ) {
+            return;
         }
+        throw new AssertionError("unexpected subclass");
     }
 
     public final String getCanonicalType() {
