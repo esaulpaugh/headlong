@@ -656,4 +656,25 @@ public class TupleTest {
         assertEquals(a.toString(), b.toString());
         assertEquals(a.deepCopy(), b.deepCopy());
     }
+
+    @Test
+    public void testUnexpectedSubclass() throws Throwable {
+        assertThrown(AssertionError.class, "unexpected subclass", () -> new UnitType<Long>("custom", Long.class, 64, false) {
+
+            @Override
+            Class<?> arrayClass() {
+                return null;
+            }
+
+            @Override
+            public int typeCode() {
+                return 0;
+            }
+
+            @Override
+            Long decode(ByteBuffer buffer, byte[] unitBuffer) {
+                return null;
+            }
+        });
+    }
 }
