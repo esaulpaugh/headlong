@@ -201,9 +201,10 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     }
 
     private int measureArrayElements(int n, IntUnaryOperator measurer) {
+        final int elementsLength = countBytes(true, n, measurer);
         return elementType.dynamic
-                ? OFFSET_LENGTH_BYTES * n + countBytes(true, n, measurer)
-                : countBytes(true, n, measurer);
+                ? OFFSET_LENGTH_BYTES * n + elementsLength
+                : elementsLength;
     }
 
     private int validateInts(int[] arr, IntType type) {
