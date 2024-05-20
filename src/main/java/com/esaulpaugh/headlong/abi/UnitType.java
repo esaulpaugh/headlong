@@ -92,12 +92,11 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     @Override
     public final int validate(J value) {
         validateClass(value);
-        validateInternal(value);
-        return UNIT_LENGTH_BYTES;
+        return validateInternal(value);
     }
 
-    void validateInternal(J value) {
-        validatePrimitive(toLong(value));
+    int validateInternal(J value) {
+        return validatePrimitive(toLong(value));
     }
 
     @Override

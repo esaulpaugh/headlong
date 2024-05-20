@@ -37,8 +37,8 @@ public final class AddressType extends UnitType<Address> {
     }
 
     @Override
-    void validateInternal(Address value) {
-        ADDRESS_INNER.validateInternal(value.value());
+    int validateInternal(Address value) {
+        return ADDRESS_INNER.validateInternal(value.value());
     }
 
     @Override

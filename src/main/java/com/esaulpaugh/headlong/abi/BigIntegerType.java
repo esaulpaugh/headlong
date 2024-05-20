@@ -36,8 +36,8 @@ public final class BigIntegerType extends UnitType<BigInteger> {
     }
 
     @Override
-    void validateInternal(BigInteger value) {
-        validateBigInt(value);
+    int validateInternal(BigInteger value) {
+        return validateBigInt(value);
     }
 
     @Override
