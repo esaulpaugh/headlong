@@ -540,8 +540,8 @@ public class TupleTest {
         TupleType<?> tt = TupleType.parse("(bytes8,decimal)");
         ArrayType<ByteType, Byte, byte[]> at = tt.get(0);
         assertEquals(8, at.getLength());
-        BigIntegerType decimal = tt.get(1);
-        assertEquals("int168", decimal.getCanonicalType());
+        BigDecimalType decimal = tt.get(1);
+        assertEquals("fixed168x10", decimal.getCanonicalType());
         assertEquals("iii", Single.of("iii").get0());
 
         TupleType<?> outer = TupleType.parse("((address,int256))");

@@ -119,7 +119,7 @@ public class FunctionTest {
         testNonCanonicalEquals("foo(uint256[5][])",     "foo(uint[5][])");
         testNonCanonicalEquals("foo(uint256[100][100])","foo(uint[100][100])");
 
-        testNonCanonicalEquals("foo(bool,(decimal[0][][99]))","foo(bool,(int168[0][][99]))");
+        testNonCanonicalEquals("foo(bool,(decimal[0][][99]))","foo(bool,(fixed168x10[0][][99]))");
     }
 
     private static void testNonCanonicalEquals(String canonical, String nonCanonical) {
