@@ -112,10 +112,13 @@ public final class KVP implements Comparable<KVP> {
         sb.append('[');
         final Iterator<RLPItem> iter = value.asRLPList().iterator();
         if (iter.hasNext()) {
-            sb.append('"').append(iter.next().asString(ASCII)).append('"');
-        }
-        while (iter.hasNext()) {
-            sb.append(", ").append('"').append(iter.next().asString(ASCII)).append('"');
+            for (;;) {
+                sb.append('"').append(iter.next().asString(ASCII)).append('"');
+                if (!iter.hasNext()) {
+                    break;
+                }
+                sb.append(", ");
+            }
         }
         return sb.append(']').toString();
     }
