@@ -475,7 +475,7 @@ public class EIP778Test {
 
     @Test
     public void testToString() {
-        assertEquals("key0 --> 76616c756530", new KVP("key0", "value0", ASCII).toString());
-        assertEquals("key1 --> [\"dd\", \"\"]", new KVP("key1", RLPDecoder.RLP_STRICT.wrapBits(0xc482646480L)).toString());
+        assertEquals("ip --> 3235352e3130312e302e313238", new KVP(IP, "255.101.0.128", ASCII).toString());
+        assertEquals("client --> [\"dd\", \"\"]", new KVP(KVP.CLIENT, RLPDecoder.RLP_STRICT.wrapBits(0xc482646480L)).toString());
     }
 }
