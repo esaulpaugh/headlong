@@ -10,7 +10,7 @@ ABI spec: https://solidity.readthedocs.io/en/latest/abi-spec.html
 
 RLP spec: https://ethereum.org/en/developers/docs/data-structures-and-encoding/rlp
 
-SHA-256 (headlong-11.1.0.jar): 7718cca29d9b3be24a6472fffb2c185724380c7cbea008f6a05949b20d72720e
+SHA-256 (headlong-11.1.1.jar): 22bbfc15d180847988ba0ad4a473ae8d2647a1cec1fcc3339880a6b6635d9f30
 
 ## Usage
 
@@ -138,14 +138,14 @@ Or build locally:
 Clone the project and install to your local maven repository using `gradle publishToMavenLocal` or `mvn install`, then declare it as a dependency:
 
 ```kotlin
-implementation("com.esaulpaugh:headlong:11.1.1-SNAPSHOT")
+implementation("com.esaulpaugh:headlong:11.2.0-SNAPSHOT")
 ```
 
 ```xml
 <dependency>
     <groupId>com.esaulpaugh</groupId>
     <artifactId>headlong</artifactId>
-    <version>11.1.1-SNAPSHOT</version>
+    <version>11.2.0-SNAPSHOT</version>
 </dependency>
 ```
 Alternatively:
@@ -173,7 +173,7 @@ Also includes optimized implementations of:
 * Keccak
 * hexadecimal
 
-headlong depends on gson v2.10.1. Test suite should take less than one minute to run. Test packages require junit. Jar size is ~126 KiB. Java 8+.
+headlong depends on gson v2.10.1. Test suite should take less than one minute to run. Test packages require junit. Jar size is ~128 KiB. Java 8+.
 
 See the wiki for more, such as packed encoding (and decoding) and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 
