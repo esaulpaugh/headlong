@@ -74,14 +74,14 @@ public abstract class ABIType<J> {
         this.dynamic = dynamic;
         final Class<?> c = this.getClass();
         if (
-                c == BigDecimalType.class
-                        || c == BooleanType.class
-                        || c == ByteType.class
+                c == TupleType.class
+                        || c == ArrayType.class
+                        || c == BigIntegerType.class
                         || c == IntType.class
                         || c == LongType.class
-                        || c == BigIntegerType.class
-                        || c == ArrayType.class
-                        || c == TupleType.class
+                        || c == BigDecimalType.class
+                        || c == ByteType.class
+                        || c == BooleanType.class
                         || c == AddressType.class
         ) {
             return;

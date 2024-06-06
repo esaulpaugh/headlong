@@ -44,11 +44,11 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         this.maxLong = this.max.longValue();
         final Class<?> c = this.getClass();
         if (
-                c == BigDecimalType.class
-                        || c == BooleanType.class
+                c == BigIntegerType.class
                         || c == IntType.class
                         || c == LongType.class
-                        || c == BigIntegerType.class
+                        || c == BigDecimalType.class
+                        || c == BooleanType.class
                         || c == AddressType.class
         ) {
             return;
