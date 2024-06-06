@@ -185,15 +185,15 @@ public final class SuperSerial {
     private static Object deserializeArray(ArrayType<?, ?, ?> type, RLPItem item) {
         final ABIType<?> et = type.getElementType();
         switch (et.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return deserializeBooleanArray((RLPList) item);
+        case TYPE_CODE_BOOLEAN: return deserializeBooleanArray(item.asRLPList());
         case TYPE_CODE_BYTE: return deserializeByteArray(item, type.isString());
-        case TYPE_CODE_INT: return deserializeIntArray((IntType) et, (RLPList) item);
-        case TYPE_CODE_LONG: return deserializeLongArray((LongType) et, (RLPList) item);
+        case TYPE_CODE_INT: return deserializeIntArray((IntType) et, item.asRLPList());
+        case TYPE_CODE_LONG: return deserializeLongArray((LongType) et, item.asRLPList());
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
-        case TYPE_CODE_ADDRESS: return deserializeObjectArray(et, (RLPList) item);
+        case TYPE_CODE_ADDRESS: return deserializeObjectArray(et, item.asRLPList());
         default: throw new AssertionError();
         }
     }

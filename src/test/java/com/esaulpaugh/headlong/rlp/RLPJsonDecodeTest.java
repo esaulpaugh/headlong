@@ -64,7 +64,7 @@ public class RLPJsonDecodeTest {
             item.asString(Strings.HEX);
         } else {
             ArrayList<Object> collector = new ArrayList<>();
-            elementsRecursive((RLPList) item, collector, RLPDecoder.RLP_STRICT);
+            elementsRecursive(item.asRLPList(), collector, RLPDecoder.RLP_STRICT);
         }
     }
 
@@ -73,7 +73,7 @@ public class RLPJsonDecodeTest {
         for (RLPItem element : actualList) {
             if(element instanceof RLPList) {
                 List<Object> subList = new ArrayList<>();
-                elementsRecursive((RLPList) element, subList, decoder);
+                elementsRecursive(element.asRLPList(), subList, decoder);
                 results.add(subList);
             } else {
                 results.add(element);

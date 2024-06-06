@@ -186,7 +186,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
 
             @Override
             public KVP next() {
-                return new KVP((RLPString) rlpIter.next(), rlpIter.next());
+                return new KVP(rlpIter.next().asRLPString(), rlpIter.next());
             }
         };
     }
