@@ -526,7 +526,8 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         if (sb.length() > 0) {
             sb.append('\n');
         }
-        sb.append(ABIType.pad(ABIType.LABEL_LEN - unpaddedLabel.length(), unpaddedLabel)).append(Strings.encode(rowBuffer));
+        ABIType.appendPadded(ABIType.LABEL_LEN - unpaddedLabel.length(), unpaddedLabel, sb);
+        sb.append(Strings.encode(rowBuffer));
         sb.append("\t[").append(i).append(']');
         if (note == null) {
             sb.append(" ...");

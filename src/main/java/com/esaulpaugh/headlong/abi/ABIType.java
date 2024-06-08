@@ -336,11 +336,20 @@ public abstract class ABIType<J> {
     }
 
     static String pad(final int leftPadding, String unpadded) {
-        final StringBuilder label = new StringBuilder(LABEL_PADDED_LEN);
-        for (int l = 0; l < leftPadding; l++) label.append(' ');
-        label.append(unpadded);
-        for (int r = label.length(); r < LABEL_PADDED_LEN; r++) label.append(' ');
+        StringBuilder label = new StringBuilder(LABEL_PADDED_LEN);
+        appendPadded(leftPadding, unpadded, label);
         return label.toString();
+    }
+
+    static void appendPadded(final int leftPadding, String unpadded, StringBuilder sb) {
+        int i;
+        for (i = 0; i < leftPadding; i++) {
+            sb.append(' ');
+        }
+        sb.append(unpadded);
+        for (i += unpadded.length(); i < LABEL_PADDED_LEN; i++) {
+            sb.append(' ');
+        }
     }
 
     static String friendlyClassName(Class<?> clazz, int arrayLen) {

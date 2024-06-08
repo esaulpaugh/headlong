@@ -421,7 +421,9 @@ public final class Function implements ABIObject {
      */
     public String annotateCall(Tuple args) {
         StringBuilder sb = new StringBuilder(768);
-        sb.append(name).append(":\n").append(ABIType.pad(0, "ID")).append(Strings.encode(selector));
+        sb.append(name).append(":\n");
+        ABIType.appendPadded(0, "ID", sb);
+        sb.append(Strings.encode(selector));
         return inputTypes.annotate(args, sb);
     }
 }
