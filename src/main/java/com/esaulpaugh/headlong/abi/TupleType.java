@@ -447,41 +447,43 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
      * This method is subject to change or removal in a future release.
      */
     public String annotate(Tuple tuple) {
+        return annotate(tuple, new StringBuilder(512));
+    }
+
+    String annotate(Tuple tuple, StringBuilder sb) {
         if (size() != tuple.elements.length) {
             throw lengthMismatch(tuple);
         }
-        if (size() == 0) {
-            return "";
+        if (size() > 0) {
+            int row = 0;
+            int i = 0;
+            final int last = size() - 1;
+            int offset = firstOffset;
+            final byte[] rowBuffer = newUnitBuffer();
+            do {
+                final ABIType<Object> t = get(i);
+                if (!t.dynamic) {
+                    row = encodeTailAnnotated(sb, row, i, tuple.elements[i]);
+                    if (i >= last) {
+                        break;
+                    }
+                } else {
+                    encodeOffsetAnnotated(sb, offset, rowBuffer, row++, i);
+                    if (i >= last) {
+                        break;
+                    }
+                    offset += t.dynamicByteLength(tuple.elements[i]); // calculate next offset
+                }
+                i++;
+            } while (true);
+            i = 0;
+            do {
+                final ABIType<Object> t = get(i);
+                if (t.dynamic) {
+                    row = encodeTailAnnotated(sb, row, i, tuple.elements[i]);
+                }
+            } while (++i < size());
         }
-        int row = 0;
-        final StringBuilder sb = new StringBuilder();
-        int i = 0;
-        final int last = size() - 1;
-        int offset = firstOffset;
-        final byte[] rowBuffer = newUnitBuffer();
-        do {
-            final ABIType<Object> t = get(i);
-            if (!t.dynamic) {
-                row = encodeTailAnnotated(sb, row, i, tuple.elements[i]);
-                if (i >= last) {
-                    break;
-                }
-            } else {
-                encodeOffsetAnnotated(sb, offset, rowBuffer, row++, i);
-                if (i >= last) {
-                    break;
-                }
-                offset += t.dynamicByteLength(tuple.elements[i]); // calculate next offset
-            }
-            i++;
-        } while (true);
-        i = 0;
-        do {
-            final ABIType<Object> t = get(i);
-            if (t.dynamic) {
-                row = encodeTailAnnotated(sb,  row, i, tuple.elements[i]);
-            }
-        } while (++i < size());
         return sb.toString();
     }
 
