@@ -537,7 +537,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         if (OFFSET_NOTE.equals(note) || !element.isDynamic()) {
             String name = getElementName(i);
             if (name != null) {
-                sb.append(" \"").append(getElementName(i)).append('"');
+                sb.append(" \"").append(name).append('"');
             }
             sb.append(note);
             String internalType = getElementInternalType(i);
