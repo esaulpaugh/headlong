@@ -521,7 +521,10 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     private void appendAnnotatedRow(StringBuilder sb, ByteBuffer bb, byte[] rowBuffer, int row, int i, String note) {
         bb.get(rowBuffer);
         String unpaddedLabel = Integer.toHexString(row * UNIT_LENGTH_BYTES);
-        sb.append('\n').append(ABIType.pad(ABIType.LABEL_LEN - unpaddedLabel.length(), unpaddedLabel)).append(Strings.encode(rowBuffer));
+        if (sb.length() > 0) {
+            sb.append('\n');
+        }
+        sb.append(ABIType.pad(ABIType.LABEL_LEN - unpaddedLabel.length(), unpaddedLabel)).append(Strings.encode(rowBuffer));
         sb.append("\t[").append(i).append(']');
         if (note == null) {
             sb.append(" ...");
