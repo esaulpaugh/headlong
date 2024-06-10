@@ -73,14 +73,14 @@ public final class TypeFactory {
         local.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
         local.put("fixed168x10", new BigDecimalType("fixed168x10", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
 
-        local.put("decimal", local.get("fixed168x10"));
+        local.put("bool", BooleanType.INSTANCE);
+
+        local.put("decimal", local.get("int168"));
 
         local.put("int", local.get("int256"));
         local.put("uint", local.get("uint256"));
         local.put("fixed", local.get("fixed128x18"));
         local.put("ufixed", local.get("ufixed128x18"));
-
-        local.put("bool", BooleanType.INSTANCE);
 
         final Map<String, ABIType<?>> localLegacy = new HashMap<>(256);
         for (Map.Entry<String, ABIType<?>> e : local.entrySet()) {

@@ -523,7 +523,7 @@ public class DecodeTest {
         );
         assertThrown(
                 IllegalArgumentException.class,
-                "return type not a singleton: (fixed168x10,uint256)",
+                "return type not a singleton: (int168,uint256)",
                 () -> Function.parse("bim()", "(decimal,uint)").decodeSingletonReturn(new byte[0])
         );
         Function bar = Function.parse("bar()", "(bool)");

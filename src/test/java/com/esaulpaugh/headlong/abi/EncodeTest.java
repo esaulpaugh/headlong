@@ -636,19 +636,16 @@ public class EncodeTest {
 
     @Test
     public void testDecimalMinMax() throws Throwable {
-        final BigDecimalType decimal = TypeFactory.create("decimal");
-        assertEquals(decimal, TypeFactory.create("fixed168x10"));
+        final BigIntegerType decimal = TypeFactory.create("decimal");
+        assertEquals(decimal, TypeFactory.create("int168"));
 
         final BigDecimal decimalMin = new BigDecimal("-18707220957835557353007165858768422651595.9365500928");
         final BigDecimal decimalMax = new BigDecimal("18707220957835557353007165858768422651595.9365500927");
 
-        assertThrown(ILLEGAL, "signed val exceeds bit limit: 168 >= 168", () -> decimal.validate(decimalMin.subtract(O_0000000001)));
-        decimal.validate(decimalMin);
-        decimal.validate(decimalMax);
-        assertThrown(ILLEGAL, "signed val exceeds bit limit: 168 >= 168", () -> decimal.validate(decimalMax.add(O_0000000001)));
-
-        assertEquals(decimalMin, decimal.minDecimal());
-        assertEquals(decimalMax, decimal.maxDecimal());
+        assertThrown(ILLEGAL, "signed val exceeds bit limit: 168 >= 168", () -> decimal.validate(decimalMin.unscaledValue().subtract(BigInteger.ONE)));
+        decimal.validate(decimalMin.unscaledValue());
+        decimal.validate(decimalMax.unscaledValue());
+        assertThrown(ILLEGAL, "signed val exceeds bit limit: 168 >= 168", () -> decimal.validate(decimalMax.unscaledValue().add(BigInteger.ONE)));
     }
 
     @Test
