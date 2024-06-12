@@ -271,28 +271,26 @@ public final class TypeFactory {
     }
 
     private static int nextTerminator(String signature, int i) {
-        char c;
         do {
-            c = signature.charAt(++i);
-        } while (c != ',' && c != ')');
-        return i;
+            switch (signature.charAt(++i)) {
+            case ',':
+            case ')': return i;
+            }
+        } while (true);
     }
 
     private static int findSubtupleEnd(String parentTypeString, int i) {
-        int depth = 0;
-        do {
-            char x = parentTypeString.charAt(i);
-            if (x <= ')') {
-                if (x == ')') {
-                    if (depth == 0) {
-                        return i;
-                    }
-                    depth--;
-                } else if (x == '(') {
-                    depth++;
+        for (int depth = 0; true; i++) {
+            switch (parentTypeString.charAt(i)) {
+            case '(':
+                depth++;
+                continue;
+            case ')':
+                if (depth == 0) {
+                    return i;
                 }
+                depth--;
             }
-            i++;
-        } while (true);
+        }
     }
 }
