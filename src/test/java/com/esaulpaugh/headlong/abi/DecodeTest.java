@@ -1034,9 +1034,9 @@ public class DecodeTest {
                 final LongType signed = new LongType("signed", bitWidth, false);
                 final byte[] buffer = ABIType.newUnitBuffer();
                 final ByteBuffer dest = ByteBuffer.allocate(UNIT_LENGTH_BYTES);
-                int valid = 0;
-                final int n = 2_000;
-                for (int i = 0; i < n; i++) {
+                final long n = 2_000L;
+                long valid = 0L;
+                for (long i = 0L; i < n; i++) {
                     final BigInteger v = TestUtils.wildBigInteger(r, false, bitLen);
                     writer256.encode(v, dest);
                     dest.flip();
@@ -1047,7 +1047,7 @@ public class DecodeTest {
                     }
                     dest.flip();
                 }
-                final int total = bitWidth == 64 ? n : n * 2;
+                final long total = bitWidth == 64 ? n : n * 2;
                 System.out.println(bitWidth + ": " + valid + " / " + total + " = " + (valid / (double) total));
             }
         };
