@@ -20,6 +20,7 @@ import com.esaulpaugh.headlong.util.Uint;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_ADDRESS;
@@ -31,7 +32,9 @@ import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_BYTE;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_INT;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_LONG;
 import static com.esaulpaugh.headlong.abi.ABIType.TYPE_CODE_TUPLE;
+import static com.esaulpaugh.headlong.abi.ABIType.newUnitBuffer;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
+import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
 /**
  * Experimental. Unoptimized.
@@ -92,7 +95,11 @@ final class PackedDecoder {
             switch (type.typeCode()) {
             case TYPE_CODE_ARRAY:
                 final ArrayType<?, ?, ?> arrayType = type.asArrayType();
-                end -= arrayType.getElementType().byteLengthPacked(null) * arrayType.getLength();
+                if (arrayType.getElementType() instanceof UnitType) {
+                    end -= UNIT_LENGTH_BYTES * arrayType.getLength();
+                } else {
+                    end -= arrayType.getElementType().byteLengthPacked(null) * arrayType.getLength();
+                }
                 insertArray(arrayType, buffer, end, end, elements, i);
                 break;
             case TYPE_CODE_TUPLE:
@@ -180,7 +187,7 @@ final class PackedDecoder {
 
     private static int insertArray(ArrayType<?, ?, ?> arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) {
         final ABIType<?> elementType = arrayType.getElementType();
-        final int elementByteLen = elementType.byteLengthPacked(null);
+        final int elementByteLen = elementType instanceof UnitType ? UNIT_LENGTH_BYTES : elementType.byteLengthPacked(null);
         final int arrayLen;
         final int typeLen = arrayType.getLength();
         if (DYNAMIC_LENGTH == typeLen) {
@@ -195,13 +202,13 @@ final class PackedDecoder {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: array = decodeBooleanArray(arrayLen, buffer, idx); break;
         case TYPE_CODE_BYTE: array = decodeByteArray(arrayType, arrayLen, buffer, idx); break;
-        case TYPE_CODE_INT: array = decodeIntArray((IntType) elementType, elementByteLen, arrayLen, buffer, idx); break;
-        case TYPE_CODE_LONG: array = decodeLongArray((LongType) elementType, elementByteLen, arrayLen, buffer, idx); break;
+        case TYPE_CODE_INT: array = decodeIntArray((IntType) elementType, arrayLen, buffer, idx); break;
+        case TYPE_CODE_LONG: array = decodeLongArray((LongType) elementType, arrayLen, buffer, idx); break;
         case TYPE_CODE_BIG_INTEGER: array = decodeBigIntegerArray((BigIntegerType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_BIG_DECIMAL: array = decodeBigDecimalArray((BigDecimalType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE:
-        case TYPE_CODE_ADDRESS: array = decodeObjectArray(arrayLen, elementType, buffer, idx, end); break;
+        case TYPE_CODE_TUPLE: array = decodeObjectArray(arrayLen, elementType, buffer, idx, end); break;
+        case TYPE_CODE_ADDRESS: array = decodeAddressArray((AddressType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         default: throw new AssertionError();
         }
         dest[destIdx] = array;
@@ -210,8 +217,11 @@ final class PackedDecoder {
 
     private static boolean[] decodeBooleanArray(int arrayLen, byte[] buffer, int idx) {
         boolean[] booleans = new boolean[arrayLen];
+        ByteBuffer bb = ByteBuffer.wrap(buffer);
+        byte[] unitBuffer = newUnitBuffer();
+        bb.position(idx);
         for (int i = 0; i < arrayLen; i++) {
-            booleans[i] = BooleanType.decodeBoolean(buffer[idx + i]);
+            booleans[i] = BooleanType.INSTANCE.decode(bb, unitBuffer);
         }
         return booleans;
     }
@@ -222,27 +232,30 @@ final class PackedDecoder {
         return arrayType.encodeIfString(bytes);
     }
 
-    private static int[] decodeIntArray(IntType intType, int elementLen, int arrayLen, byte[] buffer, int idx) {
-        long[] longs = decodeLongArray(intType, elementLen, arrayLen, buffer, idx);
+    private static int[] decodeIntArray(IntType intType, int arrayLen, byte[] buffer, int idx) {
+        long[] longs = decodeLongArray(intType, arrayLen, buffer, idx);
         int[] ints = new int[arrayLen];
         for (int i = 0; i < longs.length; i++) {
-            ints[i] = (int) longs[i];
+            long e = longs[i];
+            if (e < Integer.MIN_VALUE || e > Integer.MAX_VALUE) {
+                throw new ArithmeticException("overflow");
+            }
+            ints[i] = (int) e;
         }
         return ints;
     }
 
-    private static long[] decodeLongArray(UnitType<? extends Number> type, int elementLen, int arrayLen, byte[] buffer, int idx) {
+    private static long[] decodeLongArray(UnitType<? extends Number> type, int arrayLen, byte[] buffer, int idx) {
         long[] longs = new long[arrayLen];
         if (type.unsigned) {
-            Uint uint = new Uint(type.bitLength);
             for (int i = 0; i < arrayLen; i++) {
-                longs[i] = decodeUnsignedLong(uint, buffer, idx, elementLen);
-                idx += elementLen;
+                longs[i] = decodeUnsignedLong(null, buffer, idx, UNIT_LENGTH_BYTES);
+                idx += UNIT_LENGTH_BYTES;
             }
         } else {
             for (int i = 0; i < arrayLen; i++) {
-                longs[i] = decodeSignedLong(buffer, idx, elementLen);
-                idx += elementLen;
+                longs[i] = decodeSignedLong(buffer, idx, UNIT_LENGTH_BYTES);
+                idx += UNIT_LENGTH_BYTES;
             }
         }
         return longs;
@@ -264,6 +277,18 @@ final class PackedDecoder {
         return bigDecimals;
     }
 
+    private static Address[] decodeAddressArray(AddressType elementType, int elementLen, int arrayLen, byte[] buffer, int idx) {
+        Address[] addresses = new Address[arrayLen];
+        ByteBuffer bb = ByteBuffer.wrap(buffer);
+        byte[] unitBuffer = newUnitBuffer();
+        bb.position(idx);
+        for (int i = 0; i < arrayLen; i++) {
+            addresses[i] = elementType.decode(bb, unitBuffer);
+            idx += elementLen;
+        }
+        return addresses;
+    }
+
     private static Object[] decodeObjectArray(int arrayLen, ABIType<?> elementType, byte[] buffer, int idx, int end) {
         final Object[] objects = ArrayType.createArray(elementType.clazz, arrayLen);
         for (int i = 0; i < arrayLen; i++) {
@@ -281,12 +306,15 @@ final class PackedDecoder {
     }
 
     private static long decodeUnsignedLong(Uint uint, byte[] buffer, int idx, int len) {
-        long signed = decodeBigInteger(buffer, idx, len).longValue();
-        return uint.toUnsignedLong(signed);
+        long signed = decodeBigInteger(buffer, idx, len).longValueExact();
+        if (uint != null) {
+            return uint.toUnsignedLong(signed);
+        }
+        return signed;
     }
 
     private static long decodeSignedLong(byte[] buffer, int idx, int len) {
-        return decodeBigInteger(buffer, idx, len).longValue();
+        return decodeBigInteger(buffer, idx, len).longValueExact();
     }
 
     static BigInteger decodeBigInteger(byte[] buffer, int i, int len) {

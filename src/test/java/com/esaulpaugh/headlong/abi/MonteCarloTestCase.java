@@ -302,7 +302,7 @@ public class MonteCarloTestCase {
         try {
             decoded = tt.decodePacked(parr);
             equal = args.equals(decoded);
-        } catch (IllegalArgumentException ignored) {
+        } catch (IllegalArgumentException | ArithmeticException ignored) {
             /* do nothing */
         } catch (Throwable t) {
             t.printStackTrace();

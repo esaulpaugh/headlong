@@ -17,9 +17,9 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.TestUtils;
 import com.esaulpaugh.headlong.util.BizarroInts;
-import com.esaulpaugh.headlong.util.Uint;
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
+import com.esaulpaugh.headlong.util.Uint;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -32,6 +32,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PackedEncoderTest {
+
+    @Test
+    public void testOverflow() throws Throwable {
+        TupleType<Single<int[]>> tt = TupleType.parse("(uint8[])");
+        final Single<int[]> args = Single.of(new int[] { 0 });
+        ByteBuffer bb = tt.encodePacked(args);
+        System.out.println(Strings.encode(bb));
+        final byte[] corrupt = new byte[32];
+        corrupt[corrupt.length - 6] = -106;
+        assertThrown(ArithmeticException.class, "overflow", () -> PackedDecoder.decode(tt, corrupt));
+    }
+
+    @Test
+    public void testPackedEncoding() {
+        ByteBuffer bb = TupleType.parse("(uint16[])").encodePacked(Single.of(new int[] { 0x45, 0x7, 65535 }));
+
+        System.out.println(Strings.encode(bb));
+
+        assertEquals(
+                "0000000000000000000000000000000000000000000000000000000000000045" +
+                "0000000000000000000000000000000000000000000000000000000000000007" +
+                "000000000000000000000000000000000000000000000000000000000000ffff", Strings.encode(bb));
+    }
 
     @Test
     public void testOverwrite() {
@@ -98,9 +121,14 @@ public class PackedEncoderTest {
 
         final ByteBuffer bb = tupleType.encodePacked(test);
 
-        assertEquals("01020304", Strings.encode(bb));
+        assertEquals(
+                "0000000000000000000000000000000000000000000000000000000000000001" +
+                "0000000000000000000000000000000000000000000000000000000000000002" +
+                "0000000000000000000000000000000000000000000000000000000000000003" +
+                "0000000000000000000000000000000000000000000000000000000000000004", Strings.encode(bb)
+        );
 
-        final byte[] packed = Strings.decode("01020304");
+        final byte[] packed = bb.array();
 
         assertEquals(test, PackedDecoder.decode(tupleType, packed));
         Single<Tuple> t = tupleType.decodePacked(packed);
@@ -204,7 +232,7 @@ public class PackedEncoderTest {
         ByteBuffer bb = tupleType.encodePacked(test);
         assertEquals(0, bb.position());
 
-        assertEquals("000300050000070000080000090000000900000000ffffffff0100010000000000000006ffffffffffffffffff", Strings.encode(bb));
+        assertEquals("000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000007000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000090000000000000000000000000000000000000000000000000000000000000009000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffff0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000006ffffffffffffffffff", Strings.encode(bb));
 
         assertEquals(test, tupleType.decodePacked(bb.array()));
     }
@@ -219,7 +247,13 @@ public class PackedEncoderTest {
         byte[] packedArray = bb.array();
         assertEquals(0, bb.position());
 
-        assertEquals("00000000000000010000000000000002000000000000000300000000000000040000000000000000000000000000000000000000000000000000000000000001", Strings.encode(bb));
+        assertEquals(
+                        "0000000000000000000000000000000000000000000000000000000000000001" +
+                        "0000000000000000000000000000000000000000000000000000000000000002" +
+                        "0000000000000000000000000000000000000000000000000000000000000003" +
+                        "0000000000000000000000000000000000000000000000000000000000000004" +
+                        "0000000000000000000000000000000000000000000000000000000000000001", Strings.encode(bb)
+        );
 
         assertEquals(values, tupleType.decodePacked(packedArray));
     }
@@ -233,7 +267,7 @@ public class PackedEncoderTest {
         ByteBuffer bb = tupleType.encodePacked(values);
         assertEquals(0, bb.position());
 
-        assertEquals("010101010100", Strings.encode(bb));
+        assertEquals("0100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000", Strings.encode(bb));
 
         assertEquals(values, tupleType.decodePacked(bb.array()));
     }
@@ -262,7 +296,10 @@ public class PackedEncoderTest {
         ByteBuffer bb = tupleType.encodePacked(values);
         assertEquals(0, bb.position());
 
-        assertEquals("000000800000000000800000", Strings.encode(bb));
+        assertEquals(
+                "0000000000000000000000000000000000000000000000000000000000800000" +
+                "0000000000000000000000000000000000000000000000000000000000800000", Strings.encode(bb)
+        );
 
         assertEquals(values, tupleType.decodePacked(bb.array()));
     }

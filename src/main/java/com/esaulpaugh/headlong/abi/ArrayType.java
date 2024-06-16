@@ -19,6 +19,8 @@ import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.function.IntUnaryOperator;
 
@@ -135,7 +137,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         if (length == DYNAMIC_LENGTH) {
             throw new IllegalArgumentException("array of dynamic elements");
         }
-        return length * elementType.byteLengthPacked(null);
+        return length * ((elementType instanceof UnitType) ? UNIT_LENGTH_BYTES : elementType.byteLengthPacked(null));
     }
 
     @SuppressWarnings("unchecked")
@@ -145,15 +147,15 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
             return staticByteLengthPacked();
         }
         switch (elementType.typeCode()) {
-        case TYPE_CODE_BOOLEAN: return ((boolean[]) value).length; // * 1
+        case TYPE_CODE_BOOLEAN: return ((boolean[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_BYTE: return byteCount(value); // * 1
-        case TYPE_CODE_INT: return ((int[]) value).length * elementType.byteLengthPacked(null);
-        case TYPE_CODE_LONG: return ((long[]) value).length * elementType.byteLengthPacked(null);
+        case TYPE_CODE_INT: return ((int[]) value).length * UNIT_LENGTH_BYTES;
+        case TYPE_CODE_LONG: return ((long[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_BIG_INTEGER:
-        case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * elementType.byteLengthPacked(null);
+        case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE:
-        case TYPE_CODE_ADDRESS: return measureByteLengthPacked((E[]) value);
+        case TYPE_CODE_TUPLE: return measureByteLengthPacked((E[]) value);
+        case TYPE_CODE_ADDRESS: return ((Address[]) value).length * UNIT_LENGTH_BYTES;
         default: throw new AssertionError();
         }
     }
@@ -325,36 +327,54 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: encodeBooleansPacked((boolean[]) value, dest); return;
         case TYPE_CODE_BYTE: dest.put(decodeIfString(value)); return;
-        case TYPE_CODE_INT: encodeIntsPacked((int[]) value, elementType.byteLengthPacked(null), dest); return;
-        case TYPE_CODE_LONG: encodeLongsPacked((long[]) value, elementType.byteLengthPacked(null), dest); return;
-        case TYPE_CODE_BIG_INTEGER:
-        case TYPE_CODE_BIG_DECIMAL:
+        case TYPE_CODE_INT: encodeIntsPacked((int[]) value, (IntType) elementType, dest); return;
+        case TYPE_CODE_LONG: encodeLongsPacked((long[]) value, (LongType) elementType, dest); return;
+        case TYPE_CODE_BIG_INTEGER: encodeBigIntegersPacked((BigInteger[]) value, (BigIntegerType) elementType, dest); return;
+        case TYPE_CODE_BIG_DECIMAL: encodeBigDecimalsPacked((BigDecimal[]) value, (BigDecimalType) elementType, dest); return;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
-        case TYPE_CODE_ADDRESS:
             for (E e : (E[]) value) {
                 elementType.encodePackedUnchecked(e, dest);
             }
             return;
+        case TYPE_CODE_ADDRESS: encodeAddressesPacked((Address[]) value, dest); return;
         default: throw new AssertionError();
         }
     }
 
     private static void encodeBooleansPacked(boolean[] arr, ByteBuffer dest) {
         for (boolean bool : arr) {
-            BooleanType.encodeBooleanPacked(bool, dest);
+            BooleanType.encodeBoolean(bool, dest);
         }
     }
 
-    private static void encodeIntsPacked(int[] arr, int byteLen, ByteBuffer dest) {
+    private static void encodeIntsPacked(int[] arr, IntType elementType, ByteBuffer dest) {
         for (int e : arr) {
-            LongType.encodeLong(e, byteLen, dest);
+            elementType.encode(e, dest);
         }
     }
 
-    private static void encodeLongsPacked(long[] arr, int byteLen, ByteBuffer dest) {
+    private static void encodeLongsPacked(long[] arr, LongType elementType, ByteBuffer dest) {
         for (long e : arr) {
-            LongType.encodeLong(e, byteLen, dest);
+            elementType.encode(e, dest);
+        }
+    }
+
+    private static void encodeBigIntegersPacked(BigInteger[] arr, BigIntegerType elementType, ByteBuffer dest) {
+        for (BigInteger e : arr) {
+            elementType.encode(e, dest);
+        }
+    }
+
+    private static void encodeBigDecimalsPacked(BigDecimal[] arr, BigDecimalType elementType, ByteBuffer dest) {
+        for (BigDecimal e : arr) {
+            elementType.encode(e, dest);
+        }
+    }
+
+    private static void encodeAddressesPacked(Address[] arr, ByteBuffer dest) {
+        for (Address e : arr) {
+            AddressType.INSTANCE.encode(e, dest);
         }
     }
 
