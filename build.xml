@@ -167,7 +167,7 @@
   
   <target name="compile.module.headlong.main.production" description="Compile module headlong.main; production classes">
     <mkdir dir="${headlong.main.output.dir}"/>
-    <javac includeantruntime="false" destdir="${headlong.main.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
+    <javac includeantruntime="false" destdir="${headlong.main.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" source="1.8" target="1.8">
       <compilerarg line="${compiler.args.headlong.main}"/>
       <bootclasspath refid="headlong.main.module.bootclasspath"/>
       <classpath refid="headlong.main.module.production.classpath"/>
