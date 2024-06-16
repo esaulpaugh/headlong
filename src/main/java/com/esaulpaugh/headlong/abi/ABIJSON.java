@@ -191,7 +191,7 @@ public final class ABIJSON {
 
     private static TupleType<Tuple> parseTupleType(final JsonArray array, final boolean[] indexed, final int flags) {
         int size;
-        if (array == null || (size = array.size()) <= 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
+        if (array == null || (size = array.size()) == 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
             return TupleType.empty(flags);
         }
         final ABIType<?>[] elements = new ABIType<?>[size];
