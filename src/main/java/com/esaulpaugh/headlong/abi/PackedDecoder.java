@@ -185,6 +185,7 @@ final class PackedDecoder {
         return elementLen;
     }
 
+    @SuppressWarnings("unchecked")
     private static int insertArray(ArrayType<?, ?, ?> arrayType, byte[] buffer, int idx, int end, Object[] dest, int destIdx) {
         final ABIType<?> elementType = arrayType.getElementType();
         final int elementByteLen = elementType instanceof UnitType ? UNIT_LENGTH_BYTES : elementType.byteLengthPacked(null);
@@ -204,11 +205,11 @@ final class PackedDecoder {
         case TYPE_CODE_BYTE: array = decodeByteArray(arrayType, arrayLen, buffer, idx); break;
         case TYPE_CODE_INT: array = decodeIntArray((IntType) elementType, arrayLen, buffer, idx); break;
         case TYPE_CODE_LONG: array = decodeLongArray((LongType) elementType, arrayLen, buffer, idx); break;
-        case TYPE_CODE_BIG_INTEGER: array = decodeBigIntegerArray((BigIntegerType) elementType, elementByteLen, arrayLen, buffer, idx); break;
-        case TYPE_CODE_BIG_DECIMAL: array = decodeBigDecimalArray((BigDecimalType) elementType, elementByteLen, arrayLen, buffer, idx); break;
+        case TYPE_CODE_BIG_INTEGER:
+        case TYPE_CODE_BIG_DECIMAL:
+        case TYPE_CODE_ADDRESS: array = decodeElements((ABIType<Object>) elementType, arrayLen, buffer, idx); break;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: array = decodeObjectArray(arrayLen, elementType, buffer, idx, end); break;
-        case TYPE_CODE_ADDRESS: array = decodeAddressArray((AddressType) elementType, elementByteLen, arrayLen, buffer, idx); break;
         default: throw new AssertionError();
         }
         dest[destIdx] = array;
@@ -261,32 +262,16 @@ final class PackedDecoder {
         return longs;
     }
 
-    private static BigInteger[] decodeBigIntegerArray(BigIntegerType elementType, int elementLen, int arrayLen, byte[] buffer, int idx) {
-        BigInteger[] bigInts = new BigInteger[arrayLen];
-        for (int i = 0; i < arrayLen; i++) {
-            idx += insertBigInteger(elementType, elementLen, buffer, idx, bigInts, i);
-        }
-        return bigInts;
-    }
-
-    private static BigDecimal[] decodeBigDecimalArray(BigDecimalType elementType, int elementLen, int arrayLen, byte[] buffer, int idx) {
-        BigDecimal[] bigDecimals = new BigDecimal[arrayLen];
-        for (int i = 0; i < arrayLen; i++) {
-            idx += insertBigDecimal(elementType, elementLen, buffer, idx, bigDecimals, i);
-        }
-        return bigDecimals;
-    }
-
-    private static Address[] decodeAddressArray(AddressType elementType, int elementLen, int arrayLen, byte[] buffer, int idx) {
-        Address[] addresses = new Address[arrayLen];
-        ByteBuffer bb = ByteBuffer.wrap(buffer);
+    private static Object[] decodeElements(ABIType<Object> elementType, int arrayLen, byte[] buffer, int idx) {
+        Object[] elements = ArrayType.createArray(elementType.clazz, arrayLen);
         byte[] unitBuffer = newUnitBuffer();
+        ByteBuffer bb = ByteBuffer.wrap(buffer);
         bb.position(idx);
         for (int i = 0; i < arrayLen; i++) {
-            addresses[i] = elementType.decode(bb, unitBuffer);
-            idx += elementLen;
+            elements[i] = elementType.decode(bb, unitBuffer);
+            idx += UNIT_LENGTH_BYTES;
         }
-        return addresses;
+        return elements;
     }
 
     private static Object[] decodeObjectArray(int arrayLen, ABIType<?> elementType, byte[] buffer, int idx, int end) {

@@ -19,8 +19,6 @@ import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.lang.reflect.Array;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.function.IntUnaryOperator;
 
@@ -125,10 +123,10 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         case TYPE_CODE_INT: return ((int[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_LONG: return ((long[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_BIG_INTEGER:
-        case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * UNIT_LENGTH_BYTES;
+        case TYPE_CODE_BIG_DECIMAL:
+        case TYPE_CODE_ADDRESS: return ((Object[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: return measureByteLength((E[]) value);
-        case TYPE_CODE_ADDRESS: return ((Address[]) value).length * UNIT_LENGTH_BYTES;
         default: throw new AssertionError();
         }
     }
@@ -137,7 +135,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         if (length == DYNAMIC_LENGTH) {
             throw new IllegalArgumentException("array of dynamic elements");
         }
-        return length * ((elementType instanceof UnitType) ? UNIT_LENGTH_BYTES : elementType.byteLengthPacked(null));
+        return length * (elementType instanceof UnitType ? UNIT_LENGTH_BYTES : elementType.byteLengthPacked(null));
     }
 
     @SuppressWarnings("unchecked")
@@ -152,10 +150,10 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         case TYPE_CODE_INT: return ((int[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_LONG: return ((long[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_BIG_INTEGER:
-        case TYPE_CODE_BIG_DECIMAL: return ((Number[]) value).length * UNIT_LENGTH_BYTES;
+        case TYPE_CODE_BIG_DECIMAL:
+        case TYPE_CODE_ADDRESS: return ((Object[]) value).length * UNIT_LENGTH_BYTES;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE: return measureByteLengthPacked((E[]) value);
-        case TYPE_CODE_ADDRESS: return ((Address[]) value).length * UNIT_LENGTH_BYTES;
         default: throw new AssertionError();
         }
     }
@@ -329,16 +327,22 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         case TYPE_CODE_BYTE: dest.put(decodeIfString(value)); return;
         case TYPE_CODE_INT: encodeIntsPacked((int[]) value, (IntType) elementType, dest); return;
         case TYPE_CODE_LONG: encodeLongsPacked((long[]) value, (LongType) elementType, dest); return;
-        case TYPE_CODE_BIG_INTEGER: encodeBigIntegersPacked((BigInteger[]) value, (BigIntegerType) elementType, dest); return;
-        case TYPE_CODE_BIG_DECIMAL: encodeBigDecimalsPacked((BigDecimal[]) value, (BigDecimalType) elementType, dest); return;
+        case TYPE_CODE_BIG_INTEGER:
+        case TYPE_CODE_BIG_DECIMAL:
+        case TYPE_CODE_ADDRESS: encodeElementsPacked((E[]) value, dest); return;
         case TYPE_CODE_ARRAY:
         case TYPE_CODE_TUPLE:
             for (E e : (E[]) value) {
                 elementType.encodePackedUnchecked(e, dest);
             }
             return;
-        case TYPE_CODE_ADDRESS: encodeAddressesPacked((Address[]) value, dest); return;
         default: throw new AssertionError();
+        }
+    }
+
+    private void encodeElementsPacked(E[] elements, ByteBuffer dest) {
+        for (E e : elements) {
+            elementType.encode(e, dest);
         }
     }
 
@@ -357,24 +361,6 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     private static void encodeLongsPacked(long[] arr, LongType elementType, ByteBuffer dest) {
         for (long e : arr) {
             elementType.encode(e, dest);
-        }
-    }
-
-    private static void encodeBigIntegersPacked(BigInteger[] arr, BigIntegerType elementType, ByteBuffer dest) {
-        for (BigInteger e : arr) {
-            elementType.encode(e, dest);
-        }
-    }
-
-    private static void encodeBigDecimalsPacked(BigDecimal[] arr, BigDecimalType elementType, ByteBuffer dest) {
-        for (BigDecimal e : arr) {
-            elementType.encode(e, dest);
-        }
-    }
-
-    private static void encodeAddressesPacked(Address[] arr, ByteBuffer dest) {
-        for (Address e : arr) {
-            AddressType.INSTANCE.encode(e, dest);
         }
     }
 
