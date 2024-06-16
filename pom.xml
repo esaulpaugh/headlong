@@ -115,8 +115,8 @@
                 <version>3.13.0</version>
                 <configuration>
 <!--                    <release>8</release>-->
-                    <source>8</source>
-                    <target>8</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -167,7 +167,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <source>8</source>
+                    <source>1.8</source>
                     <!-- depending on what javadoc error you're getting, you may want to enable or disable this line -->
 <!--                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>-->
                 </configuration>
