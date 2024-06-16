@@ -64,7 +64,7 @@ public final class TypeFactory {
             mapByteArray(local, "bytes" + n, n);
         }
 
-        local.put("address", new AddressType());
+        local.put("address", AddressType.INSTANCE);
         mapByteArray(local, "function", FUNCTION_BYTE_LEN);
         mapByteArray(local, "bytes", DYNAMIC_LENGTH);
         local.put("string", new ArrayType<ByteType, Byte, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAGS_NONE));
