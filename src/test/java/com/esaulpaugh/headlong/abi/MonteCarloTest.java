@@ -95,6 +95,9 @@ public class MonteCarloTest {
                 throw new Error("" + o.getClass());
             }
         } else {
+            if (o == null) {
+                return x;
+            }
             Class<?> c = o.getClass();
             if (c == Boolean.class) {
                 x += 1;
