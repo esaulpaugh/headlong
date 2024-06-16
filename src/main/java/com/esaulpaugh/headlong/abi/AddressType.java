@@ -22,7 +22,7 @@ public final class AddressType extends UnitType<Address> {
 
     static final AddressType INSTANCE = new AddressType();
 
-    static final BigIntegerType ADDRESS_INNER = new BigIntegerType("ADDRESS_INNER", TypeFactory.ADDRESS_BIT_LEN, true);
+    private static final BigIntegerType ADDRESS_INNER = new BigIntegerType("ADDRESS_INNER", TypeFactory.ADDRESS_BIT_LEN, true);
 
     private AddressType() {
         super("address", Address.class, TypeFactory.ADDRESS_BIT_LEN, true);
