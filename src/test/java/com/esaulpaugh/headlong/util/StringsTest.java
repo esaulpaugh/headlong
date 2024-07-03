@@ -20,6 +20,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.function.Supplier;
@@ -30,6 +31,7 @@ import static com.esaulpaugh.headlong.util.Strings.HEX;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StringsTest {
 
@@ -41,6 +43,20 @@ public class StringsTest {
         for (int i = 0; i < n; i++) {
             byte[] x = supplier.get();
             assertArrayEquals(x, Strings.decode(Strings.encode(x, encoding), encoding));
+        }
+    }
+
+    @Test
+    public void testEncodeReadOnlyBuffer() {
+        final int len = RAND.nextInt(257);
+        final ByteBuffer ro = ByteBuffer.allocate(len).asReadOnlyBuffer();
+        assertTrue(ro.isReadOnly());
+        final String hex = Strings.encode(ro);
+        assertEquals(len * 2, hex.length());
+        for (int i = 0; i < len; i += 2) {
+            if (hex.charAt(i) != '0' || hex.charAt(i + 1) != '0') {
+                throw new AssertionError("" + i);
+            }
         }
     }
 
