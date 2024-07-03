@@ -106,21 +106,14 @@ public final class TestUtils {
         return c ^ (c << 33);
     }
 
-    /**
-     * Use {@link java.security.SecureRandom} instead, kids.
-     *
-     * @param protoseed arbitrary bits, e.g. {@code ThreadLocalRandom.current().nextLong()}
-     * @return  a short (64-bit), low-quality seed suitable for non-cryptographic uses like fuzz testing or monte carlo simulation
-     */
-    public static long getEnvSeed(final long protoseed) {
+    public static long getEnvHash() {
         final Object env = System.getenv();
-        final long e = System.nanoTime() + new Object().hashCode();
-        final long envHash = env.hashCode()
-                + System.identityHashCode(env)
-                + System.getProperty("java.version").hashCode()
-                + System.getProperty("os.arch").hashCode()
-                + System.getProperty("os.version").hashCode();
-        return getSeed(e * envHash + protoseed);
+        long hash = env.hashCode();
+        hash = 31L * hash + System.identityHashCode(env);
+        hash = 31L * hash + System.getProperty("java.version").hashCode();
+        hash = 31L * hash + System.getProperty("os.arch").hashCode();
+        hash = 31L * hash + System.getProperty("os.version").hashCode();
+        return hash;
     }
 
     public static long pickLong(Random r) {
