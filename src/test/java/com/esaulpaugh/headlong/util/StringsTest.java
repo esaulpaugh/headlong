@@ -47,6 +47,20 @@ public class StringsTest {
     }
 
     @Test
+    public void testEncodeDirectBuffer() {
+        final int len = RAND.nextInt(257);
+        final ByteBuffer ro = ByteBuffer.allocateDirect(len);
+        assertTrue(ro.isDirect());
+        final String hex = Strings.encode(ro);
+        assertEquals(len * 2, hex.length());
+        for (int i = 0; i < len; i += 2) {
+            if (hex.charAt(i) != '0' || hex.charAt(i + 1) != '0') {
+                throw new AssertionError("" + i);
+            }
+        }
+    }
+
+    @Test
     public void testEncodeReadOnlyBuffer() {
         final int len = RAND.nextInt(257);
         final ByteBuffer ro = ByteBuffer.allocate(len).asReadOnlyBuffer();
