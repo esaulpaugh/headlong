@@ -15,7 +15,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 compileJava {
-    if (Jvm.current().getJavaVersion() >= JavaVersion.VERSION_1_10) {
+    if (JavaVersion.current() >= JavaVersion.VERSION_1_10) {
         options.compilerArgs.addAll(["--release", "8"])
     }
 }
@@ -29,7 +29,7 @@ test {
 }
 
 final String versionStr = getProject().getGradle().getGradleVersion()
-final int gradleVersion = Integer.parseInt(versionStr.substring(0, versionStr.indexOf(".")))
+final int gradleVersion = Integer.parseUnsignedInt(versionStr.substring(0, versionStr.indexOf(".")))
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     if (gradleVersion >= 6) getArchiveClassifier().set("javadoc")
@@ -41,7 +41,6 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     if (gradleVersion >= 6) getArchiveClassifier().set("sources")
     else classifier = "sources"
     from sourceSets.main.allSource
-    finalizedBy(javadocJar)
 }
 
 final String junitVersion = "5.10.3"
