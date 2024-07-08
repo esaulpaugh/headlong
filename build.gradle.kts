@@ -1,4 +1,3 @@
-//import org.gradle.internal.jvm.Jvm
 //import java.time.Instant
 //import java.time.format.DateTimeFormatter
 //import java.util.Locale
@@ -7,7 +6,7 @@
 //plugins {
 //    id("java-library")
 //    id("maven-publish")
-//    id("me.champeau.jmh").version("0.7.2")
+//    id("me.champeau.jmh").version("0.7.2") // requires gradle 7.0+
 //}
 //
 //group = "com.esaulpaugh"
@@ -23,7 +22,7 @@
 //tasks.withType<JavaCompile> {
 //    if (JavaVersion.current() >= JavaVersion.VERSION_1_10) {
 //        println("setting release 8")
-//        options.compilerArgs.addAll(listOf("--release", "8"))
+//        options.release.set(8)
 //    }
 //    options.encoding = "US-ASCII"
 //}
