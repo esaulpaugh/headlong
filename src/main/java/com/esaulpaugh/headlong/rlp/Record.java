@@ -69,6 +69,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
         final ByteBuffer bb = ByteBuffer.wrap(record);
         RLPEncoder.insertListPrefix(recordDataLen, bb);
         RLPEncoder.putString(signature, bb);
+        bb.rewind();
         return bb;
     }
 
