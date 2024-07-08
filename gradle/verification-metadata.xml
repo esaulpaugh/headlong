@@ -301,20 +301,21 @@
                 <sha256 value="829bc5eb0ccd705a7c8afbf7cdc4b7e9a9f733d3a1a954b9afffd99c8e063366" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
-        <component group="org.jetbrains.kotlin" name="kotlin-stdlib-jdk8" version="1.9.0">
-            <artifact name="kotlin-stdlib-jdk8-1.9.0.pom">
-                <sha256 value="64d598dd88e250466731e20304ab6f06cbbbbab7ee322b4703b6b59f881c4f92" origin="repo.maven.apache.org/maven2/"/>
+
+        <component group="org.jetbrains.kotlin" name="kotlin-stdlib" version="1.9.22">
+            <artifact name="kotlin-stdlib-1.9.22-sources.jar">
+                <sha256 value="7e1405176c4c7f7b35a9cf446c300eacd0212eaf0006b2142a5f7a99b827ecb0" origin="plugins.gradle.org/m2/"/>
             </artifact>
-            <artifact name="kotlin-stdlib-jdk8-1.9.0-sources.jar">
-                <sha256 value="40e9a80f6b953d12389623760d438e69914098d0c4d7053f70f90533ec041259" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="kotlin-stdlib-1.9.22.module">
+                <sha256 value="f482314b5079c1455f6fb0d4257a745d101c6124ce961522ba86f9dc90901e47" origin="plugins.gradle.org/m2/"/>
             </artifact>
         </component>
-        <component group="org.jetbrains.kotlin" name="kotlin-reflect" version="1.9.0">
-            <artifact name="kotlin-reflect-1.9.0.pom">
-                <sha256 value="8571565676d189720471306cee9a55d916c080382f35a6da68193ac7b12f4cdb" origin="repo.maven.apache.org/maven2/"/>
+        <component group="org.jetbrains.kotlin" name="kotlin-reflect" version="1.9.22">
+            <artifact name="kotlin-reflect-1.9.22-sources.jar">
+                <sha256 value="a87cec92af3fde66fd98b2e641a5867075e7b19a7cdb94441bb2884051fde6f3" origin="plugins.gradle.org/m2/"/>
             </artifact>
-            <artifact name="kotlin-reflect-1.9.0-sources.jar">
-                <sha256 value="19d68b94196ea9df17a3fd5d0a1dfbe4c7e81c623fbcc49661289c0849b64a9c" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="kotlin-reflect-1.9.22.pom">
+                <sha256 value="c712e358df7b9318b68f5463971b088673837fc0ca4285d1c382c8102edd6b5f" origin="plugins.gradle.org/m2/"/>
             </artifact>
         </component>
 
