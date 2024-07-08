@@ -161,8 +161,8 @@ https://github.com/esaulpaugh/headlong-cli
 
 ## Benchmarks
 
-![Screenshot](https://github.com/esaulpaugh/headlong/blob/master/benchmark_results.jpg)
-GraalVM 20.0.1 on ARM
+![Screenshot](https://github.com/esaulpaugh/headlong/blob/master/benchmark_results.PNG)
+GraalVM 21.0.3 on x86-64
 
 ## Misc
 
