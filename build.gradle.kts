@@ -15,12 +15,15 @@
 //
 //project.ext.set("archivesBaseName", "headlong")
 //
-//val javaVersion : JavaVersion = Jvm.current().javaVersion!!
+//java {
+//    sourceCompatibility = JavaVersion.VERSION_1_8
+//    targetCompatibility = JavaVersion.VERSION_1_8
+//}
 //
 //tasks.withType<JavaCompile> {
-//    if (javaVersion > JavaVersion.VERSION_1_8) {
+//    if (Jvm.current().javaVersion!! > JavaVersion.VERSION_1_8) {
 //        println("setting release 8")
-//        options.compilerArgs.addAll(arrayOf("--release", "8"))
+//        options.compilerArgs.addAll(listOf("--release", "8"))
 //    }
 //    options.encoding = "US-ASCII"
 //}
@@ -33,14 +36,13 @@
 //val sourcesJar by tasks.registering(Jar::class) {
 //    dependsOn(JavaPlugin.CLASSES_TASK_NAME)
 //    archiveClassifier.set("sources")
-//    from(sourceSets.main.get().allSource)
+//    from(sourceSets["main"].allSource)
 //}
 //
 //val javadocJar by tasks.registering(Jar::class) {
 //    dependsOn(JavaPlugin.JAVADOC_TASK_NAME)
 //    archiveClassifier.set("javadoc")
-//    from(sourceSets.main.get().allSource)
-//    finalizedBy(sourcesJar)
+//    from(sourceSets["main"].allSource)
 //}
 //
 //artifacts {
@@ -53,10 +55,10 @@
 //tasks.withType<Jar> {
 //    manifest {
 //        attributes(
-//            Pair<String, Any?>("Implementation-Title", project.name),
-//            Pair<String, Any?>("Implementation-Version", project.version),
-//            Pair<String, Any?>("Automatic-Module-Name", project.name),
-//            Pair<String, Any?>("Build-Date", dateFormatter.format(Instant.now()))
+//            "Implementation-Title" to project.name,
+//            "Implementation-Version" to project.version,
+//            "Automatic-Module-Name" to project.name,
+//            "Build-Date" to dateFormatter.format(Instant.now())
 //        )
 //    }
 //}
