@@ -1149,4 +1149,23 @@ public class DecodeTest {
             }
         }
     }
+
+    @Test
+    public void testDecodeInvalidBoolean() throws Throwable {
+        assertThrown(
+                IllegalArgumentException.class,
+                "unsigned val exceeds bit limit: 193 > 1",
+                () -> BooleanType.INSTANCE.decode(ByteBuffer.wrap(FastHex.decode("0000000000000001000000000000000000000000000000000000000000000000")), newUnitBuffer())
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                "unsigned val exceeds bit limit: 129 > 1",
+                () -> BooleanType.INSTANCE.decode(ByteBuffer.wrap(FastHex.decode("0000000000000000000000000000000100000000000000000000000000000000")), newUnitBuffer())
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                "unsigned val exceeds bit limit: 65 > 1",
+                () -> BooleanType.INSTANCE.decode(ByteBuffer.wrap(FastHex.decode("0000000000000000000000000000000000000000000000010000000000000000")), newUnitBuffer())
+        );
+    }
 }
