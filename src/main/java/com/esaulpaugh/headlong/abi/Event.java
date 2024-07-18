@@ -38,7 +38,6 @@ public final class Event<T extends Tuple> implements ABIObject {
     private final boolean[] indexManifest;
     private final byte[] signatureHash;
 
-
     public static <X extends Tuple> Event<X> create(String name, TupleType<X> inputs, boolean... indexed) {
         return new Event<>(name, false, inputs, indexed);
     }

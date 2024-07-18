@@ -208,12 +208,12 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
             final ABIType<Object> t = get(i);
             if (!t.dynamic) {
                 t.encodeTail(values[i], dest);
-                if (i >= last) {
+                if (i == last) {
                     break;
                 }
             } else {
                 insertIntUnsigned(offset, dest); // insert offset
-                if (i >= last) {
+                if (i == last) {
                     break;
                 }
                 offset += t.dynamicByteLength(values[i]); // calculate next offset
@@ -464,12 +464,12 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                 final ABIType<Object> t = get(i);
                 if (!t.dynamic) {
                     row = encodeTailAnnotated(sb, row, i, tuple.elements[i]);
-                    if (i >= last) {
+                    if (i == last) {
                         break;
                     }
                 } else {
                     encodeOffsetAnnotated(sb, offset, rowBuffer, row++, i);
-                    if (i >= last) {
+                    if (i == last) {
                         break;
                     }
                     offset += t.dynamicByteLength(tuple.elements[i]); // calculate next offset

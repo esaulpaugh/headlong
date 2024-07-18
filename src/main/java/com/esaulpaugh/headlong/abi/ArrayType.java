@@ -275,7 +275,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         final int last = values.length - 1;
         for (int i = 0; true; i++) {
             insertIntUnsigned(offset, dest); // insert offset
-            if (i >= last) {
+            if (i == last) {
                 for (E value : values) {
                     et.encodeTail(value, dest);
                 }
