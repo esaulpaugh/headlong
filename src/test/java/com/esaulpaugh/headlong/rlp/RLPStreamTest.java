@@ -25,7 +25,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.ArrayList;
@@ -36,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -175,12 +175,7 @@ public class RLPStreamTest {
 
     @Test
     public void testStreamHard() throws Throwable {
-        ReceiveStreamTask task = new ReceiveStreamTask();
-        task.run();
-        Throwable t = task.throwable;
-        if(t != null) {
-            throw t;
-        }
+        new ReceiveStreamTask().call();
     }
 
     @Test
@@ -214,28 +209,25 @@ public class RLPStreamTest {
         }
     }
 
-    private static class ReceiveStreamTask implements Runnable {
+    private static class ReceiveStreamTask implements Callable<Void> {
 
         private final long startTime = System.nanoTime();
-        private final PipedOutputStream pos = new PipedOutputStream();
-        private final CyclicBarrier receiveBarrier = new CyclicBarrier(2);
-        private final CyclicBarrier sendBarrier = new CyclicBarrier(2);
-        private final SendStreamTask senderTask = new SendStreamTask(startTime, pos, receiveBarrier, sendBarrier);
-
-        Throwable throwable;
 
         @Override
-        public void run() {
-            Thread senderThread = new Thread(senderTask);
-            try (PipedInputStream pis = new PipedInputStream(pos, 512)) {
-                Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(pis);
+        public Void call() throws Exception {
+            final PipedInputStream pis = new PipedInputStream(512);
+            final CyclicBarrier receiveBarrier = new CyclicBarrier(2);
+            final CyclicBarrier sendBarrier = new CyclicBarrier(2);
+            final Thread senderThread = new Thread(new SendStreamTask(startTime, pis, receiveBarrier, sendBarrier));
+            try (final Closeable ignored = pis) {
+                final Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(pis);
 
                 senderThread.setPriority(Thread.MAX_PRIORITY);
                 Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
                 senderThread.start();
 
-                Runnable[] subtasks = new Runnable[] {
+                final Runnable[] subtasks = new Runnable[] {
                         () -> assertNoNext(iter),
                         () -> {
                             assertHasNext(iter);
@@ -270,10 +262,11 @@ public class RLPStreamTest {
                 }
 
                 senderThread.join();
-            } catch (Throwable io) {
-                throwable = io;
+            } catch (Exception ex) {
                 senderThread.interrupt();
+                throw ex;
             }
+            return null;
         }
 
         private void assertNoNext(Iterator<RLPItem> iter) throws RuntimeException {
@@ -292,20 +285,22 @@ public class RLPStreamTest {
     private static class SendStreamTask implements Runnable {
 
         private final long startTime;
-        private final OutputStream os;
+        private final Thread receiver;
+        private final PipedOutputStream pos;
         private final CyclicBarrier receiveBarrier;
         private final CyclicBarrier sendBarrier;
 
-        SendStreamTask(long startTime, OutputStream os, CyclicBarrier receiveBarrier, CyclicBarrier sendBarrier) {
+        SendStreamTask(long startTime, PipedInputStream pis, CyclicBarrier receiveBarrier, CyclicBarrier sendBarrier) throws IOException {
             this.startTime = startTime;
-            this.os = os;
+            this.receiver = Thread.currentThread();
+            this.pos = new PipedOutputStream(pis);
             this.sendBarrier = sendBarrier;
             this.receiveBarrier = receiveBarrier;
         }
 
         @Override
         public void run() {
-            try (final Closeable ignored = this.os) {
+            try (final Closeable ignored = this.pos) {
                 final byte[] rlpString = RLPEncoder.string(Strings.decode(TEST_STRING, UTF_8));
                 Runnable[] subtasks = new Runnable[]{
                         () -> write(TEST_BYTE),
@@ -332,13 +327,14 @@ public class RLPStreamTest {
                 doWait(receiveBarrier);
             } catch (InterruptedException | IOException ex) {
                 ex.printStackTrace();
+                receiver.interrupt();
                 throw new RuntimeException(ex);
             }
         }
 
         private void write(byte b) throws RuntimeException {
             try {
-                os.write(b);
+                pos.write(b);
                 logWrite(startTime, "'" + (char) b + "' (0x" + Strings.encode(b) +")");
             } catch (IOException e) {
                 throw new RuntimeException(e);
