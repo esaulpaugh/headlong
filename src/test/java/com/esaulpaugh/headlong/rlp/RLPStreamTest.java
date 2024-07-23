@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -84,7 +85,7 @@ public class RLPStreamTest {
         }
         try (Baos baos = new Baos(); RLPOutputStream ros = new RLPOutputStream(baos)) {
             ros.writeList(objects);
-            assertEquals(Notation.forObjects( (Object) objects), Notation.forEncoding(baos.toByteArray()));
+            assertEquals(Notation.forObjects((Object) objects), Notation.forEncoding(baos.toByteArray()));
             assertEquals("ce880573490923738490c0c3827761", baos.toString());
             assertEquals("ce880573490923738490c0c3827761", ros.toString());
         }
@@ -139,7 +140,7 @@ public class RLPStreamTest {
 
     @Test
     public void testCopyToRLPOutputStream() throws IOException {
-        final byte[] encoding = new byte[]{(byte) 0x87, 0, 1, 2, 3, 4, 5, 6};
+        final byte[] encoding = new byte[] { (byte) 0x87, 0, 1, 2, 3, 4, 5, 6 };
         final RLPString y = RLP_STRICT.wrapString(encoding);
         {
             final Baos b = new Baos();
@@ -304,7 +305,7 @@ public class RLPStreamTest {
 
         @Override
         public void run() {
-            try (OutputStream local = this.os) {
+            try (final Closeable ignored = this.os) {
                 final byte[] rlpString = RLPEncoder.string(Strings.decode(TEST_STRING, UTF_8));
                 Runnable[] subtasks = new Runnable[]{
                         () -> write(TEST_BYTE),
