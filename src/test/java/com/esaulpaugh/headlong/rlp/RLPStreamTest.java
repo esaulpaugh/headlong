@@ -226,8 +226,8 @@ public class RLPStreamTest {
         @Override
         public void run() {
             Thread senderThread = new Thread(senderTask);
-            try {
-                Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(new PipedInputStream(pos, 512));
+            try (PipedInputStream pis = new PipedInputStream(pos, 512)) {
+                Iterator<RLPItem> iter = RLP_STRICT.sequenceIterator(pis);
 
                 senderThread.setPriority(Thread.MAX_PRIORITY);
                 Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
@@ -304,34 +304,34 @@ public class RLPStreamTest {
 
         @Override
         public void run() {
-            try {
-                final byte[] rlpString = RLPEncoder.string(Strings.decode(TEST_STRING, UTF_8));
-                Runnable[] subtasks = new Runnable[] {
-                        () -> write(TEST_BYTE),
-                        () -> {
-                            for (byte b : TEST_BYTES) {
-                                write(b);
+            try (OutputStream local = this.os) {
+                    final byte[] rlpString = RLPEncoder.string(Strings.decode(TEST_STRING, UTF_8));
+                    Runnable[] subtasks = new Runnable[]{
+                            () -> write(TEST_BYTE),
+                            () -> {
+                                for (byte b : TEST_BYTES) {
+                                    write(b);
+                                }
+                            },
+                            () -> write(rlpString[0]),
+                            () -> write(rlpString[1]),
+                            () -> {
+                                for (int i = 2; i < rlpString.length; i++) {
+                                    write(rlpString[i]);
+                                }
+                                write(TEST_BYTE);
                             }
-                        },
-                        () -> write(rlpString[0]),
-                        () -> write(rlpString[1]),
-                        () -> {
-                            for (int i = 2; i < rlpString.length; i++) {
-                                write(rlpString[i]);
-                            }
-                            write(TEST_BYTE);
-                        }
-                };
+                    };
 
-                doWait(sendBarrier);
-                for(Runnable subtask : subtasks) {
-                    signalWait(receiveBarrier, sendBarrier);
-                    subtask.run();
-                }
-                doWait(receiveBarrier);
-            } catch (InterruptedException ie) {
-                ie.printStackTrace();
-                throw new RuntimeException(ie);
+                    doWait(sendBarrier);
+                    for (Runnable subtask : subtasks) {
+                        signalWait(receiveBarrier, sendBarrier);
+                        subtask.run();
+                    }
+                    doWait(receiveBarrier);
+            } catch (InterruptedException | IOException ex) {
+                ex.printStackTrace();
+                throw new RuntimeException(ex);
             }
         }
 
