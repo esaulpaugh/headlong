@@ -305,30 +305,30 @@ public class RLPStreamTest {
         @Override
         public void run() {
             try (OutputStream local = this.os) {
-                    final byte[] rlpString = RLPEncoder.string(Strings.decode(TEST_STRING, UTF_8));
-                    Runnable[] subtasks = new Runnable[]{
-                            () -> write(TEST_BYTE),
-                            () -> {
-                                for (byte b : TEST_BYTES) {
-                                    write(b);
-                                }
-                            },
-                            () -> write(rlpString[0]),
-                            () -> write(rlpString[1]),
-                            () -> {
-                                for (int i = 2; i < rlpString.length; i++) {
-                                    write(rlpString[i]);
-                                }
-                                write(TEST_BYTE);
+                final byte[] rlpString = RLPEncoder.string(Strings.decode(TEST_STRING, UTF_8));
+                Runnable[] subtasks = new Runnable[]{
+                        () -> write(TEST_BYTE),
+                        () -> {
+                            for (byte b : TEST_BYTES) {
+                                write(b);
                             }
-                    };
+                        },
+                        () -> write(rlpString[0]),
+                        () -> write(rlpString[1]),
+                        () -> {
+                            for (int i = 2; i < rlpString.length; i++) {
+                                write(rlpString[i]);
+                            }
+                            write(TEST_BYTE);
+                        }
+                };
 
-                    doWait(sendBarrier);
-                    for (Runnable subtask : subtasks) {
-                        signalWait(receiveBarrier, sendBarrier);
-                        subtask.run();
-                    }
-                    doWait(receiveBarrier);
+                doWait(sendBarrier);
+                for (Runnable subtask : subtasks) {
+                    signalWait(receiveBarrier, sendBarrier);
+                    subtask.run();
+                }
+                doWait(receiveBarrier);
             } catch (InterruptedException | IOException ex) {
                 ex.printStackTrace();
                 throw new RuntimeException(ex);
