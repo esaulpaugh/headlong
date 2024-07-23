@@ -56,6 +56,10 @@ public final class RLPOutputStream extends OutputStream {
         writeOut(RLPEncoder.sequence(rawObjects));
     }
 
+    public void writeList(Object... rawElements) throws IOException {
+        writeOut(RLPEncoder.list(rawElements));
+    }
+
     public void writeList(Iterable<?> rawElements) throws IOException {
         writeOut(RLPEncoder.list(rawElements));
     }
