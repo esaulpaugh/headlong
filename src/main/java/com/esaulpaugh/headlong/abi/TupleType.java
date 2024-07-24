@@ -281,7 +281,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         bb.mark();
         try {
             if (indices.length == 1) {
-                return (T) decodeIndex(bb, indices[0]); // specified element
+                return (T) decodeIndex(bb, bb.position(), newUnitBuffer(), indices[0]); // specified element
             }
             return (T) decodeIndices(bb, indices); // Tuple with specified elements populated
         } finally {
@@ -289,11 +289,17 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         }
     }
 
-    private Object decodeIndex(ByteBuffer bb, int index) {
-        final ABIType<?> type = elementTypes[index]; // implicit bounds check up front
-        final int start = bb.position();
-        bb.position(start + elementHeadOffsets[index]);
-        return decodeObject(type, bb, start, newUnitBuffer(), index);
+    private Object decodeIndex(ByteBuffer bb, int start, byte[] unitBuffer, int index) {
+        try {
+            final ABIType<?> type = elementTypes[index];
+            bb.position(start + elementHeadOffsets[index]);
+            if (type.dynamic) {
+                bb.position(start + IntType.UINT31.decode(bb, unitBuffer));
+            }
+            return type.decode(bb, unitBuffer);
+        } catch (IllegalArgumentException cause) {
+            throw decodeException(true, index, cause);
+        }
     }
 
     private Tuple decodeIndices(ByteBuffer bb, int... indices) {
@@ -302,26 +308,13 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         final byte[] unitBuffer = newUnitBuffer();
         int prev = -1;
         for (final int index : indices) {
-            final ABIType<?> resultType = elementTypes[index]; // implicit bounds check up front
+            results[index] = decodeIndex(bb, start, unitBuffer, index);
             if (index <= prev) {
                 throw new IllegalArgumentException("index out of order: " + index);
             }
-            bb.position(start + elementHeadOffsets[index]);
-            results[index] = decodeObject(resultType, bb, start, unitBuffer, index);
             prev = index;
         }
         return Tuple.create(results);
-    }
-
-    private static Object decodeObject(ABIType<?> type, ByteBuffer bb, int start, byte[] unitBuffer, int index) {
-        try {
-            if (type.dynamic) {
-                bb.position(start + IntType.UINT31.decode(bb, unitBuffer));
-            }
-            return type.decode(bb, unitBuffer);
-        } catch (IllegalArgumentException cause) {
-            throw decodeException(true, index, cause);
-        }
     }
 
     int staticTupleHeadLength() {
