@@ -192,19 +192,15 @@ public class StringsTest {
     @Test
     public void testHexExceptions() throws Throwable {
         assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode("0"));
-
         assertThrown(IllegalArgumentException.class, "illegal hex val @ 0", () -> FastHex.decode("(0"));
-
         assertThrown(IllegalArgumentException.class, "illegal hex val @ 1", () -> FastHex.decode("0'"));
-
         assertThrown(IllegalArgumentException.class, "illegal hex val @ 1", () -> FastHex.decode("F\0"));
+        assertThrown(IllegalArgumentException.class, "illegal hex val @ 1", () -> FastHex.decode("f\0"));
 
-        final Random rand = TestUtils.seededRandom();
-        final char[] alpha = "0123456789abcdefABCDEF".toCharArray();
         final char[] chars = "\0\0".toCharArray();
         final TestUtils.CustomRunnable r = () -> FastHex.decode(new String(chars));
 
-        chars[1] = alpha[rand.nextInt(alpha.length)];
+        chars[1] = 'F';
         for (int i = 0; i <= 0xFF; i++) {
             final char v = (char) i;
             chars[0] = v;
@@ -215,7 +211,7 @@ public class StringsTest {
             }
         }
 
-        chars[0] = alpha[rand.nextInt(alpha.length)];
+        chars[0] = 'f';
         for (int i = 0; i <= 0xFF; i++) {
             final char v = (char) i;
             chars[1] = v;
