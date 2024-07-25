@@ -27,14 +27,11 @@ import java.security.MessageDigest;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
-import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.TestUtils.uniformBigInteger;
 import static com.esaulpaugh.headlong.TestUtils.uniformLong;
 import static com.esaulpaugh.headlong.TestUtils.wildBigInteger;
@@ -51,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TupleTest {
 
     @Test
-    public void metaTest1() throws InterruptedException, TimeoutException {
+    public void metaTest1() throws InterruptedException, ExecutionException, TimeoutException {
         final int parallelism = 24;
         final boolean unsigned = true;
 
@@ -64,26 +61,22 @@ public class TupleTest {
             final long[] a = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
             {
                 final long[] b = new long[a.length];
-                final ExecutorService es = Executors.newFixedThreadPool(parallelism);
-                for (int i = 0; i < parallelism; i++) {
+                final int bits = bitLen;
+                TestUtils.parallelRun(parallelism, 1_000L, (int i) -> {
+                    final ThreadLocalRandom r = ThreadLocalRandom.current();
                     final long[] dest = i % 2 == 0 ? a : b;
-                    final int bits = bitLen;
-                    es.execute(() -> {
-                        final ThreadLocalRandom r = ThreadLocalRandom.current();
-                        for (long s = 0; s < taskSamples; s++) {
-                            final long z = uniformLong(r, unsigned, bits) & powMinus1;
-                            final int idx = (int) (z / Long.SIZE);
-                            final long x = dest[idx];
-                            if (x != -1L) {
-                                final long y = x | (0x80000000_00000000L >>> (z & 63));
-                                if (y != x) {
-                                    dest[idx] = y;
-                                }
+                    for (long s = 0; s < taskSamples; s++) {
+                        final long z = uniformLong(r, unsigned, bits) & powMinus1;
+                        final int idx = (int) (z / Long.SIZE);
+                        final long x = dest[idx];
+                        if (x != -1L) {
+                            final long y = x | (0x80000000_00000000L >>> (z & 63));
+                            if (y != x) {
+                                dest[idx] = y;
                             }
                         }
-                    });
-                }
-                requireNoTimeout(shutdownAwait(es, 1_000L));
+                    }
+                }).run();
                 for (int i = 0; i < a.length; i++) {
                     a[i] |= b[i];
                 }

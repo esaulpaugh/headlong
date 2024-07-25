@@ -34,20 +34,15 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.assertThrownWithAnySubstring;
-import static com.esaulpaugh.headlong.TestUtils.getFutures;
-import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
-import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,7 +65,7 @@ public class EncodeTest {
     @Disabled("may take minutes to run")
     @SuppressWarnings("deprecation")
     @Test
-    public void fuzzSignatures() throws InterruptedException, TimeoutException, ExecutionException {
+    public void fuzzSignatures() throws InterruptedException, ExecutionException, TimeoutException {
 
         final byte[] alphabet = Strings.decode("x0123456789", Strings.ASCII); // new char[128]; // "(),abcdefgilmnorstuxy8[]"
         final int alphabetLen = alphabet.length;
@@ -102,7 +97,7 @@ public class EncodeTest {
         final int prefixLen = prefix.length();
 
         final ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
-        final Runnable runnable = () -> {
+        final IntConsumer runnable = (int id) -> {
             final Random rand = TestUtils.seededRandom();
             for (int len = 0; len <= 14; len++) {
                 System.out.println(len + "(" + Thread.currentThread().getId() + ")");
@@ -151,15 +146,8 @@ public class EncodeTest {
                 }
             }
         };
-        final int parallelism = Runtime.getRuntime().availableProcessors();
-        System.out.println("p = " + parallelism);
-        final ExecutorService pool = Executors.newFixedThreadPool(parallelism);
-        final Future<?>[] futures = new Future<?>[parallelism];
-        for (int k = 0; k < parallelism; k++) {
-            futures[k] = pool.submit(runnable);
-        }
-        requireNoTimeout(shutdownAwait(pool, 3600L));
-        getFutures(futures);
+        TestUtils.parallelRun(Runtime.getRuntime().availableProcessors(), 3600L, runnable)
+                .run();
 
         final int size = map.size();
         System.out.println("\nsize=" + size);

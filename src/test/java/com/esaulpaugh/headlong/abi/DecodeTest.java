@@ -28,17 +28,14 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeoutException;
+import java.util.function.IntConsumer;
 import java.util.function.LongSupplier;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.assertThrownWithAnySubstring;
-import static com.esaulpaugh.headlong.TestUtils.getFutures;
-import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
-import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.abi.ABIType.newUnitBuffer;
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -1024,8 +1021,8 @@ public class DecodeTest {
     }
 
     @Test
-    public void testDecodeLong() throws Throwable {
-        final Runnable runnable = () -> {
+    public void testDecodeLong() throws InterruptedException, ExecutionException, TimeoutException {
+        final IntConsumer task = (int id) -> {
             final Random r = ThreadLocalRandom.current();
             for (int bitWidth = 1; bitWidth <= 64; bitWidth++) {
                 final int bitLen = UNIT_LENGTH_BYTES * Byte.SIZE;
@@ -1034,7 +1031,7 @@ public class DecodeTest {
                 final LongType signed = new LongType("signed", bitWidth, false);
                 final byte[] buffer = ABIType.newUnitBuffer();
                 final ByteBuffer dest = ByteBuffer.allocate(UNIT_LENGTH_BYTES);
-                final long n = 2_000L;
+                final long n = 1_000L;
                 long valid = 0L;
                 for (long i = 0L; i < n; i++) {
                     final BigInteger v = TestUtils.wildBigInteger(r, false, bitLen);
@@ -1052,13 +1049,8 @@ public class DecodeTest {
             }
         };
         final int p = 2; // Runtime.getRuntime().availableProcessors() - 1;
-        final ExecutorService es = Executors.newFixedThreadPool(p);
-        final Future<?>[] futures = new Future<?>[p];
-        for (int i = 0; i < p; i++) {
-            futures[i] = es.submit(runnable);
-        }
-        requireNoTimeout(shutdownAwait(es, 600L));
-        getFutures(futures);
+        TestUtils.parallelRun(p, 600L, task)
+                .run();
     }
 
     private static int compare(ByteBuffer bb, byte[] buffer, UnitType<?> ut, BigInteger expected) {

@@ -41,17 +41,12 @@ import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static com.esaulpaugh.headlong.TestUtils.getFutures;
 import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
-import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 
 public class MonteCarloTest {
 
@@ -131,24 +126,16 @@ public class MonteCarloTest {
 
     @Test
     public void gambleGamble() throws InterruptedException, TimeoutException, ExecutionException {
-
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(MAX_TUPLE_DEPTH, MAX_TUPLE_LEN, MAX_ARRAY_DEPTH, MAX_ARRAY_LEN);
         final long masterSeed = TestUtils.getSeed(); // (long) (Math.sqrt(2.0) * Math.pow(10, 15));
 
         final int parallelism = Runtime.getRuntime().availableProcessors();
         final int workPerProcessor = (int) (TARGET_ITERATIONS / parallelism);
-        final ExecutorService pool = Executors.newFixedThreadPool(parallelism);
         final long totalWork = workPerProcessor * (long) parallelism;
         final String initialConditions = "(" + masterSeed + "L," + limits.maxTupleDepth + ',' + limits.maxTupleLength + ',' + limits.maxArrayDepth + ',' + limits.maxArrayLength + ")";
-        final Future<?>[] futures = new Future<?>[parallelism];
         System.out.println("Running\t\t" + totalWork + "\t" + initialConditions + " with " + TIMEOUT_SECONDS + "-second timeout ...");
-        for (int i = 0; i < parallelism; i++) {
-            final long seed = masterSeed + i;
-            futures[i] = pool.submit(() -> doMonteCarlo(parallelism, masterSeed, masterSeed + seed, workPerProcessor, limits));
-        }
-
-        requireNoTimeout(shutdownAwait(pool, TIMEOUT_SECONDS));
-        getFutures(futures);
+        TestUtils.parallelRun(parallelism, TIMEOUT_SECONDS, (int i) -> doMonteCarlo(parallelism, masterSeed, masterSeed + i, workPerProcessor, limits))
+                .run();
         System.out.println("Finished\t" + totalWork + "\t" + initialConditions);
     }
 
@@ -262,30 +249,17 @@ public class MonteCarloTest {
 
         System.out.println(one);
         System.out.println(two);
-        final MonteCarloTask oneTask = new MonteCarloTask(one, 0, 308_011);
 
-        final Runnable runnable = () -> {
+        final ForkJoinPool fjPool = ForkJoinPool.commonPool();
+        fjPool.invoke(new MonteCarloTask(one, 0, 308_011));
+
+        TestUtils.parallelRun(Runtime.getRuntime().availableProcessors(), 3L, (int id) -> {
             for (int j = 0; j < 500; j++) {
                 two.runStandard();
             }
-        };
+        }).run();
 
-        final int parallelism = Runtime.getRuntime().availableProcessors();
-        final ExecutorService threadPool = Executors.newFixedThreadPool(parallelism);
-
-        final ForkJoinPool fjPool = ForkJoinPool.commonPool();
-        fjPool.invoke(oneTask);
-
-        final Future<?>[] futures = new Future<?>[parallelism];
-        for (int i = 0; i < parallelism; i++) {
-            futures[i] = threadPool.submit(runnable);
-        }
-
-        runnable.run();
-
-        requireNoTimeout(shutdownAwait(threadPool, 3L));
         requireNoTimeout(fjPool.awaitQuiescence(3L, TimeUnit.SECONDS));
-        getFutures(futures);
     }
 
     @Test

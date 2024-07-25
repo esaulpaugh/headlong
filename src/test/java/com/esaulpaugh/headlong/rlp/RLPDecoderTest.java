@@ -32,15 +32,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static com.esaulpaugh.headlong.TestUtils.CustomRunnable;
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
-import static com.esaulpaugh.headlong.TestUtils.requireNoTimeout;
-import static com.esaulpaugh.headlong.TestUtils.shutdownAwait;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_LENIENT;
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
 import static com.esaulpaugh.headlong.util.Strings.UTF_8;
@@ -107,42 +104,14 @@ public class RLPDecoderTest {
 
     @Disabled("slow")
     @Test
-    public void exhaustiveFuzz() throws InterruptedException, TimeoutException {
-        ExecutorService executorService = Executors.newWorkStealingPool();
-        ExhaustiveFuzzTask[] tasks = new ExhaustiveFuzzTask[256];
-        for (int i = 0; i < tasks.length; i++) {
-            System.out.print(i + " -> ");
-            tasks[i] = new ExhaustiveFuzzTask(new byte[] { (byte) i, 0, 0, 0 });
-            executorService.execute(tasks[i]);
-        }
-        requireNoTimeout(shutdownAwait(executorService, 2000L));
-        long valid = 0, invalid = 0;
-        for (ExhaustiveFuzzTask task : tasks) {
-            if(task != null) {
-                valid += task.valid;
-                invalid += task.invalid;
-            }
-        }
-        String result = valid + " / " + (valid + invalid) + " (" + invalid + " invalid)";
-        System.out.println(result);
-        assertEquals("2273312768 / 4294967296 (2021654528 invalid)", result);
-    }
+    public void exhaustiveFuzz() throws InterruptedException, TimeoutException, ExecutionException {
 
-    private static class ExhaustiveFuzzTask implements Runnable {
+        final long[] valids = new long[256];
+        final long[] invalids = new long[256];
 
-        private final byte[] four;
-        long valid, invalid;
-        private final String tag;
-
-        ExhaustiveFuzzTask(byte[] four) {
-            this.four = four;
-            this.tag = Arrays.toString(four);
-            System.out.println(tag);
-        }
-
-        @Override
-        public void run() {
-            byte[] four = this.four;
+        TestUtils.parallelRun(256, 2000L, (int i) -> {
+            final byte[] four = new byte[] { (byte) i, 0, 0, 0 };
+            System.out.println(i + " -> " + Arrays.toString(four));
             byte one = 0, two = 0, three = 0;
             int valid = 0, invalid = 0;
             boolean gogo = true;
@@ -164,10 +133,22 @@ public class RLPDecoderTest {
                     invalid++;
                 }
             } while(gogo);
-            System.out.println(tag + "END " + Strings.encode(four));
-            this.valid = valid;
-            this.invalid = invalid;
+            valids[i] = valid;
+            invalids[i] = invalid;
+            System.out.println(i + "\tEND " + Strings.encode(four));
+        }).run();
+
+        long valid = 0;
+        for (long v : valids) {
+            valid += v;
         }
+        long invalid = 0;
+        for (long iv : invalids) {
+            invalid += iv;
+        }
+        String result = valid + " / " + (valid + invalid) + " (" + invalid + " invalid)";
+        System.out.println(result);
+        assertEquals("2273312768 / 4294967296 (2021654528 invalid)", result);
     }
 
     @Test

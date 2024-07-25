@@ -36,12 +36,18 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.IntConsumer;
+
+import static com.esaulpaugh.headlong.TestUtils.ParallelMode.COMMON;
+import static com.esaulpaugh.headlong.TestUtils.ParallelMode.FIXED;
+import static com.esaulpaugh.headlong.TestUtils.ParallelMode.WORK_STEALING;
 
 public final class TestUtils {
 
@@ -49,23 +55,6 @@ public final class TestUtils {
 
     private static final class SecureRandomHolder {
         static final SecureRandom SR = new SecureRandom();
-    }
-
-    public static boolean shutdownAwait(ExecutorService exec, long timeoutSeconds) throws InterruptedException {
-        exec.shutdown();
-        return exec.awaitTermination(timeoutSeconds, TimeUnit.SECONDS);
-    }
-
-    public static void requireNoTimeout(boolean noTimeout) throws TimeoutException {
-        if (!noTimeout) {
-            throw new TimeoutException("not very Timely!!");
-        }
-    }
-
-    public static void getFutures(Future<?>[] futures) throws ExecutionException, InterruptedException {
-        for (Future<?> f : futures) {
-            f.get();
-        }
     }
 
     public static Random seededRandom() {
@@ -375,7 +364,9 @@ public final class TestUtils {
             if (clazz.isInstance(t)) {
                 final String msg = t.getMessage();
                 for(String substr : substrings) {
-                    if (msg.contains(substr)) return;
+                    if (msg.contains(substr)) {
+                        return;
+                    }
                 }
             }
             throw t;
@@ -496,5 +487,56 @@ public final class TestUtils {
         return len != 1
                 ? sb.deleteCharAt(len - 1).append(')').toString() // replace trailing comma
                 : "()";
+    }
+
+    public static boolean shutdownAwait(ExecutorService exec, long timeoutSeconds) throws InterruptedException {
+        exec.shutdown();
+        return exec.awaitTermination(timeoutSeconds, TimeUnit.SECONDS);
+    }
+
+    public static void requireNoTimeout(boolean noTimeout) throws TimeoutException {
+        if (!noTimeout) {
+            throw new TimeoutException("not very Timely!!");
+        }
+    }
+
+    public static void getFutures(Future<?>[] futures, long timeoutSeconds) throws InterruptedException, ExecutionException, TimeoutException {
+        for (Future<?> f : futures) {
+            f.get(timeoutSeconds, TimeUnit.SECONDS);
+        }
+    }
+
+    public enum ParallelMode {
+        FIXED,
+        WORK_STEALING,
+        COMMON
+    }
+
+    public static ParallelRun parallelRun(int tasks, long timeoutSeconds, IntConsumer test) {
+        return parallelRun(tasks, tasks, COMMON, timeoutSeconds, test);
+    }
+
+    public static ParallelRun parallelRun(int tasks, int threads, ParallelMode mode, long timeoutSeconds, IntConsumer test) {
+        return () -> {
+            final ExecutorService pool = mode == FIXED
+                                                ? Executors.newFixedThreadPool(threads)
+                                                : mode == WORK_STEALING
+                                                    ? Executors.newWorkStealingPool(threads)
+                                                    : ForkJoinPool.commonPool();
+            final Future<?>[] futures = new Future[tasks];
+            for (int i = 0; i < tasks; i++) {
+                final int id = i;
+                futures[i] = pool.submit(() -> test.accept(id));
+            }
+            getFutures(futures, timeoutSeconds);
+            if (pool != ForkJoinPool.commonPool()) {
+                pool.shutdown();
+            }
+        };
+    }
+
+    @FunctionalInterface
+    public interface ParallelRun {
+        void run() throws InterruptedException, ExecutionException, TimeoutException;
     }
 }
