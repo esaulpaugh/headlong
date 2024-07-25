@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.function.Supplier;
@@ -190,6 +191,35 @@ public class StringsTest {
     }
 
     @Test
+    public void testCharSequences() {
+        final Random rand = TestUtils.seededRandom();
+        final int size = 2_000;
+        for (int k = 0; k < 5; k++) {
+            final int start = rand.nextInt(size + 1);
+            final int end = start + rand.nextInt(1 + size - start);
+            final byte[] bytes = new byte[end - start];
+            final ByteBuffer buf = ByteBuffer.wrap(bytes);
+            final int longs = bytes.length / Long.BYTES;
+            for (int i = 0; i < longs; i++) {
+                buf.putLong(TestUtils.wildLong(rand));
+            }
+            for (int i = longs * Long.BYTES; i < bytes.length; i++) {
+                buf.put((byte) rand.nextInt());
+            }
+            final String s = Strings.encode(bytes);
+            final CharBuffer c0 = CharBuffer.wrap(s.toCharArray());
+            final CharBuffer c1 = CharBuffer.wrap(s);
+            assertArrayEquals(bytes, FastHex.decode(s));
+            assertArrayEquals(bytes, FastHex.decode(c0));
+            assertArrayEquals(bytes, FastHex.decode(c0.asReadOnlyBuffer()));
+            assertArrayEquals(bytes, FastHex.decode(c1));
+            assertArrayEquals(bytes, FastHex.decode(c1.asReadOnlyBuffer()));
+            assertArrayEquals(bytes, FastHex.decode(new StringBuffer(s)));
+            assertArrayEquals(bytes, FastHex.decode(new StringBuilder(s)));
+        }
+    }
+
+    @Test
     public void testHexExceptions() throws Throwable {
         assertThrown(IllegalArgumentException.class, "len must be a multiple of two", () -> FastHex.decode("0"));
         assertThrown(IllegalArgumentException.class, "illegal hex val @ 0", () -> FastHex.decode("(0"));
@@ -246,13 +276,13 @@ public class StringsTest {
 
     @Test
     public void testFastHexDecode() throws Throwable {
-        final byte[] hexBytes = new byte[] { '9', 'a', 'f', '0', '1', 'E' };
+        final byte[] hexBytes = new byte[] { '9', 'a', 'f', '0', '1', 'E', '9', '0', '0', '0' };
         {
             byte[] data = FastHex.decode(hexBytes);
-            assertArrayEquals(new byte[] { (byte) 0x9a, (byte) 0xf0, 0x1e }, data);
+            assertArrayEquals(new byte[] { (byte) 0x9a, (byte) 0xf0, 0x1e, (byte) 0x90, 0x00 }, data);
 
             data = FastHex.decode(hexBytes, 1, hexBytes.length - 2);
-            assertArrayEquals(new byte[] { (byte) 0xaf, 0x01 }, data);
+            assertArrayEquals(new byte[] { (byte) 0xaf, 0x01, (byte) 0xe9, 0x00 }, data);
 
 //            final int nextIdx = FastHex.decode(hexBytes, 2, hexBytes.length - 4, data, 1);
 //            assertArrayEquals(new byte[] { (byte) 0xaf, (byte) 0xf0 }, data);
@@ -261,10 +291,10 @@ public class StringsTest {
 
         final String hex = new String(hexBytes, StandardCharsets.US_ASCII);
         byte[] data = FastHex.decode(hex);
-        assertArrayEquals(new byte[] { (byte) 0x9a, (byte) 0xf0, 0x1e }, data);
+        assertArrayEquals(new byte[] { (byte) 0x9a, (byte) 0xf0, 0x1e, (byte) 0x90, 0x00 }, data);
 
         data = FastHex.decode(hex, 1, hex.length() - 2);
-        assertArrayEquals(new byte[] { (byte) 0xaf, 0x01 }, data);
+        assertArrayEquals(new byte[] { (byte) 0xaf, 0x01, (byte) 0xe9, 0x00 }, data);
 
 //        final int nextIdx = FastHex.decode(hex, 2, hex.length() - 4, data, 1);
 //        assertArrayEquals(new byte[] { (byte) 0xaf, (byte) 0xf0 }, data);
