@@ -203,14 +203,13 @@ public class AddressTest {
     }
 
     private static BigInteger computeValue6(final String checksumAddress) {
-        return parseAndShift(checksumAddress, 27, 42)
-                .add(parseAndShift(checksumAddress, 12, 27))
-                .add(parseAndShift(checksumAddress, 2, 12));
-    }
+        long a = Long.parseLong(checksumAddress.substring(29, 42), 16);
+        long b = Long.parseLong(checksumAddress.substring(16, 29), 16);
+        long c = Long.parseLong(checksumAddress.substring(2, 16), 16);
 
-    private static BigInteger parseAndShift(String addr, int start, int end) {
-        long v = Long.parseLong(addr.substring(start, end), 16);
-        return BigInteger.valueOf(v).shiftLeft((42 - end) * 4);
+        return BigInteger.valueOf(a)
+                .add(BigInteger.valueOf(b).shiftLeft((42 - 29) * 4))
+                .add(BigInteger.valueOf(c).shiftLeft((42 - 16) * 4));
     }
 
     @Test
