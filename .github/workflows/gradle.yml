@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-2019, ubuntu-20.04 ]
-        distribution: [ 'semeru', 'dragonwell' ]
+        distribution: [ 'semeru', 'liberica' ]
 
     runs-on: ${{ matrix.os }}
 
