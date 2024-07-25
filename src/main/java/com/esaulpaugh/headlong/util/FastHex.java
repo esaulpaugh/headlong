@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.util;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.function.IntUnaryOperator;
 
 /** Hexadecimal codec optimized for small inputs. */
@@ -100,16 +101,26 @@ public final class FastHex {
         return encodedLen / CHARS_PER_BYTE;
     }
 
-    private static int decodeByte(IntUnaryOperator extractor, int offset) {
-        return decodeNibble(extractor.applyAsInt(offset), offset) << BITS_PER_CHAR | decodeNibble(extractor.applyAsInt(++offset), offset);
+    private static final int[] DECODE_TABLE = new int[256];
+
+    static {
+        Arrays.fill(DECODE_TABLE, -(0xF << BITS_PER_CHAR) - 1);
+        for (int i = '0'; i <= '9'; i++) DECODE_TABLE[i] = i - '0' + 0x0;
+        for (int i = 'A'; i <= 'F'; i++) DECODE_TABLE[i] = i - 'A' + 0xA;
+        for (int i = 'a'; i <= 'f'; i++) DECODE_TABLE[i] = i - 'a' + 0xA;
     }
 
-    private static int decodeNibble(int c, int offset) {
-        switch (c) {
-        case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9': return c - '0';
-        case 'A':case 'B':case 'C':case 'D':case 'E':case 'F': return  c - ('A' - 0xA);
-        case 'a':case 'b':case 'c':case 'd':case 'e':case 'f': return c - ('a' - 0xa);
-        default: throw new IllegalArgumentException("illegal hex val @ " + offset);
+    private static int decodeByte(IntUnaryOperator extractor, int offset) {
+        try {
+            int left_ = DECODE_TABLE[extractor.applyAsInt(offset)];
+            int right = DECODE_TABLE[extractor.applyAsInt(++offset)];
+            int b = (left_ << BITS_PER_CHAR) + right;
+            if (b < 0) {
+                throw new IllegalArgumentException("illegal hex val @ " + (left_ < 0 ? offset - 1 : offset));
+            }
+            return b;
+        } catch (ArrayIndexOutOfBoundsException aioobe) {
+            throw new IllegalArgumentException("illegal hex val @ " + offset, aioobe);
         }
     }
 }

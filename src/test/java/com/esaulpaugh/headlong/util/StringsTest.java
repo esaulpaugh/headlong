@@ -196,6 +196,51 @@ public class StringsTest {
         assertThrown(IllegalArgumentException.class, "illegal hex val @ 0", () -> FastHex.decode("(0"));
 
         assertThrown(IllegalArgumentException.class, "illegal hex val @ 1", () -> FastHex.decode("0'"));
+
+        assertThrown(IllegalArgumentException.class, "illegal hex val @ 1", () -> FastHex.decode("F\0"));
+
+        final Random rand = TestUtils.seededRandom();
+        final char[] alpha = "0123456789abcdefABCDEF".toCharArray();
+        final char[] chars = "\0\0".toCharArray();
+        final TestUtils.CustomRunnable r = () -> FastHex.decode(new String(chars));
+
+        chars[1] = alpha[rand.nextInt(alpha.length)];
+        for (int i = 0; i <= 0xFF; i++) {
+            final char v = (char) i;
+            chars[0] = v;
+            if (validHex(v)) {
+                r.run();
+            } else {
+                assertThrown(IllegalArgumentException.class, "illegal hex val @ 0", r);
+            }
+        }
+
+        chars[0] = alpha[rand.nextInt(alpha.length)];
+        for (int i = 0; i <= 0xFF; i++) {
+            final char v = (char) i;
+            chars[1] = v;
+            if (validHex(v)) {
+                r.run();
+            } else {
+                assertThrown(IllegalArgumentException.class, "illegal hex val @ 1", r);
+            }
+        }
+
+        chars[0] = 256;
+        chars[1] = '0';
+        assertThrown(IllegalArgumentException.class, "illegal hex val @ 0", r);
+        chars[0] = '0';
+        chars[1] = 256;
+        assertThrown(IllegalArgumentException.class, "illegal hex val @ 1", r);
+    }
+
+    private static boolean validHex(int c) {
+        switch (c) {
+        case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
+        case 'A':case 'B':case 'C':case 'D':case 'E':case 'F':
+        case 'a':case 'b':case 'c':case 'd':case 'e':case 'f': return true;
+        default: return false;
+        }
     }
 
     @Test
