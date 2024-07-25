@@ -70,7 +70,7 @@ public final class FastHex {
         }
     }
     
-    public static byte[] decode(String hex) {
+    public static byte[] decode(CharSequence hex) {
         return decode(hex, 0, hex.length());
     }
 
@@ -78,7 +78,7 @@ public final class FastHex {
         return decode(hexBytes, 0, hexBytes.length);
     }
 
-    public static byte[] decode(String hex, int offset, int len) {
+    public static byte[] decode(CharSequence hex, int offset, int len) {
         return decode(offset, len, hex::charAt);
     }
 
