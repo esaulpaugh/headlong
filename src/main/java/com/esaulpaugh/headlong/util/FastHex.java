@@ -69,7 +69,7 @@ public final class FastHex {
             dest[j+1] = (byte) hexPair; // right
         }
     }
-    
+
     public static byte[] decode(CharSequence hex) {
         return decode(hex, 0, hex.length());
     }

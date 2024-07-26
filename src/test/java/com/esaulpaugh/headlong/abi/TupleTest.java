@@ -508,7 +508,7 @@ public class TupleTest {
         assertEquals(_uint_,            _uintBool_.exclude(false, true));
         assertEquals(_bool_,            _uintBool_.exclude(true, false));
         assertEquals(TupleType.EMPTY,   _uintBool_.exclude(true, true));
-        
+
         TupleType<?> tt2 = TupleType.parse("((int,bool))");
         assertEquals(tt2, tt2.select(true));
         assertEquals(TupleType.EMPTY, tt2.exclude(true));

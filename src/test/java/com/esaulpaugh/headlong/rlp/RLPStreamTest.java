@@ -341,7 +341,7 @@ public class RLPStreamTest {
             }
         }
     }
-    
+
     private static void doWait(CyclicBarrier barrier) throws InterruptedException {
         try {
             barrier.await();
@@ -349,7 +349,7 @@ public class RLPStreamTest {
             throw new RuntimeException(bbe);
         }
     }
-    
+
     private static void signalWait(CyclicBarrier theirs, CyclicBarrier ours) throws InterruptedException {
         try {
             theirs.await(); // wake up other thread
