@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Provides type safety by disambiguating address arguments from {@link String} and {@link BigInteger} while imposing 
+ * Provides type safety by disambiguating address arguments from {@link String} and {@link BigInteger} while imposing
  * certain format requirements such as <a href="https://eips.ethereum.org/EIPS/eip-55">EIP-55: Mixed-case checksum address encoding</a>.
  */
 public final class Address {

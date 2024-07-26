@@ -67,7 +67,7 @@ public final class ABIJSON {
     /**
      * Selects all objects with type {@link TypeEnum#FUNCTION}.
      *
-     * @see #parseFunctions(String) 
+     * @see #parseFunctions(String)
      * @param arrayJson the JSON array string
      * @return  the parsed {@link Function}s
      */
