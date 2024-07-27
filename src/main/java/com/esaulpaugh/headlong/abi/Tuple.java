@@ -39,6 +39,10 @@ public class Tuple implements Iterable<Object> {
         this.elements = elements;
     }
 
+    /**
+     * @see Single#of(Object)
+     * @return  the pair
+     */
     public static Tuple of() {
         return Tuple.EMPTY;
     }
