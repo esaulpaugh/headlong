@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-2019, ubuntu-20.04 ]
-        distribution: [ 'semeru', 'liberica' ]
+        distribution: [ 'semeru', 'dragonwell' ]
 
     runs-on: ${{ matrix.os }}
 
@@ -18,7 +18,7 @@ jobs:
       - uses: gradle/actions/wrapper-validation@v3
 
       - name: Set up JDK
-        uses: actions/setup-java@v4.2.1
+        uses: actions/setup-java@v4
         with:
           distribution: ${{ matrix.distribution }}
           java-version: '8'
