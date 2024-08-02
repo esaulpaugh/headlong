@@ -101,19 +101,7 @@ public final class RLPDecoder {
         };
     }
 
-    public Stream<RLPItem> stream(byte[] bytes) {
-        return stream(sequenceIterator(bytes));
-    }
-
-    public Stream<RLPItem> stream(byte[] buffer, int index) {
-        return stream(sequenceIterator(buffer, index));
-    }
-
-    public Stream<RLPItem> stream(InputStream is) {
-        return stream(sequenceIterator(is));
-    }
-
-    private static Stream<RLPItem> stream(Iterator<RLPItem> iter) {
+    public static Stream<RLPItem> stream(Iterator<RLPItem> iter) {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iter, Spliterator.ORDERED), false);
     }
 

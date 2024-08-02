@@ -527,7 +527,7 @@ public class RLPDecoderTest {
         assertEquals(1, numAdded);
         assertEquals(1, objectSet.size());
 
-        assertEquals(1, RLPDecoder.RLP_STRICT.stream(LONG_LIST_BYTES)
+        assertEquals(1, RLPDecoder.stream(RLP_STRICT.sequenceIterator(LONG_LIST_BYTES))
                 .collect(Collectors.toSet()).size());
 
         byte[] rlp = new byte[9];
@@ -659,7 +659,7 @@ public class RLPDecoderTest {
 
     @Test
     public void testStreaming() {
-        List<RLPItem> collection = RLP_STRICT.stream(RLPStreamTest.RLP_BYTES)
+        List<RLPItem> collection = RLPDecoder.stream(RLP_STRICT.sequenceIterator(RLPStreamTest.RLP_BYTES))
                 .collect(Collectors.toList());
 
         String joined = collection.stream()
@@ -717,7 +717,7 @@ public class RLPDecoderTest {
     }
 
     public static List<RLPItem> collectN(byte[] encodings, int index, int n) {
-        return RLP_STRICT.stream(encodings, index)
+        return RLPDecoder.stream(RLP_STRICT.sequenceIterator(encodings, index))
                 .limit(n)
                 .collect(Collectors.toList());
     }
@@ -731,7 +731,7 @@ public class RLPDecoderTest {
     }
 
     public static void collectN(byte[] encodings, int index, int n, Collection<? super RLPItem> dest) {
-        RLP_STRICT.stream(encodings, index)
+        RLPDecoder.stream(RLP_STRICT.sequenceIterator(encodings, index))
                 .limit(n)
                 .collect(Collectors.toCollection(() -> dest));
     }

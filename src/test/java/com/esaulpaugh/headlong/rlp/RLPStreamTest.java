@@ -157,7 +157,7 @@ public class RLPStreamTest {
     @Test
     public void testStreamEasy() throws Throwable {
         RLPItem[] collected = RLPDecoderTest.collectAll(RLP_BYTES).toArray(RLPItem.EMPTY_ARRAY);
-        Stream<RLPItem> stream = RLP_STRICT.stream(RLP_BYTES, 0);
+        Stream<RLPItem> stream = RLPDecoder.stream(RLP_STRICT.sequenceIterator(RLP_BYTES, 0));
         RLPItem[] streamed = stream.collect(Collectors.toList()).toArray(RLPItem.EMPTY_ARRAY);
 
         assertTrue(Arrays.deepEquals(collected, streamed));
@@ -182,12 +182,12 @@ public class RLPStreamTest {
     public void testUnrecoverable() throws Throwable {
         try (PipedOutputStream pos = new PipedOutputStream();
              PipedInputStream pis = new PipedInputStream(pos, 512);
-             Stream<RLPItem> stream = RLP_STRICT.stream(pis)) {
+             Stream<RLPItem> stream = RLPDecoder.stream(RLP_STRICT.sequenceIterator(pis))) {
             pos.write(0x81);
             pos.write(0x00);
             Iterator<RLPItem> iter = stream.iterator();
             TestUtils.assertThrown(IllegalArgumentException.class, "invalid rlp for single byte @ 0", iter::hasNext);
-            try (Stream<RLPItem> stream2 = RLP_STRICT.stream(pis)) {
+            try (Stream<RLPItem> stream2 = RLPDecoder.stream(RLP_STRICT.sequenceIterator(pis))) {
                 pos.write(0xf8);
                 pos.write(0x37);
                 Iterator<RLPItem> iter2 = stream2.iterator();
@@ -204,7 +204,7 @@ public class RLPStreamTest {
 
     @Test
     public void testInterfaces() {
-        try (Stream<RLPItem> stream = RLP_STRICT.stream(new ByteArrayInputStream(new byte[0]))) {
+        try (Stream<RLPItem> stream = RLPDecoder.stream(RLP_STRICT.sequenceIterator(new ByteArrayInputStream(new byte[0])))) {
             stream.forEach(System.out::println);
         }
     }
