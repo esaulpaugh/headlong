@@ -1,4 +1,4 @@
-name: Java CI maven
+name: Java CI GraalVM Maven
 
 on: [push, pull_request]
 
