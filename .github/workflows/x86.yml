@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: ${{ matrix.distribution }}
-          java-version: '8.0.422'
+          java-version: '8.0.412'
           java-package: jdk
           architecture: x86
           cache: 'gradle'
