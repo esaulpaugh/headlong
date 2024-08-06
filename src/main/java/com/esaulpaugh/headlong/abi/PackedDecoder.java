@@ -248,16 +248,9 @@ final class PackedDecoder {
 
     private static long[] decodeLongArray(UnitType<? extends Number> type, int arrayLen, byte[] buffer, int idx) {
         long[] longs = new long[arrayLen];
-        if (type.unsigned) {
-            for (int i = 0; i < arrayLen; i++) {
-                longs[i] = decodeUnsignedLong(null, buffer, idx, UNIT_LENGTH_BYTES);
-                idx += UNIT_LENGTH_BYTES;
-            }
-        } else {
-            for (int i = 0; i < arrayLen; i++) {
-                longs[i] = decodeSignedLong(buffer, idx, UNIT_LENGTH_BYTES);
-                idx += UNIT_LENGTH_BYTES;
-            }
+        for (int i = 0; i < arrayLen; i++) {
+            longs[i] = decodeSignedLong(buffer, idx, UNIT_LENGTH_BYTES);
+            idx += UNIT_LENGTH_BYTES;
         }
         return longs;
     }
@@ -285,17 +278,11 @@ final class PackedDecoder {
     }
 
     private static long decodeLong(UnitType<? extends Number> type, byte[] buffer, int idx, int len) {
-        return type.unsigned
-                ? decodeUnsignedLong(new Uint(type.bitLength), buffer, idx, len)
-                : decodeSignedLong(buffer, idx, len);
-    }
-
-    private static long decodeUnsignedLong(Uint uint, byte[] buffer, int idx, int len) {
-        long signed = decodeBigInteger(buffer, idx, len).longValueExact();
-        if (uint != null) {
-            return uint.toUnsignedLong(signed);
+        final long val = decodeSignedLong(buffer, idx, len);
+        if (type.unsigned) {
+            return new Uint(type.bitLength).toUnsignedLong(val);
         }
-        return signed;
+        return val;
     }
 
     private static long decodeSignedLong(byte[] buffer, int idx, int len) {
