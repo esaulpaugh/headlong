@@ -203,8 +203,8 @@ final class PackedDecoder {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: array = decodeBooleanArray(arrayLen, buffer, idx); break;
         case TYPE_CODE_BYTE: array = decodeByteArray(arrayType, arrayLen, buffer, idx); break;
-        case TYPE_CODE_INT: array = decodeIntArray((IntType) elementType, arrayLen, buffer, idx); break;
-        case TYPE_CODE_LONG: array = decodeLongArray((LongType) elementType, arrayLen, buffer, idx); break;
+        case TYPE_CODE_INT: array = decodeIntArray(arrayLen, buffer, idx); break;
+        case TYPE_CODE_LONG: array = decodeLongArray(arrayLen, buffer, idx); break;
         case TYPE_CODE_BIG_INTEGER:
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ADDRESS: array = decodeElements((ABIType<Object>) elementType, arrayLen, buffer, idx); break;
@@ -233,8 +233,8 @@ final class PackedDecoder {
         return arrayType.encodeIfString(bytes);
     }
 
-    private static int[] decodeIntArray(IntType intType, int arrayLen, byte[] buffer, int idx) {
-        long[] longs = decodeLongArray(intType, arrayLen, buffer, idx);
+    private static int[] decodeIntArray(int arrayLen, byte[] buffer, int idx) {
+        long[] longs = decodeLongArray(arrayLen, buffer, idx);
         int[] ints = new int[arrayLen];
         for (int i = 0; i < longs.length; i++) {
             long e = longs[i];
@@ -246,7 +246,7 @@ final class PackedDecoder {
         return ints;
     }
 
-    private static long[] decodeLongArray(UnitType<? extends Number> type, int arrayLen, byte[] buffer, int idx) {
+    private static long[] decodeLongArray(int arrayLen, byte[] buffer, int idx) {
         long[] longs = new long[arrayLen];
         for (int i = 0; i < arrayLen; i++) {
             longs[i] = decodeSignedLong(buffer, idx, UNIT_LENGTH_BYTES);
@@ -286,11 +286,7 @@ final class PackedDecoder {
     }
 
     private static long decodeSignedLong(byte[] buffer, int idx, int len) {
-        return decodeBigInteger(buffer, idx, len).longValueExact();
-    }
-
-    static BigInteger decodeBigInteger(byte[] buffer, int i, int len) {
-//        return new BigInteger(buffer, i, len); // Java 9+
-        return new BigInteger(Arrays.copyOfRange(buffer, i, i + len));
+        // new BigInteger(buffer, i, len); // Java 9+
+        return new BigInteger(Arrays.copyOfRange(buffer, idx, idx + len)).longValueExact();
     }
 }
