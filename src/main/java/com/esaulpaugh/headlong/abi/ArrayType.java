@@ -40,23 +40,19 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
 
     public static final int DYNAMIC_LENGTH = -1;
 
-    private final boolean isString;
     private final ET elementType;
-    private final int length;
     private final Class<?> arrayClass;
+    private final int length;
     private final int headLength;
     final int flags;
-    final boolean legacyDecode;
 
     ArrayType(String canonicalType, Class<A> clazz, ET elementType, int length, Class<?> arrayClass, int flags) {
         super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic);
-        this.isString = STRING_CLASS == clazz;
         this.elementType = elementType;
         this.length = length;
         this.arrayClass = arrayClass;
         this.headLength = dynamic ? OFFSET_LENGTH_BYTES : staticArrayHeadLength();
         this.flags = flags;
-        this.legacyDecode = (flags & ABIType.FLAG_LEGACY_DECODE) != 0;
     }
 
     int staticArrayHeadLength() {
@@ -82,7 +78,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     }
 
     public boolean isString() {
-        return isString;
+        return STRING_CLASS == clazz;
     }
 
     @Override
@@ -163,11 +159,11 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     }
 
     private byte[] decodeIfString(Object value) {
-        return !isString ? (byte[]) value : Strings.decode((String) value, Strings.UTF_8);
+        return !isString() ? (byte[]) value : Strings.decode((String) value, Strings.UTF_8);
     }
 
     Object encodeIfString(byte[] bytes) {
-        return !isString ? bytes : Strings.encode(bytes, Strings.UTF_8);
+        return !isString() ? bytes : Strings.encode(bytes, Strings.UTF_8);
     }
 
     @Override
@@ -371,7 +367,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         checkNoDecodePossible(bb.remaining(), arrayLen);
         switch (elementType.typeCode()) {
         case TYPE_CODE_BOOLEAN: return (A) decodeBooleans(arrayLen, bb, unitBuffer);
-        case TYPE_CODE_BYTE: return (A) encodeIfString(decodeBytes(arrayLen, bb, legacyDecode));
+        case TYPE_CODE_BYTE: return (A) encodeIfString(decodeBytes(arrayLen, bb, (flags & ABIType.FLAG_LEGACY_DECODE) != 0));
         case TYPE_CODE_INT: return (A) decodeInts(arrayLen, bb, (IntType) elementType, unitBuffer);
         case TYPE_CODE_LONG: return (A) decodeLongs(arrayLen, bb, (LongType) elementType, unitBuffer);
         case TYPE_CODE_BIG_INTEGER:
@@ -393,7 +389,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
                                         ? arrayLen * OFFSET_LENGTH_BYTES
                                         : !(elementType instanceof ByteType)
                                             ? arrayLen * elementType.headLength()
-                                            : legacyDecode
+                                            : (flags & ABIType.FLAG_LEGACY_DECODE) != 0
                                                 ? arrayLen
                                                 : Integers.roundLengthUp(arrayLen, UNIT_LENGTH_BYTES);
         if (remaining < minByteLen) {
