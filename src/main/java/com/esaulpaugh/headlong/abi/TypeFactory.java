@@ -100,10 +100,6 @@ public final class TypeFactory {
         LEGACY_BASE_TYPE_MAP = Collections.unmodifiableMap(localLegacy);
     }
 
-    static int getBaseTypeMapSize() {
-        return Collections.unmodifiableMap(BASE_TYPE_MAP).size();
-    }
-
     private static void mapInt(Map<String, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
         map.put(type, new IntType(type, bitLen, unsigned));
     }

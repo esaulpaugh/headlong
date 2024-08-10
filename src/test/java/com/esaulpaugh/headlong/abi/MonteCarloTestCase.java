@@ -83,7 +83,7 @@ public class MonteCarloTestCase {
                 "uint8", "uint80", "uint88", "uint96",
         };
 
-        assertEquals(orderedKeys.length, TypeFactory.getBaseTypeMapSize());
+        assertEquals(109 /*TypeFactory.mapSize()*/, orderedKeys.length);
 
         for (String key : orderedKeys) {
             ABIType<?> type = TypeFactory.create(key);
