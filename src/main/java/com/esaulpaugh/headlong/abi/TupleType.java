@@ -134,10 +134,10 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     private int countBytes(IntUnaryOperator counter) {
-        return countBytes(false, elementTypes.length, counter);
+        return countBytes(true, elementTypes.length, counter);
     }
 
-    static int countBytes(boolean array, int len, IntUnaryOperator counter) {
+    static int countBytes(boolean tuple, int len, IntUnaryOperator counter) {
         int i = 0;
         try {
             int count = 0;
@@ -145,8 +145,8 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                 count += counter.applyAsInt(i);
             }
             return count;
-        } catch (IllegalArgumentException iae) {
-            throw new IllegalArgumentException((array ? "array" : "tuple") + " index " + i + ": " + iae.getMessage(), iae);
+        } catch (IllegalArgumentException cause) {
+            throw exceptionWithIndex(tuple, i, cause);
         }
     }
 
@@ -263,7 +263,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                 }
             } while (++i < elements.length);
         } catch (IllegalArgumentException cause) {
-            throw decodeException(true, i, cause);
+            throw exceptionWithIndex(true, i, cause);
         }
         return Tuple.create(elements);
     }
@@ -298,7 +298,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
             }
             return type.decode(bb, unitBuffer);
         } catch (IllegalArgumentException cause) {
-            throw decodeException(true, index, cause);
+            throw exceptionWithIndex(true, index, cause);
         }
     }
 
@@ -333,7 +333,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         return len;
     }
 
-    static IllegalArgumentException decodeException(boolean tuple, int i, IllegalArgumentException cause) {
+    static IllegalArgumentException exceptionWithIndex(boolean tuple, int i, IllegalArgumentException cause) {
         return new IllegalArgumentException((tuple ? "tuple index " : "array index ") + i + ": " + cause.getMessage(), cause);
     }
 

@@ -197,7 +197,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     }
 
     private int measureArrayElements(int n, IntUnaryOperator measurer) {
-        final int elementsLength = countBytes(true, n, measurer);
+        final int elementsLength = countBytes(false, n, measurer);
         return elementType.dynamic
                 ? OFFSET_LENGTH_BYTES * n + elementsLength
                 : elementsLength;
@@ -220,7 +220,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     }
 
     private int measureByteLengthPacked(E[] arr) { // don't count offsets
-        return countBytes(true, arr.length, i -> elementType.byteLengthPacked(arr[i]));
+        return countBytes(false, arr.length, i -> elementType.byteLengthPacked(arr[i]));
     }
 
     private int checkLength(final int valueLen, Object value) {
@@ -405,7 +405,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
                 booleans[i] = BooleanType.INSTANCE.decode(bb, unitBuffer);
             }
         } catch (IllegalArgumentException cause) {
-            throw TupleType.decodeException(false, i, cause);
+            throw TupleType.exceptionWithIndex(false, i, cause);
         }
         return booleans;
     }
@@ -465,7 +465,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
                 ints[i] = intType.decode(bb, unitBuffer);
             }
         } catch (IllegalArgumentException cause) {
-            throw TupleType.decodeException(false, i, cause);
+            throw TupleType.exceptionWithIndex(false, i, cause);
         }
         return ints;
     }
@@ -478,7 +478,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
                 longs[i] = longType.decode(bb, unitBuffer);
             }
         } catch (IllegalArgumentException cause) {
-            throw TupleType.decodeException(false, i, cause);
+            throw TupleType.exceptionWithIndex(false, i, cause);
         }
         return longs;
     }
@@ -509,7 +509,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
                 }
             }
         } catch (IllegalArgumentException cause) {
-            throw TupleType.decodeException(false, i, cause);
+            throw TupleType.exceptionWithIndex(false, i, cause);
         }
         return elements;
     }
