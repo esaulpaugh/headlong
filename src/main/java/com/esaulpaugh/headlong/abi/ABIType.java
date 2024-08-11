@@ -68,25 +68,30 @@ public abstract class ABIType<J> {
     final Class<J> clazz;
     final boolean dynamic;
 
+    {
+        final Class<?> c = this.getClass();
+        final boolean permitted = c == TupleType.class
+                                || c == ArrayType.class
+                                || (this instanceof UnitType
+                                    && (
+                                           c == BigIntegerType.class
+                                        || c == IntType.class
+                                        || c == LongType.class
+                                        || c == BigDecimalType.class
+                                        || (c == AddressType.class && /* enforce singleton */ AddressType.INSTANCE == null)
+                                        || (c == BooleanType.class && /* enforce singleton */ BooleanType.INSTANCE == null)
+                                        )
+                                    )
+                                || (c == ByteType.class && /* enforce singleton */ ByteType.INSTANCE == null) ;
+        if (!permitted) {
+            throw new IllegalStateException ("lol no");
+        }
+    }
+
     ABIType(String canonicalType, Class<J> clazz, boolean dynamic) {
         this.canonicalType = canonicalType; // .intern() to save memory and allow == comparison?
         this.clazz = clazz;
         this.dynamic = dynamic;
-        final Class<?> c = this.getClass();
-        if (
-                c == TupleType.class
-                        || c == ArrayType.class
-                        || c == BigIntegerType.class
-                        || c == IntType.class
-                        || c == LongType.class
-                        || c == BigDecimalType.class
-                        || c == ByteType.class
-                        || c == BooleanType.class
-                        || c == AddressType.class
-        ) {
-            return;
-        }
-        throw new AssertionError("unexpected subclass");
     }
 
     public final String getCanonicalType() {

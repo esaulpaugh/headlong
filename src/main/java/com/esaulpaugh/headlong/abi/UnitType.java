@@ -42,18 +42,6 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         this.max = maxValue();
         this.minLong = this.min.longValue();
         this.maxLong = this.max.longValue();
-        final Class<?> c = this.getClass();
-        if (
-                c == BigIntegerType.class
-                        || c == IntType.class
-                        || c == LongType.class
-                        || c == BigDecimalType.class
-                        || c == BooleanType.class
-                        || c == AddressType.class
-        ) {
-            return;
-        }
-        throw new AssertionError("unexpected subclass");
     }
 
     public final int getBitLength() {
