@@ -197,7 +197,7 @@ final class PackedDecoder {
         case TYPE_CODE_BIG_DECIMAL:
         case TYPE_CODE_ADDRESS: array = decodeElements(elementType, arrayLen, bb); break;
         case TYPE_CODE_ARRAY:
-        case TYPE_CODE_TUPLE: array = decodeObjectArray(arrayLen, elementType, bb); break;
+        case TYPE_CODE_TUPLE: array = decodeObjectArray(elementType, arrayLen, bb); break;
         default: throw new AssertionError();
         }
         return array;
@@ -239,7 +239,7 @@ final class PackedDecoder {
     }
 
     private static Object[] decodeElements(ABIType<Object> elementType, int arrayLen, ByteBuffer bb) {
-        Object[] elements = ArrayType.createArray(elementType.clazz, arrayLen);
+        final Object[] elements = ArrayType.createArray(elementType.clazz, arrayLen);
         byte[] unitBuffer = newUnitBuffer();
         for (int i = 0; i < elements.length; i++) {
             elements[i] = elementType.decode(bb, unitBuffer);
@@ -247,7 +247,7 @@ final class PackedDecoder {
         return elements;
     }
 
-    private static Object[] decodeObjectArray(int arrayLen, ABIType<Object> elementType, ByteBuffer bb) {
+    private static Object[] decodeObjectArray(ABIType<Object> elementType, int arrayLen, ByteBuffer bb) {
         final Object[] objects = ArrayType.createArray(elementType.clazz, arrayLen);
         for (int i = 0; i < objects.length; i++) {
             objects[i] = decode(elementType, bb, -1);
@@ -265,8 +265,6 @@ final class PackedDecoder {
 
     private static long decodeSignedLong(ByteBuffer bb, int len) {
         // new BigInteger(buffer, i, len); // Java 9+
-        byte[] temp = new byte[len];
-        bb.get(temp);
-        return new BigInteger(temp).longValueExact();
+        return getSignedBigInt(bb, len).longValueExact();
     }
 }
