@@ -58,21 +58,19 @@ final class PackedDecoder {
     }
 
     static int countDynamics(ABIType<?> type) {
-        if (type.dynamic) {
-            switch (type.typeCode()) {
-            case TYPE_CODE_ARRAY:
-                final ArrayType<?, ?, ?> at = type.asArrayType();
-                final int count = countDynamics(at.getElementType());
-                return DYNAMIC_LENGTH == at.getLength() ? count + 1 : count;
-            case TYPE_CODE_TUPLE:
-                int numDynamic = 0;
-                for (ABIType<?> e : type.asTupleType().elementTypes) {
-                    numDynamic += countDynamics(e);
-                }
-                return numDynamic;
-            }
+        if (!type.dynamic) {
+            return 0;
         }
-        return 0;
+        if (type instanceof ArrayType) {
+            final ArrayType<?, ?, ?> at = type.asArrayType();
+            final int count = countDynamics(at.getElementType());
+            return DYNAMIC_LENGTH == at.getLength() ? count + 1 : count;
+        }
+        int numDynamic = 0;
+        for (ABIType<?> e : type.asTupleType().elementTypes) {
+            numDynamic += countDynamics(e);
+        }
+        return numDynamic;
     }
 
     private static Tuple decodeTuple(TupleType<?> tupleType, ByteBuffer bb, int end) {
