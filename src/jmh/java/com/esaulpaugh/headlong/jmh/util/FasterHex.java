@@ -76,21 +76,32 @@ public class FasterHex {
             throw new IllegalArgumentException("len must be a multiple of two");
         }
         byte[] dest = new byte[len / CHARS_PER_BYTE];
-        for (int i = 0; i < dest.length; i++, offset += CHARS_PER_BYTE) {
-            dest[i] = (byte) decodeByte(extractor, offset);
-        }
-        return dest;
-    }
-
-    private static short decodeByte(IntUnaryOperator extractor, int offset) {
+        final int chunks = dest.length / 4 * 4;
         try {
-            short val = DECODE_TABLE[extractor.applyAsInt(offset) << 7 | extractor.applyAsInt(offset+1)];
-            if(val >= 0) {
-                return val;
+            int i = 0;
+            while (i < chunks) {
+                short a = DECODE_TABLE[extractor.applyAsInt(offset++) << 7 | extractor.applyAsInt(offset++)];
+                short b = DECODE_TABLE[extractor.applyAsInt(offset++) << 7 | extractor.applyAsInt(offset++)];
+                short c = DECODE_TABLE[extractor.applyAsInt(offset++) << 7 | extractor.applyAsInt(offset++)];
+                short d = DECODE_TABLE[extractor.applyAsInt(offset++) << 7 | extractor.applyAsInt(offset++)];
+                if ((a | b | c | d) < 0) {
+                    throw new IllegalArgumentException("invalid hex quadruple @ " + offset);
+                }
+                dest[i++] = (byte) a;
+                dest[i++] = (byte) b;
+                dest[i++] = (byte) c;
+                dest[i++] = (byte) d;
+            }
+            while (i < dest.length) {
+                int left = DECODE_TABLE[extractor.applyAsInt(offset++) << 7 | extractor.applyAsInt(offset++)];
+                if (left < 0) {
+                    throw new IllegalArgumentException("invalid hex @ " + offset);
+                }
+                dest[i++] = (byte) left;
             }
         } catch (ArrayIndexOutOfBoundsException ignored) {
-            /* fall through */
+            throw new IllegalArgumentException("invalid hex quadruple @ " + offset);
         }
-        throw new IllegalArgumentException("invalid hex pair @ " + offset);
+        return dest;
     }
 }
