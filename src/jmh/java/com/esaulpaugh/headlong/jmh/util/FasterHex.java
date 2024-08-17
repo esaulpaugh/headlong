@@ -28,6 +28,18 @@ public class FasterHex {
 
     private FasterHex() {}
 
+    public static byte[] decode(String hex) {
+        return decode(hex, 0, hex.length());
+    }
+
+    public static byte[] decode(String hex, int offset, int len) {
+        return decode(offset, len, hex::charAt);
+    }
+
+    public static byte[] decode(byte[] hexBytes, int offset, int len) {
+        return decode(offset, len, o -> hexBytes[o]);
+    }
+
     private static final short[] DECODE_TABLE = new short[13_159]; // ('f' << 7) + 'f' + 1
 
     static {
@@ -47,28 +59,16 @@ public class FasterHex {
 
     private static void insert(int i, int j) {
         // ASCII values are at most 7 bits
-        DECODE_TABLE[i << 7 | j] = (short) (decodeNibble(i) << BITS_PER_CHAR | decodeNibble(j));
+        DECODE_TABLE[i << 7 | j] = (short) (decodeNibble(i, -1) << BITS_PER_CHAR | decodeNibble(j, -1));
     }
 
-    private static int decodeNibble(int c) {
+    private static int decodeNibble(int c, int index) {
         switch (c) {
         case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': return c - '0';
         case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': return  c - ('A' - 0xA);
         case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': return c - ('a' - 0xa);
-        default: throw new AssertionError();
+        default: throw new IllegalArgumentException("illegal hex val @ " + index);
         }
-    }
-
-    public static byte[] decode(String hex) {
-        return decode(hex, 0, hex.length());
-    }
-
-    public static byte[] decode(String hex, int offset, int len) {
-        return decode(offset, len, hex::charAt);
-    }
-
-    public static byte[] decode(byte[] hexBytes, int offset, int len) {
-        return decode(offset, len, o -> hexBytes[o]);
     }
 
     private static byte[] decode(int offset, int len, IntUnaryOperator extractor) {
@@ -77,31 +77,36 @@ public class FasterHex {
         }
         byte[] dest = new byte[len / CHARS_PER_BYTE];
         final int chunks = dest.length / 4 * 4;
+        final int lim = offset + len;
+        int k = 0;
         try {
-            int i = 0;
-            while (i < chunks) {
-                short a = DECODE_TABLE[extractor.applyAsInt(offset++) << 7 | extractor.applyAsInt(offset++)];
-                short b = DECODE_TABLE[extractor.applyAsInt(offset++) << 7 | extractor.applyAsInt(offset++)];
-                short c = DECODE_TABLE[extractor.applyAsInt(offset++) << 7 | extractor.applyAsInt(offset++)];
-                short d = DECODE_TABLE[extractor.applyAsInt(offset++) << 7 | extractor.applyAsInt(offset++)];
-                if ((a | b | c | d) < 0) {
-                    throw new IllegalArgumentException("invalid hex quadruple @ " + offset);
+            while (k < chunks) {
+                final short _0 = DECODE_TABLE[(extractor.applyAsInt(offset++) << 7) | extractor.applyAsInt(offset++)];
+                final short _1 = DECODE_TABLE[(extractor.applyAsInt(offset++) << 7) | extractor.applyAsInt(offset++)];
+                final short _2 = DECODE_TABLE[(extractor.applyAsInt(offset++) << 7) | extractor.applyAsInt(offset++)];
+                final short _3 = DECODE_TABLE[(extractor.applyAsInt(offset++) << 7) | extractor.applyAsInt(offset++)];
+                if ((_0 | _1 | _2 | _3) < 0) {
+                    throw new ArrayIndexOutOfBoundsException();
                 }
-                dest[i++] = (byte) a;
-                dest[i++] = (byte) b;
-                dest[i++] = (byte) c;
-                dest[i++] = (byte) d;
-            }
-            while (i < dest.length) {
-                int left = DECODE_TABLE[extractor.applyAsInt(offset++) << 7 | extractor.applyAsInt(offset++)];
-                if (left < 0) {
-                    throw new IllegalArgumentException("invalid hex @ " + offset);
-                }
-                dest[i++] = (byte) left;
+                dest[k++] = (byte) _0;
+                dest[k++] = (byte) _1;
+                dest[k++] = (byte) _2;
+                dest[k++] = (byte) _3;
             }
         } catch (ArrayIndexOutOfBoundsException ignored) {
-            throw new IllegalArgumentException("invalid hex quadruple @ " + offset);
+            throw illegalHex(offset, extractor, lim);
+        }
+        while (k < dest.length) {
+            int _0 = decodeNibble(extractor.applyAsInt(offset), offset) << BITS_PER_CHAR | decodeNibble(extractor.applyAsInt(++offset), offset++);
+            dest[k++] = (byte) _0;
         }
         return dest;
+    }
+
+    private static AssertionError illegalHex(int offset, IntUnaryOperator extractor, final int lim) {
+        for ( ; offset < lim; offset++) {
+            decodeNibble(extractor.applyAsInt(offset), offset);
+        }
+        return new AssertionError();
     }
 }
