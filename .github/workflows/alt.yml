@@ -1,4 +1,4 @@
-name: Java CI Dragonwell Maven
+name: Java CI Alt Maven
 
 on: [push, pull_request]
 
