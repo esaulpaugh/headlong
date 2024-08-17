@@ -98,7 +98,7 @@ public final class Address {
         if (this.label != null) {
             throw new IllegalArgumentException("labeling aborted because existing label not null");
         }
-        return Address.wrap(this.toString(), label);
+        return new Address(this.value, label);
     }
 
     public static void validateChecksumAddress(final String checksumAddress) {
