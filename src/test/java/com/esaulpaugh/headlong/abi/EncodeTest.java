@@ -256,7 +256,7 @@ public class EncodeTest {
                     Assertions.assertTrue(formatted.contains(labeled));
                 }
             } else {
-                assertThrown(ILLEGAL, "expected length mod 32 == 0, found: ", () -> format.apply(x));
+                assertThrown(ILLEGAL, "expected length mod 32 == 0, found: ", () -> System.out.println(format.apply(x)));
             }
         }
     }

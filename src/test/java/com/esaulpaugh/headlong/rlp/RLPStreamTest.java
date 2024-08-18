@@ -170,7 +170,7 @@ public class RLPStreamTest {
         TestUtils.assertThrown(IllegalArgumentException.class, "len is out of range: 10", () -> encodings.stream()
                 .map(RLP_STRICT::wrapItem)
                 .mapToInt(RLPItem::asInt)
-                .sum());
+                .forEach(System.out::println));
     }
 
     @Test
@@ -186,7 +186,7 @@ public class RLPStreamTest {
             pos.write(0x81);
             pos.write(0x00);
             Iterator<RLPItem> iter = stream.iterator();
-            TestUtils.assertThrown(IllegalArgumentException.class, "invalid rlp for single byte @ 0", iter::hasNext);
+            TestUtils.assertThrown(IllegalArgumentException.class, "invalid rlp for single byte @ 0", () -> System.out.println(iter.hasNext()));
             try (Stream<RLPItem> stream2 = RLPDecoder.stream(RLP_STRICT.sequenceIterator(pis))) {
                 pos.write(0xf8);
                 pos.write(0x37);
@@ -195,7 +195,7 @@ public class RLPStreamTest {
                     TestUtils.assertThrown(
                             IllegalArgumentException.class,
                             "long element data length must be 56 or greater; found: 55 for element @ 0",
-                            iter2::hasNext
+                            () -> System.out.println(iter2.hasNext())
                     );
                 }
             }
