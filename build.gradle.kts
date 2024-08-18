@@ -80,7 +80,9 @@
 //val bcVersion = "1.78.1"
 //
 //dependencies {
-//    implementation("com.google.code.gson:gson:2.10.1")
+//    implementation("com.google.code.gson:gson:2.11.0") {
+//        exclude(group = "com.google.errorprone", module = "error_prone_annotations")
+//    }
 //
 //    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
 //    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
