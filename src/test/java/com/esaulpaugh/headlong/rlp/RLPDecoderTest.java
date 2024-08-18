@@ -733,7 +733,7 @@ public class RLPDecoderTest {
     public static void collectN(byte[] encodings, int index, int n, Collection<? super RLPItem> dest) {
         RLPDecoder.stream(RLP_STRICT.sequenceIterator(encodings, index))
                 .limit(n)
-                .collect(Collectors.toCollection(() -> dest));
+                .forEach(dest::add);
     }
 
     @FunctionalInterface
