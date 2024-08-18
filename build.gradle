@@ -84,7 +84,7 @@ repositories {
     mavenCentral()
 }
 
-final String junitVersion = "5.10.3"
+final String junitVersion = "5.11.0"
 final String jmhVersion = "1.37"
 final String bcVersion = "1.78.1"
 
