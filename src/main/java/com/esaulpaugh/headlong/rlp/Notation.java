@@ -207,22 +207,21 @@ public final class Notation {
      */
     public static List<Object> parse(String notation) {
         List<Object> topLevelObjects = new ArrayList<>(); // a sequence (as in RLPEncoder.sequence)
-        parse(notation, 0, notation.length(), topLevelObjects, 0);
+        parse(notation, 0, topLevelObjects, 0);
         return topLevelObjects;
     }
 
     private static final int MAX_DEPTH = 768;
 
-    private static int parse(final String notation, int i, final int end, final List<Object> parent, int depth) {
-        while (i < end) {
-            switch (notation.charAt(i)) {
+    private static int parse(final String notation, int i, final List<Object> parent, final int depth) {
+        do {
+            switch (notation.charAt(i++)) {
             case BEGIN_STRING:
-                final int datumStart = i + 1;
-                final int datumEnd = notation.indexOf(END_STRING, datumStart);
+                final int datumEnd = notation.indexOf(END_STRING, i);
                 if (datumEnd < 0) {
-                    throw new IllegalArgumentException("unterminated string @ " + datumStart);
+                    throw new IllegalArgumentException("unterminated string @ " + i);
                 }
-                parent.add(FastHex.decode(notation, datumStart, datumEnd - datumStart));
+                parent.add(FastHex.decode(notation, i, datumEnd - i));
                 i = datumEnd + 1;
                 continue;
             case BEGIN_LIST:
@@ -230,15 +229,12 @@ public final class Notation {
                     throw new IllegalArgumentException("exceeds max depth of " + MAX_DEPTH);
                 }
                 List<Object> childList = new ArrayList<>();
-                i = parse(notation, i + 1, end, childList, depth + 1);
+                i = parse(notation, i, childList, depth + 1);
                 parent.add(childList);
                 continue;
-            case END_LIST:
-                return i + 1;
-            default:
-                i++;
+            case END_LIST: return i;
             }
-        }
+        } while (i < notation.length());
         return Integer.MAX_VALUE;
     }
 }

@@ -78,7 +78,7 @@ public class AdvancedABICasesTest {
                         System.out.println(r + " " + e + (r.equals(e) ? "" : " ****"));
                     }
                     for (; i < encodingTokens.length; i++) {
-                        System.out.println("----------------------------------------------------------------" + " " + encodingTokens[i]);
+                        System.out.println("---------------------------------------------------------------- " + encodingTokens[i]);
                     }
                 }
                 // return false;
