@@ -37,16 +37,15 @@ public final class Strings {
         return encode(new byte[] { b });
     }
 
-    public static String encode(ByteBuffer buffer) {
-        final byte[] bytes;
-        if (buffer.hasArray()) {
-            bytes = buffer.array();
+    public static String encode(ByteBuffer buf) {
+        if (buf.hasArray()) {
+            return encode(buf.array());
         } else {
-            buffer.position(0);
-            bytes = new byte[buffer.capacity()];
-            buffer.get(bytes);
+            final int pos = buf.position();
+            byte[] bytes = new byte[buf.position(0).limit()];
+            buf.get(bytes).position(pos);
+            return encode(bytes);
         }
-        return encode(bytes);
     }
 
     public static String encode(byte[] bytes) {

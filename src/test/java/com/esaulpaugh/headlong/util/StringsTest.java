@@ -49,24 +49,20 @@ public class StringsTest {
 
     @Test
     public void testEncodeDirectBuffer() {
-        final int len = RAND.nextInt(257);
-        final ByteBuffer ro = ByteBuffer.allocateDirect(len);
-        assertTrue(ro.isDirect());
-        final String hex = Strings.encode(ro);
-        assertEquals(len * 2, hex.length());
-        for (int i = 0; i < len; i += 2) {
-            if (hex.charAt(i) != '0' || hex.charAt(i + 1) != '0') {
-                throw new AssertionError("" + i);
-            }
-        }
+        testEncodeBuffer(ByteBuffer.allocateDirect(RAND.nextInt(257)));
     }
 
     @Test
     public void testEncodeReadOnlyBuffer() {
-        final int len = RAND.nextInt(257);
-        final ByteBuffer ro = ByteBuffer.allocate(len).asReadOnlyBuffer();
-        assertTrue(ro.isReadOnly());
-        final String hex = Strings.encode(ro);
+        testEncodeBuffer(ByteBuffer.allocate(RAND.nextInt(257)).asReadOnlyBuffer());
+    }
+
+    private void testEncodeBuffer(ByteBuffer bb) {
+        final int len = bb.capacity();
+        final int pos = RAND.nextInt(len + 1);
+        bb.position(pos);
+        final String hex = Strings.encode(bb);
+        assertEquals(pos, bb.position());
         assertEquals(len * 2, hex.length());
         for (int i = 0; i < len; i += 2) {
             if (hex.charAt(i) != '0' || hex.charAt(i + 1) != '0') {
