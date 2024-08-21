@@ -42,35 +42,25 @@ final class PackedDecoder {
 
     private PackedDecoder() {}
 
-    @SuppressWarnings("unchecked")
-    static <T extends Tuple> T decode(TupleType<T> tupleType, byte[] buffer) {
-        final int count = countDynamics(tupleType);
-        if (count <= 1) {
-            final Tuple tuple = decodeTuple(tupleType, ByteBuffer.wrap(buffer), buffer.length); // can also call decodeTupleStatic if numDynamic == 0
-            tupleType.validate(tuple);
-            int decodedLen = tupleType.byteLengthPacked(tuple);
-            if (decodedLen != buffer.length) {
-                throw new IllegalArgumentException("unconsumed bytes: " + (buffer.length - decodedLen) + " remaining");
+    static int checkDynamics(ABIType<?> type) {
+        int count = 0;
+        if (type.dynamic) {
+            if (type instanceof ArrayType) {
+                final ArrayType<?, ?, ?> at = type.asArrayType();
+                count = checkDynamics(at.getElementType());
+                if (DYNAMIC_LENGTH == at.getLength()) {
+                    count++;
+                }
+            } else {
+                for (ABIType<?> e : type.asTupleType().elementTypes) {
+                    count += checkDynamics(e);
+                }
             }
-            return (T) tuple;
+            if (count > 1) {
+                throw new IllegalArgumentException("multiple dynamic elements: " + count);
+            }
         }
-        throw new IllegalArgumentException("multiple dynamic elements: " + count);
-    }
-
-    static int countDynamics(ABIType<?> type) {
-        if (!type.dynamic) {
-            return 0;
-        }
-        if (type instanceof ArrayType) {
-            final ArrayType<?, ?, ?> at = type.asArrayType();
-            final int count = countDynamics(at.getElementType());
-            return DYNAMIC_LENGTH == at.getLength() ? count + 1 : count;
-        }
-        int numDynamic = 0;
-        for (ABIType<?> e : type.asTupleType().elementTypes) {
-            numDynamic += countDynamics(e);
-        }
-        return numDynamic;
+        return count;
     }
 
     private static Tuple decodeTuple(TupleType<?> tupleType, ByteBuffer bb, int end) {
@@ -102,20 +92,18 @@ final class PackedDecoder {
             }
         }
 
-        if (firstDynamicIndex != -1) {
-            for (int i = 0; i <= firstDynamicIndex; i++) {
-                ABIType<Object> t = tupleType.get(i);
-                bb.position(start);
-                Object e = decode(t, bb, end);
-                elements[i] = e;
-                start += t.byteLengthPacked(e);
-            }
+        for (int i = 0; i <= firstDynamicIndex; i++) {
+            ABIType<Object> t = tupleType.get(i);
+            bb.position(start);
+            Object e = decode(t, bb, end);
+            elements[i] = e;
+            start += t.byteLengthPacked(e);
         }
 
         return Tuple.create(elements);
     }
 
-    private static Object decode(ABIType<?> type, ByteBuffer bb, int end) {
+    static Object decode(ABIType<?> type, ByteBuffer bb, int end) {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return BooleanType.decodeBoolean(bb.get());
         case TYPE_CODE_BYTE: return bb.get();

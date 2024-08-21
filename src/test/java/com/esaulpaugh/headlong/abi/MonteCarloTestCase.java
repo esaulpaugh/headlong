@@ -316,25 +316,19 @@ public class MonteCarloTestCase {
     void runPacked() {
         final Tuple args = this.argsTuple;
         final TupleType<Tuple> tt = this.function.getInputs();
-        final int numDynamics = PackedDecoder.countDynamics(tt);
-        if(tt.dynamic ^ (numDynamics != 0)) {
-            throw new AssertionError();
-        }
-        if(tt.canonicalType.contains("int[")) {
+        if (tt.canonicalType.contains("int[")) {
             throw new AssertionError("failed canonicalization!");
         }
-        final ByteBuffer bb = tt.encodePacked(args);
         try {
-            Tuple decoded = tt.decodePacked(bb.array());
+            PackedDecoder.checkDynamics(tt);
+            Tuple decoded = tt.decodePacked(tt.encodePacked(args).array());
             if (!decoded.equals(args)) {
                 throw new RuntimeException("not equal: " + tt.canonicalType);
             }
         } catch (IllegalArgumentException iae) {
             final String msg = iae.getMessage();
-            if(msg.contains("multiple dynamic elements: ")) {
-                final int parsed = Integer.parseInt(msg.substring(msg.lastIndexOf(' ') + 1));
-                assertTrue(parsed > 1 && parsed == numDynamics);
-            } else if(!msg.endsWith("array of dynamic elements")
+            if(!msg.contains("multiple dynamic elements: ")
+                    && !msg.endsWith("array of dynamic elements")
                     && !"can't decode dynamic number of zero-length elements".equals(msg)) {
                 throw new RuntimeException(tt.canonicalType + " " + msg, iae);
             }

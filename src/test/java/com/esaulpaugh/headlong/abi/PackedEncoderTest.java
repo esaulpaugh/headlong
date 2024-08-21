@@ -41,7 +41,7 @@ public class PackedEncoderTest {
         System.out.println(Strings.encode(bb));
         final byte[] corrupt = new byte[32];
         corrupt[corrupt.length - 6] = -106;
-        assertThrown(ArithmeticException.class, "overflow", () -> PackedDecoder.decode(tt, corrupt));
+        assertThrown(ArithmeticException.class, "overflow", () -> PackedDecoder.decode(tt, ByteBuffer.wrap(corrupt), corrupt.length));
     }
 
     @Test
@@ -128,10 +128,8 @@ public class PackedEncoderTest {
                 "0000000000000000000000000000000000000000000000000000000000000004", Strings.encode(bb)
         );
 
-        final byte[] packed = bb.array();
-
-        assertEquals(test, PackedDecoder.decode(tupleType, packed));
-        Single<Tuple> t = tupleType.decodePacked(packed);
+        assertEquals(test, PackedDecoder.decode(tupleType, bb, bb.limit()));
+        Single<Tuple> t = tupleType.decodePacked(bb.array());
         assertEquals(test, t);
     }
 

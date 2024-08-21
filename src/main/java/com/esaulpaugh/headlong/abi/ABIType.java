@@ -244,11 +244,16 @@ public abstract class ABIType<J> {
      */
     abstract J decode(ByteBuffer buffer, byte[] unitBuffer);
 
+    @SuppressWarnings("unchecked")
     public final J decodePacked(byte[] buffer) {
-        return PackedDecoder.decode(
-                    new TupleType<>('(' + this.canonicalType + ')', dynamic, new ABIType[] { this }, null, null, this.getFlags()),
-                    buffer
-                ).get(0);
+        PackedDecoder.checkDynamics(this);
+        final J val = (J) PackedDecoder.decode(this, ByteBuffer.wrap(buffer), buffer.length);
+        validate(val);
+        final int decodedLen = byteLengthPacked(val);
+        if (decodedLen != buffer.length) {
+            throw new IllegalArgumentException("unconsumed bytes: " + (buffer.length - decodedLen) + " remaining");
+        }
+        return val;
     }
 
     static byte[] newUnitBuffer() {
