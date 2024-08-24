@@ -23,6 +23,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.function.IntFunction;
+import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
@@ -363,36 +364,9 @@ public abstract class ABIType<J> {
     }
 
     static String friendlyClassName(Class<?> clazz, int arrayLen) {
-        final String className = clazz.getName();
-        final int split = className.lastIndexOf('[') + 1;
-        final boolean hasArraySuffix = split > 0;
-        final StringBuilder sb = new StringBuilder();
-        final String base = hasArraySuffix ? className.substring(split) : className;
-        switch (base) {
-        case "B": sb.append("byte"); break;
-        case "S": sb.append("short"); break;
-        case "I": sb.append("int"); break;
-        case "J": sb.append("long"); break;
-        case "F": sb.append("float"); break;
-        case "D": sb.append("double"); break;
-        case "C": sb.append("char"); break;
-        case "Z": sb.append("boolean"); break;
-        default:
-            int lastDotIndex = base.lastIndexOf('.');
-            if (lastDotIndex != -1) {
-                sb.append(base, lastDotIndex + 1, base.length() - (base.charAt(0) == 'L' ? 1 : 0));
-            }
-        }
-        if (hasArraySuffix) {
-            int i = 0;
-            if (arrayLen >= 0) {
-                sb.append('[').append(arrayLen).append(']');
-                i++;
-            }
-            while (i++ < split) {
-                sb.append("[]");
-            }
-        }
-        return sb.toString();
+        final String simple = clazz.getSimpleName();
+        return arrayLen > 0 && simple.indexOf('[') > 0
+                ? simple.replaceFirst(Pattern.quote("[]"), "[" + arrayLen + "]")
+                : simple;
     }
 }
