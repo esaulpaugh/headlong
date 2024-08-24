@@ -377,28 +377,26 @@ public final class Function implements ABIObject {
     }
 
     public static String formatCall(byte[] call) {
-        return formatCall(call, 0, call.length, (int row) -> ABIType.pad(0, Integer.toString(row)));
+        return formatCall(call, (int row) -> ABIType.pad(0, Integer.toString(row)));
     }
 
     /**
      * Returns a formatted string for a given ABI-encoded function call.
      *
      * @param buffer the buffer containing the ABI call
-     * @param offset the offset into the input buffer of the ABI call
-     * @param length the length of the ABI call
      * @param labeler code to generate the row label
      * @return the formatted string
      * @throws IllegalArgumentException if {@code length} mod 32 is not equal to four
      */
-    public static String formatCall(byte[] buffer, final int offset, final int length, IntFunction<String> labeler) {
-        final int bodyLen = length - SELECTOR_LEN;
+    public static String formatCall(byte[] buffer, IntFunction<String> labeler) {
+        final int bodyLen = buffer.length - SELECTOR_LEN;
         Integers.checkIsMultiple(bodyLen, UNIT_LENGTH_BYTES);
         final String label = ABIType.pad(0, "ID");
-        final String selectorHex = Strings.encode(buffer, offset, SELECTOR_LEN, Strings.HEX);
+        final String selectorHex = Strings.encode(buffer, 0, SELECTOR_LEN, Strings.HEX);
         return ABIType.finishFormat(
                 buffer,
-                offset + SELECTOR_LEN,
-                offset + length,
+                SELECTOR_LEN,
+                buffer.length,
                 labeler,
                 new StringBuilder(label.length() + selectorHex.length() + (bodyLen / UNIT_LENGTH_BYTES) * ABIType.CHARS_PER_LINE)
                         .append(label)
@@ -417,7 +415,6 @@ public final class Function implements ABIObject {
     /**
      * Experimental. Annotates the function call given the {@code args} and returns an informational formatted String. This
      * method is subject to change or removal in a future release.
-     *
      */
     public String annotateCall(Tuple args) {
         StringBuilder sb = new StringBuilder(768);
