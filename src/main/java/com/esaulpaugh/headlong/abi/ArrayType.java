@@ -60,7 +60,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BYTE: return UNIT_LENGTH_BYTES; // all static byte arrays round up to exactly 32 bytes and not more
         case TYPE_CODE_ARRAY: return length * elementType.asArrayType().staticArrayHeadLength();
-        case TYPE_CODE_TUPLE: return length * elementType.asTupleType().staticTupleHeadLength();
+        case TYPE_CODE_TUPLE: return length * elementType.asTupleType().headLengthSum;
         default: return length * UNIT_LENGTH_BYTES;
         }
     }

@@ -38,8 +38,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     final String[] elementNames;
     final String[] elementInternalTypes;
     private final int[] elementHeadOffsets;
-    private final int headLength;
-    private final int firstOffset;
+    final int headLengthSum;
     final int flags;
 
     TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String[] elementNames, String[] elementInternalTypes, int flags) {
@@ -47,23 +46,14 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         this.elementTypes = elementTypes;
         this.elementNames = elementNames;
         this.elementInternalTypes = elementInternalTypes;
-        this.elementHeadOffsets = new int[elementTypes.length];
-        if (dynamic) {
-            this.headLength = OFFSET_LENGTH_BYTES;
-            this.firstOffset = staticTupleHeadLength();
-        } else {
-            this.headLength = staticTupleHeadLength();
-            this.firstOffset = -1;
+        final int[] elementHeadOffsets = new int[elementTypes.length];
+        int headLengthSum = 0;
+        for (int i = 0; i < elementTypes.length; headLengthSum += elementTypes[i++].headLength()) {
+            elementHeadOffsets[i] = headLengthSum;
         }
+        this.elementHeadOffsets = elementHeadOffsets;
+        this.headLengthSum = headLengthSum;
         this.flags = flags;
-    }
-
-    int staticTupleHeadLength() {
-        int sum = 0;
-        for (int i = 0; i < elementTypes.length; sum += elementTypes[i++].headLength()) {
-            this.elementHeadOffsets[i] = sum;
-        }
-        return sum;
     }
 
     @Override
@@ -108,7 +98,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
 
     @Override
     int headLength() {
-        return headLength;
+        return dynamic ? OFFSET_LENGTH_BYTES : headLengthSum;
     }
 
     @Override
@@ -118,7 +108,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
 
     @Override
     int byteLength(Tuple value) {
-        if (!dynamic) return headLength;
+        if (!dynamic) return headLengthSum;
         return dynamicByteLength(value);
     }
 
@@ -206,7 +196,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     private void encodeDynamic(Object[] values, ByteBuffer dest) {
         int i = 0;
         final int last = values.length - 1; // dynamic tuples are guaranteed not to be empty
-        int offset = firstOffset;
+        int offset = headLengthSum;
         for (;; i++) {
             final ABIType<Object> t = get(i);
             if (!t.dynamic) {
@@ -438,7 +428,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
             int row = 0;
             int i = 0;
             final int last = size() - 1;
-            int offset = firstOffset;
+            int offset = headLengthSum;
             final byte[] rowBuffer = newUnitBuffer();
             do {
                 final ABIType<Object> t = get(i);
