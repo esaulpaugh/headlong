@@ -181,8 +181,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
 
     @Override
     void encodePackedUnchecked(Tuple value, ByteBuffer dest) {
-        final int size = size();
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < value.elements.length; i++) {
             getNonCapturing(i).encodePackedUnchecked(value.elements[i], dest);
         }
     }
@@ -230,31 +229,31 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                 for ( ; i < elements.length; i++) {
                     elements[i] = get(i).decode(bb, unitBuffer);
                 }
-                return Tuple.create(elements);
-            }
-            final int start = bb.position(); // save this value before offsets are decoded
-            final int[] offsets = new int[elements.length];
-            do {
-                ABIType<?> t = get(i);
-                if (!t.dynamic) {
-                    elements[i] = t.decode(bb, unitBuffer);
-                } else {
-                    final int offset = IntType.UINT31.decode(bb, unitBuffer);
-                    offsets[i] = offset == 0 ? -1 : offset;
-                }
-            } while (++i < elements.length);
-            i = 0;
-            do {
-                final int offset = offsets[i];
-                if (offset != 0) {
-                    final int jump = start + offset;
-                    if (jump != bb.position()) { // && (this.flags & ABIType.FLAG_LEGACY_ARRAY) == 0
-                        /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-                        bb.position(offset == -1 ? start : jump); // leniently jump to specified offset
+            } else {
+                final int start = bb.position(); // save this value before offsets are decoded
+                final int[] offsets = new int[elements.length];
+                do {
+                    ABIType<?> t = get(i);
+                    if (!t.dynamic) {
+                        elements[i] = t.decode(bb, unitBuffer);
+                    } else {
+                        final int offset = IntType.UINT31.decode(bb, unitBuffer);
+                        offsets[i] = offset == 0 ? -1 : offset;
                     }
-                    elements[i] = get(i).decode(bb, unitBuffer);
-                }
-            } while (++i < elements.length);
+                } while (++i < elements.length);
+                i = 0;
+                do {
+                    final int offset = offsets[i];
+                    if (offset != 0) {
+                        final int jump = start + offset;
+                        if (jump != bb.position()) { // && (this.flags & ABIType.FLAG_LEGACY_ARRAY) == 0
+                            /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
+                            bb.position(offset == -1 ? start : jump); // leniently jump to specified offset
+                        }
+                        elements[i] = get(i).decode(bb, unitBuffer);
+                    }
+                } while (++i < elements.length);
+            }
         } catch (IllegalArgumentException cause) {
             throw exceptionWithIndex(true, i, cause);
         }
@@ -282,16 +281,16 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         }
     }
 
-    private Object decodeIndex(ByteBuffer bb, int start, byte[] unitBuffer, int index) {
+    private Object decodeIndex(ByteBuffer bb, int start, byte[] unitBuffer, int i) {
         try {
-            final ABIType<?> type = elementTypes[index];
-            bb.position(start + elementHeadOffsets[index]);
-            if (type.dynamic) {
+            final ABIType<?> t = get(i);
+            bb.position(start + elementHeadOffsets[i]);
+            if (t.dynamic) {
                 bb.position(start + IntType.UINT31.decode(bb, unitBuffer));
             }
-            return type.decode(bb, unitBuffer);
+            return t.decode(bb, unitBuffer);
         } catch (IllegalArgumentException cause) {
-            throw exceptionWithIndex(true, index, cause);
+            throw exceptionWithIndex(true, i, cause);
         }
     }
 
@@ -485,18 +484,16 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         ByteBuffer rowData = ByteBuffer.wrap(rowBuffer);
         insertIntUnsigned(offset, rowData); // insert offset
         rowData.flip();
-        appendAnnotatedRow(sb, rowData, rowBuffer, row, i, OFFSET_NOTE);
+        appendAnnotatedRow(sb, rowData, rowBuffer, row, i, " offset");
     }
-
-    private static final String OFFSET_NOTE = " offset";
 
     private void appendAnnotatedRow(StringBuilder sb, ByteBuffer bb, byte[] rowBuffer, int row, int i, String note) {
         bb.get(rowBuffer);
-        String unpaddedLabel = Integer.toHexString(row * UNIT_LENGTH_BYTES);
+        String label = Integer.toHexString(row * UNIT_LENGTH_BYTES);
         if (sb.length() > 0) {
             sb.append('\n');
         }
-        ABIType.appendPadded(ABIType.LABEL_LEN - unpaddedLabel.length(), unpaddedLabel, sb);
+        ABIType.appendPadded(ABIType.LABEL_LEN - label.length(), label, sb);
         sb.append(Strings.encode(rowBuffer));
         sb.append("\t[").append(i).append(']');
         if (note == null) {
@@ -505,7 +502,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         }
         ABIType<?> element = get(i);
         sb.append(' ').append(element.canonicalType);
-        if (OFFSET_NOTE.equals(note) || !element.isDynamic()) {
+        if (" offset".equals(note) || !element.dynamic) {
             String name = getElementName(i);
             if (name != null) {
                 sb.append(" \"").append(name).append('"');
