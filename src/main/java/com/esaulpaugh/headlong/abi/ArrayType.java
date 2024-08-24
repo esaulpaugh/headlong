@@ -21,6 +21,7 @@ import com.esaulpaugh.headlong.util.Strings;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.function.IntUnaryOperator;
+import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.abi.TupleType.countBytes;
 import static com.esaulpaugh.headlong.abi.TupleType.totalLen;
@@ -226,10 +227,16 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     private int checkLength(final int valueLen, Object value) {
         if (length != DYNAMIC_LENGTH && length != valueLen) {
             throw mismatchErr("array length",
-                    friendlyClassName(value.getClass(), valueLen), friendlyClassName(clazz, length),
+                    simpleName(value.getClass(), valueLen), simpleName(clazz, length),
                     "length " + length, "" + valueLen);
         }
         return valueLen;
+    }
+
+    private static final Pattern BRACKETS = Pattern.compile(Pattern.quote("[]"));
+
+    private static String simpleName(Class<?> clazz, int arrayLen) {
+        return BRACKETS.matcher(clazz.getSimpleName()).replaceFirst("[" + arrayLen + "]");
     }
 
     @SuppressWarnings("unchecked")

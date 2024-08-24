@@ -23,7 +23,6 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.function.IntFunction;
-import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
@@ -161,7 +160,7 @@ public abstract class ABIType<J> {
             }
             throw mismatchErr("class",
                     value.getClass().getName(), clazz.getName(),
-                    friendlyClassName(clazz, -1), friendlyClassName(value.getClass(), -1));
+                    clazz.getSimpleName(), value.getClass().getSimpleName());
         }
     }
 
@@ -361,12 +360,5 @@ public abstract class ABIType<J> {
         for (i += unpadded.length(); i < LABEL_PADDED_LEN; i++) {
             sb.append(' ');
         }
-    }
-
-    static String friendlyClassName(Class<?> clazz, int arrayLen) {
-        final String simple = clazz.getSimpleName();
-        return arrayLen > 0 && simple.indexOf('[') > 0
-                ? simple.replaceFirst(Pattern.quote("[]"), "[" + arrayLen + "]")
-                : simple;
     }
 }
