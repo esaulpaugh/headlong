@@ -50,17 +50,20 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         this.elementHeadOffsets = new int[elementTypes.length];
         if (dynamic) {
             this.headLength = OFFSET_LENGTH_BYTES;
-            int sum = 0;
-            for (int i = 0; i < elementTypes.length; i++) {
-                this.elementHeadOffsets[i] = sum;
-                sum += elementTypes[i].headLength();
-            }
-            this.firstOffset = sum;
+            this.firstOffset = staticTupleHeadLength();
         } else {
             this.headLength = staticTupleHeadLength();
             this.firstOffset = -1;
         }
         this.flags = flags;
+    }
+
+    int staticTupleHeadLength() {
+        int sum = 0;
+        for (int i = 0; i < elementTypes.length; sum += elementTypes[i++].headLength()) {
+            this.elementHeadOffsets[i] = sum;
+        }
+        return sum;
     }
 
     @Override
@@ -315,22 +318,6 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
             prev = index;
         }
         return Tuple.create(results);
-    }
-
-    int staticTupleHeadLength() {
-        int len = 0;
-        int sum = 0;
-        for (int i = 0; i < elementTypes.length; i++) {
-            elementHeadOffsets[i] = sum;
-            final ABIType<?> e = elementTypes[i];
-            sum += e.headLength();
-            switch (e.typeCode()) {
-            case TYPE_CODE_ARRAY: len += e.asArrayType().staticArrayHeadLength(); continue;
-            case TYPE_CODE_TUPLE: len += e.asTupleType().staticTupleHeadLength(); continue;
-            default: len += UNIT_LENGTH_BYTES;
-            }
-        }
-        return len;
     }
 
     static IllegalArgumentException exceptionWithIndex(boolean tuple, int i, IllegalArgumentException cause) {
