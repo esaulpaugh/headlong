@@ -25,19 +25,17 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
     public static final int UNIT_LENGTH_BYTES = 256 / Byte.SIZE;
 
-    final int bitLength;
-    final boolean unsigned;
-    private final BigInteger min;
-    private final BigInteger max;
     private final long minLong;
     private final long maxLong;
-    private final int nLZ;
+    private final BigInteger min;
+    private final BigInteger max;
+    final int bitLength;
+    final boolean unsigned;
 
     UnitType(String canonicalType, Class<J> clazz, int bitLength, boolean unsigned) {
         super(canonicalType, clazz, false);
         this.bitLength = bitLength;
         this.unsigned = unsigned;
-        this.nLZ = Long.SIZE - bitLength;
         this.min = minValue();
         this.max = maxValue();
         this.minLong = this.min.longValue();
@@ -112,10 +110,10 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     final long decodeSignedLong(ByteBuffer bb) {
         final long a = bb.getLong(), b = bb.getLong(), c = bb.getLong(), d = bb.getLong();
         if ((a | b | c) == 0L) {
-            if (Long.numberOfLeadingZeros(d) > nLZ) {
+            if (Long.numberOfLeadingZeros(d) > Long.SIZE - bitLength) {
                 return d;
             }
-        } else if ((a & b & c) == -1L && Long.numberOfLeadingZeros(~d) > nLZ) {
+        } else if ((a & b & c) == -1L && Long.numberOfLeadingZeros(~d) > Long.SIZE - bitLength) {
             return d;
         }
         throw err(bb);
