@@ -208,8 +208,7 @@ public final class ABIJSON {
             names[i] = getName(inputObj);
             final String internalType = getString(inputObj, INTERNAL_TYPE);
             if (internalType != null) {
-                final String type = e.canonicalType;
-                internalTypes[i] = internalType.equals(type) ? type : internalType;
+                internalTypes[i] = internalType.equals(e.canonicalType) ? e.canonicalType : internalType;
             }
             if (indexed != null) {
                 indexed[i] = getBoolean(inputObj, INDEXED, null);
