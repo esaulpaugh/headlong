@@ -25,8 +25,6 @@ public final class Uint {
     /* denial-of-service protection. prevent huge allocations in case numBits is untrusted. */
     private static final int MAX_BIT_LEN = 8192;
 
-    private static final long ZERO = 0L;
-
     public final int numBits;
     public final BigInteger range; // always greater than 0
     public final long rangeLong;
@@ -42,23 +40,23 @@ public final class Uint {
             }
             this.range = BigInteger.ONE.shiftLeft(numBits);
             this.halfRange = BigInteger.ONE.shiftLeft(numBits - 1);
-            this.rangeLong = ZERO;
-            this.halfRangeLong = ZERO;
-            this.maskLong = ZERO;
+            this.rangeLong = 0L;
+            this.halfRangeLong = 0L;
+            this.maskLong = 0L;
         } else {
             if (numBits < 0) {
                 throw new IllegalArgumentException("numBits must be non-negative");
             }
             this.rangeLong = 1L << numBits;
             this.range = BigInteger.valueOf(this.rangeLong);
-            this.halfRange = BigInteger.valueOf(this.rangeLong / 2);
             this.halfRangeLong = this.rangeLong >> 1;
+            this.halfRange = BigInteger.valueOf(this.halfRangeLong);
             this.maskLong = this.rangeLong - 1;
         }
     }
 
     public long toSignedLong(long unsigned) {
-        if (rangeLong != ZERO) {
+        if (rangeLong != 0L) {
             if (unsigned < 0) {
                 throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
             }
@@ -89,7 +87,7 @@ public final class Uint {
     }
 
     public long toUnsignedLong(long signed) {
-        if (maskLong != ZERO) {
+        if (maskLong != 0L) {
             final int bitLen = Integers.bitLen(signed < 0 ? ~signed : signed);
             if (bitLen < numBits) {
                 return signed & maskLong;
