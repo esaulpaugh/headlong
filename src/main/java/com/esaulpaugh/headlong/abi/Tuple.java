@@ -31,7 +31,6 @@ import java.util.function.IntFunction;
 public class Tuple implements Iterable<Object> {
 
     public static final Tuple EMPTY = new Tuple();
-    private static final String SKIPPED = "_";
 
     final Object[] elements;
 
@@ -169,12 +168,12 @@ public class Tuple implements Iterable<Object> {
     public final String toString() {
         return Arrays.deepToString(copy(new Object[elements.length], i -> {
             Object element = elements[i];
-            if (element == null) return SKIPPED;
+            if (element == null) return "_";
             String str = element.toString();
             return element instanceof String
                         ? '"' + str + '"'
-                        : SKIPPED.equals(str)
-                            ? '\\' + SKIPPED
+                        : "_".equals(str)
+                            ? "\\_"
                             : element;
         }));
     }

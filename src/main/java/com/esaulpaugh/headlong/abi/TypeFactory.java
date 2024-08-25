@@ -26,7 +26,6 @@ import java.util.Map;
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_ARRAY_CLASS;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
-import static com.esaulpaugh.headlong.abi.TupleType.EMPTY_TUPLE_STRING;
 
 /** Creates the appropriate {@link ABIType} object for a given type string. */
 public final class TypeFactory {
@@ -218,15 +217,13 @@ public final class TypeFactory {
         return c > '0' && c <= '9';
     }
 
-    private static final int CAPACITY = 40;
-
     static StringBuilder newTypeBuilder() {
-        return new StringBuilder(CAPACITY).append('(');
+        return new StringBuilder(40).append('(');
     }
 
     private static TupleType<?> parseTupleType(final String rawTypeStr, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawTypeStr.length();
-        if (len == 2 && rawTypeStr.equals(EMPTY_TUPLE_STRING)) return TupleType.empty(flags);
+        if (len == 2 && rawTypeStr.equals("()")) return TupleType.empty(flags);
         final List<ABIType<?>> elements = new ArrayList<>(8);
         int argEnd = 1;
         final StringBuilder canonicalType = newTypeBuilder();

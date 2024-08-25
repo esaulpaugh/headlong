@@ -31,8 +31,6 @@ public final class Strings {
     public static final int BASE_64_URL_SAFE = 2; // 64
     public static final int ASCII = 3; // 128
 
-    private static final int URL_SAFE_FLAGS = FastBase64.URL_SAFE_CHARS | FastBase64.NO_LINE_SEP | FastBase64.NO_PADDING;
-
     public static String encode(byte b) {
         return encode(new byte[] { b });
     }
@@ -60,7 +58,7 @@ public final class Strings {
         switch (encoding) {
         case HEX: return FastHex.encodeToString(buffer, from, len);
         case UTF_8: return new String(buffer, from, len, StandardCharsets.UTF_8);
-        case BASE_64_URL_SAFE: return FastBase64.encodeToString(buffer, from, len, URL_SAFE_FLAGS);
+        case BASE_64_URL_SAFE: return FastBase64.encodeToString(buffer, from, len, FastBase64.URL_SAFE_CHARS | FastBase64.NO_LINE_SEP | FastBase64.NO_PADDING);
         case ASCII: return new String(buffer, from, len, StandardCharsets.US_ASCII);
         default: throw new UnsupportedOperationException();
         }

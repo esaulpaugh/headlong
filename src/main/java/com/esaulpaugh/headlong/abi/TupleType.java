@@ -29,10 +29,7 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 /** @see ABIType */
 public final class TupleType<J extends Tuple> extends ABIType<J> implements Iterable<ABIType<?>> {
 
-    static final String EMPTY_TUPLE_STRING = "()";
-    private static final String[] EMPTY_STRING_ARRAY = new String[0];
-
-    public static final TupleType<Tuple> EMPTY = new TupleType<>(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null, null, ABIType.FLAGS_NONE);
+    public static final TupleType<Tuple> EMPTY = new TupleType<>("()", false, EMPTY_ARRAY, null, null, ABIType.FLAGS_NONE);
 
     final ABIType<?>[] elementTypes;
     final String[] elementNames;
@@ -364,8 +361,8 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                 completeTupleTypeString(canonicalType),
                 dynamic,
                 selected.toArray(EMPTY_ARRAY),
-                selectedNames == null ? null : selectedNames.toArray(EMPTY_STRING_ARRAY),
-                selectedInternalTypes == null ? null : selectedInternalTypes.toArray(EMPTY_STRING_ARRAY),
+                selectedNames == null ? null : selectedNames.toArray(new String[0]),
+                selectedInternalTypes == null ? null : selectedInternalTypes.toArray(new String[0]),
                 this.flags
         );
     }
@@ -376,7 +373,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
             sb.setCharAt(len - 1, ')'); // overwrite trailing comma
             return sb.toString();
         }
-        return EMPTY_TUPLE_STRING;
+        return "()";
     }
 
     public static <X extends Tuple> TupleType<X> parse(String rawTupleTypeString) {
@@ -396,7 +393,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     static TupleType<Tuple> empty(int flags) {
-        return flags == ABIType.FLAGS_NONE ? EMPTY : new TupleType<>(EMPTY_TUPLE_STRING, false, EMPTY_ARRAY, null, null, flags);
+        return flags == ABIType.FLAGS_NONE ? EMPTY : new TupleType<>("()", false, EMPTY_ARRAY, null, null, flags);
     }
 
     /**

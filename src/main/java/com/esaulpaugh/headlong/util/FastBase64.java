@@ -26,8 +26,7 @@ public final class FastBase64 {
     public static final int URL_SAFE_CHARS = 4;
 
     private static final int LINE_LEN = 76;
-    private static final int LINE_SEP_LEN = 2;
-    private static final byte PADDING_BYTE = '=';
+    private static final int LINE_SEP_LEN = 2; // "/r/n"
 
     private static final short[] URL_SAFE = table("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_");
 
@@ -122,7 +121,7 @@ public final class FastBase64 {
 
     private static void insertRemainder(byte[] buffer, int offset, int remainder, int o, int charsLeft, short[] table, byte[] dest) {
         int bits = 0;
-        short thirdChar = PADDING_BYTE;
+        short thirdChar = '=';
         switch (remainder) { /* cases fall through */
         case 2:
             bits = (buffer[offset + 1] & 0xff) << 2;
@@ -130,7 +129,7 @@ public final class FastBase64 {
         case 1:
             bits |= (buffer[offset] & 0xff) << 10;
             switch (charsLeft) { /* cases fall through */
-            case 4: dest[o + 3] = PADDING_BYTE;
+            case 4: dest[o + 3] = '=';
             case 3: dest[o + 2] = (byte) thirdChar;
             case 2: dest[o + 1] = (byte) table[(bits >> 6) & 0x3f];
             default:dest[o]     = (byte) table[bits >> 12];

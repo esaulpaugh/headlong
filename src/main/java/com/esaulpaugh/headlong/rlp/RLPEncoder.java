@@ -31,8 +31,6 @@ import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
 /** For encoding data to Recursive Length Prefix format. */
 public final class RLPEncoder {
 
-    private static final byte[] ZERO_RLP = new byte[1];
-
     private RLPEncoder() {}
 
 // -------------- made visibile to Record -------------------------------------------------------------------------------
@@ -146,6 +144,8 @@ public final class RLPEncoder {
         putSequence(elements, bb);
     }
 // ---------------------------------------------------------------------------------------------------------------------
+    private static final byte[] ZERO_RLP = new byte[1];
+
     static byte[] bitsToBytes(int bits) {
         return bits == 0 ? ZERO_RLP : Integers.toBytes(bits);
     }
@@ -153,7 +153,6 @@ public final class RLPEncoder {
     static byte[] bitsToBytes(long bits) {
         return bits == 0L ? ZERO_RLP : Integers.toBytes(bits);
     }
-
 
     /**
      * Returns the RLP encoding of the given bits.
