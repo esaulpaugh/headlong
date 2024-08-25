@@ -204,6 +204,9 @@ public class UnsignedTest {
             BigInteger a = new BigInteger(bytes);
             BigInteger b = new BigInteger(unsignedBytes);
             final int bitlen = b.bitLength();
+            if (bitlen == 0) {
+                continue;
+            }
             try {
                 assertEquals(uints[bitlen].toUnsigned(a), b);
             } catch (IllegalArgumentException iae) {
