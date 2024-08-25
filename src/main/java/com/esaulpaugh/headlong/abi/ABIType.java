@@ -247,13 +247,13 @@ public abstract class ABIType<J> {
     @SuppressWarnings("unchecked")
     public final J decodePacked(byte[] buffer) {
         PackedDecoder.checkDynamics(this);
-        final J val = (J) PackedDecoder.decode(this, ByteBuffer.wrap(buffer), buffer.length);
-        validate(val);
-        final int decodedLen = byteLengthPacked(val);
-        if (decodedLen != buffer.length) {
-            throw new IllegalArgumentException("unconsumed bytes: " + (buffer.length - decodedLen) + " remaining");
+        final J decoded = (J) PackedDecoder.decode(this, ByteBuffer.wrap(buffer), buffer.length);
+        validate(decoded);
+        final int remaining = buffer.length - byteLengthPacked(decoded);
+        if (remaining == 0) {
+            return decoded;
         }
-        return val;
+        throw new IllegalArgumentException("unconsumed bytes: " + remaining + " remaining");
     }
 
     static byte[] newUnitBuffer() {
