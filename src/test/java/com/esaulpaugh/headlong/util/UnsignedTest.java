@@ -190,28 +190,24 @@ public class UnsignedTest {
 
     @Test
     public void testUnsigned() {
-        Uint[] uints = new Uint[257];
+        final Uint[] uints = new Uint[385];
+        uints[0] = new Uint(1);
         for (int i = 1; i < uints.length; i++) {
             uints[i] = new Uint(i);
         }
-        Random r = TestUtils.seededRandom();
+        final Random r = TestUtils.seededRandom();
         int plus1 = 0;
         final int n = 1000;
         for (int i = 0; i < n; i++) {
-            byte[] bytes = TestUtils.randomBytes(1 + r.nextInt(32), r);
-            byte[] unsignedBytes = new byte[1 + bytes.length];
-            System.arraycopy(bytes, 0, unsignedBytes, 1, bytes.length);
-            BigInteger a = new BigInteger(bytes);
-            BigInteger b = new BigInteger(unsignedBytes);
-            final int bitlen = b.bitLength();
-            if (bitlen == 0) {
-                continue;
-            }
+            final byte[] bytes = TestUtils.randomBytes(1 + r.nextInt(48), r);
+            final BigInteger signed = new BigInteger(bytes);
+            final BigInteger unsigned = new BigInteger(1, bytes);
+            final int bitlen = unsigned.bitLength();
             try {
-                assertEquals(uints[bitlen].toUnsigned(a), b);
+                test(uints, bitlen, signed, unsigned);
             } catch (IllegalArgumentException iae) {
-                if(iae.getMessage().startsWith("signed has too many bits: ")) {
-                    assertEquals(uints[bitlen + 1].toUnsigned(a), b);
+                if (iae.getMessage().equals("signed has too many bits: " + bitlen + " is not less than " + bitlen)) {
+                    test(uints, bitlen + 1, signed, unsigned);
                     plus1++;
                 } else {
                     throw iae;
@@ -219,6 +215,18 @@ public class UnsignedTest {
             }
         }
         System.out.println((double) plus1 / n);
+    }
+
+    private static void test(Uint[] uints, int bitlen, BigInteger signed, BigInteger unsigned) {
+        Uint uint = uints[bitlen];
+        assertEquals(uint.toUnsigned(signed), unsigned);
+        assertEquals(uint.toSigned(unsigned), signed);
+        if (bitlen < 64) {
+            long signedL = signed.longValueExact();
+            long unsignedL = unsigned.longValueExact();
+            assertEquals(uint.toUnsignedLong(signedL), unsignedL);
+            assertEquals(uint.toSignedLong(unsignedL), signedL);
+        }
     }
 
     @Test
