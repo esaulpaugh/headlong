@@ -35,24 +35,26 @@ public final class Uint {
     public final long maskLong;
 
     public Uint(int numBits) {
-        if (numBits < 0) {
-            throw new IllegalArgumentException("numBits must be non-negative");
-        }
-        if (numBits > MAX_BIT_LEN) {
-            throw new IllegalArgumentException("numBits exceeds limit: " + numBits + " > " + MAX_BIT_LEN);
-        }
         this.numBits = numBits;
-        this.range = BigInteger.ONE.shiftLeft(numBits); // BigInteger.ONE.pow(numBits)
-        long rangeLong = ZERO, halfRangeLong = ZERO, maskLong = ZERO;
-        if (range.bitLength() < Long.SIZE) {
-            rangeLong = range.longValue();
-            halfRangeLong = rangeLong >> 1;
-            maskLong = rangeLong - 1;
+        if (numBits >= 63) {
+            if (numBits > MAX_BIT_LEN) {
+                throw new IllegalArgumentException("numBits exceeds limit: " + numBits + " > " + MAX_BIT_LEN);
+            }
+            this.range = BigInteger.ONE.shiftLeft(numBits);
+            this.halfRange = BigInteger.ONE.shiftLeft(numBits - 1);
+            this.rangeLong = ZERO;
+            this.halfRangeLong = ZERO;
+            this.maskLong = ZERO;
+        } else {
+            if (numBits < 0) {
+                throw new IllegalArgumentException("numBits must be non-negative");
+            }
+            this.rangeLong = 1L << numBits;
+            this.range = BigInteger.valueOf(this.rangeLong);
+            this.halfRange = BigInteger.valueOf(this.rangeLong / 2);
+            this.halfRangeLong = this.rangeLong >> 1;
+            this.maskLong = this.rangeLong - 1;
         }
-        this.rangeLong = rangeLong;
-        this.halfRange = range.shiftRight(1);
-        this.halfRangeLong = halfRangeLong;
-        this.maskLong = maskLong;
     }
 
     public long toSignedLong(long unsigned) {
