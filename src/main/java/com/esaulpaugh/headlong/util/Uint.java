@@ -44,8 +44,8 @@ public final class Uint {
             this.halfRangeLong = 0L;
             this.maskLong = 0L;
         } else {
-            if (numBits < 0) {
-                throw new IllegalArgumentException("numBits must be non-negative");
+            if (numBits <= 0) {
+                throw new IllegalArgumentException("numBits must be positive");
             }
             this.rangeLong = 1L << numBits;
             this.range = BigInteger.valueOf(this.rangeLong);

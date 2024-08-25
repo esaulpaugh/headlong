@@ -31,18 +31,15 @@ public class UnsignedTest {
     @Test
     public void testExceptions() throws Throwable {
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "numBits must be non-negative", () -> new Uint(-1));
-        TestUtils.assertThrown(IllegalArgumentException.class, "numBits must be non-negative", () -> new Uint(Integer.MIN_VALUE));
+        TestUtils.assertThrown(IllegalArgumentException.class, "numBits must be positive", () -> new Uint(0));
+        TestUtils.assertThrown(IllegalArgumentException.class, "numBits must be positive", () -> new Uint(-1));
+        TestUtils.assertThrown(IllegalArgumentException.class, "numBits must be positive", () -> new Uint(Integer.MIN_VALUE));
 
         TestUtils.assertThrown(IllegalArgumentException.class, "numBits exceeds limit: 8193 > 8192", () -> new Uint(8193));
 
-        Uint uint0 = new Uint(0);
-        assertEquals(-1L, uint0.toSignedLong(0L));
-        TestUtils.assertThrown(IllegalArgumentException.class, "unsigned has too many bits: 1 > 0", () -> uint0.toSignedLong(1L));
-
         Uint uint64 = new Uint(64);
-        uint64.toSignedLong(Long.MAX_VALUE);
-        uint64.toUnsigned(Long.MAX_VALUE);
+        assertEquals(Long.MAX_VALUE, uint64.toSignedLong(Long.MAX_VALUE));
+        assertEquals(BigInteger.valueOf(Long.MAX_VALUE), uint64.toUnsigned(Long.MAX_VALUE));
 
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
@@ -194,7 +191,7 @@ public class UnsignedTest {
     @Test
     public void testUnsigned() {
         Uint[] uints = new Uint[257];
-        for (int i = 0; i < uints.length; i++) {
+        for (int i = 1; i < uints.length; i++) {
             uints[i] = new Uint(i);
         }
         Random r = TestUtils.seededRandom();
