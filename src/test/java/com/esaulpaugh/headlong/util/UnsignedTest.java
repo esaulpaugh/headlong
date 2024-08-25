@@ -103,7 +103,7 @@ public class UnsignedTest {
             final Uint type = new Uint(i);
             if (type.rangeLong <= 0
                     || type.halfRangeLong <= 0
-                    || type.maskLong <= 0) {
+                    || type.numBits >= 63) {
                 throw new Error(String.valueOf(type.numBits));
             }
             final long power = (long) Math.pow(2.0, i);
@@ -222,8 +222,8 @@ public class UnsignedTest {
         assertEquals(uint.toUnsigned(signed), unsigned);
         assertEquals(uint.toSigned(unsigned), signed);
         if (bitlen < 64) {
-            long signedL = signed.longValueExact();
-            long unsignedL = unsigned.longValueExact();
+            final long signedL = signed.longValueExact();
+            final long unsignedL = unsigned.longValueExact();
             assertEquals(uint.toUnsignedLong(signedL), unsignedL);
             assertEquals(uint.toSignedLong(unsignedL), signedL);
         }

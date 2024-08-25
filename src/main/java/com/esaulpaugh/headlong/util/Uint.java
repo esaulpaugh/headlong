@@ -30,20 +30,10 @@ public final class Uint {
     public final long rangeLong;
     public final BigInteger halfRange;
     public final long halfRangeLong;
-    public final long maskLong;
 
     public Uint(int numBits) {
         this.numBits = numBits;
-        if (numBits >= 63) {
-            if (numBits > MAX_BIT_LEN) {
-                throw new IllegalArgumentException("numBits exceeds limit: " + numBits + " > " + MAX_BIT_LEN);
-            }
-            this.range = BigInteger.ONE.shiftLeft(numBits);
-            this.halfRange = BigInteger.ONE.shiftLeft(numBits - 1);
-            this.rangeLong = 0L;
-            this.halfRangeLong = 0L;
-            this.maskLong = 0L;
-        } else {
+        if (numBits < 63) {
             if (numBits <= 0) {
                 throw new IllegalArgumentException("numBits must be positive");
             }
@@ -51,7 +41,14 @@ public final class Uint {
             this.range = BigInteger.valueOf(this.rangeLong);
             this.halfRangeLong = this.rangeLong >> 1;
             this.halfRange = BigInteger.valueOf(this.halfRangeLong);
-            this.maskLong = this.rangeLong - 1;
+        } else {
+            if (numBits > MAX_BIT_LEN) {
+                throw new IllegalArgumentException("numBits exceeds limit: " + numBits + " > " + MAX_BIT_LEN);
+            }
+            this.range = BigInteger.ONE.shiftLeft(numBits);
+            this.halfRange = BigInteger.ONE.shiftLeft(numBits - 1);
+            this.rangeLong = 0L;
+            this.halfRangeLong = 0L;
         }
     }
 
@@ -87,10 +84,10 @@ public final class Uint {
     }
 
     public long toUnsignedLong(long signed) {
-        if (maskLong != 0L) {
+        if (numBits < 63) {
             final int bitLen = Integers.bitLen(signed < 0 ? ~signed : signed);
             if (bitLen < numBits) {
-                return signed & maskLong;
+                return signed & (rangeLong - 1);
             }
             throw tooManyBitsException(bitLen, numBits, true);
         }

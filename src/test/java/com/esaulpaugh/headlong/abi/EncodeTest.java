@@ -583,8 +583,8 @@ public class EncodeTest {
             testMinAndMax(signed, " >= ", " >= ");
 
             Uint uint = new Uint(i);
-            final long mask = uint.maskLong;
-            if (mask != 0) {
+            final long mask = uint.rangeLong - 1;
+            if (uint.numBits < 63) {
                 final long uMax = unsigned.maxValue().longValueExact();
                 final long uMin = unsigned.minValue().longValueExact();
                 final long max = signed.maxValue().longValueExact();
