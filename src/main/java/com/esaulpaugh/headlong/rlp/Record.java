@@ -45,12 +45,12 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
     }
 
     public static ByteBuffer encode(Signer signer, final long seq, List<KVP> pairs) {
-        if (seq < 0) {
-            throw new IllegalArgumentException("negative seq");
-        }
         final int signatureLen = signer.signatureLength();
         if (signatureLen < 0) {
             throw new InvalidParameterException("signer specifies negative signature length");
+        }
+        if (seq < 0) {
+            throw new IllegalArgumentException("negative seq");
         }
         final int payloadLen = RLPEncoder.payloadLen(seq, pairs); // content list prefix not included
         final int recordDataLen = RLPEncoder.itemLen(signatureLen) + payloadLen;
@@ -108,8 +108,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
 
     public static Record parse(String enrString, Verifier verifier) throws SignatureException {
         if (enrString.startsWith(ENR_PREFIX)) {
-            byte[] bytes = Strings.decode(enrString.substring(ENR_PREFIX.length()), BASE_64_URL_SAFE);
-            return decode(bytes, verifier);
+            return decode(Strings.decode(enrString.substring(ENR_PREFIX.length()), BASE_64_URL_SAFE), verifier);
         }
         throw new IllegalArgumentException("prefix \"" + ENR_PREFIX + "\" not found");
     }

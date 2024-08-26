@@ -319,10 +319,10 @@ public abstract class RLPItem implements Comparable<RLPItem> {
         int othrOffset = othr.dataIndex;
         final int end = thisOffset + Math.min(this.dataLength, othr.dataLength);
         while (thisOffset < end) {
-            int av = this.buffer[thisOffset++];
-            int bv = othr.buffer[othrOffset++];
-            if (av != bv) {
-                return av - bv;
+            int t = this.buffer[thisOffset++];
+            int o = othr.buffer[othrOffset++];
+            if (t != o) {
+                return t - o;
             }
         }
         return this.dataLength - othr.dataLength;
