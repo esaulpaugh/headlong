@@ -386,8 +386,8 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
 
     public static <X extends Tuple> TupleType<X> of(String... typeStrings) {
         StringBuilder sb = new StringBuilder("(");
-        for (String str : typeStrings) {
-            sb.append(str).append(',');
+        for (String t : typeStrings) {
+            sb.append(t).append(',');
         }
         return parse(completeTupleTypeString(sb));
     }
@@ -481,12 +481,12 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     private void appendAnnotatedRow(StringBuilder sb, ByteBuffer bb, byte[] rowBuffer, int row, int i, String note) {
-        bb.get(rowBuffer);
-        String label = Integer.toHexString(row * UNIT_LENGTH_BYTES);
         if (sb.length() > 0) {
             sb.append('\n');
         }
+        String label = Integer.toHexString(row * UNIT_LENGTH_BYTES);
         ABIType.appendPadded(ABIType.LABEL_LEN - label.length(), label, sb);
+        bb.get(rowBuffer);
         sb.append(Strings.encode(rowBuffer));
         sb.append("\t[").append(i).append(']');
         if (note == null) {
