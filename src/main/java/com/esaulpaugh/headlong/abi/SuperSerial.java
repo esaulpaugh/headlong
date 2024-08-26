@@ -61,7 +61,8 @@ public final class SuperSerial {
     public static String serialize(TupleType<?> tupleType, Tuple tuple, boolean machine) {
         tupleType.validate(tuple);
         Object[] objects = serializeTuple(tupleType, tuple);
-        return machine ? Strings.encode(RLPEncoder.sequence(objects))
+        return machine
+                ? Strings.encode(RLPEncoder.sequence(objects))
                 : Notation.forObjects(objects).toString();
     }
 
@@ -69,7 +70,8 @@ public final class SuperSerial {
         T in = deserializeTuple(
                 tupleType,
                 machine ? Strings.decode(str)
-                        : RLPEncoder.sequence(Notation.parse(str)));
+                        : RLPEncoder.sequence(Notation.parse(str))
+        );
         tupleType.validate(in);
         return in;
     }
