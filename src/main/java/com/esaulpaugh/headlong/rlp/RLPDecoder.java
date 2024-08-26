@@ -172,8 +172,7 @@ public final class RLPDecoder {
     }
 
     private static RLPString newSingleByte(byte[] buffer, int index, int containerEnd) {
-        final int endIndex = requireInBounds(index + 1L, containerEnd, buffer, index);
-        return new RLPString(buffer, index, index, 1, endIndex);
+        return new RLPString(buffer, index, index, 1, requireInBounds(index + 1L, containerEnd, buffer, index));
     }
 
     private static RLPString newStringShort(byte[] buffer, int index, byte lead, int containerEnd, boolean lenient) {
@@ -189,8 +188,7 @@ public final class RLPDecoder {
     private static RLPList newListShort(byte[] buffer, int index, byte lead, int containerEnd) {
         final int dataIndex = index + 1;
         final int dataLength = lead - LIST_SHORT_OFFSET;
-        final int endIndex = requireInBounds((long) dataIndex + dataLength, containerEnd, buffer, index);
-        return new RLPList(buffer, index, dataIndex, dataLength, endIndex);
+        return new RLPList(buffer, index, dataIndex, dataLength, requireInBounds((long) dataIndex + dataLength, containerEnd, buffer, index));
     }
 
     @SuppressWarnings("unchecked")
