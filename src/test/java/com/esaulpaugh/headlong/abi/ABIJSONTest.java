@@ -593,13 +593,6 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testJsonUtils() {
-        JsonObject empty = new JsonObject();
-        Boolean b = ABIJSON.getBoolean(empty, "constant", null);
-        assertNull(b);
-    }
-
-    @Test
     public void testParseElements() throws Throwable {
 
         List<ABIObject> list = ABIJSON.parseElements(CONTRACT_JSON, EnumSet.noneOf(TypeEnum.class));

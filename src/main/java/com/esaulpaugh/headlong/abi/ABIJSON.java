@@ -177,7 +177,7 @@ public final class ABIJSON {
             final boolean[] indexed = new boolean[inputs.size()];
             return new Event<>(
                     getName(event),
-                    getBoolean(event, ANONYMOUS, false),
+                    getBooleanElseFalse(event, ANONYMOUS),
                     parseTupleType(inputs, indexed, flags),
                     indexed
             );
@@ -211,7 +211,7 @@ public final class ABIJSON {
                 internalTypes[i] = internalType.equals(e.canonicalType) ? e.canonicalType : internalType;
             }
             if (indexed != null) {
-                indexed[i] = getBoolean(inputObj, INDEXED, null);
+                indexed[i] = getBooleanElseFalse(inputObj, INDEXED);
             }
             if (++i == elements.length) {
                 return new TupleType<>(
@@ -400,7 +400,7 @@ public final class ABIJSON {
         return element.getAsJsonArray();
     }
 
-    static String getString(JsonObject object, String key) {
+    private static String getString(JsonObject object, String key) {
         final JsonElement element = object.get(key);
         if (isNull(element)) {
             return null;
@@ -411,10 +411,10 @@ public final class ABIJSON {
         throw new IllegalArgumentException(key + " is not a string");
     }
 
-    static Boolean getBoolean(JsonObject object, String key, Boolean defaultVal) {
+    private static boolean getBooleanElseFalse(JsonObject object, String key) {
         final JsonElement element = object.get(key);
         if (isNull(element)) {
-            return defaultVal;
+            return false;
         }
         if (element.isJsonPrimitive() && ((JsonPrimitive) element).isBoolean()) {
             return element.getAsBoolean();
