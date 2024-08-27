@@ -40,6 +40,9 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
 
     TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String[] elementNames, String[] elementInternalTypes, int flags) {
         super(canonicalType, Tuple.classFor(elementTypes.length), dynamic);
+        if (elementNames != null && elementNames.length != elementTypes.length) {
+            throw new IllegalArgumentException("expected " + elementTypes.length + " element names but found " + elementNames.length);
+        }
         this.elementTypes = elementTypes;
         this.elementNames = elementNames;
         this.elementInternalTypes = elementInternalTypes;

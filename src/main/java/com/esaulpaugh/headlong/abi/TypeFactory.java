@@ -229,7 +229,7 @@ public final class TypeFactory {
         final StringBuilder canonicalType = newTypeBuilder();
         boolean dynamic = false;
         try {
-            do {
+            for (;;) {
                 final int argStart = argEnd;
                 switch (rawTypeStr.charAt(argStart)) {
                 case ')':
@@ -238,28 +238,26 @@ public final class TypeFactory {
                 default: argEnd = nextTerminator(rawTypeStr, argStart + 1);
                 }
                 final ABIType<?> e = buildUnchecked(rawTypeStr.substring(argStart, argEnd), null, null, flags);
-                canonicalType.append(e.canonicalType).append(',');
+                canonicalType.append(e.canonicalType);
                 dynamic |= e.dynamic;
                 elements.add(e);
-            } while (rawTypeStr.charAt(argEnd++) != ')');
+                if (rawTypeStr.charAt(argEnd++) == ')') {
+                    return argEnd != len
+                            ? null
+                            : new TupleType<>(
+                                canonicalType.append(')').toString(),
+                                dynamic,
+                                elements.toArray(new ABIType[0]),
+                                elementNames,
+                                null,
+                                flags
+                            );
+                }
+                canonicalType.append(',');
+            }
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);
         }
-        if (elementNames != null && elementNames.length != elements.size()) {
-            throw new IllegalArgumentException("expected " + elements.size() + " element names but found " + elementNames.length);
-        }
-        if (argEnd != len) {
-            return null;
-        }
-        canonicalType.setCharAt(canonicalType.length() - 1, ')'); // overwrite trailing comma
-        return new TupleType<>(
-            canonicalType.toString(),
-            dynamic,
-            elements.toArray(new ABIType[0]),
-            elementNames,
-            null,
-            flags
-        );
     }
 
     private static int nextTerminator(String signature, int i) {
