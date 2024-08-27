@@ -199,10 +199,10 @@ public final class ABIJSON {
         final String[] internalTypes = new String[size];
         final StringBuilder canonicalType = TypeFactory.newTypeBuilder();
         boolean dynamic = false;
-        for (int i = 0; i < elements.length; i++) {
+        for (int i = 0; ; ) {
             final JsonObject inputObj = array.get(i).getAsJsonObject();
             final ABIType<?> e = parseType(inputObj, flags);
-            canonicalType.append(e.canonicalType).append(',');
+            canonicalType.append(e.canonicalType);
             dynamic |= e.dynamic;
             elements[i] = e;
             names[i] = getName(inputObj);
@@ -213,16 +213,18 @@ public final class ABIJSON {
             if (indexed != null) {
                 indexed[i] = getBoolean(inputObj, INDEXED, null);
             }
+            if (++i == elements.length) {
+                return new TupleType<>(
+                        canonicalType.append(')').toString(),
+                        dynamic,
+                        elements,
+                        names,
+                        internalTypes,
+                        flags
+                );
+            }
+            canonicalType.append(',');
         }
-        canonicalType.setCharAt(canonicalType.length() - 1, ')');
-        return new TupleType<>(
-                canonicalType.toString(),
-                dynamic,
-                elements,
-                names,
-                internalTypes,
-                flags
-        );
     }
 
     private static TupleType<?> parseTupleType(JsonObject object, String arrayKey, int flags) {
