@@ -112,6 +112,7 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         return new Iterator<RLPItem>() {
 
             int idx = dataIndex;
+
             @Override
             public boolean hasNext() {
                 return idx < endIndex;

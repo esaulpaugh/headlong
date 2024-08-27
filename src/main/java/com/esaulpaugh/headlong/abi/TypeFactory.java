@@ -223,7 +223,7 @@ public final class TypeFactory {
 
     private static TupleType<?> parseTupleType(final String rawTypeStr, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawTypeStr.length();
-        if (len == 2 && rawTypeStr.equals("()")) return TupleType.empty(flags);
+        if (len == 2 && "()".equals(rawTypeStr)) return TupleType.empty(flags);
         final List<ABIType<?>> elements = new ArrayList<>(8);
         int argEnd = 1;
         final StringBuilder canonicalType = newTypeBuilder();
@@ -263,17 +263,18 @@ public final class TypeFactory {
     }
 
     private static int nextTerminator(String signature, int i) {
-        do {
-            switch (signature.charAt(++i)) {
+        for ( ; ; i++) {
+            switch (signature.charAt(i)) {
             case ',':
             case ')': return i;
             }
-        } while (true);
+        }
     }
 
     private static int findSubtupleEnd(String parentTypeString, int i) {
-        for (int depth = 0; ; i++) {
-            switch (parentTypeString.charAt(i)) {
+        int depth = 0;
+        do {
+            switch (parentTypeString.charAt(i++)) {
             case '(':
                 depth++;
                 continue;
@@ -283,6 +284,6 @@ public final class TypeFactory {
                 }
                 depth--;
             }
-        }
+        } while (true);
     }
 }
