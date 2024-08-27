@@ -53,8 +53,6 @@ public class EncodeTest {
 
     private static final Class<IllegalArgumentException> ILLEGAL = IllegalArgumentException.class;
 
-    private static final Class<StringIndexOutOfBoundsException> SIOOBE = StringIndexOutOfBoundsException.class;
-
     private static final String LETTERS     = "abcdefgilmnorstuxy";
     private static final String BASE_TYPE   = "[(" + LETTERS + "]+[" + LETTERS + ")\\d]+";
     private static final String SUFFIX      = "(\\)|\\[\\d*])*";
@@ -122,18 +120,18 @@ public class EncodeTest {
                     String sig = new String(temp, 0, 0, len);
                     try {
                         TupleType<?> tt = TupleType.parse(sig);
-                        if(map.containsKey(sig)) continue;
+                        if (map.containsKey(sig)) continue;
                         String canon = tt.canonicalType;
                         System.out.println("\t\t\t" + len + ' ' + sig + (sig.equals(canon) ? "" : " --> " + canon));
-                        if(!TYPE_PATTERN.matcher(sig).matches() || !TYPE_PATTERN.matcher(canon).matches()) {
+                        if (!TYPE_PATTERN.matcher(sig).matches() || !TYPE_PATTERN.matcher(canon).matches()) {
                             throw new RuntimeException("tuple fails TYPE_PATTERN: " + sig + " " + canon);
                         }
                         for (ABIType<?> t : tt) {
-                            if(!TYPE_PATTERN.matcher(t.canonicalType).matches()) {
+                            if (!TYPE_PATTERN.matcher(t.canonicalType).matches()) {
                                 throw new RuntimeException("element fails TYPE_PATTERN: " + t.canonicalType);
                             }
                         }
-                        if(!TUPLE_TYPE_PATTERN.matcher(sig).matches() || !TUPLE_TYPE_PATTERN.matcher(canon).matches()) {
+                        if (!TUPLE_TYPE_PATTERN.matcher(sig).matches() || !TUPLE_TYPE_PATTERN.matcher(canon).matches()) {
                             throw new RuntimeException("tuple fails TUPLE_TYPE_PATTERN: " + sig + " " + canon);
                         }
                         map.put(sig, canon);
@@ -232,16 +230,16 @@ public class EncodeTest {
         for (int i = 0; i < master.length; i++) {
             byte[] x = Arrays.copyOfRange(master, 0, i);
             int mod = i % UNIT_LENGTH_BYTES;
-            if(mod == expectedMod) {
+            if (mod == expectedMod) {
                 String formatted = format.apply(x);
                 assertEquals(i * 2, formatted.codePoints().filter(ch -> ch == 'f').count());
                 int div = (i - expectedMod) / UNIT_LENGTH_BYTES;
-                if(div > 0) {
+                if (div > 0) {
                     String ffff = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
                     boolean containsFfff = formatted.contains(ffff);
                     Assertions.assertTrue(containsFfff);
                     final String labeled;
-                    if(func) {
+                    if (func) {
                         labeled = paddedLabel(String.valueOf(div - 1)) + ffff;
                     } else {
                         String hex = Long.toHexString((div - 1) * UNIT_LENGTH_BYTES);
@@ -307,7 +305,7 @@ public class EncodeTest {
 
     private static void testSIOOBE(String signature) throws Throwable {
         assertThrownWithAnySubstring(
-                SIOOBE,
+                StringIndexOutOfBoundsException.class,
                 Arrays.asList(
                         "begin 0, end -1, length " + signature.length(),
                         "String index out of range: -1",
@@ -464,7 +462,7 @@ public class EncodeTest {
         final TupleType<Tuple> paramTypes = f.getInputs();
 
         StringBuilder sb = new StringBuilder();
-        for(ABIType<?> type : paramTypes.elementTypes) {
+        for (ABIType<?> type : paramTypes.elementTypes) {
             sb.append(type.getClass().getSimpleName()).append(',');
         }
         Assertions.assertEquals("BooleanType,IntType,LongType,BigIntegerType,AddressType,BigDecimalType,ArrayType,TupleType,ArrayType,ArrayType,", sb.toString());
