@@ -56,7 +56,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         this.flags = flags;
     }
 
-    int staticArrayHeadLength() {
+    private int staticArrayHeadLength() {
         switch (elementType.typeCode()) {
         case TYPE_CODE_BYTE: return UNIT_LENGTH_BYTES; // all static byte arrays round up to exactly 32 bytes and not more
         case TYPE_CODE_ARRAY: return length * elementType.asArrayType().staticArrayHeadLength();
