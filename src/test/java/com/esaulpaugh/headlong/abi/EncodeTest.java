@@ -59,8 +59,8 @@ public class EncodeTest {
     private static final String BASE_TYPE   = "[(" + LETTERS + "]+[" + LETTERS + ")\\d]+";
     private static final String SUFFIX      = "(\\)|\\[\\d*])*";
     private static final String SINGLE_TYPE = BASE_TYPE + SUFFIX;
-    private static final Pattern TYPE_PATTERN       = Pattern.compile("(" + SINGLE_TYPE + ")*(," + SINGLE_TYPE + ")*");
-    private static final Pattern TUPLE_TYPE_PATTERN = Pattern.compile("^\\(" + TYPE_PATTERN + "\\)$");
+    private static final Pattern TYPE_PATTERN       = Pattern.compile(SINGLE_TYPE + "(," + SINGLE_TYPE + ")*");
+    private static final Pattern TUPLE_TYPE_PATTERN = Pattern.compile("^\\((" + TYPE_PATTERN + ")?\\)$");
 
     @Disabled("may take minutes to run")
     @SuppressWarnings("deprecation")
@@ -103,14 +103,14 @@ public class EncodeTest {
                 System.out.println(len + "(" + Thread.currentThread().getId() + ")");
                 final byte[] temp = new byte[len];
                 final int last = len - 1;
-                if(len > 0) {
+                if (len > 0) {
                     temp[0] = '(';
-                    if(len > prefixLen) {
+                    if (len > prefixLen) {
                         for (int i = 0; i < prefixLen; i++) {
                             temp[i + 1] = (byte) prefix.charAt(i);
                         }
                     }
-                    if(len > 1) {
+                    if (len > 1) {
                         temp[last] = ')';
                     }
                 }
@@ -124,7 +124,6 @@ public class EncodeTest {
                         TupleType<?> tt = TupleType.parse(sig);
                         if(map.containsKey(sig)) continue;
                         String canon = tt.canonicalType;
-                        map.put(sig, canon);
                         System.out.println("\t\t\t" + len + ' ' + sig + (sig.equals(canon) ? "" : " --> " + canon));
                         if(!TYPE_PATTERN.matcher(sig).matches() || !TYPE_PATTERN.matcher(canon).matches()) {
                             throw new RuntimeException("tuple fails TYPE_PATTERN: " + sig + " " + canon);
@@ -137,6 +136,7 @@ public class EncodeTest {
                         if(!TUPLE_TYPE_PATTERN.matcher(sig).matches() || !TUPLE_TYPE_PATTERN.matcher(canon).matches()) {
                             throw new RuntimeException("tuple fails TUPLE_TYPE_PATTERN: " + sig + " " + canon);
                         }
+                        map.put(sig, canon);
                     } catch (IllegalArgumentException ignored) {
                         /* do nothing */
                     } catch (Throwable t) {
@@ -152,10 +152,10 @@ public class EncodeTest {
         final int size = map.size();
         System.out.println("\nsize=" + size);
 
-        List<String> list = Collections.list(map.keys());
-        Collections.sort(list);
+        List<String> keyList = Collections.list(map.keys());
+        Collections.sort(keyList);
 
-        list.forEach(System.out::println);
+        keyList.forEach(System.out::println);
 
         assertEquals(2 + (32 * 80), size); // for prefix fixed or ufixed
     }
