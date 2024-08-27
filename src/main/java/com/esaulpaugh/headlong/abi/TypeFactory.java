@@ -235,7 +235,7 @@ public final class TypeFactory {
                 case ')':
                 case ',': return null;
                 case '(': argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart + 1)); break;
-                default: argEnd = nextTerminator(rawTypeStr, argStart);
+                default: argEnd = nextTerminator(rawTypeStr, argStart + 1);
                 }
                 final ABIType<?> e = buildUnchecked(rawTypeStr.substring(argStart, argEnd), null, null, flags);
                 canonicalType.append(e.canonicalType).append(',');
