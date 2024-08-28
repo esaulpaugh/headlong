@@ -49,7 +49,7 @@ public class FunctionTest {
             assertEquals(
                     "ID       00000000\n" +
                     "0        0000000000000000000000000000000000000000000000000000000000000000",
-                    Function.formatCall(Arrays.copyOfRange(buffer, i, i + len), (int row) -> ABIType.pad(0, Integer.toString(row)))
+                    Function.formatCall(Arrays.copyOfRange(buffer, i, i + len), (int row) -> ABIType.padLabel(0, Integer.toString(row)))
             );
         }
     }
@@ -143,7 +143,7 @@ public class FunctionTest {
                                                     34, 33, 32, 31,
                                                     34, 33, 32, 31,
                                                     34, 33, 32, 31,
-            }, (int row) -> ABIType.pad(0, Integer.toString(row)))
+            }, (int row) -> ABIType.padLabel(0, Integer.toString(row)))
         );
     }
 

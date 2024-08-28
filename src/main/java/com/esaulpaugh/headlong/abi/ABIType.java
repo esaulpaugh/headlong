@@ -314,10 +314,10 @@ public abstract class ABIType<J> {
         dest.put(CACHED_NEG1_PADDING, 0, n);
     }
 
+    private static final int UNPADDED_LABEL_LEN = 6;
     static final String ID_LABEL_PADDED = "ID       ";
-    private static final int LABEL_LEN = 6;
-    static final int LABEL_PADDED_LEN = ID_LABEL_PADDED.length();
-    static final int CHARS_PER_LINE = "\n".length() + LABEL_PADDED_LEN + UNIT_LENGTH_BYTES * FastHex.CHARS_PER_BYTE;
+    static final int PADDED_LABEL_LEN = ID_LABEL_PADDED.length();
+    static final int CHARS_PER_LINE = "\n".length() + PADDED_LABEL_LEN + UNIT_LENGTH_BYTES * FastHex.CHARS_PER_BYTE;
 
     public static String format(byte[] abi) {
         return format(abi, ABIType::hexLabel);
@@ -343,19 +343,19 @@ public abstract class ABIType<J> {
 
     static String hexLabel(int row) {
         String hexLabel = Integer.toHexString(row * UNIT_LENGTH_BYTES);
-        return pad(LABEL_LEN - hexLabel.length(), hexLabel);
+        return padLabel(UNPADDED_LABEL_LEN - hexLabel.length(), hexLabel);
     }
 
-    static String pad(final int leftPadding, String unpadded) {
-        StringBuilder label = new StringBuilder(LABEL_PADDED_LEN);
+    static String padLabel(int leftPadding, String unpadded) {
+        StringBuilder padded = new StringBuilder(PADDED_LABEL_LEN);
         int i;
         for (i = 0; i < leftPadding; i++) {
-            label.append(' ');
+            padded.append(' ');
         }
-        label.append(unpadded);
-        for (i += unpadded.length(); i < LABEL_PADDED_LEN; i++) {
-            label.append(' ');
+        padded.append(unpadded);
+        for (i += unpadded.length(); i < PADDED_LABEL_LEN; i++) {
+            padded.append(' ');
         }
-        return label.toString();
+        return padded.toString();
     }
 }

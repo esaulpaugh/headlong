@@ -29,7 +29,7 @@ import java.util.Objects;
 import java.util.function.IntFunction;
 
 import static com.esaulpaugh.headlong.abi.ABIType.ID_LABEL_PADDED;
-import static com.esaulpaugh.headlong.abi.ABIType.LABEL_PADDED_LEN;
+import static com.esaulpaugh.headlong.abi.ABIType.PADDED_LABEL_LEN;
 import static com.esaulpaugh.headlong.abi.TypeEnum.ORDINAL_CONSTRUCTOR;
 import static com.esaulpaugh.headlong.abi.TypeEnum.ORDINAL_ERROR;
 import static com.esaulpaugh.headlong.abi.TypeEnum.ORDINAL_EVENT;
@@ -380,7 +380,7 @@ public final class Function implements ABIObject {
     }
 
     public static String formatCall(byte[] call) {
-        return formatCall(call, (int row) -> ABIType.pad(0, Integer.toString(row)));
+        return formatCall(call, (int row) -> ABIType.padLabel(0, Integer.toString(row)));
     }
 
     /**
@@ -399,7 +399,7 @@ public final class Function implements ABIObject {
                 SELECTOR_LEN,
                 buffer.length,
                 labeler,
-                new StringBuilder(LABEL_PADDED_LEN + (SELECTOR_LEN * FastHex.CHARS_PER_BYTE) + (bodyLen / UNIT_LENGTH_BYTES) * ABIType.CHARS_PER_LINE)
+                new StringBuilder(PADDED_LABEL_LEN + (SELECTOR_LEN * FastHex.CHARS_PER_BYTE) + (bodyLen / UNIT_LENGTH_BYTES) * ABIType.CHARS_PER_LINE)
                         .append(ID_LABEL_PADDED)
                         .append(FastHex.encodeToString(buffer, 0, SELECTOR_LEN))
         );
