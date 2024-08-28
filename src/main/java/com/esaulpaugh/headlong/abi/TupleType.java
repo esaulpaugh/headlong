@@ -462,7 +462,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         encoding.flip();
         int n = 0;
         if (n < len) {
-            final boolean dynamicArray = t.dynamic && t instanceof ArrayType && t.asArrayType().getLength() == ArrayType.DYNAMIC_LENGTH;
+            final boolean dynamicArray = t instanceof ArrayType && ArrayType.DYNAMIC_LENGTH == t.asArrayType().getLength();
             appendAnnotatedRow(sb, encoding, row++, i, dynamicArray ? " length" : "");
             n += UNIT_LENGTH_BYTES;
             if (n < len) {
@@ -491,16 +491,16 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
             sb.append(" ...");
             return;
         }
-        ABIType<?> element = get(i);
-        sb.append(' ').append(element.canonicalType);
-        if (" offset".equals(note) || !element.dynamic) {
+        ABIType<?> t = get(i);
+        sb.append(' ').append(t.canonicalType);
+        if (" offset".equals(note) || !t.dynamic) {
             String name = getElementName(i);
             if (name != null) {
                 sb.append(" \"").append(name).append('"');
             }
             sb.append(note);
             String internalType = getElementInternalType(i);
-            if (internalType != null && !internalType.equals(element.canonicalType)) {
+            if (internalType != null && !internalType.equals(t.canonicalType)) {
                 sb.append(" \tinternal=").append(internalType);
             }
         } else {
