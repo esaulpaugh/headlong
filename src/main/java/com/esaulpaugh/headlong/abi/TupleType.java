@@ -127,7 +127,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     private int countBytes(IntUnaryOperator counter) {
-        return countBytes(true, elementTypes.length, counter);
+        return countBytes(true, size(), counter);
     }
 
     static int countBytes(boolean tuple, int len, IntUnaryOperator counter) {
@@ -291,7 +291,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     private Tuple decodeIndices(ByteBuffer bb, int... indices) {
-        final Object[] results = new Object[elementTypes.length];
+        final Object[] results = new Object[size()];
         final int start = bb.position();
         final byte[] unitBuffer = newUnitBuffer();
         int prev = -1;
@@ -337,27 +337,26 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     private TupleType<J> selectElements(final boolean[] manifest, final boolean negate) {
-        final int size = size();
-        if (manifest.length != size) {
-            throw new IllegalArgumentException("expected manifest length " + size + " but found length " + manifest.length);
+        if (manifest.length != size()) {
+            throw new IllegalArgumentException("expected manifest length " + size() + " but found length " + manifest.length);
         }
         final StringBuilder canonicalType = new StringBuilder("(");
         boolean dynamic = false;
-        final List<ABIType<?>> selected = new ArrayList<>(size);
-        final List<String> selectedNames = elementNames == null ? null : new ArrayList<>(size);
-        final List<String> selectedInternalTypes = elementInternalTypes == null ? null : new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
+        final List<ABIType<?>> selected = new ArrayList<>(size());
+        final List<String> selectedNames = elementNames == null ? null : new ArrayList<>(size());
+        final List<String> selectedInternalTypes = elementInternalTypes == null ? null : new ArrayList<>(size());
+        for (int i = 0; i < size(); i++) {
             if (negate ^ manifest[i]) {
-                ABIType<?> e = get(i);
-                canonicalType.append(e.canonicalType).append(',');
-                dynamic |= e.dynamic;
-                selected.add(e);
                 if (selectedNames != null) {
                     selectedNames.add(elementNames[i]);
                 }
                 if (selectedInternalTypes != null) {
                     selectedInternalTypes.add(elementInternalTypes[i]);
                 }
+                ABIType<?> e = get(i);
+                canonicalType.append(e.canonicalType).append(',');
+                dynamic |= e.dynamic;
+                selected.add(e);
             }
         }
         return new TupleType<>(
@@ -372,11 +371,11 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
 
     private static String completeTupleTypeString(StringBuilder sb) {
         final int len = sb.length();
-        if (len != 1) {
-            sb.setCharAt(len - 1, ')'); // overwrite trailing comma
-            return sb.toString();
+        if (len == 1) {
+            return "()";
         }
-        return "()";
+        sb.setCharAt(len - 1, ')'); // overwrite trailing comma
+        return sb.toString();
     }
 
     public static <X extends Tuple> TupleType<X> parse(String rawTupleTypeString) {
@@ -388,11 +387,11 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     public static <X extends Tuple> TupleType<X> of(String... typeStrings) {
-        StringBuilder sb = new StringBuilder("(");
+        StringBuilder rawType = new StringBuilder("(");
         for (String t : typeStrings) {
-            sb.append(t).append(',');
+            rawType.append(t).append(',');
         }
-        return parse(completeTupleTypeString(sb));
+        return parse(completeTupleTypeString(rawType));
     }
 
     static TupleType<Tuple> empty(int flags) {
