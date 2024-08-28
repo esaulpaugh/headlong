@@ -15,7 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.esaulpaugh.headlong.util.Strings;
+import com.esaulpaugh.headlong.util.FastHex;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -484,7 +484,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         sb.append(hexLabel(row));
         byte[] rowBuffer = newUnitBuffer();
         encoding.get(rowBuffer);
-        sb.append(Strings.encode(rowBuffer));
+        sb.append(FastHex.encodeToString(rowBuffer));
         sb.append("\t[").append(i).append(']');
         if (note == null) {
             sb.append(" ...");

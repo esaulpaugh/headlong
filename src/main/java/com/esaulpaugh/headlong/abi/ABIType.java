@@ -17,7 +17,6 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Integers;
-import com.esaulpaugh.headlong.util.Strings;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -337,7 +336,7 @@ public abstract class ABIType<J> {
                 sb.append('\n');
             }
             sb.append(labeler.apply(row++))
-                    .append(Strings.encode(buffer, offset, UNIT_LENGTH_BYTES, Strings.HEX));
+                    .append(FastHex.encodeToString(buffer, offset, UNIT_LENGTH_BYTES));
             offset += UNIT_LENGTH_BYTES;
         }
         return sb.toString();
