@@ -415,7 +415,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     String annotate(Tuple tuple, StringBuilder sb) {
-        if (size() != tuple.elements.length) {
+        if (tuple.elements.length != size()) {
             throw lengthMismatch(tuple);
         }
         if (size() > 0) {
@@ -423,16 +423,20 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
             int i = 0;
             final int last = size() - 1;
             int offset = headLengthSum;
-            final byte[] rowBuffer = newUnitBuffer();
+            final ByteBuffer rowBuf = ByteBuffer.allocate(UNIT_LENGTH_BYTES);
             do {
                 final ABIType<Object> t = get(i);
                 if (!t.dynamic) {
-                    row = encodeTailAnnotated(sb, row, i, tuple.elements[i]);
+                    row = encodeTailAnnotated(sb, t, row, i, tuple.elements[i]);
                     if (i == last) {
                         break;
                     }
                 } else {
-                    encodeOffsetAnnotated(sb, offset, rowBuffer, row++, i);
+                    // encode offset
+                    insertIntUnsigned(offset, rowBuf); // insert offset
+                    rowBuf.flip();
+                    appendAnnotatedRow(sb, rowBuf, row++, i, " offset");
+                    rowBuf.flip();
                     if (i == last) {
                         break;
                     }
@@ -444,30 +448,28 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
             do {
                 final ABIType<Object> t = get(i);
                 if (t.dynamic) {
-                    row = encodeTailAnnotated(sb, row, i, tuple.elements[i]);
+                    row = encodeTailAnnotated(sb, t, row, i, tuple.elements[i]);
                 }
             } while (++i < size());
         }
         return sb.toString();
     }
 
-    private int encodeTailAnnotated(StringBuilder sb, int row, int i, Object v) {
-        final ABIType<Object> t = get(i);
-        final ByteBuffer dest = ByteBuffer.allocate(t.validate(v));
-        t.encodeTail(v, dest);
-        final int len = dest.position();
-        dest.flip();
+    private int encodeTailAnnotated(StringBuilder sb, ABIType<Object> t, int row, int i, Object v) {
+        final ByteBuffer encoding = ByteBuffer.allocate(t.validate(v));
+        t.encodeTail(v, encoding);
+        final int len = encoding.position();
+        encoding.flip();
         int n = 0;
         if (n < len) {
-            final byte[] rowData = newUnitBuffer();
             final boolean dynamicArray = t.dynamic && t instanceof ArrayType && t.asArrayType().getLength() == ArrayType.DYNAMIC_LENGTH;
-            appendAnnotatedRow(sb, dest, rowData, row++, i, dynamicArray ? " length" : "");
+            appendAnnotatedRow(sb, encoding, row++, i, dynamicArray ? " length" : "");
             n += UNIT_LENGTH_BYTES;
             if (n < len) {
-                appendAnnotatedRow(sb, dest, rowData, row++, i, dynamicArray ? "" : null);
+                appendAnnotatedRow(sb, encoding, row++, i, dynamicArray ? "" : null);
                 n += UNIT_LENGTH_BYTES;
                 while (n < len) {
-                    appendAnnotatedRow(sb, dest, rowData, row++, i, null);
+                    appendAnnotatedRow(sb, encoding, row++, i, null);
                     n += UNIT_LENGTH_BYTES;
                 }
             }
@@ -475,20 +477,14 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         return row;
     }
 
-    private void encodeOffsetAnnotated(StringBuilder sb, int offset, byte[] rowBuffer, int row, int i) {
-        ByteBuffer rowData = ByteBuffer.wrap(rowBuffer);
-        insertIntUnsigned(offset, rowData); // insert offset
-        rowData.flip();
-        appendAnnotatedRow(sb, rowData, rowBuffer, row, i, " offset");
-    }
-
-    private void appendAnnotatedRow(StringBuilder sb, ByteBuffer bb, byte[] rowBuffer, int row, int i, String note) {
+    private void appendAnnotatedRow(StringBuilder sb, ByteBuffer encoding, int row, int i, String note) {
         if (sb.length() > 0) {
             sb.append('\n');
         }
         String label = Integer.toHexString(row * UNIT_LENGTH_BYTES);
         ABIType.appendPadded(ABIType.LABEL_LEN - label.length(), label, sb);
-        bb.get(rowBuffer);
+        byte[] rowBuffer = newUnitBuffer();
+        encoding.get(rowBuffer);
         sb.append(Strings.encode(rowBuffer));
         sb.append("\t[").append(i).append(']');
         if (note == null) {
