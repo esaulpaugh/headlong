@@ -405,9 +405,9 @@ public class MonteCarloTestCase {
         switch (type.typeCode()) {
         case TYPE_CODE_BOOLEAN: return r.nextBoolean();
         case TYPE_CODE_BYTE: return (byte) r.nextInt();
-        case TYPE_CODE_INT: return (int) generateLong(r, (IntType) type);
-        case TYPE_CODE_LONG: return generateLong(r, (LongType) type);
-        case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, (BigIntegerType) type);
+        case TYPE_CODE_INT: return (int) generateLong(r, type.asUnitType());
+        case TYPE_CODE_LONG: return generateLong(r, type.asUnitType());
+        case TYPE_CODE_BIG_INTEGER: return generateBigInteger(r, type.asUnitType());
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimal(r, (BigDecimalType) type);
         case TYPE_CODE_ARRAY: return generateArray(type.asArrayType(), r);
         case TYPE_CODE_TUPLE: return generateTuple(type.asTupleType().elementTypes, r);
@@ -416,11 +416,11 @@ public class MonteCarloTestCase {
         }
     }
 
-    private static long generateLong(Random r, UnitType<? extends Number> unitType) {
+    private static long generateLong(Random r, UnitType<?> unitType) {
         return TestUtils.wildLong(r, unitType.unsigned, unitType.bitLength);
     }
 
-    private static BigInteger generateBigInteger(Random r, UnitType<? extends Number> type) {
+    private static BigInteger generateBigInteger(Random r, UnitType<?> type) {
         return TestUtils.wildBigInteger(r, type.unsigned, type.bitLength);
     }
 
@@ -444,9 +444,9 @@ public class MonteCarloTestCase {
         case TYPE_CODE_BYTE:
             final byte[] random = TestUtils.randomBytes(len, r);
             return arrayType.isString() ? Strings.encode(random, Strings.UTF_8) : random;
-        case TYPE_CODE_INT: return generateIntArray(len, (IntType) elementType, r);
-        case TYPE_CODE_LONG: return generateLongArray(len, (LongType) elementType, r);
-        case TYPE_CODE_BIG_INTEGER: return generateBigIntegerArray(len, (BigIntegerType) elementType, r);
+        case TYPE_CODE_INT: return generateIntArray(len, elementType.asUnitType(), r);
+        case TYPE_CODE_LONG: return generateLongArray(len, elementType.asUnitType(), r);
+        case TYPE_CODE_BIG_INTEGER: return generateBigIntegerArray(len, (BigIntegerType) elementType.asUnitType(), r);
         case TYPE_CODE_BIG_DECIMAL: return generateBigDecimalArray(len, (BigDecimalType) elementType, r);
         case TYPE_CODE_ARRAY: return generateArrayArray(elementType.asArrayType(), len, r);
         case TYPE_CODE_TUPLE: return generateTupleArray(elementType.asTupleType(), len, r);
@@ -467,7 +467,7 @@ public class MonteCarloTestCase {
         return booleans;
     }
 
-    private static int[] generateIntArray(final int len, IntType intType, Random r) {
+    private static int[] generateIntArray(final int len, UnitType<?> intType, Random r) {
         int[] ints = new int[len];
         for (int i = 0; i < len; i++) {
             ints[i] = (int) generateLong(r, intType);
@@ -475,7 +475,7 @@ public class MonteCarloTestCase {
         return ints;
     }
 
-    private static long[] generateLongArray(final int len, LongType longType, Random r) {
+    private static long[] generateLongArray(final int len, UnitType<?> longType, Random r) {
         long[] longs = new long[len];
         for (int i = 0; i < len; i++) {
             longs[i] = generateLong(r, longType);
@@ -483,7 +483,7 @@ public class MonteCarloTestCase {
         return longs;
     }
 
-    private static BigInteger[] generateBigIntegerArray(final int len, BigIntegerType type, Random r) {
+    private static BigInteger[] generateBigIntegerArray(final int len, UnitType<? extends Number> type, Random r) {
         BigInteger[] bigInts = new BigInteger[len];
         for (int i = 0; i < len; i++) {
             bigInts[i] = generateBigInteger(r, type);
