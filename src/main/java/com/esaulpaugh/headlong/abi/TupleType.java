@@ -481,8 +481,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         if (sb.length() > 0) {
             sb.append('\n');
         }
-        String label = Integer.toHexString(row * UNIT_LENGTH_BYTES);
-        ABIType.appendPadded(ABIType.LABEL_LEN - label.length(), label, sb);
+        sb.append(hexLabel(row));
         byte[] rowBuffer = newUnitBuffer();
         encoding.get(rowBuffer);
         sb.append(Strings.encode(rowBuffer));

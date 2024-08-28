@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.JsonObject;
@@ -27,6 +28,8 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.IntFunction;
 
+import static com.esaulpaugh.headlong.abi.ABIType.ID_LABEL_PADDED;
+import static com.esaulpaugh.headlong.abi.ABIType.LABEL_PADDED_LEN;
 import static com.esaulpaugh.headlong.abi.TypeEnum.ORDINAL_CONSTRUCTOR;
 import static com.esaulpaugh.headlong.abi.TypeEnum.ORDINAL_ERROR;
 import static com.esaulpaugh.headlong.abi.TypeEnum.ORDINAL_EVENT;
@@ -391,16 +394,14 @@ public final class Function implements ABIObject {
     public static String formatCall(byte[] buffer, IntFunction<String> labeler) {
         final int bodyLen = buffer.length - SELECTOR_LEN;
         Integers.checkIsMultiple(bodyLen, UNIT_LENGTH_BYTES);
-        final String label = ABIType.pad(0, "ID");
-        final String selectorHex = Strings.encode(buffer, 0, SELECTOR_LEN, Strings.HEX);
         return ABIType.finishFormat(
                 buffer,
                 SELECTOR_LEN,
                 buffer.length,
                 labeler,
-                new StringBuilder(label.length() + selectorHex.length() + (bodyLen / UNIT_LENGTH_BYTES) * ABIType.CHARS_PER_LINE)
-                        .append(label)
-                        .append(selectorHex)
+                new StringBuilder(LABEL_PADDED_LEN + (SELECTOR_LEN * FastHex.CHARS_PER_BYTE) + (bodyLen / UNIT_LENGTH_BYTES) * ABIType.CHARS_PER_LINE)
+                        .append(ID_LABEL_PADDED)
+                        .append(FastHex.encodeToString(buffer, 0, SELECTOR_LEN))
         );
     }
 
@@ -417,10 +418,10 @@ public final class Function implements ABIObject {
      * method is subject to change or removal in a future release.
      */
     public String annotateCall(Tuple args) {
-        StringBuilder sb = new StringBuilder(768);
-        sb.append(name).append(":\n");
-        ABIType.appendPadded(0, "ID", sb);
-        sb.append(Strings.encode(selector));
-        return inputTypes.annotate(args, sb);
+        return inputTypes.annotate(
+                args,
+                new StringBuilder(768).append(name).append(":\n")
+                    .append(ID_LABEL_PADDED).append(selectorHex())
+        );
     }
 }

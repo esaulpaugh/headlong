@@ -316,15 +316,13 @@ public abstract class ABIType<J> {
         dest.put(CACHED_NEG1_PADDING, 0, n);
     }
 
-    static final int LABEL_LEN = 6;
-    static final int LABEL_PADDED_LEN = LABEL_LEN + 3;
-    static final int CHARS_PER_LINE = "\n".length() + LABEL_PADDED_LEN + (FastHex.CHARS_PER_BYTE * UNIT_LENGTH_BYTES);
+    static final String ID_LABEL_PADDED = "ID       ";
+    private static final int LABEL_LEN = 6;
+    static final int LABEL_PADDED_LEN = ID_LABEL_PADDED.length();
+    static final int CHARS_PER_LINE = "\n".length() + LABEL_PADDED_LEN + UNIT_LENGTH_BYTES * FastHex.CHARS_PER_BYTE;
 
     public static String format(byte[] abi) {
-        return format(abi, (int row) -> {
-            String unpadded = Integer.toHexString(row * UNIT_LENGTH_BYTES);
-            return pad(LABEL_LEN - unpadded.length(), unpadded);
-        });
+        return format(abi, ABIType::hexLabel);
     }
 
     public static String format(byte[] abi, IntFunction<String> labeler) {
@@ -345,20 +343,21 @@ public abstract class ABIType<J> {
         return sb.toString();
     }
 
-    static String pad(final int leftPadding, String unpadded) {
-        StringBuilder label = new StringBuilder(LABEL_PADDED_LEN);
-        appendPadded(leftPadding, unpadded, label);
-        return label.toString();
+    static String hexLabel(int row) {
+        String hexLabel = Integer.toHexString(row * UNIT_LENGTH_BYTES);
+        return pad(LABEL_LEN - hexLabel.length(), hexLabel);
     }
 
-    static void appendPadded(final int leftPadding, String unpadded, StringBuilder sb) {
+    static String pad(final int leftPadding, String unpadded) {
+        StringBuilder label = new StringBuilder(LABEL_PADDED_LEN);
         int i;
         for (i = 0; i < leftPadding; i++) {
-            sb.append(' ');
+            label.append(' ');
         }
-        sb.append(unpadded);
+        label.append(unpadded);
         for (i += unpadded.length(); i < LABEL_PADDED_LEN; i++) {
-            sb.append(' ');
+            label.append(' ');
         }
+        return label.toString();
     }
 }
