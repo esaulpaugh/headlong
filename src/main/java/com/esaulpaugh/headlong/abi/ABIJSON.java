@@ -402,7 +402,7 @@ public final class ABIJSON {
 
     private static String getString(JsonObject object, String key) {
         final JsonElement element = object.get(key);
-        if (element instanceof JsonPrimitive) {
+        if (element instanceof JsonPrimitive && ((JsonPrimitive) element).isString()) {
             return element.getAsString();
         }
         if (isNull(element)) {
