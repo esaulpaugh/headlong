@@ -177,7 +177,7 @@ public final class ABIJSON {
             final boolean[] indexed = new boolean[inputs.size()];
             return new Event<>(
                     getName(event),
-                    getBooleanElseFalse(event, ANONYMOUS),
+                    getAnonymous(event),
                     parseTupleType(inputs, indexed, flags),
                     indexed
             );
@@ -211,7 +211,7 @@ public final class ABIJSON {
                 internalTypes[i] = internalType.equals(e.canonicalType) ? e.canonicalType : internalType;
             }
             if (indexed != null) {
-                indexed[i] = getBooleanElseFalse(inputObj, INDEXED);
+                indexed[i] = getIndexed(inputObj);
             }
             if (++i == elements.length) {
                 return new TupleType<>(
@@ -411,15 +411,26 @@ public final class ABIJSON {
         throw new IllegalArgumentException(key + " is not a string");
     }
 
-    private static boolean getBooleanElseFalse(JsonObject object, String key) {
-        final JsonElement element = object.get(key);
+    private static boolean getAnonymous(JsonObject object) {
+        final JsonElement element = object.get(ANONYMOUS);
+        if (element instanceof JsonPrimitive) {
+            return element.getAsBoolean();
+        }
         if (isNull(element)) {
             return false;
         }
-        if (element.isJsonPrimitive() && ((JsonPrimitive) element).isBoolean()) {
+        throw new IllegalArgumentException(ANONYMOUS + " is not a boolean");
+    }
+
+    private static boolean getIndexed(JsonObject object) {
+        final JsonElement element = object.get(INDEXED);
+        if (element instanceof JsonPrimitive) {
             return element.getAsBoolean();
         }
-        throw new IllegalArgumentException(key + " is not a boolean");
+        if (isNull(element)) {
+            throw new NullPointerException(INDEXED + " is null");
+        }
+        throw new IllegalArgumentException(INDEXED + " is not a boolean");
     }
 
     private static boolean isNull(JsonElement element) {
