@@ -402,11 +402,11 @@ public final class ABIJSON {
 
     private static String getString(JsonObject object, String key) {
         final JsonElement element = object.get(key);
+        if (element instanceof JsonPrimitive) {
+            return element.getAsString();
+        }
         if (isNull(element)) {
             return null;
-        }
-        if (element.isJsonPrimitive() && ((JsonPrimitive) element).isString()) {
-            return element.getAsString();
         }
         throw new IllegalArgumentException(key + " is not a string");
     }
