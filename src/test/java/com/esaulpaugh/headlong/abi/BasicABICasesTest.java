@@ -73,9 +73,9 @@ public class BasicABICasesTest {
                 throw new RuntimeException(key + " not found");
             }
 
-            JsonArray args = ABIJSON.getArray(jsonObject, "args");
+            JsonArray args = jsonObject.getAsJsonArray("args");
             String result = jsonObject.get("result").getAsString();
-            JsonArray types = ABIJSON.getArray(jsonObject, "types");
+            JsonArray types = jsonObject.getAsJsonArray("types");
 
             final int size = types.size();
             final ABIType<?>[] arr = new ABIType<?>[size];

@@ -172,7 +172,7 @@ public final class ABIJSON {
     }
 
     private static Event<?> parseEventUnchecked(JsonObject event, int flags) {
-        final JsonArray inputs = getArray(event, INPUTS);
+        final JsonArray inputs = event.getAsJsonArray(INPUTS);
         if (inputs != null) {
             final boolean[] indexed = new boolean[inputs.size()];
             return new Event<>(
@@ -228,7 +228,7 @@ public final class ABIJSON {
     }
 
     private static TupleType<?> parseTupleType(JsonObject object, String arrayKey, int flags) {
-        return parseTupleType(getArray(object, arrayKey), null, flags);
+        return parseTupleType(object.getAsJsonArray(arrayKey), null, flags);
     }
 
     private static ABIType<?> parseType(JsonObject object, int flags) {
@@ -392,48 +392,33 @@ public final class ABIJSON {
         return parseElement(json).getAsJsonArray();
     }
 
-    static JsonArray getArray(JsonObject object, String key) {
-        final JsonElement element = object.get(key);
-        if (isNull(element)) {
-            return null;
-        }
-        return element.getAsJsonArray();
-    }
-
     private static String getString(JsonObject object, String key) {
         final JsonElement element = object.get(key);
-        if (element instanceof JsonPrimitive && ((JsonPrimitive) element).isString()) {
-            return element.getAsString();
-        }
-        if (isNull(element)) {
+        if (element == null || element.isJsonNull()) {
             return null;
+        }
+        if (((JsonPrimitive) element).isString()) {
+            return element.getAsString();
         }
         throw new IllegalArgumentException(key + " is not a string");
     }
 
     private static boolean getAnonymous(JsonObject object) {
         final JsonElement element = object.get(ANONYMOUS);
-        if (element instanceof JsonPrimitive) {
-            return element.getAsBoolean();
-        }
-        if (isNull(element)) {
+        if (element == null) {
             return false;
+        }
+        if (((JsonPrimitive) element).isBoolean()) {
+            return element.getAsBoolean();
         }
         throw new IllegalArgumentException(ANONYMOUS + " is not a boolean");
     }
 
     private static boolean getIndexed(JsonObject object) {
         final JsonElement element = object.get(INDEXED);
-        if (element instanceof JsonPrimitive) {
+        if (((JsonPrimitive) element).isBoolean()) {
             return element.getAsBoolean();
         }
-        if (isNull(element)) {
-            throw new NullPointerException(INDEXED + " is null");
-        }
         throw new IllegalArgumentException(INDEXED + " is not a boolean");
-    }
-
-    private static boolean isNull(JsonElement element) {
-        return element == null || element.isJsonNull();
     }
 }
