@@ -178,12 +178,8 @@ public final class TypeFactory {
         if (baseTypeStr.charAt(0) == '(') {
             return parseTupleType(baseTypeStr, elementNames, flags);
         }
-        final ABIType<?> ret;
-        if ((flags & ABIType.FLAG_LEGACY_DECODE) != 0) {
-            ret = LEGACY_BASE_TYPE_MAP.get(baseTypeStr);
-        } else {
-            ret = BASE_TYPE_MAP.get(baseTypeStr);
-        }
+        final Map<String, ABIType<?>> map = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_BASE_TYPE_MAP : BASE_TYPE_MAP;
+        final ABIType<?> ret = map.get(baseTypeStr);
         return ret != null ? ret : tryParseFixed(baseTypeStr);
     }
 
