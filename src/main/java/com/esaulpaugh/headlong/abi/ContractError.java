@@ -55,6 +55,11 @@ public final class ContractError<T extends Tuple> implements ABIObject {
     }
 
     @Override
+    public boolean isContractError() {
+        return true;
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(name, inputs);
     }
@@ -66,6 +71,11 @@ public final class ContractError<T extends Tuple> implements ABIObject {
             return name.equals(that.name) && inputs.equals(that.inputs);
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return toJson(true);
     }
 
     public static <X extends Tuple> ContractError<X> fromJson(String errorJson) {
@@ -80,15 +90,5 @@ public final class ContractError<T extends Tuple> implements ABIObject {
     /** @see ABIObject#fromJsonObject(int, JsonObject) */
     public static <X extends Tuple> ContractError<X> fromJsonObject(int flags, JsonObject error) {
         return ABIJSON.parseError(error, flags);
-    }
-
-    @Override
-    public String toString() {
-        return toJson(true);
-    }
-
-    @Override
-    public boolean isContractError() {
-        return true;
     }
 }

@@ -103,6 +103,11 @@ public final class Event<T extends Tuple> implements ABIObject {
     }
 
     @Override
+    public boolean isEvent() {
+        return true;
+    }
+
+    @Override
     public int hashCode() {
         return 31 * (31 * (31 * name.hashCode() + inputs.hashCode()) + Arrays.hashCode(indexManifest)) + Boolean.hashCode(anonymous);
     }
@@ -118,28 +123,9 @@ public final class Event<T extends Tuple> implements ABIObject {
                 && Arrays.equals(other.indexManifest, this.indexManifest);
     }
 
-    public static <X extends Tuple> Event<X> fromJson(String eventJson) {
-        return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(eventJson));
-    }
-
-    /** @see ABIObject#fromJson(int, String) */
-    public static <X extends Tuple> Event<X> fromJson(int flags, String eventJson) {
-        return fromJsonObject(flags, ABIJSON.parseObject(eventJson));
-    }
-
-    /** @see ABIObject#fromJsonObject(int, JsonObject) */
-    public static <X extends Tuple> Event<X> fromJsonObject(int flags, JsonObject event) {
-        return ABIJSON.parseEvent(event, flags);
-    }
-
     @Override
     public String toString() {
         return toJson(true);
-    }
-
-    @Override
-    public boolean isEvent() {
-        return true;
     }
 
     public <X extends Tuple> X decodeTopics(byte[][] topics) {
@@ -216,5 +202,19 @@ public final class Event<T extends Tuple> implements ABIObject {
         if (topics.length != expectedTopics) {
             throw new IllegalArgumentException("expected topics.length " + expectedTopics + " but found length " + topics.length);
         }
+    }
+
+    public static <X extends Tuple> Event<X> fromJson(String eventJson) {
+        return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(eventJson));
+    }
+
+    /** @see ABIObject#fromJson(int, String) */
+    public static <X extends Tuple> Event<X> fromJson(int flags, String eventJson) {
+        return fromJsonObject(flags, ABIJSON.parseObject(eventJson));
+    }
+
+    /** @see ABIObject#fromJsonObject(int, JsonObject) */
+    public static <X extends Tuple> Event<X> fromJsonObject(int flags, JsonObject event) {
+        return ABIJSON.parseEvent(event, flags);
     }
 }

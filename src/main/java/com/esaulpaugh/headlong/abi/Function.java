@@ -299,6 +299,11 @@ public final class Function implements ABIObject {
     }
 
     @Override
+    public boolean isFunction() {
+        return true;
+    }
+
+    @Override
     public int hashCode() {
         return 31 * Objects.hash(type, name, inputTypes, outputTypes, stateMutability, hashAlgorithm)
                 + Arrays.hashCode(selector);
@@ -323,11 +328,6 @@ public final class Function implements ABIObject {
         return toJson(true);
     }
 
-    @Override
-    public boolean isFunction() {
-        return true;
-    }
-
     private static String validateName(String input) {
         final int len = input.length();
         if (len > MAX_NAME_CHARS) {
@@ -341,6 +341,26 @@ public final class Function implements ABIObject {
         }
         return input;
     }
+
+    /**
+     * Experimental. Annotates the given function call and returns an informational formatted String. This method is
+     * subject to change or removal in a future release.
+     */
+    public String annotateCall(byte[] call) {
+        return annotateCall(decodeCall(call));
+    }
+
+    /**
+     * Experimental. Annotates the function call given the {@code args} and returns an informational formatted String. This
+     * method is subject to change or removal in a future release.
+     */
+    public String annotateCall(Tuple args) {
+        return inputTypes.annotate(
+                args,
+                new StringBuilder(768).append(name).append(":\n")
+                        .append(ID_LABEL_PADDED).append(selectorHex())
+        );
+    }
 // ---------------------------------------------------------------------------------------------------------------------
     public static Function parse(String signature) {
         return new Function(signature);
@@ -352,24 +372,6 @@ public final class Function implements ABIObject {
 
     public static Function parse(int flags, String signature, String outputs) {
         return new Function(flags, signature, outputs);
-    }
-
-    public static Function fromJson(String objectJson) {
-        return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(objectJson));
-    }
-
-    /** @see ABIObject#fromJson(int, String) */
-    public static Function fromJson(int flags, String objectJson) {
-        return fromJsonObject(flags, ABIJSON.parseObject(objectJson));
-    }
-
-    /** @see ABIObject#fromJsonObject(int, JsonObject) */
-    public static Function fromJsonObject(int flags, JsonObject function) {
-        return fromJsonObject(flags, function, Function.newDefaultDigest());
-    }
-
-    public static Function fromJsonObject(int flags, JsonObject function, MessageDigest digest) {
-        return ABIJSON.parseFunction(function, digest, flags);
     }
 
     /**
@@ -405,23 +407,21 @@ public final class Function implements ABIObject {
         );
     }
 
-    /**
-     * Experimental. Annotates the given function call and returns an informational formatted String. This method is
-     * subject to change or removal in a future release.
-     */
-    public String annotateCall(byte[] call) {
-        return annotateCall(decodeCall(call));
+    public static Function fromJson(String objectJson) {
+        return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(objectJson));
     }
 
-    /**
-     * Experimental. Annotates the function call given the {@code args} and returns an informational formatted String. This
-     * method is subject to change or removal in a future release.
-     */
-    public String annotateCall(Tuple args) {
-        return inputTypes.annotate(
-                args,
-                new StringBuilder(768).append(name).append(":\n")
-                    .append(ID_LABEL_PADDED).append(selectorHex())
-        );
+    /** @see ABIObject#fromJson(int, String) */
+    public static Function fromJson(int flags, String objectJson) {
+        return fromJsonObject(flags, ABIJSON.parseObject(objectJson));
+    }
+
+    /** @see ABIObject#fromJsonObject(int, JsonObject) */
+    public static Function fromJsonObject(int flags, JsonObject function) {
+        return fromJsonObject(flags, function, Function.newDefaultDigest());
+    }
+
+    public static Function fromJsonObject(int flags, JsonObject function, MessageDigest digest) {
+        return ABIJSON.parseFunction(function, digest, flags);
     }
 }
