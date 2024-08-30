@@ -160,9 +160,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
             if (actual > bitLength) {
                 return new IllegalArgumentException("unsigned val exceeds bit limit: " + actual + " > " + bitLength);
             }
-            throw new AssertionError();
-        }
-        if (actual >= bitLength) {
+        } else if (actual >= bitLength) {
             return new IllegalArgumentException("signed val exceeds bit limit: " + actual + " >= " + bitLength);
         }
         throw new AssertionError();
