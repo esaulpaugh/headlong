@@ -85,11 +85,7 @@ public final class TypeFactory {
             ABIType<?> value = e.getValue();
             if (value instanceof ArrayType) {
                 final ArrayType<?, ?, ?> at = value.asArrayType();
-                if (at.isString()) {
-                    value = new ArrayType<ByteType, Byte, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAG_LEGACY_DECODE);
-                } else {
-                    value = new ArrayType<ByteType, Byte, byte[]>(at.canonicalType, byte[].class, ByteType.INSTANCE, at.getLength(), byte[][].class, ABIType.FLAG_LEGACY_DECODE);
-                }
+                value = new ArrayType<>(at.canonicalType, at.clazz, ByteType.INSTANCE, at.getLength(), at.arrayClass(), ABIType.FLAG_LEGACY_DECODE);
             }
             localLegacy.put(e.getKey(), value);
         }
