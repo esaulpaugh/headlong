@@ -34,9 +34,6 @@ public final class TypeFactory {
 
     static final int ADDRESS_BIT_LEN = 160;
 
-    private static final int DECIMAL_BIT_LEN = 168;
-    private static final int DECIMAL_SCALE = 10;
-
     private static final int FIXED_BIT_LEN = 128;
     private static final int FIXED_SCALE = 18;
 
@@ -69,7 +66,6 @@ public final class TypeFactory {
 
         local.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
         local.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
-        local.put("fixed168x10", new BigDecimalType("fixed168x10", DECIMAL_BIT_LEN, DECIMAL_SCALE, false));
 
         local.put("bool", BooleanType.INSTANCE);
 
