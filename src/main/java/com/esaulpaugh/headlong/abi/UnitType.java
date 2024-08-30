@@ -101,7 +101,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
     final long decodeUnsignedLong(ByteBuffer bb) {
         final long a = bb.getLong(), b = bb.getLong(), c = bb.getLong(), d = bb.getLong();
-        if ((a | b | c) == 0L && d >= 0L && d <= maxLong) {
+        if ((a | b | c | (d & (-1L << bitLength))) == 0L) {
             return d;
         }
         throw err(bb);
@@ -110,10 +110,10 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     final long decodeSignedLong(ByteBuffer bb) {
         final long a = bb.getLong(), b = bb.getLong(), c = bb.getLong(), d = bb.getLong();
         if ((a | b | c) == 0L) {
-            if (Long.numberOfLeadingZeros(d) > Long.SIZE - bitLength) {
+            if (Long.numberOfLeadingZeros(d) - (Long.SIZE - bitLength) > 0) {
                 return d;
             }
-        } else if ((a & b & c) == -1L && Long.numberOfLeadingZeros(~d) > Long.SIZE - bitLength) {
+        } else if ((a & b & c) == -1L && Long.numberOfLeadingZeros(~d) - (Long.SIZE - bitLength) > 0) {
             return d;
         }
         throw err(bb);
