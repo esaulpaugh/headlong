@@ -259,19 +259,19 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     private void encodeObjects(E[] arr, ByteBuffer dest) {
         encodeArrayLen(arr.length, dest);
         if (elementType.dynamic) {
-            encodeDynamic(arr, elementType, dest, OFFSET_LENGTH_BYTES * arr.length);
+            encodeDynamic(arr, dest, OFFSET_LENGTH_BYTES * arr.length);
         } else {
-            encodeStatic(arr, elementType, dest);
+            encodeStatic(arr, dest);
         }
     }
 
-    private void encodeStatic(E[] values, ET et, ByteBuffer dest) {
+    private void encodeStatic(E[] values, ByteBuffer dest) {
         for (E value : values) {
-            et.encodeTail(value, dest);
+            elementType.encodeTail(value, dest);
         }
     }
 
-    private void encodeDynamic(E[] values, ET et, ByteBuffer dest, int offset) {
+    private void encodeDynamic(E[] values, ByteBuffer dest, int offset) {
         if (values.length == 0) {
             return;
         }
@@ -280,11 +280,11 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
             insertIntUnsigned(offset, dest); // insert offset
             if (i == last) {
                 for (E value : values) {
-                    et.encodeTail(value, dest);
+                    elementType.encodeTail(value, dest);
                 }
                 return;
             }
-            offset += et.dynamicByteLength(values[i]); // return next offset
+            offset += elementType.dynamicByteLength(values[i]); // return next offset
         }
     }
 
