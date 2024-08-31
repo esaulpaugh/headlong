@@ -62,14 +62,13 @@ public final class RLPEncoder {
      */
     static byte[] encodeRecordContent(int dataLen, long seq, List<KVP> pairs) {
         pairs.sort(Comparator.naturalOrder()); // note that ArrayList overrides List.sort
-        byte[] arr = new byte[itemLen(dataLen)];
-        ByteBuffer bb = ByteBuffer.wrap(arr);
+        ByteBuffer bb = ByteBuffer.allocate(itemLen(dataLen));
         insertListPrefix(dataLen, bb);
         putString(Integers.toBytes(seq), bb);
         for (KVP pair : pairs) {
             pair.export(bb);
         }
-        return arr;
+        return bb.array();
     }
 // ---------------------------------------------------------------------------------------------------------------------
     private static int requireNoOverflow(long val) {
@@ -101,15 +100,11 @@ public final class RLPEncoder {
         if (raw instanceof Object[]) {
             return listEncodedLen(Arrays.asList((Object[]) raw));
         }
-        if (raw == null) {
-            throw new NullPointerException();
-        }
         throw new IllegalArgumentException("unsupported object type: " + raw.getClass().getName());
     }
 
     private static int stringEncodedLen(byte[] byteString) {
-        final int dataLen = byteString.length;
-        return itemLen(dataLen == 1 && DataType.isSingleByte(byteString[0]) ? 0 : dataLen);
+        return itemLen(byteString.length == 1 && DataType.isSingleByte(byteString[0]) ? 0 : byteString.length);
     }
 
     private static int listEncodedLen(Iterable<?> items) {
@@ -125,18 +120,9 @@ public final class RLPEncoder {
         } else if (raw instanceof Object[]) {
             Iterable<?> elements = Arrays.asList((Object[]) raw);
             encodeList(sumEncodedLen(elements), elements, bb);
-        } else if (raw == null) {
-            throw new NullPointerException();
         } else {
             throw new IllegalArgumentException("unsupported object type: " + raw.getClass().getName());
         }
-    }
-
-    private static void encodeLen1String(byte first, ByteBuffer bb) {
-        if (first < 0x00) { // same as (first & 0xFF) >= 0x80
-            bb.put((byte) (STRING_SHORT_OFFSET + 1));
-        }
-        bb.put(first);
     }
 
     private static void encodeList(int dataLen, Iterable<?> elements, ByteBuffer bb) {
@@ -183,16 +169,18 @@ public final class RLPEncoder {
      * @param dest    the destination for the sequence of RLP encodings
      */
     public static void putString(byte[] byteString, ByteBuffer dest) {
-        final int dataLen = byteString.length;
-        if (isShort(dataLen)) {
-            if (dataLen == 1) {
-                encodeLen1String(byteString[0], dest);
+        if (isShort(byteString.length)) {
+            if (byteString.length == 1) {
+                if (byteString[0] < 0x00) { // same as (first & 0xFF) >= 0x80
+                    dest.put((byte) (STRING_SHORT_OFFSET + 1));
+                }
+                dest.put(byteString[0]);
                 return;
             }
-            dest.put((byte) (STRING_SHORT_OFFSET + dataLen)); // dataLen is 0 or 2-55
+            dest.put((byte) (STRING_SHORT_OFFSET + byteString.length)); // dataLen is 0 or 2-55
         } else { // long string
-            dest.put((byte) (STRING_LONG_OFFSET + Integers.len(dataLen)));
-            Integers.putLong(dataLen, dest);
+            dest.put((byte) (STRING_LONG_OFFSET + Integers.len(byteString.length)));
+            Integers.putLong(byteString.length, dest);
         }
         dest.put(byteString);
     }
