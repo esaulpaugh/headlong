@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.rlp;
 
+import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 
 import java.nio.ByteBuffer;
@@ -52,11 +53,12 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
         if (seq < 0) {
             throw new IllegalArgumentException("negative seq");
         }
-        final int payloadLen = RLPEncoder.payloadLen(seq, pairs); // content list prefix not included
+        final byte[] seqBytes = Integers.toBytes(seq);
+        final int payloadLen = RLPEncoder.payloadLen(seqBytes, pairs); // content list prefix not included
         final int recordDataLen = RLPEncoder.itemLen(signatureLen) + payloadLen;
 
         final byte[] record = new byte[checkRecordLen(RLPEncoder.itemLen(recordDataLen))];
-        final byte[] content = RLPEncoder.encodeRecordContent(payloadLen, seq, pairs);
+        final byte[] content = RLPEncoder.encodeRecordContent(payloadLen, seqBytes, pairs);
 
         // copy payload to record before sending to signer
         System.arraycopy(content, content.length - payloadLen, record, record.length - payloadLen, payloadLen);
