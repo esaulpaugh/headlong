@@ -19,7 +19,6 @@ import com.esaulpaugh.headlong.util.Integers;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import static com.esaulpaugh.headlong.rlp.DataType.LIST_LONG_OFFSET;
@@ -34,12 +33,22 @@ public final class RLPEncoder {
     private RLPEncoder() {}
 
 // -------------- made visibile to Record -------------------------------------------------------------------------------
-    static int payloadLen(byte[] seqBytes, List<KVP> pairs) {
+    static int payloadLen(byte[] seqBytes, Iterable<KVP> sorted) {
         long sum = stringEncodedLen(seqBytes);
-        for (KVP pair : pairs) {
+        for (KVP pair : sorted) {
             sum += pair.rlp.length;
         }
         return requireNoOverflow(sum);
+    }
+
+    static byte[] encodeRecordContent(byte[] seqBytes, Iterable<KVP> sorted, int dataLen) {
+        ByteBuffer bb = ByteBuffer.allocate(itemLen(dataLen));
+        insertListPrefix(dataLen, bb);
+        putString(seqBytes, bb);
+        for (KVP pair : sorted) {
+            pair.export(bb);
+        }
+        return bb.array();
     }
 
     static int itemLen(int dataLen) {
@@ -54,21 +63,6 @@ public final class RLPEncoder {
             bb.put((byte) (LIST_LONG_OFFSET + Integers.len(dataLen)));
             Integers.putLong(dataLen, bb);
         }
-    }
-
-    /**
-     * @see java.util.ArrayList#sort(Comparator)
-     * @see java.util.Arrays.ArrayList#sort(Comparator)
-     */
-    static byte[] encodeRecordContent(int dataLen, byte[] seqBytes, List<KVP> pairs) {
-        pairs.sort(Comparator.naturalOrder()); // note that ArrayList overrides List.sort
-        ByteBuffer bb = ByteBuffer.allocate(itemLen(dataLen));
-        insertListPrefix(dataLen, bb);
-        putString(seqBytes, bb);
-        for (KVP pair : pairs) {
-            pair.export(bb);
-        }
-        return bb.array();
     }
 // ---------------------------------------------------------------------------------------------------------------------
     private static int requireNoOverflow(long val) {

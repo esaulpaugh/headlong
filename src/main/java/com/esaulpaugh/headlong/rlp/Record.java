@@ -23,6 +23,7 @@ import java.security.InvalidParameterException;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -53,14 +54,18 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
         if (seq < 0) {
             throw new IllegalArgumentException("negative seq");
         }
+
+        Collections.sort(pairs);
+
         final byte[] seqBytes = Integers.toBytes(seq);
         final int payloadLen = RLPEncoder.payloadLen(seqBytes, pairs); // content list prefix not included
         final int recordDataLen = RLPEncoder.itemLen(signatureLen) + payloadLen;
 
-        final byte[] record = new byte[checkRecordLen(RLPEncoder.itemLen(recordDataLen))];
-        final byte[] content = RLPEncoder.encodeRecordContent(payloadLen, seqBytes, pairs);
+        final ByteBuffer recordBuf = ByteBuffer.allocate(checkRecordLen(RLPEncoder.itemLen(recordDataLen)));
+        final byte[] content = RLPEncoder.encodeRecordContent(seqBytes, pairs, payloadLen);
 
         // copy payload to record before sending to signer
+        byte[] record = recordBuf.array();
         System.arraycopy(content, content.length - payloadLen, record, record.length - payloadLen, payloadLen);
 
         final byte[] signature = signer.sign(content);
@@ -68,11 +73,10 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
             throw new InvalidParameterException("unexpected signature length: " + signature.length + " != " + signatureLen);
         }
 
-        final ByteBuffer bb = ByteBuffer.wrap(record);
-        RLPEncoder.insertListPrefix(recordDataLen, bb);
-        RLPEncoder.putString(signature, bb);
-        bb.rewind();
-        return bb;
+        RLPEncoder.insertListPrefix(recordDataLen, recordBuf);
+        RLPEncoder.putString(signature, recordBuf);
+        recordBuf.rewind();
+        return recordBuf;
     }
 
     public Record(Signer signer, long seq, KVP... pairs) {
