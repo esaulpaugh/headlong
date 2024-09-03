@@ -17,10 +17,9 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.Integers;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
@@ -212,10 +211,11 @@ public final class TypeFactory {
     private static TupleType<?> parseTupleType(final String rawTypeStr, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawTypeStr.length();
         if (len == 2 && "()".equals(rawTypeStr)) return TupleType.empty(flags);
-        final List<ABIType<?>> elements = new ArrayList<>(8);
+        ABIType<?>[] elements = new ABIType[8];
         int argEnd = 1;
         final StringBuilder canonicalType = newTypeBuilder();
         boolean dynamic = false;
+        int i = 0;
         try {
             for (;;) {
                 final int argStart = argEnd;
@@ -228,23 +228,26 @@ public final class TypeFactory {
                 final ABIType<?> e = buildUnchecked(rawTypeStr.substring(argStart, argEnd), null, null, flags);
                 canonicalType.append(e.canonicalType);
                 dynamic |= e.dynamic;
-                elements.add(e);
+                elements[i++] = e;
                 if (rawTypeStr.charAt(argEnd++) == ')') {
                     return argEnd != len
                             ? null
                             : new TupleType<>(
-                                canonicalType.append(')').toString(),
-                                dynamic,
-                                elements.toArray(new ABIType[0]),
-                                elementNames,
-                                null,
-                                flags
-                            );
+                            canonicalType.append(')').toString(),
+                            dynamic,
+                            Arrays.copyOf(elements, i),
+                            elementNames,
+                            null,
+                            flags
+                    );
+                }
+                if (i == elements.length) {
+                    elements = Arrays.copyOf(elements, i << 1);
                 }
                 canonicalType.append(',');
             }
         } catch (IllegalArgumentException iae) {
-            throw new IllegalArgumentException("@ index " + elements.size() + ", " + iae.getMessage(), iae);
+            throw new IllegalArgumentException("@ index " + i + ", " + iae.getMessage(), iae);
         }
     }
 

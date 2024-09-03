@@ -18,10 +18,8 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.util.FastHex;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import java.util.function.IntUnaryOperator;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
@@ -342,29 +340,31 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         }
         final StringBuilder canonicalType = new StringBuilder("(");
         boolean dynamic = false;
-        final List<ABIType<?>> selected = new ArrayList<>(size());
-        final List<String> selectedNames = elementNames == null ? null : new ArrayList<>(size());
-        final List<String> selectedInternalTypes = elementInternalTypes == null ? null : new ArrayList<>(size());
+        final ABIType<?>[] selected = new ABIType<?>[size()];
+        final String[] selectedNames = elementNames == null ? null : new String[size()];
+        final String[] selectedInternalTypes = elementInternalTypes == null ? null : new String[size()];
+        int c = 0;
         for (int i = 0; i < size(); i++) {
             if (negate ^ manifest[i]) {
                 if (selectedNames != null) {
-                    selectedNames.add(elementNames[i]);
+                    selectedNames[c] = elementNames[i];
                 }
                 if (selectedInternalTypes != null) {
-                    selectedInternalTypes.add(elementInternalTypes[i]);
+                    selectedInternalTypes[c] = elementInternalTypes[i];
                 }
                 ABIType<?> e = get(i);
                 canonicalType.append(e.canonicalType).append(',');
                 dynamic |= e.dynamic;
-                selected.add(e);
+                selected[c] = e;
+                c++;
             }
         }
         return new TupleType<>(
                 completeTupleTypeString(canonicalType),
                 dynamic,
-                selected.toArray(EMPTY_ARRAY),
-                selectedNames == null ? null : selectedNames.toArray(new String[0]),
-                selectedInternalTypes == null ? null : selectedInternalTypes.toArray(new String[0]),
+                Arrays.copyOf(selected, c),
+                selectedNames == null ? null : Arrays.copyOf(selectedNames, c),
+                selectedInternalTypes == null ? null : Arrays.copyOf(selectedInternalTypes, c),
                 this.flags
         );
     }
