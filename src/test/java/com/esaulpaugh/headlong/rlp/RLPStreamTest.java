@@ -37,7 +37,6 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.esaulpaugh.headlong.rlp.RLPDecoder.RLP_STRICT;
@@ -158,7 +157,7 @@ public class RLPStreamTest {
     public void testStreamEasy() throws Throwable {
         RLPItem[] collected = RLPDecoderTest.collectAll(RLP_BYTES).toArray(RLPItem.EMPTY_ARRAY);
         Stream<RLPItem> stream = RLPDecoder.stream(RLP_STRICT.sequenceIterator(RLP_BYTES, 0));
-        RLPItem[] streamed = stream.collect(Collectors.toList()).toArray(RLPItem.EMPTY_ARRAY);
+        RLPItem[] streamed = stream.toArray(RLPItem[]::new);
 
         assertTrue(Arrays.deepEquals(collected, streamed));
 
