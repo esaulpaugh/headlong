@@ -10,7 +10,7 @@
 //}
 //
 //group = "com.esaulpaugh"
-//version = "12.1.1-SNAPSHOT"
+//version = "12.2.1-SNAPSHOT"
 //
 //project.ext.set("archivesBaseName", "headlong")
 //
@@ -76,7 +76,7 @@
 //    mavenCentral()
 //}
 //
-//val junitVersion = "5.10.3"
+//val junitVersion = "5.11.0"
 //val bcVersion = "1.78.1"
 //
 //dependencies {
