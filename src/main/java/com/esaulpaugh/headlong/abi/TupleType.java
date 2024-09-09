@@ -124,7 +124,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     @Override
     public int byteLengthPacked(Tuple value) {
         final Object[] elements = value != null ? value.elements : new Object[size()];
-        return countBytes(i -> this.<ABIType<Object>>get(i).byteLengthPacked(elements[i]));
+        return countBytes(i -> this.<ABIType<? super Object>>get(i).byteLengthPacked(elements[i]));
     }
 
     private int countBytes(IntUnaryOperator counter) {
@@ -177,7 +177,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
             encodeDynamic(value.elements, dest);
         } else {
             for (int i = 0; i < value.elements.length; i++) {
-                this.<ABIType<Object>>get(i).encodeTail(value.elements[i], dest);
+                this.<ABIType<? super Object>>get(i).encodeTail(value.elements[i], dest);
             }
         }
     }
@@ -185,7 +185,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     @Override
     void encodePackedUnchecked(Tuple value, ByteBuffer dest) {
         for (int i = 0; i < value.elements.length; i++) {
-            this.<ABIType<Object>>get(i).encodePackedUnchecked(value.elements[i], dest);
+            this.<ABIType<? super Object>>get(i).encodePackedUnchecked(value.elements[i], dest);
         }
     }
 

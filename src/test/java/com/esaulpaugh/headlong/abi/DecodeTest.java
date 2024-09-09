@@ -730,7 +730,7 @@ public class DecodeTest {
         byte[][] topics = {
                 FastHex.decode("d78fe195906f002940f4b32985f1daa40764f8481c05447b6751db32e70d744b"),
                 FastHex.decode("392791df626408017a264f53fde61065d5a93a32b60171df9d8a46afdf82992d"),
-                TypeFactory.<IntType>create("int8").encode(12).array()
+                TypeFactory.<ABIType<? super Integer>>create("int8").encode(12).array()
         };
         Tuple result = event.decodeArgs(topics, Strings.EMPTY_BYTE_ARRAY);
         assertEquals("392791df626408017a264f53fde61065d5a93a32b60171df9d8a46afdf82992d", Strings.encode((byte[]) result.get(0)));
