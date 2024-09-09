@@ -75,13 +75,16 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         return elementInternalTypes == null ? null : elementInternalTypes[index];
     }
 
+    /**
+     * If the compiler can't infer the return type, use a type witness.
+     *
+     * @param index
+     * @return
+     * @param <T>
+     */
     @SuppressWarnings("unchecked")
     public <T extends ABIType<?>> T get(int index) {
         return (T) elementTypes[index];
-    }
-
-    public ABIType<Object> getNonCapturing(int index) {
-        return get(index);
     }
 
     @Override
@@ -121,7 +124,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     @Override
     public int byteLengthPacked(Tuple value) {
         final Object[] elements = value != null ? value.elements : new Object[size()];
-        return countBytes(i -> getNonCapturing(i).byteLengthPacked(elements[i]));
+        return countBytes(i -> this.<ABIType<Object>>get(i).byteLengthPacked(elements[i]));
     }
 
     private int countBytes(IntUnaryOperator counter) {
@@ -174,7 +177,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
             encodeDynamic(value.elements, dest);
         } else {
             for (int i = 0; i < value.elements.length; i++) {
-                getNonCapturing(i).encodeTail(value.elements[i], dest);
+                this.<ABIType<Object>>get(i).encodeTail(value.elements[i], dest);
             }
         }
     }
@@ -182,7 +185,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     @Override
     void encodePackedUnchecked(Tuple value, ByteBuffer dest) {
         for (int i = 0; i < value.elements.length; i++) {
-            getNonCapturing(i).encodePackedUnchecked(value.elements[i], dest);
+            this.<ABIType<Object>>get(i).encodePackedUnchecked(value.elements[i], dest);
         }
     }
 

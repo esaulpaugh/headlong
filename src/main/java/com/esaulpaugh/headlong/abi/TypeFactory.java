@@ -105,6 +105,13 @@ public final class TypeFactory {
         map.put(type, new ArrayType<ByteType, Byte, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class, ABIType.FLAGS_NONE));
     }
 
+    /**
+     * If the compiler can't infer the return type, use a type witness.
+     *
+     * @param rawType
+     * @return
+     * @param <T>
+     */
     public static <T extends ABIType<?>> T create(String rawType) {
         return create(ABIType.FLAGS_NONE, rawType);
     }
@@ -112,11 +119,6 @@ public final class TypeFactory {
     @SuppressWarnings("unchecked")
     public static <T extends ABIType<?>> T create(int flags, String rawType) {
         return (T) build(rawType, null, null, flags);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static ABIType<Object> createNonCapturing(String rawType) {
-        return (ABIType<Object>) build(rawType, null, null, ABIType.FLAGS_NONE);
     }
 
     /** If you don't need any {@code elementNames}, use {@link TypeFactory#create(String)}. */

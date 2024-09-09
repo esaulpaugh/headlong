@@ -289,10 +289,10 @@ public class ABIJSONTest {
 
         final BigInteger val = BigInteger.valueOf(40L);
         final Object obj = val;
-        final Object a = out.getNonCapturing(0).encode(val);
-        final Object b = out.getNonCapturing(0).encode(obj);
+        final Object a = out.<ABIType<Object>>get(0).encode(val);
+        final Object b = out.<ABIType<? super Object>>get(0).encode(obj);
         assertEquals(a, b);
-        final ABIType<? super Object> type = out.getNonCapturing(0);
+        final ABIType<? super Object> type = out.get(0);
         assertEquals(a, type.encode(obj));
         assertEquals(a, type.encode(val));
 

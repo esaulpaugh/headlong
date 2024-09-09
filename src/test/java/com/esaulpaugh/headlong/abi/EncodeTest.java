@@ -661,7 +661,7 @@ public class EncodeTest {
     public void testCasts() throws Throwable {
         final Object[] args = new Object[] { (byte) -1, (short) 10, BigInteger.valueOf(10L), new BigDecimal(BigInteger.valueOf(57L), 1), 0f, -2.1d, new AtomicInteger(), new AtomicLong(98L) };
         {
-            final ABIType<Object> int8 = TypeFactory.createNonCapturing("int8");
+            final ABIType<Object> int8 = TypeFactory.create("int8");
             assertEquals(Integer.class, int8.clazz);
             for (Object arg : args) {
                 testCast(arg.getClass(), int8, arg);
@@ -669,7 +669,7 @@ public class EncodeTest {
             testCast(Long.class, int8, 3L);
         }
         {
-            final ABIType<Object> uint24 = TypeFactory.createNonCapturing("uint24");
+            final ABIType<Object> uint24 = TypeFactory.create("uint24");
             assertEquals(Integer.class, uint24.clazz);
             for (Object arg : args) {
                 testCast(arg.getClass(), uint24, arg);
@@ -677,7 +677,7 @@ public class EncodeTest {
             testCast(Long.class, uint24, 3L);
         }
         {
-            final ABIType<Object> int64 = TypeFactory.createNonCapturing("int64");
+            final ABIType<Object> int64 = TypeFactory.create("int64");
             assertEquals(Long.class, int64.clazz);
             for (Object arg : args) {
                 testCast(arg.getClass(), int64, arg);
@@ -685,7 +685,7 @@ public class EncodeTest {
             testCast(Integer.class, int64, 5);
         }
         {
-            final ABIType<Object> uint56 = TypeFactory.createNonCapturing("uint56");
+            final ABIType<Object> uint56 = TypeFactory.create("uint56");
             assertEquals(Long.class, uint56.clazz);
             for (Object arg : args) {
                 testCast(arg.getClass(), uint56, arg);
@@ -704,11 +704,11 @@ public class EncodeTest {
     @Test
     public void testCasts2() throws Throwable {
         assertThrown(ClassCastException.class, () -> ((ABIType<Object>) (ABIType<?>) ByteType.INSTANCE).encode(7));
-        testCast(Integer.class, TypeFactory.createNonCapturing("uint64"), 10);
-        testCast(Byte.class, TypeFactory.createNonCapturing("bool"), (byte) 11);
-        testCast(BigInteger.class, TypeFactory.createNonCapturing("address"), BigInteger.valueOf(12L));
-        testCast(Double.class, TypeFactory.createNonCapturing("int96"), 13.2d);
-        testCast(Long.class, TypeFactory.createNonCapturing("fixed"), 14L);
+        testCast(Integer.class, TypeFactory.create("uint64"), 10);
+        testCast(Byte.class, TypeFactory.create("bool"), (byte) 11);
+        testCast(BigInteger.class, TypeFactory.create("address"), BigInteger.valueOf(12L));
+        testCast(Double.class, TypeFactory.create("int96"), 13.2d);
+        testCast(Long.class, TypeFactory.create("fixed"), 14L);
     }
 
     @Test
