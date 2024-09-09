@@ -24,12 +24,16 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static com.esaulpaugh.headlong.TestUtils.uniformBigInteger;
@@ -648,5 +652,33 @@ public class TupleTest {
         assertEquals(a, b);
         assertEquals(a.toString(), b.toString());
         assertEquals(a.deepCopy(), b.deepCopy());
+    }
+
+    @Test
+    void testTypeWitnesses() {
+        abstract class Nonsense {
+            public <T extends List<?>> T create(Boolean... bools) {
+                return createList();
+            }
+            protected abstract <T extends List<?>> T createList();
+        }
+
+        assertTrue(
+                new Nonsense() {
+                    @SuppressWarnings("unchecked")
+                    @Override
+                    public <T extends List<?>> T create(Boolean... bools) {
+                        return (T) Stream.of(bools)
+                                .filter(b -> b == super.<List<String>>create(bools).add(""))
+                                .collect(Collectors.toList());
+                    }
+                    @SuppressWarnings("unchecked")
+                    @Override
+                    protected <T extends List<?>> T createList() {
+                        return (T) new ArrayList<String>();
+                    }
+                }.<List<Boolean>>create(true, false).add(true),
+                "nonsense failed"
+        );
     }
 }
