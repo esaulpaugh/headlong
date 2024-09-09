@@ -74,7 +74,7 @@ final class PackedDecoder {
                 break;
             }
             if (type instanceof ArrayType) {
-                final ArrayType<?, ?, ?> arrayType = type.asArrayType();
+                final ArrayType<ABIType<Object>, ?, ?> arrayType = type.asArrayType();
                 final int elementByteLength = arrayType.getElementType() instanceof UnitType
                         ? UNIT_LENGTH_BYTES
                         : arrayType.getElementType().byteLengthPacked(null);
@@ -159,9 +159,8 @@ final class PackedDecoder {
         return new BigInteger(temp);
     }
 
-    @SuppressWarnings("unchecked")
-    private static Object decodeArray(ArrayType<?, ?, ?> arrayType, ByteBuffer bb, int end) {
-        final ABIType<Object> elementType = (ABIType<Object>) arrayType.getElementType();
+    private static Object decodeArray(ArrayType<ABIType<Object>, ?, ?> arrayType, ByteBuffer bb, int end) {
+        final ABIType<Object> elementType = arrayType.getElementType();
         final int elementByteLen = elementType instanceof UnitType ? UNIT_LENGTH_BYTES : elementType.byteLengthPacked(null);
         final int typeLen = arrayType.getLength();
         final int arrayLen;

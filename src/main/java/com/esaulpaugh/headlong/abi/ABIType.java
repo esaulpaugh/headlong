@@ -109,8 +109,8 @@ public abstract class ABIType<J> {
         return FLAGS_UNSET;
     }
 
-    public final ArrayType<?, ?, J> asArrayType() {
-        return (ArrayType<?, ?, J>) this;
+    public final <E, ET extends ABIType<E>> ArrayType<ET, E, J> asArrayType() {
+        return (ArrayType<ET, E, J>) this;
     }
 
     public final TupleType<? extends Tuple> asTupleType() {
