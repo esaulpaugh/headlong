@@ -42,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DecodeTest {
@@ -523,8 +524,8 @@ public class DecodeTest {
                 "return type not a singleton: (int168,uint256)",
                 () -> Function.parse("bim()", "(decimal,uint)").decodeSingletonReturn(new byte[0])
         );
-        Function bar = Function.parse("bar()", "(bool)");
-        boolean b = bar.decodeSingletonReturn(Strings.decode("0000000000000000000000000000000000000000000000000000000000000001"));
+        final Function bar = Function.parse("bar()", "(bool)");
+        final boolean b = bar.decodeSingletonReturn(Strings.decode("0000000000000000000000000000000000000000000000000000000000000001"));
         assertTrue(b);
 
         assertThrown(
@@ -535,13 +536,13 @@ public class DecodeTest {
 
         final byte[] singletonPlus2 = Strings.decode("00000000000000000000000000000000000000000000000000000000000000010000");
         assertThrown(IllegalArgumentException.class, "unconsumed bytes: 2 remaining", () -> bar.decodeSingletonReturn(singletonPlus2));
-        boolean b2 = bar.decodeSingletonReturn(ByteBuffer.wrap(singletonPlus2));
+        final boolean b2 = bar.decodeSingletonReturn(ByteBuffer.wrap(singletonPlus2));
         assertTrue(b2);
     }
 
     @Test
     public void testDecodeEvent() {
-        Event<?> event = Event.fromJson("{\n" +
+        final Event<Sextuple<byte[], byte[], Address, Address, BigInteger, byte[]>> event0 = Event.fromJson("{\n" +
                 "    \"anonymous\": false,\n" +
                 "    \"inputs\": [\n" +
                 "      {\n" +
@@ -578,20 +579,33 @@ public class DecodeTest {
                 "    \"name\": \"OrdersMatched\",\n" +
                 "    \"type\": \"event\"\n" +
                 "  }");
-        byte[][] topics = {
+
+        final TupleType<Sextuple<byte[], byte[], Address, Address, BigInteger, byte[]>> inputs = event0.getInputs();
+        assertEquals(byte[].class, inputs.get(0).clazz);
+        assertEquals(byte[].class, inputs.get(1).clazz);
+        assertEquals(Address.class, inputs.get(2).clazz);
+        assertEquals(Address.class, inputs.get(3).clazz);
+        assertEquals(BigInteger.class, inputs.get(4).clazz);
+        assertEquals(byte[].class, inputs.get(5).clazz);
+
+        final Event<Sextuple<byte[], byte[], Address, Address, BigInteger, byte[]>> event1 = new Event<>("OrdersMatched", false, inputs, false, false, true, true, false, true);
+        assertEquals(event0, event1);
+        assertSame(event0.getInputs(), event1.getInputs());
+
+        final byte[][] topics = {
                 FastHex.decode("c4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006c9"),
                 FastHex.decode("000000000000000000000000bbb677a94eda9660832e9944353dd6e814a45705"),
                 FastHex.decode("000000000000000000000000bcead8896acb7a045c38287e433d896eefb40f6c"),
                 FastHex.decode("0000000000000000000000000000000000000000000000000000000000000000")
         };
-        byte[] data = FastHex.decode("00000000000000000000000000000000000000000000000000000000000000009b5de4f892fe73b139777ff15eb165f359a0ea9ea1c687f8e8dc5748249ca5f200000000000000000000000000000000000000000000000002386f26fc100000");
-        Tuple result = event.decodeArgs(topics, data);
-        assertEquals("0000000000000000000000000000000000000000000000000000000000000000", Strings.encode((byte[]) result.get(0)));
-        assertEquals("9b5de4f892fe73b139777ff15eb165f359a0ea9ea1c687f8e8dc5748249ca5f2", Strings.encode((byte[]) result.get(1)));
-        assertEquals("0xbbb677a94eda9660832e9944353dd6e814a45705", result.get(2).toString().toLowerCase());
-        assertEquals("0xbcead8896acb7a045c38287e433d896eefb40f6c", result.get(3).toString().toLowerCase());
-        assertEquals(new BigInteger("160000000000000000"), result.get(4));
-        assertEquals("0000000000000000000000000000000000000000000000000000000000000000", Strings.encode((byte[]) result.get(5)));
+        final byte[] data = FastHex.decode("00000000000000000000000000000000000000000000000000000000000000009b5de4f892fe73b139777ff15eb165f359a0ea9ea1c687f8e8dc5748249ca5f200000000000000000000000000000000000000000000000002386f26fc100000");
+        final Sextuple<byte[], byte[], Address, Address, BigInteger, byte[]> result = event1.decodeArgs(topics, data);
+        assertEquals("0000000000000000000000000000000000000000000000000000000000000000", Strings.encode(result.get0()));
+        assertEquals("9b5de4f892fe73b139777ff15eb165f359a0ea9ea1c687f8e8dc5748249ca5f2", Strings.encode(result.get1()));
+        assertEquals("0xbbb677a94eda9660832e9944353dd6e814a45705", result.get2().toString().toLowerCase());
+        assertEquals("0xbcead8896acb7a045c38287e433d896eefb40f6c", result.get3().toString().toLowerCase());
+        assertEquals(new BigInteger("160000000000000000"), result.get4());
+        assertEquals("0000000000000000000000000000000000000000000000000000000000000000", Strings.encode(result.get5()));
     }
 
     @Test
@@ -651,7 +665,7 @@ public class DecodeTest {
 
     @Test
     public void testDecodeAnonymousEvent() {
-        Event<?> event = Event.fromJson("{\n" +
+        final Event<Pair<Address, Address>> event = Event.fromJson("{\n" +
                 "    \"anonymous\": true,\n" +
                 "    \"inputs\": [\n" +
                 "      {\n" +
@@ -668,19 +682,19 @@ public class DecodeTest {
                 "    \"name\": \"TestEvent\",\n" +
                 "    \"type\": \"event\"\n" +
                 "  }");
-        byte[][] topics = {
+        final byte[][] topics = {
                 FastHex.decode("000000000000000000000000bbb677a94eda9660832e9944353dd6e814a45705"),
                 FastHex.decode("000000000000000000000000bcead8896acb7a045c38287e433d896eefb40f6c")
         };
-        Tuple result = event.decodeTopics(topics);
-        assertEquals("0xbbb677a94eda9660832e9944353dd6e814a45705", result.get(0).toString().toLowerCase());
-        assertEquals("0xbcead8896acb7a045c38287e433d896eefb40f6c", result.get(1).toString().toLowerCase());
+        final Pair<Address, Address> result = event.decodeTopics(topics);
+        assertEquals("0xbbb677a94eda9660832e9944353dd6e814a45705", result.get0().toString().toLowerCase());
+        assertEquals("0xbcead8896acb7a045c38287e433d896eefb40f6c", result.get1().toString().toLowerCase());
         assertEquals(result, event.decodeArgs(topics, null));
     }
 
     @Test
     public void testDecodeEmptyTopicsEvent() {
-        Event<?> event = Event.fromJson("{\n" +
+        final Event<Pair<Address, Address>> event = Event.fromJson("{\n" +
                 "    \"anonymous\": true,\n" +
                 "    \"inputs\": [\n" +
                 "      {\n" +
@@ -697,18 +711,21 @@ public class DecodeTest {
                 "    \"name\": \"TestEvent\",\n" +
                 "    \"type\": \"event\"\n" +
                 "  }");
-        byte[] data = FastHex.decode("000000000000000000000000bbb677a94eda9660832e9944353dd6e814a45705000000000000000000000000bcead8896acb7a045c38287e433d896eefb40f6c");
-        Tuple result = event.decodeData(data);
-        assertEquals("0xbbb677a94eda9660832e9944353dd6e814a45705", result.get(0).toString().toLowerCase());
-        assertEquals("0xbcead8896acb7a045c38287e433d896eefb40f6c", result.get(1).toString().toLowerCase());
+        final byte[] data = FastHex.decode("000000000000000000000000bbb677a94eda9660832e9944353dd6e814a45705000000000000000000000000bcead8896acb7a045c38287e433d896eefb40f6c");
+        final Pair<Address, Address> result = event.decodeData(data);
+        assertEquals("0xbbb677a94eda9660832e9944353dd6e814a45705", result.get0().toString().toLowerCase());
+        assertEquals("0xbcead8896acb7a045c38287e433d896eefb40f6c", result.get1().toString().toLowerCase());
         assertEquals(result, event.decodeArgs(null, data));
         assertEquals(result, event.decodeArgs(new byte[0][0], data));
         assertEquals(result, event.decodeArgs(Event.EMPTY_TOPICS, data));
+        assertEquals(Tuple.EMPTY, event.decodeTopics(null));
+        assertEquals(Tuple.EMPTY, event.decodeTopics(new byte[0][0]));
+        assertEquals(Tuple.EMPTY, event.decodeTopics(Event.EMPTY_TOPICS));
     }
 
     @Test
     public void testDecodeIndexedDynamicType() throws Throwable {
-        Event<?> event = Event.fromJson("{\n" +
+        final Event<Pair<BigInteger[], Integer>> event = Event.fromJson("{\n" +
                 "        \"anonymous\": false,\n" +
                 "        \"inputs\": [\n" +
                 "          {\n" +
@@ -727,14 +744,21 @@ public class DecodeTest {
                 "        \"name\": \"Stored\",\n" +
                 "        \"type\": \"event\"\n" +
                 "      }");
+        final TupleType<Pair<BigInteger[], Integer>> inputs = event.getInputs();
+        assertEquals(BigInteger[].class, inputs.get(0).clazz);
+        assertEquals("uint256[]", inputs.get(0).getCanonicalType());
+        assertEquals(Integer.class, inputs.get(1).clazz);
+        assertEquals("uint8", inputs.get(1).getCanonicalType());
         byte[][] topics = {
                 FastHex.decode("d78fe195906f002940f4b32985f1daa40764f8481c05447b6751db32e70d744b"),
                 FastHex.decode("392791df626408017a264f53fde61065d5a93a32b60171df9d8a46afdf82992d"),
                 TypeFactory.<ABIType<? super Integer>>create("int8").encode(12).array()
         };
-        Tuple result = event.decodeArgs(topics, Strings.EMPTY_BYTE_ARRAY);
-        assertEquals("392791df626408017a264f53fde61065d5a93a32b60171df9d8a46afdf82992d", Strings.encode((byte[]) result.get(0)));
-        assertEquals(12, (int) result.get(1));
+        final Pair<byte[], Integer> result = event.decodeArgs(topics, Strings.EMPTY_BYTE_ARRAY);
+        assertEquals(byte[].class, result.get0().getClass());
+        assertEquals(Integer.class, result.get1().getClass());
+        assertEquals("392791df626408017a264f53fde61065d5a93a32b60171df9d8a46afdf82992d", Strings.encode(result.get0()));
+        assertEquals(12, (int) result.get1());
 
         byte[] tooLong = new byte[35];
         System.arraycopy(topics[2], 0, tooLong, 0, 32);
