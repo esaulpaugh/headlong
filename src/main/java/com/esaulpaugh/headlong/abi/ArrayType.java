@@ -45,7 +45,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
     private final Class<?> arrayClass;
     private final int length;
     private final int headLength;
-    final int flags;
+    private final int flags;
 
     ArrayType(String canonicalType, Class<A> clazz, ET elementType, int length, Class<?> arrayClass, int flags) {
         super(canonicalType, clazz, DYNAMIC_LENGTH == length || elementType.dynamic);

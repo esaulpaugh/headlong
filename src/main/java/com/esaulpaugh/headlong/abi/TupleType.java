@@ -34,7 +34,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     final String[] elementInternalTypes;
     private final int[] elementHeadOffsets;
     final int headLengthSum;
-    final int flags;
+    private final int flags;
 
     TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String[] elementNames, String[] elementInternalTypes, int flags) {
         super(canonicalType, Tuple.classFor(elementTypes.length), dynamic);
