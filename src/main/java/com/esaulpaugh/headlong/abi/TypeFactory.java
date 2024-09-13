@@ -235,13 +235,13 @@ public final class TypeFactory {
                     return argEnd != len
                             ? null
                             : new TupleType<>(
-                            canonicalType.append(')').toString(),
-                            dynamic,
-                            Arrays.copyOf(elements, i),
-                            elementNames,
-                            null,
-                            flags
-                    );
+                                canonicalType.append(')').toString(),
+                                dynamic,
+                                Arrays.copyOf(elements, i),
+                                elementNames,
+                                null,
+                                flags
+                            );
                 }
                 if (i == elements.length) {
                     elements = Arrays.copyOf(elements, i << 1);
