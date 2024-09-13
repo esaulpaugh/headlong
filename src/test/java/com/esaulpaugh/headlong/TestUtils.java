@@ -165,6 +165,10 @@ public final class TestUtils {
         return uniformBigInteger(r, unsigned, r.nextInt(1 + bitLength));
     }
 
+    public static BigInteger wildBigInteger(Random r, boolean unsigned, int minBitLen, int maxBitLen) {
+        return uniformBigInteger(r, unsigned, minBitLen + r.nextInt(1 + (maxBitLen - minBitLen)));
+    }
+
     public static BigInteger uniformBigInteger(Random r, boolean unsigned, int bitLength) {
         if (bitLength == 0) {
             return BigInteger.ZERO;
