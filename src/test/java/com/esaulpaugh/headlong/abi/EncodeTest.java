@@ -662,7 +662,7 @@ public class EncodeTest {
         final Object[] args = new Object[] { (byte) -1, (short) 10, BigInteger.valueOf(10L), new BigDecimal(BigInteger.valueOf(57L), 1), 0f, -2.1d, new AtomicInteger(), new AtomicLong(98L) };
         {
             final ABIType<Object> int8 = TypeFactory.create("int8");
-            assertEquals(Integer.class, int8.clazz);
+            assertEquals(Integer.class, int8.clazz());
             for (Object arg : args) {
                 testCast(arg.getClass(), int8, arg);
             }
@@ -670,7 +670,7 @@ public class EncodeTest {
         }
         {
             final ABIType<Object> uint24 = TypeFactory.create("uint24");
-            assertEquals(Integer.class, uint24.clazz);
+            assertEquals(Integer.class, uint24.clazz());
             for (Object arg : args) {
                 testCast(arg.getClass(), uint24, arg);
             }
@@ -678,7 +678,7 @@ public class EncodeTest {
         }
         {
             final ABIType<Object> int64 = TypeFactory.create("int64");
-            assertEquals(Long.class, int64.clazz);
+            assertEquals(Long.class, int64.clazz());
             for (Object arg : args) {
                 testCast(arg.getClass(), int64, arg);
             }
@@ -686,7 +686,7 @@ public class EncodeTest {
         }
         {
             final ABIType<Object> uint56 = TypeFactory.create("uint56");
-            assertEquals(Long.class, uint56.clazz);
+            assertEquals(Long.class, uint56.clazz());
             for (Object arg : args) {
                 testCast(arg.getClass(), uint56, arg);
             }
@@ -695,7 +695,7 @@ public class EncodeTest {
     }
 
     private static void testCast(Class<?> from, ABIType<Object> type, Object arg) throws Throwable {
-        final String expectedMsg = "class mismatch: " + from.getName() + " != " + type.clazz.getName() + " (" + type + " requires " + type.clazz.getSimpleName() + " but found " + from.getSimpleName();
+        final String expectedMsg = "class mismatch: " + from.getName() + " != " + type.clazz().getName() + " (" + type + " requires " + type.clazz().getSimpleName() + " but found " + from.getSimpleName();
         assertThrown(IllegalArgumentException.class, expectedMsg, () -> type.validate(arg));
         assertThrown(IllegalArgumentException.class, expectedMsg, () -> type.encode(arg));
     }

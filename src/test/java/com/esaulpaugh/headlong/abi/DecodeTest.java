@@ -581,12 +581,12 @@ public class DecodeTest {
                 "  }");
 
         final TupleType<Sextuple<byte[], byte[], Address, Address, BigInteger, byte[]>> inputs = event0.getInputs();
-        assertEquals(byte[].class, inputs.get(0).clazz);
-        assertEquals(byte[].class, inputs.get(1).clazz);
-        assertEquals(Address.class, inputs.get(2).clazz);
-        assertEquals(Address.class, inputs.get(3).clazz);
-        assertEquals(BigInteger.class, inputs.get(4).clazz);
-        assertEquals(byte[].class, inputs.get(5).clazz);
+        assertEquals(byte[].class, inputs.get(0).clazz());
+        assertEquals(byte[].class, inputs.get(1).clazz());
+        assertEquals(Address.class, inputs.get(2).clazz());
+        assertEquals(Address.class, inputs.get(3).clazz());
+        assertEquals(BigInteger.class, inputs.get(4).clazz());
+        assertEquals(byte[].class, inputs.get(5).clazz());
 
         final Event<Sextuple<byte[], byte[], Address, Address, BigInteger, byte[]>> event1 = new Event<>("OrdersMatched", false, inputs, false, false, true, true, false, true);
         assertEquals(event0, event1);
@@ -745,9 +745,9 @@ public class DecodeTest {
                 "        \"type\": \"event\"\n" +
                 "      }");
         final TupleType<Pair<BigInteger[], Integer>> inputs = event.getInputs();
-        assertEquals(BigInteger[].class, inputs.get(0).clazz);
+        assertEquals(BigInteger[].class, inputs.get(0).clazz());
         assertEquals("uint256[]", inputs.get(0).getCanonicalType());
-        assertEquals(Integer.class, inputs.get(1).clazz);
+        assertEquals(Integer.class, inputs.get(1).clazz());
         assertEquals("uint8", inputs.get(1).getCanonicalType());
         byte[][] topics = {
                 FastHex.decode("d78fe195906f002940f4b32985f1daa40764f8481c05447b6751db32e70d744b"),

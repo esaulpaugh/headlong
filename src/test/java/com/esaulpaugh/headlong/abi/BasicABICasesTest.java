@@ -107,7 +107,7 @@ public class BasicABICasesTest {
         int flags = ABIType.FLAGS_UNSET;
         for (ABIType<?> e : elements) {
             canonicalBuilder.append(e.canonicalType).append(',');
-            dynamic |= e.dynamic;
+            dynamic |= e.isDynamic();
             if (e.getFlags() != flags) {
                 if (flags != ABIType.FLAGS_UNSET) {
                     throw new IllegalArgumentException();

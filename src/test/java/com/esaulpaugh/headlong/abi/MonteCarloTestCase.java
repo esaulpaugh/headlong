@@ -500,7 +500,7 @@ public class MonteCarloTestCase {
     }
 
     private Object[] generateArrayArray(ArrayType<? extends ABIType<?>, ?, ?> elementType, final int len, Random r) {
-        Object[] dest = ArrayType.createArray(elementType.clazz, len);
+        Object[] dest = ArrayType.createArray(elementType.clazz(), len);
         for (int i = 0; i < len; i++) {
             dest[i] = generateArray(elementType, r);
         }
