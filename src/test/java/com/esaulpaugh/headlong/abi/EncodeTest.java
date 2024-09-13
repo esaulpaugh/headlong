@@ -734,5 +734,16 @@ public class EncodeTest {
         assertEquals(boolean[].class, BooleanType.INSTANCE.arrayClass());
         assertEquals(0, BooleanType.INSTANCE.typeCode());
         assertEquals(0, BooleanType.TYPE_CODE_BOOLEAN);
+
+        assertEquals("address", AddressType.INSTANCE.canonicalType);
+        assertEquals("address", AddressType.INSTANCE.getCanonicalType());
+        assertEquals(Address.class, AddressType.INSTANCE.clazz);
+        assertEquals(Address.class, AddressType.INSTANCE.clazz());
+        assertFalse(AddressType.INSTANCE.dynamic);
+        assertFalse(AddressType.INSTANCE.isDynamic());
+
+        assertEquals(Address[].class, AddressType.INSTANCE.arrayClass());
+        assertEquals(8, AddressType.INSTANCE.typeCode());
+        assertEquals(8, AddressType.TYPE_CODE_ADDRESS);
     }
 }
