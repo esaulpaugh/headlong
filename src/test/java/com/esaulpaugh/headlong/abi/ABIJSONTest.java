@@ -280,6 +280,12 @@ public class ABIJSONTest {
 
     @Test
     public void testParseFunctionA() throws Throwable {
+
+        assertEquals(
+                "foo((fixed168x10,fixed168x10)[11][6])",
+                Function.fromJson(FUNCTION_A_JSON.replace("tuple[][]", "tuple[11][6]")).getCanonicalSignature()
+        );
+
         final JsonObject object = ABIJSON.parseObject(FUNCTION_A_JSON);
         final Function f = Function.fromJsonObject(ABIType.FLAGS_NONE, object);
         assertEquals(FUNCTION_A_JSON, f.toJson(true));
@@ -713,26 +719,7 @@ public class ABIJSONTest {
 
     @Test
     public void testInternalType() throws Throwable {
-        String eventStr =
-                "{\n" +
-                "  \"type\": \"event\",\n" +
-                "  \"name\": \"ManyThings\",\n" +
-                "  \"inputs\": [\n" +
-                "    {\n" +
-                "      \"internalType\": \"struct Thing[]\",\n" +
-                "      \"name\": \"thing\",\n" +
-                "      \"type\": \"tuple[]\",\n" +
-                "      \"components\": [\n" +
-                "        {\n" +
-                "          \"name\": \"thing_string\",\n" +
-                "          \"type\": \"string\"\n" +
-                "        }\n" +
-                "      ],\n" +
-                "      \"indexed\": false\n" +
-                "    }\n" +
-                "  ],\n" +
-                "  \"anonymous\": false\n" +
-                "}";
+        String eventStr = EVENT_STR;
 
         Event<Single<Single<String>[]>> e = Event.fromJson(eventStr);
 
@@ -764,7 +751,61 @@ public class ABIJSONTest {
         assertThrown(ArrayIndexOutOfBoundsException.class, () -> nonIndexed.getElementInternalType(-1));
         assertThrown(ArrayIndexOutOfBoundsException.class, () -> nonIndexed.getElementInternalType(1));
 
-        System.out.println(e);
+        assertEquals(eventStr, e.toString());
+    }
+
+    private static final String EVENT_STR = "{\n" +
+            "  \"type\": \"event\",\n" +
+            "  \"name\": \"ManyThings\",\n" +
+            "  \"inputs\": [\n" +
+            "    {\n" +
+            "      \"internalType\": \"struct Thing[]\",\n" +
+            "      \"name\": \"thing\",\n" +
+            "      \"type\": \"tuple[]\",\n" +
+            "      \"components\": [\n" +
+            "        {\n" +
+            "          \"name\": \"thing_string\",\n" +
+            "          \"type\": \"string\"\n" +
+            "        }\n" +
+            "      ],\n" +
+            "      \"indexed\": false\n" +
+            "    }\n" +
+            "  ],\n" +
+            "  \"anonymous\": false\n" +
+            "}";
+
+    @Test
+    public void testStaticTupleArray() throws Throwable {
+        String eventStr = EVENT_STR.replace("tuple[]", "tuple[1]");
+
+        Event<Single<Single<String>[]>> e = Event.fromJson(eventStr);
+
+        TupleType<Single<Single<String>[]>> in = e.getInputs();
+        Single<Single<String>[]> s = in.decode(
+                FastHex.decode(
+                        "0000000000000000000000000000000000000000000000000000000000000020" +
+                        "0000000000000000000000000000000000000000000000000000000000000020" +
+                        "0000000000000000000000000000000000000000000000000000000000000020" +
+                        "0000000000000000000000000000000000000000000000000000000000000006" +
+                        "000a09080c0d0000000000000000000000000000000000000000000000000000"
+                )
+        );
+        final Single<String>[] arr = s.get0();
+        assertEquals(Single[].class, arr.getClass());
+        final Single<String> single = arr[0];
+        final String str = single.get0();
+        assertEquals(String.class, str.getClass());
+        assertEquals("\0\n\t\b\f\r", str);
+        assertEquals("struct Thing[]", in.getElementInternalType(0));
+
+        TupleType<?> indexed = e.getIndexedParams();
+        assertEquals(0, indexed.size());
+
+        TupleType<?> nonIndexed = e.getNonIndexedParams();
+        assertEquals("struct Thing[]", nonIndexed.getElementInternalType(0));
+
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> nonIndexed.getElementInternalType(-1));
+        assertThrown(ArrayIndexOutOfBoundsException.class, () -> nonIndexed.getElementInternalType(1));
 
         assertEquals(eventStr, e.toString());
     }
