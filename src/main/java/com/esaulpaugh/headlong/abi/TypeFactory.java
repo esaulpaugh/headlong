@@ -128,14 +128,14 @@ public final class TypeFactory {
                 .asTupleType();
     }
 
-    static ABIType<?> build(String rawType, String[] elementNames, ABIType<?> baseType, int flags) {
+    static ABIType<?> build(String rawType, String[] elementNames, TupleType<?> baseType, int flags) {
         if (rawType.length() > MAX_LENGTH_CHARS) {
             throw new IllegalArgumentException("type length exceeds maximum: " + rawType.length() + " > " + MAX_LENGTH_CHARS);
         }
         return buildUnchecked(rawType, elementNames, baseType, flags);
     }
 
-    private static ABIType<?> buildUnchecked(final String rawType, final String[] elementNames, ABIType<?> baseType, int flags) {
+    private static ABIType<?> buildUnchecked(final String rawType, final String[] elementNames, TupleType<?> baseType, int flags) {
         try {
             final int lastCharIdx = rawType.length() - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array
@@ -147,13 +147,19 @@ public final class TypeFactory {
                 final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType.substring(arrayOpenIndex + 1, lastCharIdx));
                 return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null, flags);
             }
-            if (baseType != null || (baseType = resolveBaseType(rawType, elementNames, flags)) != null) {
-                return baseType;
+            if (rawType.charAt(0) == '(') {
+                return baseType != null ? baseType : parseTupleType(rawType, elementNames, flags);
+            } else {
+                ABIType<?> t = ((flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_BASE_TYPE_MAP : BASE_TYPE_MAP).get(rawType);
+                return t != null ? t : tryParseFixed(rawType);
             }
         } catch (StringIndexOutOfBoundsException ignored) { // e.g. type equals "" or "82]" or "[]" or "[1]"
-            /* fall through */
+            throw unrecognizedType(rawType);
         }
-        throw new IllegalArgumentException("unrecognized type: \"" + rawType + '"');
+    }
+
+    private static IllegalArgumentException unrecognizedType(String rawType) {
+        return new IllegalArgumentException("unrecognized type: \"" + rawType + '"');
     }
 
     private static int parseLen(String lenStr) {
@@ -171,23 +177,14 @@ public final class TypeFactory {
         throw new IllegalArgumentException("bad array length");
     }
 
-    private static ABIType<?> resolveBaseType(final String baseTypeStr, final String[] elementNames, final int flags) {
-        if (baseTypeStr.charAt(0) == '(') {
-            return parseTupleType(baseTypeStr, elementNames, flags);
-        }
-        final Map<String, ABIType<?>> map = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_BASE_TYPE_MAP : BASE_TYPE_MAP;
-        final ABIType<?> ret = map.get(baseTypeStr);
-        return ret != null ? ret : tryParseFixed(baseTypeStr);
-    }
-
-    private static BigDecimalType tryParseFixed(final String type) {
-        final int idx = type.indexOf("fixed");
+    private static BigDecimalType tryParseFixed(final String rawType) {
+        final int idx = rawType.indexOf("fixed");
         boolean unsigned = false;
-        if (idx == 0 || (unsigned = (idx == 1 && type.charAt(0) == 'u'))) {
-            final int indexOfX = type.lastIndexOf('x');
+        if (idx == 0 || (unsigned = (idx == 1 && rawType.charAt(0) == 'u'))) {
+            final int indexOfX = rawType.lastIndexOf('x');
             try {
-                final String mStr = type.substring(idx + "fixed".length(), indexOfX);
-                final String nStr = type.substring(indexOfX + 1); // everything after x
+                final String mStr = rawType.substring(idx + "fixed".length(), indexOfX);
+                final String nStr = rawType.substring(indexOfX + 1); // everything after x
                 if (leadDigitValid(mStr.charAt(0)) && leadDigitValid(nStr.charAt(0))) { // starts with a digit 1-9
                     final int M = Integer.parseInt(mStr); // no parseUnsignedInt on older Android versions?
                     final int N = Integer.parseInt(nStr);
@@ -199,7 +196,7 @@ public final class TypeFactory {
                 /* fall through */
             }
         }
-        return null;
+        throw unrecognizedType(rawType);
     }
 
     private static boolean leadDigitValid(char c) {
@@ -210,9 +207,9 @@ public final class TypeFactory {
         return new StringBuilder(40).append('(');
     }
 
-    private static TupleType<?> parseTupleType(final String rawTypeStr, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
-        final int len = rawTypeStr.length();
-        if (len == 2 && "()".equals(rawTypeStr)) return TupleType.empty(flags);
+    private static TupleType<?> parseTupleType(final String rawType, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
+        final int len = rawType.length();
+        if (len == 2 && "()".equals(rawType)) return TupleType.empty(flags);
         ABIType<?>[] elements = new ABIType[8];
         int argEnd = 1;
         final StringBuilder canonicalType = newTypeBuilder();
@@ -221,27 +218,28 @@ public final class TypeFactory {
         try {
             for (;;) {
                 final int argStart = argEnd;
-                switch (rawTypeStr.charAt(argStart)) {
+                switch (rawType.charAt(argStart)) {
                 case ')':
-                case ',': return null;
-                case '(': argEnd = nextTerminator(rawTypeStr, findSubtupleEnd(rawTypeStr, argStart + 1)); break;
-                default: argEnd = nextTerminator(rawTypeStr, argStart + 1);
+                case ',': throw unrecognizedType(rawType);
+                case '(': argEnd = nextTerminator(rawType, findSubtupleEnd(rawType, argStart + 1)); break;
+                default: argEnd = nextTerminator(rawType, argStart + 1);
                 }
-                final ABIType<?> e = buildUnchecked(rawTypeStr.substring(argStart, argEnd), null, null, flags);
+                final ABIType<?> e = buildUnchecked(rawType.substring(argStart, argEnd), null, null, flags);
                 canonicalType.append(e.canonicalType);
                 dynamic |= e.dynamic;
                 elements[i++] = e;
-                if (rawTypeStr.charAt(argEnd++) == ')') {
-                    return argEnd != len
-                            ? null
-                            : new TupleType<>(
-                                canonicalType.append(')').toString(),
-                                dynamic,
-                                Arrays.copyOf(elements, i),
-                                elementNames,
-                                null,
-                                flags
-                            );
+                if (rawType.charAt(argEnd++) == ')') {
+                    if (argEnd != len) {
+                        throw unrecognizedType(rawType);
+                    }
+                    return new TupleType<>(
+                            canonicalType.append(')').toString(),
+                            dynamic,
+                            Arrays.copyOf(elements, i),
+                            elementNames,
+                            null,
+                            flags
+                    );
                 }
                 if (i == elements.length) {
                     elements = Arrays.copyOf(elements, i << 1);
