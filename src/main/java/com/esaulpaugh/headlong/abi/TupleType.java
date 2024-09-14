@@ -77,7 +77,16 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
 
     /**
      * If the compiler can't infer the return type, use a type witness.
-     *
+     * <p>
+     * From Java:
+     * <blockquote><pre>
+     *     {@code TypeFactory.<TupleType<Single<Integer>>>create("(int8)").<ABIType<Integer>>get(0).encode(12)}
+     * </pre></blockquote><p>
+     * <p>
+     * From Kotlin:
+     * <blockquote><pre>
+     *     {@code TypeFactory.create<TupleType<Single<Int>>>("(int8)").get<ABIType<Int>>(0).encode(12)}
+     * </pre></blockquote><p>
      * @param index
      * @return
      * @param <T>
