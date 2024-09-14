@@ -234,11 +234,10 @@ public final class ABIJSON {
     private static ABIType<?> parseType(JsonObject object, int flags) {
         final String type = getType(object);
         if (type.startsWith(TUPLE)) {
-            if (type.length() == TUPLE.length()) {
-                return parseTupleType(object, COMPONENTS, flags);
-            }
-            TupleType<?> baseType = parseTupleType(object, COMPONENTS, flags);
-            return TypeFactory.build(baseType.canonicalType + type.substring(TUPLE.length()), null, baseType, flags); // return ArrayType
+            final TupleType<?> tt = parseTupleType(object, COMPONENTS, flags);
+            return type.length() > TUPLE.length()
+                    ? TypeFactory.build(tt.canonicalType + type.substring(TUPLE.length()), null, tt, flags) // tuple array
+                    : tt;
         }
         return TypeFactory.create(flags, type);
     }
