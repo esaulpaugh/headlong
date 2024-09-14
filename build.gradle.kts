@@ -56,7 +56,8 @@
 //        attributes(
 //            "Implementation-Title" to project.name,
 //            "Implementation-Version" to project.version,
-//            "Automatic-Module-Name" to project.name,
+//            "Automatic-Module-Name" to "com.esaulpaugh.headlong",
+//            "Created-By" to "Gradle KTS"
 //            "Build-Date" to dateFormatter.format(Instant.now())
 //        )
 //    }

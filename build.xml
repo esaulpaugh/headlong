@@ -196,8 +196,8 @@
       <manifest>
         <attribute name = "Implementation-Title" value = "${project.name}"/>
         <attribute name = "Implementation-Version" value = "${project.version}"/>
-        <attribute name= "Automatic-Module-Name" value="${project.name}"/>
-        <attribute name= "Created-By" value="com.esaulpaugh"/>
+        <attribute name= "Automatic-Module-Name" value="com.esaulpaugh.headlong"/>
+        <attribute name= "Created-By" value="Apache Ant"/>
       </manifest>
     </jar>
   </target>

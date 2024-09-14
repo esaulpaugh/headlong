@@ -135,11 +135,11 @@
                         <manifestEntries>
                             <Implementation-Title>${project.name}</Implementation-Title>
                             <Implementation-Version>${project.version}</Implementation-Version>
-                            <Created-By>${project.groupId}</Created-By>
+                            <Automatic-Module-Name>com.esaulpaugh.headlong</Automatic-Module-Name>
+                            <Created-By>Apache Maven</Created-By>
                             <!--suppress UnresolvedMavenProperty -->
                             <Build-Tool>${maven.build.version}</Build-Tool>
                             <Build-Date>${maven.build.timestamp}</Build-Date>
-                            <Automatic-Module-Name>${project.name}</Automatic-Module-Name>
                         </manifestEntries>
                         <manifest>
                             <addDefaultEntries>false</addDefaultEntries>

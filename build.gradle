@@ -53,7 +53,8 @@ jar {
         attributes(
                 "Implementation-Title": project.name,
                 "Implementation-Version": project.version,
-                "Automatic-Module-Name": project.name,
+                "Automatic-Module-Name": "com.esaulpaugh.headlong",
+                "Created-By": "Gradle",
                 "Build-Date": todayUTC() // DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneOffset.UTC).format(Instant.now())
         )
     }
