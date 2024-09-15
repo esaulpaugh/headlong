@@ -46,32 +46,35 @@ public final class TypeFactory {
     static {
         final Map<String, ABIType<?>> local = new HashMap<>(256);
 
-        for(int n = 8; n <= 32; n += 8) mapInt(local, "int" + n, n, false);
-        for(int n = 40; n <= 64; n += 8) mapLong(local, "int" + n, n, false);
-        for(int n = 72; n <= 256; n += 8) mapBigInteger(local, "int" + n, n, false);
-
-        for(int n = 8; n <= 24; n += 8) mapInt(local, "uint" + n, n, true);
-        for(int n = 32; n <= 56; n += 8) mapLong(local, "uint" + n, n, true);
-        for(int n = 64; n <= 256; n += 8) mapBigInteger(local, "uint" + n, n, true);
+        // optimized insertion order
+        local.put("string", new ArrayType<ByteType, Byte, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAGS_NONE));
+        local.put("bool", BooleanType.INSTANCE);
 
         for (int n = 1; n <= 32; n++) {
             mapByteArray(local, "bytes" + n, n);
         }
-
-        local.put("address", AddressType.INSTANCE);
         mapByteArray(local, "function", FUNCTION_BYTE_LEN);
         mapByteArray(local, "bytes", DYNAMIC_LENGTH);
-        local.put("string", new ArrayType<ByteType, Byte, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAGS_NONE));
+
+        for (int n = 8; n <= 24; n += 8) mapInt(local, "uint" + n, n, true);
+        for (int n = 32; n <= 56; n += 8) mapLong(local, "uint" + n, n, true);
+        for (int n = 64; n <= 256; n += 8) mapBigInteger(local, "uint" + n, n, true);
+
+        local.put("uint", local.get("uint256"));
+
+        mapBigInteger(local, "int256", 256, false);
+        local.put("int", local.get("int256"));
+
+        for (int n = 8; n <= 32; n += 8) mapInt(local, "int" + n, n, false);
+        for (int n = 40; n <= 64; n += 8) mapLong(local, "int" + n, n, false);
+        for (int n = 72; n < 256; n += 8) mapBigInteger(local, "int" + n, n, false);
+
+        local.put("address", AddressType.INSTANCE);
 
         local.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
         local.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
 
-        local.put("bool", BooleanType.INSTANCE);
-
         local.put("decimal", local.get("int168"));
-
-        local.put("int", local.get("int256"));
-        local.put("uint", local.get("uint256"));
         local.put("fixed", local.get("fixed128x18"));
         local.put("ufixed", local.get("ufixed128x18"));
 
