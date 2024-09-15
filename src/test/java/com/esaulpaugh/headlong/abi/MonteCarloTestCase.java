@@ -547,17 +547,23 @@ public class MonteCarloTestCase {
     }
 
     private static String[] genFixedKeys() {
-        final ArrayList<String> fixedKeys = new ArrayList<>();
+        final String[] fixedKeys = new String[2 * 32 * 80];
+        int count = 0;
         for (int M = 8; M <= 256; M += 8) {
             final String Mx = Integer.toString(M) + 'x';
             for (int N = 1; N <= 80; N++) {
                 final String suffix = Mx + N;
-                fixedKeys.add("fixed" + suffix);
-                fixedKeys.add("ufixed" + suffix);
+                fixedKeys[count++] = "fixed" + suffix;
+                fixedKeys[count++] = "ufixed" + suffix;
             }
         }
-//        Collections.sort(fixedKeys);
-        return fixedKeys.toArray(new String[0]);
+        for (String key : fixedKeys) {
+            ABIType<?> type = TypeFactory.create(key);
+            assertEquals(key, type.canonicalType);
+            assertEquals(type, ArrayType.baseType(type));
+        }
+        Arrays.sort(fixedKeys);
+        return fixedKeys;
     }
 
     static class Limits {
