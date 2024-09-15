@@ -27,7 +27,6 @@ import java.math.BigInteger;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Random;
@@ -135,7 +134,9 @@ public class MonteCarloTestCase {
 
         instance.setSeed(seed);
 
-        this.rawInputsStr = generateTupleTypeString(BASE_TYPES, instance, 0);
+        StringBuilder sb = new StringBuilder(128);
+        generateTupleTypeString(BASE_TYPES, instance, 0, sb);
+        this.rawInputsStr = sb.toString();
         this.function = new Function(TypeEnum.FUNCTION, generateFunctionName(instance), TupleType.parse(rawInputsStr), TupleType.EMPTY, null, md);
         this.argsTuple = generateTuple(function.getInputs().elementTypes, instance);
         testDeepCopy(argsTuple);
@@ -348,36 +349,46 @@ public class MonteCarloTestCase {
         assertEquals(args, deserial);
     }
 
-    private String generateTupleTypeString(String[] baseTypes, Random r, int tupleDepth) {
-        final int len = r.nextInt(1 + limits.maxTupleLength);
-        StringBuilder signature = new StringBuilder("(");
-        for (int i = 0; i < len; i++) {
-            String typeStr = generateType(baseTypes, r, tupleDepth).canonicalType;
-            if(r.nextBoolean()) {
-                switch (typeStr) {
-                case "int256": typeStr = "int"; break;
-                case "uint256": typeStr = "uint"; break;
-                case "fixed128x18": typeStr = "fixed"; break;
-                case "ufixed128x18": typeStr = "ufixed"; break;
-                }
-            }
-            signature.append(typeStr).append(',');
+    private void generateTupleTypeString(String[] baseTypes, Random r, int tupleDepth, StringBuilder sb) {
+        int len = r.nextInt(1 + limits.maxTupleLength);
+        if (len == 0) {
+            sb.append("()");
+            return;
         }
-        return TestUtils.completeTupleTypeString(signature);
+        sb.append('(');
+        do {
+            generateType(baseTypes, r, tupleDepth, sb);
+            if (--len == 0) {
+                break;
+            }
+            sb.append(',');
+        } while (true);
+        sb.append(')');
     }
 
-    private ABIType<?> generateType(String[] canonicalBaseTypes, Random r, final int tupleDepth) {
+    private void generateType(String[] canonicalBaseTypes, Random r, final int tupleDepth, StringBuilder sb) {
         String baseTypeString = canonicalBaseTypes[r.nextInt(canonicalBaseTypes.length)];
 
         if (baseTypeString == TUPLE_KEY) {
-            baseTypeString = tupleDepth < limits.maxTupleDepth
-                    ? generateTupleTypeString(canonicalBaseTypes, r, tupleDepth + 1)
-                    : "uint256";
+            if (tupleDepth < limits.maxTupleDepth) {
+                generateTupleTypeString(canonicalBaseTypes, r, tupleDepth + 1, sb);
+            } else {
+                sb.append(r.nextBoolean() ? "uint256" : "uint");
+            }
         } else if (baseTypeString == FIXED_KEY) {
-            baseTypeString = FIXED_TYPES[r.nextInt(FIXED_TYPES.length)];
+            sb.append(FIXED_TYPES[r.nextInt(FIXED_TYPES.length)]);
+        } else {
+            if (r.nextBoolean()) {
+                switch (baseTypeString) {
+                case "int256": sb.append("int"); return;
+                case "uint256": sb.append("uint"); return;
+                case "fixed128x18": sb.append("fixed"); return;
+                case "ufixed128x18": sb.append("ufixed"); return;
+                }
+            }
+            sb.append(baseTypeString);
         }
 
-        StringBuilder sb = new StringBuilder(baseTypeString);
         boolean isElement = r.nextBoolean() && r.nextBoolean();
         if(isElement) {
             int arrayDepth = r.nextInt(limits.maxArrayDepth + 1);
@@ -389,7 +400,6 @@ public class MonteCarloTestCase {
                 sb.append(']');
             }
         }
-        return TypeFactory.create(sb.toString());
     }
 
     private Tuple generateTuple(ABIType<?>[] elementTypes, Random r) {
