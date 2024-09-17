@@ -108,7 +108,7 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         }
     }
 
-    public Iterator<RLPItem> iterator(RLPDecoder decoder) {
+    public Iterator<RLPItem> iterator(final RLPDecoder decoder) {
         return new Iterator<RLPItem>() {
 
             int idx = dataIndex;
