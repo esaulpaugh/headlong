@@ -111,12 +111,13 @@ public final class Address {
     @SuppressWarnings("deprecation")
     public static String toChecksumAddress(final BigInteger address) {
         final String minimalHex = address.toString(HEX_RADIX);
-        final int start = ADDRESS_LEN_CHARS - minimalHex.length();
+        final int len = minimalHex.length();
+        final int start = ADDRESS_LEN_CHARS - len;
         if (start < PREFIX_LEN) {
             throw new IllegalArgumentException("invalid bit length: " + address.bitLength());
         }
         final byte[] addressBytes = "0x0000000000000000000000000000000000000000".getBytes(StandardCharsets.US_ASCII);
-        minimalHex.getBytes(0, minimalHex.length(), addressBytes, start);
+        minimalHex.getBytes(0, len, addressBytes, start);
         return doChecksum(addressBytes);
     }
 
