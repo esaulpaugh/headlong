@@ -421,44 +421,14 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         final byte[] data = new byte[len];
         bb.get(data);
         if (!legacyDecode) {
-            long p;
-            switch (Integers.mod(len, UNIT_LENGTH_BYTES)) {
-            case 0: return data;
-            case 1:  p = bb.getLong() | bb.getLong() | bb.getLong() | bb.getInt() | bb.getShort() | bb.get(); break;
-            case 2:  p = bb.getLong() | bb.getLong() | bb.getLong() | bb.getInt() | bb.getShort(); break;
-            case 3:  p = bb.getLong() | bb.getLong() | bb.getLong() | bb.getInt() | bb.get(); break;
-            case 4:  p = bb.getLong() | bb.getLong() | bb.getLong() | bb.getInt(); break;
-            case 5:  p = bb.getLong() | bb.getLong() | bb.getLong() | bb.getShort() | bb.get(); break;
-            case 6:  p = bb.getLong() | bb.getLong() | bb.getLong() | bb.getShort(); break;
-            case 7:  p = bb.getLong() | bb.getLong() | bb.getLong() | bb.get(); break;
-            case 8:  p = bb.getLong() | bb.getLong() | bb.getLong(); break;
-            case 9:  p = bb.getLong() | bb.getLong() | bb.getInt() | bb.getShort() | bb.get(); break;
-            case 10: p = bb.getLong() | bb.getLong() | bb.getInt() | bb.getShort(); break;
-            case 11: p = bb.getLong() | bb.getLong() | bb.getInt() | bb.get(); break;
-            case 12: p = bb.getLong() | bb.getLong() | bb.getInt(); break;
-            case 13: p = bb.getLong() | bb.getLong() | bb.getShort() | bb.get(); break;
-            case 14: p = bb.getLong() | bb.getLong() | bb.getShort(); break;
-            case 15: p = bb.getLong() | bb.getLong() | bb.get(); break;
-            case 16: p = bb.getLong() | bb.getLong(); break;
-            case 17: p = bb.getLong() | bb.getInt() | bb.getShort() | bb.get(); break;
-            case 18: p = bb.getLong() | bb.getInt() | bb.getShort(); break;
-            case 19: p = bb.getLong() | bb.getInt() | bb.get(); break;
-            case 20: p = bb.getLong() | bb.getInt(); break;
-            case 21: p = bb.getLong() | bb.getShort() | bb.get(); break;
-            case 22: p = bb.getLong() | bb.getShort(); break;
-            case 23: p = bb.getLong() | bb.get(); break;
-            case 24: p = bb.getLong(); break;
-            case 25: p = bb.getInt() | bb.getShort() | bb.get(); break;
-            case 26: p = bb.getInt() | bb.getShort(); break;
-            case 27: p = bb.getInt() | bb.get(); break;
-            case 28: p = bb.getInt(); break;
-            case 29: p = bb.getShort() | bb.get(); break;
-            case 30: p = bb.getShort(); break;
-            case 31: p = bb.get(); break;
-            default: throw new AssertionError();
+            int bytes = Integers.roundLengthUp(len, UNIT_LENGTH_BYTES) - len; // (32 - (len & 31)) & 31;
+            while (bytes >= Long.BYTES) {
+                if (bb.getLong() != 0L) throw new IllegalArgumentException("malformed array: non-zero padding byte");
+                bytes -= Long.BYTES;
             }
-            if (p != 0L) {
-                throw new IllegalArgumentException("malformed array: non-zero padding byte");
+            while (bytes != 0) {
+               if (bb.get() != 0) throw new IllegalArgumentException("malformed array: non-zero padding byte");
+               bytes -= Byte.BYTES;
             }
         }
         return data;
