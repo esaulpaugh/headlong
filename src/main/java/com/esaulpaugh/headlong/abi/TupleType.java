@@ -76,7 +76,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     /**
-     * If the compiler can't infer the return type, use a type witness.
+     * Returns the {@link ABIType} at the given index. If the compiler can't infer the return type, use a type witness.
      * <p>
      * From Java:
      * <blockquote><pre>
@@ -87,9 +87,9 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
      *     {@code TypeFactory.create<TupleType<*>>("(int8)").get<IntType>(0).encode(12)}
      * </pre></blockquote>
      *
-     * @param index
-     * @return
-     * @param <T>
+     * @param index the type's index
+     * @return  the type
+     * @param <T>   the expected return type, e.g. {@link BooleanType} or {@link ABIType}&#60;Boolean&#62;
      */
     @SuppressWarnings("unchecked")
     public <T extends ABIType<?>> T get(int index) {

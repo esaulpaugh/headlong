@@ -109,7 +109,7 @@ public final class TypeFactory {
     }
 
     /**
-     * If the compiler can't infer the return type, use a type witness.
+     * Creates an {@link ABIType}. If the compiler can't infer the return type, use a type witness.
      * <p>
      * From Java:
      * <blockquote><pre>
@@ -120,9 +120,9 @@ public final class TypeFactory {
      *     {@code TypeFactory.create<TupleType<*>>("(int8)").get<IntType>(0).encode(12)}
      * </pre></blockquote>
      *
-     * @param rawType
-     * @return
-     * @param <T>
+     * @param rawType   the type's string representation, e.g. "int" or "(address,bytes)[]"
+     * @return  the type
+     * @param <T>   the expected return type, e.g. {@link IntType} or {@link ABIType}&#60;Integer&#62;
      */
     public static <T extends ABIType<?>> T create(String rawType) {
         return create(ABIType.FLAGS_NONE, rawType);

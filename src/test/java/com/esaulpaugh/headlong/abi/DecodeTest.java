@@ -117,7 +117,7 @@ public class DecodeTest {
         Function foo2 = new Function("()", "(uint)");
         byte[] _big_ = Strings.decode("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
         BigInteger expected = BigInteger.valueOf(2L).pow(256).subtract(BigInteger.ONE);
-        BigInteger bi = ((UnitType<?>) foo2.getOutputs().get(0)).maxValue();
+        BigInteger bi = foo2.getOutputs().<UnitType<?>>get(0).maxValue();
         assertEquals(expected, bi);
         assertEquals(expected, foo2.decodeReturn(_big_, 0));
         BigInteger n = foo2.decodeSingletonReturn(_big_);

@@ -17,6 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import java.nio.ByteBuffer;
 
+/** Represents a small integer type such as int8, int32, uint8 or uint24. */
 public final class IntType extends UnitType<Integer> {
 
     static final IntType UINT21 = new IntType("uint21", 21, true); // small bit length for Denial-of-Service protection

@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+/** Enum representing the variants of {@link ABIObject}. */
 public enum TypeEnum {
 
     FUNCTION(ABIJSON.FUNCTION, true),
