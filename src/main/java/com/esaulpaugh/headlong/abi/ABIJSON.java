@@ -190,7 +190,7 @@ public final class ABIJSON {
     }
 
     private static TupleType<Tuple> parseTupleType(final JsonArray array, final boolean[] indexed, final int flags) {
-        int size;
+        final int size;
         if (array == null || (size = array.size()) == 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
             return TupleType.empty(flags);
         }
@@ -213,7 +213,7 @@ public final class ABIJSON {
             if (indexed != null) {
                 indexed[i] = getIndexed(inputObj);
             }
-            if (++i == elements.length) {
+            if (++i == size) {
                 return new TupleType<>(
                         canonicalType.append(')').toString(),
                         dynamic,
