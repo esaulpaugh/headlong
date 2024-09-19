@@ -300,7 +300,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         }
     }
 
-    private Tuple decodeIndices(ByteBuffer bb, int... indices) {
+    private J decodeIndices(ByteBuffer bb, int... indices) {
         final Object[] results = new Object[size()];
         final int start = bb.position();
         final byte[] unitBuffer = newUnitBuffer();
