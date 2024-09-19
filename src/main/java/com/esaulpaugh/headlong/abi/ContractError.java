@@ -19,12 +19,12 @@ import com.google.gson.JsonObject;
 
 import java.util.Objects;
 
-public final class ContractError<T extends Tuple> implements ABIObject {
+public final class ContractError<J extends Tuple> implements ABIObject {
 
     private final String name;
-    private final TupleType<T> inputs;
+    private final TupleType<J> inputs;
 
-    public ContractError(String name, TupleType<T> inputs) {
+    public ContractError(String name, TupleType<J> inputs) {
         this.name = Objects.requireNonNull(name);
         this.inputs = Objects.requireNonNull(inputs);
     }
@@ -41,7 +41,7 @@ public final class ContractError<T extends Tuple> implements ABIObject {
 
     @SuppressWarnings("unchecked")
     @Override
-    public TupleType<T> getInputs() {
+    public TupleType<J> getInputs() {
         return inputs;
     }
 

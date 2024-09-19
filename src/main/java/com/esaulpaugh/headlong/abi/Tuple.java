@@ -46,7 +46,7 @@ public class Tuple implements Iterable<Object> {
      * @see Single#of(Object)
      * @return  a tuple with one element
      */
-    public static <T> Single<T> singleton(T element) {
+    public static <V> Single<V> singleton(V element) {
         return Single.of(element);
     }
 
@@ -75,15 +75,15 @@ public class Tuple implements Iterable<Object> {
     }
 
     @SuppressWarnings("unchecked")
-    static <T extends Tuple> T create(Object[] elements) {
+    static <J extends Tuple> J create(Object[] elements) {
         switch (elements.length) {
-        case 1: return (T) new Single<>(elements);
-        case 2: return (T) new Pair<>(elements);
-        case 3: return (T) new Triple<>(elements);
-        case 4: return (T) new Quadruple<>(elements);
-        case 5: return (T) new Quintuple<>(elements);
-        case 6: return (T) new Sextuple<>(elements);
-        default: return (T) new Tuple(elements);
+        case 1: return (J) new Single<>(elements);
+        case 2: return (J) new Pair<>(elements);
+        case 3: return (J) new Triple<>(elements);
+        case 4: return (J) new Quadruple<>(elements);
+        case 5: return (J) new Quintuple<>(elements);
+        case 6: return (J) new Sextuple<>(elements);
+        default: return (J) new Tuple(elements);
         }
     }
 
@@ -196,7 +196,7 @@ public class Tuple implements Iterable<Object> {
      *
      * @return  an independent copy of this tuple
      */
-    public final <T extends Tuple> T deepCopy() {
+    public final <J extends Tuple> J deepCopy() {
         return create(copy(new Object[elements.length], i -> deepCopyElement(elements[i])));
     }
 

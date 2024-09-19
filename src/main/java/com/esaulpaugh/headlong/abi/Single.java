@@ -25,7 +25,7 @@ public final class Single<A> extends Tuple {
         super(elements);
     }
 
-    public static <A> Single<A> of(A a) {
+    public static <V> Single<V> of(V a) {
         return new Single<>(new Object[] { Tuple.requireNotNull(a, 0) });
     }
 
