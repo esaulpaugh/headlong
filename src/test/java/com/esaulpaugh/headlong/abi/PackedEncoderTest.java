@@ -89,7 +89,7 @@ public class PackedEncoderTest {
                 new Single<?>[] {
                         Single.of(true),
                         Single.of(false),
-                        Single.of(true)
+                        Tuple.singleton(true)
                 }
         );
 

@@ -38,18 +38,18 @@ public class Tuple implements Iterable<Object> {
         this.elements = elements;
     }
 
-    /**
-     * @see Single#of(Object)
-     * @return  the pair
-     */
     public static Tuple of() {
         return Tuple.EMPTY;
     }
 
     /**
      * @see Single#of(Object)
-     * @return  the pair
+     * @return  a tuple with one element
      */
+    public static <T> Single<T> singleton(T element) {
+        return Single.of(element);
+    }
+
     public static <A, B> Pair<A, B> of(A a, B b) {
         return new Pair<>(requireNoNulls(new Object[] { a, b }));
     }
