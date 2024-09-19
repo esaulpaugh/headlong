@@ -168,8 +168,8 @@ public class MonteCarloTestCase {
         for (int i = 0; i < values.elements.length; i++) {
             final Object tElement = values.elements[i];
             final Object t2Element = copy.elements[i];
-            assertSame(tElement.getClass(), t2Element.getClass());
             final Class<?> c = tElement.getClass();
+            assertSame(c, t2Element.getClass());
             if (c.isArray()) {
                 assertNotSame(tElement, t2Element);
                 if (tElement instanceof Object[]) {
