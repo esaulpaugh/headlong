@@ -19,6 +19,7 @@ import com.google.gson.JsonObject;
 
 import java.util.Objects;
 
+/** Represents a custom error. */
 public final class ContractError<J extends Tuple> implements ABIObject {
 
     private final String name;
