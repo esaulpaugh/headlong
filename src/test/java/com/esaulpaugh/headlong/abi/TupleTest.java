@@ -188,14 +188,15 @@ public class TupleTest {
     public void testTypeSafety() throws Throwable {
 
         final MonteCarloTestCase.Limits limits = new MonteCarloTestCase.Limits(3, 3, 3, 3);
-        final Random r = new Random();
+        final Random r = TestUtils.seededRandom();
+        final Random instance = new Random();
         final Keccak k = new Keccak(256);
         final Object defaultObj = new Object();
 
-        long seed = r.nextLong();
+        long seed = TestUtils.getSeed();
         for (int idx = 0; idx < limits.maxTupleLength; idx++) {
             for (int i = 0; i < 30; i++, seed++) {
-                final MonteCarloTestCase testCase = new MonteCarloTestCase(seed, limits, r, k);
+                final MonteCarloTestCase testCase = new MonteCarloTestCase(seed, limits, instance, k);
                 final Object[] elements = testCase.argsTuple.elements;
                 if (idx < elements.length) {
                     Object replacement = OBJECTS[r.nextInt(OBJECTS.length)];
