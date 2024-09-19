@@ -338,7 +338,7 @@ public class MonteCarloTestCase {
 
     void runSuperSerial() {
         final Tuple args = this.argsTuple;
-        final TupleType<?> tt = this.function.getInputs();
+        final TupleType<Tuple> tt = this.function.getInputs();
 
         String str = SuperSerial.serialize(tt, args, false);
         Tuple deserial = SuperSerial.deserialize(tt, str, false);

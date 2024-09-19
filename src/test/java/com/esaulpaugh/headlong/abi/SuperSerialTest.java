@@ -62,9 +62,9 @@ public class SuperSerialTest {
     @Test
     public void testBoolean() throws Throwable {
 
-        TupleType<?> _bool_ = TupleType.parse("(bool)");
-        Tuple _true = Single.of(true);
-        Tuple _false = Single.of(false);
+        TupleType<Single<Boolean>> _bool_ = TupleType.parse("(bool)");
+        Single<Boolean> _true = Single.of(true);
+        Single<Boolean> _false = Single.of(false);
 
         assertEquals("01", SuperSerial.serialize(_bool_, _true, true));
         assertEquals("80", SuperSerial.serialize(_bool_, _false, true));
@@ -93,7 +93,7 @@ public class SuperSerialTest {
     @Test
     public void testToFromRLP() {
         final Triple<Boolean, int[], byte[][]> t = Tuple.of(false, new int[] { 0, 1, 2, 3 }, new byte[][] { new byte[0], new byte[1], new byte[] { -1 } });
-        final TupleType<?> tt = TupleType.parse("(bool,int8[],bytes[])");
+        final TupleType<Triple<Boolean, int[], byte[][]>> tt = TupleType.parse("(bool,int8[],bytes[])");
         final byte[] x = SuperSerial.toRLP(tt, t);
         Tuple t_ = SuperSerial.fromRLP(tt, x);
         assertEquals(t, t_);
