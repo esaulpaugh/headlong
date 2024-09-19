@@ -82,11 +82,11 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
      * <blockquote><pre>
      *     {@code TypeFactory.<TupleType<?>>create("(int8)").<IntType>get(0).encode(12)}
      * </pre></blockquote><p>
-     * <p>
      * From Kotlin:
      * <blockquote><pre>
      *     {@code TypeFactory.create<TupleType<*>>("(int8)").get<IntType>(0).encode(12)}
-     * </pre></blockquote><p>
+     * </pre></blockquote>
+     *
      * @param index
      * @return
      * @param <T>
