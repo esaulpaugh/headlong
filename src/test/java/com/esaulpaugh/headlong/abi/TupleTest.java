@@ -151,7 +151,7 @@ public class TupleTest {
     @Test
     public void testTuple() {
         final Tuple emptyA = new Tuple();
-        final Tuple emptyB = Tuple.of();
+        final Tuple emptyB = Tuple.from();
 
         assertEquals(Tuple.EMPTY, emptyA);
         assertEquals(Tuple.EMPTY, emptyB);
@@ -612,11 +612,8 @@ public class TupleTest {
 
     @Test
     public void testTupleEquals() {
-        assertEquals(Tuple.EMPTY, Tuple.of());
-        assertEquals(Tuple.EMPTY, Tuple.from());
         assertEquals(Tuple.EMPTY, new Tuple());
 
-        final Tuple e = Tuple.of();
         final Single<byte[]> s = Single.of(new byte[0]);
         final Pair<byte[], String> p = Tuple.of(new byte[1], "75");
         final Triple<byte[], String, Long> t = Tuple.of(new byte[2], "75", 75L);
@@ -637,7 +634,7 @@ public class TupleTest {
         final Tuple t7 = Tuple.from(90, new String("_"), t);
         final Tuple t8 = t7.get(2);
 
-        testEquals(e, t0);
+        assertEquals(Tuple.EMPTY, t0);
         testEquals(s, t1);
         testEquals(p, t2);
         testEquals(t, t3);

@@ -163,7 +163,7 @@ public class EncodeTest {
     @Test
     public void testFunctionAnnotate() {
         final Function foo = Function.parse("foo()");
-        assertEquals("foo:\nID       c2985578", foo.annotateCall(Tuple.of()));
+        assertEquals("foo:\nID       c2985578", foo.annotateCall(Tuple.EMPTY));
         assertEquals("", TupleType.EMPTY.annotate(new byte[0]));
         final Function f = new Function(
                 TypeEnum.FUNCTION,

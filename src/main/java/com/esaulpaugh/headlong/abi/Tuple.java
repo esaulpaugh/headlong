@@ -38,10 +38,6 @@ public class Tuple implements Iterable<Object> {
         this.elements = elements;
     }
 
-    public static Tuple of() {
-        return Tuple.EMPTY;
-    }
-
     /**
      * @see Single#of(Object)
      * @return  a tuple with one element
