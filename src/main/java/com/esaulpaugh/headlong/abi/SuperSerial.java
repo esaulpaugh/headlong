@@ -47,18 +47,18 @@ public final class SuperSerial {
 
     private static final byte[] TRUE = new byte[] { 0x1 };
 
-    public static byte[] toRLP(TupleType<?> schema, Tuple vals) {
+    public static <T extends Tuple> byte[] toRLP(TupleType<T> schema, T vals) {
         schema.validate(vals);
         return RLPEncoder.sequence(serializeTuple(schema, vals));
     }
 
-    public static <T extends Tuple> T fromRLP(TupleType<?> schema, byte[] rlp) {
+    public static <T extends Tuple> T fromRLP(TupleType<T> schema, byte[] rlp) {
         T in = deserializeTuple(schema, rlp);
         schema.validate(in);
         return in;
     }
 
-    public static String serialize(TupleType<?> tupleType, Tuple tuple, boolean machine) {
+    public static <T extends Tuple> String serialize(TupleType<T> tupleType, T tuple, boolean machine) {
         tupleType.validate(tuple);
         Object[] objects = serializeTuple(tupleType, tuple);
         return machine
@@ -66,7 +66,7 @@ public final class SuperSerial {
                 : Notation.forObjects(objects).toString();
     }
 
-    public static <T extends Tuple> T deserialize(TupleType<?> tupleType, String str, boolean machine) {
+    public static <T extends Tuple> T deserialize(TupleType<T> tupleType, String str, boolean machine) {
         T in = deserializeTuple(
                 tupleType,
                 machine ? Strings.decode(str)
