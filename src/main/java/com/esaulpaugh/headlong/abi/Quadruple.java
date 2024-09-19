@@ -15,10 +15,11 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+/** A tuple with four values. */
 public final class Quadruple<A, B, C, D> extends Tuple {
 
-    Quadruple(Object[] elements) {
-        super(elements);
+    Quadruple(Object[] values) {
+        super(values);
     }
 
     @SuppressWarnings("unchecked")

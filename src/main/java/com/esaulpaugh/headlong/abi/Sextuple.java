@@ -15,10 +15,11 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+/** A tuple with six values. */
 public final class Sextuple<A, B, C, D, E, F> extends Tuple {
 
-    Sextuple(Object[] elements) {
-        super(elements);
+    Sextuple(Object[] values) {
+        super(values);
     }
 
     @SuppressWarnings("unchecked")

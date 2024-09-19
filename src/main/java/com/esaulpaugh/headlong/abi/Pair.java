@@ -15,10 +15,11 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+/** A tuple with two values. */
 public final class Pair<A, B> extends Tuple {
 
-    Pair(Object[] elements) {
-        super(elements);
+    Pair(Object[] values) {
+        super(values);
     }
 
     @SuppressWarnings("unchecked")

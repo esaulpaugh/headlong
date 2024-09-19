@@ -15,10 +15,11 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+/** A tuple with five values. */
 public final class Quintuple<A, B, C, D, E> extends Tuple {
 
-    Quintuple(Object[] elements) {
-        super(elements);
+    Quintuple(Object[] values) {
+        super(values);
     }
 
     @SuppressWarnings("unchecked")

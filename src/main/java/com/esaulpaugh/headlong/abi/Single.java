@@ -16,13 +16,13 @@
 package com.esaulpaugh.headlong.abi;
 
 /**
- * Singleton tuple. One element.
- * @param <A>   the element's type
+ * Singleton tuple. One value.
+ * @param <A>   the value's type
  */
 public final class Single<A> extends Tuple {
 
-    Single(Object[] elements) {
-        super(elements);
+    Single(Object[] values) {
+        super(values);
     }
 
     public static <V> Single<V> of(V a) {

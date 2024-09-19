@@ -15,10 +15,11 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+/** A tuple with three values. */
 public final class Triple<A, B, C> extends Tuple {
 
-    Triple(Object[] elements) {
-        super(elements);
+    Triple(Object[] values) {
+        super(values);
     }
 
     @SuppressWarnings("unchecked")
