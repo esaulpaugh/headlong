@@ -49,7 +49,7 @@ public final class Function implements ABIObject {
 
     private final TypeEnum type;
     private final String name;
-    private final TupleType<?> inputTypes;
+    private final TupleType<Tuple> inputTypes;
     private final TupleType<?> outputTypes;
     private final String stateMutability;
 
@@ -88,10 +88,11 @@ public final class Function implements ABIObject {
      * @param messageDigest hash function with which to generate the 4-byte selector
      * @throws IllegalArgumentException if the arguments do not specify a valid function
      */
+    @SuppressWarnings("unchecked")
     public Function(TypeEnum type, String name, TupleType<?> inputs, TupleType<?> outputs, String stateMutability, MessageDigest messageDigest) {
         this.type = Objects.requireNonNull(type);
         this.name = name != null ? validateName(name) : null;
-        this.inputTypes = Objects.requireNonNull(inputs);
+        this.inputTypes = (TupleType<Tuple>) Objects.requireNonNull(inputs);
         this.outputTypes = Objects.requireNonNull(outputs);
         this.stateMutability = stateMutability;
         this.hashAlgorithm = Objects.requireNonNull(messageDigest.getAlgorithm());

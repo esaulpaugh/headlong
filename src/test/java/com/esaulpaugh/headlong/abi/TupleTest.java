@@ -549,7 +549,7 @@ public class TupleTest {
 
     @Test
     public void testTupleLengthMismatch() throws Throwable {
-        TupleType<?> tt = TupleType.parse("(bool)");
+        TupleType<Tuple> tt = TupleType.parse("(bool)");
         assertThrown(IllegalArgumentException.class, "tuple length mismatch: expected length 1 but found 0", () -> tt.validate(Tuple.EMPTY));
         assertThrown(IllegalArgumentException.class, "tuple length mismatch: expected length 1 but found 2", () -> tt.validate(Tuple.of("", "")));
     }

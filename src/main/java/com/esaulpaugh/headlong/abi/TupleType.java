@@ -154,7 +154,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     @Override
-    public int validate(final Tuple value) {
+    public int validate(final J value) {
         if (value.size() == this.size()) {
             return countBytes(i -> validateObject(get(i), value.elements[i]));
         }
