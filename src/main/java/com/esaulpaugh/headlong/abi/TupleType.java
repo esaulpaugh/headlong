@@ -165,7 +165,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         throw new IllegalArgumentException("tuple length mismatch: expected length " + this.size() + " but found " + args.size());
     }
 
-    private static int validateObject(ABIType<Object> type, Object value) {
+    private static <X> int validateObject(ABIType<X> type, X value) {
         try {
             return totalLen(type.validate(value), type.dynamic);
         } catch (ClassCastException cce) {
