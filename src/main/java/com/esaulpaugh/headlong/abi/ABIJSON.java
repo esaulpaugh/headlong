@@ -33,8 +33,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /** For parsing JSON representations of {@link ABIObject}s according to the ABI specification. */
 public final class ABIJSON {
@@ -98,23 +104,72 @@ public final class ABIJSON {
         return parseElements(arrayJson, ALL);
     }
 
+    public static Stream<ABIObject> streamElements(String arrayJson) {
+        final JsonArray arr = parseArray(arrayJson);
+        return StreamSupport.stream(
+                Spliterators.spliterator(
+                        iterator(ABIType.FLAGS_NONE, arr, ALL),
+                        arr.size(),
+                        Spliterator.ORDERED
+                ),
+                false
+        );
+    }
+
     public static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types) {
         return parseElements(ABIType.FLAGS_NONE, arrayJson, types);
     }
 
     public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
-        final List<T> selected = new ArrayList<>();
-        final MessageDigest digest = Function.newDefaultDigest();
-        for (final JsonElement e : parseArray(arrayJson)) {
-            if (e.isJsonObject()) {
-                final JsonObject object = e.getAsJsonObject();
-                final TypeEnum t = TypeEnum.parse(getType(object));
-                if (types.contains(t)) {
-                    selected.add(parseABIObject(t, object, digest, flags));
-                }
-            }
+        final JsonArray arr = parseArray(arrayJson);
+        final List<T> selected = new ArrayList<>(arr.size());
+        final Iterator<T> iter = iterator(flags, arr, types);
+        while (iter.hasNext()) {
+            selected.add(iter.next());
         }
         return selected;
+    }
+
+    public static <T extends ABIObject> Iterator<T> iterator(int flags, String arrayJson, Set<TypeEnum> types) {
+        return iterator(flags, parseArray(arrayJson), types);
+    }
+
+    static <T extends ABIObject> Iterator<T> iterator(int flags, JsonArray arr, Set<TypeEnum> types) {
+        final Iterator<JsonElement> jsonIter = arr.iterator();
+        final MessageDigest digest = Function.newDefaultDigest();
+        return new Iterator<T>() {
+
+            T next;
+
+            @Override
+            public boolean hasNext() {
+                if (this.next != null) {
+                    return true;
+                }
+                while (jsonIter.hasNext()) {
+                    JsonElement e = jsonIter.next();
+                    if (e.isJsonObject()) {
+                        JsonObject obj = (JsonObject) e;
+                        TypeEnum t = TypeEnum.parse(getType(obj));
+                        if (types.contains(t)) {
+                            this.next = parseABIObject(t, obj, digest, flags);
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public T next() {
+                if (hasNext()) {
+                    final T obj = this.next;
+                    this.next = null;
+                    return obj;
+                }
+                throw new NoSuchElementException();
+            }
+        };
     }
 
     /** @see ABIObject#fromJsonObject(int,JsonObject) */
