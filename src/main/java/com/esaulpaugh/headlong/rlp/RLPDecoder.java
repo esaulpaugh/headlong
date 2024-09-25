@@ -101,6 +101,7 @@ public final class RLPDecoder {
         };
     }
 
+    /** Iterator-based stream for single-threaded use only. */
     public static Stream<RLPItem> stream(Iterator<RLPItem> iter) {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iter, Spliterator.ORDERED), false);
     }
