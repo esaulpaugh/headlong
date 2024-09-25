@@ -104,6 +104,7 @@ public final class ABIJSON {
         return parseElements(arrayJson, ALL);
     }
 
+    /** Iterator-based stream for single-threaded use only. */
     public static Stream<ABIObject> streamElements(String arrayJson) {
         final JsonArray arr = parseArray(arrayJson);
         return StreamSupport.stream(
@@ -130,6 +131,7 @@ public final class ABIJSON {
         return selected;
     }
 
+    /** Iterators are not thread-safe. */
     public static <T extends ABIObject> Iterator<T> iterator(int flags, String arrayJson, Set<TypeEnum> types) {
         return iterator(flags, parseArray(arrayJson), types);
     }
