@@ -149,12 +149,12 @@ public final class ABIJSON {
                     return true;
                 }
                 while (jsonIter.hasNext()) {
-                    JsonElement e = jsonIter.next();
+                    final JsonElement e = jsonIter.next();
                     if (e.isJsonObject()) {
-                        JsonObject obj = (JsonObject) e;
-                        TypeEnum t = TypeEnum.parse(getType(obj));
+                        final JsonObject object = (JsonObject) e;
+                        final TypeEnum t = TypeEnum.parse(getType(object));
                         if (types.contains(t)) {
-                            this.next = parseABIObject(t, obj, digest, flags);
+                            this.next = parseABIObject(t, object, digest, flags);
                             return true;
                         }
                     }
@@ -165,9 +165,9 @@ public final class ABIJSON {
             @Override
             public T next() {
                 if (hasNext()) {
-                    final T obj = this.next;
+                    final T curr = this.next;
                     this.next = null;
-                    return obj;
+                    return curr;
                 }
                 throw new NoSuchElementException();
             }
@@ -176,8 +176,8 @@ public final class ABIJSON {
 
     /** @see ABIObject#fromJsonObject(int,JsonObject) */
     static <T extends ABIObject> T parseABIObject(JsonObject object, int flags) {
-        final TypeEnum typeEnum = TypeEnum.parse(getType(object));
-        return parseABIObject(typeEnum, object, typeEnum.isFunction ? Function.newDefaultDigest() : null, flags);
+        final TypeEnum t = TypeEnum.parse(getType(object));
+        return parseABIObject(t, object, t.isFunction ? Function.newDefaultDigest() : null, flags);
     }
 
     @SuppressWarnings("unchecked")
