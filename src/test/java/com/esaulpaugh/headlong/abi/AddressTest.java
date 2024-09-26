@@ -299,6 +299,10 @@ public class AddressTest {
         );
         final int addrDataChars = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
         assertEquals(40, addrDataChars);
-        assertTrue(MAX_LABEL_LEN < addrDataChars);
+        Address.wrap("0x0000000000000000000000000000000000000000", "012345678901234567890123456789012345");
+        assertThrown(
+                IllegalArgumentException.class,
+                () -> Address.wrap("0x0000000000000000000000000000000000000000", "0123456789012345678901234567890123456"));
+        assertEquals(36, MAX_LABEL_LEN);
     }
 }
