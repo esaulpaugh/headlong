@@ -331,7 +331,7 @@ public abstract class ABIType<J> {
     static String finishFormat(byte[] buffer, int offset, int end, IntFunction<String> labeler, StringBuilder sb) {
         int row = 0;
         while (offset < end) {
-            if (offset > 0) {
+            if (offset != 0) {
                 sb.append('\n');
             }
             sb.append(labeler.apply(row++))
