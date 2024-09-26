@@ -1046,11 +1046,11 @@ public class DecodeTest {
     public void testDecodeLong() throws InterruptedException, ExecutionException, TimeoutException {
         final IntConsumer task = (int id) -> {
             final Random r = ThreadLocalRandom.current();
-            for (int bitWidth = 1; bitWidth <= 64; bitWidth++) {
+            final BigIntegerType writer256 = TypeFactory.create("int256");
+            for (int bitWidth = 8; bitWidth <= 64; bitWidth += 8) {
                 final int bitLen = UNIT_LENGTH_BYTES * Byte.SIZE;
-                final BigIntegerType writer256 = new BigIntegerType("writer" + bitLen, bitLen, false);
-                final LongType unsigned = new LongType("unsigned", bitWidth, true);
-                final LongType signed = new LongType("signed", bitWidth, false);
+                final UnitType<Number> unsigned = TypeFactory.create("uint" + bitWidth);
+                final UnitType<Number> signed = TypeFactory.create("int" + bitWidth);
                 final byte[] buffer = ABIType.newUnitBuffer();
                 final ByteBuffer dest = ByteBuffer.allocate(UNIT_LENGTH_BYTES);
                 final long n = 1_000L;
