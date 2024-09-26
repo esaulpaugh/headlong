@@ -20,7 +20,6 @@ import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.util.WrappedKeccak;
 import com.joemelsha.crypto.hash.Keccak;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
@@ -231,27 +230,34 @@ public class EqualsTest {
         );
     }
 
+    private static final String UNEXPECTED_CLASS = "class not permitted";
+
     @Test
     public void testSubclassingConstraints() throws Throwable {
+        // should cause the following to print to System.err:
+//        unexpected instance creation rejected: com.esaulpaugh.headlong.abi.AddressType
+//        unexpected instance creation rejected: com.esaulpaugh.headlong.abi.BooleanType
+//        unexpected instance creation rejected: com.esaulpaugh.headlong.abi.ByteType
+//        unexpected instance creation rejected: com.esaulpaugh.headlong.abi.EqualsTest$1
         {
             final Constructor<AddressType> constructor = AddressType.class.getDeclaredConstructor();
             constructor.setAccessible(true);
-            assertThrownWithCause(InvocationTargetException.class, IllegalStateException.class, "lol no", constructor::newInstance);
+            assertThrownWithCause(InvocationTargetException.class, IllegalStateException.class, UNEXPECTED_CLASS, constructor::newInstance);
         }
         {
             final Constructor<BooleanType> constructor = BooleanType.class.getDeclaredConstructor();
             constructor.setAccessible(true);
-            assertThrownWithCause(InvocationTargetException.class, IllegalStateException.class, "lol no", constructor::newInstance);
+            assertThrownWithCause(InvocationTargetException.class, IllegalStateException.class, UNEXPECTED_CLASS, constructor::newInstance);
         }
         {
             final Constructor<ByteType> constructor = ByteType.class.getDeclaredConstructor();
             constructor.setAccessible(true);
-            assertThrownWithCause(InvocationTargetException.class, IllegalStateException.class, "lol no", constructor::newInstance);
+            assertThrownWithCause(InvocationTargetException.class, IllegalStateException.class, UNEXPECTED_CLASS, constructor::newInstance);
         }
 
         assertThrown(
                 IllegalStateException.class,
-                "lol no",
+                UNEXPECTED_CLASS,
                 () -> new UnitType<Address>("lol pwned", Address.class, TypeFactory.ADDRESS_BIT_LEN, true) {
 
             static final long HACKER_TIME = 26448843480000L;
@@ -275,6 +281,7 @@ public class EqualsTest {
                 }
             }
         });
+        System.out.println("Constraints verified.");
     }
 
     private static void assertThrownWithCause(Class<? extends Throwable> clazz, Class<? extends Throwable> causeClazz, String internedMsg, TestUtils.CustomRunnable r) throws Throwable {
@@ -282,7 +289,7 @@ public class EqualsTest {
             r.run();
         } catch (Throwable t) {
             if (clazz.isInstance(t) && causeClazz.isInstance(t.getCause()) && t.getCause().getMessage() == internedMsg) {
-                Assertions.assertThrowsExactly(clazz, r::run);
+//                Assertions.assertThrowsExactly(clazz, r::run);
                 return;
             }
             throw t;

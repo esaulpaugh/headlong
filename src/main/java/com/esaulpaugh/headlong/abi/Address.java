@@ -29,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 public final class Address {
 
     private static final int PREFIX_LEN = 2;
-    private static final int ADDRESS_DATA_BYTES = TypeFactory.ADDRESS_BIT_LEN / Byte.SIZE;
+    private static final int ADDRESS_DATA_BYTES = 160 / Byte.SIZE;
     private static final int ADDRESS_HEX_CHARS = ADDRESS_DATA_BYTES * FastHex.CHARS_PER_BYTE;
     private static final int ADDRESS_LEN_CHARS = PREFIX_LEN + ADDRESS_HEX_CHARS;
     private static final int HEX_RADIX = 16;

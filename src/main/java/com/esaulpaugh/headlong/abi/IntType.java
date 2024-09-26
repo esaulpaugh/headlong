@@ -22,6 +22,9 @@ public final class IntType extends UnitType<Integer> {
 
     static final IntType UINT21 = new IntType("uint21", 21, true); // small bit length for Denial-of-Service protection
     static final IntType UINT31 = new IntType("uint31", 31, true);
+    static {
+        UnitType.ensureInitialized();
+    }
 
     IntType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, Integer.class, bitLength, unsigned);
