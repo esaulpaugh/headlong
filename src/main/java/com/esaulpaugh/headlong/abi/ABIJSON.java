@@ -105,7 +105,7 @@ public final class ABIJSON {
     }
 
     /** Iterator-based stream for single-threaded use only. */
-    public static Stream<ABIObject> streamElements(String arrayJson) {
+    public static Stream<ABIObject> stream(String arrayJson) {
         final JsonArray arr = parseArray(arrayJson);
         return StreamSupport.stream(
                 Spliterators.spliterator(
