@@ -155,14 +155,18 @@ Alternatively:
 * Execute `ant all build-jar` which outputs to `build/lib`
 * Add headlong as a project dependency
 
-## Command line interface
-
-https://github.com/esaulpaugh/headlong-cli
-
 ## Benchmarks
 
 ![Screenshot](https://github.com/esaulpaugh/headlong/blob/master/benchmark_results.PNG)
 GraalVM 20.0.2 on x86-64
+
+## Command line interface
+
+https://github.com/esaulpaugh/headlong-cli
+
+## Example Android app
+
+https://github.com/esaulpaugh/headlong-android
 
 ## Misc
 
