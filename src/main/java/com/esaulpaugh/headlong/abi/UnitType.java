@@ -56,7 +56,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
                 System.err.println("unexpected instance creation rejected by " + UnitType.class.getName());
                 throw illegalState("instance not permitted");
             }
-        } else if (Integers.mod(bitLength, Byte.SIZE) != 0) {
+        } else if (bitLength < 8 || Integers.mod(bitLength, Byte.SIZE) != 0) {
             System.err.println("unexpected bit length rejected");
             throw illegalState("bit length not permitted");
         }
