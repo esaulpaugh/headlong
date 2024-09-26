@@ -40,7 +40,6 @@ class RLPSequenceIterator implements Iterator<RLPItem> {
         }
         if (index < buffer.length) {
             next = decoder.wrap(buffer, index);
-            this.index = next.endIndex;
             return true;
         }
         return false;
