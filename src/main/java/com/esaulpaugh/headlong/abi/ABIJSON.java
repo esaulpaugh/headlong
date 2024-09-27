@@ -18,10 +18,12 @@ package com.esaulpaugh.headlong.abi;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.CharArrayWriter;
@@ -38,7 +40,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -104,17 +106,13 @@ public final class ABIJSON {
         return parseElements(arrayJson, ALL);
     }
 
-    /** Iterator-based stream for single-threaded use only. */
     public static Stream<ABIObject> stream(String arrayJson) {
-        final JsonArray arr = parseArray(arrayJson);
-        return StreamSupport.stream(
-                Spliterators.spliterator(
-                        iterator(ABIType.FLAGS_NONE, arr, ALL),
-                        arr.size(),
-                        Spliterator.ORDERED
-                ),
-                false
-        );
+        return stream(ABIType.FLAGS_NONE, arrayJson, ABIJSON.ALL);
+    }
+
+    /** For single-threaded use only. */
+    public static <T extends ABIObject> Stream<T> stream(int flags, String arrayJson, Set<TypeEnum> types) {
+        return StreamSupport.stream(new JsonSpliterator<>(flags, arrayJson, types), false);
     }
 
     public static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types) {
@@ -149,14 +147,11 @@ public final class ABIJSON {
                     return true;
                 }
                 while (jsonIter.hasNext()) {
-                    final JsonElement e = jsonIter.next();
-                    if (e.isJsonObject()) {
-                        final JsonObject object = (JsonObject) e;
-                        final TypeEnum t = TypeEnum.parse(getType(object));
-                        if (types.contains(t)) {
-                            this.next = parseABIObject(t, object, digest, flags);
-                            return true;
-                        }
+                    final JsonObject object = (JsonObject) jsonIter.next();
+                    final TypeEnum t = TypeEnum.parse(getType(object));
+                    if (types.contains(t)) {
+                        this.next = parseABIObject(t, object, digest, flags);
+                        return true;
                     }
                 }
                 return false;
@@ -476,5 +471,90 @@ public final class ABIJSON {
             return element.getAsBoolean();
         }
         throw new IllegalArgumentException(INDEXED + " is not a boolean");
+    }
+
+    static class JsonSpliterator<T extends ABIObject> implements Spliterator<T> {
+
+        private final JsonReader jsonReader;
+        private final int flags;
+        private final Set<TypeEnum> types;
+        private final MessageDigest digest = Function.newDefaultDigest();
+
+        JsonSpliterator(int flags, String arrayJson, Set<TypeEnum> types) {
+            JsonReader reader = new JsonReader(new StringReader(arrayJson));
+            try {
+                reader.beginArray();
+            } catch (IOException io) {
+                throw new IllegalArgumentException("not a JSON array");
+            }
+            this.flags = flags;
+            this.jsonReader = reader;
+            this.types = types;
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super T> action) {
+            try {
+                while (jsonReader.peek() != JsonToken.END_ARRAY) {
+                    JsonObject object = readJsonObject(jsonReader);
+                    TypeEnum t = TypeEnum.parse(getType(object));
+                    if (types.contains(t)) {
+                        action.accept(parseABIObject(t, object, digest, flags));
+                        return true;
+                    }
+                }
+                return false;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public Spliterator<T> trySplit() {
+            return null;
+        }
+
+        @Override
+        public long estimateSize() {
+            return Long.MAX_VALUE;
+        }
+
+        @Override
+        public int characteristics() {
+            return ORDERED | NONNULL | IMMUTABLE;
+        }
+    }
+
+    private static JsonObject readJsonObject(JsonReader reader) throws IOException {
+        JsonObject jsonObject = new JsonObject();
+        reader.beginObject();
+        while (reader.hasNext()) {
+            jsonObject.add(reader.nextName(), readElement(reader));
+        }
+        reader.endObject();
+        return jsonObject;
+    }
+
+    private static JsonArray readJsonArray(JsonReader reader) throws IOException {
+        JsonArray jsonArray = new JsonArray();
+        reader.beginArray();
+        while (reader.hasNext()) {
+            jsonArray.add(readElement(reader));
+        }
+        reader.endArray();
+        return jsonArray;
+    }
+
+    private static JsonElement readElement(JsonReader reader) throws IOException {
+        switch (reader.peek()) {
+        case STRING: return new JsonPrimitive(reader.nextString());
+        case NUMBER: return new JsonPrimitive(reader.nextDouble());
+        case BOOLEAN: return new JsonPrimitive(reader.nextBoolean());
+        case BEGIN_OBJECT: return readJsonObject(reader);
+        case BEGIN_ARRAY: return readJsonArray(reader);
+        default: // NULL and unknown
+            reader.skipValue();
+            return JsonNull.INSTANCE;
+        }
     }
 }
