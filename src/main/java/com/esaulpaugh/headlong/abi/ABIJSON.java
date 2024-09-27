@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -473,7 +474,7 @@ public final class ABIJSON {
         throw new IllegalArgumentException(INDEXED + " is not a boolean");
     }
 
-    static class JsonSpliterator<T extends ABIObject> implements Spliterator<T> {
+    static class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> {
 
         private final JsonReader jsonReader;
         private final int flags;
@@ -481,11 +482,12 @@ public final class ABIJSON {
         private final MessageDigest digest = Function.newDefaultDigest();
 
         JsonSpliterator(int flags, String arrayJson, Set<TypeEnum> types) {
+            super(Long.SIZE, ORDERED | NONNULL | IMMUTABLE);
             JsonReader reader = new JsonReader(new StringReader(arrayJson));
             try {
                 reader.beginArray();
             } catch (IOException io) {
-                throw new IllegalArgumentException("not a JSON array");
+                throw new IllegalStateException("not a JSON array");
             }
             this.flags = flags;
             this.jsonReader = reader;
@@ -512,16 +514,6 @@ public final class ABIJSON {
         @Override
         public Spliterator<T> trySplit() {
             return null;
-        }
-
-        @Override
-        public long estimateSize() {
-            return Long.MAX_VALUE;
-        }
-
-        @Override
-        public int characteristics() {
-            return ORDERED | NONNULL | IMMUTABLE;
         }
     }
 
