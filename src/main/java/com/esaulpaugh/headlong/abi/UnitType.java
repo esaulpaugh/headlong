@@ -33,7 +33,8 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
     private static final AtomicLong INSTANCE_COUNT = new AtomicLong(0L);
 
-    public static final int UNIT_LENGTH_BYTES = 256 / Byte.SIZE;
+    static final int UNIT_LENGTH_BITS = 256;
+    public static final int UNIT_LENGTH_BYTES = UNIT_LENGTH_BITS / Byte.SIZE;
 
     private final long minLong;
     private final long maxLong;
@@ -56,7 +57,9 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
                 System.err.println("unexpected instance creation rejected by " + UnitType.class.getName());
                 throw illegalState("instance not permitted");
             }
-        } else if (bitLength < 8 || Integers.mod(bitLength, Byte.SIZE) != 0) {
+        } else if (bitLength > UNIT_LENGTH_BITS) {
+            bitLength = UNIT_LENGTH_BITS;
+        } else if (bitLength < Byte.SIZE || Integers.mod(bitLength, Byte.SIZE) != 0) {
             System.err.println("unexpected bit length rejected");
             throw illegalState("bit length not permitted");
         }
