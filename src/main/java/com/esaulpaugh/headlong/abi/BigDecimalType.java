@@ -31,6 +31,10 @@ public final class BigDecimalType extends UnitType<BigDecimal> {
 
     BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean unsigned) {
         super(canonicalTypeString, BigDecimal.class, bitLength, unsigned);
+        if (scale <= 0 || scale > 80) {
+            System.err.println("unexpected instance creation rejected by " + BigDecimalType.class.getName());
+            throw illegalState("bad scale");
+        }
         this.scale = scale;
     }
 
