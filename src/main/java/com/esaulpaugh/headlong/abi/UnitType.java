@@ -221,7 +221,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         // trigger initialization of all subclasses
         final Integer h = AddressType.INSTANCE.getBitLength()
                         + BooleanType.INSTANCE.getBitLength()
-                        + ByteType.INSTANCE.getFlags()
+                        + ByteType.INSTANCE.typeCode()
                         + IntType.UINT21.getBitLength()
                         + IntType.UINT31.getBitLength()
                         + LongType.init()
