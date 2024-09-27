@@ -505,7 +505,7 @@ public final class ABIJSON {
                 }
                 return false;
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException(e);
             }
         }
 
