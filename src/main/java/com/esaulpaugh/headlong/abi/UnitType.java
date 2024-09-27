@@ -231,8 +231,6 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     }
 
     private static synchronized void initMaps(Object h) {
-        Objects.requireNonNull(h);
-
         final int empty = 0;
         final int full = 108;
         final int size = BASE_TYPE_MAP.size();
@@ -245,6 +243,8 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
             ise.printStackTrace();
             throw ise;
         }
+
+        Objects.requireNonNull(h);
 
         final Map<String, ABIType<?>> map = BASE_TYPE_MAP;
 
