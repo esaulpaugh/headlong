@@ -483,15 +483,15 @@ public final class ABIJSON {
 
         JsonSpliterator(int flags, String arrayJson, Set<TypeEnum> types) {
             super(Long.SIZE, ORDERED | NONNULL | IMMUTABLE);
-            JsonReader reader = new JsonReader(new StringReader(arrayJson));
             try {
+                JsonReader reader = new JsonReader(new StringReader(arrayJson));
                 reader.beginArray();
+                this.flags = flags;
+                this.jsonReader = reader;
+                this.types = types;
             } catch (IOException io) {
-                throw new IllegalStateException("not a JSON array");
+                throw new IllegalStateException(io);
             }
-            this.flags = flags;
-            this.jsonReader = reader;
-            this.types = types;
         }
 
         @Override
