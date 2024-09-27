@@ -21,7 +21,7 @@ import java.nio.ByteBuffer;
 /** Represents an integer type such as uint64 or int256. */
 public final class BigIntegerType extends UnitType<BigInteger> {
 
-    static final Object __ = "";
+    static int init() {return 0;}
 
     static {
         UnitType.ensureInitialized();

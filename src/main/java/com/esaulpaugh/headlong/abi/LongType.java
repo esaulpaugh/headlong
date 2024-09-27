@@ -22,7 +22,7 @@ import java.nio.ByteBuffer;
 /** Represents a long integer type such as int40, int64, uint32, or uint56. */
 public final class LongType extends UnitType<Long> {
 
-    static final Object __ = "";
+    static int init() {return 0;}
 
     static {
         UnitType.ensureInitialized();

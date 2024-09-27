@@ -224,9 +224,9 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
                         + ByteType.INSTANCE.getFlags()
                         + IntType.UINT21.getBitLength()
                         + IntType.UINT31.getBitLength()
-                        + LongType.__.hashCode()
-                        + BigDecimalType.__.hashCode()
-                        + BigIntegerType.__.hashCode();
+                        + LongType.init()
+                        + BigDecimalType.init()
+                        + BigIntegerType.init();
         initMaps(h); // synchronized
     }
 
