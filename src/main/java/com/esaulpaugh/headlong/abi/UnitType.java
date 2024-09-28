@@ -31,6 +31,12 @@ import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
 /** Superclass for any 256-bit ("unit") Contract ABI type. Usually numbers or boolean. Not for arrays or tuples. */
 public abstract class UnitType<J> extends ABIType<J> { // J generally extends Number or is Boolean
 
+    // 69 non-BigDecimalType entries in BASE_TYPE_MAP
+    // - 3 which are only aliases to instances already counted (int, uint, decimal)
+    // + 0 unique instances in LEGACY_BASE_TYPE_MAP
+    // + 3 instances not in the maps (uint21, uint31, and ADDRESS_INNER)
+    // =
+    private static final int INSTANCE_LIMIT = 69;
     private static final AtomicLong INSTANCE_COUNT = new AtomicLong(0L);
 
     static final int UNIT_LENGTH_BITS = 256;
@@ -46,13 +52,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     UnitType(String canonicalType, Class<J> clazz, int bitLength, boolean unsigned) {
         super(canonicalType, clazz, false);
         if (!(this instanceof BigDecimalType)) {
-            // 69 non-BigDecimalType entries in BASE_TYPE_MAP
-            // - 3 which are only aliases to instances already counted (int, uint, decimal)
-            // + 0 unique instances in LEGACY_BASE_TYPE_MAP
-            // + 3 instances not in the maps (uint21, uint31, and ADDRESS_INNER)
-            // =
-            final int instanceLimit = 69;
-            if (INSTANCE_COUNT.incrementAndGet() > instanceLimit) {
+            if (INSTANCE_COUNT.incrementAndGet() > INSTANCE_LIMIT) {
                 INSTANCE_COUNT.decrementAndGet();
                 throw illegalState("instance not permitted", "unexpected instance creation rejected by " + UnitType.class.getName());
             }
