@@ -36,7 +36,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
     // + 0 unique instances in LEGACY_BASE_TYPE_MAP
     // + 3 instances not in the maps (uint21, uint31, and ADDRESS_INNER)
     // =
-    private static final int INSTANCE_LIMIT = 69;
+    private static final long INSTANCE_LIMIT = 69L;
     private static final AtomicLong INSTANCE_COUNT = new AtomicLong(0L);
 
     static final int UNIT_LENGTH_BITS = 256;
