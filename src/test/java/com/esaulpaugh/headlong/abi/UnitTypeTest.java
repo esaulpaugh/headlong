@@ -74,7 +74,7 @@ public class UnitTypeTest {
         assertThrown(
                 IllegalStateException.class,
                 UNEXPECTED_CLASS,
-                () -> new UnitType<Address>("lol pwned", Address.class, TypeFactory.ADDRESS_BIT_LEN, true) {
+                () -> new UnitType<Address>("lol pwned", Address.class, Address.ADDRESS_BIT_LEN, true) {
 
                     static final long HACKER_TIME = 26448843480000L;
 

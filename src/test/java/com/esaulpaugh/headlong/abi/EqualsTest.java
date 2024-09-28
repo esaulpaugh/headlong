@@ -113,7 +113,7 @@ public class EqualsTest {
 //                       10000000000000000000000000000000000000000
 //                        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         final String addressHex = "ff00ee01dd02cc03cafebabe9906880777086609";
-        assertEquals(TypeFactory.ADDRESS_BIT_LEN, addressHex.length() * FastHex.BITS_PER_CHAR);
+        assertEquals(Address.ADDRESS_BIT_LEN, addressHex.length() * FastHex.BITS_PER_CHAR);
         final String checksumAddress = Address.toChecksumAddress("0x" + addressHex);
         assertEquals("0xFF00eE01dd02cC03cafEBAbe9906880777086609", checksumAddress);
         assertEquals(addressHex, checksumAddress.replace("0x", "").toLowerCase(Locale.ENGLISH));

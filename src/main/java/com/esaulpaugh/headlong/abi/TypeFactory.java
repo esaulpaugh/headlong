@@ -30,8 +30,6 @@ public final class TypeFactory {
 
     private static final int MAX_LENGTH_CHARS = 2_000;
 
-    static final int ADDRESS_BIT_LEN = 160;
-
     private TypeFactory() {}
 
     /**

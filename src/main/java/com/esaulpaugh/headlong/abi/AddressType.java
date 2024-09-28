@@ -17,10 +17,10 @@ package com.esaulpaugh.headlong.abi;
 
 import java.nio.ByteBuffer;
 
+import static com.esaulpaugh.headlong.abi.Address.ADDRESS_BIT_LEN;
+
 /** The {@link ABIType} for {@link Address}. Corresponds to the "address" type. */
 public final class AddressType extends UnitType<Address> {
-
-    private static final int ADDRESS_BIT_LEN = 160;
 
     static final AddressType INSTANCE = new AddressType();
 
