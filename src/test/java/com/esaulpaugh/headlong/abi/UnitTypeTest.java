@@ -27,14 +27,22 @@ import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 public class UnitTypeTest {
 
     @Test
-    public void testConstructorAccess() throws Throwable {
+    public void testConstructorConstraints() throws Throwable {
         // should print to System.err:
 //        unexpected instance creation rejected by com.esaulpaugh.headlong.abi.UnitType
 //        unexpected instance creation rejected by com.esaulpaugh.headlong.abi.UnitType
 //        unexpected instance creation rejected by com.esaulpaugh.headlong.abi.UnitType
-        TestUtils.assertThrown(IllegalStateException.class, "instance not permitted", () -> new IntType("custom", 300, true));
-        TestUtils.assertThrown(IllegalStateException.class, "instance not permitted", () -> new LongType("custom", 300, true));
-        TestUtils.assertThrown(IllegalStateException.class, "instance not permitted", () -> new BigIntegerType("custom", 300, true));
+//        unexpected instance creation rejected by com.esaulpaugh.headlong.abi.BigDecimalType
+//        unexpected instance creation rejected by com.esaulpaugh.headlong.abi.BigDecimalType
+//        unexpected bit length rejected
+        TestUtils.assertThrown(IllegalStateException.class, "instance not permitted", () -> new IntType("x", 300, true));
+        TestUtils.assertThrown(IllegalStateException.class, "instance not permitted", () -> new LongType("x", 300, true));
+        TestUtils.assertThrown(IllegalStateException.class, "instance not permitted", () -> new BigIntegerType("x", 300, true));
+        TestUtils.assertThrown(IllegalStateException.class, "bad scale", () -> new BigDecimalType("x", 257, 81, true));
+        TestUtils.assertThrown(IllegalStateException.class, "bad scale", () -> new BigDecimalType("x", 257, 0, true));
+        new BigDecimalType("x", 257, 80, true);
+        new BigDecimalType("x", 257, 1, true);
+        TestUtils.assertThrown(IllegalStateException.class, "bit length not permitted", () -> new BigDecimalType("x", 45, 10, true));
         System.out.println("Constraints checked successfully.");
     }
 
@@ -42,7 +50,7 @@ public class UnitTypeTest {
 
     @Test
     public void testSubclassingConstraints() throws Throwable {
-        // should cause the following to print to System.err:
+        // should print to System.err:
 //        unexpected instance creation rejected: com.esaulpaugh.headlong.abi.AddressType
 //        unexpected instance creation rejected: com.esaulpaugh.headlong.abi.BooleanType
 //        unexpected instance creation rejected: com.esaulpaugh.headlong.abi.ByteType
