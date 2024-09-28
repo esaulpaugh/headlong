@@ -54,14 +54,12 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
             final int instanceLimit = 69;
             if (INSTANCE_COUNT.incrementAndGet() > instanceLimit) {
                 INSTANCE_COUNT.decrementAndGet();
-                System.err.println("unexpected instance creation rejected by " + UnitType.class.getName());
-                throw illegalState("instance not permitted");
+                throw illegalState("instance not permitted", "unexpected instance creation rejected by " + UnitType.class.getName());
             }
         } else if (bitLength > UNIT_LENGTH_BITS) {
             bitLength = UNIT_LENGTH_BITS;
         } else if (bitLength < Byte.SIZE || Integers.mod(bitLength, Byte.SIZE) != 0) {
-            System.err.println("unexpected bit length rejected");
-            throw illegalState("bit length not permitted");
+            throw illegalState("bit length not permitted", "unexpected bit length rejected");
         }
         this.bitLength = bitLength;
         this.unsigned = unsigned;
@@ -242,9 +240,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
             if (size == full && legacySize == full) {
                 return;
             }
-            IllegalStateException ise = illegalState("bad map size");
-            ise.printStackTrace();
-            throw ise;
+            throw illegalState("bad map size", "bad map size");
         }
 
         Objects.requireNonNull(h);

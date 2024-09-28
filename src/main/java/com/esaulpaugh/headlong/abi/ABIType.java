@@ -83,8 +83,7 @@ public abstract class ABIType<J> {
                                     )
                                 || (c == ByteType.class && /* enforce singleton */ ByteType.INSTANCE == null) ;
         if (!permitted) {
-            System.err.println("unexpected instance creation rejected: " + c.getName());
-            throw illegalState("class not permitted");
+            throw illegalState("class not permitted", "unexpected instance creation rejected: " + c.getName());
         }
     }
 
@@ -360,7 +359,8 @@ public abstract class ABIType<J> {
         return padded.toString();
     }
 
-    static IllegalStateException illegalState(String msg) {
+    static IllegalStateException illegalState(String msg, String printMsg) {
+        System.err.println(printMsg);
         return new IllegalStateException(msg);
     }
 }
