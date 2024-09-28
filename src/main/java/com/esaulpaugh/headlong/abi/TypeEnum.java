@@ -49,9 +49,7 @@ public enum TypeEnum {
         if (ABIJSON.FUNCTION.equals(typeString) || typeString == null) {
             return FUNCTION;
         }
-        if (ABIJSON.EVENT.equals(typeString)) {
-            return EVENT;
-        }
+        if (ABIJSON.EVENT.equals(typeString)) return EVENT;
         if (ABIJSON.ERROR.equals(typeString)) return ERROR;
         if (ABIJSON.RECEIVE.equals(typeString)) return RECEIVE;
         if (ABIJSON.FALLBACK.equals(typeString)) return FALLBACK;
