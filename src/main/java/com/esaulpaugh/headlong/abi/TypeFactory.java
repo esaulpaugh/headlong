@@ -25,7 +25,7 @@ import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
 public final class TypeFactory {
 
     static {
-        UnitType.ensureInitialized();
+        UnitType.initInstances(); // initialize type maps
     }
 
     private static final int MAX_LENGTH_CHARS = 2_000;

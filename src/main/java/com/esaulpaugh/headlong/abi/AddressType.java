@@ -23,11 +23,12 @@ public final class AddressType extends UnitType<Address> {
     private static final int ADDRESS_BIT_LEN = 160;
 
     static final AddressType INSTANCE = new AddressType();
-    static {
-        UnitType.ensureInitialized();
-    }
 
     private static final BigIntegerType ADDRESS_INNER = new BigIntegerType("ADDRESS_INNER", ADDRESS_BIT_LEN, true);
+
+    static {
+        UnitType.initInstances();
+    }
 
     private AddressType() {
         super("address", Address.class, ADDRESS_BIT_LEN, true);

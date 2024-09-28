@@ -21,7 +21,6 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
@@ -29,7 +28,7 @@ import static com.esaulpaugh.headlong.abi.ArrayType.STRING_ARRAY_CLASS;
 import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
 
 /** Superclass for any 256-bit ("unit") Contract ABI type. Usually numbers or boolean. Not for arrays or tuples. */
-public abstract class UnitType<J> extends ABIType<J> { // J generally extends Number or is Boolean
+public abstract class UnitType<J> extends ABIType<J> { // J generally extends Number or is Boolean or Address
 
     // 69 non-BigDecimalType entries in BASE_TYPE_MAP
     // - 3 which are only aliases to instances already counted (int, uint, decimal)
@@ -218,37 +217,26 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         return LEGACY_BASE_TYPE_MAP.get(rawType);
     }
 
-    static void ensureInitialized() {
-        // trigger initialization of all subclasses
-        final Integer h = AddressType.INSTANCE.typeCode()
-                        + BooleanType.INSTANCE.typeCode()
-                        + ByteType.INSTANCE.typeCode()
-                        + IntType.UINT21.typeCode()
-                        + IntType.UINT31.typeCode()
-                        + LongType.init()
-                        + BigDecimalType.init()
-                        + BigIntegerType.init();
-        initMaps(h); // synchronized
-    }
-
-    private static synchronized void initMaps(Object h) {
-        final int empty = 0;
-        final int full = 108;
-        final int size = BASE_TYPE_MAP.size();
-        final int legacySize = LEGACY_BASE_TYPE_MAP.size();
-        if (size != empty || legacySize != empty) {
-            if (size == full && legacySize == full) {
-                return;
-            }
-            throw illegalState("bad map size", "bad map size");
+    static synchronized void initInstances() {
+        // synchronized won't prevent method reentry when we trigger the initialization of a subclass of UnitType, which will call initInstances again
+        // so add at least one non-UnitType entry to the map before touching any of UnitType's subclasses!
+        if (!BASE_TYPE_MAP.isEmpty()) {
+            return;
         }
-
-        Objects.requireNonNull(h);
+        final long initialCount = INSTANCE_COUNT.get();
+        if (initialCount < 0L || initialCount > 2L) { // will be the number of static instances in whichever subclass is initialized first
+            throw new AssertionError(initialCount + " instances");
+        }
+        if (!LEGACY_BASE_TYPE_MAP.isEmpty()) {
+            throw new AssertionError("map not empty");
+        }
 
         final Map<String, ABIType<?>> map = BASE_TYPE_MAP;
 
-        // optimized insertion order
+        // first entry is not a UnitType, because of reentrancy. see above.
         map.put("string", new ArrayType<ByteType, Byte, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAGS_NONE));
+
+        // optimized insertion order
         map.put("bool", BooleanType.INSTANCE);
 
         for (int n = 1; n <= 32; n++) {
@@ -257,7 +245,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         mapByteArray(map, "function", FUNCTION_BYTE_LEN);
         mapByteArray(map, "bytes", DYNAMIC_LENGTH);
 
-        for (int n = 8; n <= 24; n += 8) mapInt(map, "uint" + n, n, true);
+        for (int n = 8; n <= 24; n += 8) mapInt(map, "uint" + n, n, true); // will trigger IntType initialization, which will init UINT21 and UINT31
         for (int n = 32; n <= 56; n += 8) mapLong(map, "uint" + n, n, true);
         for (int n = 64; n <= 256; n += 8) mapBigInteger(map, "uint" + n, n, true);
 
@@ -288,7 +276,11 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
             LEGACY_BASE_TYPE_MAP.put(e.getKey(), value);
         }
 
+        final int full = 108;
         if (BASE_TYPE_MAP.size() != full || LEGACY_BASE_TYPE_MAP.size() != full) {
+            throw new AssertionError();
+        }
+        if (INSTANCE_COUNT.get() != INSTANCE_LIMIT) {
             throw new AssertionError();
         }
     }

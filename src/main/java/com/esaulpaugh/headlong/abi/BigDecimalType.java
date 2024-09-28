@@ -21,12 +21,6 @@ import java.nio.ByteBuffer;
 /** Represents a decimal type such as fixed or ufixed. */
 public final class BigDecimalType extends UnitType<BigDecimal> {
 
-    static int init() {return 0;}
-
-    static {
-        UnitType.ensureInitialized();
-    }
-
     final int scale;
 
     BigDecimalType(String canonicalTypeString, int bitLength, int scale, boolean unsigned) {

@@ -21,9 +21,6 @@ import java.nio.ByteBuffer;
 public final class ByteType extends ABIType<Byte> {
 
     static final ByteType INSTANCE = new ByteType();
-    static {
-        UnitType.ensureInitialized();
-    }
 
     private ByteType() {
         super("BYTE", Byte.class, false);

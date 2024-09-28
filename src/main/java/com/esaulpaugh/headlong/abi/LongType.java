@@ -22,10 +22,8 @@ import java.nio.ByteBuffer;
 /** Represents a long integer type such as int40, int64, uint32, or uint56. */
 public final class LongType extends UnitType<Long> {
 
-    static int init() {return 0;}
-
     static {
-        UnitType.ensureInitialized();
+        UnitType.initInstances(); // will prevent creation of new UnitTypes once finished (except BigDecimalType)
     }
 
     LongType(String canonicalType, int bitLength, boolean unsigned) {
