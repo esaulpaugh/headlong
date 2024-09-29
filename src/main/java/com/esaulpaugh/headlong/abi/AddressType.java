@@ -17,15 +17,21 @@ package com.esaulpaugh.headlong.abi;
 
 import java.nio.ByteBuffer;
 
+import static com.esaulpaugh.headlong.abi.Address.ADDRESS_BIT_LEN;
+
 /** The {@link ABIType} for {@link Address}. Corresponds to the "address" type. */
 public final class AddressType extends UnitType<Address> {
 
     static final AddressType INSTANCE = new AddressType();
 
-    private static final BigIntegerType ADDRESS_INNER = new BigIntegerType("ADDRESS_INNER", TypeFactory.ADDRESS_BIT_LEN, true);
+    private static final BigIntegerType ADDRESS_INNER = new BigIntegerType("ADDRESS_INNER", ADDRESS_BIT_LEN, true);
+
+    static {
+        UnitType.initInstances();
+    }
 
     private AddressType() {
-        super("address", Address.class, TypeFactory.ADDRESS_BIT_LEN, true);
+        super("address", Address.class, ADDRESS_BIT_LEN, true);
     }
 
     @Override

@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
+import static com.esaulpaugh.headlong.abi.Address.ADDRESS_BIT_LEN;
 import static com.esaulpaugh.headlong.abi.Address.MAX_LABEL_LEN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -78,7 +79,7 @@ public class AddressTest {
     }
 
     private static String generateAddressString(Random r) {
-        byte[] _20 = new byte[TypeFactory.ADDRESS_BIT_LEN / Byte.SIZE];
+        byte[] _20 = new byte[ADDRESS_BIT_LEN / Byte.SIZE];
         r.nextBytes(_20);
         return Address.toChecksumAddress("0x" + Strings.encode(_20));
     }
@@ -138,8 +139,8 @@ public class AddressTest {
         final SecureRandom sr = new SecureRandom();
         sr.setSeed(new SecureRandom().generateSeed(64));
         sr.setSeed(sr.generateSeed(64));
-        testBigIntAddressVal(new BigInteger(TypeFactory.ADDRESS_BIT_LEN, sr));
-        testBigIntAddressVal(new BigInteger(TypeFactory.ADDRESS_BIT_LEN, sr));
+        testBigIntAddressVal(new BigInteger(ADDRESS_BIT_LEN, sr));
+        testBigIntAddressVal(new BigInteger(ADDRESS_BIT_LEN, sr));
 
         BigInteger temp;
         do {
@@ -297,7 +298,7 @@ public class AddressTest {
                         "Four score and seven years ago our fathers brought forth on this continent, a new nation, " +
                         "conceived in Liberty, and dedicated to the proposition that all men are created equal.")
         );
-        final int addrDataChars = TypeFactory.ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
+        final int addrDataChars = ADDRESS_BIT_LEN / FastHex.BITS_PER_CHAR;
         assertEquals(40, addrDataChars);
         Address.wrap("0x0000000000000000000000000000000000000000", "012345678901234567890123456789012345");
         assertThrown(

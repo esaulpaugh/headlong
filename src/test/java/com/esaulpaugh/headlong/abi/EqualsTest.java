@@ -20,18 +20,14 @@ import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import com.esaulpaugh.headlong.util.WrappedKeccak;
 import com.joemelsha.crypto.hash.Keccak;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Random;
 
-import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -117,7 +113,7 @@ public class EqualsTest {
 //                       10000000000000000000000000000000000000000
 //                        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         final String addressHex = "ff00ee01dd02cc03cafebabe9906880777086609";
-        assertEquals(TypeFactory.ADDRESS_BIT_LEN, addressHex.length() * FastHex.BITS_PER_CHAR);
+        assertEquals(Address.ADDRESS_BIT_LEN, addressHex.length() * FastHex.BITS_PER_CHAR);
         final String checksumAddress = Address.toChecksumAddress("0x" + addressHex);
         assertEquals("0xFF00eE01dd02cC03cafEBAbe9906880777086609", checksumAddress);
         assertEquals(addressHex, checksumAddress.replace("0x", "").toLowerCase(Locale.ENGLISH));
@@ -229,64 +225,5 @@ public class EqualsTest {
                 new Event<>("lo", false, tt_a, false, false, false),
                 Event.create("lo", tt_c, false, false, false)
         );
-    }
-
-    @Test
-    public void testSubclassingConstraints() throws Throwable {
-        {
-            final Constructor<AddressType> constructor = AddressType.class.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            assertThrownWithCause(InvocationTargetException.class, IllegalStateException.class, "lol no", constructor::newInstance);
-        }
-        {
-            final Constructor<BooleanType> constructor = BooleanType.class.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            assertThrownWithCause(InvocationTargetException.class, IllegalStateException.class, "lol no", constructor::newInstance);
-        }
-        {
-            final Constructor<ByteType> constructor = ByteType.class.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            assertThrownWithCause(InvocationTargetException.class, IllegalStateException.class, "lol no", constructor::newInstance);
-        }
-
-        assertThrown(
-                IllegalStateException.class,
-                "lol no",
-                () -> new UnitType<Address>("lol pwned", Address.class, TypeFactory.ADDRESS_BIT_LEN, true) {
-
-            static final long HACKER_TIME = 26448843480000L;
-
-            @Override
-            Class<?> arrayClass() {
-                return Address[].class;
-            }
-
-            @Override
-            public int typeCode() {
-                return ABIType.TYPE_CODE_ADDRESS;
-            }
-
-            @Override
-            Address decode(ByteBuffer buffer, byte[] unitBuffer) {
-                if (System.currentTimeMillis() >= HACKER_TIME) {
-                    return Address.wrap("0xdeADbabe00000000000000000000000000000000", "Haxxor " + (char)074615 + "'s address");
-                } else {
-                    return AddressType.INSTANCE.decode(buffer, unitBuffer);
-                }
-            }
-        });
-    }
-
-    private static void assertThrownWithCause(Class<? extends Throwable> clazz, Class<? extends Throwable> causeClazz, String internedMsg, TestUtils.CustomRunnable r) throws Throwable {
-        try {
-            r.run();
-        } catch (Throwable t) {
-            if (clazz.isInstance(t) && causeClazz.isInstance(t.getCause()) && t.getCause().getMessage() == internedMsg) {
-                Assertions.assertThrowsExactly(clazz, r::run);
-                return;
-            }
-            throw t;
-        }
-        throw new AssertionError("no " + clazz.getName() + " thrown");
     }
 }

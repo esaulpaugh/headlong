@@ -26,7 +26,8 @@ public final class BooleanType extends UnitType<Boolean> {
     private static final byte[] BOOLEAN_TRUE = new byte[UNIT_LENGTH_BYTES];
 
     static {
-        BOOLEAN_TRUE[BOOLEAN_TRUE.length-1] = 1;
+        BOOLEAN_TRUE[BOOLEAN_TRUE.length - 1] = 1;
+        UnitType.initInstances(); // will prevent creation of new UnitTypes once finished (except BigDecimalType)
     }
 
     private BooleanType() {

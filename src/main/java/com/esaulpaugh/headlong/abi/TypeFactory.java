@@ -18,95 +18,19 @@ package com.esaulpaugh.headlong.abi;
 import com.esaulpaugh.headlong.util.Integers;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.esaulpaugh.headlong.abi.ArrayType.DYNAMIC_LENGTH;
-import static com.esaulpaugh.headlong.abi.ArrayType.STRING_ARRAY_CLASS;
-import static com.esaulpaugh.headlong.abi.ArrayType.STRING_CLASS;
 
 /** Creates the appropriate {@link ABIType} object for a given type string. */
 public final class TypeFactory {
 
-    private TypeFactory() {}
-
-    static final int ADDRESS_BIT_LEN = 160;
-
-    private static final int FIXED_BIT_LEN = 128;
-    private static final int FIXED_SCALE = 18;
-
-    private static final int FUNCTION_BYTE_LEN = 24;
+    static {
+        UnitType.initInstances(); // initialize type maps
+    }
 
     private static final int MAX_LENGTH_CHARS = 2_000;
 
-    private static final Map<String, ABIType<?>> BASE_TYPE_MAP;
-    private static final Map<String, ABIType<?>> LEGACY_BASE_TYPE_MAP;
-
-    static {
-        final Map<String, ABIType<?>> local = new HashMap<>(256);
-
-        // optimized insertion order
-        local.put("string", new ArrayType<ByteType, Byte, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAGS_NONE));
-        local.put("bool", BooleanType.INSTANCE);
-
-        for (int n = 1; n <= 32; n++) {
-            mapByteArray(local, "bytes" + n, n);
-        }
-        mapByteArray(local, "function", FUNCTION_BYTE_LEN);
-        mapByteArray(local, "bytes", DYNAMIC_LENGTH);
-
-        for (int n = 8; n <= 24; n += 8) mapInt(local, "uint" + n, n, true);
-        for (int n = 32; n <= 56; n += 8) mapLong(local, "uint" + n, n, true);
-        for (int n = 64; n <= 256; n += 8) mapBigInteger(local, "uint" + n, n, true);
-
-        local.put("uint", local.get("uint256"));
-
-        mapBigInteger(local, "int256", 256, false);
-        local.put("int", local.get("int256"));
-
-        for (int n = 8; n <= 32; n += 8) mapInt(local, "int" + n, n, false);
-        for (int n = 40; n <= 64; n += 8) mapLong(local, "int" + n, n, false);
-        for (int n = 72; n < 256; n += 8) mapBigInteger(local, "int" + n, n, false);
-
-        local.put("address", AddressType.INSTANCE);
-
-        local.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
-        local.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
-
-        local.put("decimal", local.get("int168"));
-        local.put("fixed", local.get("fixed128x18"));
-        local.put("ufixed", local.get("ufixed128x18"));
-
-        final Map<String, ABIType<?>> localLegacy = new HashMap<>(256);
-        for (Map.Entry<String, ABIType<?>> e : local.entrySet()) {
-            ABIType<?> value = e.getValue();
-            if (value instanceof ArrayType) {
-                final ArrayType<?, ?, ?> at = value.asArrayType();
-                value = new ArrayType<>(at.canonicalType, at.clazz, ByteType.INSTANCE, at.getLength(), at.arrayClass(), ABIType.FLAG_LEGACY_DECODE);
-            }
-            localLegacy.put(e.getKey(), value);
-        }
-
-        BASE_TYPE_MAP = Collections.unmodifiableMap(local);
-        LEGACY_BASE_TYPE_MAP = Collections.unmodifiableMap(localLegacy);
-    }
-
-    private static void mapInt(Map<String, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
-        map.put(type, new IntType(type, bitLen, unsigned));
-    }
-
-    private static void mapLong(Map<String, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
-        map.put(type, new LongType(type, bitLen, unsigned));
-    }
-
-    private static void mapBigInteger(Map<String, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
-        map.put(type, new BigIntegerType(type, bitLen, unsigned));
-    }
-
-    private static void mapByteArray(Map<String, ABIType<?>> map, String type, int arrayLen) {
-        map.put(type, new ArrayType<ByteType, Byte, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class, ABIType.FLAGS_NONE));
-    }
+    private TypeFactory() {}
 
     /**
      * Creates an {@link ABIType}. If the compiler can't infer the return type, use a type witness.
@@ -162,7 +86,7 @@ public final class TypeFactory {
             if (rawType.charAt(0) == '(') {
                 return baseType != null ? baseType : parseTupleType(rawType, elementNames, flags);
             } else {
-                ABIType<?> t = ((flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_BASE_TYPE_MAP : BASE_TYPE_MAP).get(rawType);
+                ABIType<?> t = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? UnitType.getLegacy(rawType) : UnitType.get(rawType);
                 return t != null ? t : tryParseFixed(rawType);
             }
         } catch (StringIndexOutOfBoundsException ignored) { // e.g. type equals "" or "82]" or "[]" or "[1]"

@@ -21,6 +21,15 @@ import java.nio.ByteBuffer;
 /** Represents an integer type such as uint64 or int256. */
 public final class BigIntegerType extends UnitType<BigInteger> {
 
+    static {
+        if (AddressType.INSTANCE == null) {
+            UnitType.initInstances(); // will prevent creation of new UnitTypes once finished (except BigDecimalType)
+        } else {
+            // AddressType is currently initializing. UnitType.initInstances() will be called shortly once ADDRESS_INNER is created
+            /* do nothing */
+        }
+    }
+
     BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {
         super(canonicalType, BigInteger.class, bitLength, unsigned);
     }
