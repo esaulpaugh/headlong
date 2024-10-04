@@ -337,7 +337,7 @@ public final class Function implements ABIObject {
         for (int i = 0; i < len; i++) {
             final char c = input.charAt(i);
             if (c >= 0x80 || c == '(') {
-                throw new IllegalArgumentException("illegal char 0x" + Integer.toHexString(c) + " '" + c + "' @ index " + i);
+                throw new IllegalArgumentException("illegal name char");
             }
         }
         return input;

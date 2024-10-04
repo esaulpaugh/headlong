@@ -88,11 +88,11 @@ public class FunctionTest {
         assertEquals("", f.getName());
         assertNull(f.getStateMutability());
 
-        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 0", () -> new Function(TypeEnum.FUNCTION, "(", inputs, outputs, null, md));
-        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 1", () -> new Function(TypeEnum.FUNCTION, "a(", inputs, outputs, null, md));
-        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 0", () -> new Function(TypeEnum.FUNCTION, "(b", inputs, outputs, null, md));
-        TestUtils.assertThrown(err, "illegal char 0x28 '(' @ index 1", () -> new Function(TypeEnum.FUNCTION, "c(d", inputs, outputs, null, md));
-        TestUtils.assertThrown(err, "illegal char 0x256 '\u0256' @ index 0", () -> new Function(TypeEnum.FUNCTION, "\u0256", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "illegal name char", () -> new Function(TypeEnum.FUNCTION, "(", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "illegal name char", () -> new Function(TypeEnum.FUNCTION, "a(", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "illegal name char", () -> new Function(TypeEnum.FUNCTION, "(b", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "illegal name char", () -> new Function(TypeEnum.FUNCTION, "c(d", inputs, outputs, null, md));
+        TestUtils.assertThrown(err, "illegal name char", () -> new Function(TypeEnum.FUNCTION, "\u0256", inputs, outputs, null, md));
         new Function(TypeEnum.FUNCTION, "z", inputs, outputs, null, md);
         new Function(TypeEnum.FUNCTION, "", inputs, outputs, null, md);
 
