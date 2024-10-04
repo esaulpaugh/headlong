@@ -247,7 +247,7 @@ public class RLPEncoderTest {
     @Test
     public void testExceptions() throws Throwable {
 
-        TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.sequence(new byte[0], null, new byte[]{-1}));
+        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type. expected instanceof byte[], Iterable, or Object[]", () -> RLPEncoder.sequence(new byte[0], null, new byte[]{-1}));
 
         TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type. expected instanceof byte[], Iterable, or Object[]", () -> RLPEncoder.sequence((Object) new String[]{"00"}));
 
