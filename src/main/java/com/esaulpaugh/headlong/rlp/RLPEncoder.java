@@ -93,7 +93,7 @@ public final class RLPEncoder {
         if (raw instanceof Object[]) {
             return listEncodedLen(Arrays.asList((Object[]) raw));
         }
-        throw new IllegalArgumentException("unsupported object type: " + raw.getClass().getName());
+        throw new IllegalArgumentException("unsupported object type. expected instanceof byte[], Iterable, or Object[]");
     }
 
     private static int stringEncodedLen(byte[] byteString) {
@@ -114,7 +114,7 @@ public final class RLPEncoder {
             Iterable<?> elements = Arrays.asList((Object[]) raw);
             encodeList(sumEncodedLen(elements), elements, bb);
         } else {
-            throw new IllegalArgumentException("unsupported object type: " + raw.getClass().getName());
+            throw new IllegalArgumentException("unsupported object type. expected instanceof byte[], Iterable, or Object[]");
         }
     }
 

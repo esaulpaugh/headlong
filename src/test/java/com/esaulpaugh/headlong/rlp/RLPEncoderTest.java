@@ -249,9 +249,9 @@ public class RLPEncoderTest {
 
         TestUtils.assertThrown(NullPointerException.class, () -> RLPEncoder.sequence(new byte[0], null, new byte[]{-1}));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type: java.lang.String", () -> RLPEncoder.sequence((Object) new String[]{"00"}));
+        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type. expected instanceof byte[], Iterable, or Object[]", () -> RLPEncoder.sequence((Object) new String[]{"00"}));
 
-        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type: java.lang.String", () -> RLPEncoder.sequence(new Object[]{new ArrayList<>(), "00"}));
+        TestUtils.assertThrown(IllegalArgumentException.class, "unsupported object type. expected instanceof byte[], Iterable, or Object[]", () -> RLPEncoder.sequence(new Object[]{new ArrayList<>(), "00"}));
     }
 
     @Test
@@ -261,12 +261,12 @@ public class RLPEncoderTest {
         RLPEncoder.putSequence(Collections.emptyList(), ByteBuffer.allocate(0));
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
-                "unsupported object type: java.util.HashMap",
+                "unsupported object type. expected instanceof byte[], Iterable, or Object[]",
                 () -> RLPEncoder.sequence(new HashMap<>(), ByteBuffer.allocate(0))
         );
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
-                "unsupported object type: java.nio.HeapByteBuffer",
+                "unsupported object type. expected instanceof byte[], Iterable, or Object[]",
                 () -> RLPEncoder.sequence(new byte[0], ByteBuffer.allocate(0))
         );
         RLPEncoder.putSequence(() -> new Iterator<Object>() {

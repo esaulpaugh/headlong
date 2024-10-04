@@ -55,7 +55,7 @@ public final class Uint {
     public long toSignedLong(long unsigned) {
         if (rangeLong != 0L) {
             if (unsigned < 0) {
-                throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
+                throw new IllegalArgumentException("input must be non-negative");
             }
             final int bitLen = Integers.bitLen(unsigned);
             if (bitLen <= numBits) {
@@ -71,7 +71,7 @@ public final class Uint {
 
     public BigInteger toSigned(BigInteger unsigned) {
         if (unsigned.compareTo(BigInteger.ZERO) < 0) {
-            throw new IllegalArgumentException("unsigned value is negative: " + unsigned);
+            throw new IllegalArgumentException("input must be non-negative");
         }
         final int bitLen = unsigned.bitLength();
         if (bitLen <= numBits) {

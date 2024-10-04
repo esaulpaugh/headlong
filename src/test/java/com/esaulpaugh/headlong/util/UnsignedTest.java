@@ -43,12 +43,12 @@ public class UnsignedTest {
 
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
-                "unsigned value is negative: -1",
+                "input must be non-negative",
                 () -> uint64.toSignedLong(-1L)
         );
         TestUtils.assertThrown(
                 IllegalArgumentException.class,
-                "unsigned value is negative: -9223372036854775808",
+                "input must be non-negative",
                 () -> uint64.toSignedLong(Long.MIN_VALUE)
         );
         TestUtils.assertThrown(
