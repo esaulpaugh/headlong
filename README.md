@@ -79,7 +79,7 @@ System.out.println(a);
 Tuple t2 = tt.decode(b0, 0, 2); // decode only indices 0 and 2
 System.out.println(t2);
 
-ByteBuffer b1 = tt.getNonCapturing(2).encode(new BigInteger[][] {  }); // encode only int72[][]
+ByteBuffer b1 = tt.<ABIType<BigInteger[][]>>get(2).encode(new BigInteger[][] {  }); // encode only int72[][]
 ```
 
 #### Misc
