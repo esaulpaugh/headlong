@@ -416,7 +416,7 @@ public final class Integers {
     }
 
     public static int len(BigInteger val) {
-        return roundLengthUp(val.bitLength(), Byte.SIZE) / Byte.SIZE;
+        return (val.bitLength() + 7) >>> 3; // roundLengthUp(val.bitLength(), Byte.SIZE) / Byte.SIZE;
     }
 
     /**

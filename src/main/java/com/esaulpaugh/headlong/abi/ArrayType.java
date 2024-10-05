@@ -421,7 +421,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         final byte[] data = new byte[len];
         bb.get(data);
         if (!legacyDecode) {
-            int bytes = Integers.roundLengthUp(len, UNIT_LENGTH_BYTES) - len; // (32 - (len & 31)) & 31;
+            int bytes = -len & 31; // Integers.roundLengthUp(len, UNIT_LENGTH_BYTES) - len; // (32 - (len & 31)) & 31;
             while (bytes >= Long.BYTES) {
                 if (bb.getLong() != 0L) throw new IllegalArgumentException("malformed array: non-zero padding byte");
                 bytes -= Long.BYTES;
