@@ -278,10 +278,11 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
         final int full = 108;
         if (BASE_TYPE_MAP.size() != full || LEGACY_BASE_TYPE_MAP.size() != full) {
-            throw new AssertionError();
+            throw new AssertionError("map not full");
         }
-        if (INSTANCE_COUNT.get() != INSTANCE_LIMIT) {
-            throw new AssertionError();
+        final long finalCount = INSTANCE_COUNT.get();
+        if (finalCount != INSTANCE_LIMIT) {
+            throw new AssertionError(finalCount + " instances");
         }
     }
 
