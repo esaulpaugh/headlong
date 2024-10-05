@@ -122,6 +122,9 @@
             </artifact>
         </component>
         <component group="org.junit" name="junit-bom" version="5.11.2">
+            <artifact name="junit-bom-5.11.2.pom">
+                <sha256 value="f48e88538aac145eb3ae0345a9ebd055b28f329a35dce8d1e9281325ca9b0ea2" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
             <artifact name="junit-bom-5.11.2.module">
                 <sha256 value="883a05b892f11859f3836de79b7207e247e14125583ccb8a3bef4d8bc0f58f2c" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
