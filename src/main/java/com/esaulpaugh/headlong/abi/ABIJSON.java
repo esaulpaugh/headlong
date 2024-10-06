@@ -27,6 +27,7 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.CharArrayWriter;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.Writer;
@@ -140,7 +141,9 @@ public final class ABIJSON {
 
     /** For single-threaded use only. */
     public static <T extends ABIObject> Stream<T> stream(int flags, String arrayJson, Set<TypeEnum> types) {
-        return StreamSupport.stream(new JsonSpliterator<>(flags, arrayJson, types), false);
+        final JsonSpliterator<T> spliterator = new JsonSpliterator<>(flags, arrayJson, types);
+        return StreamSupport.stream(spliterator, false)
+                    .onClose(spliterator::close);
     }
 
     /** Iterators are not thread-safe. */
@@ -439,7 +442,7 @@ public final class ABIJSON {
         throw new IllegalArgumentException(key + " is not a boolean");
     }
 
-    static class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> {
+    static class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> implements Closeable {
 
         private final JsonReader jsonReader;
         private final int flags;
@@ -471,21 +474,30 @@ public final class ABIJSON {
                             return true;
                         }
                     }
-                    try {
-                        jsonReader.close();
-                    } finally {
-                        closed = true;
-                    }
+                    close();
                 }
                 return false;
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
+            } catch (IOException io) {
+                throw new IllegalStateException(io);
             }
         }
 
         @Override
         public Spliterator<T> trySplit() {
             return null;
+        }
+
+        @Override
+        public void close() {
+            if (!closed) {
+                try {
+                    jsonReader.close();
+                } catch (IOException io) {
+                    throw new IllegalStateException(io);
+                } finally {
+                    closed = true;
+                }
+            }
         }
     }
 
