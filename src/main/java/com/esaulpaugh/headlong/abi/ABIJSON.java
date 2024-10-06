@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.Writer;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -41,7 +42,6 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -116,7 +116,22 @@ public final class ABIJSON {
     }
 
     public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
-        return ABIJSON.<T>stream(flags, arrayJson, types).collect(Collectors.toList());
+        List<T> list = new ArrayList<>();
+        JsonReader jsonReader = new JsonReader(new StringReader(arrayJson));
+        MessageDigest digest = Function.newDefaultDigest();
+        try {
+            jsonReader.beginArray();
+            while (jsonReader.peek() != JsonToken.END_ARRAY) {
+                T e = tryParse(jsonReader, types, digest, flags);
+                if (e != null) {
+                    list.add(e);
+                }
+            }
+            jsonReader.endArray();
+            return list;
+        } catch (IOException io) {
+            throw new IllegalStateException(io);
+        }
     }
 
     public static <T extends ABIObject> Stream<T> stream(String arrayJson, Set<TypeEnum> types) {
@@ -495,32 +510,12 @@ public final class ABIJSON {
         @Override
         public boolean tryAdvance(Consumer<? super T> action) {
             try {
-                OUTER:
                 while (jsonReader.peek() != JsonToken.END_ARRAY) {
-                    JsonObject jsonObject = null;
-                    jsonReader.beginObject();
-                    TypeEnum t = TypeEnum.FUNCTION;
-                    while (jsonReader.peek() != JsonToken.END_OBJECT) {
-                        String name = jsonReader.nextName();
-                        if (TYPE.equals(name)) {
-                            t = TypeEnum.parse(jsonReader.nextString());
-                            if (types.contains(t)) {
-                                continue;
-                            }
-                            while (jsonReader.peek() != JsonToken.END_OBJECT) {
-                                jsonReader.skipValue();
-                            }
-                            jsonReader.endObject();
-                            continue OUTER;
-                        }
-                        if (jsonObject == null) {
-                            jsonObject = new JsonObject();
-                        }
-                        jsonObject.add(name, readElement(jsonReader));
+                    T e = tryParse(jsonReader, types, digest, flags);
+                    if (e != null) {
+                        action.accept(e);
+                        return true;
                     }
-                    jsonReader.endObject();
-                    action.accept(parseABIObject(t, jsonObject, digest, flags));
-                    return true;
                 }
                 return false;
             } catch (IOException e) {
@@ -532,6 +527,32 @@ public final class ABIJSON {
         public Spliterator<T> trySplit() {
             return null;
         }
+    }
+
+    private static <T extends ABIObject> T tryParse(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) throws IOException {
+        JsonObject jsonObject = null;
+        reader.beginObject();
+        TypeEnum t = TypeEnum.FUNCTION;
+        while (reader.peek() != JsonToken.END_OBJECT) {
+            String name = reader.nextName();
+            if (TYPE.equals(name)) {
+                t = TypeEnum.parse(reader.nextString());
+                if (!types.contains(t)) {
+                    while (reader.peek() != JsonToken.END_OBJECT) {
+                        reader.skipValue();
+                    }
+                    reader.endObject();
+                    return null;
+                }
+                continue;
+            }
+            if (jsonObject == null) {
+                jsonObject = new JsonObject();
+            }
+            jsonObject.add(name, readElement(reader));
+        }
+        reader.endObject();
+        return parseABIObject(t, jsonObject, digest, flags);
     }
 
     private static JsonObject readJsonObject(JsonReader reader) throws IOException {
