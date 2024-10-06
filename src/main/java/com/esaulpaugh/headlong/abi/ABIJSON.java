@@ -445,6 +445,7 @@ public final class ABIJSON {
         private final int flags;
         private final Set<TypeEnum> types;
         private final MessageDigest digest = Function.newDefaultDigest();
+        boolean closed = false;
 
         JsonSpliterator(int flags, String arrayJson, Set<TypeEnum> types) {
             super(Long.SIZE, ORDERED | NONNULL | IMMUTABLE);
@@ -462,11 +463,18 @@ public final class ABIJSON {
         @Override
         public boolean tryAdvance(Consumer<? super T> action) {
             try {
-                while (jsonReader.peek() != JsonToken.END_ARRAY) {
-                    T e = tryParse(jsonReader, types, digest, flags);
-                    if (e != null) {
-                        action.accept(e);
-                        return true;
+                if (!closed) {
+                    while (jsonReader.peek() != JsonToken.END_ARRAY) {
+                        T e = tryParse(jsonReader, types, digest, flags);
+                        if (e != null) {
+                            action.accept(e);
+                            return true;
+                        }
+                    }
+                    try {
+                        jsonReader.close();
+                    } finally {
+                        closed = true;
                     }
                 }
                 return false;
