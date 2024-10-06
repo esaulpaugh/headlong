@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.Writer;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -42,6 +41,7 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -121,13 +121,7 @@ public final class ABIJSON {
     }
 
     public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
-        final JsonArray arr = parseArray(arrayJson);
-        final List<T> selected = new ArrayList<>(arr.size());
-        final Iterator<T> iter = iterator(flags, arr, types);
-        while (iter.hasNext()) {
-            selected.add(iter.next());
-        }
-        return selected;
+        return ABIJSON.<T>stream(flags, arrayJson, types).collect(Collectors.toList());
     }
 
     /** Iterators are not thread-safe. */
@@ -501,7 +495,7 @@ public final class ABIJSON {
                 while (jsonReader.peek() != JsonToken.END_ARRAY) {
                     JsonObject jsonObject = null;
                     jsonReader.beginObject();
-                    TypeEnum t = null;
+                    TypeEnum t = TypeEnum.FUNCTION;
                     while (jsonReader.peek() != JsonToken.END_OBJECT) {
                         String name = jsonReader.nextName();
                         if (types != null && TYPE.equals(name)) {
