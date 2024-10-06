@@ -141,7 +141,7 @@ public final class ABIJSON {
 
     /** For single-threaded use only. */
     public static <T extends ABIObject> Stream<T> stream(int flags, String arrayJson, Set<TypeEnum> types) {
-        final JsonSpliterator<T> spliterator = new JsonSpliterator<>(flags, arrayJson, types);
+        final JsonSpliterator<T> spliterator = new JsonSpliterator<>(arrayJson, types, flags);
         return StreamSupport.stream(spliterator, false)
                     .onClose(spliterator::close);
     }
@@ -445,19 +445,20 @@ public final class ABIJSON {
     static class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> implements Closeable {
 
         private final JsonReader jsonReader;
-        private final int flags;
         private final Set<TypeEnum> types;
-        private final MessageDigest digest = Function.newDefaultDigest();
+        private final MessageDigest digest;
+        private final int flags;
         boolean closed = false;
 
-        JsonSpliterator(int flags, String arrayJson, Set<TypeEnum> types) {
+        JsonSpliterator(String arrayJson, Set<TypeEnum> types, int flags) {
             super(Long.SIZE, ORDERED | NONNULL | IMMUTABLE);
             try {
                 JsonReader reader = new JsonReader(new StringReader(arrayJson));
                 reader.beginArray();
-                this.flags = flags;
                 this.jsonReader = reader;
                 this.types = types;
+                this.digest = Function.newDefaultDigest();
+                this.flags = flags;
             } catch (IOException io) {
                 throw new IllegalStateException(io);
             }
@@ -474,7 +475,7 @@ public final class ABIJSON {
                             return true;
                         }
                     }
-                    close();
+                    doClose();
                 }
                 return false;
             } catch (IOException io) {
@@ -491,12 +492,18 @@ public final class ABIJSON {
         public void close() {
             if (!closed) {
                 try {
-                    jsonReader.close();
+                    doClose();
                 } catch (IOException io) {
                     throw new IllegalStateException(io);
-                } finally {
-                    closed = true;
                 }
+            }
+        }
+
+        private void doClose() throws IOException {
+            try {
+                jsonReader.close();
+            } finally {
+                closed = true;
             }
         }
     }
