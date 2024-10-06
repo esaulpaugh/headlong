@@ -502,16 +502,16 @@ public final class ABIJSON {
                     TypeEnum t = TypeEnum.FUNCTION;
                     while (jsonReader.peek() != JsonToken.END_OBJECT) {
                         String name = jsonReader.nextName();
-                        if (types != null && TYPE.equals(name)) {
+                        if (TYPE.equals(name)) {
                             t = TypeEnum.parse(jsonReader.nextString());
-                            if (!types.contains(t)) {
-                                while (jsonReader.peek() != JsonToken.END_OBJECT) {
-                                    jsonReader.skipValue();
-                                }
-                                jsonReader.endObject();
-                                continue OUTER;
+                            if (types.contains(t)) {
+                                continue;
                             }
-                            continue;
+                            while (jsonReader.peek() != JsonToken.END_OBJECT) {
+                                jsonReader.skipValue();
+                            }
+                            jsonReader.endObject();
+                            continue OUTER;
                         }
                         if (jsonObject == null) {
                             jsonObject = new JsonObject();
