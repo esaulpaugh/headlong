@@ -497,13 +497,32 @@ public final class ABIJSON {
         @Override
         public boolean tryAdvance(Consumer<? super T> action) {
             try {
+                OUTER:
                 while (jsonReader.peek() != JsonToken.END_ARRAY) {
-                    JsonObject object = readJsonObject(jsonReader);
-                    TypeEnum t = TypeEnum.parse(getType(object));
-                    if (types.contains(t)) {
-                        action.accept(parseABIObject(t, object, digest, flags));
-                        return true;
+                    JsonObject jsonObject = null;
+                    jsonReader.beginObject();
+                    TypeEnum t = null;
+                    while (jsonReader.peek() != JsonToken.END_OBJECT) {
+                        String name = jsonReader.nextName();
+                        if (types != null && TYPE.equals(name)) {
+                            t = TypeEnum.parse(jsonReader.nextString());
+                            if (!types.contains(t)) {
+                                while (jsonReader.peek() != JsonToken.END_OBJECT) {
+                                    jsonReader.skipValue();
+                                }
+                                jsonReader.endObject();
+                                continue OUTER;
+                            }
+                        } else {
+                            if (jsonObject == null) {
+                                jsonObject = new JsonObject();
+                            }
+                            jsonObject.add(name, readElement(jsonReader));
+                        }
                     }
+                    jsonReader.endObject();
+                    action.accept(parseABIObject(t, jsonObject, digest, flags));
+                    return true;
                 }
                 return false;
             } catch (IOException e) {
@@ -520,7 +539,7 @@ public final class ABIJSON {
     private static JsonObject readJsonObject(JsonReader reader) throws IOException {
         JsonObject jsonObject = new JsonObject();
         reader.beginObject();
-        while (reader.hasNext()) {
+        while (reader.peek() != JsonToken.END_OBJECT) {
             jsonObject.add(reader.nextName(), readElement(reader));
         }
         reader.endObject();
@@ -530,7 +549,7 @@ public final class ABIJSON {
     private static JsonArray readJsonArray(JsonReader reader) throws IOException {
         JsonArray jsonArray = new JsonArray();
         reader.beginArray();
-        while (reader.hasNext()) {
+        while (reader.peek() != JsonToken.END_ARRAY) {
             jsonArray.add(readElement(reader));
         }
         reader.endArray();
