@@ -111,12 +111,12 @@ public class AdvancedABICasesTest {
 
     @Test
     public void testAbiV2Cases() throws IOException {
-        runCases(ABIJSON.parseArray(TestUtils.readFileResourceAsString(ABI_V2_CASES_PATH)), false);
+        runCases(TestUtils.parseArray(TestUtils.readFileResourceAsString(ABI_V2_CASES_PATH)), false);
     }
 
     @Test
     public void testHeadlongCases() throws IOException {
-        runCases(ABIJSON.parseArray(TestUtils.readFileResourceAsString(HEADLONG_CASES_PATH)), true);
+        runCases(TestUtils.parseArray(TestUtils.readFileResourceAsString(HEADLONG_CASES_PATH)), true);
     }
 
     private static final String HEADLONG_X = "{\n" +

@@ -21,9 +21,12 @@ import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonReader;
 import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -296,6 +299,10 @@ public final class TestUtils {
         } else {
             return Strings.decode(string);
         }
+    }
+
+    public static JsonArray parseArray(String json) {
+        return Streams.parse(new JsonReader(new StringReader(json))).getAsJsonArray();
     }
 
     public static String parseString(JsonElement in) {

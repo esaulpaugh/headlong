@@ -37,7 +37,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -145,42 +144,7 @@ public final class ABIJSON {
 
     /** Iterators are not thread-safe. */
     public static <T extends ABIObject> Iterator<T> iterator(int flags, String arrayJson, Set<TypeEnum> types) {
-        return iterator(flags, parseArray(arrayJson), types);
-    }
-
-    static <T extends ABIObject> Iterator<T> iterator(int flags, JsonArray arr, Set<TypeEnum> types) {
-        final Iterator<JsonElement> jsonIter = arr.iterator();
-        final MessageDigest digest = Function.newDefaultDigest();
-        return new Iterator<T>() {
-
-            T next;
-
-            @Override
-            public boolean hasNext() {
-                if (this.next != null) {
-                    return true;
-                }
-                while (jsonIter.hasNext()) {
-                    final JsonObject object = (JsonObject) jsonIter.next();
-                    final TypeEnum t = TypeEnum.parse(getType(object));
-                    if (types.contains(t)) {
-                        this.next = parseABIObject(t, object, digest, flags);
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            @Override
-            public T next() {
-                if (hasNext()) {
-                    final T curr = this.next;
-                    this.next = null;
-                    return curr;
-                }
-                throw new NoSuchElementException();
-            }
-        };
+        return ABIJSON.<T>stream(flags, arrayJson, types).iterator();
     }
 
     /** @see ABIObject#fromJsonObject(int,JsonObject) */
@@ -453,10 +417,6 @@ public final class ABIJSON {
         return parseElement(json).getAsJsonObject();
     }
 
-    static JsonArray parseArray(String json) {
-        return parseElement(json).getAsJsonArray();
-    }
-
     private static String getString(JsonObject object, String key) {
         final JsonElement element = object.get(key);
         if (element == null || element.isJsonNull()) {
@@ -493,6 +453,7 @@ public final class ABIJSON {
         private final int flags;
         private final Set<TypeEnum> types;
         private final MessageDigest digest = Function.newDefaultDigest();
+        private boolean closed = false;
 
         JsonSpliterator(int flags, String arrayJson, Set<TypeEnum> types) {
             super(Long.SIZE, ORDERED | NONNULL | IMMUTABLE);
@@ -510,14 +471,16 @@ public final class ABIJSON {
         @Override
         public boolean tryAdvance(Consumer<? super T> action) {
             try {
-                while (jsonReader.peek() != JsonToken.END_ARRAY) {
-                    T e = tryParse(jsonReader, types, digest, flags);
-                    if (e != null) {
-                        action.accept(e);
-                        return true;
+                if (!closed) {
+                    while (jsonReader.peek() != JsonToken.END_ARRAY) {
+                        T e = tryParse(jsonReader, types, digest, flags);
+                        if (e != null) {
+                            action.accept(e);
+                            return true;
+                        }
                     }
+                    closed = false;
                 }
-                jsonReader.close();
                 return false;
             } catch (IOException e) {
                 throw new IllegalStateException(e);

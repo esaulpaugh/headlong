@@ -259,12 +259,12 @@ public class ABIJSONTest {
         int i = 0;
         jsons[i++] = FUNCTION_A_JSON;
         jsons[i++] = FUNCTION_B_JSON;
-        JsonArray contractArray = ABIJSON.parseArray(CONTRACT_JSON);
+        JsonArray contractArray = TestUtils.parseArray(CONTRACT_JSON);
         final int n = contractArray.size();
         for (int j = 0; j < n; j++) {
             jsons[i++] = TestUtils.toPrettyPrint(contractArray.get(j).getAsJsonObject());
         }
-        JsonArray fallbackEtc = ABIJSON.parseArray(FALLBACK_CONSTRUCTOR_RECEIVE);
+        JsonArray fallbackEtc = TestUtils.parseArray(FALLBACK_CONSTRUCTOR_RECEIVE);
         final int n2 = fallbackEtc.size();
         for (int j = 0; j < n2; j++) {
             jsons[i++] = TestUtils.toPrettyPrint(fallbackEtc.get(j).getAsJsonObject());
