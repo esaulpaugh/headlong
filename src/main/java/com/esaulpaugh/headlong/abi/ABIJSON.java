@@ -111,17 +111,21 @@ public final class ABIJSON {
         return stream(ABIType.FLAGS_NONE, arrayJson, ABIJSON.ALL);
     }
 
-    /** For single-threaded use only. */
-    public static <T extends ABIObject> Stream<T> stream(int flags, String arrayJson, Set<TypeEnum> types) {
-        return StreamSupport.stream(new JsonSpliterator<>(flags, arrayJson, types), false);
-    }
-
     public static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types) {
         return parseElements(ABIType.FLAGS_NONE, arrayJson, types);
     }
 
     public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
         return ABIJSON.<T>stream(flags, arrayJson, types).collect(Collectors.toList());
+    }
+
+    public static <T extends ABIObject> Stream<T> stream(String arrayJson, Set<TypeEnum> types) {
+        return stream(ABIType.FLAGS_NONE, arrayJson, types);
+    }
+
+    /** For single-threaded use only. */
+    public static <T extends ABIObject> Stream<T> stream(int flags, String arrayJson, Set<TypeEnum> types) {
+        return StreamSupport.stream(new JsonSpliterator<>(flags, arrayJson, types), false);
     }
 
     /** Iterators are not thread-safe. */
