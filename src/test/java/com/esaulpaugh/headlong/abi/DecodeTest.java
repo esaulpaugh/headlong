@@ -953,7 +953,9 @@ public class DecodeTest {
         checkLegacyFlags(f.getInputs());
         checkLegacyFlags(f.getOutputs());
 
-        final Function f2 = (Function) ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, "[" + FN_JSON + "]", ABIJSON.ALL).get(0);
+        final Function f2 = ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, "[" + FN_JSON + "]", ABIJSON.ALL)
+                .get(0)
+                .asFunction();
         checkLegacyFlags(f2.getInputs());
         checkLegacyFlags(f2.getOutputs());
 
