@@ -115,9 +115,10 @@ public final class ABIJSON {
     }
 
     public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
-        List<T> list = new ArrayList<>();
-        JsonReader jsonReader = new JsonReader(new StringReader(arrayJson));
-        MessageDigest digest = Function.newDefaultDigest();
+//        return ABIJSON.<T>stream(flags, arrayJson, types).collect(Collectors.toList());
+        final List<T> list = new ArrayList<>();
+        final MessageDigest digest = Function.newDefaultDigest();
+        final JsonReader jsonReader = new JsonReader(new StringReader(arrayJson));
         try {
             jsonReader.beginArray();
             while (jsonReader.peek() != JsonToken.END_ARRAY) {
@@ -127,10 +128,10 @@ public final class ABIJSON {
                 }
             }
             jsonReader.endArray();
-            return list;
         } catch (IOException io) {
             throw new IllegalStateException(io);
         }
+        return list;
     }
 
     public static <T extends ABIObject> Stream<T> stream(String arrayJson, Set<TypeEnum> types) {
@@ -444,7 +445,6 @@ public final class ABIJSON {
         private final int flags;
         private final Set<TypeEnum> types;
         private final MessageDigest digest = Function.newDefaultDigest();
-        private boolean closed = false;
 
         JsonSpliterator(int flags, String arrayJson, Set<TypeEnum> types) {
             super(Long.SIZE, ORDERED | NONNULL | IMMUTABLE);
@@ -462,15 +462,12 @@ public final class ABIJSON {
         @Override
         public boolean tryAdvance(Consumer<? super T> action) {
             try {
-                if (!closed) {
-                    while (jsonReader.peek() != JsonToken.END_ARRAY) {
-                        T e = tryParse(jsonReader, types, digest, flags);
-                        if (e != null) {
-                            action.accept(e);
-                            return true;
-                        }
+                while (jsonReader.peek() != JsonToken.END_ARRAY) {
+                    T e = tryParse(jsonReader, types, digest, flags);
+                    if (e != null) {
+                        action.accept(e);
+                        return true;
                     }
-                    closed = false;
                 }
                 return false;
             } catch (IOException e) {
