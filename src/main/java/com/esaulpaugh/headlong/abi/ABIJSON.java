@@ -513,12 +513,12 @@ public final class ABIJSON {
                                 jsonReader.endObject();
                                 continue OUTER;
                             }
-                        } else {
-                            if (jsonObject == null) {
-                                jsonObject = new JsonObject();
-                            }
-                            jsonObject.add(name, readElement(jsonReader));
+                            continue;
                         }
+                        if (jsonObject == null) {
+                            jsonObject = new JsonObject();
+                        }
+                        jsonObject.add(name, readElement(jsonReader));
                     }
                     jsonReader.endObject();
                     action.accept(parseABIObject(t, jsonObject, digest, flags));
