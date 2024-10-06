@@ -517,6 +517,7 @@ public final class ABIJSON {
                         return true;
                     }
                 }
+                jsonReader.close();
                 return false;
             } catch (IOException e) {
                 throw new IllegalStateException(e);
@@ -529,7 +530,7 @@ public final class ABIJSON {
         }
     }
 
-    private static <T extends ABIObject> T tryParse(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) throws IOException {
+    static <T extends ABIObject> T tryParse(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) throws IOException {
         JsonObject jsonObject = null;
         reader.beginObject();
         TypeEnum t = TypeEnum.FUNCTION;
