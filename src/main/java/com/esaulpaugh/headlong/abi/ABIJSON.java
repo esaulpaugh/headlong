@@ -207,7 +207,7 @@ public final class ABIJSON {
             final boolean[] indexed = new boolean[inputs.size()];
             return new Event<>(
                     getName(event),
-                    getAnonymous(event),
+                    getBoolean(event, ANONYMOUS),
                     parseTupleType(inputs, indexed, flags),
                     indexed
             );
@@ -241,7 +241,7 @@ public final class ABIJSON {
                 internalTypes[i] = internalType.equals(e.canonicalType) ? e.canonicalType : internalType;
             }
             if (indexed != null) {
-                indexed[i] = getIndexed(inputObj);
+                indexed[i] = getBoolean(inputObj, INDEXED);
             }
             if (++i == size) {
                 return new TupleType<>(
@@ -424,23 +424,18 @@ public final class ABIJSON {
         throw new IllegalArgumentException(key + " is not a string");
     }
 
-    private static boolean getAnonymous(JsonObject object) {
-        final JsonElement element = object.get(ANONYMOUS);
+    private static boolean getBoolean(JsonObject object, String key) {
+        final JsonElement element = object.get(key);
         if (element == null) {
-            return false;
+            if (ANONYMOUS.equals(key)) {
+                return false;
+            }
+            throw new NullPointerException();
         }
         if (((JsonPrimitive) element).isBoolean()) {
             return element.getAsBoolean();
         }
-        throw new IllegalArgumentException(ANONYMOUS + " is not a boolean");
-    }
-
-    private static boolean getIndexed(JsonObject object) {
-        final JsonElement element = object.get(INDEXED);
-        if (((JsonPrimitive) element).isBoolean()) {
-            return element.getAsBoolean();
-        }
-        throw new IllegalArgumentException(INDEXED + " is not a boolean");
+        throw new IllegalArgumentException(key + " is not a boolean");
     }
 
     static class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> {
