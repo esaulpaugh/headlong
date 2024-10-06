@@ -409,12 +409,8 @@ public final class ABIJSON {
         }
     }
 //-------------------------------------------------------------------------------------
-    private static JsonElement parseElement(String json) {
-        return Streams.parse(new JsonReader(new StringReader(json)));
-    }
-
     static JsonObject parseObject(String json) {
-        return parseElement(json).getAsJsonObject();
+        return Streams.parse(new JsonReader(new StringReader(json))).getAsJsonObject();
     }
 
     private static String getString(JsonObject object, String key) {
