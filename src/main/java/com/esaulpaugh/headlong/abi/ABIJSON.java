@@ -18,6 +18,7 @@ package com.esaulpaugh.headlong.abi;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.internal.Streams;
@@ -510,19 +511,31 @@ public final class ABIJSON {
 
     static <T extends ABIObject> T tryParseStreaming(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) throws IOException {
         reader.beginObject();
-        final String nextName = reader.nextName();
-        if (!nextName.equals(TYPE)) {
-            throw new IllegalArgumentException(nextName);
-        }
-        TypeEnum t = TypeEnum.parse(reader.nextString());
-        if (!types.contains(t)) {
-            while (reader.peek() != JsonToken.END_OBJECT) {
-                reader.skipValue();
+        JsonObject jsonObject = null;
+        TypeEnum t = TypeEnum.FUNCTION;
+        while (reader.peek() != JsonToken.END_OBJECT) {
+            String name = reader.nextName();
+            if (TYPE.equals(name)) {
+                t = TypeEnum.parse(reader.nextString());
+                if (!types.contains(t)) {
+                    while (reader.peek() != JsonToken.END_OBJECT) {
+                        reader.skipValue();
+                    }
+                    reader.endObject();
+                    return null;
+                }
+                if (jsonObject == null) {
+                    return parseABIObject(t, reader, digest, flags);
+                }
+                continue;
             }
-            reader.endObject();
-            return null;
+            if (jsonObject == null) {
+                jsonObject = new JsonObject();
+            }
+            jsonObject.add(name, readElement(reader));
         }
-        return parseABIObject(t, reader, digest, flags);
+        reader.endObject();
+        return parseABIObject(t, jsonObject, digest, flags);
     }
 
 //    static <T extends ABIObject> T tryParse(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) throws IOException {
@@ -550,39 +563,39 @@ public final class ABIJSON {
 //        reader.endObject();
 //        return parseABIObject(t, jsonObject, digest, flags);
 //    }
-//
-//    private static JsonObject readJsonObject(JsonReader reader) throws IOException {
-//        JsonObject jsonObject = new JsonObject();
-//        reader.beginObject();
-//        while (reader.peek() != JsonToken.END_OBJECT) {
-//            jsonObject.add(reader.nextName(), readElement(reader));
-//        }
-//        reader.endObject();
-//        return jsonObject;
-//    }
-//
-//    private static JsonArray readJsonArray(JsonReader reader) throws IOException {
-//        JsonArray jsonArray = new JsonArray();
-//        reader.beginArray();
-//        while (reader.peek() != JsonToken.END_ARRAY) {
-//            jsonArray.add(readElement(reader));
-//        }
-//        reader.endArray();
-//        return jsonArray;
-//    }
-//
-//    private static JsonElement readElement(JsonReader reader) throws IOException {
-//        switch (reader.peek()) {
-//        case STRING: return new JsonPrimitive(reader.nextString());
-//        case NUMBER: return new JsonPrimitive(reader.nextDouble());
-//        case BOOLEAN: return new JsonPrimitive(reader.nextBoolean());
-//        case BEGIN_OBJECT: return readJsonObject(reader);
-//        case BEGIN_ARRAY: return readJsonArray(reader);
-//        default: // NULL and unknown
-//            reader.skipValue();
-//            return JsonNull.INSTANCE;
-//        }
-//    }
+
+    private static JsonObject readJsonObject(JsonReader reader) throws IOException {
+        JsonObject jsonObject = new JsonObject();
+        reader.beginObject();
+        while (reader.peek() != JsonToken.END_OBJECT) {
+            jsonObject.add(reader.nextName(), readElement(reader));
+        }
+        reader.endObject();
+        return jsonObject;
+    }
+
+    private static JsonArray readJsonArray(JsonReader reader) throws IOException {
+        JsonArray jsonArray = new JsonArray();
+        reader.beginArray();
+        while (reader.peek() != JsonToken.END_ARRAY) {
+            jsonArray.add(readElement(reader));
+        }
+        reader.endArray();
+        return jsonArray;
+    }
+
+    private static JsonElement readElement(JsonReader reader) throws IOException {
+        switch (reader.peek()) {
+        case STRING: return new JsonPrimitive(reader.nextString());
+        case NUMBER: return new JsonPrimitive(reader.nextDouble());
+        case BOOLEAN: return new JsonPrimitive(reader.nextBoolean());
+        case BEGIN_OBJECT: return readJsonObject(reader);
+        case BEGIN_ARRAY: return readJsonArray(reader);
+        default: // NULL and unknown
+            reader.skipValue();
+            return JsonNull.INSTANCE;
+        }
+    }
 
     public static Function parseFunction(TypeEnum t, JsonReader reader, MessageDigest digest, int flags) throws IOException {
         String name = null;

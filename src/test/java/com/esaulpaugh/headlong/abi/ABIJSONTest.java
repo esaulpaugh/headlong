@@ -447,11 +447,11 @@ public class ABIJSONTest {
 
         assertEquals(1, functions.size());
 
-//        {
-//            List<Function> f2 = ABIJSON.parseFunctions(CONTRACT_JSON.replace("    \"type\": \"function\",\n", ""));
-//            assertEquals(1, f2.size());
-//            assertEquals(functions.get(0), f2.get(0));
-//        }
+        {
+            List<Function> f2 = ABIJSON.parseFunctions(CONTRACT_JSON.replace("    \"type\": \"function\",\n", ""));
+            assertEquals(1, f2.size());
+            assertEquals(functions.get(0), f2.get(0));
+        }
 
         Function func = functions.get(0);
 
