@@ -38,7 +38,7 @@ public class BasicABICasesTest {
 
     static {
         try {
-            TESTS = ABIJSON.parseObject(TestUtils.readFileResourceAsString(RESOURCE)).entrySet();
+            TESTS = TestUtils.parseObject(TestUtils.readFileResourceAsString(RESOURCE)).entrySet();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

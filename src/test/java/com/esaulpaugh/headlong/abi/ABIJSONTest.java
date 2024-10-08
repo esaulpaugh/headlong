@@ -271,11 +271,11 @@ public class ABIJSONTest {
         }
 
         for (String originalJson : jsons) {
-            ABIObject orig = ABIObject.fromJson(FLAGS_NONE, ABIJSON.parseObject(originalJson).toString());
+            ABIObject orig = ABIObject.fromJson(FLAGS_NONE, TestUtils.parseObject(originalJson).toString());
             String newJson = orig.toJson(false);
             assertNotEquals(originalJson, newJson);
 
-            ABIObject reconstructed = ABIObject.fromJson(FLAGS_NONE, ABIJSON.parseObject(newJson).toString());
+            ABIObject reconstructed = ABIObject.fromJson(FLAGS_NONE, TestUtils.parseObject(newJson).toString());
 
             assertEquals(orig, reconstructed);
             assertEquals(originalJson, reconstructed.toString());
@@ -291,7 +291,7 @@ public class ABIJSONTest {
                 Function.fromJson(FUNCTION_A_JSON.replace("tuple[][]", "tuple[11][6]")).getCanonicalSignature()
         );
 
-        final JsonObject object = ABIJSON.parseObject(FUNCTION_A_JSON);
+        final JsonObject object = TestUtils.parseObject(FUNCTION_A_JSON);
         final Function f = Function.fromJson(FLAGS_NONE, object.toString());
         assertEquals(FUNCTION_A_JSON, f.toJson(true));
         final TupleType<?> in = f.getInputs();
@@ -551,7 +551,7 @@ public class ABIJSONTest {
 
     @Test
     public void testGetErrors() throws Throwable {
-        JsonObject object = ABIJSON.parseObject(ERROR_JSON);
+        JsonObject object = TestUtils.parseObject(ERROR_JSON);
 
         ContractError<Tuple> error0 = ABIJSON.parseErrors(ERROR_JSON_ARRAY).get(0);
         ContractError<?> error1 = ABIObject.fromJson(ERROR_JSON);

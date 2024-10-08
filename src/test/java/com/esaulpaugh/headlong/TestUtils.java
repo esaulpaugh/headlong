@@ -21,6 +21,7 @@ import com.esaulpaugh.headlong.util.Strings;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import org.junit.jupiter.api.Assertions;
@@ -299,6 +300,10 @@ public final class TestUtils {
         } else {
             return Strings.decode(string);
         }
+    }
+
+    public static JsonObject parseObject(String json) {
+        return Streams.parse(new JsonReader(new StringReader(json))).getAsJsonObject();
     }
 
     public static JsonArray parseArray(String json) {
