@@ -403,23 +403,12 @@ public final class ABIJSON {
         TupleType<?> outputs = TupleType.EMPTY;
         String stateMutability = null;
         while (reader.peek() != JsonToken.END_OBJECT) {
-            String fieldName = reader.nextName();
-            switch (fieldName) {
-            case NAME:
-                name = reader.nextString();
-                break;
-            case INPUTS:
-                inputs = parseTupleType(reader, false, flags);
-                break;
-            case OUTPUTS:
-                outputs = parseTupleType(reader, false, flags);
-                break;
-            case STATE_MUTABILITY:
-                stateMutability = reader.nextString();
-                break;
-            default:
-                reader.skipValue();
-                break;
+            switch (reader.nextName()) {
+            case NAME: name = reader.nextString(); break;
+            case INPUTS: inputs = parseTupleType(reader, false, flags); break;
+            case OUTPUTS: outputs = parseTupleType(reader, false, flags); break;
+            case STATE_MUTABILITY: stateMutability = reader.nextString(); break;
+            default: reader.skipValue();
             }
         }
         reader.endObject();
@@ -431,22 +420,16 @@ public final class ABIJSON {
         boolean anonymous = false;
         TupleType<?> tt = null;
         while (reader.peek() != JsonToken.END_OBJECT) {
-            String key = reader.nextName();
-            switch (key) {
+            switch (reader.nextName()) {
             case TYPE:
                 if (!"event".equals(reader.nextString())) {
                     throw new IllegalArgumentException();
                 }
                 break;
-            case NAME:
-                name = reader.nextString();
-                break;
-            case ANONYMOUS:
-                anonymous = reader.nextBoolean();
-                break;
-            case INPUTS:
-                tt = parseTupleType(reader, true, flags);
-                break;
+            case NAME: name = reader.nextString(); break;
+            case ANONYMOUS: anonymous = reader.nextBoolean(); break;
+            case INPUTS: tt = parseTupleType(reader, true, flags); break;
+            default: reader.skipValue();
             }
         }
         reader.endObject();
@@ -462,21 +445,15 @@ public final class ABIJSON {
         String name = null;
         TupleType<?> tt = null;
         while (reader.peek() != JsonToken.END_OBJECT) {
-            String key = reader.nextName();
-            switch (key) {
+            switch (reader.nextName()) {
             case TYPE:
                 if (!"error".equals(reader.nextString())) {
                     throw new IllegalArgumentException();
                 }
                 break;
-            case NAME:
-                name = reader.nextString();
-                break;
-            case INPUTS:
-                tt = parseTupleType(reader, false, flags);
-                break;
-            default:
-                reader.skipValue();
+            case NAME: name = reader.nextString(); break;
+            case INPUTS: tt = parseTupleType(reader, false, flags); break;
+            default: reader.skipValue();
             }
         }
         reader.endObject();
@@ -504,7 +481,6 @@ public final class ABIJSON {
 
         int i = 0;
         while (true) {
-
             String name = null;
             String internalType = null;
             boolean isIndexed = false;
@@ -513,26 +489,13 @@ public final class ABIJSON {
 
             reader.beginObject();
             while (reader.peek() != JsonToken.END_OBJECT) {
-                String key = reader.nextName();
-                switch (key) {
-                case TYPE:
-                    type = reader.nextString();
-                    break;
-                case COMPONENTS:
-                    e = parseTupleType(reader, false, flags);
-                    break;
-                case NAME:
-                    name = reader.nextString();
-                    break;
-                case INTERNAL_TYPE:
-                    internalType = reader.nextString();
-                    break;
-                case INDEXED:
-                    isIndexed = reader.nextBoolean();
-                    break;
-                default:
-                    reader.skipValue();
-                    break;
+                switch (reader.nextName()) {
+                case TYPE: type = reader.nextString(); break;
+                case COMPONENTS: e = parseTupleType(reader, false, flags); break;
+                case NAME: name = reader.nextString(); break;
+                case INTERNAL_TYPE: internalType = reader.nextString(); break;
+                case INDEXED: isIndexed = reader.nextBoolean(); break;
+                default: reader.skipValue();
                 }
             }
             reader.endObject();
