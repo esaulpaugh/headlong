@@ -423,7 +423,7 @@ public final class ABIJSON {
         while (reader.peek() != JsonToken.END_OBJECT) {
             switch (reader.nextName()) {
             case TYPE:
-                if (!"event".equals(reader.nextString())) {
+                if (!EVENT.equals(reader.nextString())) {
                     throw new IllegalArgumentException();
                 }
                 break;
@@ -448,7 +448,7 @@ public final class ABIJSON {
         while (reader.peek() != JsonToken.END_OBJECT) {
             switch (reader.nextName()) {
             case TYPE:
-                if (!"error".equals(reader.nextString())) {
+                if (!ERROR.equals(reader.nextString())) {
                     throw new IllegalArgumentException();
                 }
                 break;
