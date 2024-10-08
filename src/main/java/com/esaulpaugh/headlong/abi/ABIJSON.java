@@ -360,12 +360,12 @@ public final class ABIJSON {
                 if (jsonObject == null) {
                     return finishParse(t, reader, digest, flags);
                 }
-                continue;
+            } else {
+                if (jsonObject == null) {
+                    jsonObject = new JsonObject();
+                }
+                jsonObject.add(name, TypeAdapters.JSON_ELEMENT.read(reader));
             }
-            if (jsonObject == null) {
-                jsonObject = new JsonObject();
-            }
-            jsonObject.add(name, TypeAdapters.JSON_ELEMENT.read(reader));
         }
         reader.endObject();
         JsonReader r = read(jsonObject.toString());
@@ -502,10 +502,9 @@ public final class ABIJSON {
             reader.endObject();
 
             if (type.startsWith(TUPLE)) {
-                final TupleType<?> tt = e.asTupleType();
                 e = type.length() > TUPLE.length()
-                        ? TypeFactory.build(tt.canonicalType + type.substring(TUPLE.length()), null, tt, flags) // tuple array
-                        : tt;
+                        ? TypeFactory.build(e.canonicalType + type.substring(TUPLE.length()), null, e.asTupleType(), flags) // tuple array
+                        : e;
             } else {
                 e = TypeFactory.create(flags, type);
             }
@@ -518,7 +517,7 @@ public final class ABIJSON {
             if (internalType != null) {
                 internalTypes[i] = internalType.equals(e.canonicalType) ? e.canonicalType : internalType;
             }
-            if (indexed != null) {
+            if (eventParams) {
                 indexed[i] = isIndexed;
             }
 
