@@ -22,6 +22,7 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.internal.Streams;
+import com.google.gson.internal.bind.TypeAdapters;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
@@ -532,7 +533,7 @@ public final class ABIJSON {
             if (jsonObject == null) {
                 jsonObject = new JsonObject();
             }
-            jsonObject.add(name, readElement(reader));
+            jsonObject.add(name, TypeAdapters.JSON_ELEMENT.read(reader));
         }
         reader.endObject();
         return parseABIObject(t, jsonObject, digest, flags);
@@ -563,39 +564,39 @@ public final class ABIJSON {
 //        reader.endObject();
 //        return parseABIObject(t, jsonObject, digest, flags);
 //    }
-
-    private static JsonObject readJsonObject(JsonReader reader) throws IOException {
-        JsonObject jsonObject = new JsonObject();
-        reader.beginObject();
-        while (reader.peek() != JsonToken.END_OBJECT) {
-            jsonObject.add(reader.nextName(), readElement(reader));
-        }
-        reader.endObject();
-        return jsonObject;
-    }
-
-    private static JsonArray readJsonArray(JsonReader reader) throws IOException {
-        JsonArray jsonArray = new JsonArray();
-        reader.beginArray();
-        while (reader.peek() != JsonToken.END_ARRAY) {
-            jsonArray.add(readElement(reader));
-        }
-        reader.endArray();
-        return jsonArray;
-    }
-
-    private static JsonElement readElement(JsonReader reader) throws IOException {
-        switch (reader.peek()) {
-        case STRING: return new JsonPrimitive(reader.nextString());
-        case NUMBER: return new JsonPrimitive(reader.nextDouble());
-        case BOOLEAN: return new JsonPrimitive(reader.nextBoolean());
-        case BEGIN_OBJECT: return readJsonObject(reader);
-        case BEGIN_ARRAY: return readJsonArray(reader);
-        default: // NULL and unknown
-            reader.skipValue();
-            return JsonNull.INSTANCE;
-        }
-    }
+//
+//    private static JsonObject readJsonObject(JsonReader reader) throws IOException {
+//        JsonObject jsonObject = new JsonObject();
+//        reader.beginObject();
+//        while (reader.peek() != JsonToken.END_OBJECT) {
+//            jsonObject.add(reader.nextName(), readElement(reader));
+//        }
+//        reader.endObject();
+//        return jsonObject;
+//    }
+//
+//    private static JsonArray readJsonArray(JsonReader reader) throws IOException {
+//        JsonArray jsonArray = new JsonArray();
+//        reader.beginArray();
+//        while (reader.peek() != JsonToken.END_ARRAY) {
+//            jsonArray.add(readElement(reader));
+//        }
+//        reader.endArray();
+//        return jsonArray;
+//    }
+//
+//    private static JsonElement readElement(JsonReader reader) throws IOException {
+//        switch (reader.peek()) {
+//        case STRING: return new JsonPrimitive(reader.nextString());
+//        case NUMBER: return new JsonPrimitive(reader.nextDouble());
+//        case BOOLEAN: return new JsonPrimitive(reader.nextBoolean());
+//        case BEGIN_OBJECT: return readJsonObject(reader);
+//        case BEGIN_ARRAY: return readJsonArray(reader);
+//        default: // NULL and unknown
+//            reader.skipValue();
+//            return JsonNull.INSTANCE;
+//        }
+//    }
 
     public static Function parseFunction(TypeEnum t, JsonReader reader, MessageDigest digest, int flags) throws IOException {
         String name = null;
