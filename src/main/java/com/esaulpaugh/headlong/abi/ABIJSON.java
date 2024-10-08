@@ -373,6 +373,7 @@ public final class ABIJSON {
         return finishParse(t, r, digest, flags);
     }
 
+    @SuppressWarnings("unchecked")
     private static <T extends ABIObject> T finishParse(TypeEnum t, JsonReader reader, MessageDigest digest, int flags) throws IOException {
         switch (t.ordinal()) {
         case TypeEnum.ORDINAL_FUNCTION:
