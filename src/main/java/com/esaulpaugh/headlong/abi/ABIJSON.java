@@ -18,7 +18,6 @@ package com.esaulpaugh.headlong.abi;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.internal.Streams;
@@ -152,12 +151,6 @@ public final class ABIJSON {
         return ABIJSON.<T>stream(flags, arrayJson, types).iterator();
     }
 
-    /** @see ABIObject#fromJsonObject(int,JsonObject) */
-    static <T extends ABIObject> T parseABIObject(JsonObject object, int flags) {
-        final TypeEnum t = TypeEnum.parse(getType(object));
-        return parseABIObject(t, object, t.isFunction ? Function.newDefaultDigest() : null, flags);
-    }
-
     @SuppressWarnings("unchecked")
     private static <T extends ABIObject> T parseABIObject(TypeEnum t, JsonObject object, MessageDigest digest, int flags) {
         switch (t.ordinal()) {
@@ -171,30 +164,6 @@ public final class ABIJSON {
         }
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    static Function parseFunction(JsonObject function, MessageDigest digest, int flags) {
-        final TypeEnum t = TypeEnum.parse(getType(function));
-        if (!FUNCTIONS.contains(t)) {
-            throw TypeEnum.unexpectedType(getType(function));
-        }
-        return parseFunctionUnchecked(t, function, digest, flags);
-    }
-
-    @SuppressWarnings("unchecked")
-    static <X extends Tuple> Event<X> parseEvent(JsonObject event, int flags) {
-        if (!EVENT.equals(getType(event))) {
-            throw TypeEnum.unexpectedType(getType(event));
-        }
-        return (Event<X>) parseEventUnchecked(event, flags);
-    }
-
-    @SuppressWarnings("unchecked")
-    static <X extends Tuple> ContractError<X> parseError(JsonObject error, int flags) {
-        if (!ERROR.equals(getType(error))) {
-            throw TypeEnum.unexpectedType(getType(error));
-        }
-        return (ContractError<X>) parseErrorUnchecked(error, flags);
-    }
-
     private static Function parseFunctionUnchecked(TypeEnum type, JsonObject function, MessageDigest digest, int flags) {
         return new Function(
                 type,
@@ -526,7 +495,15 @@ public final class ABIJSON {
                     return null;
                 }
                 if (jsonObject == null) {
-                    return parseABIObject(t, reader, digest, flags);
+                    switch (t.ordinal()) {
+                    case TypeEnum.ORDINAL_FUNCTION:
+                    case TypeEnum.ORDINAL_RECEIVE:
+                    case TypeEnum.ORDINAL_FALLBACK:
+                    case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) parseFunction(t, reader, digest, flags);
+                    case TypeEnum.ORDINAL_EVENT: return (T) parseEvent(reader, flags);
+                    case TypeEnum.ORDINAL_ERROR: return (T) parseError(reader, flags);
+                    default: throw new AssertionError();
+                    }
                 }
                 continue;
             }
@@ -539,66 +516,19 @@ public final class ABIJSON {
         return parseABIObject(t, jsonObject, digest, flags);
     }
 
-//    static <T extends ABIObject> T tryParse(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) throws IOException {
-//        JsonObject jsonObject = null;
-//        reader.beginObject();
-//        TypeEnum t = TypeEnum.FUNCTION;
-//        while (reader.peek() != JsonToken.END_OBJECT) {
-//            String name = reader.nextName();
-//            if (TYPE.equals(name)) {
-//                t = TypeEnum.parse(reader.nextString());
-//                if (!types.contains(t)) {
-//                    while (reader.peek() != JsonToken.END_OBJECT) {
-//                        reader.skipValue();
-//                    }
-//                    reader.endObject();
-//                    return null;
-//                }
-//                continue;
-//            }
-//            if (jsonObject == null) {
-//                jsonObject = new JsonObject();
-//            }
-//            jsonObject.add(name, readElement(reader));
-//        }
-//        reader.endObject();
-//        return parseABIObject(t, jsonObject, digest, flags);
-//    }
-//
-//    private static JsonObject readJsonObject(JsonReader reader) throws IOException {
-//        JsonObject jsonObject = new JsonObject();
-//        reader.beginObject();
-//        while (reader.peek() != JsonToken.END_OBJECT) {
-//            jsonObject.add(reader.nextName(), readElement(reader));
-//        }
-//        reader.endObject();
-//        return jsonObject;
-//    }
-//
-//    private static JsonArray readJsonArray(JsonReader reader) throws IOException {
-//        JsonArray jsonArray = new JsonArray();
-//        reader.beginArray();
-//        while (reader.peek() != JsonToken.END_ARRAY) {
-//            jsonArray.add(readElement(reader));
-//        }
-//        reader.endArray();
-//        return jsonArray;
-//    }
-//
-//    private static JsonElement readElement(JsonReader reader) throws IOException {
-//        switch (reader.peek()) {
-//        case STRING: return new JsonPrimitive(reader.nextString());
-//        case NUMBER: return new JsonPrimitive(reader.nextDouble());
-//        case BOOLEAN: return new JsonPrimitive(reader.nextBoolean());
-//        case BEGIN_OBJECT: return readJsonObject(reader);
-//        case BEGIN_ARRAY: return readJsonArray(reader);
-//        default: // NULL and unknown
-//            reader.skipValue();
-//            return JsonNull.INSTANCE;
-//        }
-//    }
+    static <T extends ABIObject> T parseABIObject(String json, Set<TypeEnum> types, MessageDigest digest, int flags) {
+        try {
+            T obj = tryParseStreaming(new JsonReader(new StringReader(json)), types, digest, flags);
+            if (obj != null) {
+                return obj;
+            }
+            throw new IllegalArgumentException("unexpected type");
+        } catch (IOException io) {
+            throw new IllegalStateException(io);
+        }
+    }
 
-    public static Function parseFunction(TypeEnum t, JsonReader reader, MessageDigest digest, int flags) throws IOException {
+    private static Function parseFunction(TypeEnum t, JsonReader reader, MessageDigest digest, int flags) throws IOException {
         String name = null;
         TupleType<?> inputs = TupleType.EMPTY;
         TupleType<?> outputs = TupleType.EMPTY;
@@ -627,10 +557,9 @@ public final class ABIJSON {
         return new Function(t, name, inputs, outputs, stateMutability, digest);
     }
 
-    public static Event<?> parseEvent(JsonReader reader, int flags) throws IOException {
+    private static Event<?> parseEvent(JsonReader reader, int flags) throws IOException {
         String name = null;
         boolean anonymous = false;
-        boolean[] indexed = null;
         TupleType<?> tt = null;
         while (reader.peek() != JsonToken.END_OBJECT) {
             String key = reader.nextName();
@@ -648,23 +577,19 @@ public final class ABIJSON {
                 break;
             case INPUTS:
                 tt = parseTupleType(reader, true, flags);
-                indexed = tt.indexed;
                 break;
             }
         }
         reader.endObject();
-        if (tt == null) {
-            throw new IllegalStateException();
-        }
         return new Event<>(
                 name,
                 anonymous,
                 tt,
-                Arrays.copyOf(indexed, tt.size())
+                tt.indexed == null ? new boolean[tt.size()] : tt.indexed
         );
     }
 
-    public static ContractError<?> parseError(JsonReader reader, int flags) throws IOException {
+    private static ContractError<?> parseError(JsonReader reader, int flags) throws IOException {
         String name = null;
         TupleType<?> tt = null;
         while (reader.peek() != JsonToken.END_OBJECT) {
@@ -687,18 +612,6 @@ public final class ABIJSON {
         }
         reader.endObject();
         return new ContractError<>(name, tt);
-    }
-
-    public static <T extends ABIObject> T parseABIObject(TypeEnum t, JsonReader reader, MessageDigest digest, int flags) throws IOException {
-        switch (t.ordinal()) {
-        case TypeEnum.ORDINAL_FUNCTION:
-        case TypeEnum.ORDINAL_RECEIVE:
-        case TypeEnum.ORDINAL_FALLBACK:
-        case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) parseFunction(t, reader, digest, flags);
-        case TypeEnum.ORDINAL_EVENT: return (T) parseEvent(reader, flags);
-        case TypeEnum.ORDINAL_ERROR: return (T) parseError(reader, flags);
-        default: throw new AssertionError();
-        }
     }
 
     public static TupleType<?> parseTupleType(JsonReader reader, final boolean eventParams, final int flags) throws IOException {

@@ -271,11 +271,11 @@ public class ABIJSONTest {
         }
 
         for (String originalJson : jsons) {
-            ABIObject orig = ABIObject.fromJsonObject(FLAGS_NONE, ABIJSON.parseObject(originalJson));
+            ABIObject orig = ABIObject.fromJson(FLAGS_NONE, ABIJSON.parseObject(originalJson).toString());
             String newJson = orig.toJson(false);
             assertNotEquals(originalJson, newJson);
 
-            ABIObject reconstructed = ABIObject.fromJsonObject(FLAGS_NONE, ABIJSON.parseObject(newJson));
+            ABIObject reconstructed = ABIObject.fromJson(FLAGS_NONE, ABIJSON.parseObject(newJson).toString());
 
             assertEquals(orig, reconstructed);
             assertEquals(originalJson, reconstructed.toString());
@@ -292,7 +292,7 @@ public class ABIJSONTest {
         );
 
         final JsonObject object = ABIJSON.parseObject(FUNCTION_A_JSON);
-        final Function f = Function.fromJsonObject(FLAGS_NONE, object);
+        final Function f = Function.fromJson(FLAGS_NONE, object.toString());
         assertEquals(FUNCTION_A_JSON, f.toJson(true));
         final TupleType<?> in = f.getInputs();
         final TupleType<?> out = f.getOutputs();
@@ -323,7 +323,7 @@ public class ABIJSONTest {
 
         Function f2 = ABIObject.fromJson(FUNCTION_A_JSON);
         assertEquals(f, f2);
-        assertEquals(f, ABIObject.fromJsonObject(FLAGS_NONE, object));
+        assertEquals(f, ABIObject.fromJson(FLAGS_NONE, object.toString()));
 
         assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.ContractError", f2::asContractError);
         assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Event", f2::asEvent);
@@ -351,13 +351,13 @@ public class ABIJSONTest {
     public void testParseFunction2() throws Throwable {
         final JsonObject function = new JsonObject();
 
-        TestUtils.CustomRunnable parse = () -> Function.fromJsonObject(FLAGS_NONE, function);
+        TestUtils.CustomRunnable parse = () -> Function.fromJson(FLAGS_NONE, function.toString());
 
-        assertThrown(IllegalArgumentException.class, "type is \"function\"; functions of this type must define name", parse);
+        assertThrown(NullPointerException.class, parse);
 
         function.add("type", new JsonPrimitive("event"));
 
-        assertThrown(IllegalArgumentException.class, "unexpected type: \"event\"", parse);
+        assertThrown(IllegalArgumentException.class, "unexpected type", parse);
 
         function.add("type", new JsonPrimitive("function"));
 
@@ -384,13 +384,13 @@ public class ABIJSONTest {
     public void testParseEvent() throws Throwable {
         JsonObject jsonObject = new JsonObject();
 
-        TestUtils.CustomRunnable runnable = () -> Event.fromJsonObject(FLAGS_NONE, jsonObject);
+        TestUtils.CustomRunnable runnable = () -> Event.fromJson(FLAGS_NONE, jsonObject.toString());
 
-        assertThrown(IllegalArgumentException.class, "unexpected type: null", runnable);
+        assertThrown(NullPointerException.class, runnable);
 
         jsonObject.add("type", new JsonPrimitive("event"));
 
-        assertThrown(IllegalArgumentException.class, "array \"inputs\" null or not found", runnable);
+        assertThrown(NullPointerException.class, runnable);
 
         jsonObject.add("inputs", new JsonArray());
 
@@ -410,7 +410,7 @@ public class ABIJSONTest {
 
         Event<?> e = ABIObject.fromJson(json);
         assertEquals(expectedA, e);
-        assertEquals(e, ABIObject.fromJsonObject(FLAGS_NONE, jsonObject));
+        assertEquals(e, ABIObject.fromJson(FLAGS_NONE, jsonObject.toString()));
 
         assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.ContractError", e::asContractError);
         assertThrown(ClassCastException.class, "com.esaulpaugh.headlong.abi.Function", e::asFunction);
@@ -555,7 +555,7 @@ public class ABIJSONTest {
 
         ContractError<Tuple> error0 = ABIJSON.parseErrors(ERROR_JSON_ARRAY).get(0);
         ContractError<?> error1 = ABIObject.fromJson(ERROR_JSON);
-        ContractError<Pair<BigInteger, Integer>> error2 = ABIObject.fromJsonObject(FLAGS_NONE, object);
+        ContractError<Pair<BigInteger, Integer>> error2 = ABIObject.fromJson(FLAGS_NONE, object.toString());
 
         {
             TupleType<Pair<BigInteger, Integer>> in = error2.getInputs();
@@ -587,9 +587,9 @@ public class ABIJSONTest {
         assertEquals(json, error.toString());
 
         testEqualNotSame(error, ContractError.fromJson(json));
-        testEqualNotSame(error, ContractError.fromJsonObject(FLAGS_NONE, object));
+        testEqualNotSame(error, ContractError.fromJson(FLAGS_NONE, object.toString()));
         testEqualNotSame(error, ABIObject.fromJson(json));
-        testEqualNotSame(error, ABIObject.fromJsonObject(FLAGS_NONE, object));
+        testEqualNotSame(error, ABIObject.fromJson(FLAGS_NONE, object.toString()));
 
         assertFalse(error.isFunction());
         assertFalse(error.isEvent());
