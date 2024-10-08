@@ -17,7 +17,6 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
-import com.google.gson.JsonObject;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.security.MessageDigest;

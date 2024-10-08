@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.google.gson.JsonObject;
-
 import java.util.Objects;
 
 /** Represents a custom error. */
