@@ -253,19 +253,14 @@ public final class ABIJSON {
 
         @Override
         public void write(final String str, int off, final int len) {
-            int i = count;
+            int i = this.count;
+            char[] buf = this.buf;
             final int newCount = i + len;
             if (newCount > buf.length) {
-                final char[] chars = Arrays.copyOf(buf, Math.max(newCount, buf.length << 1));
-                while (i < newCount) {
-                    chars[i++] = str.charAt(off++);
-                }
-                this.buf = chars;
-            } else {
-                final char[] chars = buf;
-                while (i < newCount) {
-                    chars[i++] = str.charAt(off++);
-                }
+                this.buf = buf = Arrays.copyOf(buf, Math.max(newCount, buf.length << 1));
+            }
+            while (i < newCount) {
+                buf[i++] = str.charAt(off++);
             }
             this.count = newCount;
         }
