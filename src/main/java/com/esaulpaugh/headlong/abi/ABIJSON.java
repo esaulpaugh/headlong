@@ -478,12 +478,12 @@ public final class ABIJSON {
             }
             reader.endObject();
 
-            if (type.startsWith(TUPLE)) {
-                e = type.length() > TUPLE.length()
-                        ? TypeFactory.build(e.canonicalType + type.substring(TUPLE.length()), null, e.asTupleType(), flags) // tuple array
-                        : e;
-            } else {
+            if (e == null || !type.startsWith(TUPLE)) {
                 e = TypeFactory.create(flags, type);
+            } else {
+                e = type.length() == TUPLE.length()
+                        ? e
+                        : TypeFactory.build(e.canonicalType + type.substring(TUPLE.length()), null, e.asTupleType(), flags); // tuple array
             }
 
             canonicalType.append(e.canonicalType);
