@@ -15,13 +15,9 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.internal.Streams;
+import com.google.gson.internal.bind.TypeAdapters;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
@@ -119,11 +115,11 @@ public final class ABIJSON {
 //        return ABIJSON.<T>stream(flags, arrayJson, types).collect(Collectors.toList());
         final List<T> list = new ArrayList<>();
         final MessageDigest digest = Function.newDefaultDigest();
-        final JsonReader jsonReader = new JsonReader(new StringReader(arrayJson));
+        final JsonReader jsonReader = read(arrayJson);
         try {
             jsonReader.beginArray();
             while (jsonReader.peek() != JsonToken.END_ARRAY) {
-                T e = tryParse(jsonReader, types, digest, flags);
+                T e = tryParseStreaming(jsonReader, types, digest, flags);
                 if (e != null) {
                     list.add(e);
                 }
@@ -150,140 +146,7 @@ public final class ABIJSON {
     public static <T extends ABIObject> Iterator<T> iterator(int flags, String arrayJson, Set<TypeEnum> types) {
         return ABIJSON.<T>stream(flags, arrayJson, types).iterator();
     }
-
-    /** @see ABIObject#fromJsonObject(int,JsonObject) */
-    static <T extends ABIObject> T parseABIObject(JsonObject object, int flags) {
-        final TypeEnum t = TypeEnum.parse(getType(object));
-        return parseABIObject(t, object, t.isFunction ? Function.newDefaultDigest() : null, flags);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T extends ABIObject> T parseABIObject(TypeEnum t, JsonObject object, MessageDigest digest, int flags) {
-        switch (t.ordinal()) {
-        case TypeEnum.ORDINAL_FUNCTION:
-        case TypeEnum.ORDINAL_RECEIVE:
-        case TypeEnum.ORDINAL_FALLBACK:
-        case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) parseFunctionUnchecked(t, object, digest, flags);
-        case TypeEnum.ORDINAL_EVENT: return (T) parseEventUnchecked(object, flags);
-        case TypeEnum.ORDINAL_ERROR: return (T) parseErrorUnchecked(object, flags);
-        default: throw new AssertionError();
-        }
-    }
-// ---------------------------------------------------------------------------------------------------------------------
-    static Function parseFunction(JsonObject function, MessageDigest digest, int flags) {
-        final TypeEnum t = TypeEnum.parse(getType(function));
-        if (!FUNCTIONS.contains(t)) {
-            throw TypeEnum.unexpectedType(getType(function));
-        }
-        return parseFunctionUnchecked(t, function, digest, flags);
-    }
-
-    @SuppressWarnings("unchecked")
-    static <X extends Tuple> Event<X> parseEvent(JsonObject event, int flags) {
-        if (!EVENT.equals(getType(event))) {
-            throw TypeEnum.unexpectedType(getType(event));
-        }
-        return (Event<X>) parseEventUnchecked(event, flags);
-    }
-
-    @SuppressWarnings("unchecked")
-    static <X extends Tuple> ContractError<X> parseError(JsonObject error, int flags) {
-        if (!ERROR.equals(getType(error))) {
-            throw TypeEnum.unexpectedType(getType(error));
-        }
-        return (ContractError<X>) parseErrorUnchecked(error, flags);
-    }
-
-    private static Function parseFunctionUnchecked(TypeEnum type, JsonObject function, MessageDigest digest, int flags) {
-        return new Function(
-                type,
-                getName(function),
-                parseTupleType(function, INPUTS, flags),
-                parseTupleType(function, OUTPUTS, flags),
-                getString(function, STATE_MUTABILITY),
-                digest
-        );
-    }
-
-    private static Event<?> parseEventUnchecked(JsonObject event, int flags) {
-        final JsonArray inputs = event.getAsJsonArray(INPUTS);
-        if (inputs != null) {
-            final boolean[] indexed = new boolean[inputs.size()];
-            return new Event<>(
-                    getName(event),
-                    getBoolean(event, ANONYMOUS),
-                    parseTupleType(inputs, indexed, flags),
-                    indexed
-            );
-        }
-        throw new IllegalArgumentException("array \"" + INPUTS + "\" null or not found");
-    }
-
-    private static ContractError<?> parseErrorUnchecked(JsonObject error, int flags) {
-        return new ContractError<>(getName(error), parseTupleType(error, INPUTS, flags));
-    }
-
-    private static TupleType<Tuple> parseTupleType(final JsonArray array, final boolean[] indexed, final int flags) {
-        final int size;
-        if (array == null || (size = array.size()) == 0) { /* JsonArray.isEmpty requires gson v2.8.7 */
-            return TupleType.empty(flags);
-        }
-        final ABIType<?>[] elements = new ABIType<?>[size];
-        final String[] names = new String[size];
-        final String[] internalTypes = new String[size];
-        final StringBuilder canonicalType = TypeFactory.newTypeBuilder();
-        boolean dynamic = false;
-        for (int i = 0; ; ) {
-            final JsonObject inputObj = array.get(i).getAsJsonObject();
-            final ABIType<?> e = parseType(inputObj, flags);
-            canonicalType.append(e.canonicalType);
-            dynamic |= e.dynamic;
-            elements[i] = e;
-            names[i] = getName(inputObj);
-            final String internalType = getString(inputObj, INTERNAL_TYPE);
-            if (internalType != null) {
-                internalTypes[i] = internalType.equals(e.canonicalType) ? e.canonicalType : internalType;
-            }
-            if (indexed != null) {
-                indexed[i] = getBoolean(inputObj, INDEXED);
-            }
-            if (++i == size) {
-                return new TupleType<>(
-                        canonicalType.append(')').toString(),
-                        dynamic,
-                        elements,
-                        names,
-                        internalTypes,
-                        flags
-                );
-            }
-            canonicalType.append(',');
-        }
-    }
-
-    private static TupleType<?> parseTupleType(JsonObject object, String arrayKey, int flags) {
-        return parseTupleType(object.getAsJsonArray(arrayKey), null, flags);
-    }
-
-    private static ABIType<?> parseType(JsonObject object, int flags) {
-        final String type = getType(object);
-        if (type.startsWith(TUPLE)) {
-            final TupleType<?> tt = parseTupleType(object, COMPONENTS, flags);
-            return type.length() > TUPLE.length()
-                    ? TypeFactory.build(tt.canonicalType + type.substring(TUPLE.length()), null, tt, flags) // tuple array
-                    : tt;
-        }
-        return TypeFactory.create(flags, type);
-    }
-
-    private static String getType(JsonObject obj) {
-        return getString(obj, TYPE);
-    }
-
-    private static String getName(JsonObject obj) {
-        return getString(obj, NAME);
-    }
-// ---------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     static String toJson(ABIObject o, boolean pretty) {
         try {
             final Writer stringOut = new NonSyncWriter(pretty ? 512 : 256); // can also use StringWriter or CharArrayWriter, but this is faster
@@ -305,7 +168,10 @@ public final class ABIJSON {
                         }
                     }
                 }
-                stateMutability(out, f.getStateMutability());
+                String stateMutability = f.getStateMutability();
+                if (stateMutability != null) {
+                    out.name(STATE_MUTABILITY).value(stateMutability);
+                }
             } else if (o.isEvent()) {
                 final Event<?> e = o.asEvent();
                 type(out, EVENT);
@@ -335,25 +201,16 @@ public final class ABIJSON {
         }
     }
 
-    private static void internalType(JsonWriter out, String internalType) throws IOException {
-        if (internalType != null) {
-            out.name(INTERNAL_TYPE).value(internalType);
-        }
-    }
-
-    private static void stateMutability(JsonWriter out, String stateMutability) throws IOException {
-        if (stateMutability != null) {
-            out.name(STATE_MUTABILITY).value(stateMutability);
-        }
-    }
-
     private static void tupleType(JsonWriter out, String name, TupleType<?> tupleType, boolean[] indexedManifest) throws IOException {
         out.name(name).beginArray();
-        int i = 0;
-        for (final ABIType<?> e : tupleType) {
+        for (int i = 0; i < tupleType.elementTypes.length; i++) {
+            final ABIType<?> e = tupleType.elementTypes[i];
             out.beginObject();
             if (tupleType.elementInternalTypes != null) {
-                internalType(out, tupleType.elementInternalTypes[i]);
+                String internalType = tupleType.elementInternalTypes[i];
+                if (internalType != null) {
+                    out.name(INTERNAL_TYPE).value(internalType);
+                }
             }
             if (tupleType.elementNames != null) {
                 name(out, tupleType.elementNames[i]);
@@ -369,7 +226,6 @@ public final class ABIJSON {
                 out.name(INDEXED).value(indexedManifest[i]);
             }
             out.endObject();
-            i++;
         }
         out.endArray();
     }
@@ -390,19 +246,14 @@ public final class ABIJSON {
 
         @Override
         public void write(final String str, int off, final int len) {
-            int i = count;
+            int i = this.count;
+            char[] buf = this.buf;
             final int newCount = i + len;
             if (newCount > buf.length) {
-                final char[] chars = Arrays.copyOf(buf, Math.max(newCount, buf.length << 1));
-                while (i < newCount) {
-                    chars[i++] = str.charAt(off++);
-                }
-                this.buf = chars;
-            } else {
-                final char[] chars = buf;
-                while (i < newCount) {
-                    chars[i++] = str.charAt(off++);
-                }
+                this.buf = buf = Arrays.copyOf(buf, Math.max(newCount, buf.length << 1));
+            }
+            while (i < newCount) {
+                buf[i++] = str.charAt(off++);
             }
             this.count = newCount;
         }
@@ -412,36 +263,7 @@ public final class ABIJSON {
             return new String(buf, 0, count);
         }
     }
-//-------------------------------------------------------------------------------------
-    static JsonObject parseObject(String json) {
-        return Streams.parse(new JsonReader(new StringReader(json))).getAsJsonObject();
-    }
-
-    private static String getString(JsonObject object, String key) {
-        final JsonElement element = object.get(key);
-        if (element == null || element.isJsonNull()) {
-            return null;
-        }
-        if (((JsonPrimitive) element).isString()) {
-            return element.getAsString();
-        }
-        throw new IllegalArgumentException(key + " is not a string");
-    }
-
-    private static boolean getBoolean(JsonObject object, String key) {
-        final JsonElement element = object.get(key);
-        if (element == null) {
-            if (ANONYMOUS.equals(key)) {
-                return false;
-            }
-            throw new NullPointerException();
-        }
-        if (((JsonPrimitive) element).isBoolean()) {
-            return element.getAsBoolean();
-        }
-        throw new IllegalArgumentException(key + " is not a boolean");
-    }
-
+//----------------------------------------------------------------------------------------------------------------------
     static class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> implements Closeable {
 
         private final JsonReader jsonReader;
@@ -453,7 +275,7 @@ public final class ABIJSON {
         JsonSpliterator(String arrayJson, Set<TypeEnum> types, int flags) {
             super(Long.SIZE, ORDERED | NONNULL | IMMUTABLE);
             try {
-                JsonReader reader = new JsonReader(new StringReader(arrayJson));
+                JsonReader reader = read(arrayJson);
                 reader.beginArray();
                 this.jsonReader = reader;
                 this.types = types;
@@ -469,7 +291,7 @@ public final class ABIJSON {
             try {
                 if (!closed) {
                     while (jsonReader.peek() != JsonToken.END_ARRAY) {
-                        T e = tryParse(jsonReader, types, digest, flags);
+                        T e = tryParseStreaming(jsonReader, types, digest, flags);
                         if (e != null) {
                             action.accept(e);
                             return true;
@@ -508,9 +330,21 @@ public final class ABIJSON {
         }
     }
 
-    static <T extends ABIObject> T tryParse(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) throws IOException {
-        JsonObject jsonObject = null;
+    static <T extends ABIObject> T parseABIObject(String json, Set<TypeEnum> types, MessageDigest digest, int flags) {
+        try {
+            T obj = tryParseStreaming(read(json), types, digest, flags);
+            if (obj != null) {
+                return obj;
+            }
+            throw new IllegalArgumentException("unexpected type");
+        } catch (IOException io) {
+            throw new IllegalStateException(io);
+        }
+    }
+
+    static <T extends ABIObject> T tryParseStreaming(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) throws IOException {
         reader.beginObject();
+        JsonObject jsonObject = null;
         TypeEnum t = TypeEnum.FUNCTION;
         while (reader.peek() != JsonToken.END_OBJECT) {
             String name = reader.nextName();
@@ -523,47 +357,172 @@ public final class ABIJSON {
                     reader.endObject();
                     return null;
                 }
-                continue;
+                if (jsonObject == null) {
+                    return finishParse(t, reader, digest, flags);
+                }
+            } else {
+                if (jsonObject == null) {
+                    jsonObject = new JsonObject();
+                }
+                jsonObject.add(name, TypeAdapters.JSON_ELEMENT.read(reader));
             }
-            if (jsonObject == null) {
-                jsonObject = new JsonObject();
-            }
-            jsonObject.add(name, readElement(reader));
         }
         reader.endObject();
-        return parseABIObject(t, jsonObject, digest, flags);
+        JsonReader r = read(jsonObject.toString());
+        r.beginObject();
+        return finishParse(t, r, digest, flags);
     }
 
-    private static JsonObject readJsonObject(JsonReader reader) throws IOException {
-        JsonObject jsonObject = new JsonObject();
-        reader.beginObject();
+    @SuppressWarnings("unchecked")
+    private static <T extends ABIObject> T finishParse(TypeEnum t, JsonReader reader, MessageDigest digest, int flags) throws IOException {
+        switch (t.ordinal()) {
+        case TypeEnum.ORDINAL_FUNCTION:
+        case TypeEnum.ORDINAL_RECEIVE:
+        case TypeEnum.ORDINAL_FALLBACK:
+        case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) parseFunction(t, reader, digest, flags);
+        case TypeEnum.ORDINAL_EVENT: return (T) parseEvent(reader, flags);
+        case TypeEnum.ORDINAL_ERROR: return (T) parseError(reader, flags);
+        default: throw new AssertionError();
+        }
+    }
+
+    private static Function parseFunction(TypeEnum t, JsonReader reader, MessageDigest digest, int flags) throws IOException {
+        String name = null;
+        TupleType<?> inputs = TupleType.EMPTY;
+        TupleType<?> outputs = TupleType.EMPTY;
+        String stateMutability = null;
         while (reader.peek() != JsonToken.END_OBJECT) {
-            jsonObject.add(reader.nextName(), readElement(reader));
+            switch (reader.nextName()) {
+            case NAME: name = reader.nextString(); continue;
+            case INPUTS: inputs = parseTupleType(reader, false, flags); continue;
+            case OUTPUTS: outputs = parseTupleType(reader, false, flags); continue;
+            case STATE_MUTABILITY: stateMutability = reader.nextString(); continue;
+            default: reader.skipValue();
+            }
         }
         reader.endObject();
-        return jsonObject;
+        return new Function(t, name, inputs, outputs, stateMutability, digest);
     }
 
-    private static JsonArray readJsonArray(JsonReader reader) throws IOException {
-        JsonArray jsonArray = new JsonArray();
+    private static Event<?> parseEvent(JsonReader reader, int flags) throws IOException {
+        String name = null;
+        boolean anonymous = false;
+        TupleType<?> tt = null;
+        while (reader.peek() != JsonToken.END_OBJECT) {
+            switch (reader.nextName()) {
+            case NAME: name = reader.nextString(); continue;
+            case ANONYMOUS: anonymous = reader.nextBoolean(); continue;
+            case INPUTS: tt = parseTupleType(reader, true, flags); continue;
+            default: reader.skipValue();
+            }
+        }
+        reader.endObject();
+        return new Event<>(
+                name,
+                anonymous,
+                tt,
+                tt.indexed
+        );
+    }
+
+    private static ContractError<?> parseError(JsonReader reader, int flags) throws IOException {
+        String name = null;
+        TupleType<?> tt = null;
+        while (reader.peek() != JsonToken.END_OBJECT) {
+            switch (reader.nextName()) {
+            case NAME: name = reader.nextString(); continue;
+            case INPUTS: tt = parseTupleType(reader, false, flags); continue;
+            default: reader.skipValue();
+            }
+        }
+        reader.endObject();
+        return new ContractError<>(name, tt);
+    }
+
+    public static TupleType<?> parseTupleType(JsonReader reader, final boolean eventParams, final int flags) throws IOException {
+        if (reader.peek() == JsonToken.NULL) {
+            reader.nextNull();
+            return TupleType.empty(flags);
+        }
+
         reader.beginArray();
-        while (reader.peek() != JsonToken.END_ARRAY) {
-            jsonArray.add(readElement(reader));
+        if (reader.peek() == JsonToken.END_ARRAY) {
+            reader.endArray();
+            return TupleType.empty(flags);
         }
-        reader.endArray();
-        return jsonArray;
+
+        ABIType<?>[] elements = new ABIType<?>[8];
+        String[] names = new String[8];
+        String[] internalTypes = new String[8];
+        boolean[] indexed = eventParams ? new boolean[8] : null;
+        StringBuilder canonicalType = TypeFactory.newTypeBuilder();
+        boolean dynamic = false;
+
+        for (int i = 0; true; canonicalType.append(',')) {
+            String name = null;
+            String internalType = null;
+            boolean isIndexed = false;
+            String type = null;
+            ABIType<?> e = null;
+
+            reader.beginObject();
+            while (reader.peek() != JsonToken.END_OBJECT) {
+                switch (reader.nextName()) {
+                case TYPE: type = reader.nextString(); continue;
+                case COMPONENTS: e = parseTupleType(reader, false, flags); continue;
+                case NAME: name = reader.nextString(); continue;
+                case INTERNAL_TYPE: internalType = reader.nextString(); continue;
+                case INDEXED: isIndexed = reader.nextBoolean(); continue;
+                default: reader.skipValue();
+                }
+            }
+            reader.endObject();
+
+            if (e == null || !type.startsWith(TUPLE)) {
+                e = TypeFactory.create(flags, type);
+            } else {
+                e = type.length() == TUPLE.length()
+                        ? e
+                        : TypeFactory.build(e.canonicalType + type.substring(TUPLE.length()), null, e.asTupleType(), flags); // tuple array
+            }
+
+            canonicalType.append(e.canonicalType);
+            dynamic |= e.dynamic;
+
+            elements[i] = e;
+            names[i] = name;
+            if (internalType != null) {
+                internalTypes[i] = internalType.equals(e.canonicalType) ? e.canonicalType : internalType;
+            }
+            if (eventParams) {
+                indexed[i] = isIndexed;
+            }
+
+            i++;
+            if (reader.peek() == JsonToken.END_ARRAY) {
+                reader.endArray();
+                return new TupleType<>(
+                        canonicalType.append(')').toString(),
+                        dynamic,
+                        Arrays.copyOf(elements, i),
+                        Arrays.copyOf(names, i),
+                        Arrays.copyOf(internalTypes, i),
+                        eventParams ? Arrays.copyOf(indexed, i) : null,
+                        flags
+                );
+            }
+
+            if (i == elements.length) {
+                final int newLen = i << 1;
+                elements = Arrays.copyOf(elements, newLen);
+                names = Arrays.copyOf(names, newLen);
+                internalTypes = Arrays.copyOf(internalTypes, newLen);
+                indexed = eventParams ? Arrays.copyOf(indexed, newLen) : null;
+            }
+        }
     }
 
-    private static JsonElement readElement(JsonReader reader) throws IOException {
-        switch (reader.peek()) {
-        case STRING: return new JsonPrimitive(reader.nextString());
-        case NUMBER: return new JsonPrimitive(reader.nextDouble());
-        case BOOLEAN: return new JsonPrimitive(reader.nextBoolean());
-        case BEGIN_OBJECT: return readJsonObject(reader);
-        case BEGIN_ARRAY: return readJsonArray(reader);
-        default: // NULL and unknown
-            reader.skipValue();
-            return JsonNull.INSTANCE;
-        }
+    private static JsonReader read(String json) {
+        return new JsonReader(new StringReader(json));
     }
 }

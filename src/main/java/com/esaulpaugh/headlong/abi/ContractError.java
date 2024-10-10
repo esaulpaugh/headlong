@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.google.gson.JsonObject;
-
 import java.util.Objects;
 
 /** Represents a custom error. */
@@ -80,16 +78,11 @@ public final class ContractError<J extends Tuple> implements ABIObject {
     }
 
     public static <X extends Tuple> ContractError<X> fromJson(String errorJson) {
-        return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(errorJson));
+        return fromJson(ABIType.FLAGS_NONE, errorJson);
     }
 
     /** @see ABIObject#fromJson(int, String) */
     public static <X extends Tuple> ContractError<X> fromJson(int flags, String errorJson) {
-        return fromJsonObject(flags, ABIJSON.parseObject(errorJson));
-    }
-
-    /** @see ABIObject#fromJsonObject(int, JsonObject) */
-    public static <X extends Tuple> ContractError<X> fromJsonObject(int flags, JsonObject error) {
-        return ABIJSON.parseError(error, flags);
+        return ABIJSON.parseABIObject(errorJson, ABIJSON.ERRORS, null, flags);
     }
 }

@@ -129,7 +129,7 @@ public class AdvancedABICasesTest {
 
     @Test
     public void testCase() {
-        TestCase tc = new TestCase(ABIJSON.parseObject(HEADLONG_X), true);
+        TestCase tc = new TestCase(TestUtils.parseObject(HEADLONG_X), true);
         tc.test(true);
     }
 

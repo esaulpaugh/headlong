@@ -38,7 +38,7 @@ public class BasicABICasesTest {
 
     static {
         try {
-            TESTS = ABIJSON.parseObject(TestUtils.readFileResourceAsString(RESOURCE)).entrySet();
+            TESTS = TestUtils.parseObject(TestUtils.readFileResourceAsString(RESOURCE)).entrySet();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -115,7 +115,7 @@ public class BasicABICasesTest {
                 flags = e.getFlags();
             }
         }
-        return new TupleType<>(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, null, null, flags);
+        return new TupleType<>(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, null, null, null, flags);
     }
 
     @Test
