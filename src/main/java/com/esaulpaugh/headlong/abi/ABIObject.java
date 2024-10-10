@@ -59,23 +59,18 @@ public interface ABIObject {
     }
 
     static <T extends ABIObject> T fromJson(String json) {
-        return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(json));
-    }
-
-    /** @see #fromJsonObject(int, JsonObject) */
-    static <T extends ABIObject> T fromJson(int flags, String json) {
-        return fromJsonObject(flags, ABIJSON.parseObject(json));
+        return fromJson(ABIType.FLAGS_NONE, json);
     }
 
     /**
      * Constructs an {@link ABIObject} from a {@link JsonObject}.
      *
      * @param flags     {@link ABIType#FLAGS_NONE} recommended. See also {@link ABIType#FLAG_LEGACY_DECODE}
-     * @param object    the JSON object to decode
+     * @param json    the JSON object string to decode
      * @return  the {@link ABIObject} represented by {@code object}
      * @param <T>   {@link Function}, {@link Event}, {@link ContractError}, or supertype {@link ABIObject}
      */
-    static <T extends ABIObject> T fromJsonObject(int flags, JsonObject object) {
-        return ABIJSON.parseABIObject(object, flags);
+    static <T extends ABIObject> T fromJson(int flags, String json) {
+        return ABIJSON.parseABIObject(json, ABIJSON.ALL, Function.newDefaultDigest(), flags);
     }
 }

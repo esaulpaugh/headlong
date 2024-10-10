@@ -17,7 +17,6 @@ package com.esaulpaugh.headlong.abi;
 
 import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
-import com.google.gson.JsonObject;
 import com.joemelsha.crypto.hash.Keccak;
 
 import java.security.MessageDigest;
@@ -205,16 +204,11 @@ public final class Event<J extends Tuple> implements ABIObject {
     }
 
     public static <X extends Tuple> Event<X> fromJson(String eventJson) {
-        return fromJsonObject(ABIType.FLAGS_NONE, ABIJSON.parseObject(eventJson));
+        return fromJson(ABIType.FLAGS_NONE, eventJson);
     }
 
     /** @see ABIObject#fromJson(int, String) */
     public static <X extends Tuple> Event<X> fromJson(int flags, String eventJson) {
-        return fromJsonObject(flags, ABIJSON.parseObject(eventJson));
-    }
-
-    /** @see ABIObject#fromJsonObject(int, JsonObject) */
-    public static <X extends Tuple> Event<X> fromJsonObject(int flags, JsonObject event) {
-        return ABIJSON.parseEvent(event, flags);
+        return ABIJSON.parseABIObject(eventJson, ABIJSON.EVENTS, null, flags);
     }
 }

@@ -404,7 +404,7 @@ public class TupleTest {
                 }
             }
         }
-        return new TupleType<>(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, elementNames, null, flags);
+        return new TupleType<>(TestUtils.completeTupleTypeString(canonicalBuilder), dynamic, elements, elementNames, null, null, flags);
     }
 
     @Test

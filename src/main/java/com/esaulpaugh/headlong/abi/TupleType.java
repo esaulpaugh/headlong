@@ -27,16 +27,19 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 /** {@link ABIType} for a struct, a tuple, a set of function parameters, a function return type, or to represent the types in an event or custom error, or a subset thereof. */
 public final class TupleType<J extends Tuple> extends ABIType<J> implements Iterable<ABIType<?>> {
 
-    public static final TupleType<Tuple> EMPTY = new TupleType<>("()", false, EMPTY_ARRAY, null, null, ABIType.FLAGS_NONE);
+    private static final boolean[] EMPTY_INDEX = new boolean[0];
+
+    public static final TupleType<Tuple> EMPTY = new TupleType<>("()", false, EMPTY_ARRAY, null, null, EMPTY_INDEX, ABIType.FLAGS_NONE);
 
     final ABIType<?>[] elementTypes;
     final String[] elementNames;
     final String[] elementInternalTypes;
+    final boolean[] indexed;
     private final int[] elementHeadOffsets;
     final int headLengthSum;
     private final int flags;
 
-    TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String[] elementNames, String[] elementInternalTypes, int flags) {
+    TupleType(String canonicalType, boolean dynamic, ABIType<?>[] elementTypes, String[] elementNames, String[] elementInternalTypes, boolean[] indexed, int flags) {
         super(canonicalType, Tuple.classFor(elementTypes.length), dynamic);
         if (elementNames != null && elementNames.length != elementTypes.length) {
             throw new IllegalArgumentException("expected " + elementTypes.length + " element names but found " + elementNames.length);
@@ -51,6 +54,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         }
         this.elementHeadOffsets = elementHeadOffsets;
         this.headLengthSum = headLengthSum;
+        this.indexed = indexed;
         this.flags = flags;
     }
 
@@ -355,6 +359,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         final ABIType<?>[] selected = new ABIType<?>[size()];
         final String[] selectedNames = elementNames == null ? null : new String[size()];
         final String[] selectedInternalTypes = elementInternalTypes == null ? null : new String[size()];
+        final boolean[] selectedIsIndexed = indexed == null ? null : new boolean[size()];
         int c = 0;
         for (int i = 0; i < size(); i++) {
             if (negate ^ manifest[i]) {
@@ -363,6 +368,9 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                 }
                 if (selectedInternalTypes != null) {
                     selectedInternalTypes[c] = elementInternalTypes[i];
+                }
+                if (selectedIsIndexed != null) {
+                    selectedIsIndexed[c] = indexed[i];
                 }
                 ABIType<?> e = get(i);
                 canonicalType.append(e.canonicalType).append(',');
@@ -377,6 +385,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                 Arrays.copyOf(selected, c),
                 selectedNames == null ? null : Arrays.copyOf(selectedNames, c),
                 selectedInternalTypes == null ? null : Arrays.copyOf(selectedInternalTypes, c),
+                selectedIsIndexed == null ? null : Arrays.copyOf(selectedIsIndexed, c),
                 this.flags
         );
     }
@@ -404,10 +413,6 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
             rawType.append(t).append(',');
         }
         return parse(completeTupleTypeString(rawType));
-    }
-
-    static TupleType<Tuple> empty(int flags) {
-        return flags == ABIType.FLAGS_NONE ? EMPTY : new TupleType<>("()", false, EMPTY_ARRAY, null, null, flags);
     }
 
     /**
@@ -517,5 +522,9 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         } else {
             sb.append(note);
         }
+    }
+
+    static TupleType<Tuple> empty(int flags) {
+        return flags == ABIType.FLAGS_NONE ? EMPTY : new TupleType<>("()", false, EMPTY_ARRAY, null, null, EMPTY_INDEX, flags);
     }
 }
