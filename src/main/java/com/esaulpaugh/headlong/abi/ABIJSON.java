@@ -168,7 +168,10 @@ public final class ABIJSON {
                         }
                     }
                 }
-                stateMutability(out, f.getStateMutability());
+                String stateMutability = f.getStateMutability();
+                if (stateMutability != null) {
+                    out.name(STATE_MUTABILITY).value(stateMutability);
+                }
             } else if (o.isEvent()) {
                 final Event<?> e = o.asEvent();
                 type(out, EVENT);
@@ -198,25 +201,16 @@ public final class ABIJSON {
         }
     }
 
-    private static void internalType(JsonWriter out, String internalType) throws IOException {
-        if (internalType != null) {
-            out.name(INTERNAL_TYPE).value(internalType);
-        }
-    }
-
-    private static void stateMutability(JsonWriter out, String stateMutability) throws IOException {
-        if (stateMutability != null) {
-            out.name(STATE_MUTABILITY).value(stateMutability);
-        }
-    }
-
     private static void tupleType(JsonWriter out, String name, TupleType<?> tupleType, boolean[] indexedManifest) throws IOException {
         out.name(name).beginArray();
-        int i = 0;
-        for (final ABIType<?> e : tupleType) {
+        for (int i = 0; i < tupleType.elementTypes.length; i++) {
+            final ABIType<?> e = tupleType.elementTypes[i];
             out.beginObject();
             if (tupleType.elementInternalTypes != null) {
-                internalType(out, tupleType.elementInternalTypes[i]);
+                String internalType = tupleType.elementInternalTypes[i];
+                if (internalType != null) {
+                    out.name(INTERNAL_TYPE).value(internalType);
+                }
             }
             if (tupleType.elementNames != null) {
                 name(out, tupleType.elementNames[i]);
@@ -232,7 +226,6 @@ public final class ABIJSON {
                 out.name(INDEXED).value(indexedManifest[i]);
             }
             out.endObject();
-            i++;
         }
         out.endArray();
     }
