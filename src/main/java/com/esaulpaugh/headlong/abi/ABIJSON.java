@@ -337,6 +337,18 @@ public final class ABIJSON {
         }
     }
 
+    static <T extends ABIObject> T parseABIObject(String json, Set<TypeEnum> types, MessageDigest digest, int flags) {
+        try {
+            T obj = tryParseStreaming(read(json), types, digest, flags);
+            if (obj != null) {
+                return obj;
+            }
+            throw new IllegalArgumentException("unexpected type");
+        } catch (IOException io) {
+            throw new IllegalStateException(io);
+        }
+    }
+
     static <T extends ABIObject> T tryParseStreaming(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) throws IOException {
         reader.beginObject();
         JsonObject jsonObject = null;
@@ -378,18 +390,6 @@ public final class ABIJSON {
         case TypeEnum.ORDINAL_EVENT: return (T) parseEvent(reader, flags);
         case TypeEnum.ORDINAL_ERROR: return (T) parseError(reader, flags);
         default: throw new AssertionError();
-        }
-    }
-
-    static <T extends ABIObject> T parseABIObject(String json, Set<TypeEnum> types, MessageDigest digest, int flags) {
-        try {
-            T obj = tryParseStreaming(read(json), types, digest, flags);
-            if (obj != null) {
-                return obj;
-            }
-            throw new IllegalArgumentException("unexpected type");
-        } catch (IOException io) {
-            throw new IllegalStateException(io);
         }
     }
 
@@ -475,8 +475,7 @@ public final class ABIJSON {
         StringBuilder canonicalType = TypeFactory.newTypeBuilder();
         boolean dynamic = false;
 
-        int i = 0;
-        while (true) {
+        for (int i = 0; true; canonicalType.append(',')) {
             String name = null;
             String internalType = null;
             boolean isIndexed = false;
@@ -537,8 +536,6 @@ public final class ABIJSON {
                 internalTypes = Arrays.copyOf(internalTypes, newLen);
                 indexed = eventParams ? Arrays.copyOf(indexed, newLen) : null;
             }
-
-            canonicalType.append(',');
         }
     }
 
