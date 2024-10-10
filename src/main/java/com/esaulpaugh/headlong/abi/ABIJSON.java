@@ -421,7 +421,7 @@ public final class ABIJSON {
                 name,
                 anonymous,
                 tt,
-                tt.indexed == null ? new boolean[tt.size()] : tt.indexed
+                tt.indexed
         );
     }
 

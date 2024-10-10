@@ -27,7 +27,9 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 /** {@link ABIType} for a struct, a tuple, a set of function parameters, a function return type, or to represent the types in an event or custom error, or a subset thereof. */
 public final class TupleType<J extends Tuple> extends ABIType<J> implements Iterable<ABIType<?>> {
 
-    public static final TupleType<Tuple> EMPTY = new TupleType<>("()", false, EMPTY_ARRAY, null, null, null, ABIType.FLAGS_NONE);
+    private static final boolean[] EMPTY_INDEX = new boolean[0];
+
+    public static final TupleType<Tuple> EMPTY = new TupleType<>("()", false, EMPTY_ARRAY, null, null, EMPTY_INDEX, ABIType.FLAGS_NONE);
 
     final ABIType<?>[] elementTypes;
     final String[] elementNames;
@@ -413,10 +415,6 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         return parse(completeTupleTypeString(rawType));
     }
 
-    static TupleType<Tuple> empty(int flags) {
-        return flags == ABIType.FLAGS_NONE ? EMPTY : new TupleType<>("()", false, EMPTY_ARRAY, null, null, null, flags);
-    }
-
     /**
      * Experimental. Annotates the given ABI encoding and returns an informational formatted String. This
      * method is subject to change or removal in a future release.
@@ -524,5 +522,9 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         } else {
             sb.append(note);
         }
+    }
+
+    static TupleType<Tuple> empty(int flags) {
+        return flags == ABIType.FLAGS_NONE ? EMPTY : new TupleType<>("()", false, EMPTY_ARRAY, null, null, EMPTY_INDEX, flags);
     }
 }
