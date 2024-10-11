@@ -1,0 +1,250 @@
+[
+  {
+    "name" : "byte[]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "byte[][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "byte[][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "byte[][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "byte[][][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "boolean[]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "boolean[][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "boolean[][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "boolean[][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "boolean[][][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "int[]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "int[][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "int[][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "int[][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "int[][][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "long[]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "long[][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "long[][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "long[][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "long[][][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "java.math.BigInteger[]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "java.math.BigInteger[][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "java.math.BigInteger[][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "java.math.BigInteger[][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "java.math.BigInteger[][][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "java.math.BigDecimal[]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "java.math.BigDecimal[][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "java.math.BigDecimal[][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "java.math.BigDecimal[][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "java.math.BigDecimal[][][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Address[]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Address[][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Address[][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Address[][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Tuple[]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Tuple[][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Tuple[][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Tuple[][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Single[]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Single[][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Single[][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Single[][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Pair[]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Pair[][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Pair[][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Pair[][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Triple[]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Triple[][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Triple[][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Triple[][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Quadruple[]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Quadruple[][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Quadruple[][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Quadruple[][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Quintuple[]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Quintuple[][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Quintuple[][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Quintuple[][][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Sextuple[]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Sextuple[][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Sextuple[][][]",
+    "unsafeAllocated" : true
+  },
+  {
+    "name" : "com.esaulpaugh.headlong.abi.Sextuple[][][][]",
+    "unsafeAllocated" : true
+  }
+]
