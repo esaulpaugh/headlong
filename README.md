@@ -10,7 +10,7 @@ ABI spec: https://solidity.readthedocs.io/en/latest/abi-spec.html
 
 RLP spec: https://ethereum.org/en/developers/docs/data-structures-and-encoding/rlp
 
-SHA-256 (headlong-12.3.0.jar): 446daf0f5a616a54ac85fb28f9ef240394471ff34fc89d4b21e939965b5b5962
+SHA-256 (headlong-12.3.1.jar): c2cf0735de80c6da56fdecc3dcec4d3a05e851fe40626eda1a93040e59a5477e
 
 ## Usage
 
@@ -138,14 +138,14 @@ Or build locally:
 Clone the project and install to your local maven repository using `gradle publishToMavenLocal` or `mvn install`, then declare it as a dependency:
 
 ```kotlin
-implementation("com.esaulpaugh:headlong:12.3.1-SNAPSHOT")
+implementation("com.esaulpaugh:headlong:12.3.2-SNAPSHOT")
 ```
 
 ```xml
 <dependency>
     <groupId>com.esaulpaugh</groupId>
     <artifactId>headlong</artifactId>
-    <version>12.3.1-SNAPSHOT</version>
+    <version>12.3.2-SNAPSHOT</version>
 </dependency>
 ```
 Alternatively:
