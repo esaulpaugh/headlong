@@ -897,4 +897,26 @@ public class ABIJSONTest {
 
         assertEquals(json, f.toString());
     }
+
+    @Test
+    public void testParseABIField() {
+        final String json = "{\n" +
+                "  \"abi\": [\n" +
+                "    {\n" +
+                "      \"name\": \"aller\",\n" +
+                "      \"inputs\": [\n" +
+                "        { \"name\": \"amt\", \"type\": \"uint256\" },\n" +
+                "        { \"name\": \"balance\", \"type\": \"uint256\" },\n" +
+                "        { \"name\": \"rate\", \"type\": \"uint256\" },\n" +
+                "        { \"name\": \"dest\", \"type\": \"address\" },\n" +
+                "        { \"name\": \"msg\", \"type\": \"string\" }\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+        final List<ABIObject> objects = ABIJSON.parseABIField(FLAGS_NONE, json, ABIJSON.ALL);
+        assertEquals(1, objects.size());
+        assertEquals(TypeEnum.FUNCTION, objects.get(0).getType());
+        assertEquals("aller(uint256,uint256,uint256,address,string)", objects.get(0).getCanonicalSignature());
+    }
 }

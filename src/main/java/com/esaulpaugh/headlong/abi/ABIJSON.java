@@ -112,22 +112,24 @@ public final class ABIJSON {
     }
 
     public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
-//        return ABIJSON.<T>stream(flags, arrayJson, types).collect(Collectors.toList());
-        final List<T> list = new ArrayList<>();
-        final MessageDigest digest = Function.newDefaultDigest();
-        final JsonReader jsonReader = read(arrayJson);
-        try {
-            jsonReader.beginArray();
-            while (jsonReader.peek() != JsonToken.END_ARRAY) {
-                T e = tryParseStreaming(jsonReader, types, digest, flags);
-                if (e != null) {
-                    list.add(e);
-                }
-            }
-            jsonReader.endArray();
+        try (final JsonReader reader = read(arrayJson)) {
+            return parseArray(reader, types, flags);
         } catch (IOException io) {
             throw new IllegalStateException(io);
         }
+    }
+
+    private static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags) throws IOException {
+        final List<T> list = new ArrayList<>();
+        reader.beginArray();
+        final MessageDigest digest = Function.newDefaultDigest();
+        while (reader.peek() != JsonToken.END_ARRAY) {
+            T e = tryParseStreaming(reader, types, digest, flags);
+            if (e != null) {
+                list.add(e);
+            }
+        }
+        reader.endArray();
         return list;
     }
 
@@ -524,5 +526,20 @@ public final class ABIJSON {
 
     private static JsonReader read(String json) {
         return new JsonReader(new StringReader(json));
+    }
+
+    public static <T extends ABIObject> List<T> parseABIField(int flags, String objectJson, Set<TypeEnum> types) {
+        try (final JsonReader reader = read(objectJson)) {
+            reader.beginObject();
+            while (reader.peek() != JsonToken.END_OBJECT) {
+                if ("abi".equals(reader.nextName())) {
+                    return parseArray(reader, types, flags);
+                }
+                reader.skipValue();
+            }
+        } catch (IOException io) {
+            throw new IllegalStateException(io);
+        }
+        throw new IllegalStateException("abi key not found");
     }
 }
