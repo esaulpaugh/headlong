@@ -104,7 +104,7 @@ public final class ABIJSON {
     }
 
     public static Stream<ABIObject> stream(String arrayJson) {
-        return stream(ABIType.FLAGS_NONE, arrayJson, ABIJSON.ALL);
+        return stream(arrayJson, ABIJSON.ALL);
     }
 
     public static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types) {
@@ -117,20 +117,6 @@ public final class ABIJSON {
         } catch (IOException io) {
             throw new IllegalStateException(io);
         }
-    }
-
-    private static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags) throws IOException {
-        final List<T> list = new ArrayList<>();
-        reader.beginArray();
-        final MessageDigest digest = Function.newDefaultDigest();
-        while (reader.peek() != JsonToken.END_ARRAY) {
-            T e = tryParseStreaming(reader, types, digest, flags);
-            if (e != null) {
-                list.add(e);
-            }
-        }
-        reader.endArray();
-        return list;
     }
 
     public static <T extends ABIObject> Stream<T> stream(String arrayJson, Set<TypeEnum> types) {
@@ -541,5 +527,19 @@ public final class ABIJSON {
             throw new IllegalStateException(io);
         }
         throw new IllegalStateException("abi key not found");
+    }
+
+    private static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags) throws IOException {
+        final List<T> list = new ArrayList<>();
+        reader.beginArray();
+        final MessageDigest digest = Function.newDefaultDigest();
+        while (reader.peek() != JsonToken.END_ARRAY) {
+            T e = tryParseStreaming(reader, types, digest, flags);
+            if (e != null) {
+                list.add(e);
+            }
+        }
+        reader.endArray();
+        return list;
     }
 }
