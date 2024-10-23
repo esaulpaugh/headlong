@@ -351,17 +351,20 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     private TupleType<J> selectElements(final boolean[] manifest, final boolean negate) {
-        if (manifest.length != size()) {
-            throw new IllegalArgumentException("expected manifest length " + size() + " but found length " + manifest.length);
+        final int size = size();
+        if (manifest.length != size) {
+            throw new IllegalArgumentException("expected manifest length " + size + " but found length " + manifest.length);
         }
-        final StringBuilder canonicalType = new StringBuilder("(");
-        boolean dynamic = false;
-        final ABIType<?>[] selected = new ABIType<?>[size()];
-        final String[] selectedNames = elementNames == null ? null : new String[size()];
-        final String[] selectedInternalTypes = elementInternalTypes == null ? null : new String[size()];
-        final boolean[] selectedIsIndexed = indexed == null ? null : new boolean[size()];
         int c = 0;
-        for (int i = 0; i < size(); i++) {
+        for (boolean b : manifest) if (negate ^ b) c++;
+        boolean dynamic = false;
+        final ABIType<?>[] selected = new ABIType<?>[c];
+        final String[] selectedNames = elementNames == null ? null : new String[c];
+        final String[] selectedInternalTypes = elementInternalTypes == null ? null : new String[c];
+        final boolean[] selectedIsIndexed = indexed == null ? null : new boolean[c];
+        final StringBuilder canonicalType = new StringBuilder("(");
+        c = 0;
+        for (int i = 0; i < size; i++) {
             if (negate ^ manifest[i]) {
                 if (selectedNames != null) {
                     selectedNames[c] = elementNames[i];
@@ -382,10 +385,10 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         return new TupleType<>(
                 completeTupleTypeString(canonicalType),
                 dynamic,
-                Arrays.copyOf(selected, c),
-                selectedNames == null ? null : Arrays.copyOf(selectedNames, c),
-                selectedInternalTypes == null ? null : Arrays.copyOf(selectedInternalTypes, c),
-                selectedIsIndexed == null ? null : Arrays.copyOf(selectedIsIndexed, c),
+                selected,
+                selectedNames,
+                selectedInternalTypes,
+                selectedIsIndexed,
                 this.flags
         );
     }
