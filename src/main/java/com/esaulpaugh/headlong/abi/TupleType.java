@@ -391,11 +391,10 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     private static String completeTupleTypeString(StringBuilder sb) {
-        final int len = sb.length();
-        if (len == 1) {
+        if (sb.length() == 1) {
             return "()";
         }
-        sb.setCharAt(len - 1, ')'); // overwrite trailing comma
+        sb.setCharAt(sb.length() - 1, ')'); // overwrite trailing comma
         return sb.toString();
     }
 

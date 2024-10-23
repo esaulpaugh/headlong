@@ -152,7 +152,7 @@ public final class TypeFactory {
         boolean dynamic = false;
         int i = 0;
         try {
-            for (;;) {
+            for ( ; true; canonicalType.append(',')) {
                 final int argStart = argEnd;
                 switch (rawType.charAt(argStart)) {
                 case ')':
@@ -181,7 +181,6 @@ public final class TypeFactory {
                 if (i == elements.length) {
                     elements = Arrays.copyOf(elements, i << 1);
                 }
-                canonicalType.append(',');
             }
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException("@ index " + i + ", " + iae.getMessage(), iae);
