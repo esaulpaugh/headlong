@@ -139,16 +139,12 @@ public final class TypeFactory {
         return c > '0' && c <= '9';
     }
 
-    static StringBuilder newTypeBuilder() {
-        return new StringBuilder(40).append('(');
-    }
-
     private static TupleType<?> parseTupleType(final String rawType, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawType.length();
         if (len == 2 && "()".equals(rawType)) return TupleType.empty(flags);
         ABIType<?>[] elements = new ABIType[8];
         int argEnd = 1;
-        final StringBuilder canonicalType = newTypeBuilder();
+        final StringBuilder canonicalType = TupleType.newTypeBuilder();
         boolean dynamic = false;
         int i = 0;
         try {

@@ -443,7 +443,7 @@ public final class ABIJSON {
         String[] names = new String[8];
         String[] internalTypes = new String[8];
         boolean[] indexed = eventParams ? new boolean[8] : null;
-        StringBuilder canonicalType = TypeFactory.newTypeBuilder();
+        StringBuilder canonicalType = TupleType.newTypeBuilder();
         boolean dynamic = false;
 
         for (int i = 0; true; canonicalType.append(',')) {

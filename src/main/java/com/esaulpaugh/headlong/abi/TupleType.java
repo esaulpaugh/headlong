@@ -363,7 +363,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         final ABIType<?>[] selected = new ABIType<?>[c];
         final String[] selectedNames = elementNames == null ? null : new String[c];
         final String[] selectedInternalTypes = elementInternalTypes == null ? null : new String[c];
-        final StringBuilder canonicalType = new StringBuilder("(");
+        final StringBuilder canonicalType = newTypeBuilder();
         c = 0;
         for (int i = 0; i < size; i++) {
             if (negate ^ manifest[i]) {
@@ -392,6 +392,10 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         );
     }
 
+    static StringBuilder newTypeBuilder() {
+        return new StringBuilder(40).append('(');
+    }
+
     public static <X extends Tuple> TupleType<X> parse(String rawTupleTypeString) {
         return TypeFactory.create(rawTupleTypeString);
     }
@@ -403,7 +407,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     @SuppressWarnings("unchecked")
     public static <X extends Tuple> TupleType<X> of(String... typeStrings) {
         if (typeStrings.length == 0) return (TupleType<X>) TupleType.EMPTY;
-        StringBuilder rawType = new StringBuilder("(");
+        StringBuilder rawType = newTypeBuilder();
         for (String t : typeStrings) {
             rawType.append(t).append(',');
         }
