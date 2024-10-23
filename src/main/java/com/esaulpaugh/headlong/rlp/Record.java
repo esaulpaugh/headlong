@@ -35,7 +35,7 @@ import static com.esaulpaugh.headlong.util.Strings.BASE_64_URL_SAFE;
 /** Implementation of <a href="https://eips.ethereum.org/EIPS/eip-778">EIP-778: Ethereum Node Records (ENR)</a> */
 public final class Record implements Iterable<KVP>, Comparable<Record> {
 
-    private static final long MAX_RECORD_LEN = 300;
+    private static final int MAX_RECORD_LEN = 300;
 
     private static final String ENR_PREFIX = "enr:";
 
