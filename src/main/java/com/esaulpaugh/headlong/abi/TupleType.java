@@ -350,6 +350,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         return selectElements(manifest, true);
     }
 
+    @SuppressWarnings("unchecked")
     private TupleType<J> selectElements(final boolean[] manifest, final boolean negate) {
         final int size = size();
         if (manifest.length != size) {
@@ -357,6 +358,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         }
         int c = 0;
         for (boolean b : manifest) if (negate ^ b) c++;
+        if (c == 0) return (TupleType<J>) TupleType.empty(this.flags);
         boolean dynamic = false;
         final ABIType<?>[] selected = new ABIType<?>[c];
         final String[] selectedNames = elementNames == null ? null : new String[c];
@@ -382,8 +384,9 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                 c++;
             }
         }
+        canonicalType.setCharAt(canonicalType.length() - 1, ')');
         return new TupleType<>(
-                completeTupleTypeString(canonicalType),
+                canonicalType.toString(),
                 dynamic,
                 selected,
                 selectedNames,
@@ -391,14 +394,6 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                 selectedIsIndexed,
                 this.flags
         );
-    }
-
-    private static String completeTupleTypeString(StringBuilder sb) {
-        if (sb.length() == 1) {
-            return "()";
-        }
-        sb.setCharAt(sb.length() - 1, ')'); // overwrite trailing comma
-        return sb.toString();
     }
 
     public static <X extends Tuple> TupleType<X> parse(String rawTupleTypeString) {
@@ -409,12 +404,15 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         return TypeFactory.create(flags, rawTupleTypeString);
     }
 
+    @SuppressWarnings("unchecked")
     public static <X extends Tuple> TupleType<X> of(String... typeStrings) {
+        if (typeStrings.length == 0) return (TupleType<X>) TupleType.EMPTY;
         StringBuilder rawType = new StringBuilder("(");
         for (String t : typeStrings) {
             rawType.append(t).append(',');
         }
-        return parse(completeTupleTypeString(rawType));
+        rawType.setCharAt(rawType.length() - 1, ')'); // overwrite trailing comma
+        return parse(rawType.toString());
     }
 
     /**
