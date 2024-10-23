@@ -363,7 +363,6 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         final ABIType<?>[] selected = new ABIType<?>[c];
         final String[] selectedNames = elementNames == null ? null : new String[c];
         final String[] selectedInternalTypes = elementInternalTypes == null ? null : new String[c];
-        final boolean[] selectedIsIndexed = indexed == null ? null : new boolean[c];
         final StringBuilder canonicalType = new StringBuilder("(");
         c = 0;
         for (int i = 0; i < size; i++) {
@@ -373,9 +372,6 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                 }
                 if (selectedInternalTypes != null) {
                     selectedInternalTypes[c] = elementInternalTypes[i];
-                }
-                if (selectedIsIndexed != null) {
-                    selectedIsIndexed[c] = indexed[i];
                 }
                 ABIType<?> e = get(i);
                 canonicalType.append(e.canonicalType).append(',');
@@ -391,7 +387,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                 selected,
                 selectedNames,
                 selectedInternalTypes,
-                selectedIsIndexed,
+                null, // selectedIsIndexed
                 this.flags
         );
     }

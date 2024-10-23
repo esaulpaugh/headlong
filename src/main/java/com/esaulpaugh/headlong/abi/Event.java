@@ -47,6 +47,7 @@ public final class Event<J extends Tuple> implements ABIObject {
 
     public Event(String name, boolean anonymous, TupleType<J> inputs, boolean... indexed) {
         this.name = Objects.requireNonNull(name);
+        this.anonymous = anonymous;
         this.inputs = Objects.requireNonNull(inputs);
         if (indexed.length != inputs.size()) {
             throw new IllegalArgumentException("indexed.length doesn't match number of inputs");
@@ -54,7 +55,6 @@ public final class Event<J extends Tuple> implements ABIObject {
         this.indexManifest = Arrays.copyOf(indexed, indexed.length);
         this.indexedParams = inputs.select(indexManifest);
         this.nonIndexedParams = inputs.exclude(indexManifest);
-        this.anonymous = anonymous;
         this.signatureHash = new Keccak(256).digest(Strings.decode(getCanonicalSignature(), Strings.ASCII));
     }
 
