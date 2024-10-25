@@ -157,6 +157,12 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         }
     }
 
+    /**
+     * Ensures that the given {@link Tuple} is valid for this {@link TupleType}.
+     *
+     * @param value tuple containing values
+     * @return  the total length in bytes of the tuple when encoded
+     */
     @Override
     public int validate(final J value) {
         if (value.size() == this.size()) {

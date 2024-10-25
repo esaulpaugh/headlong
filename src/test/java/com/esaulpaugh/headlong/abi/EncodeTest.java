@@ -746,4 +746,13 @@ public class EncodeTest {
         assertEquals(8, AddressType.INSTANCE.typeCode());
         assertEquals(8, AddressType.TYPE_CODE_ADDRESS);
     }
+
+    @Test
+    public void testValidate() {
+        TupleType<Pair<byte[], BigInteger[]>> tt = TupleType.parse("(bytes,int[])");
+        Pair<byte[], BigInteger[]> pair = Tuple.of(new byte[1], new BigInteger[] { BigInteger.ONE, BigInteger.TEN });
+        final int expected = UNIT_LENGTH_BYTES * 7;
+        assertEquals(expected, tt.validate(pair));
+        assertEquals(expected, tt.byteLength(pair));
+    }
 }
