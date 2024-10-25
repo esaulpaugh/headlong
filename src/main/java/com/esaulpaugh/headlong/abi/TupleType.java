@@ -172,7 +172,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     private IllegalArgumentException lengthMismatch(Tuple args) {
-        throw new IllegalArgumentException("tuple length mismatch: expected length " + this.size() + " but found " + args.size());
+        return new IllegalArgumentException("tuple length mismatch: expected length " + this.size() + " but found " + args.size());
     }
 
     private static <X> int validateObject(ABIType<X> type, X value) {
