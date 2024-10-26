@@ -427,7 +427,7 @@ public final class ABIJSON {
         return new ContractError<>(name, tt);
     }
 
-    public static TupleType<?> parseTupleType(JsonReader reader, final boolean eventParams, final int flags) throws IOException {
+    private static TupleType<?> parseTupleType(JsonReader reader, final boolean eventParams, final int flags) throws IOException {
         if (reader.peek() == JsonToken.NULL) {
             reader.nextNull();
             return TupleType.empty(flags);
