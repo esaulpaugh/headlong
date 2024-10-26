@@ -134,6 +134,21 @@ public final class ABIJSON {
     public static <T extends ABIObject> Iterator<T> iterator(int flags, String arrayJson, Set<TypeEnum> types) {
         return ABIJSON.<T>stream(flags, arrayJson, types).iterator();
     }
+
+    public static <T extends ABIObject> List<T> parseABIField(int flags, String objectJson, Set<TypeEnum> types) {
+        try (final JsonReader reader = read(objectJson)) {
+            reader.beginObject();
+            while (reader.peek() != JsonToken.END_OBJECT) {
+                if ("abi".equals(reader.nextName())) {
+                    return parseArray(reader, types, flags);
+                }
+                reader.skipValue();
+            }
+        } catch (IOException io) {
+            throw new IllegalStateException(io);
+        }
+        throw new IllegalStateException("abi key not found");
+    }
 //----------------------------------------------------------------------------------------------------------------------
     static String toJson(ABIObject o, boolean pretty) {
         try {
@@ -512,21 +527,6 @@ public final class ABIJSON {
 
     private static JsonReader read(String json) {
         return new JsonReader(new StringReader(json));
-    }
-
-    public static <T extends ABIObject> List<T> parseABIField(int flags, String objectJson, Set<TypeEnum> types) {
-        try (final JsonReader reader = read(objectJson)) {
-            reader.beginObject();
-            while (reader.peek() != JsonToken.END_OBJECT) {
-                if ("abi".equals(reader.nextName())) {
-                    return parseArray(reader, types, flags);
-                }
-                reader.skipValue();
-            }
-        } catch (IOException io) {
-            throw new IllegalStateException(io);
-        }
-        throw new IllegalStateException("abi key not found");
     }
 
     private static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags) throws IOException {

@@ -282,7 +282,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
      * @param bb    the buffer containing the encoding
      * @param indices   the positions of the elements to decode
      * @return  the decoded data
-     * @param <T>   the type of the decoded element or {@link Tuple} if decoding multiple elements
+     * @param <T>   the type of the decoded element or a subtype of {@link Tuple} if decoding multiple elements
      */
     @SuppressWarnings("unchecked")
     public <T> T decode(ByteBuffer bb, int... indices) {
