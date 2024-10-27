@@ -49,7 +49,7 @@ public final class Function implements ABIObject {
     private final TypeEnum type;
     private final String name;
     private final TupleType<Tuple> inputTypes;
-    private final TupleType<?> outputTypes;
+    private final TupleType<Tuple> outputTypes;
     private final String stateMutability;
 
     private final String hashAlgorithm;
@@ -92,7 +92,7 @@ public final class Function implements ABIObject {
         this.type = Objects.requireNonNull(type);
         this.name = name != null ? validateName(name) : null;
         this.inputTypes = (TupleType<Tuple>) Objects.requireNonNull(inputs);
-        this.outputTypes = Objects.requireNonNull(outputs);
+        this.outputTypes = (TupleType<Tuple>) Objects.requireNonNull(outputs);
         this.stateMutability = stateMutability;
         this.hashAlgorithm = Objects.requireNonNull(messageDigest.getAlgorithm());
         validateFunction();
