@@ -20,6 +20,7 @@ import com.esaulpaugh.headlong.util.Strings;
 import com.joemelsha.crypto.hash.Keccak;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -460,17 +461,11 @@ public class TupleTest {
     }
 
     @Test
-    public void testDecodeIndex2() {
-        final String en = "One\u2019s simple recognition, amidst those in his sphere of existence, of the facts of a circumstance presents a danger; a man\u2019s embodied confrontation of awkward truths demands faith, for genuine behaviors may upset the egg-shell equilibrium of ethereal yet ever-present expectations. Violate another man\u2019s expectations and he is liable to exact an instantaneous huffy revenge.\n\nAdopting pretense and thoughtlessly treading the socially prescribed path likewise risks immediate agony. No more than the act of swigging, as one might do when faced with compatriots wielding a bottle of particularly loathsome rum, may bring with it divine punishment (of a rather uncharacteristic promptitude)\u2014peradventure the remorse of a mislaid wallet after inebriated vagaries. And yet, the man in question will persist in feigning pleasure while he dances on the precipice of emptying his belly onto the road.";
-        final String[] fr = {
-                "\n\n",
-                "La simple reconnaissance d\u2019un homme, parmi ceux qui font partie de sa sph\u00E8re d\u2019existence, des faits d\u2019une circonstance pr\u00E9sente un danger\u00A0; la confrontation incarn\u00E9e d\u2019un individu avec des v\u00E9rit\u00E9s g\u00EAnantes exige de la foi, car les comportements authentiques peuvent perturber l\u2019\u00E9quilibre fragile des attentes \u00E9th\u00E9r\u00E9es mais to\u00FBjours pr\u00E9sentes. Violez les attentes d\u2019un autre homme et il est susceptible de prendre une revanche froiss\u00E9e instantan\u00E9e.",
-                "\n\n",
-                "Adopter le semblant et suivre sans r\u00E9fl\u00E9chir la voie socialement prescrite risque \u00E9galement une agonie imm\u00E9diate. Point plus que l\u2019acte de boire \u00E0 grandes gorg\u00E9es, comme on pourrait le faire face \u00E0 des compatriotes brandissant une bouteille de rhum particuli\u00E8rement infect, peut apporter avec lui une punition divine (d\u2019une promptitude pl\u00FBt\u00F4t inhabituelle)\u2014par aventure le remords d\u2019un portefeuille \u00E9gar\u00E9 apr\u00E8s des vagabondages \u00E9m\u00E9ch\u00E9s. Et pourtant, l\u2019homme en question persistera \u00E0 feindre le plaisir alors qu\u2019il danse sur le pr\u00E9cipice de vider son ventre sur la route.",
-                "\n\n",
-                "N\u2019est-ce point ainsi\u00A0?\n"
-        };
-//        Arrays.stream(fr).forEach(System.out::print);
+    public void testDecodeIndex2() throws IOException {
+        final String en = TestUtils.readFileResourceAsString("tests/headlong/tests/string_en.txt");
+        final String[] fr = TestUtils.readFileResourceAsString("tests/headlong/tests/string_fr.txt").split("[\n]");
+//        System.out.println(en);
+//        Arrays.stream(fr).forEach(System.out::println);
         TupleType<Tuple> tt = TupleType.parse("(bool,uint16,address,int64,uint64,address,string[][])");
         Tuple args = Tuple.from(
                 true,
