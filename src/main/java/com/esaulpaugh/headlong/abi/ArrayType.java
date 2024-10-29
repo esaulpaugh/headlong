@@ -478,7 +478,7 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
                 int saved = start;
                 for ( ; i < elements.length; i++) {
                     bb.position(saved);
-                    final int jump = start + IntType.UINT31.decode(bb, unitBuffer);
+                    final int jump = start + IntType.UINT30.decode(bb, unitBuffer);
                     /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
                     saved = bb.position();
                     bb.position(jump); // leniently jump to specified offset

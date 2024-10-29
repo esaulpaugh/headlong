@@ -173,24 +173,24 @@ public class DecodeTest {
         );
 
         final String bigOffset =
-                "000000000000000000000000000000000000000000000000000000007FFFFFFF" +
+                "000000000000000000000000000000000000000000000000000000003FFFFFFF" +
                 "0000000000000000000000000000000000000000000000000000000000000001" +
                 "aa00000000000000000000000000000000000000000000000000000000000000";
         assertThrownWithAnySubstring(
                 IllegalArgumentException.class,
                 Arrays.asList(
-                        "tuple index 0: newPosition > limit: (2147483647 > 96)",
+                        "tuple index 0: newPosition > limit: (1073741823 > 96)",
                         "tuple index 0: null"
                 ),
                 () -> Function.parse("()", "(bytes)").decodeReturn(Strings.decode(bigOffset))
         );
         final String tooBigOffset =
-                "0000000000000000000000000000000000000000000000000000000080000000" +
+                "0000000000000000000000000000000000000000000000000000000040000000" +
                 "0000000000000000000000000000000000000000000000000000000000000001" +
                 "aa00000000000000000000000000000000000000000000000000000000000000";
         assertThrown(
                 IllegalArgumentException.class,
-                "exceeds bit limit: 32 > 31",
+                "tuple index 0: unsigned val exceeds bit limit: 31 > 30",
                 () -> Function.parse("()", "(bytes)").decodeReturn(Strings.decode(tooBigOffset))
         );
 

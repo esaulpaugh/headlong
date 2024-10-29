@@ -253,18 +253,17 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
                     if (!t.dynamic) {
                         elements[i] = t.decode(bb, unitBuffer);
                     } else {
-                        final int offset = IntType.UINT31.decode(bb, unitBuffer);
-                        offsets[i] = offset == 0 ? -1 : offset;
+                        offsets[i] = IntType.UINT30.decode(bb, unitBuffer) + 1; // read as 30-bit unsigned--no overflow possible
                     }
                 } while (++i < elements.length);
                 i = 0;
                 do {
                     final int offset = offsets[i];
-                    if (offset != 0) {
-                        final int jump = start + offset;
+                    if (offset != 0) { // use != instead of > so as to tolerate any potential overflow/wraparound in the future
+                        final int jump = start + offset - 1;
                         if (jump != bb.position()) { // && (this.flags & ABIType.FLAG_LEGACY_ARRAY) == 0
                             /* LENIENT MODE; see https://github.com/ethereum/solidity/commit/3d1ca07e9b4b42355aa9be5db5c00048607986d1 */
-                            bb.position(offset == -1 ? start : jump); // leniently jump to specified offset
+                            bb.position(jump); // leniently jump to specified offset
                         }
                         elements[i] = get(i).decode(bb, unitBuffer);
                     }
@@ -302,7 +301,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
             final ABIType<?> t = get(i);
             bb.position(start + elementHeadOffsets[i]);
             if (t.dynamic) {
-                bb.position(start + IntType.UINT31.decode(bb, unitBuffer));
+                bb.position(start + IntType.UINT30.decode(bb, unitBuffer));
             }
             return t.decode(bb, unitBuffer);
         } catch (IllegalArgumentException cause) {
