@@ -19,7 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-/** Utility for encoding and decoding hexadecimal, Base64, ASCII, and UTF-8 {@link String}s. */
+/** Utility for encoding and decoding hexadecimal, UTF-8, URL-safe Base64, and ASCII {@link String}s. */
 public final class Strings {
 
     private Strings() {}
