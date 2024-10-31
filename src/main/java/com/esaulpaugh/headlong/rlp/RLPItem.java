@@ -107,7 +107,7 @@ public abstract class RLPItem implements Comparable<RLPItem> {
 
     /**
      * Inserts this item's RLP encoding into the specified buffer, starting at {@code destIndex} (inclusive) and ending
-     * at {code destIndex} plus {@link RLPItem#encodingLength()} (exclusive).
+     * at {@code destIndex} plus {@link RLPItem#encodingLength()} (exclusive).
      *
      * @param dest  the destination array into which the bytes will be copied
      * @param destIndex the index into the destination array
@@ -141,7 +141,7 @@ public abstract class RLPItem implements Comparable<RLPItem> {
 
     /**
      * Inserts this item's data into the specified buffer, starting at {@code destIndex} (inclusive) and ending at
-     * {code destIndex} plus {@link RLPItem#dataLength} (exclusive).
+     * {@code destIndex} plus {@link RLPItem#dataLength} (exclusive).
      *
      * @param dest  the destination array into which the bytes will be copied
      * @param destIndex the index into the destination array
