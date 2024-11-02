@@ -315,6 +315,12 @@
             </artifact>
         </component>
 
+        <component group="org.ow2" name="ow2" version="1.5">
+            <artifact name="ow2-1.5.pom">
+                <sha256 value="0f8a1b116e760b8fe6389c51b84e4b07a70fc11082d4f936e453b583dd50b43b" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
+
         <component group="org.apache" name="apache" version="16">
             <artifact name="apache-16.pom">
                 <sha256 value="9f85ff2fd7d6cb3097aa47fb419ee7f0ebe869109f98aba9f4eca3f49e74a40e" origin="repo.maven.apache.org/maven2/"/>
