@@ -6,7 +6,6 @@ plugins {
 }
 
 group = "com.esaulpaugh"
-archivesBaseName = "headlong"
 version = "12.3.4-SNAPSHOT"
 
 sourceCompatibility = 1.8

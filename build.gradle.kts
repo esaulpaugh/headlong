@@ -12,8 +12,6 @@
 //group = "com.esaulpaugh"
 //version = "12.3.4-SNAPSHOT"
 //
-//project.ext.set("archivesBaseName", "headlong")
-//
 //java {
 //    sourceCompatibility = JavaVersion.VERSION_1_8
 //    targetCompatibility = JavaVersion.VERSION_1_8
