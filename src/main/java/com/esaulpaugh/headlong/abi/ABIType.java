@@ -69,6 +69,7 @@ public abstract class ABIType<J> {
 
     {
         final Class<?> c = this.getClass();
+        @SuppressWarnings("ConstantConditions")
         final boolean permitted = c == TupleType.class
                                 || c == ArrayType.class
                                 || (this instanceof UnitType
