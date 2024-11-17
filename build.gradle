@@ -8,8 +8,11 @@ plugins {
 group = "com.esaulpaugh"
 version = "12.3.4-SNAPSHOT"
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+final String versionStr = getProject().getGradle().getGradleVersion()
+final int gradleMajorVersion = Integer.parseUnsignedInt(versionStr.substring(0, versionStr.indexOf('.')))
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
 compileJava {
     if (JavaVersion.current() >= JavaVersion.VERSION_1_10) {
@@ -26,17 +29,14 @@ test {
     maxParallelForks = Runtime.runtime.availableProcessors()
 }
 
-final String versionStr = getProject().getGradle().getGradleVersion()
-final int gradleVersion = Integer.parseUnsignedInt(versionStr.substring(0, versionStr.indexOf(".")))
-
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    if (gradleVersion >= 6) getArchiveClassifier().set("javadoc")
+    if (gradleMajorVersion >= 6) getArchiveClassifier().set("javadoc")
     else classifier = "javadoc"
     from javadoc.destinationDir
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-    if (gradleVersion >= 6) getArchiveClassifier().set("sources")
+    if (gradleMajorVersion >= 6) getArchiveClassifier().set("sources")
     else classifier = "sources"
     from sourceSets.main.allSource
 }
@@ -103,7 +103,7 @@ dependencies {
 }
 
 task jmh(type: JavaExec, dependsOn: jmhClasses) { // run benchmarks with `gradle jmh`
-    if (gradleVersion >= 7) getMainClass().set("org.openjdk.jmh.Main")
+    if (gradleMajorVersion >= 7) getMainClass().set("org.openjdk.jmh.Main")
     else main = "org.openjdk.jmh.Main"
     classpath = sourceSets.jmh.compileClasspath + sourceSets.jmh.runtimeClasspath
 }
