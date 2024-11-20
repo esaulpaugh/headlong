@@ -24,7 +24,10 @@ import java.util.function.IntUnaryOperator;
 
 import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 
-/** {@link ABIType} for a struct, a tuple, a set of function parameters, a function return type, or to represent the types in an event or custom error, or a subset thereof. */
+/**
+ * {@link ABIType} for a struct, a tuple, a set of function parameters, a function return type, or to represent the types
+ * in an event or custom error, or a subset thereof.
+ */
 public final class TupleType<J extends Tuple> extends ABIType<J> implements Iterable<ABIType<?>> {
 
     private static final boolean[] EMPTY_INDEX = new boolean[0];

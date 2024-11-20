@@ -22,12 +22,15 @@ import java.nio.ByteBuffer;
 public final class BigIntegerType extends UnitType<BigInteger> {
 
     static {
+        init();
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private static void init() {
         if (AddressType.INSTANCE == null) {
             UnitType.initInstances(); // will prevent creation of new UnitTypes once finished (except BigDecimalType)
-        } else {
-            // AddressType is currently initializing. UnitType.initInstances() will be called shortly once ADDRESS_INNER is created
-            /* do nothing */
         }
+        // else AddressType is currently initializing. UnitType.initInstances() will be called shortly once ADDRESS_INNER is created
     }
 
     BigIntegerType(String canonicalType, int bitLength, boolean unsigned) {

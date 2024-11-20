@@ -30,6 +30,7 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 /**
  * Represents static array types such as uint16[3][2] or bytes3 and dynamic array types such as fixed168x10[5][],
  * bytes[4], or string.
+ *
  * @param <ET>   the {@link ABIType} for the elements of the array
  * @param <E>  the Java type of the elements of the array
  * @param <A>   the Java type of the array. not necessarily equivalent to {@link E}[]
