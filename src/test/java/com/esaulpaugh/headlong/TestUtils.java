@@ -78,20 +78,18 @@ public final class TestUtils {
     public static long getSeed(final long protoseed) {
         final Runtime runtime = Runtime.getRuntime();
         final long oldFree = runtime.freeMemory();
-        final Thread thread = Thread.currentThread();
-        final ThreadGroup group = thread.getThreadGroup();
-        final Object a = new Object();
-        final Object b = new Throwable();
+        final Thread t = Thread.currentThread();
+        final ThreadGroup group = t.getThreadGroup();
         final long[] vals = new long[] {
                 runtime.hashCode(),         runtime.totalMemory(),      runtime.availableProcessors(),
                 new Object().hashCode(),    oldFree,                    Double.doubleToLongBits(Math.random()),
-                a.hashCode(),               protoseed,                  ThreadLocalRandom.current().nextLong(),
-                thread.getId(),             thread.hashCode(),          thread.getName().hashCode(),
-                thread.getPriority(),       System.currentTimeMillis(), ForkJoinPool.commonPool().getParallelism(),
-                new Object().hashCode(),    group.activeCount(),        group.hashCode(),
-                b.hashCode(),               runtime.freeMemory(),       System.nanoTime()
+                t.getId(),                  protoseed,                  ThreadLocalRandom.current().nextLong(),
+                t.hashCode(),               t.getName().hashCode(),     t.getContextClassLoader().hashCode(),
+                t.getPriority(),            System.currentTimeMillis(), System.identityHashCode(new String()),
+                group.hashCode(),           System.nanoTime(),          new Throwable().hashCode(),
+                group.activeCount(),        System.identityHashCode(BigInteger.valueOf(System.nanoTime()))
         };
-        long c = System.identityHashCode(vals);
+        long c = System.identityHashCode(vals) + runtime.freeMemory();
         for (long v : vals) {
             c = 31 * c + v;
         }
