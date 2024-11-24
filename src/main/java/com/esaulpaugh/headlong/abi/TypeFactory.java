@@ -60,8 +60,7 @@ public final class TypeFactory {
     /** If you don't need any {@code elementNames}, use {@link TypeFactory#create(String)}. */
     @SuppressWarnings("unchecked")
     public static <X extends Tuple> TupleType<X> createTupleTypeWithNames(String rawType, String... elementNames) {
-        return (TupleType<X>) build(rawType, elementNames, null, ABIType.FLAGS_NONE)
-                .asTupleType();
+        return (TupleType<X>) build(rawType, elementNames, null, ABIType.FLAGS_NONE);
     }
 
     static ABIType<?> build(String rawType, String[] elementNames, TupleType<?> baseType, int flags) {
