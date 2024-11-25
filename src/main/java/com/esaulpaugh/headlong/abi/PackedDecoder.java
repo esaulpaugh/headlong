@@ -115,7 +115,7 @@ final class PackedDecoder {
         case TYPE_CODE_TUPLE: return type.dynamic
                                         ? decodeTuple(type.asTupleType(), bb, end)
                                         : decodeTupleStatic(type.asTupleType(), bb);
-        case TYPE_CODE_ADDRESS: return decodeAddress(type.byteLengthPacked(null), bb);
+        case TYPE_CODE_ADDRESS: return new Address(getBigInt(bb, type.byteLengthPacked(null)));
         default: throw new AssertionError();
         }
     }
@@ -138,10 +138,6 @@ final class PackedDecoder {
 //            dest[destIdx] = new BigInteger(buffer, idx, elementLen); // Java 9+
             return getSignedBigInt(bb, elementLen);
         }
-    }
-
-    private static Address decodeAddress(int elementLen, ByteBuffer bb) {
-        return new Address(getBigInt(bb, elementLen));
     }
 
     private static BigDecimal decodeBigDecimal(BigDecimalType type, int elementLen, ByteBuffer bb) {
