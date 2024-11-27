@@ -58,7 +58,7 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         } else if (bitLength > UNIT_LENGTH_BITS) {
             bitLength = UNIT_LENGTH_BITS;
         } else if (bitLength < Byte.SIZE || Integers.mod(bitLength, Byte.SIZE) != 0) {
-            throw illegalState("bit length not permitted", "unexpected bit length rejected");
+            throw illegalState("bit length not permitted", "unexpected bit length rejected by " + UnitType.class.getName());
         }
         this.bitLength = bitLength;
         this.unsigned = unsigned;
