@@ -27,6 +27,12 @@ import static com.esaulpaugh.headlong.TestUtils.assertThrown;
 public class UnitTypeTest {
 
     @Test
+    public void testTupleConstraints() throws Throwable {
+        TestUtils.assertThrown(IllegalStateException.class, "unexpected subclass", () -> new Tuple() {});
+        System.out.println("Constraint checked.");
+    }
+
+    @Test
     public void testConstructorConstraints() throws Throwable {
         // should print to System.err:
 //        unexpected instance creation rejected by com.esaulpaugh.headlong.abi.UnitType

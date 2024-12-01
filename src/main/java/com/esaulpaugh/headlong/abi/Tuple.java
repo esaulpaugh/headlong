@@ -32,6 +32,20 @@ public class Tuple implements Iterable<Object> {
 
     public static final Tuple EMPTY = new Tuple();
 
+    {
+        final Class<?> c = this.getClass();
+        final boolean permitted = c == Tuple.class
+                                    || c == Single.class
+                                    || c == Pair.class
+                                    || c == Triple.class
+                                    || c == Quadruple.class
+                                    || c == Quintuple.class
+                                    || c == Sextuple.class;
+        if (!permitted) {
+            throw ABIType.illegalState("unexpected subclass", "unexpected subclass rejected by " + Tuple.class.getName());
+        }
+    }
+
     final Object[] elements;
 
     Tuple(Object... elements) {
