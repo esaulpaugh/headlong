@@ -234,10 +234,12 @@ public final class ArrayType<ET extends ABIType<E>, E, A> extends ABIType<A> {
         return valueLen;
     }
 
-    private static final Pattern BRACKETS = Pattern.compile(Pattern.quote("[]"));
-
     private static String simpleName(Class<?> clazz, int arrayLen) {
-        return BRACKETS.matcher(clazz.getSimpleName()).replaceFirst("[" + arrayLen + "]");
+        String name = clazz.getSimpleName();
+        int index = name.indexOf("[]") + 1;
+        return index != 0
+                ? name.substring(0, index) + arrayLen + name.substring(index)
+                : name;
     }
 
     @SuppressWarnings("unchecked")
