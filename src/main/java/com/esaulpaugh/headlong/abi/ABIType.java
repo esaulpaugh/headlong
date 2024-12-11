@@ -138,6 +138,7 @@ public abstract class ABIType<J> {
     }
 
     /**
+     * @see #measureEncodedLength
      * @param value the value to measure
      * @return the length in bytes of the value when encoded
      */
@@ -171,6 +172,13 @@ public abstract class ABIType<J> {
         );
     }
 
+    /**
+     * Returns the length in bytes of the encoding of the value.
+     *
+     * @param value the instance being measured
+     * @return  the number of bytes
+     * @throws IllegalArgumentException if the value is invalid
+     */
     public final int measureEncodedLength(J value) {
         return validate(value);
     }
