@@ -21,7 +21,6 @@ import com.esaulpaugh.headlong.util.Strings;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.function.IntUnaryOperator;
-import java.util.regex.Pattern;
 
 import static com.esaulpaugh.headlong.abi.TupleType.countBytes;
 import static com.esaulpaugh.headlong.abi.TupleType.totalLen;
