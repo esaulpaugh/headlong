@@ -144,7 +144,7 @@ public final class Address {
     }
 
     /**
-     * @see <a href="https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md#implementation">EIP-55</a>
+     * @see <a href="https://github.com/ethereum/ercs/blob/master/ERCS/erc-55.md">EIP-55</a>
      * @param address   the hexadecimal Ethereum address
      * @return  the same address with the correct EIP-55 checksum casing
      */
