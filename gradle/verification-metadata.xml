@@ -298,20 +298,20 @@
             </artifact>
         </component>
 
-        <component group="org.jetbrains.kotlin" name="kotlin-stdlib" version="1.9.22">
-            <artifact name="kotlin-stdlib-1.9.22-sources.jar">
-                <sha256 value="7e1405176c4c7f7b35a9cf446c300eacd0212eaf0006b2142a5f7a99b827ecb0" origin="plugins.gradle.org/m2/"/>
+        <component group="org.jetbrains.kotlin" name="kotlin-stdlib" version="2.0.20">
+            <artifact name="kotlin-stdlib-2.0.20-sources.jar">
+                <sha256 value="41fa0409b06192b58fc16a08cc95237708f9d54f9bbf68b3d4a72358da9cb523" origin="plugins.gradle.org/m2/"/>
             </artifact>
-            <artifact name="kotlin-stdlib-1.9.22.module">
-                <sha256 value="f482314b5079c1455f6fb0d4257a745d101c6124ce961522ba86f9dc90901e47" origin="plugins.gradle.org/m2/"/>
+            <artifact name="kotlin-stdlib-2.0.20.module">
+                <sha256 value="dc051dc04c6a196f2d06d0d3c9af33b9f12bc9b4fe139ae1290140508236b67b" origin="plugins.gradle.org/m2/"/>
             </artifact>
         </component>
-        <component group="org.jetbrains.kotlin" name="kotlin-reflect" version="1.9.22">
-            <artifact name="kotlin-reflect-1.9.22-sources.jar">
-                <sha256 value="a87cec92af3fde66fd98b2e641a5867075e7b19a7cdb94441bb2884051fde6f3" origin="plugins.gradle.org/m2/"/>
+        <component group="org.jetbrains.kotlin" name="kotlin-reflect" version="2.0.20">
+            <artifact name="kotlin-reflect-2.0.20-sources.jar">
+                <sha256 value="9d88e821c645d67106ce7afb11c405acf1ae4153f0d41f3667d66e77d51dd5be" origin="plugins.gradle.org/m2/"/>
             </artifact>
-            <artifact name="kotlin-reflect-1.9.22.pom">
-                <sha256 value="c712e358df7b9318b68f5463971b088673837fc0ca4285d1c382c8102edd6b5f" origin="plugins.gradle.org/m2/"/>
+            <artifact name="kotlin-reflect-2.0.20.pom">
+                <sha256 value="63e638b056dd449e6f52d71e9c2c5dc5db0d16444323970e16d7fc0d658393db" origin="plugins.gradle.org/m2/"/>
             </artifact>
         </component>
 
