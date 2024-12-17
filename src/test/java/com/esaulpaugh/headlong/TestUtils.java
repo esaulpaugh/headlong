@@ -86,11 +86,10 @@ public final class TestUtils {
                 t.getId(),                  protoseed,                  Double.doubleToLongBits(Math.random()),
                 t.hashCode(),               t.getName().hashCode(),     t.getContextClassLoader().hashCode(),
                 t.getPriority(),            System.currentTimeMillis(), System.identityHashCode(new String()),
-                group.hashCode(),           System.nanoTime(),          new Throwable().hashCode(),
-                group.activeCount(),        r.nextLong(),               r.hashCode(),
-                System.identityHashCode(BigInteger.valueOf(System.nanoTime()))
+                group.hashCode(),           System.nanoTime(),          System.identityHashCode(r.nextInt()),
+                group.activeCount(),        r.nextLong(),               r.hashCode()
         };
-        long c = System.identityHashCode(vals) + runtime.freeMemory();
+        long c = (long)System.identityHashCode(vals) * new Throwable().hashCode();
         for (long v : vals) {
             c = 31 * c + v;
         }
