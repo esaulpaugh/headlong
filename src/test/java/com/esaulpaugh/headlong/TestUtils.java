@@ -77,18 +77,18 @@ public final class TestUtils {
      */
     public static long getSeed(final long protoseed) {
         final Runtime runtime = Runtime.getRuntime();
-        final long oldFree = runtime.freeMemory();
         final Thread t = Thread.currentThread();
         final ThreadGroup group = t.getThreadGroup();
         final ThreadLocalRandom r = ThreadLocalRandom.current();
         final long[] vals = new long[] {
-                runtime.hashCode(),         runtime.totalMemory(),      runtime.availableProcessors(),
-                new Object().hashCode(),    oldFree,                    Double.doubleToLongBits(r.nextDouble()),
+                runtime.freeMemory(),       runtime.hashCode(),         runtime.availableProcessors(),
+                new Object().hashCode(),    runtime.totalMemory(),      Double.doubleToLongBits(r.nextDouble()),
                 t.getId(),                  protoseed,                  Double.doubleToLongBits(Math.random()),
                 t.hashCode(),               t.getName().hashCode(),     t.getContextClassLoader().hashCode(),
                 t.getPriority(),            System.currentTimeMillis(), System.identityHashCode(new String()),
                 group.hashCode(),           System.nanoTime(),          new Throwable().hashCode(),
-                group.activeCount(),        r.nextLong(),               System.identityHashCode(BigInteger.valueOf(System.nanoTime()))
+                group.activeCount(),        r.nextLong(),               r.hashCode(),
+                System.identityHashCode(BigInteger.valueOf(System.nanoTime()))
         };
         long c = System.identityHashCode(vals) + runtime.freeMemory();
         for (long v : vals) {
