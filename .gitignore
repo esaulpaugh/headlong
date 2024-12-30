@@ -12,6 +12,7 @@
 *.iml
 *.log
 gradle.properties
+/.vscode/settings.json
 
 # macOS
 .DS_Store
