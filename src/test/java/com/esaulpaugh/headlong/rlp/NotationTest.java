@@ -59,6 +59,12 @@ public class NotationTest {
     @Test
     public void test() throws Throwable {
 
+        assertThrown(IllegalArgumentException.class, "syntax error", () -> Notation.parse("]"));
+        assertThrown(IllegalArgumentException.class, "syntax error", () -> Notation.parse("(]"));
+        assertThrown(IllegalArgumentException.class, "syntax error", () -> Notation.parse("(])"));
+        assertThrown(IllegalArgumentException.class, "syntax error", () -> Notation.parse("((]"));
+        assertThrown(IllegalArgumentException.class, "syntax error", () -> Notation.parse("((])"));
+
         final byte[] bytes = new byte[769];
         Arrays.fill(bytes, (byte)'[');
         final String not = Strings.encode(bytes, Strings.UTF_8);

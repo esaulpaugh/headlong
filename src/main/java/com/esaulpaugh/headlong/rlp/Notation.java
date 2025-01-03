@@ -207,7 +207,9 @@ public final class Notation {
      */
     public static List<Object> parse(String notation) {
         List<Object> topLevelObjects = new ArrayList<>(); // a sequence (as in RLPEncoder.sequence)
-        parse(notation, 0, topLevelObjects, 0);
+        if (parse(notation, 0, topLevelObjects, 0) != Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("syntax error");
+        }
         return topLevelObjects;
     }
 
