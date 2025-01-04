@@ -11,8 +11,10 @@ version = "12.3.4-SNAPSHOT"
 final String versionStr = getProject().getGradle().getGradleVersion()
 final int gradleMajorVersion = Integer.parseUnsignedInt(versionStr.substring(0, versionStr.indexOf('.')))
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
 
 compileJava {
     if (JavaVersion.current() >= JavaVersion.VERSION_1_10) {
