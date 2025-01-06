@@ -113,19 +113,6 @@
                 <sha256 value="b51f8867c92b6a722499557fc3a1fdea77bdf9ef574722fe90ce436a29559454" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
-        <component group="org.junit.platform" name="junit-platform-launcher" version="1.9.3">
-            <artifact name="junit-platform-launcher-1.9.3.module">
-                <sha256 value="45b5b23f1e91b2e666d99f0c93557b6dd2f67df0627ed29a6692b0b3885f19ad" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-        </component>
-        <component group="org.junit" name="junit-bom" version="5.9.3">
-            <artifact name="junit-bom-5.9.3.module">
-                <sha256 value="b401fd25901e582a524aa5343c4b39e28bc56e24961c1069bf2b4bbfcee46b93" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-            <artifact name="junit-bom-5.9.3.pom">
-                <sha256 value="4d0329cd9e72f2420e5ca15724cbfe6ffa6e5fd2888361516271190fdc342ed7" origin="repo.maven.apache.org/maven2/"/>
-            </artifact>
-        </component>
         <component group="org.junit.platform" name="junit-platform-launcher" version="1.11.4">
             <artifact name="junit-platform-launcher-1.11.4.jar">
                 <sha256 value="d7430bd029e7fcced53ee445e4d2d1a8a1e043ea4c4df43b6335a857f79761ae" origin="repo.maven.apache.org/maven2/"/>
