@@ -531,8 +531,8 @@ public final class ABIJSON {
 
     private static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags) throws IOException {
         final List<T> list = new ArrayList<>();
-        reader.beginArray();
         final MessageDigest digest = Function.newDefaultDigest();
+        reader.beginArray();
         while (reader.peek() != JsonToken.END_ARRAY) {
             T e = tryParseStreaming(reader, types, digest, flags);
             if (e != null) {
