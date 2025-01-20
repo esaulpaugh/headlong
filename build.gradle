@@ -89,7 +89,7 @@ repositories {
 
 final String junitVersion = "5.11.4"
 final String jmhVersion = "1.37"
-final String bcVersion = "1.79"
+final String bcVersion = "1.80"
 
 dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
