@@ -163,6 +163,16 @@ public final class TestUtils {
         return r.nextBoolean() ? ~maskedUnsigned : maskedUnsigned;
     }
 
+    public static long uniformLong(Random r, final long limit) {
+        final long bound = (Long.MAX_VALUE / limit) * limit;
+        long sample;
+        do {
+            sample = r.nextLong();
+            if (sample < 0L) sample = ~sample;
+        } while (sample >= bound);
+        return sample % limit;
+    }
+
     public static BigInteger wildBigInteger(Random r, boolean unsigned, int bitLength) {
         return uniformBigInteger(r, unsigned, r.nextInt(1 + bitLength));
     }
