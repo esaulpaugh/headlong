@@ -75,7 +75,7 @@
 //    mavenCentral()
 //}
 //
-//val junitVersion = "5.11.3"
+//val junitVersion = "5.11.4"
 //val bcVersion = "1.80"
 //
 //dependencies {
