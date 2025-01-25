@@ -17,7 +17,7 @@ package com.esaulpaugh.headlong.abi;
 
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
-import com.google.gson.internal.bind.TypeAdapters;
+import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
@@ -367,7 +367,7 @@ public final class ABIJSON {
                 if (jsonObject == null) {
                     jsonObject = new JsonObject();
                 }
-                jsonObject.add(name, TypeAdapters.JSON_ELEMENT.read(reader));
+                jsonObject.add(name, JsonParser.parseReader(reader)); // TypeAdapters.JSON_ELEMENT.read(reader)
             }
         }
         reader.endObject();
