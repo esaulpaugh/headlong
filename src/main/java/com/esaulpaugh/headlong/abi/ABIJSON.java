@@ -15,9 +15,11 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
@@ -68,6 +70,8 @@ public final class ABIJSON {
     private static final String STATE_MUTABILITY = "stateMutability";
     static final String PAYABLE = "payable"; // to mark as nonpayable, do not specify any stateMutability
     private static final String INTERNAL_TYPE = "internalType";
+
+    private static final TypeAdapter<JsonElement> JSON_ELEMENT_ADAPTER = new Gson().getAdapter(JsonElement.class);
 
     /**
      * Selects all objects with type {@link TypeEnum#FUNCTION}.
@@ -367,7 +371,7 @@ public final class ABIJSON {
                 if (jsonObject == null) {
                     jsonObject = new JsonObject();
                 }
-                jsonObject.add(name, JsonParser.parseReader(reader)); // TypeAdapters.JSON_ELEMENT.read(reader)
+                jsonObject.add(name, JSON_ELEMENT_ADAPTER.read(reader)); // JsonParser.parseReader(reader), TypeAdapters.JSON_ELEMENT.read(reader)
             }
         }
         reader.endObject();
