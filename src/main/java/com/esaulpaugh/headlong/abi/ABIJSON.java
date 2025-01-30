@@ -371,7 +371,8 @@ public final class ABIJSON {
                 if (jsonObject == null) {
                     jsonObject = new JsonObject();
                 }
-                jsonObject.add(name, JSON_ELEMENT_ADAPTER.read(reader)); // JsonParser.parseReader(reader), TypeAdapters.JSON_ELEMENT.read(reader)
+                // read is equivalent to JsonParser.parseReader, Streams.parse, and TypeAdapters.JSON_ELEMENT.read
+                jsonObject.add(name, JSON_ELEMENT_ADAPTER.read(reader));
             }
         }
         reader.endObject();
