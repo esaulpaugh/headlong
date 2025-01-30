@@ -20,6 +20,7 @@ import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import com.joemelsha.crypto.hash.Keccak;
 
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.security.DigestException;
 import java.security.MessageDigest;
@@ -418,5 +419,9 @@ public final class Function implements ABIObject {
 
     public static Function fromJson(int flags, String objectJson, MessageDigest digest) {
         return ABIJSON.parseABIObject(objectJson, ABIJSON.FUNCTIONS, digest, flags);
+    }
+
+    public static Function fromJson(int flags, InputStream jsonStream, MessageDigest digest) {
+        return ABIJSON.parseABIObject(jsonStream, ABIJSON.FUNCTIONS, digest, flags);
     }
 }

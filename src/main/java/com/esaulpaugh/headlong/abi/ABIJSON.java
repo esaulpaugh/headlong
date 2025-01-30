@@ -27,6 +27,8 @@ import com.google.gson.stream.JsonWriter;
 import java.io.CharArrayWriter;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.security.MessageDigest;
@@ -338,8 +340,17 @@ public final class ABIJSON {
     }
 
     static <T extends ABIObject> T parseABIObject(String json, Set<TypeEnum> types, MessageDigest digest, int flags) {
-        try {
-            T obj = tryParseStreaming(read(json), types, digest, flags);
+        return parseABIObject(read(json), types, digest, flags);
+    }
+
+    /** Parses and closes the InputStream. */
+    static <T extends ABIObject> T parseABIObject(InputStream is, Set<TypeEnum> types, MessageDigest digest, int flags) {
+        return parseABIObject(new JsonReader(new InputStreamReader(is)), types, digest, flags);
+    }
+
+    private static <T extends ABIObject> T parseABIObject(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) {
+        try (JsonReader r = reader) {
+            T obj = tryParseStreaming(r, types, digest, flags);
             if (obj != null) {
                 return obj;
             }

@@ -22,8 +22,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -918,5 +921,32 @@ public class ABIJSONTest {
         assertEquals(1, objects.size());
         assertEquals(TypeEnum.FUNCTION, objects.get(0).getType());
         assertEquals("aller(uint256,uint256,uint256,address,string)", objects.get(0).getCanonicalSignature());
+    }
+
+    @Test
+    public void testInputStreamParse() {
+        testABIObject(FUNCTION_A_JSON);
+        testABIObject(EVENT_STR);
+        testABIObject(ERROR_JSON);
+
+        Function f = Function.fromJson(FLAGS_NONE, stream(FUNCTION_A_JSON), Function.newDefaultDigest());
+        assertEquals(FUNCTION_A_JSON, f.toJson(true));
+
+        Event<Single<Single<String>[]>> e = Event.fromJson(FLAGS_NONE, stream(EVENT_STR));
+        assertEquals(EVENT_STR, e.toJson(true));
+
+        ContractError<Pair<BigInteger, Integer>> err = ContractError.fromJson(FLAGS_NONE, stream(ERROR_JSON));
+        assertEquals(ERROR_JSON, err.toJson(true));
+    }
+
+    private static void testABIObject(String json) {
+        assertEquals(
+                json,
+                ABIObject.fromJson(FLAGS_NONE, stream(json)).toJson(true)
+        );
+    }
+
+    private static InputStream stream(String str) {
+        return new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
     }
 }

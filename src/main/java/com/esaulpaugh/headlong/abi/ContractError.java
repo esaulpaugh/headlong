@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import java.io.InputStream;
 import java.util.Objects;
 
 /** Represents a custom error. */
@@ -84,5 +85,9 @@ public final class ContractError<J extends Tuple> implements ABIObject {
     /** @see ABIObject#fromJson(int, String) */
     public static <X extends Tuple> ContractError<X> fromJson(int flags, String errorJson) {
         return ABIJSON.parseABIObject(errorJson, ABIJSON.ERRORS, null, flags);
+    }
+
+    public static <X extends Tuple> ContractError<X> fromJson(int flags, InputStream jsonStream) {
+        return ABIJSON.parseABIObject(jsonStream, ABIJSON.ERRORS, null, flags);
     }
 }

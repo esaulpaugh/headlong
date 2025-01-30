@@ -19,6 +19,7 @@ import com.esaulpaugh.headlong.util.FastHex;
 import com.esaulpaugh.headlong.util.Strings;
 import com.joemelsha.crypto.hash.Keccak;
 
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Objects;
@@ -210,5 +211,9 @@ public final class Event<J extends Tuple> implements ABIObject {
     /** @see ABIObject#fromJson(int, String) */
     public static <X extends Tuple> Event<X> fromJson(int flags, String eventJson) {
         return ABIJSON.parseABIObject(eventJson, ABIJSON.EVENTS, null, flags);
+    }
+
+    public static <X extends Tuple> Event<X> fromJson(int flags, InputStream jsonStream) {
+        return ABIJSON.parseABIObject(jsonStream, ABIJSON.EVENTS, null, flags);
     }
 }
