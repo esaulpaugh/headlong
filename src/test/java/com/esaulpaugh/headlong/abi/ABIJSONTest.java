@@ -23,6 +23,7 @@ import com.google.gson.JsonPrimitive;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -948,5 +949,14 @@ public class ABIJSONTest {
 
     private static InputStream stream(String str) {
         return new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void testInputStreamParse2() throws IOException {
+        InputStream json = TestUtils.getFileResource("tests/headlong/tests/performAction.json");
+        Function performAction = Function.fromJson(FLAGS_NONE, json, Function.newDefaultDigest());
+        assertEquals("performAction", performAction.getName());
+        assertEquals(TupleType.parse("(address,uint)"), performAction.getInputs());
+        assertEquals(TupleType.parse("(uint32)"), performAction.getOutputs());
     }
 }

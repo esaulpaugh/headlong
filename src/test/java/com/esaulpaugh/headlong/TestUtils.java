@@ -27,6 +27,7 @@ import com.google.gson.stream.JsonReader;
 import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.net.URISyntaxException;
@@ -251,6 +252,18 @@ public final class TestUtils {
         } catch (URISyntaxException use) {
             throw new RuntimeException(use);
         }
+    }
+
+    public static InputStream getFileResource(String resourceName) throws IOException {
+        return getFileResource(Thread.currentThread().getContextClassLoader(), resourceName);
+    }
+
+    public static InputStream getFileResource(ClassLoader classLoader, String resourceName) throws IOException {
+        URL url = classLoader.getResource(resourceName);
+        if (url == null) {
+            throw new IOException("resource not found");
+        }
+        return url.openStream();
     }
 
     public static byte[] parsePrimitiveToBytes(JsonElement in) {
