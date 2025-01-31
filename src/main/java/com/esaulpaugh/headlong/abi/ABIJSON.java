@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
+import com.google.gson.Strictness;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
@@ -29,6 +30,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
@@ -119,7 +121,7 @@ public final class ABIJSON {
     }
 
     public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
-        try (final JsonReader reader = read(arrayJson)) {
+        try (final JsonReader reader = reader(arrayJson)) {
             return parseArray(reader, types, flags);
         } catch (IOException io) {
             throw new IllegalStateException(io);
@@ -143,7 +145,7 @@ public final class ABIJSON {
     }
 
     public static <T extends ABIObject> List<T> parseABIField(int flags, String objectJson, Set<TypeEnum> types) {
-        try (final JsonReader reader = read(objectJson)) {
+        try (final JsonReader reader = reader(objectJson)) {
             reader.beginObject();
             while (reader.peek() != JsonToken.END_OBJECT) {
                 if ("abi".equals(reader.nextName())) {
@@ -285,7 +287,7 @@ public final class ABIJSON {
         JsonSpliterator(String arrayJson, Set<TypeEnum> types, int flags) {
             super(Long.SIZE, ORDERED | NONNULL | IMMUTABLE);
             try {
-                JsonReader reader = read(arrayJson);
+                JsonReader reader = reader(arrayJson);
                 reader.beginArray();
                 this.jsonReader = reader;
                 this.types = types;
@@ -341,12 +343,12 @@ public final class ABIJSON {
     }
 
     static <T extends ABIObject> T parseABIObject(String json, Set<TypeEnum> types, MessageDigest digest, int flags) {
-        return parseABIObject(read(json), types, digest, flags);
+        return parseABIObject(reader(json), types, digest, flags);
     }
 
     /** Reads an {@link ABIObject} from JSON and closes the {@link InputStream}. Assumes UTF-8 encoding. */
     static <T extends ABIObject> T parseABIObject(InputStream is, Set<TypeEnum> types, MessageDigest digest, int flags) {
-        return parseABIObject(new JsonReader(new InputStreamReader(is, StandardCharsets.UTF_8)), types, digest, flags);
+        return parseABIObject(reader(is), types, digest, flags);
     }
 
     private static <T extends ABIObject> T parseABIObject(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) {
@@ -388,7 +390,7 @@ public final class ABIJSON {
             }
         }
         reader.endObject();
-        JsonReader r = read(jsonObject.toString());
+        JsonReader r = reader(jsonObject.toString());
         r.beginObject();
         return finishParse(t, r, digest, flags);
     }
@@ -542,8 +544,18 @@ public final class ABIJSON {
         }
     }
 
-    private static JsonReader read(String json) {
-        return new JsonReader(new StringReader(json));
+    private static JsonReader reader(String json) {
+        return strict(new StringReader(json));
+    }
+
+    private static JsonReader reader(InputStream input) {
+        return strict(new InputStreamReader(input, StandardCharsets.UTF_8));
+    }
+
+    private static JsonReader strict(Reader reader) {
+        JsonReader jsonReader = new JsonReader(reader);
+        jsonReader.setStrictness(Strictness.STRICT);
+        return jsonReader;
     }
 
     private static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags) throws IOException {
