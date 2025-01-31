@@ -53,8 +53,8 @@
 
   <!-- Project Libraries -->
   
-  <path id="lib.mvn:_com.google.code.gson:gson:2.10.1.classpath">
-    <pathelement location="${user.home}${repository}${gson_path}/gson-2.10.1.jar"/>
+  <path id="lib.mvn:_com.google.code.gson:gson:2.11.0.classpath">
+    <pathelement location="${user.home}${repository}${gson_path}/gson-2.11.0.jar"/>
   </path>
 
   <!-- Modules -->
@@ -129,22 +129,22 @@
   </path>
   
   <path id="headlong.main.module.production.classpath">
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.11.0.classpath"/>
   </path>
   
   <path id="headlong.main.runtime.production.module.classpath">
     <pathelement location="${headlong.main.output.dir}"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.11.0.classpath"/>
   </path>
   
   <path id="headlong.main.module.classpath">
     <pathelement location="${headlong.main.output.dir}"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.11.0.classpath"/>
   </path>
   
   <path id="headlong.main.runtime.module.classpath">
     <pathelement location="${headlong.main.output.dir}"/>
-    <path refid="lib.mvn:_com.google.code.gson:gson:2.10.1.classpath"/>
+    <path refid="lib.mvn:_com.google.code.gson:gson:2.11.0.classpath"/>
   </path>
   
   
