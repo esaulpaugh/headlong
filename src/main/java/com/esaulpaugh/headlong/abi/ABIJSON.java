@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -343,9 +344,9 @@ public final class ABIJSON {
         return parseABIObject(read(json), types, digest, flags);
     }
 
-    /** Parses and closes the InputStream. */
+    /** Reads an {@link ABIObject} from JSON and closes the {@link InputStream}. Assumes UTF-8 encoding. */
     static <T extends ABIObject> T parseABIObject(InputStream is, Set<TypeEnum> types, MessageDigest digest, int flags) {
-        return parseABIObject(new JsonReader(new InputStreamReader(is)), types, digest, flags);
+        return parseABIObject(new JsonReader(new InputStreamReader(is, StandardCharsets.UTF_8)), types, digest, flags);
     }
 
     private static <T extends ABIObject> T parseABIObject(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) {
