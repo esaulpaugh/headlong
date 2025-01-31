@@ -19,7 +19,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
-import com.google.gson.Strictness;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
@@ -552,9 +551,10 @@ public final class ABIJSON {
         return strict(new InputStreamReader(input, StandardCharsets.UTF_8));
     }
 
+    @SuppressWarnings("deprecation")
     private static JsonReader strict(Reader reader) {
         JsonReader jsonReader = new JsonReader(reader);
-        jsonReader.setStrictness(Strictness.STRICT);
+        jsonReader.setLenient(false); // jsonReader.setStrictness(Strictness.STRICT);
         return jsonReader;
     }
 
