@@ -32,7 +32,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -552,33 +552,39 @@ public final class ABIJSON {
         return strict(new InputStreamReader(input, StandardCharsets.UTF_8));
     }
 
-    private static final Class<?> STRICTNESS_CLASS;
+    private static final Enum<?> STRICT;
+    private static final Method SET_STRICTNESS; // jsonReader.setStrictness(Strictness)
     private static volatile boolean invokeFailed = false;
 
     static {
-        Class<?> local;
-        try {
-            local = Class.forName("com.google.gson.Strictness");
-        } catch (ClassNotFoundException ignored) {
-            local = null;
-        }
-        STRICTNESS_CLASS = local;
+        Pair<Enum<?>, Method> pair = reflect();
+        STRICT = pair.get0();
+        SET_STRICTNESS = pair.get1();
     }
 
-    @SuppressWarnings({"deprecation", "unchecked", "rawtypes"})
-    private static JsonReader strict(Reader reader) {
+    private static Pair<Enum<?>, Method> reflect() {
+        try {
+            @SuppressWarnings({"unchecked", "rawtypes"})
+            Class<Enum> c = (Class<Enum>) Class.forName("com.google.gson.Strictness");
+            @SuppressWarnings("unchecked")
+            Enum<?> strict = Enum.valueOf(c, "STRICT");
+            return Tuple.of(strict, JsonReader.class.getMethod("setStrictness", c));
+        } catch (Exception ignored) {
+            return new Pair<>(new Object[] { null, null });
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private static JsonReader strict(final Reader reader) {
         final JsonReader jsonReader = new JsonReader(reader);
         jsonReader.setLenient(false);
-        if (STRICTNESS_CLASS != null && !invokeFailed) {
+        if (SET_STRICTNESS != null && !invokeFailed) {
             try {
-                JsonReader.class.getMethod("setStrictness", STRICTNESS_CLASS) // jsonReader.setStrictness(Strictness.STRICT);
-                                .invoke(jsonReader, Enum.valueOf((Class<Enum>) STRICTNESS_CLASS, "STRICT"));
-            } catch (NoSuchMethodException | InvocationTargetException roe) {
-                throw new IllegalStateException(roe);
-            } catch (ReflectiveOperationException roe) {
+                SET_STRICTNESS.invoke(jsonReader, STRICT);
+            } catch (ReflectiveOperationException | LinkageError throwable) {
                 invokeFailed = true;
-                roe.printStackTrace();
-                System.err.println("falling back on legacy strictness");
+                throwable.printStackTrace();
+                System.err.println("Falling back on legacy strictness");
             }
         }
         return jsonReader;
