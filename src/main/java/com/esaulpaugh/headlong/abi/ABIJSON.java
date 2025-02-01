@@ -580,7 +580,7 @@ public final class ABIJSON {
         if (SET_STRICTNESS != null && !invokeFailed) {
             try {
                 SET_STRICTNESS.invoke(jsonReader, STRICT);
-            } catch (ReflectiveOperationException | LinkageError throwable) {
+            } catch (ReflectiveOperationException | IllegalArgumentException | LinkageError throwable) {
                 invokeFailed = true;
                 throwable.printStackTrace();
                 System.err.println("Falling back on legacy strictness");
