@@ -572,7 +572,7 @@ public final class ABIJSON {
         if (STRICTNESS_CLASS != null && !invokeFailed) {
             try {
                 JsonReader.class.getMethod("setStrictness", STRICTNESS_CLASS) // jsonReader.setStrictness(Strictness.STRICT);
-                        .invoke(jsonReader, Enum.valueOf((Class<? extends Enum>) STRICTNESS_CLASS, "STRICT"));
+                                .invoke(jsonReader, Enum.valueOf((Class<Enum>) STRICTNESS_CLASS, "STRICT"));
             } catch (NoSuchMethodException | InvocationTargetException roe) {
                 throw new IllegalStateException(roe);
             } catch (ReflectiveOperationException roe) {
