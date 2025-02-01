@@ -564,10 +564,9 @@ public final class ABIJSON {
 
     private static Pair<Enum<?>, Method> reflect() {
         try {
+            final Class<?> c = Class.forName("com.google.gson.Strictness");
             @SuppressWarnings({"unchecked", "rawtypes"})
-            Class<Enum> c = (Class<Enum>) Class.forName("com.google.gson.Strictness");
-            @SuppressWarnings("unchecked")
-            Enum<?> strict = Enum.valueOf(c, "STRICT");
+            final Enum<?> strict = Enum.valueOf((Class<Enum>) c, "STRICT");
             return Tuple.of(strict, JsonReader.class.getMethod("setStrictness", c));
         } catch (Exception ignored) {
             return new Pair<>(new Object[] { null, null });
