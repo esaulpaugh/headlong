@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
+import com.google.gson.Strictness;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
@@ -32,7 +33,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -552,40 +552,20 @@ public final class ABIJSON {
         return strict(new InputStreamReader(input, StandardCharsets.UTF_8));
     }
 
-    private static final Enum<?> STRICT;
-    private static final Method SET_STRICTNESS; // jsonReader.setStrictness(Strictness)
-    private static volatile boolean invokeFailed = false;
-
-    static {
-        Pair<Enum<?>, Method> pair = reflect();
-        STRICT = pair.get0();
-        SET_STRICTNESS = pair.get1();
-    }
-
-    private static Pair<Enum<?>, Method> reflect() {
-        try {
-            final Class<?> c = Class.forName("com.google.gson.Strictness");
-            @SuppressWarnings({"unchecked", "rawtypes"})
-            final Enum<?> strict = Enum.valueOf((Class<Enum>) c, "STRICT");
-            return Tuple.of(strict, JsonReader.class.getMethod("setStrictness", c));
-        } catch (Exception ignored) {
-            return new Pair<>(new Object[] { null, null });
-        }
-    }
+    private static volatile boolean fallback = false;
 
     @SuppressWarnings("deprecation")
     private static JsonReader strict(final Reader reader) {
         final JsonReader jsonReader = new JsonReader(reader);
-        jsonReader.setLenient(false);
-        if (SET_STRICTNESS != null && !invokeFailed) {
+        if (!fallback) {
             try {
-                SET_STRICTNESS.invoke(jsonReader, STRICT);
-            } catch (ReflectiveOperationException | IllegalArgumentException | LinkageError throwable) {
-                invokeFailed = true;
-                throwable.printStackTrace();
-                System.err.println("Falling back on legacy strictness");
+                jsonReader.setStrictness(Strictness.STRICT);
+                return jsonReader;
+            } catch (LinkageError le) {
+                fallback = true;
             }
         }
+        jsonReader.setLenient(false);
         return jsonReader;
     }
 
