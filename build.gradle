@@ -92,9 +92,9 @@ final String jmhVersion = "1.37"
 final String bcVersion = "1.80"
 
 dependencies {
-    implementation('com.google.code.gson:gson:2.11.0') {
+    implementation('com.google.code.gson:gson:2.12.0') {
         version {
-            strictly '[2.1,2.11.0]'
+            strictly '[2.1,2.12.0]'
         }
         exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
     }

@@ -32,17 +32,17 @@
       </trusted-keys>
    </configuration>
     <components>
-        <component group="com.google.code.gson" name="gson-parent" version="2.11.0">
-            <artifact name="gson-parent-2.11.0.pom">
-                <sha256 value="8acb1f3b72a6f026916ac0735bad9aab0293d527edb7b365327def13a9367b7a" origin="repo.maven.apache.org/maven2/"/>
+        <component group="com.google.code.gson" name="gson-parent" version="2.12.0">
+            <artifact name="gson-parent-2.12.0.pom">
+                <sha256 value="b6dd0454a689944b4a66641c90792b59888ad24f43be69bcf6b165e2e29ce010" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
-        <component group="com.google.code.gson" name="gson" version="2.11.0">
-            <artifact name="gson-2.11.0.jar">
-                <sha256 value="57928d6e5a6edeb2abd3770a8f95ba44dce45f3b23b7a9dc2b309c581552a78b" origin="repo.maven.apache.org/maven2/"/>
+        <component group="com.google.code.gson" name="gson" version="2.12.0">
+            <artifact name="gson-2.12.0.jar">
+                <sha256 value="4d377f51c84bb5b4e5603bdee5fe7ffc9ab6b7aee4ee0e1f62c6fadd84c5fa05" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="gson-2.11.0.pom">
-                <sha256 value="c0e547bea998888e6e25c5886a90e762272bc88b5275343dd2c05ded6ca2e360" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="gson-2.12.0.pom">
+                <sha256 value="ee4cb3d1d489b7ceb8bc73805e024cd36a12d19816585c8b0d46cfd8b604ea46" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
 
