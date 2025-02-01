@@ -32,6 +32,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -551,10 +552,35 @@ public final class ABIJSON {
         return strict(new InputStreamReader(input, StandardCharsets.UTF_8));
     }
 
-    @SuppressWarnings("deprecation")
+    private static final Class<?> STRICTNESS_CLASS;
+    private static volatile boolean invokeFailed = false;
+
+    static {
+        Class<?> local;
+        try {
+            local = Class.forName("com.google.gson.Strictness");
+        } catch (ClassNotFoundException ignored) {
+            local = null;
+        }
+        STRICTNESS_CLASS = local;
+    }
+
+    @SuppressWarnings({"deprecation", "unchecked", "rawtypes"})
     private static JsonReader strict(Reader reader) {
-        JsonReader jsonReader = new JsonReader(reader);
-        jsonReader.setLenient(false); // jsonReader.setStrictness(Strictness.STRICT);
+        final JsonReader jsonReader = new JsonReader(reader);
+        jsonReader.setLenient(false);
+        if (STRICTNESS_CLASS != null && !invokeFailed) {
+            try {
+                JsonReader.class.getMethod("setStrictness", STRICTNESS_CLASS) // jsonReader.setStrictness(Strictness.STRICT);
+                        .invoke(jsonReader, Enum.valueOf((Class<? extends Enum>) STRICTNESS_CLASS, "STRICT"));
+            } catch (NoSuchMethodException | InvocationTargetException roe) {
+                throw new IllegalStateException(roe);
+            } catch (ReflectiveOperationException roe) {
+                invokeFailed = true;
+                roe.printStackTrace();
+                System.err.println("falling back on legacy strictness");
+            }
+        }
         return jsonReader;
     }
 

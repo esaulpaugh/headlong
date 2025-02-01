@@ -1,5 +1,27 @@
 [
   {
+    "name": "com.google.gson.stream.JsonReader",
+    "methods": [
+      {
+        "name": "setStrictness",
+        "parameterTypes": ["com.google.gson.Strictness"]
+      }
+    ]
+  },
+  {
+    "name": "com.google.gson.Strictness",
+    "methods": [
+      {
+        "name": "valueOf",
+        "parameterTypes": ["java.lang.String"]
+      },
+      {
+        "name": "valueOf",
+        "parameterTypes": [ "java.lang.Class" ,"java.lang.String"]
+      }
+    ]
+  },
+  {
     "name" : "byte[]",
     "unsafeAllocated" : true
   },
