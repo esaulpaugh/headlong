@@ -461,7 +461,7 @@ public final class ABIJSON {
         return new ContractError<>(name, tt);
     }
 
-    private static TupleType<?> parseTupleType(JsonReader reader, final boolean eventParams, final int flags) throws IOException {
+    private static TupleType<?> parseTupleType(final JsonReader reader, final boolean eventParams, final int flags) throws IOException {
         if (reader.peek() == JsonToken.NULL) {
             reader.nextNull();
             return TupleType.empty(flags);
@@ -555,7 +555,7 @@ public final class ABIJSON {
     private static volatile boolean fallback = false;
 
     @SuppressWarnings("deprecation")
-    private static JsonReader strict(final Reader reader) {
+    private static JsonReader strict(Reader reader) {
         final JsonReader jsonReader = new JsonReader(reader);
         if (!fallback) {
             try {
