@@ -87,16 +87,24 @@ repositories {
     mavenCentral()
 }
 
+final String gsonVersion = "2.12.0"
 final String junitVersion = "5.11.4"
 final String jmhVersion = "1.37"
 final String bcVersion = "1.80"
 
 dependencies {
-    implementation('com.google.code.gson:gson:2.12.0') {
+    implementation("com.google.code.gson:gson:" + gsonVersion) {
         version {
-            strictly '[2.1,2.12.0]'
+            prefer(gsonVersion)
         }
-        exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
+        exclude(group: "com.google.errorprone", module: "error_prone_annotations")
+    }
+    constraints {
+        implementation("com.google.code.gson:gson") {
+            version {
+                require("[2.1,)")
+            }
+        }
     }
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:" + junitVersion)
