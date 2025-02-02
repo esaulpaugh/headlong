@@ -11,12 +11,7 @@ version = "12.3.4-SNAPSHOT"
 final String versionStr = getProject().getGradle().getGradleVersion()
 final int gradleMajorVersion = Integer.parseUnsignedInt(versionStr.substring(0, versionStr.indexOf('.')))
 
-if (gradleMajorVersion >= 5) {
-    java {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-} else {
+java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
@@ -92,27 +87,26 @@ repositories {
     mavenCentral()
 }
 
+final String gsonVersion = "2.12.0"
 final String junitVersion = "5.11.4"
 final String jmhVersion = "1.37"
 final String bcVersion = "1.80"
 
-final String compileRange = "[2.11.0, 2.12.0]"
+final String requires = "[2.1, " + gsonVersion + "]"
+final String runtimeRange = "[2.1,)"
 
 dependencies {
-    implementation("com.google.code.gson:gson") {
-        if (gradleMajorVersion >= 5) {
-            version {
-                require(compileRange)
-            }
-        } else {
-            version(compileRange)
+    implementation("com.google.code.gson:gson:" + gsonVersion) {
+        version {
+            require(requires) // published in "dependencies"
         }
-
         exclude(group: "com.google.errorprone", module: "error_prone_annotations")
     }
     constraints {
-        implementation("com.google.code.gson:gson:2.12.0") {
-            version("[2.1,)") // gets published to consumers
+        implementation("com.google.code.gson:gson:") {
+            version {
+                require(runtimeRange) // published in "dependencyConstraints" / "<dependencyManagement>"
+            }
         }
     }
 
