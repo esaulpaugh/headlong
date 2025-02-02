@@ -27,7 +27,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-            gradle-version: 4.10.3
+            gradle-version: 4.6
 
       - name: Run gradle and ant builds
         run: |
