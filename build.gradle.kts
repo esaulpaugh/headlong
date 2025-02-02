@@ -82,7 +82,7 @@
 //dependencies {
 //    implementation("com.google.code.gson:gson:$gsonVersion") {
 //        version {
-//            prefer(gsonVersion)
+//            strictly(gsonVersion)
 //        }
 //        exclude(group = "com.google.errorprone", module = "error_prone_annotations")
 //    }
