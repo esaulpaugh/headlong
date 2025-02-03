@@ -1,4 +1,6 @@
-import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 plugins {
     id("java-library")
@@ -43,11 +45,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
 }
 
-static String todayUTC() {
-    SimpleDateFormat sdf = new SimpleDateFormat("MMMMM d yyyy")
-    sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
-    return sdf.format(new Date())
-}
+final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneOffset.UTC)
 
 jar {
     manifest {
@@ -56,7 +54,7 @@ jar {
                 "Implementation-Version": project.version,
                 "Automatic-Module-Name": "com.esaulpaugh.headlong",
                 "Created-By": "Gradle",
-                "Build-Date": todayUTC() // DateTimeFormatter.ofPattern("MMMM d yyyy", Locale.ENGLISH).withZone(ZoneOffset.UTC).format(Instant.now())
+                "Build-Date": dateFormatter.format(Instant.now())
         )
     }
     finalizedBy(sourcesJar)
