@@ -45,7 +45,7 @@ import static com.esaulpaugh.headlong.abi.UnitType.UNIT_LENGTH_BYTES;
 public final class Function implements ABIObject {
 
     public static final int SELECTOR_LEN = 4;
-    private static final int MAX_NAME_CHARS = 2048;
+    private static final int MAX_NAME_CHARS = 384;
 
     private final TypeEnum type;
     private final String name;

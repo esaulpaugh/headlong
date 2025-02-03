@@ -149,11 +149,11 @@ public class FunctionTest {
 
     @Test
     public void testNameTooLong() throws Throwable {
-        final byte[] b = new byte[2096];
+        final byte[] b = new byte[387];
         Arrays.fill(b, (byte) 'a');
         b[b.length - 2] = '(';
         b[b.length - 1] = ')';
         final String sig = Strings.encode(b, Strings.ASCII);
-        TestUtils.assertThrown(IllegalArgumentException.class, "function name is too long: 2094 > 2048", () -> Function.parse(sig));
+        TestUtils.assertThrown(IllegalArgumentException.class, "function name is too long: 385 > 384", () -> Function.parse(sig));
     }
 }
