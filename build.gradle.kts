@@ -79,17 +79,20 @@
 //val junitVersion = "5.11.4"
 //val bcVersion = "1.80"
 //
+//val requires = "[2.1, " + gsonVersion + "]" // cap the require at the preferred version
+//val runtimeRange = "[2.1,)" // allow later versions at runtime
+//
 //dependencies {
 //    implementation("com.google.code.gson:gson:$gsonVersion") {
 //        version {
-//            strictly(gsonVersion)
+//            require(requires) // published in "dependencies"
 //        }
 //        exclude(group = "com.google.errorprone", module = "error_prone_annotations")
 //    }
 //    constraints {
-//        implementation("com.google.code.gson:gson") {
+//        implementation("com.google.code.gson:gson:") {
 //            version {
-//                require("[2.1,)")
+//                require(runtimeRange) // published in "dependencyConstraints" / "<dependencyManagement>"
 //            }
 //        }
 //    }
