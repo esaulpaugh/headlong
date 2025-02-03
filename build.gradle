@@ -9,7 +9,7 @@ group = "com.esaulpaugh"
 version = "12.3.4-SNAPSHOT"
 
 final String versionStr = getProject().getGradle().getGradleVersion()
-final int gradleMajorVersion = Integer.parseUnsignedInt(versionStr.substring(0, versionStr.indexOf('.')))
+final int gradleMajorVersion = Integer.parseUnsignedInt(versionStr.substring(0, versionStr.indexOf((int)".".charAt(0))))
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -93,7 +93,7 @@ final String jmhVersion = "1.37"
 final String bcVersion = "1.80"
 
 final String minRuntimeGson = "2.1" // allow later versions at runtime
-final String requires = "[" + minRuntimeGson + ", " + gsonVersion + "]" // cap the require at the preferred version
+final String requires = "[$minRuntimeGson, $gsonVersion]" // cap the require at the preferred version
 
 dependencies {
     implementation("com.google.code.gson:gson:" + gsonVersion) {
@@ -105,7 +105,7 @@ dependencies {
     constraints {
         implementation("com.google.code.gson:gson:") {
             version {
-                require("[" + minRuntimeGson) // published in "dependencyConstraints" / "<dependencyManagement>"
+                require("[$minRuntimeGson") // published in "dependencyConstraints" / "<dependencyManagement>"
             }
         }
     }
