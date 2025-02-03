@@ -28,7 +28,7 @@ public final class TypeFactory {
         UnitType.initInstances(); // initialize type maps
     }
 
-    private static final int MAX_LENGTH_CHARS = 2_000;
+    private static final int MAX_LENGTH_CHARS = 1_600;
 
     private TypeFactory() {}
 
