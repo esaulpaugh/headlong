@@ -561,7 +561,7 @@ public final class ABIJSON {
             try {
                 jsonReader.setStrictness(Strictness.STRICT);
                 return jsonReader;
-            } catch (LinkageError le) {
+            } catch (LinkageError le) { // e.g. at runtime, gson is below 2.11.0
                 fallback = true;
             }
         }
