@@ -87,12 +87,28 @@ repositories {
     mavenCentral()
 }
 
+final String gsonVersion = "2.12.0"
 final String junitVersion = "5.11.4"
 final String jmhVersion = "1.37"
 final String bcVersion = "1.80"
 
+final String requires = "[2.1, " + gsonVersion + "]" // cap the require at the preferred version
+final String runtimeRange = "[2.1,)" // allow later versions at runtime
+
 dependencies {
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson:" + gsonVersion) {
+        version {
+            require(requires) // published in "dependencies"
+        }
+        exclude(group: "com.google.errorprone", module: "error_prone_annotations")
+    }
+    constraints {
+        implementation("com.google.code.gson:gson:") {
+            version {
+                require(runtimeRange) // published in "dependencyConstraints" / "<dependencyManagement>"
+            }
+        }
+    }
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:" + junitVersion)
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:" + junitVersion)

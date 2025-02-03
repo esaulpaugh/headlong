@@ -27,11 +27,11 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-            gradle-version: 4.10.3
+            gradle-version: 5.6.4
 
       - name: Run gradle and ant builds
         run: |
           java -version
           gradle -version
           gradle build --no-daemon
-          ant -noinput -buildfile build.xml -Drepository="/.gradle/caches/modules-2/files-2.1" -Dgson_path="/com.google.code.gson/gson/2.10.1/b3add478d4382b78ea20b1671390a858002feb6c" clean all build-jar
+          ant -noinput -buildfile build.xml -Drepository="/.gradle/caches/modules-2/files-2.1" -Dgson_path="/com.google.code.gson/gson/2.12.0/10596b68aaca6230f7c40bfd9298b21ff4b84103" clean all build-jar
