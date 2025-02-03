@@ -79,8 +79,8 @@
 //val junitVersion = "5.11.4"
 //val bcVersion = "1.80"
 //
-//val requires = "[2.1, " + gsonVersion + "]" // cap the require at the preferred version
-//val runtimeRange = "[2.1,)" // allow later versions at runtime
+//val minRuntimeGson = "2.1" // allow later versions at runtime
+//val requires = "[$minRuntimeGson, $gsonVersion]" // cap the require at the preferred version
 //
 //dependencies {
 //    implementation("com.google.code.gson:gson:$gsonVersion") {
@@ -92,7 +92,7 @@
 //    constraints {
 //        implementation("com.google.code.gson:gson:") {
 //            version {
-//                require(runtimeRange) // published in "dependencyConstraints" / "<dependencyManagement>"
+//                require("[$minRuntimeGson") // published in "dependencyConstraints" / "<dependencyManagement>"
 //            }
 //        }
 //    }

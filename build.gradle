@@ -92,8 +92,8 @@ final String junitVersion = "5.11.4"
 final String jmhVersion = "1.37"
 final String bcVersion = "1.80"
 
-final String requires = "[2.1, " + gsonVersion + "]" // cap the require at the preferred version
-final String runtimeRange = "[2.1,)" // allow later versions at runtime
+final String minRuntimeGson = "2.1" // allow later versions at runtime
+final String requires = "[" + minRuntimeGson + ", " + gsonVersion + "]" // cap the require at the preferred version
 
 dependencies {
     implementation("com.google.code.gson:gson:" + gsonVersion) {
@@ -105,7 +105,7 @@ dependencies {
     constraints {
         implementation("com.google.code.gson:gson:") {
             version {
-                require(runtimeRange) // published in "dependencyConstraints" / "<dependencyManagement>"
+                require("[" + minRuntimeGson) // published in "dependencyConstraints" / "<dependencyManagement>"
             }
         }
     }
