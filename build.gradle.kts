@@ -75,26 +75,15 @@
 //    mavenCentral()
 //}
 //
-//val gsonVersion = "2.12.0"
 //val junitVersion = "5.11.4"
 //val bcVersion = "1.80"
 //
-//val minRuntimeGson = "2.1" // allow later versions at runtime
-//val requires = "[$minRuntimeGson, $gsonVersion]" // cap the require at the preferred version
-//
 //dependencies {
-//    implementation("com.google.code.gson:gson:$gsonVersion") {
+//    implementation("com.google.code.gson:gson:") {
 //        version {
-//            require(requires) // published in "dependencies"
+//            require("[2.1, 2.12.0]") // published in "dependencies"
 //        }
 //        exclude(group = "com.google.errorprone", module = "error_prone_annotations")
-//    }
-//    constraints {
-//        implementation("com.google.code.gson:gson:") {
-//            version {
-//                require("[$minRuntimeGson") // published in "dependencyConstraints" / "<dependencyManagement>"
-//            }
-//        }
 //    }
 //
 //    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
