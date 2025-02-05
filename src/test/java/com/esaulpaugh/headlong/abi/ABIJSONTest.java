@@ -357,7 +357,7 @@ public class ABIJSONTest {
 
         TestUtils.CustomRunnable parse = () -> Function.fromJson(FLAGS_NONE, function.toString());
 
-        assertThrown(NullPointerException.class, parse);
+        assertThrown(IllegalStateException.class, parse);
 
         function.add("type", new JsonPrimitive("event"));
 
@@ -390,7 +390,7 @@ public class ABIJSONTest {
 
         TestUtils.CustomRunnable runnable = () -> Event.fromJson(FLAGS_NONE, jsonObject.toString());
 
-        assertThrown(NullPointerException.class, runnable);
+        assertThrown(IllegalStateException.class, runnable);
 
         jsonObject.add("type", new JsonPrimitive("event"));
 
