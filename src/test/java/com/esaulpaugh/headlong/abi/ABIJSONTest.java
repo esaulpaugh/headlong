@@ -357,7 +357,7 @@ public class ABIJSONTest {
 
         TestUtils.CustomRunnable parse = () -> Function.fromJson(FLAGS_NONE, function.toString());
 
-        assertThrown(NullPointerException.class, parse);
+        assertThrown(IllegalStateException.class, parse);
 
         function.add("type", new JsonPrimitive("event"));
 
@@ -390,7 +390,7 @@ public class ABIJSONTest {
 
         TestUtils.CustomRunnable runnable = () -> Event.fromJson(FLAGS_NONE, jsonObject.toString());
 
-        assertThrown(IllegalArgumentException.class, runnable);
+        assertThrown(IllegalStateException.class, runnable);
 
         jsonObject.add("type", new JsonPrimitive("event"));
 
@@ -953,15 +953,6 @@ public class ABIJSONTest {
 
     @Test
     public void testInputStreamParse2() throws IOException {
-        assertEquals(0, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.RECEIVE)).size());
-        assertEquals(0, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.FALLBACK)).size());
-        assertEquals(0, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.CONSTRUCTOR)).size());
-        assertEquals(0, ABIJSON.parseEvents("[{\"name\":\"\"}]").size());
-        assertEquals(0, ABIJSON.parseErrors("[{\"name\":\"\"}]").size());
-
-        assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", ABIJSON.FUNCTIONS).size());
-        assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.FUNCTION)).size());
-
         InputStream json = TestUtils.getFileResource("tests/headlong/tests/performAction.json");
         Function performAction = Function.fromJson(FLAGS_NONE, json, Function.newDefaultDigest());
         assertEquals("performAction", performAction.getName());

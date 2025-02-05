@@ -18,14 +18,13 @@ package com.esaulpaugh.headlong.abi;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.Strictness;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
+import java.io.CharArrayReader;
 import java.io.CharArrayWriter;
 import java.io.Closeable;
 import java.io.IOException;
@@ -78,6 +77,8 @@ public final class ABIJSON {
     private static final String INTERNAL_TYPE = "internalType";
 
     private static final TypeAdapter<JsonElement> JSON_ELEMENT_ADAPTER = new Gson().getAdapter(JsonElement.class);
+    private static final int INITIAL_SIZE_PRETTY = 512;
+    private static final int INITIAL_SIZE_COMPACT = 256;
 
     /**
      * Selects all objects with type {@link TypeEnum#FUNCTION}.
@@ -162,7 +163,7 @@ public final class ABIJSON {
 //----------------------------------------------------------------------------------------------------------------------
     static String toJson(ABIObject o, boolean pretty) {
         try {
-            final Writer stringOut = new NonSyncWriter(pretty ? 512 : 256); // can also use StringWriter or CharArrayWriter, but this is faster
+            final Writer stringOut = new NonSyncWriter(pretty ? INITIAL_SIZE_PRETTY : INITIAL_SIZE_COMPACT); // can also use StringWriter or CharArrayWriter, but this is faster
             final JsonWriter out = new JsonWriter(stringOut);
             if (pretty) {
                 out.setIndent("  ");
@@ -271,6 +272,10 @@ public final class ABIJSON {
             this.count = newCount;
         }
 
+        char[] getBuf() {
+            return buf;
+        }
+
         @Override
         public String toString() {
             return new String(buf, 0, count);
@@ -366,9 +371,10 @@ public final class ABIJSON {
 
     static <T extends ABIObject> T tryParseStreaming(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) throws IOException {
         reader.beginObject();
-        JsonObject jsonObject = null;
-        TypeEnum t = null;
-        while (reader.peek() != JsonToken.END_OBJECT) {
+        NonSyncWriter charsWriter = null;
+        JsonWriter jsonWriter = null;
+        TypeEnum t = TypeEnum.FUNCTION;
+        do {
             String name = reader.nextName();
             if (TYPE.equals(name)) {
                 t = TypeEnum.parse(reader.nextString());
@@ -379,29 +385,21 @@ public final class ABIJSON {
                     reader.endObject();
                     return null;
                 }
-                if (jsonObject == null) {
+                if (jsonWriter == null) {
                     return finishParse(t, reader, digest, flags);
                 }
             } else {
-                if (jsonObject == null) {
-                    jsonObject = new JsonObject();
+                if (jsonWriter == null) {
+                    jsonWriter = new JsonWriter((charsWriter = new NonSyncWriter(INITIAL_SIZE_PRETTY))).beginObject();
                 }
+                jsonWriter.name(name);
                 // read is equivalent to JsonParser.parseReader, Streams.parse, and TypeAdapters.JSON_ELEMENT.read
-                jsonObject.add(name, JSON_ELEMENT_ADAPTER.read(reader));
+                JSON_ELEMENT_ADAPTER.write(jsonWriter, JSON_ELEMENT_ADAPTER.read(reader));
             }
-        }
+        } while (reader.peek() != JsonToken.END_OBJECT);
         reader.endObject();
-        if (t == null) {
-            if (types.contains(TypeEnum.FUNCTION)) {
-                if (jsonObject != null) {
-                    jsonObject.add(TYPE, new JsonPrimitive(FUNCTION));
-                }
-                t = TypeEnum.FUNCTION;
-            } else {
-                return null; // skip
-            }
-        }
-        JsonReader r = reader(jsonObject.toString());
+        jsonWriter.endObject();
+        JsonReader r = reader(charsWriter.getBuf());
         r.beginObject();
         return finishParse(t, r, digest, flags);
     }
@@ -553,6 +551,10 @@ public final class ABIJSON {
                 indexed = eventParams ? Arrays.copyOf(indexed, newLen) : null;
             }
         }
+    }
+
+    private static JsonReader reader(char[] chars) {
+        return strict(new CharArrayReader(chars));
     }
 
     private static JsonReader reader(String json) {
