@@ -162,7 +162,7 @@ public final class ABIJSON {
         try (final JsonReader reader = reader(json)) {
             final JsonToken token = reader.peek();
             if (token == JsonToken.BEGIN_OBJECT) {
-                return ABIObject.fromJson(json).toJson(false);
+                return toJson(ABIObject.fromJson(json), false);
             } else if (token == JsonToken.BEGIN_ARRAY) {
                 return optimizedArrayJson(parseElements(json));
             }
