@@ -376,7 +376,7 @@ public final class ABIJSON {
 
     /** Reads an {@link ABIObject} from JSON and closes the {@link InputStream}. Assumes UTF-8 encoding. */
     static <T extends ABIObject> T parseABIObject(InputStream is, Set<TypeEnum> types, MessageDigest digest, int flags) {
-        return parseABIObject(reader(is), types, digest, flags);
+        return parseABIObject(strict(new InputStreamReader(is, StandardCharsets.UTF_8)), types, digest, flags);
     }
 
     private static <T extends ABIObject> T parseABIObject(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) {
@@ -523,10 +523,6 @@ public final class ABIJSON {
 
     private static JsonReader reader(String json) {
         return strict(new StringReader(json));
-    }
-
-    private static JsonReader reader(InputStream input) {
-        return strict(new InputStreamReader(input, StandardCharsets.UTF_8));
     }
 
     private static volatile boolean fallback = false;
