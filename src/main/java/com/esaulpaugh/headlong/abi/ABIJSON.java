@@ -15,16 +15,12 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.Strictness;
-import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
-import java.io.CharArrayReader;
 import java.io.CharArrayWriter;
 import java.io.Closeable;
 import java.io.IOException;
@@ -75,10 +71,6 @@ public final class ABIJSON {
     private static final String STATE_MUTABILITY = "stateMutability";
     static final String PAYABLE = "payable"; // to mark as nonpayable, do not specify any stateMutability
     private static final String INTERNAL_TYPE = "internalType";
-
-    private static final TypeAdapter<JsonElement> JSON_ELEMENT_ADAPTER = new Gson().getAdapter(JsonElement.class);
-    private static final int INITIAL_SIZE_PRETTY = 512;
-    private static final int INITIAL_SIZE_COMPACT = 256;
 
     /**
      * Selects all objects with type {@link TypeEnum#FUNCTION}.
@@ -163,7 +155,7 @@ public final class ABIJSON {
 //----------------------------------------------------------------------------------------------------------------------
     static String toJson(ABIObject o, boolean pretty) {
         try {
-            final Writer stringOut = new NonSyncWriter(pretty ? INITIAL_SIZE_PRETTY : INITIAL_SIZE_COMPACT); // can also use StringWriter or CharArrayWriter, but this is faster
+            final Writer stringOut = new NonSyncWriter(pretty ? 512 : 256); // can also use StringWriter or CharArrayWriter, but this is faster
             final JsonWriter out = new JsonWriter(stringOut);
             if (pretty) {
                 out.setIndent("  ");
@@ -272,10 +264,6 @@ public final class ABIJSON {
             this.count = newCount;
         }
 
-        char[] getBuf() {
-            return buf;
-        }
-
         @Override
         public String toString() {
             return new String(buf, 0, count);
@@ -371,106 +359,53 @@ public final class ABIJSON {
 
     static <T extends ABIObject> T tryParseStreaming(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) throws IOException {
         reader.beginObject();
-        NonSyncWriter charsWriter = null;
-        JsonWriter jsonWriter = null;
         TypeEnum t = TypeEnum.FUNCTION;
-        do {
-            String name = reader.nextName();
-            if (TYPE.equals(name)) {
-                t = TypeEnum.parse(reader.nextString());
-                if (!types.contains(t)) {
-                    while (reader.peek() != JsonToken.END_OBJECT) {
-                        reader.skipValue();
-                    }
-                    reader.endObject();
-                    return null;
-                }
-                if (jsonWriter == null) {
-                    return finishParse(t, reader, digest, flags);
-                }
-            } else {
-                if (jsonWriter == null) {
-                    jsonWriter = new JsonWriter((charsWriter = new NonSyncWriter(INITIAL_SIZE_PRETTY))).beginObject();
-                }
-                jsonWriter.name(name);
-                // read is equivalent to JsonParser.parseReader, Streams.parse, and TypeAdapters.JSON_ELEMENT.read
-                JSON_ELEMENT_ADAPTER.write(jsonWriter, JSON_ELEMENT_ADAPTER.read(reader));
-            }
-        } while (reader.peek() != JsonToken.END_OBJECT);
-        reader.endObject();
-        jsonWriter.endObject();
-        JsonReader r = reader(charsWriter.getBuf());
-        r.beginObject();
-        return finishParse(t, r, digest, flags);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T extends ABIObject> T finishParse(TypeEnum t, JsonReader reader, MessageDigest digest, int flags) throws IOException {
-        switch (t.ordinal()) {
-        case TypeEnum.ORDINAL_FUNCTION:
-        case TypeEnum.ORDINAL_RECEIVE:
-        case TypeEnum.ORDINAL_FALLBACK:
-        case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) parseFunction(t, reader, digest, flags);
-        case TypeEnum.ORDINAL_EVENT: return (T) parseEvent(reader, flags);
-        case TypeEnum.ORDINAL_ERROR: return (T) parseError(reader, flags);
-        default: throw new AssertionError();
-        }
-    }
-
-    private static Function parseFunction(TypeEnum t, JsonReader reader, MessageDigest digest, int flags) throws IOException {
         String name = null;
         TupleType<?> inputs = TupleType.EMPTY;
         TupleType<?> outputs = TupleType.EMPTY;
         String stateMutability = null;
-        while (reader.peek() != JsonToken.END_OBJECT) {
-            switch (reader.nextName()) {
-            case NAME: name = reader.nextString(); continue;
-            case INPUTS: inputs = parseTupleType(reader, false, flags); continue;
-            case OUTPUTS: outputs = parseTupleType(reader, false, flags); continue;
-            case STATE_MUTABILITY: stateMutability = reader.nextString(); continue;
-            default: reader.skipValue();
-            }
-        }
-        reader.endObject();
-        return new Function(t, name, inputs, outputs, stateMutability, digest);
-    }
-
-    private static Event<?> parseEvent(JsonReader reader, int flags) throws IOException {
-        String name = null;
         boolean anonymous = false;
-        TupleType<?> tt = null;
-        while (reader.peek() != JsonToken.END_OBJECT) {
-            switch (reader.nextName()) {
-            case NAME: name = reader.nextString(); continue;
-            case ANONYMOUS: anonymous = reader.nextBoolean(); continue;
-            case INPUTS: tt = parseTupleType(reader, true, flags); continue;
-            default: reader.skipValue();
-            }
+        try {
+            do {
+                final String key = reader.nextName();
+                switch (key) {
+                case TYPE:
+                    t = TypeEnum.parse(reader.nextString());
+                    if (!types.contains(t)) {
+                        while (reader.peek() != JsonToken.END_OBJECT) {
+                            reader.skipValue();
+                        }
+                        return null;
+                    }
+                    continue;
+                case NAME: name = reader.nextString(); continue;
+                case INPUTS: inputs = parseTupleType(reader, flags); continue;
+                case OUTPUTS: outputs = parseTupleType(reader, flags); continue;
+                case STATE_MUTABILITY: stateMutability = reader.nextString(); continue;
+                case ANONYMOUS: anonymous = reader.nextBoolean(); continue;
+                default: reader.skipValue();
+                }
+            } while (reader.peek() != JsonToken.END_OBJECT);
+            return finishParse(t, name, inputs, outputs, stateMutability, anonymous, digest);
+        } finally {
+            reader.endObject();
         }
-        reader.endObject();
-        return new Event<>(
-                name,
-                anonymous,
-                tt,
-                tt.indexed
-        );
     }
 
-    private static ContractError<?> parseError(JsonReader reader, int flags) throws IOException {
-        String name = null;
-        TupleType<?> tt = null;
-        while (reader.peek() != JsonToken.END_OBJECT) {
-            switch (reader.nextName()) {
-            case NAME: name = reader.nextString(); continue;
-            case INPUTS: tt = parseTupleType(reader, false, flags); continue;
-            default: reader.skipValue();
-            }
+    @SuppressWarnings("unchecked")
+    private static <T extends ABIObject> T finishParse(TypeEnum t, String name, TupleType<?> inputs, TupleType<?> outputs, String stateMutability, boolean anonymous, MessageDigest digest) {
+        switch (t.ordinal()) {
+        case TypeEnum.ORDINAL_FUNCTION:
+        case TypeEnum.ORDINAL_RECEIVE:
+        case TypeEnum.ORDINAL_FALLBACK:
+        case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) new Function(t, name, inputs, outputs, stateMutability, digest);
+        case TypeEnum.ORDINAL_EVENT: return (T) new Event<>(name, anonymous, inputs, inputs.indexed);
+        case TypeEnum.ORDINAL_ERROR: return (T) new ContractError<>(name, inputs);
+        default: throw new AssertionError();
         }
-        reader.endObject();
-        return new ContractError<>(name, tt);
     }
 
-    private static TupleType<?> parseTupleType(final JsonReader reader, final boolean eventParams, final int flags) throws IOException {
+    private static TupleType<?> parseTupleType(final JsonReader reader, final int flags) throws IOException {
         if (reader.peek() == JsonToken.NULL) {
             reader.nextNull();
             return TupleType.empty(flags);
@@ -485,7 +420,7 @@ public final class ABIJSON {
         ABIType<?>[] elements = new ABIType<?>[8];
         String[] names = new String[8];
         String[] internalTypes = new String[8];
-        boolean[] indexed = eventParams ? new boolean[8] : null;
+        boolean[] indexed = new boolean[8];
         StringBuilder canonicalType = TupleType.newTypeBuilder();
         boolean dynamic = false;
 
@@ -500,7 +435,7 @@ public final class ABIJSON {
             while (reader.peek() != JsonToken.END_OBJECT) {
                 switch (reader.nextName()) {
                 case TYPE: type = reader.nextString(); continue;
-                case COMPONENTS: e = parseTupleType(reader, false, flags); continue;
+                case COMPONENTS: e = parseTupleType(reader, flags); continue;
                 case NAME: name = reader.nextString(); continue;
                 case INTERNAL_TYPE: internalType = reader.nextString(); continue;
                 case INDEXED: isIndexed = reader.nextBoolean(); continue;
@@ -525,9 +460,7 @@ public final class ABIJSON {
             if (internalType != null) {
                 internalTypes[i] = internalType.equals(e.canonicalType) ? e.canonicalType : internalType;
             }
-            if (eventParams) {
-                indexed[i] = isIndexed;
-            }
+            indexed[i] = isIndexed;
 
             i++;
             if (reader.peek() == JsonToken.END_ARRAY) {
@@ -538,7 +471,7 @@ public final class ABIJSON {
                         Arrays.copyOf(elements, i),
                         Arrays.copyOf(names, i),
                         Arrays.copyOf(internalTypes, i),
-                        eventParams ? Arrays.copyOf(indexed, i) : null,
+                        Arrays.copyOf(indexed, i),
                         flags
                 );
             }
@@ -548,13 +481,9 @@ public final class ABIJSON {
                 elements = Arrays.copyOf(elements, newLen);
                 names = Arrays.copyOf(names, newLen);
                 internalTypes = Arrays.copyOf(internalTypes, newLen);
-                indexed = eventParams ? Arrays.copyOf(indexed, newLen) : null;
+                indexed = Arrays.copyOf(indexed, newLen);
             }
         }
-    }
-
-    private static JsonReader reader(char[] chars) {
-        return strict(new CharArrayReader(chars));
     }
 
     private static JsonReader reader(String json) {
