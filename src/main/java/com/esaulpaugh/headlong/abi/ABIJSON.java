@@ -21,7 +21,6 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.CharArrayWriter;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -129,7 +128,7 @@ public final class ABIJSON {
     public static <T extends ABIObject> Stream<T> stream(int flags, String arrayJson, Set<TypeEnum> types) {
         final JsonSpliterator<T> spliterator = new JsonSpliterator<>(arrayJson, types, flags);
         return StreamSupport.stream(spliterator, false)
-                    .onClose(spliterator::close);
+                    .onClose(spliterator::tryClose);
     }
 
     /** Iterators are not thread-safe. */
@@ -304,7 +303,7 @@ public final class ABIJSON {
         }
     }
 //----------------------------------------------------------------------------------------------------------------------
-    static class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> implements Closeable {
+    static class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> {
 
         private final JsonReader jsonReader;
         private final Set<TypeEnum> types;
@@ -313,7 +312,7 @@ public final class ABIJSON {
         boolean closed = false;
 
         JsonSpliterator(String arrayJson, Set<TypeEnum> types, int flags) {
-            super(Long.SIZE, ORDERED | NONNULL | IMMUTABLE);
+            super(Long.SIZE, ORDERED | NONNULL);
             try {
                 JsonReader reader = reader(arrayJson);
                 reader.beginArray();
@@ -337,7 +336,7 @@ public final class ABIJSON {
                             return true;
                         }
                     }
-                    doClose();
+                    tryClose();
                 }
                 return false;
             } catch (IOException io) {
@@ -347,25 +346,20 @@ public final class ABIJSON {
 
         @Override
         public Spliterator<T> trySplit() {
-            return null;
+            return null; // alternatively, throw new ConcurrentModificationException();
         }
 
-        @Override
-        public void close() {
+        public void tryClose() {
             if (!closed) {
                 try {
-                    doClose();
+                    try {
+                        jsonReader.close();
+                    } finally {
+                        closed = true;
+                    }
                 } catch (IOException io) {
                     throw new IllegalStateException(io);
                 }
-            }
-        }
-
-        private void doClose() throws IOException {
-            try {
-                jsonReader.close();
-            } finally {
-                closed = true;
             }
         }
     }
@@ -380,8 +374,8 @@ public final class ABIJSON {
     }
 
     private static <T extends ABIObject> T parseABIObject(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) {
-        try (JsonReader r = reader) {
-            T obj = tryParseStreaming(r, types, digest, flags);
+        try (JsonReader ignored = reader) {
+            T obj = tryParseStreaming(reader, types, digest, flags);
             if (obj != null) {
                 return obj;
             }
