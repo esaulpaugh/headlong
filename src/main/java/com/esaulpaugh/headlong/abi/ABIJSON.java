@@ -146,54 +146,89 @@ public final class ABIJSON {
                 }
                 reader.skipValue();
             }
+            throw new IllegalStateException("abi key not found");
         } catch (IOException io) {
             throw new IllegalStateException(io);
         }
-        throw new IllegalStateException("abi key not found");
+    }
+
+    /**
+     * Parses Ethereum ABI JSON and returns a minimal version, optimized for parsing by this class. Accepts JSON array or JSON object.
+     *
+     * @param json  array or object json
+     * @return  optimized json
+     */
+    public static String optimizeJson(String json) {
+        try (final JsonReader reader = reader(json)) {
+            final JsonToken token = reader.peek();
+            if (token == JsonToken.BEGIN_OBJECT) {
+                return ABIObject.fromJson(json).toJson(false);
+            } else if (token == JsonToken.BEGIN_ARRAY) {
+                return optimizedArrayJson(parseElements(json));
+            }
+            throw new IllegalArgumentException("unexpected token: " + token);
+        } catch (IOException io) {
+            throw new IllegalStateException(io);
+        }
     }
 //----------------------------------------------------------------------------------------------------------------------
     static String toJson(ABIObject o, boolean pretty) {
-        try {
-            final Writer stringOut = new NonSyncWriter(pretty ? 512 : 256); // can also use StringWriter or CharArrayWriter, but this is faster
-            final JsonWriter out = new JsonWriter(stringOut);
+        final Writer stringOut = new NonSyncWriter(pretty ? 512 : 256); // can also use StringWriter or CharArrayWriter, but this is faster
+        try (final JsonWriter out = new JsonWriter(stringOut)) {
             if (pretty) {
                 out.setIndent("  ");
             }
-            out.beginObject();
-            if (o.isFunction()) {
-                final Function f = o.asFunction();
-                final TypeEnum t = o.getType();
-                type(out, t.toString());
-                if (t != TypeEnum.FALLBACK) {
-                    name(out, o.getName());
-                    if (t != TypeEnum.RECEIVE) {
-                        tupleType(out, INPUTS, o.getInputs(), null);
-                        if (t != TypeEnum.CONSTRUCTOR) {
-                            tupleType(out, OUTPUTS, f.getOutputs(), null);
-                        }
-                    }
-                }
-                String stateMutability = f.getStateMutability();
-                if (stateMutability != null) {
-                    out.name(STATE_MUTABILITY).value(stateMutability);
-                }
-            } else if (o.isEvent()) {
-                final Event<?> e = o.asEvent();
-                type(out, EVENT);
-                name(out, o.getName());
-                tupleType(out, INPUTS, o.getInputs(), e.getIndexManifest());
-                out.name(ANONYMOUS).value(e.isAnonymous());
-            } else {
-                type(out, ERROR);
-                name(out, o.getName());
-                tupleType(out, INPUTS, o.getInputs(), null);
-            }
-            out.endObject()
-                    .close();
+            writeObject(o, out);
             return stringOut.toString();
         } catch (IOException io) {
             throw new IllegalStateException(io);
         }
+    }
+
+    private static String optimizedArrayJson(List<ABIObject> elements) throws IOException {
+        final Writer stringOut = new NonSyncWriter(2048);
+        try (final JsonWriter out = new JsonWriter(stringOut)) {
+            out.setIndent("");
+            out.beginArray();
+            for (ABIObject e : elements) {
+                writeObject(e, out);
+            }
+            out.endArray();
+            return stringOut.toString();
+        }
+    }
+
+    private static void writeObject(ABIObject o, JsonWriter out) throws IOException {
+        out.beginObject();
+        if (o.isFunction()) {
+            final Function f = o.asFunction();
+            final TypeEnum t = o.getType();
+            type(out, t.toString()); // "type" key should be first, so streaming API can skip non-matching items quickly
+            if (t != TypeEnum.FALLBACK) {
+                name(out, o.getName());
+                if (t != TypeEnum.RECEIVE) {
+                    tupleType(out, INPUTS, o.getInputs(), null);
+                    if (t != TypeEnum.CONSTRUCTOR) {
+                        tupleType(out, OUTPUTS, f.getOutputs(), null);
+                    }
+                }
+            }
+            String stateMutability = f.getStateMutability();
+            if (stateMutability != null) {
+                out.name(STATE_MUTABILITY).value(stateMutability);
+            }
+        } else if (o.isEvent()) {
+            final Event<?> e = o.asEvent();
+            type(out, EVENT);
+            name(out, o.getName());
+            tupleType(out, INPUTS, o.getInputs(), e.getIndexManifest());
+            out.name(ANONYMOUS).value(e.isAnonymous());
+        } else {
+            type(out, ERROR);
+            name(out, o.getName());
+            tupleType(out, INPUTS, o.getInputs(), null);
+        }
+        out.endObject();
     }
 
     private static void type(JsonWriter out, String type) throws IOException {
@@ -371,6 +406,7 @@ public final class ABIJSON {
                 case TYPE:
                     t = TypeEnum.parse(reader.nextString());
                     if (!types.contains(t)) {
+                        // abort. for best performance, "type" should be declared first in the json object
                         while (reader.peek() != JsonToken.END_OBJECT) {
                             reader.skipValue();
                         }
