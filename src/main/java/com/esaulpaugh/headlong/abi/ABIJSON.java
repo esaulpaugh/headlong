@@ -400,7 +400,7 @@ public final class ABIJSON {
                 case TYPE:
                     t = TypeEnum.parse(reader.nextString());
                     if (!types.contains(t)) {
-                        // abort. for best performance, "type" should be declared first in the json object
+                        // skip this json object. for best performance, "type" should be declared first
                         while (reader.peek() != JsonToken.END_OBJECT) {
                             reader.skipValue();
                         }
@@ -527,6 +527,7 @@ public final class ABIJSON {
         if (!fallback) {
             try {
                 jsonReader.setStrictness(Strictness.STRICT);
+                jsonReader.setNestingLimit(50);
                 return jsonReader;
             } catch (LinkageError le) { // e.g. at runtime, gson is below 2.11.0
                 fallback = true;
