@@ -616,26 +616,26 @@ public class ABIJSONTest {
         List<ABIObject> list = ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, CONTRACT_JSON, EnumSet.noneOf(TypeEnum.class));
         assertEquals(0, list.size());
 
-        list = ABIJSON.parseElements(CONTRACT_JSON);
+        list = new ABIParser().parse(CONTRACT_JSON);
         assertEquals(2, list.size());
         assertTrue(list.stream().anyMatch(ABIObject::isEvent));
         assertTrue(list.stream().anyMatch(ABIObject::isFunction));
 
-        list = ABIJSON.parseElements(CONTRACT_JSON, FUNCTIONS_AND_EVENTS);
+        list = new ABIParser(FUNCTIONS_AND_EVENTS).parse(CONTRACT_JSON);
         assertEquals(2, list.size());
         assertTrue(list.stream().anyMatch(ABIObject::isEvent));
         assertTrue(list.stream().anyMatch(ABIObject::isFunction));
         assertFalse(list.stream().anyMatch(ABIObject::isContractError));
 
-        list = ABIJSON.parseElements(CONTRACT_JSON, EVENTS_AND_ERRORS);
+        list = new ABIParser(EVENTS_AND_ERRORS).parse(CONTRACT_JSON);
         assertEquals(1, list.size());
         assertTrue(list.stream().anyMatch(ABIObject::isEvent));
 
-        List<Function> fList = ABIJSON.parseElements(CONTRACT_JSON, ABIJSON.FUNCTIONS);
+        List<Function> fList = new ABIParser(ABIJSON.FUNCTIONS).parse(CONTRACT_JSON);
         assertEquals(1, fList.size());
         assertTrue(fList.stream().anyMatch(ABIObject::isFunction));
 
-        List<ContractError<?>> errList = ABIJSON.parseElements(ERROR_JSON_ARRAY, ABIJSON.ERRORS);
+        List<ContractError<?>> errList = new ABIParser(ABIJSON.ERRORS).parse(ERROR_JSON_ARRAY);
         assertEquals(1, errList.size());
         assertTrue(errList.stream().anyMatch(ABIObject::isContractError));
 
@@ -647,55 +647,39 @@ public class ABIJSONTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testIteratorAndStream() throws Throwable {
-        assertFalse(ABIJSON.iterator(ABIType.FLAG_LEGACY_DECODE, CONTRACT_JSON, EnumSet.noneOf(TypeEnum.class)).hasNext());
-        assertFalse(ABIJSON.iterator(ABIType.FLAG_LEGACY_DECODE, "[]", ABIJSON.ALL).hasNext());
-        assertEquals(0, (int) ABIJSON.stream("[]").count());
+    public void testStream() throws Throwable {
+        assertEquals(0, (int) new ABIParser().stream("[]").count());
 
-        Iterator<ABIObject> iter;
+        final ABIParser p = new ABIParser();
+
         for (Set<?> set : new Set[] { ABIJSON.ALL, FUNCTIONS_AND_EVENTS, EnumSet.of(TypeEnum.EVENT, TypeEnum.FUNCTION) }) {
-            iter = ABIJSON.iterator(FLAGS_NONE, CONTRACT_JSON, (Set<TypeEnum>) set);
-            assertTrue(iter.next().isEvent());
-            assertTrue(iter.next().isFunction());
-            assertFalse(iter.hasNext());
-            assertThrown(NoSuchElementException.class, iter::next);
-            assertEquals(2, ABIJSON.stream(CONTRACT_JSON).count());
-            assertTrue(ABIJSON.stream(CONTRACT_JSON).anyMatch(ABIObject::isEvent));
-            assertTrue(ABIJSON.stream(CONTRACT_JSON).anyMatch(ABIObject::isFunction));
-            assertFalse(ABIJSON.stream(CONTRACT_JSON).anyMatch(ABIObject::isContractError));
+            assertEquals(2, p.stream(CONTRACT_JSON).count());
+            assertTrue(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isEvent));
+            assertTrue(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isFunction));
+            assertFalse(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isContractError));
         }
 
-        iter = ABIJSON.iterator(FLAGS_NONE, CONTRACT_JSON, EVENTS_AND_ERRORS);
-        assertTrue(iter.next().isEvent());
-        assertFalse(iter.hasNext());
-        assertTrue(ABIJSON.stream(CONTRACT_JSON).anyMatch(ABIObject::isEvent));
+        assertTrue(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isEvent));
 
-        Iterator<Function> fIter = ABIJSON.iterator(FLAGS_NONE, CONTRACT_JSON, ABIJSON.FUNCTIONS);
-        assertInstanceOf(Function.class, fIter.next());
-        assertFalse(fIter.hasNext());
-        assertTrue(ABIJSON.stream(CONTRACT_JSON).anyMatch(ABIObject::isFunction));
+        assertTrue(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isFunction));
 
-        Iterator<ContractError<Tuple>> errIter = ABIJSON.iterator(FLAGS_NONE, ERROR_JSON_ARRAY, ABIJSON.ERRORS);
-        assertInstanceOf(ContractError.class, errIter.next());
-        assertFalse(errIter.hasNext());
-        assertEquals(1, ABIJSON.stream(ERROR_JSON_ARRAY).count());
-        assertInstanceOf(ContractError.class, ABIJSON.stream(ERROR_JSON_ARRAY).filter(ABIObject::isContractError).findFirst().get());
-
-        assertFalse(ABIJSON.iterator(FLAGS_NONE, ERROR_JSON_ARRAY, ABIJSON.FUNCTIONS).hasNext());
+        assertEquals(1, p.stream(ERROR_JSON_ARRAY).count());
+        assertInstanceOf(ContractError.class, p.stream(ERROR_JSON_ARRAY).filter(ABIObject::isContractError).findFirst().get());
     }
 
     @Test
     public void testEnumSet() {
+        final ABIParser p = new ABIParser(EnumSet.noneOf(TypeEnum.class));
         {
-            List<ABIObject> list = ABIJSON.parseElements(CONTRACT_JSON, EnumSet.noneOf(TypeEnum.class));
+            List<ABIObject> list = p.parse(CONTRACT_JSON);
             assertEquals(0, list.size());
 
-            list = ABIJSON.parseElements(CONTRACT_JSON, FUNCTIONS_AND_EVENTS);
+            list = new ABIParser(FUNCTIONS_AND_EVENTS).parse(CONTRACT_JSON);
             assertEquals(2, list.size());
             assertTrue(list.stream().anyMatch(ABIObject::isEvent));
             assertTrue(list.stream().anyMatch(ABIObject::isFunction));
 
-            list = ABIJSON.parseElements(CONTRACT_JSON, EVENTS_AND_ERRORS);
+            list = new ABIParser(EVENTS_AND_ERRORS).parse(CONTRACT_JSON);
             assertEquals(1, list.size());
             assertTrue(list.stream().anyMatch(ABIObject::isEvent));
 
@@ -703,7 +687,7 @@ public class ABIJSONTest {
             assertEquals(1, fList.size());
             assertTrue(fList.stream().anyMatch(ABIObject::isFunction));
 
-            List<ContractError<?>> errList = ABIJSON.parseElements(ERROR_JSON_ARRAY, EnumSet.of(TypeEnum.ERROR));
+            List<ContractError<?>> errList = new ABIParser(EnumSet.of(TypeEnum.ERROR)).parse(ERROR_JSON_ARRAY);
             assertEquals(1, errList.size());
             assertTrue(errList.stream().anyMatch(ABIObject::isContractError));
         }
@@ -725,7 +709,7 @@ public class ABIJSONTest {
     }
 
     private static void testFallbackConstructorReceive(EnumSet<TypeEnum> expectedTypes, int expectedSize) {
-        List<Function> fns = ABIJSON.parseElements(FALLBACK_CONSTRUCTOR_RECEIVE, expectedTypes);
+        List<Function> fns = new ABIParser(expectedTypes).parse(FALLBACK_CONSTRUCTOR_RECEIVE);
         assertEquals(expectedSize, fns.size());
         for(Function f : fns) {
             assertTrue(expectedTypes.contains(f.getType()));
@@ -734,7 +718,7 @@ public class ABIJSONTest {
 
     @Test
     public void testStreamObjects() {
-        List<ABIObject> objects = ABIJSON.parseElements(CONTRACT_JSON);
+        List<ABIObject> objects = new ABIParser().parse(CONTRACT_JSON);
 
         List<Function> functions = objects.stream()
                 .filter(ABIObject::isFunction)
@@ -930,24 +914,24 @@ public class ABIJSONTest {
         testABIObject(EVENT_STR);
         testABIObject(ERROR_JSON);
 
-        Function f = Function.fromJson(FLAGS_NONE, stream(FUNCTION_A_JSON), Function.newDefaultDigest());
+        Function f = Function.fromJson(FLAGS_NONE, baos(FUNCTION_A_JSON), Function.newDefaultDigest());
         assertEquals(FUNCTION_A_JSON, f.toJson(true));
 
-        Event<Single<Single<String>[]>> e = Event.fromJson(FLAGS_NONE, stream(EVENT_STR));
+        Event<Single<Single<String>[]>> e = Event.fromJson(FLAGS_NONE, baos(EVENT_STR));
         assertEquals(EVENT_STR, e.toJson(true));
 
-        ContractError<Pair<BigInteger, Integer>> err = ContractError.fromJson(FLAGS_NONE, stream(ERROR_JSON));
+        ContractError<Pair<BigInteger, Integer>> err = ContractError.fromJson(FLAGS_NONE, baos(ERROR_JSON));
         assertEquals(ERROR_JSON, err.toJson(true));
     }
 
     private static void testABIObject(String json) {
         assertEquals(
                 json,
-                ABIObject.fromJson(FLAGS_NONE, stream(json)).toJson(true)
+                ABIObject.fromJson(FLAGS_NONE, baos(json)).toJson(true)
         );
     }
 
-    private static InputStream stream(String str) {
+    private static InputStream baos(String str) {
         return new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -965,7 +949,7 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testInputStreamParse2() throws IOException {
+    public void testParseFilter() throws Throwable {
         assertEquals(0, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.RECEIVE)).size());
         assertEquals(0, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.FALLBACK)).size());
         assertEquals(0, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.CONSTRUCTOR)).size());
@@ -975,10 +959,8 @@ public class ABIJSONTest {
         assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", ABIJSON.FUNCTIONS).size());
         assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.FUNCTION)).size());
 
-        InputStream json = TestUtils.getFileResource("tests/headlong/tests/performAction.json");
-        Function performAction = Function.fromJson(FLAGS_NONE, json, Function.newDefaultDigest());
-        assertEquals("performAction", performAction.getName());
-        assertEquals(TupleType.parse("(address,uint)"), performAction.getInputs());
-        assertEquals(TupleType.parse("(uint32)"), performAction.getOutputs());
+        assertEquals(0L, new ABIParser(ABIJSON.EVENTS).stream(baos("[{\"name\":\"\"}]")).count());
+
+        assertThrown(IllegalArgumentException.class, "Argument flags must be one of: { 0, 1 }", () -> new ABIParser(-1));
     }
 }

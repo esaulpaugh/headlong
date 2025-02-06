@@ -21,10 +21,12 @@ import com.esaulpaugh.headlong.util.Integers;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -953,13 +955,32 @@ public class DecodeTest {
         checkLegacyFlags(f.getInputs());
         checkLegacyFlags(f.getOutputs());
 
-        final Function f2 = ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, "[" + FN_JSON + "]", ABIJSON.ALL)
+        final String arrayJson = "[" + FN_JSON + "]";
+
+        final Function f2 = ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, arrayJson, ABIJSON.ALL)
                 .get(0)
                 .asFunction();
         checkLegacyFlags(f2.getInputs());
         checkLegacyFlags(f2.getOutputs());
 
+        final Function f3 = new ABIParser(ABIType.FLAG_LEGACY_DECODE)
+                .parse(arrayJson)
+                .get(0)
+                .asFunction();
+        checkLegacyFlags(f3.getInputs());
+        checkLegacyFlags(f3.getOutputs());
+
+        final Function f4 = new ABIParser(ABIType.FLAG_LEGACY_DECODE)
+                .stream(new ByteArrayInputStream(arrayJson.getBytes(StandardCharsets.UTF_8)))
+                .findFirst()
+                .get()
+                .asFunction();
+        checkLegacyFlags(f4.getInputs());
+        checkLegacyFlags(f4.getOutputs());
+
         assertEquals(f, f2);
+        assertEquals(f, f3);
+        assertEquals(f, f4);
 
         final Tuple args = Single.of(new byte[] { 9, 100 });
         final ByteBuffer bb = f.encodeCall(args);
