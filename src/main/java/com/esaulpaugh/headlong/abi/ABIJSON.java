@@ -78,7 +78,7 @@ public final class ABIJSON {
      * @return  the parsed {@link Function}s
      */
     public static List<Function> parseNormalFunctions(String arrayJson) {
-        return parseElements(arrayJson, EnumSet.of(TypeEnum.FUNCTION));
+        return parseElements(ABIType.FLAGS_NONE, arrayJson, EnumSet.of(TypeEnum.FUNCTION));
     }
 
     /**
@@ -89,72 +89,21 @@ public final class ABIJSON {
      * @return  the parsed {@link Function}s
      */
     public static List<Function> parseFunctions(String arrayJson) {
-        return parseElements(arrayJson, FUNCTIONS);
+        return parseElements(ABIType.FLAGS_NONE, arrayJson, FUNCTIONS);
     }
 
     public static List<Event<Tuple>> parseEvents(String arrayJson) {
-        return parseElements(arrayJson, EVENTS);
+        return parseElements(ABIType.FLAGS_NONE, arrayJson, EVENTS);
     }
 
     public static List<ContractError<Tuple>> parseErrors(String arrayJson) {
-        return parseElements(arrayJson, ERRORS);
-    }
-
-    public static List<ABIObject> parseElements(String arrayJson) {
-        return parseElements(arrayJson, ALL);
-    }
-
-    public static Stream<ABIObject> stream(String arrayJson) {
-        return stream(arrayJson, ABIJSON.ALL);
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    public static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types) {
-        return parseElements(ABIType.FLAGS_NONE, arrayJson, types);
-    }
-
-    public static <T extends ABIObject> List<T> parseElements(InputStream arrayStream, Set<TypeEnum> types) {
-        return parseElements(ABIType.FLAGS_NONE, arrayStream, types);
-    }
-
-    public static <T extends ABIObject> Stream<T> stream(String arrayJson, Set<TypeEnum> types) {
-        return stream(ABIType.FLAGS_NONE, arrayJson, types);
-    }
-
-    public static <T extends ABIObject> Stream<T> stream(InputStream arrayStream, Set<TypeEnum> types) {
-        return stream(ABIType.FLAGS_NONE, arrayStream, types);
+        return parseElements(ABIType.FLAGS_NONE, arrayJson, ERRORS);
     }
 
     public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
-        return parseElements(reader(arrayJson), types, flags);
-    }
-
-    public static <T extends ABIObject> List<T> parseElements(int flags, InputStream arrayStream, Set<TypeEnum> types) {
-        return parseElements(reader(arrayStream), types, flags);
-    }
-
-    public static <T extends ABIObject> Stream<T> stream(int flags, String arrayJson, Set<TypeEnum> types) {
-        return stream(reader(arrayJson), types, flags);
-    }
-
-    public static <T extends ABIObject> Stream<T> stream(int flags, InputStream arrayStream, Set<TypeEnum> types) {
-        return stream(reader(arrayStream), types, flags);
+        return parseArray(reader(arrayJson), types, flags);
     }
 //----------------------------------------------------------------------------------------------------------------------
-    private static <T extends ABIObject> List<T> parseElements(JsonReader reader, Set<TypeEnum> types, int flags) {
-        return parseArray(reader, types, flags);
-    }
-
-    private static <T extends ABIObject> Stream<T> stream(JsonReader reader, Set<TypeEnum> types, int flags) {
-        final JsonSpliterator<T> spliterator = new JsonSpliterator<>(reader, types, flags); // For single-threaded use only
-        return StreamSupport.stream(spliterator, false)
-                .onClose(spliterator::tryClose);
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    /** Iterators are not thread-safe. */
-    public static <T extends ABIObject> Iterator<T> iterator(int flags, String arrayJson, Set<TypeEnum> types) {
-        return ABIJSON.<T>stream(flags, arrayJson, types).iterator();
-    }
-
     public static <T extends ABIObject> List<T> parseABIField(int flags, String objectJson, Set<TypeEnum> types) {
         try (final JsonReader reader = reader(objectJson)) {
             reader.beginObject();
@@ -182,7 +131,7 @@ public final class ABIJSON {
             if (token == JsonToken.BEGIN_OBJECT) {
                 return toJson(ABIObject.fromJson(json), false);
             } else if (token == JsonToken.BEGIN_ARRAY) {
-                return optimizedArrayJson(parseElements(json));
+                return optimizedArrayJson(parseArray(reader, ABIJSON.ALL, ABIType.FLAGS_NONE));
             }
             throw new IllegalArgumentException("unexpected token: " + token);
         } catch (IOException io) {
@@ -190,6 +139,12 @@ public final class ABIJSON {
         }
     }
 //----------------------------------------------------------------------------------------------------------------------
+    static <T extends ABIObject> Stream<T> _stream(JsonReader reader, Set<TypeEnum> types, int flags) {
+        final JsonSpliterator<T> spliterator = new JsonSpliterator<>(reader, types, flags); // For single-threaded use only
+        return StreamSupport.stream(spliterator, false)
+                .onClose(spliterator::tryClose);
+    }
+
     static String toJson(ABIObject o, boolean pretty) {
         final Writer stringOut = new NonSyncWriter(pretty ? 512 : 256); // can also use StringWriter or CharArrayWriter, but this is faster
         try (final JsonWriter out = new JsonWriter(stringOut)) {
@@ -540,11 +495,11 @@ public final class ABIJSON {
         }
     }
 
-    private static JsonReader reader(InputStream input) {
+    static JsonReader reader(InputStream input) {
         return strict(new InputStreamReader(input, StandardCharsets.UTF_8));
     }
 
-    private static JsonReader reader(String json) {
+    static JsonReader reader(String json) {
         return strict(new StringReader(json));
     }
 
@@ -566,7 +521,7 @@ public final class ABIJSON {
         return jsonReader;
     }
 
-    private static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags) {
+    static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags) {
         final List<T> list = new ArrayList<>();
         final MessageDigest digest = Function.newDefaultDigest();
         try {
