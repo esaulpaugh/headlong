@@ -387,7 +387,7 @@ public final class ABIJSON {
 
     static <T extends ABIObject> T tryParseStreaming(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) throws IOException {
         reader.beginObject();
-        TypeEnum t = TypeEnum.FUNCTION;
+        TypeEnum t = null;
         String name = null;
         TupleType<?> inputs = TupleType.EMPTY;
         TupleType<?> outputs = TupleType.EMPTY;
@@ -415,6 +415,13 @@ public final class ABIJSON {
                 default: reader.skipValue();
                 }
             } while (reader.peek() != JsonToken.END_OBJECT);
+            if (t == null) {
+                if (types.contains(TypeEnum.FUNCTION)) {
+                    t = TypeEnum.FUNCTION;
+                } else {
+                    return null; // skip
+                }
+            }
             return finishParse(t, name, inputs, outputs, stateMutability, anonymous, digest);
         } finally {
             reader.endObject();
