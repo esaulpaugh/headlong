@@ -952,11 +952,15 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testInputStreamParse2() throws IOException {
-        InputStream json = TestUtils.getFileResource("tests/headlong/tests/performAction.json");
-        Function performAction = Function.fromJson(FLAGS_NONE, json, Function.newDefaultDigest());
-        assertEquals("performAction", performAction.getName());
-        assertEquals(TupleType.parse("(address,uint)"), performAction.getInputs());
-        assertEquals(TupleType.parse("(uint32)"), performAction.getOutputs());
+    public void testNestingLimit() throws Throwable {
+        InputStream deepJson = TestUtils.getFileResource("tests/headlong/tests/deep.json");
+        Function emptyNest = Function.fromJson(FLAGS_NONE, deepJson, Function.newDefaultDigest());
+        assertEquals("emptyNest", emptyNest.getName());
+        assertEquals(TupleType.parse("((((((((((((((((((((((((()))))))))))))))))))))))))"), emptyNest.getInputs());
+        assertEquals(TupleType.parse("()"), emptyNest.getOutputs());
+        System.out.println(emptyNest.toJson(false));
+
+        InputStream tooDeepJson = TestUtils.getFileResource("tests/headlong/tests/deep_and_excessively_so.json");
+        assertThrown(IllegalStateException.class, () -> Function.fromJson(FLAGS_NONE, tooDeepJson, Function.newDefaultDigest()));
     }
 }
