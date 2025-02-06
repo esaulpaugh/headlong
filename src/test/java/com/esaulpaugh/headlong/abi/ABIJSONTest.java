@@ -964,9 +964,14 @@ public class ABIJSONTest {
 
     @Test
     public void optimizeJson() {
-        final String in = "{\n  \"type\": \"event\",\n  \"name\":\"\",\n  \"inputs\":[],\n  \"outputs\":[],\n  \"anonymous\": false\n}\n";
+        final String in = "{\n    \"type\": \"event\",\n    \"name\":\"\",\n    \"inputs\":[],\n    \"outputs\":[],\n    \"anonymous\": false\n  }";
         final String out = "{\"type\":\"event\",\"name\":\"\"}";
         assertEquals(out, ABIJSON.optimizeJson(in));
-        assertEquals("[" + out + "]", ABIJSON.optimizeJson("[\n  " + in + "]"));
+        final String inContract = "[\n  " + in + ",\n  " + in + "\n]";
+        final String outContract = "[" + out + "," + out + "]";
+        assertEquals(208, inContract.length());
+        assertEquals(55, outContract.length());
+        assertEquals(outContract, ABIJSON.optimizeJson(inContract));
+        System.out.println(outContract);
     }
 }
