@@ -526,10 +526,10 @@ public final class ABIJSON {
         final JsonReader jsonReader = new JsonReader(reader);
         if (!fallback) {
             try {
-                jsonReader.setStrictness(Strictness.STRICT);
-                jsonReader.setNestingLimit(50);
+                jsonReader.setStrictness(Strictness.STRICT); // since 2.11.0
+                jsonReader.setNestingLimit(50); // since 2.12.0 (allow setStrictness to succeed before trying)
                 return jsonReader;
-            } catch (LinkageError le) { // e.g. at runtime, gson is below 2.11.0
+            } catch (LinkageError le) { // e.g. runtime gson doesn't have one of the above methods
                 fallback = true;
             }
         }
