@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.Strictness;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
@@ -366,7 +367,7 @@ public final class ABIJSON {
     static <T extends ABIObject> T tryParseStreaming(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) throws IOException {
         reader.beginObject();
         JsonObject jsonObject = null;
-        TypeEnum t = TypeEnum.FUNCTION;
+        TypeEnum t = null;
         while (reader.peek() != JsonToken.END_OBJECT) {
             String name = reader.nextName();
             if (TYPE.equals(name)) {
@@ -390,6 +391,16 @@ public final class ABIJSON {
             }
         }
         reader.endObject();
+        if (t == null) {
+            if (types.contains(TypeEnum.FUNCTION)) {
+                if (jsonObject != null) {
+                    jsonObject.add(TYPE, new JsonPrimitive(FUNCTION));
+                }
+                t = TypeEnum.FUNCTION;
+            } else {
+                return null; // skip
+            }
+        }
         JsonReader r = reader(jsonObject.toString());
         r.beginObject();
         return finishParse(t, r, digest, flags);
