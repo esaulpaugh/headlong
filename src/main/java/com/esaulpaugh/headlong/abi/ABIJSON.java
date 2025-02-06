@@ -108,56 +108,32 @@ public final class ABIJSON {
         return stream(arrayJson, ABIJSON.ALL);
     }
 //----------------------------------------------------------------------------------------------------------------------
-    public static List<Function> parseNormalFunctions(InputStream arrayStream) {
-        return parseElements(arrayStream, EnumSet.of(TypeEnum.FUNCTION));
-    }
-
-    public static List<Function> parseFunctions(InputStream arrayStream) {
-        return parseElements(arrayStream, FUNCTIONS);
-    }
-
-    public static List<Event<Tuple>> parseEvents(InputStream arrayStream) {
-        return parseElements(arrayStream, EVENTS);
-    }
-
-    public static List<ContractError<Tuple>> parseErrors(InputStream arrayStream) {
-        return parseElements(arrayStream, ERRORS);
-    }
-
-    public static <T extends ABIObject> List<T> parseElements(InputStream arrayStream) {
-        return parseArray(reader(arrayStream), ALL, ABIType.FLAGS_NONE);
-    }
-
-    public static Stream<ABIObject> stream(InputStream arrayStream) {
-        return stream(ABIType.FLAGS_NONE, arrayStream, ALL);
-    }
-//----------------------------------------------------------------------------------------------------------------------
     public static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types) {
         return parseElements(ABIType.FLAGS_NONE, arrayJson, types);
-    }
-
-    public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
-        return parseElements(reader(arrayJson), types, flags);
     }
 
     public static <T extends ABIObject> List<T> parseElements(InputStream arrayStream, Set<TypeEnum> types) {
         return parseElements(ABIType.FLAGS_NONE, arrayStream, types);
     }
 
-    public static <T extends ABIObject> List<T> parseElements(int flags, InputStream arrayStream, Set<TypeEnum> types) {
-        return parseElements(reader(arrayStream), types, flags);
-    }
-
     public static <T extends ABIObject> Stream<T> stream(String arrayJson, Set<TypeEnum> types) {
         return stream(ABIType.FLAGS_NONE, arrayJson, types);
     }
 
-    public static <T extends ABIObject> Stream<T> stream(int flags, String arrayJson, Set<TypeEnum> types) {
-        return stream(reader(arrayJson), types, flags);
-    }
-
     public static <T extends ABIObject> Stream<T> stream(InputStream arrayStream, Set<TypeEnum> types) {
         return stream(ABIType.FLAGS_NONE, arrayStream, types);
+    }
+
+    public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
+        return parseElements(reader(arrayJson), types, flags);
+    }
+
+    public static <T extends ABIObject> List<T> parseElements(int flags, InputStream arrayStream, Set<TypeEnum> types) {
+        return parseElements(reader(arrayStream), types, flags);
+    }
+
+    public static <T extends ABIObject> Stream<T> stream(int flags, String arrayJson, Set<TypeEnum> types) {
+        return stream(reader(arrayJson), types, flags);
     }
 
     public static <T extends ABIObject> Stream<T> stream(int flags, InputStream arrayStream, Set<TypeEnum> types) {
