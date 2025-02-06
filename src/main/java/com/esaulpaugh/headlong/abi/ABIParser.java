@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import static com.esaulpaugh.headlong.abi.ABIJSON.reader;
 
+/** Parses JSON arrays containing contract ABI descriptions. Object types are {@link Function}, {@link Event}, and {@link ContractError}. */
 public final class ABIParser {
 
     private final int flags;
@@ -51,7 +52,7 @@ public final class ABIParser {
     }
 
     public <T extends ABIObject> List<T> parse(String arrayJson) {
-        return ABIJSON.parseElements(flags, arrayJson, types);
+        return ABIJSON.parseArray(reader(arrayJson), types, flags);
     }
 
     public <T extends ABIObject> List<T> parse(InputStream arrayStream) {
