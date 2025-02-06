@@ -961,4 +961,12 @@ public class ABIJSONTest {
         assertThrown(IllegalArgumentException.class, "Argument flags must be one of: { ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE }", () -> new ABIParser(-1));
         assertThrown(IllegalArgumentException.class, "Argument flags must be one of: { ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE }", () -> new ABIParser(2));
     }
+
+    @Test
+    public void optimizeJson() {
+        final String in = "{\n  \"type\": \"event\",\n  \"name\":\"\",\n  \"inputs\":[],\n  \"outputs\":[],\n  \"anonymous\": false\n}\n";
+        final String out = "{\"type\":\"event\",\"name\":\"\"}";
+        assertEquals(out, ABIJSON.optimizeJson(in));
+        assertEquals("[" + out + "]", ABIJSON.optimizeJson("[\n  " + in + "]"));
+    }
 }
