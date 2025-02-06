@@ -961,6 +961,7 @@ public class ABIJSONTest {
 
         assertEquals(0L, new ABIParser(ABIJSON.EVENTS).stream(baos("[{\"name\":\"\"}]")).count());
 
-        assertThrown(IllegalArgumentException.class, "Argument flags must be one of: { 0, 1 }", () -> new ABIParser(-1));
+        assertThrown(IllegalArgumentException.class, "Argument flags must be one of: { ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE }", () -> new ABIParser(-1));
+        assertThrown(IllegalArgumentException.class, "Argument flags must be one of: { ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE }", () -> new ABIParser(2));
     }
 }

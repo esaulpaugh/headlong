@@ -44,8 +44,7 @@ public final class ABIParser {
     public ABIParser(int flags, Set<TypeEnum> types) {
         if (flags != ABIType.FLAGS_NONE
                 && flags != ABIType.FLAG_LEGACY_DECODE) {
-            throw new IllegalArgumentException("Argument flags must be one of: { "
-                    + ABIType.FLAGS_NONE + ", " + ABIType.FLAG_LEGACY_DECODE + " }");
+            throw new IllegalArgumentException("Argument flags must be one of: { ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE }");
         }
         this.flags = flags;
         this.types = EnumSet.copyOf(Objects.requireNonNull(types));
