@@ -107,30 +107,73 @@ public final class ABIJSON {
     public static Stream<ABIObject> stream(String arrayJson) {
         return stream(arrayJson, ABIJSON.ALL);
     }
+//----------------------------------------------------------------------------------------------------------------------
+    public static List<Function> parseNormalFunctions(InputStream arrayStream) {
+        return parseElements(arrayStream, EnumSet.of(TypeEnum.FUNCTION));
+    }
 
+    public static List<Function> parseFunctions(InputStream arrayStream) {
+        return parseElements(arrayStream, FUNCTIONS);
+    }
+
+    public static List<Event<Tuple>> parseEvents(InputStream arrayStream) {
+        return parseElements(arrayStream, EVENTS);
+    }
+
+    public static List<ContractError<Tuple>> parseErrors(InputStream arrayStream) {
+        return parseElements(arrayStream, ERRORS);
+    }
+
+    public static <T extends ABIObject> List<T> parseElements(InputStream arrayStream) {
+        return parseArray(reader(arrayStream), ALL, ABIType.FLAGS_NONE);
+    }
+
+    public static Stream<ABIObject> stream(InputStream arrayStream) {
+        return stream(ABIType.FLAGS_NONE, arrayStream, ALL);
+    }
+//----------------------------------------------------------------------------------------------------------------------
     public static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types) {
         return parseElements(ABIType.FLAGS_NONE, arrayJson, types);
     }
 
     public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
-        try (final JsonReader reader = reader(arrayJson)) {
-            return parseArray(reader, types, flags);
-        } catch (IOException io) {
-            throw new IllegalStateException(io);
-        }
+        return parseElements(reader(arrayJson), types, flags);
+    }
+
+    public static <T extends ABIObject> List<T> parseElements(InputStream arrayStream, Set<TypeEnum> types) {
+        return parseElements(ABIType.FLAGS_NONE, arrayStream, types);
+    }
+
+    public static <T extends ABIObject> List<T> parseElements(int flags, InputStream arrayStream, Set<TypeEnum> types) {
+        return parseElements(reader(arrayStream), types, flags);
     }
 
     public static <T extends ABIObject> Stream<T> stream(String arrayJson, Set<TypeEnum> types) {
         return stream(ABIType.FLAGS_NONE, arrayJson, types);
     }
 
-    /** For single-threaded use only. */
     public static <T extends ABIObject> Stream<T> stream(int flags, String arrayJson, Set<TypeEnum> types) {
-        final JsonSpliterator<T> spliterator = new JsonSpliterator<>(arrayJson, types, flags);
-        return StreamSupport.stream(spliterator, false)
-                    .onClose(spliterator::tryClose);
+        return stream(reader(arrayJson), types, flags);
     }
 
+    public static <T extends ABIObject> Stream<T> stream(InputStream arrayStream, Set<TypeEnum> types) {
+        return stream(ABIType.FLAGS_NONE, arrayStream, types);
+    }
+
+    public static <T extends ABIObject> Stream<T> stream(int flags, InputStream arrayStream, Set<TypeEnum> types) {
+        return stream(reader(arrayStream), types, flags);
+    }
+//----------------------------------------------------------------------------------------------------------------------
+    private static <T extends ABIObject> List<T> parseElements(JsonReader reader, Set<TypeEnum> types, int flags) {
+        return parseArray(reader, types, flags);
+    }
+
+    private static <T extends ABIObject> Stream<T> stream(JsonReader reader, Set<TypeEnum> types, int flags) {
+        final JsonSpliterator<T> spliterator = new JsonSpliterator<>(reader, types, flags); // For single-threaded use only
+        return StreamSupport.stream(spliterator, false)
+                .onClose(spliterator::tryClose);
+    }
+//----------------------------------------------------------------------------------------------------------------------
     /** Iterators are not thread-safe. */
     public static <T extends ABIObject> Iterator<T> iterator(int flags, String arrayJson, Set<TypeEnum> types) {
         return ABIJSON.<T>stream(flags, arrayJson, types).iterator();
@@ -311,10 +354,9 @@ public final class ABIJSON {
         private final int flags;
         boolean closed = false;
 
-        JsonSpliterator(String arrayJson, Set<TypeEnum> types, int flags) {
+        JsonSpliterator(JsonReader reader, Set<TypeEnum> types, int flags) {
             super(Long.SIZE, ORDERED | NONNULL);
             try {
-                JsonReader reader = reader(arrayJson);
                 reader.beginArray();
                 this.jsonReader = reader;
                 this.types = types;
@@ -370,7 +412,7 @@ public final class ABIJSON {
 
     /** Reads an {@link ABIObject} from JSON and closes the {@link InputStream}. Assumes UTF-8 encoding. */
     static <T extends ABIObject> T parseABIObject(InputStream is, Set<TypeEnum> types, MessageDigest digest, int flags) {
-        return parseABIObject(strict(new InputStreamReader(is, StandardCharsets.UTF_8)), types, digest, flags);
+        return parseABIObject(reader(is), types, digest, flags);
     }
 
     private static <T extends ABIObject> T parseABIObject(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) {
@@ -522,6 +564,10 @@ public final class ABIJSON {
         }
     }
 
+    private static JsonReader reader(InputStream input) {
+        return strict(new InputStreamReader(input, StandardCharsets.UTF_8));
+    }
+
     private static JsonReader reader(String json) {
         return strict(new StringReader(json));
     }
@@ -544,17 +590,21 @@ public final class ABIJSON {
         return jsonReader;
     }
 
-    private static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags) throws IOException {
+    private static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags) {
         final List<T> list = new ArrayList<>();
         final MessageDigest digest = Function.newDefaultDigest();
-        reader.beginArray();
-        while (reader.peek() != JsonToken.END_ARRAY) {
-            T e = tryParseStreaming(reader, types, digest, flags);
-            if (e != null) {
-                list.add(e);
+        try {
+            reader.beginArray();
+            while (reader.peek() != JsonToken.END_ARRAY) {
+                T e = tryParseStreaming(reader, types, digest, flags);
+                if (e != null) {
+                    list.add(e);
+                }
             }
+            reader.endArray();
+            return list;
+        } catch (IOException io) {
+            throw new IllegalStateException(io);
         }
-        reader.endArray();
-        return list;
     }
 }
