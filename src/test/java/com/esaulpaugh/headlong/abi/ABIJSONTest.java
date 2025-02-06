@@ -963,4 +963,22 @@ public class ABIJSONTest {
         InputStream tooDeepJson = TestUtils.getFileResource("tests/headlong/tests/deep_and_excessively_so.json");
         assertThrown(IllegalStateException.class, () -> Function.fromJson(FLAGS_NONE, tooDeepJson, Function.newDefaultDigest()));
     }
+
+    @Test
+    public void testInputStreamParse2() throws IOException {
+        assertEquals(0, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.RECEIVE)).size());
+        assertEquals(0, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.FALLBACK)).size());
+        assertEquals(0, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.CONSTRUCTOR)).size());
+        assertEquals(0, ABIJSON.parseEvents("[{\"name\":\"\"}]").size());
+        assertEquals(0, ABIJSON.parseErrors("[{\"name\":\"\"}]").size());
+
+        assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", ABIJSON.FUNCTIONS).size());
+        assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.FUNCTION)).size());
+
+        InputStream json = TestUtils.getFileResource("tests/headlong/tests/performAction.json");
+        Function performAction = Function.fromJson(FLAGS_NONE, json, Function.newDefaultDigest());
+        assertEquals("performAction", performAction.getName());
+        assertEquals(TupleType.parse("(address,uint)"), performAction.getInputs());
+        assertEquals(TupleType.parse("(uint32)"), performAction.getOutputs());
+    }
 }
