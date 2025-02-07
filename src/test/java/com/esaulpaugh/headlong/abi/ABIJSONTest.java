@@ -907,24 +907,24 @@ public class ABIJSONTest {
         testABIObject(EVENT_STR);
         testABIObject(ERROR_JSON);
 
-        Function f = Function.fromJson(FLAGS_NONE, baos(FUNCTION_A_JSON), Function.newDefaultDigest());
+        Function f = Function.fromJson(FLAGS_NONE, bais(FUNCTION_A_JSON), Function.newDefaultDigest());
         assertEquals(FUNCTION_A_JSON, f.toJson(true));
 
-        Event<Single<Single<String>[]>> e = Event.fromJson(FLAGS_NONE, baos(EVENT_STR));
+        Event<Single<Single<String>[]>> e = Event.fromJson(FLAGS_NONE, bais(EVENT_STR));
         assertEquals(EVENT_STR, e.toJson(true));
 
-        ContractError<Pair<BigInteger, Integer>> err = ContractError.fromJson(FLAGS_NONE, baos(ERROR_JSON));
+        ContractError<Pair<BigInteger, Integer>> err = ContractError.fromJson(FLAGS_NONE, bais(ERROR_JSON));
         assertEquals(ERROR_JSON, err.toJson(true));
     }
 
     private static void testABIObject(String json) {
         assertEquals(
                 json,
-                ABIObject.fromJson(FLAGS_NONE, baos(json)).toJson(true)
+                ABIObject.fromJson(FLAGS_NONE, bais(json)).toJson(true)
         );
     }
 
-    private static InputStream baos(String str) {
+    private static InputStream bais(String str) {
         return new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -952,7 +952,7 @@ public class ABIJSONTest {
         assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", ABIJSON.FUNCTIONS).size());
         assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.FUNCTION)).size());
 
-        assertEquals(0L, new ABIParser(ABIJSON.EVENTS).stream(baos("[{\"name\":\"\"}]")).count());
+        assertEquals(0L, new ABIParser(ABIJSON.EVENTS).stream(bais("[{\"name\":\"\"}]")).count());
 
         assertThrown(IllegalArgumentException.class, "Argument flags must be one of: { ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE }", () -> new ABIParser(-1));
         assertThrown(IllegalArgumentException.class, "Argument flags must be one of: { ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE }", () -> new ABIParser(2));

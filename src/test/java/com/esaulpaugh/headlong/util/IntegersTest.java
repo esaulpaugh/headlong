@@ -231,7 +231,7 @@ public class IntegersTest {
 
         BigInteger positive = BigInteger.valueOf(x).add(BigInteger.ONE);
 
-        assertEquals(positive, new BigInteger("8000000000000000", 16));
+        assertEquals(new BigInteger("8000000000000000", 16), positive);
 
         byte[] bBytes = positive.toByteArray();
 
