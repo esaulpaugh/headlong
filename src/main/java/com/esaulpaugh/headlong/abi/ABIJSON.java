@@ -198,9 +198,7 @@ public final class ABIJSON {
             if (t != TypeEnum.FALLBACK) {
                 name(out, o.getName());
                 if (t != TypeEnum.RECEIVE) {
-                    if (!minimize || !o.getInputs().isEmpty()) {
-                        tupleType(out, INPUTS, o.getInputs(), null, minimize);
-                    }
+                    tupleType(out, INPUTS, o.getInputs(), null, minimize);
                     if (t != TypeEnum.CONSTRUCTOR) {
                         tupleType(out, OUTPUTS, f.getOutputs(), null, minimize);
                     }
