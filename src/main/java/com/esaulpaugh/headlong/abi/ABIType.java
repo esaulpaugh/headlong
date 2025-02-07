@@ -34,8 +34,7 @@ public abstract class ABIType<J> {
 
     public static final int FLAGS_NONE = 0;
     /**
-     * Experimental flag which enables an incompatible decode mode. Strongly consider using {@link #FLAGS_NONE} instead.
-     * Behavior is subject to change or removal in future versions.
+     * Enables an incompatible decode mode. Strongly consider using {@link #FLAGS_NONE} instead.
      */
     public static final int FLAG_LEGACY_DECODE = 1;
     static final int FLAGS_UNSET = 0x80000000;
