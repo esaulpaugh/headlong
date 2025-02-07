@@ -70,7 +70,7 @@ public final class TypeFactory {
         return buildUnchecked(rawType, elementNames, baseType, flags);
     }
 
-    private static ABIType<?> buildUnchecked(final String rawType, final String[] elementNames, TupleType<?> baseType, int flags) {
+    private static ABIType<?> buildUnchecked(final String rawType, final String[] elementNames, final TupleType<?> baseType, final int flags) {
         try {
             final int lastCharIdx = rawType.length() - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array
@@ -83,14 +83,20 @@ public final class TypeFactory {
                 return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null, flags);
             }
             if (rawType.charAt(0) == '(') {
-                return baseType != null ? baseType : parseTupleType(rawType, elementNames, flags);
+                if (baseType != null) {
+                    if (rawType.length() == baseType.canonicalType.length()) {
+                        return baseType;
+                    }
+                } else {
+                    return parseTupleType(rawType, elementNames, flags);
+                }
             } else {
                 ABIType<?> t = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? UnitType.getLegacy(rawType) : UnitType.get(rawType);
                 return t != null ? t : tryParseFixed(rawType);
             }
         } catch (StringIndexOutOfBoundsException ignored) { // e.g. type equals "" or "82]" or "[]" or "[1]"
-            throw unrecognizedType(rawType);
         }
+        throw unrecognizedType(rawType);
     }
 
     private static IllegalArgumentException unrecognizedType(String rawType) {

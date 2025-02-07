@@ -840,31 +840,22 @@ public class ABIJSONTest {
 
     @Test
     public void testBadJson() throws Throwable {
-        assertThrown(
-                IllegalArgumentException.class,
-                "components missing at tuple index 0",
-                () -> Event.fromJson(MISSING_COMPONENTS_0)
-        );
-        assertThrown(
-                IllegalArgumentException.class,
-                "components missing at tuple index 1",
-                () -> Function.fromJson(MISSING_COMPONENTS_1)
-        );
-        assertThrown(
-                IllegalArgumentException.class,
-                "unexpected field components at tuple index 0",
-                () -> Event.fromJson(EVENT_STR.replace("tuple[]", "bytes"))
-        );
-        assertThrown(
-                IllegalArgumentException.class,
-                "unexpected type at tuple index 0",
-                () -> Event.fromJson(EVENT_STR.replace("tuple[]", "()[]"))
-        );
-        assertThrown(
-                IllegalArgumentException.class,
-                "unexpected ABI object type",
-                () -> Function.fromJson(MISSING_COMPONENTS_0)
-        );
+        final Class<IllegalArgumentException> cl = IllegalArgumentException.class;
+        assertThrown(cl, "components missing at tuple index 0", () -> Event.fromJson(MISSING_COMPONENTS_0));
+        assertThrown(cl, "components missing at tuple index 1", () -> Function.fromJson(MISSING_COMPONENTS_1));
+        assertThrown(cl, "unexpected field components at tuple index 0", () -> Event.fromJson(EVENT_STR.replace("tuple[]", "bytes")));
+        assertThrown(cl, "unexpected type at tuple index 0", () -> Event.fromJson(EVENT_STR.replace("tuple[]", "()[]")));
+        assertThrown(cl, "unexpected ABI object type", () -> Function.fromJson(MISSING_COMPONENTS_0));
+        for (char i = 35; i < 92; i++) {
+            final char ch = i;
+            assertThrown(cl, "unrecognized type: \"(string)" + ch + "\"", () -> Event.fromJson(EVENT_STR.replace("tuple", "tuple" + ch)));
+            for (char j = 35; j < 92; j++) {
+                final String str = "" + i + j;
+                assertThrown(cl, "unrecognized type: \"(string)" + str + "\"", () -> Event.fromJson(EVENT_STR.replace("tuple", "tuple" + str)));
+            }
+        }
+        assertThrown(cl, "unrecognized type: \"(string)]]]\"", () -> Event.fromJson(EVENT_STR.replace("tuple[]", "tuple]]][]")));
+        assertThrown(cl, "unrecognized type: \"(string)[[[\"", () -> Event.fromJson(EVENT_STR.replace("tuple[]", "tuple[[[[]")));
     }
 
     @Test

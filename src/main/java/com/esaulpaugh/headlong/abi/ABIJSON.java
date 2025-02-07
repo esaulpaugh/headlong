@@ -516,10 +516,10 @@ public final class ABIJSON {
             if (comp == null) {
                 throw new IllegalArgumentException("components missing at tuple index " + i);
             }
-            if (type.length() > TUPLE.length() && type.charAt(TUPLE.length()) == '[') {
-                return TypeFactory.build(comp.canonicalType + type.substring(TUPLE.length()), null, comp, flags); // tuple array
+            if (type.equals(TUPLE)) {
+                return comp;
             }
-            return comp;
+            return TypeFactory.build(comp.canonicalType + type.substring(TUPLE.length()), null, comp, flags); // tuple array
         }
         if (type.charAt(0) == '(') {
             throw new IllegalArgumentException("unexpected type at tuple index " + i);
