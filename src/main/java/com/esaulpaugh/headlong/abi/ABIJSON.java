@@ -314,19 +314,19 @@ public final class ABIJSON {
             super(Long.SIZE, ORDERED | NONNULL);
             try {
                 reader.beginArray();
-                this.jsonReader = reader;
-                this.types = types;
-                this.digest = Function.newDefaultDigest();
-                this.flags = flags;
             } catch (IOException io) {
                 throw new IllegalStateException(io);
             }
+            this.jsonReader = reader;
+            this.types = types;
+            this.digest = Function.newDefaultDigest();
+            this.flags = flags;
         }
 
         @Override
         public boolean tryAdvance(Consumer<? super T> action) {
-            try {
-                if (!closed) {
+            if (!closed) {
+                try {
                     while (jsonReader.peek() != JsonToken.END_ARRAY) {
                         T e = tryParseStreaming(jsonReader, types, digest, flags);
                         if (e != null) {
@@ -335,11 +335,11 @@ public final class ABIJSON {
                         }
                     }
                     close();
+                } catch (IOException io) {
+                    throw new IllegalStateException(io);
                 }
-                return false;
-            } catch (IOException io) {
-                throw new IllegalStateException(io);
             }
+            return false;
         }
 
         @Override

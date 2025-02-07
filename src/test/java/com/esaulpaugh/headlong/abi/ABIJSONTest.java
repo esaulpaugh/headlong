@@ -642,19 +642,15 @@ public class ABIJSONTest {
         assertThrown(UnsupportedOperationException.class, () -> ABIJSON.ALL.remove(TypeEnum.EVENT));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
-    public void testStream() throws Throwable {
+    public void testStream() {
         assertEquals(0, (int) new ABIParser().stream("[]").count());
 
         final ABIParser p = new ABIParser();
-
-        for (Set<?> set : new Set[] { ABIJSON.ALL, FUNCTIONS_AND_EVENTS, EnumSet.of(TypeEnum.EVENT, TypeEnum.FUNCTION) }) {
-            assertEquals(2, p.stream(CONTRACT_JSON).count());
-            assertTrue(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isEvent));
-            assertTrue(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isFunction));
-            assertFalse(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isContractError));
-        }
+        assertEquals(2, p.stream(CONTRACT_JSON).count());
+        assertTrue(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isEvent));
+        assertTrue(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isFunction));
+        assertFalse(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isContractError));
 
         assertTrue(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isEvent));
 
