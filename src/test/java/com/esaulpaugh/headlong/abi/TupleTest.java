@@ -60,7 +60,7 @@ public class TupleTest {
         for (int bitLen = 0; bitLen < 22; bitLen++) {
             final long pow = (long) Math.pow(2.0, bitLen);
             final long powMinus1 = pow - 1;
-            final long samples = pow * (bitLen / 2 + 12);
+            final long samples = pow * (bitLen / 2 + 13);
             final long taskSamples = 1 + samples / parallelism;
             System.out.println("bitLen=" + bitLen + ", samples=" + samples);
             final long[] a = new long[(int) Math.ceil(pow / (double) Long.SIZE)];
