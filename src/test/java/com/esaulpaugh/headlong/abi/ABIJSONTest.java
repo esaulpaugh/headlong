@@ -852,7 +852,7 @@ public class ABIJSONTest {
         );
         assertThrown(
                 IllegalArgumentException.class,
-                "unexpected field: components",
+                "unexpected field components at tuple index 0",
                 () -> Event.fromJson(EVENT_STR.replace("tuple[]", "bytes"))
         );
         assertThrown(

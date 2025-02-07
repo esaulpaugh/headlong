@@ -472,24 +472,7 @@ public final class ABIJSON {
             }
             reader.endObject();
 
-            if (type == null) {
-                throw new IllegalArgumentException("type missing at tuple index " + i);
-            }
-
-            if (type.startsWith(TUPLE)) {
-                if (e == null) {
-                    throw new IllegalArgumentException("components missing at tuple index " + i);
-                }
-                if (type.length() > TUPLE.length() && type.charAt(TUPLE.length()) == '[') {
-                    e = TypeFactory.build(e.canonicalType + type.substring(TUPLE.length()), null, e.asTupleType(), flags); // tuple array
-                }
-            } else if (e != null) {
-                throw new IllegalArgumentException("unexpected field: " + COMPONENTS);
-            } else if (type.charAt(0) == '(') {
-                throw new IllegalArgumentException("unexpected type at tuple index " + i);
-            } else {
-                e = TypeFactory.create(flags, type);
-            }
+            e = resolveElement(type, e, flags, i);
 
             canonicalType.append(e.canonicalType);
             dynamic |= e.dynamic;
@@ -523,6 +506,28 @@ public final class ABIJSON {
                 indexed = Arrays.copyOf(indexed, newLen);
             }
         }
+    }
+
+    private static ABIType<?> resolveElement(final String type, final ABIType<?> e, final int flags, final int i) {
+        if (type == null) {
+            throw new IllegalArgumentException("type missing at tuple index " + i);
+        }
+        if (type.startsWith(TUPLE)) {
+            if (e == null) {
+                throw new IllegalArgumentException("components missing at tuple index " + i);
+            }
+            if (type.length() > TUPLE.length() && type.charAt(TUPLE.length()) == '[') {
+                return TypeFactory.build(e.canonicalType + type.substring(TUPLE.length()), null, e.asTupleType(), flags); // tuple array
+            }
+            return e;
+        }
+        if (e != null) {
+            throw new IllegalArgumentException("unexpected field " + COMPONENTS + " at tuple index " + i);
+        }
+        if (type.charAt(0) == '(') {
+            throw new IllegalArgumentException("unexpected type at tuple index " + i);
+        }
+        return TypeFactory.create(flags, type);
     }
 
     static JsonReader reader(InputStream input) {
