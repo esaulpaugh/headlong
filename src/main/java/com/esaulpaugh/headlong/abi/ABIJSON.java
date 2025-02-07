@@ -372,7 +372,7 @@ public final class ABIJSON {
             if (obj != null) {
                 return obj;
             }
-            throw new IllegalArgumentException("unexpected type");
+            throw new IllegalArgumentException("unexpected ABI object type");
         } catch (IOException io) {
             throw new IllegalStateException(io);
         }
@@ -485,6 +485,8 @@ public final class ABIJSON {
                 }
             } else if (e != null) {
                 throw new IllegalArgumentException("unexpected field: " + COMPONENTS);
+            } else if (type.charAt(0) == '(') {
+                throw new IllegalArgumentException("unexpected type at tuple index " + i);
             } else {
                 e = TypeFactory.create(flags, type);
             }

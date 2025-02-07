@@ -358,7 +358,7 @@ public class ABIJSONTest {
 
         function.add("type", new JsonPrimitive("event"));
 
-        assertThrown(IllegalArgumentException.class, "unexpected type", parse);
+        assertThrown(IllegalArgumentException.class, "unexpected ABI object type", parse);
 
         function.add("type", new JsonPrimitive("function"));
 
@@ -839,7 +839,7 @@ public class ABIJSONTest {
             "}";
 
     @Test
-    public void testStaticTupleArray() throws Throwable {
+    public void testBadJson() throws Throwable {
         assertThrown(
                 IllegalArgumentException.class,
                 "components missing at tuple index 0",
@@ -855,7 +855,20 @@ public class ABIJSONTest {
                 "unexpected field: components",
                 () -> Event.fromJson(EVENT_STR.replace("tuple[]", "bytes"))
         );
+        assertThrown(
+                IllegalArgumentException.class,
+                "unexpected type at tuple index 0",
+                () -> Event.fromJson(MISSING_COMPONENTS_0.replace("tuple[]", "()[]"))
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                "unexpected ABI object type",
+                () -> Function.fromJson(MISSING_COMPONENTS_0)
+        );
+    }
 
+    @Test
+    public void testStaticTupleArray() throws Throwable {
         String eventStr = EVENT_STR.replace("tuple[]", "tuple[1]");
 
         Event<Single<Single<String>[]>> e = Event.fromJson(eventStr);
