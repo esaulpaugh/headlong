@@ -858,7 +858,7 @@ public class ABIJSONTest {
         assertThrown(
                 IllegalArgumentException.class,
                 "unexpected type at tuple index 0",
-                () -> Event.fromJson(MISSING_COMPONENTS_0.replace("tuple[]", "()[]"))
+                () -> Event.fromJson(EVENT_STR.replace("tuple[]", "()[]"))
         );
         assertThrown(
                 IllegalArgumentException.class,

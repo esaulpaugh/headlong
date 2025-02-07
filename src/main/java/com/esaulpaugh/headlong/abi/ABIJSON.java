@@ -521,11 +521,11 @@ public final class ABIJSON {
             }
             return comp;
         }
-        if (comp != null) {
-            throw new IllegalArgumentException("unexpected field " + COMPONENTS + " at tuple index " + i);
-        }
         if (type.charAt(0) == '(') {
             throw new IllegalArgumentException("unexpected type at tuple index " + i);
+        }
+        if (comp != null) {
+            throw new IllegalArgumentException("unexpected field " + COMPONENTS + " at tuple index " + i);
         }
         return TypeFactory.create(flags, type);
     }
