@@ -476,12 +476,16 @@ public final class ABIJSON {
                 throw new IllegalArgumentException("type is null at tuple index " + i);
             }
 
-            if (e == null || !type.startsWith(TUPLE)) {
-                e = TypeFactory.create(flags, type);
+            if (e != null) {
+                if (type.startsWith(TUPLE)) {
+                    if (type.startsWith(TUPLE + "[")) {
+                        e = TypeFactory.build(e.canonicalType + type.substring(TUPLE.length()), null, e.asTupleType(), flags); // tuple array
+                    }
+                } else {
+                    throw new IllegalArgumentException("unexpected field: " + COMPONENTS);
+                }
             } else {
-                e = type.length() == TUPLE.length()
-                        ? e
-                        : TypeFactory.build(e.canonicalType + type.substring(TUPLE.length()), null, e.asTupleType(), flags); // tuple array
+                e = TypeFactory.create(flags, type);
             }
 
             canonicalType.append(e.canonicalType);

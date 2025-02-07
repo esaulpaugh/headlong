@@ -811,6 +811,12 @@ public class ABIJSONTest {
 
     @Test
     public void testStaticTupleArray() throws Throwable {
+        assertThrown(
+                IllegalArgumentException.class,
+                "unexpected field: components",
+                () -> Event.fromJson(EVENT_STR.replace("tuple[]", "bytes"))
+        );
+
         String eventStr = EVENT_STR.replace("tuple[]", "tuple[1]");
 
         Event<Single<Single<String>[]>> e = Event.fromJson(eventStr);
