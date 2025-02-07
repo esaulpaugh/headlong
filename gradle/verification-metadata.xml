@@ -280,15 +280,15 @@
             </artifact>
         </component>
 
-        <component group="commons-codec" name="commons-codec" version="1.17.2">
-            <artifact name="commons-codec-1.17.2.jar">
-                <sha256 value="4148332728490cef12b29dac4c385f46982f04285132c6fa51ad7267d7dc7a8b" origin="repo.maven.apache.org/maven2/"/>
+        <component group="commons-codec" name="commons-codec" version="1.18.0">
+            <artifact name="commons-codec-1.18.0.jar">
+                <sha256 value="ba005f304cef92a3dede24a38ad5ac9b8afccf0d8f75839d6c1338634cf7f6e4" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="commons-codec-1.17.2.pom">
-                <sha256 value="e2402fb9a6060384f32bd4fc6902b106bff7afc7b9529b831a850cacaaa3246e" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="commons-codec-1.18.0.pom">
+                <sha256 value="74b916da4b0384c619e6dd4c18defe8aa4387f795205253cfb4bbb2f458cddce" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="commons-codec-1.17.2-sources.jar">
-                <sha256 value="6cfa7935df61d05e4cfd92d0f141d91a368c6847be1febb8a5fcf211bde4c4f1" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="commons-codec-1.18.0-sources.jar">
+                <sha256 value="6c50e3dd81284139baddf94b3d0f78d25135eea0853f6495267196cdcf5949e3" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
         <component group="org.ow2.asm" name="asm" version="9.0">
@@ -341,9 +341,9 @@
                 <sha256 value="87cd27e1a02a5c3eb6d85059ce98696bb1b44c2b8b650f0567c86df60fa61da7" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
-        <component group="org.apache.commons" name="commons-parent" version="78">
-            <artifact name="commons-parent-78.pom">
-                <sha256 value="022d202e655edd04f2a10ecbe453d92977924d38380a4ca8c359f1817a80320e" origin="repo.maven.apache.org/maven2/"/>
+        <component group="org.apache.commons" name="commons-parent" version="79">
+            <artifact name="commons-parent-79.pom">
+                <sha256 value="628df30148acd3c491cfcb6b73c7ae4b5989e5526ab13a2f428dea5d4ad10d7a" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
     </components>
