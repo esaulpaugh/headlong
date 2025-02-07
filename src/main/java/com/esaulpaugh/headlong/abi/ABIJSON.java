@@ -457,13 +457,13 @@ public final class ABIJSON {
             String internalType = null;
             boolean isIndexed = false;
             String type = null;
-            ABIType<?> e = null;
+            TupleType<?> components = null;
 
             reader.beginObject();
             while (reader.peek() != JsonToken.END_OBJECT) {
                 switch (reader.nextName()) {
                 case TYPE: type = reader.nextString(); continue;
-                case COMPONENTS: e = parseTupleType(reader, flags); continue;
+                case COMPONENTS: components = parseTupleType(reader, flags); continue;
                 case NAME: name = reader.nextString(); continue;
                 case INTERNAL_TYPE: internalType = reader.nextString(); continue;
                 case INDEXED: isIndexed = reader.nextBoolean(); continue;
@@ -472,7 +472,7 @@ public final class ABIJSON {
             }
             reader.endObject();
 
-            e = resolveElement(type, e, flags, i);
+            ABIType<?> e = resolveElement(type, components, flags, i);
 
             canonicalType.append(e.canonicalType);
             dynamic |= e.dynamic;
@@ -508,20 +508,20 @@ public final class ABIJSON {
         }
     }
 
-    private static ABIType<?> resolveElement(final String type, final ABIType<?> e, final int flags, final int i) {
+    private static ABIType<?> resolveElement(final String type, final TupleType<?> comp, final int flags, final int i) {
         if (type == null) {
             throw new IllegalArgumentException("type missing at tuple index " + i);
         }
         if (type.startsWith(TUPLE)) {
-            if (e == null) {
+            if (comp == null) {
                 throw new IllegalArgumentException("components missing at tuple index " + i);
             }
             if (type.length() > TUPLE.length() && type.charAt(TUPLE.length()) == '[') {
-                return TypeFactory.build(e.canonicalType + type.substring(TUPLE.length()), null, e.asTupleType(), flags); // tuple array
+                return TypeFactory.build(comp.canonicalType + type.substring(TUPLE.length()), null, comp, flags); // tuple array
             }
-            return e;
+            return comp;
         }
-        if (e != null) {
+        if (comp != null) {
             throw new IllegalArgumentException("unexpected field " + COMPONENTS + " at tuple index " + i);
         }
         if (type.charAt(0) == '(') {
