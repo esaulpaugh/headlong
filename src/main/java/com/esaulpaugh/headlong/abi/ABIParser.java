@@ -48,7 +48,7 @@ public final class ABIParser {
             throw new IllegalArgumentException("Argument flags must be one of: { ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE }");
         }
         this.flags = flags;
-        this.types = EnumSet.copyOf(Objects.requireNonNull(types));
+        this.types = EnumSet.copyOf(types);
     }
 
     public <T extends ABIObject> List<T> parse(String arrayJson) {
