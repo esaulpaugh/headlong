@@ -824,9 +824,9 @@ public class ABIJSONTest {
             "}";
 
     private static final String MISSING_COMPONENTS_1 = "{\n" +
-            "  \"type\": \"event\",\n" +
+            "  \"type\": \"function\",\n" +
             "  \"name\": \"MalformedAt1\",\n" +
-            "  \"inputs\": [\n" +
+            "  \"outputs\": [\n" +
             "    {\"type\":\"bool\"}," +
             "    {\n" +
             "      \"internalType\": \"struct Thing[]\",\n" +
@@ -848,7 +848,7 @@ public class ABIJSONTest {
         assertThrown(
                 IllegalArgumentException.class,
                 "components missing at tuple index 1",
-                () -> Event.fromJson(MISSING_COMPONENTS_1)
+                () -> Function.fromJson(MISSING_COMPONENTS_1)
         );
         assertThrown(
                 IllegalArgumentException.class,
