@@ -552,6 +552,12 @@ public class ABIJSONTest {
 
     @Test
     public void testGetErrors() throws Throwable {
+        assertThrown(
+                IllegalArgumentException.class,
+                "type is null at tuple index 1",
+                () -> ABIObject.fromJson(ERROR_JSON.replace(",\n      \"type\": \"uint24\"", ""))
+        );
+
         JsonObject object = TestUtils.parseObject(ERROR_JSON);
 
         ContractError<Tuple> error0 = ABIJSON.parseErrors(ERROR_JSON_ARRAY).get(0);

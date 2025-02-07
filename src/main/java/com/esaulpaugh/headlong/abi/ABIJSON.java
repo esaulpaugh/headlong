@@ -386,39 +386,38 @@ public final class ABIJSON {
         TupleType<?> outputs = TupleType.EMPTY;
         String stateMutability = null;
         boolean anonymous = false;
-        try {
-            do {
-                final String key = reader.nextName();
-                switch (key) {
-                case TYPE:
-                    t = TypeEnum.parse(reader.nextString());
-                    if (!types.contains(t)) {
-                        // skip this json object. for best performance, "type" should be declared first
-                        while (reader.peek() != JsonToken.END_OBJECT) {
-                            reader.skipValue();
-                        }
-                        return null;
+        do {
+            final String key = reader.nextName();
+            switch (key) {
+            case TYPE:
+                t = TypeEnum.parse(reader.nextString());
+                if (!types.contains(t)) {
+                    // skip this json object. for best performance, "type" should be declared first
+                    while (reader.peek() != JsonToken.END_OBJECT) {
+                        reader.skipValue();
                     }
-                    continue;
-                case NAME: name = reader.nextString(); continue;
-                case INPUTS: inputs = parseTupleType(reader, flags); continue;
-                case OUTPUTS: outputs = parseTupleType(reader, flags); continue;
-                case STATE_MUTABILITY: stateMutability = reader.nextString(); continue;
-                case ANONYMOUS: anonymous = reader.nextBoolean(); continue;
-                default: reader.skipValue();
+                    reader.endObject();
+                    return null;
                 }
-            } while (reader.peek() != JsonToken.END_OBJECT);
-            if (t == null) {
-                if (types.contains(TypeEnum.FUNCTION)) {
-                    t = TypeEnum.FUNCTION;
-                } else {
-                    return null; // skip
-                }
+                continue;
+            case NAME: name = reader.nextString(); continue;
+            case INPUTS: inputs = parseTupleType(reader, flags); continue;
+            case OUTPUTS: outputs = parseTupleType(reader, flags); continue;
+            case STATE_MUTABILITY: stateMutability = reader.nextString(); continue;
+            case ANONYMOUS: anonymous = reader.nextBoolean(); continue;
+            default: reader.skipValue();
             }
-            return finishParse(t, name, inputs, outputs, stateMutability, anonymous, digest);
-        } finally {
-            reader.endObject();
+        } while (reader.peek() != JsonToken.END_OBJECT);
+        if (t == null) {
+            if (types.contains(TypeEnum.FUNCTION)) {
+                t = TypeEnum.FUNCTION;
+            } else {
+                reader.endObject();
+                return null; // skip
+            }
         }
+        reader.endObject();
+        return finishParse(t, name, inputs, outputs, stateMutability, anonymous, digest);
     }
 
     @SuppressWarnings("unchecked")
@@ -472,6 +471,10 @@ public final class ABIJSON {
                 }
             }
             reader.endObject();
+
+            if (type == null) {
+                throw new IllegalArgumentException("type is null at tuple index " + i);
+            }
 
             if (e == null || !type.startsWith(TUPLE)) {
                 e = TypeFactory.create(flags, type);
