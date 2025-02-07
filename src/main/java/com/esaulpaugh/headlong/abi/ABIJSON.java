@@ -473,17 +473,18 @@ public final class ABIJSON {
             reader.endObject();
 
             if (type == null) {
-                throw new IllegalArgumentException("type is null at tuple index " + i);
+                throw new IllegalArgumentException("type missing at tuple index " + i);
             }
 
-            if (e != null) {
-                if (type.startsWith(TUPLE)) {
-                    if (type.startsWith(TUPLE + "[")) {
-                        e = TypeFactory.build(e.canonicalType + type.substring(TUPLE.length()), null, e.asTupleType(), flags); // tuple array
-                    }
-                } else {
-                    throw new IllegalArgumentException("unexpected field: " + COMPONENTS);
+            if (type.startsWith(TUPLE)) {
+                if (e == null) {
+                    throw new IllegalArgumentException("components missing at tuple index " + i);
                 }
+                if (type.length() > TUPLE.length() && type.charAt(TUPLE.length()) == '[') {
+                    e = TypeFactory.build(e.canonicalType + type.substring(TUPLE.length()), null, e.asTupleType(), flags); // tuple array
+                }
+            } else if (e != null) {
+                throw new IllegalArgumentException("unexpected field: " + COMPONENTS);
             } else {
                 e = TypeFactory.create(flags, type);
             }

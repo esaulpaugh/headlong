@@ -554,7 +554,7 @@ public class ABIJSONTest {
     public void testGetErrors() throws Throwable {
         assertThrown(
                 IllegalArgumentException.class,
-                "type is null at tuple index 1",
+                "type missing at tuple index 1",
                 () -> ABIObject.fromJson(ERROR_JSON.replace(",\n      \"type\": \"uint24\"", ""))
         );
 
@@ -809,8 +809,47 @@ public class ABIJSONTest {
             "  \"anonymous\": false\n" +
             "}";
 
+    private static final String MISSING_COMPONENTS_0 = "{\n" +
+            "  \"type\": \"event\",\n" +
+            "  \"name\": \"MalformedAt0\",\n" +
+            "  \"inputs\": [\n" +
+            "    {\n" +
+            "      \"internalType\": \"struct Thing[]\",\n" +
+            "      \"name\": \"thing\",\n" +
+            "      \"type\": \"tuple[]\",\n" +
+            "      \"indexed\": false\n" +
+            "    }\n" +
+            "  ],\n" +
+            "  \"anonymous\": false\n" +
+            "}";
+
+    private static final String MISSING_COMPONENTS_1 = "{\n" +
+            "  \"type\": \"event\",\n" +
+            "  \"name\": \"MalformedAt1\",\n" +
+            "  \"inputs\": [\n" +
+            "    {\"type\":\"bool\"}," +
+            "    {\n" +
+            "      \"internalType\": \"struct Thing[]\",\n" +
+            "      \"name\": \"thing\",\n" +
+            "      \"type\": \"tuple\",\n" +
+            "      \"indexed\": false\n" +
+            "    }\n" +
+            "  ],\n" +
+            "  \"anonymous\": false\n" +
+            "}";
+
     @Test
     public void testStaticTupleArray() throws Throwable {
+        assertThrown(
+                IllegalArgumentException.class,
+                "components missing at tuple index 0",
+                () -> Event.fromJson(MISSING_COMPONENTS_0)
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                "components missing at tuple index 1",
+                () -> Event.fromJson(MISSING_COMPONENTS_1)
+        );
         assertThrown(
                 IllegalArgumentException.class,
                 "unexpected field: components",
