@@ -138,7 +138,7 @@ public final class ABIJSON {
     }
 
     /**
-     * Parses Ethereum ABI JSON and returns a minimal version, optimized for parsing by this class. Accepts JSON array or JSON object.
+     * Parses Ethereum ABI JSON and returns a minified version, optimized for parsing by this class. Accepts JSON array or JSON object.
      *
      * @param json  array or object json
      * @return  optimized json
@@ -163,13 +163,13 @@ public final class ABIJSON {
                 .onClose(spliterator::close);
     }
 
-    static String toJson(ABIObject o, boolean pretty, boolean minimize) {
+    static String toJson(ABIObject o, boolean pretty, boolean minify) {
         final Writer stringOut = new NonSyncWriter(pretty ? 512 : 256); // can also use StringWriter or CharArrayWriter, but this is faster
         try (final JsonWriter out = new JsonWriter(stringOut)) {
             if (pretty) {
                 out.setIndent("  ");
             }
-            writeObject(o, out, minimize);
+            writeObject(o, out, minify);
             return stringOut.toString();
         } catch (IOException io) {
             throw new IllegalStateException(io);
@@ -189,7 +189,7 @@ public final class ABIJSON {
         }
     }
 
-    private static void writeObject(ABIObject o, JsonWriter out, boolean minimize) throws IOException {
+    private static void writeObject(ABIObject o, JsonWriter out, boolean minify) throws IOException {
         out.beginObject();
         if (o.isFunction()) {
             final Function f = o.asFunction();
@@ -198,9 +198,9 @@ public final class ABIJSON {
             if (t != TypeEnum.FALLBACK) {
                 name(out, o.getName());
                 if (t != TypeEnum.RECEIVE) {
-                    tupleType(out, INPUTS, o.getInputs(), null, minimize);
+                    tupleType(out, INPUTS, o.getInputs(), null, minify);
                     if (t != TypeEnum.CONSTRUCTOR) {
-                        tupleType(out, OUTPUTS, f.getOutputs(), null, minimize);
+                        tupleType(out, OUTPUTS, f.getOutputs(), null, minify);
                     }
                 }
             }
@@ -212,14 +212,14 @@ public final class ABIJSON {
             final Event<?> e = o.asEvent();
             type(out, EVENT);
             name(out, o.getName());
-            tupleType(out, INPUTS, o.getInputs(), e.getIndexManifest(), minimize);
-            if (!minimize || e.isAnonymous()) {
+            tupleType(out, INPUTS, o.getInputs(), e.getIndexManifest(), minify);
+            if (!minify || e.isAnonymous()) {
                 out.name(ANONYMOUS).value(e.isAnonymous());
             }
         } else {
             type(out, ERROR);
             name(out, o.getName());
-            tupleType(out, INPUTS, o.getInputs(), null, minimize);
+            tupleType(out, INPUTS, o.getInputs(), null, minify);
         }
         out.endObject();
     }
@@ -234,8 +234,8 @@ public final class ABIJSON {
         }
     }
 
-    private static void tupleType(JsonWriter out, String name, TupleType<?> tupleType, boolean[] indexedManifest, boolean minimize) throws IOException {
-        if (minimize && tupleType.isEmpty()) {
+    private static void tupleType(JsonWriter out, String name, TupleType<?> tupleType, boolean[] indexedManifest, boolean minify) throws IOException {
+        if (minify && tupleType.isEmpty()) {
             return;
         }
         out.name(name).beginArray();
@@ -254,7 +254,7 @@ public final class ABIJSON {
             final String type = e.canonicalType;
             if (type.charAt(0) == '(') {
                 type(out, TUPLE + type.substring(type.lastIndexOf(')') + 1));
-                tupleType(out, COMPONENTS, ArrayType.baseType(e), null, minimize);
+                tupleType(out, COMPONENTS, ArrayType.baseType(e), null, minify);
             } else {
                 type(out, type);
             }
