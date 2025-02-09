@@ -143,7 +143,7 @@ public final class ABIJSON {
      * @param json  array or object json
      * @return  optimized json
      */
-    public static String optimizeJson(String json) {
+    public static String optimize(String json) {
         try (final JsonReader reader = reader(json)) {
             final JsonToken token = reader.peek();
             if (token == JsonToken.BEGIN_OBJECT) {

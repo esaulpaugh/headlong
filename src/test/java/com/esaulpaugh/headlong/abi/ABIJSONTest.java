@@ -1017,12 +1017,12 @@ public class ABIJSONTest {
     public void optimizeJson() {
         final String in = "{\n    \"type\": \"event\",\n    \"name\":\"\",\n    \"inputs\":[],\n    \"outputs\":[],\n    \"anonymous\": false\n  }";
         final String out = "{\"type\":\"event\",\"name\":\"\"}";
-        assertEquals(out, ABIJSON.optimizeJson(in));
+        assertEquals(out, ABIJSON.optimize(in));
         final String inContract = "[\n  " + in + ",\n  " + in + "\n]";
         final String outContract = "[" + out + "," + out + "]";
         assertEquals(208, inContract.length());
         assertEquals(55, outContract.length());
-        assertEquals(outContract, ABIJSON.optimizeJson(inContract));
+        assertEquals(outContract, ABIJSON.optimize(inContract));
         System.out.println(outContract);
     }
 }
