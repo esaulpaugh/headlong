@@ -170,10 +170,10 @@ public final class ABIJSON {
                 out.setIndent("  ");
             }
             writeObject(o, out, minify);
-            return stringOut.toString();
         } catch (IOException io) {
             throw new IllegalStateException(io);
         }
+        return stringOut.toString();
     }
 
     private static String optimizedArrayJson(List<ABIObject> elements) throws IOException {
@@ -185,8 +185,8 @@ public final class ABIJSON {
                 writeObject(e, out, true);
             }
             out.endArray();
-            return stringOut.toString();
         }
+        return stringOut.toString();
     }
 
     private static void writeObject(ABIObject o, JsonWriter out, boolean minify) throws IOException {
