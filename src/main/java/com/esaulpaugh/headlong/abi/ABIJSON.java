@@ -39,8 +39,6 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /** For parsing JSON representations of {@link ABIObject}s according to the ABI specification. */
 public final class ABIJSON {
@@ -103,24 +101,6 @@ public final class ABIJSON {
     public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
         return parseArray(reader(arrayJson), types, flags);
     }
-//----------------------------------------------------------------------------------------------------------------------
-    static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags) {
-        final List<T> list = new ArrayList<>();
-        try (JsonReader ignored = reader) {
-            reader.beginArray();
-            final MessageDigest digest = Function.newDefaultDigest();
-            while (reader.peek() != JsonToken.END_ARRAY) {
-                T e = tryParseStreaming(reader, types, digest, flags);
-                if (e != null) {
-                    list.add(e);
-                }
-            }
-            reader.endArray();
-        } catch (IOException io) {
-            throw new IllegalStateException(io);
-        }
-        return list;
-    }
 
     public static <T extends ABIObject> List<T> parseABIField(int flags, String objectJson, Set<TypeEnum> types) {
         try (final JsonReader reader = reader(objectJson)) {
@@ -149,7 +129,7 @@ public final class ABIJSON {
             if (token == JsonToken.BEGIN_OBJECT) {
                 return toJson(ABIObject.fromJson(json), false, true);
             } else if (token == JsonToken.BEGIN_ARRAY) {
-                return optimizedArrayJson(parseArray(reader, ABIJSON.ALL, ABIType.FLAGS_NONE));
+                return toMinifiedJsonArray(parseArray(reader, ABIJSON.ALL, ABIType.FLAGS_NONE));
             }
             throw new IllegalArgumentException("unexpected token: " + token);
         } catch (IOException io) {
@@ -157,10 +137,22 @@ public final class ABIJSON {
         }
     }
 //----------------------------------------------------------------------------------------------------------------------
-    static <T extends ABIObject> Stream<T> _stream(JsonReader reader, Set<TypeEnum> types, int flags) {
-        final JsonSpliterator<T> spliterator = new JsonSpliterator<>(reader, types, flags); // For single-threaded use only
-        return StreamSupport.stream(spliterator, false)
-                .onClose(spliterator::close);
+    static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags) {
+        final List<T> list = new ArrayList<>();
+        try (JsonReader ignored = reader) {
+            reader.beginArray();
+            final MessageDigest digest = Function.newDefaultDigest();
+            while (reader.peek() != JsonToken.END_ARRAY) {
+                T e = tryParseStreaming(reader, types, digest, flags);
+                if (e != null) {
+                    list.add(e);
+                }
+            }
+            reader.endArray();
+        } catch (IOException io) {
+            throw new IllegalStateException(io);
+        }
+        return list;
     }
 
     static String toJson(ABIObject o, boolean pretty, boolean minify) {
@@ -176,7 +168,7 @@ public final class ABIJSON {
         return stringOut.toString();
     }
 
-    private static String optimizedArrayJson(List<ABIObject> elements) throws IOException {
+    private static String toMinifiedJsonArray(List<ABIObject> elements) throws IOException {
         final Writer stringOut = new NonSyncWriter(2048);
         try (final JsonWriter out = new JsonWriter(stringOut)) {
             out.setIndent("");

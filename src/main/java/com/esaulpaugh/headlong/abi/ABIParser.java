@@ -15,11 +15,14 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+import com.google.gson.stream.JsonReader;
+
 import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static com.esaulpaugh.headlong.abi.ABIJSON.reader;
 
@@ -63,10 +66,16 @@ public final class ABIParser {
     }
 
     public <T extends ABIObject> Stream<T> stream(String arrayJson) {
-        return ABIJSON._stream(reader(arrayJson), types, flags);
+        return stream(reader(arrayJson), types, flags);
     }
 
     public <T extends ABIObject> Stream<T> stream(InputStream arrayStream) {
-        return ABIJSON._stream(reader(arrayStream), types, flags);
+        return stream(reader(arrayStream), types, flags);
+    }
+
+    private static <T extends ABIObject> Stream<T> stream(JsonReader reader, Set<TypeEnum> types, int flags) {
+        final ABIJSON.JsonSpliterator<T> spliterator = new ABIJSON.JsonSpliterator<>(reader, types, flags); // For single-threaded use only
+        return StreamSupport.stream(spliterator, false)
+                .onClose(spliterator::close);
     }
 }
