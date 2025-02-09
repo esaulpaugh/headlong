@@ -41,6 +41,10 @@ public final class ABIParser {
         this(ABIType.FLAGS_NONE, types);
     }
 
+    /**
+     * @param flags flags with which to initialize the parsed {@link ABIObject}s. {@link ABIType#FLAGS_NONE} or {@link ABIType#FLAG_LEGACY_DECODE}
+     * @param types {@link Set} of {@link ABIObject} types to parse. Objects whose type is not in the set will be skipped
+     */
     public ABIParser(int flags, Set<TypeEnum> types) {
         if (flags != ABIType.FLAGS_NONE
                 && flags != ABIType.FLAG_LEGACY_DECODE) {
