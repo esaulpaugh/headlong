@@ -31,7 +31,7 @@ public interface ABIObject {
     String getCanonicalSignature();
 
     default String toJson(boolean pretty) {
-        return ABIJSON.toJson(this, pretty);
+        return ABIJSON.toJson(this, pretty, false);
     }
 
     default boolean isFunction() {

@@ -179,7 +179,7 @@ Also includes optimized implementations of:
 
 headlong depends on gson v2.1 or greater at runtime and v2.11.0 or greater at compile time. Test suite should take less than one minute to run. Test packages require junit. Jar size is ~128 KiB. Java 8+.
 
-For best JSON parsing performance, make sure objects are compact and that the "type" field is positioned first. See ABIJSON.tryParseStreaming. This can be done via the method `Function#toJson(boolean)` while giving `false` as the argument (no pretty print).
+For better contract ABI JSON parsing performance, consider ABIJSON methods which accept a `Set<TypeEnum>` by which to filter objects by type. For best performance, json should be compact and "type" should be the first key in functions, events, and errors. This can be done via `ABIJSON.optimizeJson(String)`.
 
 See the wiki for more, such as packed encoding (and decoding) and RLP Object Notation: https://github.com/esaulpaugh/headlong/wiki
 

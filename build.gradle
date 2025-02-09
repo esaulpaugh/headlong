@@ -106,7 +106,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.4")
     testImplementation("org.bouncycastle:bcprov-jdk14:" + bcVersion)
 
-    jmhImplementation("commons-codec:commons-codec:1.17.2")
+    jmhImplementation("commons-codec:commons-codec:1.18.0")
     jmhImplementation("org.openjdk.jmh:jmh-core:" + jmhVersion)
     jmhAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:" + jmhVersion)
     jmhImplementation("org.bouncycastle:bcprov-jdk14:" + bcVersion)

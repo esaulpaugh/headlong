@@ -1,0 +1,127 @@
+{
+  "type": "function",
+  "name": "emptyNest",
+  "inputs": [
+    {
+      "type": "tuple",
+      "components": [
+        {
+          "type": "tuple",
+          "components": [
+            {
+              "type": "tuple",
+              "components": [
+                {
+                  "type": "tuple",
+                  "components": [
+                    {
+                      "type": "tuple",
+                      "components": [
+                        {
+                          "type": "tuple",
+                          "components": [
+                            {
+                              "type": "tuple",
+                              "components": [
+                                {
+                                  "type": "tuple",
+                                  "components": [
+                                    {
+                                      "type": "tuple",
+                                      "components": [
+                                        {
+                                          "type": "tuple",
+                                          "components": [
+                                            {
+                                              "type": "tuple",
+                                              "components": [
+                                                {
+                                                  "type": "tuple",
+                                                  "components": [
+                                                    {
+                                                      "type": "tuple",
+                                                      "components": [
+                                                        {
+                                                          "type": "tuple",
+                                                          "components": [
+                                                            {
+                                                              "type": "tuple",
+                                                              "components": [
+                                                                {
+                                                                  "type": "tuple",
+                                                                  "components": [
+                                                                    {
+                                                                      "type": "tuple",
+                                                                      "components": [
+                                                                        {
+                                                                          "type": "tuple",
+                                                                          "components": [
+                                                                            {
+                                                                              "type": "tuple",
+                                                                              "components": [
+                                                                                {
+                                                                                  "type": "tuple",
+                                                                                  "components": [
+                                                                                    {
+                                                                                      "type": "tuple",
+                                                                                      "components": [
+                                                                                        {
+                                                                                          "type": "tuple",
+                                                                                          "components": [
+                                                                                            {
+                                                                                              "type": "tuple",
+                                                                                              "components": [
+                                                                                                {
+                                                                                                  "type": "tuple",
+                                                                                                  "name": "this is so deep",
+                                                                                                  "components": []
+                                                                                                }
+                                                                                              ]
+                                                                                            }
+                                                                                          ]
+                                                                                        }
+                                                                                      ]
+                                                                                    }
+                                                                                  ]
+                                                                                }
+                                                                              ]
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "outputs": []
+}
