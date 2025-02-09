@@ -23,6 +23,7 @@ import com.google.gson.JsonPrimitive;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -957,7 +958,7 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testInputStreamParse() {
+    public void testInputStreamParse() throws IOException {
         testABIObject(FUNCTION_A_JSON);
         testABIObject(EVENT_STR);
         testABIObject(ERROR_JSON);
@@ -970,6 +971,9 @@ public class ABIJSONTest {
 
         ContractError<Pair<BigInteger, Integer>> err = ContractError.fromJson(FLAGS_NONE, bais(ERROR_JSON));
         assertEquals(ERROR_JSON, err.toJson(true));
+
+        InputStream abi = TestUtils.getFileResource("tests/headlong/tests/abi.json");
+        assertEquals(4, new ABIParser().parse(abi).size());
     }
 
     private static void testABIObject(String json) {
