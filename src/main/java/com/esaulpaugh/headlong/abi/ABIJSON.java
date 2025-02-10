@@ -301,8 +301,7 @@ public final class ABIJSON {
         String stateMutability = null;
         boolean anonymous = false;
         do {
-            final String key = reader.nextName();
-            switch (key) {
+            switch (reader.nextName()) {
             case TYPE:
                 t = TypeEnum.parse(reader.nextString());
                 if (!types.contains(t)) {
