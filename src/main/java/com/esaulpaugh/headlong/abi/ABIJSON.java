@@ -103,10 +103,10 @@ public final class ABIJSON {
     }
 
     /**
-     * Reads and parses the value of the key "abi" as a contract ABI json array.
+     * Reads and parses the value of the key "abi" as a contract ABI JSON array.
      *
      * @param flags {@link ABIType#FLAGS_NONE} (recommended) or {@link ABIType#FLAG_LEGACY_DECODE}
-     * @param objectJson    the json object containing the "abi" field
+     * @param objectJson    the JSON object containing the "abi" field
      * @param types the types to allow in the returned {@link List}
      * @return  the list of ABI objects
      * @param <T>   the element type
@@ -129,8 +129,8 @@ public final class ABIJSON {
     /**
      * Returns a minified version of the argument, optimized for parsing by this class. Accepts JSON array or JSON object.
      *
-     * @param json  array or object json
-     * @return  optimized json
+     * @param json  Contract ABI JSON array or Function/Event/ContractError JSON object
+     * @return  optimized JSON
      */
     public static String optimize(String json) {
         try (final JsonReader reader = reader(json)) {
@@ -393,7 +393,7 @@ public final class ABIJSON {
             case TYPE:
                 t = TypeEnum.parse(reader.nextString());
                 if (!types.contains(t)) {
-                    // skip this json object. for best performance, "type" should be declared first
+                    // skip this JSON object. for best performance, "type" should be declared first
                     while (reader.peek() != JsonToken.END_OBJECT) {
                         reader.skipValue();
                     }
