@@ -360,36 +360,31 @@ public final class ABIJSON {
         boolean dynamic = false;
 
         for (int i = 0; true; canonicalType.append(',')) {
-            String name = null;
-            String internalType = null;
-            boolean isIndexed = false;
             String type = null;
             TupleType<?> components = null;
+            String internalType = null;
 
             reader.beginObject();
             while (reader.peek() != JsonToken.END_OBJECT) {
                 switch (reader.nextName()) {
                 case TYPE: type = reader.nextString(); continue;
                 case COMPONENTS: components = parseTupleType(reader, flags); continue;
-                case NAME: name = reader.nextString(); continue;
+                case NAME: names[i] = reader.nextString(); continue;
                 case INTERNAL_TYPE: internalType = reader.nextString(); continue;
-                case INDEXED: isIndexed = reader.nextBoolean(); continue;
+                case INDEXED: indexed[i] = reader.nextBoolean(); continue;
                 default: reader.skipValue();
                 }
             }
             reader.endObject();
 
             ABIType<?> e = resolveElement(type, components, flags, i);
-
             canonicalType.append(e.canonicalType);
             dynamic |= e.dynamic;
-
             elements[i] = e;
-            names[i] = name;
+
             if (internalType != null) {
                 internalTypes[i] = internalType.equals(e.canonicalType) ? e.canonicalType : internalType;
             }
-            indexed[i] = isIndexed;
 
             i++;
             if (reader.peek() == JsonToken.END_ARRAY) {
