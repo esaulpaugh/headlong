@@ -141,7 +141,7 @@ public final class ABIJSON {
             if (token == JsonToken.BEGIN_OBJECT) {
                 return toJson(ABIObject.fromJson(json), false, true);
             } else if (token == JsonToken.BEGIN_ARRAY) {
-                return toMinifiedJsonArray(parseArray(reader, ABIJSON.ALL, ABIType.FLAGS_NONE, Function.newDefaultDigest()));
+                return minifyArray(reader);
             }
             throw new IllegalArgumentException("unexpected token: " + token);
         } catch (IOException io) {
@@ -179,7 +179,8 @@ public final class ABIJSON {
         return stringOut.toString();
     }
 
-    private static String toMinifiedJsonArray(List<ABIObject> elements) throws IOException {
+    private static String minifyArray(JsonReader reader) throws IOException {
+        final List<ABIObject> elements = parseArray(reader, ABIJSON.ALL, ABIType.FLAGS_NONE, Function.newDefaultDigest());
         final Writer stringOut = new NonSyncWriter(2048);
         try (final JsonWriter out = new JsonWriter(stringOut)) {
             out.setIndent("");
@@ -268,40 +269,6 @@ public final class ABIJSON {
         }
         out.endArray();
     }
-
-    private static final class NonSyncWriter extends CharArrayWriter {
-
-        NonSyncWriter(int initialLen) {
-            super(initialLen);
-        }
-
-        @Override
-        public void write(int c) {
-            if (count >= buf.length) {
-                this.buf = Arrays.copyOf(buf, buf.length << 1); // expects buffer.length to be non-zero
-            }
-            this.buf[count++] = (char) c;
-        }
-
-        @Override
-        public void write(final String str, int off, final int len) {
-            int i = this.count;
-            char[] buf = this.buf;
-            final int newCount = i + len;
-            if (newCount > buf.length) {
-                this.buf = buf = Arrays.copyOf(buf, Math.max(newCount, buf.length << 1));
-            }
-            while (i < newCount) {
-                buf[i++] = str.charAt(off++);
-            }
-            this.count = newCount;
-        }
-
-        @Override
-        public String toString() {
-            return new String(buf, 0, count);
-        }
-    }
 //----------------------------------------------------------------------------------------------------------------------
     static <T extends ABIObject> T parseABIObject(String json, Set<TypeEnum> types, MessageDigest digest, int flags) {
         return parseABIObject(reader(json), types, digest, flags);
@@ -324,6 +291,7 @@ public final class ABIJSON {
         }
     }
 
+    @SuppressWarnings("unchecked")
     static <T extends ABIObject> T tryParseStreaming(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) throws IOException {
         reader.beginObject();
         TypeEnum t = null;
@@ -354,20 +322,13 @@ public final class ABIJSON {
             default: reader.skipValue();
             }
         } while (reader.peek() != JsonToken.END_OBJECT);
+        reader.endObject();
         if (t == null) {
-            if (types.contains(TypeEnum.FUNCTION)) {
-                t = TypeEnum.FUNCTION;
-            } else {
-                reader.endObject();
+            t = TypeEnum.FUNCTION;
+            if (!types.contains(t)) {
                 return null; // skip
             }
         }
-        reader.endObject();
-        return finishParse(t, name, inputs, outputs, stateMutability, anonymous, digest);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T extends ABIObject> T finishParse(TypeEnum t, String name, TupleType<?> inputs, TupleType<?> outputs, String stateMutability, boolean anonymous, MessageDigest digest) {
         switch (t.ordinal()) {
         case TypeEnum.ORDINAL_FUNCTION:
         case TypeEnum.ORDINAL_RECEIVE:
@@ -497,5 +458,39 @@ public final class ABIJSON {
         }
         jsonReader.setLenient(false);
         return jsonReader;
+    }
+
+    private static final class NonSyncWriter extends CharArrayWriter {
+
+        NonSyncWriter(int initialLen) {
+            super(initialLen);
+        }
+
+        @Override
+        public void write(int c) {
+            if (count >= buf.length) {
+                this.buf = Arrays.copyOf(buf, buf.length << 1); // expects buffer.length to be non-zero
+            }
+            this.buf[count++] = (char) c;
+        }
+
+        @Override
+        public void write(final String str, int off, final int len) {
+            int i = this.count;
+            char[] buf = this.buf;
+            final int newCount = i + len;
+            if (newCount > buf.length) {
+                this.buf = buf = Arrays.copyOf(buf, Math.max(newCount, buf.length << 1));
+            }
+            while (i < newCount) {
+                buf[i++] = str.charAt(off++);
+            }
+            this.count = newCount;
+        }
+
+        @Override
+        public String toString() {
+            return new String(buf, 0, count);
+        }
     }
 }
