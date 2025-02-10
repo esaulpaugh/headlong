@@ -936,7 +936,10 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testParseABIField() {
+    public void testParseABIField() throws Throwable {
+        assertThrown(IllegalArgumentException.class, "abi key not found", () -> ABIJSON.parseABIField(FLAGS_NONE, "{}", ABIJSON.ALL));
+        assertThrown(IllegalStateException.class, () -> ABIJSON.parseABIField(FLAGS_NONE, "{\"abi\":null}", ABIJSON.ALL));
+        assertEquals(0, ABIJSON.parseABIField(FLAGS_NONE, "{\"abi\":[]}", ABIJSON.ALL).size());
         final String json = "{\n" +
                 "  \"abi\": [\n" +
                 "    {\n" +

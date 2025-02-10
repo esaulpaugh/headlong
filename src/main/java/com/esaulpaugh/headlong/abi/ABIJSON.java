@@ -102,6 +102,15 @@ public final class ABIJSON {
         return parseArray(reader(arrayJson), types, flags);
     }
 
+    /**
+     * Reads and parses the value of the key "abi" as a contract ABI json array.
+     *
+     * @param flags {@link ABIType#FLAGS_NONE} (recommended) or {@link ABIType#FLAG_LEGACY_DECODE}
+     * @param objectJson    the json object containing the "abi" field
+     * @param types the types to allow in the returned {@link List}
+     * @return  the list of ABI objects
+     * @param <T>   the element type
+     */
     public static <T extends ABIObject> List<T> parseABIField(int flags, String objectJson, Set<TypeEnum> types) {
         try (final JsonReader reader = reader(objectJson)) {
             reader.beginObject();
@@ -111,7 +120,7 @@ public final class ABIJSON {
                 }
                 reader.skipValue();
             }
-            throw new IllegalStateException("abi key not found");
+            throw new IllegalArgumentException("abi key not found");
         } catch (IOException io) {
             throw new IllegalStateException(io);
         }
