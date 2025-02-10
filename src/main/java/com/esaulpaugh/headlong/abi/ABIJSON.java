@@ -95,7 +95,14 @@ public final class ABIJSON {
     }
 
     public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
-        return parseArray(reader(arrayJson), types, flags);
+        return parseArray(reader(arrayJson), types, flags, requiresDigest(types) ? Function.newDefaultDigest() : null);
+    }
+
+    static boolean requiresDigest(Set<TypeEnum> types) {
+        return types.contains(TypeEnum.FUNCTION)
+                || types.contains(TypeEnum.CONSTRUCTOR)
+                || types.contains(TypeEnum.RECEIVE)
+                || types.contains(TypeEnum.FALLBACK);
     }
 
     /**
@@ -112,7 +119,7 @@ public final class ABIJSON {
             reader.beginObject();
             while (reader.peek() != JsonToken.END_OBJECT) {
                 if ("abi".equals(reader.nextName())) {
-                    return parseArray(reader, types, flags);
+                    return parseArray(reader, types, flags, requiresDigest(types) ? Function.newDefaultDigest() : null);
                 }
                 reader.skipValue();
             }
@@ -134,7 +141,7 @@ public final class ABIJSON {
             if (token == JsonToken.BEGIN_OBJECT) {
                 return toJson(ABIObject.fromJson(json), false, true);
             } else if (token == JsonToken.BEGIN_ARRAY) {
-                return toMinifiedJsonArray(parseArray(reader, ABIJSON.ALL, ABIType.FLAGS_NONE));
+                return toMinifiedJsonArray(parseArray(reader, ABIJSON.ALL, ABIType.FLAGS_NONE, Function.newDefaultDigest()));
             }
             throw new IllegalArgumentException("unexpected token: " + token);
         } catch (IOException io) {
@@ -142,11 +149,10 @@ public final class ABIJSON {
         }
     }
 //----------------------------------------------------------------------------------------------------------------------
-    static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags) {
+    static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags, MessageDigest digest) {
         final List<T> list = new ArrayList<>();
         try (JsonReader ignored = reader) {
             reader.beginArray();
-            final MessageDigest digest = Function.newDefaultDigest();
             while (reader.peek() != JsonToken.END_ARRAY) {
                 T e = tryParseStreaming(reader, types, digest, flags);
                 if (e != null) {

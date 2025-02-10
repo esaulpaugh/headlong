@@ -50,10 +50,10 @@ public enum TypeEnum {
             return FUNCTION;
         }
         if (ABIJSON.EVENT.equals(typeString)) return EVENT;
+        if (ABIJSON.CONSTRUCTOR.equals(typeString)) return CONSTRUCTOR;
         if (ABIJSON.ERROR.equals(typeString)) return ERROR;
         if (ABIJSON.RECEIVE.equals(typeString)) return RECEIVE;
         if (ABIJSON.FALLBACK.equals(typeString)) return FALLBACK;
-        if (ABIJSON.CONSTRUCTOR.equals(typeString)) return CONSTRUCTOR;
         throw unexpectedType(typeString);
     }
 

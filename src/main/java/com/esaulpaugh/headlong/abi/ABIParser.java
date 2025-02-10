@@ -38,6 +38,7 @@ public final class ABIParser {
 
     private final int flags;
     private final Set<TypeEnum> types;
+    private final boolean requiresDigest;
 
     public ABIParser() {
         this(ABIType.FLAGS_NONE, ABIJSON.ALL);
@@ -62,49 +63,50 @@ public final class ABIParser {
         }
         this.flags = flags;
         this.types = EnumSet.copyOf(types);
+        this.requiresDigest = ABIJSON.requiresDigest(this.types);
     }
 
     public <T extends ABIObject> List<T> parse(String arrayJson) {
-        return ABIJSON.parseArray(reader(arrayJson), types, flags);
+        return parse(reader(arrayJson));
     }
 
     public <T extends ABIObject> List<T> parse(InputStream arrayStream) {
-        return ABIJSON.parseArray(reader(arrayStream), types, flags);
+        return parse(reader(arrayStream));
+    }
+
+    private <T extends ABIObject> List<T> parse(JsonReader reader) {
+        return ABIJSON.parseArray(reader, types, flags, requiresDigest ? Function.newDefaultDigest() : null);
     }
 
     public <T extends ABIObject> Stream<T> stream(String arrayJson) {
-        return stream(reader(arrayJson), types, flags);
+        return stream(reader(arrayJson));
     }
 
     public <T extends ABIObject> Stream<T> stream(InputStream arrayStream) {
-        return stream(reader(arrayStream), types, flags);
+        return stream(reader(arrayStream));
     }
 
-    private static <T extends ABIObject> Stream<T> stream(JsonReader reader, Set<TypeEnum> types, int flags) {
-        final JsonSpliterator<T> spliterator = new JsonSpliterator<>(reader, types, flags); // For single-threaded use only
+    private <T extends ABIObject> Stream<T> stream(JsonReader reader) {
+        final JsonSpliterator<T> spliterator = new JsonSpliterator<>(reader); // sequential (non-parallel)
         return StreamSupport.stream(spliterator, false)
                 .onClose(spliterator::close);
     }
 
-    private static final class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> implements Closeable {
+    private final class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> implements Closeable {
 
         private final JsonReader jsonReader;
-        private final Set<TypeEnum> types;
-        private final MessageDigest digest;
-        private final int flags;
-        boolean closed = false;
+        private final MessageDigest digest = requiresDigest ? Function.newDefaultDigest() : null;
 
-        JsonSpliterator(JsonReader reader, Set<TypeEnum> types, int flags) {
-            super(Long.SIZE, ORDERED | NONNULL);
+        private boolean closed = false;
+
+        JsonSpliterator(final JsonReader reader) {
+            super(0, ORDERED | NONNULL);
+            this.jsonReader = reader;
             try {
-                reader.beginArray();
+                this.jsonReader.beginArray();
             } catch (IOException io) {
                 throw new IllegalStateException(io);
             }
-            this.jsonReader = reader;
-            this.types = types;
-            this.digest = Function.newDefaultDigest();
-            this.flags = flags;
         }
 
         @Override
