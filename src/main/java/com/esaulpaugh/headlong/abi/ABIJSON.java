@@ -127,7 +127,7 @@ public final class ABIJSON {
     }
 
     /**
-     * Parses Ethereum ABI JSON and returns a minified version, optimized for parsing by this class. Accepts JSON array or JSON object.
+     * Returns a minified version of the argument, optimized for parsing by this class. Accepts JSON array or JSON object.
      *
      * @param json  array or object json
      * @return  optimized json
