@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-2025, ubuntu-24.04 ]
-        distribution: [ 'temurin' ]
+        distribution: [ 'zulu' ]
 
     runs-on: ${{ matrix.os }}
 
@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: ${{ matrix.distribution }}
-          java-version: '8.0.302'
+          java-version: '8.0.153'
           java-package: jdk
           architecture: x86
           cache: 'gradle'
