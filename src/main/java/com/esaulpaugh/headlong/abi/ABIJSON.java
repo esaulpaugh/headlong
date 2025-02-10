@@ -21,7 +21,6 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.CharArrayWriter;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -36,9 +35,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.function.Consumer;
 
 /** For parsing JSON representations of {@link ABIObject}s according to the ABI specification. */
 public final class ABIJSON {
@@ -267,7 +263,7 @@ public final class ABIJSON {
         out.endArray();
     }
 
-    private static class NonSyncWriter extends CharArrayWriter {
+    private static final class NonSyncWriter extends CharArrayWriter {
 
         NonSyncWriter(int initialLen) {
             super(initialLen);
@@ -301,63 +297,6 @@ public final class ABIJSON {
         }
     }
 //----------------------------------------------------------------------------------------------------------------------
-    static class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> implements Closeable {
-
-        private final JsonReader jsonReader;
-        private final Set<TypeEnum> types;
-        private final MessageDigest digest;
-        private final int flags;
-        boolean closed = false;
-
-        JsonSpliterator(JsonReader reader, Set<TypeEnum> types, int flags) {
-            super(Long.SIZE, ORDERED | NONNULL);
-            try {
-                reader.beginArray();
-            } catch (IOException io) {
-                throw new IllegalStateException(io);
-            }
-            this.jsonReader = reader;
-            this.types = types;
-            this.digest = Function.newDefaultDigest();
-            this.flags = flags;
-        }
-
-        @Override
-        public boolean tryAdvance(Consumer<? super T> action) {
-            if (!closed) {
-                try {
-                    while (jsonReader.peek() != JsonToken.END_ARRAY) {
-                        T e = tryParseStreaming(jsonReader, types, digest, flags);
-                        if (e != null) {
-                            action.accept(e);
-                            return true;
-                        }
-                    }
-                    close();
-                } catch (IOException io) {
-                    throw new IllegalStateException(io);
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public Spliterator<T> trySplit() {
-            return null; // alternatively, throw new ConcurrentModificationException();
-        }
-
-        @Override
-        public void close() {
-            try {
-                jsonReader.close();
-            } catch (IOException io) {
-                throw new IllegalStateException(io);
-            } finally {
-                closed = true;
-            }
-        }
-    }
-
     static <T extends ABIObject> T parseABIObject(String json, Set<TypeEnum> types, MessageDigest digest, int flags) {
         return parseABIObject(reader(json), types, digest, flags);
     }
