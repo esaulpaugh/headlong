@@ -555,7 +555,7 @@ public class ABIJSONTest {
     public void testGetErrors() throws Throwable {
         assertThrown(
                 IllegalArgumentException.class,
-                "type missing at tuple index 1",
+                "bad type at tuple index 1",
                 () -> ABIObject.fromJson(ERROR_JSON.replace(",\n      \"type\": \"uint24\"", ""))
         );
 
@@ -845,7 +845,10 @@ public class ABIJSONTest {
         assertThrown(cl, "components missing at tuple index 0", () -> Event.fromJson(MISSING_COMPONENTS_0));
         assertThrown(cl, "components missing at tuple index 1", () -> Function.fromJson(MISSING_COMPONENTS_1));
         assertThrown(cl, "unexpected field components at tuple index 0", () -> Event.fromJson(EVENT_STR.replace("tuple[]", "bytes")));
-        assertThrown(cl, "unexpected type at tuple index 0", () -> Event.fromJson(EVENT_STR.replace("tuple[]", "()[]")));
+        assertThrown(cl, "bad type at tuple index 0", () -> Event.fromJson(EVENT_STR.replace("tuple[]", "()")));
+        assertThrown(cl, "bad type at tuple index 0", () -> Event.fromJson(EVENT_STR.replace("tuple[]", "()[]")));
+        assertThrown(cl, "bad type at tuple index 0", () -> Event.fromJson(MISSING_COMPONENTS_0.replace("tuple[]", "()")));
+        assertThrown(cl, "bad type at tuple index 0", () -> Event.fromJson(MISSING_COMPONENTS_0.replace("tuple[]", "()[]")));
         assertThrown(cl, "unexpected ABI object type", () -> Function.fromJson(MISSING_COMPONENTS_0));
         for (char i = 35; i < 92; i++) {
             final char ch = i;

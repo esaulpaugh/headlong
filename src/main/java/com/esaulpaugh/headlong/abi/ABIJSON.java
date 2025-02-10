@@ -509,24 +509,21 @@ public final class ABIJSON {
         }
     }
 
-    private static ABIType<?> resolveElement(final String type, final TupleType<?> comp, final int flags, final int i) {
-        if (type == null) {
-            throw new IllegalArgumentException("type missing at tuple index " + i);
+    private static ABIType<?> resolveElement(String type, TupleType<?> components, int flags, int i) {
+        if (type == null || type.charAt(0) == '(') {
+            throw new IllegalArgumentException("bad type at tuple index " + i);
+        }
+        if (components != null) {
+            if (type.equals(TUPLE)) {
+                return components;
+            }
+            if (type.startsWith(TUPLE)) {
+                return TypeFactory.build(components.canonicalType + type.substring(TUPLE.length()), null, components, flags); // tuple array
+            }
+            throw new IllegalArgumentException("unexpected field " + COMPONENTS + " at tuple index " + i);
         }
         if (type.startsWith(TUPLE)) {
-            if (comp == null) {
-                throw new IllegalArgumentException("components missing at tuple index " + i);
-            }
-            if (type.equals(TUPLE)) {
-                return comp;
-            }
-            return TypeFactory.build(comp.canonicalType + type.substring(TUPLE.length()), null, comp, flags); // tuple array
-        }
-        if (type.charAt(0) == '(') {
-            throw new IllegalArgumentException("unexpected type at tuple index " + i);
-        }
-        if (comp != null) {
-            throw new IllegalArgumentException("unexpected field " + COMPONENTS + " at tuple index " + i);
+            throw new IllegalArgumentException("components missing at tuple index " + i);
         }
         return TypeFactory.create(flags, type);
     }
@@ -546,8 +543,8 @@ public final class ABIJSON {
         final JsonReader jsonReader = new JsonReader(reader);
         if (!fallback) {
             try {
-                jsonReader.setStrictness(Strictness.STRICT); // since 2.11.0
-                jsonReader.setNestingLimit(50); // since 2.12.0 (allow setStrictness to succeed before trying)
+                jsonReader.setStrictness(Strictness.STRICT); // since gson 2.11.0
+                jsonReader.setNestingLimit(50); // since gson 2.12.0 (allow setStrictness to succeed before trying)
                 return jsonReader;
             } catch (LinkageError le) { // e.g. runtime gson doesn't have one of the above methods
                 fallback = true;
