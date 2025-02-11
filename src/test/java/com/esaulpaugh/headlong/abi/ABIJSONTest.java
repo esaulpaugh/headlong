@@ -651,10 +651,11 @@ public class ABIJSONTest {
 
     @Test
     public void testStream() {
-        assertEquals(0, (int) new ABIParser().stream("[]").count());
-
         final ABIParser p = new ABIParser();
-        assertEquals(2, p.stream(CONTRACT_JSON).count());
+        assertEquals(0L, p.stream("[]").count());
+        assertEquals(0L, p.stream("[]").parallel().count());
+
+        assertEquals(2L, p.stream(CONTRACT_JSON).count());
         assertTrue(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isEvent));
         assertTrue(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isFunction));
         assertFalse(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isContractError));
@@ -663,7 +664,7 @@ public class ABIJSONTest {
 
         assertTrue(p.stream(CONTRACT_JSON).anyMatch(ABIObject::isFunction));
 
-        assertEquals(1, p.stream(ERROR_JSON_ARRAY).count());
+        assertEquals(1L, p.stream(ERROR_JSON_ARRAY).count());
         assertInstanceOf(ContractError.class, p.stream(ERROR_JSON_ARRAY).filter(ABIObject::isContractError).findFirst().get());
     }
 
