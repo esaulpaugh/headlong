@@ -15,10 +15,12 @@
 */
 package com.esaulpaugh.headlong.abi.example;
 
+import com.esaulpaugh.headlong.abi.Quintuple;
 import com.esaulpaugh.headlong.abi.TupleType;
 import com.esaulpaugh.headlong.util.Strings;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -29,7 +31,7 @@ public class ABIStudentTest {
 
     @Test
     public void abiDecodeEncode() {
-        final TupleType<?> tt = TupleType.parse("(string,fixed128x9,bytes,bytes,uint16)");
+        final TupleType<Quintuple<String, BigDecimal, byte[], byte[], Integer>> tt = TupleType.parse("(string,fixed128x9,bytes,bytes,uint16)");
 
         final ByteBuffer studentAbi = ByteBuffer.wrap(Strings.decode(STUDENT_ABI));
 

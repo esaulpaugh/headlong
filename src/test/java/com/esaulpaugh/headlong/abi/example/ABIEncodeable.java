@@ -17,7 +17,7 @@ package com.esaulpaugh.headlong.abi.example;
 
 import com.esaulpaugh.headlong.abi.Tuple;
 
-public interface ABIEncodeable {
+public interface ABIEncodeable<T extends Tuple> {
 
-    <T extends Tuple> T toTuple();
+    T toTuple();
 }
