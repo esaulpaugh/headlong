@@ -463,7 +463,7 @@ public class TupleTest {
     @Test
     public void testDecodeIndex2() throws IOException {
         final String en = TestUtils.readFileResourceAsString("tests/headlong/tests/string_en.txt");
-        final String[] fr = TestUtils.readFileResourceAsString("tests/headlong/tests/string_fr.txt").split("[\n]");
+        final String[] fr = TestUtils.readFileResourceAsString("tests/headlong/tests/string_fr.txt").split("\\R");
 //        System.out.println(en);
 //        Arrays.stream(fr).forEach(System.out::println);
         TupleType<Tuple> tt = TupleType.parse("(bool,uint16,address,int64,uint64,address,string[][])");
