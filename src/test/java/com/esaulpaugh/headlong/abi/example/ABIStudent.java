@@ -37,12 +37,12 @@ public class ABIStudent implements ABIEncodeable<Quintuple<String, BigDecimal, b
         this.balance = balance;
     }
 
-    public ABIStudent(Tuple values) {
+    public ABIStudent(Quintuple<String, BigDecimal, byte[], byte[], Integer> values) {
         this(
-                values.get(0),
-                ((BigDecimal) values.get(1)).floatValue(),
-                values.get(2),
-                new BigDecimal(new BigInteger((byte[]) values.get(3)), (int) values.get(4))
+                values.get0(),
+                values.get1().floatValue(),
+                values.get2(),
+                new BigDecimal(new BigInteger(values.get3()), values.get4())
         );
     }
 
