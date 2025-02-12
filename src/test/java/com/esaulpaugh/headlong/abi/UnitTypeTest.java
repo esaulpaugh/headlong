@@ -34,7 +34,6 @@ public class UnitTypeTest {
 
     @Test
     public void testConstructorConstraints() throws Throwable {
-        // should print to System.err:
 //        unexpected instance creation rejected by com.esaulpaugh.headlong.abi.UnitType
 //        unexpected instance creation rejected by com.esaulpaugh.headlong.abi.UnitType
 //        unexpected instance creation rejected by com.esaulpaugh.headlong.abi.UnitType
@@ -56,7 +55,6 @@ public class UnitTypeTest {
 
     @Test
     public void testSubclassingConstraints() throws Throwable {
-        // should print to System.err:
 //        unexpected instance creation rejected: com.esaulpaugh.headlong.abi.AddressType
 //        unexpected instance creation rejected: com.esaulpaugh.headlong.abi.BooleanType
 //        unexpected instance creation rejected: com.esaulpaugh.headlong.abi.ByteType

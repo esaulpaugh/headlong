@@ -53,12 +53,12 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         if (!(this instanceof BigDecimalType)) {
             if (INSTANCE_COUNT.incrementAndGet() > INSTANCE_LIMIT) {
                 INSTANCE_COUNT.decrementAndGet();
-                throw illegalState("instance not permitted", "unexpected instance creation rejected by " + UnitType.class.getName());
+                throw new IllegalStateException("instance not permitted");
             }
         } else if (bitLength > UNIT_LENGTH_BITS) {
             bitLength = UNIT_LENGTH_BITS;
         } else if (bitLength < Byte.SIZE || Integers.mod(bitLength, Byte.SIZE) != 0) {
-            throw illegalState("bit length not permitted", "unexpected bit length rejected by " + UnitType.class.getName());
+            throw new IllegalStateException("bit length not permitted");
         }
         this.bitLength = bitLength;
         this.unsigned = unsigned;

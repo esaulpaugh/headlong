@@ -42,7 +42,7 @@ public class Tuple implements Iterable<Object> {
                                     || c == Quintuple.class
                                     || c == Sextuple.class;
         if (!permitted) {
-            throw ABIType.illegalState("unexpected subclass", "unexpected subclass rejected by " + Tuple.class.getName());
+            throw new IllegalStateException("unexpected subclass");
         }
     }
 
