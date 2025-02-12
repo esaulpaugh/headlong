@@ -33,6 +33,7 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     private static final boolean[] EMPTY_INDEX = new boolean[0];
 
     public static final TupleType<Tuple> EMPTY = new TupleType<>("()", false, EMPTY_ARRAY, null, null, EMPTY_INDEX, ABIType.FLAGS_NONE);
+    private static final TupleType<Tuple> EMPTY_LEGACY = new TupleType<>("()", false, EMPTY_ARRAY, null, null, EMPTY_INDEX, ABIType.FLAG_LEGACY_DECODE);
 
     final ABIType<?>[] elementTypes;
     final String[] elementNames;
@@ -533,6 +534,10 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
     }
 
     static TupleType<Tuple> empty(int flags) {
-        return flags == ABIType.FLAGS_NONE ? EMPTY : new TupleType<>("()", false, EMPTY_ARRAY, null, null, EMPTY_INDEX, flags);
+        return flags == ABIType.FLAGS_NONE
+                ? EMPTY
+                : flags == ABIType.FLAG_LEGACY_DECODE
+                    ? EMPTY_LEGACY
+                    : new TupleType<>("()", false, EMPTY_ARRAY, null, null, EMPTY_INDEX, flags);
     }
 }
