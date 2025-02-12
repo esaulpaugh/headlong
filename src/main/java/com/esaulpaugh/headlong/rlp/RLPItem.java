@@ -336,7 +336,7 @@ public abstract class RLPItem implements Comparable<RLPItem> {
         return this.dataLength - othr.dataLength;
     }
 
-    @SuppressWarnings("removal")
+    @SuppressWarnings({"deprecation", "removal"})
     @Override
     protected final void finalize() throws Throwable { /* (empty) final finalize helps prevent finalizer attacks on non-final class RLPItem */ }
 }

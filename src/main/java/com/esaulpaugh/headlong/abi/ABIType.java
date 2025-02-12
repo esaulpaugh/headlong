@@ -372,7 +372,7 @@ public abstract class ABIType<J> {
         return new IllegalStateException(msg);
     }
 
-    @SuppressWarnings("removal")
+    @SuppressWarnings({"deprecation", "removal"})
     @Override
     protected final void finalize() throws Throwable { /* (empty) final finalize helps prevent finalizer attacks on non-final class ABIType */ }
 }
