@@ -43,6 +43,14 @@ public abstract class RLPItem implements Comparable<RLPItem> {
     public final transient int dataLength;
     public final transient int endIndex;
 
+    {
+        final Class<?> c = this.getClass();
+        final boolean permitted = c == RLPString.class || c == RLPList.class;
+        if (!permitted) {
+            throw new IllegalStateException("unexpected subclass");
+        }
+    }
+
     RLPItem(byte[] buffer, int index, int dataIndex, int dataLength, int endIndex) {
         this.buffer = buffer;
         this.index = index;
@@ -327,4 +335,8 @@ public abstract class RLPItem implements Comparable<RLPItem> {
         }
         return this.dataLength - othr.dataLength;
     }
+
+    @SuppressWarnings("removal")
+    @Override
+    protected final void finalize() throws Throwable { /* (empty) final finalize helps prevent finalizer attacks on non-final class RLPItem */ }
 }
