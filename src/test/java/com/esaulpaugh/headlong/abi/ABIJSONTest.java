@@ -29,6 +29,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -1035,5 +1036,21 @@ public class ABIJSONTest {
         assertEquals(55, outContract.length());
         assertEquals(outContract, ABIJSON.optimize(inContract));
         System.out.println(outContract);
+
+        final Event<?> e = Event.fromJson(in);
+        assertEquals(e, Event.fromJson(ABIJSON.optimize(in)));
+        assertEquals(e, Event.fromJson(ABIJSON.optimize(e.toJson(true))));
+        assertEquals(e, Event.fromJson(ABIJSON.optimize(e.toJson(false))));
+
+        final String optimized = ABIJSON.optimize(CONTRACT_JSON);
+        {
+            final List<ABIObject> norm3 = ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, CONTRACT_JSON, ABIJSON.ALL);
+            final List<ABIObject> opt3 = ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, optimized, ABIJSON.ALL);
+
+            assertEquals(norm3.size(), opt3.size());
+            for (Iterator<ABIObject> normIter = norm3.iterator(), optIter = opt3.iterator(); normIter.hasNext(); ) {
+                assertEquals(normIter.next(), optIter.next());
+            }
+        }
     }
 }

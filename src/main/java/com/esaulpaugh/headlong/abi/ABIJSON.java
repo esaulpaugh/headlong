@@ -296,8 +296,8 @@ public final class ABIJSON {
         reader.beginObject();
         TypeEnum t = null;
         String name = null;
-        TupleType<?> inputs = TupleType.EMPTY;
-        TupleType<?> outputs = TupleType.EMPTY;
+        TupleType<?> inputs = TupleType.empty(flags);
+        TupleType<?> outputs = TupleType.empty(flags);
         String stateMutability = null;
         boolean anonymous = false;
         do {
