@@ -248,4 +248,8 @@ public class Tuple implements Iterable<Object> {
         }
         return e instanceof Tuple ? ((Tuple) e).deepCopy() : e;
     }
+
+    @SuppressWarnings("removal")
+    @Override
+    protected final void finalize() throws Throwable { /* (empty) final finalize helps prevent finalizer attacks on non-final class Tuple */ }
 }
