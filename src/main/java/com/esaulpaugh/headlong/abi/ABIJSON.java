@@ -115,7 +115,7 @@ public final class ABIJSON {
      * @param <T>   the element type
      */
     public static <T extends ABIObject> List<T> parseABIField(int flags, String objectJson, Set<TypeEnum> types) {
-        try (final JsonReader reader = reader(objectJson)) {
+        try (JsonReader reader = reader(objectJson)) {
             reader.beginObject();
             while (reader.peek() != JsonToken.END_OBJECT) {
                 if ("abi".equals(reader.nextName())) {
@@ -136,7 +136,7 @@ public final class ABIJSON {
      * @return  optimized JSON
      */
     public static String optimize(String json) {
-        try (final JsonReader reader = reader(json)) {
+        try (JsonReader reader = reader(json)) {
             final JsonToken token = reader.peek();
             if (token == JsonToken.BEGIN_OBJECT) {
                 return toJson(ABIObject.fromJson(json), false, true);
@@ -168,7 +168,7 @@ public final class ABIJSON {
 
     static String toJson(ABIObject o, boolean pretty, boolean minify) {
         final Writer stringOut = new NonSyncWriter(pretty ? 512 : 256); // can also use StringWriter or CharArrayWriter, but this is faster
-        try (final JsonWriter out = new JsonWriter(stringOut)) {
+        try (JsonWriter out = new JsonWriter(stringOut)) {
             if (pretty) {
                 out.setIndent("  ");
             }
@@ -182,7 +182,7 @@ public final class ABIJSON {
     private static String minifyArray(JsonReader reader) throws IOException {
         final List<ABIObject> elements = parseArray(reader, ABIJSON.ALL, ABIType.FLAGS_NONE, Function.newDefaultDigest());
         final Writer stringOut = new NonSyncWriter(2048);
-        try (final JsonWriter out = new JsonWriter(stringOut)) {
+        try (JsonWriter out = new JsonWriter(stringOut)) {
             out.setIndent("");
             out.beginArray();
             for (ABIObject e : elements) {
@@ -208,7 +208,7 @@ public final class ABIJSON {
                     }
                 }
             }
-            String stateMutability = f.getStateMutability();
+            final String stateMutability = f.getStateMutability();
             if (stateMutability != null) {
                 out.name(STATE_MUTABILITY).value(stateMutability);
             }
