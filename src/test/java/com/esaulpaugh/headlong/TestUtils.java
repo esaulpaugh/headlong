@@ -79,14 +79,13 @@ public final class TestUtils {
     public static long getSeed(final long protoseed) {
         final Runtime runtime = Runtime.getRuntime();
         final Thread t = Thread.currentThread();
-        final ThreadGroup group = t.getThreadGroup();
         final ThreadLocalRandom rand = ThreadLocalRandom.current();
         final long[] vals = new long[] {
                 System.nanoTime(),          protoseed,                  Double.doubleToLongBits(rand.nextDouble()),
                 System.currentTimeMillis(), rand.hashCode(),            Double.doubleToLongBits(Math.random()),
                 new Object().hashCode(),    runtime.freeMemory(),       System.identityHashCode(new String()),
                 t.hashCode(),               t.getName().hashCode(),     System.identityHashCode(rand.nextInt()),
-                runtime.totalMemory(),      group.activeCount(),        t.getId(),
+                runtime.totalMemory(),      t.getId(),                  t.getThreadGroup().activeCount(),
                 t.getPriority(),            runtime.availableProcessors()
         };
         long c = 0x9e3779b97f4a7c15L * rand.nextLong() + System.identityHashCode(vals);
