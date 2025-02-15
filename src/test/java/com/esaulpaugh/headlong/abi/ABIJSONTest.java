@@ -46,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -1052,5 +1053,17 @@ public class ABIJSONTest {
                 assertEquals(normIter.next(), optIter.next());
             }
         }
+    }
+
+    @Test
+    public void testMisc() throws Throwable {
+        Function c = Function.parse("c(int,bool,(string,bytes),address,address,uint,uint8,int8,uint32,bytes32)", "()");
+        String json = c.toJson(false).replace("\"bool\"", "\"bool\",\"m11\":1,\"internalType\":\"\"").replace("[]}", "null,\"moo\":null}");
+        assertEquals(c, Function.fromJson(json));
+
+        assertThrown(UnsupportedOperationException.class, () -> c.getInputs().get(0).dynamicByteLength(null));
+        assertNotEquals(new Object(), c.getInputs().get(0).asUnitType());
+
+        assertNotNull(ContractError.fromJson("{\"type\":\"error\",\"name\":\"\"}"));
     }
 }
