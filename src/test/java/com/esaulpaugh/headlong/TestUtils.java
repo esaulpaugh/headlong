@@ -80,22 +80,22 @@ public final class TestUtils {
         final Runtime runtime = Runtime.getRuntime();
         final Thread t = Thread.currentThread();
         final ThreadGroup group = t.getThreadGroup();
-        final ThreadLocalRandom r = ThreadLocalRandom.current();
+        final ThreadLocalRandom rand = ThreadLocalRandom.current();
         final long[] vals = new long[] {
-                runtime.freeMemory(),       runtime.hashCode(),         runtime.availableProcessors(),
-                new Object().hashCode(),    runtime.totalMemory(),      Double.doubleToLongBits(r.nextDouble()),
-                t.getId(),                  protoseed,                  Double.doubleToLongBits(Math.random()),
-                t.hashCode(),               t.getName().hashCode(),     t.getContextClassLoader().hashCode(),
-                t.getPriority(),            System.currentTimeMillis(), System.identityHashCode(new String()),
-                group.hashCode(),           System.nanoTime(),          System.identityHashCode(r.nextInt()),
-                group.activeCount(),        r.nextLong(),               r.hashCode()
+                System.nanoTime(),          protoseed,                  Double.doubleToLongBits(rand.nextDouble()),
+                System.currentTimeMillis(), rand.hashCode(),            Double.doubleToLongBits(Math.random()),
+                new Object().hashCode(),    runtime.freeMemory(),       System.identityHashCode(new String()),
+                t.hashCode(),               t.getName().hashCode(),     System.identityHashCode(rand.nextInt()),
+                runtime.totalMemory(),      group.activeCount(),        t.getId(),
+                t.getPriority(),            runtime.availableProcessors()
         };
-        long c = (long)System.identityHashCode(vals) * new Throwable().hashCode();
-        for (long v : vals) {
-            c = 31 * c + v;
+        long c = 0x9e3779b97f4a7c15L * rand.nextLong() + System.identityHashCode(vals);
+        for (final long v : vals) {
+            c = 31L * c + v;
+            c ^= c >> 32;
         }
-        c ^= c >> 32;
-        return c ^ (c << 33);
+        c ^= (c << 33);
+        return c ^ (c >> 32);
     }
 
     public static long getEnvHash() {
