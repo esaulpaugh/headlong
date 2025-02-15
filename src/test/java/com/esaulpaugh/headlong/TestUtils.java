@@ -94,8 +94,7 @@ public final class TestUtils {
             c = 31L * c + v;
             c ^= c >> 32;
         }
-        c ^= (c << 33);
-        return c ^ (c >> 32);
+        return c ^ (c << 33);
     }
 
     public static long getEnvHash() {
