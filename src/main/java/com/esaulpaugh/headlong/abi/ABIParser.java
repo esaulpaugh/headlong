@@ -38,7 +38,7 @@ public final class ABIParser {
 
     private final int flags;
     private final Set<TypeEnum> types;
-    private final boolean requiresDigest;
+    private final transient boolean requiresDigest;
 
     public ABIParser() {
         this(ABIType.FLAGS_NONE, ABIJSON.ALL);
@@ -143,5 +143,24 @@ public final class ABIParser {
                 closed = true;
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof ABIParser) {
+            ABIParser other = (ABIParser) o;
+            return flags == other.flags && types.equals(other.types);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return flags + types.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "ABIParser{flags=" + flags + ", types=" + types + '}';
     }
 }

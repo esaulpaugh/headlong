@@ -76,7 +76,7 @@ public final class RLPEncoder {
     }
 
     private static int sumEncodedLen(Iterable<?> rawItems) {
-        long sum = 0;
+        long sum = 0L;
         for (Object raw : rawItems) {
             sum += encodedLen(raw);
         }
