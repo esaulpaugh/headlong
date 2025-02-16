@@ -64,9 +64,9 @@ public final class RLPEncoder {
         }
     }
 // ---------------------------------------------------------------------------------------------------------------------
-    private static int requireNoOverflow(long val) {
-        if (val <= Integer.MAX_VALUE) {
-            return (int) val;
+    private static int requireNoOverflow(long length) {
+        if (length >= 0L && length <= Integer.MAX_VALUE) {
+            return (int) length;
         }
         throw new ArithmeticException("integer overflow");
     }
