@@ -18,7 +18,7 @@
     <inceptionYear>2018</inceptionYear>
 
     <properties>
-        <argLine>-Dfile.encoding=US-ASCII</argLine>
+        <argLine>-Dfile.encoding=US-ASCII -XX:+UseSerialGC</argLine>
         <project.build.sourceEncoding>US-ASCII</project.build.sourceEncoding>
         <junit.version>5.11.4</junit.version>
         <jmh.version>1.37</jmh.version>
