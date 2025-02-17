@@ -72,7 +72,7 @@ public final class ABIJSON {
      * @return  the parsed {@link Function}s
      */
     public static List<Function> parseNormalFunctions(String arrayJson) {
-        return parseElements(ABIType.FLAGS_NONE, arrayJson, EnumSet.of(TypeEnum.FUNCTION));
+        return parseElements(ABIType.FLAGS_NONE, arrayJson, EnumSet.of(TypeEnum.FUNCTION), Function.newDefaultDigest());
     }
 
     /**
@@ -83,19 +83,20 @@ public final class ABIJSON {
      * @return  the parsed {@link Function}s
      */
     public static List<Function> parseFunctions(String arrayJson) {
-        return parseElements(ABIType.FLAGS_NONE, arrayJson, FUNCTIONS);
+        return parseElements(ABIType.FLAGS_NONE, arrayJson, FUNCTIONS, Function.newDefaultDigest());
     }
 
     public static List<Event<Tuple>> parseEvents(String arrayJson) {
-        return parseElements(ABIType.FLAGS_NONE, arrayJson, EVENTS);
+        return parseElements(ABIType.FLAGS_NONE, arrayJson, EVENTS, null);
     }
 
     public static List<ContractError<Tuple>> parseErrors(String arrayJson) {
-        return parseElements(ABIType.FLAGS_NONE, arrayJson, ERRORS);
+        return parseElements(ABIType.FLAGS_NONE, arrayJson, ERRORS, null);
     }
 
-    public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types) {
-        return parseArray(reader(arrayJson), types, flags, requiresDigest(types) ? Function.newDefaultDigest() : null);
+    /** Allows a {@link MessageDigest} to be reused for multiple calls. See also {@link ABIParser}. */
+    public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types, MessageDigest digest) {
+        return parseArray(reader(arrayJson), types, flags, digest);
     }
 
     static boolean requiresDigest(Set<TypeEnum> types) {
