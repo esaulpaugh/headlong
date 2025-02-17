@@ -1063,7 +1063,7 @@ public class ABIJSONTest {
     @Test
     public void testMisc() throws Throwable {
 
-        assertEquals("", new ABIParser(ABIType.FLAG_LEGACY_DECODE, ABIJSON.FUNCTIONS).toString());
+        assertEquals("ABIParser{flags=1, types=[function, receive, fallback, constructor]}", new ABIParser(ABIType.FLAG_LEGACY_DECODE, ABIJSON.FUNCTIONS).toString());
 
         Function c = Function.parse("c(int,bool,(string,bytes),address,address,uint,uint8,int8,uint32,bytes32)", "()");
         String json = c.toJson(false).replace("\"bool\"", "\"bool\",\"m11\":1,\"internalType\":\"\"").replace("[]}", "null,\"moo\":null}");
