@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -619,7 +620,7 @@ public class ABIJSONTest {
     @Test
     public void testParseElements() throws Throwable {
 
-        List<ABIObject> list = ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, CONTRACT_JSON, EnumSet.noneOf(TypeEnum.class));
+        List<ABIObject> list = ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, CONTRACT_JSON, EnumSet.noneOf(TypeEnum.class), Function.newDefaultDigest());
         assertEquals(0, list.size());
 
         list = new ABIParser().parse(CONTRACT_JSON);
@@ -943,9 +944,12 @@ public class ABIJSONTest {
 
     @Test
     public void testParseABIField() throws Throwable {
-        assertThrown(IllegalArgumentException.class, "abi key not found", () -> ABIJSON.parseABIField(FLAGS_NONE, "{}", ABIJSON.ALL));
+        assertThrown(IllegalStateException.class, () -> ABIJSON.parseABIField(FLAGS_NONE, "[]", ABIJSON.ALL));
         assertThrown(IllegalStateException.class, () -> ABIJSON.parseABIField(FLAGS_NONE, "{\"abi\":null}", ABIJSON.ALL));
+        assertThrown(IllegalArgumentException.class, "abi key not found", () -> ABIJSON.parseABIField(FLAGS_NONE, "{}", ABIJSON.ALL));
+        assertThrown(IllegalArgumentException.class, "abi key not found", () -> ABIJSON.parseABIField(FLAGS_NONE, "{\"ABI\":\"\"}", ABIJSON.ALL));
         assertEquals(0, ABIJSON.parseABIField(FLAGS_NONE, "{\"abi\":[]}", ABIJSON.ALL).size());
+        assertEquals(0, ABIJSON.parseABIField(FLAGS_NONE, "{\"\":null,\"abi\":[],\"\":null}", ABIJSON.ALL).size());
         final String json = "{\n" +
                 "  \"abi\": [\n" +
                 "    {\n" +
@@ -1011,14 +1015,15 @@ public class ABIJSONTest {
 
     @Test
     public void testParseFilter() throws Throwable {
-        assertEquals(0, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.RECEIVE)).size());
-        assertEquals(0, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.FALLBACK)).size());
-        assertEquals(0, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.CONSTRUCTOR)).size());
+        final MessageDigest digest = Function.newDefaultDigest();
+        assertEquals(0, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.RECEIVE), digest).size());
+        assertEquals(0, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.FALLBACK), digest).size());
+        assertEquals(0, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.CONSTRUCTOR), digest).size());
         assertEquals(0, ABIJSON.parseEvents("[{\"name\":\"\"}]").size());
         assertEquals(0, ABIJSON.parseErrors("[{\"name\":\"\"}]").size());
 
-        assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", ABIJSON.FUNCTIONS).size());
-        assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.FUNCTION)).size());
+        assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", ABIJSON.FUNCTIONS, digest).size());
+        assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.FUNCTION), digest).size());
 
         assertEquals(0L, new ABIParser(ABIJSON.EVENTS).stream(bais("[{\"name\":\"\"}]")).count());
 
@@ -1045,8 +1050,8 @@ public class ABIJSONTest {
 
         final String optimized = ABIJSON.optimize(CONTRACT_JSON);
         {
-            final List<ABIObject> norm3 = ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, CONTRACT_JSON, ABIJSON.ALL);
-            final List<ABIObject> opt3 = ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, optimized, ABIJSON.ALL);
+            final List<ABIObject> norm3 = ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, CONTRACT_JSON, ABIJSON.ALL, Function.newDefaultDigest());
+            final List<ABIObject> opt3 = ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, optimized, ABIJSON.ALL, Function.newDefaultDigest());
 
             assertEquals(norm3.size(), opt3.size());
             for (Iterator<ABIObject> normIter = norm3.iterator(), optIter = opt3.iterator(); normIter.hasNext(); ) {
@@ -1057,6 +1062,9 @@ public class ABIJSONTest {
 
     @Test
     public void testMisc() throws Throwable {
+
+        assertEquals("", new ABIParser(ABIType.FLAG_LEGACY_DECODE, ABIJSON.FUNCTIONS).toString());
+
         Function c = Function.parse("c(int,bool,(string,bytes),address,address,uint,uint8,int8,uint32,bytes32)", "()");
         String json = c.toJson(false).replace("\"bool\"", "\"bool\",\"m11\":1,\"internalType\":\"\"").replace("[]}", "null,\"moo\":null}");
         assertEquals(c, Function.fromJson(json));
@@ -1064,6 +1072,10 @@ public class ABIJSONTest {
         assertThrown(UnsupportedOperationException.class, () -> c.getInputs().get(0).dynamicByteLength(null));
         assertNotEquals(new Object(), c.getInputs().get(0).asUnitType());
 
-        assertNotNull(ContractError.fromJson("{\"type\":\"error\",\"name\":\"\"}"));
+        final ContractError<?> ce = ContractError.fromJson("{\"type\":\"error\",\"name\":\" \"}");
+
+        assertNotEquals(ce, ContractError.fromJson("{\"type\":\"error\",\"name\":\"\\\\\"}"));
+
+        assertFalse(ce.equals(new Object()));
     }
 }
