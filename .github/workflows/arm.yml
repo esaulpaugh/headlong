@@ -15,8 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: gradle/actions/wrapper-validation@v3.5.0
-
       - name: Set up JDK 8, arm
         uses: actions/setup-java@v4
         with:
@@ -25,9 +23,13 @@ jobs:
           java-package: jdk
           cache: 'gradle'
 
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "4.6"
+
       - name: Run gradle and ant builds
         run: |
           java -version
-          chmod +x ./gradlew
-          ./gradlew build --no-daemon
+          gradle build --no-daemon
           ant -noinput -buildfile build.xml -Drepository="/.gradle/caches/modules-2/files-2.1" -Dgson_path="/com.google.code.gson/gson/2.12.0/10596b68aaca6230f7c40bfd9298b21ff4b84103" clean all build-jar
