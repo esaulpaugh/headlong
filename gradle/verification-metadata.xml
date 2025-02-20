@@ -44,6 +44,9 @@
             <artifact name="gson-2.12.0.pom">
                 <sha256 value="ee4cb3d1d489b7ceb8bc73805e024cd36a12d19816585c8b0d46cfd8b604ea46" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
+            <artifact name="gson-2.12.0-sources.jar">
+                <sha256 value="75e71087135f0cdbcf78fd7ad41bf82e106a0a0c52f8f14ec000de3bbcf55054" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
         </component>
 
         <component group="net.sf.jopt-simple" name="jopt-simple" version="5.0.4">
@@ -116,6 +119,9 @@
             </artifact>
             <artifact name="junit-platform-launcher-1.11.4.module">
                 <sha256 value="60c4533209ba587b1cda7d72c087f351a3231f9b91c94f3f76394b0e22341cc4" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+            <artifact name="junit-platform-launcher-1.11.4-sources.jar">
+                <sha256 value="e560e5e7bc6eed184774f75a7b36b824e20ec818be4b991213c0d31aff4260c5" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
         <component group="org.junit" name="junit-bom" version="5.11.2">
