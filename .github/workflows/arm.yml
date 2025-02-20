@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: gradle/actions/wrapper-validation@v3
+      - uses: gradle/actions/wrapper-validation@v3.5.0
 
       - name: Set up JDK 8, arm
         uses: actions/setup-java@v4
