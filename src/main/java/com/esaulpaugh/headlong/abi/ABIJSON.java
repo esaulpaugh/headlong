@@ -75,7 +75,7 @@ public final class ABIJSON {
      * @return  the parsed {@link Function}s
      */
     public static List<Function> parseNormalFunctions(String arrayJson) {
-        return parseElements(ABIType.FLAGS_NONE, arrayJson, EnumSet.of(TypeEnum.FUNCTION), Function.newDefaultDigest());
+        return parseElements(ABIType.FLAGS_NONE, arrayJson, NORMAL_FUNCTIONS, Function.newDefaultDigest());
     }
 
     /**
