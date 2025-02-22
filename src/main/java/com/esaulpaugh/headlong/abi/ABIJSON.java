@@ -20,6 +20,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
+import java.io.BufferedReader;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +28,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -430,7 +432,16 @@ public final class ABIJSON {
     }
 
     static JsonReader reader(InputStream input) {
-        return strict(new InputStreamReader(input, StandardCharsets.UTF_8));
+        return strict(
+                new BufferedReader(
+                    new InputStreamReader(
+                            input,
+                            StandardCharsets.UTF_8.newDecoder()
+                                .onMalformedInput(CodingErrorAction.REPORT)
+                                .onUnmappableCharacter(CodingErrorAction.REPORT)
+                    )
+                )
+        );
     }
 
     static JsonReader reader(String json) {
