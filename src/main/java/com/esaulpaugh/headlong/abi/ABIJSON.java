@@ -448,22 +448,29 @@ public final class ABIJSON {
         return strict(new StringReader(json));
     }
 
-    private static volatile boolean fallback = false;
+    private static final int STRICTNESS;
+
+    static {
+        final JsonReader jsonReader = new JsonReader(new StringReader(""));
+        int level = 0;
+        try {
+            jsonReader.setStrictness(Strictness.STRICT); // since gson 2.11.0
+            level = 1;
+            jsonReader.setNestingLimit(50); // since gson 2.12.0 (allow setStrictness to succeed before trying)
+            level = 2;
+        } catch (LinkageError ignored) { // e.g. runtime gson doesn't have one of the above methods
+        }
+        STRICTNESS = level;
+    }
 
     @SuppressWarnings("deprecation")
     private static JsonReader strict(Reader reader) {
         final JsonReader jsonReader = new JsonReader(reader);
-        if (!fallback) {
-            try {
-                jsonReader.setStrictness(Strictness.STRICT); // since gson 2.11.0
-                jsonReader.setNestingLimit(50); // since gson 2.12.0 (allow setStrictness to succeed before trying)
-                return jsonReader;
-            } catch (LinkageError le) { // e.g. runtime gson doesn't have one of the above methods
-                fallback = true;
-            }
+        switch (STRICTNESS) {
+        case 2: jsonReader.setNestingLimit(50); /* fall through */
+        case 1: jsonReader.setStrictness(Strictness.STRICT); return jsonReader;
+        default: jsonReader.setLenient(false); return jsonReader;
         }
-        jsonReader.setLenient(false);
-        return jsonReader;
     }
 
     private static final class NonSyncWriter extends CharArrayWriter {
