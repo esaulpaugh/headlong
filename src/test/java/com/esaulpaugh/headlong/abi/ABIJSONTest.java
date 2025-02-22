@@ -645,6 +645,7 @@ public class ABIJSONTest {
         assertEquals(1, errList.size());
         assertTrue(errList.stream().anyMatch(ABIObject::isContractError));
 
+        assertThrown(UnsupportedOperationException.class, () -> ABIJSON.NORMAL_FUNCTIONS.add(TypeEnum.EVENT));
         assertThrown(UnsupportedOperationException.class, () -> ABIJSON.FUNCTIONS.add(TypeEnum.EVENT));
         assertThrown(UnsupportedOperationException.class, () -> ABIJSON.EVENTS.add(TypeEnum.CONSTRUCTOR));
         assertThrown(UnsupportedOperationException.class, () -> ABIJSON.ERRORS.add(TypeEnum.EVENT));
@@ -1022,7 +1023,7 @@ public class ABIJSONTest {
         assertEquals(0, ABIJSON.parseErrors("[{\"name\":\"\"}]").size());
 
         assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", ABIJSON.FUNCTIONS, digest).size());
-        assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", EnumSet.of(TypeEnum.FUNCTION), digest).size());
+        assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", ABIJSON.NORMAL_FUNCTIONS, digest).size());
 
         assertEquals(0L, new ABIParser(ABIJSON.EVENTS).stream(bais("[{\"name\":\"\"}]")).count());
 

@@ -43,10 +43,11 @@ public final class ABIJSON {
 
     private ABIJSON() {}
 
-    public static final Set<TypeEnum> FUNCTIONS = Collections.unmodifiableSet(EnumSet.of(TypeEnum.FUNCTION, TypeEnum.RECEIVE, TypeEnum.FALLBACK, TypeEnum.CONSTRUCTOR));
-    public static final Set<TypeEnum> EVENTS    = Collections.unmodifiableSet(EnumSet.of(TypeEnum.EVENT));
-    public static final Set<TypeEnum> ERRORS    = Collections.unmodifiableSet(EnumSet.of(TypeEnum.ERROR));
-    public static final Set<TypeEnum> ALL       = Collections.unmodifiableSet(EnumSet.allOf(TypeEnum.class));
+    public static final Set<TypeEnum> NORMAL_FUNCTIONS  = Collections.unmodifiableSet(EnumSet.of(TypeEnum.FUNCTION));
+    public static final Set<TypeEnum> FUNCTIONS         = Collections.unmodifiableSet(EnumSet.of(TypeEnum.FUNCTION, TypeEnum.RECEIVE, TypeEnum.FALLBACK, TypeEnum.CONSTRUCTOR));
+    public static final Set<TypeEnum> EVENTS            = Collections.unmodifiableSet(EnumSet.of(TypeEnum.EVENT));
+    public static final Set<TypeEnum> ERRORS            = Collections.unmodifiableSet(EnumSet.of(TypeEnum.ERROR));
+    public static final Set<TypeEnum> ALL               = Collections.unmodifiableSet(EnumSet.allOf(TypeEnum.class));
 
     private static final String NAME = "name";
     private static final String TYPE = "type";
