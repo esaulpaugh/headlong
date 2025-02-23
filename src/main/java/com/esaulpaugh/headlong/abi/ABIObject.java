@@ -15,8 +15,6 @@
 */
 package com.esaulpaugh.headlong.abi;
 
-import com.google.gson.JsonObject;
-
 import java.io.InputStream;
 
 /** Supertype of json-encodeable types {@link Function}, {@link Event}, and {@link ContractError}. */
@@ -65,10 +63,10 @@ public interface ABIObject {
     }
 
     /**
-     * Constructs an {@link ABIObject} from a {@link JsonObject}.
+     * Constructs an {@link ABIObject} from a String.
      *
-     * @param flags     {@link ABIType#FLAGS_NONE} recommended. See also {@link ABIType#FLAG_LEGACY_DECODE}
-     * @param json    the JSON object string to decode
+     * @param flags {@link ABIType#FLAGS_NONE} recommended. See also {@link ABIType#FLAG_LEGACY_DECODE}
+     * @param json  the JSON object string to decode
      * @return  the {@link ABIObject} represented by {@code object}
      * @param <T>   {@link Function}, {@link Event}, {@link ContractError}, or supertype {@link ABIObject}
      */
