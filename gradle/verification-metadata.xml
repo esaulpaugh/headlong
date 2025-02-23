@@ -101,6 +101,11 @@
             </artifact>
         </component>
 
+        <component group="org.junit" name="junit-bom" version="5.11.4">
+            <artifact name="junit-bom-5.11.4.pom">
+                <sha256 value="19d4b747b204805325b6334553296f986562277a4ac1cb5e593a5e4c4f5e4115" origin="repo.maven.apache.org/maven2/"/>
+            </artifact>
+        </component>
         <component group="org.junit.jupiter" name="junit-jupiter" version="5.11.4">
             <artifact name="junit-jupiter-5.11.4.jar">
                 <sha256 value="aa880e4afba87d447357e4c1fc098c5cb1d200cb9403496c00d3b35a5bd0e8db" origin="repo.maven.apache.org/maven2/"/>
