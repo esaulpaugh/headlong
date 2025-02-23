@@ -1007,7 +1007,6 @@ public class ABIJSONTest {
         assertEquals("emptyNest", emptyNest.getName());
         assertEquals(TupleType.parse("((((((((((((((((((((((((()))))))))))))))))))))))))"), emptyNest.getInputs());
         assertEquals(TupleType.parse("()"), emptyNest.getOutputs());
-        System.out.println(emptyNest.toJson(false));
 
         InputStream tooDeepJson = TestUtils.getFileResource("tests/headlong/tests/deep_and_excessively_so.json");
         assertThrown(IllegalStateException.class, () -> Function.fromJson(FLAGS_NONE, tooDeepJson, Function.newDefaultDigest()));

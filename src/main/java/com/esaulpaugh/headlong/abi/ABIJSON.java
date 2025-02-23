@@ -355,11 +355,11 @@ public final class ABIJSON {
             return TupleType.empty(flags);
         }
 
+        final StringBuilder canonicalType = TupleType.newTypeBuilder();
         ABIType<?>[] elements = new ABIType<?>[8];
         String[] names = new String[8];
         String[] internalTypes = new String[8];
         boolean[] indexed = new boolean[8];
-        StringBuilder canonicalType = TupleType.newTypeBuilder();
         boolean dynamic = false;
 
         for (int i = 0; true; canonicalType.append(',')) {
@@ -380,7 +380,7 @@ public final class ABIJSON {
             }
             reader.endObject();
 
-            ABIType<?> e = resolveElement(type, components, flags, i);
+            final ABIType<?> e = resolveElement(type, components, flags, i);
             canonicalType.append(e.canonicalType);
             dynamic |= e.dynamic;
             elements[i] = e;
