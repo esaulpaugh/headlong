@@ -45,24 +45,6 @@ public class MeasureBase64 {
                 .nextBytes(LARGE);
     }
 
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    public void largeBase64BC(Blackhole blackhole) {
-        blackhole.consume(org.bouncycastle.util.encoders.Base64.encode(LARGE));
-    }
-
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    public void largeBase64Commons(Blackhole blackhole) {
-        blackhole.consume(org.apache.commons.codec.binary.Base64.encodeBase64(LARGE));
-    }
-
     private static final int URL_SAFE_FLAGS = FastBase64.URL_SAFE_CHARS | FastBase64.NO_LINE_SEP | FastBase64.NO_PADDING;
 
     @Benchmark
@@ -81,24 +63,6 @@ public class MeasureBase64 {
     @Measurement(iterations = THREE)
     public void largeBase64JavaUtil(Blackhole blackhole) {
         blackhole.consume(java.util.Base64.getUrlEncoder().encodeToString(LARGE));
-    }
-
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    public void smallBase64BC(Blackhole blackhole) {
-        blackhole.consume(org.bouncycastle.util.encoders.Base64.toBase64String(SMALL));
-    }
-
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    public void smallBase64Commons(Blackhole blackhole) {
-        blackhole.consume(org.apache.commons.codec.binary.Base64.encodeBase64(SMALL));
     }
 
     @Benchmark

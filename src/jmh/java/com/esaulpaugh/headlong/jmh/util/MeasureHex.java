@@ -59,24 +59,6 @@ public class MeasureHex {
     @BenchmarkMode(Mode.Throughput)
     @Warmup(iterations = 1)
     @Measurement(iterations = THREE)
-    public void largeHexBC(Blackhole blackhole) {
-        blackhole.consume(org.bouncycastle.util.encoders.Hex.toHexString(LARGE));
-    }
-
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    public void largeHexCommons(Blackhole blackhole) {
-        blackhole.consume(org.apache.commons.codec.binary.Hex.encodeHexString(LARGE));
-    }
-
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
     public void largeHexFast(Blackhole blackhole) {
         blackhole.consume(FastHex.encodeToString(LARGE));
     }
@@ -88,24 +70,6 @@ public class MeasureHex {
     @Measurement(iterations = THREE)
     public void largeHexSlow(Blackhole blackhole) {
         blackhole.consume(slowHex(LARGE));
-    }
-
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    public void smallHexBC(Blackhole blackhole) {
-        blackhole.consume(org.bouncycastle.util.encoders.Hex.toHexString(SMALL));
-    }
-
-    @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    public void smallHexCommons(Blackhole blackhole) {
-        blackhole.consume(org.apache.commons.codec.binary.Hex.encodeHexString(SMALL));
     }
 
     @Benchmark

@@ -86,11 +86,8 @@
 //        exclude(group = "com.google.errorprone", module = "error_prone_annotations")
 //    }
 //
-//    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-//    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+//    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
 //    testImplementation("org.bouncycastle:bcprov-jdk14:$bcVersion")
-//
-//    jmhImplementation("commons-codec:commons-codec:1.17.2")
 //}
 //
 //jmh {
