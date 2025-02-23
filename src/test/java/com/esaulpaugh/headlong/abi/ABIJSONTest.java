@@ -136,7 +136,7 @@ public class ABIJSONTest {
     private static final String CONTRACT_JSON = "[\n" +
             "  {\n" +
             "    \"type\": \"event\",\n" +
-            "    \"name\": \"an_event\",\n" +
+            "    \"name\": \"\u0101n_event\",\n" +
             "    \"inputs\": [\n" +
             "      {\n" +
             "        \"name\": \"a\",\n" +
@@ -501,7 +501,7 @@ public class ABIJSONTest {
 
         Event<?> event = events.get(0);
 
-        assertEquals("an_event", event.getName());
+        assertEquals("\u0101n_event", event.getName());
         assertEquals(TupleType.parse("(bytes,uint256)"), event.getInputs());
         assertEquals(TupleType.parse("(bytes)"), event.getIndexedParams());
         assertEquals(TupleType.parse("(uint256)"), event.getNonIndexedParams());
@@ -517,7 +517,7 @@ public class ABIJSONTest {
 
         final String eventJson = "{\n" +
                 "  \"type\": \"event\",\n" +
-                "  \"name\": \"an_event\",\n" +
+                "  \"name\": \"\u0101n_event\",\n" +
                 "  \"inputs\": [\n" +
                 "    {\n" +
                 "      \"name\": \"a\",\n" +
@@ -534,6 +534,7 @@ public class ABIJSONTest {
                 "}";
 
         assertEquals(eventJson, event.toJson(true));
+        assertEquals("\u0101n_event", Event.fromJson(FLAGS_NONE, bais(eventJson)).getName());
     }
 
     private static final String ERROR_JSON = "{\n" +
