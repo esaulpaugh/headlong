@@ -485,18 +485,14 @@ public final class TupleType<J extends Tuple> extends ABIType<J> implements Iter
         final ByteBuffer encoding = ByteBuffer.allocate(t.validate(v));
         t.encodeTail(v, encoding);
         final int len = encoding.position();
-        encoding.flip();
-        int n = 0;
-        if (n < len) {
+        if (len > 0) {
+            encoding.flip();
             final boolean dynamicArray = t instanceof ArrayType && ArrayType.DYNAMIC_LENGTH == t.asArrayType().getLength();
             appendAnnotatedRow(sb, encoding, row++, i, dynamicArray ? " length" : "");
-            n += UNIT_LENGTH_BYTES;
-            if (n < len) {
+            if (len > UNIT_LENGTH_BYTES) {
                 appendAnnotatedRow(sb, encoding, row++, i, dynamicArray ? "" : null);
-                n += UNIT_LENGTH_BYTES;
-                while (n < len) {
+                for (int n = 2 * UNIT_LENGTH_BYTES; n < len; n += UNIT_LENGTH_BYTES) {
                     appendAnnotatedRow(sb, encoding, row++, i, null);
-                    n += UNIT_LENGTH_BYTES;
                 }
             }
         }
