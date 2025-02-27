@@ -110,7 +110,7 @@ public final class ABIJSON {
     }
 
     /**
-     * Reads and parses the value of the key "abi" as a contract ABI JSON array.
+     * Parses the value for the key "abi" as a contract ABI JSON array.
      *
      * @param flags {@link ABIType#FLAGS_NONE} (recommended) or {@link ABIType#FLAG_LEGACY_DECODE}
      * @param objectJson    the JSON object containing the "abi" field
