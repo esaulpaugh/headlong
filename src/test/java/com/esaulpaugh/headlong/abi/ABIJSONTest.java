@@ -1058,6 +1058,19 @@ public class ABIJSONTest {
                 assertEquals(normIter.next(), optIter.next());
             }
         }
+
+        final ABIParser p = new ABIParser();
+        assertEquals(optimized, ABIJSON.optimize(p.parse(CONTRACT_JSON)));
+        assertEquals(optimized, ABIJSON.optimize(p.parse(optimized)));
+        assertEquals(optimized, ABIJSON.optimize(optimized));
+        assertEquals(ABIJSON.optimize(FALLBACK_CONSTRUCTOR_RECEIVE), ABIJSON.optimize(p.parse(FALLBACK_CONSTRUCTOR_RECEIVE)));
+        assertEquals(ABIJSON.optimize(FALLBACK_CONSTRUCTOR_RECEIVE), ABIJSON.optimize(ABIJSON.optimize(FALLBACK_CONSTRUCTOR_RECEIVE)));
+        assertEquals(ABIJSON.optimize("[]"), ABIJSON.optimize(p.parse("[]")));
+        assertEquals(ABIJSON.optimize("[]"), ABIJSON.optimize(ABIJSON.optimize("[]")));
+
+        assertEquals(CONTRACT_JSON, ABIJSON.encode(p.parse(CONTRACT_JSON)));
+        assertEquals(FALLBACK_CONSTRUCTOR_RECEIVE, ABIJSON.encode(p.parse(FALLBACK_CONSTRUCTOR_RECEIVE)));
+        assertEquals("[]", ABIJSON.encode(p.parse("[]")));
     }
 
     @Test

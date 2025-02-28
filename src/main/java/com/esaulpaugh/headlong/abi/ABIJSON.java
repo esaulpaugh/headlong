@@ -134,7 +134,7 @@ public final class ABIJSON {
     }
 
     /**
-     * Returns a minified version of the argument, optimized for parsing by this class. Accepts JSON array or JSON object.
+     * Returns a minified version of the argument which is optimized for parsing. Accepts JSON array or JSON object.
      *
      * @param json  Contract ABI JSON array or Function/Event/ContractError JSON object
      * @return  optimized JSON
@@ -145,14 +145,51 @@ public final class ABIJSON {
             if (token == JsonToken.BEGIN_OBJECT) {
                 return toJson(ABIObject.fromJson(json), false, true);
             } else if (token == JsonToken.BEGIN_ARRAY) {
-                return minifyArray(reader);
+                return encode(true, parseArray(reader, ABIJSON.ALL, ABIType.FLAGS_NONE, Function.newDefaultDigest()));
             }
             throw new IllegalArgumentException("unexpected token: " + token);
         } catch (IOException io) {
             throw new IllegalStateException(io);
         }
     }
+
+    /**
+     * Returns a minified JSON array containing the given elements' encodings which is optimized for parsing.
+     *
+     * @param elements  the objects to be put into the array
+     * @return  the JSON array
+     * @param <T>   the common supertype of the elements
+     */
+    public static <T extends ABIObject> String optimize(List<T> elements) {
+        return encode(true, elements);
+    }
+
+    /**
+     * Returns a JSON array string containing the given elements' encodings.
+     *
+     * @param elements  the objects to be put into the array
+     * @return  the JSON array
+     * @param <T>   common supertype of the elements
+     */
+    public static <T extends ABIObject> String encode(List<T> elements) {
+        return encode(false, elements);
+    }
 //----------------------------------------------------------------------------------------------------------------------
+    private static <T extends ABIObject> String encode(boolean minify, List<T> elements) {
+        final Writer stringOut = new NonSyncWriter(2048);
+        try (JsonWriter out = new JsonWriter(stringOut)) {
+            out.setIndent(minify ? "" : "  ");
+            out.beginArray();
+            for (ABIObject e : elements) {
+                writeObject(e, out, minify);
+            }
+            out.endArray();
+        } catch (IOException io) {
+            throw new IllegalStateException(io);
+        }
+        return stringOut.toString();
+    }
+
     static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags, MessageDigest digest) {
         final List<T> list = new ArrayList<>();
         try (JsonReader ignored = reader) {
@@ -179,20 +216,6 @@ public final class ABIJSON {
             writeObject(o, out, minify);
         } catch (IOException io) {
             throw new IllegalStateException(io);
-        }
-        return stringOut.toString();
-    }
-
-    private static String minifyArray(JsonReader reader) throws IOException {
-        final List<ABIObject> elements = parseArray(reader, ABIJSON.ALL, ABIType.FLAGS_NONE, Function.newDefaultDigest());
-        final Writer stringOut = new NonSyncWriter(2048);
-        try (JsonWriter out = new JsonWriter(stringOut)) {
-            out.setIndent("");
-            out.beginArray();
-            for (ABIObject e : elements) {
-                writeObject(e, out, true);
-            }
-            out.endArray();
         }
         return stringOut.toString();
     }
