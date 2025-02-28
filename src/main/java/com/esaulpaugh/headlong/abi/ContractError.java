@@ -61,7 +61,7 @@ public final class ContractError<J extends Tuple> implements ABIObject {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, inputs);
+        return 31 * name.hashCode() + inputs.hashCode();
     }
 
     @Override
