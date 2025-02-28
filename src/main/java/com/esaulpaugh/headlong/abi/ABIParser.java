@@ -36,9 +36,9 @@ import static com.esaulpaugh.headlong.abi.ABIJSON.reader;
 /** Parses JSON arrays containing contract ABI descriptions. Object types are {@link Function}, {@link Event}, and {@link ContractError}. */
 public final class ABIParser {
 
-    private final int flags;
-    private final Set<TypeEnum> types;
-    private final transient boolean requiresDigest;
+    final int flags;
+    final Set<TypeEnum> types;
+    final transient boolean requiresDigest;
 
     public ABIParser() {
         this(ABIType.FLAGS_NONE, ABIJSON.ALL);
