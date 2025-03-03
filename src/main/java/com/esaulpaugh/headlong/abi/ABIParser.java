@@ -41,15 +41,21 @@ public final class ABIParser {
     final transient boolean requiresDigest;
 
     public ABIParser() {
-        this(ABIType.FLAGS_NONE, ABIJSON.ALL);
+        this.flags = ABIType.FLAGS_NONE;
+        this.types = ABIJSON._ALL;
+        this.requiresDigest = true;
     }
 
     public ABIParser(int flags) {
-        this(flags, ABIJSON.ALL);
+        this.flags = checkFlags(flags);
+        this.types = ABIJSON._ALL;
+        this.requiresDigest = true;
     }
 
     public ABIParser(Set<TypeEnum> types) {
-        this(ABIType.FLAGS_NONE, types);
+        this.flags = ABIType.FLAGS_NONE;
+        this.types = EnumSet.copyOf(types);
+        this.requiresDigest = ABIJSON.requiresDigest(this.types);
     }
 
     /**
@@ -57,13 +63,16 @@ public final class ABIParser {
      * @param types {@link Set} of {@link ABIObject} types to parse. Objects whose type is not in the set will be skipped
      */
     public ABIParser(int flags, Set<TypeEnum> types) {
-        if (flags != ABIType.FLAGS_NONE
-                && flags != ABIType.FLAG_LEGACY_DECODE) {
-            throw new IllegalArgumentException("Argument flags must be one of: { ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE }");
-        }
-        this.flags = flags;
+        this.flags = checkFlags(flags);
         this.types = EnumSet.copyOf(types);
         this.requiresDigest = ABIJSON.requiresDigest(this.types);
+    }
+
+    private static int checkFlags(int flags) {
+        if (flags == ABIType.FLAGS_NONE || flags == ABIType.FLAG_LEGACY_DECODE) {
+            return flags;
+        }
+        throw new IllegalArgumentException("Argument flags must be one of: { ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE }");
     }
 
     public <T extends ABIObject> List<T> parse(String arrayJson) {
