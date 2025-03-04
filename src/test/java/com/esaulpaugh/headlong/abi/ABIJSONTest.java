@@ -945,6 +945,11 @@ public class ABIJSONTest {
 
     @Test
     public void testParseABIField() throws Throwable {
+
+        List<Function> list = new ABIParser(ABIType.FLAG_LEGACY_DECODE).parseABIField("{\"abi\":[{\"name\":\"\"}]");
+        assertEquals(ABIType.FLAG_LEGACY_DECODE, list.get(0).asFunction().getInputs().getFlags());
+        assertEquals(ABIType.FLAG_LEGACY_DECODE, list.get(0).asFunction().getOutputs().getFlags());
+
         final ABIParser p = new ABIParser();
         assertThrown(IllegalStateException.class, () -> p.parseABIField("[]"));
         assertThrown(IllegalStateException.class, () -> p.parseABIField("{\"abi\":null}"));
