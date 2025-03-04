@@ -147,7 +147,7 @@ public final class ABIJSON {
             if (token == JsonToken.BEGIN_OBJECT) {
                 return toJson(ABIObject.fromJson(json), false, true);
             } else if (token == JsonToken.BEGIN_ARRAY) {
-                return encode(true, parseArray(reader, ABIJSON.ALL, ABIType.FLAGS_NONE, Function.newDefaultDigest()));
+                return optimize(parseArray(reader, ABIJSON.ALL, ABIType.FLAGS_NONE, Function.newDefaultDigest()));
             }
             throw new IllegalArgumentException("unexpected token: " + token);
         } catch (IOException io) {
