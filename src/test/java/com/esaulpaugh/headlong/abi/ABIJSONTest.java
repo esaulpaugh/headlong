@@ -945,12 +945,13 @@ public class ABIJSONTest {
 
     @Test
     public void testParseABIField() throws Throwable {
-        assertThrown(IllegalStateException.class, () -> ABIJSON.parseABIField(FLAGS_NONE, "[]", ABIJSON.ALL));
-        assertThrown(IllegalStateException.class, () -> ABIJSON.parseABIField(FLAGS_NONE, "{\"abi\":null}", ABIJSON.ALL));
-        assertThrown(IllegalArgumentException.class, "abi key not found", () -> ABIJSON.parseABIField(FLAGS_NONE, "{}", ABIJSON.ALL));
-        assertThrown(IllegalArgumentException.class, "abi key not found", () -> ABIJSON.parseABIField(FLAGS_NONE, "{\"ABI\":\"\"}", ABIJSON.ALL));
-        assertEquals(0, ABIJSON.parseABIField(FLAGS_NONE, "{\"abi\":[]}", ABIJSON.ALL).size());
-        assertEquals(0, ABIJSON.parseABIField(FLAGS_NONE, "{\"\":null,\"abi\":[],\"\":null}", ABIJSON.ALL).size());
+        final ABIParser p = new ABIParser();
+        assertThrown(IllegalStateException.class, () -> p.parseABIField("[]"));
+        assertThrown(IllegalStateException.class, () -> p.parseABIField("{\"abi\":null}"));
+        assertThrown(IllegalArgumentException.class, "abi key not found", () -> p.parseABIField("{}"));
+        assertThrown(IllegalArgumentException.class, "abi key not found", () -> p.parseABIField("{\"ABI\":\"\"}"));
+        assertEquals(0, p.parseABIField("{\"abi\":[]}").size());
+        assertEquals(0, p.parseABIField("{\"\":null,\"abi\":[],\"\":null}").size());
         final String json = "{\n" +
                 "  \"abi\": [\n" +
                 "    {\n" +
@@ -965,7 +966,7 @@ public class ABIJSONTest {
                 "    }\n" +
                 "  ]\n" +
                 "}";
-        final List<ABIObject> objects = ABIJSON.parseABIField(FLAGS_NONE, json, ABIJSON.ALL);
+        final List<ABIObject> objects = p.parseABIField(json);
         assertEquals(1, objects.size());
         assertEquals(TypeEnum.FUNCTION, objects.get(0).getType());
         assertEquals("aller(uint256,uint256,uint256,address,string)", objects.get(0).getCanonicalSignature());

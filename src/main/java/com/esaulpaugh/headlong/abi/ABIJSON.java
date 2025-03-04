@@ -112,30 +112,6 @@ public final class ABIJSON {
     }
 
     /**
-     * Parses the value for the key "abi" as a contract ABI JSON array.
-     *
-     * @param flags {@link ABIType#FLAGS_NONE} (recommended) or {@link ABIType#FLAG_LEGACY_DECODE}
-     * @param objectJson    the JSON object containing the "abi" field
-     * @param types the types to allow in the returned {@link List}
-     * @return  the list of ABI objects
-     * @param <T>   the element type
-     */
-    public static <T extends ABIObject> List<T> parseABIField(int flags, String objectJson, Set<TypeEnum> types) {
-        try (JsonReader reader = reader(objectJson)) {
-            reader.beginObject();
-            while (reader.peek() != JsonToken.END_OBJECT) {
-                if ("abi".equals(reader.nextName())) {
-                    return parseArray(reader, types, flags, requiresDigest(types) ? Function.newDefaultDigest() : null);
-                }
-                reader.skipValue();
-            }
-            throw new IllegalArgumentException("abi key not found");
-        } catch (IOException io) {
-            throw new IllegalStateException(io);
-        }
-    }
-
-    /**
      * Returns a minified version of the argument which is optimized for parsing. Accepts JSON array or JSON object.
      *
      * @param json  Contract ABI JSON array or Function/Event/ContractError JSON object

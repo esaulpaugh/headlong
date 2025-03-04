@@ -31,7 +31,9 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.esaulpaugh.headlong.abi.ABIJSON.parseArray;
 import static com.esaulpaugh.headlong.abi.ABIJSON.reader;
+import static com.esaulpaugh.headlong.abi.ABIJSON.requiresDigest;
 
 /** Parses JSON arrays containing contract ABI descriptions. Object types are {@link Function}, {@link Event}, and {@link ContractError}. */
 public final class ABIParser {
@@ -55,7 +57,7 @@ public final class ABIParser {
     public ABIParser(Set<TypeEnum> types) {
         this.flags = ABIType.FLAGS_NONE;
         this.types = EnumSet.copyOf(types);
-        this.requiresDigest = ABIJSON.requiresDigest(this.types);
+        this.requiresDigest = requiresDigest(this.types);
     }
 
     /**
@@ -65,7 +67,7 @@ public final class ABIParser {
     public ABIParser(int flags, Set<TypeEnum> types) {
         this.flags = checkFlags(flags);
         this.types = EnumSet.copyOf(types);
-        this.requiresDigest = ABIJSON.requiresDigest(this.types);
+        this.requiresDigest = requiresDigest(this.types);
     }
 
     private static int checkFlags(int flags) {
@@ -83,16 +85,38 @@ public final class ABIParser {
         return parse(reader(arrayStream));
     }
 
-    private <T extends ABIObject> List<T> parse(JsonReader reader) {
-        return ABIJSON.parseArray(reader, types, flags, requiresDigest ? Function.newDefaultDigest() : null);
-    }
-
     public <T extends ABIObject> Stream<T> stream(String arrayJson) {
         return stream(reader(arrayJson));
     }
 
     public <T extends ABIObject> Stream<T> stream(InputStream arrayStream) {
         return stream(reader(arrayStream));
+    }
+
+    /**
+     * Parses the value for the key "abi" as a contract ABI JSON array.
+     *
+     * @param objectJson    the JSON object containing the "abi" field
+     * @return  the list of ABI objects
+     * @param <T>   the element type
+     */
+    public <T extends ABIObject> List<T> parseABIField(String objectJson) {
+        try (JsonReader reader = reader(objectJson)) {
+            reader.beginObject();
+            while (reader.peek() != JsonToken.END_OBJECT) {
+                if ("abi".equals(reader.nextName())) {
+                    return parse(reader);
+                }
+                reader.skipValue();
+            }
+            throw new IllegalArgumentException("abi key not found");
+        } catch (IOException io) {
+            throw new IllegalStateException(io);
+        }
+    }
+
+    private <T extends ABIObject> List<T> parse(JsonReader reader) {
+        return parseArray(reader, types, flags, requiresDigest ? Function.newDefaultDigest() : null);
     }
 
     private <T extends ABIObject> Stream<T> stream(JsonReader reader) {
