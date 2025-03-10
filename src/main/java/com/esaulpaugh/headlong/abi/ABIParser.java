@@ -181,7 +181,7 @@ public final class ABIParser {
 
         @Override
         public int characteristics() {
-            return ORDERED | NONNULL;
+            return ORDERED | NONNULL | IMMUTABLE;
         }
     }
 
