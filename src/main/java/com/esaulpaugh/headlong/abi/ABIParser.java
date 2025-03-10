@@ -111,8 +111,7 @@ public final class ABIParser {
     }
 
     private <T extends ABIObject> Stream<T> stream(JsonReader reader) {
-        final JsonSpliterator<T> spliterator = new JsonSpliterator<>(reader); // sequential (non-parallel)
-        return StreamSupport.stream(spliterator, false)
+        return StreamSupport.stream(new JsonSpliterator<T>(reader), false) // sequential (non-parallel)
                 .onClose(() -> {
                     try {
                         reader.close();
