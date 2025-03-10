@@ -38,24 +38,24 @@ public final class ABIParser {
 
     final int flags;
     final Set<TypeEnum> types;
-    final transient boolean needsDigest;
+    final transient boolean requiresDigest;
 
     public ABIParser() {
         this.flags = ABIType.FLAGS_NONE;
         this.types = ABIJSON._ALL;
-        this.needsDigest = true;
+        this.requiresDigest = true;
     }
 
     public ABIParser(int flags) {
         this.flags = checkFlags(flags);
         this.types = ABIJSON._ALL;
-        this.needsDigest = true;
+        this.requiresDigest = true;
     }
 
     public ABIParser(Set<TypeEnum> types) {
         this.flags = ABIType.FLAGS_NONE;
         this.types = EnumSet.copyOf(types);
-        this.needsDigest = needsDigest();
+        this.requiresDigest = requiresDigest();
     }
 
     /**
@@ -65,7 +65,7 @@ public final class ABIParser {
     public ABIParser(int flags, Set<TypeEnum> types) {
         this.flags = checkFlags(flags);
         this.types = EnumSet.copyOf(types);
-        this.needsDigest = needsDigest();
+        this.requiresDigest = requiresDigest();
     }
 
     public <T extends ABIObject> List<T> parse(String arrayJson) {
@@ -85,46 +85,47 @@ public final class ABIParser {
     }
 
     /**
-     * Parses the value for the key "abi" as a contract ABI JSON array.
+     * Parses the value for the given key as a contract ABI JSON array.
      *
-     * @param objectJson    the JSON object containing the "abi" field
+     * @param key   the key whose value should be parsed
+     * @param objectJson    the JSON object containing the field
      * @return  the list of ABI objects
-     * @param <T>   the element type
+     * @param <T>   the common type of the elements
      */
-    public <T extends ABIObject> List<T> parseABIField(String objectJson) {
-        return readABIField(reader(objectJson), true);
+    public <T extends ABIObject> List<T> parseField(String key, String objectJson) {
+        return readField(reader(objectJson), key, true);
     }
 
-    public <T extends ABIObject> List<T> parseABIField(InputStream objectStream) {
-        return readABIField(reader(objectStream), true);
+    public <T extends ABIObject> List<T> parseField(String key, InputStream objectStream) {
+        return readField(reader(objectStream), key, true);
     }
 
-    public <T extends ABIObject> Stream<T> streamABIField(String objectJson) {
-        return readABIField(reader(objectJson), false);
+    public <T extends ABIObject> Stream<T> streamField(String key, String objectJson) {
+        return readField(reader(objectJson), key, false);
     }
 
-    public <T extends ABIObject> Stream<T> streamABIField(InputStream objectStream) {
-        return readABIField(reader(objectStream), false);
+    public <T extends ABIObject> Stream<T> streamField(String key, InputStream objectStream) {
+        return readField(reader(objectStream), key, false);
     }
 
     @SuppressWarnings("unchecked")
-    private <X> X readABIField(JsonReader reader, boolean parse) {
+    private <X> X readField(JsonReader reader, String key, boolean parse) {
         try {
             reader.beginObject();
             while (reader.peek() != JsonToken.END_OBJECT) {
-                if ("abi".equals(reader.nextName())) {
+                if (key.equals(reader.nextName())) {
                     return (X) (parse ? parse(reader) : stream(reader));
                 }
                 reader.skipValue();
             }
-            throw new IllegalArgumentException("abi key not found");
+            throw new IllegalArgumentException("key not found");
         } catch (IOException io) {
             throw new IllegalStateException(io);
         }
     }
 
     private <T extends ABIObject> List<T> parse(JsonReader reader) {
-        return parseAndCloseArray(reader, types, flags, needsDigest ? Function.newDefaultDigest() : null);
+        return parseAndCloseArray(reader, types, flags, requiresDigest ? Function.newDefaultDigest() : null);
     }
 
     private <T extends ABIObject> Stream<T> stream(JsonReader reader) {
@@ -142,7 +143,7 @@ public final class ABIParser {
     private final class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> {
 
         private final JsonReader reader;
-        private final MessageDigest digest = needsDigest ? Function.newDefaultDigest() : null;
+        private final MessageDigest digest = requiresDigest ? Function.newDefaultDigest() : null;
 
         JsonSpliterator(final JsonReader reader) {
             super(0, ORDERED | NONNULL);
@@ -202,7 +203,7 @@ public final class ABIParser {
         throw new IllegalArgumentException("Flags must be one of: ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE");
     }
 
-    private boolean needsDigest() {
+    private boolean requiresDigest() {
         return types.contains(TypeEnum.FUNCTION)
                 || types.contains(TypeEnum.CONSTRUCTOR)
                 || types.contains(TypeEnum.RECEIVE)

@@ -946,17 +946,17 @@ public class ABIJSONTest {
     @Test
     public void testParseABIField() throws Throwable {
 
-        List<Function> list = new ABIParser(ABIType.FLAG_LEGACY_DECODE).parseABIField("{\"abi\":[{\"name\":\"\"}]");
+        List<Function> list = new ABIParser(ABIType.FLAG_LEGACY_DECODE).parseField("abi", "{\"abi\":[{\"name\":\"\"}]");
         assertEquals(ABIType.FLAG_LEGACY_DECODE, list.get(0).asFunction().getInputs().getFlags());
         assertEquals(ABIType.FLAG_LEGACY_DECODE, list.get(0).asFunction().getOutputs().getFlags());
 
         final ABIParser p = new ABIParser();
-        assertThrown(IllegalStateException.class, () -> p.parseABIField("[]"));
-        assertThrown(IllegalStateException.class, () -> p.parseABIField("{\"abi\":null}"));
-        assertThrown(IllegalArgumentException.class, "abi key not found", () -> p.parseABIField("{}"));
-        assertThrown(IllegalArgumentException.class, "abi key not found", () -> p.parseABIField("{\"ABI\":\"\"}"));
-        assertEquals(0, p.parseABIField("{\"abi\":[]}").size());
-        assertEquals(0, p.parseABIField("{\"\":null,\"abi\":[],\"\":null}").size());
+        assertThrown(IllegalStateException.class, () -> p.parseField("abi", "[]"));
+        assertThrown(IllegalStateException.class, () -> p.parseField("abi", "{\"abi\":null}"));
+        assertThrown(IllegalArgumentException.class, "key not found", () -> p.parseField("abi", "{}"));
+        assertThrown(IllegalArgumentException.class, "key not found", () -> p.parseField("abi", "{\"ABI\":\"\"}"));
+        assertEquals(0, p.parseField("abi", "{\"abi\":[]}").size());
+        assertEquals(0, p.parseField("abi", "{\"\":null,\"abi\":[],\"\":null}").size());
         final String json = "{\n" +
                 "  \"abi\": [\n" +
                 "    {\n" +
@@ -971,14 +971,14 @@ public class ABIJSONTest {
                 "    }\n" +
                 "  ]\n" +
                 "}";
-        final List<ABIObject> objects = p.parseABIField(json);
+        final List<ABIObject> objects = p.parseField("abi", json);
         assertEquals(1, objects.size());
         assertEquals(TypeEnum.FUNCTION, objects.get(0).getType());
         assertEquals("aller(uint256,uint256,uint256,address,string)", objects.get(0).getCanonicalSignature());
 
-        final Stream<ABIObject> stream = p.streamABIField(json);
+        final Stream<ABIObject> stream = p.streamField("abi", json);
         assertEquals(5, stream.findFirst().get().asFunction().getInputs().size());
-        assertEquals(ABIType.FLAG_LEGACY_DECODE, new ABIParser(ABIType.FLAG_LEGACY_DECODE).streamABIField(json).findFirst().get().asFunction().getOutputs().getFlags());
+        assertEquals(ABIType.FLAG_LEGACY_DECODE, new ABIParser(ABIType.FLAG_LEGACY_DECODE).streamField("abi", json).findFirst().get().asFunction().getOutputs().getFlags());
     }
 
     @Test
