@@ -114,15 +114,19 @@ public final class ABIParser {
     private <T extends ABIObject> Stream<T> stream(JsonReader reader) {
         final JsonSpliterator<T> spliterator = new JsonSpliterator<>(reader); // sequential (non-parallel)
         return StreamSupport.stream(spliterator, false)
-                .onClose(spliterator::close);
+                .onClose(() -> {
+                    try {
+                        reader.close();
+                    } catch (IOException io) {
+                        throw new IllegalStateException(io);
+                    }
+                });
     }
 
-    private final class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> implements Closeable {
+    private final class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> {
 
         private final JsonReader jsonReader;
         private final MessageDigest digest = requiresDigest ? Function.newDefaultDigest() : null;
-
-        private boolean closed = false;
 
         JsonSpliterator(final JsonReader reader) {
             super(0, ORDERED | NONNULL);
@@ -136,37 +140,24 @@ public final class ABIParser {
 
         @Override
         public boolean tryAdvance(Consumer<? super T> action) {
-            if (!closed) {
-                try {
-                    while (jsonReader.peek() != JsonToken.END_ARRAY) {
-                        T e = ABIJSON.tryParseStreaming(jsonReader, types, digest, flags);
-                        if (e != null) {
-                            action.accept(e);
-                            return true;
-                        }
+            try {
+                while (jsonReader.peek() != JsonToken.END_ARRAY) {
+                    T e = ABIJSON.tryParseStreaming(jsonReader, types, digest, flags);
+                    if (e != null) {
+                        action.accept(e);
+                        return true;
                     }
-                    close();
-                } catch (IOException io) {
-                    throw new IllegalStateException(io);
                 }
+                jsonReader.endArray();
+                return false;
+            } catch (IOException io) {
+                throw new IllegalStateException(io);
             }
-            return false;
         }
 
         @Override
         public Spliterator<T> trySplit() {
             return null; // alternatively, throw new ConcurrentModificationException();
-        }
-
-        @Override
-        public void close() {
-            try {
-                jsonReader.close();
-            } catch (IOException io) {
-                throw new IllegalStateException(io);
-            } finally {
-                closed = true;
-            }
         }
     }
 
