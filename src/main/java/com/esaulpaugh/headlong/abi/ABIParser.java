@@ -25,7 +25,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -140,13 +139,12 @@ public final class ABIParser {
                             });
     }
 
-    private final class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> {
+    private final class JsonSpliterator<T extends ABIObject> implements Spliterator<T> {
 
         private final JsonReader reader;
         private final MessageDigest digest = requiresDigest ? Function.newDefaultDigest() : null;
 
         JsonSpliterator(final JsonReader reader) {
-            super(0, ORDERED | NONNULL);
             this.reader = reader;
             try {
                 this.reader.beginArray();
@@ -174,6 +172,16 @@ public final class ABIParser {
         @Override
         public Spliterator<T> trySplit() {
             return null; // alternatively, throw new ConcurrentModificationException();
+        }
+
+        @Override
+        public long estimateSize() {
+            return 0;
+        }
+
+        @Override
+        public int characteristics() {
+            return ORDERED | NONNULL;
         }
     }
 
