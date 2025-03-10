@@ -33,7 +33,6 @@ import java.util.stream.StreamSupport;
 
 import static com.esaulpaugh.headlong.abi.ABIJSON.parseArray;
 import static com.esaulpaugh.headlong.abi.ABIJSON.reader;
-import static com.esaulpaugh.headlong.abi.ABIJSON.requiresDigest;
 
 /** Parses JSON arrays containing contract ABI descriptions. Object types are {@link Function}, {@link Event}, and {@link ContractError}. */
 public final class ABIParser {
@@ -68,13 +67,6 @@ public final class ABIParser {
         this.flags = checkFlags(flags);
         this.types = EnumSet.copyOf(types);
         this.requiresDigest = requiresDigest(this.types);
-    }
-
-    private static int checkFlags(int flags) {
-        if (flags == ABIType.FLAGS_NONE || flags == ABIType.FLAG_LEGACY_DECODE) {
-            return flags;
-        }
-        throw new IllegalArgumentException("Argument flags must be one of: { ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE }");
     }
 
     public <T extends ABIObject> List<T> parse(String arrayJson) {
@@ -195,5 +187,19 @@ public final class ABIParser {
     @Override
     public String toString() {
         return "ABIParser{flags=" + flags + ", types=" + types + '}';
+    }
+
+    private static int checkFlags(int flags) {
+        if (flags == ABIType.FLAGS_NONE || flags == ABIType.FLAG_LEGACY_DECODE) {
+            return flags;
+        }
+        throw new IllegalArgumentException("Argument flags must be one of: { ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE }");
+    }
+
+    private static boolean requiresDigest(Set<TypeEnum> types) {
+        return types.contains(TypeEnum.FUNCTION)
+                || types.contains(TypeEnum.CONSTRUCTOR)
+                || types.contains(TypeEnum.RECEIVE)
+                || types.contains(TypeEnum.FALLBACK);
     }
 }

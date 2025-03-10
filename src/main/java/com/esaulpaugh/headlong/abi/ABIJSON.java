@@ -104,13 +104,6 @@ public final class ABIJSON {
         return parseArray(reader(arrayJson), types, flags, digest);
     }
 
-    static boolean requiresDigest(Set<TypeEnum> types) {
-        return types.contains(TypeEnum.FUNCTION)
-                || types.contains(TypeEnum.CONSTRUCTOR)
-                || types.contains(TypeEnum.RECEIVE)
-                || types.contains(TypeEnum.FALLBACK);
-    }
-
     /**
      * Returns a minified version of the argument which is optimized for parsing. Accepts JSON array or JSON object.
      *
