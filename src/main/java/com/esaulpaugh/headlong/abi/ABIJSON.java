@@ -101,7 +101,7 @@ public final class ABIJSON {
 
     /** Allows a {@link MessageDigest} to be reused for multiple calls. See also {@link ABIParser}. */
     public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types, MessageDigest digest) {
-        return parseArray(reader(arrayJson), types, flags, digest);
+        return parseAndCloseArray(reader(arrayJson), types, flags, digest);
     }
 
     /**
@@ -116,7 +116,7 @@ public final class ABIJSON {
             if (token == JsonToken.BEGIN_OBJECT) {
                 return toJson(ABIObject.fromJson(json), false, true);
             } else if (token == JsonToken.BEGIN_ARRAY) {
-                return optimize(parseArray(reader, ABIJSON.ALL, ABIType.FLAGS_NONE, Function.newDefaultDigest()));
+                return optimize(parseAndCloseArray(reader, ABIJSON.ALL, ABIType.FLAGS_NONE, Function.newDefaultDigest()));
             }
             throw new IllegalArgumentException("unexpected token: " + token);
         } catch (IOException io) {
@@ -161,7 +161,7 @@ public final class ABIJSON {
         return stringOut.toString();
     }
 
-    static <T extends ABIObject> List<T> parseArray(final JsonReader reader, Set<TypeEnum> types, int flags, MessageDigest digest) {
+    static <T extends ABIObject> List<T> parseAndCloseArray(final JsonReader reader, Set<TypeEnum> types, int flags, MessageDigest digest) {
         final List<T> list = new ArrayList<>();
         try (JsonReader ignored = reader) {
             reader.beginArray();

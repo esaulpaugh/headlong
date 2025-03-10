@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static com.esaulpaugh.headlong.abi.ABIJSON.parseArray;
+import static com.esaulpaugh.headlong.abi.ABIJSON.parseAndCloseArray;
 import static com.esaulpaugh.headlong.abi.ABIJSON.reader;
 
 /** Parses JSON arrays containing contract ABI descriptions. Object types are {@link Function}, {@link Event}, and {@link ContractError}. */
@@ -92,11 +92,28 @@ public final class ABIParser {
      * @param <T>   the element type
      */
     public <T extends ABIObject> List<T> parseABIField(String objectJson) {
-        try (JsonReader reader = reader(objectJson)) {
+        return readABIField(reader(objectJson), true);
+    }
+
+    public <T extends ABIObject> List<T> parseABIField(InputStream objectStream) {
+        return readABIField(reader(objectStream), true);
+    }
+
+    public <T extends ABIObject> Stream<T> streamABIField(String objectJson) {
+        return readABIField(reader(objectJson), false);
+    }
+
+    public <T extends ABIObject> Stream<T> streamABIField(InputStream objectStream) {
+        return readABIField(reader(objectStream), false);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <X> X readABIField(JsonReader reader, boolean parse) {
+        try {
             reader.beginObject();
             while (reader.peek() != JsonToken.END_OBJECT) {
                 if ("abi".equals(reader.nextName())) {
-                    return parse(reader);
+                    return (X) (parse ? parse(reader) : stream(reader));
                 }
                 reader.skipValue();
             }
@@ -107,7 +124,7 @@ public final class ABIParser {
     }
 
     private <T extends ABIObject> List<T> parse(JsonReader reader) {
-        return parseArray(reader, types, flags, requiresDigest ? Function.newDefaultDigest() : null);
+        return parseAndCloseArray(reader, types, flags, requiresDigest ? Function.newDefaultDigest() : null);
     }
 
     private <T extends ABIObject> Stream<T> stream(JsonReader reader) {

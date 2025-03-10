@@ -975,6 +975,10 @@ public class ABIJSONTest {
         assertEquals(1, objects.size());
         assertEquals(TypeEnum.FUNCTION, objects.get(0).getType());
         assertEquals("aller(uint256,uint256,uint256,address,string)", objects.get(0).getCanonicalSignature());
+
+        final Stream<ABIObject> stream = p.streamABIField(json);
+        assertEquals(5, stream.findFirst().get().asFunction().getInputs().size());
+        assertEquals(ABIType.FLAG_LEGACY_DECODE, new ABIParser(ABIType.FLAG_LEGACY_DECODE).streamABIField(json).findFirst().get().asFunction().getOutputs().getFlags());
     }
 
     @Test
