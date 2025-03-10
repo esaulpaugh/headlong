@@ -131,6 +131,7 @@ public final class ABIParser {
         return StreamSupport.stream(new JsonSpliterator<T>(reader), false) // sequential (non-parallel)
                 .onClose(() -> {
                     try {
+                        reader.endArray();
                         reader.close();
                     } catch (IOException io) {
                         throw new IllegalStateException(io);
@@ -163,7 +164,6 @@ public final class ABIParser {
                         return true;
                     }
                 }
-                reader.endArray();
                 return false;
             } catch (IOException io) {
                 throw new IllegalStateException(io);

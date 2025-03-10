@@ -462,12 +462,12 @@ public final class ABIJSON {
     }
 
     @SuppressWarnings("deprecation")
-    private static JsonReader strict(Reader reader) {
-        final JsonReader jsonReader = new JsonReader(reader);
+    private static JsonReader strict(Reader r) {
+        final JsonReader reader = new JsonReader(r);
         switch (STRICTNESS) {
-        case 2: jsonReader.setNestingLimit(50); /* fall through */
-        case 1: jsonReader.setStrictness(Strictness.STRICT); return jsonReader;
-        default: jsonReader.setLenient(false); return jsonReader;
+        case 2: reader.setNestingLimit(50); /* fall through */
+        case 1: reader.setStrictness(Strictness.STRICT); return reader;
+        default: reader.setLenient(false); return reader;
         }
     }
 
