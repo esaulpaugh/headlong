@@ -18,7 +18,6 @@ package com.esaulpaugh.headlong.abi;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
