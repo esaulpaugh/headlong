@@ -38,24 +38,24 @@ public final class ABIParser {
 
     final int flags;
     final Set<TypeEnum> types;
-    final transient boolean requiresDigest;
+    final transient boolean needsDigest;
 
     public ABIParser() {
         this.flags = ABIType.FLAGS_NONE;
         this.types = ABIJSON._ALL;
-        this.requiresDigest = true;
+        this.needsDigest = true;
     }
 
     public ABIParser(int flags) {
         this.flags = checkFlags(flags);
         this.types = ABIJSON._ALL;
-        this.requiresDigest = true;
+        this.needsDigest = true;
     }
 
     public ABIParser(Set<TypeEnum> types) {
         this.flags = ABIType.FLAGS_NONE;
         this.types = EnumSet.copyOf(types);
-        this.requiresDigest = requiresDigest(this.types);
+        this.needsDigest = needsDigest();
     }
 
     /**
@@ -65,7 +65,7 @@ public final class ABIParser {
     public ABIParser(int flags, Set<TypeEnum> types) {
         this.flags = checkFlags(flags);
         this.types = EnumSet.copyOf(types);
-        this.requiresDigest = requiresDigest(this.types);
+        this.needsDigest = needsDigest();
     }
 
     public <T extends ABIObject> List<T> parse(String arrayJson) {
@@ -124,7 +124,7 @@ public final class ABIParser {
     }
 
     private <T extends ABIObject> List<T> parse(JsonReader reader) {
-        return parseAndCloseArray(reader, types, flags, requiresDigest ? Function.newDefaultDigest() : null);
+        return parseAndCloseArray(reader, types, flags, needsDigest ? Function.newDefaultDigest() : null);
     }
 
     private <T extends ABIObject> Stream<T> stream(JsonReader reader) {
@@ -140,14 +140,14 @@ public final class ABIParser {
 
     private final class JsonSpliterator<T extends ABIObject> extends Spliterators.AbstractSpliterator<T> {
 
-        private final JsonReader jsonReader;
-        private final MessageDigest digest = requiresDigest ? Function.newDefaultDigest() : null;
+        private final JsonReader reader;
+        private final MessageDigest digest = needsDigest ? Function.newDefaultDigest() : null;
 
         JsonSpliterator(final JsonReader reader) {
             super(0, ORDERED | NONNULL);
-            this.jsonReader = reader;
+            this.reader = reader;
             try {
-                this.jsonReader.beginArray();
+                this.reader.beginArray();
             } catch (IOException io) {
                 throw new IllegalStateException(io);
             }
@@ -156,14 +156,14 @@ public final class ABIParser {
         @Override
         public boolean tryAdvance(Consumer<? super T> action) {
             try {
-                while (jsonReader.peek() != JsonToken.END_ARRAY) {
-                    T e = ABIJSON.tryParseStreaming(jsonReader, types, digest, flags);
+                while (reader.peek() != JsonToken.END_ARRAY) {
+                    T e = ABIJSON.tryParseStreaming(reader, types, digest, flags);
                     if (e != null) {
                         action.accept(e);
                         return true;
                     }
                 }
-                jsonReader.endArray();
+                reader.endArray();
                 return false;
             } catch (IOException io) {
                 throw new IllegalStateException(io);
@@ -199,10 +199,10 @@ public final class ABIParser {
         if (flags == ABIType.FLAGS_NONE || flags == ABIType.FLAG_LEGACY_DECODE) {
             return flags;
         }
-        throw new IllegalArgumentException("Argument flags must be one of: { ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE }");
+        throw new IllegalArgumentException("Flags must be one of: ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE");
     }
 
-    private static boolean requiresDigest(Set<TypeEnum> types) {
+    private boolean needsDigest() {
         return types.contains(TypeEnum.FUNCTION)
                 || types.contains(TypeEnum.CONSTRUCTOR)
                 || types.contains(TypeEnum.RECEIVE)

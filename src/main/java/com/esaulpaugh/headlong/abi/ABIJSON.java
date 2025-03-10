@@ -449,12 +449,12 @@ public final class ABIJSON {
     private static final int STRICTNESS;
 
     static {
-        final JsonReader jsonReader = new JsonReader(new StringReader(""));
+        final JsonReader reader = new JsonReader(new StringReader(""));
         int level = 0;
         try {
-            jsonReader.setStrictness(Strictness.STRICT); // since gson 2.11.0
+            reader.setStrictness(Strictness.STRICT); // since gson 2.11.0
             level = 1;
-            jsonReader.setNestingLimit(50); // since gson 2.12.0 (allow setStrictness to succeed before trying)
+            reader.setNestingLimit(50); // since gson 2.12.0 (allow setStrictness to succeed before trying)
             level = 2;
         } catch (LinkageError ignored) { // e.g. runtime gson doesn't have one of the above methods
         }
