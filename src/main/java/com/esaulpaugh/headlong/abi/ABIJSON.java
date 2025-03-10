@@ -294,8 +294,8 @@ public final class ABIJSON {
         reader.beginObject();
         TypeEnum t = null;
         String name = null;
-        TupleType<?> inputs = TupleType.empty(flags);
-        TupleType<?> outputs = TupleType.empty(flags);
+        TupleType<?> inputs = null;
+        TupleType<?> outputs = null;
         String stateMutability = null;
         boolean anonymous = false;
         do {
@@ -326,11 +326,14 @@ public final class ABIJSON {
                 return null; // skip
             }
         }
+        if (inputs == null) {
+            inputs = TupleType.empty(flags);
+        }
         switch (t.ordinal()) {
         case TypeEnum.ORDINAL_FUNCTION:
         case TypeEnum.ORDINAL_RECEIVE:
         case TypeEnum.ORDINAL_FALLBACK:
-        case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) new Function(t, name, inputs, outputs, stateMutability, digest);
+        case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) new Function(t, name, inputs, outputs != null ? outputs : TupleType.empty(flags), stateMutability, digest);
         case TypeEnum.ORDINAL_EVENT: return (T) new Event<>(name, anonymous, inputs, inputs.indexed);
         case TypeEnum.ORDINAL_ERROR: return (T) new ContractError<>(name, inputs);
         default: throw new AssertionError();
