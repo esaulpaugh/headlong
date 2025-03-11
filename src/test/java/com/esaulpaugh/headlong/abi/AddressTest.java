@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AddressTest {
 
-    private static final Pattern ADDRESS_PATTERN = Pattern.compile("^0x[\\dA-Fa-f]{40}$");
+    private static final Pattern ADDRESS_PATTERN = Pattern.compile("\\A0x[\\dA-Fa-f]{40}\\Z");
 
     private static final String[] VECTORS = new String[] {
             "0x52908400098527886E0F7030069857D2E4169EE7",

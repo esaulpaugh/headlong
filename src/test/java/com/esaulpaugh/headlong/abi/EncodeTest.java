@@ -58,7 +58,7 @@ public class EncodeTest {
     private static final String SUFFIX      = "(\\)|\\[\\d*])*";
     private static final String SINGLE_TYPE = BASE_TYPE + SUFFIX;
     private static final Pattern TYPE_PATTERN       = Pattern.compile(SINGLE_TYPE + "(," + SINGLE_TYPE + ")*");
-    private static final Pattern TUPLE_TYPE_PATTERN = Pattern.compile("^\\((" + TYPE_PATTERN + ")?\\)$");
+    private static final Pattern TUPLE_TYPE_PATTERN = Pattern.compile("\\A\\((" + TYPE_PATTERN + ")?\\)\\Z");
 
     @Disabled("may take minutes to run")
     @SuppressWarnings("deprecation")
