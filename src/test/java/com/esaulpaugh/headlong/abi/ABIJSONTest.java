@@ -946,15 +946,19 @@ public class ABIJSONTest {
     @Test
     public void testParseABIField() throws Throwable {
 
-        List<Function> list = new ABIParser(ABIType.FLAG_LEGACY_DECODE).parseField("abi", "{\"abi\":[{\"name\":\"\"}]");
+        final List<Function> list = new ABIParser(ABIType.FLAG_LEGACY_DECODE).parseField("abi", "{\"abi\":[{\"name\":\"\"}]");
         assertEquals(ABIType.FLAG_LEGACY_DECODE, list.get(0).asFunction().getInputs().getFlags());
         assertEquals(ABIType.FLAG_LEGACY_DECODE, list.get(0).asFunction().getOutputs().getFlags());
 
         final ABIParser p = new ABIParser();
         assertThrown(IllegalStateException.class, () -> p.parseField("abi", "[]"));
+        assertThrown(IllegalStateException.class, () -> p.parseField("abi", bais("[]")));
         assertThrown(IllegalStateException.class, () -> p.parseField("abi", "{\"abi\":null}"));
+        assertThrown(IllegalStateException.class, () -> p.parseField("abi", bais("{\"abi\":null}")));
         assertThrown(IllegalArgumentException.class, "key not found", () -> p.parseField("abi", "{}"));
+        assertThrown(IllegalArgumentException.class, "key not found", () -> p.parseField("abi", bais("{}")));
         assertThrown(IllegalArgumentException.class, "key not found", () -> p.parseField("abi", "{\"ABI\":\"\"}"));
+        assertThrown(IllegalArgumentException.class, "key not found", () -> p.parseField("abi", bais("{\"ABI\":\"\"}")));
         assertEquals(0, p.parseField("abi", "{\"abi\":[]}").size());
         assertEquals(0, p.parseField("abi", "{\"\":null,\"abi\":[],\"\":null}").size());
         final String json = "{\n" +
@@ -982,7 +986,7 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void testInputStreamParse() throws IOException {
+    public void testInputStreamParse() throws Throwable {
         testABIObject(FUNCTION_A_JSON);
         testABIObject(EVENT_STR);
         testABIObject(ERROR_JSON);
@@ -998,6 +1002,9 @@ public class ABIJSONTest {
 
         InputStream abi = TestUtils.getFileResource("tests/headlong/tests/abi.json");
         assertEquals(4, new ABIParser().parse(abi).size());
+
+        assertEquals(0, new ABIParser().streamField("abi", bais("{\"abi\":[]}")).count());
+        assertThrown(IllegalArgumentException.class, "key not found", () -> new ABIParser().streamField("abi", bais("{\"\":\"\"}")));
     }
 
     private static void testABIObject(String json) {
