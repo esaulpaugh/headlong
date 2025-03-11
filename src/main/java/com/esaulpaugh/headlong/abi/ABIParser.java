@@ -168,6 +168,11 @@ public final class ABIParser {
                 reader.close();
                 return false;
             } catch (IOException io) {
+                try {
+                    reader.close();
+                } catch (IOException io2) {
+                    io.addSuppressed(io2);
+                }
                 throw new IllegalStateException(io);
             }
         }
