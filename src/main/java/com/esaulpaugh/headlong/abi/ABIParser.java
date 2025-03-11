@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static com.esaulpaugh.headlong.abi.ABIJSON.parseAndCloseArray;
+import static com.esaulpaugh.headlong.abi.ABIJSON.parseArrayAndCloseReader;
 import static com.esaulpaugh.headlong.abi.ABIJSON.reader;
 
 /** Parses JSON arrays containing contract ABI descriptions. Object types are {@link Function}, {@link Event}, and {@link ContractError}. */
@@ -124,7 +124,7 @@ public final class ABIParser {
     }
 
     private <T extends ABIObject> List<T> parse(JsonReader reader) {
-        return parseAndCloseArray(reader, types, flags, requiresDigest ? Function.newDefaultDigest() : null);
+        return parseArrayAndCloseReader(reader, types, flags, requiresDigest ? Function.newDefaultDigest() : null);
     }
 
     private <T extends ABIObject> Stream<T> stream(JsonReader reader) {

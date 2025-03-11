@@ -101,7 +101,7 @@ public final class ABIJSON {
 
     /** Allows a {@link MessageDigest} to be reused for multiple calls. See also {@link ABIParser}. */
     public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types, MessageDigest digest) {
-        return parseAndCloseArray(reader(arrayJson), types, flags, digest);
+        return parseArrayAndCloseReader(reader(arrayJson), types, flags, digest);
     }
 
     /**
@@ -116,7 +116,7 @@ public final class ABIJSON {
             if (token == JsonToken.BEGIN_OBJECT) {
                 return toJson(ABIObject.fromJson(json), false, true);
             } else if (token == JsonToken.BEGIN_ARRAY) {
-                return optimize(parseAndCloseArray(reader, ABIJSON.ALL, ABIType.FLAGS_NONE, Function.newDefaultDigest()));
+                return optimize(parseArrayAndCloseReader(reader, ABIJSON.ALL, ABIType.FLAGS_NONE, Function.newDefaultDigest()));
             }
             throw new IllegalArgumentException("unexpected token: " + token);
         } catch (IOException io) {
@@ -161,7 +161,7 @@ public final class ABIJSON {
         return stringOut.toString();
     }
 
-    static <T extends ABIObject> List<T> parseAndCloseArray(final JsonReader reader, Set<TypeEnum> types, int flags, MessageDigest digest) {
+    static <T extends ABIObject> List<T> parseArrayAndCloseReader(final JsonReader reader, Set<TypeEnum> types, int flags, MessageDigest digest) {
         final List<T> list = new ArrayList<>();
         try (JsonReader ignored = reader) {
             reader.beginArray();
@@ -269,15 +269,15 @@ public final class ABIJSON {
     }
 //----------------------------------------------------------------------------------------------------------------------
     static <T extends ABIObject> T parseABIObject(String json, Set<TypeEnum> types, MessageDigest digest, int flags) {
-        return parseABIObject(reader(json), types, digest, flags);
+        return parseABIObjectAndCloseReader(reader(json), types, digest, flags);
     }
 
     /** Reads an {@link ABIObject} from JSON and closes the {@link InputStream}. Assumes UTF-8 encoding. */
     static <T extends ABIObject> T parseABIObject(InputStream is, Set<TypeEnum> types, MessageDigest digest, int flags) {
-        return parseABIObject(reader(is), types, digest, flags);
+        return parseABIObjectAndCloseReader(reader(is), types, digest, flags);
     }
 
-    private static <T extends ABIObject> T parseABIObject(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) {
+    private static <T extends ABIObject> T parseABIObjectAndCloseReader(JsonReader reader, Set<TypeEnum> types, MessageDigest digest, int flags) {
         try (JsonReader ignored = reader) {
             T obj = tryParseStreaming(reader, types, digest, flags);
             if (obj != null) {
