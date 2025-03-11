@@ -980,9 +980,12 @@ public class ABIJSONTest {
         assertEquals(TypeEnum.FUNCTION, objects.get(0).getType());
         assertEquals("aller(uint256,uint256,uint256,address,string)", objects.get(0).getCanonicalSignature());
 
-        final Stream<ABIObject> stream = p.streamField("abi", json);
-        assertEquals(5, stream.findFirst().get().asFunction().getInputs().size());
-        assertEquals(ABIType.FLAG_LEGACY_DECODE, new ABIParser(ABIType.FLAG_LEGACY_DECODE).streamField("abi", json).findFirst().get().asFunction().getOutputs().getFlags());
+        try (final Stream<ABIObject> s = p.streamField("abi", json)) {
+            assertEquals(5, s.findFirst().get().asFunction().getInputs().size());
+        }
+        try (final Stream<ABIObject> s = new ABIParser(ABIType.FLAG_LEGACY_DECODE).streamField("abi", json)) {
+            assertEquals(ABIType.FLAG_LEGACY_DECODE, s.findFirst().get().asFunction().getOutputs().getFlags());
+        }
     }
 
     @Test
@@ -1002,9 +1005,19 @@ public class ABIJSONTest {
 
         InputStream abi = TestUtils.getFileResource("tests/headlong/tests/abi.json");
         assertEquals(4, new ABIParser().parse(abi).size());
+        assertThrown(IllegalStateException.class, "IOException", () -> new ABIParser().parse(abi));
+        assertThrown(IllegalStateException.class, "IOException", () -> new ABIParser().stream(abi));
+        assertThrown(IllegalStateException.class, "IOException", () -> new ABIParser().parseField("", abi));
+        assertThrown(IllegalStateException.class, "IOException", () -> new ABIParser().streamField("", abi));
 
-        assertEquals(0, new ABIParser().streamField("abi", bais("{\"abi\":[]}")).count());
-        assertThrown(IllegalArgumentException.class, "key not found", () -> new ABIParser().streamField("abi", bais("{\"\":\"\"}")));
+        try (Stream<ABIObject> s = new ABIParser().streamField("abi", bais("{\"abi\":[]}"))) {
+            assertEquals(0, s.count());
+        }
+        assertThrown(IllegalArgumentException.class, "key not found", () -> {
+            try (Stream<ABIObject> ignored = new ABIParser().streamField("abi", bais("{\"\":\"\"}"))) {
+                throw new AssertionError();
+            }
+        });
     }
 
     private static void testABIObject(String json) {
@@ -1042,7 +1055,9 @@ public class ABIJSONTest {
         assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", ABIJSON.FUNCTIONS, digest).size());
         assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", ABIJSON.NORMAL_FUNCTIONS, digest).size());
 
-        assertEquals(0L, new ABIParser(ABIJSON.EVENTS).stream(bais("[{\"name\":\"\"}]")).count());
+        try (Stream s = new ABIParser(ABIJSON.EVENTS).stream(bais("[{\"name\":\"\"}]"))) {
+            assertEquals(0L, s.count());
+        }
 
         assertThrown(IllegalArgumentException.class, "Flags must be one of: ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE", () -> new ABIParser(-1));
         assertThrown(IllegalArgumentException.class, "Flags must be one of: ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE", () -> new ABIParser(2));
