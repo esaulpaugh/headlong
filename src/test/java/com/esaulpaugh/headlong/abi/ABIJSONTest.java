@@ -1008,6 +1008,9 @@ public class ABIJSONTest {
         assertThrown(IllegalStateException.class, "IOException", () -> new ABIParser().stream(abi));
         assertThrown(IllegalStateException.class, "IOException", () -> new ABIParser().parseField("", abi));
         assertThrown(IllegalStateException.class, "IOException", () -> new ABIParser().streamField("", abi));
+        assertThrown(IllegalStateException.class, "END_OBJECT", () -> new ABIParser().stream(bais("[{}]")).findAny());
+        assertThrown(IllegalStateException.class, "END_OBJECT", () -> new ABIParser().streamField("", bais("{\"\":[{}]}")).findAny());
+        assertThrown(IllegalStateException.class, "END_OBJECT", () -> new ABIParser().parseField("", bais("{\"\":[{}]}")));
 
         try (Stream<ABIObject> s = new ABIParser().streamField("abi", bais("{\"abi\":[]}"))) {
             assertEquals(0, s.count());
