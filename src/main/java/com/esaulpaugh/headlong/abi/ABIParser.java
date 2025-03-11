@@ -79,6 +79,7 @@ public final class ABIParser {
         return stream(reader(arrayJson));
     }
 
+    /** Use via try-with-resources to ensure that {@link Stream#close()} is called, closing the underlying {@link InputStream}. */
     public <T extends ABIObject> Stream<T> stream(InputStream arrayStream) {
         return stream(reader(arrayStream));
     }
@@ -103,6 +104,7 @@ public final class ABIParser {
         return readField(reader(objectJson), key, false);
     }
 
+    /** Use via try-with-resources to ensure that {@link Stream#close()} is called, closing the underlying {@link InputStream}. */
     public <T extends ABIObject> Stream<T> streamField(String key, InputStream objectStream) {
         return readField(reader(objectStream), key, false);
     }
@@ -131,7 +133,6 @@ public final class ABIParser {
         return StreamSupport.stream(new JsonSpliterator<T>(reader), false) // sequential (non-parallel)
                             .onClose(() -> {
                                 try {
-                                    reader.endArray();
                                     reader.close();
                                 } catch (IOException io) {
                                     throw new IllegalStateException(io);
@@ -163,6 +164,8 @@ public final class ABIParser {
                         return true;
                     }
                 }
+                reader.endArray();
+                reader.close();
                 return false;
             } catch (IOException io) {
                 throw new IllegalStateException(io);
