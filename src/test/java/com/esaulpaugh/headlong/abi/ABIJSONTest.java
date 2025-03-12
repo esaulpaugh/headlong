@@ -960,6 +960,8 @@ public class ABIJSONTest {
         assertThrown(IllegalArgumentException.class, "key not found", () -> p.parseField("abi", bais("{\"ABI\":\"\"}")));
         assertEquals(0, p.parseField("abi", "{\"abi\":[]}").size());
         assertEquals(0, p.parseField("abi", "{\"\":null,\"abi\":[],\"\":null}").size());
+        assertEquals(1L, p.parseField("abi", bais("{\"abi\":[{\"name\":\"\"}]}")).size());
+
         final String json = "{\n" +
                 "  \"abi\": [\n" +
                 "    {\n" +
@@ -1057,7 +1059,7 @@ public class ABIJSONTest {
         assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", ABIJSON.FUNCTIONS, digest).size());
         assertEquals(1, ABIJSON.parseElements(FLAGS_NONE, "[{\"name\":\"\"}]", ABIJSON.NORMAL_FUNCTIONS, digest).size());
 
-        try (Stream s = new ABIParser(ABIJSON.EVENTS).stream(bais("[{\"name\":\"\"}]"))) {
+        try (Stream<Event<Tuple>> s = new ABIParser(ABIJSON.EVENTS).stream(bais("[{\"name\":\"\"}]"))) {
             assertEquals(0L, s.count());
         }
 
