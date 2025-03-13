@@ -10,7 +10,7 @@ ABI spec: https://solidity.readthedocs.io/en/latest/abi-spec.html
 
 RLP spec: https://ethereum.org/en/developers/docs/data-structures-and-encoding/rlp
 
-SHA-256 (headlong-13.0.0.jar): 5ec5ab76ffc1532eff553f74b41c7f1214940c454594120ddd6306203ad028f5
+SHA-256 (headlong-13.1.0.jar): 260cad9ebf38da44edcdcbf75f203428e35d864c4320f59658812df2f80f1ba2
 
 ## Usage
 
@@ -138,14 +138,14 @@ Or build locally:
 Clone the project and install to your local maven repository using `gradle publishToMavenLocal` or `mvn install`, then declare it as a dependency:
 
 ```kotlin
-implementation("com.esaulpaugh:headlong:13.0.1-SNAPSHOT")
+implementation("com.esaulpaugh:headlong:13.1.1-SNAPSHOT")
 ```
 
 ```xml
 <dependency>
     <groupId>com.esaulpaugh</groupId>
     <artifactId>headlong</artifactId>
-    <version>13.0.1-SNAPSHOT</version>
+    <version>13.1.1-SNAPSHOT</version>
 </dependency>
 ```
 Alternatively:
@@ -177,7 +177,7 @@ Also includes optimized implementations of:
 * Keccak
 * hexadecimal
 
-headlong depends on gson v2.1 or greater at runtime and v2.12.0 or greater at compile time. Test suite should take less than one minute to run. Test packages require junit. Jar size is ~132 KiB. Java 8+.
+headlong depends on gson v2.1 or greater at runtime and v2.12.0 or greater at compile time. Test suite should take less than one minute to run. Test packages require junit. Jar size is ~133 KiB. Java 8+.
 
 For better contract ABI JSON parsing performance, consider ABIJSON methods which accept a `Set<TypeEnum>` by which to filter objects by type. For best performance, json should be compact and "type" should be the first key in functions, events, and errors. This can be done via `ABIJSON.optimize(String)`.
 

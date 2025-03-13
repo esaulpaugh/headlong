@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.esaulpaugh"
-version = "13.0.1-SNAPSHOT"
+version = "13.1.1-SNAPSHOT"
 
 final String versionStr = getProject().getGradle().getGradleVersion()
 final int gradleMajorVersion = Integer.parseUnsignedInt(versionStr.substring(0, versionStr.indexOf((int)".".charAt(0))))
