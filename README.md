@@ -158,7 +158,7 @@ Alternatively:
 ## Benchmarks
 
 ![Screenshot](https://github.com/esaulpaugh/headlong/blob/master/benchmark_results.PNG)
-GraalVM 20.0.2 on x86-64
+graalvm-jdk-23.0.2 (aarch64 JIT) on Apple M3 Max
 
 ## Command line interface
 
