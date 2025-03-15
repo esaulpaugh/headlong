@@ -157,6 +157,9 @@ Alternatively:
 
 ## Benchmarks
 
+![Screenshot](https://github.com/esaulpaugh/headlong/blob/master/temurin-1.8.0_442_ubuntu24.10_xeon_gold_6140.png)
+temurin 1.8.0_442 on Intel Xeon Gold 6140, Ubuntu 24.10
+
 ![Screenshot](https://github.com/esaulpaugh/headlong/blob/master/benchmark_results.PNG)
 graalvm-jdk-23.0.2 (aarch64 JIT) on Apple M3 Max
 
