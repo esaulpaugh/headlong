@@ -297,10 +297,11 @@ public final class ABIJSON {
         TupleType<?> inputs = null;
         TupleType<?> outputs = null;
         String stateMutability = null;
-        boolean anonymous = false;
+        Boolean anonymous = null;
         do {
             switch (reader.nextName()) {
             case TYPE:
+                checkDuplicate(TYPE, t);
                 t = TypeEnum.parse(reader.nextString());
                 if (!types.contains(t)) {
                     // skip this JSON object. for best performance, "type" should be declared first
@@ -311,11 +312,11 @@ public final class ABIJSON {
                     return null;
                 }
                 continue;
-            case NAME: name = reader.nextString(); continue;
-            case INPUTS: inputs = parseTupleType(reader, flags); continue;
-            case OUTPUTS: outputs = parseTupleType(reader, flags); continue;
-            case STATE_MUTABILITY: stateMutability = reader.nextString(); continue;
-            case ANONYMOUS: anonymous = reader.nextBoolean(); continue;
+            case NAME: checkDuplicate(NAME, name); name = reader.nextString(); continue;
+            case INPUTS: checkDuplicate(INPUTS, inputs); inputs = parseTupleType(reader, flags); continue;
+            case OUTPUTS: checkDuplicate(OUTPUTS, outputs); outputs = parseTupleType(reader, flags); continue;
+            case STATE_MUTABILITY: checkDuplicate(STATE_MUTABILITY, stateMutability); stateMutability = reader.nextString(); continue;
+            case ANONYMOUS: checkDuplicate(ANONYMOUS, anonymous); anonymous = reader.nextBoolean(); continue;
             default: reader.skipValue();
             }
         } while (reader.peek() != JsonToken.END_OBJECT);
@@ -334,9 +335,15 @@ public final class ABIJSON {
         case TypeEnum.ORDINAL_RECEIVE:
         case TypeEnum.ORDINAL_FALLBACK:
         case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) new Function(t, name, inputs, outputs != null ? outputs : TupleType.empty(flags), stateMutability, digest);
-        case TypeEnum.ORDINAL_EVENT: return (T) new Event<>(name, anonymous, inputs, inputs.indexed);
+        case TypeEnum.ORDINAL_EVENT: return (T) new Event<>(name, anonymous != null ? anonymous : false, inputs, inputs.indexed);
         case TypeEnum.ORDINAL_ERROR: return (T) new ContractError<>(name, inputs);
         default: throw new AssertionError();
+        }
+    }
+
+    private static void checkDuplicate(String key, Object result) {
+        if (result != null) {
+            throw new IllegalStateException("duplicate field: " + key);
         }
     }
 

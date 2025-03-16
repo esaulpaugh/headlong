@@ -1127,4 +1127,14 @@ public class ABIJSONTest {
 
         assertFalse(ce.equals(new Object()));
     }
+
+    @Test
+    public void testDuplicateField() throws Throwable {
+        assertThrown(IllegalStateException.class, "duplicate field: type", () -> Event.fromJson("{\n  \"type\": \"event\",\n  \"type\": \"error\"}"));
+        assertThrown(IllegalStateException.class, "duplicate field: name", () -> Event.fromJson("{\"type\": \"event\",\"name\":\"\",\"name\":\"\"}"));
+        assertThrown(IllegalStateException.class, "duplicate field: inputs", () -> Event.fromJson("{\n  \"type\": \"event\",\n  \"inputs\":[],\"inputs\":[]}"));
+        assertThrown(IllegalStateException.class, "duplicate field: outputs", () -> Function.fromJson("{\n  \"type\": \"function\",\n  \"outputs\":[],\"outputs\":null}"));
+        assertThrown(IllegalStateException.class, "duplicate field: stateMutability", () -> Function.fromJson("{\"type\":\"function\",\"stateMutability\": \"payable\",\"stateMutability\":\"view\"}"));
+        assertThrown(IllegalStateException.class, "duplicate field: anonymous", () -> Event.fromJson("{\n  \"type\": \"event\",\n  \"anonymous\": false, \"anonymous\": true}"));
+    }
 }
