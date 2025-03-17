@@ -1096,7 +1096,15 @@ public class ABIJSONTest {
         }
 
         final ABIParser p = new ABIParser();
-        assertEquals(optimized, ABIJSON.optimize(p.parse(CONTRACT_JSON)));
+        final List<ABIObject> originalList = p.parse(CONTRACT_JSON);
+        final List<ABIObject> optimizedList = p.parse(ABIJSON.optimize(CONTRACT_JSON));
+        assertEquals(originalList.size(), optimizedList.size());
+
+        int i = 0;
+        for (ABIObject opt : optimizedList) {
+            assertEquals(originalList.get(i++), opt);
+        }
+
         assertEquals(optimized, ABIJSON.optimize(p.parse(optimized)));
         assertEquals(optimized, ABIJSON.optimize(optimized));
         assertEquals(ABIJSON.optimize(FALLBACK_CONSTRUCTOR_RECEIVE), ABIJSON.optimize(p.parse(FALLBACK_CONSTRUCTOR_RECEIVE)));
@@ -1135,6 +1143,18 @@ public class ABIJSONTest {
         assertThrown(IllegalStateException.class, "duplicate field: inputs", () -> Event.fromJson("{\n  \"type\": \"event\",\n  \"inputs\":[],\"inputs\":[]}"));
         assertThrown(IllegalStateException.class, "duplicate field: outputs", () -> Function.fromJson("{\n  \"type\": \"function\",\n  \"outputs\":[],\"outputs\":null}"));
         assertThrown(IllegalStateException.class, "duplicate field: stateMutability", () -> Function.fromJson("{\"type\":\"function\",\"stateMutability\": \"payable\",\"stateMutability\":\"view\"}"));
-        assertThrown(IllegalStateException.class, "duplicate field: anonymous", () -> Event.fromJson("{\n  \"type\": \"event\",\n  \"anonymous\": false, \"anonymous\": true}"));
+        assertThrown(IllegalStateException.class, "duplicate field: anonymous", () -> Event.fromJson("{\"type\":\"event\",\"anonymous\":false,\"anonymous\":false}"));
+        assertThrown(IllegalStateException.class, "duplicate field: anonymous", () -> Event.fromJson("{\"type\":\"event\",\"anonymous\":false,\"anonymous\":true}"));
+        assertThrown(IllegalStateException.class, "duplicate field: anonymous", () -> Event.fromJson("{\"type\":\"event\",\"anonymous\":true,\"anonymous\":false}"));
+        assertThrown(IllegalStateException.class, "duplicate field: anonymous", () -> Event.fromJson("{\"type\":\"event\",\"anonymous\":true,\"anonymous\":true}"));
+
+        assertThrown(IllegalStateException.class, "duplicate field: type", () -> Event.fromJson("{\"type\":\"event\",\"name\":\"\",\"inputs\":[{\"type\":\"string\",\"type\":\"bool\"}]}"));
+        assertThrown(IllegalStateException.class, "duplicate field: components", () -> Event.fromJson("{\"type\":\"event\",\"name\":\"x\",\"inputs\":[{\"type\":\"tuple\",\"components\":[],\"components\":[]}]}"));
+        assertThrown(IllegalStateException.class, "duplicate field: name", () -> Event.fromJson("{\"type\":\"event\",\"name\":\"x\",\"name\":\"x\"}"));
+        assertThrown(IllegalStateException.class, "duplicate field: internalType", () -> Event.fromJson("{\"type\":\"event\",\"name\":\"x\",\"inputs\":[{\"internalType\":\"int\",\"internalType\":\"int\",\"type\":\"bool\"}]}"));
+        assertThrown(IllegalStateException.class, "duplicate field: indexed", () -> Event.fromJson("{\"type\":\"event\",\"name\":\"x\",\"inputs\":[{\"indexed\":false,\"indexed\":false,\"type\":\"bool\"}]}"));
+        assertThrown(IllegalStateException.class, "duplicate field: indexed", () -> Event.fromJson("{\"type\":\"event\",\"name\":\"x\",\"inputs\":[{\"indexed\":false,\"indexed\":true,\"type\":\"bool\"}]}"));
+        assertThrown(IllegalStateException.class, "duplicate field: indexed", () -> Event.fromJson("{\"type\":\"event\",\"name\":\"x\",\"inputs\":[{\"indexed\":true,\"indexed\":false,\"type\":\"bool\"}]}"));
+        assertThrown(IllegalStateException.class, "duplicate field: indexed", () -> Event.fromJson("{\"type\":\"event\",\"name\":\"x\",\"inputs\":[{\"indexed\":true,\"indexed\":true,\"type\":\"bool\"}]}"));
     }
 }

@@ -363,22 +363,23 @@ public final class ABIJSON {
         ABIType<?>[] elements = new ABIType<?>[8];
         String[] names = new String[8];
         String[] internalTypes = new String[8];
-        boolean[] indexed = new boolean[8];
+        boolean[] indexedManifest = new boolean[8];
         boolean dynamic = false;
 
         for (int i = 0; true; canonicalType.append(',')) {
             String type = null;
             TupleType<?> components = null;
             String internalType = null;
+            Boolean indexed = null;
 
             reader.beginObject();
             while (reader.peek() != JsonToken.END_OBJECT) {
                 switch (reader.nextName()) {
-                case TYPE: type = reader.nextString(); continue;
-                case COMPONENTS: components = parseTupleType(reader, flags); continue;
-                case NAME: names[i] = reader.nextString(); continue;
-                case INTERNAL_TYPE: internalType = reader.nextString(); continue;
-                case INDEXED: indexed[i] = reader.nextBoolean(); continue;
+                case TYPE: checkDuplicate(TYPE, type); type = reader.nextString(); continue;
+                case COMPONENTS: checkDuplicate(COMPONENTS, components); components = parseTupleType(reader, flags); continue;
+                case NAME: checkDuplicate(NAME, names[i]); names[i] = reader.nextString(); continue;
+                case INTERNAL_TYPE: checkDuplicate(INTERNAL_TYPE, internalType); internalType = reader.nextString(); continue;
+                case INDEXED: checkDuplicate(INDEXED, indexed); indexed = reader.nextBoolean(); continue;
                 default: reader.skipValue();
                 }
             }
@@ -392,6 +393,9 @@ public final class ABIJSON {
             if (internalType != null) {
                 internalTypes[i] = internalType.equals(e.canonicalType) ? e.canonicalType : internalType;
             }
+            if (indexed == Boolean.TRUE) {
+                indexedManifest[i] = true;
+            }
 
             i++;
             if (reader.peek() == JsonToken.END_ARRAY) {
@@ -402,7 +406,7 @@ public final class ABIJSON {
                         Arrays.copyOf(elements, i),
                         Arrays.copyOf(names, i),
                         Arrays.copyOf(internalTypes, i),
-                        Arrays.copyOf(indexed, i),
+                        Arrays.copyOf(indexedManifest, i),
                         flags
                 );
             }
@@ -412,7 +416,7 @@ public final class ABIJSON {
                 elements = Arrays.copyOf(elements, newLen);
                 names = Arrays.copyOf(names, newLen);
                 internalTypes = Arrays.copyOf(internalTypes, newLen);
-                indexed = Arrays.copyOf(indexed, newLen);
+                indexedManifest = Arrays.copyOf(indexedManifest, newLen);
             }
         }
     }
