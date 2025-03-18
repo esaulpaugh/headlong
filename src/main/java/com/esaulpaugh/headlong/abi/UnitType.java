@@ -222,13 +222,10 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
     static void initInstances() {
         if (MAP_INITIALIZED.compareAndSet(false, true)) {
-            if (!BASE_TYPE_MAP.isEmpty() || !LEGACY_BASE_TYPE_MAP.isEmpty()) {
-                throw new AssertionError("map not empty");
-            }
-            final long initialCount = INSTANCE_COUNT.get();
-            if (initialCount < 0L || initialCount > 2L) { // will be the number of static instances in whichever subclass is initialized first
-                throw new AssertionError(initialCount + " instances");
-            }
+//            assert BASE_TYPE_MAP.isEmpty();
+//            assert LEGACY_BASE_TYPE_MAP.isEmpty();
+//            assert INSTANCE_COUNT.get() >= 0L; // the number of static instances in whichever subclass is initialized first
+//            assert INSTANCE_COUNT.get() <= 2L;
 
             final Map<String, ABIType<?>> map = BASE_TYPE_MAP;
 
@@ -273,14 +270,9 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
                 LEGACY_BASE_TYPE_MAP.put(e.getKey(), value);
             }
 
-            final int full = 108;
-            if (BASE_TYPE_MAP.size() != full || LEGACY_BASE_TYPE_MAP.size() != full) {
-                throw new AssertionError("map not full");
-            }
-            final long finalCount = INSTANCE_COUNT.get();
-            if (finalCount != INSTANCE_LIMIT) {
-                throw new AssertionError(finalCount + " instances");
-            }
+//            assert BASE_TYPE_MAP.size() == 108;
+//            assert LEGACY_BASE_TYPE_MAP.size() == 108;
+//            assert INSTANCE_COUNT.get() == INSTANCE_LIMIT;
         }
     }
 
