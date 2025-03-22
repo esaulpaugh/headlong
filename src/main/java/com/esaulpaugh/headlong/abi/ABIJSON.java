@@ -335,7 +335,7 @@ public final class ABIJSON {
         case TypeEnum.ORDINAL_RECEIVE:
         case TypeEnum.ORDINAL_FALLBACK:
         case TypeEnum.ORDINAL_CONSTRUCTOR: return (T) new Function(t, name, inputs, outputs != null ? outputs : TupleType.empty(flags), stateMutability, digest);
-        case TypeEnum.ORDINAL_EVENT: return (T) new Event<>(name, anonymous != null ? anonymous : false, inputs, inputs.indexed);
+        case TypeEnum.ORDINAL_EVENT: return (T) new Event<>(name, anonymous == Boolean.TRUE, inputs, inputs.indexed);
         case TypeEnum.ORDINAL_ERROR: return (T) new ContractError<>(name, inputs);
         default: throw new AssertionError();
         }
