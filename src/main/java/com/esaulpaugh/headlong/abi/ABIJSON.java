@@ -301,7 +301,7 @@ public final class ABIJSON {
         do {
             switch (reader.nextName()) {
             case TYPE:
-                checkDuplicate(TYPE, t);
+                requireNull(t, TYPE);
                 t = TypeEnum.parse(reader.nextString());
                 if (!types.contains(t)) {
                     // skip this JSON object. for best performance, "type" should be declared first
@@ -312,11 +312,11 @@ public final class ABIJSON {
                     return null;
                 }
                 continue;
-            case NAME: checkDuplicate(NAME, name); name = reader.nextString(); continue;
-            case INPUTS: checkDuplicate(INPUTS, inputs); inputs = parseTupleType(reader, flags); continue;
-            case OUTPUTS: checkDuplicate(OUTPUTS, outputs); outputs = parseTupleType(reader, flags); continue;
-            case STATE_MUTABILITY: checkDuplicate(STATE_MUTABILITY, stateMutability); stateMutability = reader.nextString(); continue;
-            case ANONYMOUS: checkDuplicate(ANONYMOUS, anonymous); anonymous = reader.nextBoolean(); continue;
+            case NAME: requireNull(name, NAME); name = reader.nextString(); continue;
+            case INPUTS: requireNull(inputs, INPUTS); inputs = parseTupleType(reader, flags); continue;
+            case OUTPUTS: requireNull(outputs, OUTPUTS); outputs = parseTupleType(reader, flags); continue;
+            case STATE_MUTABILITY: requireNull(stateMutability, STATE_MUTABILITY); stateMutability = reader.nextString(); continue;
+            case ANONYMOUS: requireNull(anonymous, ANONYMOUS); anonymous = reader.nextBoolean(); continue;
             default: reader.skipValue();
             }
         } while (reader.peek() != JsonToken.END_OBJECT);
@@ -341,8 +341,8 @@ public final class ABIJSON {
         }
     }
 
-    private static void checkDuplicate(String key, Object result) {
-        if (result != null) {
+    private static void requireNull(Object val, String key) {
+        if (val != null) {
             throw new IllegalStateException("duplicate field: " + key);
         }
     }
@@ -375,11 +375,11 @@ public final class ABIJSON {
             reader.beginObject();
             while (reader.peek() != JsonToken.END_OBJECT) {
                 switch (reader.nextName()) {
-                case TYPE: checkDuplicate(TYPE, type); type = reader.nextString(); continue;
-                case COMPONENTS: checkDuplicate(COMPONENTS, components); components = parseTupleType(reader, flags); continue;
-                case NAME: checkDuplicate(NAME, names[i]); names[i] = reader.nextString(); continue;
-                case INTERNAL_TYPE: checkDuplicate(INTERNAL_TYPE, internalType); internalType = reader.nextString(); continue;
-                case INDEXED: checkDuplicate(INDEXED, indexed); indexed = reader.nextBoolean(); continue;
+                case TYPE: requireNull(type, TYPE); type = reader.nextString(); continue;
+                case COMPONENTS: requireNull(components, COMPONENTS); components = parseTupleType(reader, flags); continue;
+                case NAME: requireNull(names[i], NAME); names[i] = reader.nextString(); continue;
+                case INTERNAL_TYPE: requireNull(internalType, INTERNAL_TYPE); internalType = reader.nextString(); continue;
+                case INDEXED: requireNull(indexed, INDEXED); indexed = reader.nextBoolean(); continue;
                 default: reader.skipValue();
                 }
             }
