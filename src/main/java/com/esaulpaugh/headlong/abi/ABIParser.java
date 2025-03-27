@@ -26,10 +26,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static com.esaulpaugh.headlong.abi.ABIJSON.parseArrayAndCloseReader;
 import static com.esaulpaugh.headlong.abi.ABIJSON.reader;
 
 /** Parses JSON arrays containing contract ABI descriptions. Object types are {@link Function}, {@link Event}, and {@link ContractError}. */
@@ -126,10 +126,13 @@ public final class ABIParser {
     }
 
     private <T extends ABIObject> List<T> parse(JsonReader reader) {
-        return parseArrayAndCloseReader(reader, types, flags, requiresDigest ? Function.newDefaultDigest() : null);
+        Stream<T> stream = stream(reader);
+        List<T> result = stream.collect(Collectors.toList());
+        stream.close();
+        return result;
     }
 
-    private <T extends ABIObject> Stream<T> stream(JsonReader reader) {
+    <T extends ABIObject> Stream<T> stream(JsonReader reader) {
         return StreamSupport.stream(new JsonSpliterator<T>(reader), false) // sequential (non-parallel)
                             .onClose(() -> {
                                 try {

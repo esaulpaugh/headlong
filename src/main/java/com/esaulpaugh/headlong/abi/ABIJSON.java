@@ -31,7 +31,6 @@ import java.io.Writer;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -77,7 +76,7 @@ public final class ABIJSON {
      * @return  the parsed {@link Function}s
      */
     public static List<Function> parseNormalFunctions(String arrayJson) {
-        return parseElements(ABIType.FLAGS_NONE, arrayJson, NORMAL_FUNCTIONS, Function.newDefaultDigest());
+        return parseElements(arrayJson, NORMAL_FUNCTIONS);
     }
 
     /**
@@ -88,20 +87,20 @@ public final class ABIJSON {
      * @return  the parsed {@link Function}s
      */
     public static List<Function> parseFunctions(String arrayJson) {
-        return parseElements(ABIType.FLAGS_NONE, arrayJson, FUNCTIONS, Function.newDefaultDigest());
+        return parseElements(arrayJson, FUNCTIONS);
     }
 
     public static List<Event<Tuple>> parseEvents(String arrayJson) {
-        return parseElements(ABIType.FLAGS_NONE, arrayJson, EVENTS, null);
+        return parseElements(arrayJson, EVENTS);
     }
 
     public static List<ContractError<Tuple>> parseErrors(String arrayJson) {
-        return parseElements(ABIType.FLAGS_NONE, arrayJson, ERRORS, null);
+        return parseElements(arrayJson, ERRORS);
     }
 
     /** Allows a {@link MessageDigest} to be reused for multiple calls. See also {@link ABIParser}. */
-    public static <T extends ABIObject> List<T> parseElements(int flags, String arrayJson, Set<TypeEnum> types, MessageDigest digest) {
-        return parseArrayAndCloseReader(reader(arrayJson), types, flags, digest);
+    private static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types) {
+        return new ABIParser(ABIType.FLAGS_NONE, types).parse(arrayJson);
     }
 
     /**
@@ -116,7 +115,7 @@ public final class ABIJSON {
             if (token == JsonToken.BEGIN_OBJECT) {
                 return toJson(ABIObject.fromJson(json), false, true);
             } else if (token == JsonToken.BEGIN_ARRAY) {
-                return optimize(parseArrayAndCloseReader(reader, ABIJSON.ALL, ABIType.FLAGS_NONE, Function.newDefaultDigest()));
+                return optimize(new ABIParser().parse(json));
             }
             throw new IllegalArgumentException("unexpected token: " + token);
         } catch (IOException io) {
@@ -159,23 +158,6 @@ public final class ABIJSON {
             throw new IllegalStateException(io);
         }
         return stringOut.toString();
-    }
-
-    static <T extends ABIObject> List<T> parseArrayAndCloseReader(final JsonReader reader, Set<TypeEnum> types, int flags, MessageDigest digest) {
-        final List<T> list = new ArrayList<>();
-        try (JsonReader ignored = reader) {
-            reader.beginArray();
-            while (reader.peek() != JsonToken.END_ARRAY) {
-                T e = tryParseStreaming(reader, types, digest, flags);
-                if (e != null) {
-                    list.add(e);
-                }
-            }
-            reader.endArray();
-        } catch (IOException io) {
-            throw new IllegalStateException(io);
-        }
-        return list;
     }
 
     static String toJson(ABIObject o, boolean pretty, boolean minify) {

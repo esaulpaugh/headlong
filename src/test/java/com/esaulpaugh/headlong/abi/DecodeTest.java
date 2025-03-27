@@ -957,7 +957,8 @@ public class DecodeTest {
 
         final String arrayJson = "[" + FN_JSON + "]";
 
-        final Function f2 = ABIJSON.parseElements(ABIType.FLAG_LEGACY_DECODE, arrayJson, ABIJSON.ALL, Function.newDefaultDigest())
+        final Function f2 = new ABIParser(ABIType.FLAG_LEGACY_DECODE)
+                .parse(arrayJson)
                 .get(0)
                 .asFunction();
         checkLegacyFlags(f2.getInputs());
