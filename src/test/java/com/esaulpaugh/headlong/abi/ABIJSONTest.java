@@ -1068,7 +1068,7 @@ public class ABIJSONTest {
     }
 
     @Test
-    public void optimizeJson() {
+    public void optimizeJson() throws Throwable {
         final String in = "{\n    \"type\": \"event\",\n    \"name\":\"\",\n    \"inputs\":[],\n    \"outputs\":[],\n    \"anonymous\": false\n  }";
         final String out = "{\"type\":\"event\",\"name\":\"\"}";
         assertEquals(out, ABIJSON.optimize(in));
@@ -1115,6 +1115,12 @@ public class ABIJSONTest {
         assertEquals(CONTRACT_JSON, ABIJSON.encode(p.parse(CONTRACT_JSON)));
         assertEquals(FALLBACK_CONSTRUCTOR_RECEIVE, ABIJSON.encode(p.parse(FALLBACK_CONSTRUCTOR_RECEIVE)));
         assertEquals("[]", ABIJSON.encode(p.parse("[]")));
+
+        assertThrown(IllegalArgumentException.class, "unexpected token: NULL", () -> ABIJSON.optimize("null"));
+        assertThrown(IllegalArgumentException.class, "unexpected token: NUMBER", () -> ABIJSON.optimize("0"));
+        assertThrown(IllegalArgumentException.class, "unexpected token: BOOLEAN", () -> ABIJSON.optimize("true"));
+        assertThrown(IllegalArgumentException.class, "unexpected token: STRING", () -> ABIJSON.optimize("\"\""));
+        assertThrown(IllegalStateException.class, "MalformedJsonException", () -> ABIJSON.optimize("]"));
     }
 
     @Test
