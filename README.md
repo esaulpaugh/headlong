@@ -138,14 +138,14 @@ Or build locally:
 Clone the project and install to your local maven repository using `gradle publishToMavenLocal` or `mvn install`, then declare it as a dependency:
 
 ```kotlin
-implementation("com.esaulpaugh:headlong:13.1.2-SNAPSHOT")
+implementation("com.esaulpaugh:headlong:13.2.0-SNAPSHOT")
 ```
 
 ```xml
 <dependency>
     <groupId>com.esaulpaugh</groupId>
     <artifactId>headlong</artifactId>
-    <version>13.1.2-SNAPSHOT</version>
+    <version>13.2.0-SNAPSHOT</version>
 </dependency>
 ```
 Alternatively:
