@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.function.IntUnaryOperator;
 
-/** Hexadecimal codec optimized for small inputs. */
+/** Hexadecimal codec optimized for small inputs. Emits lowercase hex characters. */
 public final class FastHex {
 
     private FastHex() {}
