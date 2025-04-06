@@ -98,7 +98,6 @@ public final class ABIJSON {
         return parseElements(arrayJson, ERRORS);
     }
 
-    /** Allows a {@link MessageDigest} to be reused for multiple calls. See also {@link ABIParser}. */
     private static <T extends ABIObject> List<T> parseElements(String arrayJson, Set<TypeEnum> types) {
         return new ABIParser(ABIType.FLAGS_NONE, types).parse(arrayJson);
     }
