@@ -178,8 +178,8 @@ public final class ABIParser {
             } catch (Exception e) {
                 try {
                     reader.close();
-                } catch (IOException io2) {
-                    e.addSuppressed(io2);
+                } catch (IOException io) {
+                    e.addSuppressed(io);
                 }
                 if (e instanceof IllegalStateException) {
                     throw (IllegalStateException) e;
