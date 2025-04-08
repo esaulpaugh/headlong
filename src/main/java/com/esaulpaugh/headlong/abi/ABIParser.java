@@ -132,15 +132,24 @@ public final class ABIParser {
         return result;
     }
 
-    <T extends ABIObject> Stream<T> stream(JsonReader reader) {
-        return StreamSupport.stream(new JsonSpliterator<T>(reader), false) // sequential (non-parallel)
-                            .onClose(() -> {
-                                try {
-                                    reader.close();
-                                } catch (IOException io) {
-                                    throw new IllegalStateException(io);
-                                }
-                            });
+    <T extends ABIObject> Stream<T> stream(com.google.gson.stream.JsonReader reader) {
+        try {
+            return StreamSupport.stream(new JsonSpliterator<T>(reader), false) // sequential (non-parallel)
+                    .onClose(() -> {
+                        try {
+                            reader.close();
+                        } catch (IOException io) {
+                            throw new IllegalStateException(io);
+                        }
+                    });
+        } catch (Exception e) {
+            try {
+                reader.close();
+            } catch (IOException io) {
+                e.addSuppressed(io);
+            }
+            throw new IllegalStateException(e);
+        }
     }
 
     private final class JsonSpliterator<T extends ABIObject> implements Spliterator<T> {
@@ -148,13 +157,9 @@ public final class ABIParser {
         private final JsonReader reader;
         private final MessageDigest digest = requiresDigest ? Function.newDefaultDigest() : null;
 
-        JsonSpliterator(final JsonReader reader) {
+        JsonSpliterator(final JsonReader reader) throws IOException {
             this.reader = reader;
-            try {
-                this.reader.beginArray();
-            } catch (IOException io) {
-                throw new IllegalStateException(io);
-            }
+            this.reader.beginArray();
         }
 
         @Override
