@@ -132,7 +132,7 @@ public final class ABIParser {
         return result;
     }
 
-    <T extends ABIObject> Stream<T> stream(com.google.gson.stream.JsonReader reader) {
+    <T extends ABIObject> Stream<T> stream(JsonReader reader) {
         try {
             return StreamSupport.stream(new JsonSpliterator<T>(reader), false) // sequential (non-parallel)
                     .onClose(() -> {
