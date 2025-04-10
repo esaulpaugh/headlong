@@ -135,13 +135,13 @@ public final class ABIParser {
     <T extends ABIObject> Stream<T> stream(JsonReader reader) {
         try {
             return StreamSupport.stream(new JsonSpliterator<T>(reader), false) // sequential (non-parallel)
-                    .onClose(() -> {
-                        try {
-                            reader.close();
-                        } catch (IOException io) {
-                            throw new IllegalStateException(io);
-                        }
-                    });
+                                .onClose(() -> {
+                                    try {
+                                        reader.close();
+                                    } catch (IOException io) {
+                                        throw new IllegalStateException(io);
+                                    }
+                                });
         } catch (Exception e) {
             try {
                 reader.close();
