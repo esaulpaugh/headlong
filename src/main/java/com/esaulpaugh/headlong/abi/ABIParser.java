@@ -40,21 +40,18 @@ public final class ABIParser {
     final transient boolean requiresDigest;
 
     public ABIParser() {
-        this.flags = ABIType.FLAGS_NONE;
-        this.types = ABIJSON._ALL;
-        this.requiresDigest = true;
+        this(ABIType.FLAGS_NONE, null);
     }
 
+    /**
+     * @param flags flags with which to initialize the parsed {@link ABIObject}s. {@link ABIType#FLAGS_NONE} or {@link ABIType#FLAG_LEGACY_DECODE}
+     */
     public ABIParser(int flags) {
-        this.flags = checkFlags(flags);
-        this.types = ABIJSON._ALL;
-        this.requiresDigest = true;
+        this(flags, null);
     }
 
     public ABIParser(Set<TypeEnum> types) {
-        this.flags = ABIType.FLAGS_NONE;
-        this.types = EnumSet.copyOf(types);
-        this.requiresDigest = requiresDigest();
+        this(ABIType.FLAGS_NONE, types);
     }
 
     /**
@@ -62,9 +59,14 @@ public final class ABIParser {
      * @param types {@link Set} of {@link ABIObject} types to parse. Objects whose type is not in the set will be skipped
      */
     public ABIParser(int flags, Set<TypeEnum> types) {
-        this.flags = checkFlags(flags);
-        this.types = EnumSet.copyOf(types);
-        this.requiresDigest = requiresDigest();
+        this.flags = flags;
+        if (types == null) {
+            this.types = ABIJSON._ALL;
+            this.requiresDigest = true;
+        } else {
+            this.types = EnumSet.copyOf(types);
+            this.requiresDigest = requiresDigest();
+        }
     }
 
     public <T extends ABIObject> List<T> parse(String arrayJson) {
@@ -221,13 +223,6 @@ public final class ABIParser {
     @Override
     public String toString() {
         return "ABIParser{flags=" + flags + ", types=" + types + '}';
-    }
-
-    private static int checkFlags(int flags) {
-        if (flags == ABIType.FLAGS_NONE || flags == ABIType.FLAG_LEGACY_DECODE) {
-            return flags;
-        }
-        throw new IllegalArgumentException("Flags must be one of: ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE");
     }
 
     private boolean requiresDigest() {

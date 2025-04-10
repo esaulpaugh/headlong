@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -1049,7 +1048,6 @@ public class ABIJSONTest {
 
     @Test
     public void testParseFilter() throws Throwable {
-        final MessageDigest digest = Function.newDefaultDigest();
         assertEquals(0, new ABIParser(EnumSet.of(TypeEnum.RECEIVE)).parse("[{\"name\":\"\"}]").size());
         assertEquals(0, new ABIParser(EnumSet.of(TypeEnum.FALLBACK)).parse("[{\"name\":\"\"}]").size());
         assertEquals(0, new ABIParser(EnumSet.of(TypeEnum.CONSTRUCTOR)).parse("[{\"name\":\"\"}]").size());
@@ -1063,8 +1061,9 @@ public class ABIJSONTest {
             assertEquals(0L, s.count());
         }
 
-        assertThrown(IllegalArgumentException.class, "Flags must be one of: ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE", () -> new ABIParser(-1));
-        assertThrown(IllegalArgumentException.class, "Flags must be one of: ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE", () -> new ABIParser(2));
+//        assertThrown(IllegalArgumentException.class, "Flags must be one of: ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE", () -> new ABIParser(-1));
+//        assertThrown(IllegalArgumentException.class, "Flags must be one of: ABIType.FLAGS_NONE, ABIType.FLAG_LEGACY_DECODE", () -> new ABIParser(2));
+        assertEquals(99, new ABIParser(99).parse("[{\"name\":\"\"}]").get(0).getInputs().getFlags());
     }
 
     @Test
