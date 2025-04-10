@@ -282,7 +282,7 @@ public final class TestUtils {
         for (JsonElement element : array) {
             if (element.isJsonArray()) {
                 arrayList.add(parseArrayToBytesHierarchy(element.getAsJsonArray()));
-            } else if(element.isJsonPrimitive()) {
+            } else if (element.isJsonPrimitive()) {
                 arrayList.add(parsePrimitiveToBytes(element));
             } else {
                 throw new Error("unexpected element type");
@@ -383,7 +383,7 @@ public final class TestUtils {
         try {
             r.run();
         } catch (Throwable t) {
-            if(clazz.isInstance(t) && t.getMessage() != null && t.getMessage().contains(substr)) {
+            if (clazz.isInstance(t) && t.getMessage() != null && t.getMessage().contains(substr)) {
                 return;
             }
             throw t;
@@ -398,7 +398,7 @@ public final class TestUtils {
         } catch (Throwable t) {
             if (clazz.isInstance(t)) {
                 final String msg = t.getMessage();
-                for(String substr : substrings) {
+                for (String substr : substrings) {
                     if (msg.contains(substr)) {
                         return;
                     }
@@ -441,7 +441,7 @@ public final class TestUtils {
                 int i = (int) lo;
                 int len = Integers.putInt(i, four, 0);
                 int r = Integers.getInt(four, 0, len, false);
-                if(i != r) {
+                if (i != r) {
                     throw new AssertionError(i + " !=" + r);
                 }
             }
@@ -469,7 +469,7 @@ public final class TestUtils {
                         : i != 0 ? 1
                         : 0;
                 int len = LenIntTask.this.len(i); // len(int) can be overridden by subclasses
-                if(expectedLen != len) {
+                if (expectedLen != len) {
                     throw new AssertionError(expectedLen + " != " + len);
                 }
             }
