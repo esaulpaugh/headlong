@@ -21,7 +21,6 @@ import com.esaulpaugh.headlong.util.Strings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -34,6 +33,9 @@ import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_SINGLE_BYTE;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_LONG;
 import static com.esaulpaugh.headlong.rlp.DataType.ORDINAL_STRING_SHORT;
 import static com.esaulpaugh.headlong.rlp.DataType.STRING_SHORT_OFFSET;
+import static java.util.Spliterator.ORDERED;
+import static java.util.Spliterator.NONNULL;
+import static java.util.Spliterator.IMMUTABLE;
 
 /** Decodes RLP-formatted data. */
 public final class RLPDecoder {
@@ -103,7 +105,7 @@ public final class RLPDecoder {
 
     /** Iterator-based stream for single-threaded use only. */
     public static Stream<RLPItem> stream(Iterator<RLPItem> iter) {
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iter, Spliterator.ORDERED), false);
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iter, ORDERED | NONNULL | IMMUTABLE), false);
     }
 
     public Iterator<RLPItem> listIterator(byte[] buffer) {

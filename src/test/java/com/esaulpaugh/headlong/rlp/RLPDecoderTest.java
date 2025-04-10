@@ -872,4 +872,10 @@ public class RLPDecoderTest {
         RLPString s = RLP_STRICT.wrapBits(0x70);
         list = RLP_STRICT.wrapBits(0xc1ff);
     }
+
+    @Test
+    public void testIteratorRemove() throws Throwable {
+        assertThrown(UnsupportedOperationException.class, "remove", () -> RLP_STRICT.sequenceIterator(new byte[1]).remove());
+        assertThrown(UnsupportedOperationException.class, "remove", () -> RLP_STRICT.listIterator(Strings.decode("c0")).remove());
+    }
 }
