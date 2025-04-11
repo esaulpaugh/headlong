@@ -30,4 +30,4 @@ jobs:
           java -version
           chmod +x ./gradlew
           ./gradlew build --no-daemon
-          ant -noinput -buildfile build.xml -Drepository=".gradle/caches/modules-2/files-2.1" -Dgson_path="/com.google.code.gson/gson/2.13.0/111ac98ad3d2d099d81d53b0549748144a8d2659/gson-2.13.0.jar" clean all build-jar
+          ant -noinput -buildfile build.xml -Dgson_path=".gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.13.0/111ac98ad3d2d099d81d53b0549748144a8d2659/gson-2.13.0.jar" clean all build-jar
