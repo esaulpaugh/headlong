@@ -81,7 +81,7 @@
 //dependencies {
 //    implementation("com.google.code.gson:gson:") {
 //        version {
-//            require("[2.1, 2.12.0]") // published in "dependencies"
+//            require("[2.1, 2.13.0]") // published in "dependencies"
 //        }
 //        exclude(group = "com.google.errorprone", module = "error_prone_annotations")
 //    }
