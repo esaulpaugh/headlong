@@ -10,7 +10,7 @@
 //}
 //
 //group = "com.esaulpaugh"
-//version = "13.2.1-SNAPSHOT"
+//version = "13.2.2-SNAPSHOT"
 //
 //java {
 //    sourceCompatibility = JavaVersion.VERSION_1_8
