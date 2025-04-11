@@ -54,7 +54,7 @@
   <!-- Project Libraries -->
   
   <path id="lib.mvn:_com.google.code.gson:gson:x.x.x.classpath">
-    <pathelement location="${user.home}/${repository}${gson.path}"/>
+    <pathelement location="${user.home}/${repository}${gson_path}"/>
   </path>
 
   <!-- Modules -->
