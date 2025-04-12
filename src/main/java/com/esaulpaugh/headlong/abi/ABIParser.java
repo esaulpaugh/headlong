@@ -66,7 +66,10 @@ public final class ABIParser {
             this.requiresDigest = true;
         } else {
             this.types = EnumSet.copyOf(types);
-            this.requiresDigest = requiresDigest();
+            this.requiresDigest = this.types.contains(TypeEnum.FUNCTION)
+                                    || this.types.contains(TypeEnum.CONSTRUCTOR)
+                                    || this.types.contains(TypeEnum.RECEIVE)
+                                    || this.types.contains(TypeEnum.FALLBACK);
         }
     }
 
@@ -232,12 +235,5 @@ public final class ABIParser {
     @Override
     public String toString() {
         return "ABIParser{flags=" + flags + ", types=" + types + '}';
-    }
-
-    private boolean requiresDigest() {
-        return types.contains(TypeEnum.FUNCTION)
-                || types.contains(TypeEnum.CONSTRUCTOR)
-                || types.contains(TypeEnum.RECEIVE)
-                || types.contains(TypeEnum.FALLBACK);
     }
 }
