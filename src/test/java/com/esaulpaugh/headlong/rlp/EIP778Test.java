@@ -34,6 +34,7 @@ import java.util.Random;
 import java.util.Set;
 
 import static com.esaulpaugh.headlong.TestUtils.assertThrown;
+import static com.esaulpaugh.headlong.rlp.KVP.CLIENT;
 import static com.esaulpaugh.headlong.rlp.KVP.EMPTY_ARRAY;
 import static com.esaulpaugh.headlong.rlp.KVP.ID;
 import static com.esaulpaugh.headlong.rlp.KVP.IP;
@@ -340,11 +341,10 @@ public class EIP778Test {
 
     @Test
     public void testDuplicateKeys() throws Throwable {
-        byte[] keyBytes = new byte[0];
-        final List<KVP> pairs = Arrays.asList(new KVP(keyBytes, new byte[0]), new KVP(keyBytes, new byte[1]));
+        final List<KVP> pairs = Arrays.asList(new KVP("", new byte[0]), new KVP("", new byte[1]));
         assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs.sort(Comparator.naturalOrder()));
 
-        final List<KVP> pairs2 = Arrays.asList(new KVP(new byte[] { 2 }, new byte[0]), new KVP(new byte[] { 2 }, new byte[1]));
+        final List<KVP> pairs2 = Arrays.asList(new KVP("d", new byte[0]), new KVP("d", new byte[1]));
         assertThrown(IllegalArgumentException.class, "duplicate key", () -> pairs2.sort(Comparator.naturalOrder()));
     }
 
@@ -476,6 +476,9 @@ public class EIP778Test {
     @Test
     public void testToString() {
         assertEquals("ip --> 3235352e3130312e302e313238", new KVP(IP, "255.101.0.128", ASCII).toString());
-        assertEquals("client --> [\"dd\", \"\"]", new KVP(KVP.CLIENT, RLPDecoder.RLP_STRICT.wrapBits(0xc482646480L)).toString());
+        assertEquals(
+                "client --> [\"dd\", \"\"]",
+                new KVP(RLPDecoder.RLP_STRICT.wrapString(RLPEncoder.string(Strings.decode(CLIENT, UTF_8))), RLPDecoder.RLP_STRICT.wrapBits(0xc482646480L)).toString()
+        );
     }
 }
