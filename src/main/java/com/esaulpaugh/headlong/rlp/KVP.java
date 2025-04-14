@@ -51,8 +51,8 @@ public final class KVP implements Comparable<KVP> {
         this(keyUtf8, Strings.decode(val, valEncoding));
     }
 
-    public KVP(String keyUtf8, byte[] val) {
-        this.rlp = RLPEncoder.sequence(Strings.decode(keyUtf8, UTF_8), val);
+    public KVP(String keyUtf8, byte[] strBytes) {
+        this.rlp = RLPEncoder.sequence(Strings.decode(keyUtf8, UTF_8), strBytes);
         this.key = RLP_STRICT.wrapString(rlp);
     }
 
