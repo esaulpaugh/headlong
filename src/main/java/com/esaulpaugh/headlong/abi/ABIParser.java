@@ -21,7 +21,6 @@ import com.google.gson.stream.JsonToken;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -71,14 +70,6 @@ public final class ABIParser {
                                     || this.types.contains(TypeEnum.RECEIVE)
                                     || this.types.contains(TypeEnum.FALLBACK);
         }
-    }
-
-    public int getFlags() {
-        return flags;
-    }
-
-    public Set<TypeEnum> getTypes() {
-        return Collections.unmodifiableSet(types);
     }
 
     public <T extends ABIObject> List<T> parse(String arrayJson) {
