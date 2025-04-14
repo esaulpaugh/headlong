@@ -16,6 +16,7 @@
 package com.esaulpaugh.headlong.jmh.rlp;
 
 import com.esaulpaugh.headlong.rlp.KVP;
+import com.esaulpaugh.headlong.util.Strings;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -61,7 +62,7 @@ public class MeasureKeyValuePairSort {
             value = new byte[rand.nextInt(VALUE_LEN_BOUND)];
             rand.nextBytes(key);
             rand.nextBytes(value);
-            KVP pair = new KVP(key, value);
+            KVP pair = new KVP(Strings.encode(key, Strings.UTF_8), value);
             array[i] = pair;
             arrayList.add(pair);
         }
