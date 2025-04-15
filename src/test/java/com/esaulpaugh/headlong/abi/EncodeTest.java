@@ -163,7 +163,7 @@ public class EncodeTest {
     @Test
     public void testFunctionAnnotate() {
         final Function foo = Function.parse("foo()");
-        assertEquals("foo:\nID       c2985578", foo.annotateCall(Tuple.EMPTY));
+        assertEquals("foo():\nID       c2985578", foo.annotateCall(Tuple.EMPTY));
         assertEquals("", TupleType.EMPTY.annotate(new byte[0]));
         final Function f = new Function(
                 TypeEnum.FUNCTION,
@@ -183,7 +183,7 @@ public class EncodeTest {
         );
         final String annotated = f.annotateCall(args);
         assertEquals(
-                "do_something:\n" +
+                "do_something(bool,(),string,(int8,uint8),address,(uint16,bytes)):\n" +
                         "ID       d88de50f\n" +
                         "     0   0000000000000000000000000000000000000000000000000000000000000001\t[0] bool \"isFree\"\n" +
                         "    20   00000000000000000000000000000000000000000000000000000000000000c0\t[2] string \"word\" offset\n" +

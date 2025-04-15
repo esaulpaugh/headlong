@@ -358,7 +358,7 @@ public final class Function implements ABIObject {
     public String annotateCall(Tuple args) {
         return inputTypes.annotate(
                 args,
-                new StringBuilder(768).append(name).append(":\n")
+                new StringBuilder(768).append(getCanonicalSignature()).append(":\n")
                         .append(ID_LABEL_PADDED).append(selectorHex())
         );
     }
