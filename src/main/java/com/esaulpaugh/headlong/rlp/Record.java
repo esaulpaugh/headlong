@@ -49,7 +49,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
     public static ByteBuffer encode(Signer signer, final long seq, List<KVP> pairs) {
         final int signatureLen = signer.signatureLength();
         if (signatureLen <= 1) {
-            throw new InvalidParameterException("invalid signature length");
+            throw new InvalidParameterException("signer specifies bad signature length: " + signatureLen);
         }
         if (seq < 0) {
             throw new IllegalArgumentException("negative seq");

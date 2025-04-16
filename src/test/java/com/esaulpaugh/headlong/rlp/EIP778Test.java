@@ -157,7 +157,7 @@ public class EIP778Test {
         );
         assertThrown(
                 InvalidParameterException.class,
-                "invalid signature length",
+                "signer specifies bad signature length: 1",
                 () -> new Record(new Record.Signer() {
                     @Override
                     public int signatureLength() {
