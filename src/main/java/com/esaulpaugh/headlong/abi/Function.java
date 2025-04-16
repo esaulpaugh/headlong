@@ -233,10 +233,12 @@ public final class Function implements ABIObject {
         return (T) inputTypes.decode(buffer);
     }
 
+    /** Decode-with-indices. */
     public <T> T decodeCall(byte[] call, int... indices) {
         return decodeCall(ByteBuffer.wrap(call), indices);
     }
 
+    /** Decode-with-indices. */
     public <T> T decodeCall(ByteBuffer buffer, int... indices) {
         checkSelector(buffer);
         return inputTypes.decode(buffer, indices);
@@ -265,12 +267,13 @@ public final class Function implements ABIObject {
         return (T) outputTypes.decode(buf);
     }
 
+    /** Decode-with-indices. */
     public <T> T decodeReturn(byte[] returnVals, int... indices) {
         return decodeReturn(ByteBuffer.wrap(returnVals), indices);
     }
 
     /**
-     * Decodes and returns the elements at the specified indices.
+     * Decode-with-indices. Decodes the specified elements of the function output.
      * NOTE: This method does not advance the {@link ByteBuffer}'s {@code position}.
      *
      * @param buf   the buffer containing the return values
