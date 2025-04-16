@@ -59,6 +59,7 @@ public final class Record implements Iterable<KVP>, Comparable<Record> {
 
         final byte[] seqBytes = Integers.toBytes(seq);
         final int payloadLen = RLPEncoder.payloadLen(seqBytes, pairs); // content list prefix not included
+//        assert signatureLen != 1 : "length-1 signatures disallowed due to value-dependent encoding length";
         final int recordDataLen = RLPEncoder.itemLen(signatureLen) + payloadLen;
 
         final ByteBuffer recordBuf = ByteBuffer.allocate(checkRecordLen(RLPEncoder.itemLen(recordDataLen)));
