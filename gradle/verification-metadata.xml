@@ -309,20 +309,20 @@
             </artifact>
         </component>
 
-        <component group="org.jetbrains.kotlin" name="kotlin-stdlib" version="2.0.20">
-            <artifact name="kotlin-stdlib-2.0.20-sources.jar">
-                <sha256 value="41fa0409b06192b58fc16a08cc95237708f9d54f9bbf68b3d4a72358da9cb523" origin="plugins.gradle.org/m2/"/>
+        <component group="org.jetbrains.kotlin" name="kotlin-stdlib" version="2.0.21">
+            <artifact name="kotlin-stdlib-2.0.21-sources.jar">
+                <sha256 value="5995c780c3ac742fb277ced561ebd7b0739227ea7c93a6bd9c7cee6593493fce" origin="plugins.gradle.org/m2/"/>
             </artifact>
-            <artifact name="kotlin-stdlib-2.0.20.module">
-                <sha256 value="dc051dc04c6a196f2d06d0d3c9af33b9f12bc9b4fe139ae1290140508236b67b" origin="plugins.gradle.org/m2/"/>
+            <artifact name="kotlin-stdlib-2.0.21.module">
+                <sha256 value="81fd6d181012487ee3246eff4e2bacb64b58c46e5b5aa72971a4ddf1bd1541ed" origin="plugins.gradle.org/m2/"/>
             </artifact>
         </component>
-        <component group="org.jetbrains.kotlin" name="kotlin-reflect" version="2.0.20">
-            <artifact name="kotlin-reflect-2.0.20-sources.jar">
+        <component group="org.jetbrains.kotlin" name="kotlin-reflect" version="2.0.21">
+            <artifact name="kotlin-reflect-2.0.21-sources.jar">
                 <sha256 value="9d88e821c645d67106ce7afb11c405acf1ae4153f0d41f3667d66e77d51dd5be" origin="plugins.gradle.org/m2/"/>
             </artifact>
-            <artifact name="kotlin-reflect-2.0.20.pom">
-                <sha256 value="63e638b056dd449e6f52d71e9c2c5dc5db0d16444323970e16d7fc0d658393db" origin="plugins.gradle.org/m2/"/>
+            <artifact name="kotlin-reflect-2.0.21.pom">
+                <sha256 value="02ab7aeab03c68f40103026e5e9c277360cbc360818a5b2e36b9a3a9d8e8b049" origin="plugins.gradle.org/m2/"/>
             </artifact>
         </component>
 
