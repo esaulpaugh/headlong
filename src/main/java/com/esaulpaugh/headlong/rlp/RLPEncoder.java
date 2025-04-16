@@ -50,6 +50,7 @@ public final class RLPEncoder {
         return bb.array();
     }
 
+    /** Doesn't work for single-byte items. */
     static int itemLen(int dataLen) {
         return (isShort(dataLen) ? 1 : 1 + Integers.len(dataLen))
                 + dataLen;

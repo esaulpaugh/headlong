@@ -146,7 +146,7 @@ public class EIP778Test {
                 () -> new Record(new Record.Signer() {
                     @Override
                     public int signatureLength() {
-                        return 0;
+                        return 2;
                     }
 
                     @Override
@@ -157,11 +157,11 @@ public class EIP778Test {
         );
         assertThrown(
                 InvalidParameterException.class,
-                "signer specifies negative signature length",
+                "invalid signature length",
                 () -> new Record(new Record.Signer() {
                     @Override
                     public int signatureLength() {
-                        return -1;
+                        return 1;
                     }
 
                     @Override
@@ -175,7 +175,7 @@ public class EIP778Test {
                 () -> new Record(new Record.Signer() {
                     @Override
                     public int signatureLength() {
-                        return 0;
+                        return 2;
                     }
 
                     @Override
@@ -296,16 +296,16 @@ public class EIP778Test {
     }
 
     @Test
-    public void testZeroLenSig() {
+    public void testSmallSig() {
         Record record = new Record(new Record.Signer() {
                     @Override
                     public int signatureLength() {
-                        return 0;
+                        return 2;
                     }
 
                     @Override
                     public byte[] sign(byte[] content) {
-                        return new byte[0];
+                        return new byte[2];
                     }
                 },
                 1L,
@@ -314,7 +314,7 @@ public class EIP778Test {
                 new KVP(ID, "v4", UTF_8),
                 new KVP(SECP256K1, "03ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138", HEX)
         );
-        assertEquals(0, record.getSignature().dataLength);
+        assertEquals(2, record.getSignature().dataLength);
     }
 
     @Test
