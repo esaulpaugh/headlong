@@ -162,14 +162,11 @@ public final class RLPEncoder {
      * @param dest    the destination for the sequence of RLP encodings
      */
     public static void putString(byte[] byteString, ByteBuffer dest) {
-        if (isShort(byteString.length)) {
-            if (byteString.length == 1) {
-                if (byteString[0] < 0x00) { // same as (byteString[0] & 0xFF) >= 0x80
-                    dest.put((byte) (STRING_SHORT_OFFSET + 1));
-                }
-                dest.put(byteString[0]);
-                return;
+        if (byteString.length == 1) {
+            if (byteString[0] < 0x00) { // same as (byteString[0] & 0xFF) >= 0x80
+                dest.put((byte) (STRING_SHORT_OFFSET + 1));
             }
+        } else if (isShort(byteString.length)) {
             dest.put((byte) (STRING_SHORT_OFFSET + byteString.length)); // dataLen is 0 or 2-55
         } else { // long string
             dest.put((byte) (STRING_LONG_OFFSET + Integers.len(byteString.length)));
