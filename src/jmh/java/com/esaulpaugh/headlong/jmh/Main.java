@@ -28,6 +28,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 public class Main {
 
     public static final int THREE = 3;
+    public static final int FIVE = 5;
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()

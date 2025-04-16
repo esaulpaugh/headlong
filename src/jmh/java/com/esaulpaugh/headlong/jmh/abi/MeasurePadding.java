@@ -33,6 +33,10 @@ import java.util.Random;
 import static com.esaulpaugh.headlong.jmh.Main.THREE;
 
 @State(Scope.Thread)
+@Fork(value = 1, warmups = 1)
+@BenchmarkMode(Mode.Throughput)
+@Warmup(iterations = 1)
+@Measurement(iterations = THREE)
 public class MeasurePadding {
 
     private static final int UNIT_LENGTH_BYTES = 32;
@@ -52,19 +56,11 @@ public class MeasurePadding {
     }
 
     @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
     public void cached() {
         insertPadding(paddingLen, negativeOnes, bb);
     }
 
     @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
     public void uncached() {
         putN(negativeOnes ? (byte) -1 : (byte) 0, paddingLen, bb);
     }

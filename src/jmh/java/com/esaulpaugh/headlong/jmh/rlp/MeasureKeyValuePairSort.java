@@ -37,6 +37,10 @@ import java.util.Random;
 import static com.esaulpaugh.headlong.jmh.Main.THREE;
 
 @State(Scope.Thread)
+@Fork(value = 1, warmups = 1)
+@BenchmarkMode(Mode.Throughput)
+@Warmup(iterations = 1)
+@Measurement(iterations = THREE)
 public class MeasureKeyValuePairSort {
 
     private static final int SIZE = 20;
@@ -70,28 +74,16 @@ public class MeasureKeyValuePairSort {
     }
 
     @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
     public void sortArray() {
         Arrays.sort(array, Comparator.naturalOrder());
     }
 
     @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
     public void sortArrayList() {
         arrayList.sort(Comparator.naturalOrder());
     }
 
     @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.Throughput)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
     public void sortArraysArrayList() {
         arraysArrayList.sort(Comparator.naturalOrder());
     }

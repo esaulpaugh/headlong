@@ -38,6 +38,11 @@ import java.util.concurrent.TimeUnit;
 import static com.esaulpaugh.headlong.jmh.Main.THREE;
 
 @State(Scope.Benchmark)
+@Fork(value = 1, warmups = 1)
+@BenchmarkMode(Mode.AverageTime)
+@Warmup(iterations = 1)
+@Measurement(iterations = THREE)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
 public class MeasureFunction {
 
     private static final Function F = new Function("sam(bytes,bool,uint256[])", "(bytes,uint256[3],bool)");
@@ -57,81 +62,41 @@ public class MeasureFunction {
     private static final byte[] RETURN = Strings.decode("00000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000046461766500000000000000000000000000000000000000000000000000000000");
 
     @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.AverageTime)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void encode_call(Blackhole blackhole) {
         blackhole.consume(F.encodeCall(ARGS));
     }
 
     @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.AverageTime)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void decode_call(Blackhole blackhole) {
         blackhole.consume(F.decodeCall(CALL));
     }
 
     @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.AverageTime)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void decode_index_slow(Blackhole blackhole) {
         blackhole.consume(F.decodeReturn(RETURN).get(2));
     }
 
     @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.AverageTime)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void decode_index_fast(Blackhole blackhole) {
         blackhole.consume(F.decodeReturn(RETURN, 2));
     }
 
     @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.AverageTime)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void init_function(Blackhole blackhole) {
         blackhole.consume(Function.parse("sam(bytes,bool,uint256[])"));
     }
 
     @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.AverageTime)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void parse_tuple_type(Blackhole blackhole) {
         blackhole.consume(TypeFactory.create("(int,bool,string,uint8,bytes5,fixed)"));
     }
 
     @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.AverageTime)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void decode_big_return(Blackhole blackhole) {
         blackhole.consume(BIG_RETURN_FUNCTION.decodeReturn(BIG_RETURN));
     }
 
     @Benchmark
-    @Fork(value = 1, warmups = 1)
-    @BenchmarkMode(Mode.AverageTime)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = THREE)
-    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void decode_big_hex_return(Blackhole blackhole) {
         blackhole.consume(BIG_RETURN_FUNCTION.decodeReturn(FastHex.decode(BIG_RETURN_HEX)));
     }
