@@ -34,4 +34,4 @@ jobs:
           java -version
           gradle -version
           gradle build --no-daemon
-          ant -noinput -buildfile build.xml -Dgson_path=".gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.13.1/291e19613797898e0b2ba95553c874c1d07e00c1/gson-2.13.1.jar" clean all build-jar
+          ant -noinput -buildfile build.xml -Dgson_path=".gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.13.1/853ce06c11316b33a8eae5e9095da096a9528b8f/gson-2.13.1.jar" clean all build-jar
