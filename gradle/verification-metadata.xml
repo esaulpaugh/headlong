@@ -32,20 +32,20 @@
       </trusted-keys>
    </configuration>
     <components>
-        <component group="com.google.code.gson" name="gson-parent" version="2.13.0">
-            <artifact name="gson-parent-2.13.0.pom">
-                <sha256 value="6cd460bb445ff7bee0a9bb66270264874457802c541899456382184af34d16a2" origin="repo.maven.apache.org/maven2/"/>
+        <component group="com.google.code.gson" name="gson-parent" version="2.13.1">
+            <artifact name="gson-parent-2.13.1.pom">
+                <sha256 value="f8810ace50ddfe3fda83d1126de65d99d5d2515a14a36b88beb1b99a47697836" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
-        <component group="com.google.code.gson" name="gson" version="2.13.0">
-            <artifact name="gson-2.13.0.jar">
-                <sha256 value="8c6a742b74f869a79f39f5c78cc09999f99f3b6aff6304fcedd6f543e27efa78" origin="repo.maven.apache.org/maven2/"/>
+        <component group="com.google.code.gson" name="gson" version="2.13.1">
+            <artifact name="gson-2.13.1.jar">
+                <sha256 value="94855942d4992f112946d3de1c334e709237b8126d8130bf07807c018a4a2120" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="gson-2.13.0.pom">
-                <sha256 value="02e449245deb4a5646f015cecf1124ee5bd37b551eed81dfd090151b456eff4c" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="gson-2.13.1.pom">
+                <sha256 value="c0f65722d75c0e58cd1835b3046046f606b5da699904161f8db6b78feb9b401a" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
-            <artifact name="gson-2.13.0-sources.jar">
-                <sha256 value="6d962fe9c273cecc717dbb3e39018e933f4a19c7f6d5cddc3ca7dfa7fc308177" origin="repo.maven.apache.org/maven2/"/>
+            <artifact name="gson-2.13.1-sources.jar">
+                <sha256 value="3317b8662ebc2b7a5ff34af2214cd0f8d74d37a9fa9757be494ad8824e96eee7" origin="repo.maven.apache.org/maven2/"/>
             </artifact>
         </component>
 

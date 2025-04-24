@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <project name="headlong" default="all">
 
-  <property name="gson.version" value="2.13.0" />
+  <property name="gson.version" value="2.13.1" />
   <property name="gson_path" value=".m2/repository/com/google/code/gson/gson/${gson.version}/gson-${gson.version}.jar" />
   <property name="project.name" value="headlong" />
   <property name="project.version" value="13.2.2-SNAPSHOT" />
