@@ -377,15 +377,7 @@ public final class Integers {
      * @return the byte length
      */
     public static int len(int val) {
-        if (val != 0)
-            if ((val >>>= Byte.SIZE) != 0)
-                if ((val >>>= Byte.SIZE) != 0)
-                    if (val >>> Byte.SIZE != 0)
-                        return 4;
-                    else return 3;
-                else return 2;
-            else return 1;
-        return 0;
+        return (Integer.SIZE - Integer.numberOfLeadingZeros(val) + 7) / 8;
     }
 
     /**
@@ -396,27 +388,11 @@ public final class Integers {
      * @return the byte length
      */
     public static int len(long val) {
-        if (val != 0)
-            if ((val >>>= Byte.SIZE) != 0)
-                if ((val >>>= Byte.SIZE) != 0)
-                    if ((val >>>= Byte.SIZE) != 0)
-                        if ((val >>>= Byte.SIZE) != 0)
-                            if ((val >>>= Byte.SIZE) != 0)
-                                if ((val >>>= Byte.SIZE) != 0)
-                                    if (val >>> Byte.SIZE != 0)
-                                        return 8;
-                                    else return 7;
-                                else return 6;
-                            else return 5;
-                        else return 4;
-                    else return 3;
-                else return 2;
-            else return 1;
-        return 0;
+        return (bitLen(val) + 7) / 8;
     }
 
     public static int len(BigInteger val) {
-        return (val.bitLength() + 7) >>> 3; // roundLengthUp(val.bitLength(), Byte.SIZE) / Byte.SIZE;
+        return (val.bitLength() + 7) / 8; // roundLengthUp(val.bitLength(), Byte.SIZE) / Byte.SIZE;
     }
 
     /**
