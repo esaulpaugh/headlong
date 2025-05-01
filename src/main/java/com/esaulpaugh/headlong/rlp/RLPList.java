@@ -80,7 +80,7 @@ public final class RLPList extends RLPItem implements Iterable<RLPItem> {
         final int prefixLen = 1 + lengthOfLength;
         byte[] dest = new byte[prefixLen + dataLen];
         dest[0] = (byte) (DataType.LIST_LONG_OFFSET + lengthOfLength);
-        Integers.putLong(dataLen, dest, 1);
+        Integers.putLong(dataLen, lengthOfLength, dest, 1);
         copyElements(elements, dest, prefixLen);
         return dest;
     }
