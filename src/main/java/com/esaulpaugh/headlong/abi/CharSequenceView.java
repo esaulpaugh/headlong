@@ -49,13 +49,14 @@ final class CharSequenceView implements CharSequence {
         return new CharSequenceView(source, this.start + start, this.start + end);
     }
 
-    public int lastIndexOf(int ch, int fromIdx) {
-        for (int i = Math.min(length() - 1, fromIdx); i >= 0; i--) {
-            if (ch == charAt(i)) {
-                return i;
+    int lastIndexOf(int ch, int fromIdx) {
+        int i = start + fromIdx;
+        do {
+            if (ch == source.charAt(i)) {
+                return i - start;
             }
-        }
-        return -1;
+        } while (--i >= start);
+        throw new StringIndexOutOfBoundsException();
     }
 
     @Override

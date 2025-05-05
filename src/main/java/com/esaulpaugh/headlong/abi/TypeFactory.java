@@ -80,19 +80,20 @@ public final class TypeFactory {
 
     private static ABIType<?> buildUnchecked(final CharSequenceView rawType, final String[] elementNames, final TupleType<?> baseType, final int flags) {
         try {
-            final int lastCharIdx = rawType.length() - 1;
+            final int len = rawType.length();
+            final int lastCharIdx = len - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array
                 final int secondToLastCharIdx = lastCharIdx - 1;
                 final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIdx);
 
                 final ABIType<?> elementType = buildUnchecked(rawType.subSequence(0, arrayOpenIndex), null, baseType, flags);
-                final String type = new StringBuilder(elementType.canonicalType).append(rawType, arrayOpenIndex, rawType.length()).toString();
+                final String type = new StringBuilder(elementType.canonicalType).append(rawType, arrayOpenIndex, len).toString();
                 final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseArrayLen(rawType, arrayOpenIndex + 1, lastCharIdx);
                 return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null, flags);
             }
             if (rawType.charAt(0) == '(') {
                 if (baseType != null) {
-                    if (rawType.length() == baseType.canonicalType.length()) {
+                    if (len == baseType.canonicalType.length()) {
                         return baseType;
                     }
                 } else {
@@ -119,14 +120,14 @@ public final class TypeFactory {
         return (char)(c - '1') <= 8; // cast to wrap negative vals, 1-9 allowed
     }
 
-    private static int parseArrayLen(CharSequenceView rawType, int start, int end) {
-        final char lead = rawType.charAt(start);
+    private static int parseArrayLen(CharSequenceView rawType, int i, final int end) {
+        final char lead = rawType.charAt(i);
         int temp = lead - '0';
-        if (end - start == 1 && (char)temp <= 9 /* cast to wrap negative vals */) {
+        if (end - i == 1 && (char)temp <= 9 /* cast to wrap negative vals */) {
             return temp;
         }
         if (leadDigitValid(lead)) {
-            int i = start + 1;
+            i++;
             do {
                 final int d = rawType.charAt(i++) - '0';
                 if ((char)d > 9 /* cast to wrap negative vals */) {
