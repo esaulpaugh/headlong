@@ -58,10 +58,6 @@ final class CharSequenceView implements CharSequence {
         return -1;
     }
 
-    public void append(StringBuilder sb, int start) {
-        sb.append(this, start, length());
-    }
-
     @Override
     public boolean equals(Object obj) {
 //        if (!(obj instanceof CharSequenceView)) return false;

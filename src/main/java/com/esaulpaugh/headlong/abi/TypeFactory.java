@@ -86,9 +86,7 @@ public final class TypeFactory {
                 final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIdx);
 
                 final ABIType<?> elementType = buildUnchecked(rawType.subSequence(0, arrayOpenIndex), null, baseType, flags);
-                final StringBuilder sb = new StringBuilder(elementType.canonicalType);
-                rawType.append(sb, arrayOpenIndex);
-                final String type = sb.toString();
+                final String type = new StringBuilder(elementType.canonicalType).append(rawType, arrayOpenIndex, rawType.length()).toString();
                 final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseArrayLen(rawType, arrayOpenIndex + 1, lastCharIdx);
                 return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null, flags);
             }
