@@ -205,17 +205,22 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 
     private static final int FUNCTION_BYTE_LEN = 24;
 
-    private static final Map<String, ABIType<?>> BASE_TYPE_MAP = new HashMap<>(256);
-    private static final Map<String, ABIType<?>> LEGACY_BASE_TYPE_MAP = new HashMap<>(256);
+    private static final Map<Slice, ABIType<?>> BASE_TYPE_MAP = new HashMap<>(256);
+    private static final Map<Slice, ABIType<?>> LEGACY_BASE_TYPE_MAP = new HashMap<>(256);
 
     /* called from TypeFactory */
     static ABIType<?> get(String rawType) {
-        return BASE_TYPE_MAP.get(rawType);
+        return BASE_TYPE_MAP.get(new Slice(rawType));
     }
 
     /* called from TypeFactory */
-    static ABIType<?> getLegacy(String rawType) {
-        return LEGACY_BASE_TYPE_MAP.get(rawType);
+    static ABIType<?> get(Slice slice) {
+        return BASE_TYPE_MAP.get(slice);
+    }
+
+    /* called from TypeFactory */
+    static ABIType<?> getLegacy(Slice slice) {
+        return LEGACY_BASE_TYPE_MAP.get(slice);
     }
 
     private static final AtomicBoolean MAP_INITIALIZED = new AtomicBoolean(false);
@@ -227,11 +232,11 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
 //            assert INSTANCE_COUNT.get() >= 0L; // the number of static instances in whichever subclass is initialized first
 //            assert INSTANCE_COUNT.get() <= 2L;
 
-            final Map<String, ABIType<?>> map = BASE_TYPE_MAP;
+            final Map<Slice, ABIType<?>> map = BASE_TYPE_MAP;
 
             // optimized insertion order
-            map.put("bool", BooleanType.INSTANCE);
-            map.put("string", new ArrayType<ByteType, Byte, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAGS_NONE));
+            map.put(new Slice("bool"), BooleanType.INSTANCE);
+            map.put(new Slice("string"), new ArrayType<ByteType, Byte, String>("string", STRING_CLASS, ByteType.INSTANCE, DYNAMIC_LENGTH, STRING_ARRAY_CLASS, ABIType.FLAGS_NONE));
 
             for (int n = 1; n <= 32; n++) {
                 mapByteArray(map, "bytes" + n, n);
@@ -243,25 +248,25 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
             for (int n = 32; n <= 56; n += 8) mapLong(map, "uint" + n, n, true);
             for (int n = 64; n <= 256; n += 8) mapBigInteger(map, "uint" + n, n, true);
 
-            map.put("uint", map.get("uint256"));
+            map.put(new Slice("uint"), map.get(new Slice("uint256")));
 
             mapBigInteger(map, "int256", 256, false);
-            map.put("int", map.get("int256"));
+            map.put(new Slice("int"), map.get(new Slice("int256")));
 
             for (int n = 8; n <= 32; n += 8) mapInt(map, "int" + n, n, false);
             for (int n = 40; n <= 64; n += 8) mapLong(map, "int" + n, n, false);
             for (int n = 72; n < 256; n += 8) mapBigInteger(map, "int" + n, n, false);
 
-            map.put("address", AddressType.INSTANCE);
+            map.put(new Slice("address"), AddressType.INSTANCE);
 
-            map.put("fixed128x18", new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
-            map.put("ufixed128x18", new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
+            map.put(new Slice("fixed128x18"), new BigDecimalType("fixed128x18", FIXED_BIT_LEN, FIXED_SCALE, false));
+            map.put(new Slice("ufixed128x18"), new BigDecimalType("ufixed128x18", FIXED_BIT_LEN, FIXED_SCALE, true));
 
-            map.put("decimal", map.get("int168"));
-            map.put("fixed", map.get("fixed128x18"));
-            map.put("ufixed", map.get("ufixed128x18"));
+            map.put(new Slice("decimal"), map.get(new Slice("int168")));
+            map.put(new Slice("fixed"), map.get(new Slice("fixed128x18")));
+            map.put(new Slice("ufixed"), map.get(new Slice("ufixed128x18")));
 
-            for (Map.Entry<String, ABIType<?>> e : map.entrySet()) {
+            for (Map.Entry<Slice, ABIType<?>> e : map.entrySet()) {
                 ABIType<?> value = e.getValue();
                 if (value instanceof ArrayType) {
                     final ArrayType<?, ?, ?> at = value.asArrayType();
@@ -276,19 +281,19 @@ public abstract class UnitType<J> extends ABIType<J> { // J generally extends Nu
         }
     }
 
-    private static void mapInt(Map<String, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
-        map.put(type, new IntType(type, bitLen, unsigned));
+    private static void mapInt(Map<Slice, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
+        map.put(new Slice(type), new IntType(type, bitLen, unsigned));
     }
 
-    private static void mapLong(Map<String, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
-        map.put(type, new LongType(type, bitLen, unsigned));
+    private static void mapLong(Map<Slice, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
+        map.put(new Slice(type), new LongType(type, bitLen, unsigned));
     }
 
-    private static void mapBigInteger(Map<String, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
-        map.put(type, new BigIntegerType(type, bitLen, unsigned));
+    private static void mapBigInteger(Map<Slice, ABIType<?>> map, String type, int bitLen, boolean unsigned) {
+        map.put(new Slice(type), new BigIntegerType(type, bitLen, unsigned));
     }
 
-    private static void mapByteArray(Map<String, ABIType<?>> map, String type, int arrayLen) {
-        map.put(type, new ArrayType<ByteType, Byte, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class, ABIType.FLAGS_NONE));
+    private static void mapByteArray(Map<Slice, ABIType<?>> map, String type, int arrayLen) {
+        map.put(new Slice(type), new ArrayType<ByteType, Byte, byte[]>(type, byte[].class, ByteType.INSTANCE, arrayLen, byte[][].class, ABIType.FLAGS_NONE));
     }
 }

@@ -29,6 +29,14 @@ public final class TypeFactory {
     }
 
     private static final int MAX_LENGTH_CHARS = 1_600;
+    private static final ABIType<?> STRING = UnitType.get("string");
+    private static final ABIType<?> BYTES = UnitType.get("bytes");
+    private static final ABIType<?> BYTES_4 = UnitType.get("bytes4");
+    private static final ABIType<?> BYTES_32 = UnitType.get("bytes32");
+    private static final ABIType<?> BOOL = UnitType.get("bool");
+    private static final ABIType<?> UINT_256 = UnitType.get("uint256");
+    private static final ABIType<?> UINT_8 = UnitType.get("uint8");
+    private static final ABIType<?> UINT_32 = UnitType.get("uint32");
 
     private TypeFactory() {}
 
@@ -67,19 +75,21 @@ public final class TypeFactory {
         if (rawType.length() > MAX_LENGTH_CHARS) {
             throw new IllegalArgumentException("type length exceeds maximum: " + rawType.length() + " > " + MAX_LENGTH_CHARS);
         }
-        return buildUnchecked(rawType, elementNames, baseType, flags);
+        return buildUnchecked(new Slice(rawType), elementNames, baseType, flags);
     }
 
-    private static ABIType<?> buildUnchecked(final String rawType, final String[] elementNames, final TupleType<?> baseType, final int flags) {
+    private static ABIType<?> buildUnchecked(final Slice rawType, final String[] elementNames, final TupleType<?> baseType, final int flags) {
         try {
             final int lastCharIdx = rawType.length() - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array
                 final int secondToLastCharIdx = lastCharIdx - 1;
                 final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIdx);
 
-                final ABIType<?> elementType = buildUnchecked(rawType.substring(0, arrayOpenIndex), null, baseType, flags);
-                final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
-                final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType.substring(arrayOpenIndex + 1, lastCharIdx));
+                final ABIType<?> elementType = buildUnchecked(rawType.slice(0, arrayOpenIndex), null, baseType, flags);
+                final StringBuilder sb = new StringBuilder(elementType.canonicalType);
+                rawType.append(sb, arrayOpenIndex);
+                final String type = sb.toString();
+                final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseArrayLen(rawType, arrayOpenIndex + 1, lastCharIdx);
                 return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null, flags);
             }
             if (rawType.charAt(0) == '(') {
@@ -92,28 +102,43 @@ public final class TypeFactory {
                 }
             } else {
                 ABIType<?> t = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? UnitType.getLegacy(rawType) : UnitType.get(rawType);
-                return t != null ? t : tryParseFixed(rawType);
+                return t != null ? t : tryParseFixed(rawType.toString());
             }
-        } catch (StringIndexOutOfBoundsException ignored) { // e.g. type equals "" or "82]" or "[]" or "[1]"
+        } catch (IndexOutOfBoundsException ignored) { // e.g. type equals "" or "82]" or "[]" or "[1]"
         }
         throw unrecognizedType(rawType);
+    }
+
+    private static IllegalArgumentException unrecognizedType(Slice rawType) {
+        return unrecognizedType(rawType.toString());
     }
 
     private static IllegalArgumentException unrecognizedType(String rawType) {
         return new IllegalArgumentException("unrecognized type: \"" + rawType + '"');
     }
 
-    private static int parseLen(String lenStr) {
-        try {
-//            final char first = rawType.charAt(start);
-//            if (leadDigitValid(first) || (first == '0' && end - start == 1)) {
-//                return Integer.parseInt(rawType, start, end, 10); // Java 9+
-//            }
-            if (leadDigitValid(lenStr.charAt(0)) || "0".equals(lenStr)) {
-                return Integer.parseInt(lenStr);
-            }
-        } catch (NumberFormatException ignored) {
-            /* fall through */
+    private static boolean leadDigitValid(char c) {
+        return (char)(c - '1') <= 8; // cast to wrap negative vals, 1-9 allowed
+    }
+
+    private static int parseArrayLen(Slice rawType, int start, int end) {
+        final char lead = rawType.charAt(start);
+        int temp = lead - '0';
+        if (end - start == 1 && (char)temp <= 9 /* cast to wrap negative vals */) {
+            return temp;
+        }
+        if (leadDigitValid(lead)) {
+            int i = start + 1;
+            do {
+                final int d = rawType.charAt(i++) - '0';
+                if ((char)d > 9 /* cast to wrap negative vals */) {
+                    break; // not a digit
+                }
+                temp = temp * 10 + d;
+                if (i >= end) {
+                    return temp;
+                }
+            } while (true);
         }
         throw new IllegalArgumentException("bad array length");
     }
@@ -140,13 +165,11 @@ public final class TypeFactory {
         throw unrecognizedType(rawType);
     }
 
-    private static boolean leadDigitValid(char c) {
-        return c > '0' && c <= '9';
-    }
-
-    private static TupleType<?> parseTupleType(final String rawType, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
+    private static TupleType<?> parseTupleType(final Slice rawType, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawType.length();
-        if (len == 2 && "()".equals(rawType)) return TupleType.empty(flags);
+        if (len == 2 && rawType.charAt(0) == '(' && rawType.charAt(1) == ')') {
+            return TupleType.empty(flags);
+        }
         ABIType<?>[] elements = new ABIType[8];
         int argEnd = 1;
         final StringBuilder canonicalType = TupleType.newTypeBuilder();
@@ -155,13 +178,87 @@ public final class TypeFactory {
         try {
             for ( ; true; canonicalType.append(',')) {
                 final int argStart = argEnd;
+                ABIType<?> e = null;
                 switch (rawType.charAt(argStart)) {
                 case ')':
                 case ',': throw unrecognizedType(rawType);
                 case '(': argEnd = nextTerminator(rawType, findSubtupleEnd(rawType, argStart + 1)); break;
+                case 'a':
+                    argEnd = nextTerminator(rawType, argStart + 1);
+                    if (argEnd - argStart == 7
+                            && rawType.charAt(argStart + 1) == 'd'
+                            && rawType.charAt(argStart + 2) == 'd'
+                            && rawType.charAt(argStart + 3) == 'r'
+                            && rawType.charAt(argStart + 4) == 'e'
+                            && rawType.charAt(argStart + 5) == 's'
+                            && rawType.charAt(argStart + 6) == 's') {
+                        e = AddressType.INSTANCE;
+                    }
+                    break;
+                case 'b': {
+                    argEnd = nextTerminator(rawType, argStart + 1);
+                    final int argLen = argEnd - argStart;
+                    if (rawType.charAt(argStart + 1) == 'y'
+                            && rawType.charAt(argStart + 2) == 't'
+                            && rawType.charAt(argStart + 3) == 'e'
+                            && rawType.charAt(argStart + 4) == 's') {
+                        switch (argLen) {
+                        case 5: e = BYTES; break;
+                        case 6: if (rawType.charAt(argStart + 5) == '4') e = BYTES_4; break;
+                        case 7: if (rawType.charAt(argStart + 5) == '3' && rawType.charAt(argStart + 6) == '2') e = BYTES_32; break;
+                        }
+                    } else if (argLen == 4
+                            && rawType.charAt(argStart + 1) == 'o'
+                            && rawType.charAt(argStart + 2) == 'o'
+                            && rawType.charAt(argStart + 3) == 'l') {
+                        e = BOOL;
+                    }
+                    break;
+                }
+                case 's':
+                    argEnd = nextTerminator(rawType, argStart + 1);
+                    if (argEnd - argStart == 6
+                            && rawType.charAt(argStart + 1) == 't'
+                            && rawType.charAt(argStart + 2) == 'r'
+                            && rawType.charAt(argStart + 3) == 'i'
+                            && rawType.charAt(argStart + 4) == 'n'
+                            && rawType.charAt(argStart + 5) == 'g') {
+                        e = STRING;
+                    }
+                    break;
+                case 'u':
+                    argEnd = nextTerminator(rawType, argStart + 1);
+                    if (rawType.charAt(argStart + 1) == 'i' && rawType.charAt(argStart + 2) == 'n' && rawType.charAt(argStart + 3) == 't') {
+                        final int argLen = argEnd - argStart;
+                        switch (argLen) {
+                        case 4:
+                            e = UINT_256;
+                            break;
+                        case 5:
+                            if (rawType.charAt(argStart + 4) == '8') {
+                                e = UINT_8;
+                            }
+                            break;
+                        case 6:
+                            if (rawType.charAt(argStart + 4) == '3' && rawType.charAt(argStart + 5) == '2') {
+                                e = UINT_32;
+                            }
+                            break;
+                        case 7:
+                            if (rawType.charAt(argStart + 4) == '2'
+                                    && rawType.charAt(argStart + 5) == '5'
+                                    && rawType.charAt(argStart + 6) == '6') {
+                                e = UINT_256;
+                            }
+                            break;
+                        }
+                    }
+                    break;
                 default: argEnd = nextTerminator(rawType, argStart + 1);
                 }
-                final ABIType<?> e = buildUnchecked(rawType.substring(argStart, argEnd), null, null, flags);
+                if (e == null) {
+                    e = buildUnchecked(rawType.slice(argStart, argEnd), null, null, flags);
+                }
                 canonicalType.append(e.canonicalType);
                 dynamic |= e.dynamic;
                 elements[i++] = e;
@@ -188,7 +285,7 @@ public final class TypeFactory {
         }
     }
 
-    private static int nextTerminator(String signature, int i) {
+    private static int nextTerminator(Slice signature, int i) {
         for ( ; ; i++) {
             switch (signature.charAt(i)) {
             case ',':
@@ -197,7 +294,7 @@ public final class TypeFactory {
         }
     }
 
-    private static int findSubtupleEnd(String parentTypeString, int i) {
+    private static int findSubtupleEnd(Slice parentTypeString, int i) {
         int depth = 0;
         do {
             switch (parentTypeString.charAt(i++)) {
