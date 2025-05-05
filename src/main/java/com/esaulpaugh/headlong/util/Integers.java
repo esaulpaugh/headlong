@@ -42,8 +42,9 @@ public final class Integers {
      * @return the minimal representation
      */
     public static byte[] toBytes(short val) {
-        byte[] bytes = new byte[len(val)];
-        putShort(val, bytes, 0);
+        final int len = len(val);
+        byte[] bytes = new byte[len];
+        putLong(val, len, bytes, 0);
         return bytes;
     }
 
@@ -55,8 +56,9 @@ public final class Integers {
      * @return the minimal representation
      */
     public static byte[] toBytes(int val) {
-        byte[] bytes = new byte[len(val)];
-        putInt(val, bytes, 0);
+        final int len = len(val);
+        byte[] bytes = new byte[len];
+        putLong(val, len, bytes, 0);
         return bytes;
     }
 
@@ -68,8 +70,9 @@ public final class Integers {
      * @return the minimal representation
      */
     public static byte[] toBytes(long val) {
-        byte[] bytes = new byte[len(val)];
-        putLong(val, bytes, 0);
+        final int len = len(val);
+        byte[] bytes = new byte[len];
+        putLong(val, len, bytes, 0);
         return bytes;
     }
 
@@ -117,14 +120,7 @@ public final class Integers {
      * @see #getShort(byte[], int, int, boolean)
      */
     public static int putShort(short val, byte[] o, int i) {
-        if (val != 0) {
-            byte b = (byte) val;
-//            val = (short) (val >>> Byte.SIZE); // ICAST_QUESTIONABLE_UNSIGNED_RIGHT_SHIFT
-            val = (short) (val >> Byte.SIZE); // high bytes chopped off either way, see above
-            if (val != 0) {
-                o[i]=(byte) val; o[i+1]=b; return 2;
-            } else o[i]=b; return 1;
-        } else return 0;
+        return putLong(val, len(val), o, i);
     }
 
     /**
@@ -139,18 +135,7 @@ public final class Integers {
      * @see #getInt(byte[], int, int, boolean)
      */
     public static int putInt(int val, byte[] o, int i) {
-        if (val != 0) {
-            byte d = (byte) val;
-            if ((val >>>= Byte.SIZE) != 0) {
-                byte c = (byte) val;
-                if ((val >>>= Byte.SIZE) != 0) {
-                    byte b = (byte) val;
-                    if ((val >>>= Byte.SIZE) != 0) {
-                        o[i]=(byte) val; o[i+1]=b; o[i+2]=c; o[i+3]=d; return 4;
-                    } else o[i]=b; o[i+1]=c; o[i+2]=d; return 3;
-                } else o[i]=c; o[i+1]=d; return 2;
-            } else o[i]=d; return 1;
-        } else return 0;
+        return putLong(val, len(val), o, i);
     }
 
     /**
@@ -165,57 +150,41 @@ public final class Integers {
      * @see #getLong(byte[], int, int, boolean)
      */
     public static int putLong(long val, byte[] o, int i) {
-        if (val != 0) {
-            byte h = (byte) val;
-            if ((val >>>= Byte.SIZE) != 0) {
-                byte g = (byte) val;
-                if ((val >>>= Byte.SIZE) != 0) {
-                    byte f = (byte) val;
-                    if ((val >>>= Byte.SIZE) != 0) {
-                        byte e = (byte) val;
-                        if ((val >>>= Byte.SIZE) != 0) {
-                            byte d = (byte) val;
-                            if ((val >>>= Byte.SIZE) != 0) {
-                                byte c = (byte) val;
-                                if ((val >>>= Byte.SIZE) != 0) {
-                                    byte b = (byte) val;
-                                    if ((val >>>= Byte.SIZE) != 0) {
-                                        o[i]=(byte) val; o[i+1]=b; o[i+2]=c; o[i+3]=d; o[i+4]=e; o[i+5]=f; o[i+6]=g; o[i+7]=h; return 8;
-                                    } else o[i]=b; o[i+1]=c; o[i+2]=d; o[i+3]=e; o[i+4]=f; o[i+5]=g; o[i+6]=h; return 7;
-                                } else o[i]=c; o[i+1]=d; o[i+2]=e; o[i+3]=f; o[i+4]=g; o[i+5]=h; return 6;
-                            } else o[i]=d; o[i+1]=e; o[i+2]=f; o[i+3]=g; o[i+4]=h; return 5;
-                        } else o[i]=e; o[i+1]=f; o[i+2]=g; o[i+3]=h; return 4;
-                    } else o[i]=f; o[i+1]=g; o[i+2]=h; return 3;
-                } else o[i]=g; o[i+1]=h; return 2;
-            } else o[i]=h; return 1;
-        } else return 0;
+        return putLong(val, len(val), o, i);
     }
 
     public static int putLong(long val, ByteBuffer o) {
-        if (val != 0) {
-            byte h = (byte) val;
-            if ((val >>>= Byte.SIZE) != 0) {
-                byte g = (byte) val;
-                if ((val >>>= Byte.SIZE) != 0) {
-                    byte f = (byte) val;
-                    if ((val >>>= Byte.SIZE) != 0) {
-                        byte e = (byte) val;
-                        if ((val >>>= Byte.SIZE) != 0) {
-                            byte d = (byte) val;
-                            if ((val >>>= Byte.SIZE) != 0) {
-                                byte c = (byte) val;
-                                if ((val >>>= Byte.SIZE) != 0) {
-                                    byte b = (byte) val;
-                                    if ((val >>>= Byte.SIZE) != 0) {
-                                        o.put((byte) val).put(b).put(c).put(d).put(e).put(f).put(g).put(h); return 8;
-                                    } else o.put(b).put(c).put(d).put(e).put(f).put(g).put(h); return 7;
-                                } else o.put(c).put(d).put(e).put(f).put(g).put(h); return 6;
-                            } else o.put(d).put(e).put(f).put(g).put(h); return 5;
-                        } else o.put(e).put(f).put(g).put(h); return 4;
-                    } else o.put(f).put(g).put(h); return 3;
-                } else o.put(g).put(h); return 2;
-            } else o.put(h); return 1;
-        } else return 0;
+        return putLong(val, len(val), o);
+    }
+
+    public static int putLong(long val, int len, byte[] o, int i) {
+        switch (len) { /* cases 8 through 1 fall through */
+        case 8: o[i++] = (byte) (val >>> 56);
+        case 7: o[i++] = (byte) (val >>> 48);
+        case 6: o[i++] = (byte) (val >>> 40);
+        case 5: o[i++] = (byte) (val >>> 32);
+        case 4: o[i++] = (byte) (val >>> 24);
+        case 3: o[i++] = (byte) (val >>> 16);
+        case 2: o[i++] = (byte) (val >>> 8);
+        case 1: o[i++] = (byte) val;
+        case 0: return i;
+        default: throw outOfRangeException(len);
+        }
+    }
+
+    public static int putLong(long val, int len, ByteBuffer o) {
+        switch (len) { /* cases 8 through 1 fall through */
+        case 8: o.put((byte) (val >>> 56));
+        case 7: o.put((byte) (val >>> 48));
+        case 6: o.put((byte) (val >>> 40));
+        case 5: o.put((byte) (val >>> 32));
+        case 4: o.put((byte) (val >>> 24));
+        case 3: o.put((byte) (val >>> 16));
+        case 2: o.put((byte) (val >>> 8));
+        case 1: o.put((byte) val);
+        case 0: return len;
+        default: throw outOfRangeException(len);
+        }
     }
 
     /**

@@ -60,8 +60,9 @@ public final class RLPEncoder {
         if (isShort(dataLen)) {
             bb.put((byte) (LIST_SHORT_OFFSET + dataLen));
         } else {
-            bb.put((byte) (LIST_LONG_OFFSET + Integers.len(dataLen)));
-            Integers.putLong(dataLen, bb);
+            final int len = Integers.len(dataLen);
+            bb.put((byte) (LIST_LONG_OFFSET + len));
+            Integers.putLong(dataLen, len, bb);
         }
     }
 // ---------------------------------------------------------------------------------------------------------------------
@@ -170,8 +171,9 @@ public final class RLPEncoder {
         } else if (isShort(byteString.length)) {
             dest.put((byte) (STRING_SHORT_OFFSET + byteString.length)); // dataLen is 0 or 2-55
         } else { // long string
-            dest.put((byte) (STRING_LONG_OFFSET + Integers.len(byteString.length)));
-            Integers.putLong(byteString.length, dest);
+            final int len = Integers.len(byteString.length);
+            dest.put((byte) (STRING_LONG_OFFSET + len));
+            Integers.putLong(byteString.length, len, dest);
         }
         dest.put(byteString);
     }
