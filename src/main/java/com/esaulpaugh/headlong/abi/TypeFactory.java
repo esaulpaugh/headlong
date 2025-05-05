@@ -75,17 +75,17 @@ public final class TypeFactory {
         if (rawType.length() > MAX_LENGTH_CHARS) {
             throw new IllegalArgumentException("type length exceeds maximum: " + rawType.length() + " > " + MAX_LENGTH_CHARS);
         }
-        return buildUnchecked(new Slice(rawType), elementNames, baseType, flags);
+        return buildUnchecked(new CharSequenceView(rawType), elementNames, baseType, flags);
     }
 
-    private static ABIType<?> buildUnchecked(final Slice rawType, final String[] elementNames, final TupleType<?> baseType, final int flags) {
+    private static ABIType<?> buildUnchecked(final CharSequenceView rawType, final String[] elementNames, final TupleType<?> baseType, final int flags) {
         try {
             final int lastCharIdx = rawType.length() - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array
                 final int secondToLastCharIdx = lastCharIdx - 1;
                 final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIdx);
 
-                final ABIType<?> elementType = buildUnchecked(rawType.slice(0, arrayOpenIndex), null, baseType, flags);
+                final ABIType<?> elementType = buildUnchecked(rawType.subSequence(0, arrayOpenIndex), null, baseType, flags);
                 final StringBuilder sb = new StringBuilder(elementType.canonicalType);
                 rawType.append(sb, arrayOpenIndex);
                 final String type = sb.toString();
@@ -109,7 +109,7 @@ public final class TypeFactory {
         throw unrecognizedType(rawType);
     }
 
-    private static IllegalArgumentException unrecognizedType(Slice rawType) {
+    private static IllegalArgumentException unrecognizedType(CharSequenceView rawType) {
         return unrecognizedType(rawType.toString());
     }
 
@@ -121,7 +121,7 @@ public final class TypeFactory {
         return (char)(c - '1') <= 8; // cast to wrap negative vals, 1-9 allowed
     }
 
-    private static int parseArrayLen(Slice rawType, int start, int end) {
+    private static int parseArrayLen(CharSequenceView rawType, int start, int end) {
         final char lead = rawType.charAt(start);
         int temp = lead - '0';
         if (end - start == 1 && (char)temp <= 9 /* cast to wrap negative vals */) {
@@ -165,7 +165,7 @@ public final class TypeFactory {
         throw unrecognizedType(rawType);
     }
 
-    private static TupleType<?> parseTupleType(final Slice rawType, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
+    private static TupleType<?> parseTupleType(final CharSequenceView rawType, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawType.length();
         if (len == 2 && rawType.charAt(0) == '(' && rawType.charAt(1) == ')') {
             return TupleType.empty(flags);
@@ -257,7 +257,7 @@ public final class TypeFactory {
                 default: argEnd = nextTerminator(rawType, argStart + 1);
                 }
                 if (e == null) {
-                    e = buildUnchecked(rawType.slice(argStart, argEnd), null, null, flags);
+                    e = buildUnchecked(rawType.subSequence(argStart, argEnd), null, null, flags);
                 }
                 canonicalType.append(e.canonicalType);
                 dynamic |= e.dynamic;
@@ -285,7 +285,7 @@ public final class TypeFactory {
         }
     }
 
-    private static int nextTerminator(Slice signature, int i) {
+    private static int nextTerminator(CharSequenceView signature, int i) {
         for ( ; ; i++) {
             switch (signature.charAt(i)) {
             case ',':
@@ -294,7 +294,7 @@ public final class TypeFactory {
         }
     }
 
-    private static int findSubtupleEnd(Slice parentTypeString, int i) {
+    private static int findSubtupleEnd(CharSequenceView parentTypeString, int i) {
         int depth = 0;
         do {
             switch (parentTypeString.charAt(i++)) {
