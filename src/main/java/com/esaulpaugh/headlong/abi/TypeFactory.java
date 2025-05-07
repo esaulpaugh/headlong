@@ -187,7 +187,7 @@ public final class TypeFactory {
                     final long val = rawType.getAsciiLong(argStart);
                     if (val == CharSequenceView.toAsciiLong("address,") || val == CharSequenceView.toAsciiLong("address)")) {
                         e = AddressType.INSTANCE;
-                        argEnd = argStart + 7;
+                        argEnd = argStart + "address".length();
                     } else {
                         argEnd = nextTerminator(rawType, argStart + 1);
                     }
@@ -205,7 +205,7 @@ public final class TypeFactory {
                         }
                     } else if (val == CharSequenceView.toAsciiInt("ool,") || val == CharSequenceView.toAsciiInt("ool)")) {
                         e = BOOL;
-                        argEnd = argStart + 4;
+                        argEnd = argStart + "bool".length();
                     } else {
                         argEnd = nextTerminator(rawType, argStart + 1);
                     }
@@ -215,7 +215,7 @@ public final class TypeFactory {
                     final long val = rawType.getAsciiLong(argStart - 1) & 0x00FFFFFF_FFFFFFFFL;
                     if (val == CharSequenceView.toAsciiLong("\0string,") || val == CharSequenceView.toAsciiLong("\0string)")) {
                         e = STRING;
-                        argEnd = argStart + 6;
+                        argEnd = argStart + "string".length();
                     } else {
                         argEnd = nextTerminator(rawType, argStart + 1);
                     }
