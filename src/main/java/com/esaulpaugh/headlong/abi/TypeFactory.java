@@ -29,6 +29,7 @@ public final class TypeFactory {
     }
 
     private static final int MAX_LENGTH_CHARS = 1_600;
+    private static final int NESTING_LIMIT = 80;
     private static final ABIType<?> STRING = UnitType.get("string");
     private static final ABIType<?> BYTES = UnitType.get("bytes");
     private static final ABIType<?> BYTES_4 = UnitType.get("bytes4");
@@ -287,16 +288,16 @@ public final class TypeFactory {
     }
 
     private static int findSubtupleEnd(CharSequenceView parentTypeString, int i) {
-        int depth = 0;
+        int depth = 1;
         do {
             switch (parentTypeString.charAt(i++)) {
             case '(':
-                if (++depth >= 80) {
-                    throw new IllegalArgumentException("exceeds nesting limit");
+                if (++depth >= NESTING_LIMIT) {
+                    throw new IllegalArgumentException("exceeds nesting limit: " + NESTING_LIMIT);
                 }
                 continue;
             case ')':
-                if (depth == 0) {
+                if (depth == 1) {
                     return i;
                 }
                 depth--;
