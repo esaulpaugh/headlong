@@ -164,6 +164,16 @@ public final class TypeFactory {
         throw unrecognizedType(rawType);
     }
 
+    private static final int OOL_COMMA_INT = CharSequenceView.toAsciiInt("ool,");
+    private static final int OOL_PAREN_INT = CharSequenceView.toAsciiInt("ool)");
+    private static final int YTES_INT = CharSequenceView.toAsciiInt("ytes");
+    private static final int UINT_INT = CharSequenceView.toAsciiInt("uint");
+    private static final long _UINT256_LONG = CharSequenceView.toAsciiLong("\0uint256");
+    private static final long _STRING_COMMA_LONG = CharSequenceView.toAsciiLong("\0string,");
+    private static final long _STRING_PAREN_LONG = CharSequenceView.toAsciiLong("\0string)");
+    private static final long ADDRESS_COMMA_LONG = CharSequenceView.toAsciiLong("address,");
+    private static final long ADDRESS_PAREN_LONG = CharSequenceView.toAsciiLong("address)");
+
     private static TupleType<?> parseTupleType(final CharSequenceView rawType, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawType.length();
         if (len == 2 && rawType.charAt(0) == '(' && rawType.charAt(1) == ')') {
@@ -182,56 +192,54 @@ public final class TypeFactory {
                 case ')':
                 case ',': throw unrecognizedType(rawType);
                 case '(': argEnd = nextTerminator(rawType, findSubtupleEnd(rawType, argStart + 1)); break;
-                case 'a':
-                    argEnd = nextTerminator(rawType, argStart + 1);
-                    if (argEnd - argStart == 7
-                            && rawType.charAt(argStart + 1) == 'd'
-                            && rawType.charAt(argStart + 2) == 'd'
-                            && rawType.charAt(argStart + 3) == 'r'
-                            && rawType.charAt(argStart + 4) == 'e'
-                            && rawType.charAt(argStart + 5) == 's'
-                            && rawType.charAt(argStart + 6) == 's') {
+// ======================= OPTIONAL FAST PATHS FOR COMMON TYPES TO SKIP buildUnchecked =================================
+                case 'a': {
+                    final long val = rawType.getAsciiLong(argStart);
+                    if (val == ADDRESS_COMMA_LONG || val == ADDRESS_PAREN_LONG) {
                         e = AddressType.INSTANCE;
-                    }
-                    break;
-                case 'b': {
-                    argEnd = nextTerminator(rawType, argStart + 1);
-                    final int argLen = argEnd - argStart;
-                    if (rawType.charAt(argStart + 1) == 'y'
-                            && rawType.charAt(argStart + 2) == 't'
-                            && rawType.charAt(argStart + 3) == 'e'
-                            && rawType.charAt(argStart + 4) == 's') {
-                        switch (argLen) {
-                        case 5: e = BYTES; break;
-                        case 6: if (rawType.charAt(argStart + 5) == '4') e = BYTES_4; break;
-                        case 7: if (rawType.charAt(argStart + 5) == '3' && rawType.charAt(argStart + 6) == '2') e = BYTES_32; break;
-                        }
-                    } else if (argLen == 4
-                            && rawType.charAt(argStart + 1) == 'o'
-                            && rawType.charAt(argStart + 2) == 'o'
-                            && rawType.charAt(argStart + 3) == 'l') {
-                        e = BOOL;
+                        argEnd = argStart + 7;
+                    } else {
+                        argEnd = nextTerminator(rawType, argStart + 1);
                     }
                     break;
                 }
-                case 's':
-                    argEnd = nextTerminator(rawType, argStart + 1);
-                    if (argEnd - argStart == 6
-                            && rawType.charAt(argStart + 1) == 't'
-                            && rawType.charAt(argStart + 2) == 'r'
-                            && rawType.charAt(argStart + 3) == 'i'
-                            && rawType.charAt(argStart + 4) == 'n'
-                            && rawType.charAt(argStart + 5) == 'g') {
-                        e = STRING;
+                case 'b': {
+                    final long val = rawType.getAsciiInt(argStart + 1);
+                    if (val == YTES_INT) {
+                        final int nIdx = argStart + 5;
+                        argEnd = nextTerminator(rawType, nIdx);
+                        switch (argEnd - argStart) {
+                        case 5: e = BYTES; break;
+                        case 6: if (rawType.charAt(nIdx) == '4') e = BYTES_4; break;
+                        case 7: if (rawType.charAt(nIdx) == '3' && rawType.charAt(argStart + 6) == '2') e = BYTES_32; break;
+                        }
+                    } else if (val == OOL_COMMA_INT || val == OOL_PAREN_INT) {
+                        e = BOOL;
+                        argEnd = argStart + 4;
+                    } else {
+                        argEnd = nextTerminator(rawType, argStart + 1);
                     }
                     break;
-                case 'u':
+                }
+                case 's': {
+                    final long val = rawType.getAsciiLong(argStart - 1) & 0x00FFFFFF_FFFFFFFFL;
+                    if (val == _STRING_COMMA_LONG || val == _STRING_PAREN_LONG) {
+                        e = STRING;
+                        argEnd = argStart + 6;
+                    } else {
+                        argEnd = nextTerminator(rawType, argStart + 1);
+                    }
+                    break;
+                }
+                case 'u': {
                     argEnd = nextTerminator(rawType, argStart + 1);
-                    if (rawType.charAt(argStart + 1) == 'i' && rawType.charAt(argStart + 2) == 'n' && rawType.charAt(argStart + 3) == 't') {
-                        final int argLen = argEnd - argStart;
+                    final int argLen = argEnd - argStart;
+                    if (argLen == 7 && (rawType.getAsciiLong(argStart - 1) & 0x00FFFFFF_FFFFFFFFL) == _UINT256_LONG) {
+                        e = UINT_256;
+                    } else if (rawType.getAsciiInt(argStart) == UINT_INT) {
                         switch (argLen) {
                         case 4:
-                            e = UINT_256;
+                            e = UINT_256; // "uint"
                             break;
                         case 5:
                             if (rawType.charAt(argStart + 4) == '8') {
@@ -243,16 +251,11 @@ public final class TypeFactory {
                                 e = UINT_32;
                             }
                             break;
-                        case 7:
-                            if (rawType.charAt(argStart + 4) == '2'
-                                    && rawType.charAt(argStart + 5) == '5'
-                                    && rawType.charAt(argStart + 6) == '6') {
-                                e = UINT_256;
-                            }
-                            break;
                         }
                     }
                     break;
+                }
+// ======================= END OPTIONAL FAST PATHS =====================================================================
                 default: argEnd = nextTerminator(rawType, argStart + 1);
                 }
                 if (e == null) {
