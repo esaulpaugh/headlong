@@ -291,7 +291,9 @@ public final class TypeFactory {
         do {
             switch (parentTypeString.charAt(i++)) {
             case '(':
-                depth++;
+                if (++depth >= 80) {
+                    throw new IllegalArgumentException("exceeds nesting limit");
+                }
                 continue;
             case ')':
                 if (depth == 0) {
