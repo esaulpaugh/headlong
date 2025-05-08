@@ -61,7 +61,6 @@ public class EncodeTest {
     private static final Pattern TUPLE_TYPE_PATTERN = Pattern.compile("\\A\\((" + TYPE_PATTERN + ")?\\)\\Z");
 
     @Disabled("may take minutes to run")
-    @SuppressWarnings("deprecation")
     @Test
     public void fuzzSignatures() throws InterruptedException, ExecutionException, TimeoutException {
 
@@ -99,13 +98,13 @@ public class EncodeTest {
             final Random rand = TestUtils.seededRandom();
             for (int len = 0; len <= 14; len++) {
                 System.out.println(len + "(" + Thread.currentThread().getId() + ")");
-                final byte[] temp = new byte[len];
+                final char[] temp = new char[len];
                 final int last = len - 1;
                 if (len > 0) {
                     temp[0] = '(';
                     if (len > prefixLen) {
                         for (int i = 0; i < prefixLen; i++) {
-                            temp[i + 1] = (byte) prefix.charAt(i);
+                            temp[i + 1] = prefix.charAt(i);
                         }
                     }
                     if (len > 1) {
@@ -115,9 +114,9 @@ public class EncodeTest {
                 final int num = iterations[len]; // 1_000_000 + (int) Math.pow(3.7, len);
                 for (int j = 0; j < num; j++) {
                     for (int i = 1 + prefixLen; i < last; i++) {
-                        temp[i] = alphabet[rand.nextInt(alphabetLen)];
+                        temp[i] = (char) alphabet[rand.nextInt(alphabetLen)];
                     }
-                    String sig = new String(temp, 0, 0, len);
+                    String sig = new String(temp);
                     try {
                         TupleType<?> tt = TupleType.parse(sig);
                         if (map.containsKey(sig)) continue;
