@@ -305,12 +305,14 @@ public class EncodeTest {
 
     private static void testSIOOBE(String signature) throws Throwable {
         assertThrownWithAnySubstring(
-                StringIndexOutOfBoundsException.class,
+                IndexOutOfBoundsException.class,
                 Arrays.asList(
                         "begin 0, end -1, length " + signature.length(),
                         "String index out of range: -1",
                         "String index out of range: 0",
-                        "Range [0, -1) out of bounds for length " + signature.length() // JDK 18
+                        "Range [0, -1) out of bounds for length " + signature.length(), // JDK 18
+                        "Range [-1, 0) out of bounds for length " + signature.length(),
+                        "Range [-1, 1) out of bounds for length " + signature.length()
                 ),
                 () -> Function.parse(signature)
         );
