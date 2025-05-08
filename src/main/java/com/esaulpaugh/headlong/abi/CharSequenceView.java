@@ -43,9 +43,12 @@ final class CharSequenceView implements CharSequence {
 
     @Override
     public CharSequenceView subSequence(int start, int end) {
-        if (start > end || start < 0 || end > length()) {
-            throw new StringIndexOutOfBoundsException();
-        }
+//        if (start > end || start < 0 || end > length()) {
+//            throw new StringIndexOutOfBoundsException();
+//        }
+//        assert end >= start;
+//        assert start >= 0;
+//        assert length() >= end;
         return new CharSequenceView(source, this.start + start, this.start + end);
     }
 
@@ -55,8 +58,8 @@ final class CharSequenceView implements CharSequence {
             if (ch == source.charAt(i)) {
                 return i - start;
             }
-        } while (--i >= start);
-        throw new StringIndexOutOfBoundsException();
+            i--;
+        } while (true);
     }
 
     @Override
