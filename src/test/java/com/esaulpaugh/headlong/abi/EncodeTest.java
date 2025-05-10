@@ -66,11 +66,14 @@ public class EncodeTest {
         final int parallelism = Runtime.getRuntime().availableProcessors() / 2 - 1;
         final byte[] alphabet = Strings.decode("x0123456789", Strings.ASCII); // new char[128]; // "(),abcdefgilmnorstuxy8[]" // "34567890()[],ttttiiiinnnn1122abcdefglmorsuxy"
         final int alphabetLen = alphabet.length;
-        final int uniques = countUniques(alphabet);
+        final int uniques;
         if (alphabetLen == 96) {
             for (int i = 0; i < alphabetLen; i++) {
                 alphabet[i] = (byte) (32 + i);
             }
+            uniques = alphabetLen;
+        } else {
+            uniques = countUniques(alphabet);
         }
 
         final String prefix = "ufixed";
