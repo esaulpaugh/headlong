@@ -123,9 +123,9 @@ public final class TypeFactory {
 
     private static int parseArrayLen(CharSequenceView rawType, int i, final int end) {
         final char lead = rawType.charAt(i);
-        int temp = lead - '0';
-        if (end - i == 1 && (char)temp <= 9 /* cast to wrap negative vals */) {
-            return temp;
+        int len = lead - '0';
+        if (end - i == 1 && (char)len <= 9 /* cast to wrap negative vals */) {
+            return len;
         }
         if (leadDigitValid(lead)) {
             i++;
@@ -134,9 +134,9 @@ public final class TypeFactory {
                 if ((char)d > 9 /* cast to wrap negative vals */) {
                     break; // not a digit
                 }
-                temp = temp * 10 + d;
+                len = len * 10 + d;
                 if (i >= end) {
-                    return temp;
+                    return len;
                 }
             } while (true);
         }
