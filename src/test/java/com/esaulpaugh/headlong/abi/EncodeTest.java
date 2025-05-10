@@ -173,8 +173,8 @@ public class EncodeTest {
             final double multiplier = -Math.log(1.0 - targetFraction); // Math.log(k) + 0.57721 + 4.605
             final long iterations = (long) (permutations * multiplier / parallelism);
             final int base = 50_000;
-            if (iterations > Integer.MAX_VALUE - base) {
-                final int max = 250_000_000;
+            final int max = 250_000_000;
+            if (iterations > max) {
                 System.err.println("clamping iterations to max of " + max);
                 return max;
             }
