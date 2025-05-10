@@ -175,7 +175,7 @@ public class EncodeTest {
             final int base = 50_000;
             final int max = 250_000_000;
             if (iterations > max) {
-                System.err.println("clamping iterations to max of " + max);
+                System.err.println("clamping " + iterations + " iterations to max of " + max);
                 return max;
             }
             return  base + (int) iterations;
