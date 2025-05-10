@@ -15,6 +15,7 @@
 */
 package com.esaulpaugh.headlong.abi;
 
+/** An immutable view into a {@link CharSequence}, for use as a HashMap key when a substring is too slow. */
 final class CharSequenceView implements CharSequence {
 
     private final CharSequence source;
@@ -43,9 +44,6 @@ final class CharSequenceView implements CharSequence {
 
     @Override
     public CharSequenceView subSequence(int start, int end) {
-//        if (start > end || start < 0 || end > length()) {
-//            throw new StringIndexOutOfBoundsException();
-//        }
 //        assert end >= start;
 //        assert start >= 0;
 //        assert length() >= end;
