@@ -29,6 +29,15 @@ public final class TypeFactory {
     }
 
     private static final int MAX_LENGTH_CHARS = 1_600;
+    private static final int NESTING_LIMIT = 80;
+    private static final ABIType<?> STRING = UnitType.get("string");
+    private static final ABIType<?> BYTES = UnitType.get("bytes");
+    private static final ABIType<?> BYTES_4 = UnitType.get("bytes4");
+    private static final ABIType<?> BYTES_32 = UnitType.get("bytes32");
+    private static final ABIType<?> BOOL = UnitType.get("bool");
+    private static final ABIType<?> UINT_256 = UnitType.get("uint256");
+    private static final ABIType<?> UINT_8 = UnitType.get("uint8");
+    private static final ABIType<?> UINT_32 = UnitType.get("uint32");
 
     private TypeFactory() {}
 
@@ -67,24 +76,25 @@ public final class TypeFactory {
         if (rawType.length() > MAX_LENGTH_CHARS) {
             throw new IllegalArgumentException("type length exceeds maximum: " + rawType.length() + " > " + MAX_LENGTH_CHARS);
         }
-        return buildUnchecked(rawType, elementNames, baseType, flags);
+        return buildUnchecked(new CharSequenceView(rawType), elementNames, baseType, flags);
     }
 
-    private static ABIType<?> buildUnchecked(final String rawType, final String[] elementNames, final TupleType<?> baseType, final int flags) {
+    private static ABIType<?> buildUnchecked(final CharSequenceView rawType, final String[] elementNames, final TupleType<?> baseType, final int flags) {
         try {
-            final int lastCharIdx = rawType.length() - 1;
+            final int len = rawType.length();
+            final int lastCharIdx = len - 1;
             if (rawType.charAt(lastCharIdx) == ']') { // array
                 final int secondToLastCharIdx = lastCharIdx - 1;
                 final int arrayOpenIndex = rawType.lastIndexOf('[', secondToLastCharIdx);
 
-                final ABIType<?> elementType = buildUnchecked(rawType.substring(0, arrayOpenIndex), null, baseType, flags);
-                final String type = elementType.canonicalType + rawType.substring(arrayOpenIndex);
-                final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseLen(rawType.substring(arrayOpenIndex + 1, lastCharIdx));
+                final ABIType<?> elementType = buildUnchecked(rawType.subSequence(0, arrayOpenIndex), null, baseType, flags);
+                final String type = new StringBuilder(elementType.canonicalType).append(rawType, arrayOpenIndex, len).toString();
+                final int length = arrayOpenIndex == secondToLastCharIdx ? DYNAMIC_LENGTH : parseArrayLen(rawType, arrayOpenIndex + 1, lastCharIdx);
                 return new ArrayType<>(type, elementType.arrayClass(), elementType, length, null, flags);
             }
             if (rawType.charAt(0) == '(') {
                 if (baseType != null) {
-                    if (rawType.length() == baseType.canonicalType.length()) {
+                    if (len == baseType.canonicalType.length()) {
                         return baseType;
                     }
                 } else {
@@ -92,28 +102,43 @@ public final class TypeFactory {
                 }
             } else {
                 ABIType<?> t = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? UnitType.getLegacy(rawType) : UnitType.get(rawType);
-                return t != null ? t : tryParseFixed(rawType);
+                return t != null ? t : tryParseFixed(rawType.toString());
             }
-        } catch (StringIndexOutOfBoundsException ignored) { // e.g. type equals "" or "82]" or "[]" or "[1]"
+        } catch (IndexOutOfBoundsException ignored) { // e.g. type equals "" or "82]" or "[]" or "[1]"
         }
         throw unrecognizedType(rawType);
+    }
+
+    private static IllegalArgumentException unrecognizedType(CharSequenceView rawType) {
+        return unrecognizedType(rawType.toString());
     }
 
     private static IllegalArgumentException unrecognizedType(String rawType) {
         return new IllegalArgumentException("unrecognized type: \"" + rawType + '"');
     }
 
-    private static int parseLen(String lenStr) {
-        try {
-//            final char first = rawType.charAt(start);
-//            if (leadDigitValid(first) || (first == '0' && end - start == 1)) {
-//                return Integer.parseInt(rawType, start, end, 10); // Java 9+
-//            }
-            if (leadDigitValid(lenStr.charAt(0)) || "0".equals(lenStr)) {
-                return Integer.parseInt(lenStr);
-            }
-        } catch (NumberFormatException ignored) {
-            /* fall through */
+    private static boolean leadDigitValid(char c) {
+        return (char)(c - '1') <= 8; // cast to wrap negative vals, 1-9 allowed
+    }
+
+    private static int parseArrayLen(CharSequenceView rawType, int i, final int end) {
+        final char lead = rawType.charAt(i);
+        int len = lead - '0';
+        if (end - i == 1 && (char)len <= 9 /* cast to wrap negative vals */) {
+            return len;
+        }
+        if (leadDigitValid(lead)) {
+            i++;
+            do {
+                final int d = rawType.charAt(i++) - '0';
+                if ((char)d > 9 /* cast to wrap negative vals */) {
+                    break; // not a digit
+                }
+                len = len * 10 + d;
+                if (i >= end) {
+                    return len;
+                }
+            } while (true);
         }
         throw new IllegalArgumentException("bad array length");
     }
@@ -140,13 +165,11 @@ public final class TypeFactory {
         throw unrecognizedType(rawType);
     }
 
-    private static boolean leadDigitValid(char c) {
-        return c > '0' && c <= '9';
-    }
-
-    private static TupleType<?> parseTupleType(final String rawType, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
+    private static TupleType<?> parseTupleType(final CharSequenceView rawType, final String[] elementNames, final int flags) { /* assumes that rawTypeStr.charAt(0) == '(' */
         final int len = rawType.length();
-        if (len == 2 && "()".equals(rawType)) return TupleType.empty(flags);
+        if (len == 2 && rawType.charAt(0) == '(' && rawType.charAt(1) == ')') {
+            return TupleType.empty(flags);
+        }
         ABIType<?>[] elements = new ABIType[8];
         int argEnd = 1;
         final StringBuilder canonicalType = TupleType.newTypeBuilder();
@@ -155,13 +178,80 @@ public final class TypeFactory {
         try {
             for ( ; true; canonicalType.append(',')) {
                 final int argStart = argEnd;
+                ABIType<?> e = null;
                 switch (rawType.charAt(argStart)) {
                 case ')':
                 case ',': throw unrecognizedType(rawType);
                 case '(': argEnd = nextTerminator(rawType, findSubtupleEnd(rawType, argStart + 1)); break;
+// ======================= OPTIONAL FAST PATHS FOR COMMON TYPES TO SKIP buildUnchecked =================================
+                case 'a': {
+                    final long val = rawType.getAsciiLong(argStart);
+                    if (val == CharSequenceView.toAsciiLong("address,") || val == CharSequenceView.toAsciiLong("address)")) {
+                        e = AddressType.INSTANCE;
+                        argEnd = argStart + "address".length();
+                    } else {
+                        argEnd = nextTerminator(rawType, argStart + 1);
+                    }
+                    break;
+                }
+                case 'b': {
+                    final long val = rawType.getAsciiInt(argStart + 1);
+                    if (val == CharSequenceView.toAsciiInt("ytes")) {
+                        final int nIdx = argStart + 5;
+                        argEnd = nextTerminator(rawType, nIdx);
+                        switch (argEnd - argStart) {
+                        case 5: e = BYTES; break;
+                        case 6: if (rawType.charAt(nIdx) == '4') e = BYTES_4; break;
+                        case 7: if (rawType.charAt(nIdx) == '3' && rawType.charAt(argStart + 6) == '2') e = BYTES_32; break;
+                        }
+                    } else if (val == CharSequenceView.toAsciiInt("ool,") || val == CharSequenceView.toAsciiInt("ool)")) {
+                        e = BOOL;
+                        argEnd = argStart + "bool".length();
+                    } else {
+                        argEnd = nextTerminator(rawType, argStart + 1);
+                    }
+                    break;
+                }
+                case 's': {
+                    final long val = rawType.getAsciiLong(argStart - 1) & 0x00FFFFFF_FFFFFFFFL;
+                    if (val == CharSequenceView.toAsciiLong("\0string,") || val == CharSequenceView.toAsciiLong("\0string)")) {
+                        e = STRING;
+                        argEnd = argStart + "string".length();
+                    } else {
+                        argEnd = nextTerminator(rawType, argStart + 1);
+                    }
+                    break;
+                }
+                case 'u': {
+                    argEnd = nextTerminator(rawType, argStart + 1);
+                    final int argLen = argEnd - argStart;
+                    if (argLen == 7 && (rawType.getAsciiLong(argStart - 1) & 0x00FFFFFF_FFFFFFFFL) == CharSequenceView.toAsciiLong("\0uint256")) {
+                        e = UINT_256;
+                    } else if (rawType.getAsciiInt(argStart) == CharSequenceView.toAsciiInt("uint")) {
+                        switch (argLen) {
+                        case 4: // "uint"
+                            e = UINT_256;
+                            break;
+                        case 5:
+                            if (rawType.charAt(argStart + 4) == '8') {
+                                e = UINT_8;
+                            }
+                            break;
+                        case 6:
+                            if (rawType.charAt(argStart + 4) == '3' && rawType.charAt(argStart + 5) == '2') {
+                                e = UINT_32;
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                }
+// ======================= END OPTIONAL FAST PATHS =====================================================================
                 default: argEnd = nextTerminator(rawType, argStart + 1);
                 }
-                final ABIType<?> e = buildUnchecked(rawType.substring(argStart, argEnd), null, null, flags);
+                if (e == null) {
+                    e = buildUnchecked(rawType.subSequence(argStart, argEnd), null, null, flags);
+                }
                 canonicalType.append(e.canonicalType);
                 dynamic |= e.dynamic;
                 elements[i++] = e;
@@ -188,7 +278,7 @@ public final class TypeFactory {
         }
     }
 
-    private static int nextTerminator(String signature, int i) {
+    private static int nextTerminator(CharSequenceView signature, int i) {
         for ( ; ; i++) {
             switch (signature.charAt(i)) {
             case ',':
@@ -197,15 +287,17 @@ public final class TypeFactory {
         }
     }
 
-    private static int findSubtupleEnd(String parentTypeString, int i) {
-        int depth = 0;
+    private static int findSubtupleEnd(CharSequenceView parentTypeString, int i) {
+        int depth = 1;
         do {
             switch (parentTypeString.charAt(i++)) {
             case '(':
-                depth++;
+                if (++depth >= NESTING_LIMIT) {
+                    throw new IllegalArgumentException("exceeds nesting limit: " + NESTING_LIMIT);
+                }
                 continue;
             case ')':
-                if (depth == 0) {
+                if (depth == 1) {
                     return i;
                 }
                 depth--;
