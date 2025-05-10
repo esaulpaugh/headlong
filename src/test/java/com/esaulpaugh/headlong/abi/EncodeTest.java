@@ -105,6 +105,7 @@ public class EncodeTest {
 
                 final int randomLen = len - 1 - suffixLen - prefixLen - 1;
                 final int num = calcIterations(randomLen, uniques, parallelism);
+                System.out.println(len + idStr + " " + num);
                 for (int j = 0; j < num; j++) {
                     int end = last - suffixLen;
                     for (int i = 1 + prefixLen; i < end; i++) {
@@ -173,7 +174,9 @@ public class EncodeTest {
             final long iterations = (long) (permutations * multiplier / parallelism);
             final int base = 50_000;
             if (iterations > Integer.MAX_VALUE - base) {
-                throw new IllegalArgumentException();
+                final int max = 250_000_000;
+                System.err.println("clamping iterations to max of " + max);
+                return max;
             }
             return  base + (int) iterations;
         }
