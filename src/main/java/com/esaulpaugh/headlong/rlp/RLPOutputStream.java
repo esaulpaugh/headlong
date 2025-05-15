@@ -72,4 +72,14 @@ public final class RLPOutputStream extends OutputStream {
     public String toString() {
         return out.toString();
     }
+
+    @Override
+    public void flush() throws IOException {
+        out.flush();
+    }
+
+    @Override
+    public void close() throws IOException {
+        out.close();
+    }
 }
