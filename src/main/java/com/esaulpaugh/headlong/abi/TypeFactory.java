@@ -172,7 +172,7 @@ public final class TypeFactory {
         }
         ABIType<?>[] elements = new ABIType[8];
         int argEnd = 1;
-        final StringBuilder canonicalType = TupleType.newTypeBuilder();
+        final StringBuilder canonicalType = new StringBuilder(len);
         boolean dynamic = false;
         int i = 0;
         try {
