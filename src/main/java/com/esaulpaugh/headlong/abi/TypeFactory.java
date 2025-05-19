@@ -229,19 +229,9 @@ public final class TypeFactory {
                         e = UINT_256;
                     } else if (rawType.getAsciiInt(argStart) == CharSequenceView.toAsciiInt("uint")) {
                         switch (argLen) {
-                        case 4: // "uint"
-                            e = UINT_256;
-                            break;
-                        case 5:
-                            if (rawType.charAt(argStart + 4) == '8') {
-                                e = UINT_8;
-                            }
-                            break;
-                        case 6:
-                            if (rawType.charAt(argStart + 4) == '3' && rawType.charAt(argStart + 5) == '2') {
-                                e = UINT_32;
-                            }
-                            break;
+                        case 4: e = UINT_256; break; // "uint"
+                        case 5: if (rawType.charAt(argStart + 4) == '8') e = UINT_8; break;
+                        case 6: if (rawType.charAt(argStart + 4) == '3' && rawType.charAt(argStart + 5) == '2') e = UINT_32; break;
                         }
                     }
                     break;
