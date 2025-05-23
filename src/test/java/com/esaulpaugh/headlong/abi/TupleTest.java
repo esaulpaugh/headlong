@@ -260,6 +260,21 @@ public class TupleTest {
     }
 
     @Test
+    public void testStringFlags() {
+        ArrayType<ByteType, Byte, String> none = TupleType.parse(ABIType.FLAGS_NONE, "(string)")
+                                                            .<ArrayType<ByteType, Byte, String>>get(0)
+                                                            .asArrayType();
+        assertEquals(ABIType.FLAGS_NONE, none.getFlags());
+        assertEquals(TypeFactory.create(ABIType.FLAGS_NONE, "string"), none);
+
+        ArrayType<ByteType, Byte, String> legacy = TupleType.parse(ABIType.FLAG_LEGACY_DECODE, "(string)")
+                                                                .<ArrayType<ByteType, Byte, String>>get(0)
+                                                                .asArrayType();
+        assertEquals(ABIType.FLAG_LEGACY_DECODE, legacy.getFlags());
+        assertEquals(TypeFactory.create(ABIType.FLAG_LEGACY_DECODE, "string"), legacy);
+    }
+
+    @Test
     public void testGenerics() {
         TupleType<Single<Single<String>>> in = TupleType.parse(ABIType.FLAG_LEGACY_DECODE, "((string))");
         TupleType<Single<Single<String>>> t = new Function(

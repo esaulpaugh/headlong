@@ -30,7 +30,8 @@ public final class TypeFactory {
 
     private static final int MAX_LENGTH_CHARS = 1_600;
     private static final int NESTING_LIMIT = 80;
-    private static final ABIType<?> STRING = UnitType.get("string");
+    private static final ABIType<?> NONE_STRING = UnitType.get("string");
+    private static final ABIType<?> LEGACY_STRING = UnitType.getLegacy(new CharSequenceView("string"));
     private static final ABIType<?> BYTES = UnitType.get("bytes");
     private static final ABIType<?> BYTES_4 = UnitType.get("bytes4");
     private static final ABIType<?> BYTES_32 = UnitType.get("bytes32");
@@ -215,7 +216,7 @@ public final class TypeFactory {
                 case 's': {
                     final long val = rawType.getAsciiLong(argStart - 1) & 0x00FFFFFF_FFFFFFFFL;
                     if (val == CharSequenceView.toAsciiLong("\0string,") || val == CharSequenceView.toAsciiLong("\0string)")) {
-                        e = STRING;
+                        e = (flags & ABIType.FLAG_LEGACY_DECODE) != 0 ? LEGACY_STRING : NONE_STRING;
                         argEnd = argStart + "string".length();
                     } else {
                         argEnd = nextTerminator(rawType, argStart + 1);
