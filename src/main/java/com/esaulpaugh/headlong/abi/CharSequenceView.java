@@ -85,32 +85,18 @@ final class CharSequenceView implements CharSequence {
         return source.subSequence(start, end).toString();
     }
 
-    public int getAsciiInt(int index) {
+    public long getFourAscii(int index) {
         final int off = start + index;
-        return source.charAt(off) << 24 |
-                source.charAt(off + 1) << 16 |
-                source.charAt(off + 2) << 8 |
+        return ((long)source.charAt(off) << 48) |
+                ((long)source.charAt(off + 1) << 32) |
+                ((long)source.charAt(off + 2) << 16) |
                 source.charAt(off + 3);
     }
 
-    public long getAsciiLong(int index) {
-        final int off = start + index;
-        return ((long) source.charAt(off) << 56) |
-                ((long) source.charAt(off + 1) << 48) |
-                ((long) source.charAt(off + 2) << 40) |
-                ((long) source.charAt(off + 3) << 32) |
-                ((long) source.charAt(off + 4) << 24) |
-                (long) source.charAt(off + 5) << 16 |
-                source.charAt(off + 6) << 8 |
-                source.charAt(off + 7);
-    }
-
-    public static int toAsciiInt(String s) {
-        return s.charAt(0) << 24 | s.charAt(1) << 16 | s.charAt(2) << 8 | s.charAt(3);
-    }
-
-    public static long toAsciiLong(String s) {
-        return (long)s.charAt(0) << 56 | (long)s.charAt(1) << 48 | (long)s.charAt(2) << 40 | (long)s.charAt(3) << 32
-                | (long)s.charAt(4) << 24 | (long)s.charAt(5) << 16 | s.charAt(6) << 8 | s.charAt(7);
+    public static long toFourAscii(String s) {
+        return (long)s.charAt(0) << 48
+                | (long)s.charAt(1) << 32
+                | (long)s.charAt(2) << 16
+                | s.charAt(3);
     }
 }
