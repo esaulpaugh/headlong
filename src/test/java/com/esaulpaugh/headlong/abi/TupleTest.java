@@ -44,6 +44,7 @@ import static com.esaulpaugh.headlong.TestUtils.wildLong;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -256,6 +257,39 @@ public class TupleTest {
 
         TestUtils.assertThrown(IllegalArgumentException.class, "tuple index 0: array length mismatch: byte[31] != byte[21] (bytes21 requires length 21 but found 31)",
                 () -> Function.parse("foo(bytes21)").encodeCallWithArgs((Object) new byte[31])
+        );
+    }
+
+    @Test
+    public void testArrayLens() throws Throwable {
+//        assertInstanceOf(ArrayType.class, TypeFactory.create("int[" + (Integer.MAX_VALUE + 14L) + "]"));
+        assertThrown(
+                IllegalArgumentException.class,
+                () -> TypeFactory.create("int[" + (Integer.MAX_VALUE - 13) + "]")
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                () -> TypeFactory.create("int[" + Integer.MAX_VALUE+ "]")
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                "bad array length",
+                () -> TypeFactory.create("int[" + (Integer.MAX_VALUE + 1L) + "]")
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                "bad array length",
+                () -> TypeFactory.create("int[" + Long.MAX_VALUE + "]")
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                "bad array length",
+                () -> TypeFactory.create("int[" + ArrayType.DYNAMIC_LENGTH + "]")
+        );
+        assertThrown(
+                IllegalArgumentException.class,
+                "bad array length",
+                () -> TypeFactory.create("int[" + -2 + "]")
         );
     }
 
